@@ -264,3 +264,45 @@ token_step_max,useful_token_steps,executed_token_steps,latency_ms
 - `steps_executed`：调度器实际执行了多少 step；sync 下可能被 batch 内 hardest request 拉高。
 
 如果后面实现真正多 block 生成，只要每生成一个 block append 一行，把 `block_index=0,1,2,...` 填进去即可，画图和 summary 都可以继续复用。
+
+
+## 14. 真实模型统一 H100 跑法
+
+老师要的真实模型版本，直接跑：
+
+```bash
+python3 -m pip install -r requirements-h100.txt
+bash scripts/run_h100_llada_experiment.sh
+```
+
+默认配置：
+
+- 模型：`GSAI-ML/LLaDA-8B-Instruct`。
+- batch size：`2 4 8 16`。
+- block size：`16 32 64`。
+- `NUM_BLOCKS=4`，也就是每个 prompt 连续生成 4 个 block。
+- `MAX_STEPS=64`，每个 block 最多 denoise 64 step。
+- `CONFIDENCE_THRESHOLD=0.90`，token confidence 到阈值就认为完成。
+
+关键点：这不是模拟 difficulty。`llada_block_step_probe.py` 会真的跑模型：
+
+1. 对原始 prompt tokenize。
+2. append 第 0 个 `[MASK] * block_size`。
+3. 每个 denoising step forward 一次，用 softmax 最大概率当 token confidence。
+4. confidence 过阈值的 token 写回 `input_ids`，并记录这个 token 在第几步完成。
+5. 第 0 个 block 完成后，append 第 1 个 `[MASK] * block_size`；此时上下文已经包含第 0 个 block 的生成结果。
+6. 重复到 `NUM_BLOCKS-1`。
+
+所以每行 `prompt_block_steps.csv` 的 `steps_needed` 来自：
+
+```text
+当前 prompt + 前面已经生成的 blocks + 当前 block 内 token confidence
+```
+
+如果要先小跑确认显存：
+
+```bash
+BATCH_SIZES="2" BLOCK_SIZES="16" TRIALS=1 NUM_BLOCKS=2 bash scripts/run_h100_llada_experiment.sh
+```
+
+如果 H100 显存足够，再跑默认完整 sweep。

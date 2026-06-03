@@ -2,7 +2,8 @@
 """用真实 masked-diffusion LM 在 H100 上探测 block 内 token step 分布。
 
 默认读取带 difficulty 的 prompt JSONL：easy/medium/hard/extreme。脚本会在 prompt
-后追加一个 masked block，然后逐步接受 confidence 足够高的 token，记录每个 token
+后按 block 逐段追加 masked tokens；第 k 个 block 会以上一个 block 已经生成的
+内容作为前文。每个 block 内逐步接受 confidence 足够高的 token，记录每个 token
 在哪一步完成，输出与 `dlm_block_sampling_benchmark.py --mode plot-csv` 兼容的 CSV。
 """
 
@@ -108,80 +109,56 @@ def cuda_sync() -> None:
         torch.cuda.synchronize()
 
 
-def build_batch(
+def build_prompt_batch(
     tokenizer: AutoTokenizer,
     prompts: list[PromptRecord],
+    device: torch.device,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Tokenize prompts and keep an attention mask so padding is not context."""
+
+    encoded = [tokenizer(item.prompt, add_special_tokens=True)["input_ids"] for item in prompts]
+    max_prompt = max(len(ids) for ids in encoded)
+    pad_id = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else tokenizer.eos_token_id
+    rows = [ids + [pad_id] * (max_prompt - len(ids)) for ids in encoded]
+    masks = [[1] * len(ids) + [0] * (max_prompt - len(ids)) for ids in encoded]
+    return (
+        torch.tensor(rows, dtype=torch.long, device=device),
+        torch.tensor(masks, dtype=torch.long, device=device),
+    )
+
+
+def append_mask_block(
+    input_ids: torch.Tensor,
+    attention_mask: torch.Tensor,
     block_size: int,
     mask_token_id: int,
-    device: torch.device,
-) -> tuple[torch.Tensor, torch.Tensor, list[tuple[int, int]]]:
-    encoded = [tokenizer(item.prompt, add_special_tokens=True)["input_ids"] for item in prompts]
-    prompt_lengths = [len(ids) for ids in encoded]
-    max_prompt = max(prompt_lengths)
-    pad_id = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else tokenizer.eos_token_id
-    rows = []
-    block_spans = []
-    for ids, prompt_len in zip(encoded, prompt_lengths):
-        padded_prompt = ids + [pad_id] * (max_prompt - prompt_len)
-        block_start = max_prompt
-        block_end = block_start + block_size
-        rows.append(padded_prompt + [mask_token_id] * block_size)
-        block_spans.append((block_start, block_end))
-    input_ids = torch.tensor(rows, dtype=torch.long, device=device)
-    attention_mask = torch.ones_like(input_ids, device=device)
-    return input_ids, attention_mask, block_spans
+) -> tuple[torch.Tensor, torch.Tensor, tuple[int, int]]:
+    """Append one masked block to every request and return its shared span."""
+
+    batch_size = input_ids.shape[0]
+    block_start = input_ids.shape[1]
+    block_end = block_start + block_size
+    mask_block = torch.full(
+        (batch_size, block_size),
+        mask_token_id,
+        dtype=torch.long,
+        device=input_ids.device,
+    )
+    mask_attention = torch.ones_like(mask_block, device=input_ids.device)
+    return torch.cat([input_ids, mask_block], dim=1), torch.cat([attention_mask, mask_attention], dim=1), (block_start, block_end)
 
 
-@torch.inference_mode()
-def probe_one_batch(
-    model: AutoModelForCausalLM,
-    tokenizer: AutoTokenizer,
+def make_probe_rows(
     prompts: list[PromptRecord],
+    token_steps: torch.Tensor,
+    step_latencies_ms: list[float],
     batch_size: int,
     block_size: int,
-    max_steps: int,
-    confidence_threshold: float,
     trial: int,
-    device: torch.device,
+    block_index: int,
 ) -> list[ProbeRow]:
-    mask_token_id = choose_mask_token_id(tokenizer)
-    input_ids, attention_mask, block_spans = build_batch(
-        tokenizer,
-        prompts,
-        block_size,
-        mask_token_id,
-        device,
-    )
-    token_steps = torch.zeros((batch_size, block_size), dtype=torch.long, device=device)
-    step_latencies_ms: list[float] = []
+    """Convert one finished block's token_steps into sync/dynamic_oracle CSV rows."""
 
-    for step in range(1, max_steps + 1):
-        still_masked = token_steps.eq(0)
-        if not bool(still_masked.any()):
-            break
-
-        cuda_sync()
-        start = time.perf_counter()
-        logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
-        cuda_sync()
-        step_latencies_ms.append((time.perf_counter() - start) * 1000.0)
-
-        for request_id, (block_start, block_end) in enumerate(block_spans):
-            masked_positions = token_steps[request_id].eq(0)
-            if not bool(masked_positions.any()):
-                continue
-            block_logits = logits[request_id, block_start:block_end]
-            probs = torch.softmax(block_logits, dim=-1)
-            confidence, predicted = torch.max(probs, dim=-1)
-            accept = masked_positions & confidence.ge(confidence_threshold)
-            if not bool(accept.any()):
-                masked_conf = confidence.masked_fill(~masked_positions, -1.0)
-                accept[torch.argmax(masked_conf)] = True
-            absolute_positions = torch.arange(block_start, block_end, device=device)[accept]
-            input_ids[request_id, absolute_positions] = predicted[accept]
-            token_steps[request_id, accept] = step
-
-    token_steps = token_steps.masked_fill(token_steps.eq(0), max_steps)
     batch_finish_steps = int(token_steps.max().item())
     full_batch_latency = sum(step_latencies_ms[:batch_finish_steps])
     rows: list[ProbeRow] = []
@@ -190,13 +167,12 @@ def probe_one_batch(
         steps_needed = max(steps)
         useful_token_steps = sum(steps)
         block_internal_waste = (steps_needed * block_size) / useful_token_steps
-
         common = dict(
             batch_size=batch_size,
             block_size=block_size,
             trial=trial,
             request_id=request_id,
-            block_index=0,
+            block_index=block_index,
             prompt_id=prompt.prompt_id,
             prompt_difficulty=prompt.difficulty,
             steps_needed=steps_needed,
@@ -228,6 +204,75 @@ def probe_one_batch(
     return rows
 
 
+@torch.inference_mode()
+def probe_one_batch(
+    model: AutoModelForCausalLM,
+    tokenizer: AutoTokenizer,
+    prompts: list[PromptRecord],
+    batch_size: int,
+    block_size: int,
+    num_blocks: int,
+    max_steps: int,
+    confidence_threshold: float,
+    trial: int,
+    device: torch.device,
+) -> list[ProbeRow]:
+    """Probe multiple blocks; each later block is conditioned on previous blocks."""
+
+    mask_token_id = choose_mask_token_id(tokenizer)
+    input_ids, attention_mask = build_prompt_batch(tokenizer, prompts, device)
+    rows: list[ProbeRow] = []
+
+    for block_index in range(num_blocks):
+        input_ids, attention_mask, (block_start, block_end) = append_mask_block(
+            input_ids,
+            attention_mask,
+            block_size,
+            mask_token_id,
+        )
+        token_steps = torch.zeros((batch_size, block_size), dtype=torch.long, device=device)
+        step_latencies_ms: list[float] = []
+
+        for step in range(1, max_steps + 1):
+            still_masked = token_steps.eq(0)
+            if not bool(still_masked.any()):
+                break
+
+            cuda_sync()
+            start = time.perf_counter()
+            logits = model(input_ids=input_ids, attention_mask=attention_mask).logits
+            cuda_sync()
+            step_latencies_ms.append((time.perf_counter() - start) * 1000.0)
+
+            for request_id in range(batch_size):
+                masked_positions = token_steps[request_id].eq(0)
+                if not bool(masked_positions.any()):
+                    continue
+                block_logits = logits[request_id, block_start:block_end]
+                probs = torch.softmax(block_logits, dim=-1)
+                confidence, predicted = torch.max(probs, dim=-1)
+                accept = masked_positions & confidence.ge(confidence_threshold)
+                if not bool(accept.any()):
+                    masked_conf = confidence.masked_fill(~masked_positions, -1.0)
+                    accept[torch.argmax(masked_conf)] = True
+                absolute_positions = torch.arange(block_start, block_end, device=device)[accept]
+                input_ids[request_id, absolute_positions] = predicted[accept]
+                token_steps[request_id, accept] = step
+
+        token_steps = token_steps.masked_fill(token_steps.eq(0), max_steps)
+        rows.extend(
+            make_probe_rows(
+                prompts=prompts,
+                token_steps=token_steps,
+                step_latencies_ms=step_latencies_ms,
+                batch_size=batch_size,
+                block_size=block_size,
+                trial=trial,
+                block_index=block_index,
+            )
+        )
+    return rows
+
 def write_rows(rows: list[ProbeRow], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="", encoding="utf-8") as handle:
@@ -245,6 +290,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-sizes", type=int, nargs="+", default=[2, 4, 8, 16])
     parser.add_argument("--block-sizes", type=int, nargs="+", default=[16, 32, 64])
     parser.add_argument("--trials", type=int, default=5)
+    parser.add_argument("--num-blocks", type=int, default=4)
     parser.add_argument("--max-steps", type=int, default=64)
     parser.add_argument("--confidence-threshold", type=float, default=0.90)
     parser.add_argument("--dtype", choices=["bf16", "fp16", "fp32"], default="bf16")
@@ -279,13 +325,14 @@ def main() -> None:
                         prompts=batch_prompts,
                         batch_size=batch_size,
                         block_size=block_size,
+                        num_blocks=args.num_blocks,
                         max_steps=args.max_steps,
                         confidence_threshold=args.confidence_threshold,
                         trial=trial,
                         device=device,
                     )
                 )
-                print(f"done block={block_size} batch={batch_size} trial={trial}")
+                print(f"done block_size={block_size} batch={batch_size} trial={trial} num_blocks={args.num_blocks}")
     write_rows(rows, args.out)
     print(f"wrote {args.out}")
 

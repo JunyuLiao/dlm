@@ -38,17 +38,11 @@ python3 scripts/dlm_block_sampling_benchmark.py --mode simulate --prompt-file da
 ```bash
 python3 -m pip install -r requirements-h100.txt
 
-python3 scripts/llada_block_step_probe.py \
-  --model GSAI-ML/LLaDA-8B-Instruct \
-  --prompts data/prompts_heterogeneous.jsonl \
-  --batch-sizes 2 4 8 16 \
-  --block-sizes 16 32 64 \
-  --out outputs/h100_llada/per_request_rows.csv
+bash scripts/run_h100_llada_experiment.sh
 
-python3 scripts/dlm_block_sampling_benchmark.py \
-  --mode plot-csv \
-  --input-csv outputs/h100_llada/per_request_rows.csv \
-  --outdir outputs/h100_llada_plots
+# 等价于：先运行 scripts/llada_block_step_probe.py 生成真实模型 CSV，
+# 再运行 scripts/dlm_block_sampling_benchmark.py --mode plot-csv 画图。
+# 默认 NUM_BLOCKS=4，block k 的 step 来自模型 confidence，并以前面已生成 block 为上下文。
 ```
 
 prompt 要故意混合简单翻译、代码、数学、长摘要、SQL、推理等不同复杂度；否则一个 batch 里的 request 太像，step 分布不明显。当前默认 prompt 文件已经显式标了 `difficulty=easy/medium/hard/extreme`。
