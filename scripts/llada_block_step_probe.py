@@ -294,6 +294,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-steps", type=int, default=64)
     parser.add_argument("--confidence-threshold", type=float, default=0.90)
     parser.add_argument("--dtype", choices=["bf16", "fp16", "fp32"], default="bf16")
+    parser.add_argument(
+        "--device-map",
+        choices=["none", "auto"],
+        default="none",
+        help=(
+            "Use none for single H100 loading via model.to(cuda). "
+            "Use auto only if the remote model class supports accelerate device maps."
+        ),
+    )
     return parser.parse_args()
 
 
@@ -302,12 +311,15 @@ def main() -> None:
     dtype = {"bf16": torch.bfloat16, "fp16": torch.float16, "fp32": torch.float32}[args.dtype]
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     tokenizer = AutoTokenizer.from_pretrained(args.model, trust_remote_code=True)
-    model = AutoModelForCausalLM.from_pretrained(
-        args.model,
-        trust_remote_code=True,
-        torch_dtype=dtype,
-        device_map="auto" if torch.cuda.is_available() else None,
-    )
+    model_kwargs = {
+        "trust_remote_code": True,
+        "torch_dtype": dtype,
+    }
+    if args.device_map == "auto":
+        model_kwargs["device_map"] = "auto"
+    model = AutoModelForCausalLM.from_pretrained(args.model, **model_kwargs)
+    if args.device_map == "none":
+        model = model.to(device)
     model.eval()
 
     prompts = read_prompts(args.prompts)

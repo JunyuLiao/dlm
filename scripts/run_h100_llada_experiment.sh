@@ -17,6 +17,7 @@ NUM_BLOCKS=${NUM_BLOCKS:-4}
 MAX_STEPS=${MAX_STEPS:-64}
 CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-0.90}
 DTYPE=${DTYPE:-bf16}
+DEVICE_MAP=${DEVICE_MAP:-none}
 
 mkdir -p "$OUTDIR"
 
@@ -30,6 +31,7 @@ $PYTHON scripts/llada_block_step_probe.py \
   --max-steps "$MAX_STEPS" \
   --confidence-threshold "$CONFIDENCE_THRESHOLD" \
   --dtype "$DTYPE" \
+  --device-map "$DEVICE_MAP" \
   --out "$OUTDIR/per_request_rows.csv"
 
 $PYTHON scripts/dlm_block_sampling_benchmark.py \

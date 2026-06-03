@@ -306,3 +306,28 @@ BATCH_SIZES="2" BLOCK_SIZES="16" TRIALS=1 NUM_BLOCKS=2 bash scripts/run_h100_lla
 ```
 
 如果 H100 显存足够，再跑默认完整 sweep。
+
+
+## 15. LLaDA 加载时报 `all_tied_weights_keys` 怎么办
+
+如果报错：
+
+```text
+AttributeError: 'LLaDAModelLM' object has no attribute 'all_tied_weights_keys'
+```
+
+原因通常是 `transformers/accelerate` 的 `device_map=auto` 会访问这个 remote-code 模型类没有实现的属性。解决：不要走 accelerate auto device map，单张 H100 直接加载后 `.to(cuda)`。
+
+当前脚本默认就是：
+
+```bash
+DEVICE_MAP=none bash scripts/run_h100_llada_experiment.sh
+```
+
+如果你明确要多 GPU shard，才尝试：
+
+```bash
+DEVICE_MAP=auto bash scripts/run_h100_llada_experiment.sh
+```
+
+但 LLaDA 这个 remote model class 在部分 transformers 版本下可能不支持 `auto`。
