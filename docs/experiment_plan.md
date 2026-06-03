@@ -138,7 +138,7 @@ sync_executed_token_steps = block_size * max(token_steps)
 5. 一个 request 的 `steps_needed = max(token_steps)`；block 内浪费看 `block_size * max(token_steps) / sum(token_steps)`。
 6. 输出 CSV 后，再用 `dlm_block_sampling_benchmark.py --mode plot-csv` 画图。
 
-注意：这个 probe 的 `dynamic_oracle` 是分析口径，不等于已经实现了高性能动态 shape kernel。它告诉你“如果已经完成的 token 可以不再算，理论上能省多少 token-step”；真正的 wall-clock 加速还需要后续把 attention / batching kernel 改成动态执行。
+注意：当前 H100 主实验默认不再输出 `dynamic_oracle`。如果以后要研究理论上界，可以单独做离线分析；主结果只看真实 `real_llada` 行。
 
 
 ## 9. 当前代码到底是按 prompt 还是写死 step
@@ -395,4 +395,67 @@ request_id,prompt_id,difficulty,trial,batch_size,block_index,block_size,
 steps_used,latency_ms,mean_confidence,min_confidence,num_tokens
 ```
 
-`per_request_rows.csv` 仍保留 sync / dynamic_oracle 两种分析行，用于画 waste/latency 图；`block_steps.csv` 则是一行一个 prompt/request/block，更适合直接汇报“每个 block 用了多少 denoising steps”。
+`per_request_rows.csv` 现在用于保存真实 `real_llada` 行并画 latency/step 图；`block_steps.csv` 则是一行一个 prompt/request/block，更适合直接汇报“每个 block 用了多少 denoising steps”。
+
+
+## 19. 输出目录按时间戳保存不同版本
+
+两个统一入口现在都会默认使用 UTC 时间戳目录，避免覆盖之前结果：
+
+```bash
+bash scripts/run_dlm_experiment.sh
+# -> outputs/prompt_difficulty_demo/YYYYMMDD_HHMMSS
+
+bash scripts/run_h100_llada_experiment.sh
+# -> outputs/h100_llada/YYYYMMDD_HHMMSS
+```
+
+如果你想固定某次实验名，可以手动传：
+
+```bash
+RUN_ID=bs_sweep_v1 bash scripts/run_h100_llada_experiment.sh
+```
+
+如果想完全指定目录，也可以传：
+
+```bash
+OUTDIR=outputs/my_manual_run bash scripts/run_h100_llada_experiment.sh
+```
+
+## 12. 当前代码的主实验路径：真实 batched LLaDA，不用离线模拟 step
+
+现在最终 H100 实验统一跑 `scripts/run_h100_llada_experiment.sh`。这个入口会把 `BATCH_SIZE` / `BATCH_SIZES` 传给 `scripts/llada_block_step_probe.py`，然后真实地按 batch tokenize prompts、append mask block、调用 LLaDA forward，并用 LLaDA 官方 top-k/low-confidence 规则决定每一步接受哪些 token。模拟脚本 `scripts/run_dlm_experiment.sh` 只用于检查 CSV/plot pipeline，不作为最终实验数据。
+
+推荐命令：
+
+```bash
+BATCH_SIZES=1,2,4,8,16 \
+BLOCK_SIZES=16,32,64 \
+NUM_BLOCKS=4 \
+MAX_STEPS_PER_BLOCK=64 \
+ACCEPTANCE_POLICY=topk \
+CONFIDENCE_THRESHOLD=0.95 \
+MASK_TOKEN_ID=126336 \
+DEVICE_MAP=none \
+bash scripts/run_h100_llada_experiment.sh
+```
+
+真实 probe 的循环是：
+
+1. 每个 batch 一次 tokenize + padding。
+2. 对 `block_index = 0..NUM_BLOCKS-1`：只 append 当前 block 的 mask token。
+3. 在当前 block 内迭代真实 LLaDA forward；每一步只更新当前 block 里还没 finalized 的 token。
+4. 某个 request 当前 block 先完成时，记录它自己的 `steps_used`；整个 batch 继续跑到所有 request 当前 block 都完成或达到 `MAX_STEPS_PER_BLOCK`。
+5. 当前 block 结束后，再 append 下一个 block，因此后续 block 的 step 会依赖 prompt 和前面真实生成出来的内容。
+
+真实输出：
+
+- `block_steps.csv`：一行一个 request/block，字段包括 `run_id`, `batch_size`, `batch_id`, `request_id`, `prompt_id`, `difficulty`, `block_index`, `steps_used`, `latency_ms`, `mean_confidence`, `min_confidence`。
+- `batch_block_latency.csv`：一行一个 batch/block，字段包括 `batch_block_steps`, `max_request_steps_used`, `min_request_steps_used`, `mean_request_steps_used`, `latency_ms`, `waste_token_steps`。
+- `per_request_rows.csv`：用于复用画图脚本；H100 主路径只包含真实 `real_llada` 行，不再默认混入未真实执行的 dynamic/oracle 曲线。
+
+## 13. LLaDA confidence / acceptance 规则修正
+
+H100 主实验默认 `ACCEPTANCE_POLICY=topk`，尽量贴近官方 LLaDA `generate.py` 的采样方式：每一步先对当前 block 中仍为 mask 的位置计算预测 token 的 confidence，然后按线性 schedule 决定本 step 要 unmask 多少个 token，并选择 confidence 最高的 top-k 位置写回。也就是说，官方流程不是“所有超过固定 threshold 的 token 都接受”，而是“每步必须接受 schedule 指定数量的最高置信 token；其他位置继续保持 mask 到后续 step”。
+
+`CONFIDENCE_THRESHOLD` 仍保留给 `ACCEPTANCE_POLICY=threshold` 这个实验模式，但 H100 runner 默认不会使用它。最终图默认只画真实 `real_llada` 行，不再默认混入未真实执行的 dynamic/oracle 曲线。

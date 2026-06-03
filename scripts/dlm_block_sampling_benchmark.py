@@ -419,7 +419,24 @@ def write_prompt_block_steps(rows: list[RequestRow], path: Path) -> None:
             writer.writerow({field: getattr(row, field) for field in fieldnames})
 
 
-def plot(rows: list[RequestRow], outdir: Path) -> bool:
+def scheduler_label(scheduler: str) -> str:
+    labels = {
+        "sync": "simulated sync batch",
+        "dynamic": "simulated dynamic token skip",
+        "real_llada": "real LLaDA top-k batch",
+    }
+    return labels.get(scheduler, scheduler)
+
+def actual_step_schedulers(rows: list[RequestRow]) -> set[str]:
+    schedulers = {row.scheduler for row in rows}
+    if "real_llada" in schedulers:
+        return {"real_llada"}
+    if "dynamic" in schedulers:
+        return {"dynamic"}
+    return schedulers
+
+
+def plot(rows: list[RequestRow], outdir: Path, data_label: str) -> bool:
     try:
         import matplotlib.pyplot as plt
     except ModuleNotFoundError:
@@ -428,6 +445,8 @@ def plot(rows: list[RequestRow], outdir: Path) -> bool:
 
     outdir.mkdir(parents=True, exist_ok=True)
     block_for_exp1 = 32 if any(row.block_size == 32 for row in rows) else rows[0].block_size
+    batch_for_exp2 = 8 if any(row.batch_size == 8 for row in rows) else rows[0].batch_size
+    batch_for_exp3 = batch_for_exp2
 
     fig, ax = plt.subplots(figsize=(7, 4))
     for scheduler in sorted({row.scheduler for row in rows}):
@@ -443,41 +462,43 @@ def plot(rows: list[RequestRow], outdir: Path) -> bool:
             if group:
                 xs.append(batch_size)
                 ys.append(sum(row.executed_token_steps for row in group) / sum(row.useful_token_steps for row in group))
-        ax.plot(xs, ys, marker="o", label=scheduler)
-    ax.set_title(f"Exp1: batch size vs waste ratio (block={block_for_exp1})")
+        ax.plot(xs, ys, marker="o", label=scheduler_label(scheduler))
+    ax.set_title(f"Exp1: batch size vs wasted work (block={block_for_exp1})\n{data_label}")
     ax.set_xlabel("batch size")
-    ax.set_ylabel("executed token-steps / useful token-steps")
+    ax.set_ylabel("waste ratio (1.0 = no wasted token-steps)")
     ax.legend()
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
     fig.savefig(outdir / "exp1_batch_speed_gap.png", dpi=180)
     plt.close(fig)
 
+    preferred_schedulers = actual_step_schedulers(rows)
     example = [
         row
         for row in rows
-        if row.batch_size == 8 and row.block_size == block_for_exp1 and row.trial == 0
+        if row.batch_size == batch_for_exp2
+        and row.block_size == block_for_exp1
+        and row.trial == 0
+        and row.scheduler in preferred_schedulers
     ]
     fig, ax = plt.subplots(figsize=(7, 4))
-    for scheduler in sorted({row.scheduler for row in example}):
-        group = [row for row in example if row.scheduler == scheduler]
+    difficulties = ["easy", "medium", "hard", "extreme", "unknown"]
+    for difficulty in difficulties:
+        group = [row for row in example if row.prompt_difficulty == difficulty]
+        if not group:
+            continue
         ax.scatter(
             [row.steps_needed for row in group],
             [row.latency_ms for row in group],
-            label=scheduler,
-            s=60,
-            alpha=0.8,
+            label=difficulty,
+            s=55,
+            alpha=0.75,
         )
-        for row in group:
-            ax.annotate(
-                f"r{row.request_id}:{row.prompt_difficulty}",
-                (row.steps_needed, row.latency_ms),
-                fontsize=8,
-            )
-    ax.set_title("Exp2: block finish steps vs latency")
-    ax.set_xlabel("steps needed by the hardest token in this block")
+    ax.set_title(f"Exp2: actual block steps vs latency (dynamic rows only)\n{data_label}")
+    ax.set_xlabel("actual steps used by this request block")
     ax.set_ylabel("request/block latency (ms)")
-    ax.legend()
+    if ax.has_data():
+        ax.legend(title="prompt difficulty")
     ax.grid(True, alpha=0.3)
     fig.tight_layout()
     fig.savefig(outdir / "exp2_steps_vs_perf.png", dpi=180)
@@ -490,15 +511,15 @@ def plot(rows: list[RequestRow], outdir: Path) -> bool:
             group = [
                 row
                 for row in rows
-                if row.batch_size == 8
+                if row.batch_size == batch_for_exp3
                 and row.block_size == block_size
                 and row.scheduler == scheduler
             ]
             if group:
                 xs.append(block_size)
                 ys.append(mean(row.latency_ms for row in group))
-        ax.plot(xs, ys, marker="o", label=scheduler)
-    ax.set_title("Exp3: block size vs mean latency (batch=8)")
+        ax.plot(xs, ys, marker="o", label=scheduler_label(scheduler))
+    ax.set_title(f"Exp3: block size vs mean latency (batch={batch_for_exp3})\n{data_label}")
     ax.set_xlabel("block size")
     ax.set_ylabel("mean request/block latency (ms)")
     ax.legend()
@@ -511,19 +532,46 @@ def plot(rows: list[RequestRow], outdir: Path) -> bool:
     order = ["easy", "medium", "hard", "extreme", "unknown"]
     labels, values = [], []
     for difficulty in order:
-        group = [row for row in rows if row.prompt_difficulty == difficulty and row.scheduler in {"sync", "dynamic"}]
+        group = [row for row in rows if row.prompt_difficulty == difficulty and row.scheduler in actual_step_schedulers(rows)]
         if group:
             labels.append(difficulty)
             values.append(mean(row.steps_needed for row in group))
     ax.bar(labels, values)
-    ax.set_title("Prompt difficulty vs steps needed")
+    ax.set_title(f"Exp4: prompt difficulty vs actual steps used\n{data_label}")
     ax.set_xlabel("prompt difficulty")
-    ax.set_ylabel("mean block finish steps")
+    ax.set_ylabel("mean actual block steps")
     ax.grid(True, axis="y", alpha=0.3)
     fig.tight_layout()
     fig.savefig(outdir / "exp4_prompt_difficulty_steps.png", dpi=180)
     plt.close(fig)
     return True
+
+
+def write_plot_guide(outdir: Path, num_blocks: int | None = None, data_label: str = "simulated data only") -> None:
+    block_text = "unknown" if num_blocks is None else str(num_blocks)
+    guide = f"""# Plot guide
+
+数据来源：`{data_label}`。H100 真实实验只消费 LLaDA real probe 写出的 CSV；模拟模式只用于 smoke/debug。
+
+- `real LLaDA top-k batch`: H100 真实模型 probe 结果；每一步按 LLaDA 官方 low-confidence/top-k unmasking 规则接受 token。
+- `simulated sync batch` / `simulated dynamic token skip`: 只会出现在 simulator 输出里，用于 debug 图表，不作为 H100 真实实验结论。
+
+## 输出文件
+
+- `per_request_rows.csv`: 完整分析表；H100 真实 runner 中只包含真实 `real_llada` 行，用于画真实 latency/step 图。
+- `prompt_block_steps.csv`: 从完整表整理出的 per request/block step 表。
+- H100 真实模型 runner 还会写 `../block_steps.csv`: 一行一个 prompt/request/block，字段包括 `steps_used`, `mean_confidence`, `min_confidence`。
+
+## 图怎么读
+
+1. `exp1_batch_speed_gap.png`: batch size 越大，sync 的 waste ratio 通常越高，说明容易被 hardest request 拖住；真实 LLaDA 曲线展示实际 batch/block 的同步 cost。
+2. `exp2_steps_vs_perf.png`: 只画真实/动态行，横轴是这个 block 实际用了多少 denoising steps，纵轴是 latency。
+3. `exp3_block_size_latency.png`: block size 16/32/64 对 mean latency 的影响。
+4. `exp4_prompt_difficulty_steps.png`: 不同 difficulty 的 prompt 平均实际 block steps；真实模型下规律不一定单调，要以 `block_steps.csv` 为准。
+
+当前默认 NUM_BLOCKS={block_text}；每个 request 会有多个 `block_index`。
+"""
+    (outdir / "plot_guide.md").write_text(guide, encoding="utf-8")
 
 
 def parse_args() -> argparse.Namespace:
@@ -537,6 +585,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--schedulers", nargs="+", default=["sync", "dynamic"])
     parser.add_argument("--trials", type=int, default=50)
     parser.add_argument("--seed", type=int, default=7)
+    parser.add_argument("--data-label", default=None, help="Label printed in plot titles and plot_guide.md")
     return parser.parse_args()
 
 
@@ -548,6 +597,7 @@ def main() -> None:
         rows = read_rows(args.input_csv)
     else:
         rows = simulate(args)
+    data_label = args.data_label or ("real LLaDA H100 data" if args.mode == "plot-csv" else "simulated data only")
 
     raw_csv = args.outdir / "per_request_rows.csv"
     summary_csv = args.outdir / "summary.csv"
@@ -557,11 +607,14 @@ def main() -> None:
     summarize(rows, summary_csv)
     write_difficulty_summary(rows, difficulty_csv)
     write_prompt_block_steps(rows, prompt_block_csv)
-    plotted = plot(rows, args.outdir)
+    plotted = plot(rows, args.outdir, data_label)
+    num_blocks = max((row.block_index for row in rows), default=0) + 1
+    write_plot_guide(args.outdir, num_blocks, data_label)
     print(f"wrote {raw_csv}")
     print(f"wrote {summary_csv}")
     print(f"wrote {difficulty_csv}")
     print(f"wrote {prompt_block_csv}")
+    print(f"wrote {args.outdir / 'plot_guide.md'}")
     if plotted:
         print(f"wrote figures under {args.outdir}")
 

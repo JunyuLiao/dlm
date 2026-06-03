@@ -6,9 +6,10 @@ set -euo pipefail
 # 2) 输出 per_request_rows.csv / summary.csv / difficulty_summary.csv。
 # 3) 如果装了 matplotlib，会输出 exp1~exp4 四张图。
 
-OUTDIR=${OUTDIR:-outputs/prompt_difficulty_demo}
-PROMPTS=${PROMPTS:-data/prompts_heterogeneous.jsonl}
 PYTHON=${PYTHON:-python3}
+RUN_ID=${RUN_ID:-$(date -u +"%Y%m%d_%H%M%S")}
+OUTDIR=${OUTDIR:-outputs/prompt_difficulty_demo/$RUN_ID}
+PROMPTS=${PROMPTS:-data/prompts_heterogeneous.jsonl}
 
 $PYTHON scripts/dlm_block_sampling_benchmark.py \
   --mode simulate \

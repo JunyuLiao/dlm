@@ -2,25 +2,26 @@
 
 这个 repo 放的是一个轻量级实验脚手架，用来设计和画 Diffusion LM / DLM 的 serving 实验：batch size、dynamic sampling、一个 block 内 token 需要的 decoding step 数量不一样、以及 block size 16/32/64 对性能的影响。
 
-重点不是先做一个真实模型实现，而是先把实验口径定清楚：脚本默认用模拟数据验证图和指标；等你在 H100 上跑真实 DLM decoder 后，把真实 per-request/per-block CSV 喂给同一个脚本即可。
+重点分两条线：`scripts/run_h100_llada_experiment.sh` 是主实验，使用真实 LLaDA forward + 真实 batch size 记录数据；`scripts/run_dlm_experiment.sh` 只是 smoke/debug 用的模拟脚本，不作为最终实验结论。
 
 ## 快速开始
 
 ```bash
 bash scripts/run_dlm_experiment.sh
+# 每次运行默认带 UTC 时间戳，例如 outputs/prompt_difficulty_demo/20260603_123456
 
 # 或者直接跑 Python：
 python3 scripts/dlm_block_sampling_benchmark.py --mode simulate --prompt-file data/prompts_heterogeneous.jsonl --outdir outputs/demo
 ```
 
-脚本会根据 `data/prompts_heterogeneous.jsonl` 里的 prompt difficulty 生成不同难度 request，不是写死每个 block step。它会输出 CSV 和四张诊断图：
+模拟脚本会根据 `data/prompts_heterogeneous.jsonl` 里的 prompt difficulty 生成不同难度 request，不是写死每个 block step；但它只用于检查图和 CSV 格式。它会输出 CSV 和四张诊断图：
 
 1. `exp1_batch_speed_gap`：`x = batch size 2/4/8/16`，`y = 因 step 不均导致的同步等待 / waste ratio`。
 2. `exp2_steps_vs_perf`：`x = 一个 block 里该 request 需要的 decoding steps`，`y = latency`，体现 step 数不一样如何变成性能差距。
 3. `exp3_block_size`：比较 `block size = 16/32/64` 下的 mean latency / waste ratio。
 4. `exp4_prompt_difficulty_steps`：检查 easy/medium/hard/extreme prompt 是否真的产生了不同 step 数。
 
-另外会写 `prompt_block_steps.csv`，这就是你问的“每个 prompt / request 的每个 block 需要多少 step”的表；当前默认每个 request probe 一个 block，所以 `block_index=0`，以后多 block 生成时这个字段可以直接扩展。
+另外会写 `prompt_block_steps.csv`，这就是你问的“每个 prompt / request 的每个 block 需要多少 step”的表。真实 H100 脚本默认 `NUM_BLOCKS=4`，所以同一个 request 会有 `block_index=0..3` 多行。
 
 详细实验设置、老师那两句话该怎么理解、以及 H100 上需要 log 什么字段，见 `docs/experiment_plan.md`。
 
@@ -33,18 +34,28 @@ python3 scripts/dlm_block_sampling_benchmark.py --mode simulate --prompt-file da
 
 推荐先用 LLaDA-8B-Instruct 做 probe，因为它是开源 masked diffusion LM，比较适合测“一个 block 内不同 token 需要多少 step”。如果你想严格复现 block diffusion 论文里的 block-autoregressive 设定，可以再切到 BD3-LM；如果目标是效率优化，可以参考 DPad/Fast-dLLM 类代码。
 
-真实模型探测脚本：
+真实模型探测脚本（主实验入口）：
 
 ```bash
 python3 -m pip install -r requirements-h100.txt
 
+BATCH_SIZES=1,2,4,8,16 \
+BLOCK_SIZES=16,32,64 \
+NUM_BLOCKS=4 \
+MAX_STEPS_PER_BLOCK=64 \
+ACCEPTANCE_POLICY=topk \
+CONFIDENCE_THRESHOLD=0.95 \
+MASK_TOKEN_ID=126336 \
+DEVICE_MAP=none \
 bash scripts/run_h100_llada_experiment.sh
-
-# 等价于：先运行 scripts/llada_block_step_probe.py 生成真实模型 CSV，
-# 再运行 scripts/dlm_block_sampling_benchmark.py --mode plot-csv 画图。
-# 默认 NUM_BLOCKS=4，block k 的 step 来自模型 confidence，并以前面已生成 block 为上下文。
-# 这不是把 total steps 平均分给 blocks；每个 block 会动态停止并写入 outputs/h100_llada/block_steps.csv。
+# 每次运行默认带 UTC 时间戳，例如 outputs/h100_llada/20260603_123456
 ```
+
+真实 runner 做的是：prompt batching -> append masks -> real LLaDA forward -> LLaDA 官方 top-k/low-confidence unmasking -> 写真实 CSV -> 用真实 CSV 画图。它不是先 `bs=1` 跑完再离线模拟 batch size，也不是把 total steps 平均分给 blocks。输出里最重要的是：
+
+- `block_steps.csv`：一行一个 request/block，含真实 `steps_used`, `latency_ms`, `mean_confidence`, `min_confidence`。
+- `batch_block_latency.csv`：一行一个真实 batch/block，含真实 batch 同步 cost、最慢 request step、waste token-steps。
+- `per_request_rows.csv`：完整分析表；H100 主路径只保留实际跑出来的 `real_llada` 结果，不再默认输出未真实执行的 dynamic/oracle 曲线。
 
 prompt 要故意混合简单翻译、代码、数学、长摘要、SQL、推理等不同复杂度；否则一个 batch 里的 request 太像，step 分布不明显。当前默认 prompt 文件已经显式标了 `difficulty=easy/medium/hard/extreme`。
 
