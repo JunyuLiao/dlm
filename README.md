@@ -43,9 +43,13 @@ bash scripts/run_h100_llada_experiment.sh
 # 等价于：先运行 scripts/llada_block_step_probe.py 生成真实模型 CSV，
 # 再运行 scripts/dlm_block_sampling_benchmark.py --mode plot-csv 画图。
 # 默认 NUM_BLOCKS=4，block k 的 step 来自模型 confidence，并以前面已生成 block 为上下文。
+# 这不是把 total steps 平均分给 blocks；每个 block 会动态停止并写入 outputs/h100_llada/block_steps.csv。
 ```
 
 prompt 要故意混合简单翻译、代码、数学、长摘要、SQL、推理等不同复杂度；否则一个 batch 里的 request 太像，step 分布不明显。当前默认 prompt 文件已经显式标了 `difficulty=easy/medium/hard/extreme`。
 
 
 如果你遇到 `LLaDAModelLM object has no attribute all_tied_weights_keys`，更新后的 probe 已经在 `from_pretrained()` 期间加了兼容补丁（包括 `all_tied_weights_keys` 和新版 `tie_weights(missing_keys=...)` 兼容）；同时不要主动开 `DEVICE_MAP=auto`，默认 `DEVICE_MAP=none` 会先加载模型再 `model.to(cuda)`，单张 H100 可以放下 LLaDA-8B。
+
+
+LLaDA 的 Hugging Face tokenizer 可能不暴露 `mask_token_id`；脚本默认使用官方推理代码常用的 `MASK_TOKEN_ID=126336`，如需覆盖可运行 `MASK_TOKEN_ID=<id> bash scripts/run_h100_llada_experiment.sh`。

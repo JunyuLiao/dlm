@@ -18,6 +18,7 @@ MAX_STEPS=${MAX_STEPS:-64}
 CONFIDENCE_THRESHOLD=${CONFIDENCE_THRESHOLD:-0.90}
 DTYPE=${DTYPE:-bf16}
 DEVICE_MAP=${DEVICE_MAP:-none}
+MASK_TOKEN_ID=${MASK_TOKEN_ID:-126336}
 
 mkdir -p "$OUTDIR"
 
@@ -32,7 +33,9 @@ $PYTHON scripts/llada_block_step_probe.py \
   --confidence-threshold "$CONFIDENCE_THRESHOLD" \
   --dtype "$DTYPE" \
   --device-map "$DEVICE_MAP" \
-  --out "$OUTDIR/per_request_rows.csv"
+  --mask-token-id "$MASK_TOKEN_ID" \
+  --out "$OUTDIR/per_request_rows.csv" \
+  --block-steps-out "$OUTDIR/block_steps.csv"
 
 $PYTHON scripts/dlm_block_sampling_benchmark.py \
   --mode plot-csv \
@@ -41,6 +44,7 @@ $PYTHON scripts/dlm_block_sampling_benchmark.py \
 
 printf '\nDone. Real-model H100 outputs:\n'
 printf '  %s/per_request_rows.csv\n' "$OUTDIR"
+printf '  %s/block_steps.csv\n' "$OUTDIR"
 printf '  %s/plots/summary.csv\n' "$OUTDIR"
 printf '  %s/plots/difficulty_summary.csv\n' "$OUTDIR"
 printf '  %s/plots/prompt_block_steps.csv\n' "$OUTDIR"

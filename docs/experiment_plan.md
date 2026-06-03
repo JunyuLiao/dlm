@@ -348,3 +348,51 @@ TypeError: LLaDAModelLM.tie_weights() got an unexpected keyword argument 'missin
 ```bash
 bash scripts/run_h100_llada_experiment.sh
 ```
+
+
+## 17. tokenizer 没有 mask token 怎么办
+
+如果报错：
+
+```text
+ValueError: tokenizer 没有 mask token
+```
+
+LLaDA 的 Hugging Face tokenizer 可能没有把 mask token 注册成 `tokenizer.mask_token_id`，但官方推理代码通常使用固定 mask id `126336`。当前脚本已经默认 fallback 到 `126336`，H100 runner 也显式设置：
+
+```bash
+MASK_TOKEN_ID=126336 bash scripts/run_h100_llada_experiment.sh
+```
+
+如果你换了别的 diffusion LM，需要用对应模型的 mask token id 覆盖：
+
+```bash
+MASK_TOKEN_ID=<your_mask_id> bash scripts/run_h100_llada_experiment.sh
+```
+
+
+## 18. 确认真实模型实验不是固定 steps / block
+
+`llada_block_step_probe.py` 没有采用官方 LLaDA 那种把 total `steps` 平均分给每个 block 的固定预算逻辑。真实 H100 probe 的逻辑是：
+
+1. `NUM_BLOCKS=4` 时，每个 request 会顺序 probe 4 个 block。
+2. 第 `k` 个 block 是在 prompt + 已完成的 `0..k-1` blocks 后面 append `[MASK] * block_size`。
+3. 当前 block 每一步 forward 后，计算每个 masked token 的 confidence。
+4. confidence 达阈值的 token 被 unmask；如果没有 token 达阈值，会接受当前 confidence 最高的一个 token，避免无限等待。
+5. 当前 request 的当前 block 的 `steps_used=max(token_steps)`，因此不同 prompt、不同 block 可以有不同 `steps_used`。
+6. 最多只受 `MAX_STEPS` 截断，不会把 total steps 均分到 blocks。
+
+真实模型会额外输出紧凑表：
+
+```text
+outputs/h100_llada/block_steps.csv
+```
+
+字段正是老师要看的 block-level 口径：
+
+```text
+request_id,prompt_id,difficulty,trial,batch_size,block_index,block_size,
+steps_used,latency_ms,mean_confidence,min_confidence,num_tokens
+```
+
+`per_request_rows.csv` 仍保留 sync / dynamic_oracle 两种分析行，用于画 waste/latency 图；`block_steps.csv` 则是一行一个 prompt/request/block，更适合直接汇报“每个 block 用了多少 denoising steps”。

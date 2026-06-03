@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import time
 from contextlib import contextmanager
 from dataclasses import asdict, dataclass
@@ -114,6 +115,7 @@ class ProbeRow:
     block_index: int
     prompt_id: int
     prompt_difficulty: str
+    steps_used: int
     steps_needed: int
     steps_executed: int
     useful_token_steps: int
@@ -121,8 +123,11 @@ class ProbeRow:
     token_step_min: int
     token_step_mean: float
     token_step_max: int
+    mean_confidence: float
+    min_confidence: float
     block_internal_waste_ratio: float
     latency_ms: float
+    num_tokens: int
     tokens_generated: int
 
 
@@ -171,13 +176,28 @@ def choose_mixed_batch(prompts: list[PromptRecord], batch_size: int, trial: int)
     return batch
 
 
-def choose_mask_token_id(tokenizer: AutoTokenizer) -> int:
+def choose_mask_token_id(tokenizer: AutoTokenizer, explicit_mask_token_id: int | None) -> int:
+    """Resolve the mask token id.
+
+    Priority is intentionally:
+    1. `MASK_TOKEN_ID` environment variable.
+    2. CLI `--mask-token-id` / explicit argument.
+    3. `tokenizer.mask_token_id` if the tokenizer exposes it.
+    4. `[MASK]` token conversion if registered.
+    5. LLaDA default `126336`.
+    """
+
+    env_mask_token_id = os.environ.get("MASK_TOKEN_ID")
+    if env_mask_token_id:
+        return int(env_mask_token_id)
+    if explicit_mask_token_id is not None:
+        return explicit_mask_token_id
     if tokenizer.mask_token_id is not None:
         return int(tokenizer.mask_token_id)
     token_id = tokenizer.convert_tokens_to_ids("[MASK]")
-    if token_id is None or token_id == tokenizer.unk_token_id:
-        raise ValueError("tokenizer 没有 mask token；请使用 masked diffusion LM，例如 LLaDA。")
-    return int(token_id)
+    if token_id is not None and token_id != tokenizer.unk_token_id:
+        return int(token_id)
+    return 126336
 
 
 def cuda_sync() -> None:
@@ -227,6 +247,7 @@ def append_mask_block(
 def make_probe_rows(
     prompts: list[PromptRecord],
     token_steps: torch.Tensor,
+    token_confidences: torch.Tensor,
     step_latencies_ms: list[float],
     batch_size: int,
     block_size: int,
@@ -240,6 +261,7 @@ def make_probe_rows(
     rows: list[ProbeRow] = []
     for request_id, prompt in enumerate(prompts):
         steps = [int(x) for x in token_steps[request_id].tolist()]
+        confidences = [float(x) for x in token_confidences[request_id].tolist()]
         steps_needed = max(steps)
         useful_token_steps = sum(steps)
         block_internal_waste = (steps_needed * block_size) / useful_token_steps
@@ -251,12 +273,16 @@ def make_probe_rows(
             block_index=block_index,
             prompt_id=prompt.prompt_id,
             prompt_difficulty=prompt.difficulty,
+            steps_used=steps_needed,
             steps_needed=steps_needed,
             useful_token_steps=useful_token_steps,
             token_step_min=min(steps),
             token_step_mean=mean(steps),
             token_step_max=max(steps),
+            mean_confidence=mean(confidences),
+            min_confidence=min(confidences),
             block_internal_waste_ratio=block_internal_waste,
+            num_tokens=block_size,
             tokens_generated=block_size,
         )
         rows.append(
@@ -290,12 +316,13 @@ def probe_one_batch(
     num_blocks: int,
     max_steps: int,
     confidence_threshold: float,
+    mask_token_id: int | None,
     trial: int,
     device: torch.device,
 ) -> list[ProbeRow]:
     """Probe multiple blocks; each later block is conditioned on previous blocks."""
 
-    mask_token_id = choose_mask_token_id(tokenizer)
+    mask_token_id = choose_mask_token_id(tokenizer, mask_token_id)
     input_ids, attention_mask = build_prompt_batch(tokenizer, prompts, device)
     rows: list[ProbeRow] = []
 
@@ -307,6 +334,7 @@ def probe_one_batch(
             mask_token_id,
         )
         token_steps = torch.zeros((batch_size, block_size), dtype=torch.long, device=device)
+        token_confidences = torch.zeros((batch_size, block_size), dtype=torch.float32, device=device)
         step_latencies_ms: list[float] = []
 
         for step in range(1, max_steps + 1):
@@ -334,12 +362,16 @@ def probe_one_batch(
                 absolute_positions = torch.arange(block_start, block_end, device=device)[accept]
                 input_ids[request_id, absolute_positions] = predicted[accept]
                 token_steps[request_id, accept] = step
+                token_confidences[request_id, accept] = confidence[accept].float()
 
-        token_steps = token_steps.masked_fill(token_steps.eq(0), max_steps)
+        unfinished = token_steps.eq(0)
+        token_steps = token_steps.masked_fill(unfinished, max_steps)
+        token_confidences = token_confidences.masked_fill(unfinished, 0.0)
         rows.extend(
             make_probe_rows(
                 prompts=prompts,
                 token_steps=token_steps,
+                token_confidences=token_confidences,
                 step_latencies_ms=step_latencies_ms,
                 batch_size=batch_size,
                 block_size=block_size,
@@ -348,6 +380,58 @@ def probe_one_batch(
             )
         )
     return rows
+
+def write_block_step_rows(rows: list[ProbeRow], path: Path) -> None:
+    """Write one real-model row per request/prompt block.
+
+    This is the compact CSV for the teacher-facing experiment. It intentionally
+    drops the sync/dynamic_oracle duplicate rows and keeps the dynamic row where
+    `steps_used` is the request block's actual confidence-based completion step.
+    """
+
+    fieldnames = [
+        "request_id",
+        "prompt_id",
+        "difficulty",
+        "trial",
+        "batch_size",
+        "block_index",
+        "block_size",
+        "steps_used",
+        "latency_ms",
+        "mean_confidence",
+        "min_confidence",
+        "num_tokens",
+    ]
+    seen: set[tuple[int, int, int, int, int, int]] = set()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", newline="", encoding="utf-8") as handle:
+        writer = csv.DictWriter(handle, fieldnames=fieldnames)
+        writer.writeheader()
+        for row in rows:
+            if row.scheduler not in {"dynamic_oracle", "dynamic"}:
+                continue
+            key = (row.trial, row.batch_size, row.block_size, row.request_id, row.prompt_id, row.block_index)
+            if key in seen:
+                continue
+            seen.add(key)
+            writer.writerow(
+                {
+                    "request_id": row.request_id,
+                    "prompt_id": row.prompt_id,
+                    "difficulty": row.prompt_difficulty,
+                    "trial": row.trial,
+                    "batch_size": row.batch_size,
+                    "block_index": row.block_index,
+                    "block_size": row.block_size,
+                    "steps_used": row.steps_used,
+                    "latency_ms": row.latency_ms,
+                    "mean_confidence": row.mean_confidence,
+                    "min_confidence": row.min_confidence,
+                    "num_tokens": row.num_tokens,
+                }
+            )
+
 
 def write_rows(rows: list[ProbeRow], path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -363,12 +447,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", default="GSAI-ML/LLaDA-8B-Instruct")
     parser.add_argument("--prompts", type=Path, default=Path("data/prompts_heterogeneous.jsonl"))
     parser.add_argument("--out", type=Path, default=Path("outputs/h100_llada/per_request_rows.csv"))
+    parser.add_argument("--block-steps-out", type=Path, help="Compact CSV with one row per request/prompt block")
     parser.add_argument("--batch-sizes", type=int, nargs="+", default=[2, 4, 8, 16])
     parser.add_argument("--block-sizes", type=int, nargs="+", default=[16, 32, 64])
     parser.add_argument("--trials", type=int, default=5)
     parser.add_argument("--num-blocks", type=int, default=4)
     parser.add_argument("--max-steps", type=int, default=64)
     parser.add_argument("--confidence-threshold", type=float, default=0.90)
+    parser.add_argument(
+        "--mask-token-id",
+        type=int,
+        default=None,
+        help="Override mask token id. LLaDA HF tokenizers often need 126336, which is the built-in fallback.",
+    )
     parser.add_argument("--dtype", choices=["bf16", "fp16", "fp32"], default="bf16")
     parser.add_argument(
         "--device-map",
@@ -418,13 +509,17 @@ def main() -> None:
                         num_blocks=args.num_blocks,
                         max_steps=args.max_steps,
                         confidence_threshold=args.confidence_threshold,
+                        mask_token_id=args.mask_token_id,
                         trial=trial,
                         device=device,
                     )
                 )
                 print(f"done block_size={block_size} batch={batch_size} trial={trial} num_blocks={args.num_blocks}")
     write_rows(rows, args.out)
+    block_steps_out = args.block_steps_out or (args.out.parent / "block_steps.csv")
+    write_block_step_rows(rows, block_steps_out)
     print(f"wrote {args.out}")
+    print(f"wrote {block_steps_out}")
 
 
 if __name__ == "__main__":
