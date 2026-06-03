@@ -316,9 +316,9 @@ BATCH_SIZES="2" BLOCK_SIZES="16" TRIALS=1 NUM_BLOCKS=2 bash scripts/run_h100_lla
 AttributeError: 'LLaDAModelLM' object has no attribute 'all_tied_weights_keys'
 ```
 
-原因通常是 `transformers/accelerate` 的 `device_map=auto` 会访问这个 remote-code 模型类没有实现的属性。解决：不要走 accelerate auto device map，单张 H100 直接加载后 `.to(cuda)`。
+原因通常是较新的 `transformers` 会访问 remote-code 模型类没有实现的 `all_tied_weights_keys` 属性；`device_map=auto` 会触发，某些版本即使不用 `auto` 也会在 finalize loading 时触发。脚本现在会在 `from_pretrained()` 期间临时补一个兼容属性，把 LLaDA 的 `_tied_weights_keys` 转成 transformers 期望的 dict-like `all_tied_weights_keys`。
 
-当前脚本默认就是：
+当前脚本默认就是单卡加载，并带兼容补丁：
 
 ```bash
 DEVICE_MAP=none bash scripts/run_h100_llada_experiment.sh

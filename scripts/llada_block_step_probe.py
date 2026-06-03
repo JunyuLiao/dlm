@@ -13,12 +13,64 @@ import argparse
 import csv
 import json
 import time
+from contextlib import contextmanager
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from statistics import mean
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
+
+
+def normalize_tied_weight_keys(value: object) -> dict[str, None]:
+    """Return a dict-like all_tied_weights_keys value for newer transformers.
+
+    Some remote-code LLaDA model classes expose `_tied_weights_keys` but not the
+    newer `all_tied_weights_keys` attribute expected by recent transformers.
+    Transformers calls both `len(model.all_tied_weights_keys)` and
+    `model.all_tied_weights_keys.keys()`, so a list is not enough here.
+    """
+
+    if value is None:
+        return {}
+    if isinstance(value, dict):
+        return value
+    if isinstance(value, (list, tuple, set)):
+        return {str(item): None for item in value}
+    return {str(value): None}
+
+
+@contextmanager
+def patch_missing_all_tied_weights_keys() -> object:
+    """Temporarily shim remote-code models missing all_tied_weights_keys.
+
+    This fixes LLaDAModelLM with newer transformers versions where loading can
+    fail inside `from_pretrained()` before user code gets a model instance.
+    """
+
+    original_getattr = torch.nn.Module.__getattr__
+
+    def patched_getattr(self: torch.nn.Module, name: str) -> object:
+        if name == "all_tied_weights_keys":
+            tied = self.__dict__.get("_tied_weights_keys", None)
+            if tied is None:
+                tied = getattr(type(self), "_tied_weights_keys", None)
+            return normalize_tied_weight_keys(tied)
+        return original_getattr(self, name)
+
+    torch.nn.Module.__getattr__ = patched_getattr
+    try:
+        yield
+    finally:
+        torch.nn.Module.__getattr__ = original_getattr
+
+
+def ensure_all_tied_weights_keys(model: torch.nn.Module) -> None:
+    """Persist the compatibility attribute after loading."""
+
+    if not hasattr(model, "all_tied_weights_keys"):
+        tied = getattr(model, "_tied_weights_keys", None)
+        model.all_tied_weights_keys = normalize_tied_weight_keys(tied)
 
 
 @dataclass(frozen=True)
@@ -317,7 +369,9 @@ def main() -> None:
     }
     if args.device_map == "auto":
         model_kwargs["device_map"] = "auto"
-    model = AutoModelForCausalLM.from_pretrained(args.model, **model_kwargs)
+    with patch_missing_all_tied_weights_keys():
+        model = AutoModelForCausalLM.from_pretrained(args.model, **model_kwargs)
+    ensure_all_tied_weights_keys(model)
     if args.device_map == "none":
         model = model.to(device)
     model.eval()
