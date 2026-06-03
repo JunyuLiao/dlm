@@ -90,6 +90,19 @@ def patch_llada_transformers_compat() -> object:
         torch.nn.Module.__getattribute__ = original_getattribute  # type: ignore[method-assign]
 
 
+def disable_use_cache(model: torch.nn.Module) -> None:
+    """Disable KV cache for masked-diffusion block probing."""
+
+    if not hasattr(model.config, "use_cache"):
+        model.config.use_cache = False
+    else:
+        model.config.use_cache = False
+    generation_config = getattr(model, "generation_config", None)
+    if generation_config is not None:
+        generation_config.use_cache = False
+    print("[llada probe] set config.use_cache=False")
+
+
 def ensure_all_tied_weights_keys(model: torch.nn.Module) -> None:
     """Persist the compatibility attribute after loading."""
 
@@ -487,6 +500,7 @@ def main() -> None:
     with patch_llada_transformers_compat():
         model = AutoModelForCausalLM.from_pretrained(args.model, **model_kwargs)
     ensure_all_tied_weights_keys(model)
+    disable_use_cache(model)
     if args.device_map == "none":
         model = model.to(device)
     model.eval()
