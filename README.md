@@ -59,6 +59,10 @@ bash scripts/run_h100_llada_experiment.sh
 
 prompt 要故意混合简单翻译、代码、数学、长摘要、SQL、推理等不同复杂度；否则一个 batch 里的 request 太像，step 分布不明显。当前默认 prompt 文件已经显式标了 `difficulty=easy/medium/hard/extreme`。
 
+### Waste ratio 怎么理解
+
+`waste ratio` 不是 confidence 小的 token 被丢掉的比例。它是 token-step 口径：`useful_token_steps=sum(token_steps)`，表示一个 request/block 里每个 token 被接受前实际经历的 forward 次数之和；`executed_token_steps=batch_finish_steps*block_size`，表示同步 batch 要等当前 batch/block 里最慢 request 时，dense forward 实际执行的 token-step 数。因此 `waste ratio=sum(executed_token_steps)/sum(useful_token_steps)` 衡量的是陪跑/straggler 浪费。
+
 
 如果你遇到 `LLaDAModelLM object has no attribute all_tied_weights_keys`，更新后的 probe 已经在 `from_pretrained()` 期间加了兼容补丁（包括 `all_tied_weights_keys` 和新版 `tie_weights(missing_keys=...)` 兼容）；同时不要主动开 `DEVICE_MAP=auto`，默认 `DEVICE_MAP=none` 会先加载模型再 `model.to(cuda)`，单张 H100 可以放下 LLaDA-8B。
 

@@ -439,6 +439,21 @@ def actual_step_schedulers(rows: list[RequestRow]) -> set[str]:
     return schedulers
 
 
+def add_bottom_caption(fig: object, caption: str) -> None:
+    """Add a short human-readable explanation below a plot."""
+
+    fig.subplots_adjust(bottom=0.28)
+    fig.text(
+        0.5,
+        0.025,
+        caption,
+        ha="center",
+        va="bottom",
+        fontsize=8.5,
+        bbox={"boxstyle": "round", "facecolor": "white", "alpha": 0.85, "edgecolor": "0.8"},
+    )
+
+
 def plot(rows: list[RequestRow], outdir: Path, data_label: str) -> bool:
     try:
         import matplotlib.pyplot as plt
@@ -451,7 +466,7 @@ def plot(rows: list[RequestRow], outdir: Path, data_label: str) -> bool:
     batch_for_exp2 = 8 if any(row.batch_size == 8 for row in rows) else rows[0].batch_size
     batch_for_exp3 = batch_for_exp2
 
-    fig, ax = plt.subplots(figsize=(7, 4))
+    fig, ax = plt.subplots(figsize=(8, 4.8))
     for scheduler in sorted({row.scheduler for row in rows}):
         xs, ys = [], []
         for batch_size in sorted({row.batch_size for row in rows}):
@@ -468,10 +483,15 @@ def plot(rows: list[RequestRow], outdir: Path, data_label: str) -> bool:
         ax.plot(xs, ys, marker="o", label=scheduler_label(scheduler))
     ax.set_title(f"Exp1: batch size vs wasted work (block={block_for_exp1})\n{data_label}")
     ax.set_xlabel("batch size")
-    ax.set_ylabel("waste ratio (1.0 = no wasted token-steps)")
+    ax.set_ylabel("token-step waste ratio\nΣ executed / Σ useful")
     ax.legend()
     ax.grid(True, alpha=0.3)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.20, 1, 1))
+    add_bottom_caption(
+        fig,
+        "Meaning: useful = sum of per-token finish steps; executed = batch slowest block steps x block size;\n"
+        "waste ratio measures sync-batch straggler waste, not low-confidence rejection rate.",
+    )
     fig.savefig(outdir / "exp1_batch_speed_gap.png", dpi=180)
     plt.close(fig)
 
@@ -484,7 +504,7 @@ def plot(rows: list[RequestRow], outdir: Path, data_label: str) -> bool:
         and row.trial == 0
         and row.scheduler in preferred_schedulers
     ]
-    fig, ax = plt.subplots(figsize=(7, 4))
+    fig, ax = plt.subplots(figsize=(8, 4.8))
     difficulties = ["easy", "medium", "hard", "extreme", "unknown"]
     for difficulty in difficulties:
         group = [row for row in example if row.prompt_difficulty == difficulty]
@@ -503,11 +523,16 @@ def plot(rows: list[RequestRow], outdir: Path, data_label: str) -> bool:
     if ax.has_data():
         ax.legend(title="prompt difficulty")
     ax.grid(True, alpha=0.3)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.20, 1, 1))
+    add_bottom_caption(
+        fig,
+        "Meaning: each point is one request/block; x is measured denoising steps used by that block;\n"
+        "y is observed sync-batch latency, so it can also be affected by the slowest request in the same batch.",
+    )
     fig.savefig(outdir / "exp2_steps_vs_perf.png", dpi=180)
     plt.close(fig)
 
-    fig, ax = plt.subplots(figsize=(7, 4))
+    fig, ax = plt.subplots(figsize=(8, 4.8))
     for scheduler in sorted({row.scheduler for row in rows}):
         xs, ys = [], []
         for block_size in sorted({row.block_size for row in rows}):
@@ -527,11 +552,16 @@ def plot(rows: list[RequestRow], outdir: Path, data_label: str) -> bool:
     ax.set_ylabel("mean request/block latency (ms)")
     ax.legend()
     ax.grid(True, alpha=0.3)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.20, 1, 1))
+    add_bottom_caption(
+        fig,
+        "Meaning: compare mean block latency for block size 16/32/64 at a fixed batch size;\n"
+        "larger blocks expose more parallel tokens but increase dense-forward and waiting cost per block.",
+    )
     fig.savefig(outdir / "exp3_block_size_latency.png", dpi=180)
     plt.close(fig)
 
-    fig, ax = plt.subplots(figsize=(7, 4))
+    fig, ax = plt.subplots(figsize=(8, 4.8))
     order = ["easy", "medium", "hard", "extreme", "unknown"]
     labels, values = [], []
     for difficulty in order:
@@ -544,7 +574,12 @@ def plot(rows: list[RequestRow], outdir: Path, data_label: str) -> bool:
     ax.set_xlabel("prompt difficulty")
     ax.set_ylabel("mean actual block steps")
     ax.grid(True, axis="y", alpha=0.3)
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0.20, 1, 1))
+    add_bottom_caption(
+        fig,
+        "Meaning: aggregate measured steps by manual difficulty label; this is only a sanity check;\n"
+        "model confidence may not be monotonic with manual labels, so prioritize measured steps and batch waste.",
+    )
     fig.savefig(outdir / "exp4_prompt_difficulty_steps.png", dpi=180)
     plt.close(fig)
     return True
@@ -565,6 +600,13 @@ def write_plot_guide(outdir: Path, num_blocks: int | None = None, data_label: st
 - `per_request_rows.csv`: 完整分析表；H100 真实 runner 中只包含真实 `real_llada_*` 行，用于画真实 latency/step 图。
 - `prompt_block_steps.csv`: 从完整表整理出的 per request/block step 表。
 - H100 真实模型 runner 还会写 `../block_steps.csv`: 一行一个 prompt/request/block，字段包括 `steps_used`, `mean_confidence`, `min_confidence`。
+
+## 关键指标定义
+
+- `token_step`: 一个 token 直到被接受为止经历了多少次 denoising forward；例如第 5 步才被接受，就是 5 token-steps。
+- `useful_token_steps = sum(token_steps)`: 一个 request/block 内所有 token 的完成步数求和。这个求和是在统计每个 token 实际经历过的 forward 次数，不是说这些步骤按 token 顺序串行执行。
+- `executed_token_steps = batch_finish_steps * block_size`: 同步 batch 口径下，这个 request/block 被 dense forward 陪跑的 token-step 数；`batch_finish_steps` 是同一 batch 当前 block 里最慢 request 的步数。
+- `waste ratio = sum(executed_token_steps) / sum(useful_token_steps)`: 衡量同步 batch / block 内 step 不均带来的陪跑浪费；它不是低 confidence token 被丢弃的比例。
 
 ## 图怎么读
 

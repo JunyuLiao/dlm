@@ -459,3 +459,14 @@ bash scripts/run_h100_llada_experiment.sh
 H100 主实验默认 `ACCEPTANCE_POLICY=confidence_cutoff`，因为官方固定 top-k schedule 会让每个 block 按预设数量 unmask；当 `max_steps_per_block > block_size` 时，一个 `block_size=16` 的 block 会自然跑成 16 步，无法体现“不同 request/block 需要不同 step”。主实验的 confidence-cutoff 做法是：每一步仍按 LLaDA 的 confidence 排序理解 masked positions，但只接受 confidence 达到阈值的高置信前缀；如果一个都没达阈值，就 force accept 最高置信的 1 个避免死循环。因此 `steps_used` 来自真实 forward 的 confidence 变化，而不是固定 schedule。
 
 如果你想做官方采样对照，可以显式设置 `ACCEPTANCE_POLICY=topk`；但它预期会出现你看到的“很多 block 都是 16 步”。`ACCEPTANCE_POLICY=threshold` 也保留为实验模式。最终图默认只画真实 `real_llada_*` 行，不再默认混入未真实执行的 dynamic/oracle 曲线。
+
+## 14. `useful_token_steps` / `executed_token_steps` / waste ratio 解释
+
+这些指标都是 **token-step** 口径，不是 confidence 被丢弃的比例。
+
+- `token_step`：某个 token 从当前 block 开始 denoise，到被接受为止经历了多少次 forward。例如一个 token 第 5 步才被接受，那么它贡献 5 个 useful token-steps。
+- `useful_token_steps = sum(token_steps)`：对同一个 request/block 里的所有 token 完成步数求和。这个求和不是说 token 按顺序串行生成；block 内 token 是并行预测的，但每个 token 在被接受前都实际参与了若干次 forward，所以统计工作量时要把每个 token 经历过的 forward 次数加起来。
+- `executed_token_steps = batch_finish_steps * block_size`：同步 batch / dense forward 口径下，这个 request/block 被执行了多少 token-step。`batch_finish_steps` 是当前 batch 当前 block 里最慢 request 的完成步数，因此快 request 即使早完成，也会按最慢步数陪跑。
+- `waste ratio = sum(executed_token_steps) / sum(useful_token_steps)`：实际同步执行工作量除以真正有用工作量。它衡量的是 block 内 token step 不均和 batch 内 request step 不均造成的陪跑浪费，不是“低 confidence token 被 reject 的比例”。
+
+例如 `block_size=4`，某个 request/block 的 `token_steps=[1,1,2,5]`，则 `useful_token_steps=1+1+2+5=9`。如果同 batch 最慢 request 需要 `batch_finish_steps=5`，那么这个 request 的 `executed_token_steps=5*4=20`，waste ratio 贡献就是 `20/9`。
