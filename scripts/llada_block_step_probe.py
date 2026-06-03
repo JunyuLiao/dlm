@@ -41,14 +41,20 @@ def normalize_tied_weight_keys(value: object) -> dict[str, None]:
 
 
 @contextmanager
-def patch_missing_all_tied_weights_keys() -> object:
-    """Temporarily shim remote-code models missing all_tied_weights_keys.
+def patch_llada_transformers_compat() -> object:
+    """Temporarily shim LLaDA remote-code models for newer transformers.
 
-    This fixes LLaDAModelLM with newer transformers versions where loading can
-    fail inside `from_pretrained()` before user code gets a model instance.
+    Newer transformers versions expect two APIs that some LLaDA remote-code
+    model classes do not provide:
+    - `all_tied_weights_keys`, accessed during loading finalization.
+    - `tie_weights(missing_keys=..., recompute_mapping=...)`, where older remote
+      classes often define `tie_weights(self)` without keyword arguments.
+    Both failures happen inside `from_pretrained()` before user code receives the
+    model instance, so the patch must be active around `from_pretrained()`.
     """
 
     original_getattr = torch.nn.Module.__getattr__
+    original_getattribute = torch.nn.Module.__getattribute__
 
     def patched_getattr(self: torch.nn.Module, name: str) -> object:
         if name == "all_tied_weights_keys":
@@ -58,11 +64,29 @@ def patch_missing_all_tied_weights_keys() -> object:
             return normalize_tied_weight_keys(tied)
         return original_getattr(self, name)
 
+    def patched_getattribute(self: torch.nn.Module, name: str) -> object:
+        attr = original_getattribute(self, name)
+        if name != "tie_weights" or not callable(attr):
+            return attr
+
+        def tie_weights_compat(*args: object, **kwargs: object) -> object:
+            try:
+                return attr(*args, **kwargs)
+            except TypeError as exc:
+                message = str(exc)
+                if "unexpected keyword argument" not in message:
+                    raise
+                return attr()
+
+        return tie_weights_compat
+
     torch.nn.Module.__getattr__ = patched_getattr
+    torch.nn.Module.__getattribute__ = patched_getattribute  # type: ignore[method-assign]
     try:
         yield
     finally:
         torch.nn.Module.__getattr__ = original_getattr
+        torch.nn.Module.__getattribute__ = original_getattribute  # type: ignore[method-assign]
 
 
 def ensure_all_tied_weights_keys(model: torch.nn.Module) -> None:
@@ -369,7 +393,7 @@ def main() -> None:
     }
     if args.device_map == "auto":
         model_kwargs["device_map"] = "auto"
-    with patch_missing_all_tied_weights_keys():
+    with patch_llada_transformers_compat():
         model = AutoModelForCausalLM.from_pretrained(args.model, **model_kwargs)
     ensure_all_tied_weights_keys(model)
     if args.device_map == "none":

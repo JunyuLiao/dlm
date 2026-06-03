@@ -48,4 +48,4 @@ bash scripts/run_h100_llada_experiment.sh
 prompt 要故意混合简单翻译、代码、数学、长摘要、SQL、推理等不同复杂度；否则一个 batch 里的 request 太像，step 分布不明显。当前默认 prompt 文件已经显式标了 `difficulty=easy/medium/hard/extreme`。
 
 
-如果你遇到 `LLaDAModelLM object has no attribute all_tied_weights_keys`，更新后的 probe 已经在 `from_pretrained()` 期间加了兼容补丁；同时不要主动开 `DEVICE_MAP=auto`，默认 `DEVICE_MAP=none` 会先加载模型再 `model.to(cuda)`，单张 H100 可以放下 LLaDA-8B。
+如果你遇到 `LLaDAModelLM object has no attribute all_tied_weights_keys`，更新后的 probe 已经在 `from_pretrained()` 期间加了兼容补丁（包括 `all_tied_weights_keys` 和新版 `tie_weights(missing_keys=...)` 兼容）；同时不要主动开 `DEVICE_MAP=auto`，默认 `DEVICE_MAP=none` 会先加载模型再 `model.to(cuda)`，单张 H100 可以放下 LLaDA-8B。

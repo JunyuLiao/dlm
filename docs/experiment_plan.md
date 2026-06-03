@@ -331,3 +331,20 @@ DEVICE_MAP=auto bash scripts/run_h100_llada_experiment.sh
 ```
 
 但 LLaDA 这个 remote model class 在部分 transformers 版本下可能不支持 `auto`。
+
+
+## 16. LLaDA 加载时报 `tie_weights() got an unexpected keyword argument` 怎么办
+
+如果报错：
+
+```text
+TypeError: LLaDAModelLM.tie_weights() got an unexpected keyword argument 'missing_keys'
+```
+
+原因也是新版 `transformers` 和 LLaDA remote-code 模型类接口不完全一致：新版 transformers 会调用 `tie_weights(missing_keys=..., recompute_mapping=False)`，但 LLaDA 的 `tie_weights()` 可能不接受这些 keyword。
+
+当前 `llada_block_step_probe.py` 已经在 `from_pretrained()` 外层加了兼容 patch：如果 remote model 的 `tie_weights` 不接受这些新版 keyword，会自动退回调用老接口 `tie_weights()`。所以更新代码后直接重新跑：
+
+```bash
+bash scripts/run_h100_llada_experiment.sh
+```
