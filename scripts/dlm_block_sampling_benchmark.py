@@ -423,14 +423,17 @@ def scheduler_label(scheduler: str) -> str:
     labels = {
         "sync": "simulated sync batch",
         "dynamic": "simulated dynamic token skip",
-        "real_llada": "real LLaDA top-k batch",
+        "real_llada_confidence_cutoff": "real LLaDA confidence-cutoff batch",
+        "real_llada_topk": "real LLaDA fixed top-k batch",
+        "real_llada_threshold": "real LLaDA threshold batch",
     }
     return labels.get(scheduler, scheduler)
 
 def actual_step_schedulers(rows: list[RequestRow]) -> set[str]:
     schedulers = {row.scheduler for row in rows}
-    if "real_llada" in schedulers:
-        return {"real_llada"}
+    real = {scheduler for scheduler in schedulers if scheduler.startswith("real_llada")}
+    if real:
+        return real
     if "dynamic" in schedulers:
         return {"dynamic"}
     return schedulers
@@ -553,12 +556,13 @@ def write_plot_guide(outdir: Path, num_blocks: int | None = None, data_label: st
 
 数据来源：`{data_label}`。H100 真实实验只消费 LLaDA real probe 写出的 CSV；模拟模式只用于 smoke/debug。
 
-- `real LLaDA top-k batch`: H100 真实模型 probe 结果；每一步按 LLaDA 官方 low-confidence/top-k unmasking 规则接受 token。
+- `real LLaDA confidence-cutoff batch`: H100 主实验结果；每一步按 confidence 从高到低接受达到阈值的前缀 token，所以不同 block/request 可以用不同步数。
+- `real LLaDA fixed top-k batch`: 官方固定步数 top-k unmasking 对照；如果 `max_steps_per_block > block_size`，`steps_used` 很可能等于 `block_size`，不适合作为动态步数主图。
 - `simulated sync batch` / `simulated dynamic token skip`: 只会出现在 simulator 输出里，用于 debug 图表，不作为 H100 真实实验结论。
 
 ## 输出文件
 
-- `per_request_rows.csv`: 完整分析表；H100 真实 runner 中只包含真实 `real_llada` 行，用于画真实 latency/step 图。
+- `per_request_rows.csv`: 完整分析表；H100 真实 runner 中只包含真实 `real_llada_*` 行，用于画真实 latency/step 图。
 - `prompt_block_steps.csv`: 从完整表整理出的 per request/block step 表。
 - H100 真实模型 runner 还会写 `../block_steps.csv`: 一行一个 prompt/request/block，字段包括 `steps_used`, `mean_confidence`, `min_confidence`。
 

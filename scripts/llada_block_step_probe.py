@@ -2,8 +2,8 @@
 """Run real batched LLaDA block probes on H100 and record dynamic steps.
 
 This is the real-data path, not the simulator. It batches prompts, appends masked
-blocks sequentially, runs real model forward passes, dynamically finalizes tokens
-by confidence, and writes per-request/block plus per-batch/block CSVs.
+blocks sequentially, runs real model forward passes, finalizes tokens with a
+confidence cutoff by default, and writes per-request/block plus per-batch/block CSVs.
 """
 
 from __future__ import annotations
@@ -110,6 +110,7 @@ class ProbeRow:
     num_blocks: int
     max_steps_per_block: int
     confidence_threshold: float
+    acceptance_policy: str
     steps_used: int
     steps_needed: int
     steps_executed: int
@@ -270,6 +271,7 @@ def make_probe_rows(
     num_blocks: int,
     max_steps_per_block: int,
     confidence_threshold: float,
+    acceptance_policy: str,
 ) -> tuple[list[ProbeRow], BatchBlockRow]:
     request_steps = [int(max(row.tolist())) for row in token_steps]
     batch_finish_steps = max(request_steps)
@@ -295,6 +297,7 @@ def make_probe_rows(
             num_blocks=num_blocks,
             max_steps_per_block=max_steps_per_block,
             confidence_threshold=confidence_threshold,
+            acceptance_policy=acceptance_policy,
             steps_used=steps_used,
             steps_needed=steps_used,
             useful_token_steps=useful_token_steps,
@@ -312,7 +315,7 @@ def make_probe_rows(
         )
         rows.append(
             ProbeRow(
-                scheduler="real_llada",
+                scheduler=f"real_llada_{acceptance_policy}",
                 steps_executed=batch_finish_steps,
                 executed_token_steps=batch_finish_steps * block_size,
                 latency_ms=full_batch_latency,
@@ -389,20 +392,29 @@ def probe_one_batch(
                 probs = torch.softmax(block_logits, dim=-1)
                 confidence, predicted = torch.max(probs, dim=-1)
                 force_accept = torch.zeros_like(masked_positions)
+                threshold_accept = torch.zeros_like(masked_positions)
+                masked_conf = confidence.masked_fill(~masked_positions, -float("inf"))
                 if acceptance_policy == "topk":
                     k = int(num_transfer_tokens[request_id, step - 1].item())
                     k = min(k, int(masked_positions.sum().item()))
-                    threshold_accept = torch.zeros_like(masked_positions)
                     if k > 0:
-                        masked_conf = confidence.masked_fill(~masked_positions, -float("inf"))
                         _, select_index = torch.topk(masked_conf, k=k)
                         threshold_accept[select_index] = True
                     accept = threshold_accept
+                elif acceptance_policy == "confidence_cutoff":
+                    # Sort like LLaDA low-confidence remasking, then accept the high-confidence prefix.
+                    sorted_conf, sorted_index = torch.sort(masked_conf, descending=True)
+                    keep = sorted_conf.ge(confidence_threshold)
+                    if bool(keep.any()):
+                        threshold_accept[sorted_index[keep]] = True
+                    accept = threshold_accept.clone()
+                    if not bool(accept.any()):
+                        force_accept[torch.argmax(masked_conf)] = True
+                        accept = force_accept
                 else:
                     threshold_accept = masked_positions & confidence.ge(confidence_threshold)
                     accept = threshold_accept.clone()
                     if not bool(accept.any()):
-                        masked_conf = confidence.masked_fill(~masked_positions, -1.0)
                         force_accept[torch.argmax(masked_conf)] = True
                         accept = force_accept
                 if not bool(accept.any()):
@@ -436,6 +448,7 @@ def probe_one_batch(
             num_blocks=num_blocks,
             max_steps_per_block=max_steps,
             confidence_threshold=confidence_threshold,
+            acceptance_policy=acceptance_policy,
         )
         rows.extend(block_rows)
         batch_rows.append(batch_row)
@@ -456,6 +469,7 @@ def write_block_step_rows(rows: list[ProbeRow], path: Path) -> None:
         "block_size",
         "max_steps_per_block",
         "confidence_threshold",
+        "acceptance_policy",
         "steps_used",
         "latency_ms",
         "num_tokens",
@@ -484,6 +498,7 @@ def write_block_step_rows(rows: list[ProbeRow], path: Path) -> None:
                     "block_size": row.block_size,
                     "max_steps_per_block": row.max_steps_per_block,
                     "confidence_threshold": row.confidence_threshold,
+                    "acceptance_policy": row.acceptance_policy,
                     "steps_used": row.steps_used,
                     "latency_ms": row.latency_ms,
                     "num_tokens": row.num_tokens,
@@ -532,7 +547,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num-blocks", type=int, default=4)
     parser.add_argument("--max-steps", type=int, default=64)
     parser.add_argument("--confidence-threshold", type=float, default=0.90)
-    parser.add_argument("--acceptance-policy", choices=["topk", "threshold"], default="topk")
+    parser.add_argument("--acceptance-policy", choices=["confidence_cutoff", "topk", "threshold"], default="confidence_cutoff")
     parser.add_argument("--mask-token-id", type=int, default=None)
     parser.add_argument("--dtype", choices=["bf16", "fp16", "fp32"], default="bf16")
     parser.add_argument("--device-map", choices=["none", "auto"], default="none")

@@ -43,7 +43,7 @@ BATCH_SIZES=1,2,4,8,16 \
 BLOCK_SIZES=16,32,64 \
 NUM_BLOCKS=4 \
 MAX_STEPS_PER_BLOCK=64 \
-ACCEPTANCE_POLICY=topk \
+ACCEPTANCE_POLICY=confidence_cutoff \
 CONFIDENCE_THRESHOLD=0.95 \
 MASK_TOKEN_ID=126336 \
 DEVICE_MAP=none \
@@ -51,11 +51,11 @@ bash scripts/run_h100_llada_experiment.sh
 # 每次运行默认带 UTC 时间戳，例如 outputs/h100_llada/20260603_123456
 ```
 
-真实 runner 做的是：prompt batching -> append masks -> real LLaDA forward -> LLaDA 官方 top-k/low-confidence unmasking -> 写真实 CSV -> 用真实 CSV 画图。它不是先 `bs=1` 跑完再离线模拟 batch size，也不是把 total steps 平均分给 blocks。输出里最重要的是：
+真实 runner 做的是：prompt batching -> append masks -> real LLaDA forward -> confidence-cutoff dynamic unmasking -> 写真实 CSV -> 用真实 CSV 画图。它不是先 `bs=1` 跑完再离线模拟 batch size，也不是把 total steps 平均分给 blocks。输出里最重要的是：
 
 - `block_steps.csv`：一行一个 request/block，含真实 `steps_used`, `latency_ms`, `mean_confidence`, `min_confidence`。
 - `batch_block_latency.csv`：一行一个真实 batch/block，含真实 batch 同步 cost、最慢 request step、waste token-steps。
-- `per_request_rows.csv`：完整分析表；H100 主路径只保留实际跑出来的 `real_llada` 结果，不再默认输出未真实执行的 dynamic/oracle 曲线。
+- `per_request_rows.csv`：完整分析表；H100 主路径只保留实际跑出来的 `real_llada_confidence_cutoff` 结果，不再默认输出未真实执行的 dynamic/oracle 曲线。
 
 prompt 要故意混合简单翻译、代码、数学、长摘要、SQL、推理等不同复杂度；否则一个 batch 里的 request 太像，step 分布不明显。当前默认 prompt 文件已经显式标了 `difficulty=easy/medium/hard/extreme`。
 

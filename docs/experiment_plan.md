@@ -138,7 +138,7 @@ sync_executed_token_steps = block_size * max(token_steps)
 5. 一个 request 的 `steps_needed = max(token_steps)`；block 内浪费看 `block_size * max(token_steps) / sum(token_steps)`。
 6. 输出 CSV 后，再用 `dlm_block_sampling_benchmark.py --mode plot-csv` 画图。
 
-注意：当前 H100 主实验默认不再输出 `dynamic_oracle`。如果以后要研究理论上界，可以单独做离线分析；主结果只看真实 `real_llada` 行。
+注意：当前 H100 主实验默认不再输出 `dynamic_oracle`。如果以后要研究理论上界，可以单独做离线分析；主结果只看真实 `real_llada_*` 行。
 
 
 ## 9. 当前代码到底是按 prompt 还是写死 step
@@ -395,7 +395,7 @@ request_id,prompt_id,difficulty,trial,batch_size,block_index,block_size,
 steps_used,latency_ms,mean_confidence,min_confidence,num_tokens
 ```
 
-`per_request_rows.csv` 现在用于保存真实 `real_llada` 行并画 latency/step 图；`block_steps.csv` 则是一行一个 prompt/request/block，更适合直接汇报“每个 block 用了多少 denoising steps”。
+`per_request_rows.csv` 现在用于保存真实 `real_llada_*` 行并画 latency/step 图；`block_steps.csv` 则是一行一个 prompt/request/block，更适合直接汇报“每个 block 用了多少 denoising steps”。
 
 
 ## 19. 输出目录按时间戳保存不同版本
@@ -433,7 +433,7 @@ BATCH_SIZES=1,2,4,8,16 \
 BLOCK_SIZES=16,32,64 \
 NUM_BLOCKS=4 \
 MAX_STEPS_PER_BLOCK=64 \
-ACCEPTANCE_POLICY=topk \
+ACCEPTANCE_POLICY=confidence_cutoff \
 CONFIDENCE_THRESHOLD=0.95 \
 MASK_TOKEN_ID=126336 \
 DEVICE_MAP=none \
@@ -452,10 +452,10 @@ bash scripts/run_h100_llada_experiment.sh
 
 - `block_steps.csv`：一行一个 request/block，字段包括 `run_id`, `batch_size`, `batch_id`, `request_id`, `prompt_id`, `difficulty`, `block_index`, `steps_used`, `latency_ms`, `mean_confidence`, `min_confidence`。
 - `batch_block_latency.csv`：一行一个 batch/block，字段包括 `batch_block_steps`, `max_request_steps_used`, `min_request_steps_used`, `mean_request_steps_used`, `latency_ms`, `waste_token_steps`。
-- `per_request_rows.csv`：用于复用画图脚本；H100 主路径只包含真实 `real_llada` 行，不再默认混入未真实执行的 dynamic/oracle 曲线。
+- `per_request_rows.csv`：用于复用画图脚本；H100 主路径只包含真实 `real_llada_*` 行，不再默认混入未真实执行的 dynamic/oracle 曲线。
 
 ## 13. LLaDA confidence / acceptance 规则修正
 
-H100 主实验默认 `ACCEPTANCE_POLICY=topk`，尽量贴近官方 LLaDA `generate.py` 的采样方式：每一步先对当前 block 中仍为 mask 的位置计算预测 token 的 confidence，然后按线性 schedule 决定本 step 要 unmask 多少个 token，并选择 confidence 最高的 top-k 位置写回。也就是说，官方流程不是“所有超过固定 threshold 的 token 都接受”，而是“每步必须接受 schedule 指定数量的最高置信 token；其他位置继续保持 mask 到后续 step”。
+H100 主实验默认 `ACCEPTANCE_POLICY=confidence_cutoff`，因为官方固定 top-k schedule 会让每个 block 按预设数量 unmask；当 `max_steps_per_block > block_size` 时，一个 `block_size=16` 的 block 会自然跑成 16 步，无法体现“不同 request/block 需要不同 step”。主实验的 confidence-cutoff 做法是：每一步仍按 LLaDA 的 confidence 排序理解 masked positions，但只接受 confidence 达到阈值的高置信前缀；如果一个都没达阈值，就 force accept 最高置信的 1 个避免死循环。因此 `steps_used` 来自真实 forward 的 confidence 变化，而不是固定 schedule。
 
-`CONFIDENCE_THRESHOLD` 仍保留给 `ACCEPTANCE_POLICY=threshold` 这个实验模式，但 H100 runner 默认不会使用它。最终图默认只画真实 `real_llada` 行，不再默认混入未真实执行的 dynamic/oracle 曲线。
+如果你想做官方采样对照，可以显式设置 `ACCEPTANCE_POLICY=topk`；但它预期会出现你看到的“很多 block 都是 16 步”。`ACCEPTANCE_POLICY=threshold` 也保留为实验模式。最终图默认只画真实 `real_llada_*` 行，不再默认混入未真实执行的 dynamic/oracle 曲线。
