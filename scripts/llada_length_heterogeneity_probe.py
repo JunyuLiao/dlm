@@ -604,7 +604,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch-sizes", type=int, nargs="+", default=[4, 8])
     parser.add_argument("--block-sizes", type=int, nargs="+", default=[16, 32, 64])
     parser.add_argument("--target-tokens-per-request", type=int, default=500)
-    parser.add_argument("--trials", type=int, default=3)
+    parser.add_argument("--trials", type=int, default=10)
     parser.add_argument("--num-blocks", type=int, default=4)
     parser.add_argument("--max-steps", type=int, default=64)
     parser.add_argument("--confidence-threshold", type=float, default=0.90)
