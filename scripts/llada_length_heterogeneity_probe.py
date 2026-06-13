@@ -160,15 +160,48 @@ def length_targets(batch_size: int, total_prompt_tokens: int) -> dict[str, list[
     }
 
 
-def make_prompt_for_target(tokenizer: AutoTokenizer, group_name: str, request_id: int, target_tokens: int) -> tuple[str, int]:
+NEUTRAL_PROMPT_UNITS = [
+    (
+        "This neutral benchmark passage discusses sequence length, attention masks, "
+        "batched forward passes, token confidence, and request completion. "
+    ),
+    (
+        "The serving trace records padding, prompt tokens, denoising iterations, "
+        "shared step latency, and block-level completion behavior. "
+    ),
+    (
+        "A diffusion language model repeatedly refines masked positions while the "
+        "batch shape is determined by the longest visible sequence. "
+    ),
+    (
+        "The measurement focuses on runtime mechanics rather than domain knowledge, "
+        "using plain context about scheduling, latency, and token finalization. "
+    ),
+    (
+        "Each request contains neutral technical prose so length heterogeneity can be "
+        "studied without changing the intended difficulty category. "
+    ),
+    (
+        "The batch contains requests with controlled prompt lengths, fixed block size, "
+        "and comparable wording about inference system behavior. "
+    ),
+]
+
+
+def make_prompt_for_target(
+    tokenizer: AutoTokenizer,
+    group_name: str,
+    request_id: int,
+    trial: int,
+    target_tokens: int,
+) -> tuple[str, int]:
     prefix = (
-        f"Request group {group_name}, request {request_id}. "
-        "Analyze diffusion language model serving, padding, denoising confidence, and latency. "
+        f"Request group {group_name}, trial {trial}, request {request_id}. "
+        "Read the following neutral serving-context passage and continue with a concise technical answer. "
     )
-    unit = (
-        "This context sentence is neutral benchmark filler about sequence length, attention masks, "
-        "batched forward passes, token confidence, and request-level completion. "
-    )
+    offset = (trial * 3 + request_id) % len(NEUTRAL_PROMPT_UNITS)
+    units = NEUTRAL_PROMPT_UNITS[offset:] + NEUTRAL_PROMPT_UNITS[:offset]
+    unit = "".join(units)
     text = prefix + unit * max(8, target_tokens // 8)
     token_ids = tokenizer(text, add_special_tokens=False)["input_ids"]
     while len(token_ids) < target_tokens + 64:
@@ -186,12 +219,13 @@ def build_length_prompt_batch(
     tokenizer: AutoTokenizer,
     group_name: str,
     targets: list[int],
+    trial: int,
     device: torch.device,
 ) -> tuple[torch.Tensor, torch.Tensor, list[LengthPromptRecord]]:
     records: list[LengthPromptRecord] = []
     encoded: list[list[int]] = []
     for request_id, target in enumerate(targets):
-        prompt, actual = make_prompt_for_target(tokenizer, group_name, request_id, target)
+        prompt, actual = make_prompt_for_target(tokenizer, group_name, request_id, trial, target)
         records.append(
             LengthPromptRecord(
                 group_name=group_name,
@@ -358,7 +392,7 @@ def probe_length_batch(
     device: torch.device,
 ) -> tuple[list[LengthRequestBlockRow], list[LengthBatchStepRow], list[LengthRequestStepRow], int]:
     mask_token_id = choose_mask_token_id(tokenizer, mask_token_id)
-    input_ids, attention_mask, prompts = build_length_prompt_batch(tokenizer, group_name, targets, device)
+    input_ids, attention_mask, prompts = build_length_prompt_batch(tokenizer, group_name, targets, trial, device)
     batch_size = len(prompts)
     prompt_lengths = [record.actual_prompt_tokens for record in prompts]
     batch_max_prompt_tokens = max(prompt_lengths)
