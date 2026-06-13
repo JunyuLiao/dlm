@@ -275,15 +275,22 @@ def write_length_plot_summary(
         block_steps.setdefault(key, []).append(row.steps_executed)
 
     step_latencies: dict[tuple[str, int, int], list[float]] = {}
+    batch_end_to_end_latencies: dict[tuple[str, int, int], dict[int, float]] = {}
     for row in batch_step_rows:
         key = (row.group_name, row.batch_size, row.block_size)
         step_latencies.setdefault(key, []).append(row.step_latency_ms)
+        batch_end_to_end_latencies.setdefault(key, {})
+        batch_end_to_end_latencies[key][row.batch_id] = (
+            batch_end_to_end_latencies[key].get(row.batch_id, 0.0) + row.step_latency_ms
+        )
 
+    summary_keys = set(block_steps) | set(step_latencies) | set(batch_end_to_end_latencies)
     summary_rows: list[dict[str, object]] = []
-    for key in sorted(set(block_steps) | set(step_latencies)):
+    for key in sorted(summary_keys):
         group_name, batch_size, block_size = key
         steps = block_steps.get(key, [])
         latencies = step_latencies.get(key, [])
+        batch_latencies = list(batch_end_to_end_latencies.get(key, {}).values())
         summary_rows.append(
             {
                 "group_name": group_name,
@@ -293,6 +300,8 @@ def write_length_plot_summary(
                 "num_block_samples": len(steps),
                 "mean_step_latency_ms": mean(latencies) if latencies else 0.0,
                 "num_step_samples": len(latencies),
+                "mean_batch_end_to_end_latency_ms": mean(batch_latencies) if batch_latencies else 0.0,
+                "num_batch_samples": len(batch_latencies),
             }
         )
 
@@ -306,6 +315,8 @@ def write_length_plot_summary(
             "num_block_samples",
             "mean_step_latency_ms",
             "num_step_samples",
+            "mean_batch_end_to_end_latency_ms",
+            "num_batch_samples",
         ]
         writer = csv.DictWriter(handle, fieldnames=fieldnames)
         writer.writeheader()
@@ -370,6 +381,12 @@ def plot_length_group_figures(summary_rows: list[dict[str, object]], out_dir: Pa
         ylabel="Mean execution time per denoising step (ms)",
         title="Per-Step Batch Forward Latency by Length Heterogeneity",
         filename="length_group_step_latency.png",
+    )
+    grouped_bar(
+        metric="mean_batch_end_to_end_latency_ms",
+        ylabel="Mean end-to-end batch latency (ms)",
+        title="End-to-End Batch Latency by Length Heterogeneity",
+        filename="length_group_batch_latency.png",
     )
     return True
 
@@ -699,6 +716,7 @@ def main() -> None:
     if plotted:
         print(f"wrote {args.out_dir / 'length_group_block_steps.png'}")
         print(f"wrote {args.out_dir / 'length_group_step_latency.png'}")
+        print(f"wrote {args.out_dir / 'length_group_batch_latency.png'}")
     print(f"[llada length probe] total real model forward calls={total_forward_calls}")
     if steps_used:
         sorted_steps = sorted(steps_used)
