@@ -68,3 +68,26 @@ prompt 要故意混合简单翻译、代码、数学、长摘要、SQL、推理�
 
 
 LLaDA 的 Hugging Face tokenizer 可能不暴露 `mask_token_id`；脚本默认使用官方推理代码常用的 `MASK_TOKEN_ID=126336`，如需覆盖可运行 `MASK_TOKEN_ID=<id> bash scripts/run_h100_llada_experiment.sh`。
+
+## Request length / block steps probe
+
+`llada_length_step_probe.py` isolates prompt-length effects. It creates 24
+requests with exact token lengths from 50 to 2000, first runs each request at
+batch size 1, and then reuses the same requests in three ordered batches of 8
+(default maximum lengths: 300, 1100, and 2000).
+
+```bash
+conda run -n ljy_dlm python scripts/llada_length_step_probe.py \
+  --outdir outputs/llada_length_steps \
+  --block-size 32 \
+  --num-blocks 4 \
+  --max-steps 64 \
+  --confidence-threshold 0.90
+```
+
+The output includes exact request and batch membership tables,
+`exp1_step_latency.csv`, per-block and per-request experiment-1 summaries, and
+`exp2_block_summary.csv`. The wide `exp1_request_summary.csv` shows all four
+block step counts for each request; `exp2_batch_summary.csv` shows the eight
+request IDs and lengths alongside all four synchronized batch/block step
+counts. These batch step counts are not independently measured per request.

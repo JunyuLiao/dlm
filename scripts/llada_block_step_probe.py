@@ -218,8 +218,11 @@ def build_prompt_batch(
     prompt_lengths = [len(ids) for ids in encoded]
     max_prompt = max(prompt_lengths)
     pad_id = tokenizer.pad_token_id if tokenizer.pad_token_id is not None else tokenizer.eos_token_id
-    rows = [ids + [pad_id] * (max_prompt - len(ids)) for ids in encoded]
-    masks = [[1] * len(ids) + [0] * (max_prompt - len(ids)) for ids in encoded]
+    # Append generated blocks immediately after every prompt in relative
+    # position space. Right padding would insert a positional gap before the
+    # block for shorter prompts because LLaDA's RoPE uses tensor positions.
+    rows = [[pad_id] * (max_prompt - len(ids)) + ids for ids in encoded]
+    masks = [[0] * (max_prompt - len(ids)) + [1] * len(ids) for ids in encoded]
     return (
         torch.tensor(rows, dtype=torch.long, device=device),
         torch.tensor(masks, dtype=torch.long, device=device),
