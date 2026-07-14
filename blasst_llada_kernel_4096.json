@@ -1,0 +1,124 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "context_length": 4096,
+  "mask_ratios": [
+    0.15,
+    0.5,
+    0.9
+  ],
+  "num_contexts": 1,
+  "kernel": "BF16 bidirectional 2D BLASST, Q tile 128, KV tile 64, reverse traversal, base-2 softmax",
+  "launch": {
+    "num_warps": 4,
+    "pipeline_stages": 2
+  },
+  "dense_flash_ms": 470.706511263658,
+  "kernel_lambda_zero_ms": 459.4901922081287,
+  "kernel_zero_agreement_with_compiled_dense": [
+    {
+      "mask_ratio": 0.15,
+      "agreement": 1.0,
+      "masked_tokens": 646
+    },
+    {
+      "mask_ratio": 0.5,
+      "agreement": 0.9903194578896418,
+      "masked_tokens": 2066
+    },
+    {
+      "mask_ratio": 0.9,
+      "agreement": 0.9854486661277284,
+      "masked_tokens": 3711
+    }
+  ],
+  "measurements": [
+    {
+      "lambda": 0.03,
+      "latency_ms": 459.70633839218254,
+      "speedup_vs_dense_flash": 1.023928695240419,
+      "skipped_2d_tiles_per_forward": 304268,
+      "total_2d_tiles_per_forward": 6291456,
+      "physical_tile_sparsity": 0.04836209615071615,
+      "agreement_with_kernel_lambda_zero": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.9969040247678018,
+          "masked_tokens": 646
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9869312681510165,
+          "masked_tokens": 2066
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9671247642144974,
+          "masked_tokens": 3711
+        }
+      ],
+      "agreement_with_compiled_dense": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.9969040247678018,
+          "masked_tokens": 646
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9869312681510165,
+          "masked_tokens": 2066
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.967663702506063,
+          "masked_tokens": 3711
+        }
+      ]
+    }
+  ],
+  "diffusion_schedule": {
+    "per_sequence_lambdas": [
+      1.0,
+      0.30000001192092896,
+      0.029999999329447746
+    ],
+    "latency_ms": 456.3280157686677,
+    "speedup_vs_dense_flash": 1.0315091228198432,
+    "skipped_2d_tiles_per_forward": 1634893,
+    "total_2d_tiles_per_forward": 6291456,
+    "physical_tile_sparsity": 0.25985924402872723,
+    "agreement_with_kernel_lambda_zero": [
+      {
+        "mask_ratio": 0.15,
+        "agreement": 0.9659442724458205,
+        "masked_tokens": 646
+      },
+      {
+        "mask_ratio": 0.5,
+        "agreement": 0.9549854791868344,
+        "masked_tokens": 2066
+      },
+      {
+        "mask_ratio": 0.9,
+        "agreement": 0.9671247642144974,
+        "masked_tokens": 3711
+      }
+    ],
+    "agreement_with_compiled_dense": [
+      {
+        "mask_ratio": 0.15,
+        "agreement": 0.9659442724458205,
+        "masked_tokens": 646
+      },
+      {
+        "mask_ratio": 0.5,
+        "agreement": 0.9559535333978703,
+        "masked_tokens": 2066
+      },
+      {
+        "mask_ratio": 0.9,
+        "agreement": 0.967663702506063,
+        "masked_tokens": 3711
+      }
+    ]
+  }
+}

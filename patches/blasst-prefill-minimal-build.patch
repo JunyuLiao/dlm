@@ -1,0 +1,37 @@
+diff --git a/cpp/kernels/fmha_v2/Makefile b/cpp/kernels/fmha_v2/Makefile
+index bec3b70e..019c2a96 100644
+--- a/cpp/kernels/fmha_v2/Makefile
++++ b/cpp/kernels/fmha_v2/Makefile
+@@ -136,7 +136,11 @@ GENCODES += $(GENCODE_SM90)
+ GENCODES += $(GENCODE_SM100)
+ GENCODES += $(GENCODE_SM120)
+ 
++ifdef BLASST_AE_MINIMAL
++SOFTMAX_GENCODES = $(GENCODE_SM90)
++else
+ SOFTMAX_GENCODES = $(GENCODE_SM80) $(GENCODE_SM89) $(GENCODE_SM90)
++endif
+ ifdef SOFTMAX_ALL_GENCODES
+ SOFTMAX_GENCODES = $(GENCODES)
+ endif
+diff --git a/cpp/kernels/fmha_v2/setup.py b/cpp/kernels/fmha_v2/setup.py
+index 163d6d0c..36ba06ec 100644
+--- a/cpp/kernels/fmha_v2/setup.py
++++ b/cpp/kernels/fmha_v2/setup.py
+@@ -6687,6 +6687,15 @@ def enumerate_kernels():
+                   # only generate head_size = 128/256 for attn_logit_softcapping operation.
+                   and (kspec.head_size == 128 or kspec.head_size == 256 or not kspec.enable_attn_logit_softcapping)]
+     # yapf: enable
+ 
++    if 'BLASST_AE_MINIMAL' in os.environ:
++        wanted = {
++            'fmha_v2_flash_attention_bf16_64_128_S_qkv_128_tma_ws_sm90',
++            'fmha_v2_flash_attention_bf16_64_128_S_qkv_128_skipSoftmax_tma_ws_sm90',
++        }
++        specs_names = [item for item in specs_names if item[1].removesuffix('.cu') in wanted]
++        if len(specs_names) != len(wanted):
++            raise RuntimeError(f'Could not select minimal BLASST kernels: {[item[1] for item in specs_names]}')
++
+     generate_files(specs_names)
+ 
+ 

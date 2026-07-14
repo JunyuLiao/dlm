@@ -1,0 +1,29 @@
+diff --git a/cpp/kernels/xqa/CMakeLists.txt b/cpp/kernels/xqa/CMakeLists.txt
+index 1833a885..be2a0325 100644
+--- a/cpp/kernels/xqa/CMakeLists.txt
++++ b/cpp/kernels/xqa/CMakeLists.txt
+@@ -45,6 +45,7 @@ set(CACHE_ELEM_ENUM
+ option(SKIP_SOFTMAX_ATTN "Enable skip softmax attention" OFF)
+ option(SKIP_SOFTMAX_ATTN_BLOCK_STATS
+        "Enable skip softmax block statistics (for sparsity reporting)" OFF)
++option(BUILD_XQA_NVRTC_TESTS "Build NVRTC-only XQA tests" OFF)
+ 
+ if(NOT HEAD_ELEMS STREQUAL "")
+   add_definitions(-DHEAD_ELEMS=${HEAD_ELEMS})
+@@ -166,10 +167,12 @@ if(BUILD_XQA_TESTS)
+   target_link_libraries(unitTests PUBLIC GTest::gtest GTest::gtest_main cuda
+                                          Eigen3::Eigen)
+ 
+-  find_library(
+-    NVRTC_LIB nvrtc
+-    HINTS ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}/../lib
+-    PATH_SUFFIXES lib64 lib lib/x64)
++  if(BUILD_XQA_NVRTC_TESTS)
++    find_library(
++      NVRTC_LIB nvrtc
++      HINTS ${CMAKE_CUDA_TOOLKIT_INCLUDE_DIRECTORIES}/../lib
++      PATH_SUFFIXES lib64 lib lib/x64)
++  endif()
+   if(NOT NVRTC_LIB)
+     message("Nvrtc not found")
+     add_definitions(-DENABLE_NVRTC=0)

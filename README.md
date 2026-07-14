@@ -100,3 +100,20 @@ The output includes exact request and batch membership tables,
 block step counts for each request; `exp2_batch_summary.csv` shows the eight
 request IDs and lengths alongside all four synchronized batch/block step
 counts. These batch step counts are not independently measured per request.
+
+## BLASST Hopper kernel reproduction
+
+The paper's exact pinned SM90 prefill/decode kernels and the BF16 H100
+dense-versus-BLASST benchmark can be prepared, built, and run with:
+
+```bash
+python scripts/blasst_hopper_reproduce.py
+```
+
+Use `--phase decode` or `--phase prefill` to run one kernel family. The default
+prefill run is the paper's 64K shape at five representative thresholds;
+`--prefill-full-sweep` enables all 17 artifact thresholds at 16K and 64K.
+
+See `docs/blasst_kernel_reproduction.md` for the full algorithm-to-kernel
+mapping, pinned revisions, host-build patch, experiment configuration, and
+result interpretation.
