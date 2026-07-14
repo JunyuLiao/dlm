@@ -13,8 +13,8 @@ from blasst.triton_bidirectional import (
 class DiffusionScheduleTest(unittest.TestCase):
     def test_noise_aware_thresholds(self):
         schedule = DiffusionLambdaSchedule()
-        self.assertEqual(schedule.threshold(0.9), 0.03)
-        self.assertEqual(schedule.threshold(0.5), 0.3)
+        self.assertEqual(schedule.threshold(0.9), 0.04858582466840744)
+        self.assertEqual(schedule.threshold(0.5), 0.4334796965122223)
         self.assertEqual(schedule.threshold(0.15), 1.0)
 
 

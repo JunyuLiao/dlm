@@ -17,16 +17,13 @@ The diffusion-specific calibration uses:
 - FlashAttention 2.8's reverse KV traversal and 128-by-64 tile shape;
 - separate row-decision and physically skippable tile counts.
 
-Threshold selection maximizes physical sparsity subject to a configurable
-masked-position disagreement limit relative to lambda zero at every noise
-level. This measures fidelity to dense attention rather than the model's
-ability to reconstruct inherently ambiguous hidden text.
-
-With the default 5% disagreement limit, the selected threshold is
-`lambda=0.001`. It yields 9.10% row-level sparsity and 0.049% physically
-skippable tiles. Agreement with dense is 99.76%, 98.65%, and 96.32% at 15%,
-50%, and 90% masking. `lambda=0.003` fails because agreement at 90% masking
-falls to 93.22%.
+The lambda-zero pass records the physical score
+`R_j = max_i exp(local_max_ij - running_max_i)` for every 2D attention tile.
+For each remaining-mask-ratio bucket and target physical sparsity `s`, the
+calibrator proposes `lambda_s = quantile_s({R_j})`. It then selects the largest
+proposed lambda in each denoising bucket that satisfies the configurable
+masked-position disagreement limit. This calibrates realizable kernel
+sparsity directly instead of using row sparsity as a proxy.
 
 Reproduce the calibration:
 
@@ -34,11 +31,12 @@ Reproduce the calibration:
 conda run -n ljy_dlm python scripts/llada_blasst_calibrate.py \
   --context-length 4096 --num-contexts 2 \
   --mask-ratios 0.15,0.5,0.9 \
-  --lambdas 0,0.001,0.003,0.01,0.03,0.1,0.3,1.0
+  --target-physical-sparsities 0.05,0.1,0.2,0.3,0.4,0.5
 ```
 
-Here `lambda=0` is a separate exact no-pruning control. The remaining values
-are readable, approximately logarithmic values from `1e-3` through `1`.
+Here `lambda=0` is a separate exact no-pruning control. All nonzero thresholds
+are derived from the observed physical-score quantiles rather than a fixed
+lambda sweep.
 
 Ground-truth recovery at `lambda=0` is not expected to be 100%: it asks whether
 one denoising forward reconstructs inherently ambiguous hidden text. The

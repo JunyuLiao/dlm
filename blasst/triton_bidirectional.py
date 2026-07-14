@@ -10,7 +10,7 @@ from __future__ import annotations
 import math
 import weakref
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Callable, Iterator
 
 import torch
@@ -135,11 +135,26 @@ class KernelStats:
 class DiffusionLambdaSchedule:
     """Noise-aware thresholds calibrated for LLaDA's denoising trajectory."""
 
-    high_noise_lambda: float = 0.03
-    mid_noise_lambda: float = 0.3
+    high_noise_lambda: float = 0.04858582466840744
+    mid_noise_lambda: float = 0.4334796965122223
     low_noise_lambda: float = 1.0
     high_noise_boundary: float = 0.75
     low_noise_boundary: float = 0.25
+
+    def __post_init__(self) -> None:
+        for name in ("high_noise_lambda", "mid_noise_lambda", "low_noise_lambda"):
+            value = getattr(self, name)
+            if not 0.0 <= value <= 1.0:
+                raise ValueError(f"{name} must be in [0, 1]")
+        if not 0.0 <= self.low_noise_boundary <= self.high_noise_boundary <= 1.0:
+            raise ValueError("noise boundaries must satisfy 0 <= low <= high <= 1")
+
+    def to_dict(self) -> dict[str, float]:
+        return asdict(self)
+
+    @classmethod
+    def from_dict(cls, values: dict[str, float]) -> "DiffusionLambdaSchedule":
+        return cls(**values)
 
     def threshold(self, remaining_mask_ratio: float) -> float:
         if not 0.0 <= remaining_mask_ratio <= 1.0:
@@ -154,7 +169,7 @@ class DiffusionLambdaSchedule:
 @dataclass
 class DiffusionKernelController:
     schedule: DiffusionLambdaSchedule
-    current_threshold: float | torch.Tensor = 0.03
+    current_threshold: float | torch.Tensor = 0.04858582466840744
 
     def __post_init__(self) -> None:
         self.current_threshold = self.schedule.high_noise_lambda
@@ -215,7 +230,7 @@ def blasst_bidirectional_flash_attn_func(
     deterministic: bool = False,
     return_attn_probs: bool = False,
     *,
-    blasst_lambda: float | torch.Tensor = 0.03,
+    blasst_lambda: float | torch.Tensor = 0.04858582466840744,
     collect_stats: bool = True,
     num_warps: int = 4,
     pipeline_stages: int = 2,
@@ -309,7 +324,7 @@ def blasst_bidirectional_flash_attn_func(
 def install_bidirectional_blasst_kernel(
     model: torch.nn.Module,
     *,
-    blasst_lambda: float | torch.Tensor | Callable[[], float | torch.Tensor] = 0.03,
+    blasst_lambda: float | torch.Tensor | Callable[[], float | torch.Tensor] = 0.04858582466840744,
     collect_stats: bool = True,
     num_warps: int = 4,
     pipeline_stages: int = 2,

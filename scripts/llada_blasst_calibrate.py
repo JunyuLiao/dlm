@@ -15,7 +15,13 @@ from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from blasst import collect_blasst_stats, install_blasst
+from blasst import (
+    PhysicalTileScoreCollector,
+    collect_blasst_stats,
+    install_blasst,
+    lambda_for_physical_sparsity,
+    select_largest_eligible_lambda,
+)
 from llada_eval_utils import (
     choose_mask_token_id,
     disable_use_cache,
@@ -89,9 +95,9 @@ def main():
     parser.add_argument("--mask-ratios", default="0.15,0.5,0.9")
     parser.add_argument("--num-contexts", type=int, default=2)
     parser.add_argument(
-        "--lambdas",
-        default="0,0.001,0.003,0.01,0.03,0.1,0.3,1.0",
-        help="lambda=0 control followed by a readable approximately logarithmic sweep",
+        "--target-physical-sparsities",
+        default="0.05,0.1,0.2,0.3,0.4,0.5",
+        help="comma-separated physical tile sparsities used to derive lambda quantiles",
     )
     parser.add_argument("--q-block-size", type=int, default=128)
     parser.add_argument("--kv-block-size", type=int, default=64)
@@ -103,6 +109,8 @@ def main():
     )
     parser.add_argument("--output", type=pathlib.Path, default=ROOT / "blasst_calibration_4096.json")
     args = parser.parse_args()
+    if not 0.0 <= args.max_relative_disagreement <= 1.0:
+        raise ValueError("max relative disagreement must be in [0, 1]")
 
     config = AutoConfig.from_pretrained(args.model, trust_remote_code=True)
     if args.context_length > config.max_sequence_length:
@@ -124,8 +132,46 @@ def main():
     )
     labels, inputs, masks = labels.cuda(), inputs.cuda(), masks.cuda()
 
-    measurements, reference_predictions = [], None
-    for threshold in [float(value) for value in args.lambdas.split(",")]:
+    targets = [float(value) for value in args.target_physical_sparsities.split(",")]
+    if targets != sorted(set(targets)) or any(not 0.0 <= value <= 1.0 for value in targets):
+        raise ValueError("target physical sparsities must be unique, sorted values in [0, 1]")
+
+    # A single lambda-zero pass both establishes the prediction reference and
+    # records R_j = max_i exp(local_max_ij - running_max_i) for every physical
+    # attention tile. Threshold candidates then come directly from quantiles
+    # of this physical score distribution, conditioned on denoising state.
+    collector = PhysicalTileScoreCollector()
+    collect_blasst_stats(reset=True)
+    with install_blasst(
+        model,
+        blasst_lambda=0.0,
+        q_block_size=args.q_block_size,
+        kv_block_size=args.kv_block_size,
+        physical_score_callback=collector,
+    ):
+        reference_logits, reference_elapsed_ms = forward(model, inputs)
+    reference_stats = collect_blasst_stats(reset=True)
+    reference_predictions = reference_logits.argmax(dim=-1)
+    del reference_logits
+
+    score_groups = collector.bucketed_scores([item["mask_ratio"] for item in metadata])
+    candidate_schedules = []
+    for target in targets:
+        candidate_schedules.append(
+            {
+                "target_physical_sparsity": target,
+                "lambda_by_mask_ratio": {
+                    ratio: lambda_for_physical_sparsity(score_groups[(ratio,)], target) for ratio in ratios
+                },
+            }
+        )
+
+    def evaluate(lambda_by_ratio, *, target_physical_sparsity):
+        threshold = torch.tensor(
+            [lambda_by_ratio[item["mask_ratio"]] for item in metadata],
+            dtype=torch.float32,
+            device=inputs.device,
+        )
         collect_blasst_stats(reset=True)
         with install_blasst(
             model,
@@ -137,17 +183,20 @@ def main():
         stats = collect_blasst_stats(reset=True)
         predictions = logits.argmax(dim=-1)
         del logits
-        if threshold == 0.0:
-            reference_predictions = predictions.clone()
-        assert reference_predictions is not None, "lambda sweep must start with 0"
         per_sample = masked_metrics(predictions, labels, masks, metadata, reference_predictions)
         per_ratio = []
         for ratio in ratios:
-            selected = [row for row in per_sample if row["mask_ratio"] == ratio]
+            selected_indices = [index for index, item in enumerate(metadata) if item["mask_ratio"] == ratio]
+            selected = [per_sample[index] for index in selected_indices]
             total = sum(row["masked_tokens"] for row in selected)
+            skipped_tiles = sum(stats.skipped_blocks_per_sequence[index] for index in selected_indices)
+            total_tiles = sum(stats.total_blocks_per_sequence[index] for index in selected_indices)
             per_ratio.append(
                 {
                     "mask_ratio": ratio,
+                    "lambda": lambda_by_ratio[ratio],
+                    "target_physical_sparsity": target_physical_sparsity,
+                    "achieved_physical_sparsity": skipped_tiles / total_tiles if total_tiles else 0.0,
                     "masked_tokens": total,
                     "recovery_accuracy": sum(
                         row["recovery_accuracy"] * row["masked_tokens"] for row in selected
@@ -158,31 +207,54 @@ def main():
                 }
             )
         mean_accuracy = sum(row["recovery_accuracy"] for row in per_ratio) / len(per_ratio)
+        return {
+            "target_physical_sparsity": target_physical_sparsity,
+            "lambda_by_mask_ratio": {str(key): value for key, value in lambda_by_ratio.items()},
+            "elapsed_ms": elapsed_ms,
+            "physical_block_sparsity": stats.sparsity_ratio,
+            "skipped_physical_blocks": stats.skipped_blocks,
+            "total_physical_blocks": stats.total_blocks,
+            "row_block_sparsity": (
+                stats.skipped_row_blocks / stats.total_row_blocks if stats.total_row_blocks else 0.0
+            ),
+            "mean_recovery_accuracy": mean_accuracy,
+            "per_mask_ratio": per_ratio,
+            "per_sample": per_sample,
+        }
+
+    baseline_samples = masked_metrics(
+        reference_predictions, labels, masks, metadata, reference_predictions
+    )
+    baseline = {
+        "target_physical_sparsity": 0.0,
+        "lambda_by_mask_ratio": {str(ratio): 0.0 for ratio in ratios},
+        "elapsed_ms": reference_elapsed_ms,
+        "physical_block_sparsity": reference_stats.sparsity_ratio,
+        "skipped_physical_blocks": reference_stats.skipped_blocks,
+        "total_physical_blocks": reference_stats.total_blocks,
+        "per_sample": baseline_samples,
+    }
+    measurements = [baseline]
+    for candidate in candidate_schedules:
         measurements.append(
-            {
-                "lambda": threshold,
-                "elapsed_ms": elapsed_ms,
-                "physical_block_sparsity": stats.sparsity_ratio,
-                "skipped_physical_blocks": stats.skipped_blocks,
-                "total_physical_blocks": stats.total_blocks,
-                "row_block_sparsity": (
-                    stats.skipped_row_blocks / stats.total_row_blocks if stats.total_row_blocks else 0.0
-                ),
-                "mean_recovery_accuracy": mean_accuracy,
-                "per_mask_ratio": per_ratio,
-                "per_sample": per_sample,
-            }
+            evaluate(
+                candidate["lambda_by_mask_ratio"],
+                target_physical_sparsity=candidate["target_physical_sparsity"],
+            )
         )
 
-    eligible = [
-        row
-        for row in measurements
-        if all(
-            metric["agreement_with_lambda_zero"] >= 1.0 - args.max_relative_disagreement
-            for metric in row["per_mask_ratio"]
+    selected_lambda_by_ratio = {}
+    for ratio in ratios:
+        candidates = []
+        for measurement in measurements[1:]:
+            metric = next(row for row in measurement["per_mask_ratio"] if row["mask_ratio"] == ratio)
+            candidates.append((metric["lambda"], metric["agreement_with_lambda_zero"]))
+        # Deliberately exact: 0.9499999938 fails a 0.95 requirement.
+        selected_lambda_by_ratio[ratio] = select_largest_eligible_lambda(
+            candidates, minimum_agreement=1.0 - args.max_relative_disagreement
         )
-    ]
-    selected = max(eligible, key=lambda row: row["physical_block_sparsity"])
+
+    selected_measurement = evaluate(selected_lambda_by_ratio, target_physical_sparsity="accuracy-constrained")
     result = {
         "model": args.model,
         "context_length": args.context_length,
@@ -191,9 +263,15 @@ def main():
         "q_block_size": args.q_block_size,
         "kv_block_size": args.kv_block_size,
         "kv_traversal": "reverse (matching FlashAttention 2.8)",
+        "calibration_score": "R_j = max_i exp(local_max_ij - running_max_i)",
+        "calibration_bucket": "remaining mask ratio",
+        "target_physical_sparsities": targets,
         "primary_accuracy_metric": "top-1 agreement with lambda=0 on masked positions",
-        "selection_rule": f"maximum physical sparsity with relative disagreement <= {args.max_relative_disagreement} at every noise level",
-        "selected_lambda": selected["lambda"],
+        "selection_rule": f"largest quantile-derived lambda per denoising bucket with relative disagreement <= {args.max_relative_disagreement}",
+        "selected_lambda_by_mask_ratio": {
+            str(key): value for key, value in selected_lambda_by_ratio.items()
+        },
+        "selected_measurement": selected_measurement,
         "measurements": measurements,
     }
     args.output.write_text(json.dumps(result, indent=2) + "\n", encoding="utf-8")

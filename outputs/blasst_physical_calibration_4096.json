@@ -1,0 +1,697 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "context_length": 4096,
+  "mask_ratios": [
+    0.15,
+    0.5,
+    0.9
+  ],
+  "num_contexts": 2,
+  "q_block_size": 128,
+  "kv_block_size": 64,
+  "kv_traversal": "reverse (matching FlashAttention 2.8)",
+  "calibration_score": "R_j = max_i exp(local_max_ij - running_max_i)",
+  "calibration_bucket": "remaining mask ratio",
+  "target_physical_sparsities": [
+    0.05,
+    0.1,
+    0.2,
+    0.3,
+    0.4,
+    0.5
+  ],
+  "primary_accuracy_metric": "top-1 agreement with lambda=0 on masked positions",
+  "selection_rule": "largest quantile-derived lambda per denoising bucket with relative disagreement <= 0.05",
+  "selected_lambda_by_mask_ratio": {
+    "0.15": 1.0,
+    "0.5": 0.4334796965122223,
+    "0.9": 0.04858582466840744
+  },
+  "selected_measurement": {
+    "target_physical_sparsity": "accuracy-constrained",
+    "lambda_by_mask_ratio": {
+      "0.15": 1.0,
+      "0.5": 0.4334796965122223,
+      "0.9": 0.04858582466840744
+    },
+    "elapsed_ms": 38609.278438962065,
+    "physical_block_sparsity": 0.2915613651275635,
+    "skipped_physical_blocks": 3668691,
+    "total_physical_blocks": 12582912,
+    "row_block_sparsity": 0.6994407797853152,
+    "mean_recovery_accuracy": 0.577028982156833,
+    "per_mask_ratio": [
+      {
+        "mask_ratio": 0.15,
+        "lambda": 1.0,
+        "target_physical_sparsity": "accuracy-constrained",
+        "achieved_physical_sparsity": 0.48378896713256836,
+        "masked_tokens": 1232,
+        "recovery_accuracy": 0.849025947223236,
+        "agreement_with_lambda_zero": 0.9691558141600002
+      },
+      {
+        "mask_ratio": 0.5,
+        "lambda": 0.4334796965122223,
+        "target_physical_sparsity": "accuracy-constrained",
+        "achieved_physical_sparsity": 0.2923400402069092,
+        "masked_tokens": 4060,
+        "recovery_accuracy": 0.6995074086294972,
+        "agreement_with_lambda_zero": 0.9586206978471409
+      },
+      {
+        "mask_ratio": 0.9,
+        "lambda": 0.04858582466840744,
+        "target_physical_sparsity": "accuracy-constrained",
+        "achieved_physical_sparsity": 0.09855508804321289,
+        "masked_tokens": 7417,
+        "recovery_accuracy": 0.18255359061776555,
+        "agreement_with_lambda_zero": 0.9551031390129435
+      }
+    ],
+    "per_sample": [
+      {
+        "context_index": 0,
+        "mask_ratio": 0.15,
+        "masked_tokens": 646,
+        "recovery_accuracy": 0.8513931632041931,
+        "agreement_with_lambda_zero": 0.9736841917037964
+      },
+      {
+        "context_index": 0,
+        "mask_ratio": 0.5,
+        "masked_tokens": 2066,
+        "recovery_accuracy": 0.70425945520401,
+        "agreement_with_lambda_zero": 0.9598257541656494
+      },
+      {
+        "context_index": 0,
+        "mask_ratio": 0.9,
+        "masked_tokens": 3711,
+        "recovery_accuracy": 0.1948261857032776,
+        "agreement_with_lambda_zero": 0.9568849205970764
+      },
+      {
+        "context_index": 1,
+        "mask_ratio": 0.15,
+        "masked_tokens": 586,
+        "recovery_accuracy": 0.8464163541793823,
+        "agreement_with_lambda_zero": 0.9641637802124023
+      },
+      {
+        "context_index": 1,
+        "mask_ratio": 0.5,
+        "masked_tokens": 1994,
+        "recovery_accuracy": 0.6945837736129761,
+        "agreement_with_lambda_zero": 0.9573721289634705
+      },
+      {
+        "context_index": 1,
+        "mask_ratio": 0.9,
+        "masked_tokens": 3706,
+        "recovery_accuracy": 0.17026443779468536,
+        "agreement_with_lambda_zero": 0.9533189535140991
+      }
+    ]
+  },
+  "measurements": [
+    {
+      "target_physical_sparsity": 0.0,
+      "lambda_by_mask_ratio": {
+        "0.15": 0.0,
+        "0.5": 0.0,
+        "0.9": 0.0
+      },
+      "elapsed_ms": 42217.55547996145,
+      "physical_block_sparsity": 0.0,
+      "skipped_physical_blocks": 0,
+      "total_physical_blocks": 12582912,
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.8560371398925781,
+          "agreement_with_lambda_zero": 1.0
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.7008712887763977,
+          "agreement_with_lambda_zero": 1.0
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.1948261857032776,
+          "agreement_with_lambda_zero": 0.9999999403953552
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8498293161392212,
+          "agreement_with_lambda_zero": 0.9999999403953552
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6940822601318359,
+          "agreement_with_lambda_zero": 1.0
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.17053426802158356,
+          "agreement_with_lambda_zero": 1.0
+        }
+      ]
+    },
+    {
+      "target_physical_sparsity": 0.05,
+      "lambda_by_mask_ratio": {
+        "0.15": 0.033978141844272614,
+        "0.5": 0.03017866425216198,
+        "0.9": 0.0219657551497221
+      },
+      "elapsed_ms": 38805.31556595815,
+      "physical_block_sparsity": 0.04951357841491699,
+      "skipped_physical_blocks": 623025,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.38088997391362983,
+      "mean_recovery_accuracy": 0.5781882130125799,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "lambda": 0.033978141844272614,
+          "target_physical_sparsity": 0.05,
+          "achieved_physical_sparsity": 0.04944157600402832,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.8530843925553483,
+          "agreement_with_lambda_zero": 0.9983765985091011
+        },
+        {
+          "mask_ratio": 0.5,
+          "lambda": 0.03017866425216198,
+          "target_physical_sparsity": 0.05,
+          "achieved_physical_sparsity": 0.04939579963684082,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6985221789681852,
+          "agreement_with_lambda_zero": 0.9889162631751282
+        },
+        {
+          "mask_ratio": 0.9,
+          "lambda": 0.0219657551497221,
+          "target_physical_sparsity": 0.05,
+          "achieved_physical_sparsity": 0.049703359603881836,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.18295806751420624,
+          "agreement_with_lambda_zero": 0.9708776902731368
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.8560371398925781,
+          "agreement_with_lambda_zero": 1.0
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.7028073668479919,
+          "agreement_with_lambda_zero": 0.9912875294685364
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.19590406119823456,
+          "agreement_with_lambda_zero": 0.9735919833183289
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8498293161392212,
+          "agreement_with_lambda_zero": 0.9965869784355164
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6940822601318359,
+          "agreement_with_lambda_zero": 0.9864593744277954
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.16999460756778717,
+          "agreement_with_lambda_zero": 0.9681597352027893
+        }
+      ]
+    },
+    {
+      "target_physical_sparsity": 0.1,
+      "lambda_by_mask_ratio": {
+        "0.15": 0.07533697038888931,
+        "0.5": 0.06750738620758057,
+        "0.9": 0.04858582466840744
+      },
+      "elapsed_ms": 38783.80755498074,
+      "physical_block_sparsity": 0.09788131713867188,
+      "skipped_physical_blocks": 1231632,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.47741098205248517,
+      "mean_recovery_accuracy": 0.5777828169063769,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "lambda": 0.07533697038888931,
+          "target_physical_sparsity": 0.1,
+          "achieved_physical_sparsity": 0.09760117530822754,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.8522726976639264,
+          "agreement_with_lambda_zero": 0.9935064666069947
+        },
+        {
+          "mask_ratio": 0.5,
+          "lambda": 0.06750738620758057,
+          "target_physical_sparsity": 0.1,
+          "achieved_physical_sparsity": 0.0974876880645752,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6985221624374389,
+          "agreement_with_lambda_zero": 0.9812807984246409
+        },
+        {
+          "mask_ratio": 0.9,
+          "lambda": 0.04858582466840744,
+          "target_physical_sparsity": 0.1,
+          "achieved_physical_sparsity": 0.09855508804321289,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.18255359061776555,
+          "agreement_with_lambda_zero": 0.9551031390129435
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.8529411554336548,
+          "agreement_with_lambda_zero": 0.995356023311615
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.7037754058837891,
+          "agreement_with_lambda_zero": 0.9820910096168518
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.1948261857032776,
+          "agreement_with_lambda_zero": 0.9568849205970764
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8515357971191406,
+          "agreement_with_lambda_zero": 0.9914675354957581
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6930792331695557,
+          "agreement_with_lambda_zero": 0.9804413318634033
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.17026443779468536,
+          "agreement_with_lambda_zero": 0.9533189535140991
+        }
+      ]
+    },
+    {
+      "target_physical_sparsity": 0.2,
+      "lambda_by_mask_ratio": {
+        "0.15": 0.21880778670310974,
+        "0.5": 0.20257100462913513,
+        "0.9": 0.1402788609266281
+      },
+      "elapsed_ms": 38759.79234202532,
+      "physical_block_sparsity": 0.19481396675109863,
+      "skipped_physical_blocks": 2451327,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.6237019443263611,
+      "mean_recovery_accuracy": 0.5782511009443855,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "lambda": 0.21880778670310974,
+          "target_physical_sparsity": 0.2,
+          "achieved_physical_sparsity": 0.19506120681762695,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.8498376379539441,
+          "agreement_with_lambda_zero": 0.9845778935334899
+        },
+        {
+          "mask_ratio": 0.5,
+          "lambda": 0.20257100462913513,
+          "target_physical_sparsity": 0.2,
+          "achieved_physical_sparsity": 0.19417762756347656,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6992610919064489,
+          "agreement_with_lambda_zero": 0.9714286076024248
+        },
+        {
+          "mask_ratio": 0.9,
+          "lambda": 0.1402788609266281,
+          "target_physical_sparsity": 0.2,
+          "achieved_physical_sparsity": 0.19520306587219238,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.1856545729727634,
+          "agreement_with_lambda_zero": 0.9269245925000434
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.8529411554336548,
+          "agreement_with_lambda_zero": 0.9876160621643066
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.7037754058837891,
+          "agreement_with_lambda_zero": 0.970958411693573
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.19859875738620758,
+          "agreement_with_lambda_zero": 0.9299379587173462
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8464163541793823,
+          "agreement_with_lambda_zero": 0.9812286496162415
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6945837736129761,
+          "agreement_with_lambda_zero": 0.9719157814979553
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.1726929247379303,
+          "agreement_with_lambda_zero": 0.9239071607589722
+        }
+      ]
+    },
+    {
+      "target_physical_sparsity": 0.3,
+      "lambda_by_mask_ratio": {
+        "0.15": 0.45565158128738403,
+        "0.5": 0.4334796965122223,
+        "0.9": 0.2983616888523102
+      },
+      "elapsed_ms": 38697.90552800987,
+      "physical_block_sparsity": 0.29366405804951984,
+      "skipped_physical_blocks": 3695149,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.7394257020205259,
+      "mean_recovery_accuracy": 0.5784240026169138,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "lambda": 0.45565158128738403,
+          "target_physical_sparsity": 0.3,
+          "achieved_physical_sparsity": 0.2949650287628174,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.850649328684652,
+          "agreement_with_lambda_zero": 0.9772726735704905
+        },
+        {
+          "mask_ratio": 0.5,
+          "lambda": 0.4334796965122223,
+          "target_physical_sparsity": 0.3,
+          "achieved_physical_sparsity": 0.2923400402069092,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6995074086294972,
+          "agreement_with_lambda_zero": 0.9586206978471409
+        },
+        {
+          "mask_ratio": 0.9,
+          "lambda": 0.2983616888523102,
+          "target_physical_sparsity": 0.3,
+          "achieved_physical_sparsity": 0.293687105178833,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.18511527053659232,
+          "agreement_with_lambda_zero": 0.9060266693920657
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.8544891476631165,
+          "agreement_with_lambda_zero": 0.9829720854759216
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.70425945520401,
+          "agreement_with_lambda_zero": 0.9598257541656494
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.19536511600017548,
+          "agreement_with_lambda_zero": 0.9137698411941528
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8464163541793823,
+          "agreement_with_lambda_zero": 0.9709897041320801
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6945837736129761,
+          "agreement_with_lambda_zero": 0.9573721289634705
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.17485159635543823,
+          "agreement_with_lambda_zero": 0.8982730507850647
+        }
+      ]
+    },
+    {
+      "target_physical_sparsity": 0.4,
+      "lambda_by_mask_ratio": {
+        "0.15": 0.7609646320343018,
+        "0.5": 0.7338266372680664,
+        "0.9": 0.5208170413970947
+      },
+      "elapsed_ms": 38644.01112898486,
+      "physical_block_sparsity": 0.3941243489583333,
+      "skipped_physical_blocks": 4959232,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.8322749727716049,
+      "mean_recovery_accuracy": 0.5775026494972013,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "lambda": 0.7609646320343018,
+          "target_physical_sparsity": 0.4,
+          "achieved_physical_sparsity": 0.39720773696899414,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.8498376296325163,
+          "agreement_with_lambda_zero": 0.9732142636528263
+        },
+        {
+          "mask_ratio": 0.5,
+          "lambda": 0.7338266372680664,
+          "target_physical_sparsity": 0.4,
+          "achieved_physical_sparsity": 0.39208245277404785,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6987684791604873,
+          "agreement_with_lambda_zero": 0.9499999938046404
+        },
+        {
+          "mask_ratio": 0.9,
+          "lambda": 0.5208170413970947,
+          "target_physical_sparsity": 0.4,
+          "achieved_physical_sparsity": 0.393082857131958,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.1839018396986002,
+          "agreement_with_lambda_zero": 0.8833760116980117
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.8498451709747314,
+          "agreement_with_lambda_zero": 0.9798761606216431
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.70425945520401,
+          "agreement_with_lambda_zero": 0.9506292343139648
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.1948261857032776,
+          "agreement_with_lambda_zero": 0.8903260231018066
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8498293161392212,
+          "agreement_with_lambda_zero": 0.9658702611923218
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6930792331695557,
+          "agreement_with_lambda_zero": 0.9493480324745178
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.1729627549648285,
+          "agreement_with_lambda_zero": 0.8764166235923767
+        }
+      ]
+    },
+    {
+      "target_physical_sparsity": 0.5,
+      "lambda_by_mask_ratio": {
+        "0.15": 1.0,
+        "0.5": 1.0,
+        "0.9": 0.8095752596855164
+      },
+      "elapsed_ms": 38656.2171279802,
+      "physical_block_sparsity": 0.48816410700480145,
+      "skipped_physical_blocks": 6142526,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.8934586718678474,
+      "mean_recovery_accuracy": 0.5757957027736333,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "lambda": 1.0,
+          "target_physical_sparsity": 0.5,
+          "achieved_physical_sparsity": 0.48378896713256836,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.849025947223236,
+          "agreement_with_lambda_zero": 0.9691558141600002
+        },
+        {
+          "mask_ratio": 0.5,
+          "lambda": 1.0,
+          "target_physical_sparsity": 0.5,
+          "achieved_physical_sparsity": 0.4861927032470703,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6972906494962758,
+          "agreement_with_lambda_zero": 0.9396551764363725
+        },
+        {
+          "mask_ratio": 0.9,
+          "lambda": 0.8095752596855164,
+          "target_physical_sparsity": 0.5,
+          "achieved_physical_sparsity": 0.4945106506347656,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.18107051160138815,
+          "agreement_with_lambda_zero": 0.870163127974839
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.8513931632041931,
+          "agreement_with_lambda_zero": 0.9736841917037964
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.70425945520401,
+          "agreement_with_lambda_zero": 0.9390125870704651
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.19159255921840668,
+          "agreement_with_lambda_zero": 0.8825114369392395
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8464163541793823,
+          "agreement_with_lambda_zero": 0.9641637802124023
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6900702118873596,
+          "agreement_with_lambda_zero": 0.9403209686279297
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.17053426802158356,
+          "agreement_with_lambda_zero": 0.857798159122467
+        }
+      ]
+    }
+  ]
+}
