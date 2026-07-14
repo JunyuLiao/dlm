@@ -23,7 +23,7 @@ from blasst import (
     reset_kernel_stats,
 )
 from llada_blasst_calibrate import build_masked_batch
-from llada_block_step_probe import (
+from llada_eval_utils import (
     choose_mask_token_id,
     disable_use_cache,
     ensure_all_tied_weights_keys,

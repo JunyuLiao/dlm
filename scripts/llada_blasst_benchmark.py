@@ -12,7 +12,7 @@ from transformers import AutoConfig, AutoModelForCausalLM, AutoTokenizer
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 from blasst import collect_blasst_stats, install_blasst
-from llada_block_step_probe import (
+from llada_eval_utils import (
     disable_use_cache,
     ensure_all_tied_weights_keys,
     patch_llada_transformers_compat,

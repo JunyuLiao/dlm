@@ -16,7 +16,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from blasst import collect_blasst_stats, install_blasst
-from llada_block_step_probe import (
+from llada_eval_utils import (
     choose_mask_token_id,
     disable_use_cache,
     ensure_all_tied_weights_keys,
@@ -28,7 +28,8 @@ def calibration_text() -> str:
     """Use heterogeneous repository prose rather than a repeated sentence."""
     paths = [
         ROOT / "README.md",
-        ROOT / "docs" / "experiment_plan.md",
+        ROOT / "docs" / "blasst.md",
+        ROOT / "docs" / "llada_blasst_kernel.md",
         ROOT / "data" / "prompts_heterogeneous.jsonl",
     ]
     return "\n\n".join(path.read_text(encoding="utf-8") for path in paths)
