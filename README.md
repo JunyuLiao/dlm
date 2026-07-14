@@ -1,5 +1,64 @@
 # Diffusion LM 动态 block sampling 实验
 
+## `sparse` branch: diffusion-LM sparsity mechanism
+
+This branch is an experimental testbed for answering one question: can
+BLASST-style attention-tile sparsity be effective for a diffusion language
+model with full bidirectional attention? It is not a reproduction of every
+specialized BLASST kernel optimization and is not yet a production inference
+stack. The branch contains:
+
+- a readable PyTorch numerical oracle for the BLASST pruning rule;
+- the authors' pinned Hopper artifact reproduction and build driver;
+- a fused Triton implementation adapted to LLaDA's bidirectional attention;
+- a diffusion-step-dependent lambda schedule and dense-relative evaluation;
+- exact physical 2D tile counts, masked-token prediction agreement, and H100
+  latency measurements.
+
+The LLaDA experiment uses the following fixed setup:
+
+| Item | Setting |
+|---|---|
+| Model | `GSAI-ML/LLaDA-8B-Instruct` |
+| Attention | Full bidirectional MHA through the model's FlashAttention mode |
+| Hardware / dtype | One NVIDIA H100 80GB, BF16 inference |
+| Shape | Batch 3, sequence 4096, 32 heads, head dimension 128 |
+| Diffusion states | One sequence each at 15%, 50%, and 90% remaining masks |
+| Sparse tile | 128 query rows x 64 KV columns, reverse KV traversal |
+| Dense reference | Installed compiled `flash_attn_func` |
+| Fidelity reference | The same fused kernel with `lambda=0`, compared only at masked positions |
+| Lambda schedule | `1.0`, `0.3`, `0.03` for low-, mid-, and high-noise sequences |
+| Timing | 5 warmups and 30 synchronized full-model forwards; statistics collected separately |
+
+With this setup, dense FlashAttention takes 470.71 ms. The heterogeneous
+diffusion schedule takes 456.33 ms (1.032x speedup), skips 1,634,893 of
+6,291,456 physical tiles (25.99%), and retains 96.59%, 95.50%, and 96.71%
+masked-token prediction agreement with the fused `lambda=0` reference at 15%,
+50%, and 90% masks. These numbers validate that the mechanism produces useful
+sparsity in bidirectional diffusion attention; they do not imply that the
+current portable Triton kernel reaches the paper's fully specialized-kernel
+speedups.
+
+Run the experiment with:
+
+```bash
+conda run -n ljy_dlm python scripts/llada_blasst_kernel_benchmark.py \
+  --context-length 4096 \
+  --num-contexts 1 \
+  --mask-ratios 0.15,0.5,0.9 \
+  --lambdas 0.03 \
+  --warmup 5 \
+  --repeats 30 \
+  --num-warps 4 \
+  --pipeline-stages 2
+```
+
+The detailed algorithm mapping, measurement definitions, kernel-only
+optimizations, limitations, and results are in
+[`docs/llada_blasst_kernel.md`](docs/llada_blasst_kernel.md). The exact Hopper
+artifact reproduction is documented separately in
+[`docs/blasst_kernel_reproduction.md`](docs/blasst_kernel_reproduction.md).
+
 这个 repo 放的是一个轻量级实验脚手架，用来设计和画 Diffusion LM / DLM 的 serving 实验：batch size、dynamic sampling、一个 block 内 token 需要的 decoding step 数量不一样、以及 block size 16/32/64 对性能的影响。
 
 重点分两条线：`scripts/run_h100_llada_experiment.sh` 是主实验，使用真实 LLaDA forward + 真实 batch size 记录数据；`scripts/run_dlm_experiment.sh` 只是 smoke/debug 用的模拟脚本，不作为最终实验结论。

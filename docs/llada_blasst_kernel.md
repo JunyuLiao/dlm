@@ -4,6 +4,16 @@
 noncausal self-attention. It follows the reproduced BLASST prefill semantics
 while adapting the pruning unit to diffusion attention.
 
+## Intended takeaway
+
+This experiment tests the sparsity mechanism, not a claim of complete BLASST
+kernel reproduction. Its intended takeaway is that the same online-max tile
+criterion can skip a measurable fraction of LLaDA's full bidirectional 2D
+attention tiles while preserving high agreement with an unpruned execution of
+the same fused kernel. Dense FlashAttention is the latency baseline; the fused
+`lambda=0` path is the numerical reference, which separates pruning effects
+from different kernel reduction orders and BF16 rounding.
+
 ## 2D tile decision
 
 Each CUDA program owns one `(batch, head, 128-query-row)` tile and traverses
@@ -33,6 +43,27 @@ The schedule selects the largest tested threshold that retains at least 95%
 agreement with the fused lambda-zero path in each diffusion regime. Exact
 heterogeneous-batch sparsity and latency are recorded by the benchmark below.
 
+## Experimental setup
+
+| Component | Configuration |
+|---|---|
+| Model | `GSAI-ML/LLaDA-8B-Instruct`, evaluation/inference mode |
+| Model attention configuration | `flash_attention=True`, full noncausal self-attention |
+| Device and precision | One NVIDIA H100 80GB, BF16 Q/K/V and FP32 online-softmax state |
+| Input shape | Batch 3, sequence length 4096, 32 heads, head dimension 128 |
+| Diffusion batch | One sequence at each remaining-mask ratio: 0.15, 0.50, 0.90 |
+| Dense latency baseline | The installed compiled `flash_attn_func` bound by LLaDA |
+| Sparse numerical baseline | This fused kernel at `lambda=0`, so no tile can be pruned |
+| Fidelity metric | Argmax-token agreement at masked positions only, reported by mask ratio |
+| Sparsity metric | Skipped physical 128x64 `(query, KV)` tiles divided by all such tiles across 32 layers |
+| Timing protocol | 5 warmups, then 30 CUDA-synchronized full-model forwards per configuration |
+| Statistics protocol | A separate instrumented forward; counter atomics are disabled during timing |
+| Launch | 4 warps, 2 pipeline stages |
+
+The tested diffusion schedule assigns per-sequence thresholds in the same
+heterogeneous batch: `lambda=1.0` at 15% masks, `0.3` at 50%, and `0.03` at
+90%. The fixed-threshold comparison uses `lambda=0.03` for every sequence.
+
 On an H100 with LLaDA-8B-Instruct, native 4096-token contexts, BF16, and a
 heterogeneous `[15%, 50%, 90%]` masking batch, the optimized schedule skips
 25.99% of physical tiles. Over 30 measured full-model forwards it takes
@@ -40,7 +71,7 @@ heterogeneous `[15%, 50%, 90%]` masking batch, the optimized schedule skips
 speedup. Fixed `lambda=0.03` takes 459.71 ms (1.024x). Scheduled agreement with
 the lambda-zero kernel is 96.59%, 95.50%, and 96.71% respectively.
 
-## Kernel-only optimizations
+## Kernel-only optimizations (algorithm unchanged)
 
 These changes preserve BLASST's tile order, 128x64 pruning unit, strict
 threshold predicate, unanimous 2D vote, and always-QK/conditional-softmax-PV
@@ -92,7 +123,15 @@ combinations were slower for this 128x64, head-dimension-128 shape.
 Run the end-to-end sweep with:
 
 ```bash
-conda run -n ljy_dlm python scripts/llada_blasst_kernel_benchmark.py
+conda run -n ljy_dlm python scripts/llada_blasst_kernel_benchmark.py \
+  --context-length 4096 \
+  --num-contexts 1 \
+  --mask-ratios 0.15,0.5,0.9 \
+  --lambdas 0.03 \
+  --warmup 5 \
+  --repeats 30 \
+  --num-warps 4 \
+  --pipeline-stages 2
 ```
 
 Results are written to `blasst_llada_kernel_4096.json`.
