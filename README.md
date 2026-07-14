@@ -25,6 +25,15 @@ python3 scripts/dlm_block_sampling_benchmark.py --mode simulate --prompt-file da
 
 详细实验设置、老师那两句话该怎么理解、以及 H100 上需要 log 什么字段，见 `docs/experiment_plan.md`。
 
+## SparseD first-step accuracy/efficiency check
+
+`scripts/sparsed_quick_eval.py` is a separate, lightweight dense-vs-SparseD
+valuation harness. It imports the official SparseD repository as a backend and
+records paired output fidelity, latency, generated-token throughput, and peak
+GPU memory without attempting the paper's full benchmark suite. Setup, long-
+context examples, output fields, and interpretation are in
+`docs/sparsed_quick_eval.md`.
+
 
 ## A100 还是 H100
 

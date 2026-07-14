@@ -1,0 +1,602 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "context_length": 4096,
+  "mask_ratios": [
+    0.15,
+    0.5,
+    0.9
+  ],
+  "num_contexts": 2,
+  "q_block_size": 128,
+  "kv_block_size": 64,
+  "kv_traversal": "reverse (matching FlashAttention 2.8)",
+  "primary_accuracy_metric": "top-1 agreement with lambda=0 on masked positions",
+  "selection_rule": "maximum physical sparsity with relative disagreement <= 0.05 at every noise level",
+  "selected_lambda": 0.001,
+  "measurements": [
+    {
+      "lambda": 0.0,
+      "elapsed_ms": 34477.317816985305,
+      "physical_block_sparsity": 0.0,
+      "skipped_physical_blocks": 0,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.0,
+      "mean_recovery_accuracy": 0.5431977121514089,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.8043830862099474,
+          "agreement_with_lambda_zero": 0.9999999716490894
+        },
+        {
+          "mask_ratio": 0.5,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6677339875932985,
+          "agreement_with_lambda_zero": 1.0
+        },
+        {
+          "mask_ratio": 0.9,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.15747606265098077,
+          "agreement_with_lambda_zero": 0.999999970177587
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.767801821231842,
+          "agreement_with_lambda_zero": 1.0
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.640367865562439,
+          "agreement_with_lambda_zero": 1.0
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.1376987248659134,
+          "agreement_with_lambda_zero": 0.9999999403953552
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8447098731994629,
+          "agreement_with_lambda_zero": 0.9999999403953552
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6960882544517517,
+          "agreement_with_lambda_zero": 1.0
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.17728008329868317,
+          "agreement_with_lambda_zero": 1.0
+        }
+      ]
+    },
+    {
+      "lambda": 0.001,
+      "elapsed_ms": 33967.01259701513,
+      "physical_block_sparsity": 0.00048772493998209637,
+      "skipped_physical_blocks": 6137,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.09098989143967628,
+      "mean_recovery_accuracy": 0.5429867475529716,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.8027597089092453,
+          "agreement_with_lambda_zero": 0.9975649077783931
+        },
+        {
+          "mask_ratio": 0.5,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6672413844780382,
+          "agreement_with_lambda_zero": 0.9864531938371988
+        },
+        {
+          "mask_ratio": 0.9,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.1589591492716315,
+          "agreement_with_lambda_zero": 0.9631926657151578
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.7662538290023804,
+          "agreement_with_lambda_zero": 0.9984520077705383
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.6393998265266418,
+          "agreement_with_lambda_zero": 0.9869312644004822
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.13823767006397247,
+          "agreement_with_lambda_zero": 0.9665858149528503
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8430033922195435,
+          "agreement_with_lambda_zero": 0.9965869784355164
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6960882544517517,
+          "agreement_with_lambda_zero": 0.9859578609466553
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.1797085851430893,
+          "agreement_with_lambda_zero": 0.9597949385643005
+        }
+      ]
+    },
+    {
+      "lambda": 0.003,
+      "elapsed_ms": 33972.118883015355,
+      "physical_block_sparsity": 0.0026503403981526694,
+      "skipped_physical_blocks": 33349,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.1577598669876655,
+      "mean_recovery_accuracy": 0.5424423260428047,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.8035714079613809,
+          "agreement_with_lambda_zero": 0.9886363347048883
+        },
+        {
+          "mask_ratio": 0.5,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6660098546244241,
+          "agreement_with_lambda_zero": 0.9780788426916001
+        },
+        {
+          "mask_ratio": 0.9,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.15774571554260916,
+          "agreement_with_lambda_zero": 0.9321828027435016
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.7708978056907654,
+          "agreement_with_lambda_zero": 0.99071204662323
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.6364956498146057,
+          "agreement_with_lambda_zero": 0.9787028431892395
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.13608191907405853,
+          "agreement_with_lambda_zero": 0.9415251612663269
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8395904302597046,
+          "agreement_with_lambda_zero": 0.9863480925559998
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6965897679328918,
+          "agreement_with_lambda_zero": 0.9774323105812073
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.1794387400150299,
+          "agreement_with_lambda_zero": 0.9228278398513794
+        }
+      ]
+    },
+    {
+      "lambda": 0.01,
+      "elapsed_ms": 33940.59827699675,
+      "physical_block_sparsity": 0.01314234733581543,
+      "skipped_physical_blocks": 165369,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.2583973966538906,
+      "mean_recovery_accuracy": 0.5439671259473369,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.8076298449720655,
+          "agreement_with_lambda_zero": 0.9805194523620915
+        },
+        {
+          "mask_ratio": 0.5,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6662561675597881,
+          "agreement_with_lambda_zero": 0.9640394265134934
+        },
+        {
+          "mask_ratio": 0.9,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.15801536531015695,
+          "agreement_with_lambda_zero": 0.8917351772365053
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.772445797920227,
+          "agreement_with_lambda_zero": 0.9845200777053833
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.6389157772064209,
+          "agreement_with_lambda_zero": 0.9641820192337036
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.13689032196998596,
+          "agreement_with_lambda_zero": 0.909997284412384
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8464163541793823,
+          "agreement_with_lambda_zero": 0.9761092066764832
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6945837736129761,
+          "agreement_with_lambda_zero": 0.9638916850090027
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.1791689097881317,
+          "agreement_with_lambda_zero": 0.8734484314918518
+        }
+      ]
+    },
+    {
+      "lambda": 0.03,
+      "elapsed_ms": 33991.515474015614,
+      "physical_block_sparsity": 0.04353451728820801,
+      "skipped_physical_blocks": 547791,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.3753739930689335,
+      "mean_recovery_accuracy": 0.5434736069861291,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.8068181542413575,
+          "agreement_with_lambda_zero": 0.9707791956214161
+        },
+        {
+          "mask_ratio": 0.5,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6647783416832609,
+          "agreement_with_lambda_zero": 0.9428571552185002
+        },
+        {
+          "mask_ratio": 0.9,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.15882432503376878,
+          "agreement_with_lambda_zero": 0.8406363754110451
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.7708978056907654,
+          "agreement_with_lambda_zero": 0.9767801761627197
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.6369796991348267,
+          "agreement_with_lambda_zero": 0.937560498714447
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.13958501815795898,
+          "agreement_with_lambda_zero": 0.8587981462478638
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8464163541793823,
+          "agreement_with_lambda_zero": 0.9641637802124023
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6935807466506958,
+          "agreement_with_lambda_zero": 0.9483450651168823
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.17808958888053894,
+          "agreement_with_lambda_zero": 0.8224501013755798
+        }
+      ]
+    },
+    {
+      "lambda": 0.1,
+      "elapsed_ms": 33951.96110900724,
+      "physical_block_sparsity": 0.11872975031534831,
+      "skipped_physical_blocks": 1493966,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.5304505874713262,
+      "mean_recovery_accuracy": 0.5435488351233599,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.8076298532934932,
+          "agreement_with_lambda_zero": 0.9602272452472093
+        },
+        {
+          "mask_ratio": 0.5,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.66527093516782,
+          "agreement_with_lambda_zero": 0.9169950792648522
+        },
+        {
+          "mask_ratio": 0.9,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.15774571690876657,
+          "agreement_with_lambda_zero": 0.7497640365745495
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.7755417823791504,
+          "agreement_with_lambda_zero": 0.9674922227859497
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.6393998265266418,
+          "agreement_with_lambda_zero": 0.9104549884796143
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.13823767006397247,
+          "agreement_with_lambda_zero": 0.7677175402641296
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8430033922195435,
+          "agreement_with_lambda_zero": 0.9522184133529663
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6920762062072754,
+          "agreement_with_lambda_zero": 0.923771321773529
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.17728008329868317,
+          "agreement_with_lambda_zero": 0.73178631067276
+        }
+      ]
+    },
+    {
+      "lambda": 0.3,
+      "elapsed_ms": 33951.34014697396,
+      "physical_block_sparsity": 0.23856075604756674,
+      "skipped_physical_blocks": 3001789,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.6987041719257832,
+      "mean_recovery_accuracy": 0.5381279644794507,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.8027597096833315,
+          "agreement_with_lambda_zero": 0.9334415206080907
+        },
+        {
+          "mask_ratio": 0.5,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.658867009901648,
+          "agreement_with_lambda_zero": 0.8682266163414922
+        },
+        {
+          "mask_ratio": 0.9,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.15275717385337248,
+          "agreement_with_lambda_zero": 0.6354321016284258
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.7770897746086121,
+          "agreement_with_lambda_zero": 0.9411764144897461
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.6316553950309753,
+          "agreement_with_lambda_zero": 0.8606002330780029
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.135812446475029,
+          "agreement_with_lambda_zero": 0.6429533362388611
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8310579657554626,
+          "agreement_with_lambda_zero": 0.9249146580696106
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6870611906051636,
+          "agreement_with_lambda_zero": 0.8761283755302429
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.16972476243972778,
+          "agreement_with_lambda_zero": 0.6279007196426392
+        }
+      ]
+    },
+    {
+      "lambda": 1.0,
+      "elapsed_ms": 33871.758944005705,
+      "physical_block_sparsity": 0.5104311307271322,
+      "skipped_physical_blocks": 6422710,
+      "total_physical_blocks": 12582912,
+      "row_block_sparsity": 0.9091651681810617,
+      "mean_recovery_accuracy": 0.5178271045837569,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "masked_tokens": 1232,
+          "recovery_accuracy": 0.7946428536594689,
+          "agreement_with_lambda_zero": 0.8798701080989528
+        },
+        {
+          "mask_ratio": 0.5,
+          "masked_tokens": 4060,
+          "recovery_accuracy": 0.6339901432908814,
+          "agreement_with_lambda_zero": 0.7815270964148009
+        },
+        {
+          "mask_ratio": 0.9,
+          "masked_tokens": 7417,
+          "recovery_accuracy": 0.1248483168009206,
+          "agreement_with_lambda_zero": 0.4505864655825268
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 646,
+          "recovery_accuracy": 0.7585139274597168,
+          "agreement_with_lambda_zero": 0.8684210181236267
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 2066,
+          "recovery_accuracy": 0.608906090259552,
+          "agreement_with_lambda_zero": 0.7637947797775269
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3711,
+          "recovery_accuracy": 0.1193748265504837,
+          "agreement_with_lambda_zero": 0.5079492926597595
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.15,
+          "masked_tokens": 586,
+          "recovery_accuracy": 0.8344709873199463,
+          "agreement_with_lambda_zero": 0.8924914598464966
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.5,
+          "masked_tokens": 1994,
+          "recovery_accuracy": 0.6599799394607544,
+          "agreement_with_lambda_zero": 0.799899697303772
+        },
+        {
+          "context_index": 1,
+          "mask_ratio": 0.9,
+          "masked_tokens": 3706,
+          "recovery_accuracy": 0.1303291916847229,
+          "agreement_with_lambda_zero": 0.39314624667167664
+        }
+      ]
+    }
+  ]
+}
