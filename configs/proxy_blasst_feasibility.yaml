@@ -1,0 +1,42 @@
+schema_version: proxy-blasst-feasibility-v1
+model: GSAI-ML/LLaDA-8B-Instruct
+attention:
+  q_block_size: 128
+  kv_block_size: 64
+  traversal: reverse
+lambda_schedule:
+  high_noise: 0.04858582466840744
+  mid_noise: 0.4334796965122223
+  low_noise: 1.0
+trace:
+  num_contexts: 8
+  batch_size: 1
+  sample_fraction: 0.05
+  shard_records: 100000
+  device_buffer_tiles: 256
+  sampling_unit: spatial_tile_shared_across_steps_layers_heads
+  bitpack_masks: true
+  quantize_log_scores: null
+  mask_ratios: [0.9, 0.5, 0.15]
+calibration:
+  split_unit: sample_id
+  false_skip_budgets: [0.01, 0.001, 0.0001, 0.00001]
+  familywise_confidence: 0.99
+  minimum_predictions: 512
+  new_max_budget_scale: 0.1
+  transition_aware: true
+  sequence_length_transfer: disabled_by_default
+safety:
+  warmup_tiles: 2
+  anchor_local: true
+  anchor_diagonal: true
+  anchor_sink: true
+  periodic_refresh: 8
+evaluation:
+  source_modes: [oracle, realistic]
+  cascading_layer_counts: [1, 4, 8, 16, 32]
+smoke:
+  sequence_length: 48
+  q_block_size: 16
+  kv_block_size: 8
+  samples: 6

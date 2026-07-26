@@ -19,9 +19,30 @@ specific optimization in the BLASST CUDA kernel.
   calibration on fixed 4096-token diffusion inputs.
 - `scripts/llada_blasst_kernel_benchmark.py`: primary dense FlashAttention
   versus fused sparse-kernel evaluation.
+- `scripts/llada_pre_qk_kernel_benchmark.py`: dense versus sparse versus
+  conservative pre-QK evaluation, including a gate-disabled kernel ablation;
+  see [`docs/pre_qk_kernel.md`](docs/pre_qk_kernel.md).
+- `scripts/llada_blasst_vs_sparsed.py`: official `INV-WZQ/SparseD` artifact
+  reproduction versus fused BLASST under the paper's matched LLaDA-1.5
+  generation and long-context latency settings;
+  see [`docs/llada_blasst_vs_sparsed.md`](docs/llada_blasst_vs_sparsed.md).
 - `scripts/llada_blasst_benchmark.py`: unfused/reference-path benchmark.
 - `scripts/blasst_hopper_reproduce.py`: build and evaluation driver for the
   authors' pinned SM90 prefill and decode artifacts.
+- `tools/analyze_query_regrouping.py`: offline current/previous-step query-row
+  grouping simulator; the H100 go/no-go analysis is in
+  [`docs/query_regrouping.md`](docs/query_regrouping.md).
+- `tools/analyze_cross_tile_exception_packing.py`: Phase-A active-row packing,
+  V-reuse, extra-QK and metadata feasibility analysis; the semantics audit and
+  Hopper stop decision are in
+  [`docs/cross_tile_exception_packing.md`](docs/cross_tile_exception_packing.md).
+- `eval/eval_active_voter_llada.py`: opt-in `--blasst-row-masking` quality
+  evaluation for fully row-masked and output-only Active-Voter BLASST. The
+  diagnostic Triton path preserves the selected recurrence but intentionally
+  makes no packed-kernel speed claim.
+- `tools/analyze_active_voter_contributions.py`: removed attention-mass,
+  output-contribution, accumulation-bound, and training-free policy analysis;
+  see [`docs/active_voter_blasst.md`](docs/active_voter_blasst.md).
 
 ## LLaDA experimental setup
 
@@ -78,3 +99,41 @@ python scripts/blasst_hopper_reproduce.py
 Use `--phase decode` or `--phase prefill` to select a kernel family. See
 [`docs/blasst_kernel_reproduction.md`](docs/blasst_kernel_reproduction.md) for
 the pinned revisions, build patches, setup, and H100 results.
+
+## Pre-QK proxy feasibility framework
+
+The opt-in research framework under `tracing/`, `analysis/`, `proxy/`, and
+`eval/` tests whether physical tiles can be skipped before QK computation.
+It keeps the fused kernel and all default attention behavior unchanged. Run
+the dependency-free CPU smoke pipeline with:
+
+```bash
+bash scripts/run_proxy_smoke.sh
+```
+
+Collect sampled exact LLaDA traces on CUDA, then analyze/calibrate them with:
+
+```bash
+bash scripts/collect_proxy_traces.sh
+bash scripts/run_proxy_analysis.sh artifacts/proxy_traces
+bash scripts/run_proxy_score_eval.sh artifacts/proxy_calibration/policy_summary.json
+```
+
+The design, schema, counterfactual semantics, cost assumptions, and current
+go/no-go status are in [`docs/proxy_blasst_feasibility.md`](docs/proxy_blasst_feasibility.md).
+
+## Compare BLASST with official SparseD
+
+Clone the pinned third-party artifact, then run the paper's batch-1
+4k/8k/16k/32k/64k LLaDA-1.5 sweep:
+
+```bash
+git clone --depth 1 https://github.com/INV-WZQ/SparseD.git reference/SparseD
+conda run -n ljy_dlm python scripts/llada_blasst_vs_sparsed.py
+```
+
+Results are written incrementally to
+`outputs/llada_official_sparsed_vs_blasst.json`. The driver invokes the
+authors' SparseD model and generation code directly; see
+[`docs/llada_blasst_vs_sparsed.md`](docs/llada_blasst_vs_sparsed.md) for the
+exact settings, the shorter smoke command, and the 64k/1024-step command.
