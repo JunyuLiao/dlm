@@ -1,0 +1,42 @@
+{
+  "target": "sm90",
+  "note": "Static PTX counts prove specialized matrix instructions and branch structure, not runtime instruction retirement or latency.",
+  "variants": [
+    {
+      "skip_group_rows": 128,
+      "groups": 1,
+      "shared_bytes": 65540,
+      "wgmma_instructions_static": 24,
+      "mma_sync_instructions_static": 0,
+      "branch_instructions_static": 6,
+      "global_load_instructions_static": 258
+    },
+    {
+      "skip_group_rows": 64,
+      "groups": 2,
+      "shared_bytes": 49156,
+      "wgmma_instructions_static": 32,
+      "mma_sync_instructions_static": 0,
+      "branch_instructions_static": 10,
+      "global_load_instructions_static": 258
+    },
+    {
+      "skip_group_rows": 32,
+      "groups": 4,
+      "shared_bytes": 65540,
+      "wgmma_instructions_static": 24,
+      "mma_sync_instructions_static": 128,
+      "branch_instructions_static": 13,
+      "global_load_instructions_static": 258
+    },
+    {
+      "skip_group_rows": 16,
+      "groups": 8,
+      "shared_bytes": 65540,
+      "wgmma_instructions_static": 24,
+      "mma_sync_instructions_static": 128,
+      "branch_instructions_static": 17,
+      "global_load_instructions_static": 258
+    }
+  ]
+}

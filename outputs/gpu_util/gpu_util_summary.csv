@@ -1,0 +1,6 @@
+batch_size,block_size,target_prompt_tokens,prompt_tokens_mean,seq_len,forward_steps,forward_ms_mean,forward_ms_max,post_ms_mean,gpu_util_forward_mean,gpu_util_forward_max,sm_util_forward_mean,sm_util_forward_max,mem_util_forward_mean,mem_util_forward_max,gpu_util_post_mean,verdict
+1,32,300,300.0,300,6,20.118,20.612,1.575,3.7,9.0,3.7,9.0,1.1,4.0,2.2,underutilized
+2,32,300,300.0,300,6,24.108,24.170,0.775,65.0,72.0,65.0,72.0,31.0,35.0,0.0,moderately utilized
+4,32,300,300.0,300,20,45.993,49.573,0.861,86.6,99.0,86.6,99.0,44.9,52.0,0.0,well utilized
+8,32,300,300.0,300,20,89.963,98.786,1.296,91.4,99.0,91.4,99.0,52.3,58.0,98.0,well utilized
+16,32,300,300.0,300,20,178.245,185.041,2.704,94.1,100.0,94.1,100.0,53.6,59.0,100.0,well utilized

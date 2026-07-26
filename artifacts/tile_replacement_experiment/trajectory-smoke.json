@@ -1,0 +1,125 @@
+{
+  "schema": "blasst-tile-replacement-llada-v1",
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "device": "NVIDIA H100 80GB HBM3",
+  "torch": "2.5.1+cu124",
+  "mode": "trajectory",
+  "context_length": 256,
+  "generation_length": 128,
+  "steps": 2,
+  "policy_name": "all_rows__calibrated_maximum__proxy_mean_q_r8__all_candidates_0.03__newmax_none",
+  "policy": {
+    "k": 8,
+    "scope": "all_rows",
+    "mass_method": "calibrated_maximum",
+    "value_method": "proxy_mean_q",
+    "summary_slots": 8,
+    "policy": "all_candidates",
+    "qualification": 0.03,
+    "new_maximum_protection": "none",
+    "calibrated_maximum_bias": 0.9463811033763883,
+    "q_block_size": 128,
+    "kv_block_size": 64,
+    "protected_layers": []
+  },
+  "split": "test",
+  "context_indices": [
+    1
+  ],
+  "results": [
+    {
+      "context_index": 1,
+      "split": "test",
+      "metrics": {
+        "exact_final_sequence_agreement": false,
+        "differing_tokens": 4,
+        "first_divergent_step": 0,
+        "final_edit_distance": 4,
+        "minimum_hidden_cosine": 0.8630714416503906,
+        "mean_masked_top1_agreement": 0.96484375,
+        "mean_confidence_rank_correlation": 0.7560026049613953,
+        "mean_reveal_position_jaccard": 0.7777777910232544
+      },
+      "runtime_stats": {
+        "physical_tiles": 16384,
+        "baseline_kept_tiles": 16226,
+        "candidate_tiles": 515,
+        "replaced_tiles": 515,
+        "replaced_new_maximum_tiles": 287,
+        "calls": 128,
+        "by_layer": {
+          "0": 2,
+          "1": 10,
+          "2": 5,
+          "3": 11,
+          "4": 16,
+          "5": 7,
+          "6": 9,
+          "7": 0,
+          "8": 3,
+          "9": 8,
+          "10": 6,
+          "11": 12,
+          "12": 19,
+          "13": 16,
+          "14": 18,
+          "15": 16,
+          "16": 12,
+          "17": 8,
+          "18": 15,
+          "19": 14,
+          "20": 17,
+          "21": 7,
+          "22": 12,
+          "23": 18,
+          "24": 18,
+          "25": 28,
+          "26": 33,
+          "27": 35,
+          "28": 48,
+          "29": 42,
+          "30": 36,
+          "31": 14
+        },
+        "by_step": {
+          "0": 52,
+          "1": 463
+        },
+        "physical_replacement_fraction": 0.03143310546875,
+        "kept_replacement_fraction": 0.031739184025637864
+      },
+      "steps": [
+        {
+          "step": 0,
+          "remaining_mask_ratio": 1.0,
+          "masked_logits": {
+            "cosine": 0.9998534917831421,
+            "kl": 0.001986047253012657,
+            "top1_agreement": 0.9765625
+          },
+          "confidence_rank_correlation": 0.857884407043457,
+          "reveal_position_jaccard": 0.7777777910232544,
+          "exact_reveal_position_set": false,
+          "generated_state_agreement": 0.8671875,
+          "hidden_state_cosine": 0.9989198446273804
+        },
+        {
+          "step": 1,
+          "remaining_mask_ratio": 0.5,
+          "masked_logits": {
+            "cosine": 0.9581319093704224,
+            "kl": 0.3574797511100769,
+            "top1_agreement": 0.953125
+          },
+          "confidence_rank_correlation": 0.6541208028793335,
+          "reveal_position_jaccard": 0.7777777910232544,
+          "exact_reveal_position_set": false,
+          "generated_state_agreement": 0.96875,
+          "hidden_state_cosine": 0.8630714416503906
+        }
+      ],
+      "reference_text": " then run\n\n\n\n\n\n\n\nbashbashbashbashbash\nbash\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+      "candidate_text": " `SparseD`:\n\n\n\n\n\nbashbashbashbashbash\nbash\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+    }
+  ]
+}

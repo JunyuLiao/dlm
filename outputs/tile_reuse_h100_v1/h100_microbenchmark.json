@@ -1,0 +1,123 @@
+{
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "tiles": 256,
+  "geometry": {
+    "query_rows": 128,
+    "kv_rows": 64,
+    "head_dim": 128
+  },
+  "fresh_all_ms": 0.10135359764099121,
+  "cached_all_ms": 0.15506431579589844,
+  "cached_vs_fresh_speedup": 0.6536229636120581,
+  "caveat": "Framework-level batched diagnostic; it includes index selection and separate operator launches and is not a fused persistent attention kernel.",
+  "mixed": [
+    {
+      "reuse_ratio": 0.0,
+      "pattern": "contiguous",
+      "tiles": 256,
+      "dirty_tiles": 256,
+      "reused_tiles": 0,
+      "latency_ms": 0.1051308822631836,
+      "nanoseconds_per_tile": 410.6675088405609
+    },
+    {
+      "reuse_ratio": 0.0,
+      "pattern": "random",
+      "tiles": 256,
+      "dirty_tiles": 256,
+      "reused_tiles": 0,
+      "latency_ms": 0.11670975685119629,
+      "nanoseconds_per_tile": 455.8974876999855
+    },
+    {
+      "reuse_ratio": 0.25,
+      "pattern": "contiguous",
+      "tiles": 256,
+      "dirty_tiles": 192,
+      "reused_tiles": 64,
+      "latency_ms": 0.27557952880859377,
+      "nanoseconds_per_tile": 1076.4825344085693
+    },
+    {
+      "reuse_ratio": 0.25,
+      "pattern": "random",
+      "tiles": 256,
+      "dirty_tiles": 192,
+      "reused_tiles": 64,
+      "latency_ms": 0.27193727493286135,
+      "nanoseconds_per_tile": 1062.2549802064896
+    },
+    {
+      "reuse_ratio": 0.5,
+      "pattern": "contiguous",
+      "tiles": 256,
+      "dirty_tiles": 128,
+      "reused_tiles": 128,
+      "latency_ms": 0.2668057632446289,
+      "nanoseconds_per_tile": 1042.2100126743317
+    },
+    {
+      "reuse_ratio": 0.5,
+      "pattern": "random",
+      "tiles": 256,
+      "dirty_tiles": 128,
+      "reused_tiles": 128,
+      "latency_ms": 0.2820319938659668,
+      "nanoseconds_per_tile": 1101.6874760389328
+    },
+    {
+      "reuse_ratio": 0.75,
+      "pattern": "contiguous",
+      "tiles": 256,
+      "dirty_tiles": 64,
+      "reused_tiles": 192,
+      "latency_ms": 0.26885311126708983,
+      "nanoseconds_per_tile": 1050.2074658870697
+    },
+    {
+      "reuse_ratio": 0.75,
+      "pattern": "random",
+      "tiles": 256,
+      "dirty_tiles": 64,
+      "reused_tiles": 192,
+      "latency_ms": 0.26630144119262694,
+      "nanoseconds_per_tile": 1040.240004658699
+    },
+    {
+      "reuse_ratio": 0.9,
+      "pattern": "contiguous",
+      "tiles": 256,
+      "dirty_tiles": 26,
+      "reused_tiles": 230,
+      "latency_ms": 0.2702400016784668,
+      "nanoseconds_per_tile": 1055.625006556511
+    },
+    {
+      "reuse_ratio": 0.9,
+      "pattern": "random",
+      "tiles": 256,
+      "dirty_tiles": 26,
+      "reused_tiles": 230,
+      "latency_ms": 0.2695999908447266,
+      "nanoseconds_per_tile": 1053.1249642372131
+    },
+    {
+      "reuse_ratio": 1.0,
+      "pattern": "contiguous",
+      "tiles": 256,
+      "dirty_tiles": 0,
+      "reused_tiles": 256,
+      "latency_ms": 0.15532928466796875,
+      "nanoseconds_per_tile": 606.7550182342529
+    },
+    {
+      "reuse_ratio": 1.0,
+      "pattern": "random",
+      "tiles": 256,
+      "dirty_tiles": 0,
+      "reused_tiles": 256,
+      "latency_ms": 0.1559334373474121,
+      "nanoseconds_per_tile": 609.1149896383286
+    }
+  ]
+}

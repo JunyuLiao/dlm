@@ -1,0 +1,338 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "prompt": "Explain why physical attention tiles matter in GPU kernels.",
+  "seed": 20260902,
+  "steps": 16,
+  "generation_length": 128,
+  "policy": {
+    "family": "k_veto",
+    "k": 8,
+    "restriction": "any",
+    "new_max_protection": "critical"
+  },
+  "metrics": {
+    "candidate_token_agreement_vs_sparse": 0.875,
+    "candidate_token_agreement_vs_dense": 0.8671875,
+    "sparse_token_agreement_vs_dense": 0.921875,
+    "candidate_exact_generated_sequence_vs_sparse": false
+  },
+  "policy_stats": {
+    "total_tiles": 98304,
+    "baseline_skipped_tiles": 2606,
+    "additional_skipped_tiles": 7169,
+    "baseline_physical_sparsity": 0.026509602864583332,
+    "additional_physical_sparsity": 0.07292683919270833,
+    "new_physical_sparsity": 0.09943644205729166,
+    "downstream_work_reduction": 0.07491274634788606,
+    "additional_new_max_tiles": 4195,
+    "veto_histogram": {
+      "1": 1094,
+      "2": 856,
+      "3": 761,
+      "4": 788,
+      "5": 782,
+      "6": 781,
+      "7": 931,
+      "8": 1176
+    },
+    "additional_by_layer": {
+      "0": 113,
+      "1": 183,
+      "2": 83,
+      "3": 165,
+      "4": 141,
+      "5": 94,
+      "6": 152,
+      "7": 58,
+      "8": 168,
+      "9": 151,
+      "10": 130,
+      "11": 184,
+      "12": 224,
+      "13": 118,
+      "14": 163,
+      "15": 217,
+      "16": 230,
+      "17": 223,
+      "18": 279,
+      "19": 229,
+      "20": 277,
+      "21": 309,
+      "22": 269,
+      "23": 284,
+      "24": 287,
+      "25": 332,
+      "26": 329,
+      "27": 298,
+      "28": 340,
+      "29": 321,
+      "30": 329,
+      "31": 489
+    }
+  },
+  "dense_text": "\nPhysical attention tiles matter in GPU kernels because they determine the amount of the attention matrix that is be can...",
+  "sparse_text": "\nPhysical attention tiles matter in GPU kernels because they determine the performance of of the attention...",
+  "candidate_text": "\nPhysical attention tiles matter in GPU kernels because they are the smallest units of computation that can be executed on the GPU...",
+  "dense_steps": [
+    {
+      "step": 0,
+      "remaining_mask_ratio": 1.0,
+      "revealed": 8
+    },
+    {
+      "step": 1,
+      "remaining_mask_ratio": 0.9375,
+      "revealed": 8
+    },
+    {
+      "step": 2,
+      "remaining_mask_ratio": 0.875,
+      "revealed": 8
+    },
+    {
+      "step": 3,
+      "remaining_mask_ratio": 0.8125,
+      "revealed": 8
+    },
+    {
+      "step": 4,
+      "remaining_mask_ratio": 0.75,
+      "revealed": 8
+    },
+    {
+      "step": 5,
+      "remaining_mask_ratio": 0.6875,
+      "revealed": 8
+    },
+    {
+      "step": 6,
+      "remaining_mask_ratio": 0.625,
+      "revealed": 8
+    },
+    {
+      "step": 7,
+      "remaining_mask_ratio": 0.5625,
+      "revealed": 8
+    },
+    {
+      "step": 8,
+      "remaining_mask_ratio": 0.5,
+      "revealed": 8
+    },
+    {
+      "step": 9,
+      "remaining_mask_ratio": 0.4375,
+      "revealed": 8
+    },
+    {
+      "step": 10,
+      "remaining_mask_ratio": 0.375,
+      "revealed": 8
+    },
+    {
+      "step": 11,
+      "remaining_mask_ratio": 0.3125,
+      "revealed": 8
+    },
+    {
+      "step": 12,
+      "remaining_mask_ratio": 0.25,
+      "revealed": 8
+    },
+    {
+      "step": 13,
+      "remaining_mask_ratio": 0.1875,
+      "revealed": 8
+    },
+    {
+      "step": 14,
+      "remaining_mask_ratio": 0.125,
+      "revealed": 8
+    },
+    {
+      "step": 15,
+      "remaining_mask_ratio": 0.0625,
+      "revealed": 8
+    }
+  ],
+  "sparse_steps": [
+    {
+      "step": 0,
+      "remaining_mask_ratio": 1.0,
+      "revealed": 8
+    },
+    {
+      "step": 1,
+      "remaining_mask_ratio": 0.9375,
+      "revealed": 8
+    },
+    {
+      "step": 2,
+      "remaining_mask_ratio": 0.875,
+      "revealed": 8
+    },
+    {
+      "step": 3,
+      "remaining_mask_ratio": 0.8125,
+      "revealed": 8
+    },
+    {
+      "step": 4,
+      "remaining_mask_ratio": 0.75,
+      "revealed": 8
+    },
+    {
+      "step": 5,
+      "remaining_mask_ratio": 0.6875,
+      "revealed": 8
+    },
+    {
+      "step": 6,
+      "remaining_mask_ratio": 0.625,
+      "revealed": 8
+    },
+    {
+      "step": 7,
+      "remaining_mask_ratio": 0.5625,
+      "revealed": 8
+    },
+    {
+      "step": 8,
+      "remaining_mask_ratio": 0.5,
+      "revealed": 8
+    },
+    {
+      "step": 9,
+      "remaining_mask_ratio": 0.4375,
+      "revealed": 8
+    },
+    {
+      "step": 10,
+      "remaining_mask_ratio": 0.375,
+      "revealed": 8
+    },
+    {
+      "step": 11,
+      "remaining_mask_ratio": 0.3125,
+      "revealed": 8
+    },
+    {
+      "step": 12,
+      "remaining_mask_ratio": 0.25,
+      "revealed": 8
+    },
+    {
+      "step": 13,
+      "remaining_mask_ratio": 0.1875,
+      "revealed": 8
+    },
+    {
+      "step": 14,
+      "remaining_mask_ratio": 0.125,
+      "revealed": 8
+    },
+    {
+      "step": 15,
+      "remaining_mask_ratio": 0.0625,
+      "revealed": 8
+    }
+  ],
+  "candidate_steps": [
+    {
+      "step": 0,
+      "remaining_mask_ratio": 1.0,
+      "revealed": 8,
+      "additional_skipped_tiles": 143
+    },
+    {
+      "step": 1,
+      "remaining_mask_ratio": 0.9375,
+      "revealed": 8,
+      "additional_skipped_tiles": 593
+    },
+    {
+      "step": 2,
+      "remaining_mask_ratio": 0.875,
+      "revealed": 8,
+      "additional_skipped_tiles": 647
+    },
+    {
+      "step": 3,
+      "remaining_mask_ratio": 0.8125,
+      "revealed": 8,
+      "additional_skipped_tiles": 179
+    },
+    {
+      "step": 4,
+      "remaining_mask_ratio": 0.75,
+      "revealed": 8,
+      "additional_skipped_tiles": 188
+    },
+    {
+      "step": 5,
+      "remaining_mask_ratio": 0.6875,
+      "revealed": 8,
+      "additional_skipped_tiles": 558
+    },
+    {
+      "step": 6,
+      "remaining_mask_ratio": 0.625,
+      "revealed": 8,
+      "additional_skipped_tiles": 564
+    },
+    {
+      "step": 7,
+      "remaining_mask_ratio": 0.5625,
+      "revealed": 8,
+      "additional_skipped_tiles": 493
+    },
+    {
+      "step": 8,
+      "remaining_mask_ratio": 0.5,
+      "revealed": 8,
+      "additional_skipped_tiles": 497
+    },
+    {
+      "step": 9,
+      "remaining_mask_ratio": 0.4375,
+      "revealed": 8,
+      "additional_skipped_tiles": 463
+    },
+    {
+      "step": 10,
+      "remaining_mask_ratio": 0.375,
+      "revealed": 8,
+      "additional_skipped_tiles": 474
+    },
+    {
+      "step": 11,
+      "remaining_mask_ratio": 0.3125,
+      "revealed": 8,
+      "additional_skipped_tiles": 505
+    },
+    {
+      "step": 12,
+      "remaining_mask_ratio": 0.25,
+      "revealed": 8,
+      "additional_skipped_tiles": 599
+    },
+    {
+      "step": 13,
+      "remaining_mask_ratio": 0.1875,
+      "revealed": 8,
+      "additional_skipped_tiles": 412
+    },
+    {
+      "step": 14,
+      "remaining_mask_ratio": 0.125,
+      "revealed": 8,
+      "additional_skipped_tiles": 410
+    },
+    {
+      "step": 15,
+      "remaining_mask_ratio": 0.0625,
+      "revealed": 8,
+      "additional_skipped_tiles": 444
+    }
+  ]
+}

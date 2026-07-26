@@ -1,0 +1,465 @@
+{
+  "schema_version": "official-sparsed-vs-blasst-v2",
+  "status": "complete",
+  "artifact": {
+    "repository": "https://github.com/INV-WZQ/SparseD.git",
+    "revision": "52155b4aa78368695f96744cade06d2e0865d085",
+    "validated_revision": "52155b4aa78368695f96744cade06d2e0865d085",
+    "path": "/home/exouser/ljy/dlm/reference/SparseD"
+  },
+  "environment": {
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "torch": "2.12.0+cu130",
+    "python": "3.12.13 | packaged by Anaconda, Inc. | (main, Mar 19 2026, 20:20:58) [GCC 14.3.0]"
+  },
+  "paper_settings": {
+    "model": "GSAI-ML/LLaDA-1.5",
+    "batch_size": 1,
+    "prompt_names": [
+      "4k",
+      "8k",
+      "16k",
+      "32k",
+      "64k"
+    ],
+    "generated_tokens": 128,
+    "denoising_steps": 128,
+    "generation_block_length": 32,
+    "temperature": 0.0,
+    "remasking": "low_confidence",
+    "mask_id": 126336,
+    "sparsed_skip": 0.2,
+    "sparsed_select": 0.3,
+    "sparsed_block_size": 128,
+    "dense_backend": "PyTorch SDPA forced to FLASH_ATTENTION",
+    "vocabulary_projection": "generated 128-token suffix only",
+    "warmup_generations_per_method_and_shape": 1,
+    "timed_generations_per_method_and_shape": 1
+  },
+  "blasst_settings": {
+    "kernel": "fused bidirectional 128x64 BLASST",
+    "lambda_source": "LLaDA 4096-token calibrated noise schedule scaled by calibration_length/L",
+    "calibration_length": 4096,
+    "num_warps": 4,
+    "pipeline_stages": 2
+  },
+  "results": [
+    {
+      "prompt": "4k",
+      "prompt_tokens": 4204,
+      "total_sequence_length": 4332,
+      "expected_answer": "yes",
+      "dense": {
+        "timing": {
+          "median_ms": 23921.142578125,
+          "p95_ms": 23921.142578125,
+          "minimum_ms": 23921.142578125,
+          "maximum_ms": 23921.142578125,
+          "samples_ms": [
+            23921.142578125
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 15.557033061981201
+        },
+        "speedup_vs_dense": 1.0,
+        "accuracy": {
+          "decoded_text": "Yes, Scott Derrickson and Ed Wood were of the same nationality. Scott Derrickson is an American director, screenwriter, and producer, while Ed Wood was an American filmmaker, actor, writer, producer, and director. Both Derrickson and Wood are American citizens, as mentioned in their respective biographies. Derrickson was born on July 16, 1966, and lives in Los Angeles, California, while Wood was born on October 10, 1924, and passed away on December 10, 1978, further confirming their American nationality.",
+          "normalized_text": "yes scott derrickson and ed wood were of the same nationality scott derrickson is an american director screenwriter and producer while ed wood was an american filmmaker actor writer producer and director both derrickson and wood are american citizens as mentioned in their respective biographies derrickson was born on july 16 1966 and lives in los angeles california while wood was born on october 10 1924 and passed away on december 10 1978 further confirming their american nationality",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": true
+        }
+      },
+      "sparsed_official": {
+        "timing": {
+          "median_ms": 23535.798828125,
+          "p95_ms": 23535.798828125,
+          "minimum_ms": 23535.798828125,
+          "maximum_ms": 23535.798828125,
+          "samples_ms": [
+            23535.798828125
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 15.676122665405273
+        },
+        "speedup_vs_dense": 1.0163726650118847,
+        "accuracy": {
+          "decoded_text": "Yes, Scott Derrickson and Ed Wood were of the same nationality. Scott Derrickson is an American director, screenwriter, and producer, and Ed Wood was an American filmmaker, actor, writer, producer, and director.",
+          "normalized_text": "yes scott derrickson and ed wood were of the same nationality scott derrickson is an american director screenwriter and producer and ed wood was an american filmmaker actor writer producer and director",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": true,
+          "generated_token_agreement_vs_dense": 0.3671875,
+          "exact_generated_tokens_vs_dense": false
+        }
+      },
+      "blasst": {
+        "timing": {
+          "median_ms": 23424.587890625,
+          "p95_ms": 23424.587890625,
+          "minimum_ms": 23424.587890625,
+          "maximum_ms": 23424.587890625,
+          "samples_ms": [
+            23424.587890625
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 15.557061672210693
+        },
+        "speedup_vs_dense": 1.0211980116712631,
+        "speedup_vs_sparsed": 1.0047476155405282,
+        "length_scaled_lambda_schedule": {
+          "high_noise_lambda": 0.04593895148702606,
+          "mid_noise_lambda": 0.4098644591214364,
+          "low_noise_lambda": 0.9455216989843028,
+          "high_noise_boundary": 0.75,
+          "low_noise_boundary": 0.25
+        },
+        "accuracy": {
+          "decoded_text": "Yes, Scott Derrickson and Ed Wood were of the same nationality. Scott Derrickson is an American director, screenwriter, and producer, while Ed Wood was an American filmmaker, actor, writer, producer, and director.",
+          "normalized_text": "yes scott derrickson and ed wood were of the same nationality scott derrickson is an american director screenwriter and producer while ed wood was an american filmmaker actor writer producer and director",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": true,
+          "generated_token_agreement_vs_dense": 0.375,
+          "exact_generated_tokens_vs_dense": false
+        },
+        "stats": null
+      }
+    },
+    {
+      "prompt": "8k",
+      "prompt_tokens": 7749,
+      "total_sequence_length": 7877,
+      "expected_answer": "yes",
+      "dense": {
+        "timing": {
+          "median_ms": 48923.23828125,
+          "p95_ms": 48923.23828125,
+          "minimum_ms": 48923.23828125,
+          "maximum_ms": 48923.23828125,
+          "samples_ms": [
+            48923.23828125
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 15.994526863098145
+        },
+        "speedup_vs_dense": 1.0,
+        "accuracy": {
+          "decoded_text": "No, Scott Derrickson and Ed Wood were not of the same nationality. Scott Derrickson is an American director, screenwriter, and producer, while Ed Wood was an American filmmaker, actor, writer, and producer. Scott Derrickson is known for directing horror films such as \"Sinister\", \"The Exorcism of Emily Rose\", and \"Deliver Us From Evil\", as well as the 2016 Marvel Cinematic Universe installment, \"Doctor Strange.\" Ed Wood is known for films such as \"Plan 9 from Outer Space\", \"Glen or Glenda\", and \"Jail Bait.\"",
+          "normalized_text": "no scott derrickson and ed wood were not of the same nationality scott derrickson is an american director screenwriter and producer while ed wood was an american filmmaker actor writer and producer scott derrickson is known for directing horror films such as sinister the exorcism of emily rose and deliver us from evil as well as the 2016 marvel cinematic universe installment doctor strange ed wood is known for films such as plan 9 from outer space glen or glenda and jail bait",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false
+        }
+      },
+      "sparsed_official": {
+        "timing": {
+          "median_ms": 44501.55859375,
+          "p95_ms": 44501.55859375,
+          "minimum_ms": 44501.55859375,
+          "maximum_ms": 44501.55859375,
+          "samples_ms": [
+            44501.55859375
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 16.24013090133667
+        },
+        "speedup_vs_dense": 1.0993601084372133,
+        "accuracy": {
+          "decoded_text": "No, Scott Derrickson and Ed Wood were not of the same nationality. Scott Derrickson is an American director, screenwriter, and producer, while Ed Wood was an American filmmaker, actor, writer, and producer. Scott Derrickson is known for directing horror films such as \"Sinister,\" \"The Exorcism of Emily Rose,\" and \"Deliver Us From Evil,\" as well as the 2016 Marvel Cinematic Universe installment, \"Doctor Strange.\" Ed Wood is known for films such as \"Plan 9 from Outer Space,\" \"Glen or Glenda,\" and \"Jail Bait.\"",
+          "normalized_text": "no scott derrickson and ed wood were not of the same nationality scott derrickson is an american director screenwriter and producer while ed wood was an american filmmaker actor writer and producer scott derrickson is known for directing horror films such as sinister the exorcism of emily rose and deliver us from evil as well as the 2016 marvel cinematic universe installment doctor strange ed wood is known for films such as plan 9 from outer space glen or glenda and jail bait",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false,
+          "generated_token_agreement_vs_dense": 0.9609375,
+          "exact_generated_tokens_vs_dense": false
+        }
+      },
+      "blasst": {
+        "timing": {
+          "median_ms": 46238.99609375,
+          "p95_ms": 46238.99609375,
+          "minimum_ms": 46238.99609375,
+          "maximum_ms": 46238.99609375,
+          "samples_ms": [
+            46238.99609375
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 15.994694709777832
+        },
+        "speedup_vs_dense": 1.0580514806605592,
+        "speedup_vs_sparsed": 0.9624248438163032,
+        "length_scaled_lambda_schedule": {
+          "high_noise_lambda": 0.025264382105090376,
+          "mid_noise_lambda": 0.22540724094376827,
+          "low_noise_lambda": 0.5199949219245906,
+          "high_noise_boundary": 0.75,
+          "low_noise_boundary": 0.25
+        },
+        "accuracy": {
+          "decoded_text": "No, Scott Derrickson and Ed Wood were not of the same nationality. Scott Derrickson is an American director, screenwriter, and producer, while Ed Wood was an American filmmaker, actor, writer, and producer. Ed Wood was born in Baltimore, Maryland, and is known for his iconic films, such as \"Plan 9 from Outer Space\" and \"Jail Bait.\" Scott Derrickson, on the other hand, was born in Los Angeles, California, and is known for directing horror films like \"Sinister,\" \"The Exorcism of Emily Rose,\" and \"Deliver Us from Evil.\"",
+          "normalized_text": "no scott derrickson and ed wood were not of the same nationality scott derrickson is an american director screenwriter and producer while ed wood was an american filmmaker actor writer and producer ed wood was born in baltimore maryland and is known for his iconic films such as plan 9 from outer space and jail bait scott derrickson on the other hand was born in los angeles california and is known for directing horror films like sinister the exorcism of emily rose and deliver us from evil",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false,
+          "generated_token_agreement_vs_dense": 0.421875,
+          "exact_generated_tokens_vs_dense": false
+        },
+        "stats": null
+      }
+    },
+    {
+      "prompt": "16k",
+      "prompt_tokens": 16469,
+      "total_sequence_length": 16597,
+      "expected_answer": "yes",
+      "dense": {
+        "timing": {
+          "median_ms": 139118.09375,
+          "p95_ms": 139118.09375,
+          "minimum_ms": 139118.09375,
+          "maximum_ms": 139118.09375,
+          "samples_ms": [
+            139118.09375
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 17.066522121429443
+        },
+        "speedup_vs_dense": 1.0,
+        "accuracy": {
+          "decoded_text": "No, Scott Derrickson and Ed Wood were not of the same nationality. Scott Derrickson was an American filmmaker, while Ed Wood was an American filmmaker, actor, writer, producer, and director. Derrickson was born in Chicago, Illinois, USA, while Wood was born in Chicago, Illinois, USA. Derrickson was a film director, writer, and producer, while Wood was a filmmaker, actor, writer, producer, and director. Derrickson was a member of the American film industry, while Wood was a member of the American film industry. Therefore, they were not of the same nationality.",
+          "normalized_text": "no scott derrickson and ed wood were not of the same nationality scott derrickson was an american filmmaker while ed wood was an american filmmaker actor writer producer and director derrickson was born in chicago illinois usa while wood was born in chicago illinois usa derrickson was a film director writer and producer while wood was a filmmaker actor writer producer and director derrickson was a member of the american film industry while wood was a member of the american film industry therefore they were not of the same nationality",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false
+        }
+      },
+      "sparsed_official": {
+        "timing": {
+          "median_ms": 116955.9296875,
+          "p95_ms": 116955.9296875,
+          "minimum_ms": 116955.9296875,
+          "maximum_ms": 116955.9296875,
+          "samples_ms": [
+            116955.9296875
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 17.73133945465088
+        },
+        "speedup_vs_dense": 1.1894915813308151,
+        "accuracy": {
+          "decoded_text": "No, Scott Derrickson and Ed Wood were not of the same nationality. Scott Derrickson was an American filmmaker, while Ed Wood was an American filmmaker, actor, writer, producer, and director. Derrickson is known for his work on the \"John Wick\" series, while Wood is known for his work on films like \"The Evil Dead\" and \"The Exorcist.\" Derrickson was born in Hollywood, California, while Wood was born in New York City, New York. Derrickson died in 2015, while Wood passed away much earlier in 1978.",
+          "normalized_text": "no scott derrickson and ed wood were not of the same nationality scott derrickson was an american filmmaker while ed wood was an american filmmaker actor writer producer and director derrickson is known for his work on the john wick series while wood is known for his work on films like the evil dead and the exorcist derrickson was born in hollywood california while wood was born in new york city new york derrickson died in 2015 while wood passed away much earlier in 1978",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false,
+          "generated_token_agreement_vs_dense": 0.390625,
+          "exact_generated_tokens_vs_dense": false
+        }
+      },
+      "blasst": {
+        "timing": {
+          "median_ms": 123707.2734375,
+          "p95_ms": 123707.2734375,
+          "minimum_ms": 123707.2734375,
+          "maximum_ms": 123707.2734375,
+          "samples_ms": [
+            123707.2734375
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 17.06675434112549
+        },
+        "speedup_vs_dense": 1.1245748926823282,
+        "speedup_vs_sparsed": 0.9454248439691709,
+        "length_scaled_lambda_schedule": {
+          "high_noise_lambda": 0.011990572865083864,
+          "mid_noise_lambda": 0.10697914303272052,
+          "low_noise_lambda": 0.24679158884135688,
+          "high_noise_boundary": 0.75,
+          "low_noise_boundary": 0.25
+        },
+        "accuracy": {
+          "decoded_text": "No, Scott Derrickson and Ed Wood were not of the same nationality. Scott Derrickson was an American filmmaker, actor, writer, and producer, while Ed Wood was an American filmmaker, actor, writer, producer, and director. They were both American, but Derrickson was born in Chicago, Illinois, and Wood was born in Chicago, Illinois. Derrickson was a member of the American rock band The Vogues, and Wood was a member of the American rock band The Velvet Underground. Therefore, while they were both American and born in the same city, they were not of the same nationality.",
+          "normalized_text": "no scott derrickson and ed wood were not of the same nationality scott derrickson was an american filmmaker actor writer and producer while ed wood was an american filmmaker actor writer producer and director they were both american but derrickson was born in chicago illinois and wood was born in chicago illinois derrickson was a member of the american rock band the vogues and wood was a member of the american rock band the velvet underground therefore while they were both american and born in the same city they were not of the same nationality",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false,
+          "generated_token_agreement_vs_dense": 0.3125,
+          "exact_generated_tokens_vs_dense": false
+        },
+        "stats": null
+      }
+    },
+    {
+      "prompt": "32k",
+      "prompt_tokens": 33951,
+      "total_sequence_length": 34079,
+      "expected_answer": "yes",
+      "dense": {
+        "timing": {
+          "median_ms": 421329.8125,
+          "p95_ms": 421329.8125,
+          "minimum_ms": 421329.8125,
+          "maximum_ms": 421329.8125,
+          "samples_ms": [
+            421329.8125
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 19.21548843383789
+        },
+        "speedup_vs_dense": 1.0,
+        "accuracy": {
+          "decoded_text": "The Wood, Wood, Wood, Wood, Wood, Wood, Derricks, Wood, Wood, Wood, Wood, Wood Wood, Derricks, and Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood",
+          "normalized_text": "the wood wood wood wood wood wood derricks wood wood wood wood wood wood derricks and wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false
+        }
+      },
+      "sparsed_official": {
+        "timing": {
+          "median_ms": 315763.4375,
+          "p95_ms": 315763.4375,
+          "minimum_ms": 315763.4375,
+          "maximum_ms": 315763.4375,
+          "samples_ms": [
+            315763.4375
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 21.194326400756836
+        },
+        "speedup_vs_dense": 1.334321084910282,
+        "accuracy": {
+          "decoded_text": "The Wood, Wood, Wood, Wood, Wood, Wood, Derricks, Wood, Wood, Wood, Wood, Wood Wood, Wood Wood, and Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood",
+          "normalized_text": "the wood wood wood wood wood wood derricks wood wood wood wood wood wood wood wood and wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false,
+          "generated_token_agreement_vs_dense": 0.984375,
+          "exact_generated_tokens_vs_dense": false
+        }
+      },
+      "blasst": {
+        "timing": {
+          "median_ms": 361800.28125,
+          "p95_ms": 361800.28125,
+          "minimum_ms": 361800.28125,
+          "maximum_ms": 361800.28125,
+          "samples_ms": [
+            361800.28125
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 19.21584987640381
+        },
+        "speedup_vs_dense": 1.1645369955057214,
+        "speedup_vs_sparsed": 0.8727561968969586,
+        "length_scaled_lambda_schedule": {
+          "high_noise_lambda": 0.0058395944083393546,
+          "mid_noise_lambda": 0.05210049698976092,
+          "low_noise_lambda": 0.1201913201678453,
+          "high_noise_boundary": 0.75,
+          "low_noise_boundary": 0.25
+        },
+        "accuracy": {
+          "decoded_text": "The Wood, Wood, Wood, Wood, Wood, Wood, Derricks, Wood, Wood, Wood, Wood, Wood Wood, Derricks, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood, Wood,",
+          "normalized_text": "the wood wood wood wood wood wood derricks wood wood wood wood wood wood derricks wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false,
+          "generated_token_agreement_vs_dense": 0.234375,
+          "exact_generated_tokens_vs_dense": false
+        },
+        "stats": null
+      }
+    },
+    {
+      "prompt": "64k",
+      "prompt_tokens": 70264,
+      "total_sequence_length": 70392,
+      "expected_answer": "yes",
+      "dense": {
+        "timing": {
+          "median_ms": 1415291.375,
+          "p95_ms": 1415291.375,
+          "minimum_ms": 1415291.375,
+          "maximum_ms": 1415291.375,
+          "samples_ms": [
+            1415291.375
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 23.68486738204956
+        },
+        "speedup_vs_dense": 1.0,
+        "accuracy": {
+          "decoded_text": " the\" Wood\" was.\n\"\"\n\" Wood\" was the Wood\"\n\"\n\" was\n\" was\" Wood\" was\" is the\" Wood\"\" Wood\" Wood\" Wood\" Wood\"\" Wood\"\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\"\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\"\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\" Wood\"",
+          "normalized_text": "the wood was wood was the wood was was wood was is the wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false
+        }
+      },
+      "sparsed_official": {
+        "timing": {
+          "median_ms": 972491.5,
+          "p95_ms": 972491.5,
+          "minimum_ms": 972491.5,
+          "maximum_ms": 972491.5,
+          "samples_ms": [
+            972491.5
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 30.364600658416748
+        },
+        "speedup_vs_dense": 1.4553251879322338,
+        "accuracy": {
+          "decoded_text": " the\"\n\" Wood.\n\"\"\n\"\n\" was the\n\"\n\"\n\" was\n\" was\"\n\" was\" is the\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\"\n\"\n\"\n\"\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\n\"\"\n\"\"\n\"\"\n\"\"\n\"",
+          "normalized_text": "the wood was the was was was is the",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false,
+          "generated_token_agreement_vs_dense": 0.3984375,
+          "exact_generated_tokens_vs_dense": false
+        }
+      },
+      "blasst": {
+        "timing": {
+          "median_ms": 1154406.75,
+          "p95_ms": 1154406.75,
+          "minimum_ms": 1154406.75,
+          "maximum_ms": 1154406.75,
+          "samples_ms": [
+            1154406.75
+          ],
+          "deterministic_across_repeats": true,
+          "peak_allocated_gib": 23.68551206588745
+        },
+        "speedup_vs_dense": 1.2259902109893241,
+        "speedup_vs_sparsed": 0.8424166785234061,
+        "length_scaled_lambda_schedule": {
+          "high_noise_lambda": 0.002827132882171225,
+          "mid_noise_lambda": 0.02522350319516511,
+          "low_noise_lambda": 0.0581884305034663,
+          "high_noise_boundary": 0.75,
+          "low_noise_boundary": 0.25
+        },
+        "accuracy": {
+          "decoded_text": " the\" the Wood\".\n\"\"\n\" Wood\" was the Wood\"\n\" Wood\" was\n\"\n\" Wood\"\n\" Wood\"\n\" Wood\"\n\"\n\" Wood\"\n\" Wood\"\n\" Wood\"\n\" Wood\"\n\" Wood\"\"\n\"\n\" and Wood\" Wood\"\n\" Wood\"\n\" Wood\"\n\" Wood\" Wood\" Wood\"\n\" Wood\"\n\" Wood\" Wood\" Wood\"\n\" Wood\"\n\" Wood\"\n\" Wood\"\n\" Wood\"\n\" Wood\"\n\" Wood\"\n\" Wood\" Wood\"\n\"",
+          "normalized_text": "the the wood wood was the wood wood was wood wood wood wood wood wood wood wood and wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood wood",
+          "expected_answer": "yes",
+          "exact_expected_answer": false,
+          "expected_answer_prefix": false,
+          "generated_token_agreement_vs_dense": 0.5,
+          "exact_generated_tokens_vs_dense": false
+        },
+        "stats": null
+      }
+    }
+  ],
+  "summary": {
+    "prompt_count": 5,
+    "dense_expected_answer_accuracy": 0.2,
+    "sparsed_expected_answer_accuracy": 0.2,
+    "blasst_expected_answer_accuracy": 0.2,
+    "note": "Accuracy here scores the official example prompts only. Reproducing paper Table 1 requires the authors' external MMLU/GSM8K/HumanEval/RULER evaluation harness."
+  }
+}

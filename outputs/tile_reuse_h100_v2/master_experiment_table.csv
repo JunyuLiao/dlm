@@ -1,0 +1,11 @@
+policy,granularity,heldout_reuse_fraction,heldout_precision,heldout_unsafe_wilson95_upper,oracle_safe_recall,cache_size_batch1_gib,measured_speedup,verdict
+oracle at 1% error,128Qx64KV,0.402840,1.000000,0.000000,1.000000,65.0,,upper bound only
+Q drift only,128Qx64KV,0.010840,0.994369,0.009270,0.026757,65.0,,no-go: negligible coverage
+KV drift only,128Qx64KV,0.010380,0.998040,0.004580,0.025717,65.0,,no-go: negligible coverage
+joint Q+K drift,128Qx64KV,0.018831,0.996759,0.005341,0.046595,65.0,,no-go: negligible coverage
+joint Q+K+V drift,128Qx64KV,0.022245,0.997439,0.004294,0.055080,65.0,,no-go: negligible coverage
+stable query x stable KV,128Qx64KV,0.035103,0.974267,0.029291,0.084897,65.0,,no-go: safety failure
+fixed external outside local-4,128Qx64KV,0.859375,0.393390,0.608691,0.839215,65.0,,no-go: safety failure
+full query output oracle,128Q,0.000260,1.000000,0.000000,1.000000,1.0,,no-go: no temporal stability
+causal prior-mass x QKV drift (held-out),128Qx64KV,0.141020,0.992181,0.008803,0.347326,65.0,0.6629,no-go: cached load slower
+causal prior-mass x QKV drift (final),128Qx64KV,0.135742,0.985042,0.016318,0.325847,65.0,0.6629,no-go: safety and latency failure

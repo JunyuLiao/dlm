@@ -1,0 +1,375 @@
+{
+  "schema_version": "llada-blasst-vs-sparsed-v1",
+  "experiment": {
+    "model": "GSAI-ML/LLaDA-8B-Instruct",
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "dtype": "bfloat16",
+    "context_length": 4096,
+    "batch": 3,
+    "num_contexts": 1,
+    "transitions": [
+      {
+        "source": 0.5,
+        "target": 0.15
+      },
+      {
+        "source": 0.9,
+        "target": 0.5
+      },
+      {
+        "source": 1.0,
+        "target": 0.9
+      }
+    ],
+    "timing_scope": "one steady-state target denoising forward",
+    "warmup_forwards": 5,
+    "timed_forwards": 30,
+    "seed": 20260716
+  },
+  "shared_hyperparameters": {
+    "q_block_size": 128,
+    "kv_block_size": 64,
+    "num_warps": 4,
+    "pipeline_stages": 2,
+    "lambda_schedule": {
+      "high_noise_lambda": 0.04858582466840744,
+      "mid_noise_lambda": 0.4334796965122223,
+      "low_noise_lambda": 1.0,
+      "high_noise_boundary": 0.75,
+      "low_noise_boundary": 0.25
+    },
+    "per_sequence_blasst_lambdas": [
+      1.0,
+      0.4334796965122223,
+      0.04858582466840744
+    ]
+  },
+  "sparsed_style_reuse": {
+    "implementation": "conservative previous-step pre-QK tile-score reuse",
+    "threshold_provenance": "safe_disabled_no_certified_threshold_for_budget",
+    "active_certified_thresholds": 0,
+    "reuse_gate_configured": false,
+    "pre_qk_skips_observed": false,
+    "false_skip_budget": 0.001,
+    "safety": {
+      "warmup_tiles": 2,
+      "periodic_refresh": 8,
+      "anchor_local": true,
+      "anchor_sink": true,
+      "local_radius": 1,
+      "non_cascading_unknown_sentinel": "+inf"
+    }
+  },
+  "methods": {
+    "dense_flashattention": {
+      "timing": {
+        "median_ms": 496.5992736816406,
+        "p95_ms": 519.0330810546875,
+        "minimum_ms": 471.7220153808594,
+        "maximum_ms": 519.6790771484375,
+        "samples_ms": [
+          472.1456604003906,
+          480.8673400878906,
+          471.7220153808594,
+          484.1770935058594,
+          477.57318115234375,
+          484.2579650878906,
+          477.30096435546875,
+          482.6076354980469,
+          482.1219482421875,
+          481.4430847167969,
+          498.1083068847656,
+          500.13623046875,
+          496.2043151855469,
+          492.3708801269531,
+          493.4808654785156,
+          497.8377380371094,
+          489.93414306640625,
+          496.9942321777344,
+          497.0118408203125,
+          495.3852844238281,
+          519.6790771484375,
+          519.0330810546875,
+          514.1390380859375,
+          509.7888488769531,
+          508.7917785644531,
+          506.3370056152344,
+          502.3328857421875,
+          501.0717468261719,
+          503.55560302734375,
+          512.645263671875
+        ]
+      },
+      "speedup_vs_dense": 1.0,
+      "accuracy": {
+        "aggregate": {
+          "masked_tokens": 6348,
+          "masked_token_recovery_accuracy": 0.4012287334593573,
+          "masked_top1_agreement_vs_dense": 1.0
+        },
+        "by_transition": [
+          {
+            "transition": "0.5->0.15",
+            "masked_tokens": 614,
+            "masked_token_recovery_accuracy": 0.8420195439739414,
+            "masked_top1_agreement_vs_dense": 1.0
+          },
+          {
+            "transition": "0.9->0.5",
+            "masked_tokens": 2048,
+            "masked_token_recovery_accuracy": 0.69287109375,
+            "masked_top1_agreement_vs_dense": 1.0
+          },
+          {
+            "transition": "1->0.9",
+            "masked_tokens": 3686,
+            "masked_token_recovery_accuracy": 0.16576234400434076,
+            "masked_top1_agreement_vs_dense": 1.0
+          }
+        ]
+      }
+    },
+    "blasst_dynamic": {
+      "timing": {
+        "median_ms": 494.01792907714844,
+        "p95_ms": 504.5120849609375,
+        "minimum_ms": 461.20904541015625,
+        "maximum_ms": 504.90618896484375,
+        "samples_ms": [
+          461.20904541015625,
+          481.6974182128906,
+          482.0903625488281,
+          486.4533996582031,
+          481.6253662109375,
+          499.8547668457031,
+          499.83282470703125,
+          498.1418151855469,
+          494.57391357421875,
+          493.4619445800781,
+          487.27587890625,
+          485.9643249511719,
+          485.3097229003906,
+          490.76171875,
+          504.90618896484375,
+          502.6488342285156,
+          500.634521484375,
+          498.49383544921875,
+          498.5887756347656,
+          496.40838623046875,
+          497.4018249511719,
+          495.8550720214844,
+          491.165283203125,
+          490.8773498535156,
+          487.73626708984375,
+          486.85992431640625,
+          485.9847106933594,
+          502.2115478515625,
+          504.5120849609375,
+          501.96722412109375
+        ]
+      },
+      "speedup_vs_dense": 1.0052252042943346,
+      "accuracy": {
+        "aggregate": {
+          "masked_tokens": 6348,
+          "masked_token_recovery_accuracy": 0.4017013232514178,
+          "masked_top1_agreement_vs_dense": 0.9607750472589792
+        },
+        "by_transition": [
+          {
+            "transition": "0.5->0.15",
+            "masked_tokens": 614,
+            "masked_token_recovery_accuracy": 0.8452768729641694,
+            "masked_top1_agreement_vs_dense": 0.9739413680781759
+          },
+          {
+            "transition": "0.9->0.5",
+            "masked_tokens": 2048,
+            "masked_token_recovery_accuracy": 0.69384765625,
+            "masked_top1_agreement_vs_dense": 0.95703125
+          },
+          {
+            "transition": "1->0.9",
+            "masked_tokens": 3686,
+            "masked_token_recovery_accuracy": 0.16549104720564298,
+            "masked_top1_agreement_vs_dense": 0.9606619641888225
+          }
+        ]
+      },
+      "accuracy_delta_vs_dense": 0.000472589792060496,
+      "stats": {
+        "skipped_tiles_after_or_before_qk": 1779012,
+        "total_tiles": 6291456,
+        "downstream_tile_skip_rate": 0.28276634216308594,
+        "pre_qk_skipped_tiles": 0,
+        "proxy_metadata_tiles": 0,
+        "qk_avoidance_rate": 0.0,
+        "skipped_bmm2_groups": 1779012,
+        "bmm2_flop_skip_rate": 0.28276634216308594,
+        "skipped_v_loads": 0,
+        "v_load_skip_rate": 0.0
+      }
+    },
+    "sparsed_style_reuse": {
+      "timing": {
+        "median_ms": 518.1854553222656,
+        "p95_ms": 532.3026733398438,
+        "minimum_ms": 490.8252258300781,
+        "maximum_ms": 540.1574096679688,
+        "samples_ms": [
+          516.8320922851562,
+          502.1639099121094,
+          529.0264892578125,
+          511.83880615234375,
+          527.73486328125,
+          532.3026733398438,
+          531.6918334960938,
+          523.0048828125,
+          519.9017944335938,
+          518.9459228515625,
+          514.9359130859375,
+          512.2293701171875,
+          513.5829467773438,
+          511.0735778808594,
+          494.3924560546875,
+          517.655517578125,
+          529.0795288085938,
+          522.372802734375,
+          506.445068359375,
+          514.1934814453125,
+          510.8663024902344,
+          518.8448486328125,
+          540.1574096679688,
+          490.8252258300781,
+          504.2371520996094,
+          520.045166015625,
+          518.7153930664062,
+          524.0759887695312,
+          523.3775024414062,
+          516.136962890625
+        ]
+      },
+      "speedup_vs_dense": 0.95834274887704,
+      "speedup_vs_blasst": 0.953361241623258,
+      "speedup_vs_same_kernel_gate_disabled": 1.0065659393420492,
+      "accuracy": {
+        "aggregate": {
+          "masked_tokens": 6348,
+          "masked_token_recovery_accuracy": 0.4017013232514178,
+          "masked_top1_agreement_vs_dense": 0.9607750472589792
+        },
+        "by_transition": [
+          {
+            "transition": "0.5->0.15",
+            "masked_tokens": 614,
+            "masked_token_recovery_accuracy": 0.8452768729641694,
+            "masked_top1_agreement_vs_dense": 0.9739413680781759
+          },
+          {
+            "transition": "0.9->0.5",
+            "masked_tokens": 2048,
+            "masked_token_recovery_accuracy": 0.69384765625,
+            "masked_top1_agreement_vs_dense": 0.95703125
+          },
+          {
+            "transition": "1->0.9",
+            "masked_tokens": 3686,
+            "masked_token_recovery_accuracy": 0.16549104720564298,
+            "masked_top1_agreement_vs_dense": 0.9606619641888225
+          }
+        ]
+      },
+      "accuracy_delta_vs_dense": 0.000472589792060496,
+      "stats": {
+        "skipped_tiles_after_or_before_qk": 1779012,
+        "total_tiles": 6291456,
+        "downstream_tile_skip_rate": 0.28276634216308594,
+        "pre_qk_skipped_tiles": 0,
+        "proxy_metadata_tiles": 6291456,
+        "qk_avoidance_rate": 0.0,
+        "skipped_bmm2_groups": 1779012,
+        "bmm2_flop_skip_rate": 0.28276634216308594,
+        "skipped_v_loads": 1779012,
+        "v_load_skip_rate": 0.28276634216308594
+      }
+    }
+  },
+  "controls": {
+    "reuse_kernel_gate_disabled": {
+      "timing": {
+        "median_ms": 521.5878295898438,
+        "p95_ms": 533.5203247070312,
+        "minimum_ms": 503.37579345703125,
+        "maximum_ms": 537.802490234375,
+        "samples_ms": [
+          519.7376708984375,
+          517.2542114257812,
+          515.629638671875,
+          518.8304443359375,
+          526.6912231445312,
+          525.1351318359375,
+          507.61419677734375,
+          517.4530029296875,
+          522.41357421875,
+          519.3438110351562,
+          518.2288818359375,
+          525.196533203125,
+          533.5203247070312,
+          529.8775024414062,
+          526.4129028320312,
+          503.37579345703125,
+          523.276123046875,
+          526.4015502929688,
+          523.1642456054688,
+          523.1533813476562,
+          520.7620849609375,
+          520.523681640625,
+          519.8341064453125,
+          537.802490234375,
+          533.4471435546875,
+          530.37841796875,
+          523.8516235351562,
+          520.5753784179688,
+          515.1683959960938,
+          516.33935546875
+        ]
+      },
+      "speedup_vs_dense": 0.952091374662915,
+      "speedup_vs_blasst": 0.9471423623239538,
+      "accuracy": {
+        "aggregate": {
+          "masked_tokens": 6348,
+          "masked_token_recovery_accuracy": 0.4017013232514178,
+          "masked_top1_agreement_vs_dense": 0.9607750472589792
+        },
+        "by_transition": [
+          {
+            "transition": "0.5->0.15",
+            "masked_tokens": 614,
+            "masked_token_recovery_accuracy": 0.8452768729641694,
+            "masked_top1_agreement_vs_dense": 0.9739413680781759
+          },
+          {
+            "transition": "0.9->0.5",
+            "masked_tokens": 2048,
+            "masked_token_recovery_accuracy": 0.69384765625,
+            "masked_top1_agreement_vs_dense": 0.95703125
+          },
+          {
+            "transition": "1->0.9",
+            "masked_tokens": 3686,
+            "masked_token_recovery_accuracy": 0.16549104720564298,
+            "masked_top1_agreement_vs_dense": 0.9606619641888225
+          }
+        ]
+      }
+    }
+  },
+  "interpretation": {
+    "primary_speed_metric": "median target-forward latency speedup versus dense FlashAttention",
+    "primary_accuracy_metric": "masked-token recovery accuracy",
+    "fidelity_metric": "masked-token top-1 agreement versus dense FlashAttention",
+    "valid_reuse_comparison": false,
+    "warning": "No certified previous-step threshold is active; the SparseD-style row is a safe gate-disabled-equivalent control, not evidence of reuse acceleration."
+  }
+}

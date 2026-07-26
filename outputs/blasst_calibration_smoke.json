@@ -1,0 +1,328 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "context_length": 128,
+  "mask_ratios": [
+    0.15,
+    0.5,
+    0.9
+  ],
+  "num_contexts": 1,
+  "q_block_size": 128,
+  "kv_block_size": 64,
+  "kv_traversal": "reverse (matching FlashAttention 2.8)",
+  "calibration_score": "R_j = max_i exp(local_max_ij - running_max_i)",
+  "calibration_bucket": "remaining mask ratio",
+  "target_physical_sparsities": [
+    0.1,
+    0.2,
+    0.3
+  ],
+  "primary_accuracy_metric": "top-1 agreement with lambda=0 on masked positions",
+  "selection_rule": "largest quantile-derived lambda per denoising bucket with relative disagreement <= 0.05",
+  "selected_lambda_by_mask_ratio": {
+    "0.15": 0.0,
+    "0.5": 1.0,
+    "0.9": 0.0
+  },
+  "selected_measurement": {
+    "target_physical_sparsity": "accuracy-constrained",
+    "lambda_by_mask_ratio": {
+      "0.15": 0.0,
+      "0.5": 1.0,
+      "0.9": 0.0
+    },
+    "elapsed_ms": 74.63658699998632,
+    "physical_block_sparsity": 0.0022786458333333335,
+    "skipped_physical_blocks": 14,
+    "total_physical_blocks": 6144,
+    "row_block_sparsity": 0.12238820393880208,
+    "mean_recovery_accuracy": 0.4404064466555913,
+    "per_mask_ratio": [
+      {
+        "mask_ratio": 0.15,
+        "lambda": 0.0,
+        "target_physical_sparsity": "accuracy-constrained",
+        "achieved_physical_sparsity": 0.0,
+        "masked_tokens": 17,
+        "recovery_accuracy": 0.7647058963775635,
+        "agreement_with_lambda_zero": 1.0
+      },
+      {
+        "mask_ratio": 0.5,
+        "lambda": 1.0,
+        "target_physical_sparsity": "accuracy-constrained",
+        "achieved_physical_sparsity": 0.0068359375,
+        "masked_tokens": 63,
+        "recovery_accuracy": 0.444444477558136,
+        "agreement_with_lambda_zero": 0.968254029750824
+      },
+      {
+        "mask_ratio": 0.9,
+        "lambda": 0.0,
+        "target_physical_sparsity": "accuracy-constrained",
+        "achieved_physical_sparsity": 0.0,
+        "masked_tokens": 116,
+        "recovery_accuracy": 0.11206896603107452,
+        "agreement_with_lambda_zero": 1.0
+      }
+    ],
+    "per_sample": [
+      {
+        "context_index": 0,
+        "mask_ratio": 0.15,
+        "masked_tokens": 17,
+        "recovery_accuracy": 0.7647058963775635,
+        "agreement_with_lambda_zero": 1.0
+      },
+      {
+        "context_index": 0,
+        "mask_ratio": 0.5,
+        "masked_tokens": 63,
+        "recovery_accuracy": 0.444444477558136,
+        "agreement_with_lambda_zero": 0.968254029750824
+      },
+      {
+        "context_index": 0,
+        "mask_ratio": 0.9,
+        "masked_tokens": 116,
+        "recovery_accuracy": 0.11206896603107452,
+        "agreement_with_lambda_zero": 1.0
+      }
+    ]
+  },
+  "measurements": [
+    {
+      "target_physical_sparsity": 0.0,
+      "lambda_by_mask_ratio": {
+        "0.15": 0.0,
+        "0.5": 0.0,
+        "0.9": 0.0
+      },
+      "elapsed_ms": 804.6046249801293,
+      "physical_block_sparsity": 0.0,
+      "skipped_physical_blocks": 0,
+      "total_physical_blocks": 6144,
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 17,
+          "recovery_accuracy": 0.7647058963775635,
+          "agreement_with_lambda_zero": 1.0
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 63,
+          "recovery_accuracy": 0.4285714626312256,
+          "agreement_with_lambda_zero": 1.0
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 116,
+          "recovery_accuracy": 0.11206896603107452,
+          "agreement_with_lambda_zero": 1.0
+        }
+      ]
+    },
+    {
+      "target_physical_sparsity": 0.1,
+      "lambda_by_mask_ratio": {
+        "0.15": 1.0,
+        "0.5": 1.0,
+        "0.9": 1.0
+      },
+      "elapsed_ms": 82.13960099965334,
+      "physical_block_sparsity": 0.01953125,
+      "skipped_physical_blocks": 120,
+      "total_physical_blocks": 6144,
+      "row_block_sparsity": 0.3670056660970052,
+      "mean_recovery_accuracy": 0.43465931961933774,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "lambda": 1.0,
+          "target_physical_sparsity": 0.1,
+          "achieved_physical_sparsity": 0.01025390625,
+          "masked_tokens": 17,
+          "recovery_accuracy": 0.7647058963775635,
+          "agreement_with_lambda_zero": 0.9411764740943909
+        },
+        {
+          "mask_ratio": 0.5,
+          "lambda": 1.0,
+          "target_physical_sparsity": 0.1,
+          "achieved_physical_sparsity": 0.0068359375,
+          "masked_tokens": 63,
+          "recovery_accuracy": 0.444444477558136,
+          "agreement_with_lambda_zero": 0.968254029750824
+        },
+        {
+          "mask_ratio": 0.9,
+          "lambda": 1.0,
+          "target_physical_sparsity": 0.1,
+          "achieved_physical_sparsity": 0.04150390625,
+          "masked_tokens": 116,
+          "recovery_accuracy": 0.09482758492231369,
+          "agreement_with_lambda_zero": 0.8706896305084229
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 17,
+          "recovery_accuracy": 0.7647058963775635,
+          "agreement_with_lambda_zero": 0.9411764740943909
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 63,
+          "recovery_accuracy": 0.444444477558136,
+          "agreement_with_lambda_zero": 0.968254029750824
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 116,
+          "recovery_accuracy": 0.09482758492231369,
+          "agreement_with_lambda_zero": 0.8706896305084229
+        }
+      ]
+    },
+    {
+      "target_physical_sparsity": 0.2,
+      "lambda_by_mask_ratio": {
+        "0.15": 1.0,
+        "0.5": 1.0,
+        "0.9": 1.0
+      },
+      "elapsed_ms": 74.75582597544417,
+      "physical_block_sparsity": 0.01953125,
+      "skipped_physical_blocks": 120,
+      "total_physical_blocks": 6144,
+      "row_block_sparsity": 0.3670056660970052,
+      "mean_recovery_accuracy": 0.43465931961933774,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "lambda": 1.0,
+          "target_physical_sparsity": 0.2,
+          "achieved_physical_sparsity": 0.01025390625,
+          "masked_tokens": 17,
+          "recovery_accuracy": 0.7647058963775635,
+          "agreement_with_lambda_zero": 0.9411764740943909
+        },
+        {
+          "mask_ratio": 0.5,
+          "lambda": 1.0,
+          "target_physical_sparsity": 0.2,
+          "achieved_physical_sparsity": 0.0068359375,
+          "masked_tokens": 63,
+          "recovery_accuracy": 0.444444477558136,
+          "agreement_with_lambda_zero": 0.968254029750824
+        },
+        {
+          "mask_ratio": 0.9,
+          "lambda": 1.0,
+          "target_physical_sparsity": 0.2,
+          "achieved_physical_sparsity": 0.04150390625,
+          "masked_tokens": 116,
+          "recovery_accuracy": 0.09482758492231369,
+          "agreement_with_lambda_zero": 0.8706896305084229
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 17,
+          "recovery_accuracy": 0.7647058963775635,
+          "agreement_with_lambda_zero": 0.9411764740943909
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 63,
+          "recovery_accuracy": 0.444444477558136,
+          "agreement_with_lambda_zero": 0.968254029750824
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 116,
+          "recovery_accuracy": 0.09482758492231369,
+          "agreement_with_lambda_zero": 0.8706896305084229
+        }
+      ]
+    },
+    {
+      "target_physical_sparsity": 0.3,
+      "lambda_by_mask_ratio": {
+        "0.15": 1.0,
+        "0.5": 1.0,
+        "0.9": 1.0
+      },
+      "elapsed_ms": 74.5132559677586,
+      "physical_block_sparsity": 0.01953125,
+      "skipped_physical_blocks": 120,
+      "total_physical_blocks": 6144,
+      "row_block_sparsity": 0.3670056660970052,
+      "mean_recovery_accuracy": 0.43465931961933774,
+      "per_mask_ratio": [
+        {
+          "mask_ratio": 0.15,
+          "lambda": 1.0,
+          "target_physical_sparsity": 0.3,
+          "achieved_physical_sparsity": 0.01025390625,
+          "masked_tokens": 17,
+          "recovery_accuracy": 0.7647058963775635,
+          "agreement_with_lambda_zero": 0.9411764740943909
+        },
+        {
+          "mask_ratio": 0.5,
+          "lambda": 1.0,
+          "target_physical_sparsity": 0.3,
+          "achieved_physical_sparsity": 0.0068359375,
+          "masked_tokens": 63,
+          "recovery_accuracy": 0.444444477558136,
+          "agreement_with_lambda_zero": 0.968254029750824
+        },
+        {
+          "mask_ratio": 0.9,
+          "lambda": 1.0,
+          "target_physical_sparsity": 0.3,
+          "achieved_physical_sparsity": 0.04150390625,
+          "masked_tokens": 116,
+          "recovery_accuracy": 0.09482758492231369,
+          "agreement_with_lambda_zero": 0.8706896305084229
+        }
+      ],
+      "per_sample": [
+        {
+          "context_index": 0,
+          "mask_ratio": 0.15,
+          "masked_tokens": 17,
+          "recovery_accuracy": 0.7647058963775635,
+          "agreement_with_lambda_zero": 0.9411764740943909
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.5,
+          "masked_tokens": 63,
+          "recovery_accuracy": 0.444444477558136,
+          "agreement_with_lambda_zero": 0.968254029750824
+        },
+        {
+          "context_index": 0,
+          "mask_ratio": 0.9,
+          "masked_tokens": 116,
+          "recovery_accuracy": 0.09482758492231369,
+          "agreement_with_lambda_zero": 0.8706896305084229
+        }
+      ]
+    }
+  ]
+}

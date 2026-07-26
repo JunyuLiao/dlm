@@ -1,0 +1,124 @@
+{
+  "schema_version": "proxy-blasst-physical-v2",
+  "dtype": [
+    [
+      "sample_id",
+      "<U64"
+    ],
+    [
+      "request_id",
+      "<U64"
+    ],
+    [
+      "seed",
+      "<i8"
+    ],
+    [
+      "sequence_length",
+      "<i4"
+    ],
+    [
+      "diffusion_block",
+      "<i2"
+    ],
+    [
+      "denoising_iteration",
+      "<i2"
+    ],
+    [
+      "remaining_mask_ratio",
+      "<f4"
+    ],
+    [
+      "noise_bucket",
+      "<U8"
+    ],
+    [
+      "layer",
+      "<i2"
+    ],
+    [
+      "head",
+      "<i2"
+    ],
+    [
+      "kv_group",
+      "<i2"
+    ],
+    [
+      "query_tile",
+      "<i4"
+    ],
+    [
+      "kv_tile",
+      "<i4"
+    ],
+    [
+      "traversal_index",
+      "<i4"
+    ],
+    [
+      "valid_query_rows",
+      "<i2"
+    ],
+    [
+      "score",
+      "<f4"
+    ],
+    [
+      "log_score",
+      "<f4"
+    ],
+    [
+      "exact_skip",
+      "|u1"
+    ],
+    [
+      "introduced_new_max",
+      "|u1"
+    ],
+    [
+      "row_max",
+      "<f4"
+    ],
+    [
+      "row_q50",
+      "<f4"
+    ],
+    [
+      "row_q90",
+      "<f4"
+    ],
+    [
+      "row_q99",
+      "<f4"
+    ],
+    [
+      "output_contribution_norm",
+      "<f4"
+    ],
+    [
+      "is_local",
+      "|u1"
+    ],
+    [
+      "is_diagonal",
+      "|u1"
+    ],
+    [
+      "is_sink",
+      "|u1"
+    ],
+    [
+      "is_distant",
+      "|u1"
+    ]
+  ],
+  "q_block_size": 128,
+  "kv_block_size": 64,
+  "sample_fraction": 0.05,
+  "bitpack_masks": true,
+  "quantize_log_scores": null,
+  "sampling_unit": "sample_id+query_tile+kv_tile (shared across steps/layers/heads)",
+  "note": "output_contribution_norm is NaN unless a future cheap kernel-side measurement is supplied"
+}

@@ -1,0 +1,34 @@
+{
+  "device": "NVIDIA H100 80GB HBM3",
+  "layer": 15,
+  "mask_ratio": 0.49,
+  "heads": 32,
+  "rows": 4096,
+  "tiles": 64,
+  "timings": {
+    "signature_pack": {
+      "median_ms": 0.13015999644994736,
+      "p95_ms": 0.133760005235672
+    },
+    "per_head_sort": {
+      "median_ms": 0.06854400038719177,
+      "p95_ms": 0.07379200309515
+    },
+    "gather_q": {
+      "median_ms": 0.0650240033864975,
+      "p95_ms": 0.06761600077152252
+    },
+    "scatter_output": {
+      "median_ms": 0.0647680014371872,
+      "p95_ms": 0.06755200028419495
+    },
+    "combined": {
+      "median_ms": 0.3049760013818741,
+      "p95_ms": 0.30748799443244934
+    },
+    "sparse_attention_kernel": {
+      "median_ms": 0.7225120067596436,
+      "p95_ms": 0.8148800134658813
+    }
+  }
+}

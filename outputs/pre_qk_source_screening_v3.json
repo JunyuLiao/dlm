@@ -1,0 +1,88 @@
+{
+  "trace": {
+    "schema": "proxy-blasst-physical-v3",
+    "records": 9944064,
+    "calibration_samples": 20,
+    "held_out_samples": 12,
+    "safety_filter": {
+      "warmup_tiles": 2,
+      "periodic_refresh": 8,
+      "anchor_local": true,
+      "anchor_diagonal": true,
+      "anchor_sink": true
+    }
+  },
+  "formal_calibration": {
+    "previous_step": {
+      "candidate_thresholds": 6342,
+      "certified_thresholds": 0
+    },
+    "previous_layer": {
+      "candidate_thresholds": 9216,
+      "certified_thresholds": 0
+    },
+    "false_skip_budgets": [0.01, 0.001, 0.0001],
+    "family_confidence": 0.99
+  },
+  "calibration_selected_earlier_head_held_out": {
+    "selection_rule": "per-layer/target-head best legal earlier head and score threshold with at least 128 calibration predictions, zero calibration false skips, and zero calibration false-new-max events",
+    "high": {
+      "selected_layer_heads": 1,
+      "qk_avoidance": 0.00005941382819194516,
+      "false_skip_rate": 0.028169014084507043,
+      "false_new_max_rate": 0.0
+    },
+    "mid": {
+      "selected_layer_heads": 152,
+      "qk_avoidance": 0.019144641709511568,
+      "false_skip_rate": 0.004939242940816505,
+      "false_new_max_rate": 0.0008742022904100009
+    },
+    "low": {
+      "selected_layer_heads": 401,
+      "qk_avoidance": 0.05921550315981148,
+      "false_skip_rate": 0.004098186905586253,
+      "false_new_max_rate": 0.004098186905586253
+    }
+  },
+  "conservative_intersections_held_out": {
+    "previous_step_and_selected_leader": {
+      "mid": {
+        "previous_step_threshold": 0.04858582466840744,
+        "qk_avoidance": 0.012024187285775492,
+        "false_skip_rate": 0.000974319716055397,
+        "false_new_max_rate": 0.00027837706173011343
+      },
+      "low": {
+        "previous_step_threshold": 0.3,
+        "qk_avoidance": 0.04939799566195373,
+        "false_skip_rate": 0.0009994748521963037,
+        "false_new_max_rate": 0.0009994748521963037
+      }
+    },
+    "previous_step_and_previous_layer": {
+      "low_zero_observed_error": {
+        "previous_step_threshold": 0.003,
+        "previous_layer_threshold": 0.7,
+        "qk_avoidance": 0.0014016642566409597,
+        "false_skip_rate": 0.0,
+        "false_new_max_rate": 0.0
+      }
+    },
+    "two_previous_steps": {
+      "low_zero_observed_error": {
+        "previous_step_threshold": 0.003,
+        "two_steps_back_threshold": 0.003,
+        "qk_avoidance": 0.0008234254498714653,
+        "false_skip_rate": 0.0,
+        "false_new_max_rate": 0.0
+      }
+    }
+  },
+  "hardware_break_even_qk_avoidance_estimate": {
+    "lower": 0.5,
+    "upper": 0.7,
+    "basis": "end-to-end H100 latency deltas between sparse, gate-disabled metadata kernel, and manual-threshold pre-QK runs"
+  },
+  "conclusion": "No screened previous-information source or conservative combination is both statistically safe and remotely close to hardware break-even."
+}

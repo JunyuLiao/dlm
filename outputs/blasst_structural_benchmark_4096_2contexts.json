@@ -1,0 +1,505 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "context_length": 4096,
+  "mask_ratios": [
+    0.15,
+    0.5,
+    0.9
+  ],
+  "num_contexts": 2,
+  "kernel": "BF16 bidirectional 2D BLASST, Q tile 128, KV tile 64, reverse traversal, base-2 softmax",
+  "launch": {
+    "num_warps": 4,
+    "pipeline_stages": 2
+  },
+  "dense_flash_ms": 984.3779296875,
+  "dense_flash_timing": {
+    "median_ms": 984.3779296875,
+    "p95_ms": 987.716552734375,
+    "minimum_ms": 984.013916015625,
+    "maximum_ms": 987.716552734375
+  },
+  "kernel_lambda_zero_ms": 949.4390258789062,
+  "kernel_lambda_zero_timing": {
+    "median_ms": 949.4390258789062,
+    "p95_ms": 950.2999877929688,
+    "minimum_ms": 945.819580078125,
+    "maximum_ms": 950.2999877929688
+  },
+  "kernel_zero_agreement_with_compiled_dense": [
+    {
+      "mask_ratio": 0.15,
+      "agreement": 0.9991883116883117,
+      "masked_tokens": 1232
+    },
+    {
+      "mask_ratio": 0.5,
+      "agreement": 0.9911330049261083,
+      "masked_tokens": 4060
+    },
+    {
+      "mask_ratio": 0.9,
+      "agreement": 0.9835513010651207,
+      "masked_tokens": 7417
+    }
+  ],
+  "measurements": [],
+  "diffusion_schedule": {
+    "per_sequence_lambdas": [
+      1.0,
+      0.4334796965122223,
+      0.04858582466840744,
+      1.0,
+      0.4334796965122223,
+      0.04858582466840744
+    ],
+    "latency_ms": 941.175048828125,
+    "timing": {
+      "median_ms": 941.175048828125,
+      "p95_ms": 942.5581665039062,
+      "minimum_ms": 938.445068359375,
+      "maximum_ms": 942.5581665039062
+    },
+    "speedup_vs_dense_flash": 1.045903130255278,
+    "skipped_2d_tiles_per_forward": 3669773,
+    "total_2d_tiles_per_forward": 12582912,
+    "physical_tile_sparsity": 0.29164735476175946,
+    "stats": {
+      "skipped_parent_tiles": 3669773,
+      "total_parent_tiles": 12582912,
+      "full_parent_tile_skip_rate": 0.29164735476175946,
+      "skipped_microgroups": 3669773,
+      "total_microgroups": 12582912,
+      "microgroup_skip_rate": 0.29164735476175946,
+      "skipped_bmm2_groups": 3669773,
+      "total_bmm2_groups": 12582912,
+      "bmm2_flop_skip_rate": 0.29164735476175946,
+      "skipped_v_loads": 0,
+      "total_v_loads": 12582912,
+      "v_load_skip_rate": 0.0,
+      "dense_fallbacks": 0,
+      "partial_tiles": 0
+    },
+    "agreement_with_kernel_lambda_zero": [
+      {
+        "mask_ratio": 0.15,
+        "agreement": 0.9699675324675324,
+        "masked_tokens": 1232
+      },
+      {
+        "mask_ratio": 0.5,
+        "agreement": 0.9613300492610838,
+        "masked_tokens": 4060
+      },
+      {
+        "mask_ratio": 0.9,
+        "agreement": 0.9518673318053121,
+        "masked_tokens": 7417
+      }
+    ],
+    "agreement_with_compiled_dense": [
+      {
+        "mask_ratio": 0.15,
+        "agreement": 0.9707792207792207,
+        "masked_tokens": 1232
+      },
+      {
+        "mask_ratio": 0.5,
+        "agreement": 0.9620689655172414,
+        "masked_tokens": 4060
+      },
+      {
+        "mask_ratio": 0.9,
+        "agreement": 0.9526762842119455,
+        "masked_tokens": 7417
+      }
+    ]
+  },
+  "structural_plan_overhead_ms": 104.66489795362577,
+  "structural_measurements": [
+    {
+      "name": "query_grouping_only",
+      "skip_group_rows": 128,
+      "query_grouping": true,
+      "kv_priority_prefix": false,
+      "timing": {
+        "median_ms": 947.3846435546875,
+        "p95_ms": 950.6773071289062,
+        "minimum_ms": 944.350341796875,
+        "maximum_ms": 950.6773071289062
+      },
+      "speedup_vs_compiled_dense": 1.0390478000508956,
+      "speedup_vs_calibrated_sparse_baseline": 0.9934455400255767,
+      "agreement_with_kernel_lambda_zero": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.9837662337662337,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9780788177339902,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9669677767291358,
+          "masked_tokens": 7417
+        }
+      ],
+      "agreement_with_compiled_dense": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.984577922077922,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9761083743842365,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9665633005258191,
+          "masked_tokens": 7417
+        }
+      ],
+      "stats": {
+        "skipped_parent_tiles": 1899710,
+        "total_parent_tiles": 12582912,
+        "full_parent_tile_skip_rate": 0.15097538630167642,
+        "skipped_microgroups": 1899710,
+        "total_microgroups": 12582912,
+        "microgroup_skip_rate": 0.15097538630167642,
+        "skipped_bmm2_groups": 1899710,
+        "total_bmm2_groups": 12582912,
+        "bmm2_flop_skip_rate": 0.15097538630167642,
+        "skipped_v_loads": 0,
+        "total_v_loads": 12582912,
+        "v_load_skip_rate": 0.0,
+        "dense_fallbacks": 0,
+        "partial_tiles": 0
+      }
+    },
+    {
+      "name": "kv_priority_only",
+      "skip_group_rows": 128,
+      "query_grouping": false,
+      "kv_priority_prefix": true,
+      "timing": {
+        "median_ms": 946.27197265625,
+        "p95_ms": 949.4927978515625,
+        "minimum_ms": 943.28125,
+        "maximum_ms": 949.4927978515625
+      },
+      "speedup_vs_compiled_dense": 1.0402695611117847,
+      "speedup_vs_calibrated_sparse_baseline": 0.9946136798136189,
+      "agreement_with_kernel_lambda_zero": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.974025974025974,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9588669950738916,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9518673318053121,
+          "masked_tokens": 7417
+        }
+      ],
+      "agreement_with_compiled_dense": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.9748376623376623,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9610837438423645,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9515976810031009,
+          "masked_tokens": 7417
+        }
+      ],
+      "stats": {
+        "skipped_parent_tiles": 3853597,
+        "total_parent_tiles": 12582912,
+        "full_parent_tile_skip_rate": 0.30625637372334796,
+        "skipped_microgroups": 3853597,
+        "total_microgroups": 12582912,
+        "microgroup_skip_rate": 0.30625637372334796,
+        "skipped_bmm2_groups": 3853597,
+        "total_bmm2_groups": 12582912,
+        "bmm2_flop_skip_rate": 0.30625637372334796,
+        "skipped_v_loads": 0,
+        "total_v_loads": 12582912,
+        "v_load_skip_rate": 0.0,
+        "dense_fallbacks": 0,
+        "partial_tiles": 0
+      }
+    },
+    {
+      "name": "microgroups_only_64",
+      "skip_group_rows": 64,
+      "query_grouping": false,
+      "kv_priority_prefix": false,
+      "timing": {
+        "median_ms": 1076.362060546875,
+        "p95_ms": 1077.1607666015625,
+        "minimum_ms": 1074.549560546875,
+        "maximum_ms": 1077.1607666015625
+      },
+      "speedup_vs_compiled_dense": 0.9145416452038081,
+      "speedup_vs_calibrated_sparse_baseline": 0.8744037748319886,
+      "agreement_with_kernel_lambda_zero": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.9594155844155844,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9561576354679803,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9458001887555616,
+          "masked_tokens": 7417
+        }
+      ],
+      "agreement_with_compiled_dense": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.9602272727272727,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9551724137931035,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9449912363489281,
+          "masked_tokens": 7417
+        }
+      ],
+      "stats": {
+        "skipped_parent_tiles": 3656476,
+        "total_parent_tiles": 12582912,
+        "full_parent_tile_skip_rate": 0.2905906041463216,
+        "skipped_microgroups": 8870670,
+        "total_microgroups": 25165824,
+        "microgroup_skip_rate": 0.35248875617980957,
+        "skipped_bmm2_groups": 8870670,
+        "total_bmm2_groups": 25165824,
+        "bmm2_flop_skip_rate": 0.35248875617980957,
+        "skipped_v_loads": 3656476,
+        "total_v_loads": 12582912,
+        "v_load_skip_rate": 0.2905906041463216,
+        "dense_fallbacks": 7368718,
+        "partial_tiles": 1557718
+      }
+    },
+    {
+      "name": "microgroups_only_32",
+      "skip_group_rows": 32,
+      "query_grouping": false,
+      "kv_priority_prefix": false,
+      "timing": {
+        "median_ms": 1085.3291015625,
+        "p95_ms": 1086.1544189453125,
+        "minimum_ms": 1083.71875,
+        "maximum_ms": 1086.1544189453125
+      },
+      "speedup_vs_compiled_dense": 0.9069856583319612,
+      "speedup_vs_calibrated_sparse_baseline": 0.8671794089674341,
+      "agreement_with_kernel_lambda_zero": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.9569805194805194,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.948768472906404,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9348793312660105,
+          "masked_tokens": 7417
+        }
+      ],
+      "agreement_with_compiled_dense": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.9577922077922078,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9470443349753694,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9336659026560604,
+          "masked_tokens": 7417
+        }
+      ],
+      "stats": {
+        "skipped_parent_tiles": 3644833,
+        "total_parent_tiles": 12582912,
+        "full_parent_tile_skip_rate": 0.28966530164082843,
+        "skipped_microgroups": 20787563,
+        "total_microgroups": 50331648,
+        "microgroup_skip_rate": 0.4130117694536845,
+        "skipped_bmm2_groups": 20787563,
+        "total_bmm2_groups": 50331648,
+        "bmm2_flop_skip_rate": 0.4130117694536845,
+        "skipped_v_loads": 3644833,
+        "total_v_loads": 12582912,
+        "v_load_skip_rate": 0.28966530164082843,
+        "dense_fallbacks": 5840835,
+        "partial_tiles": 3097244
+      }
+    },
+    {
+      "name": "microgroups_only_16",
+      "skip_group_rows": 16,
+      "query_grouping": false,
+      "kv_priority_prefix": false,
+      "timing": {
+        "median_ms": 1116.6436767578125,
+        "p95_ms": 1116.7686767578125,
+        "minimum_ms": 1116.5042724609375,
+        "maximum_ms": 1116.7686767578125
+      },
+      "speedup_vs_compiled_dense": 0.8815506236919305,
+      "speedup_vs_calibrated_sparse_baseline": 0.8428606801059738,
+      "agreement_with_kernel_lambda_zero": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.948051948051948,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9403940886699508,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9231495213698261,
+          "masked_tokens": 7417
+        }
+      ],
+      "agreement_with_compiled_dense": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.9488636363636364,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9413793103448276,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9239584737764595,
+          "masked_tokens": 7417
+        }
+      ],
+      "stats": {
+        "skipped_parent_tiles": 3638654,
+        "total_parent_tiles": 12582912,
+        "full_parent_tile_skip_rate": 0.28917423884073895,
+        "skipped_microgroups": 47767080,
+        "total_microgroups": 100663296,
+        "microgroup_skip_rate": 0.47452330589294434,
+        "skipped_bmm2_groups": 47767080,
+        "total_bmm2_groups": 100663296,
+        "bmm2_flop_skip_rate": 0.47452330589294434,
+        "skipped_v_loads": 3638654,
+        "total_v_loads": 12582912,
+        "v_load_skip_rate": 0.28917423884073895,
+        "dense_fallbacks": 4479234,
+        "partial_tiles": 4465024
+      }
+    },
+    {
+      "name": "all_three_first_step",
+      "skip_group_rows": 32,
+      "query_grouping": true,
+      "kv_priority_prefix": true,
+      "timing": {
+        "median_ms": 1328.83984375,
+        "p95_ms": 1329.91943359375,
+        "minimum_ms": 1320.5350341796875,
+        "maximum_ms": 1329.91943359375
+      },
+      "speedup_vs_compiled_dense": 0.7407799625495689,
+      "speedup_vs_calibrated_sparse_baseline": 0.7082682335684028,
+      "agreement_with_kernel_lambda_zero": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.9569805194805194,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9576354679802955,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9382499662936498,
+          "masked_tokens": 7417
+        }
+      ],
+      "agreement_with_compiled_dense": [
+        {
+          "mask_ratio": 0.15,
+          "agreement": 0.9561688311688312,
+          "masked_tokens": 1232
+        },
+        {
+          "mask_ratio": 0.5,
+          "agreement": 0.9583743842364532,
+          "masked_tokens": 4060
+        },
+        {
+          "mask_ratio": 0.9,
+          "agreement": 0.9383847916947553,
+          "masked_tokens": 7417
+        }
+      ],
+      "stats": {
+        "skipped_parent_tiles": 2004323,
+        "total_parent_tiles": 12582912,
+        "full_parent_tile_skip_rate": 0.159289280573527,
+        "skipped_microgroups": 18380240,
+        "total_microgroups": 50331648,
+        "microgroup_skip_rate": 0.3651825586954753,
+        "skipped_bmm2_groups": 18380240,
+        "total_bmm2_groups": 50331648,
+        "bmm2_flop_skip_rate": 0.3651825586954753,
+        "skipped_v_loads": 2004323,
+        "total_v_loads": 12582912,
+        "v_load_skip_rate": 0.159289280573527,
+        "dense_fallbacks": 5292327,
+        "partial_tiles": 5286262
+      }
+    }
+  ]
+}

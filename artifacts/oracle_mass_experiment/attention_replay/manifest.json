@@ -1,0 +1,37 @@
+{
+  "schema": "blasst-oracle-mass-experiment-v1",
+  "source": "artifacts/certified_omission_pilot_h100_v2/context-000",
+  "records": 16,
+  "configurations": 1480,
+  "thresholds": [
+    1e-06,
+    3e-06,
+    1e-05,
+    3e-05,
+    0.0001,
+    0.0003,
+    0.001,
+    0.003,
+    0.01,
+    0.03
+  ],
+  "budgets": [
+    0.0001,
+    0.0003,
+    0.001,
+    0.003,
+    0.01,
+    0.03
+  ],
+  "k_values": [
+    1,
+    2,
+    4,
+    8,
+    16
+  ],
+  "limitations": [
+    "raw trace covers one development prompt, layer 0, head 0, and one query tile",
+    "attention-output replay cannot reconstruct hidden states, logits, or generated tokens"
+  ]
+}

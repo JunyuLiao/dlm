@@ -1,0 +1,138 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "context_length": 4096,
+  "batch": 4,
+  "transition": {
+    "source_mask_ratio": 0.5,
+    "target_mask_ratio": 0.15
+  },
+  "threshold_provenance": "manual_uncertified",
+  "active_certified_or_manual_thresholds": 1,
+  "false_skip_budget": null,
+  "exact_blasst_lambda": 1.0,
+  "safety": {
+    "warmup_tiles": 2,
+    "periodic_refresh": 8,
+    "anchor_local": true,
+    "anchor_sink": true,
+    "local_radius": 1,
+    "non_cascading_unknown_sentinel": "+inf"
+  },
+  "dense_baseline": {
+    "timing": {
+      "median_ms": 630.87939453125,
+      "p95_ms": 638.7763671875,
+      "minimum_ms": 625.5335083007812,
+      "maximum_ms": 638.7763671875,
+      "samples_ms": [
+        625.5335083007812,
+        630.87939453125,
+        638.7763671875,
+        626.562255859375,
+        633.9837646484375
+      ]
+    }
+  },
+  "sparse_baseline_no_pre_qk": {
+    "timing": {
+      "median_ms": 602.2311401367188,
+      "p95_ms": 604.8533935546875,
+      "minimum_ms": 590.6005249023438,
+      "maximum_ms": 604.8533935546875,
+      "samples_ms": [
+        590.6005249023438,
+        604.8533935546875,
+        602.2311401367188,
+        598.1393432617188,
+        604.198974609375
+      ]
+    },
+    "speedup_vs_dense": 1.0475701976952363,
+    "stats": {
+      "skipped_tiles_after_or_before_qk": 4049836,
+      "total_tiles": 8388608,
+      "downstream_tile_skip_rate": 0.48277807235717773,
+      "pre_qk_skipped_tiles": 0,
+      "proxy_metadata_tiles": 0,
+      "qk_avoidance_rate": 0.0,
+      "skipped_v_loads": 0,
+      "v_load_skip_rate": 0.0
+    },
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.9670194983482361,
+      "all_token_top1_agreement": 0.96588134765625,
+      "masked_tokens": 2456,
+      "all_tokens": 16384
+    }
+  },
+  "pre_qk_kernel_gate_disabled": {
+    "timing": {
+      "median_ms": 624.9029541015625,
+      "p95_ms": 630.518310546875,
+      "minimum_ms": 620.8134765625,
+      "maximum_ms": 630.518310546875,
+      "samples_ms": [
+        630.518310546875,
+        624.9029541015625,
+        626.8492431640625,
+        623.5120239257812,
+        620.8134765625
+      ]
+    },
+    "speedup_vs_dense": 1.0095637896900007,
+    "speedup_vs_sparse": 0.9637194642527502,
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.9670194983482361,
+      "all_token_top1_agreement": 0.96588134765625,
+      "masked_tokens": 2456,
+      "all_tokens": 16384
+    },
+    "agreement_vs_sparse": {
+      "masked_top1_agreement": 0.9999999403953552,
+      "all_token_top1_agreement": 1.0,
+      "masked_tokens": 2456,
+      "all_tokens": 16384
+    }
+  },
+  "pre_qk_enabled": {
+    "timing": {
+      "median_ms": 620.2759399414062,
+      "p95_ms": 621.2061767578125,
+      "minimum_ms": 617.8693237304688,
+      "maximum_ms": 621.2061767578125,
+      "samples_ms": [
+        617.8693237304688,
+        621.2061767578125,
+        621.0630493164062,
+        620.2759399414062,
+        619.5929565429688
+      ]
+    },
+    "speedup_vs_dense": 1.017094737853036,
+    "speedup_vs_sparse": 0.9709084318079594,
+    "speedup_vs_same_kernel_gate_disabled": 1.0074596060595118,
+    "stats": {
+      "skipped_tiles_after_or_before_qk": 4060003,
+      "total_tiles": 8388608,
+      "downstream_tile_skip_rate": 0.4839900732040405,
+      "pre_qk_skipped_tiles": 491213,
+      "proxy_metadata_tiles": 8388608,
+      "qk_avoidance_rate": 0.05855715274810791,
+      "skipped_v_loads": 4060003,
+      "v_load_skip_rate": 0.4839900732040405
+    },
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.9678338170051575,
+      "all_token_top1_agreement": 0.96551513671875,
+      "masked_tokens": 2456,
+      "all_tokens": 16384
+    },
+    "agreement_vs_sparse": {
+      "masked_top1_agreement": 0.9910423159599304,
+      "all_token_top1_agreement": 0.99383544921875,
+      "masked_tokens": 2456,
+      "all_tokens": 16384
+    }
+  }
+}

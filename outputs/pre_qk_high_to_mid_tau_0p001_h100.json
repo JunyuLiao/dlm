@@ -1,0 +1,158 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "context_length": 4096,
+  "batch": 1,
+  "transition": {
+    "source_mask_ratio": 0.9,
+    "target_mask_ratio": 0.5
+  },
+  "threshold_provenance": "manual_uncertified",
+  "active_certified_or_manual_thresholds": 1,
+  "false_skip_budget": null,
+  "exact_blasst_lambda": 0.4334796965122223,
+  "safety": {
+    "warmup_tiles": 2,
+    "periodic_refresh": 8,
+    "anchor_local": true,
+    "anchor_sink": true,
+    "local_radius": 1,
+    "non_cascading_unknown_sentinel": "+inf"
+  },
+  "dense_baseline": {
+    "timing": {
+      "median_ms": 158.83950805664062,
+      "p95_ms": 166.27993774414062,
+      "minimum_ms": 156.17958068847656,
+      "maximum_ms": 166.27993774414062,
+      "samples_ms": [
+        156.55104064941406,
+        156.17958068847656,
+        166.27993774414062,
+        160.67750549316406,
+        159.3263702392578,
+        157.6024627685547,
+        156.26220703125,
+        158.35264587402344,
+        162.87046813964844,
+        159.37271118164062
+      ]
+    }
+  },
+  "sparse_baseline_no_pre_qk": {
+    "timing": {
+      "median_ms": 151.4202880859375,
+      "p95_ms": 160.27798461914062,
+      "minimum_ms": 150.8197479248047,
+      "maximum_ms": 160.27798461914062,
+      "samples_ms": [
+        150.90103149414062,
+        150.8197479248047,
+        157.21705627441406,
+        158.2815704345703,
+        151.33343505859375,
+        150.8943328857422,
+        151.50714111328125,
+        151.0602264404297,
+        153.6459197998047,
+        160.27798461914062
+      ]
+    },
+    "speedup_vs_dense": 1.0489975290926168,
+    "stats": {
+      "skipped_tiles_after_or_before_qk": 603213,
+      "total_tiles": 2097152,
+      "downstream_tile_skip_rate": 0.28763437271118164,
+      "pre_qk_skipped_tiles": 0,
+      "proxy_metadata_tiles": 0,
+      "qk_avoidance_rate": 0.0,
+      "skipped_v_loads": 0,
+      "v_load_skip_rate": 0.0
+    },
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.94775390625,
+      "all_token_top1_agreement": 0.9677734375,
+      "masked_tokens": 2048,
+      "all_tokens": 4096
+    }
+  },
+  "pre_qk_kernel_gate_disabled": {
+    "timing": {
+      "median_ms": 162.37620544433594,
+      "p95_ms": 165.65455627441406,
+      "minimum_ms": 160.5437469482422,
+      "maximum_ms": 165.65455627441406,
+      "samples_ms": [
+        160.5437469482422,
+        164.25840759277344,
+        163.16522216796875,
+        162.03762817382812,
+        162.71478271484375,
+        165.65455627441406,
+        163.05833435058594,
+        161.25885009765625,
+        161.37606811523438,
+        161.27191162109375
+      ]
+    },
+    "speedup_vs_dense": 0.9782191154300146,
+    "speedup_vs_sparse": 0.9325275687504951,
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.94775390625,
+      "all_token_top1_agreement": 0.9677734375,
+      "masked_tokens": 2048,
+      "all_tokens": 4096
+    },
+    "agreement_vs_sparse": {
+      "masked_top1_agreement": 1.0,
+      "all_token_top1_agreement": 1.0,
+      "masked_tokens": 2048,
+      "all_tokens": 4096
+    }
+  },
+  "pre_qk_enabled": {
+    "timing": {
+      "median_ms": 162.82299041748047,
+      "p95_ms": 164.9610595703125,
+      "minimum_ms": 160.56626892089844,
+      "maximum_ms": 164.9610595703125,
+      "samples_ms": [
+        162.16067504882812,
+        160.56626892089844,
+        160.8976287841797,
+        164.9610595703125,
+        161.41075134277344,
+        161.10940551757812,
+        163.5820770263672,
+        164.7966766357422,
+        163.81954956054688,
+        163.4853057861328
+      ]
+    },
+    "speedup_vs_dense": 0.9755348900629688,
+    "speedup_vs_sparse": 0.9299687206192057,
+    "speedup_vs_same_kernel_gate_disabled": 0.9972560080612758,
+    "stats": {
+      "skipped_tiles_after_or_before_qk": 603251,
+      "total_tiles": 2097152,
+      "downstream_tile_skip_rate": 0.28765249252319336,
+      "pre_qk_skipped_tiles": 806,
+      "proxy_metadata_tiles": 2097152,
+      "qk_avoidance_rate": 0.00038433074951171875,
+      "skipped_v_loads": 603251,
+      "v_load_skip_rate": 0.28765249252319336
+    },
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.951171875,
+      "all_token_top1_agreement": 0.9697265625,
+      "masked_tokens": 2048,
+      "all_tokens": 4096
+    },
+    "agreement_vs_sparse": {
+      "masked_top1_agreement": 0.99560546875,
+      "all_token_top1_agreement": 0.99658203125,
+      "masked_tokens": 2048,
+      "all_tokens": 4096
+    }
+  }
+}

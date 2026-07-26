@@ -1,0 +1,18 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "context_length": 8192,
+  "block_size": 128,
+  "dense_ms": 545.611084002303,
+  "metric_note": "accuracy is top-1 logit agreement with dense FlashAttention, not task accuracy",
+  "measurements": [
+    {"lambda": 0.0, "sparsity_ratio": 0.0, "accuracy_top1_agreement": 0.9934082031},
+    {"lambda": 0.001, "sparsity_ratio": 0.0493341461, "accuracy_top1_agreement": 0.9924316406},
+    {"lambda": 0.003, "sparsity_ratio": 0.0833983794, "accuracy_top1_agreement": 0.9916992188},
+    {"lambda": 0.01, "sparsity_ratio": 0.1738557145, "accuracy_top1_agreement": 0.9914550781},
+    {"lambda": 0.03, "sparsity_ratio": 0.2914110273, "accuracy_top1_agreement": 0.9914550781},
+    {"lambda": 0.1, "sparsity_ratio": 0.4494545199, "accuracy_top1_agreement": 0.9912109375},
+    {"lambda": 0.3, "sparsity_ratio": 0.6466014516, "accuracy_top1_agreement": 0.9920654297}
+  ],
+  "selected_lambda": 0.3,
+  "incremental_top1_drop_vs_zero_pruning": 0.0013427734
+}

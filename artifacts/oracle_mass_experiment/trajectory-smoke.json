@@ -1,0 +1,173 @@
+{
+  "schema": "blasst-oracle-mass-llada-trajectory-v1",
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "generation_length": 16,
+  "steps": 2,
+  "policy": {
+    "k": 8,
+    "aggregation": "all_max",
+    "selection": "cumulative",
+    "threshold": null,
+    "budget": 0.01,
+    "budget_scope": "all",
+    "order": "score",
+    "new_maximum_protection": "none",
+    "visible_weight": 0.25,
+    "visible_budget_multiplier": 4.0
+  },
+  "oracle_refresh": "current_step",
+  "results": [
+    {
+      "prompt_index": 0,
+      "prompt": "Explain why physical attention tiles matter in GPU kernels.",
+      "seed": 20260721,
+      "metrics": {
+        "exact_generated_sequence_agreement": true,
+        "differing_generated_tokens": 0,
+        "differing_generated_token_fraction": 0.0,
+        "first_divergent_step": -1,
+        "final_edit_distance": 0,
+        "oracle_vs_dense_differing_tokens": 0,
+        "sparse_vs_dense_differing_tokens": 0,
+        "oracle_vs_dense_edit_distance": 0
+      },
+      "policy_stats": {
+        "total_tiles": 2048,
+        "baseline_skipped_tiles": 0,
+        "candidate_tiles": 0,
+        "additional_skipped_tiles": 0,
+        "removed_new_maximum_tiles": 0,
+        "calls": 64,
+        "by_layer": {
+          "0": 0,
+          "1": 0,
+          "2": 0,
+          "3": 0,
+          "4": 0,
+          "5": 0,
+          "6": 0,
+          "7": 0,
+          "8": 0,
+          "9": 0,
+          "10": 0,
+          "11": 0,
+          "12": 0,
+          "13": 0,
+          "14": 0,
+          "15": 0,
+          "16": 0,
+          "17": 0,
+          "18": 0,
+          "19": 0,
+          "20": 0,
+          "21": 0,
+          "22": 0,
+          "23": 0,
+          "24": 0,
+          "25": 0,
+          "26": 0,
+          "27": 0,
+          "28": 0,
+          "29": 0,
+          "30": 0,
+          "31": 0
+        },
+        "additional_physical_sparsity": 0.0,
+        "fraction_of_baseline_kept_removed": 0.0
+      },
+      "steps": [
+        {
+          "step": 0,
+          "mask_ratio": 1.0,
+          "masked_token_logit_cosine": 1.0,
+          "masked_token_kl": 0.0,
+          "masked_token_top1_agreement": 1.0,
+          "all_token_top1_agreement": 1.0,
+          "hidden_state_cosine": 1.0,
+          "sparse_vs_dense_hidden_state_cosine": 0.9998537302017212,
+          "generated_state_agreement": 1.0,
+          "oracle_vs_dense_generated_state_agreement": 1.0,
+          "sparse_vs_dense_generated_state_agreement": 1.0,
+          "dense_revealed_positions": [
+            11,
+            25,
+            12,
+            24,
+            13,
+            16,
+            17,
+            15
+          ],
+          "sparse_revealed_positions": [
+            11,
+            25,
+            12,
+            24,
+            13,
+            17,
+            16,
+            15
+          ],
+          "oracle_revealed_positions": [
+            11,
+            25,
+            12,
+            24,
+            13,
+            17,
+            16,
+            15
+          ],
+          "additional_skipped_tiles": 0
+        },
+        {
+          "step": 1,
+          "mask_ratio": 0.5,
+          "masked_token_logit_cosine": 1.0,
+          "masked_token_kl": 0.0,
+          "masked_token_top1_agreement": 1.0,
+          "all_token_top1_agreement": 1.0,
+          "hidden_state_cosine": 0.9999999403953552,
+          "sparse_vs_dense_hidden_state_cosine": 0.9996055364608765,
+          "generated_state_agreement": 1.0,
+          "oracle_vs_dense_generated_state_agreement": 1.0,
+          "sparse_vs_dense_generated_state_agreement": 1.0,
+          "dense_revealed_positions": [
+            23,
+            14,
+            22,
+            19,
+            18,
+            20,
+            21,
+            10
+          ],
+          "sparse_revealed_positions": [
+            23,
+            14,
+            22,
+            19,
+            18,
+            20,
+            21,
+            10
+          ],
+          "oracle_revealed_positions": [
+            23,
+            14,
+            22,
+            19,
+            18,
+            20,
+            21,
+            10
+          ],
+          "additional_skipped_tiles": 0
+        }
+      ],
+      "sparse_text": "",
+      "oracle_text": "",
+      "dense_text": ""
+    }
+  ]
+}

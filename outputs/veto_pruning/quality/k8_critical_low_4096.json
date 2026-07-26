@@ -1,0 +1,87 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "context_length": 4096,
+  "num_contexts": 1,
+  "previous_mask_ratio": 0.15,
+  "current_mask_ratio": 0.14,
+  "blasst_lambda": 1.0,
+  "new_max_protection": "critical",
+  "policy": {
+    "family": "k_veto",
+    "k": 8,
+    "restriction": "any"
+  },
+  "metrics": {
+    "masked_top1_agreement_vs_sparse": 0.9751332402229309,
+    "masked_top1_agreement_vs_dense": 0.9698046445846558,
+    "sparse_masked_top1_agreement_vs_dense": 0.9733570218086243,
+    "all_token_top1_agreement_vs_sparse": 0.955322265625,
+    "masked_logit_cosine_vs_sparse": 0.9948332872949739,
+    "masked_logit_kl_vs_sparse": 0.011710672511935869,
+    "hidden_state_cosine_vs_sparse": 0.9519640207290649,
+    "hidden_state_cosine_vs_dense": 0.9261629581451416,
+    "worst_context_masked_agreement_vs_sparse": 0.9751332402229309
+  },
+  "policy_stats": {
+    "total_tiles": 2097152,
+    "baseline_skipped_tiles": 988803,
+    "additional_skipped_tiles": 429290,
+    "baseline_physical_sparsity": 0.4714980125427246,
+    "additional_physical_sparsity": 0.20470142364501953,
+    "new_physical_sparsity": 0.6761994361877441,
+    "downstream_work_reduction": 0.38732384835462474,
+    "additional_new_max_tiles": 429290,
+    "veto_histogram": {
+      "1": 165137,
+      "2": 89143,
+      "3": 56481,
+      "4": 39187,
+      "5": 28437,
+      "6": 21336,
+      "7": 16673,
+      "8": 12896
+    },
+    "additional_by_layer": {
+      "0": 14515,
+      "1": 12273,
+      "2": 14783,
+      "3": 10220,
+      "4": 10704,
+      "5": 12509,
+      "6": 10667,
+      "7": 13536,
+      "8": 10942,
+      "9": 9961,
+      "10": 12768,
+      "11": 10634,
+      "12": 10678,
+      "13": 14154,
+      "14": 11128,
+      "15": 12565,
+      "16": 13689,
+      "17": 13529,
+      "18": 12459,
+      "19": 16074,
+      "20": 12530,
+      "21": 14130,
+      "22": 15003,
+      "23": 15893,
+      "24": 14869,
+      "25": 15640,
+      "26": 14203,
+      "27": 14923,
+      "28": 15056,
+      "29": 14556,
+      "30": 15730,
+      "31": 18969
+    }
+  },
+  "per_context": [
+    {
+      "context": 0,
+      "masked_tokens": 563,
+      "masked_top1_agreement_vs_sparse": 0.9751332402229309,
+      "masked_top1_agreement_vs_dense": 0.9698046445846558
+    }
+  ]
+}

@@ -1,0 +1,158 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "context_length": 4096,
+  "batch": 1,
+  "transition": {
+    "source_mask_ratio": 0.9,
+    "target_mask_ratio": 0.5
+  },
+  "threshold_provenance": "manual_uncertified",
+  "active_certified_or_manual_thresholds": 1,
+  "false_skip_budget": null,
+  "exact_blasst_lambda": 0.4334796965122223,
+  "safety": {
+    "warmup_tiles": 2,
+    "periodic_refresh": 8,
+    "anchor_local": true,
+    "anchor_sink": true,
+    "local_radius": 1,
+    "non_cascading_unknown_sentinel": "+inf"
+  },
+  "dense_baseline": {
+    "timing": {
+      "median_ms": 158.51798248291016,
+      "p95_ms": 164.439453125,
+      "minimum_ms": 156.82672119140625,
+      "maximum_ms": 164.439453125,
+      "samples_ms": [
+        157.712890625,
+        157.29910278320312,
+        164.439453125,
+        161.51670837402344,
+        156.82672119140625,
+        157.25762939453125,
+        157.50306701660156,
+        159.33120727539062,
+        159.3230743408203,
+        161.90316772460938
+      ]
+    }
+  },
+  "sparse_baseline_no_pre_qk": {
+    "timing": {
+      "median_ms": 152.279052734375,
+      "p95_ms": 160.76400756835938,
+      "minimum_ms": 150.19308471679688,
+      "maximum_ms": 160.76400756835938,
+      "samples_ms": [
+        151.13821411132812,
+        151.90133666992188,
+        154.97683715820312,
+        160.76400756835938,
+        153.26710510253906,
+        151.67091369628906,
+        150.19308471679688,
+        151.31417846679688,
+        152.65676879882812,
+        157.446533203125
+      ]
+    },
+    "speedup_vs_dense": 1.040970374037051,
+    "stats": {
+      "skipped_tiles_after_or_before_qk": 603213,
+      "total_tiles": 2097152,
+      "downstream_tile_skip_rate": 0.28763437271118164,
+      "pre_qk_skipped_tiles": 0,
+      "proxy_metadata_tiles": 0,
+      "qk_avoidance_rate": 0.0,
+      "skipped_v_loads": 0,
+      "v_load_skip_rate": 0.0
+    },
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.94775390625,
+      "all_token_top1_agreement": 0.9677734375,
+      "masked_tokens": 2048,
+      "all_tokens": 4096
+    }
+  },
+  "pre_qk_kernel_gate_disabled": {
+    "timing": {
+      "median_ms": 163.84935760498047,
+      "p95_ms": 165.1795196533203,
+      "minimum_ms": 161.15231323242188,
+      "maximum_ms": 165.1795196533203,
+      "samples_ms": [
+        163.94163513183594,
+        165.1565399169922,
+        165.1795196533203,
+        163.85702514648438,
+        163.4252166748047,
+        163.21353149414062,
+        161.15231323242188,
+        163.34390258789062,
+        164.33648681640625,
+        163.84169006347656
+      ]
+    },
+    "speedup_vs_dense": 0.9674617270400073,
+    "speedup_vs_sparse": 0.9293844965904599,
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.94775390625,
+      "all_token_top1_agreement": 0.9677734375,
+      "masked_tokens": 2048,
+      "all_tokens": 4096
+    },
+    "agreement_vs_sparse": {
+      "masked_top1_agreement": 1.0,
+      "all_token_top1_agreement": 1.0,
+      "masked_tokens": 2048,
+      "all_tokens": 4096
+    }
+  },
+  "pre_qk_enabled": {
+    "timing": {
+      "median_ms": 163.37464141845703,
+      "p95_ms": 164.85043334960938,
+      "minimum_ms": 160.4463653564453,
+      "maximum_ms": 164.85043334960938,
+      "samples_ms": [
+        163.43971252441406,
+        163.14454650878906,
+        163.98646545410156,
+        164.85043334960938,
+        162.9074249267578,
+        160.4463653564453,
+        163.70204162597656,
+        161.64968872070312,
+        164.08128356933594,
+        163.3095703125
+      ]
+    },
+    "speedup_vs_dense": 0.9702728716440923,
+    "speedup_vs_sparse": 0.9320850005377364,
+    "speedup_vs_same_kernel_gate_disabled": 1.0029056907632778,
+    "stats": {
+      "skipped_tiles_after_or_before_qk": 621503,
+      "total_tiles": 2097152,
+      "downstream_tile_skip_rate": 0.2963557243347168,
+      "pre_qk_skipped_tiles": 156208,
+      "proxy_metadata_tiles": 2097152,
+      "qk_avoidance_rate": 0.07448577880859375,
+      "skipped_v_loads": 621503,
+      "v_load_skip_rate": 0.2963557243347168
+    },
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.9482421875,
+      "all_token_top1_agreement": 0.966796875,
+      "masked_tokens": 2048,
+      "all_tokens": 4096
+    },
+    "agreement_vs_sparse": {
+      "masked_top1_agreement": 0.98828125,
+      "all_token_top1_agreement": 0.99169921875,
+      "masked_tokens": 2048,
+      "all_tokens": 4096
+    }
+  }
+}

@@ -1,0 +1,138 @@
+{
+  "model": "GSAI-ML/LLaDA-8B-Instruct",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "context_length": 4096,
+  "batch": 4,
+  "transition": {
+    "source_mask_ratio": 0.9,
+    "target_mask_ratio": 0.5
+  },
+  "threshold_provenance": "manual_uncertified",
+  "active_certified_or_manual_thresholds": 1,
+  "false_skip_budget": null,
+  "exact_blasst_lambda": 0.4334796965122223,
+  "safety": {
+    "warmup_tiles": 2,
+    "periodic_refresh": 8,
+    "anchor_local": true,
+    "anchor_sink": true,
+    "local_radius": 1,
+    "non_cascading_unknown_sentinel": "+inf"
+  },
+  "dense_baseline": {
+    "timing": {
+      "median_ms": 631.3193969726562,
+      "p95_ms": 635.5115356445312,
+      "minimum_ms": 623.8778076171875,
+      "maximum_ms": 635.5115356445312,
+      "samples_ms": [
+        623.8778076171875,
+        635.1044921875,
+        635.5115356445312,
+        624.876953125,
+        631.3193969726562
+      ]
+    }
+  },
+  "sparse_baseline_no_pre_qk": {
+    "timing": {
+      "median_ms": 606.447509765625,
+      "p95_ms": 613.4447631835938,
+      "minimum_ms": 599.7476196289062,
+      "maximum_ms": 613.4447631835938,
+      "samples_ms": [
+        599.7476196289062,
+        613.4447631835938,
+        606.447509765625,
+        606.7227783203125,
+        605.367919921875
+      ]
+    },
+    "speedup_vs_dense": 1.0410124319195302,
+    "stats": {
+      "skipped_tiles_after_or_before_qk": 2433382,
+      "total_tiles": 8388608,
+      "downstream_tile_skip_rate": 0.2900817394256592,
+      "pre_qk_skipped_tiles": 0,
+      "proxy_metadata_tiles": 0,
+      "qk_avoidance_rate": 0.0,
+      "skipped_v_loads": 0,
+      "v_load_skip_rate": 0.0
+    },
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.95751953125,
+      "all_token_top1_agreement": 0.96978759765625,
+      "masked_tokens": 8192,
+      "all_tokens": 16384
+    }
+  },
+  "pre_qk_kernel_gate_disabled": {
+    "timing": {
+      "median_ms": 639.0291137695312,
+      "p95_ms": 642.3001708984375,
+      "minimum_ms": 635.1008911132812,
+      "maximum_ms": 642.3001708984375,
+      "samples_ms": [
+        635.1008911132812,
+        639.3345336914062,
+        636.7496337890625,
+        642.3001708984375,
+        639.0291137695312
+      ]
+    },
+    "speedup_vs_dense": 0.9879352651847165,
+    "speedup_vs_sparse": 0.9490138973297906,
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.95751953125,
+      "all_token_top1_agreement": 0.96978759765625,
+      "masked_tokens": 8192,
+      "all_tokens": 16384
+    },
+    "agreement_vs_sparse": {
+      "masked_top1_agreement": 1.0,
+      "all_token_top1_agreement": 1.0,
+      "masked_tokens": 8192,
+      "all_tokens": 16384
+    }
+  },
+  "pre_qk_enabled": {
+    "timing": {
+      "median_ms": 633.7008056640625,
+      "p95_ms": 639.0192260742188,
+      "minimum_ms": 631.751220703125,
+      "maximum_ms": 639.0192260742188,
+      "samples_ms": [
+        631.9729614257812,
+        631.751220703125,
+        635.558837890625,
+        639.0192260742188,
+        633.7008056640625
+      ]
+    },
+    "speedup_vs_dense": 0.9962420614426855,
+    "speedup_vs_sparse": 0.9569934334076182,
+    "speedup_vs_same_kernel_gate_disabled": 1.0084082394370402,
+    "stats": {
+      "skipped_tiles_after_or_before_qk": 2516395,
+      "total_tiles": 8388608,
+      "downstream_tile_skip_rate": 0.2999776601791382,
+      "pre_qk_skipped_tiles": 706891,
+      "proxy_metadata_tiles": 8388608,
+      "qk_avoidance_rate": 0.08426797389984131,
+      "skipped_v_loads": 2516395,
+      "v_load_skip_rate": 0.2999776601791382
+    },
+    "agreement_vs_dense": {
+      "masked_top1_agreement": 0.9560546875,
+      "all_token_top1_agreement": 0.96832275390625,
+      "masked_tokens": 8192,
+      "all_tokens": 16384
+    },
+    "agreement_vs_sparse": {
+      "masked_top1_agreement": 0.9840087890625,
+      "all_token_top1_agreement": 0.98907470703125,
+      "masked_tokens": 8192,
+      "all_tokens": 16384
+    }
+  }
+}
