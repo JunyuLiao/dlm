@@ -58,9 +58,9 @@ while True:
     generated_ids = model.generate(
         model_inputs["input_ids"],
         tokenizer=tokenizer,
-        block_size=32,
+        block_size=16,
         max_new_tokens=2048,
-        small_block_size=8,
+        small_block_size=16,
         threshold=0.9,
     )
     response = tokenizer.decode(generated_ids[0][model_inputs["input_ids"].shape[1]:], skip_special_tokens=True)

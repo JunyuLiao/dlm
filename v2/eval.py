@@ -57,8 +57,8 @@ class Fast_dLLM_v2EvalHarness(LM):
         batch_size=32,
         mask_id=151665,
         use_block_cache=False,
-        small_block_size=8,
-        bd_size=32,
+        small_block_size=16,
+        bd_size=16,
         threshold=0.9,
         **kwargs,
     ):
@@ -105,8 +105,14 @@ class Fast_dLLM_v2EvalHarness(LM):
         self.model_path = model_path
         self.use_block_cache = use_block_cache
         self.small_block_size = small_block_size
-        self.threshold = threshold
         self.bd_size = bd_size
+        if self.small_block_size != self.bd_size:
+            raise ValueError(
+                "Sub-block splitting is disabled; small_block_size must equal bd_size"
+            )
+        if self.use_block_cache:
+            raise ValueError("The dual block-cache/sub-block path is disabled")
+        self.threshold = threshold
 
     @property
     def rank(self):

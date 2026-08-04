@@ -152,6 +152,142 @@ accelerate launch eval.py \
     --model_args model_path=Efficient-Large-Model/Fast_dLLM_v2_7B,threshold=0.9
 ```
 
+### Reference 2D-BLASST experiment
+
+The repository includes an opt-in, accuracy-only implementation of the
+two-dimensional BLASST tile decision. It keeps dense QK computation and
+emulates skipped softmax/PV tiles with a score mask; it is not a CUDA/Triton
+kernel and does not claim runtime speedup. The existing dense SDPA path is
+called directly when the feature is disabled.
+
+The reference experiment uses diffusion `block_size=16` by default. This is
+independent of the fixed BLASST Q/KV physical tile sizes of 128/64. Sub-block
+splitting and the associated dual block-cache path remain disabled unless
+explicitly requested; ordinary read-only KV caching remains available.
+
+Run ordinary-cache generation in dense and sparse modes:
+
+```bash
+python scripts/run_blasst_2d.py \
+    --output-dir ../results/blasst_2d/dense
+
+python scripts/run_blasst_2d.py \
+    --enable-blasst-2d \
+    --blasst-lambda 0.5 \
+    --collect-blasst-stats \
+    --output-dir ../results/blasst_2d/lambda_0p5
+```
+
+Run paired same-state and end-to-end evaluation:
+
+```bash
+python scripts/eval_blasst_2d.py \
+    --blasst-lambda 0.5 \
+    --collect-blasst-stats \
+    --output-dir ../results/blasst_2d_lambda_0p5
+```
+
+The evaluation exports `summary.json`, `per_step.csv`, `per_layer.csv`,
+`per_head.csv`, `run_config.json`, paired accuracy artifacts, and `report.md`.
+Recorded BLASST query length equals the configured diffusion block size.
+
+The older controlled valid-context experiment is retained for historical
+comparison:
+
+```bash
+python scripts/sweep_blasst_controlled.py \
+    --model-path /path/to/Fast_dLLM_v2_7B \
+    --output-dir ../results/blasst_controlled_sweeps
+```
+
+That script uses artificial long-context construction and is not the basis for
+the RULER claims below.
+
+Run paired labeled sanity metrics on that same manifest:
+
+```bash
+python scripts/eval_blasst_mixed_tasks.py \
+    --model-path /path/to/Fast_dLLM_v2_7B \
+    --max-new-tokens 512 \
+    --output-dir ../results/blasst_controlled_sweeps
+```
+
+This reports GSM8K extracted-answer exact match and resource-limited,
+execution-based HumanEval pass@1, plus agreement with dense generation.
+Agreement is a behavioral diagnostic, not task accuracy. With only eight
+examples per benchmark these scores are regression sanity checks; Wilson
+intervals are included and the full benchmark is still required for an
+accuracy claim. Both official source files are checksum validated.
+
+### Reproducible RULER evaluation
+
+The primary long-context evaluation is a separate pipeline using NVIDIA's
+official RULER generators and synthetic-task scorers at pinned commit
+`c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a`:
+
+```bash
+python scripts/eval_blasst_ruler.py \
+    --phase all \
+    --model-path /path/to/Fast_dLLM_v2_7B \
+    --ruler-root /path/to/NVIDIA-RULER-at-the-pinned-commit \
+    --output-dir ../results/blasst_ruler
+```
+
+The pipeline uses model-tokenizer-verified prompts from NIAH multi, variable
+tracking, and frequent-word extraction. It caches deterministic samples and
+states, sweeps context lengths 512–16384 and diffusion block/query lengths
+1–64 over eight λ values, and runs paired dense/sparse official RULER scoring
+on 100 balanced 8K examples at λ=0.003 and block/Q=16. The block sweep exactly
+reuses the 8K context samples. Sub-block splitting and the dual block cache
+remain disabled; physical Q/KV tiles remain 128/64.
+
+Outputs include aggregate, per-task, and per-example CSVs; sample manifests
+with seeds, tasks, actual lengths, source hashes, and generator commands;
+correctness JSON; and publication-quality PNG/PDF plots. Sparsity is always
+aggregated from total integer counts. This is dense-QK observation of
+theoretical skipped softmax/PV work and does not measure runtime speedup.
+
+### DualCache sub-block experiment
+
+The controlled DualCache experiment reuses the exact cached set of 100
+balanced 8K RULER examples above. It fixes λ=0.003 and physical Q/KV tiles
+128/64. The DualCache curve fixes outer block size 64 and sweeps sub-block
+sizes 4, 8, 16, and 32; the standalone comparison curve disables DualCache
+and sets both the outer/query block to 4, 8, 16, and 32:
+
+```bash
+PYTHONPATH=/path/to/transformers:/path/to/NVIDIA-RULER \
+python scripts/eval_blasst_dualcache_ruler.py \
+    --phase all \
+    --model-path /path/to/Fast_dLLM_v2_7B \
+    --ruler-root /path/to/NVIDIA-RULER-at-the-pinned-commit \
+    --source-results-dir ../results/blasst_ruler \
+    --output-dir ../results/blasst_dualcache_ruler
+```
+
+On the fixed manifest, official RULER accuracy was 73.43% dense and 71.47%
+for sparse generation without DualCache. DualCache results for sub-block
+sizes 4/8/16/32 were 75.20%/72.92%/74.50%/75.97%, with globally aggregated
+physical tile sparsity 53.85%/55.33%/54.48%/49.69% versus 44.28% for the
+no-DualCache sparse reference. These 100-example point estimates are not
+uncertainty bounds.
+
+For standalone no-DualCache block sizes 4/8/16/32, accuracy was
+86.40%/84.02%/78.00%/77.83% and global physical sparsity was
+68.32%/61.59%/55.90%/49.13%. Thus DualCache did not improve the paired
+accuracy–sparsity result over decoding directly at the same update size on
+these measurements; at size 32 it gained 0.57 percentage points of physical
+sparsity while losing 1.86 points of accuracy. This is a system-level
+comparison rather than a pure cache on/off ablation because the standalone
+curve changes the outer diffusion block boundary.
+
+The output records every denoising attention forward and every layer/head,
+runtime-observed query lengths, forward-weighted and globally
+count-aggregated sparsity, per-query-length decompositions, official
+per-task/per-example accuracy, correctness checks, a Markdown report, and
+PNG/PDF plots. It remains a dense-QK reference evaluation and makes no
+runtime-speedup claim.
+
 ## 🏗️ Architecture
 
 ### Training Recipe
