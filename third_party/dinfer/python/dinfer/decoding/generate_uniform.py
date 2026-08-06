@@ -9,6 +9,13 @@ from .utils import calculate_op_num, BlockLoc
 
 logger = logging.getLogger(__name__)
 
+
+def _decoder_should_continue(decoder, block):
+    should_continue = getattr(decoder, "should_continue", None)
+    if should_continue is not None:
+        return should_continue(block)
+    return bool((block == decoder.mask_id).any())
+
 def align_exp2(x: torch.Tensor):
     assert x.ndim == 0 and x.item() >= 0
     shift = 0 if x == 0 else int(torch.floor(torch.log2(x.to(torch.float64)))) + 1
@@ -99,14 +106,14 @@ class BlockRunner:
         seq_idx, x = select_undecoded(seq_idx, orig_x, x, block, block_loc, decoder.mask_id, writeback=False)
         block = x[:, block_loc.start:block_loc.end]
         batch_size = x.batch_size
-        while (block == decoder.mask_id).sum() > 0:
+        while _decoder_should_continue(decoder, block):
             unroll_k = int(max(min((block == decoder.mask_id).sum()//self.expected_tpf, self.maximum_unroll), 1))
             for unroll_i in range(unroll_k):
                 self.diff_iteration.forward(model, decoder, x, kv_cache, block, block_loc, block_id)
 
             # If there are more than one sequence, we should filter the sequences and only decode
             # on the sequences that still have masked tokens.
-            if batch_size > 1:
+            if batch_size > 1 and not hasattr(decoder, "should_continue"):
                 seq_idx, x = select_undecoded(seq_idx, orig_x, x, block, block_loc, decoder.mask_id, writeback=True)
                 block = x[:, block_loc.start:block_loc.end]
                 # If all blocks have been decoded, we can jumpt out.
@@ -236,7 +243,7 @@ class BlockDiffusionRunner(BlockRunner):
 
         input_block_mask_number = 0
         output = None
-        while (block == decoder.mask_id).sum() > 0:
+        while _decoder_should_continue(decoder, block):
             unroll_k = int(max(min((block == decoder.mask_id).sum()//self.expected_tpf, self.maximum_unroll), 1))
             for unroll_i in range(unroll_k):
                 input_block_mask_number = (block == decoder.mask_id).sum()
@@ -260,7 +267,7 @@ class BlockDiffusionRunner(BlockRunner):
                     self.need_cross_block_update = False
                 else:
                     output = self.diff_iteration.forward(model, decoder, x, kv_cache, block, block_loc, block_id, pos_ids, attn_mask, past_key_values, replace_position, self.backend)
-            if batch_size > 1:
+            if batch_size > 1 and not hasattr(decoder, "should_continue"):
                 seq_idx, x = select_undecoded(seq_idx, orig_x, x, block, block_loc, decoder.mask_id, writeback=True)
                 block = x[:, block_loc.start:block_loc.end]
                 # If all blocks have been decoded, we can jumpt out.
@@ -1204,4 +1211,3 @@ class BlockDiffusionLLM(DiffusionLLM):
                 
         logger.info(f'The number of diffusion iterations: {self.num_forwards}')
         return x.get_generated_tokens()
-

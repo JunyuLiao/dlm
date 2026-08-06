@@ -18,7 +18,12 @@ import time
 from contextlib import closing
 
 
-from .parallel_strategy import ThresholdParallelDecoder, CreditThresholdParallelDecoder, HierarchyDecoder
+from .parallel_strategy import (
+    CreditThresholdParallelDecoder,
+    EditableThresholdParallelDecoder,
+    HierarchyDecoder,
+    ThresholdParallelDecoder,
+)
 from .utils import KVCacheFactory, BlockIteratorFactory
 from .generate_uniform import IterSmoothWithVicinityCacheDiffusionLLM, IterSmoothDiffusionLLM, VicinityCacheDiffusionLLM, BlockWiseDiffusionLLM, BlockDiffusionLLM
 from ..model.modeling_fused_olmoe import FusedOlmoeForCausalLM
@@ -197,7 +202,8 @@ class SamplingParams:
     def __init__(self, threshold=0.9, low_threshold=0.6, cache='dual', temperature=0., early_stop=True, cont_weight=0.3,
             prefix_look=16, after_look=16, warmup_steps=4, enable_torch_compile=True, mask_id=156895, eos_id=156892, 
             parallel_decoding='threshold', use_credit=False, use_bd=True, max_length=4096, ep_size=1, prefilling_limit=256,
-            mini_batch_size=1, batch_size=1, use_naive_batching=False):
+            mini_batch_size=1, batch_size=1, use_naive_batching=False,
+            editing_threshold=None, max_post_steps=16):
         self.threshold = threshold
         self.low_threshold = low_threshold
         self.cache = cache
@@ -219,10 +225,23 @@ class SamplingParams:
         self.mini_batch_size = mini_batch_size
         self.batch_size = batch_size
         self.use_naive_batching = use_naive_batching
+        self.editing_threshold = editing_threshold
+        self.max_post_steps = max_post_steps
 
 def init_generator(model, sample_params, backend='vllm', max_length=4096):
     if sample_params.parallel_decoding == 'threshold':
-        if sample_params.use_credit:
+        if sample_params.editing_threshold is not None:
+            if sample_params.use_credit:
+                raise ValueError("credit decoding and LLaDA2.1 token editing cannot be combined")
+            decoder = EditableThresholdParallelDecoder(
+                temperature=sample_params.temperature,
+                threshold=sample_params.threshold,
+                editing_threshold=sample_params.editing_threshold,
+                max_post_steps=sample_params.max_post_steps,
+                mask_id=sample_params.mask_id,
+                eos_id=sample_params.eos_id,
+            )
+        elif sample_params.use_credit:
             decoder = CreditThresholdParallelDecoder(temperature=sample_params.temperature, threshold=sample_params.threshold,
                     mask_id=sample_params.mask_id, eos_id=sample_params.eos_id)
         else:
@@ -257,7 +276,8 @@ def init_generator(model, sample_params, backend='vllm', max_length=4096):
     else:
         dllm = BlockDiffusionLLM(model, decoder, BlockIteratorFactory(start_block_align=True, use_block_diffusion=True), 
             cache_factory=cache_factory, early_stop=sample_params.early_stop, maximum_unroll=1, expected_tpf=15, backend=backend, 
-            prefilling_limit=sample_params.prefilling_limit, mini_batch_size=sample_params.mini_batch_size, use_naive_batching=sample_params.use_naive_batching)
+            prefilling_limit=sample_params.prefilling_limit, mini_batch_size=sample_params.mini_batch_size,
+            use_naive_batching=(sample_params.use_naive_batching or sample_params.editing_threshold is not None))
 
     return dllm
 
@@ -641,4 +661,3 @@ class DiffusionLLMServing:
                         ) from e
         return ports
     
-

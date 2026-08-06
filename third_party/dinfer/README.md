@@ -45,6 +45,7 @@ dInfer supports multiple diffusion language model variants with different archit
 
 | Model | Size | Implementation | HuggingFace Link |
 |-------|------|----------------|------------------|
+| LLaDA2.1-mini | 16B | [LLaDA2SGLangLM](python/dinfer/model/modeling_llada2_moe_sglang.py) | [inclusionAI/LLaDA2.1-mini](https://huggingface.co/inclusionAI/LLaDA2.1-mini) |
 | LLaDA2.0-mini | 16B | [LLaDA2MoeModelLM](python/dinfer/model/modeling_llada2_moe.py) | [inclusionAI/LLaDA2.0-mini](https://huggingface.co/inclusionAI/LLaDA2.0-mini) |
 | LLaDA2.0-flash | 100B | [LLaDA2MoeModelLM](python/dinfer/model/modeling_llada2_moe.py) | [inclusionAI/LLaDA2.0-flash](https://huggingface.co/inclusionAI/LLaDA2.0-flash) |
 | LLaDA2.0-mini-preview | 16B | [LLaDA2MoeModelLM](python/dinfer/model/modeling_llada2_moe.py) | [inclusionAI/LLaDA2.0-mini-preview](https://huggingface.co/inclusionAI/LLaDA2.0-mini-preview) |
@@ -108,6 +109,42 @@ model = AutoModelForCausalLM.from_pretrained(m, trust_remote_code=True, torch_dt
 ```
 
 ### Run Inference
+
+#### LLaDA2.1-mini
+
+LLaDA2.1-mini uses the existing LLaDA2 SGLang backend plus its token-editing
+decoder. The model's speed-mode defaults are `threshold=0.5`,
+`editing_threshold=0.0`; quality mode uses `threshold=0.7`,
+`editing_threshold=0.5`. Both use 32-token blocks and up to 16 post-denoising
+editing steps.
+
+```python
+from dinfer import DiffusionLLMServing, SamplingParams
+
+params = SamplingParams(
+    threshold=0.5,
+    editing_threshold=0.0,
+    max_post_steps=16,
+    cache="prefix",
+    use_bd=True,
+    mask_id=156895,
+    eos_id=156892,
+)
+server = DiffusionLLMServing(
+    "/path/to/LLaDA2.1-mini",
+    model_type="llada2.1-mini",
+    sample_params=params,
+    backend="sglang",
+)
+```
+
+`SamplingParams` does not contain a `block_length` field; pass
+`block_length=32` to `server.generate(...)`.
+
+The lm-eval wrapper is available in
+`evaluations/eval_llada2_1_mini.sh`. The paired dense/BLASST reference
+experiment, which uses LLaDA2.1's native attention and editing generation, is
+`../../v2/scripts/eval_blasst_llada21.py`.
 
 #### Benchmark (speed only)
 

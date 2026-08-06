@@ -458,6 +458,91 @@ class ThresholdParallelDecoder(ParallelDecoder):
         broadcast_if_needed(x.data)
 
 
+class EditableThresholdParallelDecoder(ThresholdParallelDecoder):
+    """LLaDA2.1 threshold decoder with confidence-based token editing.
+
+    Masked positions follow dInfer's threshold decoder. Once a token has been
+    produced, LLaDA2.1 may replace it when a different top-1 prediction exceeds
+    ``editing_threshold``. Prompt tokens are always immutable. After the final
+    mask is filled, at most ``max_post_steps`` extra editing forwards are run,
+    stopping early as soon as a forward makes no edit.
+    """
+
+    def __init__(
+        self,
+        *args,
+        editing_threshold=0.5,
+        max_post_steps=16,
+        **kwargs,
+    ):
+        super().__init__(*args, **kwargs)
+        if editing_threshold is None or not 0.0 <= editing_threshold <= 1.0:
+            raise ValueError("editing_threshold must be in [0, 1]")
+        if max_post_steps < 0:
+            raise ValueError("max_post_steps must be non-negative")
+        self.editing_threshold = float(editing_threshold)
+        self.max_post_steps = int(max_post_steps)
+        self._continue_post = False
+        self._post_steps = 0
+
+    def block_init(self, block_x, block_id):
+        self._continue_post = False
+        self._post_steps = 0
+
+    def should_continue(self, block):
+        return bool((block == self.mask_id).any()) or self._continue_post
+
+    def decode(self, logits, block_start, block_end, x, iter_threshold=None):
+        if iter_threshold is None:
+            iter_threshold = self.threshold
+
+        curr_x = x[:, block_start:block_end]
+        mask_index = curr_x == self.mask_id
+        assert mask_index.shape[1] == logits.shape[1]
+        had_masks = bool(mask_index.any())
+        if not had_masks:
+            self._post_steps += 1
+
+        logits_with_noise = add_gumbel_noise(logits, temperature=self.temperature)
+        x0 = torch.argmax(logits_with_noise, dim=-1)
+        probability_dtype = torch.float64 if self.use_float64 else torch.float32
+        probabilities = F.softmax(logits.to(probability_dtype), dim=-1)
+        x0_p = torch.gather(probabilities, -1, x0.unsqueeze(-1)).squeeze(-1)
+
+        fill_confidence = torch.where(
+            mask_index & (x0 != self.mask_id), x0_p, -torch.inf
+        )
+        actual_threshold = (
+            fill_confidence.max(dim=1).values - 1e-5
+        ).clamp(-1000, iter_threshold).unsqueeze(-1)
+        fill_index = mask_index & (fill_confidence >= actual_threshold)
+
+        absolute_positions = torch.arange(
+            block_start, block_end, device=curr_x.device
+        ).unsqueeze(0)
+        prompt_lengths = (x.prompt != self.mask_id).sum(dim=1, keepdim=True)
+        editable = (~mask_index) & (absolute_positions >= prompt_lengths)
+        edit_index = (
+            editable
+            & (x0 != curr_x)
+            & (x0 != self.mask_id)
+            & (x0_p > self.editing_threshold)
+        )
+        transfer_index = fill_index | edit_index
+        x[:, block_start:block_end] = torch.where(transfer_index, x0, curr_x)
+        broadcast_if_needed(x.data)
+
+        masks_remain = bool((x[:, block_start:block_end] == self.mask_id).any())
+        if masks_remain:
+            self._continue_post = False
+        elif had_masks:
+            self._continue_post = self.max_post_steps > 0
+        else:
+            self._continue_post = bool(edit_index.any()) and (
+                self._post_steps < self.max_post_steps
+            )
+
+
 class CreditThresholdParallelDecoder(ThresholdParallelDecoder):
     """ This decoder deocdes tokens in parallel based on a threshold + credit.
     The decoder decodes a token when its confidence is larger than a threshold.

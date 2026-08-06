@@ -11,7 +11,12 @@
 __version__ = "0.1"
 
 
-from .decoding.parallel_strategy import ThresholdParallelDecoder,CreditThresholdParallelDecoder,HierarchyDecoder
+from .decoding.parallel_strategy import (
+    CreditThresholdParallelDecoder,
+    EditableThresholdParallelDecoder,
+    HierarchyDecoder,
+    ThresholdParallelDecoder,
+)
 
 from .decoding.generate_uniform import DiffusionLLM, BlockWiseDiffusionLLM, VicinityCacheDiffusionLLM, BlockWiseDiffusionLLMWithSP, BlockDiffusionLLMAttnmask, BlockDiffusionLLM
 from .decoding.generate_uniform import IterSmoothDiffusionLLM, IterSmoothWithVicinityCacheDiffusionLLM

@@ -966,8 +966,9 @@ def install_blasst_2d(
     dual_cache_only: bool = False,
     ordinary_cache_queries_only: bool = False,
     sweep_lambdas: Optional[list[float] | tuple[float, ...]] = None,
+    attention_class_names: Optional[tuple[str, ...]] = None,
 ) -> Blasst2DRuntime:
-    """Install BLASST only on one loaded Fast-dLLM model.
+    """Install BLASST on a loaded model using the HF attention registry.
 
     The remote model hard-codes the ``sdpa`` entry from its imported
     ``ALL_ATTENTION_FUNCTIONS`` registry. We replace that registry entry with
@@ -994,13 +995,16 @@ def install_blasst_2d(
         )
         for value in runtime.sweep_lambdas
     }
+    if attention_class_names is None:
+        attention_class_names = ("Fast_dLLM_QwenAttention",)
     attention_modules = [
         module
         for module in model.modules()
-        if module.__class__.__name__ == "Fast_dLLM_QwenAttention"
+        if module.__class__.__name__ in attention_class_names
     ]
     if not attention_modules:
-        raise ValueError("No Fast_dLLM_QwenAttention modules found")
+        expected = ", ".join(attention_class_names)
+        raise ValueError(f"No supported attention modules found (expected: {expected})")
 
     modeling_module = importlib.import_module(attention_modules[0].__class__.__module__)
     registry = modeling_module.ALL_ATTENTION_FUNCTIONS

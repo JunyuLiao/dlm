@@ -28,7 +28,7 @@ from dinfer.model.modeling_llada2_moe_sglang import LLaDA2SGLangLM
 from dinfer.decoding.diffusion_runner import ModelRunner
 from dinfer.model import LLaDAMoeModelLM, LLaDAModelLM, LLaDA2MoeModelLM
 from dinfer import BlockIteratorFactory, KVCacheFactory
-from dinfer import ThresholdParallelDecoder,CreditThresholdParallelDecoder, HierarchyDecoder, BlockWiseDiffusionLLM, IterSmoothDiffusionLLM, VicinityCacheDiffusionLLM, IterSmoothWithVicinityCacheDiffusionLLM, BlockDiffusionLLM    
+from dinfer import CreditThresholdParallelDecoder, EditableThresholdParallelDecoder, HierarchyDecoder, ThresholdParallelDecoder, BlockWiseDiffusionLLM, IterSmoothDiffusionLLM, VicinityCacheDiffusionLLM, IterSmoothWithVicinityCacheDiffusionLLM, BlockDiffusionLLM
 from sglang.srt.server_args import ServerArgs
 from sglang.srt.layers.moe import initialize_moe_config
 from dataclasses import dataclass
@@ -96,7 +96,16 @@ def run_benchmark(world_size, rank, gpu_id, tokenizer, args):
     batch_size = args.batch_size
 
     if args.parallel_decoding == 'threshold':
-        if args.use_credit:
+        if args.editing_threshold is not None:
+            decoder = EditableThresholdParallelDecoder(
+                temperature=0,
+                threshold=args.threshold,
+                editing_threshold=args.editing_threshold,
+                max_post_steps=args.max_post_steps,
+                mask_id=mask_id,
+                eos_id=eos_id,
+            )
+        elif args.use_credit:
             decoder = CreditThresholdParallelDecoder(temperature=0, threshold=args.threshold, mask_id=mask_id, eos_id=eos_id)
         else:
             decoder = ThresholdParallelDecoder(temperature=0, threshold=args.threshold, mask_id=mask_id, eos_id=eos_id)
@@ -272,6 +281,8 @@ class EvalConfig:
     batch_size: int = 1
     save_samples: bool = False
     speed_path: str = ''
+    editing_threshold: float = None
+    max_post_steps: int = 16
 
 def set_seed(seed):
     torch.manual_seed(seed)
@@ -316,6 +327,8 @@ class DInferEvalHarness(LM):
         use_shift = False,
         model_type = 'llada2',
         save_samples = False,
+        editing_threshold = None,
+        max_post_steps = 16,
         **kwargs
     ):
 
@@ -354,11 +367,15 @@ class DInferEvalHarness(LM):
         self.use_shift = use_shift
         self.model_type = model_type
         self.save_samples = save_samples
+        self.editing_threshold = (
+            None if editing_threshold is None else float(editing_threshold)
+        )
+        self.max_post_steps = int(max_post_steps)
 
-        if self.model_type == 'llada2': 
+        if self.model_type in ('llada2', 'llada2.1', 'llada2.1-mini'):
             self.mask_id = 156895
             self.eos_id = 156892
-            self.vocab_size = 156896
+            self.vocab_size = 157184 if self.model_type != 'llada2' else 156896
             self.is_moe = True
         else:
             raise ValueError('model type not supported')
@@ -575,7 +592,7 @@ class DInferEvalHarness(LM):
         procs = []
         answers = []
         gpus = [int(gpu) for gpu in self.gpus.split(';')]
-        args = {"gpu": gpus, "batch_size": self.batch_size, "model_name": self.model_path, "gen_len": self.gen_length, "block_length": self.block_length, "prefix_look": self.prefix_look, "after_look": self.after_look, "warmup_times": self.warmup_times, "low_threshold": self.low_threshold, "threshold": self.threshold, "cont_weight": self.cont_weight, "use_credit": self.use_credit, "cache": self.cache, "parallel_decoding": self.parallel_decoding, "tp_size": self.tp_size, "save_path": self.save_path, "use_cudagraph": self.use_cudagraph, "use_compile": self.use_compile,"use_bd": self.use_bd, "use_shift": self.use_shift, "model_type": self.model_type, "vocab_size": self.vocab_size, "batch_size": self.batch_size, "speed_path": self.speed_path}
+        args = {"gpu": gpus, "batch_size": self.batch_size, "model_name": self.model_path, "gen_len": self.gen_length, "block_length": self.block_length, "prefix_look": self.prefix_look, "after_look": self.after_look, "warmup_times": self.warmup_times, "low_threshold": self.low_threshold, "threshold": self.threshold, "cont_weight": self.cont_weight, "use_credit": self.use_credit, "cache": self.cache, "parallel_decoding": self.parallel_decoding, "tp_size": self.tp_size, "save_path": self.save_path, "use_cudagraph": self.use_cudagraph, "use_compile": self.use_compile,"use_bd": self.use_bd, "use_shift": self.use_shift, "model_type": self.model_type, "vocab_size": self.vocab_size, "batch_size": self.batch_size, "speed_path": self.speed_path, "editing_threshold": self.editing_threshold, "max_post_steps": self.max_post_steps}
         args = EvalConfig(**args)
         args.tp_size = len(gpus)
         args.master_port = self.master_port
