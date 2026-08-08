@@ -121,12 +121,12 @@ This repo ships a **minimal multimodal MDM fine-tuning sample** wired to LMFlow�
 | Path | Role |
 |------|------|
 | [`train_scripts/finetune_dvlm.py`](train_scripts/finetune_dvlm.py) | Invokes LMFlow `finetuner` + `Dataset(..., backend="custom_multi_modal")` + `AutoModel.get_model(...)`. Supports CLI args or a single `.json` config file (`python finetune_dvlm.py /path/to/args.json`). |
-| [`train_scripts/finetune_multimodal_example.sh`](train_scripts/finetune_multimodal_example.sh) | DeepSpeed launcher: exports `PYTHONPATH=<repo>/third_party`, optional resume from latest `checkpoint-*` under `--output_dir`, default ZeRO JSON `v2/configs/ds_config_zero2_no_offload.json`. |
+| [`train_scripts/finetune_multimodal_example.sh`](train_scripts/finetune_multimodal_example.sh) | DeepSpeed launcher: exports `PYTHONPATH=<repo>/third_party`, optional resume from latest `checkpoint-*` under `--output_dir`, default ZeRO JSON `fast_dllm_v2/configs/ds_config_zero2_no_offload.json`. |
 | [`data/download_example_dataset.sh`](data/download_example_dataset.sh) | Fetches ALLaVA-4V LAION split (JSON + optional `images_*.zip` chunks) into `fast_dvlm/data/ALLaVA-4V/` and writes `source_training_env.sh`. |
 
 ### Prerequisites
 
-- **Deps:** From repo root: `pip install -r fast_dvlm/requirements.txt` and `pip install -e ./v2/` for the LMFlow CLI package—or rely only on **`PYTHONPATH=<repo>/third_party`** (`finetune_multimodal_example.sh` exports this for you).
+- **Deps:** From repo root: `pip install -r fast_dvlm/requirements.txt` and `pip install -e ./fast_dllm_v2/` for the LMFlow CLI package—or rely only on **`PYTHONPATH=<repo>/third_party`** (`finetune_multimodal_example.sh` exports this for you).
 - **Runtime:** GPU nodes with **torch**, **DeepSpeed**, **transformers**, **Pillow**, **datasets** (`huggingface_hub` for the downloader).
 - **Checkpoint:** override the launcher default with a public or local checkpoint, e.g. `MODEL_PATH=Efficient-Large-Model/Fast_dVLM_3B`.
 
@@ -161,7 +161,7 @@ bash fast_dvlm/train_scripts/finetune_multimodal_example.sh
 Writes to `OUTPUT_DIR` (default: `Fast-dLLM/output_models/finetune_fast_dVLM_3B_example`). Common overrides via environment variables:
 
 - **`MODEL_PATH`**, **`TOKENIZER_NAME`**, **`OUTPUT_DIR`**, **`DATASET_PATH`**, **`IMAGE_FOLDER`**
-- **`DEEPSPEED_CONFIG`** (default points at `v2/configs/ds_config_zero2_no_offload.json`)
+- **`DEEPSPEED_CONFIG`** (default points at `fast_dllm_v2/configs/ds_config_zero2_no_offload.json`)
 - **`MASTER_PORT`** or full **`DEEPSPEED_ARGS`**
 - **Hyperparameters:** `NUM_TRAIN_EPOCHS`, `LEARNING_RATE`, `PER_DEVICE_TRAIN_BATCH_SIZE`, `GRADIENT_ACCUMULATION_STEPS`, `SAVE_STEPS`, `MAX_STEPS`, `WARMUP_RATIO`, … (passed through to HF `TrainingArguments` / LMFlow)
 
@@ -290,7 +290,7 @@ Fast-dLLM/
 │   ├── VLMEvalKit/
 │   ├── sglang/                 # Customized SGLang with Fast-dVLM model + dLLM algorithms
 │   └── lmflow/                 # LMFlow fork (multimodal finetuner; PYTHONPATH via train script)
-├── v2/
+├── fast_dllm_v2/
 │   └── configs/                # e.g. ds_config_zero2_no_offload.json (DeepSpeed ZeRO used by train sample)
 └── fast_dvlm/
     ├── README.md

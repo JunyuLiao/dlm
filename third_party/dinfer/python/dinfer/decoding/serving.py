@@ -6,11 +6,8 @@ from queue import Empty
 import numpy as np
 import torch
 import torch.distributed as dist
-from vllm import distributed as vllm_dist
 from transformers import AutoConfig
 _original_from_pretrained = AutoConfig.from_pretrained
-from vllm.config import ParallelConfig
-from vllm.config import VllmConfig, set_current_vllm_config, get_current_vllm_config
 import socket
 from typing import Any, Optional, List, Optional, Tuple
 import random
@@ -26,8 +23,6 @@ from .parallel_strategy import (
 )
 from .utils import KVCacheFactory, BlockIteratorFactory
 from .generate_uniform import IterSmoothWithVicinityCacheDiffusionLLM, IterSmoothDiffusionLLM, VicinityCacheDiffusionLLM, BlockWiseDiffusionLLM, BlockDiffusionLLM
-from ..model.modeling_fused_olmoe import FusedOlmoeForCausalLM
-from ..model.modeling_llada import LLaDAModelLM
 import time
 import json
 import sys
@@ -370,6 +365,11 @@ def moe_server_process(model_path, sample_params, world_size, rank, gpu_id, q, r
                 logger.error(f"[ERROR_Q exception in {rank}].")
 
 def _moe_server_process(model_path, sample_params, world_size, rank, gpu_id, q, res_q, master_port):
+    from vllm import distributed as vllm_dist
+    from vllm.config import ParallelConfig, VllmConfig, set_current_vllm_config
+
+    from ..model.modeling_fused_olmoe import FusedOlmoeForCausalLM
+
     torch.cuda.set_device(gpu_id)
     device = torch.device(gpu_id)
     logger.info(f'start MOE server. server port: {master_port}')
@@ -409,6 +409,8 @@ def server_process(model_path, sample_params, world_size, rank, gpu_id, q, res_q
                 logger.error(f"[ERROR_Q exception in {rank}].")
 
 def _server_process(model_path, sample_params, world_size, rank, gpu_id, q, res_q, master_port):
+    from ..model.modeling_llada import LLaDAModelLM
+
     device = torch.device(gpu_id)
 
     os.environ['MASTER_ADDR'] = '127.0.0.1'

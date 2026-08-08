@@ -26,7 +26,6 @@ from lm_eval.api.model import LM
 from lm_eval.api.registry import register_model
 from dinfer.model.modeling_llada2_moe_sglang import LLaDA2SGLangLM
 from dinfer.decoding.diffusion_runner import ModelRunner
-from dinfer.model import LLaDAMoeModelLM, LLaDAModelLM, LLaDA2MoeModelLM
 from dinfer import BlockIteratorFactory, KVCacheFactory
 from dinfer import CreditThresholdParallelDecoder, EditableThresholdParallelDecoder, HierarchyDecoder, ThresholdParallelDecoder, BlockWiseDiffusionLLM, IterSmoothDiffusionLLM, VicinityCacheDiffusionLLM, IterSmoothWithVicinityCacheDiffusionLLM, BlockDiffusionLLM
 from sglang.srt.server_args import ServerArgs
@@ -91,7 +90,18 @@ def run_benchmark(world_size, rank, gpu_id, tokenizer, args):
     model = model.to(device)
     input_lengths = [inp.size(-1) for inp in all_input_ids]
     max_length = max(input_lengths)+args.gen_len
-    model = ModelRunner(model, device, server_args=server_args, max_length=max_length)
+    model = ModelRunner(
+        model,
+        device,
+        server_args=server_args,
+        max_length=max_length,
+        enable_compile=args.use_compile,
+        enable_cuda_graph=args.use_cudagraph,
+        supported_batch_sizes=[1],
+        prefill_lengths=[block_length],
+        decoding_lengths=[block_length],
+        use_cross_block=args.batch_size == 1,
+    )
     
     batch_size = args.batch_size
 
@@ -359,7 +369,7 @@ class DInferEvalHarness(LM):
         self.use_compile = use_compile
         self.parallel = parallel
         self.use_cudagraph = use_cudagraph
-        self.gpus = gpus
+        self.gpus = str(gpus)
         self.prefix_look = prefix_look
         self.after_look = after_look
         self.use_bd = use_bd
@@ -381,6 +391,8 @@ class DInferEvalHarness(LM):
             raise ValueError('model type not supported')
 
         accelerator = accelerate.Accelerator()
+        self._rank = 0
+        self._world_size = 1
         if accelerator.num_processes > 1:
             self.accelerator = accelerate.Accelerator()
             self._rank = self.accelerator.local_process_index

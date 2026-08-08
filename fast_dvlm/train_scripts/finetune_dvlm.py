@@ -14,7 +14,7 @@ Example data: ``bash fast_dvlm/data/download_example_dataset.sh allava`` then
 fetches all chunks ``images_0.zip`` … ``images_9.zip`` on the Hub.
 
 Run with ``PYTHONPATH`` set to ``Fast-dLLM/third_party`` (see ``finetune_multimodal_example.sh``),
-or after ``pip install -e v2/``.
+or after ``pip install -e fast_dllm_v2/``.
 """
 
 import os

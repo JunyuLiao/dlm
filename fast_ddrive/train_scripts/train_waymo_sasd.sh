@@ -41,7 +41,7 @@ else
   deepspeed_args="--master_port=${MASTER_PORT:-11001}"
 fi
 
-ds_config="${DEEPSPEED_CONFIG:-${_repo_root}/v2/configs/ds_config_zero2_no_offload.json}"
+ds_config="${DEEPSPEED_CONFIG:-${_repo_root}/fast_dllm_v2/configs/ds_config_zero2_no_offload.json}"
 if [[ ! -f "${ds_config}" ]]; then
   echo "Error: DeepSpeed config not found: ${ds_config}"
   exit 1

@@ -118,6 +118,15 @@ decoder. The model's speed-mode defaults are `threshold=0.5`,
 `editing_threshold=0.5`. Both use 32-token blocks and up to 16 post-denoising
 editing steps.
 
+The bundled SGLang backend is the tested path. On H100, its binary-compatible
+core stack is PyTorch 2.9.1 (CUDA 12.8), Transformers 4.57.1,
+`flashinfer-python==0.5.3`, and `sgl-kernel==0.3.20`. Add both bundled packages
+to `PYTHONPATH` when dInfer and SGLang are not installed editable:
+
+```bash
+export PYTHONPATH="$PWD/third_party/sglang/python:$PWD/third_party/dinfer/python"
+```
+
 ```python
 from dinfer import DiffusionLLMServing, SamplingParams
 
@@ -145,6 +154,15 @@ The lm-eval wrapper is available in
 `evaluations/eval_llada2_1_mini.sh`. The paired dense/BLASST reference
 experiment, which uses LLaDA2.1's native attention and editing generation, is
 `../../v2/scripts/eval_blasst_llada21.py`.
+
+For a full-checkpoint single-H100 deployment smoke (weight loading, forward KV
+output, cached block diffusion, and editing), run:
+
+```bash
+python third_party/dinfer/tests/smoke_llada21_sglang.py \
+  --model-path inclusionAI/LLaDA2.1-mini \
+  --gen-length 32 --block-length 32
+```
 
 #### Benchmark (speed only)
 

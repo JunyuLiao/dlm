@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dllm-inference"
+version = "0.1.0"
+description = "A model-independent inference and evaluation framework for diffusion LLMs"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "numpy",
+    "PyYAML",
+    "torch>=2.4",
+    "transformers==5.11.0",
+    "accelerate>=1.1.0",
+    "Pillow>=10.0.1",
+    "torchvision",
+]
+
+[project.optional-dependencies]
+eval = ["matplotlib", "nltk", "scipy", "tenacity", "wonderwords"]
+test = ["pytest>=8"]
+
+[project.scripts]
+dllm-eval-ruler = "dllm.cli.eval_ruler:main"
+dllm-prepare-ruler = "dllm.cli.prepare_ruler:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "fast_dllm_v2/tests"]
+markers = [
+    "cuda: requires a CUDA device",
+    "model: downloads or loads a real model checkpoint",
+]

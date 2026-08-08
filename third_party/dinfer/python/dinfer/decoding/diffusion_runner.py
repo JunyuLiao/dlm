@@ -10,7 +10,13 @@ from sglang.srt.utils import (
     is_hip,
 )
 import bisect
-from sglang.srt.layers.torchao_utils import save_gemlite_cache
+try:
+    from sglang.srt.layers.torchao_utils import save_gemlite_cache
+except ImportError:
+    # SGLang 0.5.6 removed this optional GemLite cache hook. LLaDA2.1-mini
+    # uses BF16 weights, so no quantization cache needs to be persisted.
+    def save_gemlite_cache():
+        return None
 from sglang.srt.distributed import (
     get_tensor_model_parallel_rank,
     get_tp_group,

@@ -1,9 +1,9 @@
 #!/bin/bash
-# Example Fast-dVLM finetuning (multimodal MDM). Mirrors v2/train_scripts/finetune_alpaca.sh style.
+# Example Fast-dVLM finetuning (multimodal MDM). Mirrors fast_dllm_v2/train_scripts/finetune_alpaca.sh style.
 # Uses only files inside this Fast-dLLM repo: vendored lmflow under third_party/ and
 # fast_dvlm/train_scripts/finetune_dvlm.py.
 #
-# Prerequisites: pip install -e v2/  (or set PYTHONPATH to Fast-dLLM/third_party), torch, deepspeed,
+# Prerequisites: pip install -e fast_dllm_v2/ (or set PYTHONPATH to the repository's third_party), torch, deepspeed,
 #   transformers, Pillow, datasets (see LMFlow multimodal / custom_multi_modal docs).
 #
 # Dataset (LMFlow custom_multi_modal): DATASET_PATH is one JSON file (list of samples) with
@@ -63,7 +63,7 @@ if [[ -n "${latest_checkpoint}" ]]; then
   resume_arg="--resume_from_checkpoint $(printf '%q' "${latest_checkpoint}")"
 fi
 
-ds_config="${DEEPSPEED_CONFIG:-${_repo_root}/v2/configs/ds_config_zero2_no_offload.json}"
+ds_config="${DEEPSPEED_CONFIG:-${_repo_root}/fast_dllm_v2/configs/ds_config_zero2_no_offload.json}"
 if [[ ! -f "${ds_config}" ]]; then
   echo "Error: DeepSpeed config not found: ${ds_config}"
   exit 1

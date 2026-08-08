@@ -11,7 +11,7 @@ Pillow>=10.0.0
 openai>=1.0.0
 
 # Training (Fast-dVLM finetuning via vendored lmflow under ``third_party/lmflow``).
-# Mirrors v2/requirements.txt — the lmflow code paths still rely on
+# Mirrors fast_dllm_v2/requirements.txt — the lmflow code paths still rely on
 # ``transformers.utils.send_example_telemetry`` etc. that newer transformers removed.
 # See fast_dvlm/train_scripts/finetune_multimodal_example.sh.
 transformers==4.57.1
