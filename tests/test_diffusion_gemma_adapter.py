@@ -6,7 +6,7 @@ import pytest
 import torch
 import torch.nn as nn
 
-from dllm.attention.blasst import Blasst2DConfig, apply_blasst_2d
+from dllm.attention.blasst import Blasst2DConfig, apply_blasst_2d, slow_blasst_2d
 from dllm.models import GenerationRequest, create_adapter
 from dllm.models.adapters import diffusion_gemma as diffusion_module
 
@@ -201,6 +201,50 @@ def test_steps_and_sampler_extras_map_only_to_native_parameters(fake_stack) -> N
     assert "block_size" not in kwargs
 
 
+def test_scalar_temperature_and_top_p_disable_native_schedule(fake_stack) -> None:
+    adapter = diffusion_module.DiffusionGemmaAdapter("checkpoint", device="cpu")
+    adapter.model = FakeModel()
+    kwargs = adapter._generation_kwargs(
+        GenerationRequest(
+            "hello",
+            max_new_tokens=4,
+            temperature=0.6,
+            extra={"top_p": 0.95, "thinking": True},
+        )
+    )
+    assert kwargs["generation_config"].t_min is None
+    assert kwargs["generation_config"].t_max is None
+    assert len(kwargs["logits_processor"]) == 2
+    logits = torch.tensor([[[4.0, 3.0, 2.0, 1.0]]])
+    processed = kwargs["logits_processor"](
+        torch.tensor([[1]]), logits, cur_step=torch.tensor(1)
+    )
+    assert processed.shape == logits.shape
+    assert torch.isfinite(processed).any(dim=-1).all()
+    assert adapter.model.generation_config.t_min == 0.4
+    assert adapter.model.generation_config.t_max == 0.8
+
+
+@pytest.mark.parametrize(
+    ("temperature", "extra", "message"),
+    [
+        (0.0, {"top_p": 0.95}, "positive temperature"),
+        (0.6, {"top_p": 1.1}, "at most 1"),
+    ],
+)
+def test_invalid_sampling_controls_are_rejected(
+    fake_stack, temperature, extra, message
+) -> None:
+    adapter = diffusion_module.DiffusionGemmaAdapter("checkpoint", device="cpu")
+    adapter.model = FakeModel()
+    with pytest.raises(ValueError, match=message):
+        adapter._generation_kwargs(
+            GenerationRequest(
+                "hello", max_new_tokens=4, temperature=temperature, extra=extra
+            )
+        )
+
+
 @pytest.mark.parametrize(
     "extra,match",
     [
@@ -246,8 +290,46 @@ def test_dense_prompt_prefix_is_never_blasst_eligible() -> None:
     assert torch.equal(masked[..., :2], scores[..., :2])
 
 
-def test_dense_kv_prefix_matches_encoder_cache_length() -> None:
+def test_masked_empty_cache_tile_is_counted_as_physical_work() -> None:
+    scores = torch.tensor(
+        [[[[3.0, 2.0, -torch.inf, -torch.inf], [4.0, 1.0, -torch.inf, -torch.inf]]]]
+    )
+    valid = torch.tensor(
+        [[[[True, True, False, False], [True, True, False, False]]]]
+    )
+    config = Blasst2DConfig(
+        blasst_lambda=0.5,
+        q_tile_size=2,
+        kv_tile_size=2,
+        include_masked_kv_tiles_in_physical_stats=True,
+    )
+    masked, decisions = apply_blasst_2d(scores, valid, None, config)
+    slow_masked, slow_decisions = slow_blasst_2d(scores, valid, None, config)
+
+    assert decisions.eligible_mask.sum().item() == 2
+    assert decisions.skip_mask[..., 1].all()
+    assert decisions.structural_mask.sum().item() == 0
+    assert torch.equal(masked, scores)
+    assert torch.equal(masked, slow_masked)
+    assert torch.equal(decisions.eligible_mask, slow_decisions.eligible_mask)
+    assert torch.equal(decisions.skip_mask, slow_decisions.skip_mask)
+
+
+def test_masked_empty_cache_tile_is_structural_by_default() -> None:
+    scores = torch.tensor([[[[3.0, 2.0, -torch.inf, -torch.inf]]]])
+    valid = torch.tensor([[[[True, True, False, False]]]])
+    _, decisions = apply_blasst_2d(
+        scores,
+        valid,
+        None,
+        Blasst2DConfig(blasst_lambda=0.5, q_tile_size=1, kv_tile_size=2),
+    )
+    assert decisions.eligible_mask.sum().item() == 1
+    assert decisions.structural_mask[..., 1].all()
+
+
+def test_encoder_cache_is_blasst_eligible() -> None:
     adapter = diffusion_module.DiffusionGemmaAdapter("checkpoint")
     query = torch.empty(1, 16, 256, 64)
     key = torch.empty(1, 8, 768, 64)
-    assert adapter.blasst_dense_kv_prefix(None, query, key, key, None, {}) == 512
+    assert adapter.blasst_dense_kv_prefix(None, query, key, key, None, {}) == 0

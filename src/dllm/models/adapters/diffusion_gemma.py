@@ -24,7 +24,46 @@ _SAMPLER_KEYS = (
     "confidence_threshold",
     "stability_threshold",
 )
-_EXTRA_KEYS = frozenset((*_SAMPLER_KEYS, "thinking"))
+_EXTRA_KEYS = frozenset((*_SAMPLER_KEYS, "thinking", "top_p"))
+
+
+class _ConstantTemperatureLogitsProcessor:
+    """Apply an AR-style scalar temperature to DiffusionGemma logits."""
+
+    def __init__(self, temperature: float) -> None:
+        self.temperature = temperature
+
+    def __call__(self, input_ids: torch.Tensor, scores: torch.Tensor) -> torch.Tensor:
+        del input_ids
+        return scores / self.temperature
+
+
+class _LastDimTopPLogitsProcessor:
+    """Top-p filtering for DiffusionGemma's [batch, canvas, vocab] logits."""
+
+    def __init__(self, top_p: float) -> None:
+        self.top_p = top_p
+
+    def __call__(self, input_ids: torch.Tensor, scores: torch.Tensor) -> torch.Tensor:
+        del input_ids
+        # Sorting all 262k vocabulary entries for every token in a 256-token
+        # canvas is unnecessarily expensive. Compute the exact global
+        # normalization once, then grow an ordered top-k set until it contains
+        # at least top_p mass. At that point the nucleus is guaranteed to be
+        # entirely inside the set.
+        log_normalizer = torch.logsumexp(scores.float(), dim=-1, keepdim=True)
+        vocabulary = scores.shape[-1]
+        k = min(1024, vocabulary)
+        while True:
+            values, indices = torch.topk(scores, k=k, dim=-1, sorted=True)
+            probabilities = torch.exp(values.float() - log_normalizer)
+            cumulative = probabilities.cumsum(dim=-1)
+            if k == vocabulary or bool((cumulative[..., -1] >= self.top_p).all()):
+                break
+            k = min(vocabulary, k * 2)
+        keep = (cumulative - probabilities) < self.top_p
+        filtered = torch.full_like(scores, -torch.inf)
+        return filtered.scatter(-1, indices, values.masked_fill(~keep, -torch.inf))
 
 
 def _require_diffusion_gemma():
@@ -186,6 +225,27 @@ class DiffusionGemmaAdapter(ModelAdapter):
             )
         self.prompt_configuration(extra)
         result: dict[str, Any] = {"max_new_tokens": request.max_new_tokens}
+        if request.temperature:
+            temperature = _positive_float("temperature", request.temperature)
+            top_p = _positive_float("top_p", extra.get("top_p", 1.0))
+            if top_p > 1.0:
+                raise ValueError("top_p must be at most 1")
+            # The checkpoint normally appends its native 0.8 -> 0.4 temperature
+            # schedule after external processors. Use a copied config with that
+            # schedule disabled so the requested scalar has its conventional
+            # meaning and is not compounded with a second temperature.
+            generation_config = copy.deepcopy(self.model.generation_config)
+            generation_config.t_min = None
+            generation_config.t_max = None
+            processors = [_ConstantTemperatureLogitsProcessor(temperature)]
+            if top_p < 1.0:
+                processors.append(_LastDimTopPLogitsProcessor(top_p))
+            from transformers.generation import LogitsProcessorList
+
+            result["generation_config"] = generation_config
+            result["logits_processor"] = LogitsProcessorList(processors)
+        elif "top_p" in extra:
+            raise ValueError("top_p requires a positive temperature")
         if request.steps is not None:
             if "max_denoising_steps" in extra and extra["max_denoising_steps"] != request.steps:
                 raise ValueError("steps and max_denoising_steps specify conflicting values")
@@ -216,7 +276,10 @@ class DiffusionGemmaAdapter(ModelAdapter):
         return result
 
     def _effective_denoising_config(self, generation_kwargs: Mapping[str, Any]) -> dict[str, Any]:
-        config = copy.deepcopy(getattr(self.model, "generation_config", None))
+        config = copy.deepcopy(
+            generation_kwargs.get("generation_config")
+            or getattr(self.model, "generation_config", None)
+        )
         result: dict[str, Any] = {}
         for name in _SAMPLER_KEYS:
             if name == "entropy_bound":
@@ -305,6 +368,19 @@ class DiffusionGemmaAdapter(ModelAdapter):
             ),
             "special_token_ids": special_ids,
             "thinking": self.prompt_configuration(request.extra)["thinking"],
+            "sampling": (
+                {
+                    "temperature": float(request.temperature),
+                    "top_p": float(request.extra.get("top_p", 1.0)),
+                    "temperature_schedule_disabled": True,
+                }
+                if request.temperature
+                else {
+                    "temperature": None,
+                    "top_p": None,
+                    "native_temperature_schedule": True,
+                }
+            ),
         }
         return GenerationResult(
             prompt=request.prompt,
@@ -337,8 +413,11 @@ class DiffusionGemmaAdapter(ModelAdapter):
         attention_mask: Any,
         kwargs: Mapping[str, Any],
     ) -> int:
-        # Decoder attention concatenates read-only encoder KV before canvas KV.
-        return max(0, int(key.shape[-2] - query.shape[-2]))
+        # The read-only encoder KV is part of every decoder query's attention
+        # context and must participate in BLASST decisions.  Sliding decoder
+        # layers already receive a physically cropped local cache from the
+        # native HybridCache; global layers receive the full cache.
+        return 0
 
     def runtime_metadata(self) -> dict[str, Any]:
         metadata = super().runtime_metadata()
