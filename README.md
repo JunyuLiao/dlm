@@ -4,8 +4,8 @@ This repository is a model-independent research framework for inference and
 evaluation of diffusion-based large language models (dLLMs). Its primary code
 is the `dllm` Python package in [`src/dllm`](src/dllm): model adapters expose a
 common generation interface, attention backends can be selected independently
-of the model family, and one reproducible pipeline prepares and scores
-exact-count [NVIDIA RULER](https://github.com/NVIDIA/RULER) evaluations.
+of the model family, and reproducible benchmark workflows cover long-context
+recall, mathematical reasoning, and serving-system behavior.
 
 ## What the framework provides
 
@@ -13,18 +13,30 @@ exact-count [NVIDIA RULER](https://github.com/NVIDIA/RULER) evaluations.
   dLLM families.
 - Dense attention and a drop-in `blasst-reference` attention backend across all
   registered adapters.
-- Deterministic, tokenizer-validated RULER manifests containing exactly the
-  requested number of examples.
-- Official RULER scoring, per-example seeds, provenance hashes, resumable
-  predictions, and run-fingerprint validation.
-- Scalar command-line entry points plus explicit shell scripts for dense versus
-  BLASST comparisons and context-length, block-size, and lambda sweeps.
-- An isolated SGLang FDFO system benchmark for LLaDA2.1-mini.
+- Reproducible evaluation tracks for exact-count NVIDIA RULER, NeMo-Skills
+  MATH500 reasoning, and an isolated SGLang FDFO/GSM8K system benchmark.
+- Official task scoring, per-example seeds, provenance hashes, resumable
+  predictions, run-fingerprint validation, and dense-versus-BLASST comparisons.
+- Scalar command-line entry points plus explicit scripts for context-length,
+  block-size, lambda, attention-distribution, and pruning experiments.
 
 > [!IMPORTANT]
 > `blasst-reference` materializes dense QK scores before masking attention
 > tiles. It reports reference correctness and theoretical sparsity statistics;
 > runtime acceleration requires an optimized sparse kernel.
+
+## Evaluation and benchmark tracks
+
+| Track | Focus | Entry point |
+|---|---|---|
+| MATH500 | Mathematical reasoning, sampling diversity, and majority/self-consistency scoring through NVIDIA NeMo-Skills | [`benchmarks/diffusion_gemma_math500`](benchmarks/diffusion_gemma_math500) |
+| NVIDIA RULER | Exact-count, tokenizer-validated long-context retrieval and aggregation | `dllm-prepare-ruler`, `dllm-eval-ruler`, and [`scripts/ruler`](scripts/ruler) |
+| SGLang FDFO | Scheduler-level serving behavior on GSM8K with LLaDA2.1-mini | [`benchmarks/sglang_fdfo`](benchmarks/sglang_fdfo) |
+| Research experiments | Attention distributions, lambda sweeps, block-max/quantile pruning, and model-specific BLASST studies | [`scripts/ruler`](scripts/ruler) and [`benchmarks`](benchmarks) |
+
+These tracks share model adapters and attention instrumentation where useful,
+but each retains the upstream prompt format, scorer, provenance, and reporting
+appropriate to its task.
 
 ## Supported text adapters
 
@@ -67,7 +79,9 @@ pip install -e '.[test]'
 The project-specific Fast-dLLM, Fast-dVLM, and Fast-dDrive packages have
 separate dependency instructions in their own READMEs. Isolated virtual
 environments are recommended because their dependencies may differ from the
-root package.
+root package. MATH500 evaluation additionally uses a pinned external
+[NVIDIA NeMo-Skills](https://github.com/NVIDIA-NeMo/Skills) checkout; see the
+benchmark instructions below.
 
 ## Programmatic inference
 
@@ -96,9 +110,11 @@ result = adapter.generate(
 print(result.text)
 ```
 
-DiffusionGemma uses the same interface but intentionally ignores the generic
-`threshold`, `temperature`, and `block_size` defaults because they do not map
-to its entropy-bounded native sampler:
+DiffusionGemma uses the same interface. A positive `temperature` applies a
+constant sampling temperature, and `extra["top_p"]` enables nucleus sampling;
+this disables the checkpoint's native temperature schedule so the requested
+values are not compounded. Generic `threshold` is unused, and `block_size` is
+reported but does not override the model's native 256-token canvas:
 
 ```python
 from dllm.models import GenerationRequest, create_adapter
@@ -113,8 +129,9 @@ result = adapter.generate(
     GenerationRequest(
         prompt="Explain diffusion language modeling in two sentences.",
         max_new_tokens=64,
+        temperature=0.6,
         seed=42,
-        extra={"entropy_bound": 0.1},
+        extra={"top_p": 0.95, "thinking": False},
     )
 )
 print(result.text, result.metadata)
@@ -125,9 +142,10 @@ The checkpoint defaults are 48 maximum denoising steps, `t_max=0.8`,
 threshold `1`. `GenerationRequest.steps` maps to `max_denoising_steps`.
 Supported `extra` keys are `max_denoising_steps`, `t_max`, `t_min`,
 `entropy_bound`, `confidence_threshold`, `stability_threshold`, and boolean
-`thinking` (the latter maps to the official template's `enable_thinking`). The
-native canvas remains 256 tokens; `block_size` is reported but is not presented
-as an effective native override.
+`thinking` (the latter maps to the official template's `enable_thinking`).
+`top_p` is also supported when `temperature` is positive. The native canvas
+remains 256 tokens; `block_size` is reported but is not presented as an
+effective native override.
 
 The full BF16 checkpoint fits on one 80 GB H100 without CPU offload. The
 recorded smoke at resolved model revision
@@ -144,6 +162,49 @@ gated-repository failures.
 The adapter API provides in-process inference. Optional dInfer and SGLang
 integrations are available under [`third_party`](third_party), independently of
 the core package.
+
+## MATH500 reasoning evaluation
+
+[`benchmarks/diffusion_gemma_math500`](benchmarks/diffusion_gemma_math500)
+evaluates DiffusionGemma on all 500 MATH500 problems through NVIDIA
+NeMo-Skills. The matched protocol uses the zero-shot `generic/math` prompt,
+symbolic grading, temperature `0.6`, top-p `0.95`, ten samples per problem,
+and majority/self-consistency aggregation. Runs are append-only and resumable.
+
+Prepare a pinned NeMo-Skills checkout and its MATH500 data as described in the
+[benchmark README](benchmarks/diffusion_gemma_math500/README.md), then run
+BLASST with local/global lambda `0.9/0.6`:
+
+```bash
+PYTHONPATH=src python benchmarks/diffusion_gemma_math500/run_experiment.py \
+  --nemo-skills-root /path/to/Skills \
+  --output-dir results/diffusion_gemma_math500_blasst_l0p9_g0p6
+```
+
+Run the matched native dense baseline by adding `--dense-baseline` and using a
+fresh output directory:
+
+```bash
+PYTHONPATH=src python benchmarks/diffusion_gemma_math500/run_experiment.py \
+  --nemo-skills-root /path/to/Skills \
+  --output-dir results/diffusion_gemma_math500_dense \
+  --dense-baseline
+```
+
+The completed reference comparison is summarized below:
+
+| Mode | NeMo majority@10 | Deterministic majority@10 | Average pass@1 | Oracle pass@10 | Physical sparsity (local/global) |
+|---|---:|---:|---:|---:|---:|
+| Dense | 92.91% | 93.20% | 76.54% | 96.20% | 0% / 0% |
+| BLASST, λ=0.9/0.6 | 93.23% | 93.20% | 71.38% | 96.20% | 28.62% / 19.97% |
+
+The deterministic majority result is unchanged, while BLASST reduces
+individual-draw accuracy and increases unextractable answers. See the
+[combined dense-versus-BLASST report](results/diffusion_gemma_math500_dense_vs_blasst.md)
+for paired confidence intervals, subject/difficulty breakdowns, prompt and
+sequence lengths, tile counts, and the reference-backend timing caveat. The
+comparison can be regenerated with
+[`compare_results.py`](benchmarks/diffusion_gemma_math500/compare_results.py).
 
 ## Universal RULER evaluation
 
@@ -331,7 +392,7 @@ configuration and output fingerprint visible for every result.
    and its attention class names.
 4. Register it lazily in
    [`src/dllm/models/registry.py`](src/dllm/models/registry.py).
-5. Add adapter-contract, dense-attention, BLASST, and exact-count RULER tests.
+5. Add adapter-contract, dense-attention, BLASST, and benchmark-facing tests.
 
 The RULER runner and BLASST algorithm should not require model-specific
 branches for a new adapter.
@@ -378,6 +439,7 @@ capture exceeds available memory; the same fallback is applied to both arms.
 │   └── cli/                  # dllm-prepare-ruler and dllm-eval-ruler
 ├── tests/                    # Framework unit, integration, and CUDA tests
 ├── scripts/ruler/            # Reproducible single runs and explicit sweeps
+├── benchmarks/diffusion_gemma_math500/ # NeMo-Skills reasoning evaluation
 ├── benchmarks/sglang_fdfo/   # Isolated scheduler-level FDFO benchmark
 ├── fast_dllm_v1/             # Fast-dLLM v1 research implementation
 ├── fast_dllm_v2/             # Fast-dLLM v2 research implementation
