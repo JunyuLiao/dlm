@@ -25,6 +25,21 @@ DEFAULT_TASKS = (
     "vt",
     "fwe",
 )
+PAPER_TASKS = (
+    "niah_single_1",
+    "niah_single_2",
+    "niah_single_3",
+    "niah_multikey_1",
+    "niah_multikey_2",
+    "niah_multikey_3",
+    "niah_multivalue",
+    "niah_multiquery",
+    "vt",
+    "cwe",
+    "fwe",
+    "qa_1",
+    "qa_2",
+)
 SHORT_CONTEXT_TASKS = ("niah_multikey_2", "fwe")
 SOURCE_FILES = (
     "scripts/synthetic.yaml",
@@ -106,6 +121,13 @@ def _subprocess_environment(
     dependency_path: str | None, nltk_data: str | None
 ) -> dict[str, str]:
     environment = dict(os.environ)
+    # RULER's prepare.py historically invokes task generators through the
+    # literal `python` command. Keep that subprocess on the same interpreter
+    # and ABI as the caller (important for local CUDA/NumPy environments).
+    interpreter_dir = str(Path(sys.executable).resolve().parent)
+    environment["PATH"] = os.pathsep.join(
+        value for value in (interpreter_dir, environment.get("PATH", "")) if value
+    )
     if dependency_path:
         current = environment.get("PYTHONPATH", "")
         environment["PYTHONPATH"] = os.pathsep.join(
@@ -123,7 +145,10 @@ def _oversample(task: str, desired: int) -> int:
     if task.startswith("niah_"):
         return max(desired * 6, 6)
     if task == "fwe":
-        return max(desired * 4, 4)
+        # FWE lengths vary substantially across tokenizers. DiffusionGemma in
+        # particular needs a wider deterministic candidate pool to obtain 20
+        # prompts within the declared long-context tolerance.
+        return max(desired * 8, 8)
     return desired + max(8, math.ceil(desired * 0.5))
 
 
@@ -143,12 +168,15 @@ def prepare_manifest(
     tolerance_fraction: float = 0.06,
     tolerance_min_tokens: int = 32,
     generation_extra: Mapping[str, Any] | None = None,
+    length_mode: str = "prompt",
 ) -> Path:
     """Generate a deterministic manifest containing exactly ``num_samples``."""
     ruler_root = Path(ruler_root).resolve()
     output_dir = Path(output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     provenance = verify_checkout(ruler_root)
+    if length_mode not in ("prompt", "total"):
+        raise ValueError("length_mode must be 'prompt' or 'total'")
     selected_tasks = tuple(
         tasks or (SHORT_CONTEXT_TASKS if context_length == 512 else DEFAULT_TASKS)
     )
@@ -175,7 +203,12 @@ def prepare_manifest(
         config = customized[task]
         task_base = str(config["task"])
         tokens_to_generate = int(base[task_base]["tokens_to_generate"])
-        candidates = _oversample(task, desired)
+        # Paper-style RULER defines max_seq_length as prompt + completion. Its
+        # generators already target that limit, so only modest oversampling is
+        # needed to absorb tokenizer/chat-template differences. The historical
+        # prompt-length mode needs a larger pool because it filters after adding
+        # the model's prompt template.
+        candidates = desired if length_mode == "total" else _oversample(task, desired)
         generator_seed = seed * 100_000 + context_length + task_index * 1_000
         shard_root = output_dir / "official_raw" / str(context_length)
         shard = shard_root / task / "validation.jsonl"
@@ -187,7 +220,12 @@ def prepare_manifest(
             "--task", task,
             "--tokenizer_path", tokenizer_path,
             "--tokenizer_type", "hf",
-            "--max_seq_length", str(context_length + tokens_to_generate),
+            "--max_seq_length",
+            str(
+                context_length
+                if length_mode == "total"
+                else context_length + tokens_to_generate
+            ),
             "--model_template_type", "base",
             "--num_samples", str(candidates),
             "--random_seed", str(generator_seed),
@@ -215,7 +253,18 @@ def prepare_manifest(
         for row_index, raw in enumerate(read_jsonl(shard)):
             prompt = str(raw["input"]) + str(raw.get("answer_prefix", ""))
             actual = len(adapter.encode_prompt(prompt, generation_extra))
-            if abs(actual - context_length) > tolerance:
+            measured_length = (
+                actual + tokens_to_generate if length_mode == "total" else actual
+            )
+            # Paper-style RULER keeps the generator's complete sample set; it
+            # treats max_seq_length as an upper budget rather than filtering
+            # examples into a narrow post-template length band. Retain that
+            # distribution in total mode. Historical prompt mode still needs
+            # the post-tokenization filter to construct fixed-prompt sweeps.
+            if (
+                length_mode == "prompt"
+                and abs(measured_length - context_length) > tolerance
+            ):
                 continue
             valid.append(
                 {
@@ -224,6 +273,7 @@ def prepare_manifest(
                     "task_base": task_base,
                     "target_length": context_length,
                     "actual_prompt_length": actual,
+                    "actual_total_length": actual + tokens_to_generate,
                     "generator_seed": generator_seed,
                     "inference_seed": seed * 1_000_000 + context_length * 100 + task_index * 10_000 + row_index,
                     "prompt": prompt,
@@ -249,13 +299,14 @@ def prepare_manifest(
     records_path = output_dir / "samples.jsonl"
     write_jsonl(records_path, records)
     manifest = {
-        "schema_version": 2,
+        "schema_version": 3,
         "ruler": provenance,
         "tokenizer_path": tokenizer_path,
         "model_adapter": model_adapter,
         "prompt_configuration": prompt_configuration,
         "tokenizer_revision": revision,
         "context_length": context_length,
+        "length_mode": length_mode,
         "requested_num_samples": num_samples,
         "actual_num_samples": len(records),
         "seed": seed,

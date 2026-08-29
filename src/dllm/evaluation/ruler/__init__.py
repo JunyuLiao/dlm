@@ -1,4 +1,4 @@
-from .official import RULER_COMMIT, RULER_REPOSITORY, prepare_manifest
+from .official import PAPER_TASKS, RULER_COMMIT, RULER_REPOSITORY, prepare_manifest
 from .runner import RulerRunConfig, run_evaluation
 
 __all__ = [
@@ -8,4 +8,3 @@ __all__ = [
     "prepare_manifest",
     "run_evaluation",
 ]
-

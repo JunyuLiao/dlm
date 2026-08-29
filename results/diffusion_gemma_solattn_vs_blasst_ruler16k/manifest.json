@@ -1,0 +1,81 @@
+{
+  "audit": {
+    "calibration_count": 10,
+    "calibration_task_counts": {
+      "fwe": 2,
+      "niah_multikey_1": 2,
+      "niah_multiquery": 2,
+      "niah_multivalue": 2,
+      "vt": 2
+    },
+    "context_length": 16384,
+    "disjoint": true,
+    "final_count": 50,
+    "final_task_counts": {
+      "fwe": 10,
+      "niah_multikey_1": 10,
+      "niah_multiquery": 10,
+      "niah_multivalue": 10,
+      "vt": 10
+    },
+    "prompt_hash_overlap": [],
+    "source_id_overlap": [],
+    "split_seed": 42,
+    "tasks": [
+      "niah_multikey_1",
+      "niah_multivalue",
+      "niah_multiquery",
+      "vt",
+      "fwe"
+    ]
+  },
+  "calibration": {
+    "count": 10,
+    "path": "/home/exouser/ljy/dlm/results/diffusion_gemma_solattn_vs_blasst_ruler16k/calibration.jsonl",
+    "sha256": "816404d942539c674139a3c262773d1b7f817951425ef1e5b98c8bc6d0bcbd9b"
+  },
+  "context_length": 16384,
+  "final": {
+    "count": 50,
+    "path": "/home/exouser/ljy/dlm/results/diffusion_gemma_solattn_vs_blasst_ruler16k/final.jsonl",
+    "sha256": "f71f41aadfa8f0e5fb484bd55410166069e9d6fb91e34016216720cab8f2b7fa"
+  },
+  "ruler": {
+    "commit": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a",
+    "repository": "https://github.com/NVIDIA/RULER.git",
+    "source_sha256": {
+      "scripts/data/prepare.py": "f2d210860fbf5c640cb41ed104c7a923c9f4043f6e6c354277daacc73afc643d",
+      "scripts/data/synthetic/constants.py": "6296e901d495ec6200dc3f68993ea13d8282e3c0dbe1a8c47967f111105d1fde",
+      "scripts/data/synthetic/freq_words_extraction.py": "29b7af97ffdd2122fde348df20cd02add390a21cd6d64b6fd66c8663dc487f67",
+      "scripts/data/synthetic/niah.py": "e9cada0a7660d274fe73a1338a90a7087e17b630169f1aaf14a8d3221c6805b5",
+      "scripts/data/synthetic/variable_tracking.py": "9aac483420e158d116ab63fc43b9606bdb284ac0c053288c30776d5c365530e5",
+      "scripts/data/tokenizer.py": "c2e4bfab607eef87a86334558303c1811bc8e93f22a5c4b129f302726d2357a4",
+      "scripts/eval/evaluate.py": "b9a5fcbded7209663d97670496c74dbcd6358ddbe3d9887a0c5f0c4f974bfe1c",
+      "scripts/eval/synthetic/constants.py": "6740467c17b8dc06b6b30f4f97e54ce8de81db0dd879f1538d0b6b5727f4bd5f",
+      "scripts/synthetic.yaml": "34bc71dcacdc41a829a170f04b528fbf48d62c616338005ab4991680fbf8cb0b"
+    }
+  },
+  "schema_version": 1,
+  "source_raw_root": "/home/exouser/ljy/dlm/results/blasst/fast_dllm_v2/ruler/ruler_cache/official_raw/16384",
+  "source_sha256": {
+    "fwe": "e0033d7af0370fb7356dad582e7df87943a92b88210eaa01d23582b77141cda5",
+    "niah_multikey_1": "31dea118e295e48459cf0b6664e61e1f8d9d01c01cb00acb63ea5c63956e28c9",
+    "niah_multiquery": "4799cf8e8d30e4930215f733be540565ec275669539e7787e6ea1d060a4e903f",
+    "niah_multivalue": "73361b38685ff84539027a2d3672a17c83b09e42a2af5c5d51cccef98c2334b4",
+    "vt": "5d99dba9391cdecdd5a4695b27f08a8b8d0bb071ff2aa6061c819325715ba63d"
+  },
+  "split_seed": 42,
+  "study": "diffusion_gemma_solattn_vs_blasst_ruler16k",
+  "tasks": [
+    "niah_multikey_1",
+    "niah_multivalue",
+    "niah_multiquery",
+    "vt",
+    "fwe"
+  ],
+  "tokenizer": {
+    "adapter": "diffusion_gemma",
+    "model_path": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+    "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b"
+  }
+}

@@ -114,6 +114,12 @@ class ModelAdapter(ABC):
         """Return a leading KV length that must never be sparsified."""
         return 0
 
+    def blasst_call_is_eligible(
+        self, module: Any, args: tuple, kwargs: Mapping[str, Any]
+    ) -> bool:
+        """Return whether the current model forward should use BLASST/eager attention."""
+        return True
+
     @property
     def blasst_filter_special_query_ids(self) -> bool:
         return True

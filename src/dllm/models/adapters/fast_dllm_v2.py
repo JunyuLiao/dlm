@@ -3,19 +3,79 @@ from __future__ import annotations
 import sys
 import time
 import types
+from typing import Any, Mapping
 
 import torch
+import transformers
+from packaging.version import Version
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from ..base import GenerationRequest, GenerationResult, ModelAdapter
 from .common import REPO_ROOT, dtype, round_generation_length, seed_everything
+
+REQUIRED_TRANSFORMERS_VERSION = "4.53.1"
 
 
 class FastDLLMV2Adapter(ModelAdapter):
     name = "fast_dllm_v2"
     attention_class_names = ("Fast_dLLM_QwenAttention",)
 
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self._dense_query_prefix_by_block: dict[int, int] = {}
+
+    def blasst_call_is_eligible(
+        self, module: Any, args: tuple, kwargs: Mapping[str, Any]
+    ) -> bool:
+        """Limit BLASST to ordinary cached denoising, matching Fast-dLLM-v2."""
+        metadata = kwargs.get("blasst_metadata")
+        eligible = bool(
+            isinstance(metadata, Mapping)
+            and not kwargs.get("update_past_key_values", False)
+            and not kwargs.get("use_block_cache", False)
+        )
+        if eligible:
+            block = int(metadata.get("generation_block_index", -1))
+            first_iteration = int(metadata.get("denoising_iteration", -1)) == 0
+            if first_iteration or block not in self._dense_query_prefix_by_block:
+                input_ids = kwargs.get("input_ids")
+                if input_ids is None and args:
+                    input_ids = args[0]
+                if isinstance(input_ids, torch.Tensor) and input_ids.ndim == 2:
+                    mask = input_ids[0].eq(int(self.mask_token_id or 151665))
+                    indices = mask.nonzero(as_tuple=False)
+                    self._dense_query_prefix_by_block[block] = (
+                        int(indices[0].item()) if len(indices) else int(input_ids.shape[1])
+                    )
+        return eligible
+
+    def blasst_dense_kv_prefix(
+        self,
+        module: Any,
+        query: torch.Tensor,
+        key: torch.Tensor,
+        value: torch.Tensor,
+        attention_mask: Any,
+        kwargs: Mapping[str, Any],
+    ) -> int:
+        """Keep cached prompt blocks and the prompt remainder as dense sinks."""
+        del module, value, attention_mask
+        metadata = kwargs.get("blasst_metadata") or {}
+        block = int(metadata.get("generation_block_index", -1))
+        cached_prefix = max(0, int(key.shape[-2] - query.shape[-2]))
+        return min(
+            int(key.shape[-2]),
+            cached_prefix + self._dense_query_prefix_by_block.get(block, 0),
+        )
+
     def load(self) -> "FastDLLMV2Adapter":
+        if Version(transformers.__version__) != Version(REQUIRED_TRANSFORMERS_VERSION):
+            raise ImportError(
+                "Fast-dLLM-v2 requires transformers=="
+                f"{REQUIRED_TRANSFORMERS_VERSION}; found {transformers.__version__}. "
+                "Newer cache/attention APIs can silently produce NaN outputs."
+            )
+
         source = REPO_ROOT / "fast_dllm_v2"
         if str(source) not in sys.path:
             sys.path.insert(0, str(source))
@@ -45,6 +105,11 @@ class FastDLLMV2Adapter(ModelAdapter):
             trust_remote_code=True,
         )
         return self
+
+    def runtime_metadata(self) -> dict[str, Any]:
+        metadata = super().runtime_metadata()
+        metadata["fast_dllm_v2_required_transformers"] = REQUIRED_TRANSFORMERS_VERSION
+        return metadata
 
     @torch.no_grad()
     def generate(self, request: GenerationRequest) -> GenerationResult:
@@ -90,4 +155,3 @@ class FastDLLMV2Adapter(ModelAdapter):
             ),
             metadata={"native_generation_length": generation_length},
         )
-

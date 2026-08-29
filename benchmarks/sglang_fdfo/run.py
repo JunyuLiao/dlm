@@ -1286,7 +1286,7 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--num-examples", type=int, default=100)
     parser.add_argument("--scheduler-caps", type=int, nargs="+", default=[4, 16])
     parser.add_argument("--repetitions", type=int, default=3)
-    parser.add_argument("--output-dir", type=Path, default=REPO_ROOT / "results/sglang_fdfo")
+    parser.add_argument("--output-dir", type=Path, default=REPO_ROOT / "results/systems/sglang_fdfo/runtime")
     parser.add_argument("--dataset-cache", type=Path, default=REPO_ROOT / ".cache/gsm8k/test.jsonl")
     parser.add_argument("--task-yaml", type=Path, default=DEFAULT_TASK_YAML)
     parser.add_argument("--max-new-tokens", type=int, default=512)

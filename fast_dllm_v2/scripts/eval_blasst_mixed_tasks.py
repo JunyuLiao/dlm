@@ -91,7 +91,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--execution-timeout", type=float, default=5.0)
     parser.add_argument(
         "--output-dir",
-        default=str(REPO_ROOT / "results/blasst_controlled_sweeps"),
+        default=str(REPO_ROOT / "results/blasst/fast_dllm_v2/controlled_sweeps"),
     )
     parser.add_argument(
         "--finalize-existing",

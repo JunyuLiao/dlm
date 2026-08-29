@@ -178,7 +178,7 @@ BLASST with local/global lambda `0.9/0.6`:
 ```bash
 PYTHONPATH=src python benchmarks/diffusion_gemma_math500/run_experiment.py \
   --nemo-skills-root /path/to/Skills \
-  --output-dir results/diffusion_gemma_math500_blasst_l0p9_g0p6
+  --output-dir results/math500/blasst_l0p9_g0p6
 ```
 
 Run the matched native dense baseline by adding `--dense-baseline` and using a
@@ -187,7 +187,7 @@ fresh output directory:
 ```bash
 PYTHONPATH=src python benchmarks/diffusion_gemma_math500/run_experiment.py \
   --nemo-skills-root /path/to/Skills \
-  --output-dir results/diffusion_gemma_math500_dense \
+  --output-dir results/math500/dense \
   --dense-baseline
 ```
 
@@ -200,7 +200,7 @@ The completed reference comparison is summarized below:
 
 The deterministic majority result is unchanged, while BLASST reduces
 individual-draw accuracy and increases unextractable answers. See the
-[combined dense-versus-BLASST report](results/diffusion_gemma_math500_dense_vs_blasst.md)
+[combined dense-versus-BLASST report](results/math500/dense_vs_blasst.md)
 for paired confidence intervals, subject/difficulty breakdowns, prompt and
 sequence lengths, tile counts, and the reference-backend timing caveat. The
 comparison can be regenerated with
@@ -372,11 +372,11 @@ export CONTEXT_LENGTH=8192
 export NUM_SAMPLES=100
 
 export OUTPUT_DIR=results/ruler/manifests/fast_dllm_v2/8192
-scripts/ruler/prepare.sh
+scripts/ruler/evaluation/prepare.sh
 
 export MANIFEST="$OUTPUT_DIR/manifest.json"
 export OUTPUT_DIR=results/ruler/fast_dllm_v2/8192/compare
-scripts/ruler/compare_dense_blasst.sh
+scripts/ruler/blasst/compare_dense_blasst.sh
 ```
 
 Each sweep point invokes `eval_one.sh` independently, which keeps the exact
@@ -418,7 +418,7 @@ CUDA_VISIBLE_DEVICES=0 python benchmarks/sglang_fdfo/run.py \
   --num-examples 100 \
   --scheduler-caps 4 16 \
   --repetitions 3 \
-  --output-dir results/sglang_fdfo
+  --output-dir results/systems/sglang_fdfo/runtime
 ```
 
 The benchmark pins its model revision and GSM8K data, runs parity and lifecycle
@@ -438,7 +438,8 @@ capture exceeds available memory; the same fallback is applied to both arms.
 │   ├── evaluation/ruler/     # Pinned generation, manifests, runner, and scoring
 │   └── cli/                  # dllm-prepare-ruler and dllm-eval-ruler
 ├── tests/                    # Framework unit, integration, and CUDA tests
-├── scripts/ruler/            # Reproducible single runs and explicit sweeps
+├── scripts/ruler/            # Evaluation, BLASST, pruning, and diagnostics
+├── results/                  # Organized outputs and experiment summaries
 ├── benchmarks/diffusion_gemma_math500/ # NeMo-Skills reasoning evaluation
 ├── benchmarks/sglang_fdfo/   # Isolated scheduler-level FDFO benchmark
 ├── fast_dllm_v1/             # Fast-dLLM v1 research implementation
@@ -460,7 +461,7 @@ To exercise the complete adapter-to-RULER path on one CUDA GPU, including both
 attention backends for every registered adapter:
 
 ```bash
-RULER_ROOT=/path/to/RULER scripts/ruler/smoke_h100.sh
+RULER_ROOT=/path/to/RULER scripts/ruler/evaluation/smoke_h100.sh
 ```
 
 The smoke test downloads or loads the adapters' default checkpoints, so it

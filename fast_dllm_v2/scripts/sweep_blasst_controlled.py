@@ -86,7 +86,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        default=str(REPO_ROOT / "results/blasst_controlled_sweeps"),
+        default=str(REPO_ROOT / "results/blasst/fast_dllm_v2/controlled_sweeps"),
     )
     return parser.parse_args()
 
@@ -692,7 +692,7 @@ def _report(
             )
 
     previous_path = (
-        REPO_ROOT / "results/blasst_context_sweep/context_lambda_summary.csv"
+        REPO_ROOT / "results/blasst/fast_dllm_v2/context_sweep/context_lambda_summary.csv"
     )
     proxy_differences = []
     for value in lambdas:

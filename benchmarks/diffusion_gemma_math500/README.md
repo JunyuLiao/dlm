@@ -32,7 +32,7 @@ HF_HUB_OFFLINE=1 \
 /home/exouser/miniconda3/envs/ljy_dlm/bin/python \
   benchmarks/diffusion_gemma_math500/run_experiment.py \
   --nemo-skills-root /home/exouser/ljy/Skills \
-  --output-dir results/diffusion_gemma_math500_blasst_l0p9_g0p6
+  --output-dir results/math500/blasst_l0p9_g0p6
 ```
 
 Run the matched dense baseline by adding `--dense-baseline` and using a fresh
@@ -45,7 +45,7 @@ HF_HUB_OFFLINE=1 \
 /home/exouser/miniconda3/envs/ljy_dlm/bin/python \
   benchmarks/diffusion_gemma_math500/run_experiment.py \
   --nemo-skills-root /home/exouser/ljy/Skills \
-  --output-dir results/diffusion_gemma_math500_dense \
+  --output-dir results/math500/dense \
   --dense-baseline
 ```
 
@@ -73,7 +73,7 @@ HF_HUB_OFFLINE=1 \
 /home/exouser/miniconda3/envs/ljy_dlm/bin/python \
   benchmarks/diffusion_gemma_math500/run_blockmax_quantiles.py \
   --nemo-gym-root /tmp/nemo-gym-math500 \
-  --output-dir results/diffusion_gemma_math500_blockmax_k50
+  --output-dir results/math500/blockmax_k50
 ```
 
 The run is resumable after every generation. The primary reported score is

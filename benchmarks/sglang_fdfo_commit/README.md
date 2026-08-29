@@ -10,7 +10,7 @@ Use the same isolated SGLang 0.5.16 environment as
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python benchmarks/sglang_fdfo_commit/run_experiment.py \
-  --output-dir results/sglang_fdfo_commit
+  --output-dir results/systems/sglang_fdfo/commit
 ```
 
 The default run uses LLaDA2.1-mini at its pinned revision and sweeps block
@@ -24,7 +24,7 @@ Re-run only the analysis for a completed timestamped directory with:
 
 ```bash
 python benchmarks/sglang_fdfo_commit/analyze.py \
-  results/sglang_fdfo_commit/YYYYMMDD_HHMMSS
+  results/systems/sglang_fdfo/commit/YYYYMMDD_HHMMSS
 ```
 
 This creates `iterations.csv`, `breakdown.csv`, `shape_sweeps.csv`,

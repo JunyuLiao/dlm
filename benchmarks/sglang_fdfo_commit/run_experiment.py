@@ -488,7 +488,7 @@ def collect_environment() -> dict[str, Any]:
 
 def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output-dir", type=Path, default=REPO_ROOT / "results/sglang_fdfo_commit")
+    parser.add_argument("--output-dir", type=Path, default=REPO_ROOT / "results/systems/sglang_fdfo/commit")
     parser.add_argument("--block-sizes", type=int, nargs="+", default=list(BLOCK_SIZES))
     parser.add_argument("--context-lengths", type=int, nargs="+", default=list(CONTEXT_LENGTHS))
     parser.add_argument("--batch-sizes", type=int, nargs="+", default=list(BATCH_SIZES))

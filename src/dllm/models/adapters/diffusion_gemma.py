@@ -413,10 +413,11 @@ class DiffusionGemmaAdapter(ModelAdapter):
         attention_mask: Any,
         kwargs: Mapping[str, Any],
     ) -> int:
-        # The read-only encoder KV is part of every decoder query's attention
-        # context and must participate in BLASST decisions.  Sliding decoder
-        # layers already receive a physically cropped local cache from the
-        # native HybridCache; global layers receive the full cache.
+        # The read-only encoder/prompt KV and active decoder canvas are one
+        # BLASST candidate population for this study.  Returning zero keeps
+        # prefix tiles eligible; the reference core infers the semantic
+        # prefix/canvas boundary separately for diagnostics.
+        del module, query, key, value, attention_mask, kwargs
         return 0
 
     def runtime_metadata(self) -> dict[str, Any]:

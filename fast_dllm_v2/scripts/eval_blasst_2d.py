@@ -55,7 +55,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--dump-blasst-trace", action="store_true")
     parser.add_argument(
         "--output-dir",
-        default=str(V2_ROOT.parent / "results/blasst_2d_lambda_0p5"),
+        default=str(V2_ROOT.parent / "results/blasst/fast_dllm_v2/two_dimensional_lambda_0p5"),
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="cuda")

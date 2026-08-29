@@ -67,7 +67,7 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--output-dir",
-        default=str(V2_ROOT.parent / "results/blasst_context_sweep"),
+        default=str(V2_ROOT.parent / "results/blasst/fast_dllm_v2/context_sweep"),
     )
     parser.add_argument(
         "--meaningful-physical-sparsity",
@@ -478,7 +478,7 @@ def _report(
             - float(row["physical_tile_sparsity"])
         ),
     )
-    previous_path = V2_ROOT.parent / "results/blasst_2d_lambda_0p5/summary.json"
+    previous_path = V2_ROOT.parent / "results/blasst/fast_dllm_v2/two_dimensional_lambda_0p5/summary.json"
     previous = (
         json.loads(previous_path.read_text(encoding="utf-8"))
         if previous_path.exists()

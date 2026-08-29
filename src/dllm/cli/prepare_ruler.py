@@ -29,6 +29,12 @@ def parse_args(argv=None):
     parser.add_argument("--num-samples", required=True, type=int)
     parser.add_argument("--output-dir", required=True)
     parser.add_argument("--tasks", default="")
+    parser.add_argument(
+        "--length-mode",
+        choices=("prompt", "total"),
+        default="prompt",
+        help="whether context length denotes prompt tokens or paper-style prompt+completion tokens",
+    )
     parser.add_argument("--revision")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--ruler-dependency-path")
@@ -56,6 +62,7 @@ def main(argv=None) -> None:
         dependency_path=args.ruler_dependency_path,
         nltk_data=args.nltk_data,
         generation_extra=_json_object(args.generation_config_json),
+        length_mode=args.length_mode,
     )
     print(path)
 

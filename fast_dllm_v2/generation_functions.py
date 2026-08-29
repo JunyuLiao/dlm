@@ -10,6 +10,21 @@ FAST_DLLM_STOP_TOKEN = 151645
 MASK_COLOR = 0.5  
 TOKEN_COLOR = -0.5  
 
+
+def _filter_finished_cache(past_key_values, finished_flag):
+    """Drop completed batch rows when a prefix cache actually exists.
+
+    Short prompts can finish inside their first generated block before the
+    model has committed any prefix KV cache.  In that case the native cache is
+    ``None`` and there is nothing to filter.
+    """
+    if past_key_values is None:
+        return
+    keep = ~finished_flag
+    for layer_id in range(len(past_key_values)):
+        past_key_values.key_cache[layer_id] = past_key_values.key_cache[layer_id][keep]
+        past_key_values.value_cache[layer_id] = past_key_values.value_cache[layer_id][keep]
+
 @auto_docstring
 class Fast_dLLM_QwenForCausalLM:
 
@@ -212,9 +227,7 @@ class Fast_dLLM_QwenForCausalLM:
                 seq_len = seq_len[~finished_flag]
                 x_t = x_t[~finished_flag]
 
-                for layer_id in range(len(past_key_values)):
-                    past_key_values.key_cache[layer_id] = past_key_values.key_cache[layer_id][~finished_flag]
-                    past_key_values.value_cache[layer_id] = past_key_values.value_cache[layer_id][~finished_flag]
+                _filter_finished_cache(past_key_values, finished_flag)
 
                 finished_flag = finished_flag[~finished_flag]
 

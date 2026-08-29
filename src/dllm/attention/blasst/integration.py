@@ -15,7 +15,9 @@ from .core import (
     Blasst2DConfig,
     Blasst2DRuntime,
     Blasst2DStats,
+    _observe_blasst_sweep,
     blasst_2d_attention_forward,
+    dense_eager_attention_forward,
 )
 
 
@@ -70,6 +72,7 @@ def _capture_runtime_state(
     pad_token_id: int | None,
     query_ids_extractor: Callable[[torch.nn.Module, tuple, dict], Any] | None,
     filter_special_query_ids: bool,
+    call_selector: Callable[[torch.nn.Module, tuple, dict], bool] | None,
 ):
     def capture(module, args, kwargs) -> None:
         input_ids = (
@@ -84,7 +87,11 @@ def _capture_runtime_state(
             and isinstance(args[0], torch.Tensor)
         ):
             input_ids = args[0]
-        runtime.active_call = True
+        runtime.active_call = (
+            bool(call_selector(module, args, kwargs))
+            if call_selector is not None
+            else True
+        )
         runtime.metadata = dict(runtime.metadata_context)
         if input_ids is None or input_ids.ndim != 2:
             runtime.active_query_mask = None
@@ -93,6 +100,18 @@ def _capture_runtime_state(
         if filter_special_query_ids and pad_token_id is not None:
             active &= input_ids != pad_token_id
         runtime.active_query_mask = active
+        if kwargs.get("self_conditioning_logits") is None:
+            runtime.current_denoising_iteration = 0
+        else:
+            runtime.current_denoising_iteration = max(
+                1, runtime.current_denoising_iteration + 1
+            )
+        runtime.metadata["denoising_iteration"] = (
+            runtime.current_denoising_iteration
+        )
+        runtime.metadata["denoising_phase"] = runtime.config.phase_for(
+            runtime.current_denoising_iteration
+        )
         if filter_special_query_ids and mask_token_id is not None:
             masked = int((input_ids == mask_token_id).sum().item())
             total = int(active.sum().item())
@@ -117,7 +136,10 @@ def _attach_direct(
     pad_token_id: int | None,
     query_ids_extractor: Callable[[torch.nn.Module, tuple, dict], Any] | None,
     filter_special_query_ids: bool,
+    call_selector: Callable[[torch.nn.Module, tuple, dict], bool] | None,
     dense_kv_prefix_extractor: Callable[..., int] | None,
+    sweep_lambdas: tuple[float, ...],
+    attention_observer: Callable[..., None] | None,
 ) -> BlasstBinding:
     runtime = Blasst2DRuntime(
         config=config,
@@ -128,6 +150,15 @@ def _attach_direct(
         ),
     )
     runtime.dense_kv_prefix_extractor = dense_kv_prefix_extractor
+    runtime.attention_observer = attention_observer
+    runtime.sweep_lambdas = sweep_lambdas
+    runtime.sweep_stats = {
+        value: Blasst2DStats(
+            record_layers=config.collect_blasst_layer_stats,
+            record_heads=config.collect_blasst_head_stats,
+        )
+        for value in sweep_lambdas
+    }
     added_layer_indices = []
     for index, module in enumerate(modules):
         module._dllm_attention_runtime = runtime
@@ -144,6 +175,7 @@ def _attach_direct(
             pad_token_id,
             query_ids_extractor,
             filter_special_query_ids,
+            call_selector,
         ),
         with_kwargs=True,
     )
@@ -165,7 +197,10 @@ def _attach_registry(
     pad_token_id: int | None,
     query_ids_extractor: Callable[[torch.nn.Module, tuple, dict], Any] | None,
     filter_special_query_ids: bool,
+    call_selector: Callable[[torch.nn.Module, tuple, dict], bool] | None,
     dense_kv_prefix_extractor: Callable[..., int] | None,
+    sweep_lambdas: tuple[float, ...],
+    attention_observer: Callable[..., None] | None,
 ) -> BlasstBinding:
     runtime = Blasst2DRuntime(
         config=config,
@@ -176,6 +211,15 @@ def _attach_registry(
         ),
     )
     runtime.dense_kv_prefix_extractor = dense_kv_prefix_extractor
+    runtime.attention_observer = attention_observer
+    runtime.sweep_lambdas = sweep_lambdas
+    runtime.sweep_stats = {
+        value: Blasst2DStats(
+            record_layers=config.collect_blasst_layer_stats,
+            record_heads=config.collect_blasst_head_stats,
+        )
+        for value in sweep_lambdas
+    }
     for module in modules:
         module._blasst_2d_runtime = runtime
     base_model = getattr(model, "model", model)
@@ -186,6 +230,7 @@ def _attach_registry(
             pad_token_id,
             query_ids_extractor,
             filter_special_query_ids,
+            call_selector,
         ),
         with_kwargs=True,
     )
@@ -202,8 +247,36 @@ def _attach_registry(
                     tagged is None
                     or not tagged.config.enable_blasst_2d
                     or not tagged.active_call
+                    or getattr(tagged, "force_native_attention", False)
                 ):
                     return original(module, *args, **kwargs)
+                if tagged.attention_override is not None:
+                    return tagged.attention_override(module, *args, **kwargs)
+                if tagged.attention_observer is not None:
+                    result = original(module, *args, **kwargs)
+                    guarded = getattr(tagged, "attention_output_guard", False)
+                    output = result[0] if isinstance(result, tuple) else result
+                    snapshot = output.detach().clone() if guarded else None
+                    tagged.attention_observer(module, *args, **kwargs)
+                    if guarded:
+                        tagged.attention_output_guard_checks = getattr(
+                            tagged, "attention_output_guard_checks", 0
+                        ) + 1
+                        # Compare bytes so identical NaN payloads count as
+                        # unchanged; torch.equal treats NaN != NaN.
+                        if not torch.equal(
+                            snapshot.contiguous().view(torch.uint8),
+                            output.contiguous().view(torch.uint8),
+                        ):
+                            tagged.attention_output_guard_failures = getattr(
+                                tagged, "attention_output_guard_failures", 0
+                            ) + 1
+                    return result
+                if tagged.sweep_lambdas:
+                    _observe_blasst_sweep(module, *args, **kwargs)
+                    return dense_eager_attention_forward(module, *args, **kwargs)
+                if not tagged.config.apply_blasst_mask:
+                    return dense_eager_attention_forward(module, *args, **kwargs)
                 return blasst_2d_attention_forward(module, *args, **kwargs)
 
             state = {
@@ -235,7 +308,10 @@ def install_blasst(
     module_selector: Callable[[str, torch.nn.Module], bool] | None = None,
     query_ids_extractor: Callable[[torch.nn.Module, tuple, dict], Any] | None = None,
     filter_special_query_ids: bool = True,
+    call_selector: Callable[[torch.nn.Module, tuple, dict], bool] | None = None,
     dense_kv_prefix_extractor: Callable[..., int] | None = None,
+    sweep_lambdas: tuple[float, ...] | list[float] = (),
+    attention_observer: Callable[..., None] | None = None,
     integration: str = "auto",
 ) -> BlasstBinding:
     """Install BLASST on any registered current dLLM attention implementation."""
@@ -264,6 +340,9 @@ def install_blasst(
         )
     if integration not in ("auto", "registry", "direct"):
         raise ValueError("integration must be auto, registry, or direct")
+    sweep_values = tuple(float(value) for value in sweep_lambdas)
+    if any(not 0.0 < value < 1.0 for value in sweep_values):
+        raise ValueError("all sweep lambdas must be strictly between 0 and 1")
     modeling = importlib.import_module(type(modules[0]).__module__)
     registry = getattr(modeling, "ALL_ATTENTION_FUNCTIONS", None)
     use_registry = integration == "registry" or (
@@ -282,7 +361,10 @@ def install_blasst(
             pad_token_id=pad_token_id,
             query_ids_extractor=query_ids_extractor,
             filter_special_query_ids=filter_special_query_ids,
+            call_selector=call_selector,
             dense_kv_prefix_extractor=dense_kv_prefix_extractor,
+            sweep_lambdas=sweep_values,
+            attention_observer=attention_observer,
         )
     return _attach_direct(
         model,
@@ -293,7 +375,10 @@ def install_blasst(
         pad_token_id=pad_token_id,
         query_ids_extractor=query_ids_extractor,
         filter_special_query_ids=filter_special_query_ids,
+        call_selector=call_selector,
         dense_kv_prefix_extractor=dense_kv_prefix_extractor,
+        sweep_lambdas=sweep_values,
+        attention_observer=attention_observer,
     )
 
 
@@ -310,7 +395,11 @@ def dispatch_scaled_dot_product_attention(
 ) -> torch.Tensor:
     """Use native dense SDPA unless this specific module has BLASST attached."""
     runtime = getattr(module, "_dllm_attention_runtime", None)
-    if runtime is None or not runtime.config.enable_blasst_2d:
+    if (
+        runtime is None
+        or not runtime.config.enable_blasst_2d
+        or getattr(runtime, "force_native_attention", False)
+    ):
         return dense_scaled_dot_product_attention(
             query,
             key,
@@ -323,15 +412,65 @@ def dispatch_scaled_dot_product_attention(
     active = runtime.active_query_mask
     if active is not None and active.shape[-1] != query.shape[-2]:
         active = active[..., -query.shape[-2] :]
-    output, _ = blasst_2d_attention_forward(
+    kwargs = {
+        "dropout": dropout_p,
+        "scaling": scale,
+        "is_causal": is_causal,
+        "blasst_active_query_mask": active,
+    }
+    if runtime.attention_override is not None:
+        output, _ = runtime.attention_override(
+            module, query, key, value, attention_mask, **kwargs
+        )
+    elif runtime.attention_observer is not None:
+        output = dense_scaled_dot_product_attention(
+            query,
+            key,
+            value,
+            attention_mask=attention_mask,
+            dropout_p=dropout_p,
+            is_causal=is_causal,
+            scale=scale,
+        )
+        guarded = getattr(runtime, "attention_output_guard", False)
+        snapshot = output.detach().clone() if guarded else None
+        runtime.attention_observer(
+            module,
+            query,
+            key,
+            value,
+            attention_mask,
+            **kwargs,
+        )
+        if guarded:
+            runtime.attention_output_guard_checks = getattr(
+                runtime, "attention_output_guard_checks", 0
+            ) + 1
+            if not torch.equal(
+                snapshot.contiguous().view(torch.uint8),
+                output.contiguous().view(torch.uint8),
+            ):
+                runtime.attention_output_guard_failures = getattr(
+                    runtime, "attention_output_guard_failures", 0
+                ) + 1
+    elif runtime.sweep_lambdas:
+        _observe_blasst_sweep(
+            module, query, key, value, attention_mask, **kwargs
+        )
+        output, _ = dense_eager_attention_forward(
+            module, query, key, value, attention_mask, **kwargs
+        )
+    elif not runtime.config.apply_blasst_mask:
+        output, _ = dense_eager_attention_forward(
+            module, query, key, value, attention_mask, **kwargs
+        )
+    else:
+        output, _ = blasst_2d_attention_forward(
         module,
         query,
         key,
         value,
         attention_mask,
-        dropout=dropout_p,
-        scaling=scale,
-        is_causal=is_causal,
-        blasst_active_query_mask=active,
-    )
+        **kwargs,
+        )
     return output.transpose(1, 2).contiguous()

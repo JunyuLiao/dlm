@@ -65,7 +65,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--kv-tile-size", type=int, default=64)
     parser.add_argument(
         "--output-dir",
-        default=str(V2_ROOT.parent / "results/blasst_context_sweep"),
+        default=str(V2_ROOT.parent / "results/blasst/fast_dllm_v2/context_sweep"),
     )
     return parser.parse_args()
 

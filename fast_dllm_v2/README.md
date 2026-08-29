@@ -175,13 +175,13 @@ Run ordinary-cache generation in dense and sparse modes:
 
 ```bash
 python scripts/run_blasst_2d.py \
-    --output-dir ../results/blasst_2d/dense
+    --output-dir ../results/blasst/fast_dllm_v2/two_dimensional/dense
 
 python scripts/run_blasst_2d.py \
     --enable-blasst-2d \
     --blasst-lambda 0.5 \
     --collect-blasst-stats \
-    --output-dir ../results/blasst_2d/lambda_0p5
+    --output-dir ../results/blasst/fast_dllm_v2/two_dimensional/lambda_0p5
 ```
 
 Run paired same-state and end-to-end evaluation:
@@ -190,7 +190,7 @@ Run paired same-state and end-to-end evaluation:
 python scripts/eval_blasst_2d.py \
     --blasst-lambda 0.5 \
     --collect-blasst-stats \
-    --output-dir ../results/blasst_2d_lambda_0p5
+    --output-dir ../results/blasst/fast_dllm_v2/two_dimensional_lambda_0p5
 ```
 
 The evaluation exports `summary.json`, `per_step.csv`, `per_layer.csv`,
@@ -203,7 +203,7 @@ comparison:
 ```bash
 python scripts/sweep_blasst_controlled.py \
     --model-path /path/to/Fast_dLLM_v2_7B \
-    --output-dir ../results/blasst_controlled_sweeps
+    --output-dir ../results/blasst/fast_dllm_v2/controlled_sweeps
 ```
 
 That script uses artificial long-context construction and is not the basis for
@@ -215,7 +215,7 @@ Run paired labeled sanity metrics on that same manifest:
 python scripts/eval_blasst_mixed_tasks.py \
     --model-path /path/to/Fast_dLLM_v2_7B \
     --max-new-tokens 512 \
-    --output-dir ../results/blasst_controlled_sweeps
+    --output-dir ../results/blasst/fast_dllm_v2/controlled_sweeps
 ```
 
 This reports GSM8K extracted-answer exact match and resource-limited,
@@ -236,7 +236,7 @@ python scripts/eval_blasst_ruler.py \
     --phase all \
     --model-path /path/to/Fast_dLLM_v2_7B \
     --ruler-root /path/to/NVIDIA-RULER-at-the-pinned-commit \
-    --output-dir ../results/blasst_ruler
+    --output-dir ../results/blasst/fast_dllm_v2/ruler
 ```
 
 The pipeline uses model-tokenizer-verified prompts from NIAH multi, variable
@@ -267,8 +267,8 @@ python scripts/eval_blasst_dualcache_ruler.py \
     --phase all \
     --model-path /path/to/Fast_dLLM_v2_7B \
     --ruler-root /path/to/NVIDIA-RULER-at-the-pinned-commit \
-    --source-results-dir ../results/blasst_ruler \
-    --output-dir ../results/blasst_dualcache_ruler
+    --source-results-dir ../results/blasst/fast_dllm_v2/ruler \
+    --output-dir ../results/blasst/fast_dllm_v2/dualcache_ruler
 ```
 
 On the fixed manifest, official RULER accuracy was 73.43% dense and 71.47%

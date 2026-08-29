@@ -130,11 +130,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--ruler-root", default="/tmp/nvidia-ruler")
     parser.add_argument(
         "--source-results-dir",
-        default=str(REPO_ROOT / "results/blasst_ruler"),
+        default=str(REPO_ROOT / "results/blasst/fast_dllm_v2/ruler"),
     )
     parser.add_argument(
         "--output-dir",
-        default=str(REPO_ROOT / "results/blasst_dualcache_ruler"),
+        default=str(REPO_ROOT / "results/blasst/fast_dllm_v2/dualcache_ruler"),
     )
     parser.add_argument("--device", default="cuda")
     parser.add_argument(

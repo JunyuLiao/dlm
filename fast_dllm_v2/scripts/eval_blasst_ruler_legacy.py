@@ -124,7 +124,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--denoising-threshold", type=float, default=0.9)
     parser.add_argument(
         "--output-dir",
-        default=str(REPO_ROOT / "results/blasst_ruler"),
+        default=str(REPO_ROOT / "results/blasst/fast_dllm_v2/ruler"),
     )
     return parser.parse_args()
 
@@ -1787,7 +1787,7 @@ def _write_report(args: argparse.Namespace, output_dir: Path) -> None:
     }
     previous_path = (
         REPO_ROOT
-        / "results/blasst_controlled_sweeps/context_length_sweep.csv"
+        / "results/blasst/fast_dllm_v2/controlled_sweeps/context_length_sweep.csv"
     )
     comparison_lines: list[str] = []
     if previous_path.exists():

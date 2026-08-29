@@ -3,7 +3,9 @@ from __future__ import annotations
 import json
 import math
 import platform
+import statistics
 import subprocess
+import time
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
@@ -39,10 +41,27 @@ class RulerRunConfig:
     precision: str = "bfloat16"
     revision: str | None = None
     collect_attention_stats: bool = False
+    include_masked_kv_tiles_in_physical_stats: bool = False
+    blasst_policy: dict[str, Any] = field(default_factory=dict)
+    apply_blasst_mask: bool | None = None
+    blasst_calibration_lambdas: tuple[float, ...] = ()
     stats_level: str = "summary"
     resume: bool = True
     generation_extra: dict[str, Any] = field(default_factory=dict)
     verify_dense_after_blasst: bool = False
+    routing_mode: str | None = None
+    routing_density: float | None = None
+    routing_region: str = "all"
+    routing_threshold_model: dict[str, Any] | None = None
+    routing_random_seed: int = 20260825
+    routing_execution: str = "logical"
+    routing_q_block_size: int = 64
+    routing_kv_block_size: int = 64
+    routing_combined_region_population: bool = False
+    performance_warmups: int = 0
+    performance_repeats: int = 1
+    progress_every: int = 0
+    quiet: bool = False
 
 
 def _load_manifest(config: RulerRunConfig) -> tuple[dict[str, Any], list[dict[str, Any]]]:
@@ -97,16 +116,32 @@ def _environment() -> dict[str, Any]:
     return environment
 
 
-def run_evaluation(config: RulerRunConfig) -> dict[str, Any]:
+def run_evaluation(
+    config: RulerRunConfig,
+    *,
+    loaded_adapter: Any | None = None,
+    attention_observer: Any | None = None,
+) -> dict[str, Any]:
     if config.num_samples <= 0:
         raise ValueError("num_samples must be positive")
-    if config.attention_backend not in ("dense", "blasst-reference"):
-        raise ValueError("attention_backend must be dense or blasst-reference")
+    if config.attention_backend not in ("dense", "eager-dense", "blasst-reference", "fresh-routing"):
+        raise ValueError(
+            "attention_backend must be dense, eager-dense, or blasst-reference"
+        )
     if config.stats_level not in ("summary", "step", "layer", "head"):
         raise ValueError("stats_level must be summary, step, layer, or head")
+    if config.performance_warmups < 0 or config.performance_repeats <= 0:
+        raise ValueError("performance_warmups must be nonnegative and performance_repeats positive")
     manifest, samples = _load_manifest(config)
     output_dir = Path(config.output_dir).resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
+    progress_log = output_dir / "progress.log"
+    def log_progress(message: str) -> None:
+        with progress_log.open("a", encoding="utf-8") as handle:
+            handle.write(message.rstrip() + "\n")
+    if config.progress_every < 0:
+        raise ValueError("progress_every must be nonnegative")
+    log_progress(f"run_start adapter={config.model_adapter} backend={config.attention_backend} samples={config.num_samples}")
     fingerprint_payload = {
         **asdict(config),
         "output_dir": None,
@@ -116,7 +151,26 @@ def run_evaluation(config: RulerRunConfig) -> dict[str, Any]:
     run_config_path = output_dir / "run_config.json"
     if run_config_path.exists():
         prior = json.loads(run_config_path.read_text(encoding="utf-8"))
-        if prior.get("fingerprint") != fingerprint:
+        compatible_fingerprints = {fingerprint}
+        # Routing execution and logical block-size fields were added after
+        # the first canonical Fast-dLLM conditions started. Preserve exact
+        # resumability for those artifacts when the new fields are at their
+        # historical defaults; any non-default value still receives a new
+        # fingerprint and a separate output directory.
+        if (
+            config.routing_execution == "logical"
+            and config.routing_q_block_size == 64
+            and config.routing_kv_block_size == 64
+        ):
+            legacy_payload = dict(fingerprint_payload)
+            for name in (
+                "routing_execution", "routing_q_block_size", "routing_kv_block_size",
+                "performance_warmups", "performance_repeats",
+                "progress_every", "quiet",
+            ):
+                legacy_payload.pop(name, None)
+            compatible_fingerprints.add(sha256_json(legacy_payload))
+        if prior.get("fingerprint") not in compatible_fingerprints:
             raise ValueError("output directory belongs to a different RULER run")
     write_json(
         run_config_path,
@@ -129,13 +183,15 @@ def run_evaluation(config: RulerRunConfig) -> dict[str, Any]:
         predictions_path.unlink()
     completed = {str(row["sample_id"]): row for row in existing}
 
-    adapter = create_adapter(
-        config.model_adapter,
-        config.model_path,
-        device=config.device,
-        precision=config.precision,
-        revision=config.revision,
-    ).load()
+    adapter = loaded_adapter
+    if adapter is None:
+        adapter = create_adapter(
+            config.model_adapter,
+            config.model_path,
+            device=config.device,
+            precision=config.precision,
+            revision=config.revision,
+        ).load()
     if config.device.startswith("cuda") and torch.cuda.is_available():
         torch.cuda.reset_peak_memory_stats()
     current_run_config = json.loads(run_config_path.read_text(encoding="utf-8"))
@@ -170,8 +226,63 @@ def run_evaluation(config: RulerRunConfig) -> dict[str, Any]:
         record_layers=config.stats_level in ("layer", "head"),
         record_heads=config.stats_level == "head",
     )
+    # Attention statistics are persisted independently of prediction shards.
+    # On resume, seed the accumulator from the previous export so a partial
+    # run cannot silently overwrite routing totals for already-completed
+    # examples.
+    if config.resume and config.collect_attention_stats and config.attention_backend == "blasst-reference":
+        previous_stats_path = Path(config.output_dir).resolve() / "attention_stats" / "summary.json"
+        if previous_stats_path.exists():
+            previous = Blasst2DStats.load_export(previous_stats_path.parent)
+            previous.record_layers = stats.record_layers
+            previous.record_heads = stats.record_heads
+            stats = previous
     binding = None
-    if config.attention_backend == "blasst-reference":
+    routing = None
+    if config.routing_mode is not None:
+        if config.attention_backend != "fresh-routing":
+            raise ValueError("routing_mode requires attention_backend=fresh-routing")
+        if config.routing_density is None:
+            raise ValueError("routing_density is required for fresh routing")
+        from experiments.diffusion_attention_threshold_modeling.routing import (
+            FreshRoutingAttention,
+            FreshRoutingConfig,
+        )
+        routing = FreshRoutingAttention(FreshRoutingConfig(
+            mode=config.routing_mode,
+            target_density=float(config.routing_density),
+            threshold_model=config.routing_threshold_model,
+            adapter=config.model_adapter,
+            corpus="ruler16k" if config.context_length == 16384 else "ruler8k",
+            region=config.routing_region,
+            random_seed=config.routing_random_seed,
+            execution=config.routing_execution,
+            q_block_size=config.routing_q_block_size,
+            kv_block_size=config.routing_kv_block_size,
+            combined_region_population=config.routing_combined_region_population,
+        ))
+    if config.attention_backend in ("eager-dense", "blasst-reference", "fresh-routing"):
+        allowed_policy = {
+            "local_blasst_lambda",
+            "global_blasst_lambda",
+            "denoising_phase_starts",
+            "local_phase_lambdas",
+            "global_phase_lambdas",
+        }
+        unknown_policy = set(config.blasst_policy) - allowed_policy
+        if unknown_policy:
+            raise ValueError(
+                "unsupported BLASST policy field(s): "
+                + ", ".join(sorted(unknown_policy))
+            )
+        policy = dict(config.blasst_policy)
+        for name in (
+            "denoising_phase_starts",
+            "local_phase_lambdas",
+            "global_phase_lambdas",
+        ):
+            if name in policy:
+                policy[name] = tuple(policy[name])
         binding = install_blasst(
             adapter.model,
             Blasst2DConfig(
@@ -182,6 +293,15 @@ def run_evaluation(config: RulerRunConfig) -> dict[str, Any]:
                 collect_blasst_stats=config.collect_attention_stats,
                 collect_blasst_layer_stats=config.stats_level in ("layer", "head"),
                 collect_blasst_head_stats=config.stats_level == "head",
+                include_masked_kv_tiles_in_physical_stats=(
+                    config.include_masked_kv_tiles_in_physical_stats
+                ),
+                apply_blasst_mask=(
+                    config.attention_backend == "blasst-reference"
+                    if config.apply_blasst_mask is None
+                    else bool(config.apply_blasst_mask)
+                ),
+                **policy,
             ),
             stats,
             mask_token_id=adapter.mask_token_id,
@@ -190,9 +310,35 @@ def run_evaluation(config: RulerRunConfig) -> dict[str, Any]:
             module_selector=adapter.is_blasst_attention_module,
             query_ids_extractor=adapter.blasst_query_ids,
             filter_special_query_ids=adapter.blasst_filter_special_query_ids,
+            call_selector=adapter.blasst_call_is_eligible,
             dense_kv_prefix_extractor=adapter.blasst_dense_kv_prefix,
-            integration=adapter.attention_integration,
-        )
+            sweep_lambdas=config.blasst_calibration_lambdas,
+            attention_observer=attention_observer,
+                integration=adapter.attention_integration,
+            )
+        if routing is not None:
+            binding.runtime.attention_override = routing
+
+    def persist_attention_stats() -> None:
+        """Checkpoint BLASST routing totals after each completed sample.
+
+        Predictions are appended before the next sample starts. Persisting the
+        independent attention shard at the same boundary prevents a crash or
+        pre-emption between those two operations from leaving a completed
+        prediction with no corresponding routing statistics on resume.
+        """
+
+        if (
+            binding is not None
+            and config.collect_attention_stats
+            and config.attention_backend == "blasst-reference"
+        ):
+            stats.export(
+                output_dir / "attention_stats",
+                binding.runtime.config,
+                {"run_fingerprint": fingerprint},
+            )
+
     try:
         for index, sample in enumerate(samples, start=1):
             sample_id = str(sample["sample_id"])
@@ -204,33 +350,71 @@ def run_evaluation(config: RulerRunConfig) -> dict[str, Any]:
                     "example_id": sample_id,
                     "inference_seed": int(sample["inference_seed"]),
                 }
+            def reset_routing_state() -> None:
+                if routing is not None:
+                    routing.stats = type(routing.stats)()
+                    routing._previous_retained_tiles.clear()
+
             budget = config.max_new_tokens or int(sample["tokens_to_generate"])
-            result = adapter.generate(
-                GenerationRequest(
-                    prompt=str(sample["prompt"]),
-                    max_new_tokens=budget,
-                    block_size=config.block_size,
-                    steps=config.steps,
-                    threshold=config.threshold,
-                    temperature=config.temperature,
-                    seed=int(sample["inference_seed"]),
-                    extra=config.generation_extra,
-                )
+            request = GenerationRequest(
+                prompt=str(sample["prompt"]),
+                max_new_tokens=budget,
+                block_size=config.block_size,
+                steps=config.steps,
+                threshold=config.threshold,
+                temperature=config.temperature,
+                seed=int(sample["inference_seed"]),
+                extra=config.generation_extra,
             )
+            for _ in range(config.performance_warmups):
+                reset_routing_state()
+                adapter.generate(request)
+                if config.device.startswith("cuda") and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+            repeated_results = []
+            external_elapsed = []
+            routing_repetitions = []
+            for _ in range(config.performance_repeats):
+                reset_routing_state()
+                if config.device.startswith("cuda") and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                started = time.perf_counter()
+                repeated_results.append(adapter.generate(request))
+                if config.device.startswith("cuda") and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                external_elapsed.append(time.perf_counter() - started)
+                if routing is not None:
+                    routing_repetitions.append(routing.stats.summary())
+            result = repeated_results[-1]
             if not math.isfinite(result.elapsed_seconds):
                 raise RuntimeError(f"non-finite runtime for RULER sample {sample_id}")
             row = {
                 **sample,
                 "prediction": result.text,
                 "completion_tokens": result.completion_tokens,
-                "elapsed_seconds": result.elapsed_seconds,
+                "elapsed_seconds": float(statistics.median(external_elapsed)),
+                "adapter_elapsed_seconds_repetitions": [
+                    float(item.elapsed_seconds) for item in repeated_results
+                ],
+                "synchronized_elapsed_seconds_repetitions": external_elapsed,
                 "model_evaluations": result.model_evaluations,
                 "termination_reason": result.termination_reason,
                 "generation_metadata": result.metadata,
             }
+            if routing is not None:
+                row["routing_stats"] = routing_repetitions[-1]
             append_jsonl(predictions_path, row)
             completed[sample_id] = row
-            print(f"completed RULER sample {index}/{len(samples)}: {sample_id}", flush=True)
+            persist_attention_stats()
+            log_progress(
+                f"completed sample={index}/{len(samples)} id={sample_id} elapsed={row['elapsed_seconds']:.6f}"
+            )
+            if (
+                config.progress_every
+                and index % config.progress_every == 0
+                and not config.quiet
+            ):
+                print(f"progress {index}/{len(samples)} condition={output_dir.name}", flush=True)
     finally:
         if binding is not None:
             binding.close()
@@ -278,7 +462,42 @@ def run_evaluation(config: RulerRunConfig) -> dict[str, Any]:
             bool(row["completion_tokens"]) for row in ordered
         ),
         "post_blasst_dense_verified": post_cleanup_dense_verified,
+        "performance_protocol": {
+            "warmups_per_sample": config.performance_warmups,
+            "measured_repeats_per_sample": config.performance_repeats,
+            "cuda_synchronized": bool(config.device.startswith("cuda") and torch.cuda.is_available()),
+            "sample_latency_reducer": "median",
+        },
     }
+    if routing is not None:
+        summary["routing"] = {
+            "mode": config.routing_mode,
+            "target_density": config.routing_density,
+            "region": config.routing_region,
+            "random_seed": config.routing_random_seed,
+            "execution": config.routing_execution,
+        }
+        # Fresh-routing keeps its detailed per-call records inside each
+        # prediction row. Also emit one canonical per-condition shard so
+        # reports can be regenerated without replaying generation outputs.
+        from experiments.diffusion_gemma_solattn_vs_blasst_ruler16k.metrics import (
+            aggregate_routing_stats,
+        )
+
+        routing_rows = [
+            row.get("routing_stats")
+            for row in ordered
+            if isinstance(row.get("routing_stats"), dict)
+        ]
+        summary["routing_aggregate"] = aggregate_routing_stats(routing_rows)
+        write_json(
+            output_dir / "routing_stats.json",
+            {
+                "schema_version": 1,
+                "per_example": routing_rows,
+                "aggregate": summary["routing_aggregate"],
+            },
+        )
     if config.device.startswith("cuda") and torch.cuda.is_available():
         summary["peak_cuda_memory_allocated_bytes"] = torch.cuda.max_memory_allocated()
         summary["peak_cuda_memory_reserved_bytes"] = torch.cuda.max_memory_reserved()
@@ -288,11 +507,26 @@ def run_evaluation(config: RulerRunConfig) -> dict[str, Any]:
             value.startswith("cuda") for value in parameter_devices
         )
     if config.collect_attention_stats:
-        summary["attention_sparsity"] = stats.summary()
-        stats.export(
-            output_dir / "attention_stats",
-            binding.runtime.config if binding is not None else Blasst2DConfig(),
-            {"run_fingerprint": fingerprint},
-        )
+        if config.attention_backend == "blasst-reference":
+            summary["attention_sparsity"] = stats.summary()
+            stats.export(
+                output_dir / "attention_stats",
+                binding.runtime.config if binding is not None else Blasst2DConfig(),
+                {"run_fingerprint": fingerprint},
+            )
+        if binding is not None and binding.runtime.sweep_stats:
+            calibration_summary = {}
+            for value, sweep_stats in binding.runtime.sweep_stats.items():
+                name = f"lambda_{value:g}".replace(".", "p")
+                calibration_summary[str(value)] = sweep_stats.summary()
+                sweep_stats.export(
+                    output_dir / "attention_calibration" / name,
+                    binding.runtime.config,
+                    {"run_fingerprint": fingerprint, "calibration_lambda": value},
+                )
+            summary["attention_calibration"] = calibration_summary
+    log_progress(
+        f"run_complete adapter={config.model_adapter} backend={config.attention_backend} samples={len(ordered)} accuracy={overall:.6f}"
+    )
     write_json(output_dir / "summary.json", summary)
     return summary
