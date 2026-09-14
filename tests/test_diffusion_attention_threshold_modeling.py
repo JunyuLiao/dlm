@@ -253,7 +253,8 @@ def test_fresh_all_kv_routing_reports_regions_fallback_and_no_empty_rows():
     assert set(summary["region_counts"]) == {"prefix", "canvas"}
     assert summary["logical_candidate_tiles"] == 2
     assert summary["logical_retained_tiles"] >= 2  # deterministic top-one fallback per row/region
-    assert summary["fallback_rows"] >= 1
+    assert summary["fallback_rows"] == 0
+    assert summary["degenerate_rows"] == 2
 
 
 def test_fresh_combined_region_population_standardizes_prefix_and_canvas_together():

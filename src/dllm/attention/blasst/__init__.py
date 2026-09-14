@@ -1,4 +1,7 @@
 from .core import (
+    BLASST_MASK_SEMANTICS,
+    require_blasst_mask_semantics,
+    validate_blasst_output_directory,
     Blasst2DConfig,
     Blasst2DRuntime,
     Blasst2DStats,
@@ -14,6 +17,9 @@ from .integration import (
 )
 
 __all__ = [
+    "BLASST_MASK_SEMANTICS",
+    "require_blasst_mask_semantics",
+    "validate_blasst_output_directory",
     "Blasst2DConfig",
     "Blasst2DRuntime",
     "Blasst2DStats",
@@ -25,4 +31,3 @@ __all__ = [
     "install_blasst",
     "slow_blasst_2d",
 ]
-

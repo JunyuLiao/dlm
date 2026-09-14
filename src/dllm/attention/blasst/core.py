@@ -20,6 +20,36 @@ import torch
 import torch.nn.functional as F
 
 
+BLASST_MASK_SEMANTICS = "physical_tile_v1"
+
+
+def require_blasst_mask_semantics(payload: Mapping[str, Any], source: Any) -> None:
+    """Prevent legacy row-mask statistics/generations from being resumed."""
+    if payload.get("blasst_mask_semantics") != BLASST_MASK_SEMANTICS:
+        raise ValueError(
+            f"{source}: incompatible BLASST mask semantics; use a fresh output "
+            "directory rather than mixing legacy row-mask and whole-tile results"
+        )
+
+
+def validate_blasst_output_directory(output_dir: str | Path) -> None:
+    """Read-only preflight, before callers write manifests or progress logs."""
+    output = Path(output_dir)
+    config_path = output / "run_config.json"
+    if config_path.exists():
+        require_blasst_mask_semantics(json.loads(config_path.read_text()), config_path)
+    elif (output / "predictions.jsonl").exists():
+        raise ValueError(f"{output}: missing BLASST provenance; use a fresh output directory")
+    for name in ("task_run_config.json", "ruler_run_config.json", "dualcache_run_config.json"):
+        task_config = output / name
+        if task_config.exists():
+            require_blasst_mask_semantics(json.loads(task_config.read_text()), task_config)
+    for relative in ("summary.json", "attention_stats/summary.json"):
+        stats_path = output / relative
+        if stats_path.exists():
+            require_blasst_mask_semantics(json.loads(stats_path.read_text()), stats_path)
+
+
 @dataclass(frozen=True)
 class Blasst2DConfig:
     """Configuration for the reference 2D-BLASST path."""
@@ -39,10 +69,21 @@ class Blasst2DConfig:
     denoising_phase_starts: tuple[int, ...] = ()
     local_phase_lambdas: tuple[float, ...] = ()
     global_phase_lambdas: tuple[float, ...] = ()
+    # Optional calibrated length-aware policy.  Each attention-type entry is
+    # ``{alpha, gamma, target_sparsity, unattainable}`` and implements the
+    # calibrated relation lambda * L = alpha * exp(gamma * s).  Keeping this
+    # in the reference configuration makes the deployed threshold depend on
+    # the actual valid KV length of each attention call rather than on the
+    # mean length of the calibration corpus.
+    length_aware_policy: Optional[Mapping[str, Mapping[str, Any]]] = None
+    # Experimental previous-maximum threshold extension; opt-in preserves
+    # the valid range and behavior of all existing experiment configurations.
+    allow_lambda_above_one: bool = False
 
     def __post_init__(self) -> None:
-        if not 0.0 < self.blasst_lambda < 1.0:
-            raise ValueError("blasst_lambda must be strictly between 0 and 1")
+        upper = math.inf if self.allow_lambda_above_one else 1.0
+        if not math.isfinite(self.blasst_lambda) or not 0.0 < self.blasst_lambda <= upper:
+            raise ValueError("blasst_lambda must be in (0, 1]")
         if self.q_tile_size <= 0:
             raise ValueError("q_tile_size must be positive")
         if self.kv_tile_size <= 0:
@@ -51,8 +92,8 @@ class Blasst2DConfig:
             ("local_blasst_lambda", self.local_blasst_lambda),
             ("global_blasst_lambda", self.global_blasst_lambda),
         ):
-            if value is not None and not 0.0 < value < 1.0:
-                raise ValueError(f"{name} must be strictly between 0 and 1")
+            if value is not None and (not math.isfinite(value) or not 0.0 < value <= upper):
+                raise ValueError(f"{name} must be in (0, 1]")
         if tuple(sorted(set(self.denoising_phase_starts))) != self.denoising_phase_starts:
             raise ValueError("denoising_phase_starts must be strictly increasing")
         if self.denoising_phase_starts and self.denoising_phase_starts[0] <= 0:
@@ -64,16 +105,36 @@ class Blasst2DConfig:
         ):
             if values and len(values) != expected_phases:
                 raise ValueError(f"{name} must contain {expected_phases} values")
-            if any(not 0.0 < value < 1.0 for value in values):
-                raise ValueError(f"all {name} values must be strictly between 0 and 1")
+            if any(not math.isfinite(value) or not 0.0 < value <= upper for value in values):
+                raise ValueError(f"all {name} values must be in (0, 1]")
 
     @property
     def log_lambda(self) -> float:
         return math.log(self.blasst_lambda)
 
-    def lambda_for(self, attention_type: str, denoising_iteration: int) -> float:
+    def lambda_for(
+        self,
+        attention_type: str,
+        denoising_iteration: int,
+        valid_kv_length: Optional[int] = None,
+    ) -> float:
         if attention_type not in ("local", "global"):
             raise ValueError("attention_type must be local or global")
+        length_policy = (self.length_aware_policy or {}).get(attention_type)
+        if length_policy is not None:
+            # Calibration explicitly labels a target as unattainable when its
+            # observed grid cannot bracket it.  The requested conservative
+            # fallback is lambda=1 (the strongest representable threshold).
+            if bool(length_policy.get("unattainable", False)):
+                return 1.0
+            length = int(valid_kv_length or 0)
+            if length <= 0:
+                raise ValueError("length-aware BLASST policy requires a positive valid KV length")
+            alpha = float(length_policy["alpha"])
+            gamma = float(length_policy["gamma"])
+            target = float(length_policy["target_sparsity"])
+            value = alpha * math.exp(gamma * target) / length
+            return min(math.inf if self.allow_lambda_above_one else 1.0, max(float.fromhex("0x1.0p-1022"), value))
         phases = (
             self.local_phase_lambdas
             if attention_type == "local"
@@ -105,9 +166,9 @@ class BlasstTileDecisions:
     row_total: torch.Tensor
     skipped_valid_elements: torch.Tensor
     valid_elements: torch.Tensor
-    # Boolean row-granular votes with shape [B, H, Q, kv_tiles].  The
-    # physical ``skip_mask`` remains tile-granular for reporting: a tile is
-    # physically skipped only when every valid active query row votes to skip.
+    # Diagnostic row-level votes [B, H, Q, kv_tiles], not the applied mask.
+    # Both attention and physical statistics use ``skip_mask``: skip only
+    # when every valid active query row votes to skip the tile.
     row_skip_mask: Optional[torch.Tensor] = None
 
     @property
@@ -116,6 +177,7 @@ class BlasstTileDecisions:
 
     @property
     def row_retained_mask(self) -> torch.Tensor:
+        """Diagnostic row votes before whole-tile aggregation, not execution."""
         if self.row_skip_mask is None:
             # Backward-compatible fallback for callers constructing the old
             # eight-field decision tuple. Without the query tile size there is
@@ -448,6 +510,7 @@ class Blasst2DStats:
 
     def summary(self) -> dict[str, Any]:
         summary = _with_ratios(self.totals)
+        summary["blasst_mask_semantics"] = BLASST_MASK_SEMANTICS
         if summary["eligible_tiles"] != (
             summary["skipped_tiles"] + summary["retained_tiles"]
         ):
@@ -483,6 +546,7 @@ class Blasst2DStats:
         if not summary_path.exists():
             return cls()
         summary = json.loads(summary_path.read_text(encoding="utf-8"))
+        require_blasst_mask_semantics(summary, summary_path)
         stats = cls()
         for name in _COUNT_FIELDS:
             stats.totals[name] = int(summary.get(name, 0))
@@ -572,12 +636,17 @@ class Blasst2DStats:
         run_config: Optional[Mapping[str, Any]] = None,
     ) -> None:
         output_path = Path(output_dir)
+        for name in ("summary.json", "run_config.json"):
+            prior = output_path / name
+            if prior.exists():
+                require_blasst_mask_semantics(json.loads(prior.read_text()), prior)
         output_path.mkdir(parents=True, exist_ok=True)
         (output_path / "summary.json").write_text(
             json.dumps(self.summary(), indent=2, sort_keys=True) + "\n",
             encoding="utf-8",
         )
-        merged_config = {**asdict(config), **dict(run_config or {})}
+        merged_config = {**asdict(config), **dict(run_config or {}),
+                         "blasst_mask_semantics": BLASST_MASK_SEMANTICS}
         (output_path / "run_config.json").write_text(
             json.dumps(merged_config, indent=2, sort_keys=True, default=str) + "\n",
             encoding="utf-8",
@@ -685,6 +754,7 @@ def evaluate_blasst_thresholds(
     kv_tile_size: int = 64,
     sparse_kv_start: int = 0,
     include_masked_kv_tiles_in_physical_stats: bool = False,
+    allow_lambda_above_one: bool = False,
 ) -> dict[float, BlasstTileDecisions]:
     """Evaluate many thresholds from one shared set of QK tile maxima.
 
@@ -696,8 +766,8 @@ def evaluate_blasst_thresholds(
     if not lambda_values:
         raise ValueError("at least one lambda is required")
     for value in lambda_values:
-        if not 0.0 < value < 1.0:
-            raise ValueError("all lambda values must be strictly between 0 and 1")
+        if not math.isfinite(value) or not 0.0 < value <= (math.inf if allow_lambda_above_one else 1.0):
+            raise ValueError("all lambda values must be in (0, 1]")
     if q_tile_size <= 0 or kv_tile_size <= 0:
         raise ValueError("tile sizes must be positive")
 
@@ -783,12 +853,9 @@ def evaluate_blasst_thresholds(
             ).sum(-2)
             target["row_total"][:, :, query_tile] = valid_vote.sum(-2)
             target["valid_elements"][:, :, query_tile] = valid_count
-            # Secondary BLASST sparsity is row-granular: count valid QK
-            # elements removed by individual row votes, even when another
-            # query row retains the same physical tile.
-            target["skip_elements"][:, :, query_tile] = (
-                (active_valid & (vote[..., None])).sum(dim=(-3, -1))
-            )
+            # Only wholly skipped tiles remove elements from attention.
+            # Mixed row votes remain diagnostic; retained tiles stay dense.
+            target["skip_elements"][:, :, query_tile] = valid_count * physical_skip
 
     for value, target in buffers.items():
         decisions_by_lambda[value] = BlasstTileDecisions(
@@ -805,6 +872,19 @@ def evaluate_blasst_thresholds(
             row_skip_mask=target["row_skip_mask"],
         )
     return decisions_by_lambda
+
+
+@torch.no_grad()
+def _physical_element_skip_mask(
+    decisions: BlasstTileDecisions,
+    scores: torch.Tensor,
+    config: Blasst2DConfig,
+) -> torch.Tensor:
+    """Expand the execution mask over both tile axes, trimming partial tiles."""
+    mask = decisions.skip_mask.repeat_interleave(
+        config.q_tile_size, dim=-2
+    ).repeat_interleave(config.kv_tile_size, dim=-1)
+    return mask[..., : scores.shape[-2], : scores.shape[-1]]
 
 
 @torch.no_grad()
@@ -826,6 +906,7 @@ def apply_blasst_2d(
         [value],
         q_tile_size=config.q_tile_size,
         kv_tile_size=config.kv_tile_size,
+        allow_lambda_above_one=config.allow_lambda_above_one,
         sparse_kv_start=sparse_kv_start,
         include_masked_kv_tiles_in_physical_stats=(
             config.include_masked_kv_tiles_in_physical_stats
@@ -834,13 +915,8 @@ def apply_blasst_2d(
     # Expand only the final block decision mask; all score analysis above stays
     # block-shaped. This removes the Python loop over every KV tile, which is
     # especially important for fast 8K benchmark iteration.
-    # ``apply_blasst_2d`` remains a tile-mask oracle for compatibility with
-    # callers that inspect the physical mask directly.  The attention forward
-    # path applies the row-granular mask below before softmax.
-    element_skip_mask = decisions.skip_mask.repeat_interleave(
-        config.q_tile_size, dim=-2
-    ).repeat_interleave(config.kv_tile_size, dim=-1)
-    element_skip_mask = element_skip_mask[..., : scores.shape[-2], : scores.shape[-1]]
+    # Use the same physical mask as the attention forward and mass diagnostic.
+    element_skip_mask = _physical_element_skip_mask(decisions, scores, config)
     valid, _, _, _ = _decision_tensors(
         scores, valid_pair_mask, active_query_mask, config
     )
@@ -889,7 +965,6 @@ def slow_blasst_2d(
                     valid_rows = 0
                     skippable_rows = 0
                     tile_elements = 0
-                    tile_skipped_elements = 0
                     for local_row, query_idx in enumerate(range(q_start, q_end)):
                         if not bool(active[batch_idx, head, query_idx]):
                             continue
@@ -909,8 +984,6 @@ def slow_blasst_2d(
                         votes.append(vote)
                         if kv_start >= sparse_kv_start:
                             row_skip_mask[batch_idx, head, query_idx, kv_tile] = vote
-                            if vote:
-                                tile_skipped_elements += len(valid_scores)
                         valid_rows += 1
                         skippable_rows += int(vote)
 
@@ -933,7 +1006,7 @@ def slow_blasst_2d(
                         row_total[batch_idx, head, query_tile, kv_tile] = valid_rows
                         valid_elements[batch_idx, head, query_tile, kv_tile] = tile_elements
                     skip_elements[batch_idx, head, query_tile, kv_tile] = (
-                        tile_skipped_elements if kv_start >= sparse_kv_start else 0
+                        tile_elements if tile_skip else 0
                     )
 
     element_skip_mask = skip.repeat_interleave(
@@ -1113,11 +1186,7 @@ def _retained_dense_mass(
     the denominator, matching the attention output semantics.
     """
 
-    row_skip = decisions.row_skip_mask
-    if row_skip is None:
-        row_skip = decisions.skip_mask.unsqueeze(-2)
-    element_skip = row_skip.repeat_interleave(config.kv_tile_size, dim=-1)
-    element_skip = element_skip[..., : dense_scores.shape[-2], : dense_scores.shape[-1]]
+    element_skip = _physical_element_skip_mask(decisions, dense_scores, config)
     valid_rows = valid.any(dim=-1)
     active = _expand_active_rows(active_query_mask, dense_scores)
     rows = valid_rows & active
@@ -1320,39 +1389,60 @@ def blasst_2d_attention_forward(
     }
     attention_type = _attention_type(module, sliding_window)
     denoising_iteration = int(metadata.get("denoising_iteration", -1))
-    effective_lambda = config.lambda_for(attention_type, denoising_iteration)
+    valid_lengths = valid.any(dim=(1, 2)).sum(-1)
+    if valid_lengths.numel() == 1:
+        metadata.setdefault("valid_kv_length", int(valid_lengths.item()))
+    elif torch.equal(valid_lengths, valid_lengths[:1].expand_as(valid_lengths)):
+        metadata.setdefault("valid_kv_length", int(valid_lengths[0].item()))
+    else:
+        raise ValueError("length-aware BLASST requires one shared valid KV length per batch")
+    effective_lambda = config.lambda_for(
+        attention_type,
+        denoising_iteration,
+        int(metadata["valid_kv_length"]),
+    )
     metadata.update(
         attention_type=attention_type,
         denoising_phase=config.phase_for(denoising_iteration),
         effective_blasst_lambda=effective_lambda,
     )
-    valid_lengths = valid.any(dim=(1, 2)).sum(-1)
-    if valid_lengths.numel() == 1:
-        metadata.setdefault("valid_kv_length", int(valid_lengths.item()))
     dense_scores = scores
-    # Keep the public ``apply_blasst_2d`` helper a physical-tile oracle for
-    # compatibility with callers that inspect or compare the tile mask.  The
-    # actual attention path follows BLASST's row-granular rule: each query row
-    # can skip a KV tile independently, while physical-tile sparsity is only
-    # counted when all valid rows vote to skip it.
+    # Row votes determine a whole-tile decision. Retaining a tile preserves
+    # every structurally valid position in it, even for rows voting to skip.
+    tile_order = kwargs.pop("blasst_tile_order", "forward")
+    if tile_order not in ("forward", "reverse"):
+        raise ValueError("unsupported diagnostic KV tile order")
+    decision_scores, decision_valid = scores, valid
+    if tile_order == "reverse":
+        if sparse_kv_start:
+            raise ValueError("reverse diagnostic requires all KV tiles eligible")
+        width = config.kv_tile_size
+        pad = (-scores.shape[-1]) % width
+        def reverse_blocks(tensor: torch.Tensor, fill: Any) -> torch.Tensor:
+            padded = F.pad(tensor, (0, pad), value=fill)
+            return padded.reshape(*padded.shape[:-1], -1, width).flip(-2).flatten(-2)
+        decision_scores = reverse_blocks(scores, -torch.inf)
+        decision_valid = reverse_blocks(valid, False)
     _, decisions = apply_blasst_2d(
-        scores,
-        valid,
+        decision_scores,
+        decision_valid,
         active_query_mask,
         config,
         sparse_kv_start=sparse_kv_start,
         blasst_lambda=effective_lambda,
     )
+    if tile_order == "reverse":
+        # All decision tensors end in the KV tile axis; restore physical
+        # positions before masking logits, recording regions, or reducing AV.
+        for name in decisions.__dataclass_fields__:
+            tensor = getattr(decisions, name)
+            if tensor is not None:
+                setattr(decisions, name, tensor.flip(-1))
+    metadata["kv_tile_order"] = tile_order
+    attention_valid = valid
     if config.apply_blasst_mask:
-        row_skip = decisions.row_skip_mask
-        if row_skip is None:
-            row_skip = decisions.skip_mask.unsqueeze(-2)
-        element_skip_mask = row_skip.repeat_interleave(
-            config.kv_tile_size, dim=-1
-        )
-        element_skip_mask = element_skip_mask[
-            ..., : dense_scores.shape[-2], : dense_scores.shape[-1]
-        ]
+        element_skip_mask = _physical_element_skip_mask(decisions, dense_scores, config)
+        attention_valid = valid & ~element_skip_mask
         scores = dense_scores.masked_fill(element_skip_mask & valid, -torch.inf)
     else:
         scores = dense_scores
@@ -1383,7 +1473,7 @@ def blasst_2d_attention_forward(
             region_counts=region_counts,
         )
     return _finish_eager_attention(
-        query, value, scores, valid, dropout, module.training
+        query, value, scores, attention_valid, dropout, module.training
     )
 
 

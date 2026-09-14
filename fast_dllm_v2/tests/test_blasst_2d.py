@@ -65,7 +65,8 @@ def test_config_validation() -> None:
     with pytest.raises(ValueError):
         Blasst2DConfig(blasst_lambda=0)
     with pytest.raises(ValueError):
-        Blasst2DConfig(blasst_lambda=1)
+        Blasst2DConfig(blasst_lambda=1.000001)
+    assert Blasst2DConfig(blasst_lambda=1).log_lambda == 0.
     with pytest.raises(ValueError):
         Blasst2DConfig(q_tile_size=0)
     with pytest.raises(ValueError):

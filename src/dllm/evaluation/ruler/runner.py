@@ -13,6 +13,7 @@ from typing import Any
 import torch
 
 from dllm.attention.blasst import Blasst2DConfig, Blasst2DStats, install_blasst
+from dllm.attention.blasst import BLASST_MASK_SEMANTICS, validate_blasst_output_directory
 from dllm.models import GenerationRequest, create_adapter
 
 from .io import append_jsonl, read_jsonl, sha256_file, sha256_json, write_json
@@ -121,6 +122,8 @@ def run_evaluation(
     *,
     loaded_adapter: Any | None = None,
     attention_observer: Any | None = None,
+    attention_override: Any | None = None,
+    before_prediction_commit: Any | None = None,
 ) -> dict[str, Any]:
     if config.num_samples <= 0:
         raise ValueError("num_samples must be positive")
@@ -134,6 +137,10 @@ def run_evaluation(
         raise ValueError("performance_warmups must be nonnegative and performance_repeats positive")
     manifest, samples = _load_manifest(config)
     output_dir = Path(config.output_dir).resolve()
+    semantics = {}
+    if config.attention_backend == "blasst-reference" or config.blasst_calibration_lambdas:
+        validate_blasst_output_directory(output_dir)
+        semantics = {"blasst_mask_semantics": BLASST_MASK_SEMANTICS}
     output_dir.mkdir(parents=True, exist_ok=True)
     progress_log = output_dir / "progress.log"
     def log_progress(message: str) -> None:
@@ -144,6 +151,7 @@ def run_evaluation(
     log_progress(f"run_start adapter={config.model_adapter} backend={config.attention_backend} samples={config.num_samples}")
     fingerprint_payload = {
         **asdict(config),
+        **semantics,
         "output_dir": None,
         "manifest_sha256": sha256_file(config.manifest_path),
     }
@@ -174,7 +182,7 @@ def run_evaluation(
             raise ValueError("output directory belongs to a different RULER run")
     write_json(
         run_config_path,
-        {**asdict(config), **_environment(), "fingerprint": fingerprint},
+        {**asdict(config), **_environment(), **semantics, "fingerprint": fingerprint},
     )
 
     predictions_path = output_dir / "predictions.jsonl"
@@ -318,6 +326,8 @@ def run_evaluation(
             )
         if routing is not None:
             binding.runtime.attention_override = routing
+        elif attention_override is not None:
+            binding.runtime.attention_override = attention_override
 
     def persist_attention_stats() -> None:
         """Checkpoint BLASST routing totals after each completed sample.
@@ -390,6 +400,7 @@ def run_evaluation(
                 raise RuntimeError(f"non-finite runtime for RULER sample {sample_id}")
             row = {
                 **sample,
+                **semantics,
                 "prediction": result.text,
                 "completion_tokens": result.completion_tokens,
                 "elapsed_seconds": float(statistics.median(external_elapsed)),
@@ -403,6 +414,8 @@ def run_evaluation(
             }
             if routing is not None:
                 row["routing_stats"] = routing_repetitions[-1]
+            if before_prediction_commit is not None:
+                before_prediction_commit()
             append_jsonl(predictions_path, row)
             completed[sample_id] = row
             persist_attention_stats()
@@ -448,6 +461,7 @@ def run_evaluation(
         )
     per_task, overall = score_predictions(ordered, config.ruler_root)
     summary = {
+        **semantics,
         "schema_version": 1,
         "requested_num_samples": config.num_samples,
         "actual_num_samples": len(ordered),

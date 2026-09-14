@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Fit BLASST Algorithm 2 thresholds by attention type and denoising phase."""
+"""Fit physical-tile BLASST thresholds by attention type and denoising phase.
+
+Only eligible/skipped whole-tile counts affect the fit. Legacy dense calibration
+exports remain usable: changing row-mask execution to whole tiles does not
+change these routing decisions. Row-vote counts are diagnostics, not sparsity.
+"""
 
 from __future__ import annotations
 
@@ -174,9 +179,9 @@ def main() -> None:
                 math.log(lower[1])
                 + fraction * (math.log(upper[1]) - math.log(lower[1]))
             )
-        if not 0.0 < threshold < 1.0:
+        if not 0.0 < threshold <= 1.0:
             raise RuntimeError(
-                f"fitted threshold {threshold} is outside (0, 1) for {group_key}"
+                f"fitted threshold {threshold} is outside (0, 1] for {group_key}"
             )
         name = f"{attention_type}_{PHASE_NAMES[phase]}"
         selected[group_key] = threshold

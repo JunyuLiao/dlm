@@ -100,8 +100,8 @@ class ExperimentConfig:
                 raise ValueError("Sol-Attn beta must be the analytic universal cut point")
         if self.method == "blasst_calibrated":
             for name, value in (("lambda_local", self.lambda_local), ("lambda_global", self.lambda_global)):
-                if value is None or not 0.0 < float(value) < 1.0:
-                    raise ValueError(f"{name} must lie strictly between zero and one")
+                if value is None or not 0.0 < float(value) <= 1.0:
+                    raise ValueError(f"{name} must lie in (0, 1]")
 
     @property
     def retained_density(self) -> float:

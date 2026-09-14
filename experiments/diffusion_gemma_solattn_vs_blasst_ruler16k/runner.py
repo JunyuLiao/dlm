@@ -14,6 +14,9 @@ from dllm.evaluation.ruler.io import (
     write_jsonl,
 )
 from dllm.evaluation.ruler.runner import RulerRunConfig, run_evaluation
+from dllm.attention.blasst import (
+    BLASST_MASK_SEMANTICS, require_blasst_mask_semantics, validate_blasst_output_directory,
+)
 
 from .calibration import DenseMarginTraceCollector, fit_blasst_policy_jsonl
 from .config import (
@@ -134,6 +137,9 @@ def _write_policy(path: str | Path, policy: Mapping[str, Any]) -> dict[str, Any]
     """Write a policy with a stable content digest that excludes the digest field."""
 
     output = dict(policy)
+    if Path(path).exists():
+        require_blasst_mask_semantics(json.loads(Path(path).read_text()), path)
+    output["blasst_mask_semantics"] = BLASST_MASK_SEMANTICS
     output.pop("policy_sha256", None)
     output["policy_sha256"] = sha256_json(output)
     write_json(path, output)
@@ -160,6 +166,12 @@ def run_one_condition(
     if adapter == "diffusion_gemma" and model_revision is None:
         model_revision = DEFAULT_MODEL_REVISION
     output = Path(output_dir).resolve()
+    if condition.method == "blasst_calibrated":
+        validate_blasst_output_directory(output)
+        # Legacy physical-tile calibration used the same decision rule and
+        # is reusable. Legacy row-element calibration is not interchangeable.
+        if threshold_policy is not None and threshold_policy.get("metric") != "physical":
+            require_blasst_mask_semantics(threshold_policy, "BLASST threshold policy")
     output.mkdir(parents=True, exist_ok=True)
     runner_manifest = _runner_manifest(study_manifest, rows, output / "runner_manifest.json", adapter=adapter)
     if condition.method == "dense":
@@ -230,7 +242,11 @@ def run_sweep(
     device: str = "cuda",
     precision: str = "bfloat16",
 ) -> dict[str, Any]:
-    output = Path(output_dir).resolve(); output.mkdir(parents=True, exist_ok=True)
+    output = Path(output_dir).resolve()
+    policy_path = output / "blasst_policy.json"
+    if policy_path.exists():
+        require_blasst_mask_semantics(json.loads(policy_path.read_text()), policy_path)
+    output.mkdir(parents=True, exist_ok=True)
     conditions = conditions or canonical_conditions(
         local_lambdas={float(key): value for key, value in threshold_policy["lambda_local"].items()},
         global_lambdas={float(key): value for key, value in threshold_policy["lambda_global"].items()},

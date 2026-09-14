@@ -232,11 +232,13 @@ def main() -> None:
     lambdas = [
         float(value.strip()) for value in args.lambdas.split(",") if value.strip()
     ]
-    if any(not 0.0 < value < 1.0 for value in lambdas):
-        raise ValueError("every lambda must be in (0, 1)")
+    if any(not 0.0 < value <= 1.0 for value in lambdas):
+        raise ValueError("every lambda must be in (0, 1]")
     if args.max_new_tokens % args.block_size:
         raise ValueError("max-new-tokens must be a block-size multiple")
     output_dir = Path(args.output_dir)
+    from dllm.attention.blasst import BLASST_MASK_SEMANTICS, validate_blasst_output_directory
+    validate_blasst_output_directory(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     dataset_path = (
         Path(args.dataset_path)
@@ -426,6 +428,7 @@ def main() -> None:
         encoding="utf-8",
     )
     run_config = {
+        "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
         **vars(args),
         "lambdas": lambdas,
         "dataset_path": str(dataset_path),

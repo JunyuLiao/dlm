@@ -341,8 +341,8 @@ def install_blasst(
     if integration not in ("auto", "registry", "direct"):
         raise ValueError("integration must be auto, registry, or direct")
     sweep_values = tuple(float(value) for value in sweep_lambdas)
-    if any(not 0.0 < value < 1.0 for value in sweep_values):
-        raise ValueError("all sweep lambdas must be strictly between 0 and 1")
+    if any(not 0.0 < value <= 1.0 for value in sweep_values):
+        raise ValueError("all sweep lambdas must be in (0, 1]")
     modeling = importlib.import_module(type(modules[0]).__module__)
     registry = getattr(modeling, "ALL_ATTENTION_FUNCTIONS", None)
     use_registry = integration == "registry" or (

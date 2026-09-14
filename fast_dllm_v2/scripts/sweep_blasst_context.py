@@ -624,11 +624,13 @@ def main() -> None:
         raise ValueError("contexts must be unique and ascending")
     if any(context < args.block_size or context % args.block_size for context in contexts):
         raise ValueError("every context must be a block-size multiple")
-    if any(not 0.0 < value < 1.0 for value in lambdas):
-        raise ValueError("every lambda must be in (0, 1)")
+    if any(not 0.0 < value <= 1.0 for value in lambdas):
+        raise ValueError("every lambda must be in (0, 1]")
 
     set_seed(args.seed)
     output_dir = Path(args.output_dir)
+    from dllm.attention.blasst import BLASST_MASK_SEMANTICS, validate_blasst_output_directory
+    validate_blasst_output_directory(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     model, tokenizer = load_model(args.model_path, args.device, args.precision)
     mask_token_id = int(getattr(model.config, "mask_token_id", 151665))
@@ -755,6 +757,7 @@ def main() -> None:
     )
     environment = _environment()
     run_config = {
+        "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
         **vars(args),
         **environment,
         **stream_config,

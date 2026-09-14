@@ -16,6 +16,7 @@ sys.path.insert(0, str(V2_ROOT))
 
 from scripts.blasst_common import generate_one, load_examples, load_model, set_seed
 from sparse_attention import Blasst2DConfig, Blasst2DStats, install_blasst_2d
+from sparse_attention import validate_blasst_output_directory
 
 
 def parse_args() -> argparse.Namespace:
@@ -53,6 +54,7 @@ def main() -> None:
     args = parse_args()
     set_seed(args.seed)
     output_dir = Path(args.output_dir)
+    validate_blasst_output_directory(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     model, tokenizer = load_model(args.model_path, args.device, args.precision)
     cfg = Blasst2DConfig(

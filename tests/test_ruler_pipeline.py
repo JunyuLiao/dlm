@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 import torch.nn as nn
@@ -88,10 +89,24 @@ def _manifest(
     return manifest
 
 
-def test_runner_uses_exact_requested_count_and_stable_resume(tmp_path, monkeypatch) -> None:
+@pytest.mark.parametrize("backend", ["dense", "blasst-reference"])
+def test_runner_uses_exact_requested_count_and_stable_resume(tmp_path, monkeypatch, backend) -> None:
     import dllm.evaluation.ruler.runner as runner
 
-    monkeypatch.setattr(runner, "create_adapter", lambda *args, **kwargs: FakeAdapter())
+    def make_adapter(*args, **kwargs):
+        adapter = FakeAdapter()
+        adapter.attention_integration = "registry"
+        adapter.blasst_filter_special_query_ids = False
+        adapter.is_blasst_attention_module = lambda *args: False
+        adapter.blasst_query_ids = lambda *args: None
+        adapter.blasst_call_is_eligible = lambda *args: True
+        adapter.blasst_dense_kv_prefix = lambda *args: 0
+        return adapter
+
+    monkeypatch.setattr(runner, "create_adapter", make_adapter)
+    monkeypatch.setattr(runner, "install_blasst", lambda model, config, *args, **kwargs:
+        SimpleNamespace(runtime=SimpleNamespace(config=config, metadata_context={}, sweep_stats={}),
+                        close=lambda: None))
     monkeypatch.setattr(
         runner,
         "score_predictions",
@@ -109,6 +124,8 @@ def test_runner_uses_exact_requested_count_and_stable_resume(tmp_path, monkeypat
         context_length=8,
         device="cpu",
         precision="float32",
+        attention_backend=backend,
+        collect_attention_stats=backend == "blasst-reference",
         generation_extra={"max_denoising_steps": 4},
     )
     first = run_evaluation(config)
@@ -120,6 +137,13 @@ def test_runner_uses_exact_requested_count_and_stable_resume(tmp_path, monkeypat
     run_config = json.loads((tmp_path / "run" / "run_config.json").read_text())
     assert run_config["generation_extra"] == {"max_denoising_steps": 4}
     assert run_config["transformers_version"] == "fake"
+    if backend == "blasst-reference":
+        from dllm.attention.blasst import BLASST_MASK_SEMANTICS
+        assert run_config["blasst_mask_semantics"] == BLASST_MASK_SEMANTICS
+        assert first["blasst_mask_semantics"] == BLASST_MASK_SEMANTICS
+        assert all(json.loads(row)["blasst_mask_semantics"] == BLASST_MASK_SEMANTICS for row in predictions)
+        stats = json.loads((tmp_path / "run" / "attention_stats" / "summary.json").read_text())
+        assert stats["blasst_mask_semantics"] == BLASST_MASK_SEMANTICS
 
 
 def test_runner_rejects_more_samples_than_manifest(tmp_path) -> None:

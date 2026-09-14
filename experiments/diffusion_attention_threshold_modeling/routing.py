@@ -59,6 +59,8 @@ class FreshRoutingStats:
     logical_retained_tiles: int = 0
     physical_candidate_tiles: int = 0
     physical_retained_tiles: int = 0
+    physical_total_tiles: int = 0
+    physical_skipped_tiles: int = 0
     dense_attention_mass_sum: float = 0.0
     dense_attention_mass_rows: int = 0
     output_relative_error_sum: float = 0.0
@@ -67,6 +69,7 @@ class FreshRoutingStats:
     degenerate_rows: int = 0
     routing_rows: int = 0
     region_counts: dict[str, dict[str, int]] = field(default_factory=dict)
+    all_region_counts: dict[str, dict[str, int]] = field(default_factory=dict)
     retained_tiles_per_row_histogram: dict[str, int] = field(default_factory=dict)
     by_attention_type: dict[str, dict[str, int]] = field(default_factory=dict)
     by_layer: dict[str, dict[str, int]] = field(default_factory=dict)
@@ -92,6 +95,9 @@ class FreshRoutingStats:
             "physical_candidate_tiles": self.physical_candidate_tiles,
             "physical_retained_tiles": self.physical_retained_tiles,
             "physical_density": self.physical_retained_tiles / self.physical_candidate_tiles if self.physical_candidate_tiles else math.nan,
+            "physical_total_tiles": self.physical_total_tiles,
+            "physical_skipped_tiles": self.physical_skipped_tiles,
+            "full_model_physical_sparsity": self.physical_skipped_tiles / self.physical_total_tiles if self.physical_total_tiles else math.nan,
             "retained_dense_attention_mass": self.dense_attention_mass_sum / self.dense_attention_mass_rows if self.dense_attention_mass_rows else None,
             "dense_attention_mass_rows": self.dense_attention_mass_rows,
             "attention_output_relative_error": self.output_relative_error_sum / self.output_relative_error_calls if self.output_relative_error_calls else None,
@@ -101,6 +107,7 @@ class FreshRoutingStats:
             "fallback_row_fraction": self.fallback_rows / self.routing_rows if self.routing_rows else None,
             "degenerate_row_fraction": self.degenerate_rows / self.routing_rows if self.routing_rows else None,
             "region_counts": self.region_counts,
+            "all_region_counts": self.all_region_counts,
             "retained_tiles_per_row_histogram": self.retained_tiles_per_row_histogram,
             "by_attention_type": self.by_attention_type,
             "by_layer": self.by_layer,
@@ -356,6 +363,26 @@ class FreshRoutingAttention:
             prepared_key=expanded_key, valid_pair_mask=valid,
             global_kv_tiling=self.config.combined_region_population,
         )
+        # Count every structurally valid physical tile before applying the
+        # region policy.  For prefix-only routing, canvas tiles remain dense
+        # and therefore belong in the denominator but never in the skipped
+        # numerator.  Summing these integer counters across calls correctly
+        # weights later, longer decoding canvases.
+        all_physical: set[tuple[int, int, int, int, int]] = set()
+        all_region_totals: dict[str, int] = {"prefix": 0, "canvas": 0}
+        for row in rows:
+            batch, head = int(row["batch"]), int(row["head"])
+            q_start = int(row["query_start"])
+            for region_name in ("prefix", "canvas"):
+                for kv_start, kv_end in row[f"{region_name}_spans"]:
+                    all_physical.add((
+                        batch,
+                        head,
+                        q_start // self.config.q_block_size,
+                        int(kv_start),
+                        int(kv_end),
+                    ))
+                    all_region_totals[region_name] += 1
         allowed = torch.zeros_like(valid)
         # A region-specific ablation routes only its named region; the other
         # region remains native dense.  The all-KV reproduction starts with no
@@ -440,10 +467,15 @@ class FreshRoutingAttention:
                 if not len(values):
                     continue
                 degenerate = len(values) < 2 or float(values.std(ddof=0)) < 1.0e-8
-                keep, beta, fallback = _keep_vector(
-                    values, self.config, attention_type,
-                    random_identity=(self.stats.calls, int(getattr(module, "layer_idx", -1)), batch, head, q_start, region_name),
-                )
+                if degenerate and self.config.mode in ("gaussian", "profiled"):
+                    keep = np.ones(len(values), dtype=bool)
+                    beta = float("nan")
+                    fallback = False
+                else:
+                    keep, beta, fallback = _keep_vector(
+                        values, self.config, attention_type,
+                        random_identity=(self.stats.calls, int(getattr(module, "layer_idx", -1)), batch, head, q_start, region_name),
+                    )
                 if np.isfinite(beta):
                     beta_values.append(beta)
                 fallback_rows += int(fallback)
@@ -514,6 +546,8 @@ class FreshRoutingAttention:
         self.stats.logical_retained_tiles += logical_kept
         self.stats.physical_candidate_tiles += len(physical)
         self.stats.physical_retained_tiles += sum(physical.values())
+        self.stats.physical_total_tiles += len(all_physical)
+        self.stats.physical_skipped_tiles += len(physical) - sum(physical.values())
         self.stats.dense_attention_mass_sum += mass_sum
         self.stats.dense_attention_mass_rows += mass_rows
         if math.isfinite(relative_error):
@@ -538,6 +572,10 @@ class FreshRoutingAttention:
         aggregate_counts = {
             "candidate_tiles": logical_total,
             "retained_tiles": logical_kept,
+            "physical_total_tiles": len(all_physical),
+            "physical_candidate_tiles": len(physical),
+            "physical_retained_tiles": int(sum(physical.values())),
+            "physical_skipped_tiles": int(len(physical) - sum(physical.values())),
             "routing_rows": sum(values[2] for values in head_totals.values()),
             "fallback_rows": fallback_rows,
         }
@@ -550,10 +588,38 @@ class FreshRoutingAttention:
                 candidate_tiles=candidates, retained_tiles=retained,
                 routing_rows=rows_count, fallback_rows=head_fallbacks,
             )
-        for region_name, (total, retained) in region_totals.items():
+        call_region_counts = {
+            name: {"candidate_tiles": int(total), "retained_tiles": int(retained)}
+            for name, (total, retained) in region_totals.items()
+        }
+        for region_name, counts in call_region_counts.items():
             entry = self.stats.region_counts.setdefault(region_name, {"candidate_tiles": 0, "retained_tiles": 0})
-            entry["candidate_tiles"] += total
+            entry["candidate_tiles"] += counts["candidate_tiles"]
+            entry["retained_tiles"] += counts["retained_tiles"]
+        call_all_region_counts: dict[str, dict[str, int]] = {}
+        for region_name in ("prefix", "canvas"):
+            total_tiles = int(all_region_totals.get(region_name, 0))
+            routed, routed_retained = region_totals.get(region_name, (0, 0))
+            skipped = int(routed - routed_retained)
+            retained = int(total_tiles - skipped)
+            if not total_tiles:
+                continue
+            entry = self.stats.all_region_counts.setdefault(region_name, {
+                "total_tiles": 0,
+                "candidate_tiles": 0,
+                "retained_tiles": 0,
+                "skipped_tiles": 0,
+            })
+            entry["total_tiles"] += total_tiles
+            entry["candidate_tiles"] += int(routed)
             entry["retained_tiles"] += retained
+            entry["skipped_tiles"] += skipped
+            call_all_region_counts[region_name] = {
+                "total_tiles": total_tiles,
+                "candidate_tiles": int(routed),
+                "retained_tiles": retained,
+                "skipped_tiles": skipped,
+            }
         self.stats.per_call.append({
             "call": self.stats.calls - 1,
             "layer": layer,
@@ -564,12 +630,15 @@ class FreshRoutingAttention:
             "logical_retained_tiles": logical_kept,
             "physical_candidate_tiles": len(physical),
             "physical_retained_tiles": int(sum(physical.values())),
+            "physical_total_tiles": len(all_physical),
+            "physical_skipped_tiles": int(len(physical) - sum(physical.values())),
             "retained_dense_attention_mass": mass_sum / mass_rows if mass_rows else math.nan,
             "valid_rows": mass_rows,
             "retained_attention_mass_rows": mass_rows,
             "attention_output_relative_error": relative_error if math.isfinite(relative_error) else None,
             "beta": float(np.mean(beta_values)) if beta_values else None,
-            "region_counts": {name: {"candidate_tiles": total, "retained_tiles": retained} for name, (total, retained) in region_totals.items()},
+            "region_counts": call_region_counts,
+            "all_region_counts": call_all_region_counts,
             "fallback_rows": fallback_rows,
             "degenerate_rows": degenerate_row_count,
             "previous_call_mask_jaccard": overlap_jaccard,

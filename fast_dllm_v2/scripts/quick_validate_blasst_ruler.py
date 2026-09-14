@@ -19,6 +19,7 @@ from scripts import eval_blasst_ruler_legacy as legacy
 from scripts.blasst_common import generate_one, load_model, set_seed
 from scripts.sweep_blasst_controlled import _aggregate
 from sparse_attention import Blasst2DConfig, Blasst2DStats, install_blasst_2d
+from sparse_attention import BLASST_MASK_SEMANTICS, validate_blasst_output_directory
 
 
 def parse_args() -> argparse.Namespace:
@@ -60,7 +61,9 @@ def main() -> None:
     started = time.monotonic()
     source = Path(args.source_results).resolve()
     output = Path(args.output_dir).resolve()
+    validate_blasst_output_directory(output)
     output.mkdir(parents=True, exist_ok=True)
+    write_json(output / "run_config.json", {**vars(args), "blasst_mask_semantics": BLASST_MASK_SEMANTICS})
 
     samples = legacy._read_jsonl(
         source / "ruler_cache/ruler_accuracy_samples_8k.jsonl"
@@ -237,6 +240,7 @@ def main() -> None:
     ]
     archived_controlled = _aggregate(archived_raw, ())[0]
     result = {
+        "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
         "configuration": {
             "model_path": str(Path(args.model_path).resolve()),
             "context_length": 8192,

@@ -50,9 +50,11 @@ from scripts.sweep_blasst_controlled import (  # noqa: E402
     _write_csv,
 )
 from sparse_attention import (  # noqa: E402
+    BLASST_MASK_SEMANTICS,
     Blasst2DConfig,
     Blasst2DStats,
     install_blasst_2d,
+    validate_blasst_output_directory,
 )
 
 
@@ -1988,6 +1990,7 @@ def _write_run_config(
         **prior,
         **vars(args),
         **model_environment,
+        "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
         "contexts": list(CONTEXTS),
         "block_sizes": list(BLOCK_SIZES),
         "lambdas": list(LAMBDAS),
@@ -2041,13 +2044,16 @@ def main() -> None:
         raise ValueError("physical Q/KV tiles must remain 128/64")
     if args.state_tokens != 64:
         raise ValueError("shared block-sweep state must contain exactly 64 tokens")
-    if not 0.0 < args.accuracy_lambda < 1.0:
-        raise ValueError("accuracy lambda must be in (0,1)")
+    if not 0.0 < args.accuracy_lambda <= 1.0:
+        raise ValueError("accuracy lambda must be in (0,1]")
 
     output_dir = Path(args.output_dir).resolve()
+    if args.phase != "report":
+        validate_blasst_output_directory(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     ruler = _verify_ruler_checkout(Path(args.ruler_root))
-    _write_run_config(args, output_dir, ruler)
+    if args.phase != "report":
+        _write_run_config(args, output_dir, ruler)
     if args.phase in ("all", "prepare"):
         _prepare_samples(args, output_dir, ruler)
     if args.phase in ("all", "sweeps"):

@@ -329,6 +329,15 @@ def build_report(output_dir: str | Path, ruler_root: str | Path | None = None) -
     dense_predictions = read_jsonl(output / "dense" / "predictions.jsonl")
     table: list[dict[str, Any]] = []
     condition_dirs = {path.name: path for path in output.iterdir() if path.is_dir() and (path / "summary.json").exists()}
+    # Preflight before refreshing any derived Sol routing shards.
+    mask_semantics = sorted({
+        _load_json(path / "run_config.json").get("blasst_mask_semantics", "legacy_row_mask")
+        for name, path in condition_dirs.items()
+        if name in EXPECTED_CONDITIONS and name.startswith("blasst_")
+        and read_jsonl(path / "predictions.jsonl")
+    })
+    if len(mask_semantics) > 1:
+        raise ValueError("Mixed legacy row-mask and corrected whole-tile BLASST conditions; report separate bundles")
     for condition in EXPECTED_CONDITIONS:
         path = condition_dirs.get(condition)
         summary = _load_json(path / "summary.json") if path else {}
@@ -360,6 +369,7 @@ def build_report(output_dir: str | Path, ruler_root: str | Path | None = None) -
         dense_baseline = condition == "dense"
         table.append({
             "condition": condition,
+            "blasst_mask_semantics": (_load_json(path / "run_config.json").get("blasst_mask_semantics", "legacy_row_mask") if path and condition.startswith("blasst_") else "not_applicable"),
             "method": "dense" if condition == "dense" else "sol_gaussian" if condition.startswith("sol_gaussian") else "blasst_calibrated",
             "target_sparsity": 0.0 if condition == "dense" else int(condition.rsplit("s", 1)[-1]) / 100.0,
             "full_tile_sparsity": 0.0 if dense_baseline and predictions else overall.get("full_tile_sparsity"),
@@ -413,6 +423,7 @@ def build_report(output_dir: str | Path, ruler_root: str | Path | None = None) -
         coverage[row["condition"]] = row.get("coverage", {})
     sparse_coverage = [coverage[name].get("complete", False) for name in EXPECTED_CONDITIONS if name != "dense" and name in coverage]
     audit = {
+        "blasst_mask_semantics": mask_semantics,
         "expected_conditions": EXPECTED_CONDITIONS,
         "present_conditions": sorted(condition_dirs),
         "all_nine_conditions_present": all(name in condition_dirs for name in EXPECTED_CONDITIONS),
@@ -437,6 +448,7 @@ def build_report(output_dir: str | Path, ruler_root: str | Path | None = None) -
         lines.append(f"| {row['condition']} | {float(row['target_sparsity']):.0%} | {fmt(row['full_tile_sparsity'])} | {fmt(row['accuracy'])} | {fmt(row['equal_task_macro_accuracy'])} | {fmt(row['retained_attention_mass'])} | {fmt(row['token_agreement'])} | {fmt(row['exact_match_rate'])} |")
     lines += [
         "",
+        f"BLASST execution semantics: {', '.join(mask_semantics) or 'no completed BLASST runs'}. Legacy row-mask results are not measurements of the corrected whole-tile implementation.",
         "Comparison tables: `sol_vs_blasst.csv` and `global_local.csv`.",
         f"Audit: `{json.dumps(audit, sort_keys=True)}`",
         "",

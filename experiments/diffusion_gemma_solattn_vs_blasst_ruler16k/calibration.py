@@ -27,7 +27,7 @@ def _loads_line(line: str | bytes) -> Any:
             pass
     return json.loads(line)
 
-from dllm.attention.blasst.core import _expand_valid_mask, _prepare_attention_scores
+from dllm.attention.blasst.core import BLASST_MASK_SEMANTICS, _expand_valid_mask, _prepare_attention_scores
 
 from .config import TARGET_SPARSITIES
 
@@ -72,12 +72,12 @@ def evaluate_margin_trace(
     lambda_value: float,
     *,
     metric: str = "physical",
-) -> dict[str, float | int]:
+) -> dict[str, Any]:
     """Evaluate one BLASST threshold against a saved dense trace."""
 
     value = float(lambda_value)
-    if not 0.0 < value < 1.0:
-        raise ValueError("lambda must lie strictly between zero and one")
+    if not 0.0 < value <= 1.0:
+        raise ValueError("lambda must lie in (0, 1]")
     if metric not in {"physical", "valid_qk"}:
         raise ValueError("metric must be physical or valid_qk")
     margins, valid, eligible, valid_elements = _trace_arrays(trace)
@@ -93,7 +93,7 @@ def evaluate_margin_trace(
     eligible_count = int(eligible.sum())
     physical_skipped = int(physical_skip.sum())
     total_elements = int(valid_elements[valid].sum())
-    skipped_elements = int(valid_elements[votes].sum())
+    skipped_elements = int(valid_elements[valid & physical_skip[None, :]].sum())
     sparsity = (
         physical_skipped / eligible_count
         if metric == "physical" and eligible_count
@@ -101,6 +101,7 @@ def evaluate_margin_trace(
     )
     return {
         "lambda": value,
+        "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
         "physical_eligible_tiles": eligible_count,
         "physical_skipped_tiles": physical_skipped,
         "physical_sparsity": physical_skipped / eligible_count if eligible_count else 0.0,
@@ -142,8 +143,8 @@ def _evaluate_lambda_grid_single_pass(
     if metric not in {"physical", "valid_qk"}:
         raise ValueError("metric must be physical or valid_qk")
     values = tuple(float(value) for value in values)
-    if any(not 0.0 < value < 1.0 for value in values):
-        raise ValueError("lambda must lie strictly between zero and one")
+    if any(not 0.0 < value <= 1.0 for value in values):
+        raise ValueError("lambda must lie in (0, 1]")
     eligible_counts = [0] * len(values)
     skipped_counts = [0] * len(values)
     element_counts = [0] * len(values)
@@ -166,8 +167,9 @@ def _evaluate_lambda_grid_single_pass(
         total_elements_value = int(valid_elements[valid].sum())
         for index, value in enumerate(values):
             votes = valid & (margins < math.log(value))
-            physical_skipped = int((eligible & np.all(votes | ~valid, axis=0)).sum())
-            skipped_elements = int(valid_elements[votes].sum())
+            physical_skip = eligible & np.all(votes | ~valid, axis=0)
+            physical_skipped = int(physical_skip.sum())
+            skipped_elements = int(valid_elements[valid & physical_skip[None, :]].sum())
             eligible_counts[index] += eligible_count_value
             skipped_counts[index] += physical_skipped
             element_counts[index] += total_elements_value
@@ -181,6 +183,7 @@ def _evaluate_lambda_grid_single_pass(
         skipped_elements = skipped_element_counts[index]
         result.append({
             "lambda": value,
+            "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
             "sparsity": skipped / eligible if metric == "physical" and eligible else (
                 skipped_elements / elements if elements else 0.0
             ),
@@ -227,6 +230,10 @@ def evaluate_lambda_grid_jsonl_by_type(
     """Evaluate local and global grids in one streaming pass over JSONL."""
 
     values = tuple(candidate_lambdas() if lambdas is None else (float(x) for x in lambdas))
+    if metric not in {"physical", "valid_qk"}:
+        raise ValueError("metric must be physical or valid_qk")
+    if any(not 0.0 < value <= 1.0 for value in values):
+        raise ValueError("lambda must lie in (0, 1]")
     state = {
         name: {
             "eligible": [0] * len(values), "skipped": [0] * len(values),
@@ -255,8 +262,9 @@ def evaluate_lambda_grid_jsonl_by_type(
             total_elements = int(valid_elements[valid].sum())
             for index, value in enumerate(values):
                 votes = valid & (margins < math.log(value))
-                skipped = int((eligible & np.all(votes | ~valid, axis=0)).sum())
-                skipped_elements = int(valid_elements[votes].sum())
+                physical_skip = eligible & np.all(votes | ~valid, axis=0)
+                skipped = int(physical_skip.sum())
+                skipped_elements = int(valid_elements[valid & physical_skip[None, :]].sum())
                 item["eligible"][index] += eligible_count
                 item["skipped"][index] += skipped
                 item["elements"][index] += total_elements
@@ -271,6 +279,7 @@ def evaluate_lambda_grid_jsonl_by_type(
             elements = int(item["elements"][index]); skipped_elements = int(item["skipped_elements"][index])
             rows.append({
                 "lambda": value,
+                "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
                 "sparsity": skipped / eligible if metric == "physical" and eligible else (
                     skipped_elements / elements if elements else 0.0
                 ),
@@ -448,6 +457,7 @@ def fit_blasst_policy(
     global_ = calibrate_attention_type(traces, "global", targets=targets, max_rounds=max_rounds, metric=metric)
     return {
         "schema_version": 1,
+        "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
         "relation": "lambda * L = alpha * exp(gamma * s)",
         "metric": metric,
         "targets": [float(value) for value in targets],
@@ -620,6 +630,7 @@ def fit_blasst_policy_jsonl(
     )
     return {
         "schema_version": 1,
+        "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
         "relation": "lambda * L = alpha * exp(gamma * s)",
         "metric": metric,
         "targets": [float(value) for value in targets],

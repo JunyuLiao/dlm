@@ -36,6 +36,7 @@ from scripts.blasst_common import (  # noqa: E402
     set_seed,
 )
 from sparse_attention import Blasst2DConfig, Blasst2DStats, install_blasst_2d  # noqa: E402
+from sparse_attention import validate_blasst_output_directory  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -328,6 +329,7 @@ def main() -> None:
     ratios = [float(value) for value in args.mask_ratios.split(",")]
     set_seed(args.seed)
     output_dir = Path(args.output_dir)
+    validate_blasst_output_directory(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     model, tokenizer = load_model(args)
     examples = load_examples(args.dataset_path, args.num_samples)

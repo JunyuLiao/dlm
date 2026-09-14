@@ -230,7 +230,7 @@ def sol_gaussian_route(
 
 @dataclass
 class BlasstRoutingResult:
-    """BLASST row mask and physical-tile diagnostics."""
+    """Applied whole-tile mask plus diagnostic row votes."""
 
     allowed: torch.Tensor
     row_skip: torch.Tensor
@@ -253,15 +253,16 @@ def blasst_route(
 ) -> BlasstRoutingResult:
     """Apply BLASST's online-softmax block-max rule.
 
-    ``allowed`` is row-granular.  A physical tile is counted as skipped only
-    when every valid active query row in that tile votes to skip it.  The
-    resulting counters therefore expose both physical tile sparsity and the
-    secondary valid-QK-element sparsity.
+    ``allowed`` preserves all structurally valid positions in retained tiles.
+    Row votes only decide whether the entire tile can be skipped. Inactive
+    rows do not vote, but obey the same whole-tile mask during execution.
     """
 
     value = float(lambda_value)
-    if not 0.0 < value < 1.0:
-        raise ValueError("lambda must lie strictly between zero and one")
+    if not 0.0 < value <= 1.0:
+        raise ValueError("lambda must lie in (0, 1]")
+    if q_tile_size <= 0 or kv_tile_size <= 0:
+        raise ValueError("tile sizes must be positive")
     if scores.ndim != 4:
         raise ValueError("scores must have shape [batch, heads, query, key]")
     valid = _as_valid_mask(valid, scores)
@@ -306,10 +307,11 @@ def blasst_route(
             eligible = valid_rows.any(dim=-1)
             eligible_tiles[:, :, qi, ki] = eligible
             physical_skip[:, :, qi, ki] = (vote | ~valid_rows).all(dim=-1) & eligible
-    row_skip = row_skip_tile.repeat_interleave(kv_tile_size, dim=-1)[..., :kv_len]
-    allowed = valid & active[..., None] & ~row_skip
+    element_skip = physical_skip.repeat_interleave(q_tile_size, dim=-2).repeat_interleave(kv_tile_size, dim=-1)
+    element_skip = element_skip[..., :q_len, :kv_len]
+    allowed = valid & ~element_skip
     active_valid = valid & active[..., None]
-    skipped_elements = int((active_valid & row_skip).sum().item())
+    skipped_elements = int((active_valid & element_skip).sum().item())
     valid_elements = int(active_valid.sum().item())
     eligible_count = int(eligible_tiles.sum().item())
     physical_count = int(physical_skip.sum().item())

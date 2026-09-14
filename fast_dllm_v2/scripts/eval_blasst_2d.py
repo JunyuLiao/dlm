@@ -30,6 +30,7 @@ from scripts.blasst_common import (  # noqa: E402
     set_seed,
 )
 from sparse_attention import (  # noqa: E402
+    validate_blasst_output_directory,
     Blasst2DConfig,
     Blasst2DStats,
     install_blasst_2d,
@@ -594,6 +595,7 @@ def main() -> None:
     ratios = [float(value) for value in args.mask_ratios.split(",")]
     set_seed(args.seed)
     output_dir = Path(args.output_dir)
+    validate_blasst_output_directory(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     model, tokenizer = load_model(args.model_path, args.device, args.precision)
     examples = load_examples(args.dataset_path, args.num_samples)

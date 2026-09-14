@@ -34,6 +34,8 @@ from scripts.blasst_common import (  # noqa: E402
 )
 from scripts.sweep_blasst_controlled import _build_manifest  # noqa: E402
 from sparse_attention import (  # noqa: E402
+    BLASST_MASK_SEMANTICS,
+    validate_blasst_output_directory,
     Blasst2DConfig,
     Blasst2DStats,
     install_blasst_2d,
@@ -457,6 +459,7 @@ def main() -> None:
     if args.finalize_existing:
         _finalize_existing(output_dir, lambdas)
         return
+    validate_blasst_output_directory(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     set_seed(args.seed)
     model, tokenizer = load_model(args.model_path, args.device, args.precision)
@@ -650,6 +653,7 @@ def main() -> None:
         raise AssertionError(json.dumps(task_checks, indent=2))
     task_config = {
         **vars(args),
+        "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
         "lambdas": lambdas,
         "manifest_path": str(output_dir / "evaluation_manifest.json"),
         "manifest_examples": 16,

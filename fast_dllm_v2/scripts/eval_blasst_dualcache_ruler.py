@@ -54,6 +54,8 @@ from scripts.eval_blasst_ruler_legacy import (  # noqa: E402
     _verify_ruler_checkout,
 )
 from sparse_attention import (  # noqa: E402
+    BLASST_MASK_SEMANTICS,
+    validate_blasst_output_directory,
     Blasst2DConfig,
     Blasst2DStats,
     install_blasst_2d,
@@ -1218,6 +1220,7 @@ def _aggregate(args: argparse.Namespace, output_dir: Path) -> None:
             "still share prompts, seeds, generation budgets, and scoring."
         ),
         "dualcache_outer_block_size": OUTER_BLOCK_SIZE,
+        "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
         "lambda": BLASST_LAMBDA,
         "physical_tiles": {"query": Q_TILE_SIZE, "key_value": KV_TILE_SIZE},
         "structural_masking_excluded_from_sparsity_denominators": True,
@@ -1710,10 +1713,14 @@ def main() -> None:
         raise ValueError("generation threshold must remain 0.9")
     _verify_ruler_checkout(Path(args.ruler_root))
     output_dir = Path(args.output_dir).resolve()
+    generating = args.phase in ("all", "prepare", "run")
+    if generating:
+        validate_blasst_output_directory(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     if args.phase in ("all", "prepare"):
         _prepare(args, output_dir)
-    _write_config(args, output_dir)
+    if generating:
+        _write_config(args, output_dir)
     if args.phase in ("all", "run"):
         _run(args, output_dir)
     if args.phase in ("all", "aggregate"):
@@ -1721,7 +1728,8 @@ def main() -> None:
     if args.phase in ("all", "report"):
         _plot_results(output_dir)
         _write_report(args, output_dir)
-    _write_config(args, output_dir)
+    if generating:
+        _write_config(args, output_dir)
     print(
         json.dumps(
             {

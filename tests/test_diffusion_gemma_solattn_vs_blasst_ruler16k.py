@@ -287,7 +287,7 @@ def test_active_query_masks_trim_cached_prefix_positions():
     assert decisions.row_total.sum().item() == 4
 
 
-def test_blasst_secondary_element_sparsity_exposes_partial_row_votes():
+def test_blasst_element_sparsity_counts_only_wholly_skipped_tiles():
     scores = torch.tensor([[[[5.0, 4.0, 0.0, 0.0], [1.0, 0.0, 4.0, 3.0]]]])
     valid = torch.ones_like(scores, dtype=torch.bool)
     masked, decisions = apply_blasst_2d(
@@ -298,10 +298,9 @@ def test_blasst_secondary_element_sparsity_exposes_partial_row_votes():
         blasst_lambda=0.5,
     )
     assert not bool(decisions.skip_mask[..., 1].any())
-    assert decisions.skipped_valid_elements.sum().item() == 2
-    # The public helper returns the physical tile mask; row-granular votes
-    # remain available on the decision object and are applied by the actual
-    # attention forward path.
+    assert decisions.skipped_valid_elements.sum().item() == 0
+    # Row votes remain diagnostic, but both execution and element counts
+    # follow the physical mask: this mixed-vote tile is fully retained.
     assert torch.equal(masked, scores)
     assert decisions.row_skip_mask[0, 0, 0, 1]
     assert not decisions.row_skip_mask[0, 0, 1, 1]
@@ -316,9 +315,9 @@ def test_blasst_secondary_element_sparsity_exposes_partial_row_votes():
     assert torch.equal(decisions.skipped_valid_elements, slow_decisions.skipped_valid_elements)
 
 
-def test_blasst_attention_forward_applies_row_granular_votes():
-    query = torch.ones(1, 1, 2, 1)
-    key = torch.tensor([[[[5.0], [4.0], [0.0], [0.0]]]])
+def test_blasst_attention_forward_keeps_all_rows_of_mixed_vote_tile():
+    query = torch.eye(2).reshape(1, 1, 2, 2)
+    key = torch.tensor([[[[5.0, 1.0], [4.0, 0.0], [0.0, 4.0], [0.0, 3.0]]]])
     value = torch.tensor([[[[1.0], [1.0], [100.0], [100.0]]]])
     module = SimpleNamespace(
         _blasst_2d_runtime=SimpleNamespace(
@@ -327,6 +326,7 @@ def test_blasst_attention_forward_applies_row_granular_votes():
                 kv_tile_size=2,
                 blasst_lambda=0.5,
                 apply_blasst_mask=True,
+                collect_blasst_stats=True,
             ),
             active_query_mask=None,
             dense_kv_prefix_extractor=None,
@@ -340,7 +340,11 @@ def test_blasst_attention_forward_applies_row_granular_votes():
     output, _ = __import__("dllm.attention.blasst.core", fromlist=["blasst_2d_attention_forward"]).blasst_2d_attention_forward(
         module, query, key, value, None, scaling=1.0, is_causal=False
     )
-    # First row skips the second tile, while the second row retains it only if
-    # its vote differs; the output must therefore differ from dense attention.
+    # Row zero votes to skip the second tile, but row one retains it.
+    # Both tiles must be dense for both rows, including their value products.
     dense = torch.softmax(query @ key.transpose(-2, -1), dim=-1) @ value
-    assert not torch.allclose(output, dense.transpose(1, 2))
+    assert torch.equal(output, dense.transpose(1, 2))
+    summary = module._blasst_2d_runtime.stats.summary()
+    assert summary['skipped_tiles'] == summary['skipped_valid_elements'] == 0
+    assert summary['skippable_row_votes'] > 0
+    assert abs(summary['retained_dense_attention_mass'] - 1.) < 1.e-6

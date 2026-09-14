@@ -834,10 +834,12 @@ def main() -> None:
         raise ValueError("block-size grid must match the controlled specification")
     if args.block_sweep_context != 8192:
         raise ValueError("block-size sweep context must be 8192")
-    if any(not 0.0 < value < 1.0 for value in lambdas):
-        raise ValueError("all lambdas must be in (0, 1)")
+    if any(not 0.0 < value <= 1.0 for value in lambdas):
+        raise ValueError("all lambdas must be in (0, 1]")
 
     output_dir = Path(args.output_dir)
+    from dllm.attention.blasst import BLASST_MASK_SEMANTICS, validate_blasst_output_directory
+    validate_blasst_output_directory(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     set_seed(args.seed)
     model, tokenizer = load_model(args.model_path, args.device, args.precision)
@@ -1149,6 +1151,7 @@ def main() -> None:
     )
     elapsed = time.monotonic() - started
     run_config = {
+        "blasst_mask_semantics": BLASST_MASK_SEMANTICS,
         **vars(args),
         **_environment(),
         "contexts": contexts,
