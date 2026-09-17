@@ -195,8 +195,11 @@ def test_raw_report_requires900_and_regenerates_identically(tmp_path):
          patch.object(report,'cached',cached),patch.object(report,'condition',selected):
         first=report.regenerate(tmp_path)
         assert first['complete'] and first['completed']==900
-        second=report.regenerate(tmp_path)
-        assert first['artifacts']==second['artifacts']
+        from experiments.diffusion_gemma_longbench_v2_100.verify import verify
+        proof=verify(tmp_path)
+        assert proof['passed'] and proof['artifact_count']==16
+        assert not proof['inference_performed']
+        assert proof['identical_audit_and_artifact_hashes']
         raw.pop((manifest[-1]['id'],labels[-1]))
         partial=report.regenerate(tmp_path)
         assert not partial['complete'] and partial['completed']<900

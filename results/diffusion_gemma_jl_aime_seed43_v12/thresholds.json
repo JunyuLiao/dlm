@@ -1,0 +1,153 @@
+[
+  {
+    "benchmark": "aime26",
+    "calibration_generation_seed": 42,
+    "calibration_ids": null,
+    "cap_one_unattainable": null,
+    "config": {
+      "method": "blasst"
+    },
+    "evaluation_generation_seed": 43,
+    "fingerprint": "1dd005b1107cc514accf36aa62473977a2b2a14f678e9caca19df29409bad28e",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/policies/aime26/blasst_aggressive_s50.json",
+    "measured": {
+      "global": 0.4954629205529647,
+      "local": 0.5187806033226464
+    },
+    "name": "blasst_aggressive",
+    "policy": {
+      "global": {
+        "log_scale": 7.779279118037186,
+        "source": "existing AIME26 refined aggressive policy",
+        "source_sha256": "25f4b8a909373450454895db3594bdd80091ffde568115199c9c2a74095e1bd1"
+      },
+      "local": {
+        "log_scale": 8.091333801578767,
+        "source": "existing AIME26 refined aggressive policy",
+        "source_sha256": "25f4b8a909373450454895db3594bdd80091ffde568115199c9c2a74095e1bd1"
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/audit.json": "da2c014a51c79ec2376d8dfa8144bc0756cf75f0c80517fc1e7a1aee48272fb5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/policies/aime26/blasst_aggressive_s50.json": "84e963a0bfc6661bb622a8c6b28e805e4b4db7c966c0b58e32f0c318e394de70",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/regeneration_verification.json": "5a4152e3a73bdf154cae2151c3bb80b1e22b22e3e9a5ac088f13cdf6095b3175"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_generation_seed": 42,
+    "calibration_ids": [
+      "aime26/2",
+      "aime26/8",
+      "aime26/14",
+      "aime26/20",
+      "aime26/23",
+      "aime26/30"
+    ],
+    "cap_one_unattainable": null,
+    "config": {
+      "family": "identity"
+    },
+    "evaluation_generation_seed": 43,
+    "fingerprint": "1dd005b1107cc514accf36aa62473977a2b2a14f678e9caca19df29409bad28e",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/policies/aime26/full_centered_s50.json",
+    "measured": {
+      "global": 0.49868485470625395,
+      "local": 0.5091728696596107,
+      "overall": 0.5071056932079935
+    },
+    "name": "full_centered",
+    "policy": {
+      "global": {
+        "log_threshold": -1.2118581533432007
+      },
+      "local": {
+        "log_threshold": -0.7402970194816589
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/audit.json": "da2c014a51c79ec2376d8dfa8144bc0756cf75f0c80517fc1e7a1aee48272fb5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/policies/aime26/full_centered_s50.json": "dbdc038a23976b46356037bfe7b77526e5a17176dd964659aa6bc3747fe5b426",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/regeneration_verification.json": "5a4152e3a73bdf154cae2151c3bb80b1e22b22e3e9a5ac088f13cdf6095b3175"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_generation_seed": 42,
+    "calibration_ids": [
+      "aime26/2",
+      "aime26/8",
+      "aime26/14",
+      "aime26/20",
+      "aime26/23",
+      "aime26/30"
+    ],
+    "cap_one_unattainable": null,
+    "config": {
+      "family": "gaussian",
+      "rank": 8
+    },
+    "evaluation_generation_seed": 43,
+    "fingerprint": "1dd005b1107cc514accf36aa62473977a2b2a14f678e9caca19df29409bad28e",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/policies/aime26/jl_gaussian_r8_s50.json",
+    "measured": {
+      "global": 0.48997440681209337,
+      "local": 0.5099148300481142,
+      "overall": 0.5060122740550257
+    },
+    "name": "jl_gaussian_r8",
+    "policy": {
+      "global": {
+        "log_threshold": -1.268207311630249
+      },
+      "local": {
+        "log_threshold": -0.7595282196998596
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/audit.json": "da2c014a51c79ec2376d8dfa8144bc0756cf75f0c80517fc1e7a1aee48272fb5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/policies/aime26/jl_gaussian_r8_s50.json": "ce8e7ddd62ccdb0fe9d73afa3d7ad253a83332e2d33b1c96e4be7ad88db83094",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/regeneration_verification.json": "5a4152e3a73bdf154cae2151c3bb80b1e22b22e3e9a5ac088f13cdf6095b3175"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_generation_seed": 42,
+    "calibration_ids": null,
+    "cap_one_unattainable": null,
+    "config": {
+      "method": "mass"
+    },
+    "evaluation_generation_seed": 43,
+    "fingerprint": "1dd005b1107cc514accf36aa62473977a2b2a14f678e9caca19df29409bad28e",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/policies/aime26/mass_s50.json",
+    "measured": {
+      "global": 0.5193236772995132,
+      "local": 0.5021994498205088
+    },
+    "name": "mass",
+    "policy": {
+      "global": {
+        "dense_unattainable": false,
+        "log_threshold": -0.045639991760253906
+      },
+      "local": {
+        "dense_unattainable": false,
+        "log_threshold": -0.018442153930664062
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/audit.json": "da2c014a51c79ec2376d8dfa8144bc0756cf75f0c80517fc1e7a1aee48272fb5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/policies/aime26/mass_s50.json": "2545045c6d54046d2fe76dae22b1cd71d2400e2839ebd313d24d5decee752ac8",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/regeneration_verification.json": "5a4152e3a73bdf154cae2151c3bb80b1e22b22e3e9a5ac088f13cdf6095b3175"
+    },
+    "target": 0.5
+  }
+]

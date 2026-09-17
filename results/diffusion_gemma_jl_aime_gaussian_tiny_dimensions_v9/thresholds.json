@@ -1,0 +1,1428 @@
+[
+  {
+    "benchmark": "aime26",
+    "calibration_ids": null,
+    "cap_one_unattainable": null,
+    "config": {
+      "method": "blasst"
+    },
+    "fingerprint": "85c2635b2f5e1cbe0dce6f592b87d87329b7f32ecf2277dea6844763fe64f56a",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/blasst_aggressive_s50.json",
+    "measured": {
+      "global": 0.4954629205529647,
+      "local": 0.5187806033226464
+    },
+    "name": "blasst_aggressive",
+    "policy": {
+      "global": {
+        "log_scale": 7.779279118037186,
+        "source": "existing AIME26 refined aggressive policy",
+        "source_sha256": "25f4b8a909373450454895db3594bdd80091ffde568115199c9c2a74095e1bd1"
+      },
+      "local": {
+        "log_scale": 8.091333801578767,
+        "source": "existing AIME26 refined aggressive policy",
+        "source_sha256": "25f4b8a909373450454895db3594bdd80091ffde568115199c9c2a74095e1bd1"
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/audit.json": "b0bc0527c81dc0bf8f483bc3f27b0c7bddfa0afa0a47613787c2a48b402a691c",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/blasst_aggressive_s50.json": "f5e81e3e8a652e9aa1b56097506d33faf5f7d148e3887afd5998f1c8a6d7a03e",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/regeneration_verification.json": "38c2d3b66ea5663056eb218492598c9ba5ee70a7ebecbc11bc173066550f8402"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_ids": null,
+    "cap_one_unattainable": {
+      "global": true,
+      "local": true
+    },
+    "config": {
+      "method": "blasst"
+    },
+    "fingerprint": "85c2635b2f5e1cbe0dce6f592b87d87329b7f32ecf2277dea6844763fe64f56a",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/blasst_original_s50.json",
+    "measured": {
+      "global": 0.36388977128335454,
+      "local": 0.2630263827082009
+    },
+    "name": "blasst_original",
+    "policy": {
+      "global": {
+        "cap_one": true,
+        "log_threshold": 0.0,
+        "source": "exact lambda1 fallback for this attention type only",
+        "unattainable": true
+      },
+      "local": {
+        "cap_one": true,
+        "log_threshold": 0.0,
+        "source": "exact lambda1 fallback for this attention type only",
+        "unattainable": true
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/audit.json": "b0bc0527c81dc0bf8f483bc3f27b0c7bddfa0afa0a47613787c2a48b402a691c",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/blasst_original_s50.json": "c994ca8525b2351df4fd4e65f5f56239c4ef84bcd2ba873a2bb25d45fc4f1717",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/regeneration_verification.json": "38c2d3b66ea5663056eb218492598c9ba5ee70a7ebecbc11bc173066550f8402"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_ids": [
+      "aime26/2",
+      "aime26/8",
+      "aime26/14",
+      "aime26/20",
+      "aime26/23",
+      "aime26/30"
+    ],
+    "cap_one_unattainable": null,
+    "config": {
+      "family": "identity"
+    },
+    "fingerprint": "85c2635b2f5e1cbe0dce6f592b87d87329b7f32ecf2277dea6844763fe64f56a",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/full_centered_s50.json",
+    "measured": {
+      "global": 0.49868485470625395,
+      "local": 0.5091728696596107,
+      "overall": 0.5071056932079935
+    },
+    "name": "full_centered",
+    "policy": {
+      "global": {
+        "log_threshold": -1.2118581533432007
+      },
+      "local": {
+        "log_threshold": -0.7402970194816589
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/audit.json": "b0bc0527c81dc0bf8f483bc3f27b0c7bddfa0afa0a47613787c2a48b402a691c",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/full_centered_s50.json": "e7a8bc03cf564fbabaf37242338c690a1856e3b3b0916f3094fed0e51dba6ffc",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/regeneration_verification.json": "38c2d3b66ea5663056eb218492598c9ba5ee70a7ebecbc11bc173066550f8402"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_ids": [
+      "aime26/2",
+      "aime26/8",
+      "aime26/14",
+      "aime26/20",
+      "aime26/23",
+      "aime26/30"
+    ],
+    "cap_one_unattainable": null,
+    "config": {
+      "family": "gaussian",
+      "rank": 16
+    },
+    "fingerprint": "85c2635b2f5e1cbe0dce6f592b87d87329b7f32ecf2277dea6844763fe64f56a",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/jl_gaussian_r16_s50.json",
+    "measured": {
+      "global": 0.5118089743589743,
+      "local": 0.5096667539181363,
+      "overall": 0.5101023121236609
+    },
+    "name": "jl_gaussian_r16",
+    "policy": {
+      "global": {
+        "log_threshold": -1.2361350059509277
+      },
+      "local": {
+        "log_threshold": -0.7595282196998596
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/audit.json": "b0bc0527c81dc0bf8f483bc3f27b0c7bddfa0afa0a47613787c2a48b402a691c",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/jl_gaussian_r16_s50.json": "2fcba79aa8f5fc8e659ff205742df247a5907b540793d5c419c368db3aed665b",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/regeneration_verification.json": "38c2d3b66ea5663056eb218492598c9ba5ee70a7ebecbc11bc173066550f8402"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_ids": [
+      "aime26/2",
+      "aime26/8",
+      "aime26/14",
+      "aime26/20",
+      "aime26/23",
+      "aime26/30"
+    ],
+    "cap_one_unattainable": null,
+    "config": {
+      "family": "gaussian",
+      "rank": 24
+    },
+    "fingerprint": "85c2635b2f5e1cbe0dce6f592b87d87329b7f32ecf2277dea6844763fe64f56a",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/jl_gaussian_r24_s50.json",
+    "measured": {
+      "global": 0.4942841025476892,
+      "local": 0.5048478010370655,
+      "overall": 0.5028031086798952
+    },
+    "name": "jl_gaussian_r24",
+    "policy": {
+      "global": {
+        "log_threshold": -1.2361350059509277
+      },
+      "local": {
+        "log_threshold": -0.7595282196998596
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/audit.json": "b0bc0527c81dc0bf8f483bc3f27b0c7bddfa0afa0a47613787c2a48b402a691c",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/jl_gaussian_r24_s50.json": "c48ff599d8ad2b3a98c7183b641acff6d316fc6bedd52ca3541071b6dfbda999",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/regeneration_verification.json": "38c2d3b66ea5663056eb218492598c9ba5ee70a7ebecbc11bc173066550f8402"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_budget": 2048,
+    "calibration_ids": [
+      "aime26/2",
+      "aime26/8",
+      "aime26/14",
+      "aime26/20",
+      "aime26/23",
+      "aime26/30"
+    ],
+    "config": {
+      "family": "gaussian",
+      "rank": 2
+    },
+    "distribution_sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/jl_gaussian_r32_s50.json": "99e0de16f9f5d984c90a566f92593d0c3eb213ae411ea53cc0a7222a5d3360e1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/01a20ed4bf0165c7020a36742bcf33ac2850ce9cf47767c62e85060fe3d52ed9.npz": "f08c35fc5cca820b6b4c208bebe24b4b6937f01f91588a5822700e0b9e07eea1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/01e1d148d7f5debe5416a9c9a7514fc416c3e7560aa4085874da0953b84796ff.npz": "f38e3abbdb660c34bd633c1913da507e26c067cf0e497bea13358b0e6afd2546",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/01e42ec57807d2d417d6ff7c94cb4d7656060922818ed82a78ce78bb30378728.npz": "f2f54952e49e666c9a23d0505dfeab2b2bfe72830828db6f259673c04c77806b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/021dab5adb522965379319ab580f4304236ae06497d318c64fdd106ba4692d47.npz": "db56f0206d664a2d8263a9119f6fc5b96079a3060c3cbc0326f31284066257c7",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/022ab8bdc9b10a420b655d836d39f0f88a5d16e924a1ad96040152ce9b7033a9.npz": "7b6115f673869abfd6ecd88aa3313f2378f663e43582652280972f4fbe03087c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0748c4796c74a80dd08808f9a766d3272b443ccc553e031edb3248b99930bc6a.npz": "d9dcaaf589db76bad80854029b57061c73057169bbc2fdc2c8b2d8cb3a7a24c1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/07f540c28f0027a27643f8b1162ff0d4b13bdf8e13b8cd4279039b9079b768bc.npz": "e0d40fc156cbfaf011754d439544a9d6b72a3786b20cfe608048ee669bf4b41e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/08991c50e51e54982879d33286294841b7cbac3406112568572e0c43470e07bf.npz": "bc1beb9158671d51038f55c2031fdff5db2627b8fceb9708c8ec6e038b53fcee",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/09c49b126a6ee45f990429589fed5b5bb7ced36596f73db836290d5ac628ca56.npz": "51858c5077c18ea6330e40792a33ea384605027bb613efda6105cf88340fcb90",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0ae0e3649f0fd3eec0952387562d2cc2320e10e3c04c9615ea0218fcba4fdaef.npz": "dcdfc9e43816da5010149c3657e53d67adbcf7ba2c077cc7af141a43935ed273",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0b1a3bbaa0028893a4aca5da8a0f66b008ae79be05f39c600912d2be86af6246.npz": "24c7e0bcf8e19e868972fe6852d783af9ce814a2e8db849bdc42a436e0d4e8c2",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0c3a344bab888c6fd5fa198439a497b0865ca659f35a398ecc2e48b5f042d2d4.npz": "54d1c906d6fad295cee5c4e4db71344d23f490f0c1670debefead42aa36b7960",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0d0d8243a6c82e8be87906e94e06c38ef66791dc2624265d67940413c9f64024.npz": "0030c7ff4b90c34b44af6eb8947e3115058b6c0bf4ff4b2fc5b707acefa2a5ab",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0e56d236b909c261f2f29ba2156ba123e85201b4cd0e658acd955438463122dc.npz": "8708a5091e9bd18d5744cadfcdc2731d21f77a4818bec5e9ca78dd798ada6fc4",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/10657a98dfc1be702394241b11eda7d9f365f2a24179e31599cd5378461fface.npz": "4d0cb5fdc5f04c910b8c9d5b0f3a30b255e9b97888087e42c9946ec1de16ae46",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1067e5fb14354e9a2a75ac8dc3252a22c7420d3568d87823408118159867dd90.npz": "8b98cd6c274e444e225d329a9177c3e7be80dcfab16d590a7ffc4482c2a86fe8",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/138992e3ba5a9a9c793f6ac29ce0dc8931f8e7bf131f533929f77142a780702b.npz": "312385617475659d701863eec3968af5f7c4608249115f87ca36a45189ac54a9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/15d1838906d3d42730377d74efff18dbcabeb737293143ebcbb5d6d05693cdd7.npz": "662ea5d9aeeb87d648b5497dd271c12d2af0522603463bfccc7844f976fbaa3a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/16dfaea3292529cf673891bbe2c929801596cb79e5a0af49df7e9ee625e1129d.npz": "a551eaed464f2a7e47572764dfb703ea67c5ebe1ca5397b0aae8b58d658426f1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/170ca635c31eb2d4c5dff799adaf384e9e588a02468797fa3213ce4965f010d8.npz": "e360c9c967382753c798300980caa93c438210da1c8c39322964828a19be6705",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1831de73897aab799e6da565631c8f15338398b818d9dd93e2a912ab5421e2ae.npz": "03acaa14caf4943c0fd01e28ba87ad4a5c7440fa6444ac417a34e0748cf80bfe",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1852e168716d32d0a9ed3169afa8bf65e0c45c3026fff23ab2cc678453ed40be.npz": "29e87f27b3d12fe36a3440d20540d1238148fcd690dbaa8339f0604c804ef169",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/191c838d31af677a2f38288d55d2380036b1d46164a2b275c47ef5a41e779d85.npz": "236978c1b82ffb8fb52237f34b5713d0b41156a13c43fcd400b82677f4b50b22",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1a2e5a856db2bc4e8b9735c758eb5d1a193c2ce4f2b4ae30f377169e675d59c8.npz": "1bd171fc00ac0a8b36db609362a3cd37a175debd78517f4f4ce608c86aca588b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1ac0f6d981572f72077afa920d03882573a9aff6c2b0f16e92152e05aac41908.npz": "484940247c95f1dcc0bbd4ec732e811e68d3e55191b498cfcd617742dacb1298",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1b92a3143f663551e1d0786486ac8cbd1b0f25154fa527e0a61789335e102248.npz": "ebb31ce60644c860fde40f8531fa0a44542b85bf9c220af31c0bab36eca14b81",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1beae11fa2ff0595c42ef3d568526ba39160a3b2e0b1a33fb6810c6024b774f0.npz": "f2220c71428dbdd1fbad95a63354a435a8a612fe29062a2172a0cd97e0f499a8",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1c8a0b9530c74228f496f004d1b8b3b5f061fd37249efd9e451f3fe1a697c7bc.npz": "2207c034205b8dbb6a6f151df4c5c4889139a3984d978fb657965941aa46251a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1cb047458fda702c96dd13138f7e6b8cb6d17429620a35a1b037c876b8f4e7f9.npz": "a920fbd0ce63eff439426d810dbb5788b9db32fd9ddd21b21c090cfb876e4232",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1df5be95459939e45517fa55ff38cbf33c8168fea3ca01532de75c2db53b6263.npz": "38a09c6b42278ed7e12697974e5c793714221bdb708f1786f75f2610959cdde9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1fb5541547f5fed29ae03dae3873319099e8b91d3e566ff0edc59a3592738c8e.npz": "86f0bfaf08ba3d290892559d2dde7d92d4d28621140f739429f2f415c74cff05",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/20bd215cf2d3886050e9744c92f80da830e0fbd0100160e8d5c5ec76aa683c70.npz": "d58a17fe7dcd527dfbc5f3c5b61ca24d770e32cf909dd60e9de2199f415f6570",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/21023902b17631a032cd53e32bb23198ec00ffe8f0c89d8727aabc7ff095b60a.npz": "25ecda0c8118f748693b2683046e3334741b00633fa81b52b26abbfc8b90213e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/21220a19e9e01e3434150323bab858b8151793914d2341d899e9469825d5e9df.npz": "598da1b694bc60e72734d2532228d129173e38f80a693ec0af3bc9a8657a26ca",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/212d051ffaa2cbc0b6b4f1dccb220f72620dc10301cfa8f2b01dc05c168aa271.npz": "103ead500f8292c41bb092e5c0915256352a8b2d5ec804d28d75405d58fd5594",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/223a21cf03a9495f951818bf39c744397997e5879bbb5a19d74c3cd2fbe60144.npz": "fcf413c197a35dab5071c7482547c22bfd1554d65bb500c461daab5908ad3e15",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2259f68bf8b214d84667352955fd6ef658262e8e28217a61aa5831b2329ae033.npz": "598eff6cb4c33216419d89c526a773772955ba25413aa83348ef77ba720fca7d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/22a2295c7a2d0a671c979b3a1b2e651620d1dab65edd79ab106e615d6f7be178.npz": "886a4b1c86499506815e7260719836fe49bba3a9ead298f9898e8e5e986e74ff",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/23e87d8f9bf698607a0fd460129f221d0878f260f06e3c9af9613e3736020291.npz": "eb5961a5d9d1ad5bf453d8bbd325160b510a2ef7046b1a9e98c1abf70d1e3768",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/240098925f3e543fae02151507337e68f5282c63e4f264db5bbcf95c7ea97205.npz": "6f125d323a0e35248d0556cecd0e7d82ea7744a8e9566e71f4fbd64c41836668",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2433d29dfe346d70a0ab27c7c5bd2766b28c9244ce4d05cdbceb13f4864d56c9.npz": "3a56e7b2337ffb335badb78a5bc9833b5a1284cc754cf3b3d23f35932c6111bf",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2659865db78a237cd7467092bbfe6b4122b55cf67ba95acbe83153e780d30318.npz": "f3471df95e0ee9466aea1409ac184ee3dbfe0da4268bd7dcebf766ce96ae2941",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/277938042661f654e379e492a4fe361e393a81cb5b9e708d9da36fffab6bca5e.npz": "6b08ed2cf41a41a31503e1e3f6faa6cfe8f53f2e5d97a02e67d29ce7a87245fa",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/27e503ba68a351a410ac7c4f43efb0ab36ec262fdcf8d881b0084a0121040c6e.npz": "065a89614fff67fb5a263c757bc430e6b4912d1fc1b150dbe58f9f2f96d265b9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/287ff7bd2dac0c06976b3ee8b78f79986d5dccd47d0fbb51614b0126674bc1a1.npz": "4015645d3ebb6578add32a2bafb3f785e2433c5fd1558c07f3676ad98b9bf8e7",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/28a800c584cd8bdd06ac8da66be733e9c86580882361396978a15a854abf5053.npz": "e3c91e1b2e71c99aedcfec9f8d402b67c8d672b802db1d4daf874517a96f2474",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/29a843824fe9ddc81f6230983cea5954b6bf48be6d5a91871af4f9ba1afa94a0.npz": "83fa11a77c82c385424eb43564ed186b9fd99b586b28036717986b145e432799",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2a543248bf0e1b295994fdba7bc40265fd38b3d60675461d18694a17ff41e82f.npz": "bbb428f33fb167f5bb26f1a41bf2735cbdc953c2c2fe41d01449a0f8d85eadba",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2b4f56b7f8d1e51996d01771302429167afbb81cd3fbdb24ee7eb43b6290019e.npz": "8a76e4ec879dea959cc7be44058db1562991b370d0acc95b16c6bdeed2c9e19b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2c476abcea54b69fe18d000c6c47ad23b4a934bc34905d9a94b745a52fdee80e.npz": "66fb331ad734b46db904d951a001fbb0bbf793fab2b27e0d5155b34a2a64aee6",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2d0f4e55e90b46ab5c8134bcf1be958928a5e8528a01f771d6800a1de7a7569e.npz": "8caeb573defb7f5a0ff8d783fbf7c47231593e45a0760b5306d91a64cf3438bb",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2d8c09f40800756626d59daecc359ffa9eabb455257eb33b93d5dd76f8c5ca7a.npz": "53feaeeb41115f58218c6a260189eb4b2369612af017315caf8a04d061abc27a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2ead833a6dc684c37a9eefc0283c191c5dd14f5bf6520551feaae185bbdb838a.npz": "8131e78ce168a4e5cc31fcf4e5dab6e728f830f7d8565b9e06ef97f27c57d8b7",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2ff9dc62604aaf86e817ab29ff0d7ccf1d794df2ee23df9bc303c3d08c8bc08e.npz": "a2f681e64d18ff6eb3a9b684b6c8d5729e5478609a83a3b7c7e4e1bae2b2289d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/3035b8e49ef317c2586300f6dbb3a4b61c4d046c0016d8bef2fd8b3953447124.npz": "06ac67ea472a5827bc42a6b15e8f48ed42a76129fe8ff06a5a9842fc62456362",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/305a73da41af45169b535ed28339598e4db62e50e33418ae2b8423cddd89614d.npz": "ba26ad76d4bb5ffd437cd48f629b9bdd3df0e0fe0445b9a2500794f2d568ee29",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/311c71906c75434fb823a3c3fc90f83527a571dea8528442cdbd37147126650e.npz": "bfd99de2954657fd7a9997293b0f9b99b8dc7c4acc7e8b43e1e0ab86900fc9f5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/31b57af5385b227c1ab3d0359b626bde2e1fdb0ff117eff02b59f15d328a3225.npz": "204d65ad5739cafb0e80ee2e832af4a431682270f2203f1bb49f06dd8d1ca158",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/34582651422ca2cd23ad02cb2b2710e416d85a0c0a83b75d0aec3d728acaa129.npz": "d7e28b4b5bf396c4064b420602130d7f160c19fbe90f2cd4e9b202f8d25786c7",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/34eb5046295d27c9890ee3a72a3ac695df6ba8641151e4c876fd4d0ad51ff517.npz": "7eed869dd5d716d66a8ceab210997e6e781e0cfc3f83fb31062f24b40d2f18a9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/357398eaaea8ad357e88b10e319399cb17af9145f348639632b09a707842618c.npz": "6fbbdb1d71eafacc8f1e9891804413e19ac821ac8db853a669db9c1ad5f7d7d4",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/376ffdcf2fb1ffa3ff0cf442197d2945844f72e7491432aa63e0afc3dc327a92.npz": "0be02779030dd2187fd04ac771165c22b57357059650a7a59511cf09bb1e7dc2",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/38438aa5d8aa09ea0763fafcae2fffbaf5ba197167c98729ada7e1cabed65c67.npz": "d34c38161d70896b4531ca941c540fb685de2b88c9811d9cfcda113babe1dcf9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/386bcc7fd1c2fdf9c8c69b0db619b706108cff59dff68dd4c1e52af6870f94f6.npz": "533aef3c8d1d802fd91895b4799974df5cdb46c255ce9df79340a6a7cb541d7d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/38985c7b54f3712a60abdbbc891f423adc84ff171391ce70e0c8419f77bf2a30.npz": "b10e45f1d2d234e9c6299440a86d461208457348054e52a5708fff591cf4b6e6",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/391abc014065443e31ff45b3dbc0219c065fca6425f780f7a25ed0c5b6a683a3.npz": "f01de4e88bad4225080f0a245f592b6748e5ed2776c6674160c48007d16aec05",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/3b3093c13ef1778000a385cc3ed3302f8bd704e5d26d822fbc2de474344d1af2.npz": "3bc38290c9039752b63995085ae95ec71b83bc395a3b74bb950e703a3359569b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/3dc226f694ef325a713947553ec46103630bb7ad68fba7d401962008f9a66481.npz": "f52e0deff7055294c5ed88e3e6f16ab8ad5ae2484dd7946e04fa5e487d34aaf5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/3e7f148a56269abb777b29fa7dd8bb64e36246ea3b863fef6139621c88c9573c.npz": "8f40cd2c90a36021f073f11359537d1e44f768c82675287adf1b07a6c5e94870",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/3e9e023c547d9cb8af146d5583539f02e594bdc2484a77f43879d35558b7a559.npz": "809afb9e2535e487eaf8650cf64ccb1fc116ed4d54e4530e6832d43c954b54dc",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/42f903e30861cb68392692963e469f9d4f1401114c0c0221850d4d36fc56cdb1.npz": "3c77c27254c4acc26b43d2e47ce1bef5bd6fb11ef666b52988e3c6fdd3356c4f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/44f61a6b3ef6b9be60efb25bbb36bb26b601bf79ccc5b094529e84fcb7747e85.npz": "a594c4f90a935a69f67daec11d2932333d8d90f06c6421e029f7e4a93d6db012",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/47975fa983eeea81fe3ef3eda1e935aa31d1a5ac4392640621a74d7cb958828f.npz": "b9154c208531bc86565404c4d6f0e821366eea67cced0fb03fffa55404bd329b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4974c5e3b976925099a18d7976fd1623e0bdcaf24d139c8bec226096555fa19e.npz": "51e175e119e134e7a3616ba1cc455dd6ae92ce160b94d0c0beedb631479d83f6",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4a2d79d3a3abc887e19caeeef86d327cab032c34cbda5a4d15b6f2fe04fb9c6b.npz": "d07bcf3bc496994da9779e7c9917ba345605d6b6237f8ee40f4b32a1571adaa5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4ad355cac66f27ea96359bb610c0f70a079c2964b5f64e2550433374f71941eb.npz": "71e9e188045c6b69144206e918c7fdfa87a1a7e98e9fe7023a6a0167800f915d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4b28ef7065a68bac563b0b806a7d2e90daa66cfca074f844d2260d30ea29eed7.npz": "e48ab1b1702a737d8a976bc47866e32d99ac7db1c34c058a5cbaa6da413736a5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4c9347a1033a709f01c98aca81da8e502e5848c49f6d02b298f364a9e1ef85b7.npz": "f004828f0b6f780e65550e0dc28b6079c2a620d17ebe1f7e97bb3954272f071a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4d18d0fd6adef20666e1fda9f90583991d187b3ccbf4b03204bd4419279685a9.npz": "35de9d5f662fe8e540472bc02feab62858971ee9041cb0e118bdd53669b73cab",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4f711f20a72a9458a391baf8814383bd178021e27e52db3ee2fef9191a4a15d6.npz": "9a48f4e6b61cad38652e019a8c58cde4c96c25ac5ee8bce2717bc2c0f279d01f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/508dff44f70ba77440cd0620afa229b9ad977500e02c62306487a76b95a40462.npz": "9415a6aceb6da52b56b62e1771b9731832017b8540a48bf04521e04d4f2f8f52",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/523852162530a0685cb716a9c29c8f9884bd103c21721686086821f783eb3905.npz": "e08a1b7f9493d88fbfae871b6d616b496ff17d11a3e4b305b53b55c549a269ed",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/52fca9d63ad4e682fe94e661448be39024eec908c56f6010315449768b084c0a.npz": "fdb0ef641086e4c54086ffa5c59e2da5b05cc84a03761e9fc923727350b15ebc",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5305830de236cd6c2b47c50b04383266ecb7c153d4512d66bd996606427e241e.npz": "11faff883be9a9591ab19d924767db5823ba6cadb9ec7fa3064ec83ea2d7ac25",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5338a46a835ba9592970c709e9a9d4786507f38c1181a095a5049e0f2c586f5e.npz": "f58ae78330e85c2f272a055aad7469f5331e9854f841bbe9e1dc267cbe6bf0df",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5634c00838b6c4e11b4fb78935a2b39df6ecbda71d1722fd8f816ac7d494a1ab.npz": "ce8e8722783daf3818979eeeef06ba00988420e2ac84b650a67662201c96db47",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/57323caba67ddffe81598404441f474245a2e5a2ba7c433ae8ff67206989bc19.npz": "3fa71f79f8fa1166d223ebec0070da5f10657695572b9ccb238c5bf640963c36",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/58871183162f0a75155c0c872e27978dc70dfd6a5522ba967941a31e5a854b71.npz": "86eec88c7d61b2b6c3a5b2a6a80d9bd8742cd59fa48e3fb500ef9979dd917c24",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5906aa25fddd1a80f26304efd2e44aa58429e171634981b3ab2a83e1524c88f0.npz": "9715f245167fd20f8bea3f49da1a659932e9d99641f89f5ac520ff1bfb2341ad",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5b77f2c53c109b605df487b7459c9c5efebd5a7c532cec8af76dcab1b2d4d1cc.npz": "d5e70868a08c0c8d1a3b917ecf6ed3a2d69704c97526ad98dd0dcc4c7784088f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5cf3dd01cffffdd12a78d66091c44d0604ffbbc141f70676847b3eb701ac1e08.npz": "afd01332255dc047739edfcf61adbcfccc43a862bcbb55850e66f6afcbd32d8a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5d72688ba6180d46b1378b0c60857b64982124fdf937b3d9a3a3c57beb34ef1e.npz": "7dbe1655af87e7ab6fcf3e5efd7b3cb25e05b7d09f61773de2e2877641ccf9aa",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5f75119410967a41b8923588cc862a3988a4b9be78d78d6cd107cca5cea8faea.npz": "6279e910bd5bad5563ea91024fb6f9f8e05972d66a33860f5d5e96562a40b45d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/615ad811f2ec77fc17cc059f9311351df61e0afba9b51dce27e722f9ddbc6f10.npz": "a6de2cde0d4eef652721895d9482d9f816f2223fec8bae3a3e490fb6fb6826ed",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/62219eb702bf4efc097b83056d9e3443dd7a6c853ff2b3c7cfaf978493fc6a29.npz": "b46912d9733b47fbcf8d30888ec3e9e353ec75f91c8fbf018cab8da1dd02440a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/628628e2d7a1387ef80c36318049f0b4621a8cf4e8cd95978ba52565ff02218d.npz": "77c7fc8780c3f60a6f0440fe1909e07604f395e78bb7027f1c7cc782dde43d6a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/636bc3f60599526150dda890dcaba1f5b43536cf02c7a93258328a42196ba6a2.npz": "e8b90fce9025244b1191307575f70039e175f1f6805c20d9a97a72e1e433bfa4",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/642a95599fb5dd22aa4f01e3551e3d4fd33ca298050a99ab693dc966aa7da634.npz": "d481c1a26dd984bf762ce3c3b9029ed71cfb2d482f535fb0267eba3f1033fe1a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/655c5821dfaa9b6ea90bc1c819f0c1d6fbb6903ef4066b806ab1562590f77e2f.npz": "4e8beb6c7fb72ea6645e7c2ea84a3dc1b3dc3c11e55fb0eac061bca9434bad9d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/656539f35a3e98206115f310dfc97a0c744c513cb148c6878b09bc6da5f097dd.npz": "7d86d8e287aaebc04c3518f5b9942c8d29a2545c4d635b05e16fe35bd249aed3",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/671118fb72cda3d05277711debea947a67ac5f8f20b02e2ed5cbed29c278d7d0.npz": "bf088b99fe7bde77764f0d145423447a989be73af865f6a31d549ec07f6c9419",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/672bc373d16e551492b299e1d010e15cf345ecabfd1cc9584068284790216543.npz": "e2818592dec425e11966eee9d4017f6858af16e14769c1964022fac5a2e396d8",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/67b95681a443fed1474ea607eef547d70e52d711016e5bfe17830b1372e9f579.npz": "234e4a90dcc591608ffb2ea55cfd339d9cf82dc0f920d32d0d7aa404f126f97d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/68367d3c174ddb409b35533b6456596b4b10540214de87368f6cd8d7dc490835.npz": "565d409ed82d7e4a8d2292dcc6d6841e72edb57c7d1d097a885cc0c79e758e01",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/68826989c851072e071a738933246e8d6654a4c27636a22cac04431d56c8e57b.npz": "0f5dd7484e54eeaae45205f4f29e9b60b0c9ebc83a0537db5fb37d878b8a5ccc",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/68f50f351b782754279a2e52d6764a96d95714430ab11241f9e8b26df7786d64.npz": "beb0719e390c87ba89d83fc159fbdf0edf3ca2c59655689b35173c5f2917f8b0",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/699a1094c26bcb07f4351ab4f022b5c8752ab1b5f121a0ad05d5cdb7648aeab6.npz": "bd7eae5bcc595425db693e1af9159f3da24ad6627760574c5d61a7b825bcdb51",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6aae22ceeae61753f6df323be9e137d55551623840d95b9dff750658c8c051c2.npz": "170fb8b3d602d7298fdf726d10a38d603b57b0bb399445f4c7615e9f10d36879",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6ae7a820b278653a44aafdfed67bfbac0dd098b38e049387c2685f8c73daaa42.npz": "7b6dbfef1bfbac7c0a556565eab8a515e241d01c776df48e187cdfa9ff5ac43a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6bcabaf2fb53866224ad28c56a478702cc9149001cf90c04475bf066ba14a930.npz": "f5a059aed4ef0b6b256d6521179d5c2a882718125a8c019c89bc62e83ef816ec",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6d332c4a2921388abfd881e54697156daa91cb174866c413b3d08e64e53ca721.npz": "892aabd9641abc4c34171fc7d5b02f20908a730b29e00676a6493b485bad3d5a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6e76a49c40bf697e4acfd1bf4880054418e31d5dbf079023e7b38debaef75c29.npz": "84f07db14f2a1c9f948b0015fbe666c46fb375a30d4bfd974d9da28df1162315",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6f4516947fbb646b69d457184cadd31541152ac3bc1d7bd1b18cb29729beefda.npz": "689571bde4976f44f24f577209ba020571354cb92aeb44634658f29656de6cd2",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6f9a5c170cdbd95808307898b0a91234e59533c0eabd4a24aa119083f3da59ea.npz": "6265887ee859fa6f212db239443f7325d2e54c9e4e46245ddf1e7058efa1fb4d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7105472f5cfe61043735c9e7ed94ac35d78ff5c40d636515f6208bab5b81ca4b.npz": "6d5ab4de27cdebed017f985a3a28a98a0acd02c95fc13ebe7d4818a162d2b983",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/71370d1b17c0b515a36151e3127347f4861bb5ef852772d85d7406a515832e94.npz": "3125a4042b75bd692c297cfa5aeb2e480b201e50fc4db437a18b0f3b81bd7bbd",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/71f923f33173d3310ffbf24decbb5ccca73c49018faf597b20077dd2ece72e86.npz": "523cd99dadf4399e28328508536da50b8027381b7b38fb06c2737493c32dc881",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7284a400d23fe0a226e7a1c29e224ba1f6893f679b4bbdd5f6bef207801cd414.npz": "61e4481f0440eea4090f8bc2c249f2225893576788382d5d4045f1d10420fc71",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/72866ab129ce54683e7bf4dca610d7472faabf536711750081dc3f8148fb962f.npz": "514c691a40555677a5e425e4b5916ff22cc30ed0808b6efb795ad4dce463395a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/772285a48c6eafbe023ec81317cc3325ecc34c7823d0b67b13afaab4d5a94a73.npz": "babba00eee9b8e237d085081be2a9702246f06b6c6b26b38be696bb2f9760089",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/78812fa0552fa2a85ed9925700119e86058c2005d9a2ef4c8316488a61eabcfc.npz": "e0bb7c2fb457b48b1d38055cfee7067bea7b3718a622956d0fae68476db1172b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/79238ce4ec42881e1d39638052f3b54b6584924a8915864cc72140c1d9c53e01.npz": "d8bd91f5a9ce8b012a0cee1aa0f00411e2b9b787320e7fee9139f29fe81f55a9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7a43e87a8706a1ec8903f137b799ce7c5ba1ad3cc2be63ad7771f0a77ca32b20.npz": "d1398aafbb149183b2a91a143db734d48406fdfc2f5b019697b8f41f89abac3c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7b52b5f2c31578b8267c26ed17579040584d9b8f491125308b55b3956483c609.npz": "70de7c584b2b276d860af13a19858d25257bab30a7a473b0e3ced7f98b81db7f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7b91ffd889b976564a4ec02d69d17fabad5e16d9a2866f75290ab88afd1ed3a0.npz": "e187cb725f92a8fe68c70acdc71368171a7033daad3e833521a09c3bf2024eac",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7be4a5fabc8a623a46b670cbe0d3982d75739b6cbb3eb84f63186f596a696491.npz": "a4655195d5849e0e08287d92ae7377c0d7526d232ce28a230c5917b319341578",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7befdc34357aa32004735f23c94a7735fc53e36e34ec9e1d296393d93d845d31.npz": "61ccb05f0423f383778fba65b2f2bf9108a1489ce3005a0b57f638e7ef2ae3df",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7e3ea0ff4c6ff3f4e9abccef89b7683b8c3eb3e3d098407101eed2feca9f89d0.npz": "d4472abb22781986cbc72919aefdcbffefff53e63c0a729a29445e1bc35d7177",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7fa5fb3d57b7ed57b180e705992c49947e86a027918ec38a94ed6372545640b3.npz": "6535350930f9bc5a2dbd533f461411f5aa76e97989607c8760b5c1d63a7b4c86",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7fccf88d63cf1b51d8fe92c8c34d305006a5ae305d0a22f56008b46eb47bd9a5.npz": "340622e1d2bbf50fd0ee4b9b4b1983676b5821af2e285b38a836d2a4ce810b9e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8203cfabbeee52238df8476d048dafc0341a8f8ebf93e4ad2be7a7e8cd110f07.npz": "fbb880d74e326066ef425091df68117451a3e1b791f760dc08fa18ed13766f5e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/829dd55950f02207651e233307e96858981210ba0cf12ed5fdc23827537f689c.npz": "60c4fdd8a7b48ceedf182fc3f6f5cbb193770bbbddcaced4ab6107a1aced1a6e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/834e3aba9715a210f480d16f30582e1fe336486cd2a1edda76ef5eaeed8e1ac9.npz": "60afdb86136e5cba07872328e5cd5086e758fc007fa43ca0dd843017d6dc2b58",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8390d8cbeeafb1be3a0a1867c47d35897fabbbe3fb8bc169b2281a56ba691a67.npz": "374d245c54d8104172269cd1d4fc36df2db80910f385d64c36f31edc503ff421",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/847c950ab1e8512af43ca1f8261580af575f8a062876266674659f00e2cdef07.npz": "cf3468059ec932e36f83c632530c34c152c280d52c6573860f400802564db311",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/84bb87c8142635afb9a11dbac04c4c3f25150ea6bdd417ad04548d6c681ff365.npz": "17b37024f9dcef87c117de9a4a0111df19d9e0bc3209587d95865645f41a4a51",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8540439a45c20aeee3594656d2f9f0d127911ab0014ffa5bd347e4c6a87cd10a.npz": "faa00fccd5a21c54e8565a9f86a3b6c556482f70b537426f7b73a7bfd0f0f421",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/86b95cf17ef851decec2b99bbedf4d941cb6c0bc2ff9bd16d2e1ed9edc6dd975.npz": "265f8a2e58137ac3c2a024ace9c7df2209867ed6df65165b09cee9f96499509b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/892d82f4b4ce5bc109bae6c19ac24a90d3ed1dd31760c5b15ecab4a2c2044f26.npz": "99ea302948931c0a6e715ed27279398b486c45ae4e77dd8154f3c32b6f565722",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8960afac94c959cad0f1713a07d18233f6af222d86c4a7d082c6030cc399c771.npz": "5d19543fe35a7b9a8c0c387214a407f85ea71732ab903a8a1a5a6e5f8412c0e3",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/89848fbfc7b2ac7ea77d68cb1b77a938f175f8d0c24f4eb172b5c633893d4192.npz": "0b8d86c1804223be36a7fe0e69426fcf74228c34006ea84d5d1d92611824b423",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8c416adfe2628bf9b588fb7f5c4615250cb5481d21b2b7b6868eb69d7d1082aa.npz": "a3520083b19f9b2042e58b2bc6516a84974fa3e746887691c8a4f9c3dd908712",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8da066d51ebe322386502c8bbd970f696adbccfa31a0edd5839d08393c93877e.npz": "729d109558220848645479c8b19681fb0d3bd4503d2d5cb28f7d818f350dd8a5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8e0e746377e30a10ebae071f9287bdc2443273ed742a5e21b708a1d2f0c7b864.npz": "36561ef9d7c0de2fb63f124a41c3989351dc426d797fee5880a3bf0e1f49dcc8",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8ebc92f75c3f51b34d5ec1d9fe3909acba6064a557bb5e65f97a698094c38b63.npz": "4246121e910d1f6631fa348190d9ca905cff6612f505df24c84e37ab3b65ce89",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/9170650e8c20561653289ad2aedd15bcc42a1e4c552996c4adb5d532e081b67a.npz": "e1eb9967f554a7fc3d8771e8b83d51e65ddd6a91b8b04a35691780f3102871cf",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/942f68cfb1fcfe0f1fe946edbe83cee8bf701eca59eafa158cb8f0c83261ffc7.npz": "ae120acaff02c01ec8149a346f7460dca6d1b0deeaaeddd263cdd7c34390f82f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/9447d7675f2f03bd2d3a01941cc1739b0eb02fd17fa78c84ed4f8957e3b802f6.npz": "6a63dd99a009d515dd5daabef5603411892a40ed6b854d6279587263e15f5b28",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/950055179136ca960f6098ff3c1d262d0b29ae1811b14b05bd6896d1b87cc1f4.npz": "8aa27dedf1ecba5ed2439733bf274d16f4933ac97e7d7b808c0197f2835ab3f5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/95e118ed2d8e333680ad5308babd2a49d4779b0bf4efa634a1ec469f9b5c5967.npz": "1aba55d2d723dda6d07d6199bd37a269314d561281bd3befd7098b41813b8423",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/96efc9775bce92f74a1ac54a5d3c20b42df9719f420454ca3c88dfdb6b1e69d0.npz": "deaa0c502a2790072394a8b3ac20f4b9f7064b165080c2c9ae36a0d94f676026",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/978ebc2cb091b153ef67161b3a355a3ca33cbfe94f4b9c16ca1552eee5277ff8.npz": "9d69e9231695124381b940e8a8db3eb0c591b7dd71fbcd0a7035e274d998612f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/98b1323f16918055c0d1fd25f235582f3bedc7f700409602d5488ee78091b852.npz": "d5e05042a79057a2fd8b4866e35713ec814531879fc9e80a5978e1f4891c0479",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/9e44367ad1674ab8091ab0495b1773c89cdc789c12b65ad07df3f159da83ae48.npz": "a78fa1bc14e13f56ffa00ba18972316dcbd4dd735cbd23ecc3f92c0eec90ebb9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a02bde8f6f156d44788c2b6973b06b7fbab99b1acfed83b2859654e44a5a7ec9.npz": "796c250d61bcc3962e94e4e3eab1df06805e9fae18926a98d22be48ae982662a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a1097f27632a5981e05366a0e3e840fbf96ac7670a9b1f7df1612ea90add1a3b.npz": "c77482c63a1492b89b54a05d08ffc011ae0aa5149687251e2aed252b5499ad63",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a240d5fb9055ce06356fc49af3a7eac059958bd8ce3b82353153bea273173e90.npz": "e878236c8b3bf0e4556392bb97a6db5cb3dba7301db9f6dfb661b6f593674429",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a27209e4c7d201b5ac75e42af661a05703df944fa48b507c925f9cf8e2f16107.npz": "37249bcdb83b74d0f17cb9e671d3432807f6cf7caecae3296edd6ec295a997e5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a27dbefd96d44cb04cfbd026937add03f346e8cfd4f40cce5ca0863d0437dd37.npz": "49caefd69eeb79f310edcd4701ccf407046d99ade79ddf11d9ae160f48833b1b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a47f2a334bd650f3a9f082976104ed9839a37a934496c85866ec87e5d89a13e7.npz": "b3dd25d595816b9ab471fd8c57a91be1ba4bccfe78f55026bec506975464de77",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a4c30da29fb789f140c8881356bf638d7d3bba95346fc4c1e7b2a5d0ee9e4f7c.npz": "c50d540acacf08ea3f3bd91071ccafd43ed55b31d67d2d78eabe0ded8b6fec9f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a5812f61ca5ea44cdcb58375ca247a2ba7ba9a2fce9b6972a0dfa31d5bfead60.npz": "219ceddb545033b1ce5cf38f4bd42581b78615d7e5bf134cef1e087818f1faa1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a607b1495be4a66eb2e0be6bd58ad15f6342144bbcfef49a90d73da6f59ad82c.npz": "42d609292dcfc6a228dacf8dd1ececc477014dfcfc1dd8be992be129321242b2",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a709ad5ffce00c271d0537c5897350cba319732d957f99eb2fc340e7718fc986.npz": "baf555fc6dfa61bfa4210155b2ed576d4a5cc42e6332e5743e5a777d841f8a19",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a73e2da3dcf36a901c29df2c6dddf20c58bad5e8fcc349cf1a922a63cc9e3230.npz": "4215d8c7b6428e4f4ca78369a22a69aa2d40a00af810d47a9b2bc7e8a791e0fb",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a847952260fbae488e4325af7c5b6d73e4c830c0ac644b6d92ad26b1a6ffcc4c.npz": "cd12551bc71edac9262017ee6bb16f31a5a07525968173a8de8730aec754d15e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a9e9ef204a55e1cd581466f9e76b67a235ef504004ce0076cf6355add30aa37d.npz": "4e21bba2c633573401c2209ac7951638c2f395faa9c16bed36d96ec1a1112865",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/aa3de1bb5d5dab367cc1692f03d777519eae5a349253cb6009c1b629c22733e6.npz": "6e741bd78a767ea685cb641717f9840a2ea774ca4d56a0a8ea7db2627571de96",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/abbc62f0afc99d1582e60292750adfa08a3c6671881633d202a087fa2a001a08.npz": "feae01e66e78c2b512f01b9b880d4b6929fb90c7d67818c961162aea7473d550",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ac2436faf62bcb09f98923327f4c9caade30251d33e2fde1ed695d5049f8d05b.npz": "abae190b8eda98f97e547d9423676de84b73e319a3372f77ad22643fbbceda6a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/acad0ed1de36c753f94524876e5bbdb110ae46d38ece2ea0b4a90882686d3542.npz": "e5944ebff0cb0ad53725f5efafe442d2b666b862559d16dc5a5696213f44bb97",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ae1f1bedf8f0aa02f985d8bb23994aee6ff63a850491dcd59d5afda0286c083a.npz": "04121223ba332f04028432587a06c80b127e0bc7682a1d83a02bc8fd59efc855",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ae3df8f0e72b9a613726fd0f3c1df15d2d7409b965f83ea592ea77cb4f56bca7.npz": "33435e74ce736e56617f24f8043817000f52685a6d2908cdb195ccb9e08272f0",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ae587d0d996cdcf1f247aa3eda1787455bdc437cce4dbe0c1fa75aa0a36dfa25.npz": "bf1915d7f249e46d1720fa4a65094cdb70ca754d0fe48c97aa8833b96168e389",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b01684ae886a9fa1d5e16caf948b53ecab374e592e71cdf418d338b3ea418768.npz": "1b12c2d629381bb6382dc6ca9591cc0f93222199eade451f6e64f4246c8a6da8",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b0b51afcd2e91a2877b6d7e50e2d22e2dbaa2789d7507834ead97701e7c39365.npz": "ccadf449b6cb617109bce6a9a42cef741ead5064cbd154dacd035e7550538b1d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b1de5efbf7e67f61e457048acaded6f8e2037e2f8620641d205080473d2cd7b0.npz": "d303ac9f7d9fede60fb1d925e74f2fb7f5805a43b4b434aff5a101efd9240a3d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b425559437e87629abe52c884c306260622af2fbf182b9bee3a94cbbdd27cc1f.npz": "0e98dafd8a04598a2e2faf9753ea003efd789cf803d4e78434cb731afa01b686",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b42e656e2971317b575732ceec0eb3e2ade9c769ebd8a5ca96cd6ee42dc02475.npz": "3ce68e971dae3de43c0d18f2e9626965abb270263d926ff33e85f5f755464970",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b6ab48cc591755c21ba9dab82a83ef6c6d0755d033f9c90d2d0b7605ea5324ea.npz": "fe1dfd9fc88173d640676107f3e6c067b380b081323b86c0f56850ffd84d0b7a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b6d4820a18c660fd80fb9884918764a147da92c1b0c914c98c048b6831ed4091.npz": "51bc81da23046cf5a334d37298a8c106bb528eb0b5f61cb718f40288d585cf86",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ba29c9e10a0446199a518659a179550577fc5cf7620f37e6e1df3bf31d9c7b27.npz": "88a0aa440e5296c57f5341d0094dcd768bcc5a7724ec89052a2899241aadf0ff",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/bce2f8ad048078f3f3a3aa99a4b8bda7f9c828fc747e8cee9bb1286033534a62.npz": "ac5fc84b8336fa5476ac6a38c5601d8b9669ce0ca0ddacb2804753a6de3d4b7c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/bfa3b4a18b539cd020949f99d66e4b84392bb1eb3b2c675cd5b1611f5b6a8fcd.npz": "d3650f50e445e5605c015978999f3f0b2ba4bf6d81f98becd5cdf907575b3e3b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c2bbdf80eadeda0fe19bb492af95ac5e3a6ac931c483059a58c685071b4b308a.npz": "5f61f703adfbff9df7c740aa2725902c5a6bc899c350e399da7d6bb42e1f2cb6",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c342947c80a10f39328dd07bc1150729bbaba037d54c6bb18da61a8d85d69b69.npz": "0298741423adb99b17e38c3c3a7c574f978209d15d91b4b93e7bb2292b579833",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c4171c16ebd7edc79c0b7b75a48b0a68ca9f5d98e0687097ffd1e797a9a700e3.npz": "99391de081e21880bd8212445ab6d99ed30607f1eeab9b0763c48a5cd050e289",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c4676c1d757a11ec1af1292a0eea8bde8dff2e64235245a872768b2a57e06cdd.npz": "bf42443af1d24e3dc084bf2951c69266d5b864a55ef37ce2d923a5759f13bcfc",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c4feb69c42602a06521108272f04f2462c7758f2e2bdc925f8add375459021bf.npz": "8d728d7d71b7de8e14af7f51f27127d31fb38a29367aad77a4e41664fa9927e1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c66de5927db26b6bc18332e1821aec4838ab98d35a7b05e8920388f1f6ae19b4.npz": "f7ae2ecb73cd567de320e9a1bd5dbd90fea9252176a65bc57fa28f895984dde1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c74e497c293ef9b0c911e5b8a3b617e9c37b9924f1fdb71f8f6770cc5633f481.npz": "a649dce8e01a9bebd752db14bfb4279f00a034d2bfdf6a80e57db652ac91359e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c76fcad3c4ab1c09f5a9c48abaec596ee09ce7618cdb05e882654efdf94879d8.npz": "6ad8ed5c0fc90e522b9edd21cf712c51d892b537aa070c9ed9e9dcf0de99478e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c839f26eee468474fb9f865bc1d67e90160df9b1a3127c17e51104a395685380.npz": "c80233f3ed6e136accb38b9abe482571b6269295a0db0917592e8dbe72d2bb7e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c983724ba01d0e832e77c821fa1dac0a9aa22510a57fa0521f5b081ba3117ff5.npz": "fc561dcdfd3018102b60cabacb6e85bb601571ecab79538aff72ae26d13b9485",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c989fcdec524ea5bf0e3c2896f30a997f5525b14313e7681d85286422b399e0f.npz": "5fdb800c5e8c9266e04567f2533aeaf883e89ee9e90d3c5a839370eceb048582",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ca9691808b1200c6473c6e5f5105e74532775131ac50ff02059dfb72a64d9417.npz": "045a35babc74bee35a790512cc618bf69de15c1e67587ffa3208ac38a3df1d05",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/cbaa2fbe934b3e4eb3b12e6e47744a3209d5899ea7a2e5070905f0be3faa431e.npz": "ef55a1d81b19ec59514df98e7fd50c651607986c7e0ad3d4585048d790fc86d1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/cbd765946c481100dee4f5fc4661642e341e2f06d01729304054f63cd98cc316.npz": "dc3f261580a32ef674d217d61cdfe1016e1de4330e3f3ffc0931dd9dd2c38504",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/cbfa07882fa517029dd88234181b86911e24d6c12b43c400570e560c15eb0179.npz": "5e9036191e8979ef5c2a406200a5971b72fe5b8c5ffe2eccccb71eb1faed4f8a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/cc459c4f570c8447a871aceae3ea31beaa8ddaae730dd357a3b559095aeb6c9a.npz": "d097277d97e40b7112f97b967042775c6bf38abef524b05e4aed773ee3e55609",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/d12723476bf5416c23d7fd5700349b1020b93f3fc38008b5318df69574d3377e.npz": "4fc7031b2f08763b566e1e7de3de4459093e13c672901b68dfbc62cebbab1e8a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/d3508cab84f74a96e4b32f5dd81140c445735d617a4bc244e7e250452fb207fb.npz": "d0540b6122e1d9111a08a6ca86305d1eb764f3dc468d4c22cd3377fe9bab153b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/d51eb0d5cbc19fbef2755051b1deddbef36228555d70cbb0599f1c5e457150fd.npz": "6eb4f1cf0798817e886d8d50c4841fa752fef0dee85a86b513d403a80f97023d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/d7e279c2d1f7c5bca75587204749c90bbbd0d4fe3d17d0abbfe029c562b6b853.npz": "e3496f4f91bb0e678e09cadfc872cdd1f167f8eafdc1ceb5ecbddd31f5d4c62a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/d85acda1850599f7f5c6f8c6e52092a9ec321deb91b473620a778a0fb518a327.npz": "9e7bcb0dc4b08ccec77746ac4645e8f4931aba96784c8d3ac29d616bd75c3848",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/da9ce3b80ea2b13c4fc471f1e3f2d371258ac887668eee429a295cfc730d9150.npz": "f152ede16349bcf1202dbb3384a1873f6869a98b3be351977a9e33650dbbe630",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/dbf10909384f5489c49b8c707ed44f654da23ad505ec42a53321fd479ed592ab.npz": "8a59fc663ee9d16c08d271d568a1ab6aee639b8b0002d77f8bd19ddac4605c59",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/dcb351ad5b59f2812a427a47382704d1fd142f9a558b0f1aab985fa3bf88e728.npz": "df958f6cad05be227d769ea339a5deef8abac2bac95881b4f67a644f8825e982",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/dd9e730ecff712237d8a183a853dae3fb21af959036d4c707c5d39c50426c632.npz": "ae632bc3eef2e7d07eacef349c477df9f9dddd7d5f002e2561567641203bc31c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ddd4b2b4ad765708c0ae95bf7bf428d313c787161cc9d3f4330a0da3f2f2f7ab.npz": "ee6786e22f1b891ba39a22dbe6f2d8c07d5891a84a8fa272b44d88b58089db6c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/df5a750b1c2bdec23877ed1dd05e6633de1de22e7b371d591df44c79257649b4.npz": "1753fa0b887fe0239ac9551c27a855c3c6e081682759c1bf173a89feeccf220a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/dfd6aaf50e081dcd077125873d5f1dc09374229f54f2f99c9ec5c4eb4a1d0607.npz": "933e6aacf81c28fa6218c3afa6517c5482c1468cfa274fe6baad9a2c4dbbb198",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/dfdf8d0252c9f05929c6b7341c2b593752e918058adeb37627fdfa0cab5252bb.npz": "cde7d3e4ab8dadf1388bd665cba927460f63219de5c78a50c16c51b92183be44",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e200621cee88174bb98a04751577b81685d487c82a74275ad54732fe3a7d4fcd.npz": "dc5c8e0065dd272a1b4a9a5025d80fad46185aa71e3cd42c81c7f0f4297ff52b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e32a538da2dd107872e66e682fc2fa7d0541e30383aa1193d061caad9d965c04.npz": "fdf9414fb0eb2aa8b2361d4f4eb432a34df12075399a6d063343fd9293a04fd4",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e44575d20218381d100d9fb046298fd07a8614484a8b208f760101ca39875acd.npz": "680b04084e34eeb2ac3e292d38e753bebefd070cc44ed4e68b9f0ef7aaedace0",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e643394cd9fb623d893318299dd82ec4fd60f49f0d93e10ca3363070ce23f88a.npz": "de7d4de47388cc370a34910ba2e3055a10d3bb6c5223970f56e45a6cd60a464d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e7242fa0cec0895b359990dc172712b456b58d9c7c9aefc36c2aad3af3202818.npz": "3ae892bf25c2a1ca7034fba938e0c4c96cdf4ba5ae4e1d83178944797a326e25",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e7502cf2fc3eec4019d6dee077026efbe1ed28290327522e9534aa57222f76a4.npz": "55f52272ceb143eaf96b105ebee8a4c7ff79fac7ef1b6328731d9d9fe248b5af",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e7707b60ebe67298069bc962cbeb82ff835e1bf4c14d72a2c5be278cfbc18019.npz": "6bbd6ee3e9b11f43edc111066338475797a0a36dc8b9d2a3d33ee06da9fb4afb",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e993fd1f31b850d2c41b87a6bec56ad5cf78f8ed3f45c312230a4819cfc3c119.npz": "db4e5e736c8a599440902113c0b3f5e8413ba35e57d5e017f312c00c7e102193",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ea003b32ce9835eb7bfb589eddf154deafe3d6bb219f8e7f2601aeb96b3fe85b.npz": "f51735794125735193fb6e5c7c16dfbe59bb66bc3338534095fee2299bfeb46c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ef678dc1a19daed5bb064a5a5c8c8344b6c9344f910fb943e4247ad841681f8b.npz": "c08436cfe25db666117a01baa7c9874f80213accbae2f92f4ef26d875511f67f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f072b003bacd29ab198eb1963f5f13746c04e814c907e922b7fa6930da9bd5ea.npz": "c6b30a33fc5aa0236edd0008d1fbfb8d8379b86a0f6e3c8a578740605bc777b0",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f0c607fd3e3663c0806f121b8714698999d3823128f847302ade270fcca0bb3d.npz": "356f9e6f3637f409584b9e592a8b6e9d1056dc9e65ac8de4d78ce090a5c9d95e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f2f826fce54dc7b48d2e5f27f2ff101737c010e06cc5b02447aec5b7cc6aa973.npz": "484849ec40761fb139ffd9261fecb33577aa5534f99e051d33a80e31857e273a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f66bec9113ee669ea7efc3841f100507f8a81ce751aaab18a40b68ef49b8bbc2.npz": "0255036bd0cd9fe36e9989c591a65d36f2df025f33e733645055b614eac29043",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f685cc0e2434250c1845dfcd726f10372624baf92cdb68462a69e00c1a25eacd.npz": "e469d5dbfbca64423ddd9ad958ecdf0d32f26de0f55fc84e793f5cdd197a3439",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f6a360ff214cce058903137b2f2e946f5deea585b342c136ff079921c2e93395.npz": "69d6c452725a96d0d21444e157a4a333d898cfc87851e65bc0ac6395beefc236",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f6ee00a97cec8e4dca07172d91e67bbce11b7485a4abe41922c033755df8f3f0.npz": "ce94c6d321d6eba08953413a9fa23dee7c5a80034e67af9beb186e28cf9f587f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f72ac8e44d4f2be0ae8ca945e88644b4123c6ac68466266658fe047af53e5020.npz": "5856e191dd737b31b827b50e99369b6ffcfde79dc6e30c8183a8caca03b83394",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f73bd703b9852f79f4d5f5d425339c71fd71e2f2cfe959ae5f07ffc9b4597c54.npz": "0c07ed5878b5dca81e55764918186ce8d6e9d1871edac2ca050e13dc733f9496",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f999248a65998c96e140912230e9a2dc94e8247a9d5ee4b4171947b743654548.npz": "38f693989a869627cdf484c88a5414bbb92477ba2fd03f6ba0d39cb973f41880",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fa66316b49a4f9d17af9cc7ba94c28664f48d80c058cbedb855aa9398c8291e7.npz": "be5ea05e4c514f155e9faeae046597c06f97162273788fb29a0747eccb0daa48",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fae785324303ccd282da51ab98aef2a0b14ad396608c2d94f90f0de39cf1f799.npz": "9dc3ee91e1e1efa03311125091b1c481f2231d8b8aab848647dcde9f994447ff",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fb6e0730d885afe99c3a68262f052b94dbed56e5c980b50bfa4fa4b6fb8ac550.npz": "346eeb11bf4181a6efe5f2788b812834b913629f2789d598df0e7e89132c00ef",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fbc3b04d729b03284324605daf0bb731a5531006f40424abbc202356a0aef39b.npz": "9ebecb3425544301e32865d8c13a9b11823a7f542f2faa00d0c2ce9774fe26b3",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fd7aa8bdcf996e2f2d2897c5c70ec2fdbce113e1b3abf87747bca4a4624d8765.npz": "d0a479c6085bab9bb9bdb184e3242269142d1f7d70b2ce4e4bde854008affa7c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fd83c4f4fd6b197363bdc308dafe636fc28d22db69411d9ffe3fcf63d0e81bd1.npz": "e7572952eaf0e79ccb75cf6de4c0e02243205a12adb3f5bcaa8a6544afcb83db",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fff9fec797f17347d7c3d1a3ea3918c56832c5a5167739cfcdc6a84eecd46102.npz": "4730f91d082422860f2a933155a388a0dff8ebe1763b13ef4884dd062bb99ae5"
+    },
+    "fingerprint": "85c2635b2f5e1cbe0dce6f592b87d87329b7f32ecf2277dea6844763fe64f56a",
+    "heldout_used": false,
+    "measured": {
+      "global": 0.5117157744392721,
+      "local": 0.49632253190060444,
+      "overall": 0.4994396330098335
+    },
+    "name": "jl_gaussian_r2",
+    "policy": {
+      "global": {
+        "log_threshold": -1.2668640613555908
+      },
+      "local": {
+        "log_threshold": -0.8551128506660461
+      }
+    },
+    "rule": "Existing rank proposals/scalar fallback; full-budget joint sparse-trajectory verification, max12 points. Only achieved physical sparsity selects thresholds; never accuracy.",
+    "selected_round": 3,
+    "target": 0.5,
+    "tolerance": 0.02,
+    "trace": [
+      {
+        "achieved": {
+          "global": 0.5004987987046903,
+          "local": 0.5241053108026554,
+          "overall": 0.5194864644596259
+        },
+        "iteration": 0,
+        "metrics": {
+          "global": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7878081014367985,
+            "denominator_mass_sum": 16134309.917425632,
+            "dense_sq": 3692116401.4084473,
+            "eligible": 3063360.0,
+            "error_sq": 152282331.94443008,
+            "mass": 0.7878081014367985,
+            "mass_sum": 16134309.917425632,
+            "physical_sparsity": 0.5004987987046903,
+            "pv_omission": 0.5004987987046903,
+            "pv_omitted": 1533208.0,
+            "relative_error": 0.20308931139073694,
+            "rows": 20480000.0,
+            "same_budget_best_mass_sum": 17457292.00199318,
+            "skipped": 1533208.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 352858.0,
+            "wrongly_replaced_vs_mass": 352858.0
+          },
+          "local": {
+            "compensated": 0.0,
+            "denominator_mass": 0.6906252421538606,
+            "denominator_mass_sum": 70720024.79655533,
+            "dense_sq": 9316446090.104279,
+            "eligible": 12593200.0,
+            "error_sq": 1079103146.33478,
+            "mass": 0.6906252421538606,
+            "mass_sum": 70720024.79655533,
+            "physical_sparsity": 0.5241053108026554,
+            "pv_omission": 0.5241053108026554,
+            "pv_omitted": 6600163.0,
+            "relative_error": 0.3403347865402318,
+            "rows": 102400000.0,
+            "same_budget_best_mass_sum": 88867439.50616646,
+            "skipped": 6600163.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 2191672.0,
+            "wrongly_replaced_vs_mass": 2191672.0
+          },
+          "overall": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7068223853676836,
+            "denominator_mass_sum": 86854334.71398096,
+            "dense_sq": 13008562491.512726,
+            "eligible": 15656560.0,
+            "error_sq": 1231385478.27921,
+            "mass": 0.7068223853676836,
+            "mass_sum": 86854334.71398096,
+            "physical_sparsity": 0.5194864644596259,
+            "pv_omission": 0.5194864644596259,
+            "pv_omitted": 8133371.0,
+            "relative_error": 0.3076680224071144,
+            "rows": 122880000.0,
+            "same_budget_best_mass_sum": 106324731.50815964,
+            "skipped": 8133371.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 2544530.0,
+            "wrongly_replaced_vs_mass": 2544530.0
+          }
+        },
+        "policy": {
+          "global": {
+            "log_threshold": -1.2361350059509277
+          },
+          "local": {
+            "log_threshold": -0.7595282196998596
+          }
+        },
+        "source_condition": "jl_gaussian_r2_s50/aime26/e16b7fae05676628",
+        "source_ids": [
+          "aime26/2",
+          "aime26/8",
+          "aime26/14",
+          "aime26/20",
+          "aime26/23",
+          "aime26/30"
+        ],
+        "sources": {
+          "aime26/14": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/e16b7fae05676628/shards/35c84d77f2799941f6ab3b8ffe3980e0f66ed1af3a4dd8e1a08ed259bea6af96.json",
+            "sha256": "519e0bbdd4804863f26816d0d2ae5f6e22419124bdc1efc0379bc147ec57ebd7"
+          },
+          "aime26/2": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/e16b7fae05676628/shards/96cfcaed7e7b492892a0a0a81e9f85ea349122c7ebc52a4ac04f1ec786da42dd.json",
+            "sha256": "e8caff63d533a20a79b20b3052c9af28c8378f2f092c3cb32ef64cfcaff34726"
+          },
+          "aime26/20": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/e16b7fae05676628/shards/8436010282cd66f71b1f06888d713b94fb5076958b3460288e4f2ccd10060be7.json",
+            "sha256": "62a8dca1c06cc8c9e0c00941c68973d0bd11ac43fab080d58f3c4f0cc5433b6d"
+          },
+          "aime26/23": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/e16b7fae05676628/shards/69e3398952b90c4b7f6497af0f322249a9815d5318a0f3b41be384879c9bf1ae.json",
+            "sha256": "347e0da814218a77b7553f1752e10fd5d955c75a2847bc1e0366afd0cffd6199"
+          },
+          "aime26/30": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/e16b7fae05676628/shards/05cdf9a9f4d671a4d45e31950e678a49a53bd864b178d270cf0896674b969098.json",
+            "sha256": "53fe030539adaa021417acbf9e27eb36480a237ff5d75b4fb357f345f817636c"
+          },
+          "aime26/8": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/e16b7fae05676628/shards/94429067acb64190226d98231669449130ea35e2ae16bb3fe6fbad67cbf86325.json",
+            "sha256": "a9b33c36f4461f0d440f621ba33d073a9cfa33ca9fe6266546dc521d400b16d0"
+          }
+        }
+      },
+      {
+        "achieved": {
+          "global": 0.5303634701108698,
+          "local": 0.49633680555555554,
+          "overall": 0.5032682658501945
+        },
+        "iteration": 1,
+        "metrics": {
+          "global": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7833780604219758,
+            "denominator_mass_sum": 13781437.519922733,
+            "dense_sq": 3182504739.111084,
+            "eligible": 2799680.0,
+            "error_sq": 133391347.1714387,
+            "mass": 0.7833780604219758,
+            "mass_sum": 13781437.519922733,
+            "physical_sparsity": 0.5303634701108698,
+            "pv_omission": 0.5303634701108698,
+            "pv_omitted": 1484848.0,
+            "relative_error": 0.20472896921616668,
+            "rows": 17592320.0,
+            "same_budget_best_mass_sum": 14950531.79874134,
+            "skipped": 1484848.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 317532.0,
+            "wrongly_replaced_vs_mass": 317532.0
+          },
+          "local": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7174038691726943,
+            "denominator_mass_sum": 63103992.17862087,
+            "dense_sq": 8095798956.684814,
+            "eligible": 10944000.0,
+            "error_sq": 785276146.8522254,
+            "mass": 0.7174038691726943,
+            "mass_sum": 63103992.17862087,
+            "physical_sparsity": 0.49633680555555554,
+            "pv_omission": 0.49633680555555554,
+            "pv_omitted": 5431910.0,
+            "relative_error": 0.31144498742738264,
+            "rows": 87961600.0,
+            "same_budget_best_mass_sum": 77906278.84821701,
+            "skipped": 5431910.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 1927829.0,
+            "wrongly_replaced_vs_mass": 1927829.0
+          },
+          "overall": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7283995677142413,
+            "denominator_mass_sum": 76885429.69854361,
+            "dense_sq": 11278303695.795898,
+            "eligible": 13743680.0,
+            "error_sq": 918667494.0236641,
+            "mass": 0.7283995677142413,
+            "mass_sum": 76885429.69854361,
+            "physical_sparsity": 0.5032682658501945,
+            "pv_omission": 0.5032682658501945,
+            "pv_omitted": 6916758.0,
+            "relative_error": 0.2854021775796151,
+            "rows": 105553920.0,
+            "same_budget_best_mass_sum": 92856810.64695835,
+            "skipped": 6916758.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 2245361.0,
+            "wrongly_replaced_vs_mass": 2245361.0
+          }
+        },
+        "policy": {
+          "global": {
+            "log_threshold": -1.2361350059509277
+          },
+          "local": {
+            "log_threshold": -0.8551128506660461
+          }
+        },
+        "source_condition": "jl_gaussian_r2_s50/aime26/9cd003054af336bd",
+        "source_ids": [
+          "aime26/2",
+          "aime26/8",
+          "aime26/14",
+          "aime26/20",
+          "aime26/23",
+          "aime26/30"
+        ],
+        "sources": {
+          "aime26/14": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/9cd003054af336bd/shards/35c84d77f2799941f6ab3b8ffe3980e0f66ed1af3a4dd8e1a08ed259bea6af96.json",
+            "sha256": "332299703185ba1ce9f15441ea5030437814b8ab8a53bf75542e5d477b562983"
+          },
+          "aime26/2": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/9cd003054af336bd/shards/96cfcaed7e7b492892a0a0a81e9f85ea349122c7ebc52a4ac04f1ec786da42dd.json",
+            "sha256": "4e0ad0afbbc1666701848316725f758cb5309359e9b304249dcf863c4e86731f"
+          },
+          "aime26/20": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/9cd003054af336bd/shards/8436010282cd66f71b1f06888d713b94fb5076958b3460288e4f2ccd10060be7.json",
+            "sha256": "cdfa842002c3c2b3fb0e272961f6f4226806452312d459a1e4bfff162eb30b82"
+          },
+          "aime26/23": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/9cd003054af336bd/shards/69e3398952b90c4b7f6497af0f322249a9815d5318a0f3b41be384879c9bf1ae.json",
+            "sha256": "dd46c789bda9874ecea1bc3ea5939e94a805bfb12af2656df0000918c8396065"
+          },
+          "aime26/30": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/9cd003054af336bd/shards/05cdf9a9f4d671a4d45e31950e678a49a53bd864b178d270cf0896674b969098.json",
+            "sha256": "ba3fa8f6d86b9689df1de8a1765a8280bd0b3150923b64e39ec7fbb5b38497d5"
+          },
+          "aime26/8": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/9cd003054af336bd/shards/94429067acb64190226d98231669449130ea35e2ae16bb3fe6fbad67cbf86325.json",
+            "sha256": "0e69be342ab4c43bb0323bc23478b066509e1422216994a510512a39a7b40050"
+          }
+        }
+      },
+      {
+        "achieved": {
+          "global": 0.47270942408376965,
+          "local": 0.49434556353979536,
+          "overall": 0.4900925769042509
+        },
+        "iteration": 2,
+        "metrics": {
+          "global": {
+            "compensated": 0.0,
+            "denominator_mass": 0.8177152240890153,
+            "denominator_mass_sum": 13832863.233997345,
+            "dense_sq": 3075956949.4921875,
+            "eligible": 2505920.0,
+            "error_sq": 101321909.3018114,
+            "mass": 0.8177152240890153,
+            "mass_sum": 13832863.233997345,
+            "physical_sparsity": 0.47270942408376965,
+            "pv_omission": 0.47270942408376965,
+            "pv_omitted": 1184572.0,
+            "relative_error": 0.18149370068628964,
+            "rows": 16916480.0,
+            "same_budget_best_mass_sum": 14781734.250915527,
+            "skipped": 1184572.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 274716.0,
+            "wrongly_replaced_vs_mass": 274716.0
+          },
+          "local": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7233841550244022,
+            "denominator_mass_sum": 61185567.953935996,
+            "dense_sq": 7718053378.655518,
+            "eligible": 10242400.0,
+            "error_sq": 756304825.3802676,
+            "mass": 0.7233841550244022,
+            "mass_sum": 61185567.953935996,
+            "physical_sparsity": 0.49434556353979536,
+            "pv_omission": 0.49434556353979536,
+            "pv_omitted": 5063285.0,
+            "relative_error": 0.31303618829929597,
+            "rows": 84582400.0,
+            "same_budget_best_mass_sum": 74865646.51665497,
+            "skipped": 5063285.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 1752051.0,
+            "wrongly_replaced_vs_mass": 1752051.0
+          },
+          "overall": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7391059998685043,
+            "denominator_mass_sum": 75018431.18793334,
+            "dense_sq": 10794010328.147705,
+            "eligible": 12748320.0,
+            "error_sq": 857626734.682079,
+            "mass": 0.7391059998685043,
+            "mass_sum": 75018431.18793334,
+            "physical_sparsity": 0.4900925769042509,
+            "pv_omission": 0.4900925769042509,
+            "pv_omitted": 6247857.0,
+            "relative_error": 0.28187576685575444,
+            "rows": 101498880.0,
+            "same_budget_best_mass_sum": 89647380.7675705,
+            "skipped": 6247857.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 2026767.0,
+            "wrongly_replaced_vs_mass": 2026767.0
+          }
+        },
+        "policy": {
+          "global": {
+            "log_threshold": -1.342644453048706
+          },
+          "local": {
+            "log_threshold": -0.8551128506660461
+          }
+        },
+        "source_condition": "jl_gaussian_r2_s50/aime26/459a0fc62e29cbc2",
+        "source_ids": [
+          "aime26/2",
+          "aime26/8",
+          "aime26/14",
+          "aime26/20",
+          "aime26/23",
+          "aime26/30"
+        ],
+        "sources": {
+          "aime26/14": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/459a0fc62e29cbc2/shards/35c84d77f2799941f6ab3b8ffe3980e0f66ed1af3a4dd8e1a08ed259bea6af96.json",
+            "sha256": "d6cc811368961026f9708a11403b71abf96fdb7d6e804090bc37a4742eed9c29"
+          },
+          "aime26/2": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/459a0fc62e29cbc2/shards/96cfcaed7e7b492892a0a0a81e9f85ea349122c7ebc52a4ac04f1ec786da42dd.json",
+            "sha256": "efb346c32e231f94592b5b001439ab8ef251b23518a103a049a27de1276a7387"
+          },
+          "aime26/20": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/459a0fc62e29cbc2/shards/8436010282cd66f71b1f06888d713b94fb5076958b3460288e4f2ccd10060be7.json",
+            "sha256": "3efc96ffbb297a02bb95a7d0eeeeb10c6fdd883e34003016548a51043bea7be0"
+          },
+          "aime26/23": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/459a0fc62e29cbc2/shards/69e3398952b90c4b7f6497af0f322249a9815d5318a0f3b41be384879c9bf1ae.json",
+            "sha256": "c90c33da9fba412a9ad7517883f3b44e230e85312ca84f9dddee5cf73b572d1e"
+          },
+          "aime26/30": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/459a0fc62e29cbc2/shards/05cdf9a9f4d671a4d45e31950e678a49a53bd864b178d270cf0896674b969098.json",
+            "sha256": "b3976af24ade8c8b4a05a7b53b76e4e2589e9a2a72b7dc09aa074c6f3b017b91"
+          },
+          "aime26/8": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/459a0fc62e29cbc2/shards/94429067acb64190226d98231669449130ea35e2ae16bb3fe6fbad67cbf86325.json",
+            "sha256": "6cd14e5b66ffa247701d12163a481129c39527ad4037f2d630642d13f44915dd"
+          }
+        }
+      },
+      {
+        "achieved": {
+          "global": 0.5117157744392721,
+          "local": 0.49632253190060444,
+          "overall": 0.4994396330098335
+        },
+        "iteration": 3,
+        "metrics": {
+          "global": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7904139159947254,
+            "denominator_mass_sum": 15248791.733596802,
+            "dense_sq": 3476745210.7976074,
+            "eligible": 3024640.0,
+            "error_sq": 136609582.1820294,
+            "mass": 0.7904139159947254,
+            "mass_sum": 15248791.733596802,
+            "physical_sparsity": 0.5117157744392721,
+            "pv_omission": 0.5117157744392721,
+            "pv_omitted": 1547756.0,
+            "relative_error": 0.19822304761284731,
+            "rows": 19292160.0,
+            "same_budget_best_mass_sum": 16493574.800179482,
+            "skipped": 1547756.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 344372.0,
+            "wrongly_replaced_vs_mass": 344372.0
+          },
+          "local": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7223517593448313,
+            "denominator_mass_sum": 69678628.5878099,
+            "dense_sq": 8834328929.25885,
+            "eligible": 11912000.0,
+            "error_sq": 841445889.8517514,
+            "mass": 0.7223517593448313,
+            "mass_sum": 69678628.5878099,
+            "physical_sparsity": 0.49632253190060444,
+            "pv_omission": 0.49632253190060444,
+            "pv_omitted": 5912194.0,
+            "relative_error": 0.3086215968496419,
+            "rows": 96460800.0,
+            "same_budget_best_mass_sum": 85545753.74827957,
+            "skipped": 5912194.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 2044717.0,
+            "wrongly_replaced_vs_mass": 2044717.0
+          },
+          "overall": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7336954521198137,
+            "denominator_mass_sum": 84927420.3214067,
+            "dense_sq": 12311074140.056458,
+            "eligible": 14936640.0,
+            "error_sq": 978055472.0337808,
+            "mass": 0.7336954521198137,
+            "mass_sum": 84927420.3214067,
+            "physical_sparsity": 0.4994396330098335,
+            "pv_omission": 0.4994396330098335,
+            "pv_omitted": 7459950.0,
+            "relative_error": 0.28186020940010176,
+            "rows": 115752960.0,
+            "same_budget_best_mass_sum": 102039328.54845905,
+            "skipped": 7459950.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 2389089.0,
+            "wrongly_replaced_vs_mass": 2389089.0
+          }
+        },
+        "policy": {
+          "global": {
+            "log_threshold": -1.2668640613555908
+          },
+          "local": {
+            "log_threshold": -0.8551128506660461
+          }
+        },
+        "source_condition": "jl_gaussian_r2_s50/aime26/ce4d94b3a6f44724",
+        "source_ids": [
+          "aime26/2",
+          "aime26/8",
+          "aime26/14",
+          "aime26/20",
+          "aime26/23",
+          "aime26/30"
+        ],
+        "sources": {
+          "aime26/14": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/ce4d94b3a6f44724/shards/35c84d77f2799941f6ab3b8ffe3980e0f66ed1af3a4dd8e1a08ed259bea6af96.json",
+            "sha256": "391a71a6ded2c616b8a6cdd9d2d55a69c050c84e8bfacbef08626fcb1226eab8"
+          },
+          "aime26/2": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/ce4d94b3a6f44724/shards/96cfcaed7e7b492892a0a0a81e9f85ea349122c7ebc52a4ac04f1ec786da42dd.json",
+            "sha256": "75f20b230246278bc514697d06b78e9dc259d26463cce25496b119c4e56f13a9"
+          },
+          "aime26/20": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/ce4d94b3a6f44724/shards/8436010282cd66f71b1f06888d713b94fb5076958b3460288e4f2ccd10060be7.json",
+            "sha256": "28e5fb19a3fcfd1df430838ed17e1d8120ebffa04d94f5fba4ad2c9a20d1aa8d"
+          },
+          "aime26/23": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/ce4d94b3a6f44724/shards/69e3398952b90c4b7f6497af0f322249a9815d5318a0f3b41be384879c9bf1ae.json",
+            "sha256": "01a18ff3cfc10932084eec202fbb872519308c64be5379bd3cf8d5d47ad50ecc"
+          },
+          "aime26/30": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/ce4d94b3a6f44724/shards/05cdf9a9f4d671a4d45e31950e678a49a53bd864b178d270cf0896674b969098.json",
+            "sha256": "2ebe063fab04b54ce5d16324d74ccd399180bb90940dd28d1edcf26225f89ce4"
+          },
+          "aime26/8": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r2_s50/aime26/ce4d94b3a6f44724/shards/94429067acb64190226d98231669449130ea35e2ae16bb3fe6fbad67cbf86325.json",
+            "sha256": "4b62b2da0142987aca8b780f96d7fd5718f8b87914b0a54bfbf4b654b146d7c7"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_ids": [
+      "aime26/2",
+      "aime26/8",
+      "aime26/14",
+      "aime26/20",
+      "aime26/23",
+      "aime26/30"
+    ],
+    "cap_one_unattainable": null,
+    "config": {
+      "family": "gaussian",
+      "rank": 32
+    },
+    "fingerprint": "85c2635b2f5e1cbe0dce6f592b87d87329b7f32ecf2277dea6844763fe64f56a",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/jl_gaussian_r32_s50.json",
+    "measured": {
+      "global": 0.4921753211605081,
+      "local": 0.5080326512842839,
+      "overall": 0.5049502146434534
+    },
+    "name": "jl_gaussian_r32",
+    "policy": {
+      "global": {
+        "log_threshold": -1.2361350059509277
+      },
+      "local": {
+        "log_threshold": -0.7595282196998596
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/audit.json": "b0bc0527c81dc0bf8f483bc3f27b0c7bddfa0afa0a47613787c2a48b402a691c",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/jl_gaussian_r32_s50.json": "99e0de16f9f5d984c90a566f92593d0c3eb213ae411ea53cc0a7222a5d3360e1",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/regeneration_verification.json": "38c2d3b66ea5663056eb218492598c9ba5ee70a7ebecbc11bc173066550f8402"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_budget": 2048,
+    "calibration_ids": [
+      "aime26/2",
+      "aime26/8",
+      "aime26/14",
+      "aime26/20",
+      "aime26/23",
+      "aime26/30"
+    ],
+    "config": {
+      "family": "gaussian",
+      "rank": 4
+    },
+    "distribution_sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/jl_gaussian_r32_s50.json": "99e0de16f9f5d984c90a566f92593d0c3eb213ae411ea53cc0a7222a5d3360e1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/01a20ed4bf0165c7020a36742bcf33ac2850ce9cf47767c62e85060fe3d52ed9.npz": "f08c35fc5cca820b6b4c208bebe24b4b6937f01f91588a5822700e0b9e07eea1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/01e1d148d7f5debe5416a9c9a7514fc416c3e7560aa4085874da0953b84796ff.npz": "f38e3abbdb660c34bd633c1913da507e26c067cf0e497bea13358b0e6afd2546",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/01e42ec57807d2d417d6ff7c94cb4d7656060922818ed82a78ce78bb30378728.npz": "f2f54952e49e666c9a23d0505dfeab2b2bfe72830828db6f259673c04c77806b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/021dab5adb522965379319ab580f4304236ae06497d318c64fdd106ba4692d47.npz": "db56f0206d664a2d8263a9119f6fc5b96079a3060c3cbc0326f31284066257c7",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/022ab8bdc9b10a420b655d836d39f0f88a5d16e924a1ad96040152ce9b7033a9.npz": "7b6115f673869abfd6ecd88aa3313f2378f663e43582652280972f4fbe03087c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0748c4796c74a80dd08808f9a766d3272b443ccc553e031edb3248b99930bc6a.npz": "d9dcaaf589db76bad80854029b57061c73057169bbc2fdc2c8b2d8cb3a7a24c1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/07f540c28f0027a27643f8b1162ff0d4b13bdf8e13b8cd4279039b9079b768bc.npz": "e0d40fc156cbfaf011754d439544a9d6b72a3786b20cfe608048ee669bf4b41e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/08991c50e51e54982879d33286294841b7cbac3406112568572e0c43470e07bf.npz": "bc1beb9158671d51038f55c2031fdff5db2627b8fceb9708c8ec6e038b53fcee",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/09c49b126a6ee45f990429589fed5b5bb7ced36596f73db836290d5ac628ca56.npz": "51858c5077c18ea6330e40792a33ea384605027bb613efda6105cf88340fcb90",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0ae0e3649f0fd3eec0952387562d2cc2320e10e3c04c9615ea0218fcba4fdaef.npz": "dcdfc9e43816da5010149c3657e53d67adbcf7ba2c077cc7af141a43935ed273",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0b1a3bbaa0028893a4aca5da8a0f66b008ae79be05f39c600912d2be86af6246.npz": "24c7e0bcf8e19e868972fe6852d783af9ce814a2e8db849bdc42a436e0d4e8c2",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0c3a344bab888c6fd5fa198439a497b0865ca659f35a398ecc2e48b5f042d2d4.npz": "54d1c906d6fad295cee5c4e4db71344d23f490f0c1670debefead42aa36b7960",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0d0d8243a6c82e8be87906e94e06c38ef66791dc2624265d67940413c9f64024.npz": "0030c7ff4b90c34b44af6eb8947e3115058b6c0bf4ff4b2fc5b707acefa2a5ab",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/0e56d236b909c261f2f29ba2156ba123e85201b4cd0e658acd955438463122dc.npz": "8708a5091e9bd18d5744cadfcdc2731d21f77a4818bec5e9ca78dd798ada6fc4",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/10657a98dfc1be702394241b11eda7d9f365f2a24179e31599cd5378461fface.npz": "4d0cb5fdc5f04c910b8c9d5b0f3a30b255e9b97888087e42c9946ec1de16ae46",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1067e5fb14354e9a2a75ac8dc3252a22c7420d3568d87823408118159867dd90.npz": "8b98cd6c274e444e225d329a9177c3e7be80dcfab16d590a7ffc4482c2a86fe8",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/138992e3ba5a9a9c793f6ac29ce0dc8931f8e7bf131f533929f77142a780702b.npz": "312385617475659d701863eec3968af5f7c4608249115f87ca36a45189ac54a9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/15d1838906d3d42730377d74efff18dbcabeb737293143ebcbb5d6d05693cdd7.npz": "662ea5d9aeeb87d648b5497dd271c12d2af0522603463bfccc7844f976fbaa3a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/16dfaea3292529cf673891bbe2c929801596cb79e5a0af49df7e9ee625e1129d.npz": "a551eaed464f2a7e47572764dfb703ea67c5ebe1ca5397b0aae8b58d658426f1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/170ca635c31eb2d4c5dff799adaf384e9e588a02468797fa3213ce4965f010d8.npz": "e360c9c967382753c798300980caa93c438210da1c8c39322964828a19be6705",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1831de73897aab799e6da565631c8f15338398b818d9dd93e2a912ab5421e2ae.npz": "03acaa14caf4943c0fd01e28ba87ad4a5c7440fa6444ac417a34e0748cf80bfe",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1852e168716d32d0a9ed3169afa8bf65e0c45c3026fff23ab2cc678453ed40be.npz": "29e87f27b3d12fe36a3440d20540d1238148fcd690dbaa8339f0604c804ef169",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/191c838d31af677a2f38288d55d2380036b1d46164a2b275c47ef5a41e779d85.npz": "236978c1b82ffb8fb52237f34b5713d0b41156a13c43fcd400b82677f4b50b22",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1a2e5a856db2bc4e8b9735c758eb5d1a193c2ce4f2b4ae30f377169e675d59c8.npz": "1bd171fc00ac0a8b36db609362a3cd37a175debd78517f4f4ce608c86aca588b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1ac0f6d981572f72077afa920d03882573a9aff6c2b0f16e92152e05aac41908.npz": "484940247c95f1dcc0bbd4ec732e811e68d3e55191b498cfcd617742dacb1298",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1b92a3143f663551e1d0786486ac8cbd1b0f25154fa527e0a61789335e102248.npz": "ebb31ce60644c860fde40f8531fa0a44542b85bf9c220af31c0bab36eca14b81",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1beae11fa2ff0595c42ef3d568526ba39160a3b2e0b1a33fb6810c6024b774f0.npz": "f2220c71428dbdd1fbad95a63354a435a8a612fe29062a2172a0cd97e0f499a8",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1c8a0b9530c74228f496f004d1b8b3b5f061fd37249efd9e451f3fe1a697c7bc.npz": "2207c034205b8dbb6a6f151df4c5c4889139a3984d978fb657965941aa46251a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1cb047458fda702c96dd13138f7e6b8cb6d17429620a35a1b037c876b8f4e7f9.npz": "a920fbd0ce63eff439426d810dbb5788b9db32fd9ddd21b21c090cfb876e4232",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1df5be95459939e45517fa55ff38cbf33c8168fea3ca01532de75c2db53b6263.npz": "38a09c6b42278ed7e12697974e5c793714221bdb708f1786f75f2610959cdde9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/1fb5541547f5fed29ae03dae3873319099e8b91d3e566ff0edc59a3592738c8e.npz": "86f0bfaf08ba3d290892559d2dde7d92d4d28621140f739429f2f415c74cff05",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/20bd215cf2d3886050e9744c92f80da830e0fbd0100160e8d5c5ec76aa683c70.npz": "d58a17fe7dcd527dfbc5f3c5b61ca24d770e32cf909dd60e9de2199f415f6570",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/21023902b17631a032cd53e32bb23198ec00ffe8f0c89d8727aabc7ff095b60a.npz": "25ecda0c8118f748693b2683046e3334741b00633fa81b52b26abbfc8b90213e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/21220a19e9e01e3434150323bab858b8151793914d2341d899e9469825d5e9df.npz": "598da1b694bc60e72734d2532228d129173e38f80a693ec0af3bc9a8657a26ca",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/212d051ffaa2cbc0b6b4f1dccb220f72620dc10301cfa8f2b01dc05c168aa271.npz": "103ead500f8292c41bb092e5c0915256352a8b2d5ec804d28d75405d58fd5594",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/223a21cf03a9495f951818bf39c744397997e5879bbb5a19d74c3cd2fbe60144.npz": "fcf413c197a35dab5071c7482547c22bfd1554d65bb500c461daab5908ad3e15",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2259f68bf8b214d84667352955fd6ef658262e8e28217a61aa5831b2329ae033.npz": "598eff6cb4c33216419d89c526a773772955ba25413aa83348ef77ba720fca7d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/22a2295c7a2d0a671c979b3a1b2e651620d1dab65edd79ab106e615d6f7be178.npz": "886a4b1c86499506815e7260719836fe49bba3a9ead298f9898e8e5e986e74ff",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/23e87d8f9bf698607a0fd460129f221d0878f260f06e3c9af9613e3736020291.npz": "eb5961a5d9d1ad5bf453d8bbd325160b510a2ef7046b1a9e98c1abf70d1e3768",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/240098925f3e543fae02151507337e68f5282c63e4f264db5bbcf95c7ea97205.npz": "6f125d323a0e35248d0556cecd0e7d82ea7744a8e9566e71f4fbd64c41836668",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2433d29dfe346d70a0ab27c7c5bd2766b28c9244ce4d05cdbceb13f4864d56c9.npz": "3a56e7b2337ffb335badb78a5bc9833b5a1284cc754cf3b3d23f35932c6111bf",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2659865db78a237cd7467092bbfe6b4122b55cf67ba95acbe83153e780d30318.npz": "f3471df95e0ee9466aea1409ac184ee3dbfe0da4268bd7dcebf766ce96ae2941",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/277938042661f654e379e492a4fe361e393a81cb5b9e708d9da36fffab6bca5e.npz": "6b08ed2cf41a41a31503e1e3f6faa6cfe8f53f2e5d97a02e67d29ce7a87245fa",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/27e503ba68a351a410ac7c4f43efb0ab36ec262fdcf8d881b0084a0121040c6e.npz": "065a89614fff67fb5a263c757bc430e6b4912d1fc1b150dbe58f9f2f96d265b9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/287ff7bd2dac0c06976b3ee8b78f79986d5dccd47d0fbb51614b0126674bc1a1.npz": "4015645d3ebb6578add32a2bafb3f785e2433c5fd1558c07f3676ad98b9bf8e7",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/28a800c584cd8bdd06ac8da66be733e9c86580882361396978a15a854abf5053.npz": "e3c91e1b2e71c99aedcfec9f8d402b67c8d672b802db1d4daf874517a96f2474",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/29a843824fe9ddc81f6230983cea5954b6bf48be6d5a91871af4f9ba1afa94a0.npz": "83fa11a77c82c385424eb43564ed186b9fd99b586b28036717986b145e432799",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2a543248bf0e1b295994fdba7bc40265fd38b3d60675461d18694a17ff41e82f.npz": "bbb428f33fb167f5bb26f1a41bf2735cbdc953c2c2fe41d01449a0f8d85eadba",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2b4f56b7f8d1e51996d01771302429167afbb81cd3fbdb24ee7eb43b6290019e.npz": "8a76e4ec879dea959cc7be44058db1562991b370d0acc95b16c6bdeed2c9e19b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2c476abcea54b69fe18d000c6c47ad23b4a934bc34905d9a94b745a52fdee80e.npz": "66fb331ad734b46db904d951a001fbb0bbf793fab2b27e0d5155b34a2a64aee6",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2d0f4e55e90b46ab5c8134bcf1be958928a5e8528a01f771d6800a1de7a7569e.npz": "8caeb573defb7f5a0ff8d783fbf7c47231593e45a0760b5306d91a64cf3438bb",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2d8c09f40800756626d59daecc359ffa9eabb455257eb33b93d5dd76f8c5ca7a.npz": "53feaeeb41115f58218c6a260189eb4b2369612af017315caf8a04d061abc27a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2ead833a6dc684c37a9eefc0283c191c5dd14f5bf6520551feaae185bbdb838a.npz": "8131e78ce168a4e5cc31fcf4e5dab6e728f830f7d8565b9e06ef97f27c57d8b7",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/2ff9dc62604aaf86e817ab29ff0d7ccf1d794df2ee23df9bc303c3d08c8bc08e.npz": "a2f681e64d18ff6eb3a9b684b6c8d5729e5478609a83a3b7c7e4e1bae2b2289d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/3035b8e49ef317c2586300f6dbb3a4b61c4d046c0016d8bef2fd8b3953447124.npz": "06ac67ea472a5827bc42a6b15e8f48ed42a76129fe8ff06a5a9842fc62456362",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/305a73da41af45169b535ed28339598e4db62e50e33418ae2b8423cddd89614d.npz": "ba26ad76d4bb5ffd437cd48f629b9bdd3df0e0fe0445b9a2500794f2d568ee29",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/311c71906c75434fb823a3c3fc90f83527a571dea8528442cdbd37147126650e.npz": "bfd99de2954657fd7a9997293b0f9b99b8dc7c4acc7e8b43e1e0ab86900fc9f5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/31b57af5385b227c1ab3d0359b626bde2e1fdb0ff117eff02b59f15d328a3225.npz": "204d65ad5739cafb0e80ee2e832af4a431682270f2203f1bb49f06dd8d1ca158",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/34582651422ca2cd23ad02cb2b2710e416d85a0c0a83b75d0aec3d728acaa129.npz": "d7e28b4b5bf396c4064b420602130d7f160c19fbe90f2cd4e9b202f8d25786c7",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/34eb5046295d27c9890ee3a72a3ac695df6ba8641151e4c876fd4d0ad51ff517.npz": "7eed869dd5d716d66a8ceab210997e6e781e0cfc3f83fb31062f24b40d2f18a9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/357398eaaea8ad357e88b10e319399cb17af9145f348639632b09a707842618c.npz": "6fbbdb1d71eafacc8f1e9891804413e19ac821ac8db853a669db9c1ad5f7d7d4",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/376ffdcf2fb1ffa3ff0cf442197d2945844f72e7491432aa63e0afc3dc327a92.npz": "0be02779030dd2187fd04ac771165c22b57357059650a7a59511cf09bb1e7dc2",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/38438aa5d8aa09ea0763fafcae2fffbaf5ba197167c98729ada7e1cabed65c67.npz": "d34c38161d70896b4531ca941c540fb685de2b88c9811d9cfcda113babe1dcf9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/386bcc7fd1c2fdf9c8c69b0db619b706108cff59dff68dd4c1e52af6870f94f6.npz": "533aef3c8d1d802fd91895b4799974df5cdb46c255ce9df79340a6a7cb541d7d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/38985c7b54f3712a60abdbbc891f423adc84ff171391ce70e0c8419f77bf2a30.npz": "b10e45f1d2d234e9c6299440a86d461208457348054e52a5708fff591cf4b6e6",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/391abc014065443e31ff45b3dbc0219c065fca6425f780f7a25ed0c5b6a683a3.npz": "f01de4e88bad4225080f0a245f592b6748e5ed2776c6674160c48007d16aec05",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/3b3093c13ef1778000a385cc3ed3302f8bd704e5d26d822fbc2de474344d1af2.npz": "3bc38290c9039752b63995085ae95ec71b83bc395a3b74bb950e703a3359569b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/3dc226f694ef325a713947553ec46103630bb7ad68fba7d401962008f9a66481.npz": "f52e0deff7055294c5ed88e3e6f16ab8ad5ae2484dd7946e04fa5e487d34aaf5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/3e7f148a56269abb777b29fa7dd8bb64e36246ea3b863fef6139621c88c9573c.npz": "8f40cd2c90a36021f073f11359537d1e44f768c82675287adf1b07a6c5e94870",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/3e9e023c547d9cb8af146d5583539f02e594bdc2484a77f43879d35558b7a559.npz": "809afb9e2535e487eaf8650cf64ccb1fc116ed4d54e4530e6832d43c954b54dc",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/42f903e30861cb68392692963e469f9d4f1401114c0c0221850d4d36fc56cdb1.npz": "3c77c27254c4acc26b43d2e47ce1bef5bd6fb11ef666b52988e3c6fdd3356c4f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/44f61a6b3ef6b9be60efb25bbb36bb26b601bf79ccc5b094529e84fcb7747e85.npz": "a594c4f90a935a69f67daec11d2932333d8d90f06c6421e029f7e4a93d6db012",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/47975fa983eeea81fe3ef3eda1e935aa31d1a5ac4392640621a74d7cb958828f.npz": "b9154c208531bc86565404c4d6f0e821366eea67cced0fb03fffa55404bd329b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4974c5e3b976925099a18d7976fd1623e0bdcaf24d139c8bec226096555fa19e.npz": "51e175e119e134e7a3616ba1cc455dd6ae92ce160b94d0c0beedb631479d83f6",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4a2d79d3a3abc887e19caeeef86d327cab032c34cbda5a4d15b6f2fe04fb9c6b.npz": "d07bcf3bc496994da9779e7c9917ba345605d6b6237f8ee40f4b32a1571adaa5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4ad355cac66f27ea96359bb610c0f70a079c2964b5f64e2550433374f71941eb.npz": "71e9e188045c6b69144206e918c7fdfa87a1a7e98e9fe7023a6a0167800f915d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4b28ef7065a68bac563b0b806a7d2e90daa66cfca074f844d2260d30ea29eed7.npz": "e48ab1b1702a737d8a976bc47866e32d99ac7db1c34c058a5cbaa6da413736a5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4c9347a1033a709f01c98aca81da8e502e5848c49f6d02b298f364a9e1ef85b7.npz": "f004828f0b6f780e65550e0dc28b6079c2a620d17ebe1f7e97bb3954272f071a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4d18d0fd6adef20666e1fda9f90583991d187b3ccbf4b03204bd4419279685a9.npz": "35de9d5f662fe8e540472bc02feab62858971ee9041cb0e118bdd53669b73cab",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/4f711f20a72a9458a391baf8814383bd178021e27e52db3ee2fef9191a4a15d6.npz": "9a48f4e6b61cad38652e019a8c58cde4c96c25ac5ee8bce2717bc2c0f279d01f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/508dff44f70ba77440cd0620afa229b9ad977500e02c62306487a76b95a40462.npz": "9415a6aceb6da52b56b62e1771b9731832017b8540a48bf04521e04d4f2f8f52",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/523852162530a0685cb716a9c29c8f9884bd103c21721686086821f783eb3905.npz": "e08a1b7f9493d88fbfae871b6d616b496ff17d11a3e4b305b53b55c549a269ed",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/52fca9d63ad4e682fe94e661448be39024eec908c56f6010315449768b084c0a.npz": "fdb0ef641086e4c54086ffa5c59e2da5b05cc84a03761e9fc923727350b15ebc",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5305830de236cd6c2b47c50b04383266ecb7c153d4512d66bd996606427e241e.npz": "11faff883be9a9591ab19d924767db5823ba6cadb9ec7fa3064ec83ea2d7ac25",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5338a46a835ba9592970c709e9a9d4786507f38c1181a095a5049e0f2c586f5e.npz": "f58ae78330e85c2f272a055aad7469f5331e9854f841bbe9e1dc267cbe6bf0df",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5634c00838b6c4e11b4fb78935a2b39df6ecbda71d1722fd8f816ac7d494a1ab.npz": "ce8e8722783daf3818979eeeef06ba00988420e2ac84b650a67662201c96db47",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/57323caba67ddffe81598404441f474245a2e5a2ba7c433ae8ff67206989bc19.npz": "3fa71f79f8fa1166d223ebec0070da5f10657695572b9ccb238c5bf640963c36",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/58871183162f0a75155c0c872e27978dc70dfd6a5522ba967941a31e5a854b71.npz": "86eec88c7d61b2b6c3a5b2a6a80d9bd8742cd59fa48e3fb500ef9979dd917c24",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5906aa25fddd1a80f26304efd2e44aa58429e171634981b3ab2a83e1524c88f0.npz": "9715f245167fd20f8bea3f49da1a659932e9d99641f89f5ac520ff1bfb2341ad",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5b77f2c53c109b605df487b7459c9c5efebd5a7c532cec8af76dcab1b2d4d1cc.npz": "d5e70868a08c0c8d1a3b917ecf6ed3a2d69704c97526ad98dd0dcc4c7784088f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5cf3dd01cffffdd12a78d66091c44d0604ffbbc141f70676847b3eb701ac1e08.npz": "afd01332255dc047739edfcf61adbcfccc43a862bcbb55850e66f6afcbd32d8a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5d72688ba6180d46b1378b0c60857b64982124fdf937b3d9a3a3c57beb34ef1e.npz": "7dbe1655af87e7ab6fcf3e5efd7b3cb25e05b7d09f61773de2e2877641ccf9aa",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/5f75119410967a41b8923588cc862a3988a4b9be78d78d6cd107cca5cea8faea.npz": "6279e910bd5bad5563ea91024fb6f9f8e05972d66a33860f5d5e96562a40b45d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/615ad811f2ec77fc17cc059f9311351df61e0afba9b51dce27e722f9ddbc6f10.npz": "a6de2cde0d4eef652721895d9482d9f816f2223fec8bae3a3e490fb6fb6826ed",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/62219eb702bf4efc097b83056d9e3443dd7a6c853ff2b3c7cfaf978493fc6a29.npz": "b46912d9733b47fbcf8d30888ec3e9e353ec75f91c8fbf018cab8da1dd02440a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/628628e2d7a1387ef80c36318049f0b4621a8cf4e8cd95978ba52565ff02218d.npz": "77c7fc8780c3f60a6f0440fe1909e07604f395e78bb7027f1c7cc782dde43d6a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/636bc3f60599526150dda890dcaba1f5b43536cf02c7a93258328a42196ba6a2.npz": "e8b90fce9025244b1191307575f70039e175f1f6805c20d9a97a72e1e433bfa4",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/642a95599fb5dd22aa4f01e3551e3d4fd33ca298050a99ab693dc966aa7da634.npz": "d481c1a26dd984bf762ce3c3b9029ed71cfb2d482f535fb0267eba3f1033fe1a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/655c5821dfaa9b6ea90bc1c819f0c1d6fbb6903ef4066b806ab1562590f77e2f.npz": "4e8beb6c7fb72ea6645e7c2ea84a3dc1b3dc3c11e55fb0eac061bca9434bad9d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/656539f35a3e98206115f310dfc97a0c744c513cb148c6878b09bc6da5f097dd.npz": "7d86d8e287aaebc04c3518f5b9942c8d29a2545c4d635b05e16fe35bd249aed3",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/671118fb72cda3d05277711debea947a67ac5f8f20b02e2ed5cbed29c278d7d0.npz": "bf088b99fe7bde77764f0d145423447a989be73af865f6a31d549ec07f6c9419",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/672bc373d16e551492b299e1d010e15cf345ecabfd1cc9584068284790216543.npz": "e2818592dec425e11966eee9d4017f6858af16e14769c1964022fac5a2e396d8",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/67b95681a443fed1474ea607eef547d70e52d711016e5bfe17830b1372e9f579.npz": "234e4a90dcc591608ffb2ea55cfd339d9cf82dc0f920d32d0d7aa404f126f97d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/68367d3c174ddb409b35533b6456596b4b10540214de87368f6cd8d7dc490835.npz": "565d409ed82d7e4a8d2292dcc6d6841e72edb57c7d1d097a885cc0c79e758e01",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/68826989c851072e071a738933246e8d6654a4c27636a22cac04431d56c8e57b.npz": "0f5dd7484e54eeaae45205f4f29e9b60b0c9ebc83a0537db5fb37d878b8a5ccc",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/68f50f351b782754279a2e52d6764a96d95714430ab11241f9e8b26df7786d64.npz": "beb0719e390c87ba89d83fc159fbdf0edf3ca2c59655689b35173c5f2917f8b0",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/699a1094c26bcb07f4351ab4f022b5c8752ab1b5f121a0ad05d5cdb7648aeab6.npz": "bd7eae5bcc595425db693e1af9159f3da24ad6627760574c5d61a7b825bcdb51",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6aae22ceeae61753f6df323be9e137d55551623840d95b9dff750658c8c051c2.npz": "170fb8b3d602d7298fdf726d10a38d603b57b0bb399445f4c7615e9f10d36879",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6ae7a820b278653a44aafdfed67bfbac0dd098b38e049387c2685f8c73daaa42.npz": "7b6dbfef1bfbac7c0a556565eab8a515e241d01c776df48e187cdfa9ff5ac43a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6bcabaf2fb53866224ad28c56a478702cc9149001cf90c04475bf066ba14a930.npz": "f5a059aed4ef0b6b256d6521179d5c2a882718125a8c019c89bc62e83ef816ec",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6d332c4a2921388abfd881e54697156daa91cb174866c413b3d08e64e53ca721.npz": "892aabd9641abc4c34171fc7d5b02f20908a730b29e00676a6493b485bad3d5a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6e76a49c40bf697e4acfd1bf4880054418e31d5dbf079023e7b38debaef75c29.npz": "84f07db14f2a1c9f948b0015fbe666c46fb375a30d4bfd974d9da28df1162315",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6f4516947fbb646b69d457184cadd31541152ac3bc1d7bd1b18cb29729beefda.npz": "689571bde4976f44f24f577209ba020571354cb92aeb44634658f29656de6cd2",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/6f9a5c170cdbd95808307898b0a91234e59533c0eabd4a24aa119083f3da59ea.npz": "6265887ee859fa6f212db239443f7325d2e54c9e4e46245ddf1e7058efa1fb4d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7105472f5cfe61043735c9e7ed94ac35d78ff5c40d636515f6208bab5b81ca4b.npz": "6d5ab4de27cdebed017f985a3a28a98a0acd02c95fc13ebe7d4818a162d2b983",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/71370d1b17c0b515a36151e3127347f4861bb5ef852772d85d7406a515832e94.npz": "3125a4042b75bd692c297cfa5aeb2e480b201e50fc4db437a18b0f3b81bd7bbd",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/71f923f33173d3310ffbf24decbb5ccca73c49018faf597b20077dd2ece72e86.npz": "523cd99dadf4399e28328508536da50b8027381b7b38fb06c2737493c32dc881",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7284a400d23fe0a226e7a1c29e224ba1f6893f679b4bbdd5f6bef207801cd414.npz": "61e4481f0440eea4090f8bc2c249f2225893576788382d5d4045f1d10420fc71",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/72866ab129ce54683e7bf4dca610d7472faabf536711750081dc3f8148fb962f.npz": "514c691a40555677a5e425e4b5916ff22cc30ed0808b6efb795ad4dce463395a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/772285a48c6eafbe023ec81317cc3325ecc34c7823d0b67b13afaab4d5a94a73.npz": "babba00eee9b8e237d085081be2a9702246f06b6c6b26b38be696bb2f9760089",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/78812fa0552fa2a85ed9925700119e86058c2005d9a2ef4c8316488a61eabcfc.npz": "e0bb7c2fb457b48b1d38055cfee7067bea7b3718a622956d0fae68476db1172b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/79238ce4ec42881e1d39638052f3b54b6584924a8915864cc72140c1d9c53e01.npz": "d8bd91f5a9ce8b012a0cee1aa0f00411e2b9b787320e7fee9139f29fe81f55a9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7a43e87a8706a1ec8903f137b799ce7c5ba1ad3cc2be63ad7771f0a77ca32b20.npz": "d1398aafbb149183b2a91a143db734d48406fdfc2f5b019697b8f41f89abac3c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7b52b5f2c31578b8267c26ed17579040584d9b8f491125308b55b3956483c609.npz": "70de7c584b2b276d860af13a19858d25257bab30a7a473b0e3ced7f98b81db7f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7b91ffd889b976564a4ec02d69d17fabad5e16d9a2866f75290ab88afd1ed3a0.npz": "e187cb725f92a8fe68c70acdc71368171a7033daad3e833521a09c3bf2024eac",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7be4a5fabc8a623a46b670cbe0d3982d75739b6cbb3eb84f63186f596a696491.npz": "a4655195d5849e0e08287d92ae7377c0d7526d232ce28a230c5917b319341578",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7befdc34357aa32004735f23c94a7735fc53e36e34ec9e1d296393d93d845d31.npz": "61ccb05f0423f383778fba65b2f2bf9108a1489ce3005a0b57f638e7ef2ae3df",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7e3ea0ff4c6ff3f4e9abccef89b7683b8c3eb3e3d098407101eed2feca9f89d0.npz": "d4472abb22781986cbc72919aefdcbffefff53e63c0a729a29445e1bc35d7177",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7fa5fb3d57b7ed57b180e705992c49947e86a027918ec38a94ed6372545640b3.npz": "6535350930f9bc5a2dbd533f461411f5aa76e97989607c8760b5c1d63a7b4c86",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/7fccf88d63cf1b51d8fe92c8c34d305006a5ae305d0a22f56008b46eb47bd9a5.npz": "340622e1d2bbf50fd0ee4b9b4b1983676b5821af2e285b38a836d2a4ce810b9e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8203cfabbeee52238df8476d048dafc0341a8f8ebf93e4ad2be7a7e8cd110f07.npz": "fbb880d74e326066ef425091df68117451a3e1b791f760dc08fa18ed13766f5e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/829dd55950f02207651e233307e96858981210ba0cf12ed5fdc23827537f689c.npz": "60c4fdd8a7b48ceedf182fc3f6f5cbb193770bbbddcaced4ab6107a1aced1a6e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/834e3aba9715a210f480d16f30582e1fe336486cd2a1edda76ef5eaeed8e1ac9.npz": "60afdb86136e5cba07872328e5cd5086e758fc007fa43ca0dd843017d6dc2b58",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8390d8cbeeafb1be3a0a1867c47d35897fabbbe3fb8bc169b2281a56ba691a67.npz": "374d245c54d8104172269cd1d4fc36df2db80910f385d64c36f31edc503ff421",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/847c950ab1e8512af43ca1f8261580af575f8a062876266674659f00e2cdef07.npz": "cf3468059ec932e36f83c632530c34c152c280d52c6573860f400802564db311",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/84bb87c8142635afb9a11dbac04c4c3f25150ea6bdd417ad04548d6c681ff365.npz": "17b37024f9dcef87c117de9a4a0111df19d9e0bc3209587d95865645f41a4a51",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8540439a45c20aeee3594656d2f9f0d127911ab0014ffa5bd347e4c6a87cd10a.npz": "faa00fccd5a21c54e8565a9f86a3b6c556482f70b537426f7b73a7bfd0f0f421",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/86b95cf17ef851decec2b99bbedf4d941cb6c0bc2ff9bd16d2e1ed9edc6dd975.npz": "265f8a2e58137ac3c2a024ace9c7df2209867ed6df65165b09cee9f96499509b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/892d82f4b4ce5bc109bae6c19ac24a90d3ed1dd31760c5b15ecab4a2c2044f26.npz": "99ea302948931c0a6e715ed27279398b486c45ae4e77dd8154f3c32b6f565722",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8960afac94c959cad0f1713a07d18233f6af222d86c4a7d082c6030cc399c771.npz": "5d19543fe35a7b9a8c0c387214a407f85ea71732ab903a8a1a5a6e5f8412c0e3",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/89848fbfc7b2ac7ea77d68cb1b77a938f175f8d0c24f4eb172b5c633893d4192.npz": "0b8d86c1804223be36a7fe0e69426fcf74228c34006ea84d5d1d92611824b423",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8c416adfe2628bf9b588fb7f5c4615250cb5481d21b2b7b6868eb69d7d1082aa.npz": "a3520083b19f9b2042e58b2bc6516a84974fa3e746887691c8a4f9c3dd908712",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8da066d51ebe322386502c8bbd970f696adbccfa31a0edd5839d08393c93877e.npz": "729d109558220848645479c8b19681fb0d3bd4503d2d5cb28f7d818f350dd8a5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8e0e746377e30a10ebae071f9287bdc2443273ed742a5e21b708a1d2f0c7b864.npz": "36561ef9d7c0de2fb63f124a41c3989351dc426d797fee5880a3bf0e1f49dcc8",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/8ebc92f75c3f51b34d5ec1d9fe3909acba6064a557bb5e65f97a698094c38b63.npz": "4246121e910d1f6631fa348190d9ca905cff6612f505df24c84e37ab3b65ce89",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/9170650e8c20561653289ad2aedd15bcc42a1e4c552996c4adb5d532e081b67a.npz": "e1eb9967f554a7fc3d8771e8b83d51e65ddd6a91b8b04a35691780f3102871cf",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/942f68cfb1fcfe0f1fe946edbe83cee8bf701eca59eafa158cb8f0c83261ffc7.npz": "ae120acaff02c01ec8149a346f7460dca6d1b0deeaaeddd263cdd7c34390f82f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/9447d7675f2f03bd2d3a01941cc1739b0eb02fd17fa78c84ed4f8957e3b802f6.npz": "6a63dd99a009d515dd5daabef5603411892a40ed6b854d6279587263e15f5b28",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/950055179136ca960f6098ff3c1d262d0b29ae1811b14b05bd6896d1b87cc1f4.npz": "8aa27dedf1ecba5ed2439733bf274d16f4933ac97e7d7b808c0197f2835ab3f5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/95e118ed2d8e333680ad5308babd2a49d4779b0bf4efa634a1ec469f9b5c5967.npz": "1aba55d2d723dda6d07d6199bd37a269314d561281bd3befd7098b41813b8423",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/96efc9775bce92f74a1ac54a5d3c20b42df9719f420454ca3c88dfdb6b1e69d0.npz": "deaa0c502a2790072394a8b3ac20f4b9f7064b165080c2c9ae36a0d94f676026",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/978ebc2cb091b153ef67161b3a355a3ca33cbfe94f4b9c16ca1552eee5277ff8.npz": "9d69e9231695124381b940e8a8db3eb0c591b7dd71fbcd0a7035e274d998612f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/98b1323f16918055c0d1fd25f235582f3bedc7f700409602d5488ee78091b852.npz": "d5e05042a79057a2fd8b4866e35713ec814531879fc9e80a5978e1f4891c0479",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/9e44367ad1674ab8091ab0495b1773c89cdc789c12b65ad07df3f159da83ae48.npz": "a78fa1bc14e13f56ffa00ba18972316dcbd4dd735cbd23ecc3f92c0eec90ebb9",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a02bde8f6f156d44788c2b6973b06b7fbab99b1acfed83b2859654e44a5a7ec9.npz": "796c250d61bcc3962e94e4e3eab1df06805e9fae18926a98d22be48ae982662a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a1097f27632a5981e05366a0e3e840fbf96ac7670a9b1f7df1612ea90add1a3b.npz": "c77482c63a1492b89b54a05d08ffc011ae0aa5149687251e2aed252b5499ad63",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a240d5fb9055ce06356fc49af3a7eac059958bd8ce3b82353153bea273173e90.npz": "e878236c8b3bf0e4556392bb97a6db5cb3dba7301db9f6dfb661b6f593674429",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a27209e4c7d201b5ac75e42af661a05703df944fa48b507c925f9cf8e2f16107.npz": "37249bcdb83b74d0f17cb9e671d3432807f6cf7caecae3296edd6ec295a997e5",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a27dbefd96d44cb04cfbd026937add03f346e8cfd4f40cce5ca0863d0437dd37.npz": "49caefd69eeb79f310edcd4701ccf407046d99ade79ddf11d9ae160f48833b1b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a47f2a334bd650f3a9f082976104ed9839a37a934496c85866ec87e5d89a13e7.npz": "b3dd25d595816b9ab471fd8c57a91be1ba4bccfe78f55026bec506975464de77",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a4c30da29fb789f140c8881356bf638d7d3bba95346fc4c1e7b2a5d0ee9e4f7c.npz": "c50d540acacf08ea3f3bd91071ccafd43ed55b31d67d2d78eabe0ded8b6fec9f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a5812f61ca5ea44cdcb58375ca247a2ba7ba9a2fce9b6972a0dfa31d5bfead60.npz": "219ceddb545033b1ce5cf38f4bd42581b78615d7e5bf134cef1e087818f1faa1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a607b1495be4a66eb2e0be6bd58ad15f6342144bbcfef49a90d73da6f59ad82c.npz": "42d609292dcfc6a228dacf8dd1ececc477014dfcfc1dd8be992be129321242b2",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a709ad5ffce00c271d0537c5897350cba319732d957f99eb2fc340e7718fc986.npz": "baf555fc6dfa61bfa4210155b2ed576d4a5cc42e6332e5743e5a777d841f8a19",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a73e2da3dcf36a901c29df2c6dddf20c58bad5e8fcc349cf1a922a63cc9e3230.npz": "4215d8c7b6428e4f4ca78369a22a69aa2d40a00af810d47a9b2bc7e8a791e0fb",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a847952260fbae488e4325af7c5b6d73e4c830c0ac644b6d92ad26b1a6ffcc4c.npz": "cd12551bc71edac9262017ee6bb16f31a5a07525968173a8de8730aec754d15e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/a9e9ef204a55e1cd581466f9e76b67a235ef504004ce0076cf6355add30aa37d.npz": "4e21bba2c633573401c2209ac7951638c2f395faa9c16bed36d96ec1a1112865",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/aa3de1bb5d5dab367cc1692f03d777519eae5a349253cb6009c1b629c22733e6.npz": "6e741bd78a767ea685cb641717f9840a2ea774ca4d56a0a8ea7db2627571de96",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/abbc62f0afc99d1582e60292750adfa08a3c6671881633d202a087fa2a001a08.npz": "feae01e66e78c2b512f01b9b880d4b6929fb90c7d67818c961162aea7473d550",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ac2436faf62bcb09f98923327f4c9caade30251d33e2fde1ed695d5049f8d05b.npz": "abae190b8eda98f97e547d9423676de84b73e319a3372f77ad22643fbbceda6a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/acad0ed1de36c753f94524876e5bbdb110ae46d38ece2ea0b4a90882686d3542.npz": "e5944ebff0cb0ad53725f5efafe442d2b666b862559d16dc5a5696213f44bb97",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ae1f1bedf8f0aa02f985d8bb23994aee6ff63a850491dcd59d5afda0286c083a.npz": "04121223ba332f04028432587a06c80b127e0bc7682a1d83a02bc8fd59efc855",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ae3df8f0e72b9a613726fd0f3c1df15d2d7409b965f83ea592ea77cb4f56bca7.npz": "33435e74ce736e56617f24f8043817000f52685a6d2908cdb195ccb9e08272f0",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ae587d0d996cdcf1f247aa3eda1787455bdc437cce4dbe0c1fa75aa0a36dfa25.npz": "bf1915d7f249e46d1720fa4a65094cdb70ca754d0fe48c97aa8833b96168e389",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b01684ae886a9fa1d5e16caf948b53ecab374e592e71cdf418d338b3ea418768.npz": "1b12c2d629381bb6382dc6ca9591cc0f93222199eade451f6e64f4246c8a6da8",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b0b51afcd2e91a2877b6d7e50e2d22e2dbaa2789d7507834ead97701e7c39365.npz": "ccadf449b6cb617109bce6a9a42cef741ead5064cbd154dacd035e7550538b1d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b1de5efbf7e67f61e457048acaded6f8e2037e2f8620641d205080473d2cd7b0.npz": "d303ac9f7d9fede60fb1d925e74f2fb7f5805a43b4b434aff5a101efd9240a3d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b425559437e87629abe52c884c306260622af2fbf182b9bee3a94cbbdd27cc1f.npz": "0e98dafd8a04598a2e2faf9753ea003efd789cf803d4e78434cb731afa01b686",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b42e656e2971317b575732ceec0eb3e2ade9c769ebd8a5ca96cd6ee42dc02475.npz": "3ce68e971dae3de43c0d18f2e9626965abb270263d926ff33e85f5f755464970",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b6ab48cc591755c21ba9dab82a83ef6c6d0755d033f9c90d2d0b7605ea5324ea.npz": "fe1dfd9fc88173d640676107f3e6c067b380b081323b86c0f56850ffd84d0b7a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/b6d4820a18c660fd80fb9884918764a147da92c1b0c914c98c048b6831ed4091.npz": "51bc81da23046cf5a334d37298a8c106bb528eb0b5f61cb718f40288d585cf86",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ba29c9e10a0446199a518659a179550577fc5cf7620f37e6e1df3bf31d9c7b27.npz": "88a0aa440e5296c57f5341d0094dcd768bcc5a7724ec89052a2899241aadf0ff",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/bce2f8ad048078f3f3a3aa99a4b8bda7f9c828fc747e8cee9bb1286033534a62.npz": "ac5fc84b8336fa5476ac6a38c5601d8b9669ce0ca0ddacb2804753a6de3d4b7c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/bfa3b4a18b539cd020949f99d66e4b84392bb1eb3b2c675cd5b1611f5b6a8fcd.npz": "d3650f50e445e5605c015978999f3f0b2ba4bf6d81f98becd5cdf907575b3e3b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c2bbdf80eadeda0fe19bb492af95ac5e3a6ac931c483059a58c685071b4b308a.npz": "5f61f703adfbff9df7c740aa2725902c5a6bc899c350e399da7d6bb42e1f2cb6",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c342947c80a10f39328dd07bc1150729bbaba037d54c6bb18da61a8d85d69b69.npz": "0298741423adb99b17e38c3c3a7c574f978209d15d91b4b93e7bb2292b579833",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c4171c16ebd7edc79c0b7b75a48b0a68ca9f5d98e0687097ffd1e797a9a700e3.npz": "99391de081e21880bd8212445ab6d99ed30607f1eeab9b0763c48a5cd050e289",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c4676c1d757a11ec1af1292a0eea8bde8dff2e64235245a872768b2a57e06cdd.npz": "bf42443af1d24e3dc084bf2951c69266d5b864a55ef37ce2d923a5759f13bcfc",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c4feb69c42602a06521108272f04f2462c7758f2e2bdc925f8add375459021bf.npz": "8d728d7d71b7de8e14af7f51f27127d31fb38a29367aad77a4e41664fa9927e1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c66de5927db26b6bc18332e1821aec4838ab98d35a7b05e8920388f1f6ae19b4.npz": "f7ae2ecb73cd567de320e9a1bd5dbd90fea9252176a65bc57fa28f895984dde1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c74e497c293ef9b0c911e5b8a3b617e9c37b9924f1fdb71f8f6770cc5633f481.npz": "a649dce8e01a9bebd752db14bfb4279f00a034d2bfdf6a80e57db652ac91359e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c76fcad3c4ab1c09f5a9c48abaec596ee09ce7618cdb05e882654efdf94879d8.npz": "6ad8ed5c0fc90e522b9edd21cf712c51d892b537aa070c9ed9e9dcf0de99478e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c839f26eee468474fb9f865bc1d67e90160df9b1a3127c17e51104a395685380.npz": "c80233f3ed6e136accb38b9abe482571b6269295a0db0917592e8dbe72d2bb7e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c983724ba01d0e832e77c821fa1dac0a9aa22510a57fa0521f5b081ba3117ff5.npz": "fc561dcdfd3018102b60cabacb6e85bb601571ecab79538aff72ae26d13b9485",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/c989fcdec524ea5bf0e3c2896f30a997f5525b14313e7681d85286422b399e0f.npz": "5fdb800c5e8c9266e04567f2533aeaf883e89ee9e90d3c5a839370eceb048582",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ca9691808b1200c6473c6e5f5105e74532775131ac50ff02059dfb72a64d9417.npz": "045a35babc74bee35a790512cc618bf69de15c1e67587ffa3208ac38a3df1d05",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/cbaa2fbe934b3e4eb3b12e6e47744a3209d5899ea7a2e5070905f0be3faa431e.npz": "ef55a1d81b19ec59514df98e7fd50c651607986c7e0ad3d4585048d790fc86d1",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/cbd765946c481100dee4f5fc4661642e341e2f06d01729304054f63cd98cc316.npz": "dc3f261580a32ef674d217d61cdfe1016e1de4330e3f3ffc0931dd9dd2c38504",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/cbfa07882fa517029dd88234181b86911e24d6c12b43c400570e560c15eb0179.npz": "5e9036191e8979ef5c2a406200a5971b72fe5b8c5ffe2eccccb71eb1faed4f8a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/cc459c4f570c8447a871aceae3ea31beaa8ddaae730dd357a3b559095aeb6c9a.npz": "d097277d97e40b7112f97b967042775c6bf38abef524b05e4aed773ee3e55609",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/d12723476bf5416c23d7fd5700349b1020b93f3fc38008b5318df69574d3377e.npz": "4fc7031b2f08763b566e1e7de3de4459093e13c672901b68dfbc62cebbab1e8a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/d3508cab84f74a96e4b32f5dd81140c445735d617a4bc244e7e250452fb207fb.npz": "d0540b6122e1d9111a08a6ca86305d1eb764f3dc468d4c22cd3377fe9bab153b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/d51eb0d5cbc19fbef2755051b1deddbef36228555d70cbb0599f1c5e457150fd.npz": "6eb4f1cf0798817e886d8d50c4841fa752fef0dee85a86b513d403a80f97023d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/d7e279c2d1f7c5bca75587204749c90bbbd0d4fe3d17d0abbfe029c562b6b853.npz": "e3496f4f91bb0e678e09cadfc872cdd1f167f8eafdc1ceb5ecbddd31f5d4c62a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/d85acda1850599f7f5c6f8c6e52092a9ec321deb91b473620a778a0fb518a327.npz": "9e7bcb0dc4b08ccec77746ac4645e8f4931aba96784c8d3ac29d616bd75c3848",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/da9ce3b80ea2b13c4fc471f1e3f2d371258ac887668eee429a295cfc730d9150.npz": "f152ede16349bcf1202dbb3384a1873f6869a98b3be351977a9e33650dbbe630",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/dbf10909384f5489c49b8c707ed44f654da23ad505ec42a53321fd479ed592ab.npz": "8a59fc663ee9d16c08d271d568a1ab6aee639b8b0002d77f8bd19ddac4605c59",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/dcb351ad5b59f2812a427a47382704d1fd142f9a558b0f1aab985fa3bf88e728.npz": "df958f6cad05be227d769ea339a5deef8abac2bac95881b4f67a644f8825e982",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/dd9e730ecff712237d8a183a853dae3fb21af959036d4c707c5d39c50426c632.npz": "ae632bc3eef2e7d07eacef349c477df9f9dddd7d5f002e2561567641203bc31c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ddd4b2b4ad765708c0ae95bf7bf428d313c787161cc9d3f4330a0da3f2f2f7ab.npz": "ee6786e22f1b891ba39a22dbe6f2d8c07d5891a84a8fa272b44d88b58089db6c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/df5a750b1c2bdec23877ed1dd05e6633de1de22e7b371d591df44c79257649b4.npz": "1753fa0b887fe0239ac9551c27a855c3c6e081682759c1bf173a89feeccf220a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/dfd6aaf50e081dcd077125873d5f1dc09374229f54f2f99c9ec5c4eb4a1d0607.npz": "933e6aacf81c28fa6218c3afa6517c5482c1468cfa274fe6baad9a2c4dbbb198",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/dfdf8d0252c9f05929c6b7341c2b593752e918058adeb37627fdfa0cab5252bb.npz": "cde7d3e4ab8dadf1388bd665cba927460f63219de5c78a50c16c51b92183be44",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e200621cee88174bb98a04751577b81685d487c82a74275ad54732fe3a7d4fcd.npz": "dc5c8e0065dd272a1b4a9a5025d80fad46185aa71e3cd42c81c7f0f4297ff52b",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e32a538da2dd107872e66e682fc2fa7d0541e30383aa1193d061caad9d965c04.npz": "fdf9414fb0eb2aa8b2361d4f4eb432a34df12075399a6d063343fd9293a04fd4",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e44575d20218381d100d9fb046298fd07a8614484a8b208f760101ca39875acd.npz": "680b04084e34eeb2ac3e292d38e753bebefd070cc44ed4e68b9f0ef7aaedace0",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e643394cd9fb623d893318299dd82ec4fd60f49f0d93e10ca3363070ce23f88a.npz": "de7d4de47388cc370a34910ba2e3055a10d3bb6c5223970f56e45a6cd60a464d",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e7242fa0cec0895b359990dc172712b456b58d9c7c9aefc36c2aad3af3202818.npz": "3ae892bf25c2a1ca7034fba938e0c4c96cdf4ba5ae4e1d83178944797a326e25",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e7502cf2fc3eec4019d6dee077026efbe1ed28290327522e9534aa57222f76a4.npz": "55f52272ceb143eaf96b105ebee8a4c7ff79fac7ef1b6328731d9d9fe248b5af",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e7707b60ebe67298069bc962cbeb82ff835e1bf4c14d72a2c5be278cfbc18019.npz": "6bbd6ee3e9b11f43edc111066338475797a0a36dc8b9d2a3d33ee06da9fb4afb",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/e993fd1f31b850d2c41b87a6bec56ad5cf78f8ed3f45c312230a4819cfc3c119.npz": "db4e5e736c8a599440902113c0b3f5e8413ba35e57d5e017f312c00c7e102193",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ea003b32ce9835eb7bfb589eddf154deafe3d6bb219f8e7f2601aeb96b3fe85b.npz": "f51735794125735193fb6e5c7c16dfbe59bb66bc3338534095fee2299bfeb46c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/ef678dc1a19daed5bb064a5a5c8c8344b6c9344f910fb943e4247ad841681f8b.npz": "c08436cfe25db666117a01baa7c9874f80213accbae2f92f4ef26d875511f67f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f072b003bacd29ab198eb1963f5f13746c04e814c907e922b7fa6930da9bd5ea.npz": "c6b30a33fc5aa0236edd0008d1fbfb8d8379b86a0f6e3c8a578740605bc777b0",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f0c607fd3e3663c0806f121b8714698999d3823128f847302ade270fcca0bb3d.npz": "356f9e6f3637f409584b9e592a8b6e9d1056dc9e65ac8de4d78ce090a5c9d95e",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f2f826fce54dc7b48d2e5f27f2ff101737c010e06cc5b02447aec5b7cc6aa973.npz": "484849ec40761fb139ffd9261fecb33577aa5534f99e051d33a80e31857e273a",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f66bec9113ee669ea7efc3841f100507f8a81ce751aaab18a40b68ef49b8bbc2.npz": "0255036bd0cd9fe36e9989c591a65d36f2df025f33e733645055b614eac29043",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f685cc0e2434250c1845dfcd726f10372624baf92cdb68462a69e00c1a25eacd.npz": "e469d5dbfbca64423ddd9ad958ecdf0d32f26de0f55fc84e793f5cdd197a3439",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f6a360ff214cce058903137b2f2e946f5deea585b342c136ff079921c2e93395.npz": "69d6c452725a96d0d21444e157a4a333d898cfc87851e65bc0ac6395beefc236",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f6ee00a97cec8e4dca07172d91e67bbce11b7485a4abe41922c033755df8f3f0.npz": "ce94c6d321d6eba08953413a9fa23dee7c5a80034e67af9beb186e28cf9f587f",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f72ac8e44d4f2be0ae8ca945e88644b4123c6ac68466266658fe047af53e5020.npz": "5856e191dd737b31b827b50e99369b6ffcfde79dc6e30c8183a8caca03b83394",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f73bd703b9852f79f4d5f5d425339c71fd71e2f2cfe959ae5f07ffc9b4597c54.npz": "0c07ed5878b5dca81e55764918186ce8d6e9d1871edac2ca050e13dc733f9496",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/f999248a65998c96e140912230e9a2dc94e8247a9d5ee4b4171947b743654548.npz": "38f693989a869627cdf484c88a5414bbb92477ba2fd03f6ba0d39cb973f41880",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fa66316b49a4f9d17af9cc7ba94c28664f48d80c058cbedb855aa9398c8291e7.npz": "be5ea05e4c514f155e9faeae046597c06f97162273788fb29a0747eccb0daa48",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fae785324303ccd282da51ab98aef2a0b14ad396608c2d94f90f0de39cf1f799.npz": "9dc3ee91e1e1efa03311125091b1c481f2231d8b8aab848647dcde9f994447ff",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fb6e0730d885afe99c3a68262f052b94dbed56e5c980b50bfa4fa4b6fb8ac550.npz": "346eeb11bf4181a6efe5f2788b812834b913629f2789d598df0e7e89132c00ef",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fbc3b04d729b03284324605daf0bb731a5531006f40424abbc202356a0aef39b.npz": "9ebecb3425544301e32865d8c13a9b11823a7f542f2faa00d0c2ce9774fe26b3",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fd7aa8bdcf996e2f2d2897c5c70ec2fdbce113e1b3abf87747bca4a4624d8765.npz": "d0a479c6085bab9bb9bdb184e3242269142d1f7d70b2ce4e4bde854008affa7c",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fd83c4f4fd6b197363bdc308dafe636fc28d22db69411d9ffe3fcf63d0e81bd1.npz": "e7572952eaf0e79ccb75cf6de4c0e02243205a12adb3f5bcaa8a6544afcb83db",
+      "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/rank_proposals/shared_screen/fff9fec797f17347d7c3d1a3ea3918c56832c5a5167739cfcdc6a84eecd46102.npz": "4730f91d082422860f2a933155a388a0dff8ebe1763b13ef4884dd062bb99ae5"
+    },
+    "fingerprint": "85c2635b2f5e1cbe0dce6f592b87d87329b7f32ecf2277dea6844763fe64f56a",
+    "heldout_used": false,
+    "measured": {
+      "global": 0.4966279034781562,
+      "local": 0.5071074883686582,
+      "overall": 0.5050422186117667
+    },
+    "name": "jl_gaussian_r4",
+    "policy": {
+      "global": {
+        "log_threshold": -1.2361350059509277
+      },
+      "local": {
+        "log_threshold": -0.7595282196998596
+      }
+    },
+    "rule": "Existing rank proposals/scalar fallback; full-budget joint sparse-trajectory verification, max12 points. Only achieved physical sparsity selects thresholds; never accuracy.",
+    "selected_round": 0,
+    "target": 0.5,
+    "tolerance": 0.02,
+    "trace": [
+      {
+        "achieved": {
+          "global": 0.4966279034781562,
+          "local": 0.5071074883686582,
+          "overall": 0.5050422186117667
+        },
+        "iteration": 0,
+        "metrics": {
+          "global": {
+            "compensated": 0.0,
+            "denominator_mass": 0.8001237380916596,
+            "denominator_mass_sum": 14387376.989070892,
+            "dense_sq": 3290604573.909912,
+            "eligible": 2658880.0,
+            "error_sq": 103285180.953995,
+            "mass": 0.8001237380916596,
+            "mass_sum": 14387376.989070892,
+            "physical_sparsity": 0.4966279034781562,
+            "pv_omission": 0.4966279034781562,
+            "pv_omitted": 1320474.0,
+            "relative_error": 0.1771663177574641,
+            "rows": 17981440.0,
+            "same_budget_best_mass_sum": 15586821.949362755,
+            "skipped": 1320474.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 311746.0,
+            "wrongly_replaced_vs_mass": 311746.0
+          },
+          "local": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7112503306694595,
+            "denominator_mass_sum": 63946525.72956523,
+            "dense_sq": 8220116413.933624,
+            "eligible": 10832800.0,
+            "error_sq": 765444945.6482959,
+            "mass": 0.7112503306694595,
+            "mass_sum": 63946525.72956523,
+            "physical_sparsity": 0.5071074883686582,
+            "pv_omission": 0.5071074883686582,
+            "pv_omitted": 5493394.0,
+            "relative_error": 0.3051532472403466,
+            "rows": 89907200.0,
+            "same_budget_best_mass_sum": 78951145.40246296,
+            "skipped": 5493394.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 1872546.0,
+            "wrongly_replaced_vs_mass": 1872546.0
+          },
+          "overall": {
+            "compensated": 0.0,
+            "denominator_mass": 0.7260625652398263,
+            "denominator_mass_sum": 78333902.71863613,
+            "dense_sq": 11510720987.843536,
+            "eligible": 13491680.0,
+            "error_sq": 868730126.6022909,
+            "mass": 0.7260625652398263,
+            "mass_sum": 78333902.71863613,
+            "physical_sparsity": 0.5050422186117667,
+            "pv_omission": 0.5050422186117667,
+            "pv_omitted": 6813868.0,
+            "relative_error": 0.27472056929601596,
+            "rows": 107888640.0,
+            "same_budget_best_mass_sum": 94537967.35182571,
+            "skipped": 6813868.0,
+            "softmax_skipped": 0.0,
+            "unnecessarily_retained_vs_mass": 2184292.0,
+            "wrongly_replaced_vs_mass": 2184292.0
+          }
+        },
+        "policy": {
+          "global": {
+            "log_threshold": -1.2361350059509277
+          },
+          "local": {
+            "log_threshold": -0.7595282196998596
+          }
+        },
+        "source_condition": "jl_gaussian_r4_s50/aime26/e16b7fae05676628",
+        "source_ids": [
+          "aime26/2",
+          "aime26/8",
+          "aime26/14",
+          "aime26/20",
+          "aime26/23",
+          "aime26/30"
+        ],
+        "sources": {
+          "aime26/14": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r4_s50/aime26/e16b7fae05676628/shards/35c84d77f2799941f6ab3b8ffe3980e0f66ed1af3a4dd8e1a08ed259bea6af96.json",
+            "sha256": "e82fbb694041fc71e7227bfa656e83e3e616c11ac32a1cad62c5e408a42517a5"
+          },
+          "aime26/2": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r4_s50/aime26/e16b7fae05676628/shards/96cfcaed7e7b492892a0a0a81e9f85ea349122c7ebc52a4ac04f1ec786da42dd.json",
+            "sha256": "15847653a29457ce51e7cf71df1b12a7cbd7c8eb8c7a26887a77501e0285df51"
+          },
+          "aime26/20": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r4_s50/aime26/e16b7fae05676628/shards/8436010282cd66f71b1f06888d713b94fb5076958b3460288e4f2ccd10060be7.json",
+            "sha256": "43ea052e13632f5eb5f63227b71bfb4492c28fbcbb8d384c92da0f40a69ba466"
+          },
+          "aime26/23": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r4_s50/aime26/e16b7fae05676628/shards/69e3398952b90c4b7f6497af0f322249a9815d5318a0f3b41be384879c9bf1ae.json",
+            "sha256": "3a122e95cf8b18727085efeef28ff3c4f5282fde253046de4cb56d9e9b264c5d"
+          },
+          "aime26/30": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r4_s50/aime26/e16b7fae05676628/shards/05cdf9a9f4d671a4d45e31950e678a49a53bd864b178d270cf0896674b969098.json",
+            "sha256": "584dcbed9899fb9a760169da9d26d16038f9f947c30507a2b7714cfd919ed25c"
+          },
+          "aime26/8": {
+            "path": "results/diffusion_gemma_jl_aime_gaussian_tiny_dimensions_v9/calibration/jl_gaussian_r4_s50/aime26/e16b7fae05676628/shards/94429067acb64190226d98231669449130ea35e2ae16bb3fe6fbad67cbf86325.json",
+            "sha256": "5e724786597fb701c873fc764a80ac9401c3b6c0e8502a7607fdcf2455073060"
+          }
+        }
+      }
+    ]
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_ids": [
+      "aime26/2",
+      "aime26/8",
+      "aime26/14",
+      "aime26/20",
+      "aime26/23",
+      "aime26/30"
+    ],
+    "cap_one_unattainable": null,
+    "config": {
+      "family": "gaussian",
+      "rank": 8
+    },
+    "fingerprint": "85c2635b2f5e1cbe0dce6f592b87d87329b7f32ecf2277dea6844763fe64f56a",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/jl_gaussian_r8_s50.json",
+    "measured": {
+      "global": 0.48997440681209337,
+      "local": 0.5099148300481142,
+      "overall": 0.5060122740550257
+    },
+    "name": "jl_gaussian_r8",
+    "policy": {
+      "global": {
+        "log_threshold": -1.268207311630249
+      },
+      "local": {
+        "log_threshold": -0.7595282196998596
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/audit.json": "b0bc0527c81dc0bf8f483bc3f27b0c7bddfa0afa0a47613787c2a48b402a691c",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/jl_gaussian_r8_s50.json": "097424789a3c3b659853c9de4e41e672dddd814d32bd5246f9c4d89e450f5cc8",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/regeneration_verification.json": "38c2d3b66ea5663056eb218492598c9ba5ee70a7ebecbc11bc173066550f8402"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "aime26",
+    "calibration_ids": null,
+    "cap_one_unattainable": null,
+    "config": {
+      "method": "mass"
+    },
+    "fingerprint": "85c2635b2f5e1cbe0dce6f592b87d87329b7f32ecf2277dea6844763fe64f56a",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/mass_s50.json",
+    "measured": {
+      "global": 0.5193236772995132,
+      "local": 0.5021994498205088
+    },
+    "name": "mass",
+    "policy": {
+      "global": {
+        "dense_unattainable": false,
+        "log_threshold": -0.045639991760253906
+      },
+      "local": {
+        "dense_unattainable": false,
+        "log_threshold": -0.018442153930664062
+      }
+    },
+    "sources": {
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/audit.json": "b0bc0527c81dc0bf8f483bc3f27b0c7bddfa0afa0a47613787c2a48b402a691c",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/policies/aime26/mass_s50.json": "2709505fad30ffcd7c36b94c2d18a31aef54b338e9991496ef6c6a15efb2c8ba",
+      "results/diffusion_gemma_jl_aime_gaussian_dimensions_v8/regeneration_verification.json": "38c2d3b66ea5663056eb218492598c9ba5ee70a7ebecbc11bc173066550f8402"
+    },
+    "target": 0.5
+  }
+]

@@ -1,0 +1,197 @@
+[
+  {
+    "benchmark": "longbench_v2",
+    "calibration_ids": null,
+    "cap_one_unattainable": null,
+    "config": {
+      "method": "blasst"
+    },
+    "fingerprint": "519d23a5431bef46bc63c6046ceb3aafb78d25d029a77cd0a96d65a851d9b3d0",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_directional50_v6/policies/longbench_v2/blasst_aggressive_s50.json",
+    "measured": {
+      "global": 0.5059219321699971,
+      "local": 0.4860276769509982
+    },
+    "name": "blasst_aggressive",
+    "policy": {
+      "global": {
+        "cap_one": false,
+        "log_scale": 8.361061096191433,
+        "source": "Historical scalar warm start; must reverify on the new12 calibration examples"
+      },
+      "local": {
+        "cap_one": false,
+        "log_scale": 8.37258338928229,
+        "source": "Historical scalar warm start; must reverify on the new12 calibration examples"
+      }
+    },
+    "rule": "Unchanged completed-study threshold, no new calibration; evaluate physical sparsity transfer.",
+    "sources": {
+      "results/diffusion_gemma_jl_directional50_v6/audit.json": "a73b2ed676066e64ddafd9e5b1ed12585ce7209d1db1ed383ad91b9b3dcba727",
+      "results/diffusion_gemma_jl_directional50_v6/policies/longbench_v2/blasst_aggressive_s50.json": "0d6fef9f8775d6eb1619c88e25ce7903bee5f4dedb2e59e1242c94dea618267a",
+      "results/diffusion_gemma_jl_directional50_v6/regeneration_verification.json": "c957500e34f5f59eb092948e4e5537969c07297bfbb4f57b65accd2604e9130c",
+      "results/diffusion_gemma_longbench_v2_100_nemo/audit.json": "d33ff8d9c6f1fa35cbc9bf69288b21f981e878d28b33ef22952f343f7ff7e65d",
+      "results/diffusion_gemma_longbench_v2_100_nemo/regeneration_verification.json": "c0b015264c6f1c6e7b2a3738e81a32b0cd0af013c86864929c828169a98e7a6e"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "longbench_v2",
+    "calibration_ids": null,
+    "cap_one_unattainable": {
+      "global": false,
+      "local": true
+    },
+    "config": {
+      "method": "blasst"
+    },
+    "fingerprint": "519d23a5431bef46bc63c6046ceb3aafb78d25d029a77cd0a96d65a851d9b3d0",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_directional50_v6/policies/longbench_v2/blasst_original_s50.json",
+    "measured": {
+      "global": 0.5066934815455932,
+      "local": 0.23863547015404366
+    },
+    "name": "blasst_original",
+    "policy": {
+      "global": {
+        "cap_one": true,
+        "log_scale": 8.361061096191433,
+        "source": "Historical scalar warm start; must reverify on the new12 calibration examples"
+      },
+      "local": {
+        "cap_one": true,
+        "log_threshold": 0.0,
+        "source": "Historical scalar warm start; must reverify on the new12 calibration examples"
+      }
+    },
+    "rule": "Unchanged completed-study threshold, no new calibration; evaluate physical sparsity transfer.",
+    "sources": {
+      "results/diffusion_gemma_jl_directional50_v6/audit.json": "a73b2ed676066e64ddafd9e5b1ed12585ce7209d1db1ed383ad91b9b3dcba727",
+      "results/diffusion_gemma_jl_directional50_v6/policies/longbench_v2/blasst_original_s50.json": "eb49acd8c9cd7e2a93da29845b22c302a707b24da276bb709563a5fda9edff16",
+      "results/diffusion_gemma_jl_directional50_v6/regeneration_verification.json": "c957500e34f5f59eb092948e4e5537969c07297bfbb4f57b65accd2604e9130c",
+      "results/diffusion_gemma_longbench_v2_100_nemo/audit.json": "d33ff8d9c6f1fa35cbc9bf69288b21f981e878d28b33ef22952f343f7ff7e65d",
+      "results/diffusion_gemma_longbench_v2_100_nemo/regeneration_verification.json": "c0b015264c6f1c6e7b2a3738e81a32b0cd0af013c86864929c828169a98e7a6e"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "longbench_v2",
+    "calibration_ids": [
+      "longbench_v2/66f55729821e116aacb3358b",
+      "longbench_v2/66fe8eb3bb02136c067ca35f",
+      "longbench_v2/66fcf2f2bb02136c067c9169",
+      "longbench_v2/66ee4287821e116aacb21258",
+      "longbench_v2/66fa50acbb02136c067c6827",
+      "longbench_v2/66ecf139821e116aacb1e0e1"
+    ],
+    "cap_one_unattainable": null,
+    "config": {
+      "family": "identity"
+    },
+    "fingerprint": "519d23a5431bef46bc63c6046ceb3aafb78d25d029a77cd0a96d65a851d9b3d0",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_directional50_v6/policies/longbench_v2/full_centered_s50.json",
+    "measured": {
+      "global": 0.5083415926045552,
+      "local": 0.48832550837320576,
+      "overall": 0.504762337651226
+    },
+    "name": "full_centered",
+    "policy": {
+      "global": {
+        "log_threshold": -5.017964839935303
+      },
+      "local": {
+        "log_threshold": -0.7310190200805664
+      }
+    },
+    "rule": "Unchanged completed-study threshold, no new calibration; evaluate physical sparsity transfer.",
+    "sources": {
+      "results/diffusion_gemma_jl_directional50_v6/audit.json": "a73b2ed676066e64ddafd9e5b1ed12585ce7209d1db1ed383ad91b9b3dcba727",
+      "results/diffusion_gemma_jl_directional50_v6/policies/longbench_v2/full_centered_s50.json": "1ae604b243e3038cdd0462fef6df267f66de537c8ca47424bf06ad43d9b2b2ff",
+      "results/diffusion_gemma_jl_directional50_v6/regeneration_verification.json": "c957500e34f5f59eb092948e4e5537969c07297bfbb4f57b65accd2604e9130c",
+      "results/diffusion_gemma_longbench_v2_100_nemo/audit.json": "d33ff8d9c6f1fa35cbc9bf69288b21f981e878d28b33ef22952f343f7ff7e65d",
+      "results/diffusion_gemma_longbench_v2_100_nemo/regeneration_verification.json": "c0b015264c6f1c6e7b2a3738e81a32b0cd0af013c86864929c828169a98e7a6e"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "longbench_v2",
+    "calibration_ids": [
+      "longbench_v2/66f168d8821e116aacb27519",
+      "longbench_v2/66f55ddb821e116aacb33761",
+      "longbench_v2/66f6b623bb02136c067c2646",
+      "longbench_v2/66fb75adbb02136c067c7d73",
+      "longbench_v2/67039cfabb02136c067cd04e",
+      "longbench_v2/6719ef50bb02136c067d4911"
+    ],
+    "cap_one_unattainable": null,
+    "config": {
+      "family": "gaussian",
+      "rank": 32
+    },
+    "fingerprint": "519d23a5431bef46bc63c6046ceb3aafb78d25d029a77cd0a96d65a851d9b3d0",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_directional50_v6/policies/longbench_v2/jl_gaussian_r32_s50.json",
+    "measured": {
+      "global": 0.51076304736133,
+      "local": 0.496063033076763,
+      "overall": 0.5084841628047228
+    },
+    "name": "jl_gaussian_r32",
+    "policy": {
+      "global": {
+        "log_threshold": -5.161729335784912
+      },
+      "local": {
+        "log_threshold": -0.7221401929855347
+      }
+    },
+    "rule": "Unchanged completed-study threshold, no new calibration; evaluate physical sparsity transfer.",
+    "sources": {
+      "results/diffusion_gemma_jl_directional50_v6/audit.json": "a73b2ed676066e64ddafd9e5b1ed12585ce7209d1db1ed383ad91b9b3dcba727",
+      "results/diffusion_gemma_jl_directional50_v6/policies/longbench_v2/jl_gaussian_r32_s50.json": "76b879ffca579bff235b14f116fd8d8f5c516119faf26c03b6bc548a394cf4b5",
+      "results/diffusion_gemma_jl_directional50_v6/regeneration_verification.json": "c957500e34f5f59eb092948e4e5537969c07297bfbb4f57b65accd2604e9130c",
+      "results/diffusion_gemma_longbench_v2_100_nemo/audit.json": "d33ff8d9c6f1fa35cbc9bf69288b21f981e878d28b33ef22952f343f7ff7e65d",
+      "results/diffusion_gemma_longbench_v2_100_nemo/regeneration_verification.json": "c0b015264c6f1c6e7b2a3738e81a32b0cd0af013c86864929c828169a98e7a6e"
+    },
+    "target": 0.5
+  },
+  {
+    "benchmark": "longbench_v2",
+    "calibration_ids": null,
+    "cap_one_unattainable": null,
+    "config": {
+      "method": "mass"
+    },
+    "fingerprint": "519d23a5431bef46bc63c6046ceb3aafb78d25d029a77cd0a96d65a851d9b3d0",
+    "heldout_used": false,
+    "imported_policy": "results/diffusion_gemma_jl_directional50_v6/policies/longbench_v2/mass_s50.json",
+    "measured": {
+      "global": 0.5027521177857506,
+      "local": 0.5048954035423165
+    },
+    "name": "mass",
+    "policy": {
+      "global": {
+        "log_threshold": -1.3682001829147339,
+        "source": "Historical scalar warm start; must reverify on the new12 calibration examples"
+      },
+      "local": {
+        "log_threshold": -0.015263557434082031,
+        "source": "Historical scalar warm start; must reverify on the new12 calibration examples"
+      }
+    },
+    "rule": "Unchanged completed-study threshold, no new calibration; evaluate physical sparsity transfer.",
+    "sources": {
+      "results/diffusion_gemma_jl_directional50_v6/audit.json": "a73b2ed676066e64ddafd9e5b1ed12585ce7209d1db1ed383ad91b9b3dcba727",
+      "results/diffusion_gemma_jl_directional50_v6/policies/longbench_v2/mass_s50.json": "be5619af976b1261be5c838be4a3ffe7c707d9e5bdd0d2f1b9de238e9d3fde78",
+      "results/diffusion_gemma_jl_directional50_v6/regeneration_verification.json": "c957500e34f5f59eb092948e4e5537969c07297bfbb4f57b65accd2604e9130c",
+      "results/diffusion_gemma_longbench_v2_100_nemo/audit.json": "d33ff8d9c6f1fa35cbc9bf69288b21f981e878d28b33ef22952f343f7ff7e65d",
+      "results/diffusion_gemma_longbench_v2_100_nemo/regeneration_verification.json": "c0b015264c6f1c6e7b2a3738e81a32b0cd0af013c86864929c828169a98e7a6e"
+    },
+    "target": 0.5
+  }
+]

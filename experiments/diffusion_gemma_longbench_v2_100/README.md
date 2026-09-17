@@ -16,6 +16,8 @@ python -m experiments.diffusion_gemma_longbench_v2_100.workflow prepare
 python -m experiments.diffusion_gemma_longbench_v2_100.workflow launch
 # CPU-only, exclusively from audited completed raw shards:
 CUDA_VISIBLE_DEVICES='' python -m experiments.diffusion_gemma_longbench_v2_100.workflow report
+# Independently regenerate and require identical audit and artifact hashes:
+CUDA_VISIBLE_DEVICES='' python -m experiments.diffusion_gemma_longbench_v2_100.verify
 ```
 
 The disjoint pilot checks memory at32K/48K/64K/128K and completion at4096/8192/16384 output tokens. It selects the highest safely tested context and the lowest output budget with no length limits and at least5/6 parsable answers. It never selects by correctness. The final dense sanity gate requires all100 outputs, at most5 length-limited and at least90 parsable answers. Failures are preserved and investigated before proceeding.
