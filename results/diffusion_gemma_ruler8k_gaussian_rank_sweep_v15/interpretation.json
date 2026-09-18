@@ -1,0 +1,168 @@
+{
+  "common_support_75_primary": [
+    {
+      "dangerous_underestimate_rate": 0.4496760854583046,
+      "factor_two_underestimate_rate": 0.37500167321077993,
+      "mean_norm_ratio": 0.7962530425656247,
+      "rank": 1,
+      "rms_relative_norm_error": 0.6124724309282997,
+      "seed": 1729,
+      "tile_disagreement_rate": 0.1334478021978022
+    },
+    {
+      "dangerous_underestimate_rate": 0.3306409372846313,
+      "factor_two_underestimate_rate": 0.27203562823487415,
+      "mean_norm_ratio": 0.810417427755892,
+      "rank": 2,
+      "rms_relative_norm_error": 0.4772162792461693,
+      "seed": 1729,
+      "tile_disagreement_rate": 0.11270604395604396
+    },
+    {
+      "dangerous_underestimate_rate": 0.22645072363886976,
+      "factor_two_underestimate_rate": 0.07830236034267357,
+      "mean_norm_ratio": 0.9396642505389313,
+      "rank": 4,
+      "rms_relative_norm_error": 0.3272911201419143,
+      "seed": 1729,
+      "tile_disagreement_rate": 0.08427197802197803
+    },
+    {
+      "dangerous_underestimate_rate": 0.16203997243280496,
+      "factor_two_underestimate_rate": 0.01803051936462609,
+      "mean_norm_ratio": 0.9996205161127418,
+      "rank": 8,
+      "rms_relative_norm_error": 0.26080624744562064,
+      "seed": 1729,
+      "tile_disagreement_rate": 0.06978021978021978
+    },
+    {
+      "dangerous_underestimate_rate": 0.11557546519641626,
+      "factor_two_underestimate_rate": 0.0007702346956987328,
+      "mean_norm_ratio": 0.971148263950329,
+      "rank": 16,
+      "rms_relative_norm_error": 0.18515091352357696,
+      "seed": 1729,
+      "tile_disagreement_rate": 0.049931318681318684
+    },
+    {
+      "dangerous_underestimate_rate": 0.08634045485871812,
+      "factor_two_underestimate_rate": 3.3464215598786364e-06,
+      "mean_norm_ratio": 0.9874508813681793,
+      "rank": 32,
+      "rms_relative_norm_error": 0.12839711055485153,
+      "seed": 1729,
+      "tile_disagreement_rate": 0.036813186813186814
+    }
+  ],
+  "comparisons": {
+    "r32_vs_full": {
+      "candidate": "jl_gaussian_r32_s75",
+      "count": 130,
+      "delta": -0.023973846153846155,
+      "matched_all_types": true,
+      "paired_ci95": [
+        -0.10000321153846149,
+        0.05089773076923078
+      ],
+      "reference": "full_centered_s75",
+      "sparsity_gap": 0.0015006979721622349,
+      "sparsity_gaps": {
+        "global": 0.0028037174527743014,
+        "local": 0.0002606162078714336,
+        "overall": 0.0015006979721622349
+      }
+    },
+    "r32_vs_mass": {
+      "candidate": "jl_gaussian_r32_s75",
+      "count": 130,
+      "delta": 0.2611546153846154,
+      "matched_all_types": true,
+      "paired_ci95": [
+        0.18012846153846154,
+        0.34307769230769225
+      ],
+      "reference": "mass_s75",
+      "sparsity_gap": 0.008080869075402286,
+      "sparsity_gaps": {
+        "global": 0.010514985775527785,
+        "local": 0.004807149346816475,
+        "overall": 0.008080869075402286
+      }
+    },
+    "r32_vs_r2": {
+      "candidate": "jl_gaussian_r32_s75",
+      "count": 130,
+      "delta": 0.44884692307692303,
+      "matched_all_types": true,
+      "paired_ci95": [
+        0.38410307692307694,
+        0.5130776923076923
+      ],
+      "reference": "jl_gaussian_r2_s75",
+      "sparsity_gap": 0.004028272102734709,
+      "sparsity_gaps": {
+        "global": 0.013390431161840244,
+        "local": 0.008576401448890825,
+        "overall": 0.004028272102734709
+      }
+    },
+    "r8_vs_r16": {
+      "candidate": "jl_gaussian_r8_s75",
+      "count": 130,
+      "delta": 0.14448769230769232,
+      "matched_all_types": true,
+      "paired_ci95": [
+        0.07076603846153846,
+        0.21679538461538464
+      ],
+      "reference": "jl_gaussian_r16_s75",
+      "sparsity_gap": 0.004477251205624255,
+      "sparsity_gaps": {
+        "global": 0.0052332929821948815,
+        "local": 0.0034609277435081465,
+        "overall": 0.004477251205624255
+      }
+    }
+  },
+  "complete": true,
+  "conclusion": "Projection loss is strongly supported as a major contributor to the Gaussian2 collapse at75%, but not established as the sole cause; no monotonic downstream rank guarantee.",
+  "conditions": 19,
+  "diagnostic_rms_error_seed_ranges": {
+    "1": [
+      0.6124724309282997,
+      0.6373923600008957
+    ],
+    "2": [
+      0.4609347826230323,
+      0.5113052966960333
+    ],
+    "4": [
+      0.3272911201419143,
+      0.33360558157060693
+    ],
+    "8": [
+      0.24001039590761575,
+      0.26080624744562064
+    ],
+    "16": [
+      0.16734376364630427,
+      0.18515091352357696
+    ],
+    "32": [
+      0.11727431869739023,
+      0.12839711055485153
+    ]
+  },
+  "final_outputs": 2470,
+  "limitations": [
+    "One end-to-end generation/projection seed; other seeds are diagnostic only.",
+    "Different fixed, non-nested matrices and independently calibrated thresholds across ranks.",
+    "Shared-state diagnostics cover390 calibration snapshots at step0, not later adaptive sparse states.",
+    "Full-dimensional immediate centered routing itself loses substantial accuracy at75%.",
+    "Previously examined examples; unadjusted paired intervals; VT output-budget artifact."
+  ],
+  "new_final_outputs": 1300,
+  "recovered_observed_r2_full_score_gap": 0.9492898628532384,
+  "reused_final_outputs": 1170
+}

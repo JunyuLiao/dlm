@@ -1,0 +1,101 @@
+"""Post-run interpretation; cannot alter thresholds, samples or inference."""
+import json
+from pathlib import Path
+
+import numpy as np
+from experiments import diffusion_gemma_ruler8k_jl_v14 as study
+from experiments.diffusion_gemma_ruler8k_jl_report import bootstrap
+
+
+def analyze(root=study.ROOT):
+    base=study.base;read=base.read;sha=base.sha
+    audit=read(root/'audit.json');proof=read(root/'regeneration_verification.json')
+    if not audit['complete'] or audit['completed']!=1170 or not proof['passed'] or proof['audit_sha256']!=sha((root/'audit.json').read_bytes()):
+        raise ValueError('Require independently verified complete1170-output study')
+    base.evidence.check_sources({str(root/p):h for p,h in audit['artifacts'].items()})
+    rows=read(root/'summary.json');raw=read(root/'per_sample.json');tasks=read(root/'per_task.json')
+    pairs=read(root/'comparisons.json');thresholds=read(root/'thresholds.json');diagnostics=read(root/'shared_operator.json')
+    by={r['condition']:r for r in rows};p=lambda x:f'{100*x:.2f}'
+    sensitivity=[]
+    for label in base.CONDITIONS:
+        group=[r for r in raw if r['condition']==label and r['task']!='vt']
+        score=float(np.mean([r['accuracy'] for r in tasks if r['condition']==label and r['task']!='vt']))
+        sensitivity.append(dict(condition=label,count=len(group),official_equal_task_macro_without_vt=score,
+            delta_vs_dense=score-float(np.mean([r['accuracy'] for r in tasks if r['condition']=='dense' and r['task']!='vt'])),
+            paired_ci95=bootstrap(group),posthoc=True,not_primary_benchmark_score=True))
+    dense_vt=[r for r in raw if r['condition']=='dense' and r['task']=='vt']
+    vt_caps=sum(r['termination_reason']=='length' and r['output_length']==r['generation_budget']==30 for r in dense_vt)
+    sources={str(root/n):sha((root/n).read_bytes()) for n in ('summary.json','per_sample.json','per_task.json','comparisons.json',
+        'thresholds.json','shared_operator.json','shared_diagnostics_index.json','shared_state_index.json','audit.json','regeneration_verification.json')}
+    sources[str(Path(__file__))]=sha(Path(__file__).read_bytes())
+    lines=['# RULER8K: empirical interpretation', '',
+        'All1170 outputs passed the final audit and independent raw-only report regeneration.19 CPU/CUDA tests and the two-input actual-model smoke passed. '
+        'Version13’s initial bookkeeping failure is preserved; version14 completed without failed calibration or final evaluations. '
+        'The experiment used130 questions,10 per task, with26 disjoint calibration examples and fixed seeds/settings. '
+        'Previously used source pool and one generation/projection seed: these are not fresh, multi-seed confirmation results.', '',
+        '## Main results', '',
+        'All entries below are percentages. Score is official RULER equal-task macro with fractional answer credit, not an integer correct-question count. '
+        'Physical sparsity uses summed skipped/eligible tiles across the complete runs.', '',
+        '| Method | Target | Actual | Global | Local | RULER score | Retained mass | Token agreement |',
+        '|---|---:|---:|---:|---:|---:|---:|---:|']
+    for r in rows:
+        lines.append(f'|{r["name"]}|{p(r["target"])}|'+ '|'.join(p(r[k]) for k in ('overall_physical_sparsity','global_physical_sparsity','local_physical_sparsity','accuracy','overall_mass','token_agreement'))+'|')
+    lines+=['', '## What the comparison supports', '',
+        '1. **Around50% sparsity, Gaussian2 matches the full-dimensional score; directional routing has no clear accuracy advantage over mass-only.** '
+        f'Full and Gaussian2 both score{p(by["full_centered_s50"]["accuracy"])}%; their physical sparsities differ by only0.16pp. '
+        'The paired full-minus-Gaussian2 score interval is−3.85 to+3.85pp. Mass-only scores93.08%, but its+1.15pp difference from either centered method is inconclusive (95%CI−1.92 to+4.62pp).', '',
+        '2. **At75%, full-dimensional direction clearly helps, but rank2 does not preserve that benefit.** '
+        'Actual physical sparsities are75.19–75.89%, with local/global gaps below1.34pp between all methods. '
+        'Full-dimensional centered scores49.78%, versus21.27% mass-only,3.27% aggressive BLASST and2.50% Gaussian2. '
+        'Full-minus-mass is+28.51pp (paired95%CI+20.13 to+36.82); full-minus-Gaussian2 is+47.28pp (+39.86 to+54.40). '
+        'These are comparisons at closely matched actual budgets. Even the full-dimensional reference remains39.45pp below dense. '
+        'The result supports useful directional information, not a claim that a two-dimensional sketch is sufficient at high sparsity.', '',
+        '3. **RULER’s8K input does not make local BLASST sparsity easy.** '
+        'At the joint λlocal=λglobal=1 ceiling, calibration achieved60.18% overall,83.67% global and28.42% local. '
+        'The50% policy therefore stays capped: final λlocal=1 and λglobal≈0.479–0.618, with28.67% local and69.81% global sparsity. '
+        'That layer allocation differs materially from the roughly50/50 local/global allocation of the other methods, so the50% BLASST comparison is not layer-budget matched. '
+        'The75% ceiling test permits aggressive mode: λlocal≈18.869 while λglobal≈0.590–0.760 remains below1. '
+        'Only the local thresholds actually exceed1. Local masks see the native limited window, not the whole8K prompt.', '',
+        '4. **Attention mass alone does not explain accuracy.** '
+        'At75%, all methods retain about38.5–40.5% of dense probability mass, yet scores range from2.50% to49.78%. '
+        'Full-dimensional centered retains slightly less mass than mass-only but has much better accuracy. '
+        'Its trajectory-local normalized operator error is0.556 versus0.726 for mass-only,0.670 for Gaussian2 and0.830 for BLASST. '
+        'Token agreement is27.36% for full versus12.40%,7.24% and5.82%, respectively. These relationships are descriptive, not a causal or cumulative-error guarantee.', '',
+        '## Important dense-baseline limitation', '',
+        f'All{vt_caps}/10 dense variable-tracking (`vt`) outputs hit the official30-token budget and score zero. '
+        'The raw outputs show an unfinished introductory sentence before the requested variable names. '
+        'Some50% sparse outputs answer more tersely and fit within the same budget. Consequently, their headline improvements over dense are partly a formatting/budget effect—not clean evidence that pruning improves reasoning. '
+        'The official budgets were kept identical across methods and were not changed after seeing scores.', '',
+        'As a **post-hoc sensitivity check only**, excluding VT gives dense96.67%, BLASST-50 96.58%, mass-50 98.33%, full-50 96.25% and Gaussian2-50 96.25%. '
+        'The registered13-task results above remain primary; the alternative12-task numbers do not replace them. '
+        'A longer-output VT rerun would require a separately identified experiment.', '',
+        '## Calibration and diagnostic limits', '',
+        'All eight policies passed calibration within2pp of their declared whole-model and attainable per-type goals. '
+        'Final BLASST-50 drifted to52.27% overall (calibration50.25%); it was not retuned. Other50% final points lie49.55–50.93%;75% points lie75.19–75.89%.', '',
+        'Dense proposal snapshots cover780 sampled states:26 calibration prompts×30 layers, all at denoising step0. '
+        'The prespecified optional steps4/12/24 did not occur on the first two calibration prompts. '
+        'The existing shared-operator selector chooses one source per layer/step, resulting here in30 states from a single CWE calibration prompt and240 method/target evaluations. '
+        'It is therefore limited diagnostic evidence, not representative coverage of all13 tasks or later denoising. '
+        'Full-generation routing/mass/error counters separately cover every executed layer/head/step.', '',
+        'On that shared probe at75%, local normalized operator errors are0.629 full,0.717 Gaussian2,0.846 mass-only and0.881 BLASST. '
+        'Gaussian2 disagrees with same-threshold full-risk decisions on69/480 local physical tiles, using its own retained history. '
+        'It severely underestimates10,868/56,640 supported local row-block updates (projected centered risk below half the true risk, true risk at least0.05). '
+        'This is consistent with projection distortion affecting local selection, but the restricted probe cannot establish the sole cause of generation failure. '
+        'Baseline risk-agreement fields are not applicable; aggregate zeros in those legacy fields must not be interpreted as perfect agreement.', '',
+        '## Bottom line', '',
+        'The50% operating point preserves RULER quality for all tested methods, with no clear directional-method winner. '
+        'At matched75% budgets, full-dimensional centered selection is substantially better than mass-only and BLASST, while Gaussian2 fails to retain that advantage. '
+        'The strongest follow-up question is whether a less distorted sketch and/or a less aggressive local-layer budget preserves the full-dimensional benefit; this run does not answer it. '
+        'No hardware-speedup claim is made.', '',
+        'See [canonical report](report.md), [per-task results](per_task.csv), [thresholds](thresholds.csv), '
+        '[paired comparisons](comparisons.csv), and [tradeoff plots](figures/tradeoffs.png).', '']
+    (root/'interpretation.md').write_text('\n'.join(lines))
+    base._write(root/'non_vt_sensitivity.json',sensitivity)
+    result=dict(passed=True,source_audit_sha256=proof['audit_sha256'],sources=sources,
+        primary_cohort_unchanged=True,no_new_inference=True,no_threshold_selection=True,
+        artifacts={n:sha((root/n).read_bytes()) for n in ('interpretation.md','non_vt_sensitivity.json')})
+    base._write(root/'interpretation_audit.json',result);return result
+
+
+if __name__=='__main__':
+    print(json.dumps(analyze(),indent=2))
