@@ -52,20 +52,39 @@
   a separate, private device from the remote timing host; used only for these
   small synthetic-tensor unit tests, never for model/timing work).
 
+## Phase A2 + Phase B: DONE, real diagnosis obtained
+Ran `scripts/native_reuse_phaseAB_diagnostic.py` on the real model, real
+native-dense trajectory (generation output untouched), ids 2 and 8, 3 real
+canvases each, layers 0 (local) and 5 (global), 120 instrumented calls.
+Full numbers/interpretation: `results/numerical_qk_reuse_recovery_20260924/
+phaseAB_report.md`.
+
+- **A2 (kernel/implementation defect?): NO.** 12 real-activation
+  kernel-vs-oracle samples: max rel_l2=0.00135, skip bitmap agreed in all 12.
+- **B (which cell hurts?): stale final scores, decisively.** A-vs-E (stale
+  scores, no pruning) is already 0.33-0.69 rel_l2 at age 1 and exceeds 1.0 by
+  age 5-7 (global layers worse than local). C-vs-D tracks A-vs-E almost
+  exactly. B-vs-C (routing/pruning alone, current scores) stays 0.02-0.20 at
+  every age -- an order of magnitude smaller and not blowing up. Conclusion:
+  the 0/4 collapse is caused by reusing stale FINAL SCORES for up to 7 calls,
+  not by an implementation bug and not primarily by changed routing support.
+- **Phase D selection (per the v6 branching rule, since age1 is not viable
+  and C stays good): `routing_only_current_output`** -- reuse the
+  stale-score-derived retained support (comparatively stable) but always
+  recompute current QK for the softmax/PV. This does NOT save QK compute;
+  real retained-QK cost and net E2E effect are not yet measured.
+
 ## Not run yet (next steps, in order)
-1. Phase A2: zero-temporal-approximation checks (all-kept current-scores vs
-   high-precision reference; M1 `score_period=1` vs the Torch oracle in
-   `reference.py`) on REAL captured layer states from ids 2 and 8.
-2. Phase B: same-state/same-support 5-cell (A-E) diagnostic, real cache ages
-   0/1/2/7, on a short (<=2 canvas) real dense-trajectory capture for ids 2
-   and 8. Needs a new capture/diagnostic script against the real model on the
-   remote host (not yet written).
-3. Phase C: warm PROFILE (separate process) -- dense/T/full-refresh/M1-reuse/
-   M3 decomposed forward latency, using replayed real captured shapes.
-4. Phase D: select ONE successor from A-C evidence; bounded 4-question
-   (ids 2/8/14/20, seed42) natural generation; reuse the existing frozen
+1. Implement `routing_only_current_output` as a separately named mode
+   (not a relabeled M1) in `experiments/numerical_qk_reuse/integration.py`.
+2. Phase C: warm PROFILE (separate process) -- dense/T/full-refresh/
+   production-M1/`routing_only_current_output` decomposed forward latency,
+   using replayed real captured shapes from the diagnostic above.
+3. Phase D: bounded 4-question (ids 2/8/14/20, seed42) natural generation
+   with `routing_only_current_output`; reuse the existing frozen
    native_dense/fresh_junyu_T outputs as controls (unaffected by this repair,
-   deterministic at temperature=0) rather than rerunning them.
+   deterministic at temperature=0) rather than rerunning them. Add M3 R2 on
+   this policy only if the successor avoids wholesale failure.
 
 ## Remote
 - `exouser@149.165.151.254`, GPU idle, no own PIDs, ~60GiB free, confirmed

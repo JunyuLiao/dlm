@@ -25,9 +25,17 @@
     "proof": "tests/test_numerical_reuse_prefix_lease.py (2 GPU tests, output/phase invariance + commit-invalidation), results/numerical_qk_reuse_recovery_20260924/prefix_lease_repair.md",
     "caveat": "Not yet selected as the Phase D fix; needs Phase B 5-cell diagnostic + Phase C warm PROFILE evidence first"
   },
+  "phaseA2_and_B_diagnostic": {
+    "status": "DONE",
+    "script": "scripts/native_reuse_phaseAB_diagnostic.py",
+    "raw": "results/numerical_qk_reuse_recovery_20260924/phaseAB_diagnostic.json (120 real instrumented calls, ids 2/8, 3 canvases each, layers 0/5)",
+    "report": "results/numerical_qk_reuse_recovery_20260924/phaseAB_report.md",
+    "finding_A2": "kernel-vs-oracle on 12 real-activation samples: max rel_l2=0.00135, skip bitmap agreed in all 12. NOT an implementation/kernel defect.",
+    "finding_B": "A-vs-E (stale scores, no pruning) rel_l2 already 0.33-0.69 at age1 and >1.0 by age5-7 (global layers degrade faster than local). C-vs-D tracks A-vs-E almost exactly (same magnitude/shape). B-vs-C (routing/pruning alone, current scores) stays an order of magnitude smaller (0.02-0.20) at every age. Root cause: stale FINAL SCORES, not routing/support, not a kernel bug.",
+    "phase_D_selection": "routing_only_current_output: reuse the stale-score-derived retained support (comparatively stable) but always recompute current QK for the final softmax/PV. Does NOT save QK compute; real cost/benefit must be measured, not assumed."
+  },
   "not_run_yet": [
-    "Phase A2 zero-temporal-approximation checks on real captured layer states",
-    "Phase B 5-cell (A-E) same-state/same-support diagnostic on IDs 2 and 8",
+    "routing_only_current_output implementation",
     "Phase C warm PROFILE (separate process, decomposed components)",
     "Phase D bounded 4-question natural-generation panel with the selected M1 successor",
     "M3 R2 on the selected policy (only after M1 successor avoids wholesale failure)"
