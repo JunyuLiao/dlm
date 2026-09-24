@@ -54,15 +54,25 @@ arm. Two things are going on and they must not be conflated:
   Over thousands of steps that is enough to change argmax decisions, so the
   arms walk different trajectories. Call counts per question moved in both
   directions against v6 (aime26/2 164->102, /8 257->181, /20 129->161,
-  /14 472->633). `aime26/14` alone -- a question BOTH arms get wrong at the
-  cap -- accounts for 251.49 s of the 462.93 s total. Four questions cannot
-  separate a real regression from this.
-- **A measured structural cost that is real regardless of trajectory**, in the
-  scaling sweep: `route_only` on sliding layers. See below.
+  /14 472->633).
+- **A measured per-forward cost that trajectory does NOT explain.**
+  > **CORRECTED (v8).** This report originally leaned on `aime26/14` (251.49 s
+  > of the 462.93 s total) as the explanation. That framing is withdrawn:
+  > excluding /14 entirely, the other three requests still total **211.447 s
+  > against dense's 99.178 s (2.132x)** while running **fewer** forwards
+  > (444 vs 648). The slowdown is therefore a real per-forward cost, not an
+  > artifact of one failed answer or of higher total call counts. /14 stays in
+  > every quality and performance denominator.
 
 ## Where the remaining time actually goes (measured, not inferred)
 
-From `scaling_sweep.json`, attention only, 50% of tiles dropped:
+From `scaling_sweep.json`, attention only, 50% of tiles dropped.
+**Scope (v8 correction):** this sweep uses synthetic QKV, a random Z/reference
+unrelated to V, uniform T, threshold -1, and an independently random drop
+bitmap; `preqk+route` is an ARITHMETIC SUM of separately timed pieces, not a
+directly timed pipeline, and it excludes projection/ref/anchor/adapter
+overhead. Treat it as component stress data indicating where to look -- not as
+a measured "complete method 3.51x" nor as a confirmed global-layer net win.
 
 - Sliding geometry at its saturated length (nk=1279, where **25 of 30 layers**
   live): dense 0.435 ms, `preqk` 0.379 ms, but `route_only` **1.146 ms** --
@@ -79,6 +89,12 @@ is thickest. That is the measured limiting cost.
 
 Redacted quality/config in `panel/` (no completion text, no extracted answers;
 M1 config fingerprint `c012aba6cc802f9b`). Raw private receipts stay on the
-remote host under `results/panel_v7/`. Counters for the optimized arm across
-the four requests: 18990 attention calls, 2820 score refreshes, 16170 pre-QK
-consumer calls, 2.10e10 materialized current-QK elements.
+remote host under `results/panel_v7/`.
+
+> **CORRECTED (v8).** The counter line originally printed here ("18990
+> attention calls, 2820 score refreshes, 16170 pre-QK consumer calls, 2.10e10
+> materialized current-QK elements") was **aime26/14 alone**, not the
+> four-request aggregate. Summing `panel/request_rows.json`: **32310 attention
+> calls, 5100 score refreshes, 27210 pre-QK consumer calls, 3.271e10
+> materialized current-QK elements.** "Materialized" excludes the retained
+> dots performed inside the fused pre-QK consumer, so it is not total QK.
