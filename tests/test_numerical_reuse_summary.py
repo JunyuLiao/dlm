@@ -1,3 +1,4 @@
+import hashlib
 import json
 from pathlib import Path
 
@@ -50,6 +51,37 @@ def fixture_quality(path: Path, arm: str, *, question='q1', seed=42,
              final_response='PRIVATE FINAL RESPONSE',
              score=dict(correct=correct, extracted=None if unparsed else '1'))])
     path.write_text(json.dumps(payload))
+    return path
+
+
+def fixture_timing_control(root: Path, original_path: Path, *, retry_wall=1.25,
+                           token_match=True, sha_override=None):
+    original = json.loads(original_path.read_text())
+    retry = dict(original, phase='observer_qualification', fingerprint='event-on-dense',
+                 request_wall_seconds=retry_wall,
+                 generation_gpu_timeline_seconds=retry_wall-.2,
+                 generation_gpu_timeline_note='First encoder end to final event; includes host gaps')
+    if not token_match:
+        retry['completion_tokens'] = [17]
+    token_hash = lambda xs: hashlib.sha256(json.dumps(xs, sort_keys=True,
+                                  separators=(',', ':')).encode()).hexdigest()
+    control = dict(schema='numerical_qk_dense_timing_control_v1',
+                   id=original['id'], seed=original['seed'], condition='native_dense',
+                   quality_eligible=False, timing_retry_only=True,
+                   independent_question_count_increment=0,
+                   original_quality_receipt=str(original_path.resolve()),
+                   original_quality_receipt_sha256=sha_override or hashlib.sha256(original_path.read_bytes()).hexdigest(),
+                   original_quality_fingerprint=original['fingerprint'],
+                   original_quality_token_hash=token_hash(original['completion_tokens']),
+                   original_quality_decoder_calls=original['total_decoder_calls'],
+                   retry_source_fingerprint=retry['fingerprint'],
+                   retry_token_hash=token_hash(retry['completion_tokens']),
+                   retry_decoder_calls=retry['total_decoder_calls'],
+                   cross_load_token_match=token_match, cross_load_call_match=True,
+                   retry=retry)
+    path = root / 'timing_controls' / 'native_dense' / 'control.json'
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(control))
     return path
 
 
@@ -126,3 +158,50 @@ def test_quality_must_cover_every_attempt_in_scored_arm(tmp_path):
     q = fixture_quality(tmp_path / 'quality.json', 'M1', question='q1')
     with pytest.raises(ValueError, match='omits attempt-0'):
         collect([root], [q])
+
+
+def test_timing_control_is_separate_from_quality_and_pairs_only_event_on(tmp_path):
+    dense, batch = tmp_path / 'dense', tmp_path / 'batch'
+    original = fixture_run(dense, 'native_dense', wall=2., timing=False)
+    fixture_run(batch, 'M1', wall=1., timing=True,
+                counters=dict(score_refresh_calls=1, decision_refresh_calls=2,
+                              current_qk_elements=100, reused_qk_elements=300))
+    fixture_timing_control(batch, original, retry_wall=1.25)
+    rows, summary = collect([dense, batch], timing_control_roots=[batch])
+    assert len(rows) == 2
+    quality_dense = next(x for x in rows if x['arm'] == 'native_dense')
+    assert quality_dense['whole_wall_seconds'] == 2.
+    assert quality_dense['device_generation_timeline_seconds'] is None
+    assert summary['pairs'] == []  # Original dense events OFF; retry is separate.
+    assert len(summary['timing_controls']) == 1
+    retry = summary['timing_controls'][0]
+    assert retry['whole_wall_seconds'] == 1.25
+    assert retry['per_canvas_calls'] == [3, 2]
+    assert not retry['quality_eligible'] and retry['timing_retry_only']
+    assert retry['independent_question_count_increment'] == 0
+    assert not retry['performance_qualified']
+    assert len(summary['paired_timing_controls']) == 1
+    pair = summary['paired_timing_controls'][0]
+    assert pair['whole_wall_speedup'] == 1.25
+    assert pair['device_timeline_speedup'] == (1.25-.2)/(1.-.2)
+    assert not pair['performance_qualified']
+    json_path, csv_path = tmp_path / 'summary.json', tmp_path / 'summary.csv'
+    write(rows, summary, json_path, csv_path)
+    assert (tmp_path / 'summary.timing_controls.csv').is_file()
+    assert (tmp_path / 'summary.paired_timing_controls.csv').is_file()
+    text = ''.join(p.read_text() for p in tmp_path.glob('summary*'))
+    assert 'PRIVATE ANSWER' not in text and '918271' not in text
+
+
+def test_timing_control_sha_and_cross_load_checks(tmp_path):
+    dense, batch = tmp_path / 'dense', tmp_path / 'batch'
+    original = fixture_run(dense, 'native_dense', timing=False)
+    fixture_run(batch, 'M1', timing=True)
+    control_path = fixture_timing_control(batch, original, sha_override='bad')
+    with pytest.raises(ValueError, match='SHA256 mismatch'):
+        collect([dense, batch], timing_control_roots=[batch])
+    fixture_timing_control(batch, original, token_match=False)
+    rows, summary = collect([dense, batch], timing_control_roots=[batch])
+    assert len(rows) == 2 and len(summary['timing_controls']) == 1
+    assert not summary['timing_controls'][0]['cross_load_token_match']
+    assert summary['paired_timing_controls'] == []

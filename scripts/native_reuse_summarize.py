@@ -33,6 +33,25 @@ CSV_FIELDS = (
     'decision_refresh_calls', 'current_qk_elements', 'reused_score_elements',
     'pv_physical_eligible', 'pv_physical_skipped',
 )
+TIMING_CSV_FIELDS = (
+    'phase', 'question', 'seed', 'arm', 'source_fingerprint',
+    'original_quality_source_fingerprint', 'original_quality_receipt_sha256',
+    'whole_wall_seconds', 'device_generation_timeline_seconds',
+    'device_generation_timeline_note', 'cpu_generation_seconds', 'output_tokens',
+    'canvas_count', 'per_canvas_calls', 'total_calls', 'score_refresh_calls',
+    'decision_refresh_calls', 'current_qk_elements', 'reused_score_elements',
+    'pv_physical_eligible', 'pv_physical_skipped', 'cross_load_token_match',
+    'cross_load_call_match', 'quality_eligible', 'timing_retry_only',
+    'independent_question_count_increment', 'performance_qualified',
+    'retry_event_config_persisted', 'performance_note',
+)
+PAIRED_TIMING_CSV_FIELDS = (
+    'phase', 'question', 'seed', 'arm', 'dense_timing_source_fingerprint',
+    'method_source_fingerprint', 'whole_wall_speedup',
+    'device_timeline_speedup', 'cross_load_token_match',
+    'cross_load_call_match', 'configuration_basis',
+    'performance_qualified', 'performance_note',
+)
 
 
 def _read(path: Path) -> dict:
@@ -51,6 +70,25 @@ def _config_key(config: dict) -> str | None:
         return None
     shared = {field: config[field] for field in PAIR_CONTROL_FIELDS}
     return hashlib.sha256(json.dumps(shared, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+
+def _fingerprint(value: object) -> str:
+    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'),
+                                     allow_nan=False).encode()).hexdigest()
+
+
+def _retry_controls_match(original: dict, method: dict,
+                          retry_config: dict | None = None) -> bool:
+    # Dense quality had events OFF; the separate retry and method had them ON.
+    # The current batch script does not persist event_cfg. When one is present,
+    # compare every common field; otherwise use the original dense config and
+    # independently require an observed retry timeline and method events flag.
+    if retry_config is not None:
+        return all(x in retry_config and x in method and retry_config[x] == method[x]
+                   for x in PAIR_CONTROL_FIELDS)
+    fields = tuple(x for x in PAIR_CONTROL_FIELDS if x != 'timing_events')
+    return (all(x in original and x in method and original[x] == method[x] for x in fields)
+            and method.get('timing_events') is True)
 
 
 def _routing_counts(routing: object) -> tuple[int | None, int | None]:
@@ -91,12 +129,14 @@ def _quality_map(paths: list[Path]) -> tuple[dict, set]:
     return records, arms
 
 
-def collect(run_roots: list[Path], quality_files: list[Path] | None = None) -> tuple[list[dict], dict]:
+def collect(run_roots: list[Path], quality_files: list[Path] | None = None,
+            timing_control_roots: list[Path] | None = None) -> tuple[list[dict], dict]:
     """Read explicit roots only; reject duplicate or non-attempt-0 records."""
     if not run_roots or len({p.resolve() for p in run_roots}) != len(run_roots):
         raise ValueError('Unique explicit run roots required')
     quality, scored_arms = _quality_map(quality_files or [])
     seen = {}
+    configs = {}
     internal = []
     for root in run_roots:
         if not root.is_dir():
@@ -121,6 +161,7 @@ def collect(run_roots: list[Path], quality_files: list[Path] | None = None) -> t
                     config.get('fingerprint') != receipt['fingerprint'] or
                     config.get('condition') != arm or config.get('phase') != phase):
                 raise ValueError(f'Config/receipt identity mismatch: {path}')
+            configs[key] = config
             if not isinstance(receipt.get('prompt_hash'), str) or len(receipt['prompt_hash']) != 64:
                 raise ValueError(f'Missing prompt hash: {path}')
             canvases = receipt.get('per_canvas')
@@ -178,7 +219,156 @@ def collect(run_roots: list[Path], quality_files: list[Path] | None = None) -> t
         raise ValueError(f'Offline quality references absent attempts: {len(set(quality)-set(seen))}')
     rows = [item[0] for item in internal]
     rows.sort(key=lambda x: (x['phase'], x['question'], x['seed'], ARMS.index(x['arm'])))
-    return rows, _summaries(internal)
+    summary = _summaries(internal)
+    controls, pairs = _timing_controls(timing_control_roots or [], seen, configs, internal)
+    summary['timing_controls'] = controls
+    summary['paired_timing_controls'] = pairs
+    summary['timing_control_scope'] = ('Retry-only, quality-ineligible, no new independent questions; '
+                                       'cold/JIT state unknown, so observed ratios are unqualified performance')
+    return rows, summary
+
+
+def _timing_controls(roots: list[Path], seen: dict, configs: dict,
+                     internal: list[tuple]) -> tuple[list[dict], list[dict]]:
+    controls = []
+    used = set()
+    retry_configs = {}
+    method_rows = {(r['phase'], r['question'], r['seed'], r['arm']): (r, prompt)
+                   for r, prompt, _ in internal}
+    for root in roots:
+        directory = root / 'timing_controls' / 'native_dense'
+        if not directory.is_dir() and root.name == 'native_dense':
+            directory = root
+        if not directory.is_dir():
+            raise FileNotFoundError(f'Dense timing controls absent: {root}')
+        paths = sorted(directory.glob('*.json'))
+        if not paths:
+            raise ValueError(f'No dense timing controls: {directory}')
+        for path in paths:
+            if path.name == 'config.json':
+                continue
+            control = _read(path)
+            if (control.get('schema') != 'numerical_qk_dense_timing_control_v1' or
+                    control.get('condition') != 'native_dense' or
+                    control.get('quality_eligible') is not False or
+                    control.get('timing_retry_only') is not True or
+                    control.get('independent_question_count_increment') != 0):
+                raise ValueError(f'Invalid retry-only dense timing control: {path}')
+            question, seed = str(control['id']), int(control['seed'])
+            key = ('smoke', 'native_dense', question, seed)
+            if key in used:
+                raise ValueError(f'Duplicate dense timing control: {key}')
+            used.add(key)
+            original_path = seen.get(key)
+            if original_path is None:
+                raise ValueError(f'Timing control lacks original quality attempt-0: {key}')
+            if Path(control['original_quality_receipt']).resolve() != original_path.resolve():
+                raise ValueError(f'Timing control original path mismatch: {path}')
+            original_sha = hashlib.sha256(original_path.read_bytes()).hexdigest()
+            if original_sha != control.get('original_quality_receipt_sha256'):
+                raise ValueError(f'Timing control original SHA256 mismatch: {path}')
+            original = _read(original_path)
+            retry = control.get('retry')
+            if not isinstance(retry, dict) or retry.get('schema') != 'numerical_qk_attempt0_v1':
+                raise ValueError(f'Timing control missing full retry receipt: {path}')
+            if (control.get('original_quality_fingerprint') != original['fingerprint'] or
+                    control.get('original_quality_decoder_calls') != original['total_decoder_calls'] or
+                    retry.get('phase') != 'observer_qualification' or
+                    retry.get('condition') != 'native_dense' or retry.get('attempt') != 0 or
+                    retry.get('id') != question or retry.get('seed') != seed or
+                    retry.get('fingerprint') != control.get('retry_source_fingerprint') or
+                    retry.get('prompt_hash') != original['prompt_hash'] or
+                    control.get('retry_decoder_calls') != retry.get('total_decoder_calls')):
+                raise ValueError(f'Timing control identity mismatch: {path}')
+            config_path = directory / 'config.json'
+            retry_config = _read(config_path) if config_path.is_file() else None
+            if retry_config is not None and (retry_config.get('fingerprint') != retry['fingerprint'] or
+                                             retry_config.get('condition') != 'native_dense' or
+                                             retry_config.get('phase') != 'observer_qualification' or
+                                             retry_config.get('timing_events') is not True):
+                raise ValueError(f'Timing control event config mismatch: {config_path}')
+            retry_configs[(question, seed)] = retry_config
+            original_token_hash = _fingerprint(original['completion_tokens'])
+            retry_token_hash = _fingerprint(retry['completion_tokens'])
+            token_match = original_token_hash == retry_token_hash
+            call_match = original['total_decoder_calls'] == retry['total_decoder_calls']
+            if (control.get('original_quality_token_hash') != original_token_hash or
+                    control.get('retry_token_hash') != retry_token_hash or
+                    control.get('cross_load_token_match') is not token_match or
+                    control.get('cross_load_call_match') is not call_match):
+                raise ValueError(f'Timing control cross-load check mismatch: {path}')
+            canvases = retry.get('per_canvas')
+            if (not isinstance(canvases, list) or not canvases or
+                    any(c.get('canvas_index') != i or not isinstance(c.get('decoder_calls'), int) or
+                        c['decoder_calls'] < 1 for i, c in enumerate(canvases))):
+                raise ValueError(f'Timing retry lacks valid per-canvas calls: {path}')
+            calls = [c['decoder_calls'] for c in canvases]
+            if sum(calls) != retry['total_decoder_calls']:
+                raise ValueError(f'Timing retry total calls mismatch: {path}')
+            wall = retry.get('request_wall_seconds')
+            timeline = retry.get('generation_gpu_timeline_seconds')
+            if (not isinstance(wall, (int, float)) or not math.isfinite(wall) or wall <= 0 or
+                    not isinstance(timeline, (int, float)) or not math.isfinite(timeline) or
+                    timeline <= 0 or 'host gaps' not in str(retry.get('generation_gpu_timeline_note'))):
+                raise ValueError(f'Timing retry lacks qualified measurement boundary: {path}')
+            pv_skipped, pv_eligible = _routing_counts(retry.get('routing'))
+            counters = retry.get('counters') or {}
+            if not isinstance(counters, dict):
+                raise ValueError(f'Timing retry work counters invalid: {path}')
+            item = dict(phase='smoke', question=question, seed=seed,
+                        arm='native_dense_timing_control', source_fingerprint=retry['fingerprint'],
+                        original_quality_source_fingerprint=original['fingerprint'],
+                        original_quality_receipt_sha256=original_sha,
+                        whole_wall_seconds=float(wall),
+                        device_generation_timeline_seconds=float(timeline),
+                        device_generation_timeline_note=retry['generation_gpu_timeline_note'],
+                        cpu_generation_seconds=None,
+                        output_tokens=int(retry['output_tokens']),
+                        canvas_count=len(calls), per_canvas_calls=calls,
+                        total_calls=sum(calls),
+                        score_refresh_calls=counters.get('score_refresh_calls'),
+                        decision_refresh_calls=counters.get('decision_refresh_calls'),
+                        current_qk_elements=counters.get('current_qk_elements'),
+                        reused_score_elements=counters.get('reused_qk_elements'),
+                        pv_physical_eligible=pv_eligible, pv_physical_skipped=pv_skipped,
+                        cross_load_token_match=token_match, cross_load_call_match=call_match,
+                        quality_eligible=False, timing_retry_only=True,
+                        independent_question_count_increment=0,
+                        retry_event_config_persisted=retry_config is not None,
+                        performance_qualified=False,
+                        performance_note='Cold/JIT state unknown; measured timing is descriptive')
+            controls.append(item)
+    controls.sort(key=lambda x: (x['question'], x['seed']))
+    paired = []
+    for control in controls:
+        question, seed = control['question'], control['seed']
+        original_config = configs[('smoke', 'native_dense', question, seed)]
+        retry_config = retry_configs[(question, seed)]
+        original_prompt = _read(seen[('smoke', 'native_dense', question, seed)])['prompt_hash']
+        for arm in ARMS[1:]:
+            method = method_rows.get(('smoke', question, seed, arm))
+            if method is None:
+                continue
+            row, prompt = method
+            method_config = configs[('smoke', arm, question, seed)]
+            if (prompt != original_prompt or not _retry_controls_match(original_config, method_config, retry_config)
+                    or not control['cross_load_token_match'] or not control['cross_load_call_match']):
+                continue
+            device = row['device_generation_timeline_seconds']
+            if not isinstance(device, (int, float)) or not math.isfinite(device) or device <= 0:
+                continue
+            paired.append(dict(phase='smoke', question=question, seed=seed, arm=arm,
+                               dense_timing_source_fingerprint=control['source_fingerprint'],
+                               method_source_fingerprint=row['source_fingerprint'],
+                               whole_wall_speedup=control['whole_wall_seconds']/row['whole_wall_seconds'],
+                               device_timeline_speedup=control['device_generation_timeline_seconds']/device,
+                               cross_load_token_match=True, cross_load_call_match=True,
+                               configuration_basis=('persisted_retry_event_config' if retry_config is not None else
+                                                    'original_dense_common_controls_plus_observed_event_timeline'),
+                               performance_qualified=False,
+                               performance_note='Cold/JIT state unknown; exploratory same-question timing ratio'))
+    paired.sort(key=lambda x: (x['arm'], x['question'], x['seed']))
+    return controls, paired
 
 
 def _summaries(internal: list[tuple]) -> dict:
@@ -239,7 +429,21 @@ def _summaries(internal: list[tuple]) -> dict:
                 pairing_rule='Exact phase/question/seed/prompt hash and common config controls; arm-specific source fingerprints retained')
 
 
-def write(rows: list[dict], summary: dict, json_path: Path, csv_path: Path) -> None:
+def _write_csv(path: Path, fields: tuple[str, ...], rows: list[dict]) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix+'.tmp')
+    with temporary.open('w', encoding='utf-8', newline='') as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields)
+        writer.writeheader()
+        for row in rows:
+            writer.writerow({key: json.dumps(row[key]) if key == 'per_canvas_calls' else
+                             'N/A' if row[key] is None else row[key] for key in fields})
+    temporary.replace(path)
+
+
+def write(rows: list[dict], summary: dict, json_path: Path, csv_path: Path,
+          timing_csv_path: Path | None = None,
+          paired_timing_csv_path: Path | None = None) -> None:
     if json_path.resolve() == csv_path.resolve():
         raise ValueError('JSON and CSV destinations must differ')
     json_path.parent.mkdir(parents=True, exist_ok=True)
@@ -248,29 +452,40 @@ def write(rows: list[dict], summary: dict, json_path: Path, csv_path: Path) -> N
                    generation_timing_scope='Device timeline excludes initial encoder but includes host gaps and later encoder/commit work; CPU generation and time-between-tokens are N/A',
                    quality_denominator='All unique attempt-0 receipts; no timing filtering')
     json_tmp = json_path.with_suffix(json_path.suffix+'.tmp')
-    csv_tmp = csv_path.with_suffix(csv_path.suffix+'.tmp')
     json_tmp.write_text(json.dumps(payload, indent=2, allow_nan=False)+'\n', encoding='utf-8')
-    with csv_tmp.open('w', encoding='utf-8', newline='') as stream:
-        writer = csv.DictWriter(stream, fieldnames=CSV_FIELDS)
-        writer.writeheader()
-        for row in rows:
-            writer.writerow({key: json.dumps(row[key]) if key == 'per_canvas_calls' else
-                             'N/A' if row[key] is None else row[key] for key in CSV_FIELDS})
+    _write_csv(csv_path, CSV_FIELDS, rows)
+    if summary.get('timing_controls'):
+        timing_csv_path = timing_csv_path or csv_path.with_name(csv_path.stem+'.timing_controls.csv')
+        paired_timing_csv_path = (paired_timing_csv_path or
+                                  csv_path.with_name(csv_path.stem+'.paired_timing_controls.csv'))
+        for extra in (timing_csv_path, paired_timing_csv_path):
+            if extra.resolve() in (json_path.resolve(), csv_path.resolve()):
+                raise ValueError('Timing CSV destinations must differ from primary outputs')
+        if timing_csv_path.resolve() == paired_timing_csv_path.resolve():
+            raise ValueError('Timing CSV destinations must differ')
+        _write_csv(timing_csv_path, TIMING_CSV_FIELDS, summary['timing_controls'])
+        _write_csv(paired_timing_csv_path, PAIRED_TIMING_CSV_FIELDS,
+                   summary['paired_timing_controls'])
     json_tmp.replace(json_path)
-    csv_tmp.replace(csv_path)
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--run-root', type=Path, action='append', required=True)
     parser.add_argument('--quality', type=Path, action='append', default=[])
+    parser.add_argument('--timing-control-root', type=Path, action='append', default=[])
     parser.add_argument('--json', type=Path, required=True)
     parser.add_argument('--csv', type=Path, required=True)
+    parser.add_argument('--timing-control-csv', type=Path)
+    parser.add_argument('--paired-timing-control-csv', type=Path)
     args = parser.parse_args()
-    rows, summary = collect(args.run_root, args.quality)
-    write(rows, summary, args.json, args.csv)
+    rows, summary = collect(args.run_root, args.quality, args.timing_control_root)
+    write(rows, summary, args.json, args.csv,
+          args.timing_control_csv, args.paired_timing_control_csv)
     print(json.dumps(dict(attempts=len(rows), arms=len(summary['arms']),
-                          pairs=len(summary['pairs']), json=str(args.json), csv=str(args.csv))))
+                          pairs=len(summary['pairs']), timing_controls=len(summary['timing_controls']),
+                          paired_timing_controls=len(summary['paired_timing_controls']),
+                          json=str(args.json), csv=str(args.csv))))
 
 
 if __name__ == '__main__':
