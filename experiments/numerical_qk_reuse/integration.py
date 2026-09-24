@@ -16,7 +16,7 @@ from experiments.diffusion_gemma_solattn_blasst_multibench.runner import _instal
 from experiments.value_direction_hopper.integration import Sketches
 from experiments.value_direction_hopper.query_adaptive import State
 from .cache import Identity, ScoreCache
-from .cached_executor import attention
+from .cached_executor import attention, route_only
 
 SUPPORT_MODES = ('legacy_junyu_mask', 'native_mask')
 # cached_scores: production M1/M3 -- the routing decision AND the final
@@ -173,18 +173,34 @@ class Attention:
             # or new request invalidates the lease via Sketches' own encoder
             # pre-hook; query-only changes within a canvas never do.
             projected, ref = self.sketches.get(layer, v, valid, prefix - crop)
-            route = attention(entry.scores, v, projected.contiguous(), ref.contiguous(),
-                              sensitivity=self.query_sensitivity,
-                              log_threshold=float(self.thresholds[kind]['log_threshold']), trace=self.trace)
-            self.cache.publish_decision(identity, self.step, Decision(route.skipped, route.eligible))
-            self.decision_calls += 1
-            if self.output_mode == 'routing_only_current_output':
+            threshold = float(self.thresholds[kind]['log_threshold'])
+            # The fused route+PV call is only worth issuing when its output is
+            # the one we actually return: in cached_scores mode always, and on
+            # score anchors where the cached tensor IS the current one, so the
+            # same QK is never observed twice.
+            fused = (self.output_mode == 'cached_scores'
+                     or current_for_output is entry.scores)
+            if fused:
+                result = attention(entry.scores, v, projected.contiguous(), ref.contiguous(),
+                                   sensitivity=self.query_sensitivity,
+                                   log_threshold=threshold, trace=self.trace)
+                decision = Decision(result.skipped, result.eligible)
+            else:
+                # Selector only: no discarded PV, no discarded [B,H,Q,D]
+                # output. Malformed cached scores stay detectable through the
+                # route's own per-tile flag instead of through that PV pass.
+                route = route_only(entry.scores, projected.contiguous(), ref.contiguous(),
+                                   sensitivity=self.query_sensitivity,
+                                   log_threshold=threshold)
+                torch._assert_async(~route.invalid_tiles.any(),
+                                    'Invalid cached scores in routing decision: request must fail')
+                decision = Decision(route.skipped, route.eligible)
                 # Same retained tiles as the stale-score routing decision;
                 # the final softmax/PV consumes current, not cached, scores.
                 result = attention(current_for_output, v, skipped=route.skipped,
                                    eligible=route.eligible, trace=self.trace)
-            else:
-                result = route
+            self.cache.publish_decision(identity, self.step, decision)
+            self.decision_calls += 1
         else:
             scores_for_pv = current_for_output if self.output_mode == 'routing_only_current_output' else entry.scores
             result = attention(scores_for_pv, v, skipped=entry.decision.skipped,

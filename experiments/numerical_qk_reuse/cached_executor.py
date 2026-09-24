@@ -22,6 +22,20 @@ except ImportError:  # CPU reference/tests do not require Triton.
 
 
 @dataclass
+class Routing:
+    """Selector-only result: no attention output, no LSE, no V touched.
+
+    ``invalid_tiles`` flags [B,H,Qtiles,Ktiles] positions whose cached scores
+    contained NaN/+inf. It replaces the malformed-score detection that the
+    discarded PV pass used to provide; the caller must fail or take a
+    declared fallback rather than consuming a routed support built on them.
+    """
+    skipped: torch.Tensor
+    eligible: torch.Tensor
+    invalid_tiles: torch.Tensor
+
+
+@dataclass
 class Output:
     output: torch.Tensor
     skipped: torch.Tensor
@@ -44,7 +58,7 @@ if tr is not None:
 
 
     @tr.jit
-    def _route(S, Z, REF, T, SKIP, ELIGIBLE, LSE, STATE, RISK,
+    def _route(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, LSE, STATE, RISK,
                Q: tl.constexpr, K: tl.constexpr, H: tl.constexpr, HK: tl.constexpr,
                R: tl.constexpr, RP: tl.constexpr, QB: tl.constexpr,
                KT: tl.constexpr, THRESHOLD: tl.constexpr, TRACE: tl.constexpr):
@@ -90,6 +104,10 @@ if tr is not None:
             dest = ((batch*H+h)*QB+qb)*KT+j
             tl.store(SKIP+dest, drop)
             tl.store(ELIGIBLE+dest, eligible)
+            # Malformed (NaN/+inf) cached scores must stay detectable without
+            # relying on a PV pass that route_only never launches. This store
+            # does not participate in the skip/eligible arithmetic above.
+            tl.store(BADTILE+dest, tl.sum(bad_row.to(tl.int32), 0) > 0)
             if TRACE:
                 tl.store(RISK+dest, worst)
             if eligible & ~drop:
@@ -230,8 +248,9 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
     state = torch.empty((b, h, nq, 32) if trace and skipped is None else (1,), device=scores.device, dtype=torch.float32)
     risk = torch.empty(shape if trace and skipped is None else (1,), device=scores.device, dtype=torch.float32)
     counters = torch.empty((b, h, tr.cdiv(nq, 16), 3) if trace else (1,), device=scores.device, dtype=torch.int32)
+    bad_tiles = torch.empty(shape if skipped is None else (1,), device=scores.device, dtype=torch.bool)
     if skipped is None:
-        _route[(qb, h, b)](scores, z, reference, sensitivity, skip, elig, lse, state, risk,
+        _route[(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles, lse, state, risk,
                            nq, nk, h, hk, 32, 32, qb, kt, log_threshold, trace,
                            num_warps=num_warps, num_stages=1, enable_fp_fusion=False)
     elif eligible is None:
@@ -241,3 +260,54 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
                                  nq, nk, h, hk, d, qb, kt, trace,
                                  num_warps=num_warps, num_stages=1, enable_fp_fusion=False)
     return Output(out, skip, elig, lse, state, risk, invalid, counters)
+
+
+def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.inf,
+               num_warps=8):
+    """Selector only: the SAME ``_route`` decision, with no PV and no output.
+
+    ``attention(...)`` with ``skipped=None`` also produces a bitmap, but it
+    additionally launches ``_pv`` and allocates a full [B,H,Q,D] output plus
+    LSE that ``routing_only_current_output`` throws away. This entry point
+    exists so that discarded work is never issued. It takes no ``v``: the
+    routing decision reads only the transformed scores and the rank-32
+    projected V sketch, so V itself is not touched here.
+
+    Arithmetic, dtypes, threshold, sensitivity weighting, scan order, tie /
+    first-support handling and the per-query-head Q128 x KV64 grouping are
+    the same kernel as before -- this is not a new selection method.
+    """
+    if tr is None:
+        raise RuntimeError('Triton is required for the CUDA cached-score executor')
+    if scores.ndim != 4 or scores.dtype != torch.float32 or not scores.is_cuda or not scores.is_contiguous():
+        raise ValueError('scores must be contiguous CUDA FP32 [B,H,Q,K]')
+    b, h, nq, nk = scores.shape
+    if z is None or reference is None or z.ndim != 4 or reference.ndim != 2:
+        raise ValueError('route_only requires projected V [B,KVH,K,32] and reference [B,KVH]')
+    hk = z.shape[1]
+    if z.shape[:3] != (b, hk, nk) or z.shape[-1] != 32 or reference.shape != (b, hk):
+        raise ValueError('M1 requires rank-32 current projected V and [B,KVH] reference')
+    if not nq or not nk or not hk or h % hk:
+        raise ValueError('invalid dimensions/GQA')
+    for name, x in [('z', z), ('reference', reference)]:
+        if x.dtype != torch.float32 or x.device != scores.device or not x.is_contiguous():
+            raise ValueError(f'{name} must be contiguous CUDA FP32')
+    if math.isnan(log_threshold):
+        raise ValueError('NaN threshold')
+    if sensitivity is None:
+        sensitivity = torch.ones((b, nq), device=scores.device, dtype=torch.float32)
+    if sensitivity.shape != (b, nq) or sensitivity.dtype != torch.float32 or sensitivity.device != scores.device or not sensitivity.is_contiguous():
+        raise ValueError('sensitivity must be contiguous CUDA FP32 [B,Q]')
+    qb, kt = tr.cdiv(nq, 128), tr.cdiv(nk, 64)
+    shape = (b, h, qb, kt)
+    skip = torch.empty(shape, device=scores.device, dtype=torch.bool)
+    elig = torch.empty(shape, device=scores.device, dtype=torch.bool)
+    bad_tiles = torch.empty(shape, device=scores.device, dtype=torch.bool)
+    # TRACE=False: LSE/STATE/RISK are never written, so one-element stand-ins
+    # keep the launch signature without allocating per-query buffers.
+    dummy = torch.empty((1,), device=scores.device, dtype=torch.float32)
+    _route[(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles,
+                       dummy, dummy, dummy,
+                       nq, nk, h, hk, 32, 32, qb, kt, log_threshold, False,
+                       num_warps=num_warps, num_stages=1, enable_fp_fusion=False)
+    return Routing(skip, elig, bad_tiles)
