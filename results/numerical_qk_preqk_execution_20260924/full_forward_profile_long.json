@@ -1,0 +1,282 @@
+{
+  "attention_call": {
+    "cached_scores": {
+      "0": {
+        "anchor": {
+          "first_observation_ms": 2.5132479667663574,
+          "median_ms": 1.0956799983978271,
+          "min_ms": 1.08297598361969,
+          "p90_ms": 1.1111040115356445,
+          "reps": 12
+        },
+        "ordinary": {
+          "first_observation_ms": 0.762336015701294,
+          "median_ms": 0.7543840110301971,
+          "min_ms": 0.7282559871673584,
+          "p90_ms": 0.7714239954948425,
+          "reps": 12
+        }
+      },
+      "5": {
+        "anchor": {
+          "first_observation_ms": 1.7974079847335815,
+          "median_ms": 1.0235679745674133,
+          "min_ms": 1.0025919675827026,
+          "p90_ms": 1.033568024635315,
+          "reps": 12
+        },
+        "ordinary": {
+          "first_observation_ms": 0.8243839740753174,
+          "median_ms": 0.8113280236721039,
+          "min_ms": 0.7941439747810364,
+          "p90_ms": 0.8188480138778687,
+          "reps": 12
+        }
+      }
+    },
+    "historical_route_preqk_current_output": {
+      "0": {
+        "anchor": {
+          "first_observation_ms": 2.626944065093994,
+          "median_ms": 1.1007199883460999,
+          "min_ms": 1.0703680515289307,
+          "p90_ms": 1.1125119924545288,
+          "reps": 12
+        },
+        "ordinary": {
+          "first_observation_ms": 7.085279941558838,
+          "median_ms": 0.8200640082359314,
+          "min_ms": 0.8010560274124146,
+          "p90_ms": 0.8435840010643005,
+          "reps": 12
+        }
+      },
+      "5": {
+        "anchor": {
+          "first_observation_ms": 1.8655680418014526,
+          "median_ms": 1.0191839933395386,
+          "min_ms": 1.0001280307769775,
+          "p90_ms": 1.0418239831924438,
+          "reps": 12
+        },
+        "ordinary": {
+          "first_observation_ms": 4.903295993804932,
+          "median_ms": 0.8148960173130035,
+          "min_ms": 0.792576014995575,
+          "p90_ms": 0.8357759714126587,
+          "reps": 12
+        }
+      }
+    },
+    "native_dense": {
+      "0": {
+        "dense": {
+          "first_observation_ms": 0.18243199586868286,
+          "median_ms": 0.060175999999046326,
+          "min_ms": 0.05913599953055382,
+          "p90_ms": 0.06963200122117996,
+          "reps": 12
+        }
+      },
+      "5": {
+        "dense": {
+          "first_observation_ms": 0.11164800077676773,
+          "median_ms": 0.08190399780869484,
+          "min_ms": 0.08028800040483475,
+          "p90_ms": 0.08883199840784073,
+          "reps": 12
+        }
+      }
+    },
+    "routing_only_current_output": {
+      "0": {
+        "anchor": {
+          "first_observation_ms": 320.33160400390625,
+          "median_ms": 1.1007199883460999,
+          "min_ms": 1.0809919834136963,
+          "p90_ms": 1.1269439458847046,
+          "reps": 12
+        },
+        "ordinary": {
+          "first_observation_ms": 1.3786239624023438,
+          "median_ms": 1.0741440057754517,
+          "min_ms": 1.0501439571380615,
+          "p90_ms": 1.1026240587234497,
+          "reps": 12
+        }
+      },
+      "5": {
+        "anchor": {
+          "first_observation_ms": 10.919808387756348,
+          "median_ms": 1.0318400263786316,
+          "min_ms": 1.0072640180587769,
+          "p90_ms": 1.0548160076141357,
+          "reps": 12
+        },
+        "ordinary": {
+          "first_observation_ms": 1.0653120279312134,
+          "median_ms": 0.9822880029678345,
+          "min_ms": 0.963263988494873,
+          "p90_ms": 0.997376024723053,
+          "reps": 12
+        }
+      }
+    }
+  },
+  "captured_layers": {
+    "0": {
+      "k": [
+        1,
+        8,
+        387,
+        256
+      ],
+      "kind": "local",
+      "prefix": 131,
+      "q": [
+        1,
+        16,
+        256,
+        256
+      ]
+    },
+    "5": {
+      "k": [
+        1,
+        2,
+        387,
+        512
+      ],
+      "kind": "global",
+      "prefix": 131,
+      "q": [
+        1,
+        16,
+        256,
+        512
+      ]
+    }
+  },
+  "denoising_step": {
+    "cached_scores": {
+      "anchor": {
+        "first_observation_ms": 231.5055389404297,
+        "median_ms": 204.3297576904297,
+        "min_ms": 201.94586181640625,
+        "p90_ms": 205.71209716796875,
+        "reps": 12
+      },
+      "counters": {
+        "attention_calls": 1440,
+        "cuda_graph_qualified": false,
+        "current_qk_elements": 5786828800,
+        "decision_refresh_calls": 1440,
+        "held_decision_calls": 0,
+        "output_mode": "cached_scores",
+        "peak_score_bytes": 723353600,
+        "preqk_consumer_calls": 0,
+        "projected_current_v_tokens": 10027040,
+        "publication": "same current CUDA stream",
+        "reused_current_v_tokens": 3420160,
+        "reused_qk_elements": 2893414400,
+        "routing_only_extra_qk_elements": 0,
+        "score_refresh_calls": 960,
+        "support": "legacy_junyu_mask",
+        "unsupported_mask_refreshes": 0,
+        "work_counter_scope": "dispatch elements, not measured DRAM bytes"
+      },
+      "ordinary": {
+        "first_observation_ms": 195.59628295898438,
+        "median_ms": 197.66204833984375,
+        "min_ms": 195.96493530273438,
+        "p90_ms": 198.50233459472656,
+        "reps": 12
+      }
+    },
+    "historical_route_preqk_current_output": {
+      "anchor": {
+        "first_observation_ms": 231.19151306152344,
+        "median_ms": 203.8715057373047,
+        "min_ms": 202.3406982421875,
+        "p90_ms": 205.28941345214844,
+        "reps": 12
+      },
+      "counters": {
+        "attention_calls": 1440,
+        "cuda_graph_qualified": false,
+        "current_qk_elements": 5786828800,
+        "decision_refresh_calls": 1440,
+        "held_decision_calls": 0,
+        "output_mode": "historical_route_preqk_current_output",
+        "peak_score_bytes": 723353600,
+        "preqk_consumer_calls": 480,
+        "projected_current_v_tokens": 10027040,
+        "publication": "same current CUDA stream",
+        "reused_current_v_tokens": 3420160,
+        "reused_qk_elements": 2893414400,
+        "routing_only_extra_qk_elements": 0,
+        "score_refresh_calls": 960,
+        "support": "legacy_junyu_mask",
+        "unsupported_mask_refreshes": 0,
+        "work_counter_scope": "dispatch elements, not measured DRAM bytes"
+      },
+      "ordinary": {
+        "first_observation_ms": 204.36717224121094,
+        "median_ms": 198.742431640625,
+        "min_ms": 197.744384765625,
+        "p90_ms": 199.55955505371094,
+        "reps": 12
+      }
+    },
+    "native_dense": {
+      "anchor": {
+        "first_observation_ms": 204.28909301757812,
+        "median_ms": 174.40259552001953,
+        "min_ms": 171.6029510498047,
+        "p90_ms": 176.085693359375,
+        "reps": 12
+      }
+    },
+    "routing_only_current_output": {
+      "anchor": {
+        "first_observation_ms": 252.2084197998047,
+        "median_ms": 205.1888656616211,
+        "min_ms": 203.0755157470703,
+        "p90_ms": 206.0759735107422,
+        "reps": 12
+      },
+      "counters": {
+        "attention_calls": 1440,
+        "cuda_graph_qualified": false,
+        "current_qk_elements": 8680243200,
+        "decision_refresh_calls": 1440,
+        "held_decision_calls": 0,
+        "output_mode": "routing_only_current_output",
+        "peak_score_bytes": 723353600,
+        "preqk_consumer_calls": 0,
+        "projected_current_v_tokens": 10027040,
+        "publication": "same current CUDA stream",
+        "reused_current_v_tokens": 3420160,
+        "reused_qk_elements": 2893414400,
+        "routing_only_extra_qk_elements": 2893414400,
+        "score_refresh_calls": 960,
+        "support": "legacy_junyu_mask",
+        "unsupported_mask_refreshes": 0,
+        "work_counter_scope": "dispatch elements, not measured DRAM bytes"
+      },
+      "ordinary": {
+        "first_observation_ms": 207.01930236816406,
+        "median_ms": 207.15875244140625,
+        "min_ms": 205.8233642578125,
+        "p90_ms": 207.59222412109375,
+        "reps": 12
+      }
+    }
+  },
+  "id": "aime26/14",
+  "reps": 12,
+  "schema": "preqk_full_forward_profile_v1",
+  "score_refresh_period": 8,
+  "support": "legacy_junyu_mask",
+  "warmup": 4
+}

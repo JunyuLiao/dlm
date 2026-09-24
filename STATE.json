@@ -1,54 +1,58 @@
 {
-  "schema": 1,
-  "task": "v6 recovery: diagnose negative numerical-QK smoke, recover one E2E point",
-  "status": "BOUNDED_RECOVERY_COMPLETE_QUALITY_RESTORED_SPEED_NOT_YET_WON",
   "branch": "research/numerical-qk-reuse-native-20260924",
-  "checkpoint_sha_at_start": "c9f7808c3d89253b29480e2adc0dbd8eb87b733c",
-  "output_root": "results/numerical_qk_reuse_recovery_20260924",
-  "remote_root_new": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924",
-  "remote_root_old_readonly": "/home/exouser/dyh/numerical_qk_reuse_native_20260924",
-  "remote_code_cp": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1 (git clone at this branch, updated to each pushed commit)",
-  "executed_model_source_sha": "57f0ede6d8f7a7ecb62780ea15ef76f27c365899; actual module hashes in per-request config receipt",
-  "model_snapshot": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
-  "model_sliding_window": 1024,
-  "model_layer_types": "25/30 sliding_attention, 5/30 full_attention",
-  "gpu_status_last_check": "remote exouser@149.165.151.254 idle after this session's runs; local WSL RTX4060 used only for CPU-cost unit tests",
-  "phaseA1_native_mask": {
-    "status": "DONE, NOT combined into the Phase D successor (kept as a separate named item per instruction)",
-    "code": "experiments/numerical_qk_reuse/integration.py Attention(support=legacy_junyu_mask|native_mask)",
-    "audit": "results/numerical_qk_reuse_recovery_20260924/native_mask_audit.{json,md}",
-    "test": "tests/test_numerical_reuse_native_mask.py",
-    "finding": "legacy==native for local-layer prefix<=768 (window1024-canvas256); legacy silently drops up to ~25% of native-legal prefix for the last canvas query once prefix>768. Shared identically by T/M1/M3, so it does not alone explain M1 losing to T."
+  "budget_used": "8 new full request executions (4 preqk M1 + 4 contemporaneous dense), the entire v7 allowance",
+  "delivered": {
+    "corrections": "results/numerical_qk_preqk_execution_20260924/corrections.md + correctness_vectors.json; tests/test_preqk_correctness_vectors.py makes the wrong 'same missed question' phrasing raise",
+    "panel": "panel_report.md + redacted panel/ receipts",
+    "preqk_consumer": "cached_executor.preqk_attention / _preqk_pv + integration output_mode historical_route_preqk_current_output; dropped tiles issue no K load, no V load, no dot",
+    "profiles": "full_forward_profile.{json,md} (two captures) + full_forward_profile_long.json + scaling_sweep.json",
+    "qualification": "preqk_qualification.{json,md}, 14 cases at real geometries; preqk never further from FP32 than the incumbent (max gap 7.0e-08); BF16 paths agree to 2.3e-05; counters exact in every case; tests/test_numerical_reuse_preqk.py",
+    "route_only": "cached_executor.route_only: same _route arithmetic, no _pv launch, no per-query allocation, new per-tile malformed-score flag; bit-identical to the pre-refactor path (tests/test_numerical_reuse_route_only.py, 25 cases)"
   },
-  "phaseC_repair": {
-    "status": "DONE, active by default, proven output-invariant AND measured",
-    "code": "experiments/numerical_qk_reuse/integration.py Attention owns self.sketches = value_direction_hopper.integration.Sketches(...)",
-    "proof": "tests/test_numerical_reuse_prefix_lease.py; results/numerical_qk_reuse_recovery_20260924/prefix_lease_repair.md",
-    "measurement": "results/numerical_qk_reuse_recovery_20260924/warm_profile_report.md: modest ~7-8%/call saving (launch overhead dominates at this scale); the real win is call-count (once/canvas instead of ~40x), ~420ms/answer -- not the primary fix"
+  "execution_identity_note": "Per-run config receipts are the authority for what actually ran (results/numerical_qk_preqk_execution_20260924/panel/config.*.json, each with its own fingerprint and source_hashes). The v5-era executed_model_source_sha previously carried here described OLD code and has been removed.",
+  "headline_numbers": {
+    "dense_reproducibility": "contemporaneous dense reproduced frozen v5 calls (146/132/438/370) and canvases exactly, walls within ~5%",
+    "e2e": "preqk M1 mean wall 115.73s vs dense 40.84s (2.83x); pooled 0.4298 vs 0.1504 s/call; worse than the v6 routing_only arm (97.92s)",
+    "full_forward_step": "ordinary step preqk 198.74ms vs routing_only 207.16ms vs cached_scores floor 197.66ms vs dense 174.40ms (capture B)",
+    "limiting_cost": "route_only on sliding layers: 1.146ms vs 0.435ms for the whole dense attention of that layer at nk=1279 (25/30 layers), giving preqk+route 3.51x dense; global layers reach 0.90-0.96x dense",
+    "quality": "preqk M1 3/4, vector [T,T,F,T], identical element-wise to the contemporaneous dense control"
   },
-  "phaseA2_and_B_diagnostic": {
-    "status": "DONE",
-    "script": "scripts/native_reuse_phaseAB_diagnostic.py",
-    "raw": "results/numerical_qk_reuse_recovery_20260924/phaseAB_diagnostic.json (120 real instrumented calls, ids 2/8, 3 canvases each, layers 0/5)",
-    "report": "results/numerical_qk_reuse_recovery_20260924/phaseAB_report.md",
-    "finding_A2": "kernel-vs-oracle on 12 real-activation samples: max rel_l2=0.00135, skip bitmap agreed in all 12. NOT an implementation/kernel defect.",
-    "finding_B": "A-vs-E (stale scores, no pruning) rel_l2 already 0.33-0.69 at age1 and >1.0 by age5-7 (global layers degrade faster than local). C-vs-D tracks A-vs-E almost exactly. B-vs-C (routing/pruning alone, current scores) stays an order of magnitude smaller (0.02-0.20) at every age. Root cause: stale FINAL SCORES, not routing/support, not a kernel bug."
-  },
-  "phaseD_panel": {
-    "status": "DONE",
-    "report": "results/numerical_qk_reuse_recovery_20260924/phaseD_panel_report.md, paper_decision.md",
-    "redacted_receipts": "results/numerical_qk_reuse_recovery_20260924/panel/{quality,config}.{M1,M3}.json (no raw completion text or extracted numeric answers; correctness booleans only)",
-    "raw_private_receipts": "remote-only: /home/exouser/dyh/numerical_qk_reuse_recovery_20260924/results/panel/",
-    "M1_routing_only_current_output": "3/4 correct, matching native dense and fresh Junyu T EXACTLY (same missed question aime26/14); mean wall 97.92s (2.37x dense's 41.31s -- not yet a net E2E win); pooled calls/canvas 12.78 (down from broken M1's 40.55, near dense's 10.86)",
-    "M3_R2_routing_only_current_output": "2/4 correct, worse than M1's schedule (decision_interval=1); kept as a real negative result, not discarded",
-    "controls_reused": "native_dense (3/4, 41.31s) and fresh_junyu_T (3/4, 39.88s) reused from the frozen v5 results, not rerun (deterministic at temperature=0, unaffected by this round's changes)"
-  },
-  "not_run": [
-    "Reducing routing_only_current_output's per-call cost (its stale-score routing pass still runs a full discarded PV) to try to convert the call-count win into an E2E win over dense",
-    "240-request matrix, R3, M2, ASR, model changes -- all explicitly out of scope for this round"
+  "known_limits": [
+    "Both full-forward captures recorded the FIRST attention call, so both are short-context (prefix 109/131); the scaling sweep covers real lengths instead",
+    "Trajectory diverges from the materialized path at BF16 scale, so E2E call counts are not comparable question-by-question across arms",
+    "Four questions at one seed: development signal only, no noninferiority",
+    "native_mask remains a separately named, unresolved support discrepancy; NOT bundled into this arm",
+    "preqk_support_cells.py (K_f/K_h vs current/cached cells with real nonuniform T) is committed and syntax-checked but NOT yet run"
   ],
-  "forbidden_expansion": "No 240-request matrix; at most 16 new primary outputs after qualification (used: 8 -- 4 M1 + 4 M3); M2/R3/ASR/model changes remain deferred",
-  "local_tests_passing": "36/36: tests/test_numerical_reuse_{integration,cache,math,stop,summary,prefix_lease,native_mask,routing_only}.py, tests/test_numerical_qk_runner.py (local WSL RTX4060 CUDA, PYTHONPATH=src:.)",
-  "next_command": "No further natural expansion this round. If continuing: profile whether routing_only_current_output's discarded stale-score PV pass can be skipped (only the bitmap is needed from that call, not its output) to reduce its ~1.8x-M1 per-call cost toward a real E2E win over dense.",
-  "commit_discipline": "Committed+pushed+remote-SHA-verified at each milestone this round: (1) A1 native-mask + C repair code+tests, (2) A2/B real diagnostic+report, (3) routing_only_current_output implementation+tests, (4) warm PROFILE, (5) this Phase D panel + final HANDOFF"
+  "method_config_unchanged": {
+    "decision_interval_M1": 1,
+    "sampler": "native adaptive, temperature sentinel 0 (native 0.8->0.4 annealing), thinking ON, 8192, EOS",
+    "score_refresh_period": 8,
+    "support": "legacy_junyu_mask",
+    "thresholds": "frozen T_s50"
+  },
+  "model_geometry": "30 layers: 25 sliding (head_dim 256, GQA 16/8, window 1024), 5 full (global_head_dim 512, GQA 16/2)",
+  "model_snapshot": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "next_command": "Reduce route_only cost on sliding layers (it re-reads the full cached FP32 [Q,K] score tensor and runs a rank-32 sketch dot per tile on every decision-refresh call). Two separately testable levers: decide less often on sliding layers, or stop re-reading a [Q,K] FP32 tensor to make a per-tile decision. Qualify either on its own; do not bundle.",
+  "not_started": [
+    "240-request matrix",
+    "extra seeds",
+    "M2/R3",
+    "mask unification",
+    "any threshold/period/T/sampler retuning",
+    "the historical-route vs frozen-bitmap vs fresh-value-aware comparison study"
+  ],
+  "output_root": "results/numerical_qk_preqk_execution_20260924",
+  "panel_config_fingerprints": {
+    "M1_historical_route_preqk_current_output": "c012aba6cc802f9b",
+    "native_dense": "see panel/config.native_dense.json"
+  },
+  "remote_code_cp": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1 (git clone, pulled to each pushed commit)",
+  "remote_root": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924",
+  "reporting_sha": "resolve with git HEAD; not self-validating",
+  "reviewed_head_at_start": "237e671ebe4e3902d8350ec939c66aaf75ed059d",
+  "schema": 1,
+  "status": "PREQK_BUILT_AND_QUALIFIED_QUALITY_HELD_E2E_STILL_SLOWER_THAN_DENSE",
+  "task": "v7: preserve the recovery, remove wasted work, implement real pre-QK execution",
+  "tests": "77 targeted tests pass on the local WSL RTX4060 (a private device, never the remote timing GPU): numerical_reuse_{integration,cache,math,stop,summary,prefix_lease,native_mask,routing_only,route_only,preqk}, numerical_qk_runner, preqk_correctness_vectors"
 }

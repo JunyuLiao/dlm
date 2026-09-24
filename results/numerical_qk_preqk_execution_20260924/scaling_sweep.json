@@ -1,0 +1,99 @@
+{
+  "note": "A numerical step pays route_only AND its consumer, so preqk_plus_route_vs_dense is the ratio that decides the method. Attention only: FFN and other shared model work are identical across arms and excluded.",
+  "queries": 256,
+  "requested_drop_fraction": 0.5,
+  "rows": [
+    {
+      "dense_ms": 0.1462272047996521,
+      "drop_fraction_actual": 0.5208333333333334,
+      "geometry": "local_D256_GQA16_8",
+      "keys": 384,
+      "observe_plus_pv_ms": 0.32715840339660646,
+      "observe_pv_plus_route_vs_dense": 3.2779454848587943,
+      "preqk_ms": 0.1300480008125305,
+      "preqk_plus_route_ms": 0.2822144031524658,
+      "preqk_plus_route_vs_dense": 1.9299719470062473,
+      "queries": 256,
+      "route_only_ms": 0.1521664023399353
+    },
+    {
+      "dense_ms": 0.4345695972442627,
+      "drop_fraction_actual": 0.5082236842105263,
+      "geometry": "local_D256_GQA16_8",
+      "keys": 1279,
+      "observe_plus_pv_ms": 1.1769856452941894,
+      "observe_pv_plus_route_vs_dense": 5.346332754892833,
+      "preqk_ms": 0.37886719703674315,
+      "preqk_plus_route_ms": 1.5252352237701416,
+      "preqk_plus_route_vs_dense": 3.509760538800044,
+      "queries": 256,
+      "route_only_ms": 1.1463680267333984
+    },
+    {
+      "dense_ms": 0.36229119300842283,
+      "drop_fraction_actual": 0.4947916666666667,
+      "geometry": "global_D512_GQA16_2",
+      "keys": 384,
+      "observe_plus_pv_ms": 0.3216383934020996,
+      "observe_pv_plus_route_vs_dense": 1.323629171719118,
+      "preqk_ms": 0.22310400009155273,
+      "preqk_plus_route_ms": 0.381004798412323,
+      "preqk_plus_route_vs_dense": 1.0516534924531413,
+      "queries": 256,
+      "route_only_ms": 0.15790079832077025
+    },
+    {
+      "dense_ms": 1.2292096138000488,
+      "drop_fraction_actual": 0.48125,
+      "geometry": "global_D512_GQA16_2",
+      "keys": 1279,
+      "observe_plus_pv_ms": 1.548697566986084,
+      "observe_pv_plus_route_vs_dense": 2.110546452195587,
+      "preqk_ms": 0.6200319766998291,
+      "preqk_plus_route_ms": 1.6656383991241457,
+      "preqk_plus_route_vs_dense": 1.3550483013022459,
+      "queries": 256,
+      "route_only_ms": 1.0456064224243165
+    },
+    {
+      "dense_ms": 1.7862655639648437,
+      "drop_fraction_actual": 0.5,
+      "geometry": "global_D512_GQA16_2",
+      "keys": 2048,
+      "observe_plus_pv_ms": 2.2039424896240236,
+      "observe_pv_plus_route_vs_dense": 1.6756980327972482,
+      "preqk_ms": 0.9266176223754883,
+      "preqk_plus_route_ms": 1.7159168243408203,
+      "preqk_plus_route_vs_dense": 0.9606168640076812,
+      "queries": 256,
+      "route_only_ms": 0.789299201965332
+    },
+    {
+      "dense_ms": 3.5590145111083986,
+      "drop_fraction_actual": 0.5,
+      "geometry": "global_D512_GQA16_2",
+      "keys": 4096,
+      "observe_plus_pv_ms": 4.425625610351562,
+      "observe_pv_plus_route_vs_dense": 1.6480895025725788,
+      "preqk_ms": 1.7486848831176758,
+      "preqk_plus_route_ms": 3.1886337280273436,
+      "preqk_plus_route_vs_dense": 0.8959316457055676,
+      "queries": 256,
+      "route_only_ms": 1.439948844909668
+    },
+    {
+      "dense_ms": 6.432870483398437,
+      "drop_fraction_actual": 0.504150390625,
+      "geometry": "global_D512_GQA16_2",
+      "keys": 8192,
+      "observe_plus_pv_ms": 8.872541046142578,
+      "observe_pv_plus_route_vs_dense": 1.8220126517904118,
+      "preqk_ms": 3.3534976959228517,
+      "preqk_plus_route_ms": 6.201728057861328,
+      "preqk_plus_route_vs_dense": 0.9640685404542766,
+      "queries": 256,
+      "route_only_ms": 2.8482303619384766
+    }
+  ],
+  "schema": "preqk_scaling_sweep_v1"
+}

@@ -1,96 +1,87 @@
-# v6 recovery: bounded recovery complete -- quality restored, speed not yet won
+# v7: real pre-QK execution built and qualified; quality held, E2E still slower
 
 ## Identity / authority
-- Sole execution spec: user-supplied v6, 2026-09-24. v5/HANDOFF-before-this-round
-  is historical provenance only (period8, cached-final-output choices are
-  starting points, not proven-optimal or verbatim requirements).
-- Branch `research/numerical-qk-reuse-native-20260924`, continued from
-  checkpoint `c9f7808c3d89253b29480e2adc0dbd8eb87b733c` (local HEAD == remote
-  HEAD verified before any new work; tree was clean).
-- New output root: `results/numerical_qk_reuse_recovery_20260924/`. Old
-  `results/numerical_qk_reuse_20260924/` untouched. New remote root
-  `/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1` (git
-  clone of this branch). Junyu/Haowei refs unchanged, read-only, no peer edits.
+- Sole spec: user-supplied v7. Continued from reviewed HEAD
+  `237e671ebe4e3902d8350ec939c66aaf75ed059d` (verified local == remote, clean
+  tree, before any work). Branch `research/numerical-qk-reuse-native-20260924`.
+- New output root `results/numerical_qk_preqk_execution_20260924/`. Older roots
+  are untouched except for inline CORRECTED notes (see below). Junyu/Haowei
+  refs unchanged, read-only. Remote code_cp1 is a git clone pulled to each
+  pushed commit; raw private receipts stay remote-only.
+- **STATE.json no longer carries the inherited v5 `executed_model_source_sha`.**
+  Per-run config receipts (`panel/config.*.json`, each with its own fingerprint
+  and source hashes) are the authority for what actually ran.
 
-## Bottom line
-The frozen v5 M1/M3 0/4 collapse is diagnosed and **reversed on the four
-development questions**: `routing_only_current_output` reaches the **same
-observed 3/4 count** as native dense and fresh Junyu T. Element-wise its
-vector `[T,T,F,T]` is **identical to dense's only**; fresh T's is
-`[T,T,T,F]` (T answers /14 at 7276 tokens, misses /20) -- equal counts are
-NOT vector identity. It does **not** yet beat dense on wall time
-(97.92s vs 41.31s, cross-session observations, not matched timing).
-Corrections to earlier prose:
-`results/numerical_qk_preqk_execution_20260924/corrections.md`.
+## Corrections landed first (CPU-only checkpoint, records untouched)
+`results/numerical_qk_preqk_execution_20260924/corrections.md`:
+- **The v6 "same missed question" claim was false for fresh T.** Dense
+  `[T,T,F,T]`, fresh T `[T,T,T,F]` (T answers /14 at 7276 tokens uncapped and
+  misses /20 at 2777), new M1 `[T,T,F,T]`. Same 3/4 count, different questions;
+  M1 shares a vector with **dense only**. `scripts/preqk_correctness_vectors.py`
+  regenerates this from records and `tests/test_preqk_correctness_vectors.py`
+  makes the wrong phrasing raise.
+- `temperature=0` is the native 0.8->0.4 annealing sentinel, not greedy
+  decoding; frozen dense/T receipts are labelled development-quality
+  references, their walls are not matched timing controls.
+- The A2 kernel check was 12 uniform-T samples at two layers: narrows, does not
+  exclude, a defect. Phase B's cell B was ALL-KEPT (so B-vs-C is pruning at
+  all), ran with uniform T, and its `rel_l2` normalizes by the approximate
+  output, so >1 does not mean "bigger than the fresh signal".
+- The warm profile was two-layer components, not a full-forward speedup.
 
-## What was done, in order
-1. **Phase A1 (native-mask audit, done, kept separate).** Real
-   `sdpa_attention_forward` ignores `sliding_window`; `DynamicSlidingWindowLayer`
-   already caps the stored prefix. Legacy Junyu's extra query-relative window
-   diverges from native only once local prefix>768 (window1024-canvas256),
-   dropping up to ~25% of native-legal prefix for the last canvas query --
-   real, but shared identically by T/M1/M3, so it doesn't explain M1 losing
-   to T. `Attention(support='legacy_junyu_mask'|'native_mask')` added;
-   default unchanged. NOT combined into this round's successor (kept as a
-   separate named item, per instruction not to bundle fixes).
-   `native_mask_audit.{json,md}`, `test_numerical_reuse_native_mask.py`.
-2. **Phase C repair (done, active by default, measured).** Restored Junyu's
-   own `Sketches` prefix-V/norm lease (not reimplemented) into the
-   decision-refresh step. Proven output/phase-invariant
-   (`test_numerical_reuse_prefix_lease.py`). Measured: ~7-8% of the
-   `Sketches` COMPONENT time at two layers (not a full-forward speedup);
-   real win is call-count (once/canvas instead of ~40x). Not the primary
-   fix. `prefix_lease_repair.md`, `warm_profile_report.md`.
-3. **Phase A2/B (done): real diagnosis.** `native_reuse_phaseAB_diagnostic.py`
-   on the real model, real untouched dense trajectory, ids 2/8, 3 canvases,
-   layers 0/5, 120 instrumented calls. A2: kernel vs Torch oracle agrees to
-   rel_l2<=0.00135 on 12 samples, two layers, **uniform T** -- narrows but
-   does not exclude an implementation bug. B: stale-final-score cells
-   (A-vs-E) reach 0.33-0.69 by age 1; pruning-at-all (B-vs-C, cell B is
-   ALL-KEPT) stays 0.02-0.20 at every age. `rel_l2` divides by the
-   approximate output, so >1 is not "bigger than the fresh signal".
-   **Attributed cause: stale FINAL SCORES, not routing/support.**
-   `phaseAB_report.md`.
-4. **`routing_only_current_output` implemented (done).** Reuse the
-   stale-score-derived retained support (comparatively stable per B); always
-   recompute current QK for the final softmax/PV. Real extra cost charged,
-   not assumed free. `test_numerical_reuse_routing_only.py` (bitmap identical
-   to `cached_scores` mode, output provably matches the Cell-C oracle
-   reconstruction).
-5. **Phase D panel (done).** Ids 2/8/14/20, seed 42, native adaptive,
-   8192/thinkingON/EOS. Dense `[T,T,F,T]` and T `[T,T,T,F]` **reused as
-   labelled development-quality references** from frozen v5; their walls
-   (41.31s / 39.88s) are historical, NOT matched timing controls
-   (`temperature=0` is the native-annealing sentinel, not greedy). New:
-   - **M1 `routing_only_current_output`: `[T,T,F,T]` (3/4; vector identical
-     to dense, differs from T), recorded wall 97.92s, pooled calls/canvas
-     12.78** (down from broken M1's 40.55, near dense's 10.86).
-   - M3 R2 `routing_only_current_output`: 2/4, worse than M1's schedule --
-     kept as a real negative result.
-   `phaseD_panel_report.md`, redacted receipts in `panel/`.
+## Built this round
+1. **`route_only`** -- same `_route` arithmetic, no `_pv` launch, no discarded
+   [B,H,Q,D] output. A new per-tile malformed-score flag keeps the guard the
+   removed PV used to provide. Bit-identical to the pre-refactor path
+   (`tests/test_numerical_reuse_route_only.py`, 25 cases, incl. a launch spy).
+   Anchors keep the fused path, so the same QK is never observed twice.
+2. **`historical_route_preqk_current_output`** -- current QK/PV formed inside
+   the output program for retained tiles only; a dropped tile issues no K load,
+   no V load, no dot. GQA by indexing, explicit strides (the model hands us
+   transposed views), reference BF16 rounding path matched.
+   Qualified at real geometries (sliding D=256 GQA 16/8, global D=512 GQA 16/2)
+   in 14 cases: **never further from an independent FP32 reference than the
+   incumbent (max gap 7.0e-08)**, BF16 paths agree to 2.3e-05, in-kernel
+   counters exact everywhere. Materialized current-QK falls 33%, to the
+   `cached_scores` (anchors-only) level.
 
-36/36 local tests pass under CUDA (local WSL RTX4060, a separate private
-device from the remote timing host; used only for small synthetic-tensor
-unit tests, never model/timing work).
+## Measured outcome
+- **Quality held: 3/4, vector `[T,T,F,T]`, identical element-wise to the
+  CONTEMPORANEOUS dense control.** Dense also reproduced its frozen v5 call
+  counts (146/132/438/370) and canvases exactly, walls within ~5%.
+- **Full forward (matched state, capture B):** ordinary step preqk 198.74 ms vs
+  routing_only 207.16 ms vs the `cached_scores` floor 197.66 ms vs dense
+  174.40 ms. The earlier "local-layer regression" from capture A was a Triton
+  specialization artifact (1527 ms first observation) and is withdrawn.
+- **End to end: NOT faster.** Mean wall 115.73 s vs dense 40.84 s (2.83x);
+  pooled 0.4298 vs 0.1504 s/call; also worse than the v6 arm (97.92 s).
+  Confounded by trajectory divergence (BF16-scale differences move argmax;
+  `aime26/14` alone is 251 s of 463 s). Four questions cannot separate that.
+- **Limiting cost has moved to the selector.** Scaling sweep, attention only,
+  50% dropped: at the saturated sliding geometry (nk=1279, **25 of 30 layers**)
+  `route_only` alone is **1.146 ms vs 0.435 ms for the whole dense attention**
+  of that layer, giving `preqk+route` **3.51x dense**; global layers at >=2048
+  keys reach **0.90-0.96x dense**. The consumer rebuilt this round is no longer
+  the bottleneck.
 
-## Not done / next, if this line continues
-`routing_only_current_output` still runs a full discarded PV pass during its
-stale-score routing call (only the bitmap is needed from it). Reducing that
-is the concrete next optimization to try to convert the now-correct
-call-count reduction into an actual E2E win over dense -- not started, not
-promised. No 240-request expansion, R3, M2, ASR, or model change was
-started; 8 of the 16 allowed new primary outputs were used (4 M1 + 4 M3).
+Reports: `decision.md`, `panel_report.md`, `preqk_qualification.md`,
+`full_forward_profile.md`, `scaling_sweep.json`.
 
-## Remote
-`exouser@149.165.151.254`, GPU idle after this session. New root/code_cp
-listed above. `git@github.com:coconight01/dlm_test.git` over SSH (no HTTPS
-creds in this sandbox; origin URL switched to SSH this session). Raw private
-receipts (prompts/completions) remain remote-only under
-`/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/results/panel/`.
+## Not done
+- `scripts/preqk_support_cells.py` (K_f/K_h x current/cached cells under one
+  common mask with real nonuniform causal T, storing both norms and support
+  overlap) is committed and syntax-checked but **not yet run**.
+- `native_mask` remains a separately named, unresolved support discrepancy,
+  deliberately not bundled with this arm.
+- Not started: 240-request matrix, extra seeds, M2/R3, any retuning of
+  thresholds / `score_period` / T / sampler / budget, and the
+  historical-route vs frozen-bitmap vs fresh-value-aware comparison study.
+- 8 of 8 allowed new full requests used (4 preqk M1 + 4 contemporaneous dense).
 
 ## Next command
-None required to reproduce this state; if continuing, profile
-`routing_only_current_output`'s discarded stale-score PV pass
-(`experiments/numerical_qk_reuse/integration.py`, the `route = attention(...)`
-call in the `plan.decision_refresh` branch) to see whether skipping its PV
-output (keep only `.skipped`/`.eligible`) meaningfully reduces per-call cost.
+Reduce `route_only` on sliding layers. It re-reads the full cached FP32 [Q,K]
+score tensor and runs a rank-32 sketch dot per tile on **every**
+decision-refresh call at `decision_interval=1`. Two separately testable levers:
+decide less often on sliding layers, or stop re-reading a [Q,K] FP32 tensor to
+make a per-tile decision. Qualify either on its own; do not bundle with a mask
+change or a threshold change.
