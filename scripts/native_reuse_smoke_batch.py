@@ -45,6 +45,7 @@ def _arm_args(args: argparse.Namespace, condition: str, *, timing_events: bool,
                               decision_interval=2 if condition == "M3" else 1,
                               score_refresh_period=args.score_refresh_period,
                               support=getattr(args, "support", "legacy_junyu_mask"),
+                              output_mode=getattr(args, "output_mode", "cached_scores"),
                               diagnostic=False, timing_events=timing_events)
 
 
@@ -312,6 +313,8 @@ def parse(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--score-refresh-period", type=int, default=8)
     parser.add_argument("--support", choices=("legacy_junyu_mask", "native_mask"),
                         default="legacy_junyu_mask")
+    parser.add_argument("--output-mode", choices=("cached_scores", "routing_only_current_output"),
+                        default="cached_scores")
     parser.add_argument("--qualify-observer", action="store_true")
     parser.add_argument("--dense-timing-controls", action="store_true",
                         help="After observer parity, add four native-dense timing retries without changing quality")

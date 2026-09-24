@@ -195,6 +195,7 @@ def _args_for(args: argparse.Namespace, condition: str) -> argparse.Namespace:
                               plugin=PLUGIN if condition in ("M1", "M3") else None,
                               extra_source=[Path(__file__)], decision_interval=2 if condition == "M3" else 1,
                               score_refresh_period=8, support="legacy_junyu_mask",
+                              output_mode="cached_scores",
                               diagnostic=False, timing_events=False)
 
 

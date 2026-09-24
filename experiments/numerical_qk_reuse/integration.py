@@ -19,6 +19,16 @@ from .cache import Identity, ScoreCache
 from .cached_executor import attention
 
 SUPPORT_MODES = ('legacy_junyu_mask', 'native_mask')
+# cached_scores: production M1/M3 -- the routing decision AND the final
+# softmax/PV both consume the stale cached scores.
+# routing_only_current_output: Phase D successor selected by the phaseAB
+# diagnostic (results/numerical_qk_reuse_recovery_20260924/phaseAB_report.md).
+# The routing decision (which KV64 tiles to retain) still comes from the
+# stale cached scores -- that choice stays comparatively stable even at
+# score_age 7 -- but the final softmax/PV always consumes freshly recomputed
+# current QK restricted to that retained support. This does NOT skip QK
+# compute; it is a support-reuse-only variant, not a faster relabeling of M1.
+OUTPUT_MODES = ('cached_scores', 'routing_only_current_output')
 
 
 @dataclass
@@ -35,10 +45,14 @@ class NativeReuseState(State):
 
 class Attention:
     def __init__(self, adapter, thresholds, *, score_period=8, decision_interval=1,
-                 trace=False, max_cache_bytes=2 * 1024**3, support='legacy_junyu_mask'):
+                 trace=False, max_cache_bytes=2 * 1024**3, support='legacy_junyu_mask',
+                 output_mode='cached_scores'):
         if support not in SUPPORT_MODES:
             raise ValueError(support)
+        if output_mode not in OUTPUT_MODES:
+            raise ValueError(output_mode)
         self.support = support
+        self.output_mode = output_mode
         self.thresholds = thresholds
         self.cache = ScoreCache(score_period, decision_interval, max_cache_bytes)
         self.projections = Projections()
@@ -54,6 +68,7 @@ class Attention:
         self.pending, self.call_metadata = [], []
         self.calls = self.score_calls = self.decision_calls = self.held_calls = 0
         self.current_qk_elements = self.reused_qk_elements = 0
+        self.routing_only_extra_qk_elements = 0
         self.peak_score_bytes = 0
         self.unsupported_mask_refreshes = 0
         for name, module in adapter.model.named_modules():
@@ -129,6 +144,7 @@ class Attention:
         # Arbitrary mask contents are not inferred from pointers/shape.
         plan = self.cache.plan(identity, self.step, force_refresh=mask is not None)
         self.cache.reserve(identity)  # before allocation
+        current_for_output = None
         if plan.score_refresh:
             score = self.observe_scores(q, k, mask, scale, causal, window, crop)
             self.cache.publish_scores(identity, self.step, score)
@@ -137,8 +153,17 @@ class Attention:
             self.score_calls += 1
             self.current_qk_elements += b*h*nq*nk
             self.unsupported_mask_refreshes += int(mask is not None)
+            current_for_output = score
         else:
             self.reused_qk_elements += b*h*nq*nk
+            if self.output_mode == 'routing_only_current_output':
+                # The routing decision below still reads the stale cached
+                # score; only the final softmax/PV gets a fresh recompute.
+                # This is charged current-QK work, not reuse -- the whole
+                # point of this mode is that it does NOT skip QK compute.
+                current_for_output = self.observe_scores(q, k, mask, scale, causal, window, crop)
+                self.current_qk_elements += b*h*nq*nk
+                self.routing_only_extra_qk_elements += b*h*nq*nk
         entry = self.cache.get(identity)
         if plan.decision_refresh:
             valid = self.valid_keys[layer]
@@ -148,13 +173,21 @@ class Attention:
             # or new request invalidates the lease via Sketches' own encoder
             # pre-hook; query-only changes within a canvas never do.
             projected, ref = self.sketches.get(layer, v, valid, prefix - crop)
-            result = attention(entry.scores, v, projected.contiguous(), ref.contiguous(),
-                               sensitivity=self.query_sensitivity,
-                               log_threshold=float(self.thresholds[kind]['log_threshold']), trace=self.trace)
-            self.cache.publish_decision(identity, self.step, Decision(result.skipped, result.eligible))
+            route = attention(entry.scores, v, projected.contiguous(), ref.contiguous(),
+                              sensitivity=self.query_sensitivity,
+                              log_threshold=float(self.thresholds[kind]['log_threshold']), trace=self.trace)
+            self.cache.publish_decision(identity, self.step, Decision(route.skipped, route.eligible))
             self.decision_calls += 1
+            if self.output_mode == 'routing_only_current_output':
+                # Same retained tiles as the stale-score routing decision;
+                # the final softmax/PV consumes current, not cached, scores.
+                result = attention(current_for_output, v, skipped=route.skipped,
+                                   eligible=route.eligible, trace=self.trace)
+            else:
+                result = route
         else:
-            result = attention(entry.scores, v, skipped=entry.decision.skipped,
+            scores_for_pv = current_for_output if self.output_mode == 'routing_only_current_output' else entry.scores
+            result = attention(scores_for_pv, v, skipped=entry.decision.skipped,
                                eligible=entry.decision.eligible, trace=self.trace)
             self.held_calls += 1
         # Explicit asynchronous error, never consume zeroed invalid rows. This
@@ -168,7 +201,7 @@ class Attention:
                         source_k=source_nk, score_anchor=entry.score_step,
                         score_age=self.step-entry.score_step, score_refresh=plan.score_refresh,
                         decision_refresh=plan.decision_refresh, reason=plan.reason,
-                        current_qk_elements=b*h*nq*nk if plan.score_refresh else 0)
+                        current_qk_elements=b*h*nq*nk if current_for_output is not None else 0)
         self.call_metadata.append(metadata)
         # Tiny per-layer physical-work reductions stay on device until finish.
         self.pending.append(((result.skipped & result.eligible).sum(), result.eligible.sum()))
@@ -202,7 +235,8 @@ class Attention:
                     reused_current_v_tokens=self.sketches.reused_tokens,
                     peak_score_bytes=self.peak_score_bytes,
                     unsupported_mask_refreshes=self.unsupported_mask_refreshes,
-                    support=self.support,
+                    support=self.support, output_mode=self.output_mode,
+                    routing_only_extra_qk_elements=self.routing_only_extra_qk_elements,
                     work_counter_scope='dispatch elements, not measured DRAM bytes',
                     cuda_graph_qualified=False, publication='same current CUDA stream')
 
@@ -228,7 +262,8 @@ def install(adapter, config, condition):
         binding = _install_dense(adapter)
         router = Attention(adapter, config['policy'], score_period=config['score_refresh_period'],
                            decision_interval=config['decision_interval'], trace=False,
-                           support=config.get('support', 'legacy_junyu_mask'))
+                           support=config.get('support', 'legacy_junyu_mask'),
+                           output_mode=config.get('output_mode', 'cached_scores'))
         binding.runtime.attention_override = router
         state = NativeReuseState('T', router, m_ref=config['m_ref'], beta=config['beta'],
                                  gamma=config['gamma'], diagnostics=config['diagnostic'])
