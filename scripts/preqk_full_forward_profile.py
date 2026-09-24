@@ -159,12 +159,16 @@ def profile(args) -> dict[str, Any]:
                      is_causal=None, sliding_window=None, **kwargs):
             layer = int(module.layer_idx)
             if layer in args.layers and layer not in layer_inputs and layer in sources:
+                keys, values, absolute, prefix, _ = sources[layer]
+                # Snapshot the cache CONTENTS: the live object keeps mutating
+                # until the capture stops, so replaying against it would see a
+                # prefix that no longer matches the recorded q/k/v.
                 layer_inputs[layer] = dict(module=module, q=q.detach().clone(), k=k.detach().clone(),
                                            v=v.detach().clone(), mask=mask, scaling=scaling,
                                            is_causal=is_causal, sliding_window=sliding_window,
-                                           cache=sources[layer][4],
-                                           prefix=int(sources[layer][3]),
-                                           absolute=int(sources[layer][2]))
+                                           prefix_k=keys.detach().clone(),
+                                           prefix_v=values.detach().clone(),
+                                           prefix=int(prefix), absolute=int(absolute))
             return true_dense(q, k, v, mask, scaling=scaling, is_causal=is_causal)
 
         def close(self):
@@ -201,10 +205,14 @@ def profile(args) -> dict[str, Any]:
         attention_call={}, denoising_step={})
 
     # ---------------- 1. complete Attention.__call__, per phase ----------------
+    from types import SimpleNamespace
     for arm in args.arms:
         report['attention_call'][arm] = {}
         for layer, captured in sorted(layer_inputs.items()):
             module = captured['module']
+            frozen_cache = SimpleNamespace(
+                layers={layer: SimpleNamespace(keys=captured['prefix_k'], values=captured['prefix_v'])},
+                is_compileable=False, get_seq_length=lambda a=captured['absolute']: a)
             call_args = (module, captured['q'], captured['k'], captured['v'], captured['mask'])
             call_kwargs = dict(scaling=captured['scaling'], is_causal=captured['is_causal'],
                                sliding_window=captured['sliding_window'])
@@ -231,8 +239,8 @@ def profile(args) -> dict[str, Any]:
                         router.valid_keys.clear()
                         router.sketches.entries.clear()
                         router.canvas, router.step, router.epoch = 0, 0, 0
-                        router.identify(module, (), {'past_key_values': captured['cache']})
-                        router.sketches.identify(module, (), {'past_key_values': captured['cache']})
+                        router.identify(module, (), {'past_key_values': frozen_cache})
+                        router.sketches.identify(module, (), {'past_key_values': frozen_cache})
                         if step:
                             router(*call_args, **call_kwargs)       # establish the anchor
                             router.step = step
@@ -249,6 +257,18 @@ def profile(args) -> dict[str, Any]:
     base_kwargs = capture.kwargs
     for arm in args.arms:
         if arm == 'fresh_junyu_T':
+            if not (args.library and args.torch_library):
+                report['denoising_step']['fresh_junyu_T'] = dict(
+                    skipped='no --library/--torch-library supplied')
+                continue
+            from experiments.diffusion_gemma_jl_output_aware.projections import Projections
+            from experiments.value_direction_hopper.integration import install as install_fresh
+            with install_fresh(adapter, str(args.library), thresholds, mode='value',
+                               projections=Projections(),
+                               torch_library=str(args.torch_library), collect=False) as (_bind, _router):
+                report['denoising_step']['fresh_junyu_T'] = dict(anchor=timed(
+                    lambda: adapter.model._denoising_step(**clone_kwargs(base_kwargs)),
+                    warmup=args.warmup, reps=args.reps))
             continue
         binding = _install_dense(adapter)
         router = None
@@ -306,6 +326,8 @@ def parse(argv=None):
     parser.add_argument('--max-new-tokens', type=int, default=320)
     parser.add_argument('--score-refresh-period', type=int, default=8)
     parser.add_argument('--support', default='legacy_junyu_mask')
+    parser.add_argument('--library', type=Path)
+    parser.add_argument('--torch-library', type=Path)
     parser.add_argument('--warmup', type=int, default=5)
     parser.add_argument('--reps', type=int, default=20)
     parser.add_argument('--output', type=Path, required=True)
