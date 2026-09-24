@@ -1,29 +1,30 @@
 {
   "schema": 1,
   "task": "v6 recovery: diagnose negative numerical-QK smoke, recover one E2E point",
-  "status": "PHASE_A1_AND_REPAIR_CODE_LANDED_GPU_DIAGNOSTIC_NEXT",
+  "status": "BOUNDED_RECOVERY_COMPLETE_QUALITY_RESTORED_SPEED_NOT_YET_WON",
   "branch": "research/numerical-qk-reuse-native-20260924",
   "checkpoint_sha_at_start": "c9f7808c3d89253b29480e2adc0dbd8eb87b733c",
   "output_root": "results/numerical_qk_reuse_recovery_20260924",
   "remote_root_new": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924",
   "remote_root_old_readonly": "/home/exouser/dyh/numerical_qk_reuse_native_20260924",
+  "remote_code_cp": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1 (git clone at this branch, updated to each pushed commit)",
   "executed_model_source_sha": "57f0ede6d8f7a7ecb62780ea15ef76f27c365899; actual module hashes in per-request config receipt",
   "model_snapshot": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
   "model_sliding_window": 1024,
   "model_layer_types": "25/30 sliding_attention, 5/30 full_attention",
-  "gpu_status_last_check": "remote exouser@149.165.151.254 idle, no own PIDs; local WSL RTX4060 used only for CPU-cost unit tests",
+  "gpu_status_last_check": "remote exouser@149.165.151.254 idle after this session's runs; local WSL RTX4060 used only for CPU-cost unit tests",
   "phaseA1_native_mask": {
-    "status": "DONE",
+    "status": "DONE, NOT combined into the Phase D successor (kept as a separate named item per instruction)",
     "code": "experiments/numerical_qk_reuse/integration.py Attention(support=legacy_junyu_mask|native_mask)",
     "audit": "results/numerical_qk_reuse_recovery_20260924/native_mask_audit.{json,md}",
     "test": "tests/test_numerical_reuse_native_mask.py",
     "finding": "legacy==native for local-layer prefix<=768 (window1024-canvas256); legacy silently drops up to ~25% of native-legal prefix for the last canvas query once prefix>768. Shared identically by T/M1/M3, so it does not alone explain M1 losing to T."
   },
-  "phaseC_repair_code": {
-    "status": "CODE_AND_INVARIANCE_PROOF_DONE_NOT_YET_GPU_JUSTIFIED_OR_MEASURED",
-    "code": "experiments/numerical_qk_reuse/integration.py Attention now owns self.sketches = value_direction_hopper.integration.Sketches(...); decision-refresh calls sketches.get(layer, v, valid, prefix-crop) instead of a full-tensor recompute every call",
-    "proof": "tests/test_numerical_reuse_prefix_lease.py (2 GPU tests, output/phase invariance + commit-invalidation), results/numerical_qk_reuse_recovery_20260924/prefix_lease_repair.md",
-    "caveat": "Not yet selected as the Phase D fix; needs Phase B 5-cell diagnostic + Phase C warm PROFILE evidence first"
+  "phaseC_repair": {
+    "status": "DONE, active by default, proven output-invariant AND measured",
+    "code": "experiments/numerical_qk_reuse/integration.py Attention owns self.sketches = value_direction_hopper.integration.Sketches(...)",
+    "proof": "tests/test_numerical_reuse_prefix_lease.py; results/numerical_qk_reuse_recovery_20260924/prefix_lease_repair.md",
+    "measurement": "results/numerical_qk_reuse_recovery_20260924/warm_profile_report.md: modest ~7-8%/call saving (launch overhead dominates at this scale); the real win is call-count (once/canvas instead of ~40x), ~420ms/answer -- not the primary fix"
   },
   "phaseA2_and_B_diagnostic": {
     "status": "DONE",
@@ -31,17 +32,23 @@
     "raw": "results/numerical_qk_reuse_recovery_20260924/phaseAB_diagnostic.json (120 real instrumented calls, ids 2/8, 3 canvases each, layers 0/5)",
     "report": "results/numerical_qk_reuse_recovery_20260924/phaseAB_report.md",
     "finding_A2": "kernel-vs-oracle on 12 real-activation samples: max rel_l2=0.00135, skip bitmap agreed in all 12. NOT an implementation/kernel defect.",
-    "finding_B": "A-vs-E (stale scores, no pruning) rel_l2 already 0.33-0.69 at age1 and >1.0 by age5-7 (global layers degrade faster than local). C-vs-D tracks A-vs-E almost exactly (same magnitude/shape). B-vs-C (routing/pruning alone, current scores) stays an order of magnitude smaller (0.02-0.20) at every age. Root cause: stale FINAL SCORES, not routing/support, not a kernel bug.",
-    "phase_D_selection": "routing_only_current_output: reuse the stale-score-derived retained support (comparatively stable) but always recompute current QK for the final softmax/PV. Does NOT save QK compute; real cost/benefit must be measured, not assumed."
+    "finding_B": "A-vs-E (stale scores, no pruning) rel_l2 already 0.33-0.69 at age1 and >1.0 by age5-7 (global layers degrade faster than local). C-vs-D tracks A-vs-E almost exactly. B-vs-C (routing/pruning alone, current scores) stays an order of magnitude smaller (0.02-0.20) at every age. Root cause: stale FINAL SCORES, not routing/support, not a kernel bug."
   },
-  "not_run_yet": [
-    "routing_only_current_output implementation",
-    "Phase C warm PROFILE (separate process, decomposed components)",
-    "Phase D bounded 4-question natural-generation panel with the selected M1 successor",
-    "M3 R2 on the selected policy (only after M1 successor avoids wholesale failure)"
+  "phaseD_panel": {
+    "status": "DONE",
+    "report": "results/numerical_qk_reuse_recovery_20260924/phaseD_panel_report.md, paper_decision.md",
+    "redacted_receipts": "results/numerical_qk_reuse_recovery_20260924/panel/{quality,config}.{M1,M3}.json (no raw completion text or extracted numeric answers; correctness booleans only)",
+    "raw_private_receipts": "remote-only: /home/exouser/dyh/numerical_qk_reuse_recovery_20260924/results/panel/",
+    "M1_routing_only_current_output": "3/4 correct, matching native dense and fresh Junyu T EXACTLY (same missed question aime26/14); mean wall 97.92s (2.37x dense's 41.31s -- not yet a net E2E win); pooled calls/canvas 12.78 (down from broken M1's 40.55, near dense's 10.86)",
+    "M3_R2_routing_only_current_output": "2/4 correct, worse than M1's schedule (decision_interval=1); kept as a real negative result, not discarded",
+    "controls_reused": "native_dense (3/4, 41.31s) and fresh_junyu_T (3/4, 39.88s) reused from the frozen v5 results, not rerun (deterministic at temperature=0, unaffected by this round's changes)"
+  },
+  "not_run": [
+    "Reducing routing_only_current_output's per-call cost (its stale-score routing pass still runs a full discarded PV) to try to convert the call-count win into an E2E win over dense",
+    "240-request matrix, R3, M2, ASR, model changes -- all explicitly out of scope for this round"
   ],
-  "forbidden_expansion": "No 240-request matrix; at most 16 new primary outputs after qualification; M2/R3/ASR/model changes remain deferred",
-  "local_tests_passing": "34/34: tests/test_numerical_reuse_{integration,cache,math,stop,summary,prefix_lease,native_mask}.py, tests/test_numerical_qk_runner.py (run on local WSL RTX4060 CUDA, PYTHONPATH=src:.)",
-  "next_command": "ssh exouser@149.165.151.254; mkdir -p /home/exouser/dyh/numerical_qk_reuse_recovery_20260924; rsync repo (or git checkout) at this commit into a NEW immutable code_cp; run a bounded (<=2 canvas) real-model capture on AIME26 ids 2 and 8 for the Phase A2/B diagnostic",
-  "commit_discipline": "commit+push after each of: (1) this A1+repair-code milestone, (2) the A2/B GPU capture+diagnostic report, (3) the warm PROFILE, (4) the bounded Phase D panel + final HANDOFF"
+  "forbidden_expansion": "No 240-request matrix; at most 16 new primary outputs after qualification (used: 8 -- 4 M1 + 4 M3); M2/R3/ASR/model changes remain deferred",
+  "local_tests_passing": "36/36: tests/test_numerical_reuse_{integration,cache,math,stop,summary,prefix_lease,native_mask,routing_only}.py, tests/test_numerical_qk_runner.py (local WSL RTX4060 CUDA, PYTHONPATH=src:.)",
+  "next_command": "No further natural expansion this round. If continuing: profile whether routing_only_current_output's discarded stale-score PV pass can be skipped (only the bitmap is needed from that call, not its output) to reduce its ~1.8x-M1 per-call cost toward a real E2E win over dense.",
+  "commit_discipline": "Committed+pushed+remote-SHA-verified at each milestone this round: (1) A1 native-mask + C repair code+tests, (2) A2/B real diagnostic+report, (3) routing_only_current_output implementation+tests, (4) warm PROFILE, (5) this Phase D panel + final HANDOFF"
 }

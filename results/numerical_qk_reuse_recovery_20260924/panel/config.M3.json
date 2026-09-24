@@ -1,0 +1,71 @@
+{
+  "beta": 3.0,
+  "condition": "M3",
+  "decision_interval": 2,
+  "diagnostic": false,
+  "dtype": "bfloat16",
+  "eos_enabled": true,
+  "fingerprint": "79e77d20085094ada94d90428dcbb3da44f2f82c979e52b9b7cf9146b3be92fb",
+  "gamma": 0.5,
+  "ids": [
+    "aime26/2",
+    "aime26/8",
+    "aime26/14",
+    "aime26/20"
+  ],
+  "library": null,
+  "m_ref": 14.258454322814941,
+  "manifest": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/results/numerical_qk_reuse_20260924/private/smoke_manifest.json",
+  "manifest_sha256": "ecae4fa7f496cbe06ca86696cec2de5ac922ff5194490ea1372505246dc55fe0",
+  "max_new_tokens": 8192,
+  "model": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "model_metadata_hashes": {
+    "config.json": "13b11d2fe87302cc2332c64eb9eb4ac305d9b8a123ffe9c5cb5b1920fc70c506",
+    "generation_config.json": "99334f763c3dbe8b161aeaca1c150a05344299fda2d2e4a0e1d342c744461200",
+    "model.safetensors.index.json": "6e33e8465d55fe6c7bc0a5453c7a4b341e6467d032c6ded82aaf439f61dac69a",
+    "tokenizer_config.json": "a284d1243b62be31faa9c13e1c28cece940c4abaa7bd9ad87b94f61b40687200"
+  },
+  "native_adaptive": true,
+  "output_mode": "routing_only_current_output",
+  "phase": "smoke",
+  "plugin": "experiments.numerical_qk_reuse.integration:install",
+  "policy": {
+    "global": {
+      "log_threshold": -3.1366905212402343
+    },
+    "local": {
+      "log_threshold": -1.0099318265914916
+    }
+  },
+  "policy_file": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/results/query_adaptive_v3/configs/frozen_policies.json",
+  "policy_name": "T_s50",
+  "policy_sha256": "af2688c56f152347265be1a5e59651bb8e4d1815f19838507c03301f87601ef1",
+  "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "schema": "numerical_qk_native_runner_v1",
+  "score_refresh_period": 8,
+  "seeds": [
+    42
+  ],
+  "source_hashes": {
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/numerical_qk_reuse/__init__.py": "69d30589c650365c2202c234092c4c009b19973e04d7ba51c7bf3b49d8070a19",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/numerical_qk_reuse/cache.py": "8a40d5968f9610c466b17698d935ef62a3486a1dd5478aec23e4c9c397735b95",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/numerical_qk_reuse/cached_executor.py": "fd8ca3d499d27be216775ab22dcc3fb5fb5af2f9323756c2ac2ee88814d887fd",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/numerical_qk_reuse/integration.py": "056bf3afdf0294bd2eeac00eff190f0eab0a7073ed39f3a0886e1b8ccc1dfc78",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/numerical_qk_reuse/reference.py": "9c68481f96892b06513b583648bb5c8add04db31d765cbd7ec3a35a5dd548266",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/numerical_qk_reuse/runner.py": "db3cd3610550382d35c63728deb07d6c7934162b2829d304b77b0ca7dadd533c",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/value_direction_hopper/csrc/torch_bridge.cpp": "849d20a8abaf0fd44076aab40cc4100436eb3fe4dd683ecd0144bfa189d55cda",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/value_direction_hopper/csrc/value_direction.cu": "ae5b1e82a1d5b0024fde18cf5cfe1a3f3dd835e2ad1d3f53053d3b681783fcfb",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/value_direction_hopper/csrc/value_direction.h": "3d84caf53362ff061c0b91c45d97b02bb495b395a01a9870ea50efddf40adacb",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/value_direction_hopper/cuda.py": "83e643d23c882376b1ff94078c8a28d0336d1ee0d7346915f78d44714e76a255",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/value_direction_hopper/integration.py": "b58f74f78a27d998b27ab20c728d3b2595c831a10e967000091eca1332285f86",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/experiments/value_direction_hopper/query_adaptive.py": "9c0a3b3746f9dbda067c915d2580f7f7e1bea63dd7bec929e10bda83216ac933",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/src/dllm/models/adapters/diffusion_gemma.py": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+    "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/site-packages/transformers/models/diffusion_gemma/generation_diffusion_gemma.py": "b814a6fc41492794c1f50ba71c750206684e25dfdd53932e0842675871fef0de"
+  },
+  "support": "legacy_junyu_mask",
+  "temperature": 0.0,
+  "thinking": true,
+  "timing_events": false,
+  "torch_library": null
+}
