@@ -1,5 +1,16 @@
 # Phase A2 + Phase B: real diagnosis of the M1/M3 negative result
 
+> **CORRECTED.** (1) Cell B is ALL-KEPT legacy-legal attention, not the
+> fresh-Junyu *selected* support, so `B vs C` measures the effect of pruning
+> at all, not the incremental effect of historical selection. (2) The run
+> used default uniform sensitivity; production causal T weights were not
+> applied. (3) `rel_l2(x,y)` normalizes by the second argument, which for
+> `a_vs_e`/`c_vs_d` is the approximate output. (4) The A2 check covers 12
+> uniform-T samples at two layers and narrows, but does not exclude, an
+> implementation defect. See
+> `../numerical_qk_preqk_execution_20260924/corrections.md` items C and D.
+> Measured values are unchanged.
+
 Real capture: `scripts/native_reuse_phaseAB_diagnostic.py`, native-dense
 trajectory (untouched, generation output is the true dense answer), ids
 `aime26/2` and `aime26/8`, seed 42, thinking on, capped at 600 new tokens
@@ -10,21 +21,23 @@ sliding) and 5 (global/full), 120 real instrumented calls total. Raw:
 
 ## Phase A2: is it an implementation/kernel defect?
 
-**No.** `kernel_vs_oracle`: 12 real-activation samples (both instrumented
-layers, both ids, at natural score-refresh calls), Triton `cached_executor`
-vs the Torch `reference.py` oracle, identical scores/V/threshold: max relative
-L2 = 0.00135, and the skip/retain bitmap agreed exactly (`skip_agree=True`)
-in all 12 samples. This is the same comparison the existing GPU tests make,
-extended from synthetic random QKV to real captured activations -- it closes
-exactly the gap the v6 prompt flagged ("existing GPU tests are synthetic...
-not full-model fresh-path equivalence"). The kernel is numerically correct.
+**No disagreement in the sampled scope.** `kernel_vs_oracle`: 12
+real-activation samples (both instrumented layers, both ids, at natural
+score-refresh calls), Triton `cached_executor` vs the Torch `reference.py`
+oracle, identical scores/V/threshold: max relative L2 = 0.00135, and the
+skip/retain bitmap agreed exactly (`skip_agree=True`) in all 12 samples.
+This extends the existing synthetic-QKV GPU tests to real captured
+activations. Scope limits: 12 samples, two layers, **default uniform
+sensitivity (not production's nonuniform causal T)**. That narrows, but does
+not exclude, an implementation defect, and it is not full-decoder or
+complete A1 equivalence.
 
 ## Phase B: which of the five cells actually hurts?
 
 Mean relative L2 by real score age (score_refresh_period=8, so age 0..7
 recurs every canvas), pooled over both ids and all 3 captured canvases:
 
-| kind | age | n | A vs E (stale scores, no pruning) | B vs C (pruning alone, current scores) | C vs D (== A vs E, same support) |
+| kind | age | n | A vs E (stale scores, all-kept) | B vs C (pruning-at-all, current scores) | C vs D (stale weights, same support) |
 |---|---|---|---|---|---|
 | global | 0 | 11 | 0.000 | 0.019 | 0.000 |
 | global | 1 | 10 | **0.686** | 0.048 | 0.685 |
@@ -39,28 +52,34 @@ recurs every canvas), pooled over both ids and all 3 captured canvases:
 
 **Interpretation, directly from the five-cell design:**
 - **A vs E isolates harm from stale final scores with no pruning at all.**
-  It is already large at age 1 (0.33-0.69) and exceeds 1.0 (error bigger than
-  the signal) by age 5 on global layers. This is not a corner case -- it is
+  It is already large at age 1 (0.33-0.69) and exceeds 1.0 by age 5 on
+  global layers. NOTE: `rel_l2(x,y)` divides by `||y||`, and for this cell
+  `y` is the *approximate* (cached-score) output, so values above 1 do NOT
+  mean 'error bigger than the fresh signal' -- that gloss is withdrawn. This is not a corner case -- it is
   the typical age reached every 8 calls, and M1/M3 canvases average
   40-45 calls (`calls/canvas pooled: M1 40.55, M3 44.10` from the frozen v5
   smoke), so most calls in a canvas run at ages 1-7.
-- **C vs D tracks A vs E almost exactly at every age.** D is literally what
-  production M1 computes (stale scores restricted to the routed support).
-  Since C vs D reproduces A vs E's magnitude and shape, the *retained-support*
-  choice is not adding meaningful extra error on top of the scores already
-  being stale -- the scores themselves are the dominant failure.
-- **B vs C isolates harm from the routing/pruning decision alone, holding
-  scores current.** It stays an order of magnitude smaller (0.02-0.20) and
+- **C vs D is numerically close to A vs E at every age.** D is literally
+  what production M1 computes (stale scores restricted to the routed
+  support). The two cells use different supports and different denominators,
+  so their closeness is an empirical observation, **not a mathematical
+  identity**. Read together they indicate the retained-support choice adds
+  little on top of the scores already being stale.
+- **B vs C compares all-kept legacy-legal attention against the pruned
+  support, holding scores current.** Cell B is ALL-KEPT, not the fresh-Junyu
+  *selected* support, so this is the cost of pruning at all -- not the
+  incremental cost of choosing that support from historical information. It stays an order of magnitude smaller (0.02-0.20) and
   does not blow up with age the way A vs E does, even though the *routing
   decision itself* is being made from increasingly stale scores (mean
   retained/eligible tile fraction only drifts mildly across ages: global
   0.92->0.86, local 0.61->0.64-0.68). The tile-level selection is comparatively
   stable; the numeric attention weights are not.
 
-**Conclusion:** the 0/4 collapse is explained by **stale final attention
-scores**, not an implementation defect (A2 kernel-vs-oracle rules that out)
-and not primarily by changed routing support (B vs C is an order of
-magnitude smaller than A vs E, at every age). Global (full-attention) layers
+**Conclusion (within the sampled scope):** the 0/4 collapse is attributed to
+**stale final attention scores**. No implementation defect appeared in the
+12 sampled uniform-T cases (which narrows rather than excludes one), and the
+pruning cell stayed an order of magnitude smaller than the stale-score cells
+at every age. Global (full-attention) layers
 degrade faster than local (sliding) layers, consistent with global attention
 depending on the whole growing context while local only looks nearby.
 

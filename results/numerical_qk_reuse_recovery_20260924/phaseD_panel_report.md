@@ -1,11 +1,23 @@
 # Phase D: bounded natural-generation panel with the selected successor
 
+> **CORRECTED.** Two claims in the original text of this report were wrong
+> and are fixed inline below: (1) the new M1 does NOT miss the same question
+> as fresh Junyu T -- it shares a correctness vector with native dense only;
+> (2) `temperature=0` is this adapter's sentinel for the native 0.8->0.4
+> annealing schedule, not greedy deterministic decoding. See
+> `../numerical_qk_preqk_execution_20260924/corrections.md` (items A, B) and
+> the machine-checked `correctness_vectors.json`. Measured values below are
+> unchanged.
+
 Same four frozen AIME26 IDs (2/8/14/20), seed 42, thinking ON, cap 8192,
 native adaptive, EOS -- identical protocol to the frozen v5 smoke. Native
-dense and fresh Junyu T are **reused as controls** from the frozen v5
-results (unaffected by this round's changes: dense/T never touch
-`experiments/numerical_qk_reuse`, and generation is deterministic at
-temperature 0). Only the new arms below were actually re-run this round, on
+dense and fresh Junyu T are **reused as labelled development-quality
+references** from the frozen v5 results (dense/T never touch
+`experiments/numerical_qk_reuse`, and their model/prompt/tokenization/
+sampler/scorer identities match). Their **wall times are historical
+observations from a different session and are not contemporaneous timing
+controls** -- section 7 of the v7 round measures same-session controls.
+Only the new arms below were actually re-run this round, on
 the remote host, `support=legacy_junyu_mask` (same support as T; the
 native-mask correction from Phase A1 is a separate, not-yet-combined item
 per the instruction not to bundle a mask fix with a new output mode),
@@ -39,14 +51,17 @@ receipts (private, contain raw completions) remain on the remote host only:
 ## Interpretation
 
 **Quality is recovered.** `routing_only_current_output` with M1's schedule
-(decision_interval=1) scores **3/4, identical to native dense and fresh T,
-missing the exact same question (aime26/14)** that both controls also miss
-by hitting the length cap. This is the clearest possible evidence that the
-0/4 collapse was the stale-final-score problem diagnosed in Phase B, not
-something intrinsic to reusing the routing/support decision: reusing that
-decision (still derived from an up-to-7-call-old score, unchanged from
-production M1) while always feeding current scores into the softmax/PV is
-sufficient to restore dense-parity quality.
+(decision_interval=1) reaches **the same observed 3/4 count as native dense
+and fresh Junyu T on these four development questions.** Element-wise, its
+correctness vector `[T,T,F,T]` is **identical to native dense's** and
+**differs from fresh T's** `[T,T,T,F]`: T answers aime26/14 correctly (7276
+tokens, not capped) and misses aime26/20, while dense and the new M1 both
+miss aime26/14 at the cap. Equal counts are not vector identity, and four
+questions at one seed are not population evidence. This is consistent with
+the stale-final-score diagnosis from Phase B -- reusing the routing decision
+(still derived from an up-to-7-call-old score, unchanged from production M1)
+while always feeding current scores into the softmax/PV removes the
+collapse -- but it does not by itself settle every causal question.
 
 **Call count also recovered**, not just accuracy: pooled calls/canvas
 dropped from the broken M1's 40.55 to 12.78 -- within range of dense's 10.86

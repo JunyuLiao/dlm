@@ -13,11 +13,15 @@
   clone of this branch). Junyu/Haowei refs unchanged, read-only, no peer edits.
 
 ## Bottom line
-The frozen v5 M1/M3 0/4 collapse is diagnosed with real GPU evidence and
-**reversed on the frozen four-question panel**: `routing_only_current_output`
-scores **3/4, exactly matching native dense and fresh Junyu T (same missed
-question)**. It does **not** yet beat dense on wall time (2.37x slower).
-Full numbers: `results/numerical_qk_reuse_recovery_20260924/paper_decision.md`.
+The frozen v5 M1/M3 0/4 collapse is diagnosed and **reversed on the four
+development questions**: `routing_only_current_output` reaches the **same
+observed 3/4 count** as native dense and fresh Junyu T. Element-wise its
+vector `[T,T,F,T]` is **identical to dense's only**; fresh T's is
+`[T,T,T,F]` (T answers /14 at 7276 tokens, misses /20) -- equal counts are
+NOT vector identity. It does **not** yet beat dense on wall time
+(97.92s vs 41.31s, cross-session observations, not matched timing).
+Corrections to earlier prose:
+`results/numerical_qk_preqk_execution_20260924/corrections.md`.
 
 ## What was done, in order
 1. **Phase A1 (native-mask audit, done, kept separate).** Real
@@ -33,17 +37,19 @@ Full numbers: `results/numerical_qk_reuse_recovery_20260924/paper_decision.md`.
 2. **Phase C repair (done, active by default, measured).** Restored Junyu's
    own `Sketches` prefix-V/norm lease (not reimplemented) into the
    decision-refresh step. Proven output/phase-invariant
-   (`test_numerical_reuse_prefix_lease.py`). Measured: modest ~7-8%/call
-   saving (kernel-launch overhead dominates at this scale); real win is
-   call-count (once/canvas instead of ~40x), ~420ms/answer -- not the
-   primary fix. `prefix_lease_repair.md`, `warm_profile_report.md`.
+   (`test_numerical_reuse_prefix_lease.py`). Measured: ~7-8% of the
+   `Sketches` COMPONENT time at two layers (not a full-forward speedup);
+   real win is call-count (once/canvas instead of ~40x). Not the primary
+   fix. `prefix_lease_repair.md`, `warm_profile_report.md`.
 3. **Phase A2/B (done): real diagnosis.** `native_reuse_phaseAB_diagnostic.py`
    on the real model, real untouched dense trajectory, ids 2/8, 3 canvases,
-   layers 0/5, 120 instrumented calls. A2: kernel-vs-oracle on real
-   activations agrees to rel_l2<=0.00135 -- **not an implementation bug**.
-   B: stale final scores (A-vs-E) reach rel_l2 0.33-0.69 by age 1 and >1.0 by
-   age 5-7; routing/support alone (B-vs-C) stays 0.02-0.20 at every age --
-   **the collapse is stale FINAL SCORES, not routing/support.**
+   layers 0/5, 120 instrumented calls. A2: kernel vs Torch oracle agrees to
+   rel_l2<=0.00135 on 12 samples, two layers, **uniform T** -- narrows but
+   does not exclude an implementation bug. B: stale-final-score cells
+   (A-vs-E) reach 0.33-0.69 by age 1; pruning-at-all (B-vs-C, cell B is
+   ALL-KEPT) stays 0.02-0.20 at every age. `rel_l2` divides by the
+   approximate output, so >1 is not "bigger than the fresh signal".
+   **Attributed cause: stale FINAL SCORES, not routing/support.**
    `phaseAB_report.md`.
 4. **`routing_only_current_output` implemented (done).** Reuse the
    stale-score-derived retained support (comparatively stable per B); always
@@ -52,11 +58,13 @@ Full numbers: `results/numerical_qk_reuse_recovery_20260924/paper_decision.md`.
    to `cached_scores` mode, output provably matches the Cell-C oracle
    reconstruction).
 5. **Phase D panel (done).** Ids 2/8/14/20, seed 42, native adaptive,
-   8192/thinkingON/EOS. Dense (3/4, 41.31s) and T (3/4, 39.88s) **reused**
-   from frozen v5 (deterministic, untouched by this round). New:
-   - **M1 `routing_only_current_output`: 3/4, mean wall 97.92s (2.37x
-     dense), pooled calls/canvas 12.78** (down from broken M1's 40.55, near
-     dense's 10.86).
+   8192/thinkingON/EOS. Dense `[T,T,F,T]` and T `[T,T,T,F]` **reused as
+   labelled development-quality references** from frozen v5; their walls
+   (41.31s / 39.88s) are historical, NOT matched timing controls
+   (`temperature=0` is the native-annealing sentinel, not greedy). New:
+   - **M1 `routing_only_current_output`: `[T,T,F,T]` (3/4; vector identical
+     to dense, differs from T), recorded wall 97.92s, pooled calls/canvas
+     12.78** (down from broken M1's 40.55, near dense's 10.86).
    - M3 R2 `routing_only_current_output`: 2/4, worse than M1's schedule --
      kept as a real negative result.
    `phaseD_panel_report.md`, redacted receipts in `panel/`.
