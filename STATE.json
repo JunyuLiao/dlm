@@ -1,14 +1,14 @@
 {
   "schema": 1,
   "task": "native numerical QK reuse M1 then M3",
-  "status": "CHECKPOINT1_PUSHED_CP2_SYNTHETIC_GPU_PASS",
+  "status": "DENSE_SMOKE_COMPLETE_FRESH_KERNEL_QUALIFIED",
   "branch": "research/numerical-qk-reuse-native-20260924",
   "base_sha": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
   "peer_fetched_sha": "b23f969a3c52417ba84a999ff7a31e3dd00bb697",
-  "executed_model_source_sha": null,
+  "executed_model_source_sha": "57f0ede6d8f7a7ecb62780ea15ef76f27c365899; actual module hashes in per-request config receipt",
   "report_sha": "resolve with git HEAD; not a self-validating execution receipt",
   "live_job": null,
-  "gpu_process_seconds": 28.54,
+  "gpu_process_seconds": 472.32,
   "remote_root": "/home/exouser/dyh/numerical_qk_reuse_native_20260924",
   "gpu_status_last_check": "idle",
   "disk_free_gib_last_check": 61,
@@ -16,10 +16,11 @@
     "runner_cpu": "6 PASS",
     "cache_cpu": "5 PASS",
     "math_cpu": "4 PASS plus 5 cache PASS, 2 CUDA tests skipped",
-    "gpu": "6 math + 2 integration PASS; model generation NOT_RUN"
+    "gpu": "6 math + 2 integration PASS; model generation NOT_RUN",
+    "fresh_kernel": "12/12 PASS including Q256 native dimensions; exact bitmaps"
   },
   "controls": {
-    "native_dense": "NOT_RUN",
+    "native_dense": "4/4 complete; frozen quality3/4",
     "fresh_junyu_T": "NOT_RUN"
   },
   "score_refresh_period": 8,
@@ -27,8 +28,8 @@
     "M1": 1,
     "M3": 2
   },
-  "next_command": "Native dense four frozen AIME26 smoke; fresh T mathematical comparison",
+  "next_command": "scripts/native_reuse_smoke_batch.py --conditions fresh_junyu_T M1 --qualify-observer --dense-timing-controls ...",
   "next_gate": "CPU math, private native T build, M1 dispatch qualification",
   "forbidden_expansion": "No 240-request matrix before four-question complete-answer smoke review",
-  "last_verified_remote_sha": "b8dcddd744d72d396625de98ae8d394415397531"
+  "last_verified_remote_sha": "57f0ede6d8f7a7ecb62780ea15ef76f27c365899"
 }

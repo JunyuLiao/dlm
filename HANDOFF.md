@@ -9,11 +9,11 @@
 - Old vLLM P0 remains independent and unresolved. This is native Torch.
 
 ## Current status
-- WIP / synthetic GPU tests PASS. No model generation has run.
+- WIP / synthetic GPU tests PASS. Native dense four-question generation completed.
 - Mathematical contract, cache lifecycle, cached-score executor, native runner exist.
 - Runner/cache: 11 local CPU checks passed; combined discovery also reports missing
   local pytest for the separate Torch math suite. Remote CPU math subsequently passed: 4 math + 5 cache tests, 2 CUDA tests skipped.
-- Native dense and fresh Junyu T have NOT yet reproduced in this round.
+- Native dense:4 complete,3/4 correct. Fresh Junyu kernel:12/12 synthetic PASS; natural T pending.
 - M1/M3 synthetic integration passed; natural generation remains pending.
 - Historical failures/results are unchanged.
 
@@ -32,7 +32,7 @@
 
 ## Host and execution
 - Only authorized H100: `exouser@149.165.151.254`; idle at last check.
-- Disk at last check: 61 GiB free. No GPU jobs launched by this checkpoint.
+- Disk at last check: 61 GiB free. Bounded tests and dense smoke completed; see STATE.json for current job.
 - Private root: `/home/exouser/dyh/numerical_qk_reuse_native_20260924`.
 - Read-only Python: `/home/exouser/miniconda3/envs/ljy_dlm/bin/python`.
 - Torch 2.6.0+cu124; Transformers 5.11.0; Triton 3.2.0.
@@ -53,4 +53,4 @@ From WSL: `cd /mnt/e/dlm/numerical_qk_reuse_native_20260924`.
 CPU local: `python -m unittest discover -s tests -p test_numerical_reuse_cache.py -v`.
 Runner contract: `python -m unittest discover -s tests -p test_numerical_qk_runner.py -v`.
 Remote math: `CUDA_VISIBLE_DEVICES='' PYTHONPATH=src:. OMP_NUM_THREADS=4 <python> -m pytest tests/test_numerical_reuse_math.py -q`.
-No live model PID or pending GPU queue exists. Read STATE.json before launch.
+Dense job exited normally. Read STATE.json for latest active job before launch.

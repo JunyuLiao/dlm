@@ -40,6 +40,16 @@ Semantic/physical selection uses Junyu **per query head × Q128 × KV64**, with 
 sharing native K/V. It is not the old vLLM GQA8×Q2×KV32 method. Output execution
 may use smaller query tiles while retaining each Q128 bitmap without regrouping.
 
+Mask boundary identified before candidate generation: when there is no explicit
+mask, pinned Junyu applies a query-relative LOCAL lower window bound. Installed
+Transformers 5.11 native SDPA instead attends the supplied already-truncated
+LOCAL prefix plus canvas (its SDPA interface ignores the extra window keyword).
+This first reproduction preserves Junyu's convention identically for fresh T,
+M1 and M3. Native dense remains untouched. Thus T-versus-dense includes that
+inherited support difference; it is NOT an all-kept native-mask equivalence claim.
+No historical result is rewritten. A later native-mask correction must be named
+and qualified separately, not silently mixed into these receipts.
+
 Identity includes request, canvas, encoder-write epoch, actual native prefix
 ownership/length, absolute position range, layer/heads/shape, dtype/device,
 scale and structural mask signature. New/changed legality forces observation.
