@@ -16,8 +16,8 @@
 - Fresh Junyu T four complete: 3/4 correct. One seed, four distinct questions only.
 - Observer parity: same-load plain/counts/counts+events tokens and calls exact.
 - Separate dense timing controls match original tokens/calls across loads, all four.
-- M1 first two complete: 908/1513 calls vs dense146/132. Severe trajectory inflation.
-- Their actual per-layer dispatch clocks pass: anchors0/8/16; reuse current-QK count0.
+- M1 four complete: calls908/1513/1525/1042; quality0/4. Severe negative smoke result.
+- All four actual per-layer dispatch clocks pass: anchors0/8/16; reuse current-QK count0.
 - No unsupported-mask refresh in these requests. No CUDA Graph qualification claimed.
 - Partial redacted evidence: checkpoint2_partial.json and checkpoint2_dispatch.json.
 - Quality attempt0 is immutable; event-on retries remain separate timing-only tables.
@@ -36,15 +36,15 @@
 - CPU generation boundary and output-ready burst events unavailable: TBT=N/A.
 - Initial smoke includes JIT/cache/setup; no warm performance qualification.
 
-## Live execution — do not duplicate
-- Host exouser@149.165.151.254, only H100; own PID1413795, PGID/SID1413792.
+## Execution checkpoint — inspect STATE before resuming
+- Host exouser@149.165.151.254, only H100; previous PID1413795 exited0; GPU checked again by M3 launcher.
 - Root `/home/exouser/dyh/numerical_qk_reuse_native_20260924`.
-- Immutable worker source `code_cp2`; active `runs/integrated_smoke_01/process.log`.
-- Batch does observer parity, dense timing controls, T4, M1 four. M3 NOT queued.
+- Immutable worker source `code_cp2`; completed `runs/integrated_smoke_01/process.log` (exit0,1463.04s).
+- Batch completed observer parity, dense timing controls, T4, M1 four. M3 ready, not yet started.
 - Python `/home/exouser/miniconda3/envs/ljy_dlm/bin/python`.
 - Full model snapshot f7f5b7f5fa82ffc52addd066915886d497f5517b; no copied weights.
 - Private rebuilt libraries and native model hashes: build_identity.json / per-run config.
-- Last disk61GiB free; completed GPU-process472.32s plus current active batch.
+- Last disk61GiB free; completed GPU-process1935.36s; measured CPU1756.60s plus explicitly unmetered build/analysis.
 - Never edit active source or shared build/environment. CPU analysis uses separate analysis_cp1.
 
 ## Resume

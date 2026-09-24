@@ -1,0 +1,90 @@
+{
+  "schema": "numerical_reuse_resource_v1",
+  "records": [
+    {
+      "path": "../preflight/fresh_qualify_01.log",
+      "sha256": "39656e8341faaf25b8f7bb5ee915b0b46f337205a63316ebb86bc8945f232522",
+      "wall_seconds": 17.85,
+      "cpu_user_seconds": 16.91,
+      "cpu_system_seconds": 1.68,
+      "exit_code": 0,
+      "complete": true,
+      "accounting": "Whole process wall charged, including loading/JIT/failure; not GPU kernel active time"
+    },
+    {
+      "path": "../preflight/fresh_qualify_02.log",
+      "sha256": "c4452a057b96cb7dd4b1f70b5d03b2d1975a8b4cceeca9b4823ad3c38112ffcd",
+      "wall_seconds": 10.5,
+      "cpu_user_seconds": 9.88,
+      "cpu_system_seconds": 1.38,
+      "exit_code": 0,
+      "complete": true,
+      "accounting": "Whole process wall charged, including loading/JIT/failure; not GPU kernel active time"
+    },
+    {
+      "path": "../preflight/gpu_integration_01.log",
+      "sha256": "c73aa5b50f0531e59ee9f7f1b2e1d3789aebb39a16c01cde90c3c16bf9047698",
+      "wall_seconds": 2.22,
+      "cpu_user_seconds": 2.18,
+      "cpu_system_seconds": 0.4,
+      "exit_code": 1,
+      "complete": true,
+      "accounting": "Whole process wall charged, including loading/JIT/failure; not GPU kernel active time"
+    },
+    {
+      "path": "../preflight/gpu_integration_02.log",
+      "sha256": "ded87040b114357f9b46bf6aa63d0b7b137017d95651022e1d5b9bb11eb80600",
+      "wall_seconds": 13.66,
+      "cpu_user_seconds": 8.79,
+      "cpu_system_seconds": 1.47,
+      "exit_code": 0,
+      "complete": true,
+      "accounting": "Whole process wall charged, including loading/JIT/failure; not GPU kernel active time"
+    },
+    {
+      "path": "../preflight/gpu_math_01.log",
+      "sha256": "cb01457e374d673b7c1ad2b6abff6ce7a0f1e544920e5f3bf639c851a05dff9c",
+      "wall_seconds": 12.66,
+      "cpu_user_seconds": 9.59,
+      "cpu_system_seconds": 1.67,
+      "exit_code": 0,
+      "complete": true,
+      "accounting": "Whole process wall charged, including loading/JIT/failure; not GPU kernel active time"
+    },
+    {
+      "path": "../runs/dense_smoke_01/process.log",
+      "sha256": "c3116b741bca8e3da0ebd36c6f9c4dc78999e658868eb2e9f99b2ff45abe0548",
+      "wall_seconds": 8.2,
+      "cpu_user_seconds": 4.81,
+      "cpu_system_seconds": 0.71,
+      "exit_code": 1,
+      "complete": true,
+      "accounting": "Whole process wall charged, including loading/JIT/failure; not GPU kernel active time"
+    },
+    {
+      "path": "../runs/dense_smoke_02/process.log",
+      "sha256": "b729a623c2e8c83149c52cd3e31c94e068b21dd5f26ff6f157f889cedacdf88f",
+      "wall_seconds": 407.23,
+      "cpu_user_seconds": 189.62,
+      "cpu_system_seconds": 41.58,
+      "exit_code": 0,
+      "complete": true,
+      "accounting": "Whole process wall charged, including loading/JIT/failure; not GPU kernel active time"
+    },
+    {
+      "path": "../runs/integrated_smoke_01/process.log",
+      "sha256": "b0cd68b045b99e0dfa2081d3a846dde23f58fd107e834b2843592156f79fbcbb",
+      "wall_seconds": 1463.04,
+      "cpu_user_seconds": 1446.75,
+      "cpu_system_seconds": 19.18,
+      "exit_code": 0,
+      "complete": true,
+      "accounting": "Whole process wall charged, including loading/JIT/failure; not GPU kernel active time"
+    }
+  ],
+  "completed_gpu_process_seconds": 1935.3600000000001,
+  "measured_cpu_seconds": 1756.6,
+  "incomplete_logs": [],
+  "excluded_costs": "CPU build: first nvcc about70s wall estimate, bridge13.06s measured; shell/CPU analysis not fully metered. Do not call measured_cpu_seconds exhaustive.",
+  "weights": "Existing single read-only model snapshot; no weights copied or downloaded"
+}
