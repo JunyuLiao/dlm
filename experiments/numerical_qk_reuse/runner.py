@@ -454,7 +454,8 @@ def parse(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--support", choices=("legacy_junyu_mask", "native_mask"),
                         default="legacy_junyu_mask",
                         help="M1/M3 native-mask correction; native_dense/fresh_junyu_T are unaffected")
-    parser.add_argument("--output-mode", choices=("cached_scores", "routing_only_current_output"),
+    parser.add_argument("--output-mode", choices=("cached_scores", "routing_only_current_output",
+                                 "historical_route_preqk_current_output"),
                         default="cached_scores",
                         help="routing_only_current_output: stale-score routing decision, but current "
                              "QK for the final softmax/PV (Phase D successor); does not skip QK compute")

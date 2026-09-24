@@ -313,7 +313,8 @@ def parse(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--score-refresh-period", type=int, default=8)
     parser.add_argument("--support", choices=("legacy_junyu_mask", "native_mask"),
                         default="legacy_junyu_mask")
-    parser.add_argument("--output-mode", choices=("cached_scores", "routing_only_current_output"),
+    parser.add_argument("--output-mode", choices=("cached_scores", "routing_only_current_output",
+                                 "historical_route_preqk_current_output"),
                         default="cached_scores")
     parser.add_argument("--qualify-observer", action="store_true")
     parser.add_argument("--dense-timing-controls", action="store_true",

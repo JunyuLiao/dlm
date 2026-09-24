@@ -200,6 +200,93 @@ if tr is not None:
             tl.store(COUNTERS+base+2, pvops)
 
 
+if tr is not None:
+    @tr.jit
+    def _preqk_pv(QQ, KK, V, SKIP, ELIGIBLE, O, LSE, INVALID, COUNTERS,
+                  SQB, SQH, SQL, SKB, SKH, SKL, SVB, SVH, SVL,
+                  Q: tl.constexpr, K: tl.constexpr, H: tl.constexpr, HK: tl.constexpr,
+                  D: tl.constexpr, QB: tl.constexpr, KT: tl.constexpr,
+                  SCALE, WINDOW: tl.constexpr, TRACE: tl.constexpr):
+        """Current-QK/PV consumer that never touches a dropped tile.
+
+        Same 16-row output program and online-softmax accumulation as ``_pv``,
+        but the scores are formed here from current Q/K instead of read from a
+        materialized [B,H,Q,K] tensor. A dropped tile issues no K load, no V
+        load and no dot: the branch is taken before any of them. GQA is handled
+        by indexing the KV head, so no repeated K/V is materialized. Q/K/V
+        strides are explicit because the model hands us transposed (non
+        contiguous) [B,H,L,D] views; forcing a copy would re-introduce the
+        layout cost this consumer exists to avoid. The last dimension is
+        contiguous in every native layout we accept.
+        """
+        q16, h, batch = tl.program_id(0), tl.program_id(1), tl.program_id(2)
+        kh = h // (H // HK)
+        qb = q16 // 8
+        qi = q16*16 + tl.arange(0, 16)
+        ki = tl.arange(0, 64)
+        di = tl.arange(0, D)
+        rows = qi < Q
+        # The query tile is loaded once per program; dropped tiles cost nothing.
+        q_tile = tl.load(QQ+batch*SQB+h*SQH+qi[:, None]*SQL+di[None, :],
+                         rows[:, None], other=0.)
+        # Absolute query position inside this compact tensor, matching
+        # _attention_validity's ``arange(q_len) + (kv_len - q_len)``.
+        qpos = qi + (K - Q)
+        maximum = tl.full((16,), -float('inf'), tl.float32)
+        denom = tl.full((16,), 0., tl.float32)
+        output = tl.full((16, D), 0., tl.float32)
+        invalid = tl.full((16,), False, tl.int1)
+        visited = 0
+        kvloads = 0
+        qkdots = 0
+        for j in range(KT):
+            dest = ((batch*H+h)*QB+qb)*KT+j
+            eligible = tl.load(ELIGIBLE+dest)
+            drop = tl.load(SKIP+dest)
+            if eligible & ~drop:
+                visited += 1
+                kk = j*64+ki
+                k_tile = tl.load(KK+batch*SKB+kh*SKH+kk[:, None]*SKL+di[None, :],
+                                 kk[:, None] < K, other=0.)
+                kvloads += 1
+                score = tl.dot(q_tile, tl.trans(k_tile))
+                qkdots += 1
+                # Reference rounding (observe_scores): BF16 matmul output, then
+                # BF16 scaling, then FP32 for the softmax. Torch computes the
+                # scalar multiply in FP32 opmath and rounds back to BF16.
+                score = (score.to(tl.bfloat16).to(tl.float32)*SCALE).to(tl.bfloat16).to(tl.float32)
+                valid = rows[:, None] & (kk[None, :] < K)
+                if WINDOW > 0:
+                    valid = valid & (kk[None, :] >= (qpos[:, None] - WINDOW + 1))
+                bad = valid & ((score != score) | (score == float('inf')))
+                invalid = invalid | (tl.sum(bad.to(tl.int32), 1) > 0)
+                finite = valid & (score > -float('inf')) & (score < float('inf'))
+                clean = tl.where(finite, score, -float('inf'))
+                tile_max = tl.max(clean, 1)
+                next_max = tl.maximum(maximum, tile_max)
+                safe = tl.where(next_max > -float('inf'), next_max, 0.)
+                old_scale = tl.where(maximum > -float('inf'), lib.exp(maximum-safe), 0.)
+                p = lib.exp(clean-safe[:, None])
+                denom = old_scale*denom+tl.sum(p, 1)
+                output = old_scale[:, None]*output
+                v = tl.load(V+batch*SVB+kh*SVH+kk[:, None]*SVL+di[None, :],
+                            kk[:, None] < K, other=0.)
+                output += tl.dot(p.to(tl.bfloat16), v)
+                maximum = next_max
+        normalized = output/tl.maximum(denom[:, None], 1.e-30)
+        normalized = tl.where((denom > 0)[:, None] & ~invalid[:, None], normalized, 0.)
+        logz = tl.where((denom > 0) & ~invalid,
+                        maximum+lib.log(tl.maximum(denom, 1.e-30)), -float('inf'))
+        tl.store(O+((batch*H+h)*Q+qi[:, None])*D+di[None, :], normalized.to(tl.bfloat16), rows[:, None])
+        tl.store(LSE+(batch*H+h)*Q+qi, logz, rows)
+        tl.store(INVALID+(batch*H+h)*Q+qi, invalid, rows)
+        if TRACE:
+            base = ((batch*H+h)*tr.cdiv(Q, 16)+q16)*3
+            tl.store(COUNTERS+base+0, visited)
+            tl.store(COUNTERS+base+1, kvloads)
+            tl.store(COUNTERS+base+2, qkdots)
+
+
 def attention(scores, v, z=None, reference=None, *, sensitivity=None,
               log_threshold=-math.inf, skipped=None, eligible=None,
               trace=False, num_warps=8):
@@ -311,3 +398,59 @@ def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.in
                        nq, nk, h, hk, 32, 32, qb, kt, log_threshold, False,
                        num_warps=num_warps, num_stages=1, enable_fp_fusion=False)
     return Routing(skip, elig, bad_tiles)
+
+
+def preqk_attention(q, k, v, skipped, eligible, *, scale, window=None,
+                    is_causal=False, trace=False, num_warps=8):
+    """Current attention on a preselected support, skipping dropped tiles' QK.
+
+    ``skipped``/``eligible`` are the [B,H,Qtiles,Ktiles] bitmaps produced
+    earlier by ``route_only`` from the historical scores. Unlike
+    ``attention(scores, ...)``, no [B,H,Q,K] score tensor exists: each output
+    program forms current QK for retained tiles only.
+
+    Declared semantic difference from the score-consuming path: a *dropped*
+    tile's scores are never computed, so malformed values inside a dropped
+    tile cannot be detected here. That is intended -- those scores do not
+    reach the output -- and the historical scores that chose the support are
+    separately checked via ``route_only``'s ``invalid_tiles``. Retained tiles
+    are still checked and still zero + flag their rows.
+    """
+    if tr is None:
+        raise RuntimeError('Triton is required for the CUDA cached-score executor')
+    if is_causal:
+        raise ValueError('preqk consumer is qualified for the bidirectional decoder only')
+    for name, x in (('q', q), ('k', k), ('v', v)):
+        if x.ndim != 4 or x.dtype != torch.bfloat16 or not x.is_cuda:
+            raise ValueError(f'{name} must be a CUDA BF16 [B,heads,len,D] tensor')
+        if x.stride(-1) != 1:
+            raise ValueError(f'{name} must have a contiguous head dimension')
+    b, h, nq, d = q.shape
+    hk, nk = k.shape[1], k.shape[-2]
+    if k.shape != v.shape or k.shape[0] != b or q.device != k.device or v.device != k.device:
+        raise ValueError('k and v must share [B,KVH,K,D] geometry on q\'s device')
+    if not nq or not nk or not hk or h % hk or d != k.shape[-1] or d not in (64, 128, 256, 512):
+        raise ValueError('invalid dimensions/GQA')
+    if nk < nq:
+        raise ValueError('compact key range must contain the current queries')
+    qb, kt = tr.cdiv(nq, 128), tr.cdiv(nk, 64)
+    shape = (b, h, qb, kt)
+    for name, x in (('skipped', skipped), ('eligible', eligible)):
+        if x is None or x.shape != shape or x.dtype != torch.bool or x.device != q.device or not x.is_contiguous():
+            raise ValueError(f'{name} must be a contiguous CUDA bool {shape} bitmap')
+    bound = 0 if not window else int(window)
+    if bound < 0:
+        raise ValueError('window must be nonnegative')
+    out = torch.empty((b, h, nq, d), device=q.device, dtype=torch.bfloat16)
+    lse = torch.empty((b, h, nq), device=q.device, dtype=torch.float32)
+    invalid = torch.empty((b, h, nq), device=q.device, dtype=torch.bool)
+    counters = torch.zeros((b, h, tr.cdiv(nq, 16), 3) if trace else (1,),
+                           device=q.device, dtype=torch.int32)
+    _preqk_pv[(tr.cdiv(nq, 16), h, b)](q, k, v, skipped, eligible, out, lse, invalid, counters,
+                                       q.stride(0), q.stride(1), q.stride(2),
+                                       k.stride(0), k.stride(1), k.stride(2),
+                                       v.stride(0), v.stride(1), v.stride(2),
+                                       nq, nk, h, hk, d, qb, kt, float(scale), bound, trace,
+                                       num_warps=num_warps, num_stages=1, enable_fp_fusion=False)
+    state = torch.empty((1,), device=q.device, dtype=torch.float32)
+    return Output(out, skipped, eligible, lse, state, state, invalid, counters)

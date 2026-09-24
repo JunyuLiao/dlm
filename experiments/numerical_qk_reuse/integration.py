@@ -16,7 +16,7 @@ from experiments.diffusion_gemma_solattn_blasst_multibench.runner import _instal
 from experiments.value_direction_hopper.integration import Sketches
 from experiments.value_direction_hopper.query_adaptive import State
 from .cache import Identity, ScoreCache
-from .cached_executor import attention, route_only
+from .cached_executor import attention, preqk_attention, route_only
 
 SUPPORT_MODES = ('legacy_junyu_mask', 'native_mask')
 # cached_scores: production M1/M3 -- the routing decision AND the final
@@ -28,7 +28,14 @@ SUPPORT_MODES = ('legacy_junyu_mask', 'native_mask')
 # score_age 7 -- but the final softmax/PV always consumes freshly recomputed
 # current QK restricted to that retained support. This does NOT skip QK
 # compute; it is a support-reuse-only variant, not a faster relabeling of M1.
-OUTPUT_MODES = ('cached_scores', 'routing_only_current_output')
+# historical_route_preqk_current_output: same support and same current
+# attention output as routing_only_current_output, but the current QK of a
+# dropped tile is never computed. Only this mode physically avoids dropped
+# current QK; routing_only_current_output remains the full-QK diagnostic
+# reference that it is compared against.
+OUTPUT_MODES = ('cached_scores', 'routing_only_current_output',
+                'historical_route_preqk_current_output')
+PREQK_MODE = 'historical_route_preqk_current_output'
 
 
 @dataclass
@@ -69,6 +76,7 @@ class Attention:
         self.calls = self.score_calls = self.decision_calls = self.held_calls = 0
         self.current_qk_elements = self.reused_qk_elements = 0
         self.routing_only_extra_qk_elements = 0
+        self.preqk_calls = 0
         self.peak_score_bytes = 0
         self.unsupported_mask_refreshes = 0
         for name, module in adapter.model.named_modules():
@@ -155,6 +163,9 @@ class Attention:
             self.unsupported_mask_refreshes += int(mask is not None)
             current_for_output = score
         else:
+            # Score-cache reuse only. This is NOT avoided current-QK work:
+            # routing_only recomputes the whole thing below, and only the
+            # preqk mode actually leaves dropped tiles uncomputed.
             self.reused_qk_elements += b*h*nq*nk
             if self.output_mode == 'routing_only_current_output':
                 # The routing decision below still reads the stale cached
@@ -197,10 +208,23 @@ class Attention:
                 decision = Decision(route.skipped, route.eligible)
                 # Same retained tiles as the stale-score routing decision;
                 # the final softmax/PV consumes current, not cached, scores.
-                result = attention(current_for_output, v, skipped=route.skipped,
-                                   eligible=route.eligible, trace=self.trace)
+                if self.output_mode == PREQK_MODE:
+                    result = preqk_attention(q, k, v, route.skipped, route.eligible,
+                                             scale=scale, window=window,
+                                             is_causal=causal, trace=self.trace)
+                    self.preqk_calls += 1
+                else:
+                    result = attention(current_for_output, v, skipped=route.skipped,
+                                       eligible=route.eligible, trace=self.trace)
             self.cache.publish_decision(identity, self.step, decision)
             self.decision_calls += 1
+        elif self.output_mode == PREQK_MODE:
+            # Held support, current output, still no dropped-tile QK.
+            result = preqk_attention(q, k, v, entry.decision.skipped, entry.decision.eligible,
+                                     scale=scale, window=window, is_causal=causal,
+                                     trace=self.trace)
+            self.preqk_calls += 1
+            self.held_calls += 1
         else:
             scores_for_pv = current_for_output if self.output_mode == 'routing_only_current_output' else entry.scores
             result = attention(scores_for_pv, v, skipped=entry.decision.skipped,
@@ -217,7 +241,13 @@ class Attention:
                         source_k=source_nk, score_anchor=entry.score_step,
                         score_age=self.step-entry.score_step, score_refresh=plan.score_refresh,
                         decision_refresh=plan.decision_refresh, reason=plan.reason,
-                        current_qk_elements=b*h*nq*nk if current_for_output is not None else 0)
+                        current_qk_elements=b*h*nq*nk if current_for_output is not None else 0,
+                        # Dropped-tile QK is physically skipped only here; the
+                        # exact executed/skipped element counts follow from the
+                        # bitmap and (q, k) tails, computed offline.
+                        qk_mode=('materialized_full' if current_for_output is not None
+                                 else (PREQK_MODE if self.output_mode == PREQK_MODE
+                                       else 'cached_scores_reuse')))
         self.call_metadata.append(metadata)
         # Tiny per-layer physical-work reductions stay on device until finish.
         self.pending.append(((result.skipped & result.eligible).sum(), result.eligible.sum()))
@@ -253,6 +283,7 @@ class Attention:
                     unsupported_mask_refreshes=self.unsupported_mask_refreshes,
                     support=self.support, output_mode=self.output_mode,
                     routing_only_extra_qk_elements=self.routing_only_extra_qk_elements,
+                    preqk_consumer_calls=self.preqk_calls,
                     work_counter_scope='dispatch elements, not measured DRAM bytes',
                     cuda_graph_qualified=False, publication='same current CUDA stream')
 
