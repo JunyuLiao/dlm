@@ -37,14 +37,14 @@
 - Initial smoke includes JIT/cache/setup; no warm performance qualification.
 
 ## Execution checkpoint — inspect STATE before resuming
-- Host exouser@149.165.151.254, only H100; previous PID1413795 exited0; GPU checked again by M3 launcher.
+- Host exouser@149.165.151.254, only H100; M3 PID1417003 and prior PID1413795 exited0; no active model now.
 - Root `/home/exouser/dyh/numerical_qk_reuse_native_20260924`.
 - Immutable worker source `code_cp2`; completed `runs/integrated_smoke_01/process.log` (exit0,1463.04s).
-- Batch completed observer parity, dense timing controls, T4, M1 four. M3 ready, not yet started.
+- Batch completed observer parity, dense timing controls, T4, M1 four. M3 four complete:0/4, caps3/4, meanwall166s; all dispatch audits PASS.
 - Python `/home/exouser/miniconda3/envs/ljy_dlm/bin/python`.
 - Full model snapshot f7f5b7f5fa82ffc52addd066915886d497f5517b; no copied weights.
 - Private rebuilt libraries and native model hashes: build_identity.json / per-run config.
-- Last disk61GiB free; completed GPU-process1935.36s; measured CPU1756.60s plus explicitly unmetered build/analysis.
+- Last disk61GiB free; completed GPU-process2624.04s; measured CPU2447.09s plus explicitly unmetered build/analysis.
 - Never edit active source or shared build/environment. CPU analysis uses separate analysis_cp1.
 
 ## Resume
@@ -52,8 +52,8 @@
 2. After all M1: native_reuse_score.py with frozen manifest; native_reuse_audit_receipts.py.
 3. Redacted native_reuse_summarize.py: original dense quality + separate timing-control-root.
 4. Push four-question M1 checkpoint, then run same immutable code M3 decision-interval2.
-5. Complete four M3 requests; score/audit/report/push. No240 expansion this round.
-6. Separate exact stop-signal diagnostic is being prepared; never label it formal timing.
+5. Four-arm smoke_report.md/request_table.csv complete; M1/M3 both0/4. No240 expansion.
+6. Run scripts/native_reuse_stop_smoke.sh: one frozen ID2, dense observer parity then T/M1/M3. Six CPU tests pass. Diagnostic is not formal timing/quality.
 7. I-DLM preflight NOT_RUN applicability: no supported adapter/checkpoint found; do not invent stride.
 
 Local WSL directory `/mnt/e/dlm/numerical_qk_reuse_native_20260924`.

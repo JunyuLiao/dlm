@@ -1,0 +1,306 @@
+{
+  "schema": "numerical_reuse_execution_identity_v1",
+  "configs": [
+    {
+      "config_path": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/runs/dense_smoke_02/configs/smoke.native_dense.json",
+      "config_sha256": "58927a66a66c644e9e48be609533d7364326fed4906f9332cf867bd35bb7edf8",
+      "config": {
+        "beta": 3.0,
+        "condition": "native_dense",
+        "decision_interval": 1,
+        "diagnostic": false,
+        "dtype": "bfloat16",
+        "eos_enabled": true,
+        "fingerprint": "70a1199bb7bd9910f281b8fcd39573c517a8b8becf9164192544fc2ec89c9e65",
+        "gamma": 0.5,
+        "ids": [
+          "aime26/2",
+          "aime26/8",
+          "aime26/14",
+          "aime26/20"
+        ],
+        "library": null,
+        "m_ref": 14.258454322814941,
+        "manifest": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/results/numerical_qk_reuse_20260924/private/smoke_manifest.json",
+        "manifest_sha256": "ecae4fa7f496cbe06ca86696cec2de5ac922ff5194490ea1372505246dc55fe0",
+        "max_new_tokens": 8192,
+        "model": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+        "model_metadata_hashes": {
+          "config.json": "13b11d2fe87302cc2332c64eb9eb4ac305d9b8a123ffe9c5cb5b1920fc70c506",
+          "generation_config.json": "99334f763c3dbe8b161aeaca1c150a05344299fda2d2e4a0e1d342c744461200",
+          "model.safetensors.index.json": "6e33e8465d55fe6c7bc0a5453c7a4b341e6467d032c6ded82aaf439f61dac69a",
+          "tokenizer_config.json": "a284d1243b62be31faa9c13e1c28cece940c4abaa7bd9ad87b94f61b40687200"
+        },
+        "native_adaptive": true,
+        "phase": "smoke",
+        "plugin": null,
+        "policy": {
+          "global": {
+            "log_threshold": -3.1366905212402343
+          },
+          "local": {
+            "log_threshold": -1.0099318265914916
+          }
+        },
+        "policy_file": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/results/query_adaptive_v3/configs/frozen_policies.json",
+        "policy_name": "T_s50",
+        "policy_sha256": "af2688c56f152347265be1a5e59651bb8e4d1815f19838507c03301f87601ef1",
+        "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+        "schema": "numerical_qk_native_runner_v1",
+        "score_refresh_period": 8,
+        "seeds": [
+          42
+        ],
+        "source_hashes": {
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/__init__.py": "69d30589c650365c2202c234092c4c009b19973e04d7ba51c7bf3b49d8070a19",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/cache.py": "8a40d5968f9610c466b17698d935ef62a3486a1dd5478aec23e4c9c397735b95",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/cached_executor.py": "fd8ca3d499d27be216775ab22dcc3fb5fb5af2f9323756c2ac2ee88814d887fd",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/integration.py": "d7acab7538882a245c85c470da9b36cdbfcbbc37120c00e2990b33a8383c5b1f",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/reference.py": "9c68481f96892b06513b583648bb5c8add04db31d765cbd7ec3a35a5dd548266",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/runner.py": "d9de62ae4ee71a65006cfc197cebf3382f02f109953d97dd58cebf1b67f1e685",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/torch_bridge.cpp": "849d20a8abaf0fd44076aab40cc4100436eb3fe4dd683ecd0144bfa189d55cda",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/value_direction.cu": "ae5b1e82a1d5b0024fde18cf5cfe1a3f3dd835e2ad1d3f53053d3b681783fcfb",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/value_direction.h": "3d84caf53362ff061c0b91c45d97b02bb495b395a01a9870ea50efddf40adacb",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/cuda.py": "83e643d23c882376b1ff94078c8a28d0336d1ee0d7346915f78d44714e76a255",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/integration.py": "b58f74f78a27d998b27ab20c728d3b2595c831a10e967000091eca1332285f86",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/query_adaptive.py": "9c0a3b3746f9dbda067c915d2580f7f7e1bea63dd7bec929e10bda83216ac933",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/src/dllm/models/adapters/diffusion_gemma.py": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+          "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/site-packages/transformers/models/diffusion_gemma/generation_diffusion_gemma.py": "b814a6fc41492794c1f50ba71c750206684e25dfdd53932e0842675871fef0de"
+        },
+        "temperature": 0.0,
+        "thinking": true,
+        "timing_events": false,
+        "torch_library": null
+      }
+    },
+    {
+      "config_path": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/runs/integrated_smoke_01/configs/smoke.M1.json",
+      "config_sha256": "46dbd62062f5081966e6d9f9dda772f1ec312e79dd897db4f014f99fa4f6aa71",
+      "config": {
+        "beta": 3.0,
+        "condition": "M1",
+        "decision_interval": 1,
+        "diagnostic": false,
+        "dtype": "bfloat16",
+        "eos_enabled": true,
+        "fingerprint": "92d987f93285af7b5b141f0460fbf2eef59bb88844b082614e1de0ebdda00610",
+        "gamma": 0.5,
+        "ids": [
+          "aime26/2",
+          "aime26/8",
+          "aime26/14",
+          "aime26/20"
+        ],
+        "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+        "m_ref": 14.258454322814941,
+        "manifest": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/results/numerical_qk_reuse_20260924/private/smoke_manifest.json",
+        "manifest_sha256": "ecae4fa7f496cbe06ca86696cec2de5ac922ff5194490ea1372505246dc55fe0",
+        "max_new_tokens": 8192,
+        "model": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+        "model_metadata_hashes": {
+          "config.json": "13b11d2fe87302cc2332c64eb9eb4ac305d9b8a123ffe9c5cb5b1920fc70c506",
+          "generation_config.json": "99334f763c3dbe8b161aeaca1c150a05344299fda2d2e4a0e1d342c744461200",
+          "model.safetensors.index.json": "6e33e8465d55fe6c7bc0a5453c7a4b341e6467d032c6ded82aaf439f61dac69a",
+          "tokenizer_config.json": "a284d1243b62be31faa9c13e1c28cece940c4abaa7bd9ad87b94f61b40687200"
+        },
+        "native_adaptive": true,
+        "phase": "smoke",
+        "plugin": "experiments.numerical_qk_reuse.integration:install",
+        "policy": {
+          "global": {
+            "log_threshold": -3.1366905212402343
+          },
+          "local": {
+            "log_threshold": -1.0099318265914916
+          }
+        },
+        "policy_file": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/results/query_adaptive_v3/configs/frozen_policies.json",
+        "policy_name": "T_s50",
+        "policy_sha256": "af2688c56f152347265be1a5e59651bb8e4d1815f19838507c03301f87601ef1",
+        "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+        "schema": "numerical_qk_native_runner_v1",
+        "score_refresh_period": 8,
+        "seeds": [
+          42
+        ],
+        "source_hashes": {
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/torch_4c65c048754f9fb7/value_direction_torch_4c65c048754f9fb7.so": "824e8a7dfeac7990a9464d9e22fdaca97bdd3f401055db1ad301b71e87182a2a",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so": "7ef4c8cf417c16175d6d1a5d7b4304df792c3a7c1a66a1da4f41312cf166d819",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/__init__.py": "69d30589c650365c2202c234092c4c009b19973e04d7ba51c7bf3b49d8070a19",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/cache.py": "8a40d5968f9610c466b17698d935ef62a3486a1dd5478aec23e4c9c397735b95",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/cached_executor.py": "fd8ca3d499d27be216775ab22dcc3fb5fb5af2f9323756c2ac2ee88814d887fd",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/integration.py": "d7acab7538882a245c85c470da9b36cdbfcbbc37120c00e2990b33a8383c5b1f",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/reference.py": "9c68481f96892b06513b583648bb5c8add04db31d765cbd7ec3a35a5dd548266",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/runner.py": "d9de62ae4ee71a65006cfc197cebf3382f02f109953d97dd58cebf1b67f1e685",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/torch_bridge.cpp": "849d20a8abaf0fd44076aab40cc4100436eb3fe4dd683ecd0144bfa189d55cda",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/value_direction.cu": "ae5b1e82a1d5b0024fde18cf5cfe1a3f3dd835e2ad1d3f53053d3b681783fcfb",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/value_direction.h": "3d84caf53362ff061c0b91c45d97b02bb495b395a01a9870ea50efddf40adacb",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/cuda.py": "83e643d23c882376b1ff94078c8a28d0336d1ee0d7346915f78d44714e76a255",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/integration.py": "b58f74f78a27d998b27ab20c728d3b2595c831a10e967000091eca1332285f86",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/query_adaptive.py": "9c0a3b3746f9dbda067c915d2580f7f7e1bea63dd7bec929e10bda83216ac933",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/scripts/native_reuse_smoke_batch.py": "aa782a2b1f964f199dda95059add0d9773f3ff21f5d82bae2857bab58c701de9",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/src/dllm/models/adapters/diffusion_gemma.py": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+          "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/site-packages/transformers/models/diffusion_gemma/generation_diffusion_gemma.py": "b814a6fc41492794c1f50ba71c750206684e25dfdd53932e0842675871fef0de"
+        },
+        "temperature": 0.0,
+        "thinking": true,
+        "timing_events": true,
+        "torch_library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/torch_4c65c048754f9fb7/value_direction_torch_4c65c048754f9fb7.so"
+      }
+    },
+    {
+      "config_path": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/runs/integrated_smoke_01/configs/smoke.fresh_junyu_T.json",
+      "config_sha256": "f9fb128fe84fe98999315c96c0c85f0235ad97fb5f8ebd2cc331700295745c9b",
+      "config": {
+        "beta": 3.0,
+        "condition": "fresh_junyu_T",
+        "decision_interval": 1,
+        "diagnostic": false,
+        "dtype": "bfloat16",
+        "eos_enabled": true,
+        "fingerprint": "c4d016c6d743fd9a32b9b71051f76e233741338548e5d6325eb259c9902beb85",
+        "gamma": 0.5,
+        "ids": [
+          "aime26/2",
+          "aime26/8",
+          "aime26/14",
+          "aime26/20"
+        ],
+        "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+        "m_ref": 14.258454322814941,
+        "manifest": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/results/numerical_qk_reuse_20260924/private/smoke_manifest.json",
+        "manifest_sha256": "ecae4fa7f496cbe06ca86696cec2de5ac922ff5194490ea1372505246dc55fe0",
+        "max_new_tokens": 8192,
+        "model": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+        "model_metadata_hashes": {
+          "config.json": "13b11d2fe87302cc2332c64eb9eb4ac305d9b8a123ffe9c5cb5b1920fc70c506",
+          "generation_config.json": "99334f763c3dbe8b161aeaca1c150a05344299fda2d2e4a0e1d342c744461200",
+          "model.safetensors.index.json": "6e33e8465d55fe6c7bc0a5453c7a4b341e6467d032c6ded82aaf439f61dac69a",
+          "tokenizer_config.json": "a284d1243b62be31faa9c13e1c28cece940c4abaa7bd9ad87b94f61b40687200"
+        },
+        "native_adaptive": true,
+        "phase": "smoke",
+        "plugin": null,
+        "policy": {
+          "global": {
+            "log_threshold": -3.1366905212402343
+          },
+          "local": {
+            "log_threshold": -1.0099318265914916
+          }
+        },
+        "policy_file": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/results/query_adaptive_v3/configs/frozen_policies.json",
+        "policy_name": "T_s50",
+        "policy_sha256": "af2688c56f152347265be1a5e59651bb8e4d1815f19838507c03301f87601ef1",
+        "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+        "schema": "numerical_qk_native_runner_v1",
+        "score_refresh_period": 8,
+        "seeds": [
+          42
+        ],
+        "source_hashes": {
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/torch_4c65c048754f9fb7/value_direction_torch_4c65c048754f9fb7.so": "824e8a7dfeac7990a9464d9e22fdaca97bdd3f401055db1ad301b71e87182a2a",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so": "7ef4c8cf417c16175d6d1a5d7b4304df792c3a7c1a66a1da4f41312cf166d819",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/__init__.py": "69d30589c650365c2202c234092c4c009b19973e04d7ba51c7bf3b49d8070a19",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/cache.py": "8a40d5968f9610c466b17698d935ef62a3486a1dd5478aec23e4c9c397735b95",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/cached_executor.py": "fd8ca3d499d27be216775ab22dcc3fb5fb5af2f9323756c2ac2ee88814d887fd",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/integration.py": "d7acab7538882a245c85c470da9b36cdbfcbbc37120c00e2990b33a8383c5b1f",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/reference.py": "9c68481f96892b06513b583648bb5c8add04db31d765cbd7ec3a35a5dd548266",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/runner.py": "d9de62ae4ee71a65006cfc197cebf3382f02f109953d97dd58cebf1b67f1e685",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/torch_bridge.cpp": "849d20a8abaf0fd44076aab40cc4100436eb3fe4dd683ecd0144bfa189d55cda",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/value_direction.cu": "ae5b1e82a1d5b0024fde18cf5cfe1a3f3dd835e2ad1d3f53053d3b681783fcfb",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/value_direction.h": "3d84caf53362ff061c0b91c45d97b02bb495b395a01a9870ea50efddf40adacb",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/cuda.py": "83e643d23c882376b1ff94078c8a28d0336d1ee0d7346915f78d44714e76a255",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/integration.py": "b58f74f78a27d998b27ab20c728d3b2595c831a10e967000091eca1332285f86",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/query_adaptive.py": "9c0a3b3746f9dbda067c915d2580f7f7e1bea63dd7bec929e10bda83216ac933",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/scripts/native_reuse_smoke_batch.py": "aa782a2b1f964f199dda95059add0d9773f3ff21f5d82bae2857bab58c701de9",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/src/dllm/models/adapters/diffusion_gemma.py": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+          "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/site-packages/transformers/models/diffusion_gemma/generation_diffusion_gemma.py": "b814a6fc41492794c1f50ba71c750206684e25dfdd53932e0842675871fef0de"
+        },
+        "temperature": 0.0,
+        "thinking": true,
+        "timing_events": true,
+        "torch_library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/torch_4c65c048754f9fb7/value_direction_torch_4c65c048754f9fb7.so"
+      }
+    },
+    {
+      "config_path": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/runs/m3_smoke_01/configs/smoke.M3.json",
+      "config_sha256": "641220c8c6180f3b7ca29e71f586838b35801f9f4fb064034de0535cfa6cccff",
+      "config": {
+        "beta": 3.0,
+        "condition": "M3",
+        "decision_interval": 2,
+        "diagnostic": false,
+        "dtype": "bfloat16",
+        "eos_enabled": true,
+        "fingerprint": "fe642d9143093ab9cb7c12590e8850e2b9e4f2beaf349eef4a70f8317c77153f",
+        "gamma": 0.5,
+        "ids": [
+          "aime26/2",
+          "aime26/8",
+          "aime26/14",
+          "aime26/20"
+        ],
+        "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+        "m_ref": 14.258454322814941,
+        "manifest": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/results/numerical_qk_reuse_20260924/private/smoke_manifest.json",
+        "manifest_sha256": "ecae4fa7f496cbe06ca86696cec2de5ac922ff5194490ea1372505246dc55fe0",
+        "max_new_tokens": 8192,
+        "model": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+        "model_metadata_hashes": {
+          "config.json": "13b11d2fe87302cc2332c64eb9eb4ac305d9b8a123ffe9c5cb5b1920fc70c506",
+          "generation_config.json": "99334f763c3dbe8b161aeaca1c150a05344299fda2d2e4a0e1d342c744461200",
+          "model.safetensors.index.json": "6e33e8465d55fe6c7bc0a5453c7a4b341e6467d032c6ded82aaf439f61dac69a",
+          "tokenizer_config.json": "a284d1243b62be31faa9c13e1c28cece940c4abaa7bd9ad87b94f61b40687200"
+        },
+        "native_adaptive": true,
+        "phase": "smoke",
+        "plugin": "experiments.numerical_qk_reuse.integration:install",
+        "policy": {
+          "global": {
+            "log_threshold": -3.1366905212402343
+          },
+          "local": {
+            "log_threshold": -1.0099318265914916
+          }
+        },
+        "policy_file": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/results/query_adaptive_v3/configs/frozen_policies.json",
+        "policy_name": "T_s50",
+        "policy_sha256": "af2688c56f152347265be1a5e59651bb8e4d1815f19838507c03301f87601ef1",
+        "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+        "schema": "numerical_qk_native_runner_v1",
+        "score_refresh_period": 8,
+        "seeds": [
+          42
+        ],
+        "source_hashes": {
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/torch_4c65c048754f9fb7/value_direction_torch_4c65c048754f9fb7.so": "824e8a7dfeac7990a9464d9e22fdaca97bdd3f401055db1ad301b71e87182a2a",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so": "7ef4c8cf417c16175d6d1a5d7b4304df792c3a7c1a66a1da4f41312cf166d819",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/__init__.py": "69d30589c650365c2202c234092c4c009b19973e04d7ba51c7bf3b49d8070a19",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/cache.py": "8a40d5968f9610c466b17698d935ef62a3486a1dd5478aec23e4c9c397735b95",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/cached_executor.py": "fd8ca3d499d27be216775ab22dcc3fb5fb5af2f9323756c2ac2ee88814d887fd",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/integration.py": "d7acab7538882a245c85c470da9b36cdbfcbbc37120c00e2990b33a8383c5b1f",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/reference.py": "9c68481f96892b06513b583648bb5c8add04db31d765cbd7ec3a35a5dd548266",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/numerical_qk_reuse/runner.py": "d9de62ae4ee71a65006cfc197cebf3382f02f109953d97dd58cebf1b67f1e685",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/torch_bridge.cpp": "849d20a8abaf0fd44076aab40cc4100436eb3fe4dd683ecd0144bfa189d55cda",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/value_direction.cu": "ae5b1e82a1d5b0024fde18cf5cfe1a3f3dd835e2ad1d3f53053d3b681783fcfb",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/csrc/value_direction.h": "3d84caf53362ff061c0b91c45d97b02bb495b395a01a9870ea50efddf40adacb",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/cuda.py": "83e643d23c882376b1ff94078c8a28d0336d1ee0d7346915f78d44714e76a255",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/integration.py": "b58f74f78a27d998b27ab20c728d3b2595c831a10e967000091eca1332285f86",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/experiments/value_direction_hopper/query_adaptive.py": "9c0a3b3746f9dbda067c915d2580f7f7e1bea63dd7bec929e10bda83216ac933",
+          "/home/exouser/dyh/numerical_qk_reuse_native_20260924/code_cp2/src/dllm/models/adapters/diffusion_gemma.py": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+          "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/site-packages/transformers/models/diffusion_gemma/generation_diffusion_gemma.py": "b814a6fc41492794c1f50ba71c750206684e25dfdd53932e0842675871fef0de"
+        },
+        "temperature": 0.0,
+        "thinking": true,
+        "timing_events": true,
+        "torch_library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/torch_4c65c048754f9fb7/value_direction_torch_4c65c048754f9fb7.so"
+      }
+    }
+  ],
+  "authority": "Loaded module and binary hashes, not latest report Git HEAD"
+}
