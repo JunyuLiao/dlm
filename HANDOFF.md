@@ -13,7 +13,7 @@
 - Mathematical contract, cache lifecycle, cached-score executor, native runner exist.
 - Runner/cache: 11 local CPU checks passed; combined discovery also reports missing
   local pytest for the separate Torch math suite. Remote CPU math subsequently passed: 4 math + 5 cache tests, 2 CUDA tests skipped.
-- Native dense:4 complete,3/4 correct. Fresh Junyu kernel:12/12 synthetic PASS; natural T pending.
+- Native dense:4 complete,3/4 correct. Fresh Junyu kernel:12/12 synthetic PASS; first2 natural T requests complete.
 - M1/M3 synthetic integration passed; natural generation remains pending.
 - Historical failures/results are unchanged.
 
@@ -53,4 +53,4 @@ From WSL: `cd /mnt/e/dlm/numerical_qk_reuse_native_20260924`.
 CPU local: `python -m unittest discover -s tests -p test_numerical_reuse_cache.py -v`.
 Runner contract: `python -m unittest discover -s tests -p test_numerical_qk_runner.py -v`.
 Remote math: `CUDA_VISIBLE_DEVICES='' PYTHONPATH=src:. OMP_NUM_THREADS=4 <python> -m pytest tests/test_numerical_reuse_math.py -q`.
-Dense job exited normally. Read STATE.json for latest active job before launch.
+Dense completed. Active PID1413795/PGID1413792/SID1413792 runs integrated_smoke_01 (fresh T then M1 only); do not duplicate.
