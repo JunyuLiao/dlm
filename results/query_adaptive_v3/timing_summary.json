@@ -1,0 +1,107 @@
+{
+  "complete": true,
+  "table": [
+    {
+      "condition": "native_dense",
+      "n": 260,
+      "profile_n": 26,
+      "mean_e2e_seconds": 0.5837528070184187,
+      "mean_decoder_seconds": 0.22832305101247938,
+      "mean_prefix_encoding_seconds": 0.23292427591177137,
+      "mean_unattributed_residual_seconds": null,
+      "mean_sensitivity_update_seconds": 7.142153815724528e-05,
+      "mean_steps": 4.0,
+      "speed_ratio_vs_native_dense": 1.0
+    },
+    {
+      "condition": "kernel_dense",
+      "n": 260,
+      "profile_n": 26,
+      "mean_e2e_seconds": 0.6164515760933192,
+      "mean_decoder_seconds": 0.26447831784761866,
+      "mean_prefix_encoding_seconds": 0.23288640007605924,
+      "mean_unattributed_residual_seconds": null,
+      "mean_sensitivity_update_seconds": 7.369846155723701e-05,
+      "mean_steps": 4.076923076923077,
+      "speed_ratio_vs_native_dense": 0.9469564677210743
+    },
+    {
+      "condition": "unweighted_s50",
+      "n": 260,
+      "profile_n": 26,
+      "mean_e2e_seconds": 0.6698512720830667,
+      "mean_decoder_seconds": 0.3677841157179612,
+      "mean_prefix_encoding_seconds": 0.23292581646259014,
+      "mean_unattributed_residual_seconds": null,
+      "mean_sensitivity_update_seconds": 9.745107673538419e-05,
+      "mean_steps": 4.730769230769231,
+      "speed_ratio_vs_native_dense": 0.8714662960974848
+    },
+    {
+      "condition": "CT_s50",
+      "n": 260,
+      "profile_n": 26,
+      "mean_e2e_seconds": 0.663219175397311,
+      "mean_decoder_seconds": 0.3356989270723783,
+      "mean_prefix_encoding_seconds": 0.23289773853008564,
+      "mean_unattributed_residual_seconds": null,
+      "mean_sensitivity_update_seconds": 0.00846599139810468,
+      "mean_steps": 4.584615384615384,
+      "speed_ratio_vs_native_dense": 0.8801808341393524
+    },
+    {
+      "condition": "unweighted_s70",
+      "n": 260,
+      "profile_n": 26,
+      "mean_e2e_seconds": 1.5599311324973735,
+      "mean_decoder_seconds": 1.3860138796292818,
+      "mean_prefix_encoding_seconds": 0.2328987708458534,
+      "mean_unattributed_residual_seconds": null,
+      "mean_sensitivity_update_seconds": 0.00034385107600918186,
+      "mean_steps": 16.453846153846154,
+      "speed_ratio_vs_native_dense": 0.3742170374430947
+    },
+    {
+      "condition": "CT_s70",
+      "n": 260,
+      "profile_n": 26,
+      "mean_e2e_seconds": 0.8792654178033654,
+      "mean_decoder_seconds": 0.7301765726529635,
+      "mean_prefix_encoding_seconds": 0.23292401005671576,
+      "mean_unattributed_residual_seconds": null,
+      "mean_sensitivity_update_seconds": 0.018574603086194165,
+      "mean_steps": 7.492307692307692,
+      "speed_ratio_vs_native_dense": 0.6639096627691621
+    },
+    {
+      "condition": "T_s50",
+      "n": 260,
+      "profile_n": 26,
+      "mean_e2e_seconds": 0.6502205660360723,
+      "mean_decoder_seconds": 0.28196872535118694,
+      "mean_prefix_encoding_seconds": 0.23288215461144082,
+      "mean_unattributed_residual_seconds": null,
+      "mean_sensitivity_update_seconds": 0.007083382123221572,
+      "mean_steps": 4.453846153846154,
+      "speed_ratio_vs_native_dense": 0.8977765969125527
+    },
+    {
+      "condition": "T_s70",
+      "n": 260,
+      "profile_n": 26,
+      "mean_e2e_seconds": 0.8398396142230082,
+      "mean_decoder_seconds": 0.4586427186819223,
+      "mean_prefix_encoding_seconds": 0.23286920048640322,
+      "mean_unattributed_residual_seconds": null,
+      "mean_sensitivity_update_seconds": 0.011668507086328014,
+      "mean_steps": 6.7846153846153845,
+      "speed_ratio_vs_native_dense": 0.6950765326287776
+    }
+  ],
+  "repeats": 2,
+  "rows": 130,
+  "warmup": "One row per condition, excluded",
+  "interleaving": "Rotated condition order by example and repeat",
+  "precision": "E2E synchronized wall from all untraced runs; decoder/policy CUDA events from one task-balanced paired example per task and repeat",
+  "caveat": "Profiled subset is the same across conditions but is not the full 130 prompts. E2E-minus-decoder-minus-encoder subtracts different runs/populations and must not be interpreted as fixed overhead; other CPU work is unattributed"
+}

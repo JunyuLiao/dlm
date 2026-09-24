@@ -1,0 +1,227 @@
+{
+  "schema": "query_adaptive_v1",
+  "source": "/media/volume/new-dllm/dlm-migrated-20260921/dlm/results/value_direction_sparsity_steps_v2",
+  "model": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "library": "/home/exouser/ljy/dlm/results/query_adaptive_v1/build/value_direction_44d4a0ba1f697d4a.so",
+  "torch_library": "/home/exouser/ljy/dlm/results/query_adaptive_v1/build/torch_c27183cf1226bde0/value_direction_torch_c27183cf1226bde0.so",
+  "native_dense_backend": "Original SDPA; local window and numeric path differ from the matched kernel",
+  "baseline_binary": "/media/volume/new-dllm/dlm-migrated-20260921/dlm/results/value_direction_hopper_v1/build/value_direction_873c3073e54a37b8.so",
+  "source_hashes": {
+    "/home/exouser/ljy/dlm/experiments/value_direction_hopper/query_adaptive_study.py": "561e409fbdf5af2de42505444f2c9e26f2c830a360fc0ff872be8304d14f66cf",
+    "/home/exouser/ljy/dlm/experiments/value_direction_hopper/query_adaptive.py": "9c0a3b3746f9dbda067c915d2580f7f7e1bea63dd7bec929e10bda83216ac933",
+    "/home/exouser/ljy/dlm/experiments/value_direction_hopper/integration.py": "b58f74f78a27d998b27ab20c728d3b2595c831a10e967000091eca1332285f86",
+    "/home/exouser/ljy/dlm/experiments/value_direction_hopper/cuda.py": "83e643d23c882376b1ff94078c8a28d0336d1ee0d7346915f78d44714e76a255",
+    "/home/exouser/ljy/dlm/experiments/value_direction_hopper/csrc/value_direction.cu": "ae5b1e82a1d5b0024fde18cf5cfe1a3f3dd835e2ad1d3f53053d3b681783fcfb",
+    "/home/exouser/ljy/dlm/experiments/value_direction_hopper/csrc/value_direction.h": "3d84caf53362ff061c0b91c45d97b02bb495b395a01a9870ea50efddf40adacb",
+    "/home/exouser/ljy/dlm/experiments/value_direction_hopper/csrc/torch_bridge.cpp": "849d20a8abaf0fd44076aab40cc4100436eb3fe4dd683ecd0144bfa189d55cda",
+    "/home/exouser/ljy/dlm/src/dllm/models/adapters/diffusion_gemma.py": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+    "/home/exouser/ljy/dlm/experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+    "/home/exouser/ljy/dlm/experiments/diffusion_gemma_solattn_blasst_multibench/runner.py": "3bd732c274761b8ed2735c5cea33921c8739649bbdfb83d9176c8531b4656459",
+    "/media/volume/new-dllm/dlm-migrated-20260921/dlm/results/value_direction_sparsity_steps_v2/configuration.json": "35d6bfbb972a8817b9c43ba7de7a5fd06fbe23d5b76420e5340e7f7371f9a8f7",
+    "/media/volume/new-dllm/dlm-migrated-20260921/dlm/results/value_direction_sparsity_steps_v2/manifest.json": "c0d87ef6f81e07d04e13b34ab723a8680ac4965e650ed298c6bb0f839ef7cbfb",
+    "/media/volume/new-dllm/dlm-migrated-20260921/dlm/results/value_direction_sparsity_steps_v2/calibration_manifest.json": "b17225706ea86acb5727c592bd7959c22542cd2bb6b8c4827d40cb20109d7138",
+    "/home/exouser/ljy/dlm/results/query_adaptive_v1/build/value_direction_44d4a0ba1f697d4a.so": "42be60fdb05d28ae41757553df5c369f8969c97e65bd914f68ba70dfd87b1665",
+    "/home/exouser/ljy/dlm/results/query_adaptive_v1/build/torch_c27183cf1226bde0/value_direction_torch_c27183cf1226bde0.so": "ca0ccbe8e78630740432e646f0fdb9f9efa6f79ad1c47546aad3ef392a7d48b9",
+    "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.12/site-packages/transformers/models/diffusion_gemma/generation_diffusion_gemma.py": "cded57b7e365f0265b1c088e993c358b5f70acdf48055fce396540b4d9d691bc"
+  },
+  "base_policies": {
+    "50": {
+      "global": {
+        "log_threshold": -3.2366905212402344
+      },
+      "local": {
+        "log_threshold": -1.1099318265914917
+      }
+    },
+    "70": {
+      "global": {
+        "log_threshold": -2.2409701347351074
+      },
+      "local": {
+        "log_threshold": -0.18442977964878082
+      }
+    }
+  },
+  "methods": {
+    "native_dense": {
+      "name": "native_dense",
+      "method": "native_dense",
+      "allocation": "normal",
+      "bootstrap": false
+    },
+    "kernel_dense": {
+      "name": "kernel_dense",
+      "method": "kernel_dense",
+      "allocation": "normal",
+      "bootstrap": false
+    },
+    "unweighted": {
+      "name": "unweighted",
+      "method": "unweighted",
+      "allocation": "normal",
+      "bootstrap": false
+    },
+    "M": {
+      "name": "M",
+      "method": "M",
+      "allocation": "normal",
+      "bootstrap": false
+    },
+    "C": {
+      "name": "C",
+      "method": "C",
+      "allocation": "normal",
+      "bootstrap": false
+    },
+    "T": {
+      "name": "T",
+      "method": "T",
+      "allocation": "normal",
+      "bootstrap": false
+    },
+    "MT": {
+      "name": "MT",
+      "method": "MT",
+      "allocation": "normal",
+      "bootstrap": false
+    },
+    "CT": {
+      "name": "CT",
+      "method": "CT",
+      "allocation": "normal",
+      "bootstrap": false
+    },
+    "CT_shuffle": {
+      "name": "CT_shuffle",
+      "method": "CT",
+      "allocation": "shuffle",
+      "bootstrap": false
+    },
+    "CT_uniform": {
+      "name": "CT_uniform",
+      "method": "CT",
+      "allocation": "uniform",
+      "bootstrap": false
+    },
+    "bootstrap_unweighted": {
+      "name": "bootstrap_unweighted",
+      "method": "unweighted",
+      "allocation": "normal",
+      "bootstrap": true
+    },
+    "bootstrap_CT": {
+      "name": "bootstrap_CT",
+      "method": "CT",
+      "allocation": "normal",
+      "bootstrap": true
+    }
+  },
+  "conditions": [
+    [
+      "native_dense",
+      null
+    ],
+    [
+      "kernel_dense",
+      null
+    ],
+    [
+      "unweighted",
+      50
+    ],
+    [
+      "M",
+      50
+    ],
+    [
+      "C",
+      50
+    ],
+    [
+      "T",
+      50
+    ],
+    [
+      "MT",
+      50
+    ],
+    [
+      "CT",
+      50
+    ],
+    [
+      "CT_shuffle",
+      50
+    ],
+    [
+      "CT_uniform",
+      50
+    ],
+    [
+      "bootstrap_unweighted",
+      50
+    ],
+    [
+      "bootstrap_CT",
+      50
+    ],
+    [
+      "unweighted",
+      70
+    ],
+    [
+      "M",
+      70
+    ],
+    [
+      "C",
+      70
+    ],
+    [
+      "T",
+      70
+    ],
+    [
+      "MT",
+      70
+    ],
+    [
+      "CT",
+      70
+    ],
+    [
+      "CT_shuffle",
+      70
+    ],
+    [
+      "CT_uniform",
+      70
+    ],
+    [
+      "bootstrap_unweighted",
+      70
+    ],
+    [
+      "bootstrap_CT",
+      70
+    ]
+  ],
+  "seed": 42,
+  "projection_seed": 1729,
+  "rank": 32,
+  "beta": 3.0,
+  "gamma": 0.5,
+  "physical_tile": [
+    128,
+    64
+  ],
+  "canvas": 256,
+  "max_steps": 48,
+  "temperature": "native 0.8 to 0.4, t=.4+.4*(remaining_step/48)",
+  "margin": "Top-2 processed-logit gap multiplied by native temperature; the frozen run has only this logits processor",
+  "calibration": "26 disjoint task-balanced prompts; each policy tested on complete native adaptive generation; coordinate bisection, max 7 points; local/global measured independently",
+  "sparsity": "summed skipped eligible 128x64 physical tiles divided by summed eligible, across complete denoising; prefix encoding excluded",
+  "exposure": "The 130 final questions have been repeatedly examined; development benchmark, not fresh held-out confirmation",
+  "fingerprint": "fe3a858cddf6a6913c9d7196185362979389c9ce17597507d6d2ac3fd289b994"
+}
