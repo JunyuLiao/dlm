@@ -216,7 +216,9 @@ def render(summary: dict, audit_documents: list[dict], summary_path: Path | None
                    and pair.get("cross_load_call_match") is True and pair.get("performance_qualified") is False]
     lines.extend(["", f"Separate dense timing controls: {len(timing_rows)} retry receipts; "
                   "the original dense quality rows above remain unchanged. All reported comparisons are "
-                  "exploratory because cold/JIT state is unknown.", "",
+                  "exploratory because cold/JIT state is unknown.",
+                  f"Dense timing-control absolute means: whole wall {_mean(timing_rows, 'whole_wall_seconds', ' s', 3)}; "
+                  f"initial-prefill-excluded device timeline {_mean(timing_rows, 'device_generation_timeline_seconds', ' s', 3)}.", "",
                   "| Matched comparison | Questions | Whole-wall dense retry / method (geomean [bootstrap 95% CI]) | Device-timeline dense retry / method (geomean [bootstrap 95% CI]) |",
                   "|---|---:|---:|---:|"])
     for arm in ARMS[1:]:
@@ -229,7 +231,8 @@ def render(summary: dict, audit_documents: list[dict], summary_path: Path | None
                   "GLOBAL/LOCAL percentages use only matched audits. "
                   "The dispatch audit verifies calls and routing, not physical memory traffic.", "",
                   "Limits: four questions and one seed do not establish quality noninferiority or a stable speedup. "
-                  "Synthetic mask qualification does not settle any live-model mask semantic discrepancy. "
+                  "Pinned Junyu applies a query-relative LOCAL lower window bound; installed native SDPA attends its supplied truncated prefix plus canvas. "
+                  "T/M1/M3 inherit the Junyu rule, so dense/T differences cannot all be attributed to numerical reuse. "
                   "CUDA graph performance is unqualified. The report is numerical only; it does not infer method success."])
     if summary_path is not None:
         digest = hashlib.sha256(summary_path.read_bytes()).hexdigest()
@@ -250,7 +253,7 @@ def main() -> None:
     audits = [_load(path, "numerical_reuse_dispatch_audit_v1") for path in args.dispatch_audit]
     rendered = render(summary, audits, args.summary, args.dispatch_audit)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(rendered, encoding="utf-8")
+    args.output.write_text(rendered, encoding="utf-8", newline="\n")
     print(args.output)
 
 

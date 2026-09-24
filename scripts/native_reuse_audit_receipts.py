@@ -9,6 +9,20 @@ from pathlib import Path
 def audit(path):
     data = json.loads(path.read_text())
     arm = data['condition']
+    if arm == 'fresh_junyu_T':
+        rows = data['routing']
+        assert rows and all(0 <= r['skipped'] <= r['eligible'] for r in rows)
+        by_kind = {}
+        for kind in ('global', 'local'):
+            selected = [r for r in rows if r['attention_type'] == kind]
+            by_kind[kind] = dict(per_head_records=len(selected),
+                eligible=sum(r['eligible'] for r in selected),
+                skipped=sum(r['skipped'] for r in selected))
+        return dict(id=data['id'], arm=arm, seed=data['seed'], source_fingerprint=data['fingerprint'],
+            raw_path=str(path.resolve()), raw_sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+            decoder_calls=data['total_decoder_calls'], per_canvas_calls=[c['decoder_calls'] for c in data['per_canvas']],
+            counters={}, physical_decision_units=by_kind, dispatch_audit='PASS',
+            scope='Original Junyu per-head physical PV records; current QK executed, element counts not recorded; not a memory-traffic profile')
     assert arm in ('M1', 'M3')
     rows = data['routing']
     counts = data['counters']
@@ -47,7 +61,7 @@ def audit(path):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, required=True)
-    parser.add_argument('--arm', choices=('M1', 'M3'), required=True)
+    parser.add_argument('--arm', choices=('M1', 'M3', 'fresh_junyu_T'), required=True)
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
     paths = sorted((args.root / 'smoke' / args.arm).glob('seed_*/*.attempt0.json'))

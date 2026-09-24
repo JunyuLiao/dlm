@@ -1,0 +1,36 @@
+{
+  "schema": "numerical_reuse_failure_index_v1",
+  "failures": [
+    {
+      "run_id": "gpu_integration_01",
+      "classification": "deployment packaging",
+      "cause": "Narrow source upload omitted a Python dependency imported by existing integration",
+      "model_loaded": false,
+      "resolution": "Add only required pinned Python dependency directories in private code_cp2; gpu_integration_02 passed",
+      "preserved_raw": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/preflight/gpu_integration_01.log",
+      "wall_seconds": 2.22
+    },
+    {
+      "run_id": "dense_smoke_01",
+      "classification": "source identity packaging",
+      "cause": "Identity hashing required pinned csrc files absent from narrow deployment",
+      "model_loaded": false,
+      "resolution": "Copy already-approved exact private build inputs into own deployment before any model worker; dense_smoke_02 completed",
+      "preserved_raw": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/runs/dense_smoke_01/process.log",
+      "wall_seconds": 8.20
+    },
+    {
+      "run_id": "local_combined_test_discovery",
+      "classification": "local dependency unavailable",
+      "cause": "Windows Python lacks pytest/Torch for separate math tests",
+      "resolution": "Run required CPU/GPU tests in existing private remote environment; no shared install"
+    }
+  ],
+  "negative_research_results": [
+    "M1 four complete attempt0:0/4 correct,4/4 unparsed,3/4 output cap",
+    "M3 R2 four complete attempt0:0/4 correct,4/4 unparsed,3/4 output cap",
+    "Avoided current QK and held selector calls do not establish generation speed or quality benefit"
+  ],
+  "approval_history": "Initial source transfer rejected, then user explicitly authorized own-H100 upload and exact files were uploaded. A separate revised build-script transfer rejection was not bypassed; original approved build script plus existing Ninja was used.",
+  "immutability": "All failed receipts and original quality outputs retained; no threshold, seed or scorer change after outcomes"
+}
