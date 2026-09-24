@@ -13,9 +13,12 @@ import torch
 from dllm.attention.blasst.core import _attention_type, _attention_validity
 from experiments.diffusion_gemma_jl_output_aware.projections import Projections
 from experiments.diffusion_gemma_solattn_blasst_multibench.runner import _install_dense
+from experiments.value_direction_hopper.integration import Sketches
 from experiments.value_direction_hopper.query_adaptive import State
 from .cache import Identity, ScoreCache
 from .cached_executor import attention
+
+SUPPORT_MODES = ('legacy_junyu_mask', 'native_mask')
 
 
 @dataclass
@@ -32,10 +35,17 @@ class NativeReuseState(State):
 
 class Attention:
     def __init__(self, adapter, thresholds, *, score_period=8, decision_interval=1,
-                 trace=False, max_cache_bytes=2 * 1024**3):
+                 trace=False, max_cache_bytes=2 * 1024**3, support='legacy_junyu_mask'):
+        if support not in SUPPORT_MODES:
+            raise ValueError(support)
+        self.support = support
         self.thresholds = thresholds
         self.cache = ScoreCache(score_period, decision_interval, max_cache_bytes)
         self.projections = Projections()
+        # Restores Junyu's producer-owned lease: unchanged encoder-cache V/norm
+        # sketches are reprojected only when the source object/version/shape
+        # actually changes, not on every decision-refresh call.
+        self.sketches = Sketches(adapter, self.projections, fused=False)
         self.query_sensitivity = None
         self.policy_selector = None
         self.trace = trace
@@ -44,7 +54,7 @@ class Attention:
         self.pending, self.call_metadata = [], []
         self.calls = self.score_calls = self.decision_calls = self.held_calls = 0
         self.current_qk_elements = self.reused_qk_elements = 0
-        self.projected_tokens = self.peak_score_bytes = 0
+        self.peak_score_bytes = 0
         self.unsupported_mask_refreshes = 0
         for name, module in adapter.model.named_modules():
             if type(module).__name__ == 'DiffusionGemmaEncoderModel':
@@ -100,7 +110,14 @@ class Attention:
         scale = float(scaling) if scaling is not None else d ** -.5
         # With mask=None this is the exact Junyu lower local bound. Align to64
         # to preserve original block boundaries and the sequential scan order.
-        crop = max(0, prefix - int(sliding_window) + 1) // 64 * 64 if sliding_window and mask is None else 0
+        # native_mask never narrows beyond the already-supplied cache/canvas
+        # keys: the installed native SDPA path ignores the sliding_window
+        # keyword entirely (ALL_ATTENTION_FUNCTIONS sdpa forward ignores extra
+        # kwargs) and DynamicSlidingWindowLayer already caps the stored
+        # encoder prefix at the source, so no additional query-relative crop
+        # is a correct model of what native dense actually attends.
+        window = None if self.support == 'native_mask' else sliding_window
+        crop = max(0, prefix - int(window) + 1) // 64 * 64 if window and mask is None else 0
         k, v = k[..., crop:, :], v[..., crop:, :].contiguous()
         nk = k.shape[-2]
         kind = _attention_type(module, sliding_window)
@@ -113,7 +130,7 @@ class Attention:
         plan = self.cache.plan(identity, self.step, force_refresh=mask is not None)
         self.cache.reserve(identity)  # before allocation
         if plan.score_refresh:
-            score = self.observe_scores(q, k, mask, scale, causal, sliding_window, crop)
+            score = self.observe_scores(q, k, mask, scale, causal, window, crop)
             self.cache.publish_scores(identity, self.step, score)
             valid = torch.isfinite(score).reshape(b, hk, h//hk, nq, nk).any((2, 3))
             self.valid_keys[layer] = valid
@@ -124,17 +141,17 @@ class Attention:
             self.reused_qk_elements += b*h*nq*nk
         entry = self.cache.get(identity)
         if plan.decision_refresh:
-            matrix = self.projections.get(layer, hk, d, 'gaussian', 32, 1729, v.device)
-            current = v.float()
-            projected = torch.matmul(current, matrix).contiguous()
             valid = self.valid_keys[layer]
-            ref = (current.square().sum(-1).masked_fill(~valid, 0.).sum(-1) /
-                   valid.sum(-1).clamp_min(1)).sqrt().clamp_min(1e-12).contiguous()
-            result = attention(entry.scores, v, projected, ref,
+            # Leased sketch: reprojects only the aligned suffix (current canvas
+            # plus the unaligned boundary) when the encoder-owned prefix source
+            # object/version/shape are unchanged from the prior call. A commit
+            # or new request invalidates the lease via Sketches' own encoder
+            # pre-hook; query-only changes within a canvas never do.
+            projected, ref = self.sketches.get(layer, v, valid, prefix - crop)
+            result = attention(entry.scores, v, projected.contiguous(), ref.contiguous(),
                                sensitivity=self.query_sensitivity,
                                log_threshold=float(self.thresholds[kind]['log_threshold']), trace=self.trace)
             self.cache.publish_decision(identity, self.step, Decision(result.skipped, result.eligible))
-            self.projected_tokens += b*hk*nk
             self.decision_calls += 1
         else:
             result = attention(entry.scores, v, skipped=entry.decision.skipped,
@@ -181,8 +198,11 @@ class Attention:
         return dict(attention_calls=self.calls, score_refresh_calls=self.score_calls,
                     decision_refresh_calls=self.decision_calls, held_decision_calls=self.held_calls,
                     current_qk_elements=self.current_qk_elements, reused_qk_elements=self.reused_qk_elements,
-                    projected_current_v_tokens=self.projected_tokens, peak_score_bytes=self.peak_score_bytes,
+                    projected_current_v_tokens=self.sketches.projected_tokens,
+                    reused_current_v_tokens=self.sketches.reused_tokens,
+                    peak_score_bytes=self.peak_score_bytes,
                     unsupported_mask_refreshes=self.unsupported_mask_refreshes,
+                    support=self.support,
                     work_counter_scope='dispatch elements, not measured DRAM bytes',
                     cuda_graph_qualified=False, publication='same current CUDA stream')
 
@@ -193,6 +213,7 @@ class Attention:
         self.cache.clear()
         self.sources.clear()
         self.valid_keys.clear()
+        self.sketches.close()
 
 
 @contextmanager
@@ -206,7 +227,8 @@ def install(adapter, config, condition):
     try:
         binding = _install_dense(adapter)
         router = Attention(adapter, config['policy'], score_period=config['score_refresh_period'],
-                           decision_interval=config['decision_interval'], trace=False)
+                           decision_interval=config['decision_interval'], trace=False,
+                           support=config.get('support', 'legacy_junyu_mask'))
         binding.runtime.attention_override = router
         state = NativeReuseState('T', router, m_ref=config['m_ref'], beta=config['beta'],
                                  gamma=config['gamma'], diagnostics=config['diagnostic'])

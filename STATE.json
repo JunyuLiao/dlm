@@ -1,52 +1,39 @@
 {
   "schema": 1,
-  "task": "native numerical QK reuse M1 then M3",
-  "status": "BOUNDED_M1_M3_DELIVERY_COMPLETE_NEGATIVE_SMOKE",
+  "task": "v6 recovery: diagnose negative numerical-QK smoke, recover one E2E point",
+  "status": "PHASE_A1_AND_REPAIR_CODE_LANDED_GPU_DIAGNOSTIC_NEXT",
   "branch": "research/numerical-qk-reuse-native-20260924",
-  "base_sha": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
-  "peer_fetched_sha": "b23f969a3c52417ba84a999ff7a31e3dd00bb697",
+  "checkpoint_sha_at_start": "c9f7808c3d89253b29480e2adc0dbd8eb87b733c",
+  "output_root": "results/numerical_qk_reuse_recovery_20260924",
+  "remote_root_new": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924",
+  "remote_root_old_readonly": "/home/exouser/dyh/numerical_qk_reuse_native_20260924",
   "executed_model_source_sha": "57f0ede6d8f7a7ecb62780ea15ef76f27c365899; actual module hashes in per-request config receipt",
-  "report_sha": "resolve with git HEAD; not a self-validating execution receipt",
-  "live_job": null,
-  "gpu_process_seconds": 3056.85,
-  "remote_root": "/home/exouser/dyh/numerical_qk_reuse_native_20260924",
-  "gpu_status_last_check": "idle; all own model processes exited0",
-  "disk_free_gib_last_check": 60,
-  "tests": {
-    "runner_cpu": "6 PASS",
-    "cache_cpu": "5 PASS",
-    "math_cpu": "4 PASS plus 5 cache PASS, 2 CUDA tests skipped",
-    "gpu": "6 math + 2 integration PASS; 12 fresh qualification cases PASS; two complete M1 dispatch audits PASS",
-    "fresh_kernel": "12/12 PASS including Q256 native dimensions; exact bitmaps",
-    "observer": "PASS same-instance plain/count/events token and calls parity",
-    "summary_cpu": "6 pytest PASS, remote CPU 0.10s",
-    "stop_observer_cpu": "6 PASS on remote Torch CPU, final source",
-    "exact_stop_observer_gpu": "PASS same-instance D plain/observed tokens and counts; all4 diagnostic arms match corresponding primary tokens/calls"
+  "model_snapshot": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "model_sliding_window": 1024,
+  "model_layer_types": "25/30 sliding_attention, 5/30 full_attention",
+  "gpu_status_last_check": "remote exouser@149.165.151.254 idle, no own PIDs; local WSL RTX4060 used only for CPU-cost unit tests",
+  "phaseA1_native_mask": {
+    "status": "DONE",
+    "code": "experiments/numerical_qk_reuse/integration.py Attention(support=legacy_junyu_mask|native_mask)",
+    "audit": "results/numerical_qk_reuse_recovery_20260924/native_mask_audit.{json,md}",
+    "test": "tests/test_numerical_reuse_native_mask.py",
+    "finding": "legacy==native for local-layer prefix<=768 (window1024-canvas256); legacy silently drops up to ~25% of native-legal prefix for the last canvas query once prefix>768. Shared identically by T/M1/M3, so it does not alone explain M1 losing to T."
   },
-  "controls": {
-    "native_dense": "4/4 complete; frozen quality3/4",
-    "fresh_junyu_T": "4/4 complete; frozen quality 3/4"
+  "phaseC_repair_code": {
+    "status": "CODE_AND_INVARIANCE_PROOF_DONE_NOT_YET_GPU_JUSTIFIED_OR_MEASURED",
+    "code": "experiments/numerical_qk_reuse/integration.py Attention now owns self.sketches = value_direction_hopper.integration.Sketches(...); decision-refresh calls sketches.get(layer, v, valid, prefix-crop) instead of a full-tensor recompute every call",
+    "proof": "tests/test_numerical_reuse_prefix_lease.py (2 GPU tests, output/phase invariance + commit-invalidation), results/numerical_qk_reuse_recovery_20260924/prefix_lease_repair.md",
+    "caveat": "Not yet selected as the Phase D fix; needs Phase B 5-cell diagnostic + Phase C warm PROFILE evidence first"
   },
-  "score_refresh_period": 8,
-  "decision_intervals": {
-    "M1": 1,
-    "M3": 2
-  },
-  "next_command": "python scripts/native_reuse_report.py --summary results/numerical_qk_reuse_20260924/smoke_summary.json --dispatch-audit results/numerical_qk_reuse_20260924/T_physical.json --dispatch-audit results/numerical_qk_reuse_20260924/M1_dispatch.json --dispatch-audit results/numerical_qk_reuse_20260924/M3_dispatch.json --output results/numerical_qk_reuse_20260924/smoke_report.md",
-  "next_gate": "No further natural expansion. Next distinct diagnostic: same-state/cache/support cached-output versus current-score output; not implemented/run yet.",
-  "forbidden_expansion": "No 240-request matrix before four-question complete-answer smoke review",
-  "last_verified_remote_sha": "58fa077816805dbdb90a07aeb0d90e057fe101ba",
-  "M1": "4/4 completed; frozen quality0/4; dispatch audits PASS; negative quality/performance evidence",
-  "M3": "4/4 complete; frozen quality0/4, cap3/4, meanwall166.0s; all dispatch audit PASS",
-  "remote_task_storage_mib": 662,
-  "remote_sha_note": "last_verified_remote_sha records previous verified delivery; obtain this report commit via git HEAD and verify ls-remote, not self-referential receipt",
-  "not_run": [
-    "240-request matrix",
-    "R3",
-    "sparsity curve",
-    "warm full-forward profile",
-    "same-support current-output comparison",
-    "I-DLM generation",
-    "CUDA Graph replay"
-  ]
+  "not_run_yet": [
+    "Phase A2 zero-temporal-approximation checks on real captured layer states",
+    "Phase B 5-cell (A-E) same-state/same-support diagnostic on IDs 2 and 8",
+    "Phase C warm PROFILE (separate process, decomposed components)",
+    "Phase D bounded 4-question natural-generation panel with the selected M1 successor",
+    "M3 R2 on the selected policy (only after M1 successor avoids wholesale failure)"
+  ],
+  "forbidden_expansion": "No 240-request matrix; at most 16 new primary outputs after qualification; M2/R3/ASR/model changes remain deferred",
+  "local_tests_passing": "34/34: tests/test_numerical_reuse_{integration,cache,math,stop,summary,prefix_lease,native_mask}.py, tests/test_numerical_qk_runner.py (run on local WSL RTX4060 CUDA, PYTHONPATH=src:.)",
+  "next_command": "ssh exouser@149.165.151.254; mkdir -p /home/exouser/dyh/numerical_qk_reuse_recovery_20260924; rsync repo (or git checkout) at this commit into a NEW immutable code_cp; run a bounded (<=2 canvas) real-model capture on AIME26 ids 2 and 8 for the Phase A2/B diagnostic",
+  "commit_discipline": "commit+push after each of: (1) this A1+repair-code milestone, (2) the A2/B GPU capture+diagnostic report, (3) the warm PROFILE, (4) the bounded Phase D panel + final HANDOFF"
 }
