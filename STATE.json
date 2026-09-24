@@ -1,0 +1,33 @@
+{
+  "schema": 1,
+  "task": "native numerical QK reuse M1 then M3",
+  "status": "CHECKPOINT1_WIP_GPU_UNQUALIFIED",
+  "branch": "research/numerical-qk-reuse-native-20260924",
+  "base_sha": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
+  "peer_fetched_sha": "b23f969a3c52417ba84a999ff7a31e3dd00bb697",
+  "executed_model_source_sha": null,
+  "report_sha": "resolve with git HEAD; not a self-validating execution receipt",
+  "live_job": null,
+  "gpu_process_seconds": 0,
+  "remote_root": "/home/exouser/dyh/numerical_qk_reuse_native_20260924",
+  "gpu_status_last_check": "idle",
+  "disk_free_gib_last_check": 61,
+  "tests": {
+    "runner_cpu": "6 PASS",
+    "cache_cpu": "5 PASS",
+    "math_cpu": "4 PASS plus 5 cache PASS, 2 CUDA tests skipped",
+    "gpu": "NOT_RUN"
+  },
+  "controls": {
+    "native_dense": "NOT_RUN",
+    "fresh_junyu_T": "NOT_RUN"
+  },
+  "score_refresh_period": 8,
+  "decision_intervals": {
+    "M1": 1,
+    "M3": 2
+  },
+  "next_command": "CUDA_VISIBLE_DEVICES='' PYTHONPATH=src:. OMP_NUM_THREADS=4 <native-python> -m pytest tests/test_numerical_reuse_math.py -q",
+  "next_gate": "CPU math, private native T build, M1 dispatch qualification",
+  "forbidden_expansion": "No 240-request matrix before four-question complete-answer smoke review"
+}
