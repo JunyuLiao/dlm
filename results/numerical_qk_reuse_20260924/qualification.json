@@ -1,0 +1,14 @@
+{
+  "status": "SYNTHETIC_GPU_QUALIFIED_MODEL_NOT_RUN",
+  "base_sha": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
+  "cpu": {"runner": 6, "cache": 5, "mathematical_reference": 4},
+  "gpu_math": {"passed": 6, "process_wall_seconds": 12.66, "cpu_user_seconds": 9.59, "cpu_system_seconds": 1.67,
+    "raw": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/preflight/gpu_math_01.log"},
+  "gpu_integration": {"passed": 2, "process_wall_seconds": 13.66, "cpu_user_seconds": 8.79, "cpu_system_seconds": 1.47,
+    "raw": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/preflight/gpu_integration_02.log",
+    "scope": "Synthetic actual CUDA calls; producer replaced by throwing spy on reuse; held-map current-V update, encoder invalidation, R1 equality, real score anchor at8"},
+  "failure_index": [{"run_id": "gpu_integration_01", "cause": "Narrow source archive omitted old runner's imported Python dependency directory", "classification": "packaging", "model_loaded": false, "exit_code": 1, "process_wall_seconds": 2.22, "preserved": true}],
+  "not_qualified": ["native model generation", "fresh Junyu T mathematical parity", "CUDA graph replay", "timing observer parity", "E2E speed or task quality"],
+  "native_modeling_sha256": "3f1a24f517b51470113c5181a53c3ddb07c05d01b8780a3a6d030497a231e2ec",
+  "native_generation_sha256": "b814a6fc41492794c1f50ba71c750206684e25dfdd53932e0842675871fef0de"
+}

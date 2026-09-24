@@ -9,12 +9,12 @@
 - Old vLLM P0 remains independent and unresolved. This is native Torch.
 
 ## Current status
-- WIP / GPU_UNQUALIFIED. No new model generation has run.
+- WIP / synthetic GPU tests PASS. No model generation has run.
 - Mathematical contract, cache lifecycle, cached-score executor, native runner exist.
 - Runner/cache: 11 local CPU checks passed; combined discovery also reports missing
   local pytest for the separate Torch math suite. Remote CPU math subsequently passed: 4 math + 5 cache tests, 2 CUDA tests skipped.
 - Native dense and fresh Junyu T have NOT yet reproduced in this round.
-- M1 adapter integration and M3 natural generation remain pending.
+- M1/M3 synthetic integration passed; natural generation remains pending.
 - Historical failures/results are unchanged.
 
 ## Implementation
@@ -37,7 +37,7 @@
 - Read-only Python: `/home/exouser/miniconda3/envs/ljy_dlm/bin/python`.
 - Torch 2.6.0+cu124; Transformers 5.11.0; Triton 3.2.0.
 - Full model snapshot: `/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b`.
-- Archived Junyu binaries absent; privately rebuilding exact pinned source.
+- Private pinned Junyu kernel/ATen bridge built; see build_identity.json.
 - Never deploy edits into an active worker. Private immutable source archives only.
 
 ## Immediate next actions
