@@ -1,0 +1,1621 @@
+{
+  "P_O_same_trajectory": {},
+  "cells": {
+    "aime26/14|B8_G": {
+      "amortized_ms_per_decoder_call_warm": 150.70048769979516,
+      "arm": "B8_G",
+      "attempt0_api_wall_s": 82.50633669900708,
+      "attempt0_outer_wall_s": 82.52362515800633,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 32,
+      "completion_token_hash": "7d44a8516600ab5426c99f39b01f5013137db093418059a88dc7c503752851b6",
+      "decoder_calls": 556,
+      "error": null,
+      "id": "aime26/14",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 8192,
+      "peak_allocated_bytes": 54821662720,
+      "per_canvas_calls": [
+        9,
+        7,
+        9,
+        11,
+        14,
+        16,
+        13,
+        10,
+        13,
+        17,
+        22,
+        18,
+        14,
+        17,
+        20,
+        20,
+        27,
+        17,
+        20,
+        21,
+        23,
+        12,
+        16,
+        20,
+        23,
+        29,
+        21,
+        19,
+        26,
+        19,
+        13,
+        20
+      ],
+      "quality": {
+        "capped": true,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": false,
+        "eos": false,
+        "parsed": false,
+        "scorer_correct": false
+      },
+      "summary": {
+        "history_summary_peak_bytes": 681820160,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 681820160,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 0,
+        "summary_hits": 0,
+        "summary_misses": 0,
+        "summary_peak_bytes": 0
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "length",
+      "warm_api_median_s": 83.78947116108611,
+      "warm_api_walls_s": [
+        83.78947116108611
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/14|D_native": {
+      "amortized_ms_per_decoder_call_warm": 147.9741941274199,
+      "arm": "D_native",
+      "attempt0_api_wall_s": 64.00352661311626,
+      "attempt0_outer_wall_s": 64.00754929496907,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 32,
+      "completion_token_hash": "1a72063f4c07fa6cc31c172c9d347414e5737d99f0534fec2f51320d57e6a83f",
+      "decoder_calls": 438,
+      "error": null,
+      "id": "aime26/14",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "static",
+      "ok": true,
+      "output_tokens": 8192,
+      "peak_allocated_bytes": 54127583744,
+      "per_canvas_calls": [
+        11,
+        12,
+        16,
+        20,
+        8,
+        13,
+        10,
+        16,
+        19,
+        12,
+        11,
+        12,
+        18,
+        16,
+        27,
+        16,
+        11,
+        7,
+        12,
+        11,
+        9,
+        8,
+        12,
+        10,
+        8,
+        14,
+        23,
+        21,
+        17,
+        11,
+        17,
+        10
+      ],
+      "quality": {
+        "capped": true,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": false,
+        "eos": false,
+        "parsed": false,
+        "scorer_correct": false
+      },
+      "summary": null,
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "full",
+      "termination": "length",
+      "warm_api_median_s": 64.81269702780992,
+      "warm_api_walls_s": [
+        64.81269702780992
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/14|G1_split": {
+      "amortized_ms_per_decoder_call_warm": 156.23959489929794,
+      "arm": "G1_split",
+      "attempt0_api_wall_s": 73.7032509339042,
+      "attempt0_outer_wall_s": 73.72056302800775,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 32,
+      "completion_token_hash": "59d6f0a00034bd6259481e6ade6713866be3d37e8e7aa39b71685c274e4ab3b0",
+      "decoder_calls": 476,
+      "error": null,
+      "id": "aime26/14",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 8192,
+      "peak_allocated_bytes": 55169346048,
+      "per_canvas_calls": [
+        12,
+        15,
+        13,
+        14,
+        8,
+        7,
+        6,
+        24,
+        10,
+        15,
+        15,
+        10,
+        9,
+        16,
+        22,
+        8,
+        10,
+        9,
+        15,
+        18,
+        23,
+        19,
+        14,
+        9,
+        11,
+        23,
+        21,
+        19,
+        17,
+        20,
+        23,
+        21
+      ],
+      "quality": {
+        "capped": true,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": false,
+        "eos": false,
+        "parsed": false,
+        "scorer_correct": false
+      },
+      "summary": {
+        "history_summary_peak_bytes": 1027604480,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 681820160,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 360,
+        "summary_hits": 2020,
+        "summary_misses": 0,
+        "summary_peak_bytes": 345784320
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "length",
+      "warm_api_median_s": 74.37004717206582,
+      "warm_api_walls_s": [
+        74.37004717206582
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/14|G3_split": {
+      "amortized_ms_per_decoder_call_warm": 152.65057299590563,
+      "arm": "G3_split",
+      "attempt0_api_wall_s": 77.99666546517983,
+      "attempt0_outer_wall_s": 78.01430768193677,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 32,
+      "completion_token_hash": "3cf37c5ca6ede172077f53a0276b2c06f7341481fab3c4ca0a83ff7a5a7ad0d5",
+      "decoder_calls": 517,
+      "error": null,
+      "id": "aime26/14",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 8192,
+      "peak_allocated_bytes": 55168560640,
+      "per_canvas_calls": [
+        15,
+        13,
+        14,
+        10,
+        14,
+        13,
+        13,
+        10,
+        14,
+        21,
+        22,
+        21,
+        17,
+        20,
+        17,
+        15,
+        21,
+        14,
+        13,
+        20,
+        10,
+        15,
+        17,
+        14,
+        22,
+        8,
+        20,
+        17,
+        28,
+        22,
+        11,
+        16
+      ],
+      "quality": {
+        "capped": true,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": false,
+        "eos": false,
+        "parsed": false,
+        "scorer_correct": false
+      },
+      "summary": {
+        "history_summary_peak_bytes": 1027604480,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 681820160,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 390,
+        "summary_hits": 940,
+        "summary_misses": 0,
+        "summary_peak_bytes": 345784320
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "length",
+      "warm_api_median_s": 78.92034623888321,
+      "warm_api_walls_s": [
+        78.92034623888321
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/14|T_G": {
+      "amortized_ms_per_decoder_call_warm": 150.1788084145186,
+      "arm": "T_G",
+      "attempt0_api_wall_s": 77.31725235492922,
+      "attempt0_outer_wall_s": 77.33518490800634,
+      "attempt0_triton_miss_s": 0.5322963378857821,
+      "attempt0_triton_misses": 1,
+      "canvases": 32,
+      "completion_token_hash": "6bb649e8d36ced4226b4cbc303cf10722ddb5ba6c85c7c9a62adf105236889ef",
+      "decoder_calls": 514,
+      "error": null,
+      "id": "aime26/14",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "static",
+      "ok": true,
+      "output_tokens": 8192,
+      "peak_allocated_bytes": 54144217600,
+      "per_canvas_calls": [
+        12,
+        11,
+        7,
+        6,
+        20,
+        16,
+        11,
+        20,
+        8,
+        24,
+        15,
+        15,
+        10,
+        17,
+        21,
+        21,
+        23,
+        15,
+        27,
+        21,
+        24,
+        25,
+        11,
+        14,
+        11,
+        13,
+        19,
+        14,
+        14,
+        11,
+        22,
+        16
+      ],
+      "quality": {
+        "capped": true,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": false,
+        "eos": false,
+        "parsed": false,
+        "scorer_correct": false
+      },
+      "summary": {
+        "history_summary_peak_bytes": null,
+        "per_tile_statistics": null,
+        "score_budget_bytes": null,
+        "score_peak_bytes": null,
+        "summary_budget_bytes": null,
+        "summary_builds": null,
+        "summary_hits": null,
+        "summary_misses": null,
+        "summary_peak_bytes": null
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "full",
+      "termination": "length",
+      "warm_api_median_s": 77.19190752506256,
+      "warm_api_walls_s": [
+        77.19190752506256
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/20|B8_G": {
+      "amortized_ms_per_decoder_call_warm": 159.0792965518589,
+      "arm": "B8_G",
+      "attempt0_api_wall_s": 13.830959789920598,
+      "attempt0_outer_wall_s": 13.84589670598507,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 11,
+      "completion_token_hash": "381540a5983c5888a88df9d941f912ae07202a36088fe5b0df73b04df25ee15b",
+      "decoder_calls": 87,
+      "error": null,
+      "id": "aime26/20",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 2681,
+      "peak_allocated_bytes": 54261868544,
+      "per_canvas_calls": [
+        11,
+        13,
+        9,
+        8,
+        9,
+        6,
+        7,
+        6,
+        8,
+        6,
+        4
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": 241172480,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 241172480,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 0,
+        "summary_hits": 0,
+        "summary_misses": 0,
+        "summary_peak_bytes": 0
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "eos",
+      "warm_api_median_s": 13.839898800011724,
+      "warm_api_walls_s": [
+        13.839898800011724
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/20|D_native": {
+      "amortized_ms_per_decoder_call_warm": 149.6688505489933,
+      "arm": "D_native",
+      "attempt0_api_wall_s": 55.24070643889718,
+      "attempt0_outer_wall_s": 55.2447803770192,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 32,
+      "completion_token_hash": "2c670d4849cc9fc0c44fa68a0ede978c25e40b9c4e0ca0fae2417eb2fa8b5e92",
+      "decoder_calls": 370,
+      "error": null,
+      "id": "aime26/20",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "static",
+      "ok": true,
+      "output_tokens": 8161,
+      "peak_allocated_bytes": 54127810048,
+      "per_canvas_calls": [
+        8,
+        11,
+        10,
+        8,
+        7,
+        8,
+        10,
+        10,
+        16,
+        16,
+        15,
+        21,
+        14,
+        11,
+        10,
+        18,
+        19,
+        20,
+        12,
+        10,
+        17,
+        19,
+        13,
+        5,
+        7,
+        11,
+        9,
+        6,
+        8,
+        8,
+        9,
+        4
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": null,
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "full",
+      "termination": "eos",
+      "warm_api_median_s": 55.37747470312752,
+      "warm_api_walls_s": [
+        55.37747470312752
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/20|G1_split": {
+      "amortized_ms_per_decoder_call_warm": 154.65759344916376,
+      "arm": "G1_split",
+      "attempt0_api_wall_s": 34.74435607600026,
+      "attempt0_outer_wall_s": 34.792357800062746,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 21,
+      "completion_token_hash": "9d60b1de43aae4b605768e71911e10280547f73c95be210bece221bba94f08df",
+      "decoder_calls": 225,
+      "error": null,
+      "id": "aime26/20",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 5201,
+      "peak_allocated_bytes": 54753730560,
+      "per_canvas_calls": [
+        6,
+        17,
+        13,
+        13,
+        9,
+        9,
+        9,
+        14,
+        18,
+        14,
+        14,
+        16,
+        9,
+        11,
+        5,
+        10,
+        9,
+        9,
+        9,
+        7,
+        4
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": 675921920,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 450887680,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 200,
+        "summary_hits": 925,
+        "summary_misses": 0,
+        "summary_peak_bytes": 225034240
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "eos",
+      "warm_api_median_s": 34.79795852606185,
+      "warm_api_walls_s": [
+        34.79795852606185
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/20|G3_split": {
+      "amortized_ms_per_decoder_call_warm": 157.29774420268515,
+      "arm": "G3_split",
+      "attempt0_api_wall_s": 14.78241231595166,
+      "attempt0_outer_wall_s": 14.797267967136577,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 10,
+      "completion_token_hash": "484cb338bc2bf2d436e244c9da9472479acedcf7be5950492e87eac97e499aaf",
+      "decoder_calls": 94,
+      "error": null,
+      "id": "aime26/20",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 2477,
+      "peak_allocated_bytes": 54339140096,
+      "per_canvas_calls": [
+        7,
+        10,
+        10,
+        14,
+        10,
+        4,
+        8,
+        7,
+        9,
+        15
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": 324485120,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 220200960,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 80,
+        "summary_hits": 165,
+        "summary_misses": 0,
+        "summary_peak_bytes": 104284160
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "eos",
+      "warm_api_median_s": 14.785987955052406,
+      "warm_api_walls_s": [
+        14.785987955052406
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/20|T_G": {
+      "amortized_ms_per_decoder_call_warm": 152.44663381198743,
+      "arm": "T_G",
+      "attempt0_api_wall_s": 43.02282559382729,
+      "attempt0_outer_wall_s": 43.03869623900391,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 25,
+      "completion_token_hash": "c4952fff0c1e55c39ad018f613539d9bef274dbbcae260552baa84a82a6025c4",
+      "decoder_calls": 283,
+      "error": null,
+      "id": "aime26/20",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "static",
+      "ok": true,
+      "output_tokens": 6175,
+      "peak_allocated_bytes": 54104179200,
+      "per_canvas_calls": [
+        6,
+        13,
+        10,
+        10,
+        11,
+        10,
+        16,
+        20,
+        6,
+        13,
+        14,
+        23,
+        23,
+        13,
+        11,
+        5,
+        9,
+        12,
+        6,
+        11,
+        11,
+        6,
+        12,
+        6,
+        6
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": null,
+        "per_tile_statistics": null,
+        "score_budget_bytes": null,
+        "score_peak_bytes": null,
+        "summary_budget_bytes": null,
+        "summary_builds": null,
+        "summary_hits": null,
+        "summary_misses": null,
+        "summary_peak_bytes": null
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "full",
+      "termination": "eos",
+      "warm_api_median_s": 43.142397368792444,
+      "warm_api_walls_s": [
+        43.142397368792444
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/2|B8_G": {
+      "amortized_ms_per_decoder_call_warm": 157.56632460152215,
+      "arm": "B8_G",
+      "attempt0_api_wall_s": 25.953486796002835,
+      "attempt0_outer_wall_s": 25.96907466603443,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 19,
+      "completion_token_hash": "556d826855c47b0f8b8ad611347dfcccbc2f33dcc11dcac7e670bd7d2d918a74",
+      "decoder_calls": 166,
+      "error": null,
+      "id": "aime26/2",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 4805,
+      "peak_allocated_bytes": 54472870912,
+      "per_canvas_calls": [
+        17,
+        9,
+        12,
+        12,
+        9,
+        5,
+        5,
+        5,
+        5,
+        5,
+        11,
+        17,
+        7,
+        7,
+        14,
+        9,
+        7,
+        4,
+        6
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": 407388160,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 407388160,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 0,
+        "summary_hits": 0,
+        "summary_misses": 0,
+        "summary_peak_bytes": 0
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "eos",
+      "warm_api_median_s": 26.156009883852676,
+      "warm_api_walls_s": [
+        26.156009883852676
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/2|D_native": {
+      "amortized_ms_per_decoder_call_warm": 155.40216069936446,
+      "arm": "D_native",
+      "attempt0_api_wall_s": 23.982802846003324,
+      "attempt0_outer_wall_s": 23.987245204858482,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 20,
+      "completion_token_hash": "30011a324d250f21b379637f6143f71091e2703447964ce5032f5312102ebb0d",
+      "decoder_calls": 146,
+      "error": null,
+      "id": "aime26/2",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "static",
+      "ok": true,
+      "output_tokens": 4941,
+      "peak_allocated_bytes": 54064596480,
+      "per_canvas_calls": [
+        12,
+        6,
+        7,
+        15,
+        6,
+        8,
+        5,
+        5,
+        9,
+        7,
+        11,
+        11,
+        4,
+        4,
+        9,
+        8,
+        4,
+        4,
+        5,
+        6
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": null,
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "full",
+      "termination": "eos",
+      "warm_api_median_s": 22.68871546210721,
+      "warm_api_walls_s": [
+        22.68871546210721
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/2|G1_split": {
+      "amortized_ms_per_decoder_call_warm": 160.0793042077783,
+      "arm": "G1_split",
+      "attempt0_api_wall_s": 19.263146502897143,
+      "attempt0_outer_wall_s": 19.294313227990642,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 14,
+      "completion_token_hash": "914785b27a79ae414ce0619726f288f2d59ed01aef4c8ea91594dd1a440f07e2",
+      "decoder_calls": 121,
+      "error": null,
+      "id": "aime26/2",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 3376,
+      "peak_allocated_bytes": 54487631872,
+      "per_canvas_calls": [
+        11,
+        11,
+        8,
+        11,
+        5,
+        8,
+        8,
+        12,
+        11,
+        7,
+        7,
+        12,
+        6,
+        4
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": 447979520,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 302530560,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 100,
+        "summary_hits": 505,
+        "summary_misses": 0,
+        "summary_peak_bytes": 145448960
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "eos",
+      "warm_api_median_s": 19.369595809141174,
+      "warm_api_walls_s": [
+        19.369595809141174
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/2|G3_split": {
+      "amortized_ms_per_decoder_call_warm": 163.43026323842682,
+      "arm": "G3_split",
+      "attempt0_api_wall_s": 13.647418966982514,
+      "attempt0_outer_wall_s": 13.693442509043962,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 13,
+      "completion_token_hash": "034ef419ae61fcba0a0df0e4bec4021120d13a4329d9085ffb5b188c9da5d990",
+      "decoder_calls": 84,
+      "error": null,
+      "id": "aime26/2",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 3233,
+      "peak_allocated_bytes": 54447067648,
+      "per_canvas_calls": [
+        10,
+        13,
+        8,
+        6,
+        5,
+        4,
+        4,
+        5,
+        8,
+        9,
+        4,
+        4,
+        4
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": 416030720,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 281559040,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 80,
+        "summary_hits": 140,
+        "summary_misses": 0,
+        "summary_peak_bytes": 134471680
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "eos",
+      "warm_api_median_s": 13.728142112027854,
+      "warm_api_walls_s": [
+        13.728142112027854
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/2|T_G": {
+      "amortized_ms_per_decoder_call_warm": 156.47323954804128,
+      "arm": "T_G",
+      "attempt0_api_wall_s": 28.30865804804489,
+      "attempt0_outer_wall_s": 29.204212476033717,
+      "attempt0_triton_miss_s": 0.00788186420686543,
+      "attempt0_triton_misses": 7,
+      "canvases": 21,
+      "completion_token_hash": "25717d09fec8302d75826567181b6e92e723e5dcfe8ec6e35b6ac1e39734cd35",
+      "decoder_calls": 181,
+      "error": null,
+      "id": "aime26/2",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "static",
+      "ok": true,
+      "output_tokens": 5205,
+      "peak_allocated_bytes": 54082078208,
+      "per_canvas_calls": [
+        12,
+        13,
+        15,
+        12,
+        6,
+        7,
+        8,
+        11,
+        5,
+        8,
+        10,
+        7,
+        11,
+        12,
+        9,
+        6,
+        6,
+        6,
+        8,
+        4,
+        5
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": null,
+        "per_tile_statistics": null,
+        "score_budget_bytes": null,
+        "score_peak_bytes": null,
+        "summary_budget_bytes": null,
+        "summary_builds": null,
+        "summary_hits": null,
+        "summary_misses": null,
+        "summary_peak_bytes": null
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "full",
+      "termination": "eos",
+      "warm_api_median_s": 28.32165635819547,
+      "warm_api_walls_s": [
+        28.32165635819547
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/8|B8_G": {
+      "amortized_ms_per_decoder_call_warm": 156.238532313081,
+      "arm": "B8_G",
+      "attempt0_api_wall_s": 22.284811622928828,
+      "attempt0_outer_wall_s": 22.300086952047423,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 16,
+      "completion_token_hash": "9b57aeaa5de80abd085d30cd1a2ae445fc2889f70d92ac3771d10fea3d526d54",
+      "decoder_calls": 144,
+      "error": null,
+      "id": "aime26/8",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 4073,
+      "peak_allocated_bytes": 54394265088,
+      "per_canvas_calls": [
+        7,
+        11,
+        9,
+        14,
+        16,
+        5,
+        7,
+        9,
+        11,
+        10,
+        6,
+        10,
+        9,
+        5,
+        9,
+        6
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": 343408640,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 343408640,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 0,
+        "summary_hits": 0,
+        "summary_misses": 0,
+        "summary_peak_bytes": 0
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "eos",
+      "warm_api_median_s": 22.498348653083667,
+      "warm_api_walls_s": [
+        22.498348653083667
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/8|D_native": {
+      "amortized_ms_per_decoder_call_warm": 152.65296632600385,
+      "arm": "D_native",
+      "attempt0_api_wall_s": 19.952136985957623,
+      "attempt0_outer_wall_s": 19.95424572797492,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 16,
+      "completion_token_hash": "0217e64f07cec737078660a902bf08c44f76b1bb5da9c38f5988393a2803244e",
+      "decoder_calls": 132,
+      "error": null,
+      "id": "aime26/8",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "static",
+      "ok": true,
+      "output_tokens": 3945,
+      "peak_allocated_bytes": 54041094656,
+      "per_canvas_calls": [
+        8,
+        10,
+        10,
+        6,
+        9,
+        7,
+        7,
+        11,
+        11,
+        11,
+        9,
+        7,
+        10,
+        5,
+        8,
+        3
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": null,
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "full",
+      "termination": "eos",
+      "warm_api_median_s": 20.150191555032507,
+      "warm_api_walls_s": [
+        20.150191555032507
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/8|G1_split": {
+      "amortized_ms_per_decoder_call_warm": 158.58980672485305,
+      "arm": "G1_split",
+      "attempt0_api_wall_s": 19.955199409043416,
+      "attempt0_outer_wall_s": 19.970522016985342,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 15,
+      "completion_token_hash": "54bb8c512961d3c9e76652438f2d4be3144e131bcd8c456e51a9c16f8054d739",
+      "decoder_calls": 127,
+      "error": null,
+      "id": "aime26/8",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 3608,
+      "peak_allocated_bytes": 54521506816,
+      "per_canvas_calls": [
+        7,
+        7,
+        11,
+        14,
+        13,
+        5,
+        7,
+        10,
+        9,
+        11,
+        8,
+        7,
+        9,
+        7,
+        2
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": 478863360,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 322437120,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 110,
+        "summary_hits": 525,
+        "summary_misses": 0,
+        "summary_peak_bytes": 156426240
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "eos",
+      "warm_api_median_s": 20.140905454056337,
+      "warm_api_walls_s": [
+        20.140905454056337
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/8|G3_split": {
+      "amortized_ms_per_decoder_call_warm": 157.26551305758016,
+      "arm": "G3_split",
+      "attempt0_api_wall_s": 19.329397808993235,
+      "attempt0_outer_wall_s": 19.347808175953105,
+      "attempt0_triton_miss_s": 0,
+      "attempt0_triton_misses": 0,
+      "canvases": 14,
+      "completion_token_hash": "3df6f3b0863dbde537e2745176a02988c502295d5b67689e33eff4ba30b656a9",
+      "decoder_calls": 124,
+      "error": null,
+      "id": "aime26/8",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "generic",
+      "ok": true,
+      "output_tokens": 3388,
+      "peak_allocated_bytes": 54483679744,
+      "per_canvas_calls": [
+        8,
+        10,
+        9,
+        12,
+        10,
+        7,
+        8,
+        11,
+        12,
+        6,
+        9,
+        9,
+        10,
+        3
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": 446914560,
+        "per_tile_statistics": "N/A (minimal telemetry; use a token-matched full audit run)",
+        "score_budget_bytes": 2147483648,
+        "score_peak_bytes": 301465600,
+        "summary_budget_bytes": 1073741824,
+        "summary_builds": 115,
+        "summary_hits": 210,
+        "summary_misses": 0,
+        "summary_peak_bytes": 145448960
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "minimal",
+      "termination": "eos",
+      "warm_api_median_s": 19.50092361913994,
+      "warm_api_walls_s": [
+        19.50092361913994
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    },
+    "aime26/8|T_G": {
+      "amortized_ms_per_decoder_call_warm": 158.46602595220395,
+      "arm": "T_G",
+      "attempt0_api_wall_s": 19.18631618306972,
+      "attempt0_outer_wall_s": 19.201842146925628,
+      "attempt0_triton_miss_s": 0.0064989926759153605,
+      "attempt0_triton_misses": 7,
+      "canvases": 16,
+      "completion_token_hash": "7606208da757c3c7541442985bf04833f8bc0900bf7eaa2b3525f26d2f28e0c8",
+      "decoder_calls": 122,
+      "error": null,
+      "id": "aime26/8",
+      "initial_prefill_generation_split": "N/A (no nonintrusive boundary in the API path)",
+      "kernel_variant": "static",
+      "ok": true,
+      "output_tokens": 3918,
+      "peak_allocated_bytes": 54052340736,
+      "per_canvas_calls": [
+        7,
+        9,
+        8,
+        11,
+        6,
+        7,
+        7,
+        12,
+        8,
+        7,
+        11,
+        7,
+        6,
+        5,
+        7,
+        4
+      ],
+      "quality": {
+        "capped": false,
+        "channel_policy": "final channel, thinking ON (frozen scorer)",
+        "correct": true,
+        "eos": true,
+        "parsed": true,
+        "scorer_correct": true
+      },
+      "summary": {
+        "history_summary_peak_bytes": null,
+        "per_tile_statistics": null,
+        "score_budget_bytes": null,
+        "score_peak_bytes": null,
+        "summary_budget_bytes": null,
+        "summary_builds": null,
+        "summary_hits": null,
+        "summary_misses": null,
+        "summary_peak_bytes": null
+      },
+      "tbt": "N/A (no finalized output-ready events without extra synchronization)",
+      "telemetry": "full",
+      "termination": "eos",
+      "warm_api_median_s": 19.332855166168883,
+      "warm_api_walls_s": [
+        19.332855166168883
+      ],
+      "warm_repeats_match_attempt0": [
+        true
+      ],
+      "warm_triton_misses": [
+        0
+      ]
+    }
+  },
+  "executions": 40,
+  "failures": [],
+  "fingerprints": {
+    "B8_G": "0684e593681dc86b73fd301eb78b64d014cde20015b3feedabed169dadee0ebf",
+    "D_native": "2cf0520831d0a415b0ba232b856078355a5131d4ff409cefc4eeb58bbea8a854",
+    "G1_split": "c26094aae9c5f6307fc7254c693d2d5631c851a0a4eb3d3297aa65f8305d5bc4",
+    "G3_split": "fb5d385f955d3e4164e3f09d30b1747cca5214c056982fac236c770da247240a",
+    "T_G": "fd0bf7438af257048bb42afefa88d40d27168cc794fb87ba30405ea281531a9f"
+  },
+  "identity": {
+    "cuda": "12.4",
+    "cudnn": 92600,
+    "executable": "/home/exouser/miniconda3/envs/ljy_dlm/bin/python",
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "python": "3.10.20",
+    "pythonnousersite": null,
+    "sys_path_head": [
+      "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444",
+      "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/src",
+      "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444",
+      "/home/exouser/miniconda3/envs/ljy_dlm/lib/python310.zip",
+      "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10",
+      "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/lib-dynload"
+    ],
+    "torch": "2.6.0+cu124",
+    "torch_file": "/home/exouser/.local/lib/python3.10/site-packages/torch/__init__.py",
+    "transformers": "5.11.0",
+    "transformers_file": "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/site-packages/transformers/__init__.py",
+    "triton": "3.2.0",
+    "triton_cache_dir": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/tc_warmup",
+    "triton_file": "/home/exouser/.local/lib/python3.10/site-packages/triton/__init__.py"
+  },
+  "kernel_warmup": {
+    "compile_s": 0.32006826833821833,
+    "disk_cache_entries": 80,
+    "event": "kernel_warmup",
+    "launches": 140,
+    "misses": 52,
+    "seconds": 0.4883844438008964
+  },
+  "ledger": "/media/volume/dllm-1/dyh/numerical_qk_global_scope_20260925/panel/ledger.jsonl",
+  "ledger_sha256": "f159b9107c89285dbb6147edcf4686f15b4e0346b1ed2d5f828dc0198eab2e30",
+  "notes": [
+    "4 independent questions, seed 42: descriptive, not population noninferiority",
+    "D uses the native mask; P/O/T use the legacy Junyu local mask: D ratios are runtime references, not a model-faithful dense speedup claim",
+    "amortized ms/call = warm API wall / decoder calls; includes prefill, commits, sampler; not model latency",
+    "T = fresh Junyu T via verified extension (collect=True keeps bitmap references; no per-step device work)"
+  ],
+  "paired_warm": {
+    "B8_G/D_native": {
+      "geometric_mean_of_warm_time_ratios": 0.8030462207048041,
+      "n_questions": 4,
+      "per_question": [
+        1.1528202170606021,
+        1.1165327432068362,
+        1.2927940820782942,
+        0.2499192835030106
+      ],
+      "ratio_of_summed_warm_times": 0.8972861137495665
+    },
+    "B8_G/T_G": {
+      "geometric_mean_of_warm_time_ratios": 0.7821471214666741,
+      "n_questions": 4,
+      "per_question": [
+        0.9235339046928264,
+        1.1637364713958118,
+        1.0854696281975085,
+        0.3207957750169669
+      ],
+      "ratio_of_summed_warm_times": 0.8707944470175388
+    },
+    "G1_split/B8_G": {
+      "geometric_mean_of_warm_time_ratios": 1.1028760817437275,
+      "n_questions": 4,
+      "per_question": [
+        0.7405409271197335,
+        0.8952170563547466,
+        0.8875822480021225,
+        2.5143217467769614
+      ],
+      "ratio_of_summed_warm_times": 1.0163707781301403
+    },
+    "G1_split/D_native": {
+      "geometric_mean_of_warm_time_ratios": 0.8856604693500231,
+      "n_questions": 4,
+      "per_question": [
+        0.8537105523444307,
+        0.999539155697314,
+        1.1474610775748928,
+        0.6283774894505362
+      ],
+      "ratio_of_summed_warm_times": 0.9119753856370164
+    },
+    "G1_split/G3_split": {
+      "geometric_mean_of_warm_time_ratios": 1.3407915789925848,
+      "n_questions": 4,
+      "per_question": [
+        1.4109407996418237,
+        1.0328180268491622,
+        0.9423431436420193,
+        2.353441557766947
+      ],
+      "ratio_of_summed_warm_times": 1.1712926973015487
+    },
+    "G1_split/T_G": {
+      "geometric_mean_of_warm_time_ratios": 0.8626113526703009,
+      "n_questions": 4,
+      "per_question": [
+        0.6839146540077333,
+        1.0417967382956184,
+        0.9634435727335726,
+        0.8065837933993292
+      ],
+      "ratio_of_summed_warm_times": 0.8850500297066213
+    },
+    "G3_split/D_native": {
+      "geometric_mean_of_warm_time_ratios": 0.6605504414157134,
+      "n_questions": 4,
+      "per_question": [
+        0.6050647571897777,
+        0.9677785725202989,
+        1.2176679857192174,
+        0.267003651472344
+      ],
+      "ratio_of_summed_warm_times": 0.7786058836856462
+    },
+    "G3_split/T_G": {
+      "geometric_mean_of_warm_time_ratios": 0.6433597631321873,
+      "n_questions": 4,
+      "per_question": [
+        0.4847224307223587,
+        1.0086934108555865,
+        1.022391449689975,
+        0.3427252275449121
+      ],
+      "ratio_of_summed_warm_times": 0.7556181573962
+    },
+    "T_G/D_native": {
+      "geometric_mean_of_warm_time_ratios": 1.0267201638471037,
+      "n_questions": 4,
+      "per_question": [
+        1.2482705953757463,
+        0.9594377856591892,
+        1.190999774194568,
+        0.7790603959475226
+      ],
+      "ratio_of_summed_warm_times": 1.0304224111933202
+    }
+  },
+  "quality_attempt0": {
+    "B8_G": {
+      "correct": 3,
+      "n": 4
+    },
+    "D_native": {
+      "correct": 3,
+      "n": 4
+    },
+    "G1_split": {
+      "correct": 3,
+      "n": 4
+    },
+    "G3_split": {
+      "correct": 3,
+      "n": 4
+    },
+    "T_G": {
+      "correct": 3,
+      "n": 4
+    }
+  },
+  "schema": "v10_complete_request_results_v1",
+  "source_hashes": {
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/numerical_qk_reuse/__init__.py": "69d30589c650365c2202c234092c4c009b19973e04d7ba51c7bf3b49d8070a19",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/numerical_qk_reuse/cache.py": "8a40d5968f9610c466b17698d935ef62a3486a1dd5478aec23e4c9c397735b95",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/numerical_qk_reuse/cached_executor.py": "076781c9f0c8a09723dd220f898f4d8b4b9848ed3db27f6b5a7e988d2ce49d59",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/numerical_qk_reuse/dense_mask.py": "bdbe832d47528673fc25bf7a527b0dcafa09108514bc5695e4ce1f73539145fc",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/numerical_qk_reuse/generic_kernels.py": "bdbf42928ec2c1c18d59a0791c0f3342c97b7c7d274eeb1130952d6e80268d49",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/numerical_qk_reuse/global_scope.py": "b44f9168098ba534e7849b2aec56689bce5ade77ce77bdfb21ac4ef4e426fb5b",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/numerical_qk_reuse/integration.py": "91a2682c04118be8835f70cf84e0da40210210eb4df166f6e1662930d843bc7f",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/numerical_qk_reuse/prefix_summary_reference.py": "b5f8865c83f7443c4c0b99240181964f301ab4ffbe1c442854eb32d7018e6341",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/numerical_qk_reuse/reference.py": "9c68481f96892b06513b583648bb5c8add04db31d765cbd7ec3a35a5dd548266",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/numerical_qk_reuse/runner.py": "61867509ea785c9b376a2373bfbfd8e40de9e99ada181e55289782d1a50f112d",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/value_direction_hopper/csrc/torch_bridge.cpp": "849d20a8abaf0fd44076aab40cc4100436eb3fe4dd683ecd0144bfa189d55cda",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/value_direction_hopper/csrc/value_direction.cu": "ae5b1e82a1d5b0024fde18cf5cfe1a3f3dd835e2ad1d3f53053d3b681783fcfb",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/value_direction_hopper/csrc/value_direction.h": "3d84caf53362ff061c0b91c45d97b02bb495b395a01a9870ea50efddf40adacb",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/value_direction_hopper/cuda.py": "83e643d23c882376b1ff94078c8a28d0336d1ee0d7346915f78d44714e76a255",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/value_direction_hopper/integration.py": "b58f74f78a27d998b27ab20c728d3b2595c831a10e967000091eca1332285f86",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/experiments/value_direction_hopper/query_adaptive.py": "9c0a3b3746f9dbda067c915d2580f7f7e1bea63dd7bec929e10bda83216ac933",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/deploy/4809008f2444/src/dllm/models/adapters/diffusion_gemma.py": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+    "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/site-packages/transformers/models/diffusion_gemma/generation_diffusion_gemma.py": "b814a6fc41492794c1f50ba71c750206684e25dfdd53932e0842675871fef0de"
+  }
+}

@@ -1,0 +1,257 @@
+{
+  "deploy": "4809008f2444",
+  "full_step": {
+    "canvas1": {
+      "fresh_T_G.step0_inputs": 126.346,
+      "fresh_T_G.step1_inputs": 129.299,
+      "native_decoder_forward": 111.805,
+      "native_denoising_step.anchor_inputs": 116.843,
+      "native_denoising_step.step1_inputs": 119.592,
+      "sparse_B8.anchor": 130.821,
+      "sparse_B8.held_same_support": 129.563,
+      "sparse_B8.ordinary": 132.392,
+      "sparse_G1.anchor": 125.938,
+      "sparse_G1.held_same_support": 129.424,
+      "sparse_G1.ordinary": 131.969
+    },
+    "canvas6": {
+      "fresh_T_G.step0_inputs": 128.027,
+      "fresh_T_G.step1_inputs": 139.218,
+      "native_decoder_forward": 114.739,
+      "native_denoising_step.anchor_inputs": 120.625,
+      "native_denoising_step.step1_inputs": 131.976,
+      "sparse_B8.anchor": 134.645,
+      "sparse_B8.held_same_support": 138.978,
+      "sparse_B8.ordinary": 143.825,
+      "sparse_G1.anchor": 134.528,
+      "sparse_G1.held_same_support": 139.086,
+      "sparse_G1.ordinary": 144.242
+    }
+  },
+  "headroom": "at canvas 6 all five native GLOBAL calls cost 3.67 ms of a 132 ms step (2.8%): eliminating GLOBAL attention entirely could save at most ~3.7 ms/step, while every bound arm (including fresh T_G) pays ~6-7 ms/step of fixed overhead (T bookkeeping, binding pre-hook, dispatcher) relative to D_native",
+  "id": "aime26/2",
+  "notes": [
+    "per-call: synchronized CUDA-event span around ONE complete call on identical captured raw inputs, interleaved rotating order, 30 samples after 5 warmups",
+    "full step: per-rep restored replay (v9 harness), event span; B8 \"ordinary\" row is a decision with the legacy selector that B8 never executes -- only B8 anchor/held are B8 phases",
+    "within-process drift of ~3-4 ms/step exists (v11); single order here",
+    "realized phase frequencies come from the panel receipts (complete_request_results)"
+  ],
+  "per_call": {
+    "canvas1": {
+      "absolute": 365,
+      "kept_fraction_by_layer": {
+        "11": 0.9875,
+        "17": 0.9938,
+        "23": 0.9969,
+        "29": 0.8938,
+        "5": 0.9062
+      },
+      "output_rel_diff": {
+        "11": {
+          "G_vs_native": 0.007640041410923004,
+          "T_G_vs_native": 0.007640041410923004
+        },
+        "17": {
+          "G_vs_native": 0.008013024926185608,
+          "T_G_vs_native": 0.008013024926185608
+        },
+        "23": {
+          "G_vs_native": 0.005673454608768225,
+          "T_G_vs_native": 0.005673454608768225
+        },
+        "29": {
+          "G_vs_native": 0.015860846266150475,
+          "T_G_vs_native": 0.015860846266150475
+        },
+        "5": {
+          "G_vs_native": 0.022827038541436195,
+          "T_G_vs_native": 0.022827038541436195
+        }
+      },
+      "router_stats": {
+        "11": {
+          "B8": {
+            "summary_builds": 0,
+            "summary_bytes": 0,
+            "summary_hits": 0
+          },
+          "G": {
+            "summary_builds": 72,
+            "summary_bytes": 5488640,
+            "summary_hits": 74
+          }
+        },
+        "17": {
+          "B8": {
+            "summary_builds": 0,
+            "summary_bytes": 0,
+            "summary_hits": 0
+          },
+          "G": {
+            "summary_builds": 108,
+            "summary_bytes": 8232960,
+            "summary_hits": 111
+          }
+        },
+        "23": {
+          "B8": {
+            "summary_builds": 0,
+            "summary_bytes": 0,
+            "summary_hits": 0
+          },
+          "G": {
+            "summary_builds": 144,
+            "summary_bytes": 10977280,
+            "summary_hits": 148
+          }
+        },
+        "29": {
+          "B8": {
+            "summary_builds": 0,
+            "summary_bytes": 0,
+            "summary_hits": 0
+          },
+          "G": {
+            "summary_builds": 180,
+            "summary_bytes": 13721600,
+            "summary_hits": 185
+          }
+        },
+        "5": {
+          "B8": {
+            "summary_builds": 0,
+            "summary_bytes": 0,
+            "summary_hits": 0
+          },
+          "G": {
+            "summary_builds": 36,
+            "summary_bytes": 2744320,
+            "summary_hits": 37
+          }
+        }
+      },
+      "sum_over_5_global_layers_ms": {
+        "B8_anchor": 5.815,
+        "B8_held": 1.242,
+        "G_anchor": 5.969,
+        "G_held": 1.158,
+        "G_ordinary": 4.231,
+        "T_G": 2.203,
+        "consumer_only": 0.842,
+        "native": 1.7
+      }
+    },
+    "canvas6": {
+      "absolute": 1645,
+      "kept_fraction_by_layer": {
+        "11": 0.9948,
+        "17": 0.9927,
+        "23": 0.9844,
+        "29": 0.7,
+        "5": 0.8531
+      },
+      "output_rel_diff": {
+        "11": {
+          "G_vs_native": 0.005022916942834854,
+          "T_G_vs_native": 0.005022916942834854
+        },
+        "17": {
+          "G_vs_native": 0.008659403771162033,
+          "T_G_vs_native": 0.008659403771162033
+        },
+        "23": {
+          "G_vs_native": 0.007698001340031624,
+          "T_G_vs_native": 0.007698001340031624
+        },
+        "29": {
+          "G_vs_native": 0.032388970255851746,
+          "T_G_vs_native": 0.032388970255851746
+        },
+        "5": {
+          "G_vs_native": 0.04140949249267578,
+          "T_G_vs_native": 0.04140949249267578
+        }
+      },
+      "router_stats": {
+        "11": {
+          "B8": {
+            "summary_builds": 0,
+            "summary_bytes": 0,
+            "summary_hits": 0
+          },
+          "G": {
+            "summary_builds": 72,
+            "summary_bytes": 27443200,
+            "summary_hits": 74
+          }
+        },
+        "17": {
+          "B8": {
+            "summary_builds": 0,
+            "summary_bytes": 0,
+            "summary_hits": 0
+          },
+          "G": {
+            "summary_builds": 108,
+            "summary_bytes": 41164800,
+            "summary_hits": 111
+          }
+        },
+        "23": {
+          "B8": {
+            "summary_builds": 0,
+            "summary_bytes": 0,
+            "summary_hits": 0
+          },
+          "G": {
+            "summary_builds": 144,
+            "summary_bytes": 54886400,
+            "summary_hits": 148
+          }
+        },
+        "29": {
+          "B8": {
+            "summary_builds": 0,
+            "summary_bytes": 0,
+            "summary_hits": 0
+          },
+          "G": {
+            "summary_builds": 180,
+            "summary_bytes": 68608000,
+            "summary_hits": 185
+          }
+        },
+        "5": {
+          "B8": {
+            "summary_builds": 0,
+            "summary_bytes": 0,
+            "summary_hits": 0
+          },
+          "G": {
+            "summary_builds": 36,
+            "summary_bytes": 13721600,
+            "summary_hits": 37
+          }
+        }
+      },
+      "sum_over_5_global_layers_ms": {
+        "B8_anchor": 10.603,
+        "B8_held": 2.34,
+        "G_anchor": 10.681,
+        "G_held": 2.258,
+        "G_ordinary": 6.606,
+        "T_G": 3.956,
+        "consumer_only": 1.935,
+        "native": 3.668
+      }
+    }
+  },
+  "phase_definitions": {
+    "B8_anchor": "score refresh + decision without summaries + Triton fused PV",
+    "G_anchor": "real score refresh (current QK materialized) + decision + GLOBAL summary build + Triton fused PV",
+    "G_held": "Hopper consumer on the held bitmap + fused guard (G3 held steps, B8 non-anchor steps)",
+    "G_ordinary": "decision on age-1 cached scores with GLOBAL summary hits + current projected V sketch + Hopper consumer + fused guard",
+    "consumer_only": "Hopper consumer alone on the G bitmap (diagnostic)"
+  },
+  "schema": "v12_same_state_costs_v1"
+}
