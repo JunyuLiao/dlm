@@ -31,7 +31,9 @@ def test_2_one_receives_the_scheduled_seed_and_it_reaches_the_records(tmp_path):
 
     def execute_one(row, seed, config, entry):
         seen.append(seed)
-        return dict(record=dict(ok=True, generation_seed=seed), receipt=dict(seed=seed))
+        # realistic record: the redacted receipt carries its own id/condition/label fields
+        return dict(record=dict(ok=True, generation_seed=seed, id=entry['id'], seed=seed, condition='x', label='x'),
+                    receipt=dict(seed=seed))
     run_schedule(s, done=set(), execute_one=execute_one, rows={'aime26/2': {}}, configs=dict.fromkeys(ARM_HASHES),
                  ledger_append=ledger.append, private=tmp_path, save_receipt=lambda p, r: None)
     assert set(seen) == {17, 29} and 42 not in seen
@@ -137,3 +139,11 @@ def test_8_config_hash_is_independent_of_checkout_root():
     b = dict(x=1, source_hashes={'<repo>/experiments/a.py': 'h1', '/site/transformers/g.py': 'h2'})
     assert arm_config_hash(a) == arm_config_hash(b)
     assert arm_config_hash(a) != arm_config_hash(dict(a, source_hashes={REPO + '/experiments/a.py': 'CHANGED', '/site/transformers/g.py': 'h2'}))
+
+
+def test_9_receipt_fields_that_disagree_with_the_schedule_are_fatal(tmp_path):
+    s = schedule(ids=('aime26/2',))
+    with pytest.raises(AssertionError):
+        run_schedule(s, done=set(), execute_one=lambda row, seed, config, entry: dict(record=dict(ok=True, id='aime26/9')),
+                     rows={'aime26/2': {}}, configs=dict.fromkeys(ARM_HASHES), ledger_append=lambda r: None,
+                     private=tmp_path, save_receipt=lambda p, r: None)

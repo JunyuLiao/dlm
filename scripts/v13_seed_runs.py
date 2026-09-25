@@ -137,8 +137,11 @@ def run_schedule(schedule, *, done: set, execute_one: Callable, rows: dict, conf
         if stop_flag() or (max_executions is not None and ran >= max_executions):
             return 'stopped'
         outcome = execute_one(rows[entry['id']], entry['seed'], configs[entry['arm']], entry)
-        record = dict(event='run', execution_key=key, **{k: entry[k] for k in ('index', 'block', 'arm', 'id', 'seed', 'role', 'repeat', 'cell_id')},
-                      **outcome['record'])
+        scheduled = {k: entry[k] for k in ('index', 'block', 'arm', 'id', 'seed', 'role', 'repeat', 'cell_id')}
+        for field in ('id', 'seed'):
+            if field in outcome['record'] and outcome['record'][field] != scheduled[field]:
+                raise AssertionError(f'receipt {field} {outcome["record"][field]} != scheduled {scheduled[field]}')
+        record = {**outcome['record'], **scheduled, 'event': 'run', 'execution_key': key}
         if outcome.get('receipt') is not None and entry['role'] == 'attempt0':
             path = receipt_path(private, entry)
             save_receipt(path, outcome['receipt'])
