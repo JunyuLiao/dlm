@@ -303,7 +303,8 @@ def _runtime(adapter: Any, condition: str, config: Mapping[str, Any]):
         from experiments.value_direction_hopper.integration import install
         from experiments.value_direction_hopper.query_adaptive import State
         with install(adapter, config["library"], config["policy"], mode="value",
-                     projections=Projections(), torch_library=config["torch_library"], collect=True) as (binding, router):
+                     projections=Projections(), torch_library=config["torch_library"],
+                     collect=bool(config.get("collect", True))) as (binding, router):
             state = State("T", router, m_ref=config["m_ref"], beta=config["beta"],
                           gamma=config["gamma"], diagnostics=bool(config["diagnostic"]))
             yield dict(binding=binding, router=router, state=state, counters=None)

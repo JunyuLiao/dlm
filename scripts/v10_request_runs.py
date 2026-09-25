@@ -45,16 +45,23 @@ def arm_config(args, arm: dict) -> dict:
     ns = SimpleNamespace(
         condition=condition, phase=args.phase, ids=args.ids, seeds=[42], manifest=args.manifest,
         policy=args.policy, policy_name='T_s50', model=args.model, revision=args.revision,
-        decision_interval=1, score_refresh_period=8, support='legacy_junyu_mask',
+        decision_interval=arm.get('decision_interval', 1), score_refresh_period=8, support='legacy_junyu_mask',
         output_mode='historical_route_preqk_current_output',
         selector=arm.get('selector', 'legacy_recompute'), selector_layers='local',
         kernel_variant=arm.get('kernel_variant', 'static'),
         library=Path(LIBRARY) if condition == 'fresh_junyu_T' else None,
         torch_library=Path(TORCH_LIBRARY) if condition == 'fresh_junyu_T' else None,
-        plugin=PLUGIN if condition == 'M1' else None, diagnostic=False, timing_events=False,
+        plugin=PLUGIN if condition in ('M1', 'M3') else None, diagnostic=False, timing_events=False,
         extra_source=[])
     config = _config(ns)
     config['telemetry'] = arm.get('telemetry', 'full')
+    for key in ('guard_mode', 'consumer', 'support_build', 'collect'):   # v11 arm keys
+        if key in arm:
+            config[key] = arm[key]
+    if arm.get('support_build'):
+        identity = json.loads(Path(arm['support_build']).read_text())
+        config['support_binary'] = dict(key=identity['key'], kernel_sha256=identity['kernel_sha256'],
+                                        bridge_sha256=identity['bridge_sha256'], sources=identity['sources'])
     config['v10_arm'] = arm['name']
     config['fingerprint'] = hashlib.sha256(json.dumps({k: v for k, v in config.items() if k != 'fingerprint'},
                                                       sort_keys=True).encode()).hexdigest()
@@ -131,7 +138,7 @@ def main() -> None:
     if args.warmup_kernels:
         from experiments.numerical_qk_reuse.cached_executor import warmup_generic
         n = len(compiles)
-        seconds, launches = warmup_generic(next(c for c in configs.values() if c['condition'] == 'M1')['policy'])
+        seconds, launches = warmup_generic(next(c for c in configs.values() if c['condition'] in ('M1', 'M3'))['policy'])
         append(args.ledger, dict(event='kernel_warmup', seconds=seconds, launches=launches,
                                  misses=len(compiles) - n,
                                  compile_s=sum(c.get('seconds', 0) for c in compiles[n:]),

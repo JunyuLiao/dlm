@@ -225,7 +225,8 @@ def profile(args) -> dict[str, Any]:
                       output_mode='historical_route_preqk_current_output', selector=selector,
                       selector_layers='local', m_ref=args.m_ref, beta=args.beta, gamma=args.gamma,
                       diagnostic=False, kernel_variant=arm.get('kernel_variant', 'static'),
-                      telemetry=arm.get('telemetry', 'full'), guard_mode=arm.get('guard_mode', 'separate'))
+                      telemetry=arm.get('telemetry', 'full'), guard_mode=arm.get('guard_mode', 'separate'),
+                      consumer=arm.get('consumer', 'triton'), support_build=arm.get('support_build'))
         name = f"sparse_{arm['name']}" if 'name' in arm else f'sparse_{selector}'
         with integration.install(adapter, config, 'M1') as runtime:
             router, state = runtime['router'], runtime['state']
@@ -310,10 +311,47 @@ def profile(args) -> dict[str, Any]:
         if '_denoising_step' in vars(model):
             raise RuntimeError('observer leaked')
 
+    def fresh_t_rows(arm):
+        """v11: genuine fresh Junyu T complete step: its own production routing,
+        exactly ONE observe wrapper, T restored per repetition, collect off."""
+        from experiments.diffusion_gemma_jl_output_aware.projections import Projections
+        from experiments.value_direction_hopper.integration import install as install_t
+        from experiments.value_direction_hopper.query_adaptive import State
+        name = f"fresh_{arm['name']}"
+        with install_t(adapter, arm['library'], policy['policies'][args.policy_name], mode='value',
+                       projections=Projections(), torch_library=arm['torch_library'], collect=False) as (_b, router_t):
+            state = State('T', router_t, m_ref=args.m_ref, beta=args.beta, gamma=args.gamma, diagnostics=False)
+            with observe(model, state):
+                step = model._denoising_step
+                with dispatch_spy(model) as counts:
+                    step(**step1['snapshot'].prepare(controller=state))
+                    torch.cuda.synchronize()
+                if counts['dense_eager'] or counts['numerical_selector'] or counts['registry_sdpa'] != 30:
+                    raise AssertionError(f'{name} did not route through fresh T: {counts}')
+                report['dispatch'][name] = counts
+                context_check(name)
+                for label, snap in (('step0_inputs', step0), ('step1_inputs', step1)):
+                    digests = {}
+
+                    def prepare(snap=snap):
+                        kw = snap['snapshot'].prepare(controller=state)
+                        digests['input'] = StepSnapshot.digest(kw, controller=state)
+                        return kw
+                    row = timed_rows(lambda kw: step(**kw), prepare, warmup=args.warmup, reps=args.reps,
+                                     check=lambda fx, res: dict(input_digest=digests['input'],
+                                                                output_digest=output_digest(res)))
+                    row['label'] = 'fresh Junyu T (TMA, fused projection, collect=False) + one observe wrapper'
+                    report['rows'][f'{name}.{label}'] = summarize_identity(row)
+        if '_denoising_step' in vars(model):
+            raise RuntimeError('observer leaked')
+
     with torch.inference_mode():            # adapter.generate's own decorator
         order = args.order
         extra = {arm['name']: arm for arm in json.loads(args.sparse_arms)}
         for arm in order:
+            if arm in extra and extra[arm].get('kind') == 'fresh_t':
+                fresh_t_rows(extra[arm])
+                continue
             if arm in extra:
                 sparse_rows(extra[arm].get('selector', 'prefix_block_summary'), extra[arm])
                 continue

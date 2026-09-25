@@ -6,6 +6,7 @@ different clocks. Initial implementation uses the caller's CUDA stream.
 """
 from contextlib import contextmanager
 from dataclasses import dataclass
+from types import SimpleNamespace
 import math
 
 import torch
@@ -65,7 +66,8 @@ class Attention:
                  trace=False, max_cache_bytes=2 * 1024**3, support='legacy_junyu_mask',
                  output_mode='cached_scores', selector='legacy_recompute',
                  selector_layers='local', max_summary_bytes=1024**3,
-                 kernel_variant='static', telemetry='full', guard_mode='separate'):
+                 kernel_variant='static', telemetry='full', guard_mode='separate',
+                 consumer='triton', support_build=None):
         if support not in SUPPORT_MODES:
             raise ValueError(support)
         if output_mode not in OUTPUT_MODES:
@@ -89,6 +91,18 @@ class Attention:
         if guard_mode not in ('separate', 'fused'):
             raise ValueError(guard_mode)
         self.guard_mode = guard_mode
+        # v11: 'hopper' replaces ONLY the current-output consumer of ordinary
+        # and held steps by the preselected-support Hopper kernel (vd_support_v1).
+        # Anchors, selector, score clock, summaries, T and guards are unchanged.
+        if consumer not in ('triton', 'hopper'):
+            raise ValueError(consumer)
+        self.consumer = consumer
+        if consumer == 'hopper':
+            from experiments.value_direction_hopper import support
+            if support_build is None:
+                raise ValueError('hopper consumer requires a verified support_build identity')
+            self.support_identity = support.load(support_build)
+            self._support = support
         self.kernel_variant = kernel_variant
         self.selector = selector
         self.selector_layers = selector_layers
@@ -276,10 +290,7 @@ class Attention:
                 # Same retained tiles as the stale-score routing decision;
                 # the final softmax/PV consumes current, not cached, scores.
                 if self.output_mode == PREQK_MODE:
-                    result = preqk_attention(q, k, v, route.skipped, route.eligible,
-                                             scale=scale, window=window,
-                                             is_causal=causal, trace=self.trace,
-                                             variant=self.kernel_variant)
+                    result = self._consume(q, k, v, route.skipped, route.eligible, scale, window, causal)
                     self.preqk_calls += 1
                 else:
                     result = attention(current_for_output, v, skipped=route.skipped,
@@ -289,9 +300,8 @@ class Attention:
             self.decision_calls += 1
         elif self.output_mode == PREQK_MODE:
             # Held support, current output, still no dropped-tile QK.
-            result = preqk_attention(q, k, v, entry.decision.skipped, entry.decision.eligible,
-                                     scale=scale, window=window, is_causal=causal,
-                                     trace=self.trace, variant=self.kernel_variant)
+            result = self._consume(q, k, v, entry.decision.skipped, entry.decision.eligible,
+                                   scale, window, causal)
             self.preqk_calls += 1
             self.held_calls += 1
         else:
@@ -302,8 +312,9 @@ class Attention:
             self.held_calls += 1
         # Explicit asynchronous error, never consume zeroed invalid rows. This
         # is a measured device guard, not a steady-path host tensor read.
+        returned = result.output.transpose(1, 2).contiguous()   # no-op for the Hopper model-layout output
         if self.guard_mode == 'fused':
-            fused_guard(result.output, result.invalid_scores, route_invalid)
+            fused_guard(returned, result.invalid_scores, route_invalid)
         else:
             torch._assert_async(~result.invalid_scores.any(), 'Invalid cached scores: request must fail')
             torch._assert_async(torch.isfinite(result.output).all(), 'Invalid cached-score attention output')
@@ -327,7 +338,18 @@ class Attention:
             self.call_metadata.append(metadata)
             # Tiny per-layer physical-work reductions stay on device until finish.
             self.pending.append(((result.skipped & result.eligible).sum(), result.eligible.sum()))
-        return result.output.transpose(1, 2).contiguous(), None
+        return returned, None
+
+    def _consume(self, q, k, v, skipped, eligible, scale, window, causal):
+        if self.consumer == 'triton':
+            return preqk_attention(q, k, v, skipped, eligible, scale=scale, window=window,
+                                   is_causal=causal, trace=self.trace, variant=self.kernel_variant)
+        if causal or self.trace:
+            raise ValueError('hopper consumer is qualified for the bidirectional decoder with trace off')
+        out, lse, invalid, _ = self._support.attention(q, k, v, skipped, eligible, scale=scale,
+                                                       window=int(window or 0), layout=1)
+        return SimpleNamespace(output=out, skipped=skipped, eligible=eligible, invalid_scores=invalid,
+                               log_normalizer=lse)
 
     def _summary_for(self, layer, kind, identity, prefix_tiles, b, h, nq, nk, plan, device):
         """Return (summary, store) for this call's selector.
@@ -419,6 +441,8 @@ class Attention:
                     support=self.support, output_mode=self.output_mode,
                     selector=self.selector, selector_layers=self.selector_layers,
                     kernel_variant=self.kernel_variant, telemetry=self.telemetry, guard_mode=self.guard_mode,
+                    consumer=self.consumer,
+                    support_build=(self.support_identity['key'] if self.consumer == 'hopper' else None),
                     per_tile_statistics=('recorded' if self.telemetry == 'full' else
                                          'N/A (minimal telemetry; use a token-matched full audit run)'),
                     summary_builds=self.summary_builds, summary_hits=self.summary_hits,
@@ -471,7 +495,9 @@ def install(adapter, config, condition):
                            selector_layers=config.get('selector_layers', 'local'),
                            kernel_variant=config.get('kernel_variant', 'static'),
                            telemetry=config.get('telemetry', 'full'),
-                           guard_mode=config.get('guard_mode', 'separate'))
+                           guard_mode=config.get('guard_mode', 'separate'),
+                           consumer=config.get('consumer', 'triton'),
+                           support_build=config.get('support_build'))
         binding.runtime.attention_override = router
         state = NativeReuseState('T', router, m_ref=config['m_ref'], beta=config['beta'],
                                  gamma=config['gamma'], diagnostics=config['diagnostic'])

@@ -42,3 +42,12 @@ sparse-native gap. It is below the ~5% trigger, so the 8-ID expansion was NOT ru
   independent across tiles and could run on a tile-parallel grid ahead of the sequential risk scan (the
   existing STORE/LOAD summary split already proves bit identity for that separation). It is a new kernel
   design, outside this round's permitted repair families, so it is proposed, not implemented.
+
+---
+**CORRECTION (v11, 2026-09-25), appended; the text above is preserved as recorded.** In the v10 CP3 *panel*,
+`scripts/v10_request_runs.py::arm_config` did not copy the arm's `guard_mode` into the run config. So panel arm O
+ran `telemetry='minimal'` with the DEFAULT `guard_mode='separate'` (verified in the private config
+`cp3/private/configs/v10cp3.O.json`: no guard_mode key). The panel's O/P ratios (geometric 0.992) therefore
+measure minimal telemetry alone, not telemetry plus the fused guard. The same-state step-replay numbers
+(-3.0 ms/step) DID use `guard_mode='fused'` (the replay script passed it) and stand as stated. Fixed in v11:
+arm_config now copies guard_mode/consumer/support_build/collect.
