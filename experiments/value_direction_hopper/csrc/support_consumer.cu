@@ -48,7 +48,14 @@ __device__ inline int row_or(int x) {
     return x | __shfl_xor_sync(0xffffffff, x, 2, 4);
 }
 __device__ inline void named_sync(int id, int threads) {
+    // bar.sync == barrier.sync.aligned: every participant executes THIS instruction.
     asm volatile("bar.sync %0, %1;" ::"r"(id), "r"(threads) : "memory");
+}
+__device__ inline void cross_role_sync(int id, int threads) {
+    // Producer and consumer reach the same barrier from DIFFERENT instructions,
+    // which .aligned forbids (compute-sanitizer synccheck flagged it). The
+    // non-aligned barrier.sync is the PTX form defined for that case.
+    asm volatile("barrier.sync %0, %1;" ::"r"(id), "r"(threads) : "memory");
 }
 __device__ inline void proxy_fence() { asm volatile("fence.proxy.async.shared::cta;" ::: "memory"); }
 __device__ __forceinline__ void copy16(void* dst, void const* src, bool valid = true) {
@@ -150,7 +157,7 @@ __device__ __noinline__ void producer(Params const& a, Shared<D>& s) {
             previous[r] = combined;
         }
         proxy_fence();                   // P/scale written by this thread -> async-proxy PV reads
-        named_sync(HANDOFF, THREADS);    // publish P(slot) to the PV warpgroups
+        cross_role_sync(HANDOFF, THREADS);    // publish P(slot) to the PV warpgroups
         ++ordinal;
     }
     #pragma unroll
@@ -170,7 +177,7 @@ __device__ __noinline__ void producer(Params const& a, Shared<D>& s) {
         int32_t* c = a.counters + ((int64_t(batch) * a.heads + head) * gridDim.x + blockIdx.x) * COUNTER_FIELDS;
         c[0] = ordinal; c[1] = ordinal;  // K tiles loaded, QK WGMMA tiles issued (producer)
     }
-    named_sync(EPILOGUE, THREADS);
+    cross_role_sync(EPILOGUE, THREADS);
 }
 
 template<int D>
@@ -188,7 +195,7 @@ __device__ __noinline__ void consumer(Params const& a, Shared<D>& s) {
     for (int j = 0; j < tiles; ++j) {
         if (!kept(a, batch, head, qb, j, tiles)) continue;   // same predicate, same order
         int slot = ordinal & 1;
-        named_sync(HANDOFF, THREADS);
+        cross_role_sync(HANDOFF, THREADS);
         for (int x = u * 8; x < 64 * 256; x += 128 * 8) {
             int key = x / 256, col = x % 256, pos = j * 64 + key;
             copy16(&tv(col, key), vbase + int64_t(pos < a.keys ? pos : 0) * a.v_stride[2] + col, pos < a.keys);
@@ -211,7 +218,7 @@ __device__ __noinline__ void consumer(Params const& a, Shared<D>& s) {
         int32_t* c = a.counters + ((int64_t(batch) * a.heads + head) * gridDim.x + blockIdx.x) * COUNTER_FIELDS;
         if (part == 0) { c[2] = ordinal; c[3] = ordinal; }  // V tiles loaded, PV WGMMA tiles (first PV warpgroup)
     }
-    named_sync(EPILOGUE, THREADS);       // producer's invalid flags are now visible
+    cross_role_sync(EPILOGUE, THREADS);       // producer's invalid flags are now visible
     #pragma unroll
     for (int n = 0; n < 32; ++n) for (int r = 0; r < 2; ++r) for (int c = 0; c < 2; ++c) {
         int local = warp * 16 + lane / 4 + r * 8, row = qstart + local, col = part * 256 + n * 8 + (lane % 4) * 2 + c;

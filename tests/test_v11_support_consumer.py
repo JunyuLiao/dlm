@@ -204,3 +204,25 @@ def test_bit_identical_to_fresh_T_on_its_own_support(support, geometry, prefix):
     assert fresh.skipped.any() or prefix < 200
     assert torch.equal(out.view(torch.int16), fresh.output.view(torch.int16)), \
         (out.float() - fresh.output.float()).abs().max().item()
+
+
+@pytest.mark.parametrize('geometry', [LOCAL, GLOBAL])
+def test_dropped_tiles_are_never_loaded_or_multiplied_nan_poisoning(support, geometry):
+    """If any K load/QK or V load/PV touched a dropped tile, NaN would reach the
+    output (0 * NaN = NaN in PV). Output must be bit-identical to the clean run."""
+    q, k, v, window, scale = make(5, geometry, 1500)
+    skipped, eligible = routed(q, k, v, window, scale, -1.0 if window else 0.0, 5)
+    assert skipped.any()
+    clean = support.attention(q, k, v, skipped, eligible, scale=scale, window=window)[0].clone()
+    # a key tile dropped for EVERY query head sharing a kv head, in every Q tile, is safe to poison
+    hk = k.shape[1]
+    drop = (skipped | ~eligible).reshape(1, hk, -1, skipped.shape[2], skipped.shape[3]).all(2).all(2)   # [1,HK,KT]
+    assert drop.any()
+    kp, vp = k.clone(), v.clone()
+    for head in range(hk):
+        for tile in drop[0, head].nonzero().flatten().tolist():
+            kp[0, head, tile * 64:(tile + 1) * 64] = float('nan')
+            vp[0, head, tile * 64:(tile + 1) * 64] = float('nan')
+    out, lse, invalid, counters = support.attention(q, kp, vp, skipped, eligible, scale=scale, window=window, counters=True)
+    torch.cuda.synchronize()
+    assert not invalid.any() and torch.equal(out.view(torch.int16), clean.view(torch.int16))
