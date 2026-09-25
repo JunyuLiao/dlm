@@ -62,6 +62,8 @@ class Labels:
                    'DiffusionGemmaEncoderModel': 'encoder'}
         for module in model.modules():
             label = targets.get(type(module).__name__)
+            if label == 'attn_module':
+                label += '.local' if getattr(module, 'sliding_window', None) else '.global'
             if label:
                 self.handles.append(module.register_forward_pre_hook(self._enter(label)))
                 self.handles.append(module.register_forward_hook(self._exit))
@@ -111,7 +113,14 @@ def wrap_functions():
     return undo
 
 
+SYNC_APIS = ('cudaStreamSynchronize', 'cudaDeviceSynchronize', 'cudaEventSynchronize', 'cuStreamSynchronize',
+             'cuCtxSynchronize', 'cuEventSynchronize')
+
+
 def analyze(trace_path: Path, window_names: list[str]) -> dict[str, Any]:
+    """v10: kernels vs memcpy/memset separated; launch APIs, explicit syncs and
+    transfer APIs separated; each device event attributed to its innermost
+    label AND the enclosing attention-layer kind (local/global/none)."""
     data = json.loads(trace_path.read_text())
     events = data['traceEvents'] if isinstance(data, dict) else data
     launches, device, annotations, runtime = {}, [], collections.defaultdict(list), []
@@ -123,7 +132,7 @@ def analyze(trace_path: Path, window_names: list[str]) -> dict[str, Any]:
         ts, dur = float(e['ts']), float(e.get('dur', 0))
         if cat in ('kernel', 'gpu_memcpy', 'gpu_memset'):
             device.append((ts, ts + dur, name, cat, e.get('args', {}).get('correlation')))
-        elif cat == 'cuda_runtime' or cat == 'cuda_driver':
+        elif cat in ('cuda_runtime', 'cuda_driver'):
             runtime.append((ts, dur, name, e['tid']))
             corr = e.get('args', {}).get('correlation')
             if corr is not None:
@@ -138,47 +147,53 @@ def analyze(trace_path: Path, window_names: list[str]) -> dict[str, Any]:
     report = {}
     for window, (w0, w1) in windows.items():
         inside = [d for d in device if d[0] >= w0 and d[1] <= w1 + 1e3]
-        by_label = collections.defaultdict(list)
-        unlaunched = 0
+        by_label = collections.defaultdict(lambda: collections.defaultdict(list))
+        by_kind = collections.defaultdict(list)
         for start, end, name, cat, corr in inside:
             launch = launches.get(corr)
-            label = 'unlabeled_launch'
-            if launch is None:
-                unlaunched += 1
-            else:
+            label, kind = 'unlabeled_launch', 'none'
+            if launch is not None:
                 lts, tid = launch
-                spans = annotations.get(tid, [])
-                best = None
-                index = bisect.bisect_right(spans, (lts, float('inf'), ''))
-                for a, b, lab in reversed(spans[:index]):
-                    if a <= lts <= b and (best is None or b - a < best[1] - best[0]):
-                        best = (a, b, lab)
-                label = best[2] if best else 'outside_labels'
-            by_label[label].append((start, end))
+                enclosing = [(a, b, lab) for a, b, lab in annotations.get(tid, []) if a <= lts <= b]
+                if enclosing:
+                    label = min(enclosing, key=lambda x: x[1] - x[0])[2]
+                    kinds = [lab for _, _, lab in enclosing if lab.startswith('attn_module.')]
+                    kind = kinds[0].split('.', 1)[1] if kinds else 'none'
+                else:
+                    label = 'outside_labels'
+            by_label[label][cat].append((start, end))
+            by_kind[kind].append((start, end))
+        in_window = [r for r in runtime if w0 <= r[0] <= w1]
+        def api(pred):
+            sel = [r for r in in_window if pred(r[2])]
+            return dict(calls=len(sel), host_ms=sum(r[1] for r in sel) / 1e3)
         span = w1 - w0
-        gpu_union = union_length([(d[0], d[1]) for d in inside])
-        in_window_runtime = [r for r in runtime if w0 <= r[0] <= w1]
-        syncs = [r for r in in_window_runtime if 'Synchronize' in r[2] or r[2] == 'cudaMemcpy'
-                 or 'MemcpyAsync' in r[2]]
-        mallocs = [r for r in in_window_runtime if 'Malloc' in r[2] or 'cudaFree' in r[2]]
-        launch_calls = [r for r in in_window_runtime if 'LaunchKernel' in r[2] or 'Launch' in r[2]]
         report[window] = dict(
-            window_span_ms=span / 1e3, gpu_active_union_ms=gpu_union / 1e3,
-            gpu_idle_within_window_ms=(span - gpu_union) / 1e3,
-            kernels=len(inside), launch_api_calls=len(launch_calls),
-            launch_api_host_ms=sum(r[1] for r in launch_calls) / 1e3,
-            sync_like_calls=len(syncs), sync_like_host_ms=sum(r[1] for r in syncs) / 1e3,
-            alloc_free_calls=len(mallocs), alloc_free_host_ms=sum(r[1] for r in mallocs) / 1e3,
-            device_events_without_launch=unlaunched,
-            by_label={label: dict(kernels=len(v), kernel_sum_ms=sum(b - a for a, b in v) / 1e3,
-                                  union_ms=union_length(v) / 1e3)
-                      for label, v in sorted(by_label.items())},
-            note='union_ms per label are not additive across labels only if kernels overlap; '
-                 'gpu_idle_within_window = span - union of all device intervals')
+            window_span_ms=span / 1e3,
+            device_active_union_ms=union_length([(d[0], d[1]) for d in inside]) / 1e3,
+            device_idle_within_window_ms=(span - union_length([(d[0], d[1]) for d in inside])) / 1e3,
+            kernels=sum(1 for d in inside if d[3] == 'kernel'),
+            memcpy_events=sum(1 for d in inside if d[3] == 'gpu_memcpy'),
+            memset_events=sum(1 for d in inside if d[3] == 'gpu_memset'),
+            kernel_union_ms=union_length([(d[0], d[1]) for d in inside if d[3] == 'kernel']) / 1e3,
+            memcpy_union_ms=union_length([(d[0], d[1]) for d in inside if d[3] == 'gpu_memcpy']) / 1e3,
+            launch_api=api(lambda n: 'Launch' in n),
+            explicit_sync_api=api(lambda n: n in SYNC_APIS),
+            memcpy_api=api(lambda n: 'Memcpy' in n),
+            memset_api=api(lambda n: 'Memset' in n),
+            alloc_api=api(lambda n: 'Malloc' in n or n in ('cudaFree', 'cuMemFree_v2')),
+            by_label={label: {cat: dict(events=len(v), sum_ms=sum(b - a for a, b in v) / 1e3,
+                                        union_ms=union_length(v) / 1e3) for cat, v in cats.items()}
+                      for label, cats in sorted(by_label.items())},
+            by_layer_kind={kind: dict(events=len(v), union_ms=union_length(v) / 1e3)
+                           for kind, v in sorted(by_kind.items())},
+            note=('device_active_union = union of kernel+memcpy+memset intervals; label/kind unions are not '
+                  'additive when they overlap; memcpy API calls are transfers, not necessarily blocking '
+                  'syncs (their host_ms is the observed blocking duration); explicit_sync lists true sync APIs'))
         top = collections.Counter()
         for start, end, name, cat, corr in inside:
             top[name[:80]] += end - start
-        report[window]['top_kernels_ms'] = {k: v / 1e3 for k, v in top.most_common(15)}
+        report[window]['top_device_ms'] = {k: v / 1e3 for k, v in top.most_common(15)}
     return report
 
 
@@ -189,7 +204,9 @@ def main() -> None:
     parser.add_argument('--revision', required=True)
     parser.add_argument('--policy', type=Path, required=True)
     parser.add_argument('--id', default='aime26/2')
-    parser.add_argument('--label', default='S', choices=('D', 'L', 'S'))
+    parser.add_argument('--label', default='S', help='arm name (for reporting)')
+    parser.add_argument('--arm', default=None, help='v10 arm JSON; overrides --label mapping')
+    parser.add_argument('--warmup-kernels', action='store_true')
     parser.add_argument('--early', type=int, default=1, help='canvas of the early window (steps 0,1)')
     parser.add_argument('--late', type=int, default=8, help='canvas of the late window (steps 0,1)')
     parser.add_argument('--trace-dir', type=Path, required=True)
@@ -201,16 +218,24 @@ def main() -> None:
     from experiments.numerical_qk_reuse.runner import GOLD_FIELDS, _rows, _runtime
     from experiments.value_direction_hopper.query_adaptive import observe
     from scripts.v9_clean_request_timing import config_for
+    from scripts.v10_request_runs import arm_config
     row = next(r for r in _rows(args.manifest) if str(r['id']) == args.id)
     row = {k: v for k, v in row.items() if k not in GOLD_FIELDS}
     ns = SimpleNamespace(ids=[args.id], manifest=args.manifest, policy=args.policy,
                          model=args.model, revision=args.revision)
-    config = config_for(ns, args.label)
+    if args.arm:
+        ns.phase = 'v10trace'
+        config = arm_config(ns, json.loads(args.arm))
+    else:
+        config = config_for(ns, args.label)
     adapter = create_adapter('diffusion_gemma', config['model'], device='cuda', precision='bfloat16',
                              revision=config['revision']).load()
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
     model = adapter.model
+    if args.warmup_kernels:
+        from experiments.numerical_qk_reuse.cached_executor import warmup_generic
+        warmup_generic(config['policy'])
     compiles: list[dict] = []
     clock = {'t0': None}
 
@@ -264,6 +289,10 @@ def main() -> None:
                             prof['rf'] = record_function(f'v9::window:{window}')
                             prof['rf'].__enter__()
                             prof['t'] = time.perf_counter()
+                            import hashlib as _h
+                            results.setdefault('window_inputs', {})[window] = dict(
+                                canvas_sha=_h.sha256(kwargs['current_canvas'].cpu().numpy().tobytes()).hexdigest()[:16],
+                                absolute=int(kwargs['past_key_values'].get_seq_length()))
                         entry = time.perf_counter() - clock['t0']
                         result = inner(**kwargs)
                         steps.append(dict(canvas=canvas['n'], local=local, cur_step=cur, t_entry=entry,
@@ -321,8 +350,9 @@ def main() -> None:
     args.output.write_text(json.dumps(results, indent=2, sort_keys=True, default=str) + '\n')
     print(json.dumps({k: dict(total=v['total_seconds_truncated'], compiles=v['compile_count'],
                               compile_s=v['compile_seconds_total']) for k, v in results['passes'].items()}))
-    print(json.dumps({w: {k: a[k] for k in ('window_span_ms', 'gpu_active_union_ms', 'gpu_idle_within_window_ms',
-                                            'kernels', 'sync_like_calls')} for w, a in results['window_attribution'].items()}))
+    print(json.dumps({w: {k: a[k] for k in ('window_span_ms', 'device_active_union_ms', 'device_idle_within_window_ms',
+                                            'kernels', 'memcpy_events', 'explicit_sync_api')}
+                      for w, a in results['window_attribution'].items()}))
 
 
 if __name__ == '__main__':

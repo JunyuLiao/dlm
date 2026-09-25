@@ -65,7 +65,7 @@ class Attention:
                  trace=False, max_cache_bytes=2 * 1024**3, support='legacy_junyu_mask',
                  output_mode='cached_scores', selector='legacy_recompute',
                  selector_layers='local', max_summary_bytes=1024**3,
-                 kernel_variant='static'):
+                 kernel_variant='static', telemetry='full'):
         if support not in SUPPORT_MODES:
             raise ValueError(support)
         if output_mode not in OUTPUT_MODES:
@@ -76,6 +76,14 @@ class Attention:
             raise ValueError(selector_layers)
         if kernel_variant not in ('static', 'generic'):
             raise ValueError(kernel_variant)
+        # full: per-call metadata dicts + two on-device tile-count reductions per
+        # layer call (audit data, never used to choose support). minimal: host
+        # counters, cache/phase ownership and every correctness guard only;
+        # per-tile skip statistics are N/A (take them from a token-matched full
+        # audit run), never reported as zeros.
+        if telemetry not in ('full', 'minimal'):
+            raise ValueError(telemetry)
+        self.telemetry = telemetry
         self.kernel_variant = kernel_variant
         self.selector = selector
         self.selector_layers = selector_layers
@@ -291,7 +299,7 @@ class Attention:
         score_bytes = self.cache.storage_bytes
         self.peak_score_bytes = max(self.peak_score_bytes, score_bytes)
         self.peak_total_bytes = max(self.peak_total_bytes, score_bytes + self.summary_bytes)
-        metadata = dict(canvas=self.canvas, decoder_call=self.step, layer=layer, kind=kind,
+        metadata = None if self.telemetry != 'full' else dict(canvas=self.canvas, decoder_call=self.step, layer=layer, kind=kind,
                         query_start=absolute, key_start=identity.key_start, q=nq, k=nk,
                         source_k=source_nk, score_anchor=entry.score_step,
                         score_age=self.step-entry.score_step, score_refresh=plan.score_refresh,
@@ -303,9 +311,10 @@ class Attention:
                         qk_mode=('materialized_full' if current_for_output is not None
                                  else (PREQK_MODE if self.output_mode == PREQK_MODE
                                        else 'cached_scores_reuse')))
-        self.call_metadata.append(metadata)
-        # Tiny per-layer physical-work reductions stay on device until finish.
-        self.pending.append(((result.skipped & result.eligible).sum(), result.eligible.sum()))
+        if self.telemetry == 'full':
+            self.call_metadata.append(metadata)
+            # Tiny per-layer physical-work reductions stay on device until finish.
+            self.pending.append(((result.skipped & result.eligible).sum(), result.eligible.sum()))
         return result.output.transpose(1, 2).contiguous(), None
 
     def _summary_for(self, layer, kind, identity, prefix_tiles, b, h, nq, nk, plan, device):
@@ -380,6 +389,8 @@ class Attention:
         return scores.float().masked_fill(~valid, -math.inf).contiguous()
 
     def records(self):
+        if self.telemetry != 'full':
+            return None          # N/A in minimal mode: no fabricated per-tile counts
         values = torch.stack([torch.stack(x) for x in self.pending]).cpu().tolist() if self.pending else []
         return [dict(meta, physical_skipped=counts[0], physical_eligible=counts[1],
                      decision_geometry='per-head Q128 KV64')
@@ -395,7 +406,9 @@ class Attention:
                     unsupported_mask_refreshes=self.unsupported_mask_refreshes,
                     support=self.support, output_mode=self.output_mode,
                     selector=self.selector, selector_layers=self.selector_layers,
-                    kernel_variant=self.kernel_variant,
+                    kernel_variant=self.kernel_variant, telemetry=self.telemetry,
+                    per_tile_statistics=('recorded' if self.telemetry == 'full' else
+                                         'N/A (minimal telemetry; use a token-matched full audit run)'),
                     summary_builds=self.summary_builds, summary_hits=self.summary_hits,
                     summary_misses=self.summary_misses,
                     summary_resident_bytes=self.summary_bytes,
@@ -444,7 +457,8 @@ def install(adapter, config, condition):
                            output_mode=config.get('output_mode', 'cached_scores'),
                            selector=config.get('selector', 'legacy_recompute'),
                            selector_layers=config.get('selector_layers', 'local'),
-                           kernel_variant=config.get('kernel_variant', 'static'))
+                           kernel_variant=config.get('kernel_variant', 'static'),
+                           telemetry=config.get('telemetry', 'full'))
         binding.runtime.attention_override = router
         state = NativeReuseState('T', router, m_ref=config['m_ref'], beta=config['beta'],
                                  gamma=config['gamma'], diagnostics=config['diagnostic'])
