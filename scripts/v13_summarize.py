@@ -127,7 +127,9 @@ def aggregate(cells, ids, seeds, dev_ids, pairs=PAIRS, boot=10000):
                        outcomes=len(ids) * len(seeds),
                        mean_per_question=statistics.mean(statistics.mean(correct(cells[(a, q, s)]) for s in seeds) for q in ids),
                        caps=sum(1 for q in ids for s in seeds if (cells[(a, q, s)]['attempt0'] or {}).get('termination') == 'length'),
-                       failures=sum(1 for q in ids for s in seeds if not (cells[(a, q, s)]['attempt0'] or {}).get('ok')))
+                       failures=sum(1 for q in ids for s in seeds
+                                    if cells[(a, q, s)]['attempt0'] is not None and not cells[(a, q, s)]['attempt0'].get('ok')),
+                       not_executed=sum(1 for q in ids for s in seeds if cells[(a, q, s)]['attempt0'] is None))
                for a in arms}
     out = dict(quality=quality, pairs={})
     reserved = [q for q in ids if q not in dev_ids]
