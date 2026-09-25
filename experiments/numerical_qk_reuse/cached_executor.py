@@ -42,12 +42,24 @@ class PrefixSummary:
     prefix_tiles: int
     identity: tuple
 
+    def __post_init__(self):
+        # Fixed at construction so live accounting is an O(1) host read.
+        self.nbytes = self.bytes
+
     @property
     def bytes(self):
         return sum(t.numel() * t.element_size() for t in (self.z, self.mu, self.active, self.bad))
 
     def matches(self, identity, prefix_tiles):
         return self.identity == identity and self.prefix_tiles == prefix_tiles
+
+
+def summary_bytes(b, h, qb, prefix_tiles, rank):
+    """Bytes allocate_summary would take: FP32 z, FP32 mu[rank], int8 active/bad."""
+    if prefix_tiles <= 0:
+        return 0
+    cells = b * h * qb * int(prefix_tiles) * 128
+    return cells * (4 + 4 * rank + 1 + 1)
 
 
 def allocate_summary(b, h, qb, kt, prefix_tiles, rank, device, identity):
@@ -492,12 +504,18 @@ def _summary_arguments(summary, store_summary, shape, kt, device):
         if store_summary:
             raise ValueError('store_summary requires summary buffers')
         return 0, dummy, dummy, small, small
+    if not isinstance(summary.prefix_tiles, int) or not 0 < summary.prefix_tiles <= kt:
+        raise ValueError('summary needs a positive prefix tile count within the key tiling')
     expected = shape[:3] + (summary.prefix_tiles, 128)
-    if summary.z.shape != expected or summary.mu.shape != expected + (32,):
-        raise ValueError('summary buffers do not match this routing geometry')
-    if summary.prefix_tiles > kt:
-        raise ValueError('prefix tile count exceeds the key tiling')
-    for tensor in (summary.z, summary.mu, summary.active, summary.bad):
+    for name, tensor, want_shape, want_dtype in (
+            ('z', summary.z, expected, torch.float32),
+            ('mu', summary.mu, expected + (32,), torch.float32),
+            ('active', summary.active, expected, torch.int8),
+            ('bad', summary.bad, expected, torch.int8)):
+        if tuple(tensor.shape) != want_shape:
+            raise ValueError(f'summary {name} shape {tuple(tensor.shape)} != {want_shape}')
+        if tensor.dtype != want_dtype:
+            raise ValueError(f'summary {name} dtype {tensor.dtype} != {want_dtype}')
         if tensor.device != device or not tensor.is_contiguous():
             raise ValueError('summary buffers must be contiguous and co-located')
     return summary.prefix_tiles, summary.z, summary.mu, summary.active, summary.bad

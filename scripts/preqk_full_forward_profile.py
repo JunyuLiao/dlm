@@ -1,5 +1,13 @@
 """Directly measured full-call and complete-forward profile (no component sums).
 
+v9 CORRECTION: the ``denoising_step`` section of this script is RETIRED. Its
+"native_dense" row ran ``_install_dense`` (-> dense_eager_attention_forward,
+not native SDPA), restored RNG once per series, shared sampler/stopping/T
+objects across repetitions, reused a capture-time observer and copied fixtures
+inside the timer. Use ``scripts/v9_step_replay_profile.py``. Only the
+``attention_call`` microbenchmark remains here, and it is an attention-only
+measurement with an externally captured FIXED T, not a production step.
+
 Two measurements, both on ONE captured real state so the arms are matched:
 
 1. ``attention_call`` -- the complete ``Attention.__call__``, including input
@@ -311,7 +319,9 @@ def profile(args) -> dict[str, Any]:
             call_kwargs = dict(scaling=captured['scaling'], is_causal=captured['is_causal'],
                                sliding_window=captured['sliding_window'])
             if arm == 'native_dense':
-                measured = {'dense': timed(lambda: true_dense(
+                # v9 label: a reimplementation of native SDPA, not the installed
+                # registry function and not a full-step native baseline.
+                measured = {'true_dense_reimplementation': timed(lambda: true_dense(
                     captured['q'], captured['k'], captured['v'], captured['mask'],
                     scaling=captured['scaling'], is_causal=captured['is_causal']),
                     warmup=args.warmup, reps=args.reps)}
@@ -325,41 +335,37 @@ def profile(args) -> dict[str, Any]:
             router.query_sensitivity = captured_sensitivity
             try:
                 phases = {}
-                for phase, step in (('anchor', 0), ('ordinary', 3), ('held', 3)):
-                    if phase == 'held' and arm != 'M3_held':
+                # v9: 'ordinary' re-primes an anchor from the SAME input and then
+                # sets an integer step: a phase-COST simulation, not historical
+                # scores, and labeled as such. 'held' is anchor 0 -> held step 1
+                # under interval 2, asserted on the real ScoreCache (v8 searched
+                # steps 3..10, all of which are due decisions under interval 2).
+                for phase, step in (('anchor', 0), ('ordinary_simulated_same_input_step3', 3),
+                                    ('held_anchor0_step1', 1)):
+                    held = phase.startswith('held')
+                    if held and arm != 'M3_held':
                         continue
-                    if phase == 'ordinary' and arm == 'M3_held':
+                    if phase.startswith('ordinary') and arm == 'M3_held':
                         continue
 
                     def reset(step=step, phase=phase):
                         router.cache.clear()
                         router.valid_keys.clear()
                         router.sketches.entries.clear()
+                        router.summaries.clear()
+                        router.pending.clear()
+                        router.call_metadata.clear()
                         router.canvas, router.step, router.epoch = 0, 0, 0
                         router.identify(module, (), {'past_key_values': frozen_cache})
                         router.sketches.identify(module, (), {'past_key_values': frozen_cache})
                         if step:
                             router(*call_args, **call_kwargs)       # establish the anchor
                             router.step = step
-                            if phase == 'held':
-                                # Bug C: with decision_interval=2, step 3 after
-                                # an anchor at 0 is a DECISION REFRESH, not a
-                                # held call. Walk to a step the schedule really
-                                # holds, and assert it before timing.
-                                for candidate in range(step, step + 8):
-                                    router.step = candidate
-                                    plan = router.cache.plan(
-                                        router.cache.entries[int(module.layer_idx)].identity,
-                                        candidate)
-                                    if not plan.score_refresh and not plan.decision_refresh:
-                                        break
-                                else:
-                                    raise RuntimeError('no held step reachable for M3_held')
 
                     def run():
                         router(*call_args, **call_kwargs)
 
-                    if phase == 'held':
+                    if held:
                         reset()
                         layer_id = int(module.layer_idx)
                         plan = router.cache.plan(router.cache.entries[layer_id].identity, router.step)
@@ -370,95 +376,8 @@ def profile(args) -> dict[str, Any]:
             finally:
                 router.close()
 
-    # ------------- 2. complete denoising step (all layers + sampler) -------------
-    base_kwargs = capture.kwargs
-    for arm in args.arms:
-        if arm == 'fresh_junyu_T':
-            if not (args.library and args.torch_library):
-                report['denoising_step']['fresh_junyu_T'] = dict(
-                    skipped='no --library/--torch-library supplied')
-                continue
-            from experiments.diffusion_gemma_jl_output_aware.projections import Projections
-            from experiments.value_direction_hopper.integration import install as install_fresh
-            from experiments.value_direction_hopper.query_adaptive import State
-            with install_fresh(adapter, str(args.library), thresholds, mode='value',
-                               projections=Projections(),
-                               torch_library=str(args.torch_library), collect=False) as (_bind, router_t):
-                # Bug B: v7 installed the attention router but never the State
-                # / observe machinery, so this timed a UNIFORM-T path while
-                # calling it fresh Junyu T. Install the real causal history.
-                state = State('T', router_t, m_ref=float(args.m_ref), beta=float(args.beta),
-                              gamma=float(args.gamma), diagnostics=False)
-                router_t.query_sensitivity = captured_sensitivity
-                report['denoising_step']['fresh_junyu_T'] = dict(
-                    anchor=timed(lambda: adapter.model._denoising_step(**clone_kwargs(base_kwargs)),
-                                 warmup=args.warmup, reps=args.reps),
-                    sensitivity=describe_sensitivity(captured_sensitivity))
-            continue
-        binding = _install_dense(adapter)
-        router = None
-        try:
-            if arm == 'native_dense':
-                binding.runtime.attention_override = None
-            else:
-                router = build_router(adapter, arm, thresholds, config)
-                router.query_sensitivity = captured_sensitivity
-                binding.runtime.attention_override = router
-
-            def reset(step=0):
-                if router is not None:
-                    router.cache.clear()
-                    router.valid_keys.clear()
-                    router.sketches.entries.clear()
-                    router.canvas, router.step, router.epoch = 0, 0, 0
-                    # Bug E: optional telemetry lists must not grow across
-                    # replays, or later repetitions time list growth too.
-                    router.pending.clear()
-                    router.call_metadata.clear()
-
-            def run_anchor():
-                adapter.model._denoising_step(**clone_kwargs(base_kwargs))
-
-            report['denoising_step'].setdefault(arm, {})
-            # Bug D: prove replays really see identical inputs, and restore RNG
-            # around the whole timed series so a replay cannot advance it.
-            digests = [tuple(tensor_digest(v) for v in clone_kwargs(base_kwargs).values())
-                       for _ in range(2)]
-            report['denoising_step'][arm]['replay_inputs_identical'] = digests[0] == digests[1]
-            with replay_state(adapter.model):
-                report['denoising_step'][arm]['anchor'] = timed(
-                    run_anchor, warmup=args.warmup, reps=args.reps, before=reset)
-
-            if router is not None:
-                def reset_ordinary():
-                    router.cache.clear()
-                    router.valid_keys.clear()
-                    router.sketches.entries.clear()
-                    router.canvas, router.step, router.epoch = 0, 0, 0
-                    adapter.model._denoising_step(**clone_kwargs(base_kwargs))  # anchor
-                    router.step = 3
-
-                with replay_state(adapter.model):
-                    report['denoising_step'][arm]['ordinary'] = timed(
-                        run_anchor, warmup=args.warmup, reps=args.reps, before=reset_ordinary)
-                # Bug E: report the DELTA produced by one measured repetition,
-                # not accumulated counters spanning warmup and resets.
-                reset_ordinary()
-                before_counters = router.counters()
-                run_anchor()
-                after_counters = router.counters()
-                report['denoising_step'][arm]['counter_delta_one_ordinary_step'] = {
-                    key: after_counters[key] - before_counters[key]
-                    for key in after_counters
-                    if isinstance(after_counters.get(key), (int, float))
-                    and isinstance(before_counters.get(key), (int, float))}
-                report['denoising_step'][arm]['counters_cumulative'] = after_counters
-                report['denoising_step'][arm]['sensitivity'] = describe_sensitivity(
-                    captured_sensitivity)
-        finally:
-            if router is not None:
-                router.close()
-            binding.close()
+    # ------------- 2. complete denoising step: RETIRED in v9 -------------
+    report['denoising_step'] = dict(retired='see scripts/v9_step_replay_profile.py (v9 section 3)')
     return report
 
 

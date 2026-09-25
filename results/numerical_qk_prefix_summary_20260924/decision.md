@@ -95,3 +95,20 @@ This does not establish novel selection. Comparing numerical current-V routing
 against a frozen mass/bitmap and a fresh value-aware selector under common
 execution and measured quality/time remains the study that would, and it was
 not launched.
+
+---
+**CORRECTED (v9, 2026-09-25) — appended; the text above is preserved as recorded.**
+- The full-step row labeled `native_dense` (183.24 ms) ran `_install_dense` with
+  `attention_override=None`, which the BLASST registry dispatcher sends to
+  `dense_eager_attention_forward`, NOT the untouched native SDPA function. It is a
+  same-legal-mask eager dense row. v9's dispatch spy proves this (30/30 calls in
+  `dense_eager`) — see `results/numerical_qk_request_timing_20260924/measurement_contract_and_dispatch.md`.
+- v8's step replay restored RNG once per series, shared the native sampler /
+  stopping criterion / capture-time T observer across repetitions, and copied
+  fixtures inside the timer. Superseded by `scripts/v9_step_replay_profile.py`.
+- The inference "206 − 183 ≈ 23 ms, so there was never room for a ~10 ms gain"
+  is WITHDRAWN: the 183 ms baseline is mislabeled, the two contexts need not add,
+  and replay-state/launch-overlap effects were unresolved. The L2-residency
+  explanation remains an untested hypothesis. The raw v8 numbers stand as measured.
+- `real_state_qualify.json` is the 512-token trajectory check, not the full-budget
+  smoke receipt; the latter is now `results/numerical_qk_request_timing_20260924/v8_smoke_receipt_verification.json`.

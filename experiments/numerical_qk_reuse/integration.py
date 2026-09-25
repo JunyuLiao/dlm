@@ -17,7 +17,7 @@ from experiments.value_direction_hopper.integration import Sketches
 from experiments.value_direction_hopper.query_adaptive import State
 from .cache import Identity, ScoreCache
 from .cached_executor import (allocate_summary, attention, preqk_attention,
-                              route_only)
+                              route_only, summary_bytes as summary_nbytes)
 
 SUPPORT_MODES = ('legacy_junyu_mask', 'native_mask')
 # cached_scores: production M1/M3 -- the routing decision AND the final
@@ -64,7 +64,7 @@ class Attention:
     def __init__(self, adapter, thresholds, *, score_period=8, decision_interval=1,
                  trace=False, max_cache_bytes=2 * 1024**3, support='legacy_junyu_mask',
                  output_mode='cached_scores', selector='legacy_recompute',
-                 selector_layers='local'):
+                 selector_layers='local', max_summary_bytes=1024**3):
         if support not in SUPPORT_MODES:
             raise ValueError(support)
         if output_mode not in OUTPUT_MODES:
@@ -77,7 +77,16 @@ class Attention:
         self.selector_layers = selector_layers
         self.summaries = {}
         self.summary_hits = self.summary_builds = self.summary_misses = 0
-        self.summary_bytes = 0
+        # Two SEPARATE, separately enforced budgets. max_cache_bytes bounds the
+        # retained score cache only (ScoreCache.reserve); max_summary_bytes
+        # bounds the prefix summaries only (checked before allocation). Their
+        # sum is the history+summary bound; neither alone is a total bound.
+        if max_summary_bytes < 0:
+            raise ValueError(max_summary_bytes)
+        self.max_summary_bytes = max_summary_bytes
+        self.summary_budget_declines = 0
+        self.peak_summary_bytes = self.peak_total_bytes = 0
+        self.peak_score_transient_bytes = 0
         self.support = support
         self.output_mode = output_mode
         self.thresholds = thresholds
@@ -177,6 +186,10 @@ class Attention:
         self.cache.reserve(identity)  # before allocation
         current_for_output = None
         if plan.score_refresh:
+            # The replaced entry stays referenced until publish, so the new
+            # score tensor transiently coexists with it.
+            self.peak_score_transient_bytes = max(
+                self.peak_score_transient_bytes, self.cache.storage_bytes + identity.storage_bytes)
             score = self.observe_scores(q, k, mask, scale, causal, window, crop)
             self.cache.publish_scores(identity, self.step, score)
             valid = torch.isfinite(score).reshape(b, hk, h//hk, nq, nk).any((2, 3))
@@ -266,7 +279,9 @@ class Attention:
         torch._assert_async(~result.invalid_scores.any(), 'Invalid cached scores: request must fail')
         torch._assert_async(torch.isfinite(result.output).all(), 'Invalid cached-score attention output')
         self.calls += 1
-        self.peak_score_bytes = max(self.peak_score_bytes, self.cache.storage_bytes)
+        score_bytes = self.cache.storage_bytes
+        self.peak_score_bytes = max(self.peak_score_bytes, score_bytes)
+        self.peak_total_bytes = max(self.peak_total_bytes, score_bytes + self.summary_bytes)
         metadata = dict(canvas=self.canvas, decoder_call=self.step, layer=layer, kind=kind,
                         query_start=absolute, key_start=identity.key_start, q=nq, k=nk,
                         source_k=source_nk, score_anchor=entry.score_step,
@@ -305,13 +320,26 @@ class Attention:
         held = self.summaries.get(layer)
         if plan.score_refresh:
             qb, kt = (nq + 127) // 128, (nk + 63) // 64
+            # Release this layer's old buffers BEFORE allocating the new ones
+            # (same-stream caching-allocator reuse is ordered after queued
+            # readers), so a rebuild never transiently holds two summaries.
+            self.summaries.pop(layer, None)
+            needed = summary_nbytes(b, h, qb, prefix_tiles, 32)
+            if self.summary_bytes + needed > self.max_summary_bytes:
+                # Exact fallback: the legacy recompute path yields the same
+                # decisions, so a declined summary costs time, not semantics.
+                self.summary_budget_declines += 1
+                self.summary_recomputed_tiles += prefix_tiles
+                return None, False
             summary = allocate_summary(b, h, qb, kt, prefix_tiles, 32, device, wanted)
             if summary is None:
                 return None, False
+            if summary.bytes != needed:
+                raise AssertionError('summary byte accounting disagrees with allocation')
             self.summaries[layer] = summary
             self.summary_builds += 1
             self.summary_prefix_tiles += prefix_tiles
-            self.summary_bytes = sum(s.bytes for s in self.summaries.values())
+            self.peak_summary_bytes = max(self.peak_summary_bytes, self.summary_bytes)
             return summary, True
         if held is not None and held.matches(wanted, prefix_tiles):
             self.summary_hits += 1
@@ -322,6 +350,11 @@ class Attention:
         self.summary_misses += 1
         self.summary_recomputed_tiles += prefix_tiles
         return None, False
+
+    @property
+    def summary_bytes(self):
+        """LIVE resident summary bytes (always derived, never a stale tally)."""
+        return sum(s.nbytes for s in self.summaries.values())
 
     @staticmethod
     def observe_scores(q, k, mask, scale, causal, window, crop):
@@ -356,6 +389,17 @@ class Attention:
                     summary_builds=self.summary_builds, summary_hits=self.summary_hits,
                     summary_misses=self.summary_misses,
                     summary_resident_bytes=self.summary_bytes,
+                    summary_live_bytes=self.summary_bytes,
+                    summary_peak_bytes=self.peak_summary_bytes,
+                    summary_budget_bytes=self.max_summary_bytes,
+                    summary_budget_declines=self.summary_budget_declines,
+                    score_live_bytes=self.cache.storage_bytes,
+                    score_peak_bytes=self.peak_score_bytes,
+                    score_peak_transient_bytes=self.peak_score_transient_bytes,
+                    score_budget_bytes=self.cache.max_bytes,
+                    history_summary_peak_bytes=self.peak_total_bytes,
+                    memory_note=('score and summary budgets are separate; live bytes are '
+                                 'at counters() time, peaks over the request'),
                     summary_prefix_tiles_served=self.summary_prefix_tiles,
                     summary_prefix_tiles_recomputed=self.summary_recomputed_tiles,
                     routing_only_extra_qk_elements=self.routing_only_extra_qk_elements,
