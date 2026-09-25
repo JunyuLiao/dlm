@@ -25,6 +25,56 @@
     },
     "tests": "108 passed on H100 (targeted suites + 14 new v9 tests)"
   },
+  "cp2": {
+    "attempt0_cold_s": {
+      "aime26/2": {
+        "D": 24.16,
+        "L": 63.85,
+        "S": 34.66
+      },
+      "aime26/8": {
+        "D": 20.37,
+        "L": 38.32,
+        "S": 82.27
+      }
+    },
+    "deploy_sha": "28f0f766daef595af0a813ebfb2e95d83c474c5e",
+    "determinism": "all 12 warm repeats token/call/termination-identical to own attempt0; L==S tokens; D==v7 native_dense tokens; L/S==v7 M1 and v8 tokens",
+    "executions": 18,
+    "flags": "diagnostic False, timing_events False, trace False; per-call routing telemetry (pending/call_metadata) still ON in L and S equally",
+    "ledger": "../results/v9/request_timing/ledger.jsonl",
+    "private_receipts": "../results/v9/request_timing/private",
+    "quality_attempt0": "6/6 correct (D,L,S x /2,/8); EOS; not a noninferiority claim",
+    "summary": "results/numerical_qk_request_timing_20260924/clean_request_timing.{json,csv}",
+    "warm_L_over_S": {
+      "aime26/2": 0.997,
+      "aime26/8": 0.992
+    },
+    "warm_api_median_s": {
+      "aime26/2": {
+        "D": 22.91,
+        "L": 19.53,
+        "S": 19.59
+      },
+      "aime26/8": {
+        "D": 20.36,
+        "L": 33.72,
+        "S": 33.98
+      }
+    },
+    "warm_ms_per_call": {
+      "aime26/2": {
+        "D": 156.9,
+        "L": 191.5,
+        "S": 192.1
+      },
+      "aime26/8": {
+        "D": 154.2,
+        "L": 186.3,
+        "S": 187.7
+      }
+    }
+  },
   "deploy_rule": "runs execute from read-only ../deploy/<sha>/ git-archive snapshots",
   "environment_actual": {
     "dllm": "this checkout via PYTHONPATH=src:.",
@@ -62,7 +112,7 @@
     "mechanism": "_route optionally STOREs per-row z/mu for wholly-immutable prefix tiles at the real score anchor and LOADs them afterwards; reused values are that kernel's own FP32 outputs, so reuse is exact by construction. alpha/risk/retained state/bitmap are never cached.",
     "selector": "Attention(selector='legacy_recompute'|'prefix_block_summary', selector_layers='local'); default unchanged"
   },
-  "next_command": "CP2 clean D/L/S request timing via scripts/v9_clean_request_timing.py from deploy snapshot",
+  "next_command": "CP3: ./run_v9_trace.sh <deploy sha12> (S, aime26/2, pass A cold compile timeline + pass B warm profiler windows canvas1/canvas8)",
   "not_started": [
     "240-request matrix",
     "extra seeds",
@@ -86,7 +136,7 @@
   "reporting_sha": "resolve with git HEAD; not self-validating",
   "reviewed_head_at_start": "3b67ea16261a5241c4bee3175ee9859dc9038da0",
   "schema": 1,
-  "status": "CP1_DONE_MEASUREMENT_PATH_QUALIFIED; CP2 request timing next",
+  "status": "CP2_DONE_CLEAN_E2E: S not faster than L; L/S slower per call than native; cold cost dominated by in-request Triton specialization. CP3 trace next",
   "storage_preflight": "root 58 GB free, no migration; bulky artifacts -> /media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924",
   "task": "v9: qualify measurement path, clean paired D/L/S natural-request timing",
   "tests": "94 targeted tests pass on the local WSL RTX4060 (private device, never the remote timing GPU): numerical_reuse_{prefix_summary,preqk,route_only,routing_only,integration,cache,math,stop,summary,prefix_lease,native_mask}, numerical_qk_runner, preqk_correctness_vectors, preqk_profile_contracts. Two unrelated historical tests (test_diffusion_gemma_preqk, test_jl_accepted_round2) fail identically at the base commit on a missing results/diffusion_gemma_oracle/setup.json.",
