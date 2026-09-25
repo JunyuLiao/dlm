@@ -129,3 +129,11 @@ def test_7_reporting_metadata_comes_from_the_protocol_not_v10_notes():
     for stale in ('4 independent questions', 'seed 42', 'legacy Junyu local mask', 'collect=True'):
         assert stale not in inspect.getsource(summ)
     assert arm_config_hash(dict(a=1, seeds=[17], ids=['x'], fingerprint='f')) == arm_config_hash(dict(a=1, seeds=[42]))
+
+
+def test_8_config_hash_is_independent_of_checkout_root():
+    from scripts.v13_seed_runs import REPO
+    a = dict(x=1, source_hashes={REPO + '/experiments/a.py': 'h1', '/site/transformers/g.py': 'h2'})
+    b = dict(x=1, source_hashes={'<repo>/experiments/a.py': 'h1', '/site/transformers/g.py': 'h2'})
+    assert arm_config_hash(a) == arm_config_hash(b)
+    assert arm_config_hash(a) != arm_config_hash(dict(a, source_hashes={REPO + '/experiments/a.py': 'CHANGED', '/site/transformers/g.py': 'h2'}))

@@ -38,8 +38,16 @@ def sha(value: Any) -> str:
     return hashlib.sha256(json.dumps(value, sort_keys=True, default=str).encode()).hexdigest()
 
 
+REPO = str(Path(__file__).resolve().parents[1])
+
+
 def arm_config_hash(config: dict) -> str:
-    return sha({k: v for k, v in config.items() if k not in VOLATILE})
+    """Source hash KEYS carry the checkout/deploy root; only the relative path and
+    the content hash identify the code, so the root is normalized before hashing."""
+    stable = {k: v for k, v in config.items() if k not in VOLATILE}
+    if isinstance(stable.get('source_hashes'), dict):
+        stable['source_hashes'] = {k.replace(REPO, '<repo>'): v for k, v in stable['source_hashes'].items()}
+    return sha(stable)
 
 
 def cell_id(protocol_id: str, model_revision: str, arm_hash: str, question_id: str, seed: int) -> str:
