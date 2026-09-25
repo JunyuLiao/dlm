@@ -64,7 +64,8 @@ class Attention:
     def __init__(self, adapter, thresholds, *, score_period=8, decision_interval=1,
                  trace=False, max_cache_bytes=2 * 1024**3, support='legacy_junyu_mask',
                  output_mode='cached_scores', selector='legacy_recompute',
-                 selector_layers='local', max_summary_bytes=1024**3):
+                 selector_layers='local', max_summary_bytes=1024**3,
+                 kernel_variant='static'):
         if support not in SUPPORT_MODES:
             raise ValueError(support)
         if output_mode not in OUTPUT_MODES:
@@ -73,6 +74,9 @@ class Attention:
             raise ValueError(selector)
         if selector_layers not in ('local', 'all'):
             raise ValueError(selector_layers)
+        if kernel_variant not in ('static', 'generic'):
+            raise ValueError(kernel_variant)
+        self.kernel_variant = kernel_variant
         self.selector = selector
         self.selector_layers = selector_layers
         self.summaries = {}
@@ -237,7 +241,8 @@ class Attention:
                 result = attention(entry.scores, v, projected.contiguous(), ref.contiguous(),
                                    sensitivity=self.query_sensitivity,
                                    log_threshold=threshold, trace=self.trace,
-                                   summary=summary, store_summary=store_summary)
+                                   summary=summary, store_summary=store_summary,
+                                   variant=self.kernel_variant)
                 decision = Decision(result.skipped, result.eligible)
             else:
                 # Selector only: no discarded PV, no discarded [B,H,Q,D]
@@ -246,7 +251,8 @@ class Attention:
                 route = route_only(entry.scores, projected.contiguous(), ref.contiguous(),
                                    sensitivity=self.query_sensitivity,
                                    log_threshold=threshold,
-                                   summary=summary, store_summary=store_summary)
+                                   summary=summary, store_summary=store_summary,
+                                   variant=self.kernel_variant)
                 torch._assert_async(~route.invalid_tiles.any(),
                                     'Invalid cached scores in routing decision: request must fail')
                 decision = Decision(route.skipped, route.eligible)
@@ -255,24 +261,27 @@ class Attention:
                 if self.output_mode == PREQK_MODE:
                     result = preqk_attention(q, k, v, route.skipped, route.eligible,
                                              scale=scale, window=window,
-                                             is_causal=causal, trace=self.trace)
+                                             is_causal=causal, trace=self.trace,
+                                             variant=self.kernel_variant)
                     self.preqk_calls += 1
                 else:
                     result = attention(current_for_output, v, skipped=route.skipped,
-                                       eligible=route.eligible, trace=self.trace)
+                                       eligible=route.eligible, trace=self.trace,
+                                       variant=self.kernel_variant)
             self.cache.publish_decision(identity, self.step, decision)
             self.decision_calls += 1
         elif self.output_mode == PREQK_MODE:
             # Held support, current output, still no dropped-tile QK.
             result = preqk_attention(q, k, v, entry.decision.skipped, entry.decision.eligible,
                                      scale=scale, window=window, is_causal=causal,
-                                     trace=self.trace)
+                                     trace=self.trace, variant=self.kernel_variant)
             self.preqk_calls += 1
             self.held_calls += 1
         else:
             scores_for_pv = current_for_output if self.output_mode == 'routing_only_current_output' else entry.scores
             result = attention(scores_for_pv, v, skipped=entry.decision.skipped,
-                               eligible=entry.decision.eligible, trace=self.trace)
+                               eligible=entry.decision.eligible, trace=self.trace,
+                               variant=self.kernel_variant)
             self.held_calls += 1
         # Explicit asynchronous error, never consume zeroed invalid rows. This
         # is a measured device guard, not a steady-path host tensor read.
@@ -386,6 +395,7 @@ class Attention:
                     unsupported_mask_refreshes=self.unsupported_mask_refreshes,
                     support=self.support, output_mode=self.output_mode,
                     selector=self.selector, selector_layers=self.selector_layers,
+                    kernel_variant=self.kernel_variant,
                     summary_builds=self.summary_builds, summary_hits=self.summary_hits,
                     summary_misses=self.summary_misses,
                     summary_resident_bytes=self.summary_bytes,
@@ -433,7 +443,8 @@ def install(adapter, config, condition):
                            support=config.get('support', 'legacy_junyu_mask'),
                            output_mode=config.get('output_mode', 'cached_scores'),
                            selector=config.get('selector', 'legacy_recompute'),
-                           selector_layers=config.get('selector_layers', 'local'))
+                           selector_layers=config.get('selector_layers', 'local'),
+                           kernel_variant=config.get('kernel_variant', 'static'))
         binding.runtime.attention_override = router
         state = NativeReuseState('T', router, m_ref=config['m_ref'], beta=config['beta'],
                                  gamma=config['gamma'], diagnostics=config['diagnostic'])

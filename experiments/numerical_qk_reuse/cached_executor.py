@@ -372,9 +372,51 @@ if tr is not None:
             tl.store(COUNTERS+base+2, qkdots)
 
 
+VARIANTS = ('static', 'generic')
+
+
+_KERNEL_TABLES = {}
+
+
+def _kernels(variant):
+    """static: exact-length constexpr kernels (reference). generic: v10 CP1
+    length-generic twins (runtime K/KT/PREFIX_TILES), textually identical bodies."""
+    table = _KERNEL_TABLES.get(variant)
+    if table is not None:
+        return table
+    if variant == 'static':
+        table = dict(route=_route, held=_held_eligible, pv=_pv, preqk=_preqk_pv)
+    elif variant == 'generic':
+        from . import generic_kernels as g
+        table = dict(route=g._route_generic, held=g._held_eligible_generic,
+                     pv=g._pv_generic, preqk=g._preqk_pv_generic)
+    else:
+        raise ValueError(variant)
+    _KERNEL_TABLES[variant] = table
+    return table
+
+
+def _kdiv(nk):
+    kdiv = 1
+    while kdiv < 16 and nk % (kdiv * 2) == 0:
+        kdiv *= 2
+    return kdiv
+
+
+def _karg(variant, nk):
+    """The K argument: exact for static; K // KDIV for the generic twins."""
+    return nk if variant != 'generic' else nk // _kdiv(nk)
+
+
+def _extra(variant, nk):
+    """Launch-time extras: the generic twins take K's power-of-two alignment."""
+    return {} if variant != 'generic' else {'KDIV': _kdiv(nk)}
+
+
 def attention(scores, v, z=None, reference=None, *, sensitivity=None,
               log_threshold=-math.inf, skipped=None, eligible=None,
-              trace=False, num_warps=8, summary=None, store_summary=False):
+              trace=False, num_warps=8, summary=None, store_summary=False,
+              variant='static'):
     """Run M1, or consume a held M3 bitmap without projected-V routing.
 
     Output rows flagged in ``invalid_scores`` are zero and require caller
@@ -424,25 +466,26 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
     if skipped is None:
         prefix_tiles, zs, mus, acts, bads = _summary_arguments(summary, store_summary, shape, kt,
                                                                scores.device)
-        _route[(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles, lse, state, risk,
+        kernels = _kernels(variant)
+        kernels['route'][(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles, lse, state, risk,
                            zs, mus, acts, bads,
-                           nq, nk, h, hk, 32, 32, qb, kt, log_threshold, trace,
+                           nq, _karg(variant, nk), h, hk, 32, 32, qb, kt, log_threshold, trace,
                            prefix_tiles, bool(store_summary),
                            bool(summary is not None and not store_summary),
-                           num_warps=num_warps, num_stages=1, enable_fp_fusion=False)
+                           num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
     elif summary is not None or store_summary:
         raise ValueError('summaries apply to the selector, not the held-bitmap path')
     elif eligible is None:
-        _held_eligible[(qb, h, b)](scores, skip, elig, nq, nk, h, qb, kt,
-                                    num_warps=4, num_stages=1)
-    _pv[(tr.cdiv(nq, 16), h, b)](scores, v, skip, elig, out, lse, invalid, counters,
-                                 nq, nk, h, hk, d, qb, kt, trace,
-                                 num_warps=num_warps, num_stages=1, enable_fp_fusion=False)
+        _kernels(variant)['held'][(qb, h, b)](scores, skip, elig, nq, _karg(variant, nk), h, qb, kt,
+                                    num_warps=4, num_stages=1, **_extra(variant, nk))
+    _kernels(variant)['pv'][(tr.cdiv(nq, 16), h, b)](scores, v, skip, elig, out, lse, invalid, counters,
+                                 nq, _karg(variant, nk), h, hk, d, qb, kt, trace,
+                                 num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
     return Output(out, skip, elig, lse, state, risk, invalid, counters)
 
 
 def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.inf,
-               num_warps=8, summary=None, store_summary=False):
+               num_warps=8, summary=None, store_summary=False, variant='static'):
     """Selector only: the SAME ``_route`` decision, with no PV and no output.
 
     ``attention(...)`` with ``skipped=None`` also produces a bitmap, but it
@@ -487,12 +530,12 @@ def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.in
     dummy = torch.empty((1,), device=scores.device, dtype=torch.float32)
     prefix_tiles, zs, mus, acts, bads = _summary_arguments(summary, store_summary, shape, kt,
                                                            scores.device)
-    _route[(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles,
+    _kernels(variant)['route'][(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles,
                        dummy, dummy, dummy, zs, mus, acts, bads,
-                       nq, nk, h, hk, 32, 32, qb, kt, log_threshold, False,
+                       nq, _karg(variant, nk), h, hk, 32, 32, qb, kt, log_threshold, False,
                        prefix_tiles, bool(store_summary),
                        bool(summary is not None and not store_summary),
-                       num_warps=num_warps, num_stages=1, enable_fp_fusion=False)
+                       num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
     return Routing(skip, elig, bad_tiles)
 
 
@@ -522,7 +565,7 @@ def _summary_arguments(summary, store_summary, shape, kt, device):
 
 
 def preqk_attention(q, k, v, skipped, eligible, *, scale, window=None,
-                    is_causal=False, trace=False, num_warps=8):
+                    is_causal=False, trace=False, num_warps=8, variant='static'):
     """Current attention on a preselected support, skipping dropped tiles' QK.
 
     ``skipped``/``eligible`` are the [B,H,Qtiles,Ktiles] bitmaps produced
@@ -567,11 +610,51 @@ def preqk_attention(q, k, v, skipped, eligible, *, scale, window=None,
     invalid = torch.empty((b, h, nq), device=q.device, dtype=torch.bool)
     counters = torch.zeros((b, h, tr.cdiv(nq, 16), 3) if trace else (1,),
                            device=q.device, dtype=torch.int32)
-    _preqk_pv[(tr.cdiv(nq, 16), h, b)](q, k, v, skipped, eligible, out, lse, invalid, counters,
+    _kernels(variant)['preqk'][(tr.cdiv(nq, 16), h, b)](q, k, v, skipped, eligible, out, lse, invalid, counters,
                                        q.stride(0), q.stride(1), q.stride(2),
                                        k.stride(0), k.stride(1), k.stride(2),
                                        v.stride(0), v.stride(1), v.stride(2),
-                                       nq, nk, h, hk, d, qb, kt, float(scale), bound, trace,
-                                       num_warps=num_warps, num_stages=1, enable_fp_fusion=False)
+                                       nq, _karg(variant, nk), h, hk, d, qb, kt, float(scale), bound, trace,
+                                       num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
     state = torch.empty((1,), device=q.device, dtype=torch.float32)
     return Output(out, skipped, eligible, lse, state, state, invalid, counters)
+
+
+def warmup_generic(thresholds, device='cuda', *, geometries=None, canvas=256):
+    """Deployment warmup for the generic twins, OUTSIDE request latency.
+
+    Compiles the bounded production-mode set on synthetic tensors: for each
+    decoder geometry (LOCAL h16/hk8/d256/window1024, GLOBAL h16/hk2/d512) and
+    each of the 5 K alignment classes (KDIV 1..16): anchor route+PV with and
+    without summary STORE, ordinary route_only with and without summary LOAD,
+    and the preqk consumer -- all with trace=False, as in production. Uses the
+    frozen policy thresholds because THRESHOLD is a compile-time mode. Never
+    touches the model or any answer. Returns (seconds, launches).
+    """
+    import time
+    geometries = geometries or (('local', 16, 8, 256, 1024), ('global', 16, 2, 512, None))
+    start, launches = time.perf_counter(), 0
+    for kind, h, hk, d, window in geometries:
+        threshold = float(thresholds[kind]['log_threshold'])
+        for kdiv in (1, 2, 4, 8, 16):
+            nk = 1280 + kdiv % 16            # 1281, 1282, 1284, 1288, 1280
+            assert _kdiv(nk) == kdiv, (nk, kdiv)
+            q = torch.zeros((1, canvas, h, d), device=device, dtype=torch.bfloat16).transpose(1, 2)
+            k = torch.zeros((1, hk, nk, d), device=device, dtype=torch.bfloat16)
+            v = torch.zeros((1, hk, nk, d), device=device, dtype=torch.bfloat16)
+            scores = torch.zeros((1, h, canvas, nk), device=device, dtype=torch.float32)
+            z = torch.zeros((1, hk, nk, 32), device=device, dtype=torch.float32)
+            ref = torch.ones((1, hk), device=device, dtype=torch.float32)
+            sens = torch.ones((1, canvas), device=device, dtype=torch.float32)
+            qb, kt = tr.cdiv(canvas, 128), tr.cdiv(nk, 64)
+            for store in (False, True):
+                summary = allocate_summary(1, h, qb, kt, 16, 32, device, ('warmup',)) if store else None
+                attention(scores, v, z, ref, sensitivity=sens, log_threshold=threshold, summary=summary,
+                          store_summary=store, variant='generic')
+                routed = route_only(scores, z, ref, sensitivity=sens, log_threshold=threshold,
+                                    summary=summary, store_summary=False, variant='generic')
+                preqk_attention(q, k, v, routed.skipped, routed.eligible, scale=d ** -.5, window=window,
+                                variant='generic')
+                launches += 5
+    torch.cuda.synchronize()
+    return time.perf_counter() - start, launches
