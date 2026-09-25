@@ -100,7 +100,15 @@
     "work_avoided": "75% of local and 86% of global KV tiles skip score re-read + sketch read + tf32x3 dot per decision"
   },
   "execution_identity_note": "Per-run config receipts are the authority for what ran (results/.../configs/*.json, each with its own fingerprint and source_hashes). No inherited executed_model_source_sha is carried here.",
-  "live_jobs": [],
+  "live_jobs": [
+    {
+      "ledger": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/cp3/ledger.jsonl",
+      "pgid": 1483612,
+      "script": "../run_v10_cp3.sh 01efe3960713",
+      "started_utc": "2026-09-25T07:52Z",
+      "what": "CP3 panel D,T,P,O x /2,/8,/14,/20 x 3"
+    }
+  ],
   "method_config_unchanged": {
     "decision_interval_M1": 1,
     "output_mode": "historical_route_preqk_current_output",
@@ -143,7 +151,7 @@
   "reporting_sha": "resolve with git HEAD; not self-validating",
   "reviewed_head_at_start": "3b67ea16261a5241c4bee3175ee9859dc9038da0",
   "schema": 1,
-  "status": "V10_CP1_DONE: generic kernels bit-identical, bounded variants, cold /2 94.7->32.5 s; CP2 next",
+  "status": "V10_CP2_DONE: repair = minimal telemetry + fused guard (-3 ms/step, ~2%); CP3 panel running",
   "storage_preflight": "root 58 GB free, no migration; bulky artifacts -> /media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924",
   "task": "v10 overnight: bounded specialization (CP1), one warm repair (CP2), complete-answer panel (CP3)",
   "tests": "94 targeted tests pass on the local WSL RTX4060 (private device, never the remote timing GPU): numerical_reuse_{prefix_summary,preqk,route_only,routing_only,integration,cache,math,stop,summary,prefix_lease,native_mask}, numerical_qk_runner, preqk_correctness_vectors, preqk_profile_contracts. Two unrelated historical tests (test_diffusion_gemma_preqk, test_jl_accepted_round2) fail identically at the base commit on a missing results/diffusion_gemma_oracle/setup.json.",
@@ -162,6 +170,45 @@
       "commit": "901e360b51829dbd50e6b6007d4a95f420cbf0c3",
       "deploy": "../deploy/901e360b5182",
       "flag": "kernel_variant=generic"
+    },
+    "cp2": {
+      "commits": [
+        "947cf49c014c",
+        "48ad28963107",
+        "01efe3960713"
+      ],
+      "counterfactual_consumer_only_ms": {
+        "canvas1": {
+          "O_ord": 147.53,
+          "held_same_support": 133.95,
+          "native": 119.76
+        },
+        "canvas6": {
+          "O_ord": 161.03,
+          "held_same_support": 144.58,
+          "native": 131.08
+        }
+      },
+      "flags": {
+        "guard_mode": "fused",
+        "telemetry": "minimal"
+      },
+      "not_taken": [
+        "T-only fast path (~1.6 ms)",
+        "_route tile-parallel restructure (next decision)"
+      ],
+      "replay_ms": {
+        "canvas1": {
+          "O_ord": 150.61,
+          "P_ord": 153.61,
+          "native": 122.54
+        },
+        "canvas6": {
+          "O_ord": 163.72,
+          "P_ord": 166.87,
+          "native": 133.33
+        }
+      }
     },
     "final_by_utc": "2026-09-25T14:57:30Z",
     "fresh_T_extension": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so (+ torch bridge), source hashes match current csrc",
