@@ -46,6 +46,8 @@ def _arm_args(args: argparse.Namespace, condition: str, *, timing_events: bool,
                               score_refresh_period=args.score_refresh_period,
                               support=getattr(args, "support", "legacy_junyu_mask"),
                               output_mode=getattr(args, "output_mode", "cached_scores"),
+                              selector=getattr(args, "selector", "legacy_recompute"),
+                              selector_layers=getattr(args, "selector_layers", "local"),
                               diagnostic=False, timing_events=timing_events)
 
 
@@ -313,6 +315,9 @@ def parse(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--score-refresh-period", type=int, default=8)
     parser.add_argument("--support", choices=("legacy_junyu_mask", "native_mask"),
                         default="legacy_junyu_mask")
+    parser.add_argument("--selector", choices=("legacy_recompute", "prefix_block_summary"),
+                        default="legacy_recompute")
+    parser.add_argument("--selector-layers", choices=("local", "all"), default="local")
     parser.add_argument("--output-mode", choices=("cached_scores", "routing_only_current_output",
                                  "historical_route_preqk_current_output"),
                         default="cached_scores")

@@ -163,7 +163,8 @@ def _config(args: argparse.Namespace) -> dict[str, Any]:
                   max_new_tokens=8192, thinking=True, temperature=0.0, eos_enabled=True,
                   native_adaptive=True, decision_interval=args.decision_interval,
                   score_refresh_period=args.score_refresh_period, support=args.support,
-                  output_mode=args.output_mode,
+                  output_mode=args.output_mode, selector=args.selector,
+                  selector_layers=args.selector_layers,
                   library=str(args.library.resolve()) if args.library else None,
                   torch_library=str(args.torch_library.resolve()) if args.torch_library else None,
                   plugin=args.plugin, diagnostic=args.diagnostic,
@@ -454,6 +455,11 @@ def parse(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--support", choices=("legacy_junyu_mask", "native_mask"),
                         default="legacy_junyu_mask",
                         help="M1/M3 native-mask correction; native_dense/fresh_junyu_T are unaffected")
+    parser.add_argument("--selector", choices=("legacy_recompute", "prefix_block_summary"),
+                        default="legacy_recompute",
+                        help="prefix_block_summary: reuse exact per-row z/mu for wholly-immutable "
+                             "prefix tiles between real score anchors; decisions are unchanged")
+    parser.add_argument("--selector-layers", choices=("local", "all"), default="local")
     parser.add_argument("--output-mode", choices=("cached_scores", "routing_only_current_output",
                                  "historical_route_preqk_current_output"),
                         default="cached_scores",

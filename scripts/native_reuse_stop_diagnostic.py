@@ -196,6 +196,7 @@ def _args_for(args: argparse.Namespace, condition: str) -> argparse.Namespace:
                               extra_source=[Path(__file__)], decision_interval=2 if condition == "M3" else 1,
                               score_refresh_period=8, support="legacy_junyu_mask",
                               output_mode="cached_scores",
+                              selector="legacy_recompute", selector_layers="local",
                               diagnostic=False, timing_events=False)
 
 
