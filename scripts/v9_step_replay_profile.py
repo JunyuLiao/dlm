@@ -228,8 +228,17 @@ def profile(args) -> dict[str, Any]:
                       telemetry=arm.get('telemetry', 'full'), guard_mode=arm.get('guard_mode', 'separate'),
                       consumer=arm.get('consumer', 'triton'), support_build=arm.get('support_build'))
         name = f"sparse_{arm['name']}" if 'name' in arm else f'sparse_{selector}'
-        with integration.install(adapter, config, 'M1') as runtime:
+        condition = arm.get('condition', 'M1')
+        if arm.get('scope') == 'global':            # v12: GLOBAL-only, native LOCAL
+            from experiments.numerical_qk_reuse import global_scope
+            config['decision_interval'] = global_scope.DECISION_INTERVAL[condition]
+            installer = global_scope.install
+        else:
+            installer = integration.install
+        with installer(adapter, config, condition) as runtime:
             router, state = runtime['router'], runtime['state']
+            routed_calls = 5 if arm.get('scope') == 'global' else 30
+            router.cache.decision_interval = 1   # replay phases are constructed explicitly below
             with observe(model, state):                      # exactly ONE observer
                 step = model._denoising_step
                 with dispatch_spy(model) as counts:
@@ -266,7 +275,7 @@ def profile(args) -> dict[str, Any]:
                     def inner(fixture, result):
                         after = telemetry(router)
                         delta = {k: after[k] - digests['before'][k] for k in after}
-                        if (delta['score_calls'] > 0) != expect_scores or delta['calls'] != 30:
+                        if (delta['score_calls'] > 0) != expect_scores or delta['calls'] != routed_calls:
                             raise AssertionError(f'{name}: phase mismatch {delta}')
                         return dict(input_digest=digests['input'], output_digest=output_digest(result),
                                     telemetry_delta=delta, telemetry_after=after,
@@ -292,7 +301,7 @@ def profile(args) -> dict[str, Any]:
                 def check_held(fixture, result):
                     after = telemetry(router)
                     delta = {k: after[k] - digests['before'][k] for k in after}
-                    if delta['decision_calls'] or delta['score_calls'] or delta['held_calls'] != 30:
+                    if delta['decision_calls'] or delta['score_calls'] or delta['held_calls'] != routed_calls:
                         raise AssertionError(f'{name}: held phase mismatch {delta}')
                     return dict(input_digest=digests['input'], output_digest=output_digest(result),
                                 telemetry_delta=delta)
@@ -318,9 +327,22 @@ def profile(args) -> dict[str, Any]:
         from experiments.value_direction_hopper.integration import install as install_t
         from experiments.value_direction_hopper.query_adaptive import State
         name = f"fresh_{arm['name']}"
-        with install_t(adapter, arm['library'], policy['policies'][args.policy_name], mode='value',
-                       projections=Projections(), torch_library=arm['torch_library'], collect=False) as (_b, router_t):
-            state = State('T', router_t, m_ref=args.m_ref, beta=args.beta, gamma=args.gamma, diagnostics=False)
+        from contextlib import contextmanager
+
+        @contextmanager
+        def t_runtime():
+            if arm.get('scope') == 'global':          # v12: fresh T on GLOBAL only, native LOCAL
+                from experiments.numerical_qk_reuse import global_scope
+                cfg = dict(library=arm['library'], torch_library=arm['torch_library'], collect=False,
+                           policy=policy['policies'][args.policy_name], m_ref=args.m_ref, beta=args.beta,
+                           gamma=args.gamma, diagnostic=False)
+                with global_scope.install(adapter, cfg, 'global_T') as rt:
+                    yield rt['router'], rt['state']
+            else:
+                with install_t(adapter, arm['library'], policy['policies'][args.policy_name], mode='value',
+                               projections=Projections(), torch_library=arm['torch_library'], collect=False) as (_b, rt):
+                    yield rt, State('T', rt, m_ref=args.m_ref, beta=args.beta, gamma=args.gamma, diagnostics=False)
+        with t_runtime() as (router_t, state):
             with observe(model, state):
                 step = model._denoising_step
                 with dispatch_spy(model) as counts:
