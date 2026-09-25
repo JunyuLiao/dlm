@@ -34,7 +34,8 @@ from typing import Any
 import torch
 
 ARMS = ('native_dense', 'fresh_junyu_T', 'routing_only_current_output',
-        'historical_route_preqk_current_output', 'cached_scores', 'M3_held')
+        'historical_route_preqk_current_output', 'preqk_summary_selector',
+        'cached_scores', 'M3_held')
 
 
 class StepCapture:
@@ -175,12 +176,17 @@ def build_router(adapter, arm, thresholds, config):
         return None
     output_mode = {'routing_only_current_output': 'routing_only_current_output',
                    'historical_route_preqk_current_output': 'historical_route_preqk_current_output',
+                   'preqk_summary_selector': 'historical_route_preqk_current_output',
                    'cached_scores': 'cached_scores',
                    'M3_held': 'historical_route_preqk_current_output'}[arm]
+    # preqk_summary_selector is the same output mode with the exact
+    # prefix-block-summary selector enabled on LOCAL layers.
+    selector = 'prefix_block_summary' if arm == 'preqk_summary_selector' else 'legacy_recompute'
     interval = 2 if arm == 'M3_held' else 1
     return Attention(adapter, thresholds, score_period=config['score_refresh_period'],
                      decision_interval=interval, trace=False,
-                     support=config['support'], output_mode=output_mode)
+                     support=config['support'], output_mode=output_mode,
+                     selector=selector, selector_layers=config.get('selector_layers', 'local'))
 
 
 def profile(args) -> dict[str, Any]:
@@ -192,7 +198,8 @@ def profile(args) -> dict[str, Any]:
     manifest = {row['id']: row for row in json.loads(args.manifest.read_text(encoding='utf-8'))}
     thresholds = json.loads(args.policy.read_text(encoding='utf-8'))['policies'][args.policy_name]
     row = manifest[args.id]
-    config = dict(score_refresh_period=args.score_refresh_period, support=args.support)
+    config = dict(score_refresh_period=args.score_refresh_period, support=args.support,
+                  selector_layers=args.selector_layers)
 
     adapter = create_adapter('diffusion_gemma', str(args.model), device='cuda',
                              precision='bfloat16', revision=args.revision).load()
@@ -469,6 +476,7 @@ def parse(argv=None):
     parser.add_argument('--max-new-tokens', type=int, default=320)
     parser.add_argument('--score-refresh-period', type=int, default=8)
     parser.add_argument('--support', default='legacy_junyu_mask')
+    parser.add_argument('--selector-layers', default='local', choices=('local', 'all'))
     parser.add_argument('--library', type=Path)
     parser.add_argument('--torch-library', type=Path)
     parser.add_argument('--require-prefix-at-least', type=int, default=0,
