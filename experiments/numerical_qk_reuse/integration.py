@@ -98,14 +98,16 @@ class Attention:
             raise ValueError(consumer)
         self.consumer = consumer
         if consumer == 'hopper':
-            from experiments.value_direction_hopper import support
+            # Aliased: a bare 'support' would shadow the mask-mode parameter.
+            from experiments.value_direction_hopper import support as support_consumer
             if support_build is None:
                 raise ValueError('hopper consumer requires a verified support_build identity')
-            self.support_identity = support.load(support_build)
-            self._support = support
+            self.support_identity = support_consumer.load(support_build)
+            self._support = support_consumer
         self.kernel_variant = kernel_variant
         self.selector = selector
         self.selector_layers = selector_layers
+        assert isinstance(support, str) and support in SUPPORT_MODES, 'mask-mode parameter was shadowed'
         self.summaries = {}
         self.summary_hits = self.summary_builds = self.summary_misses = 0
         # Two SEPARATE, separately enforced budgets. max_cache_bytes bounds the
