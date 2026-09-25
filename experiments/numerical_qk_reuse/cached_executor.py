@@ -655,9 +655,11 @@ def warmup_generic(thresholds, device='cuda', *, geometries=None, canvas=256):
                           store_summary=store, variant='generic')
                 routed = route_only(scores, z, ref, sensitivity=sens, log_threshold=threshold,
                                     summary=summary, store_summary=False, variant='generic')
-                preqk_attention(q, k, v, routed.skipped, routed.eligible, scale=d ** -.5, window=window,
-                                variant='generic')
-                launches += 5
+                out = preqk_attention(q, k, v, routed.skipped, routed.eligible, scale=d ** -.5, window=window,
+                                      variant='generic')
+                guard_flags(out.output, out.invalid_scores, routed.invalid_tiles)
+                guard_flags(out.output, out.invalid_scores)
+                launches += 7
     torch.cuda.synchronize()
     return time.perf_counter() - start, launches
 

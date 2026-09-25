@@ -272,14 +272,41 @@ def profile(args) -> dict[str, Any]:
                                     router_step=router.step)
                     return inner
 
-                for phase, prepare, expect in (('anchor', prepare_anchor, True),
-                                               ('ordinary', prepare_ordinary, False)):
+                def prepare_held_same_support():
+                    # v10 consumer-only counterfactual: step 1's OWN decision is
+                    # computed untimed, then step 1 is replayed with that exact
+                    # bitmap held (no route, no sketch, no route guard); T
+                    # bookkeeping and the current-output consumer remain.
+                    router.cache.decision_interval = 1
+                    reset_router(router)
+                    step(**step0['snapshot'].prepare(controller=state))
+                    step(**step1['snapshot'].prepare(controller=state))
+                    torch.cuda.synchronize()
+                    router.cache.decision_interval = 10 ** 6
+                    kw = step1['snapshot'].prepare(controller=state)
+                    digests['input'] = StepSnapshot.digest(kw, controller=state)
+                    digests['before'] = telemetry(router)
+                    return kw
+
+                def check_held(fixture, result):
+                    after = telemetry(router)
+                    delta = {k: after[k] - digests['before'][k] for k in after}
+                    if delta['decision_calls'] or delta['score_calls'] or delta['held_calls'] != 30:
+                        raise AssertionError(f'{name}: held phase mismatch {delta}')
+                    return dict(input_digest=digests['input'], output_digest=output_digest(result),
+                                telemetry_delta=delta)
+
+                phases = [('anchor', prepare_anchor, check(True)), ('ordinary', prepare_ordinary, check(False))]
+                if args.held_counterfactual:
+                    phases.append(('held_same_support', prepare_held_same_support, check_held))
+                for phase, prepare, checker in phases:
                     row = timed_rows(lambda kw: step(**kw), prepare, warmup=args.warmup,
-                                     reps=args.reps, check=check(expect))
+                                     reps=args.reps, check=checker)
                     row['label'] = ('production M1 binding + one observe wrapper; T bookkeeping '
                                     'inside the timed step' + ('' if phase == 'anchor' else
                                     '; age-1 history from an untimed real replay of step 0'))
                     report['rows'][f'{name}.{phase}'] = summarize_identity(row)
+                router.cache.decision_interval = 1
         if '_denoising_step' in vars(model):
             raise RuntimeError('observer leaked')
 
@@ -307,6 +334,8 @@ def parse(argv=None):
     parser.add_argument('--id', required=True)
     parser.add_argument('--canvas', type=int, default=1)
     parser.add_argument('--order', nargs='+', default=['native', 'eager', 'legacy', 'summary'])
+    parser.add_argument('--held-counterfactual', action='store_true',
+                        help='v10: add the same-support consumer-only (held decision) phase')
     parser.add_argument('--sparse-arms', default='[]',
                         help='v10: JSON list of {name, selector, kernel_variant, telemetry, guard_mode}; '
                              'names usable in --order')
