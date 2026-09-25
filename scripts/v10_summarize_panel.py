@@ -20,6 +20,9 @@ def main() -> None:
     parser.add_argument('--ledger', type=Path, required=True)
     parser.add_argument('--manifest', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--pairs', nargs='+', default=['O/P', 'O/D', 'O/T', 'P/D', 'T/D'],
+                        help='numerator/denominator arm labels (v11: e.g. H1/T H3/T H1/D H3/D T/D)')
+    parser.add_argument('--prefix', default='complete_request_results')
     args = parser.parse_args()
     from experiments.diffusion_gemma_aime26_modes.protocol import final_response, numeric_score
     gold = {str(r['id']): str(r['expected']) for r in json.loads(args.manifest.read_text())}
@@ -39,7 +42,7 @@ def main() -> None:
         elif run.get('attempt0'):
             run['quality'] = dict(correct=False, failure=run.get('error'))
     ids = sorted({r['id'] for r in runs}, key=lambda x: int(x.split('/')[1]))
-    arms = sorted({r['label'] for r in runs}, key='DTPO'.index)
+    arms = list(dict.fromkeys(r['label'] for r in runs))
     cells = {}
     for id_ in ids:
         for arm in arms:
@@ -69,7 +72,7 @@ def main() -> None:
                                                             'summary_budget_bytes', 'score_peak_bytes', 'score_budget_bytes',
                                                             'history_summary_peak_bytes', 'per_tile_statistics')) if counters else None)
     paired = {}
-    for a, b in (('O', 'P'), ('O', 'D'), ('O', 'T'), ('P', 'D'), ('T', 'D')):
+    for a, b in (pair.split('/') for pair in args.pairs):
         ratios, sums = [], [0., 0.]
         for id_ in ids:
             x, y = cells.get(f'{id_}|{a}'), cells.get(f'{id_}|{b}')
@@ -99,8 +102,8 @@ def main() -> None:
                          'amortized ms/call = warm API wall / decoder calls; includes prefill, commits, sampler; not model latency',
                          'T = fresh Junyu T via verified extension (collect=True keeps bitmap references; no per-step device work)'])
     args.out.mkdir(parents=True, exist_ok=True)
-    (args.out / 'complete_request_results.json').write_text(json.dumps(report, indent=2, sort_keys=True) + '\n')
-    with (args.out / 'complete_request_results.csv').open('w', newline='') as stream:
+    (args.out / f'{args.prefix}.json').write_text(json.dumps(report, indent=2, sort_keys=True) + '\n')
+    with (args.out / f'{args.prefix}.csv').open('w', newline='') as stream:
         writer = csv.writer(stream)
         writer.writerow(['id', 'arm', 'row_type', 'index', 'ok', 'api_wall_s', 'outer_wall_s', 'decoder_calls', 'canvases',
                          'termination', 'output_tokens', 'token_hash16', 'matches_attempt0', 'correct_attempt0',

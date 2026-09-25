@@ -51,7 +51,7 @@ def arm_config(args, arm: dict) -> dict:
         kernel_variant=arm.get('kernel_variant', 'static'),
         library=Path(LIBRARY) if condition == 'fresh_junyu_T' else None,
         torch_library=Path(TORCH_LIBRARY) if condition == 'fresh_junyu_T' else None,
-        plugin=PLUGIN if condition in ('M1', 'M3') else None, diagnostic=False, timing_events=False,
+        plugin=arm.get('plugin', PLUGIN if condition in ('M1', 'M3') else None), diagnostic=False, timing_events=False,
         extra_source=[])
     config = _config(ns)
     config['telemetry'] = arm.get('telemetry', 'full')

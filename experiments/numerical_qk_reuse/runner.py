@@ -25,7 +25,7 @@ from types import MethodType
 from typing import Any, Mapping
 
 
-CONDITIONS = ("native_dense", "fresh_junyu_T", "M1", "M3")
+CONDITIONS = ("native_dense", "fresh_junyu_T", "M1", "M3", "dense_mask")
 GOLD_FIELDS = frozenset(("expected", "expected_answer", "answer", "reference_solution",
                          "solution", "gold", "target"))
 SOURCE = Path(__file__).resolve().parents[2]
@@ -143,7 +143,7 @@ def _config(args: argparse.Namespace) -> dict[str, Any]:
         raise ValueError("Policy must contain local and global thresholds")
     if args.condition == "fresh_junyu_T" and (args.library is None or args.torch_library is None):
         raise ValueError("Fresh Junyu T requires explicit matching --library and --torch-library")
-    if args.condition in ("M1", "M3") and not args.plugin:
+    if args.condition in ("M1", "M3", "dense_mask") and not args.plugin:
         raise ValueError("M1/M3 require a cache-consuming integration --plugin")
     if args.condition == "M3" and args.decision_interval not in (2, 3):
         raise ValueError("M3 decision interval must be 2, or 3 for the bounded sensitivity check")
