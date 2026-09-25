@@ -100,15 +100,7 @@
     "work_avoided": "75% of local and 86% of global KV tiles skip score re-read + sketch read + tf32x3 dot per decision"
   },
   "execution_identity_note": "Per-run config receipts are the authority for what ran (results/.../configs/*.json, each with its own fingerprint and source_hashes). No inherited executed_model_source_sha is carried here.",
-  "live_jobs": [
-    {
-      "ledger": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/cp3/ledger.jsonl",
-      "pgid": 1483612,
-      "script": "../run_v10_cp3.sh 01efe3960713",
-      "started_utc": "2026-09-25T07:52Z",
-      "what": "CP3 panel D,T,P,O x /2,/8,/14,/20 x 3"
-    }
-  ],
+  "live_jobs": [],
   "method_config_unchanged": {
     "decision_interval_M1": 1,
     "output_mode": "historical_route_preqk_current_output",
@@ -127,7 +119,7 @@
     "mechanism": "_route optionally STOREs per-row z/mu for wholly-immutable prefix tiles at the real score anchor and LOADs them afterwards; reused values are that kernel's own FP32 outputs, so reuse is exact by construction. alpha/risk/retained state/bitmap are never cached.",
     "selector": "Attention(selector='legacy_recompute'|'prefix_block_summary', selector_layers='local'); default unchanged"
   },
-  "next_command": "Implement shape-generic _route/_pv/_preqk_pv (runtime K/KT/PREFIX_TILES), run tests/test_numerical_reuse_*.py bit-exact suites, then rerun scripts/v9_clean_request_timing.py with per-arm fresh TRITON_CACHE_DIR",
+  "next_command": "Prototype historical bitmap input to Junyu fused value_direction kernel (same mask) vs fresh T; reproduce panel with ./run_v10_cp3.sh 01efe3960713",
   "not_started": [
     "240-request matrix",
     "extra seeds",
@@ -151,7 +143,7 @@
   "reporting_sha": "resolve with git HEAD; not self-validating",
   "reviewed_head_at_start": "3b67ea16261a5241c4bee3175ee9859dc9038da0",
   "schema": 1,
-  "status": "V10_CP2_DONE: repair = minimal telemetry + fused guard (-3 ms/step, ~2%); CP3 panel running",
+  "status": "V10_DONE: CP1 bounded bit-exact specialization; CP2 repair -2%/step (-0.8% request); CP3 O slower than native (geo 1.08) and fresh T (1.09); quality 3/4 all arms",
   "storage_preflight": "root 58 GB free, no migration; bulky artifacts -> /media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924",
   "task": "v10 overnight: bounded specialization (CP1), one warm repair (CP2), complete-answer panel (CP3)",
   "tests": "94 targeted tests pass on the local WSL RTX4060 (private device, never the remote timing GPU): numerical_reuse_{prefix_summary,preqk,route_only,routing_only,integration,cache,math,stop,summary,prefix_lease,native_mask}, numerical_qk_runner, preqk_correctness_vectors, preqk_profile_contracts. Two unrelated historical tests (test_diffusion_gemma_preqk, test_jl_accepted_round2) fail identically at the base commit on a missing results/diffusion_gemma_oracle/setup.json.",
@@ -210,6 +202,37 @@
         }
       }
     },
+    "cp3": {
+      "deploy": "01efe3960713",
+      "expansion": "not triggered",
+      "ledger": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/cp3/ledger.jsonl",
+      "quality": {
+        "D": "3/4 (/14 cap)",
+        "O": "3/4 (/14 cap)",
+        "P": "3/4 (/14 cap)",
+        "T": "3/4 (/20 wrong)"
+      },
+      "summed_ratios": {
+        "O/D": 1.226,
+        "O/T": 1.307
+      },
+      "warm_geo_ratios": {
+        "O/D": 1.078,
+        "O/P": 0.992,
+        "O/T": 1.091,
+        "T/D": 0.988
+      }
+    },
+    "failed_or_untaken_candidates": [
+      "tl.multiple_of scalar hint (no effect; replaced by K/KDIV)",
+      "T-only fast path (not taken)",
+      "_route tile-parallel restructure (proposed)"
+    ],
+    "filesystem": {
+      "bulky_used": "1.3G",
+      "large_disk_free_gb": 967,
+      "root_free_gb": 56
+    },
     "final_by_utc": "2026-09-25T14:57:30Z",
     "fresh_T_extension": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so (+ torch bridge), source hashes match current csrc",
     "live_jobs": [],
@@ -217,6 +240,11 @@
     "result_root": "results/numerical_qk_overnight_runtime_20260925",
     "start_utc": "2026-09-25T06:57:30Z",
     "stop_launch_utc": "2026-09-25T14:27:30Z",
+    "used": {
+      "complete_requests": 56,
+      "elapsed_h_at_final": 1.6,
+      "gpu_process_h": 1.14
+    },
     "used_at_cp1": {
       "complete_requests": 8,
       "gpu_process_s": 1400
