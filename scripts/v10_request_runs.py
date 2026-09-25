@@ -43,7 +43,8 @@ def arm_config(args, arm: dict) -> dict:
     from experiments.numerical_qk_reuse.runner import _config
     condition = arm['condition']
     ns = SimpleNamespace(
-        condition=condition, phase=args.phase, ids=args.ids, seeds=[42], manifest=args.manifest,
+        condition=condition, phase=args.phase, ids=args.ids, seeds=list(getattr(args, 'seeds', [42])),
+        manifest=args.manifest,
         policy=args.policy, policy_name='T_s50', model=args.model, revision=args.revision,
         decision_interval=arm.get('decision_interval', 1), score_refresh_period=8, support='legacy_junyu_mask',
         output_mode='historical_route_preqk_current_output',
