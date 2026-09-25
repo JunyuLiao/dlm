@@ -1,0 +1,95 @@
+{
+  "build": "e3c283b8cbb9b79c",
+  "evidence": [
+    "executed-path counters (incremented in the kept block after the support test): K tiles loaded == QK tiles == V tiles loaded == PV tiles == kept tiles of the CTA Q128 tile, exact in every unit case and all 660 real calls",
+    "all-dropped support: all counters 0, output 0, lse -inf",
+    "NaN poisoning of K and V of every dropped tile (LOCAL and GLOBAL): output bit-identical to the clean run -> no load/QK/PV touched them (0*NaN would propagate)",
+    "kernel time linear in kept tiles (below)",
+    "projected-sketch operations: 0 by construction (no Z pointer in the ABI)",
+    "hardware counters (ncu) unavailable: ERR_NVGPUCTRPERM; not worked around"
+  ],
+  "geometry_note": "each Q128 decision tile runs as 2 CTAs (64-row halves); counters are per CTA; D512 has 2 PV warpgroups, counted once (first PV warpgroup)",
+  "kept_fraction_scaling": [
+    {
+      "counter_pv_tiles": 42,
+      "counter_qk_tiles": 42,
+      "kept_tiles": 42,
+      "median_ms": 0.522159993648529,
+      "shape": "global_K2669",
+      "total_tiles": 42
+    },
+    {
+      "counter_pv_tiles": 32,
+      "counter_qk_tiles": 32,
+      "kept_tiles": 32,
+      "median_ms": 0.4052640050649643,
+      "shape": "global_K2669",
+      "total_tiles": 42
+    },
+    {
+      "counter_pv_tiles": 21,
+      "counter_qk_tiles": 21,
+      "kept_tiles": 21,
+      "median_ms": 0.2791519910097122,
+      "shape": "global_K2669",
+      "total_tiles": 42
+    },
+    {
+      "counter_pv_tiles": 10,
+      "counter_qk_tiles": 10,
+      "kept_tiles": 10,
+      "median_ms": 0.15782400220632553,
+      "shape": "global_K2669",
+      "total_tiles": 42
+    },
+    {
+      "counter_pv_tiles": 0,
+      "counter_qk_tiles": 0,
+      "kept_tiles": 0,
+      "median_ms": 0.048655999824404716,
+      "shape": "global_K2669",
+      "total_tiles": 42
+    },
+    {
+      "counter_pv_tiles": 20,
+      "counter_qk_tiles": 20,
+      "kept_tiles": 20,
+      "median_ms": 0.20393600314855576,
+      "shape": "local_K1279",
+      "total_tiles": 20
+    },
+    {
+      "counter_pv_tiles": 15,
+      "counter_qk_tiles": 15,
+      "kept_tiles": 15,
+      "median_ms": 0.16140800714492798,
+      "shape": "local_K1279",
+      "total_tiles": 20
+    },
+    {
+      "counter_pv_tiles": 10,
+      "counter_qk_tiles": 10,
+      "kept_tiles": 10,
+      "median_ms": 0.11966400220990181,
+      "shape": "local_K1279",
+      "total_tiles": 20
+    },
+    {
+      "counter_pv_tiles": 5,
+      "counter_qk_tiles": 5,
+      "kept_tiles": 5,
+      "median_ms": 0.07809599861502647,
+      "shape": "local_K1279",
+      "total_tiles": 20
+    },
+    {
+      "counter_pv_tiles": 0,
+      "counter_qk_tiles": 0,
+      "kept_tiles": 0,
+      "median_ms": 0.03718400001525879,
+      "shape": "local_K1279",
+      "total_tiles": 20
+    }
+  ],
+  "schema": "v11_executed_work_v1"
+}

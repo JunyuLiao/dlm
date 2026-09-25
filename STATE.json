@@ -143,9 +143,9 @@
   "reporting_sha": "resolve with git HEAD; not self-validating",
   "reviewed_head_at_start": "3b67ea16261a5241c4bee3175ee9859dc9038da0",
   "schema": 1,
-  "status": "V10_DONE: CP1 bounded bit-exact specialization; CP2 repair -2%/step (-0.8% request); CP3 O slower than native (geo 1.08) and fresh T (1.09); quality 3/4 all arms",
+  "status": "V11_CP1_DONE: support consumer bit-identical to fresh T on its support; sanitizer clean; real-state max-abs envelope vs Triton failed on 60/660 calls (recorded, not loosened); CP2 next",
   "storage_preflight": "root 58 GB free, no migration; bulky artifacts -> /media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924",
-  "task": "v10 overnight: bounded specialization (CP1), one warm repair (CP2), complete-answer panel (CP3)",
+  "task": "v11: qualified preselected-support Hopper consumer, then M1 (H1) / M3 (H3) E2E",
   "tests": "94 targeted tests pass on the local WSL RTX4060 (private device, never the remote timing GPU): numerical_reuse_{prefix_summary,preqk,route_only,routing_only,integration,cache,math,stop,summary,prefix_lease,native_mask}, numerical_qk_runner, preqk_correctness_vectors, preqk_profile_contracts. Two unrelated historical tests (test_diffusion_gemma_preqk, test_jl_accepted_round2) fail identically at the base commit on a missing results/diffusion_gemma_oracle/setup.json.",
   "unexplained": [
     "-0.402 ms x 25 local layers predicts ~-10 ms/step but the step did not move (minima 204.39 vs 204.36); L2 residency in the tight per-call loop is a hypothesis, not a measurement",
@@ -248,6 +248,27 @@
     "used_at_cp1": {
       "complete_requests": 8,
       "gpu_process_s": 1400
+    }
+  },
+  "v11": {
+    "budgets": {
+      "complete_requests": 64,
+      "gpu_process_h": 4
+    },
+    "cp1_commit": "ce32230285d778f173baf6c595f3851098b39676",
+    "mask_contract": "T/H1/H3/O: legacy Junyu query-relative local window (key >= q+(K-Q)-1023); D_native: native SDPA (no local crop beyond cache window) -- different LOCAL support",
+    "private_root": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925",
+    "resource_ledger": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/resource_ledger.jsonl",
+    "result_root": "results/numerical_qk_hopper_support_bridge_20260925",
+    "start_utc": "2026-09-25T17:54:30Z",
+    "support_build": {
+      "identity": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build/support_e3c283b8cbb9b79c/build_identity.json",
+      "key": "e3c283b8cbb9b79c",
+      "namespace": "vd_support_v1"
+    },
+    "used": {
+      "complete_requests": 0,
+      "gpu_process_s": 158
     }
   }
 }

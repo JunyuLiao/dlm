@@ -1,0 +1,57 @@
+{
+  "abi_version": 1,
+  "arithmetic": "identical to fresh T retained path (per-tile softmax, alpha-scaled BF16 P, log-space retained mass, oldscale rescale): bit-identical to fresh T output on fresh T support",
+  "build": {
+    "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+    "flags": [
+      "-std=c++17",
+      "-O3",
+      "-arch=sm_90a",
+      "--shared",
+      "-Xcompiler=-fPIC",
+      "-lineinfo",
+      "--ptxas-options=-v"
+    ],
+    "identity_file": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build/support_e3c283b8cbb9b79c/build_identity.json",
+    "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+    "key": "e3c283b8cbb9b79c",
+    "nvcc": "Build cuda_13.1.r13.1/compiler.37061995_0",
+    "sources": {
+      "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+      "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+      "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+      "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+      "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+    },
+    "torch": "2.6.0+cu124"
+  },
+  "empty_rows": "a row with no kept legal entry returns 0 output and -inf lse (same as the Triton consumer contract)",
+  "entry": "support_consumer_sm90 (C ABI) / torch.ops.vd_support_v1.attention (ATen, namespace disjoint from value_direction_hopper)",
+  "gqa": "per query head decisions; kv head = head // (H/HK) only for K/V addressing",
+  "header": "experiments/value_direction_hopper/csrc/support_consumer.h",
+  "inputs": {
+    "eligible": "same, READ-ONLY",
+    "k": "BF16 [B,HK,K,D] strided",
+    "legality": "query-relative window (key >= q + (K-Q) - window + 1) when window>0, else optional packed uint64 row mask [B,1|H,Q,KT]",
+    "q": "BF16 [B,H,Q,D] strided, last dim contiguous, 16B-aligned rows",
+    "scale": "float; BF16 transform float(BF(float(BF(qk))*scale))",
+    "skipped": "bool [B,H,ceil(Q/128),ceil(K/64)] contiguous READ-ONLY",
+    "v": "BF16 [B,HK,K,D] strided"
+  },
+  "not_done": [
+    "no projected-V/sketch work",
+    "no stale final attention weights",
+    "no dense QK materialization",
+    "no cluster decide()"
+  ],
+  "outputs": {
+    "counters": "optional int32 [B,H,2*QB,4]: K tiles loaded, QK tiles, V tiles loaded, PV tiles (executed-path)",
+    "invalid": "bool [B,H,Q]: NaN/+inf among legal retained scores; row output zeroed",
+    "lse": "FP32 [B,H,Q] retained log mass (-inf if none/invalid)",
+    "output": "BF16, layout 0 [B,H,Q,D] or layout 1 [B,Q,H,D] storage (model layout; no transpose copy)"
+  },
+  "ownership": "maps are produced by the caller (route_only) on the same stream before the call; the kernel never writes them (tested)",
+  "pipeline": "producer warpgroup (K cp.async + QK WGMMA + softmax + P) / 1-2 PV warpgroups (V cp.async + PV WGMMA); both test the same support entry before any work; one non-aligned barrier.sync hand-off per KEPT tile; P/scale double-buffered by kept ordinal; non-TMA cp.async bring-up (fresh-T baseline keeps TMA)",
+  "schema": "v11_support_contract_v1",
+  "semantics": "O = softmax(current transformed QK over KEPT(eligible&&!skipped) AND legal entries) @ current V; per query head; Q128xKV64 grid"
+}

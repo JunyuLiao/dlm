@@ -1,4 +1,14 @@
-# v10 overnight: bounded specialization + one warm repair + 4-question panel (DONE)
+# v11 (IN PROGRESS): preselected-support Hopper consumer -> H1/H3
+
+## v11 CP1 (done, commit ce32230)
+- New kernel `experiments/value_direction_hopper/csrc/support_consumer.{cu,h}` + ATen `vd_support_v1`
+  (support.py builds/verifies; build e3c283b8cbb9b79c under /media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build).
+- Support read BEFORE any K/QK/V/PV of a tile; NaN-poison + counters + linear scaling prove omission.
+- Bit-identical to fresh T on fresh T's own support; sanitizer clean (after aligned-barrier fix).
+- Real states: rel-Fro <= 0.0025 but max-abs envelope vs Triton consumer failed on 60/660 calls -> H1 != O numerically.
+- Results: `results/numerical_qk_hopper_support_bridge_20260925/`.
+
+# (previous) v10 overnight: bounded specialization + one warm repair + 4-question panel (DONE)
 
 ## Identity
 - Spec: user-supplied v10. Resumed from `af6dc69` (v9). Branch `research/numerical-qk-reuse-native-20260924`.
