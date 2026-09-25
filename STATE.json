@@ -1,6 +1,6 @@
 {
   "branch": "research/numerical-qk-reuse-native-20260924",
-  "budget_used": "2 new primary outputs (the mandated complete-answer smoke requests). Panel allowance intentionally unspent.",
+  "budget_used": "18/18 complete-request executions; 2 short profiler windows (truncated diagnostic request, S /2)",
   "corrections_applied": [
     "v7 panel counter line was aime26/14 alone; correct sums 32310/5100/27210/3.271e10",
     "slowdown is NOT an aime26/14 artifact: other three requests 2.132x slower on 31% fewer forwards",
@@ -75,6 +75,13 @@
       }
     }
   },
+  "cp3": {
+    "chrome_traces": "/media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924/traces_3e88d0b7c25f/{B_early,B_late}.json",
+    "deploy_sha": "3e88d0b7c25f1cb4092d7e657c0724b45f259fda",
+    "finding": "K/KT/PREFIX_TILES constexpr -> new specializations every canvas; +44-48 s cold per new prompt; warm step launch-bound (~10.7k launches, GPU active 68-80 of ~170 ms)",
+    "remedy": "none implemented this round (request budget spent; needs paired verification)",
+    "trace_json": "../results/v9/trace/request_trace_3e88d0b7c25f.json"
+  },
   "deploy_rule": "runs execute from read-only ../deploy/<sha>/ git-archive snapshots",
   "environment_actual": {
     "dllm": "this checkout via PYTHONPATH=src:.",
@@ -112,7 +119,7 @@
     "mechanism": "_route optionally STOREs per-row z/mu for wholly-immutable prefix tiles at the real score anchor and LOADs them afterwards; reused values are that kernel's own FP32 outputs, so reuse is exact by construction. alpha/risk/retained state/bitmap are never cached.",
     "selector": "Attention(selector='legacy_recompute'|'prefix_block_summary', selector_layers='local'); default unchanged"
   },
-  "next_command": "CP3: ./run_v9_trace.sh <deploy sha12> (S, aime26/2, pass A cold compile timeline + pass B warm profiler windows canvas1/canvas8)",
+  "next_command": "Implement shape-generic _route/_pv/_preqk_pv (runtime K/KT/PREFIX_TILES), run tests/test_numerical_reuse_*.py bit-exact suites, then rerun scripts/v9_clean_request_timing.py with per-arm fresh TRITON_CACHE_DIR",
   "not_started": [
     "240-request matrix",
     "extra seeds",
@@ -136,7 +143,7 @@
   "reporting_sha": "resolve with git HEAD; not self-validating",
   "reviewed_head_at_start": "3b67ea16261a5241c4bee3175ee9859dc9038da0",
   "schema": 1,
-  "status": "CP2_DONE_CLEAN_E2E: S not faster than L; L/S slower per call than native; cold cost dominated by in-request Triton specialization. CP3 trace next",
+  "status": "V9_DONE: measurement path qualified; clean E2E shows S==L (no gain), L/S ~20% slower per call than native; largest verified cost = in-request Triton constexpr re-specialization",
   "storage_preflight": "root 58 GB free, no migration; bulky artifacts -> /media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924",
   "task": "v9: qualify measurement path, clean paired D/L/S natural-request timing",
   "tests": "94 targeted tests pass on the local WSL RTX4060 (private device, never the remote timing GPU): numerical_reuse_{prefix_summary,preqk,route_only,routing_only,integration,cache,math,stop,summary,prefix_lease,native_mask}, numerical_qk_runner, preqk_correctness_vectors, preqk_profile_contracts. Two unrelated historical tests (test_diffusion_gemma_preqk, test_jl_accepted_round2) fail identically at the base commit on a missing results/diffusion_gemma_oracle/setup.json.",
