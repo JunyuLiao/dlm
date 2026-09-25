@@ -218,13 +218,15 @@ def profile(args) -> dict[str, Any]:
         finally:
             binding.close()
 
-    def sparse_rows(selector):
+    def sparse_rows(selector, arm=None):
+        arm = arm or {}
         config = dict(policy=policy['policies'][args.policy_name], score_refresh_period=8,
                       decision_interval=1, support='legacy_junyu_mask',
                       output_mode='historical_route_preqk_current_output', selector=selector,
                       selector_layers='local', m_ref=args.m_ref, beta=args.beta, gamma=args.gamma,
-                      diagnostic=False)
-        name = f'sparse_{selector}'
+                      diagnostic=False, kernel_variant=arm.get('kernel_variant', 'static'),
+                      telemetry=arm.get('telemetry', 'full'), guard_mode=arm.get('guard_mode', 'separate'))
+        name = f"sparse_{arm['name']}" if 'name' in arm else f'sparse_{selector}'
         with integration.install(adapter, config, 'M1') as runtime:
             router, state = runtime['router'], runtime['state']
             with observe(model, state):                      # exactly ONE observer
@@ -283,7 +285,11 @@ def profile(args) -> dict[str, Any]:
 
     with torch.inference_mode():            # adapter.generate's own decorator
         order = args.order
+        extra = {arm['name']: arm for arm in json.loads(args.sparse_arms)}
         for arm in order:
+            if arm in extra:
+                sparse_rows(extra[arm].get('selector', 'prefix_block_summary'), extra[arm])
+                continue
             {'native': native_rows, 'eager': eager_rows,
              'legacy': lambda: sparse_rows('legacy_recompute'),
              'summary': lambda: sparse_rows('prefix_block_summary')}[arm]()
@@ -301,6 +307,9 @@ def parse(argv=None):
     parser.add_argument('--id', required=True)
     parser.add_argument('--canvas', type=int, default=1)
     parser.add_argument('--order', nargs='+', default=['native', 'eager', 'legacy', 'summary'])
+    parser.add_argument('--sparse-arms', default='[]',
+                        help='v10: JSON list of {name, selector, kernel_variant, telemetry, guard_mode}; '
+                             'names usable in --order')
     parser.add_argument('--m-ref', type=float, default=14.258454322814941)
     parser.add_argument('--beta', type=float, default=3.0)
     parser.add_argument('--gamma', type=float, default=0.5)

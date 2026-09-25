@@ -17,7 +17,7 @@ from experiments.value_direction_hopper.integration import Sketches
 from experiments.value_direction_hopper.query_adaptive import State
 from .cache import Identity, ScoreCache
 from .cached_executor import (allocate_summary, attention, preqk_attention,
-                              route_only, summary_bytes as summary_nbytes)
+                              route_only, summary_bytes as summary_nbytes, fused_guard)
 
 SUPPORT_MODES = ('legacy_junyu_mask', 'native_mask')
 # cached_scores: production M1/M3 -- the routing decision AND the final
@@ -65,7 +65,7 @@ class Attention:
                  trace=False, max_cache_bytes=2 * 1024**3, support='legacy_junyu_mask',
                  output_mode='cached_scores', selector='legacy_recompute',
                  selector_layers='local', max_summary_bytes=1024**3,
-                 kernel_variant='static', telemetry='full'):
+                 kernel_variant='static', telemetry='full', guard_mode='separate'):
         if support not in SUPPORT_MODES:
             raise ValueError(support)
         if output_mode not in OUTPUT_MODES:
@@ -84,6 +84,11 @@ class Attention:
         if telemetry not in ('full', 'minimal'):
             raise ValueError(telemetry)
         self.telemetry = telemetry
+        # separate: the three original _assert_async chains (reference).
+        # fused: one kernel + one assert over exactly the same conditions.
+        if guard_mode not in ('separate', 'fused'):
+            raise ValueError(guard_mode)
+        self.guard_mode = guard_mode
         self.kernel_variant = kernel_variant
         self.selector = selector
         self.selector_layers = selector_layers
@@ -224,6 +229,7 @@ class Attention:
                 self.current_qk_elements += b*h*nq*nk
                 self.routing_only_extra_qk_elements += b*h*nq*nk
         entry = self.cache.get(identity)
+        route_invalid = None
         if plan.decision_refresh:
             valid = self.valid_keys[layer]
             # Leased sketch: reprojects only the aligned suffix (current canvas
@@ -261,8 +267,11 @@ class Attention:
                                    log_threshold=threshold,
                                    summary=summary, store_summary=store_summary,
                                    variant=self.kernel_variant)
-                torch._assert_async(~route.invalid_tiles.any(),
-                                    'Invalid cached scores in routing decision: request must fail')
+                if self.guard_mode == 'fused':
+                    route_invalid = route.invalid_tiles     # checked in the final fused guard
+                else:
+                    torch._assert_async(~route.invalid_tiles.any(),
+                                        'Invalid cached scores in routing decision: request must fail')
                 decision = Decision(route.skipped, route.eligible)
                 # Same retained tiles as the stale-score routing decision;
                 # the final softmax/PV consumes current, not cached, scores.
@@ -293,8 +302,11 @@ class Attention:
             self.held_calls += 1
         # Explicit asynchronous error, never consume zeroed invalid rows. This
         # is a measured device guard, not a steady-path host tensor read.
-        torch._assert_async(~result.invalid_scores.any(), 'Invalid cached scores: request must fail')
-        torch._assert_async(torch.isfinite(result.output).all(), 'Invalid cached-score attention output')
+        if self.guard_mode == 'fused':
+            fused_guard(result.output, result.invalid_scores, route_invalid)
+        else:
+            torch._assert_async(~result.invalid_scores.any(), 'Invalid cached scores: request must fail')
+            torch._assert_async(torch.isfinite(result.output).all(), 'Invalid cached-score attention output')
         self.calls += 1
         score_bytes = self.cache.storage_bytes
         self.peak_score_bytes = max(self.peak_score_bytes, score_bytes)
@@ -406,7 +418,7 @@ class Attention:
                     unsupported_mask_refreshes=self.unsupported_mask_refreshes,
                     support=self.support, output_mode=self.output_mode,
                     selector=self.selector, selector_layers=self.selector_layers,
-                    kernel_variant=self.kernel_variant, telemetry=self.telemetry,
+                    kernel_variant=self.kernel_variant, telemetry=self.telemetry, guard_mode=self.guard_mode,
                     per_tile_statistics=('recorded' if self.telemetry == 'full' else
                                          'N/A (minimal telemetry; use a token-matched full audit run)'),
                     summary_builds=self.summary_builds, summary_hits=self.summary_hits,
@@ -458,7 +470,8 @@ def install(adapter, config, condition):
                            selector=config.get('selector', 'legacy_recompute'),
                            selector_layers=config.get('selector_layers', 'local'),
                            kernel_variant=config.get('kernel_variant', 'static'),
-                           telemetry=config.get('telemetry', 'full'))
+                           telemetry=config.get('telemetry', 'full'),
+                           guard_mode=config.get('guard_mode', 'separate'))
         binding.runtime.attention_override = router
         state = NativeReuseState('T', router, m_ref=config['m_ref'], beta=config['beta'],
                                  gamma=config['gamma'], diagnostics=config['diagnostic'])

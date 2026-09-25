@@ -608,7 +608,9 @@ def preqk_attention(q, k, v, skipped, eligible, *, scale, window=None,
     out = torch.empty((b, h, nq, d), device=q.device, dtype=torch.bfloat16)
     lse = torch.empty((b, h, nq), device=q.device, dtype=torch.float32)
     invalid = torch.empty((b, h, nq), device=q.device, dtype=torch.bool)
-    counters = torch.zeros((b, h, tr.cdiv(nq, 16), 3) if trace else (1,),
+    # v10 glue: the one-element stand-in is never written when trace=False, so
+    # it needs no memset; trace=True keeps the zero-initialized counters.
+    counters = (torch.zeros if trace else torch.empty)((b, h, tr.cdiv(nq, 16), 3) if trace else (1,),
                            device=q.device, dtype=torch.int32)
     _kernels(variant)['preqk'][(tr.cdiv(nq, 16), h, b)](q, k, v, skipped, eligible, out, lse, invalid, counters,
                                        q.stride(0), q.stride(1), q.stride(2),
@@ -658,3 +660,47 @@ def warmup_generic(thresholds, device='cuda', *, geometries=None, canvas=256):
                 launches += 5
     torch.cuda.synchronize()
     return time.perf_counter() - start, launches
+
+
+if tr is not None:
+    @tr.jit
+    def _guard(OUT, INVALID, TILES, PARTIAL, N_OUT, N_ROWS, N_TILES,
+               BLOCK: tl.constexpr, HAS_TILES: tl.constexpr):
+        """One pass over the three guarded conditions; each program writes its own
+        'ok' slot, so no zero-initialization launch is needed."""
+        pid = tl.program_id(0)
+        step = tl.num_programs(0) * BLOCK
+        bad = tl.zeros((BLOCK,), tl.int32)
+        for start in range(pid * BLOCK, N_OUT, step):
+            offs = start + tl.arange(0, BLOCK)
+            x = tl.load(OUT + offs, offs < N_OUT, other=0.).to(tl.float32)
+            bad = bad | ((x != x) | (x == float('inf')) | (x == -float('inf'))).to(tl.int32)
+        for start in range(pid * BLOCK, N_ROWS, step):
+            offs = start + tl.arange(0, BLOCK)
+            bad = bad | tl.load(INVALID + offs, offs < N_ROWS, other=0).to(tl.int32)
+        if HAS_TILES:
+            for start in range(pid * BLOCK, N_TILES, step):
+                offs = start + tl.arange(0, BLOCK)
+                bad = bad | tl.load(TILES + offs, offs < N_TILES, other=0).to(tl.int32)
+        tl.store(PARTIAL + pid, tl.max(bad, 0) == 0)
+
+
+def guard_flags(output, invalid_rows, invalid_tiles=None, programs=64):
+    """Per-program 'ok' flags covering exactly the separate guards' conditions:
+    non-finite attention output (torch.isfinite), invalid score rows, and
+    malformed cached-score tiles of the routing decision (when given)."""
+    for name, x in (('output', output), ('invalid_rows', invalid_rows)) + \
+            ((('invalid_tiles', invalid_tiles),) if invalid_tiles is not None else ()):
+        if not x.is_cuda or not x.is_contiguous():
+            raise ValueError(f'{name} must be a contiguous CUDA tensor')
+    partial = torch.empty((programs,), device=output.device, dtype=torch.bool)
+    tiles = invalid_tiles if invalid_tiles is not None else invalid_rows
+    _guard[(programs,)](output, invalid_rows, tiles, partial, output.numel(), invalid_rows.numel(),
+                        tiles.numel(), BLOCK=1024, HAS_TILES=invalid_tiles is not None, num_warps=4)
+    return partial
+
+
+def fused_guard(output, invalid_rows, invalid_tiles=None):
+    """Same coverage as the three separate _assert_async guards, one reduction chain."""
+    torch._assert_async(guard_flags(output, invalid_rows, invalid_tiles).all(),
+                        'Invalid attention: non-finite output, invalid score rows or malformed routed tiles')
