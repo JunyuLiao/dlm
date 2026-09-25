@@ -1,4 +1,14 @@
-# v12 (DONE): GLOBAL-only scope, native LOCAL -- D_native / T_G / G1 / G3 / B8_G
+# v13 (RUNNING): frozen GLOBAL-only 5-arm study, all-30 AIME26 x seeds 17/29
+
+- Authorized by the user (v13 message): full 30 with seeds 17/29, frozen methods, no retuning.
+- CP0 done: seed-safe driver `scripts/v13_seed_runs.py` (cell_id includes seed; resume identity checks; each execution
+  once; device error -> clean worker), summarizer `scripts/v13_summarize.py`, protocol builder, tests
+  `tests/test_v13_seed_driver.py` (9 pass). Frozen protocol `results/numerical_qk_global_multiseed_20260925/frozen_protocol.json`
+  (600 planned; 60 blocks). Seed-42 compat: new driver reproduced v12 G3 /2 token hash.
+- Running: `../run_v13_main.sh 04e3dab07395` (PGID 1520149), ledger /media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/ledger.jsonl.
+- Resume after interruption: rerun the same command (validated resume). Summarize: see STATE next_command.
+
+# (previous) v12 (DONE): GLOBAL-only scope, native LOCAL -- D_native / T_G / G1 / G3 / B8_G
 
 - Plug-in `experiments/numerical_qk_reuse/global_scope.py` (proxy adapter tags only GLOBAL layers 5,11,17,23,29;
   LOCAL untagged -> original native SDPA). Conditions global_T / global_M1 / global_M3 / global_B8.
