@@ -1,12 +1,20 @@
-# v11 (IN PROGRESS): preselected-support Hopper consumer -> H1/H3
+# v11 (DONE): preselected-support Hopper consumer -> H1/H3 (negative E2E)
 
-## v11 CP1 (done, commit ce32230)
-- New kernel `experiments/value_direction_hopper/csrc/support_consumer.{cu,h}` + ATen `vd_support_v1`
-  (support.py builds/verifies; build e3c283b8cbb9b79c under /media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build).
-- Support read BEFORE any K/QK/V/PV of a tile; NaN-poison + counters + linear scaling prove omission.
-- Bit-identical to fresh T on fresh T's own support; sanitizer clean (after aligned-barrier fix).
-- Real states: rel-Fro <= 0.0025 but max-abs envelope vs Triton consumer failed on 60/660 calls -> H1 != O numerically.
-- Results: `results/numerical_qk_hopper_support_bridge_20260925/`.
+- Kernel `experiments/value_direction_hopper/csrc/support_consumer.{cu,h}`, ATen `vd_support_v1`, build/verify
+  `experiments/value_direction_hopper/support.py` (build e3c283b8cbb9b79c on /media/volume/dllm-1/dyh/...bridge_20260925/build).
+  Support read before any tile work (poisoning/counters/scaling); bit-identical to fresh T on its support;
+  sanitizer clean. vs O Triton consumer: rel-Fro <= 0.0025, max-abs envelope failed 60/660 -> H1 numerically != O.
+- Router: `integration.Attention(consumer='hopper', support_build=...)` (ordinary/held consumer only).
+  D_mask plug-in: `experiments/numerical_qk_reuse/dense_mask.py` (legacy-mask dense diagnostic).
+- Same inputs: consumer 0-25% faster, complete M1 call H1 ~= O (selector 0.6-1.4 ms/call = 2-3x fresh T whole call);
+  step: no gain; fresh-T step +14% vs native.
+- Panel (39 of 64 requests, 0.56 GPU-h): quality Dn 3/4, T 3/4, H1 2/4, H3 3/4.
+  H1/T geo 0.851 only via fewer calls (x0.81, per-call x1.10, two lost answers).
+  H3/T geo 1.225 (summed 1.348).
+- Bugs fixed: aligned cross-role barrier; `support` param shadowing; v10 guard_mode drop (v10 notes appended).
+- Results: `results/numerical_qk_hopper_support_bridge_20260925/` (decision.md, morning_brief.md).
+- Next: fused historical decision in the Hopper producer (anchor summaries + live T), GLOBAL layers first,
+  target complete call <= fresh T (`scripts/v11_same_support_calls.py`).
 
 # (previous) v10 overnight: bounded specialization + one warm repair + 4-question panel (DONE)
 

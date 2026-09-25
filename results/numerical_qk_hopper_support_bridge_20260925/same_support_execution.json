@@ -1,0 +1,140 @@
+{
+  "arms": {
+    "H1": "same with the Hopper consumer",
+    "O": "complete M1 call: S selector + generic Triton consumer + minimal telemetry + fused guard",
+    "consumer_hopper": "support.attention only, identical bitmap, model-layout output",
+    "consumer_triton": "preqk_attention only, identical bitmap",
+    "dense_same_mask": "SDPA + explicit legacy legal mask (diagnostic, not a speed baseline)",
+    "fresh_T": "Junyu Attention.__call__ (own routing, TMA, fused projection, collect=False)",
+    "native": "installed sdpa_attention_forward"
+  },
+  "decision": "consumer-only: Hopper 0-25% faster than the Triton consumer on the same bitmap; complete M1 call: H1 vs O -1.7%..+5.9% (no material change: the consumer is ~15-25% of the call, the selector path 0.6-1.4 ms); full step: H1 - O averaged over both orders ~ -0.3 ms ordinary, ~ -1.6 ms held (not material); fresh-T full step 141-149 ms vs native 124-131 (+14%), O/H1 ordinary +23-24%, held +10-12%",
+  "deploy": "482ecd4e8bea",
+  "drift_note": "within one process later arms ran ~3-4 ms/step slower (native 131.3 first vs 135.3 last at canvas 6); H1 vs O is therefore judged from BOTH orders",
+  "full_step": {
+    "canvas1.forward_order": {
+      "fresh_T.step0_inputs": 139.76907348632812,
+      "fresh_T.step1_inputs": 141.30137634277344,
+      "native_decoder_forward": 115.86072158813477,
+      "native_denoising_step.anchor_inputs": 121.39779281616211,
+      "native_denoising_step.step1_inputs": 123.89384078979492,
+      "sparse_H1.anchor": 165.7355728149414,
+      "sparse_H1.held_same_support": 138.84686279296875,
+      "sparse_H1.ordinary": 154.2216339111328,
+      "sparse_O.anchor": 161.5404815673828,
+      "sparse_O.held_same_support": 138.32389068603516,
+      "sparse_O.ordinary": 152.37798309326172
+    },
+    "canvas6.forward_order": {
+      "fresh_T.step0_inputs": 141.98029327392578,
+      "fresh_T.step1_inputs": 148.84246826171875,
+      "native_decoder_forward": 114.9917106628418,
+      "native_denoising_step.anchor_inputs": 120.51027297973633,
+      "native_denoising_step.step1_inputs": 131.33628845214844,
+      "sparse_H1.anchor": 167.53782653808594,
+      "sparse_H1.held_same_support": 145.8959197998047,
+      "sparse_H1.ordinary": 163.35590362548828,
+      "sparse_O.anchor": 163.54691314697266,
+      "sparse_O.held_same_support": 144.8593292236328,
+      "sparse_O.ordinary": 161.2266387939453
+    },
+    "canvas6.reversed_order": {
+      "native_decoder_forward": 118.20616149902344,
+      "native_denoising_step.anchor_inputs": 124.21047973632812,
+      "native_denoising_step.step1_inputs": 135.2735137939453,
+      "sparse_H1.anchor": 167.05988311767578,
+      "sparse_H1.held_same_support": 144.6880645751953,
+      "sparse_H1.ordinary": 162.26182556152344,
+      "sparse_O.anchor": 166.73534393310547,
+      "sparse_O.held_same_support": 148.96266174316406,
+      "sparse_O.ordinary": 164.79828643798828
+    }
+  },
+  "id": "aime26/2",
+  "inputs": "real captured native steps (canvas 1: absolute 365; canvas 6: absolute 1645), production causal T from the captured controller",
+  "per_call": {
+    "1": {
+      "0": {
+        "kept_fraction": 0.49687501788139343,
+        "kind": "local",
+        "medians": {
+          "H1": 0.801360011100769,
+          "O": 0.7728799879550934,
+          "consumer_hopper": 0.12755199521780014,
+          "consumer_triton": 0.14590399712324142,
+          "dense_same_mask": 0.15931200236082077,
+          "fresh_T": 0.38126400113105774,
+          "native": 0.07017600163817406
+        },
+        "output_rel_diff": {
+          "H1_vs_O": 0.0019272168865427375,
+          "H1_vs_native": 0.17835275828838348,
+          "fresh_T_vs_native": 0.17835275828838348
+        }
+      },
+      "5": {
+        "kept_fraction": 0.90625,
+        "kind": "global",
+        "medians": {
+          "H1": 0.9214719831943512,
+          "O": 0.9377439916133881,
+          "consumer_hopper": 0.16382399946451187,
+          "consumer_triton": 0.21860799938440323,
+          "dense_same_mask": 0.18795200437307358,
+          "fresh_T": 0.44358399510383606,
+          "native": 0.3351520001888275
+        },
+        "output_rel_diff": {
+          "H1_vs_O": 0.0018845702288672328,
+          "H1_vs_native": 0.022827038541436195,
+          "fresh_T_vs_native": 0.022827038541436195
+        }
+      }
+    },
+    "6": {
+      "0": {
+        "kept_fraction": 0.40937501192092896,
+        "kind": "local",
+        "medians": {
+          "H1": 0.9892159998416901,
+          "O": 0.9335039854049683,
+          "consumer_hopper": 0.1730399951338768,
+          "consumer_triton": 0.17267199605703354,
+          "dense_same_mask": 0.2094240039587021,
+          "fresh_T": 0.5173759758472443,
+          "native": 0.07468799874186516
+        },
+        "output_rel_diff": {
+          "H1_vs_O": 0.0018488160567358136,
+          "H1_vs_native": 0.283151775598526,
+          "fresh_T_vs_native": 0.283151775598526
+        }
+      },
+      "5": {
+        "kept_fraction": 0.8531250357627869,
+        "kind": "global",
+        "medians": {
+          "H1": 1.82668799161911,
+          "O": 1.836192011833191,
+          "consumer_hopper": 0.38467200100421906,
+          "consumer_triton": 0.4328959882259369,
+          "dense_same_mask": 0.3418080061674118,
+          "fresh_T": 0.7919360101222992,
+          "native": 0.7382560074329376
+        },
+        "output_rel_diff": {
+          "H1_vs_O": 0.002078922465443611,
+          "H1_vs_native": 0.04140949249267578,
+          "fresh_T_vs_native": 0.04140949249267578
+        }
+      }
+    }
+  },
+  "phase_note": "complete M1 calls are ORDINARY decisions at step 1 after an anchor on the same inputs (phase-cost simulation, labeled); full-step rows use genuine captured step0/step1 (age-1 history) and a held_same_support phase",
+  "schema": "v11_same_support_execution_v1",
+  "sources": {
+    "calls_canvas1": "c49a5567f78ec0f12b3b4e9f10b481acb3ca99809aed59026fb9065986d22211",
+    "calls_canvas6": "a31093744ab9344707060a619c35f5256fb5b260c4c2bcb35ca283b4ce4fe206"
+  },
+  "support_build": "e3c283b8cbb9b79c"
+}
