@@ -195,6 +195,7 @@ class Attention:
         if q.dtype != torch.bfloat16 or k.dtype != q.dtype or v.dtype != q.dtype:
             raise ValueError('Frozen BF16 model geometry required')
         causal = bool(is_causal) if is_causal is not None else mask is None and nq > 1
+        self._mask_present = mask is not None
         scale = float(scaling) if scaling is not None else d ** -.5
         # With mask=None this is the exact Junyu lower local bound. Align to64
         # to preserve original block boundaries and the sequential scan order.
@@ -348,6 +349,8 @@ class Attention:
                                    is_causal=causal, trace=self.trace, variant=self.kernel_variant)
         if causal or self.trace:
             raise ValueError('hopper consumer is qualified for the bidirectional decoder with trace off')
+        if self._mask_present:
+            raise ValueError('hopper consumer does not consume explicit masks; refusing a silently wrong path')
         out, lse, invalid, _ = self._support.attention(q, k, v, skipped, eligible, scale=scale,
                                                        window=int(window or 0), layout=1)
         return SimpleNamespace(output=out, skipped=skipped, eligible=eligible, invalid_scores=invalid,

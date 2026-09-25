@@ -49,13 +49,13 @@ def arm_config(args, arm: dict) -> dict:
         output_mode='historical_route_preqk_current_output',
         selector=arm.get('selector', 'legacy_recompute'), selector_layers='local',
         kernel_variant=arm.get('kernel_variant', 'static'),
-        library=Path(LIBRARY) if condition == 'fresh_junyu_T' else None,
-        torch_library=Path(TORCH_LIBRARY) if condition == 'fresh_junyu_T' else None,
+        library=Path(LIBRARY) if condition in ('fresh_junyu_T', 'global_T') else None,
+        torch_library=Path(TORCH_LIBRARY) if condition in ('fresh_junyu_T', 'global_T') else None,
         plugin=arm.get('plugin', PLUGIN if condition in ('M1', 'M3') else None), diagnostic=False, timing_events=False,
         extra_source=[])
     config = _config(ns)
     config['telemetry'] = arm.get('telemetry', 'full')
-    for key in ('guard_mode', 'consumer', 'support_build', 'collect'):   # v11 arm keys
+    for key in ('guard_mode', 'consumer', 'support_build', 'collect', 'selector_layers', 'kernel_variant'):   # v11/v12 arm keys
         if key in arm:
             config[key] = arm[key]
     if arm.get('support_build'):
@@ -138,7 +138,8 @@ def main() -> None:
     if args.warmup_kernels:
         from experiments.numerical_qk_reuse.cached_executor import warmup_generic
         n = len(compiles)
-        seconds, launches = warmup_generic(next(c for c in configs.values() if c['condition'] in ('M1', 'M3'))['policy'])
+        seconds, launches = warmup_generic(next(c for c in configs.values() if c['condition'] in
+                                                ('M1', 'M3', 'global_M1', 'global_M3', 'global_B8'))['policy'])
         append(args.ledger, dict(event='kernel_warmup', seconds=seconds, launches=launches,
                                  misses=len(compiles) - n,
                                  compile_s=sum(c.get('seconds', 0) for c in compiles[n:]),
