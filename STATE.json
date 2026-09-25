@@ -143,12 +143,36 @@
   "reporting_sha": "resolve with git HEAD; not self-validating",
   "reviewed_head_at_start": "3b67ea16261a5241c4bee3175ee9859dc9038da0",
   "schema": 1,
-  "status": "V9_DONE: measurement path qualified; clean E2E shows S==L (no gain), L/S ~20% slower per call than native; largest verified cost = in-request Triton constexpr re-specialization",
+  "status": "V10_CP1_DONE: generic kernels bit-identical, bounded variants, cold /2 94.7->32.5 s; CP2 next",
   "storage_preflight": "root 58 GB free, no migration; bulky artifacts -> /media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924",
-  "task": "v9: qualify measurement path, clean paired D/L/S natural-request timing",
+  "task": "v10 overnight: bounded specialization (CP1), one warm repair (CP2), complete-answer panel (CP3)",
   "tests": "94 targeted tests pass on the local WSL RTX4060 (private device, never the remote timing GPU): numerical_reuse_{prefix_summary,preqk,route_only,routing_only,integration,cache,math,stop,summary,prefix_lease,native_mask}, numerical_qk_runner, preqk_correctness_vectors, preqk_profile_contracts. Two unrelated historical tests (test_diffusion_gemma_preqk, test_jl_accepted_round2) fail identically at the base commit on a missing results/diffusion_gemma_oracle/setup.json.",
   "unexplained": [
     "-0.402 ms x 25 local layers predicts ~-10 ms/step but the step did not move (minima 204.39 vs 204.36); L2 residency in the tight per-call loop is a hypothesis, not a measurement",
     "v7's ~430 ms per real forward vs ~206 ms replayed remains unlocated; established NOT to be an /14 artifact"
-  ]
+  ],
+  "v10": {
+    "budgets": {
+      "complete_requests": 72,
+      "elapsed_h": 8,
+      "gpu_process_h": 5
+    },
+    "bulky_root": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925",
+    "cp1": {
+      "commit": "901e360b51829dbd50e6b6007d4a95f420cbf0c3",
+      "deploy": "../deploy/901e360b5182",
+      "flag": "kernel_variant=generic"
+    },
+    "final_by_utc": "2026-09-25T14:57:30Z",
+    "fresh_T_extension": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so (+ torch bridge), source hashes match current csrc",
+    "live_jobs": [],
+    "resource_ledger": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/resource_ledger.jsonl",
+    "result_root": "results/numerical_qk_overnight_runtime_20260925",
+    "start_utc": "2026-09-25T06:57:30Z",
+    "stop_launch_utc": "2026-09-25T14:27:30Z",
+    "used_at_cp1": {
+      "complete_requests": 8,
+      "gpu_process_s": 1400
+    }
+  }
 }

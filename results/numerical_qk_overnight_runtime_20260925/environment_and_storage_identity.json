@@ -1,0 +1,83 @@
+{
+  "device": {
+    "capability": [
+      9,
+      0
+    ],
+    "driver": "595.91.07",
+    "name": "NVIDIA H100 80GB HBM3"
+  },
+  "env": {
+    "CONDA_DEFAULT_ENV": "ljy_dlm",
+    "PYTHONNOUSERSITE": null,
+    "PYTHONPATH": "src:.",
+    "TRITON_CACHE_DIR": null
+  },
+  "executable": "/home/exouser/miniconda3/envs/ljy_dlm/bin/python",
+  "flags": {
+    "attn_implementation": "sdpa (adapter.load)",
+    "bf16": "model loaded in torch.bfloat16",
+    "native_dispatch": "ALL_ATTENTION_FUNCTIONS[\"sdpa\"] = sdpa_attention_forward when unbound",
+    "tf32_cudnn_set_by_runner": false,
+    "tf32_matmul_set_by_runner": false
+  },
+  "fresh_junyu_T_extension": {
+    "bridge": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/torch_4c65c048754f9fb7/value_direction_torch_4c65c048754f9fb7.so",
+    "bridge_sha256": "824e8a7dfeac7990a9464d9e22fdaca97bdd3f401055db1ad301b71e87182a2a",
+    "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+    "library_sha256": "7ef4c8cf417c16175d6d1a5d7b4304df792c3a7c1a66a1da4f41312cf166d819"
+  },
+  "host": {
+    "hostname": "mpk",
+    "ips": "10.0.125.34 172.19.0.1 172.17.0.1 172.18.0.1"
+  },
+  "import_policy": "same interpreter for every job: conda ljy_dlm python with user site ENABLED (torch/triton resolve from ~/.local); PYTHONNOUSERSITE never set; no python -s",
+  "modules": {
+    "torch": {
+      "cuda": "12.4",
+      "cudnn": 92600,
+      "file": "/home/exouser/.local/lib/python3.10/site-packages/torch/__init__.py",
+      "version": "2.6.0+cu124",
+      "version_py_sha256": "fb37823f3a4c3c29cd008fac7d3ce5aeb8e7da6f883b17aa9ea6d73ce6eecbfd"
+    },
+    "transformers": {
+      "file": "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/site-packages/transformers/__init__.py",
+      "generation_sha256": "b814a6fc41492794c1f50ba71c750206684e25dfdd53932e0842675871fef0de",
+      "modeling_sha256": "3f1a24f517b51470113c5181a53c3ddb07c05d01b8780a3a6d030497a231e2ec",
+      "sdpa_attention_sha256": "87f933d1a2d8508df572da5c0748c6b24c22ff2b625796949957dcd86cc57564",
+      "version": "5.11.0"
+    },
+    "triton": {
+      "compiler_py_sha256": "39ace39686dc8ae6b537d14ae140575242b5833746b519e6e329b355f5d9e364",
+      "file": "/home/exouser/.local/lib/python3.10/site-packages/triton/__init__.py",
+      "jit_py_sha256": "f02f0e82f674a5144bfbc4b63db2bd2a7a7a9ba91b184e8ed629a66695d52330",
+      "shadowed_conda_triton": [
+        "triton-3.7.1.dist-info"
+      ],
+      "version": "3.2.0"
+    }
+  },
+  "python": "3.10.20 (main, Mar 11 2026, 17:46:40) [GCC 14.3.0]",
+  "schema": "v10_environment_and_storage_identity_v1",
+  "storage": {
+    "bulky_root": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925",
+    "df_hT": "Filesystem     Type  Size  Used Avail Use% Mounted on\n/dev/sda1      ext4  993G  936G   57G  95% /\n/dev/sdb       ext4  984G   17G  968G   2% /media/volume/dllm-1\n",
+    "df_i": "Filesystem        Inodes   IUsed     IFree IUse% Mounted on\n/dev/sda1      132120576 1963775 130156801    2% /\n/dev/sdb        65536000   62666  65473334    1% /media/volume/dllm-1\n",
+    "findmnt": "TARGET               SOURCE   FSTYPE OPTIONS\n/media/volume/dllm-1 /dev/sdb ext4   rw,nosuid,nodev,relatime\n",
+    "migration": "none (root had ~57 GB free at start; nothing moved or deleted)"
+  },
+  "sys_path": [
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/src",
+    "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1",
+    "/home/exouser/miniconda3/envs/ljy_dlm/lib/python310.zip",
+    "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10",
+    "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/lib-dynload",
+    "/home/exouser/.local/lib/python3.10/site-packages",
+    "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/site-packages",
+    "/home/exouser/ljy/dlm/src",
+    "/home/exouser/dyh/mympk/python",
+    "/home/exouser/miniconda3/envs/ljy_dlm/lib/python3.10/site-packages/setuptools/_vendor",
+    "/tmp/tmp1oed4hgt"
+  ]
+}

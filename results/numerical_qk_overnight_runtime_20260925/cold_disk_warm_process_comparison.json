@@ -1,0 +1,197 @@
+{
+  "arm": "S = M1 preqk current output, LOCAL prefix_block_summary; static = v9 reference kernels, generic = CP1 twins",
+  "ledger": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/cp1/ledger.jsonl",
+  "ledger_sha256": "de5869c69fb7efb533fef8cb24827c8bda34d926cf82c23d995b98bd7d161d6c",
+  "protocol": {
+    "note": "each variant ran in its own process with its own fresh cache on the same /dev/sdb ext4 volume; /8 cold ran after /2 in the same process, so its misses are only NEW specializations",
+    "state1": "new process, EMPTY private TRITON_CACHE_DIR set before import (first request pays compilation)",
+    "state2": "new process reusing the POPULATED private disk cache (bounded synthetic production-shape sequence, no complete request)",
+    "state3": "same process, repeated request (no new variants)"
+  },
+  "rows": [
+    {
+      "api_wall_s": 94.672,
+      "decoder_calls": 102,
+      "id": "aime26/2",
+      "matches_own_attempt0": null,
+      "new_disk_entries": 60,
+      "outer_wall_s": 94.728,
+      "state": "1_empty_cache_new_process",
+      "token_hash": "92ff992fc6bede7b",
+      "tokens_equal_v9": true,
+      "triton_miss_s": 71.16,
+      "triton_misses": 56,
+      "variant": "static"
+    },
+    {
+      "api_wall_s": 19.647,
+      "decoder_calls": 102,
+      "id": "aime26/2",
+      "matches_own_attempt0": true,
+      "new_disk_entries": 0,
+      "outer_wall_s": 19.703,
+      "state": "3_warm_process_repeat",
+      "token_hash": "92ff992fc6bede7b",
+      "tokens_equal_v9": true,
+      "triton_miss_s": 0,
+      "triton_misses": 0,
+      "variant": "static"
+    },
+    {
+      "api_wall_s": 85.18,
+      "decoder_calls": 181,
+      "id": "aime26/8",
+      "matches_own_attempt0": null,
+      "new_disk_entries": 61,
+      "outer_wall_s": 85.272,
+      "state": "1b_first_seen_lengths_same_cold_process_after_/2",
+      "token_hash": "09b738cd21df5320",
+      "tokens_equal_v9": true,
+      "triton_miss_s": 49.5,
+      "triton_misses": 61,
+      "variant": "static"
+    },
+    {
+      "api_wall_s": 34.434,
+      "decoder_calls": 181,
+      "id": "aime26/8",
+      "matches_own_attempt0": true,
+      "new_disk_entries": 0,
+      "outer_wall_s": 34.537,
+      "state": "3_warm_process_repeat",
+      "token_hash": "09b738cd21df5320",
+      "tokens_equal_v9": true,
+      "triton_miss_s": 0,
+      "triton_misses": 0,
+      "variant": "static"
+    },
+    {
+      "api_wall_s": 32.541,
+      "decoder_calls": 102,
+      "id": "aime26/2",
+      "matches_own_attempt0": null,
+      "new_disk_entries": 11,
+      "outer_wall_s": 32.591,
+      "state": "1_empty_cache_new_process",
+      "token_hash": "92ff992fc6bede7b",
+      "tokens_equal_v9": true,
+      "triton_miss_s": 9.61,
+      "triton_misses": 7,
+      "variant": "generic"
+    },
+    {
+      "api_wall_s": 19.449,
+      "decoder_calls": 102,
+      "id": "aime26/2",
+      "matches_own_attempt0": true,
+      "new_disk_entries": 0,
+      "outer_wall_s": 19.498,
+      "state": "3_warm_process_repeat",
+      "token_hash": "92ff992fc6bede7b",
+      "tokens_equal_v9": true,
+      "triton_miss_s": 0,
+      "triton_misses": 0,
+      "variant": "generic"
+    },
+    {
+      "api_wall_s": 38.636,
+      "decoder_calls": 181,
+      "id": "aime26/8",
+      "matches_own_attempt0": null,
+      "new_disk_entries": 7,
+      "outer_wall_s": 38.725,
+      "state": "1b_first_seen_lengths_same_cold_process_after_/2",
+      "token_hash": "09b738cd21df5320",
+      "tokens_equal_v9": true,
+      "triton_miss_s": 5.01,
+      "triton_misses": 7,
+      "variant": "generic"
+    },
+    {
+      "api_wall_s": 33.383,
+      "decoder_calls": 181,
+      "id": "aime26/8",
+      "matches_own_attempt0": true,
+      "new_disk_entries": 0,
+      "outer_wall_s": 33.469,
+      "state": "3_warm_process_repeat",
+      "token_hash": "09b738cd21df5320",
+      "tokens_equal_v9": true,
+      "triton_miss_s": 0,
+      "triton_misses": 0,
+      "variant": "generic"
+    },
+    {
+      "api_wall_s": null,
+      "decoder_calls": null,
+      "id": "synthetic production-shape sequence",
+      "matches_own_attempt0": null,
+      "new_disk_entries": 0,
+      "outer_wall_s": null,
+      "state": "2_fresh_process_populated_disk_cache",
+      "token_hash": null,
+      "tokens_equal_v9": null,
+      "triton_miss_s": 0.614,
+      "triton_misses": 206,
+      "variant": "static"
+    },
+    {
+      "api_wall_s": null,
+      "decoder_calls": null,
+      "id": "synthetic production-shape sequence",
+      "matches_own_attempt0": null,
+      "new_disk_entries": 0,
+      "outer_wall_s": null,
+      "state": "2_fresh_process_populated_disk_cache",
+      "token_hash": null,
+      "tokens_equal_v9": null,
+      "triton_miss_s": 0.359,
+      "triton_misses": 65,
+      "variant": "generic"
+    }
+  ],
+  "schema": "v10_cold_disk_warm_v1",
+  "startup_warmup": {
+    "empty_cache": {
+      "cache": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/tc_warmup",
+      "disk_entries": 54,
+      "launches": 100,
+      "process_init_s": 1.5488408070523292,
+      "warmup_seconds": 56.56557476310991
+    },
+    "note": "optional deployment warmup of the bounded generic production-mode set (2 geometries x 5 K alignment classes), synthetic tensors, outside request latency",
+    "populated_cache": {
+      "cache": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/tc_warmup",
+      "disk_entries": 54,
+      "launches": 100,
+      "process_init_s": 1.6051523769274354,
+      "warmup_seconds": 0.4958514829631895
+    }
+  },
+  "summary": {
+    "cold /2 wall s": {
+      "generic": 32.54,
+      "static": 94.67
+    },
+    "cold /8 wall s (after /2)": {
+      "generic": 38.64,
+      "static": 85.18
+    },
+    "disk-reuse misses (synthetic)": {
+      "generic": 65,
+      "static": 206
+    },
+    "in-request compile s /2": {
+      "generic": 9.6,
+      "static": 71.2
+    },
+    "warm /2 s": {
+      "generic": 19.45,
+      "static": 19.65
+    },
+    "warm /8 s": {
+      "generic": 33.38,
+      "static": 34.43
+    }
+  }
+}
