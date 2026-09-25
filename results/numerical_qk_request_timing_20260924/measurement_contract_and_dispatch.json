@@ -1,0 +1,250 @@
+{
+  "deploy_sha": "669858060b12060c098423aa719f63ecb3789637",
+  "schema": "v9_measurement_contract_v1",
+  "windows": {
+    "aime26/2@canvas1": {
+      "absolute_position": 365,
+      "capture_trajectory": "untouched native SDPA (unbound), native sampler, T observed by a capture-time State outside which the step snapshot is taken",
+      "dispatch": {
+        "dense_eager_same_mask": {
+          "blasst_masked": 0,
+          "dense_eager": 30,
+          "native_sdpa": 0,
+          "numerical_selector": 0,
+          "registry_entry": "dllm.attention.blasst.integration._attach_registry.<locals>.dispatcher",
+          "registry_entry_is_native": false,
+          "registry_sdpa": 30
+        },
+        "native_decoder_forward": {
+          "blasst_masked": 0,
+          "dense_eager": 0,
+          "native_sdpa": 30,
+          "numerical_selector": 0,
+          "registry_entry": "transformers.integrations.sdpa_attention.sdpa_attention_forward",
+          "registry_entry_is_native": true,
+          "registry_sdpa": 30
+        },
+        "native_denoising_step.anchor_inputs": {
+          "blasst_masked": 0,
+          "dense_eager": 0,
+          "native_sdpa": 30,
+          "numerical_selector": 0,
+          "registry_entry": "transformers.integrations.sdpa_attention.sdpa_attention_forward",
+          "registry_entry_is_native": true,
+          "registry_sdpa": 30
+        },
+        "native_denoising_step.step1_inputs": {
+          "blasst_masked": 0,
+          "dense_eager": 0,
+          "native_sdpa": 30,
+          "numerical_selector": 0,
+          "registry_entry": "transformers.integrations.sdpa_attention.sdpa_attention_forward",
+          "registry_entry_is_native": true,
+          "registry_sdpa": 30
+        },
+        "sparse_legacy_recompute": {
+          "blasst_masked": 0,
+          "dense_eager": 0,
+          "native_sdpa": 0,
+          "numerical_selector": 30,
+          "registry_entry": "dllm.attention.blasst.integration._attach_registry.<locals>.dispatcher",
+          "registry_entry_is_native": false,
+          "registry_sdpa": 30
+        },
+        "sparse_prefix_block_summary": {
+          "blasst_masked": 0,
+          "dense_eager": 0,
+          "native_sdpa": 0,
+          "numerical_selector": 30,
+          "registry_entry": "dllm.attention.blasst.integration._attach_registry.<locals>.dispatcher",
+          "registry_entry_is_native": false,
+          "registry_sdpa": 30
+        }
+      },
+      "production_context": {
+        "attn_implementation": "sdpa",
+        "autocast_cpu": false,
+        "autocast_cuda": false,
+        "current_stream": 0,
+        "default_stream": 0,
+        "denoising_step_instance_override": true,
+        "denoising_step_is_wrapped": false,
+        "generate_is_wrapped": true,
+        "grad_enabled": false,
+        "inference_mode": true,
+        "text_attn_implementation": "sdpa",
+        "tf32_cudnn": false,
+        "tf32_matmul": false
+      },
+      "replay_context_mismatches": {
+        "native_decoder_forward": {},
+        "native_denoising_step.anchor_inputs": {},
+        "native_denoising_step.step1_inputs": {},
+        "sparse_legacy_recompute": {},
+        "sparse_prefix_block_summary": {}
+      },
+      "snapshot_inventory": {
+        "diffusion_stopping_criteria": [
+          {
+            "attributes": {
+              "argmax_canvas_history": "NoneType",
+              "confidence_threshold": "float",
+              "stability_threshold": "int"
+            },
+            "shared_not_copied": [],
+            "type": "StableAndConfidentStoppingCriteria"
+          }
+        ],
+        "logits_processor": [
+          {
+            "attributes": {
+              "max_denoising_steps": "int",
+              "t_max": "float",
+              "t_min": "float"
+            },
+            "shared_not_copied": [],
+            "type": "LinearTemperatureScheduleLogitsProcessor"
+          }
+        ],
+        "sampler": [
+          {
+            "attributes": {
+              "accepted_token_mask": "Tensor",
+              "canvas_length": "int",
+              "entropy_bound": "float",
+              "vocab_size": "int"
+            },
+            "shared_not_copied": [],
+            "type": "EntropyBoundSampler"
+          }
+        ]
+      },
+      "source_json": "../results/v9/replay/step_replay_canvas1.json",
+      "source_sha256": "230ff0cb79c1ce7b3cb8e277818367cc406e4560191f5ee40c592815bc5680bb",
+      "stored_prefix_layer0_local": 365,
+      "stored_prefix_layer5_global": 365
+    },
+    "aime26/2@canvas6": {
+      "absolute_position": 1645,
+      "capture_trajectory": "untouched native SDPA (unbound), native sampler, T observed by a capture-time State outside which the step snapshot is taken",
+      "dispatch": {
+        "dense_eager_same_mask": {
+          "blasst_masked": 0,
+          "dense_eager": 30,
+          "native_sdpa": 0,
+          "numerical_selector": 0,
+          "registry_entry": "dllm.attention.blasst.integration._attach_registry.<locals>.dispatcher",
+          "registry_entry_is_native": false,
+          "registry_sdpa": 30
+        },
+        "native_decoder_forward": {
+          "blasst_masked": 0,
+          "dense_eager": 0,
+          "native_sdpa": 30,
+          "numerical_selector": 0,
+          "registry_entry": "transformers.integrations.sdpa_attention.sdpa_attention_forward",
+          "registry_entry_is_native": true,
+          "registry_sdpa": 30
+        },
+        "native_denoising_step.anchor_inputs": {
+          "blasst_masked": 0,
+          "dense_eager": 0,
+          "native_sdpa": 30,
+          "numerical_selector": 0,
+          "registry_entry": "transformers.integrations.sdpa_attention.sdpa_attention_forward",
+          "registry_entry_is_native": true,
+          "registry_sdpa": 30
+        },
+        "native_denoising_step.step1_inputs": {
+          "blasst_masked": 0,
+          "dense_eager": 0,
+          "native_sdpa": 30,
+          "numerical_selector": 0,
+          "registry_entry": "transformers.integrations.sdpa_attention.sdpa_attention_forward",
+          "registry_entry_is_native": true,
+          "registry_sdpa": 30
+        },
+        "sparse_legacy_recompute": {
+          "blasst_masked": 0,
+          "dense_eager": 0,
+          "native_sdpa": 0,
+          "numerical_selector": 30,
+          "registry_entry": "dllm.attention.blasst.integration._attach_registry.<locals>.dispatcher",
+          "registry_entry_is_native": false,
+          "registry_sdpa": 30
+        },
+        "sparse_prefix_block_summary": {
+          "blasst_masked": 0,
+          "dense_eager": 0,
+          "native_sdpa": 0,
+          "numerical_selector": 30,
+          "registry_entry": "dllm.attention.blasst.integration._attach_registry.<locals>.dispatcher",
+          "registry_entry_is_native": false,
+          "registry_sdpa": 30
+        }
+      },
+      "production_context": {
+        "attn_implementation": "sdpa",
+        "autocast_cpu": false,
+        "autocast_cuda": false,
+        "current_stream": 0,
+        "default_stream": 0,
+        "denoising_step_instance_override": true,
+        "denoising_step_is_wrapped": false,
+        "generate_is_wrapped": true,
+        "grad_enabled": false,
+        "inference_mode": true,
+        "text_attn_implementation": "sdpa",
+        "tf32_cudnn": false,
+        "tf32_matmul": false
+      },
+      "replay_context_mismatches": {
+        "native_decoder_forward": {},
+        "native_denoising_step.anchor_inputs": {},
+        "native_denoising_step.step1_inputs": {},
+        "sparse_legacy_recompute": {},
+        "sparse_prefix_block_summary": {}
+      },
+      "snapshot_inventory": {
+        "diffusion_stopping_criteria": [
+          {
+            "attributes": {
+              "argmax_canvas_history": "NoneType",
+              "confidence_threshold": "float",
+              "stability_threshold": "int"
+            },
+            "shared_not_copied": [],
+            "type": "StableAndConfidentStoppingCriteria"
+          }
+        ],
+        "logits_processor": [
+          {
+            "attributes": {
+              "max_denoising_steps": "int",
+              "t_max": "float",
+              "t_min": "float"
+            },
+            "shared_not_copied": [],
+            "type": "LinearTemperatureScheduleLogitsProcessor"
+          }
+        ],
+        "sampler": [
+          {
+            "attributes": {
+              "accepted_token_mask": "Tensor",
+              "canvas_length": "int",
+              "entropy_bound": "float",
+              "vocab_size": "int"
+            },
+            "shared_not_copied": [],
+            "type": "EntropyBoundSampler"
+          }
+        ]
+      },
+      "source_json": "../results/v9/replay/step_replay_canvas6.json",
+      "source_sha256": "acb6f683a663425fbe6882d7ce7a34b3ead9a572b2903a149fee4b8dc6ced568",
+      "stored_prefix_layer0_local": 1023,
+      "stored_prefix_layer5_global": 1645
+    }
+  }
+}

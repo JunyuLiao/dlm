@@ -7,6 +7,32 @@
     "scaling sweep is synthetic component stress data, not a complete-method ratio",
     "profile harness bugs A-E repaired and pinned by tests"
   ],
+  "cp1": {
+    "deploy_sha": "669858060b12060c098423aa719f63ecb3789637",
+    "step_replay_ms": {
+      "canvas1": {
+        "L_ordinary": 153.3,
+        "S_ordinary": 153.35,
+        "dense_eager": 129.0,
+        "native_step": 122.46
+      },
+      "canvas6": {
+        "L_ordinary": 165.75,
+        "S_ordinary": 167.35,
+        "dense_eager": 131.46,
+        "native_step": 132.17
+      }
+    },
+    "tests": "108 passed on H100 (targeted suites + 14 new v9 tests)"
+  },
+  "deploy_rule": "runs execute from read-only ../deploy/<sha>/ git-archive snapshots",
+  "environment_actual": {
+    "dllm": "this checkout via PYTHONPATH=src:.",
+    "gpu": "1x H100 80GB HBM3, driver 595.91.07",
+    "torch": "2.6.0+cu124 from ~/.local user site",
+    "transformers": "5.11.0 from conda env ljy_dlm",
+    "triton": "3.2.0 from ~/.local user site (conda env triton 3.7.1 is shadowed)"
+  },
   "evidence": {
     "decisions_preserved": "real saturated states (local prefix 1023 asserted, global 1923) with production causal T spread 2.625: bitmaps/eligibility/malformed bit-identical, 0 disagreeing tiles; same-generation-twice tokens identical; two full 8192-budget smoke requests token-for-token identical to the v7 receipts with identical calls (102,181) and canvases (12,15)",
     "memory": "8.23 MB per local layer, 205.8 MB resident, ON TOP of the retained score cache; total increases",
@@ -17,6 +43,7 @@
     "work_avoided": "75% of local and 86% of global KV tiles skip score re-read + sketch read + tf32x3 dot per decision"
   },
   "execution_identity_note": "Per-run config receipts are the authority for what ran (results/.../configs/*.json, each with its own fingerprint and source_hashes). No inherited executed_model_source_sha is carried here.",
+  "live_jobs": [],
   "method_config_unchanged": {
     "decision_interval_M1": 1,
     "output_mode": "historical_route_preqk_current_output",
@@ -35,7 +62,7 @@
     "mechanism": "_route optionally STOREs per-row z/mu for wholly-immutable prefix tiles at the real score anchor and LOADs them afterwards; reused values are that kernel's own FP32 outputs, so reuse is exact by construction. alpha/risk/retained state/bitmap are never cached.",
     "selector": "Attention(selector='legacy_recompute'|'prefix_block_summary', selector_layers='local'); default unchanged"
   },
-  "next_command": "Locate the request-vs-replay per-forward gap (2.13x on the other three requests) with a bounded trace of one real early and one real late step, partitioning GPU active work, launch/CPU gaps and allocator behaviour (v8 section 4F). Nothing else is large enough to matter.",
+  "next_command": "CP2 clean D/L/S request timing via scripts/v9_clean_request_timing.py from deploy snapshot",
   "not_started": [
     "240-request matrix",
     "extra seeds",
@@ -46,20 +73,22 @@
     "backend migration",
     "frozen mass-bitmap vs fresh value-aware comparison study"
   ],
-  "output_root": "results/numerical_qk_prefix_summary_20260924",
+  "output_root": "results/numerical_qk_request_timing_20260924",
   "remote": {
     "code_cp": ".../code_cp1 (git clone, pulled to each pushed commit)",
     "env": "conda ljy_dlm, PYTHONPATH=src:. from code_cp1, Torch 2.6.0+cu124, transformers 5.11.0",
     "gpu_policy": "checked idle at each launch; no concurrent jobs; shared env untouched",
     "host": "exouser@149.165.151.254",
     "root": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924",
-    "v8_results": ".../results/v8/{prefix_summary_qualify.json,full_forward_profile_v8.json,support_cells.json,smoke/}"
+    "v8_results": ".../results/v8/{prefix_summary_qualify.json,full_forward_profile_v8.json,support_cells.json,smoke/}",
+    "v9_results": "../results/v9/{replay,request_timing}"
   },
   "reporting_sha": "resolve with git HEAD; not self-validating",
-  "reviewed_head_at_start": "e1f3c743513b54d1d560506f334eac0ab3045c20",
+  "reviewed_head_at_start": "3b67ea16261a5241c4bee3175ee9859dc9038da0",
   "schema": 1,
-  "status": "EXACT_OPTIMIZATION_QUALIFIED_DECISIONS_PRESERVED_BUT_NO_COMPLETE_STEP_SPEEDUP",
-  "task": "v8: exact immutable-prefix routing summaries for the existing M1 selector",
+  "status": "CP1_DONE_MEASUREMENT_PATH_QUALIFIED; CP2 request timing next",
+  "storage_preflight": "root 58 GB free, no migration; bulky artifacts -> /media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924",
+  "task": "v9: qualify measurement path, clean paired D/L/S natural-request timing",
   "tests": "94 targeted tests pass on the local WSL RTX4060 (private device, never the remote timing GPU): numerical_reuse_{prefix_summary,preqk,route_only,routing_only,integration,cache,math,stop,summary,prefix_lease,native_mask}, numerical_qk_runner, preqk_correctness_vectors, preqk_profile_contracts. Two unrelated historical tests (test_diffusion_gemma_preqk, test_jl_accepted_round2) fail identically at the base commit on a missing results/diffusion_gemma_oracle/setup.json.",
   "unexplained": [
     "-0.402 ms x 25 local layers predicts ~-10 ms/step but the step did not move (minima 204.39 vs 204.36); L2 residency in the tight per-call loop is a hypothesis, not a measurement",

@@ -1,0 +1,3251 @@
+{
+  "cpu_gpu_unit_tests": "108 passed on host H100 (targeted numerical_reuse/runner/preqk suites + tests/test_v9_replay_state.py 11 + tests/test_numerical_reuse_summary_memory.py 3), deployed 6698580",
+  "deploy_sha": "669858060b12060c098423aa719f63ecb3789637",
+  "schema": "v9_replay_state_tests_v1",
+  "windows": {
+    "aime26/2@canvas1": {
+      "dense_eager_same_mask.anchor_inputs": {
+        "first_observation_ms": 128.89202880859375,
+        "host_wall_median_ms": 129.04232740402222,
+        "inputs_identical_every_repetition": true,
+        "label": "_install_dense + attention_override=None -> dense_eager_attention_forward; NOT the untouched native SDPA path",
+        "max_ms": 129.24371337890625,
+        "median_ms": 129.00153350830078,
+        "min_ms": 128.51417541503906,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 128.89202880859375,
+            "index": 0,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 128.83648681640625,
+            "index": 1,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 129.06752014160156,
+            "index": 2,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 129.24371337890625,
+            "index": 3,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 129.24301147460938,
+            "index": 4,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 128.98233032226562,
+            "index": 5,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 129.02073669433594,
+            "index": 6,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 129.1301727294922,
+            "index": 7,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 128.51417541503906,
+            "index": 8,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 129.06463623046875,
+            "index": 9,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 128.72508239746094,
+            "index": 10,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 128.98037719726562,
+            "index": 11,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 128.8431396484375,
+            "index": 12,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "d4873e4671b5415a53d27980f5e450cc5daa19bed787fa2fd6aae1590d5e7b47",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "native_decoder_forward": {
+        "first_observation_ms": 114.48592376708984,
+        "host_wall_median_ms": 113.86353708803654,
+        "inputs_identical_every_repetition": true,
+        "label": null,
+        "max_ms": 114.0063705444336,
+        "median_ms": 113.8213119506836,
+        "min_ms": 113.65216064453125,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 114.48592376708984,
+            "index": 0,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 114.38473510742188,
+            "index": 1,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 113.96595001220703,
+            "index": 2,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 113.80448150634766,
+            "index": 3,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 113.75814056396484,
+            "index": 4,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 113.97042846679688,
+            "index": 5,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 113.98332977294922,
+            "index": 6,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 113.82972717285156,
+            "index": 7,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 113.81289672851562,
+            "index": 8,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 114.0063705444336,
+            "index": 9,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 113.65216064453125,
+            "index": 10,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 113.87142181396484,
+            "index": 11,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 113.70626831054688,
+            "index": 12,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "6e313e6d51ec3c70cb7a484b47d4ee8af38d12e63f9a05401f1389de3150005f",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "native_denoising_step.anchor_inputs": {
+        "first_observation_ms": 119.94886779785156,
+        "host_wall_median_ms": 119.90707693621516,
+        "inputs_identical_every_repetition": true,
+        "label": null,
+        "max_ms": 120.12860870361328,
+        "median_ms": 119.87139129638672,
+        "min_ms": 119.44493103027344,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 119.94886779785156,
+            "index": 0,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 119.45712280273438,
+            "index": 1,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 119.77436828613281,
+            "index": 2,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 120.06511688232422,
+            "index": 3,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 119.44493103027344,
+            "index": 4,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 119.89884948730469,
+            "index": 5,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 119.83497619628906,
+            "index": 6,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 119.84393310546875,
+            "index": 7,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 119.76924896240234,
+            "index": 8,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 120.01715087890625,
+            "index": 9,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 120.12860870361328,
+            "index": 10,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 120.11334228515625,
+            "index": 11,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 119.83821105957031,
+            "index": 12,
+            "input_digest": "4b0251190c73d0e510436eaf429da929b7babd83bbf909d552dd01eb9a6f6d77",
+            "output_digest": "85333d2d92f6ba601bf2424591d41bd7745cfdcee91cfd99cd64e4e1d9535e8a",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "native_denoising_step.step1_inputs": {
+        "first_observation_ms": 122.94585418701172,
+        "host_wall_median_ms": 122.49966186936945,
+        "inputs_identical_every_repetition": true,
+        "label": null,
+        "max_ms": 123.10380554199219,
+        "median_ms": 122.45990371704102,
+        "min_ms": 122.23945617675781,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 122.94585418701172,
+            "index": 0,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 122.58370971679688,
+            "index": 1,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 122.04716491699219,
+            "index": 2,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 122.53443145751953,
+            "index": 3,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 122.39202880859375,
+            "index": 4,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 122.57500457763672,
+            "index": 5,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 122.33200073242188,
+            "index": 6,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 122.23945617675781,
+            "index": 7,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 122.52684783935547,
+            "index": 8,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 122.52816009521484,
+            "index": 9,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 123.10380554199219,
+            "index": 10,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 122.39295959472656,
+            "index": 11,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 122.26383972167969,
+            "index": 12,
+            "input_digest": "c3be9fa4e880206a5e14a5d1e884af7d7149e55dccc597e57079316a5b0b924c",
+            "output_digest": "b8c49ec761a173a16198a943ddf3712e1d3aee451618788a10e676af9453b15e",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "sparse_legacy_recompute.anchor": {
+        "first_observation_ms": 159.9454345703125,
+        "host_wall_median_ms": 160.38400796242058,
+        "inputs_identical_every_repetition": true,
+        "label": "production M1 binding + one observe wrapper; T bookkeeping inside the timed step",
+        "max_ms": 161.23001098632812,
+        "median_ms": 160.34873962402344,
+        "min_ms": 159.5166015625,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 159.9454345703125,
+            "index": 0,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 160.2548828125,
+            "index": 1,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 160.59823608398438,
+            "index": 2,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 161.23001098632812,
+            "index": 3,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 160.84425354003906,
+            "index": 4,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 160.12696838378906,
+            "index": 5,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 160.16085815429688,
+            "index": 6,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 159.5166015625,
+            "index": 7,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 160.4145965576172,
+            "index": 8,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 160.02589416503906,
+            "index": 9,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 160.2828826904297,
+            "index": 10,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 161.10748291015625,
+            "index": 11,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 160.5695343017578,
+            "index": 12,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "sparse_legacy_recompute.ordinary": {
+        "first_observation_ms": 165.29440307617188,
+        "host_wall_median_ms": 153.3435700694099,
+        "inputs_identical_every_repetition": true,
+        "label": "production M1 binding + one observe wrapper; T bookkeeping inside the timed step; age-1 history from an untimed real replay of step 0",
+        "max_ms": 153.75074768066406,
+        "median_ms": 153.30358123779297,
+        "min_ms": 152.52796936035156,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 165.29440307617188,
+            "index": 0,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 153.62661743164062,
+            "index": 1,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 152.9261474609375,
+            "index": 2,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 153.75074768066406,
+            "index": 3,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.23699951171875,
+            "index": 4,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 152.77110290527344,
+            "index": 5,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.30313110351562,
+            "index": 6,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.70501708984375,
+            "index": 7,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.38522338867188,
+            "index": 8,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.68118286132812,
+            "index": 9,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 152.52796936035156,
+            "index": 10,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.3040313720703,
+            "index": 11,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.07907104492188,
+            "index": 12,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "sparse_prefix_block_summary.anchor": {
+        "first_observation_ms": 161.5455322265625,
+        "host_wall_median_ms": 161.60109743941575,
+        "inputs_identical_every_repetition": true,
+        "label": "production M1 binding + one observe wrapper; T bookkeeping inside the timed step",
+        "max_ms": 162.123291015625,
+        "median_ms": 161.56378173828125,
+        "min_ms": 160.60092163085938,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 161.5455322265625,
+            "index": 0,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 161.6719970703125,
+            "index": 1,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 161.80348205566406,
+            "index": 2,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 162.123291015625,
+            "index": 3,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 161.56871032714844,
+            "index": 4,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 161.55885314941406,
+            "index": 5,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 161.02806091308594,
+            "index": 6,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 160.60092163085938,
+            "index": 7,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 161.17971801757812,
+            "index": 8,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 161.1670379638672,
+            "index": 9,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 161.60195922851562,
+            "index": 10,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 161.99830627441406,
+            "index": 11,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 161.80911254882812,
+            "index": 12,
+            "input_digest": "36636d9afd1e15e46ccf807a6714c97f7e6ed93d0a0339ae9fa8a6c2f6ced1e9",
+            "output_digest": "68b8e10e8abffd9710ee9c2fc29bf6b94699deed478522812096712a3db923ed",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "sparse_prefix_block_summary.ordinary": {
+        "first_observation_ms": 160.3019256591797,
+        "host_wall_median_ms": 153.38721848092973,
+        "inputs_identical_every_repetition": true,
+        "label": "production M1 binding + one observe wrapper; T bookkeeping inside the timed step; age-1 history from an untimed real replay of step 0",
+        "max_ms": 153.69708251953125,
+        "median_ms": 153.34867095947266,
+        "min_ms": 153.12232971191406,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 160.3019256591797,
+            "index": 0,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 153.58070373535156,
+            "index": 1,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 153.61996459960938,
+            "index": 2,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 153.15267944335938,
+            "index": 3,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.33544921875,
+            "index": 4,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.21859741210938,
+            "index": 5,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.49801635742188,
+            "index": 6,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.12232971191406,
+            "index": 7,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.2848358154297,
+            "index": 8,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.6511993408203,
+            "index": 9,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.3618927001953,
+            "index": 10,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.69708251953125,
+            "index": 11,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 153.47164916992188,
+            "index": 12,
+            "input_digest": "324e5ca2bf27f66c918de1c37a5ae3f8ac359db61880cf9f89074007c442eb5f",
+            "output_digest": "5b37567824a70881d8cbe72f26ab7e6d12cf4bd96af4858ca98a8096aedf093a",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      }
+    },
+    "aime26/2@canvas6": {
+      "dense_eager_same_mask.anchor_inputs": {
+        "first_observation_ms": 131.22076416015625,
+        "host_wall_median_ms": 131.49785401765257,
+        "inputs_identical_every_repetition": true,
+        "label": "_install_dense + attention_override=None -> dense_eager_attention_forward; NOT the untouched native SDPA path",
+        "max_ms": 131.7480010986328,
+        "median_ms": 131.4606704711914,
+        "min_ms": 131.0431671142578,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 131.22076416015625,
+            "index": 0,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 131.56687927246094,
+            "index": 1,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 131.60646057128906,
+            "index": 2,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 131.7480010986328,
+            "index": 3,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 131.47695922851562,
+            "index": 4,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 131.41448974609375,
+            "index": 5,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 131.34396362304688,
+            "index": 6,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 131.391357421875,
+            "index": 7,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 131.50845336914062,
+            "index": 8,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 131.6456298828125,
+            "index": 9,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 131.46575927734375,
+            "index": 10,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 131.45558166503906,
+            "index": 11,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 131.0431671142578,
+            "index": 12,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "6ba861f5b075c5beec53e73c0480ccf5ebc44345dc26859de0d7fb149d478fd7",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "native_decoder_forward": {
+        "first_observation_ms": 115.61993408203125,
+        "host_wall_median_ms": 115.713459555991,
+        "inputs_identical_every_repetition": true,
+        "label": null,
+        "max_ms": 116.32927703857422,
+        "median_ms": 115.67454528808594,
+        "min_ms": 115.29830169677734,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 115.61993408203125,
+            "index": 0,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 115.163330078125,
+            "index": 1,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 115.62214660644531,
+            "index": 2,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 115.49024200439453,
+            "index": 3,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 115.89740753173828,
+            "index": 4,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 115.62073516845703,
+            "index": 5,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 116.32927703857422,
+            "index": 6,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 115.6759033203125,
+            "index": 7,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 115.43711853027344,
+            "index": 8,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 115.29830169677734,
+            "index": 9,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 115.73177337646484,
+            "index": 10,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 115.67318725585938,
+            "index": 11,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 115.80870056152344,
+            "index": 12,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "28dba782c0ea08c56a08b58745b4d04fab2e824075f553ec01d16156123ef9ca",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "native_denoising_step.anchor_inputs": {
+        "first_observation_ms": 121.36764526367188,
+        "host_wall_median_ms": 121.32412649225444,
+        "inputs_identical_every_repetition": true,
+        "label": null,
+        "max_ms": 121.70480346679688,
+        "median_ms": 121.28665542602539,
+        "min_ms": 120.78924560546875,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 121.36764526367188,
+            "index": 0,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 121.32752227783203,
+            "index": 1,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 121.66521453857422,
+            "index": 2,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 121.26188659667969,
+            "index": 3,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 120.89004516601562,
+            "index": 4,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 121.3114242553711,
+            "index": 5,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 120.78924560546875,
+            "index": 6,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 121.70480346679688,
+            "index": 7,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 120.9164810180664,
+            "index": 8,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 121.39305877685547,
+            "index": 9,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 121.00953674316406,
+            "index": 10,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 121.3757095336914,
+            "index": 11,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 121.41824340820312,
+            "index": 12,
+            "input_digest": "3e8be43f0cf3a183c53477a0b42856a14cab56d157cc6de926b015477bde488f",
+            "output_digest": "7ea401e14e47d3143a78219cc56a1bd8a2d81e67985466a9da882da08c3f0c79",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "native_denoising_step.step1_inputs": {
+        "first_observation_ms": 132.66969299316406,
+        "host_wall_median_ms": 132.2049651062116,
+        "inputs_identical_every_repetition": true,
+        "label": null,
+        "max_ms": 132.72872924804688,
+        "median_ms": 132.1665496826172,
+        "min_ms": 131.71072387695312,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 132.66969299316406,
+            "index": 0,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 132.69398498535156,
+            "index": 1,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 132.40133666992188,
+            "index": 2,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": true
+          },
+          {
+            "event_ms": 132.1373748779297,
+            "index": 3,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 132.38316345214844,
+            "index": 4,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 132.19410705566406,
+            "index": 5,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 132.1612548828125,
+            "index": 6,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 132.17184448242188,
+            "index": 7,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 132.05532836914062,
+            "index": 8,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 132.72872924804688,
+            "index": 9,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 132.1148223876953,
+            "index": 10,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 132.3624267578125,
+            "index": 11,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          },
+          {
+            "event_ms": 131.71072387695312,
+            "index": 12,
+            "input_digest": "d89ee167b2857a906f23023e4743de515b76d706d9418b8317996c8f62567edd",
+            "output_digest": "7d3536db27149689834ed8eda634cd0a25b191f9ea438eb0437892771d0f40bd",
+            "router_step": null,
+            "telemetry_delta": null,
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "sparse_legacy_recompute.anchor": {
+        "first_observation_ms": 166.06629943847656,
+        "host_wall_median_ms": 165.9541199915111,
+        "inputs_identical_every_repetition": true,
+        "label": "production M1 binding + one observe wrapper; T bookkeeping inside the timed step",
+        "max_ms": 166.76336669921875,
+        "median_ms": 165.9170379638672,
+        "min_ms": 165.1320343017578,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 166.06629943847656,
+            "index": 0,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 165.77154541015625,
+            "index": 1,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 165.01376342773438,
+            "index": 2,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 165.26617431640625,
+            "index": 3,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 165.14486694335938,
+            "index": 4,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 165.323974609375,
+            "index": 5,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.28883361816406,
+            "index": 6,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 165.1320343017578,
+            "index": 7,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.03900146484375,
+            "index": 8,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.13478088378906,
+            "index": 9,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.76336669921875,
+            "index": 10,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 165.79507446289062,
+            "index": 11,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.19850158691406,
+            "index": 12,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "sparse_legacy_recompute.ordinary": {
+        "first_observation_ms": 1425.947021484375,
+        "host_wall_median_ms": 165.7897385302931,
+        "inputs_identical_every_repetition": true,
+        "label": "production M1 binding + one observe wrapper; T bookkeeping inside the timed step; age-1 history from an untimed real replay of step 0",
+        "max_ms": 166.72813415527344,
+        "median_ms": 165.7496795654297,
+        "min_ms": 164.389892578125,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 1425.947021484375,
+            "index": 0,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 167.05477905273438,
+            "index": 1,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 166.01210021972656,
+            "index": 2,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 166.72813415527344,
+            "index": 3,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.13868713378906,
+            "index": 4,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 165.76205444335938,
+            "index": 5,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.04803466796875,
+            "index": 6,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 165.13417053222656,
+            "index": 7,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 165.7373046875,
+            "index": 8,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.36256408691406,
+            "index": 9,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 164.389892578125,
+            "index": 10,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 165.57763671875,
+            "index": 11,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 165.09295654296875,
+            "index": 12,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "sparse_prefix_block_summary.anchor": {
+        "first_observation_ms": 167.28480529785156,
+        "host_wall_median_ms": 167.04275307711214,
+        "inputs_identical_every_repetition": true,
+        "label": "production M1 binding + one observe wrapper; T bookkeeping inside the timed step",
+        "max_ms": 168.327392578125,
+        "median_ms": 167.00516510009766,
+        "min_ms": 165.9063720703125,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 167.28480529785156,
+            "index": 0,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 166.76637268066406,
+            "index": 1,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 166.94467163085938,
+            "index": 2,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 166.59837341308594,
+            "index": 3,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 167.60940551757812,
+            "index": 4,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 167.08668518066406,
+            "index": 5,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 168.327392578125,
+            "index": 6,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 165.9063720703125,
+            "index": 7,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.64630126953125,
+            "index": 8,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 167.14361572265625,
+            "index": 9,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 167.12179565429688,
+            "index": 10,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.38832092285156,
+            "index": 11,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.92364501953125,
+            "index": 12,
+            "input_digest": "31b0c024b89cde4afcd79de0ab84964b0cd1baf95a7b1a9a62a93c756beefe70",
+            "output_digest": "af0c4a3c40836bdc7fbc987788bf118e3bb81faaa19e57409d0be410cea1e002",
+            "router_step": 0,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 0,
+              "score_calls": 30,
+              "summary_builds": 25,
+              "summary_hits": 0,
+              "summary_misses": 0
+            },
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      },
+      "sparse_prefix_block_summary.ordinary": {
+        "first_observation_ms": 174.2935333251953,
+        "host_wall_median_ms": 167.38920554053038,
+        "inputs_identical_every_repetition": true,
+        "label": "production M1 binding + one observe wrapper; T bookkeeping inside the timed step; age-1 history from an untimed real replay of step 0",
+        "max_ms": 168.34576416015625,
+        "median_ms": 167.34886169433594,
+        "min_ms": 166.19577026367188,
+        "outputs_identical_every_repetition": true,
+        "per_repetition": [
+          {
+            "event_ms": 174.2935333251953,
+            "index": 0,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 167.39791870117188,
+            "index": 1,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 167.04153442382812,
+            "index": 2,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": true
+          },
+          {
+            "event_ms": 166.8975067138672,
+            "index": 3,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 167.5089874267578,
+            "index": 4,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 168.0227508544922,
+            "index": 5,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 167.3870391845703,
+            "index": 6,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 167.34597778320312,
+            "index": 7,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 168.34576416015625,
+            "index": 8,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 167.35174560546875,
+            "index": 9,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 166.19577026367188,
+            "index": 10,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 167.17645263671875,
+            "index": 11,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          },
+          {
+            "event_ms": 167.32073974609375,
+            "index": 12,
+            "input_digest": "16da327b216bc4dc620c012906d0495fee24051417c46f7edbaddd900d1a50e5",
+            "output_digest": "de101116781c2531c4abe1035bb2c598257cbdc53577300e0b84ce3344c06387",
+            "router_step": 1,
+            "telemetry_delta": {
+              "call_metadata": 30,
+              "calls": 30,
+              "decision_calls": 30,
+              "held_calls": 0,
+              "pending": 30,
+              "preqk_calls": 30,
+              "score_calls": 0,
+              "summary_builds": 0,
+              "summary_hits": 25,
+              "summary_misses": 0
+            },
+            "warmup": false
+          }
+        ],
+        "reps": 10,
+        "warmup": 3
+      }
+    }
+  }
+}
