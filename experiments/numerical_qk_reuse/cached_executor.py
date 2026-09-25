@@ -22,6 +22,48 @@ except ImportError:  # CPU reference/tests do not require Triton.
 
 
 @dataclass
+class PrefixSummary:
+    """Exact per-row block summaries for WHOLLY-immutable prefix KV tiles.
+
+    ``z``/``mu`` are the anchor's own FP32 ``block_z`` and ``mu`` values, so a
+    reusing call consumes identical bits rather than a recomputation that
+    merely ought to agree. Nothing decision-dependent is stored: no alpha, no
+    risk, no retained accumulator, no bitmap.
+
+    ``identity`` must carry everything the values depend on -- score-anchor
+    generation, prefix owner/version, encoder epoch, projection identity,
+    layer/head/layout, mask/scale/dtype, crop and the prefix boundary -- and is
+    compared by value. A data pointer alone never authorizes reuse.
+    """
+    z: torch.Tensor
+    mu: torch.Tensor
+    active: torch.Tensor
+    bad: torch.Tensor
+    prefix_tiles: int
+    identity: tuple
+
+    @property
+    def bytes(self):
+        return sum(t.numel() * t.element_size() for t in (self.z, self.mu, self.active, self.bad))
+
+    def matches(self, identity, prefix_tiles):
+        return self.identity == identity and self.prefix_tiles == prefix_tiles
+
+
+def allocate_summary(b, h, qb, kt, prefix_tiles, rank, device, identity):
+    """Buffers sized for the leading ``prefix_tiles`` tiles only."""
+    if prefix_tiles <= 0:
+        return None
+    shape = (b, h, qb, int(prefix_tiles), 128)
+    return PrefixSummary(
+        z=torch.empty(shape, device=device, dtype=torch.float32),
+        mu=torch.empty(shape + (rank,), device=device, dtype=torch.float32),
+        active=torch.empty(shape, device=device, dtype=torch.int8),
+        bad=torch.empty(shape, device=device, dtype=torch.int8),
+        prefix_tiles=int(prefix_tiles), identity=identity)
+
+
+@dataclass
 class Routing:
     """Selector-only result: no attention output, no LSE, no V touched.
 
@@ -59,9 +101,22 @@ if tr is not None:
 
     @tr.jit
     def _route(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, LSE, STATE, RISK,
+               ZSUM, MUSUM, ACTSUM, BADSUM,
                Q: tl.constexpr, K: tl.constexpr, H: tl.constexpr, HK: tl.constexpr,
                R: tl.constexpr, RP: tl.constexpr, QB: tl.constexpr,
-               KT: tl.constexpr, THRESHOLD: tl.constexpr, TRACE: tl.constexpr):
+               KT: tl.constexpr, THRESHOLD: tl.constexpr, TRACE: tl.constexpr,
+               PREFIX_TILES: tl.constexpr, STORE: tl.constexpr, LOAD: tl.constexpr):
+        """Selector. Optionally stores or reuses exact per-row prefix summaries.
+
+        For a KV tile lying WHOLLY inside the immutable prefix, ``block_z`` and
+        ``mu`` are functions of the frozen cached scores and the frozen prefix
+        projected V only. With STORE they are written at the real score anchor;
+        with LOAD they are read back instead of recomputed. Everything that
+        depends on live state -- alpha, risk, the running retained log mass and
+        projected accumulator, the drop decision -- is recomputed every call in
+        the same scan order. Reusing the anchor's own FP32 outputs is what makes
+        the optimized path bit-identical rather than merely close.
+        """
         qb, h, batch = tl.program_id(0), tl.program_id(1), tl.program_id(2)
         kh = h // (H // HK)
         qi = qb*128 + tl.arange(0, 128)
@@ -71,29 +126,47 @@ if tr is not None:
         projected = tl.full((128, RP), 0., tl.float32)
         reference = tl.maximum(tl.load(REF+batch*HK+kh), 1e-12)
         sensitivity = tl.load(T+batch*Q+qi, qi<Q, other=1.)
+        rows = qi < Q
         for j in range(KT):
             kk = j*64+ki
-            valid_position = (qi[:, None]<Q) & (kk[None, :]<K)
-            score = tl.load(S+((batch*H+h)*Q+qi[:, None])*K+kk[None, :],
-                            valid_position, other=-float('inf'))
-            finite = valid_position & (score > -float('inf')) & (score < float('inf'))
-            invalid = valid_position & ((score != score) | (score == float('inf')))
-            clean = tl.where(finite, score, -float('inf'))
-            active = tl.sum(finite.to(tl.int32), 1)>0
-            bad_row = tl.sum(invalid.to(tl.int32), 1)>0
-            eligible = tl.sum((active | bad_row).to(tl.int32), 0)>0
-            maximum = tl.max(clean, 1)
-            safe_max = tl.where(active, maximum, 0.)
-            weights = lib.exp(clean-safe_max[:, None])
-            ell = tl.sum(weights, 1)
-            weights = weights / tl.maximum(ell, 1.e-30)[:, None]
-            block_z = tl.where(active, maximum+lib.log(tl.maximum(ell, 1.e-30)), -float('inf'))
+            summarized = LOAD and j < PREFIX_TILES
+            if summarized:
+                base = (((batch*H+h)*QB+qb)*PREFIX_TILES+j)*128 + tl.arange(0, 128)
+                block_z = tl.load(ZSUM+base, rows, other=-float('inf'))
+                mu = tl.load(MUSUM+base[:, None]*RP+ri[None, :],
+                             rows[:, None] & (ri[None, :] < R), other=0.)
+                active = tl.load(ACTSUM+base, rows, other=0) != 0
+                bad_row = tl.load(BADSUM+base, rows, other=0) != 0
+                eligible = tl.sum((active | bad_row).to(tl.int32), 0)>0
+            else:
+                valid_position = (qi[:, None]<Q) & (kk[None, :]<K)
+                score = tl.load(S+((batch*H+h)*Q+qi[:, None])*K+kk[None, :],
+                                valid_position, other=-float('inf'))
+                finite = valid_position & (score > -float('inf')) & (score < float('inf'))
+                invalid = valid_position & ((score != score) | (score == float('inf')))
+                clean = tl.where(finite, score, -float('inf'))
+                active = tl.sum(finite.to(tl.int32), 1)>0
+                bad_row = tl.sum(invalid.to(tl.int32), 1)>0
+                eligible = tl.sum((active | bad_row).to(tl.int32), 0)>0
+                maximum = tl.max(clean, 1)
+                safe_max = tl.where(active, maximum, 0.)
+                weights = lib.exp(clean-safe_max[:, None])
+                ell = tl.sum(weights, 1)
+                weights = weights / tl.maximum(ell, 1.e-30)[:, None]
+                block_z = tl.where(active, maximum+lib.log(tl.maximum(ell, 1.e-30)), -float('inf'))
+                sketch = tl.load(Z+((batch*HK+kh)*K+kk[:, None])*R+ri[None, :],
+                                 (kk[:, None]<K) & (ri[None, :]<R), other=0.)
+                mu = tl.dot(weights, sketch, input_precision='tf32x3')
+                if STORE and j < PREFIX_TILES:
+                    base = (((batch*H+h)*QB+qb)*PREFIX_TILES+j)*128 + tl.arange(0, 128)
+                    tl.store(ZSUM+base, block_z, rows)
+                    tl.store(MUSUM+base[:, None]*RP+ri[None, :], mu,
+                             rows[:, None] & (ri[None, :] < R))
+                    tl.store(ACTSUM+base, active.to(tl.int8), rows)
+                    tl.store(BADSUM+base, bad_row.to(tl.int8), rows)
             combined = _logadd(previous, block_z)
             safe = tl.where(combined > -float('inf'), combined, 0.)
             alpha = tl.where(active, lib.exp(block_z-safe), 0.)
-            sketch = tl.load(Z+((batch*HK+kh)*K+kk[:, None])*R+ri[None, :],
-                             (kk[:, None]<K) & (ri[None, :]<R), other=0.)
-            mu = tl.dot(weights, sketch, input_precision='tf32x3')
             delta = alpha[:, None]*(mu-projected)
             norm = tl.sqrt(tl.sum(delta*delta, 1))
             risk = lib.log(norm/reference)+lib.log(sensitivity)
@@ -289,7 +362,7 @@ if tr is not None:
 
 def attention(scores, v, z=None, reference=None, *, sensitivity=None,
               log_threshold=-math.inf, skipped=None, eligible=None,
-              trace=False, num_warps=8):
+              trace=False, num_warps=8, summary=None, store_summary=False):
     """Run M1, or consume a held M3 bitmap without projected-V routing.
 
     Output rows flagged in ``invalid_scores`` are zero and require caller
@@ -337,9 +410,16 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
     counters = torch.empty((b, h, tr.cdiv(nq, 16), 3) if trace else (1,), device=scores.device, dtype=torch.int32)
     bad_tiles = torch.empty(shape if skipped is None else (1,), device=scores.device, dtype=torch.bool)
     if skipped is None:
+        prefix_tiles, zs, mus, acts, bads = _summary_arguments(summary, store_summary, shape, kt,
+                                                               scores.device)
         _route[(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles, lse, state, risk,
+                           zs, mus, acts, bads,
                            nq, nk, h, hk, 32, 32, qb, kt, log_threshold, trace,
+                           prefix_tiles, bool(store_summary),
+                           bool(summary is not None and not store_summary),
                            num_warps=num_warps, num_stages=1, enable_fp_fusion=False)
+    elif summary is not None or store_summary:
+        raise ValueError('summaries apply to the selector, not the held-bitmap path')
     elif eligible is None:
         _held_eligible[(qb, h, b)](scores, skip, elig, nq, nk, h, qb, kt,
                                     num_warps=4, num_stages=1)
@@ -350,7 +430,7 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
 
 
 def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.inf,
-               num_warps=8):
+               num_warps=8, summary=None, store_summary=False):
     """Selector only: the SAME ``_route`` decision, with no PV and no output.
 
     ``attention(...)`` with ``skipped=None`` also produces a bitmap, but it
@@ -393,11 +473,34 @@ def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.in
     # TRACE=False: LSE/STATE/RISK are never written, so one-element stand-ins
     # keep the launch signature without allocating per-query buffers.
     dummy = torch.empty((1,), device=scores.device, dtype=torch.float32)
+    prefix_tiles, zs, mus, acts, bads = _summary_arguments(summary, store_summary, shape, kt,
+                                                           scores.device)
     _route[(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles,
-                       dummy, dummy, dummy,
+                       dummy, dummy, dummy, zs, mus, acts, bads,
                        nq, nk, h, hk, 32, 32, qb, kt, log_threshold, False,
+                       prefix_tiles, bool(store_summary),
+                       bool(summary is not None and not store_summary),
                        num_warps=num_warps, num_stages=1, enable_fp_fusion=False)
     return Routing(skip, elig, bad_tiles)
+
+
+def _summary_arguments(summary, store_summary, shape, kt, device):
+    """Validate and unpack summary buffers for a ``_route`` launch."""
+    if summary is None:
+        dummy = torch.empty((1,), device=device, dtype=torch.float32)
+        small = torch.empty((1,), device=device, dtype=torch.int8)
+        if store_summary:
+            raise ValueError('store_summary requires summary buffers')
+        return 0, dummy, dummy, small, small
+    expected = shape[:3] + (summary.prefix_tiles, 128)
+    if summary.z.shape != expected or summary.mu.shape != expected + (32,):
+        raise ValueError('summary buffers do not match this routing geometry')
+    if summary.prefix_tiles > kt:
+        raise ValueError('prefix tile count exceeds the key tiling')
+    for tensor in (summary.z, summary.mu, summary.active, summary.bad):
+        if tensor.device != device or not tensor.is_contiguous():
+            raise ValueError('summary buffers must be contiguous and co-located')
+    return summary.prefix_tiles, summary.z, summary.mu, summary.active, summary.bad
 
 
 def preqk_attention(q, k, v, skipped, eligible, *, scale, window=None,

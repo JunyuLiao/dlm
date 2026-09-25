@@ -16,7 +16,8 @@ from experiments.diffusion_gemma_solattn_blasst_multibench.runner import _instal
 from experiments.value_direction_hopper.integration import Sketches
 from experiments.value_direction_hopper.query_adaptive import State
 from .cache import Identity, ScoreCache
-from .cached_executor import attention, preqk_attention, route_only
+from .cached_executor import (allocate_summary, attention, preqk_attention,
+                              route_only)
 
 SUPPORT_MODES = ('legacy_junyu_mask', 'native_mask')
 # cached_scores: production M1/M3 -- the routing decision AND the final
@@ -36,6 +37,15 @@ SUPPORT_MODES = ('legacy_junyu_mask', 'native_mask')
 OUTPUT_MODES = ('cached_scores', 'routing_only_current_output',
                 'historical_route_preqk_current_output')
 PREQK_MODE = 'historical_route_preqk_current_output'
+# legacy_recompute: the selector recomputes every block's softmax/sketch
+# product on every decision, as it always has.
+# prefix_block_summary: for KV tiles lying WHOLLY inside the immutable prefix,
+# the per-row block log mass and weighted projected value are computed once at
+# the real score anchor and read back afterwards. Exact under the existing
+# method -- those two quantities depend only on the frozen cached scores and
+# the frozen prefix projected V. Decisions, risk, alpha and the retained scan
+# state are still recomputed every step from live T and the live full-V RMS.
+SELECTORS = ('legacy_recompute', 'prefix_block_summary')
 
 
 @dataclass
@@ -53,11 +63,21 @@ class NativeReuseState(State):
 class Attention:
     def __init__(self, adapter, thresholds, *, score_period=8, decision_interval=1,
                  trace=False, max_cache_bytes=2 * 1024**3, support='legacy_junyu_mask',
-                 output_mode='cached_scores'):
+                 output_mode='cached_scores', selector='legacy_recompute',
+                 selector_layers='local'):
         if support not in SUPPORT_MODES:
             raise ValueError(support)
         if output_mode not in OUTPUT_MODES:
             raise ValueError(output_mode)
+        if selector not in SELECTORS:
+            raise ValueError(selector)
+        if selector_layers not in ('local', 'all'):
+            raise ValueError(selector_layers)
+        self.selector = selector
+        self.selector_layers = selector_layers
+        self.summaries = {}
+        self.summary_hits = self.summary_builds = self.summary_misses = 0
+        self.summary_bytes = 0
         self.support = support
         self.output_mode = output_mode
         self.thresholds = thresholds
@@ -77,6 +97,7 @@ class Attention:
         self.current_qk_elements = self.reused_qk_elements = 0
         self.routing_only_extra_qk_elements = 0
         self.preqk_calls = 0
+        self.summary_prefix_tiles = self.summary_recomputed_tiles = 0
         self.peak_score_bytes = 0
         self.unsupported_mask_refreshes = 0
         for name, module in adapter.model.named_modules():
@@ -93,11 +114,13 @@ class Attention:
         self.cache.clear()
         self.sources.clear()
         self.valid_keys.clear()
+        self.summaries.clear()
 
     def begin_step(self, canvas, step):
         if canvas != self.canvas:
             self.cache.clear()
             self.valid_keys.clear()
+            self.summaries.clear()
         self.canvas, self.step = canvas, step
 
     def identify(self, module, args, kwargs):
@@ -185,6 +208,12 @@ class Attention:
             # pre-hook; query-only changes within a canvas never do.
             projected, ref = self.sketches.get(layer, v, valid, prefix - crop)
             threshold = float(self.thresholds[kind]['log_threshold'])
+            # Only KV tiles lying WHOLLY before the real prefix boundary are
+            # immutable. Compute that from the boundary itself, never from the
+            # tensor shape, and never round it up.
+            prefix_tiles = max(0, (prefix - crop)) // 64
+            summary, store_summary = self._summary_for(
+                layer, kind, identity, prefix_tiles, b, h, nq, nk, plan, v.device)
             # The fused route+PV call is only worth issuing when its output is
             # the one we actually return: in cached_scores mode always, and on
             # score anchors where the cached tensor IS the current one, so the
@@ -194,7 +223,8 @@ class Attention:
             if fused:
                 result = attention(entry.scores, v, projected.contiguous(), ref.contiguous(),
                                    sensitivity=self.query_sensitivity,
-                                   log_threshold=threshold, trace=self.trace)
+                                   log_threshold=threshold, trace=self.trace,
+                                   summary=summary, store_summary=store_summary)
                 decision = Decision(result.skipped, result.eligible)
             else:
                 # Selector only: no discarded PV, no discarded [B,H,Q,D]
@@ -202,7 +232,8 @@ class Attention:
                 # route's own per-tile flag instead of through that PV pass.
                 route = route_only(entry.scores, projected.contiguous(), ref.contiguous(),
                                    sensitivity=self.query_sensitivity,
-                                   log_threshold=threshold)
+                                   log_threshold=threshold,
+                                   summary=summary, store_summary=store_summary)
                 torch._assert_async(~route.invalid_tiles.any(),
                                     'Invalid cached scores in routing decision: request must fail')
                 decision = Decision(route.skipped, route.eligible)
@@ -253,6 +284,45 @@ class Attention:
         self.pending.append(((result.skipped & result.eligible).sum(), result.eligible.sum()))
         return result.output.transpose(1, 2).contiguous(), None
 
+    def _summary_for(self, layer, kind, identity, prefix_tiles, b, h, nq, nk, plan, device):
+        """Return (summary, store) for this call's selector.
+
+        Identity is compared by VALUE and carries the score-anchor generation,
+        the projection lease's own identity tuple, the prefix boundary and the
+        full structural identity of the call. A surviving buffer whose identity
+        disagrees is discarded, never reused: a live pointer is not evidence
+        that the values behind it are unchanged.
+        """
+        if self.selector != 'prefix_block_summary' or prefix_tiles <= 0:
+            return None, False
+        if self.selector_layers == 'local' and kind != 'local':
+            return None, False
+        lease = self.sketches.entries.get(layer)
+        # The summary is bound to the anchor it was built from, so on reuse the
+        # stored anchor step must match the entry actually being consumed.
+        anchor = self.cache.get(identity).score_step
+        wanted = (identity, anchor, None if lease is None else lease['identity'], prefix_tiles)
+        held = self.summaries.get(layer)
+        if plan.score_refresh:
+            qb, kt = (nq + 127) // 128, (nk + 63) // 64
+            summary = allocate_summary(b, h, qb, kt, prefix_tiles, 32, device, wanted)
+            if summary is None:
+                return None, False
+            self.summaries[layer] = summary
+            self.summary_builds += 1
+            self.summary_prefix_tiles += prefix_tiles
+            self.summary_bytes = sum(s.bytes for s in self.summaries.values())
+            return summary, True
+        if held is not None and held.matches(wanted, prefix_tiles):
+            self.summary_hits += 1
+            self.summary_prefix_tiles += prefix_tiles
+            return held, False
+        if held is not None:
+            self.summaries.pop(layer, None)
+        self.summary_misses += 1
+        self.summary_recomputed_tiles += prefix_tiles
+        return None, False
+
     @staticmethod
     def observe_scores(q, k, mask, scale, causal, window, crop):
         """The ONLY current-QK producer in this adapter; called at real anchors."""
@@ -282,6 +352,12 @@ class Attention:
                     peak_score_bytes=self.peak_score_bytes,
                     unsupported_mask_refreshes=self.unsupported_mask_refreshes,
                     support=self.support, output_mode=self.output_mode,
+                    selector=self.selector, selector_layers=self.selector_layers,
+                    summary_builds=self.summary_builds, summary_hits=self.summary_hits,
+                    summary_misses=self.summary_misses,
+                    summary_resident_bytes=self.summary_bytes,
+                    summary_prefix_tiles_served=self.summary_prefix_tiles,
+                    summary_prefix_tiles_recomputed=self.summary_recomputed_tiles,
                     routing_only_extra_qk_elements=self.routing_only_extra_qk_elements,
                     preqk_consumer_calls=self.preqk_calls,
                     work_counter_scope='dispatch elements, not measured DRAM bytes',
@@ -294,6 +370,7 @@ class Attention:
         self.cache.clear()
         self.sources.clear()
         self.valid_keys.clear()
+        self.summaries.clear()
         self.sketches.close()
 
 
@@ -310,7 +387,9 @@ def install(adapter, config, condition):
         router = Attention(adapter, config['policy'], score_period=config['score_refresh_period'],
                            decision_interval=config['decision_interval'], trace=False,
                            support=config.get('support', 'legacy_junyu_mask'),
-                           output_mode=config.get('output_mode', 'cached_scores'))
+                           output_mode=config.get('output_mode', 'cached_scores'),
+                           selector=config.get('selector', 'legacy_recompute'),
+                           selector_layers=config.get('selector_layers', 'local'))
         binding.runtime.attention_override = router
         state = NativeReuseState('T', router, m_ref=config['m_ref'], beta=config['beta'],
                                  gamma=config['gamma'], diagnostics=config['diagnostic'])

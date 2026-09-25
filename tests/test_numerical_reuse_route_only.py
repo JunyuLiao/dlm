@@ -172,7 +172,8 @@ def test_refactor_leaves_routing_only_output_and_bitmaps_bit_identical():
     # still paying the discarded PV the old path paid.
     original = integration.route_only
 
-    def fused_route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.inf):
+    def fused_route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.inf,
+                         summary=None, store_summary=False):
         from experiments.numerical_qk_reuse.cached_executor import Routing, attention
         stand_in = torch.zeros((z.shape[0], z.shape[1], z.shape[2], 64),
                                device=z.device, dtype=torch.bfloat16)
