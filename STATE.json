@@ -1,58 +1,68 @@
 {
   "branch": "research/numerical-qk-reuse-native-20260924",
-  "budget_used": "8 new full request executions (4 preqk M1 + 4 contemporaneous dense), the entire v7 allowance",
-  "delivered": {
-    "corrections": "results/numerical_qk_preqk_execution_20260924/corrections.md + correctness_vectors.json; tests/test_preqk_correctness_vectors.py makes the wrong 'same missed question' phrasing raise",
-    "panel": "panel_report.md + redacted panel/ receipts",
-    "preqk_consumer": "cached_executor.preqk_attention / _preqk_pv + integration output_mode historical_route_preqk_current_output; dropped tiles issue no K load, no V load, no dot",
-    "profiles": "full_forward_profile.{json,md} (two captures) + full_forward_profile_long.json + scaling_sweep.json",
-    "qualification": "preqk_qualification.{json,md}, 14 cases at real geometries; preqk never further from FP32 than the incumbent (max gap 7.0e-08); BF16 paths agree to 2.3e-05; counters exact in every case; tests/test_numerical_reuse_preqk.py",
-    "route_only": "cached_executor.route_only: same _route arithmetic, no _pv launch, no per-query allocation, new per-tile malformed-score flag; bit-identical to the pre-refactor path (tests/test_numerical_reuse_route_only.py, 25 cases)"
-  },
-  "execution_identity_note": "Per-run config receipts are the authority for what actually ran (results/numerical_qk_preqk_execution_20260924/panel/config.*.json, each with its own fingerprint and source_hashes). The v5-era executed_model_source_sha previously carried here described OLD code and has been removed.",
-  "headline_numbers": {
-    "dense_reproducibility": "contemporaneous dense reproduced frozen v5 calls (146/132/438/370) and canvases exactly, walls within ~5%",
-    "e2e": "preqk M1 mean wall 115.73s vs dense 40.84s (2.83x); pooled 0.4298 vs 0.1504 s/call; worse than the v6 routing_only arm (97.92s)",
-    "full_forward_step": "ordinary step preqk 198.74ms vs routing_only 207.16ms vs cached_scores floor 197.66ms vs dense 174.40ms (capture B)",
-    "limiting_cost": "route_only on sliding layers: 1.146ms vs 0.435ms for the whole dense attention of that layer at nk=1279 (25/30 layers), giving preqk+route 3.51x dense; global layers reach 0.90-0.96x dense",
-    "quality": "preqk M1 3/4, vector [T,T,F,T], identical element-wise to the contemporaneous dense control"
-  },
-  "known_limits": [
-    "Both full-forward captures recorded the FIRST attention call, so both are short-context (prefix 109/131); the scaling sweep covers real lengths instead",
-    "Trajectory diverges from the materialized path at BF16 scale, so E2E call counts are not comparable question-by-question across arms",
-    "Four questions at one seed: development signal only, no noninferiority",
-    "native_mask remains a separately named, unresolved support discrepancy; NOT bundled into this arm",
-    "preqk_support_cells.py (K_f/K_h vs current/cached cells with real nonuniform T) is committed and syntax-checked but NOT yet run"
+  "budget_used": "2 new primary outputs (the mandated complete-answer smoke requests). Panel allowance intentionally unspent.",
+  "corrections_applied": [
+    "v7 panel counter line was aime26/14 alone; correct sums 32310/5100/27210/3.271e10",
+    "slowdown is NOT an aime26/14 artifact: other three requests 2.132x slower on 31% fewer forwards",
+    "scaling sweep is synthetic component stress data, not a complete-method ratio",
+    "profile harness bugs A-E repaired and pinned by tests"
   ],
+  "evidence": {
+    "decisions_preserved": "real saturated states (local prefix 1023 asserted, global 1923) with production causal T spread 2.625: bitmaps/eligibility/malformed bit-identical, 0 disagreeing tiles; same-generation-twice tokens identical; two full 8192-budget smoke requests token-for-token identical to the v7 receipts with identical calls (102,181) and canvases (12,15)",
+    "memory": "8.23 MB per local layer, 205.8 MB resident, ON TOP of the retained score cache; total increases",
+    "natural_request_time": "NOT established; panels deliberately not run per the v8 stopping rule; the 2 smoke requests ran with --diagnostic ON so their walls are not comparable",
+    "per_call": "LOCAL Attention.__call__ 1.392 -> 0.990 ms (-29%); GLOBAL unchanged by design",
+    "per_step": "complete denoising step 206.20 -> 206.23 ms (UNCHANGED); dense 183.24, cached_scores 205.07, routing_only 214.96",
+    "support_cells": "52 real cells, one common mask, real causal T. Age 0 exact (Jaccard 1.000, errors 0.0000). Stale weights O_hh/O_hf 0.37-0.95 vs historical support choice O_hf/O_ff 0.06-0.19 -- ~an order of magnitude apart",
+    "work_avoided": "75% of local and 86% of global KV tiles skip score re-read + sketch read + tf32x3 dot per decision"
+  },
+  "execution_identity_note": "Per-run config receipts are the authority for what ran (results/.../configs/*.json, each with its own fingerprint and source_hashes). No inherited executed_model_source_sha is carried here.",
   "method_config_unchanged": {
     "decision_interval_M1": 1,
-    "sampler": "native adaptive, temperature sentinel 0 (native 0.8->0.4 annealing), thinking ON, 8192, EOS",
+    "output_mode": "historical_route_preqk_current_output",
+    "sampler": "native adaptive; temperature=0 is the native 0.8->0.4 annealing SENTINEL, not greedy",
     "score_refresh_period": 8,
     "support": "legacy_junyu_mask",
     "thresholds": "frozen T_s50"
   },
-  "model_geometry": "30 layers: 25 sliding (head_dim 256, GQA 16/8, window 1024), 5 full (global_head_dim 512, GQA 16/2)",
-  "model_snapshot": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
-  "next_command": "Reduce route_only cost on sliding layers (it re-reads the full cached FP32 [Q,K] score tensor and runs a rank-32 sketch dot per tile on every decision-refresh call). Two separately testable levers: decide less often on sliding layers, or stop re-reading a [Q,K] FP32 tensor to make a per-tile decision. Qualify either on its own; do not bundle.",
+  "model": {
+    "geometry": "30 layers: 25 sliding (head_dim 256, GQA 16/8, window 1024), 5 full (global_head_dim 512, GQA 16/2)",
+    "snapshot": "f7f5b7f5fa82ffc52addd066915886d497f5517b"
+  },
+  "new_this_round": {
+    "boundary_rule": "prefix_tiles = (prefix - crop)//64; never from tensor shape, never rounded up",
+    "cache_identity": "structural Identity + anchor score_step + Sketches lease identity + prefix tile count, compared BY VALUE",
+    "mechanism": "_route optionally STOREs per-row z/mu for wholly-immutable prefix tiles at the real score anchor and LOADs them afterwards; reused values are that kernel's own FP32 outputs, so reuse is exact by construction. alpha/risk/retained state/bitmap are never cached.",
+    "selector": "Attention(selector='legacy_recompute'|'prefix_block_summary', selector_layers='local'); default unchanged"
+  },
+  "next_command": "Locate the request-vs-replay per-forward gap (2.13x on the other three requests) with a bounded trace of one real early and one real late step, partitioning GPU active work, launch/CPU gaps and allocator behaviour (v8 section 4F). Nothing else is large enough to matter.",
   "not_started": [
     "240-request matrix",
     "extra seeds",
-    "M2/R3",
-    "mask unification",
-    "any threshold/period/T/sampler retuning",
-    "the historical-route vs frozen-bitmap vs fresh-value-aware comparison study"
+    "M2",
+    "another M3/R2 quality trade-off",
+    "mask unification (native_mask still a separately named discrepancy)",
+    "any threshold/score_period/T/sampler/budget retuning",
+    "backend migration",
+    "frozen mass-bitmap vs fresh value-aware comparison study"
   ],
-  "output_root": "results/numerical_qk_preqk_execution_20260924",
-  "panel_config_fingerprints": {
-    "M1_historical_route_preqk_current_output": "c012aba6cc802f9b",
-    "native_dense": "see panel/config.native_dense.json"
+  "output_root": "results/numerical_qk_prefix_summary_20260924",
+  "remote": {
+    "code_cp": ".../code_cp1 (git clone, pulled to each pushed commit)",
+    "env": "conda ljy_dlm, PYTHONPATH=src:. from code_cp1, Torch 2.6.0+cu124, transformers 5.11.0",
+    "gpu_policy": "checked idle at each launch; no concurrent jobs; shared env untouched",
+    "host": "exouser@149.165.151.254",
+    "root": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924",
+    "v8_results": ".../results/v8/{prefix_summary_qualify.json,full_forward_profile_v8.json,support_cells.json,smoke/}"
   },
-  "remote_code_cp": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1 (git clone, pulled to each pushed commit)",
-  "remote_root": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924",
   "reporting_sha": "resolve with git HEAD; not self-validating",
-  "reviewed_head_at_start": "237e671ebe4e3902d8350ec939c66aaf75ed059d",
+  "reviewed_head_at_start": "e1f3c743513b54d1d560506f334eac0ab3045c20",
   "schema": 1,
-  "status": "PREQK_BUILT_AND_QUALIFIED_QUALITY_HELD_E2E_STILL_SLOWER_THAN_DENSE",
-  "task": "v7: preserve the recovery, remove wasted work, implement real pre-QK execution",
-  "tests": "77 targeted tests pass on the local WSL RTX4060 (a private device, never the remote timing GPU): numerical_reuse_{integration,cache,math,stop,summary,prefix_lease,native_mask,routing_only,route_only,preqk}, numerical_qk_runner, preqk_correctness_vectors"
+  "status": "EXACT_OPTIMIZATION_QUALIFIED_DECISIONS_PRESERVED_BUT_NO_COMPLETE_STEP_SPEEDUP",
+  "task": "v8: exact immutable-prefix routing summaries for the existing M1 selector",
+  "tests": "94 targeted tests pass on the local WSL RTX4060 (private device, never the remote timing GPU): numerical_reuse_{prefix_summary,preqk,route_only,routing_only,integration,cache,math,stop,summary,prefix_lease,native_mask}, numerical_qk_runner, preqk_correctness_vectors, preqk_profile_contracts. Two unrelated historical tests (test_diffusion_gemma_preqk, test_jl_accepted_round2) fail identically at the base commit on a missing results/diffusion_gemma_oracle/setup.json.",
+  "unexplained": [
+    "-0.402 ms x 25 local layers predicts ~-10 ms/step but the step did not move (minima 204.39 vs 204.36); L2 residency in the tight per-call loop is a hypothesis, not a measurement",
+    "v7's ~430 ms per real forward vs ~206 ms replayed remains unlocated; established NOT to be an /14 artifact"
+  ]
 }
