@@ -119,7 +119,7 @@
     "mechanism": "_route optionally STOREs per-row z/mu for wholly-immutable prefix tiles at the real score anchor and LOADs them afterwards; reused values are that kernel's own FP32 outputs, so reuse is exact by construction. alpha/risk/retained state/bitmap are never cached.",
     "selector": "Attention(selector='legacy_recompute'|'prefix_block_summary', selector_layers='local'); default unchanged"
   },
-  "next_command": "Design fused historical decision inside the Hopper producer (anchor summaries + live T), GLOBAL layers first; compare complete call vs fresh T with scripts/v11_same_support_calls.py",
+  "next_command": "Frozen larger panel (remaining AIME26 validation set, 2 seeds) for D_native, T_G, G3_split, B8_G via scripts/v10_request_runs.py with global_scope arms; or reduce T/binding fixed per-step overhead",
   "not_started": [
     "240-request matrix",
     "extra seeds",
@@ -143,9 +143,9 @@
   "reporting_sha": "resolve with git HEAD; not self-validating",
   "reviewed_head_at_start": "3b67ea16261a5241c4bee3175ee9859dc9038da0",
   "schema": 1,
-  "status": "V11_DONE: consumer qualified (bit-identical to fresh T); no complete-call/step gain vs O; H1 2/4 (faster than T only via shorter trajectories), H3 3/4 but slower than T",
+  "status": "V12_DONE: dispatch/summaries qualified; per-call within +2-6% of native; quality parity (3/4 panel); G1 no increment over B8; GLOBAL attention <=3% of step -> no fusion; G3 fastest via shorter trajectories",
   "storage_preflight": "root 58 GB free, no migration; bulky artifacts -> /media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924",
-  "task": "v11: qualified preselected-support Hopper consumer, then M1 (H1) / M3 (H3) E2E",
+  "task": "v12: GLOBAL-only scope (native LOCAL) D_native/T_G/G1/G3/B8_G comparison",
   "tests": "94 targeted tests pass on the local WSL RTX4060 (private device, never the remote timing GPU): numerical_reuse_{prefix_summary,preqk,route_only,routing_only,integration,cache,math,stop,summary,prefix_lease,native_mask}, numerical_qk_runner, preqk_correctness_vectors, preqk_profile_contracts. Two unrelated historical tests (test_diffusion_gemma_preqk, test_jl_accepted_round2) fail identically at the base commit on a missing results/diffusion_gemma_oracle/setup.json.",
   "unexplained": [
     "-0.402 ms x 25 local layers predicts ~-10 ms/step but the step did not move (minima 204.39 vs 204.36); L2 residency in the tight per-call loop is a hypothesis, not a measurement",
@@ -307,6 +307,54 @@
     "used": {
       "complete_requests": 39,
       "gpu_process_s": 2003
+    }
+  },
+  "v12": {
+    "arms_file": "/media/volume/dllm-1/dyh/numerical_qk_global_scope_20260925/arms.json",
+    "budgets": {
+      "elapsed_h": 6,
+      "gpu_h": 4,
+      "requests": 64
+    },
+    "deploys": {
+      "costs": "4809008f2444",
+      "extension": "6b84764ea0a5",
+      "panel": "4809008f2444",
+      "probe": "1858daa40547"
+    },
+    "extension": {
+      "ids": [
+        "aime26/23",
+        "aime26/30"
+      ],
+      "rule": "remaining authorized v8 six-calibration IDs; shortfall of 2 vs spec recorded"
+    },
+    "fusion": "not attempted (GLOBAL attention <=3% of step; no complete-path headroom)",
+    "private_root": "/media/volume/dllm-1/dyh/numerical_qk_global_scope_20260925",
+    "quality": {
+      "panel4": {
+        "B8_G": "3/4",
+        "D_native": "3/4",
+        "G1_split": "3/4",
+        "G3_split": "3/4",
+        "T_G": "3/4"
+      },
+      "six": {
+        "B8_G": "3/6",
+        "D_native": "3/6",
+        "G1_split": "3/6",
+        "G3_split": "4/6",
+        "T_G": "4/6"
+      }
+    },
+    "resource_ledger": "/media/volume/dllm-1/dyh/numerical_qk_global_scope_20260925/resource_ledger.jsonl",
+    "result_root": "results/numerical_qk_global_scope_20260925",
+    "scope_plugin": "experiments/numerical_qk_reuse/global_scope.py",
+    "start_utc": "2026-09-25T19:27:32Z",
+    "support_build": "e3c283b8cbb9b79c",
+    "used": {
+      "complete_requests": 54,
+      "gpu_process_s": 2523
     }
   }
 }

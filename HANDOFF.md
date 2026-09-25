@@ -1,4 +1,20 @@
-# v11 (DONE): preselected-support Hopper consumer -> H1/H3 (negative E2E)
+# v12 (DONE): GLOBAL-only scope, native LOCAL -- D_native / T_G / G1 / G3 / B8_G
+
+- Plug-in `experiments/numerical_qk_reuse/global_scope.py` (proxy adapter tags only GLOBAL layers 5,11,17,23,29;
+  LOCAL untagged -> original native SDPA). Conditions global_T / global_M1 / global_M3 / global_B8.
+  Tests: tests/test_v12_global_scope.py (6). Probe: scripts/v12_scope_probe.py (per-step dispatch 25 native LOCAL +
+  5 routed GLOBAL for all arms; GLOBAL summaries on/off decisions identical, 170 hits).
+- Costs (`same_state_costs.*`): 5 GLOBAL calls = native 3.7 ms of a ~132 ms step (<=3%); all bound arms pay
+  ~6-7 ms/step fixed overhead; G ordinary 6.6 ms, held 2.3 ms, anchors 10.6 ms (canvas 6).
+- Panel (40) + extension /23,/30 (10) + audit twins (4) = 54/64 requests, 0.70/4 GPU-h.
+  Quality: panel 3/4 in all arms; 6 questions: T_G 4, G3 4, D 3, G1 3, B8 3.
+  Warm summed time vs D_native: G3 0.779, B8 0.897, G1 0.912, T_G 1.030. Per call +2-6% vs native.
+  Achieved GLOBAL skip (/8): G1 21%, G3 20%, B8 31%, T_G 22%.
+- Conclusion (`history_increment.md`, `fan_update.md`): no numerical-history increment over the frozen bitmap B8;
+  no per-step headroom for GLOBAL fusion (skipped); E2E differences come from trajectory length.
+- Next: a frozen larger panel with seeds (D_native, T_G, G3, B8) before any kernel work.
+
+# (previous) v11 (DONE): preselected-support Hopper consumer -> H1/H3 (negative E2E)
 
 - Kernel `experiments/value_direction_hopper/csrc/support_consumer.{cu,h}`, ATen `vd_support_v1`, build/verify
   `experiments/value_direction_hopper/support.py` (build e3c283b8cbb9b79c on /media/volume/dllm-1/dyh/...bridge_20260925/build).
