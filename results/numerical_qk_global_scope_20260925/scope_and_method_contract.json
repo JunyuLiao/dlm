@@ -1,0 +1,48 @@
+{
+  "arithmetic": {
+    "T_G": "Junyu fused kernel (routing and output from the same current scores)",
+    "anchor": "Triton fused route + PV on the materialized current scores (unnormalized running-max BF16 P)",
+    "ordinary_and_held": "Hopper support consumer (fresh-T retained-path arithmetic: per-tile normalized alpha-scaled BF16 P)"
+  },
+  "arms": {
+    "B8_G": "same score anchors and the same value-aware anchor selector (legacy recompute, no summaries); the anchor bitmap is held until the next A8 observation / canvas reset; same consumer. A simple frozen-bitmap baseline, NOT the historical G75 mass ranking, NOT M2",
+    "D_native": "original unbound model (no T)",
+    "G1_split": "M1: historical score-anchor QK routing with CURRENT projected V (Gaussian32), live T/ref, decision every step, exact prefix summaries on GLOBAL; output = current QK/PV over retained tiles via the v11 Hopper support consumer; anchors use the Triton fused route+PV on the materialized current scores",
+    "G3_split": "same as G1 with decision interval 2 (held steps reuse the last G1 bitmap with the same consumer)",
+    "T_G": "fresh Junyu T (value-aware routing from CURRENT QK every step, fused Hopper kernel, TMA, fused projection, collect off) on GLOBAL only"
+  },
+  "clocks": {
+    "T": "causal T updated every step from completed logits",
+    "decision": {
+      "B8": "8 (== next A8 observation / canvas reset)",
+      "G1": 1,
+      "G3": 2
+    },
+    "score_anchor": "A8: real current-QK score materialization at canvas step % 8 == 0 (and canvas start)"
+  },
+  "masks": {
+    "GLOBAL": "unrestricted decoder domain (mask None), same as native; routed calls with a mask fail explicitly",
+    "LOCAL": "original native SDPA call with original inputs/kwargs in EVERY arm (no emulated window)"
+  },
+  "model": {
+    "global_layers": [
+      5,
+      11,
+      17,
+      23,
+      29
+    ],
+    "layers": 30,
+    "local_window": 1024,
+    "snapshot": "f7f5b7f5fa82ffc52addd066915886d497f5517b"
+  },
+  "not_claimed": [
+    "novelty",
+    "Haowei grouping integration",
+    "M2",
+    "model-faithful all-layer sparse speedup"
+  ],
+  "schema": "v12_scope_and_method_contract_v1",
+  "scope": "GLOBAL-only temporal methods; all 25 LOCAL layers unchanged native (new, explicitly labeled scope experiment; not a Fan instruction)",
+  "thresholds": "T_s50 GLOBAL log threshold -3.1366905212402343 (engineering working point; achieved skips reported, not assumed)"
+}
