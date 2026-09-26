@@ -182,3 +182,16 @@ The preselected26 mechanism questions use101/202/303 with first outputs only,
 no new timing claims. U70/T70 use their own density calibration then original
 130-question quality and26-question warm schedule. These are secondary work
 after the primary RULER/AIME sequence and remain budget-gated.
+
+## Secondary comparison timing interpretation
+
+All secondary (question, seed) assignments inherit the primary GPU, even when
+secondary block order differs. U70/T70 run together in a new paired stage after
+AIME and the primary RULER remainder. Their within-stage timing contrast is the
+strong secondary timing comparison. T70/T60 and U70/U60 reuse earlier primary
+warm receipts on the same GPU, separated in wall time by the staged campaign;
+label their timing contrasts cross-stage and descriptive, with possible temporal
+drift. Do not present them as equally tight contemporaneous timing evidence.
+Quality and decoder-work comparisons remain paired by question and seed.
+Allocation controls have first outputs only and no warm latency claim. This
+interpretation is frozen before secondary outcomes and does not add generations.

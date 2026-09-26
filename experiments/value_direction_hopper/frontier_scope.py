@@ -15,7 +15,10 @@ from .query_adaptive import State
 
 CONDITION = 'native_legal_all_layers'
 ARMS = {'D_matched': 'kernel_dense', 'U50': 'unweighted', 'U60': 'unweighted',
-        'U70': 'unweighted', 'T50': 'T', 'T60': 'T', 'T70': 'T'}
+        'U70': 'unweighted', 'T50': 'T', 'T60': 'T', 'T70': 'T',
+        'T60_shuffled': 'T', 'T60_uniform': 'T'}
+CONTROL_ALLOCATION = {'T60_shuffled': 'shuffle', 'T60_uniform': 'uniform'}
+CONTROL_SEED = 424242
 
 
 def runtime_policy(policy, method):
@@ -44,8 +47,15 @@ def install(adapter, config, condition):
     if getattr(adapter.model, '_value_direction_lease', False):
         raise RuntimeError('Concurrent request binding unsupported')
     policy = runtime_policy(config['policy'], method)
-    if method != 'kernel_dense' and config.get('target') != int(arm[1:]):
+    target = 60 if arm in CONTROL_ALLOCATION else int(arm[1:]) if method != 'kernel_dense' else None
+    if method != 'kernel_dense' and config.get('target') != target:
         raise ValueError('arm target and frozen calibration disagree')
+    if arm in CONTROL_ALLOCATION:
+        if (config.get('allocation') != CONTROL_ALLOCATION[arm] or
+                config.get('allocation_seed') != CONTROL_SEED):
+            raise ValueError('control allocation and independent RNG seed must match frozen identity')
+    elif config.get('allocation', 'normal') != 'normal' or config.get('allocation_seed', 42) != 42:
+        raise ValueError('normal frontier arm cannot change allocation or State RNG seed')
     adapter.model._value_direction_lease = True
     binding = router = None
     try:
@@ -54,11 +64,16 @@ def install(adapter, config, condition):
                            mode='value', collect=bool(config.get('collect', False)),
                            support_geometry='native_legal')
         binding.runtime.attention_override = router
-        state = State(method, router, m_ref=config['m_ref'], beta=config['beta'], gamma=config['gamma'],
-                      diagnostics=False, fast_t=method == 'T')
+        state_kwargs = dict(m_ref=config['m_ref'], beta=config['beta'], gamma=config['gamma'],
+                            diagnostics=False, fast_t=method == 'T')
+        if arm in CONTROL_ALLOCATION:
+            state_kwargs.update(allocation=CONTROL_ALLOCATION[arm], seed=CONTROL_SEED)
+        state = State(method, router, **state_kwargs)
 
         def counters():
             return dict(scope=CONDITION, frontier_arm=arm, method=method,
+                        **({'allocation': CONTROL_ALLOCATION[arm], 'allocation_seed': CONTROL_SEED}
+                           if arm in CONTROL_ALLOCATION else {}),
                         support_geometry=router.support_geometry, routed_calls=router.calls,
                         active_layers=sorted(int(m.layer_idx) for name, m in adapter.model.named_modules()
                                              if adapter.is_blasst_attention_module(name, m)),
