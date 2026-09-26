@@ -45,6 +45,8 @@ def main() -> None:
     parser.add_argument('--ledger', type=Path, required=True)
     parser.add_argument('--timeout', type=int, default=900)
     parser.add_argument('--max-executions', type=int, default=None)
+    parser.add_argument('--deadline-epoch', type=float, default=None,
+                        help='stop cleanly (after the current execution) once this UNIX time has passed; the ledger stays resumable')
     parser.add_argument('--only-keys', nargs='*', default=None, help='restrict to these execution keys (compat checks)')
     args = parser.parse_args()
     import torch
@@ -152,7 +154,8 @@ def main() -> None:
 
     status = run_schedule(schedule, done=done, execute_one=execute_one, rows=manifest_rows, configs=configs,
                           ledger_append=lambda r: append(args.ledger, r), private=args.private,
-                          save_receipt=_atomic, max_executions=args.max_executions)
+                          save_receipt=_atomic, max_executions=args.max_executions,
+                          stop_flag=lambda: args.deadline_epoch is not None and time.time() > args.deadline_epoch)
     JITFunction.cache_hook = JITFunction.compiled_hook = None
     append(args.ledger, dict(event='worker_end', status=status, when=time.time(), process_s=time.perf_counter() - started))
     print('STATUS', status, flush=True)
