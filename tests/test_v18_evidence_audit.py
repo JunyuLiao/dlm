@@ -2,6 +2,7 @@
 import unittest
 
 from scripts.v18_evidence_audit import require_equal_lengths, unique_ids, validate_warm
+from scripts.v15_longbench_task import score
 
 
 class EvidenceAuditTests(unittest.TestCase):
@@ -29,6 +30,8 @@ class EvidenceAuditTests(unittest.TestCase):
     def test_scorer_input_truncation_rejected(self):
         with self.assertRaisesRegex(ValueError, 'scorer_input_length_mismatch'):
             require_equal_lengths(['a', 'b'], ['A'], ['eos', 'eos'])
+        with self.assertRaisesRegex(ValueError, 'equal length'):
+            score(['x', 'y'], ['A'], ['eos', 'eos'])
 
 
 if __name__ == '__main__':

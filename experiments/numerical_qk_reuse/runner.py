@@ -324,14 +324,25 @@ def _receipt_path(root: Path, phase: str, condition: str, seed: int, id_: str) -
     return root / phase / condition / f"seed_{seed}" / f"{digest}.attempt0.json"
 
 
+def request_budget(row: Mapping[str, Any], config: Mapping[str, Any]) -> int:
+    budget = int(row.get("generation_budget", config.get("max_new_tokens", 8192)))
+    if not 1 <= budget <= 8192:
+        raise ValueError("Unsupported generation budget")
+    return budget
+
+
 def _one(adapter: Any, row: Mapping[str, Any], seed: int, config: Mapping[str, Any]) -> dict[str, Any]:
     import torch
     from dllm.models import GenerationRequest
     from experiments.value_direction_hopper.query_adaptive import observe
 
     condition = str(config["condition"])
-    request = GenerationRequest(prompt=row["prompt"], max_new_tokens=8192,
-                                temperature=0.0, seed=seed, extra={"thinking": True})
+    max_new_tokens = request_budget(row, config)
+    thinking = config.get("thinking", True)
+    if thinking is not True:
+        raise ValueError("Unsupported generation budget or thinking mode")
+    request = GenerationRequest(prompt=row["prompt"], max_new_tokens=max_new_tokens,
+                                temperature=0.0, seed=seed, extra={"thinking": thinking})
     calls = CanvasCalls()
     with _runtime(adapter, condition, config) as runtime:
         binding, router, state = (_member(runtime, key) for key in ("binding", "router", "state"))
@@ -361,7 +372,7 @@ def _one(adapter: Any, row: Mapping[str, Any], seed: int, config: Mapping[str, A
         raise AssertionError(f"Manifest prompt_hash mismatch for {row['id']}")
     if "prompt_tokens" in row and output.prompt_tokens != row["prompt_tokens"]:
         raise AssertionError(f"Tokenized prompt mismatch for {row['id']}")
-    if output.metadata.get("thinking") is not True:
+    if output.metadata.get("thinking") is not thinking:
         raise AssertionError("Native generation did not use thinking ON")
     if output.metadata.get("sampling", {}).get("native_temperature_schedule") is not True:
         raise AssertionError("Native temperature schedule was overridden")
@@ -380,6 +391,7 @@ def _one(adapter: Any, row: Mapping[str, Any], seed: int, config: Mapping[str, A
     return dict(schema="numerical_qk_attempt0_v1", fingerprint=config["fingerprint"],
                 attempt=0, phase=config["phase"], condition=condition, id=str(row["id"]),
                 source_id=row.get("source_id"), seed=seed, prompt_hash=prompt_hash,
+                max_new_tokens=max_new_tokens,
                 prompt_token_hash=_fingerprint(output.prompt_tokens),
                 request_wall_seconds=request_wall_seconds,
                 generation_gpu_timeline_seconds=generation_gpu_timeline_seconds,

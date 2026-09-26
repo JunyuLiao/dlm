@@ -104,3 +104,17 @@ def test_legacy_geometry_still_uses_window(monkeypatch):
     router(module, q, kv, kv, None, is_causal=False, sliding_window=4)
     assert captured['geometry'] == dict(causal=False, window=4)
     assert not captured['dense_geometry'][:, :64].any()
+
+
+def test_frontier_scope_rejects_wrong_arm_and_dense_threshold():
+    from experiments.value_direction_hopper.frontier_scope import install
+
+    adapter = type('Adapter', (), {'model': object()})()
+    with pytest.raises(ValueError, match='named frontier arm'):
+        with install(adapter, {'frontier_arm': 'invalid'}, 'native_legal_all_layers'):
+            pass
+    config = dict(frontier_arm='D_matched', method='kernel_dense', diagnostic=False,
+                  policy={'local': {'log_threshold': -1.}, 'global': {'log_threshold': -float('inf')}})
+    with pytest.raises(ValueError, match='retain every legal tile'):
+        with install(adapter, config, 'native_legal_all_layers'):
+            pass

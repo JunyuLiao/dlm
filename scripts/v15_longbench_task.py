@@ -110,8 +110,12 @@ def predict(final_texts: list[str]) -> list[str | None]:
 
 
 def score(raw_completions: list[str], golds: list[str], terminations: list[str]) -> list[dict]:
+    if len(raw_completions) != len(golds) or len(raw_completions) != len(terminations):
+        raise ValueError('scorer input lists must have equal length')
     texts = [final_text(r) for r in raw_completions]
     preds = predict(texts)
+    if len(preds) != len(texts):
+        raise ValueError('scorer prediction count differs from inputs')
     rows = []
     for text, pred, gold, term in zip(texts, preds, golds, terminations):
         if gold not in ('A', 'B', 'C', 'D'):
