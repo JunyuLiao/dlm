@@ -53,7 +53,10 @@
       "mpk": 625,
       "dllm": 613
     },
-    "initial_duration_note": "Wrapper elapsed; driver budget accounting uses worker_end values. Do not double-count wrappers."
+    "initial_duration_note": "Wrapper elapsed; driver budget accounting uses worker_end values. Do not double-count wrappers.",
+    "observed_completed_generations_snapshot": 1627,
+    "snapshot_note": "475 preofficial +936 initialRULER +216 AIME completed events as of22:35UTC; two current in-flight requests not yet recorded. No extrapolation replaces final ledger accounting.",
+    "completion_risk": "AIME has216/1080 after~2h39; current pace risks incomplete primary by originalcutoff. Keep frozen completeblock order and caps; no threshold, max-token or fixed-step change."
   },
   "next": "Scripts: AIME -> RULER remainder -> offline primary scoring -> CP3 CPU qualification -> density-only70 calibration/evaluation -> independently calibrated allocation controls -> offline secondary scoring; heartbeat handles terminal review and CP4.",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
@@ -98,7 +101,15 @@
     "mpk": 468,
     "dllm": 468,
     "strict_warm_accepted": 468,
-    "first_failures": 0
+    "first_failures": 0,
+    "aime_snapshot": {
+      "utc": "2026-09-26T22:35:00Z",
+      "mpk": 112,
+      "dllm": 104,
+      "total": 216,
+      "planned": 1080,
+      "scope": "redacted stage event counts only; no quality read"
+    }
   },
   "scoring": {
     "source_commit": "f45fa83c01f7bf9ea1950cc0b9d3ba52e6c0d338",
@@ -114,23 +125,28 @@
     "purpose": "hourly stage checkpoint; quiet unchanged; original budget enforced; disable at CP4 completion"
   },
   "secondary_coordinator": {
-    "pid": 42488,
-    "exec_session": 54685,
-    "status": "waiting_for_closed_primary_stages_and_offline_summaries",
-    "source_commit": "1c9a6e62bcc932cf7d3f5d0fc0f8fab97d12b5cd",
+    "pid": 16656,
+    "exec_session": 57502,
+    "status": "waiting_primary",
+    "source_commit": "01211245449027eb993940c7c55c38530b6c2913",
     "deploy": "deploy/cp3_1c9a6e6",
-    "local_cwd": "E:/dlm/v18_private/cp3_1c9a6e6",
+    "local_cwd": "E:/dlm/v18_private/controller_0121124",
     "config": "E:/dlm/v18_private/secondary_config.json",
     "config_sha256": "55bc72e47887648c697393be2cc574d34300260b631c9d7584c59451aeeea43a",
-    "outcome": "E:/dlm/v18_private/secondary_restart1.outcome.json",
+    "outcome": "E:/dlm/v18_private/secondary_readretry.outcome.json",
     "archive_sha256": "7204840b22b6b18078c2e89beb25524c5f88b4406faab5a857ad83c55a137aab",
     "cpu_qualification": "E:/dlm/v18_private/secondary_cpu_qualification.json",
     "qualification_status": "not_run; automatically after primary quiet",
     "gpu_started": false,
     "tests": "22 local unittest cases across primary coordinator/secondary stdlib/pipeline passed",
     "previous_pid47716": "exited after read-only SSH timeout; both-host stage check confirmed no secondary GPU dispatch",
-    "previous_outcome": "E:/dlm/v18_private/secondary_config.outcome.json"
+    "previous_outcome": "E:/dlm/v18_private/secondary_config.outcome.json",
+    "remote_generation_deploy_commit": "1c9a6e62bcc932cf7d3f5d0fc0f8fab97d12b5cd",
+    "local_controller_archive_sha256": "1596c0534c4aef80c87f7619a4d1fa039bf6a78af5fda3af2b7b520648ccf40f",
+    "previous_pid42488": "exited on repeated read-only SSH timeout; secondary_restart1.outcome.json preserved",
+    "retry_semantics": "at most3 attempts for read-only transport; waiting-primary connection failures stay pending until original guard cutoff; no mutation/dispatch retries",
+    "read_retry_tests": "16 focused unittest cases passed"
   },
-  "updated_utc": "2026-09-26T21:34:38.107097+00:00",
-  "stage_check": "2026-09-26T21:33Z: both AIME supervisors and primary coordinator alive; secondary GPU stages absent; only CP3 waiting controller resumed."
+  "updated_utc": "2026-09-26T22:40:00.519115+00:00",
+  "stage_check": "22:35UTC AIME216/1080 recorded, both GPU workers active (mpk1616572,dllm9130); noCP3 stage started. Localwaitingcontroller replaced only after confirmed exit."
 }
