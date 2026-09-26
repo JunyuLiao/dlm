@@ -1,13 +1,31 @@
 import unittest
 import tempfile
+import json
+import sys
+from types import ModuleType
+from unittest.mock import patch
 from pathlib import Path
 
 from scripts.v18_evaluate import (aime_token_overlay, canonical_arm_hash, native_phase_evidence,
-                                  prioritized_schedule, run_complete_blocks, strict_warm)
+                                  eval_config, prioritized_schedule, run_complete_blocks, strict_warm)
 from scripts.v18_protocol import sha
 
 
 class EvaluateTests(unittest.TestCase):
+    def test_dense_sentinel_serializes_in_native_and_matched_configs(self):
+        fake = ModuleType('experiments.numerical_qk_reuse.runner')
+        fake._config = lambda args: {'source_hashes': {}, 'model_metadata_hashes': {},
+                                     'manifest_sha256': 'm', 'policy_sha256': 'p'}
+        fake._fingerprint = lambda value: sha(json.dumps(value, allow_nan=False, sort_keys=True))
+        with patch.dict(sys.modules, {'experiments.numerical_qk_reuse.runner': fake}):
+            for arm in ('D_native', 'D_matched'):
+                config = eval_config(arm, {'ids': ['q'], 'model_revision': 'r',
+                                           'generation': {'thinking': False}}, Path('manifest'),
+                                     Path('policy'), Path('model'), Path('kernel'), Path('bridge'),
+                                     {}, 'phase')
+                self.assertEqual(config['policy']['local']['log_threshold'], '-inf')
+                json.dumps(config, allow_nan=False)
+
     def test_deadline_is_checked_between_complete_blocks(self):
         schedule = [{'block': block, 'cell_id': f'cell{block}', 'role': role, 'repeat': repeat}
                     for block in (0, 1) for role, repeat in (('attempt0', 0), ('warm', 1))]

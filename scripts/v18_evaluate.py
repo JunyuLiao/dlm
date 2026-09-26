@@ -144,9 +144,9 @@ def eval_config(arm, draft, manifest, policy_file, model, library, torch_library
     method = 'native_dense' if native else 'kernel_dense' if dense else 'unweighted' if arm.startswith('U') else 'T'
     target = None if native or dense else int(arm[1:])
     if dense:
-        policy = {k: {'log_threshold': -float('inf')} for k in ('local', 'global')}
+        policy = {k: {'log_threshold': '-inf'} for k in ('local', 'global')}
     elif native:
-        policy = {k: {'log_threshold': -float('inf')} for k in ('local', 'global')}
+        policy = {k: {'log_threshold': '-inf'} for k in ('local', 'global')}
     else:
         if arm not in frozen:
             raise ValueError(f'missing calibrated policy for {arm}')
