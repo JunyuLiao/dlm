@@ -340,19 +340,12 @@
       ]
     }
   },
-  "live_jobs": [
-    {
-      "pgid": 1520149,
-      "script": "../run_v13_main.sh 04e3dab07395",
-      "started_utc": "2026-09-25T21:01:08Z",
-      "what": "v13 main study workers (<=150 executions each, resume-safe)"
-    }
-  ],
+  "live_jobs": [],
   "model": {
     "geometry": "30 layers: 25 sliding (head_dim 256, GQA 16/8, window 1024), 5 full (global_head_dim 512, GQA 16/2)",
     "snapshot": "f7f5b7f5fa82ffc52addd066915886d497f5517b"
   },
-  "next_command": "when main_status shows MAIN_DONE: PYTHONPATH=src:. python -m scripts.v13_summarize --protocol results/numerical_qk_global_multiseed_20260925/frozen_protocol.json --ledger /media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/ledger.jsonl --manifest /media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/private/manifest_all30.json --out results/numerical_qk_global_multiseed_20260925; if interrupted, rerun ../run_v13_main.sh 04e3dab07395 (resumes)",
+  "next_command": "decision needed from Fan/PI: different model/workload regime, or seed follow-up of B8 fewer-calls effect; no kernel work on GLOBAL M1/M3",
   "remote": {
     "code_cp": ".../code_cp1 (git clone, pulled to each pushed commit)",
     "env": "conda ljy_dlm, PYTHONPATH=src:. from code_cp1, Torch 2.6.0+cu124, transformers 5.11.0",
@@ -365,7 +358,7 @@
   "reporting_sha": "resolve with git HEAD; not self-validating",
   "reviewed_head_at_start": "3b67ea16261a5241c4bee3175ee9859dc9038da0",
   "schema": 1,
-  "status": "V13_CP0_DONE; main study RUNNING",
+  "status": "V13_DONE: 600/600, 0 failures; G3 slower than T_G (1.160 [1.071,1.259]) and native; quality parity within noise; M1 no benefit over B8",
   "task": "v13: frozen GLOBAL-only D_native/T_G/G1/G3/B8_G, all-30 AIME26 x seeds 17/29 (user-authorized), attempt0 + 1 warm",
   "tests": "94 targeted tests pass on the local WSL RTX4060 (private device, never the remote timing GPU): numerical_reuse_{prefix_summary,preqk,route_only,routing_only,integration,cache,math,stop,summary,prefix_lease,native_mask}, numerical_qk_runner, preqk_correctness_vectors, preqk_profile_contracts. Two unrelated historical tests (test_diffusion_gemma_preqk, test_jl_accepted_round2) fail identically at the base commit on a missing results/diffusion_gemma_oracle/setup.json.",
   "v13": {
@@ -375,16 +368,57 @@
       "gpu_h": 12
     },
     "compat_seed42": "G3 aime26/2 seed42 via new driver reproduced the v12 token hash (84 calls)",
+    "completed_utc": "2026-09-26T04:42Z",
     "deploy": "04e3dab07395",
     "environment": "ljy_dlm python; torch 2.6.0+cu124 and triton 3.2.0 from ~/.local; transformers 5.11.0 conda; H100",
+    "key_ratios": {
+      "B8_G/D_native_summed": [
+        0.927,
+        0.856,
+        0.997
+      ],
+      "G1/B8_G": [
+        1.109,
+        1.016,
+        1.208
+      ],
+      "G3/D_native": [
+        1.091,
+        1.011,
+        1.184
+      ],
+      "G3/T_G": [
+        1.16,
+        1.071,
+        1.259
+      ],
+      "T_G/D_native": [
+        0.941,
+        0.868,
+        1.019
+      ]
+    },
     "ledger": "/media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/ledger.jsonl",
     "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+    "outputs": "results/numerical_qk_global_multiseed_20260925/{paired_summary.md,fan_update.md,morning_brief.md,first_output_quality.csv,warm_request_times.csv,trajectory_robustness.csv,work_decomposition.json}",
     "planned_executions": 600,
     "private_root": "/media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925",
     "protocol": "results/numerical_qk_global_multiseed_20260925/frozen_protocol.json",
     "protocol_id": "v13_global_multiseed_all30",
+    "quality": {
+      "B8_G": 34,
+      "D_native": 32,
+      "G1": 30,
+      "G3": 34,
+      "T_G": 34,
+      "of": 60
+    },
     "resource_ledger": "/media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/resource_ledger.jsonl",
     "start_utc": "2026-09-25T20:53:57Z",
-    "support_build": "e3c283b8cbb9b79c"
+    "support_build": "e3c283b8cbb9b79c",
+    "used": {
+      "executions": 602,
+      "gpu_process_h": 7.71
+    }
   }
 }

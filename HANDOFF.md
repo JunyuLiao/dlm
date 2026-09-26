@@ -1,12 +1,17 @@
-# v13 (RUNNING): frozen GLOBAL-only 5-arm study, all-30 AIME26 x seeds 17/29
+# v13 (DONE): frozen GLOBAL-only 5-arm study, all-30 AIME26 x seeds 17/29
 
-- Authorized by the user (v13 message): full 30 with seeds 17/29, frozen methods, no retuning.
-- CP0 done: seed-safe driver `scripts/v13_seed_runs.py` (cell_id includes seed; resume identity checks; each execution
-  once; device error -> clean worker), summarizer `scripts/v13_summarize.py`, protocol builder, tests
-  `tests/test_v13_seed_driver.py` (9 pass). Frozen protocol `results/numerical_qk_global_multiseed_20260925/frozen_protocol.json`
-  (600 planned; 60 blocks). Seed-42 compat: new driver reproduced v12 G3 /2 token hash.
-- Running: `../run_v13_main.sh 04e3dab07395` (PGID 1520149), ledger /media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/ledger.jsonl.
-- Resume after interruption: rerun the same command (validated resume). Summarize: see STATE next_command.
+- Authorized full 30 x seeds 17/29; methods frozen; protocol frozen before inference
+  (`results/numerical_qk_global_multiseed_20260925/frozen_protocol.json`).
+- Driver `scripts/v13_seed_runs.py` (seed in cell ID/request/receipts; validated resume), summarizer `scripts/v13_summarize.py`,
+  report `scripts/v13_report.py`, tests `tests/test_v13_seed_driver.py` (9). Seed-42 check reproduced the v12 hash.
+- 600/600 executions, 0 failures, all warm repeats accepted; 7.71 GPU-h. Private ledger/receipts:
+  /media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925 (index: private_receipt_index.json).
+- Quality (of 60): T_G 34, G3 34, B8 34, D 32, G1 30; all paired CIs include 0.
+- Time (candidate/reference, question-cluster 95% CI): G3/T_G 1.160 [1.071,1.259]; G3/D 1.091 [1.011,1.184];
+  B8/D summed 0.927 [0.856,0.997]; T_G/D 0.941 [0.868,1.019]; G1/B8 1.109 [1.016,1.208].
+  Almost entirely call count (G3/T_G calls x1.124, per call x1.003).
+- Conclusion: the v12 G3 signal was seed-specific; no benefit of M1 re-selection over the frozen bitmap.
+- Next: PI decision on a different model/workload regime or a B8 follow-up; no kernel work on this path.
 
 # (previous) v12 (DONE): GLOBAL-only scope, native LOCAL -- D_native / T_G / G1 / G3 / B8_G
 
