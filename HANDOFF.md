@@ -38,3 +38,12 @@ then AIME core before secondary work. Preserve1080 AIME executions and final30mi
 scoring. Wall starts2026-09-26T18:02Z; cap12h, GPU-process10h until two qualified
 hosts then20h. Count failed/load/compile/calibration jobs. No CVM expansion,
 cross-host absolute timing pooling, gold/raw answers in Git, peer branch edits.
+
+CP1 update: deploy97a020f remote25tests passed; corrected capture2 requests passed
+(12/12 states), native scope13states passed, density calibration_v2 running under
+supervisor1608369. StrongB8 supervisor1609409 waits CP1 exit and
+P/bridge_runtime_transport_quiet, then frozen16 from08f5c92. Model1047 complete
+identity passed; see model_bridge_identity.json. AIME exact token overlay30/30
+frozen privately under private_v3; no AIME generation yet. No accepted timing
+from capture/calibration/bridge. Ball opportunity script is being implemented,
+not GPU-run and not approved for CUDA integration.

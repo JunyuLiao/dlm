@@ -1,0 +1,35 @@
+{
+  "schema": "v18_scope_capture_v1",
+  "config_sha256": "43b177f69d7ef183e0cddf402485dec24f1fff9d4bd5db337b3ef2293873f60e",
+  "state_file": "/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926/qualification_v2/real_states.pt",
+  "state_file_sha256": "3215e14c0a6e130b055ba735798c48e367ce48be0def2683c270eea69a96eed5",
+  "requests": [
+    {
+      "label": "ruler_calibration_first",
+      "id": "ruler4k/ruler_4096_niah_single_1_p0388",
+      "seed": 101,
+      "status": "validated",
+      "thinking": false,
+      "fingerprint": "8176311dd83f231b4a9579eb10854e9e04ab905015df0f22169a16358f945ec5",
+      "termination": "eos",
+      "decoder_calls": 3,
+      "output_tokens": 27
+    },
+    {
+      "label": "v15_selection_first",
+      "id": "longbench_v2/66f9625fbb02136c067c5456",
+      "seed": 101,
+      "status": "validated",
+      "thinking": true,
+      "fingerprint": "483d4862946026f45d8f91ae96b80975ee7355baa9be0a569a5c1c6b4e818646",
+      "termination": "eos",
+      "decoder_calls": 156,
+      "output_tokens": 2112
+    }
+  ],
+  "expected_real_states": 12,
+  "captured_real_states": 12,
+  "missing_real_states": [],
+  "derived_padded_states": 1,
+  "note": "Padded mask is a controlled derivative of captured Q/K/V; absent step-3 states are not synthesized."
+}

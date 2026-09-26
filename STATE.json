@@ -3,16 +3,25 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP1_REQUEST_CORRECTION_VERIFIED_CPU",
+  "status": "CP1_SCOPE_QUALIFIED_CALIBRATION_RUNNING",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
   "candidate": "post-QK ball screen opportunity only; no kernel qualification or success claim",
-  "scope": "native_legal_all_layers awaiting GPU qualification",
+  "scope": "native_legal_all_layers qualified13states; dense numerical path separate fromnative",
   "hosts": {
     "149.165.151.254": "runtime inventoried; prior v15 tree clean",
-    "149.165.159.64": "private runtime transport; not bridge-qualified"
+    "149.165.159.64": "CPUmodel1047/1047 exact; runtime relay active; not bridgequalified"
   },
-  "gpu_jobs": [],
+  "gpu_jobs": [
+    {
+      "host": "149.165.151.254",
+      "supervisor_pid": 1608369,
+      "pgid": 1608369,
+      "deploy": "97a020f0133152a06e80d19fe348a78dc6bc1119",
+      "stage": "calibration_v2",
+      "resource_ledger": "/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926/resource_ledger.jsonl"
+    }
+  ],
   "budget": {
     "wall_start_utc": "2026-09-26T18:02:00Z",
     "wall_hours_cap": 12,
@@ -21,9 +30,10 @@
     "generations_cap": 7000,
     "aime_core_reserved": 1080,
     "scoring_minutes_reserved": 30,
-    "new_generations": 1,
-    "known_generation_gpu_process_seconds": 24,
-    "synthetic_qualification_seconds": "recover from job receipt, not zero"
+    "known_generation_gpu_process_seconds": 88,
+    "synthetic_qualification_seconds": "recover from job receipt, not zero",
+    "new_generations_before_live_calibration": 3,
+    "known_scope_gpu_process_seconds": 11
   },
   "next": "Commit immutable corrected deploy; calibration_v2 using private_v2; capture then scope then calibration; freeze AIME tokens before evaluation",
   "strong_b8": "CPU17 tests and GPU3 prefix export parity pass; full16 pending",
@@ -37,5 +47,14 @@
   "cpu_transport": {
     "runtime_exec_session": 98143,
     "missing_tensor_relay": "exit0"
-  }
+  },
+  "queued_jobs": [
+    {
+      "pid": 1609409,
+      "pgid": 1609409,
+      "stage": "strong_b8_full16",
+      "condition": "CP1supervisor exit and runtime transport quiet; GPUfree",
+      "launcher": "/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926/run_b8_after_cp1.sh"
+    }
+  ]
 }
