@@ -29,8 +29,10 @@ clean stop between complete blocks, it may launch a uniquely named continuation
 segment using the new budget, the same frozen protocol, GPU assignment, private
 receipt directory and append-only ledger. It must check that every outstanding
 block is wholly unstarted, that all old writers are closed, and that no first
-result is replaced. Failed/uncertain or partly executed blocks require review;
+result is replaced. Failed/uncertain launches or partly executed blocks require review;
 this amendment never authorizes automatic retries or repeated quality attempts.
+A failed first-result row in an otherwise completely recorded block remains an
+occupied cell; it is never rerun, and does not by itself block later new blocks.
 
 Generation workers must remain gold-free. Complete primary scoring before CP3;
 continue recording resource use and all missing/failed cells. End the heartbeat

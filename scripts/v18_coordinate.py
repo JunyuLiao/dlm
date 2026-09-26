@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shlex
 import subprocess
 import tempfile
@@ -23,6 +24,10 @@ HOSTS = {
 DEPLOY = 'driver_5b14a21'
 STAGES = ('initial', 'aime', 'remainder')
 SSH_OPTIONS = ('-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15')
+
+
+class UncertainDispatch(RuntimeError):
+    """Remote launch may exist despite a missing first status read."""
 
 
 def marker_state(started, done):
@@ -51,22 +56,24 @@ def marker(host, stage, suffix):
     return json.loads(value) if value else None
 
 
-def launch(host, stage):
+def launch(host, stage, *, deploy=DEPLOY, segment=None, budget_name='campaign_budget.json'):
     target, root = HOSTS[host]
-    script = f'{root}/deploy/{DEPLOY}/scripts/v18_run_stage.sh'
-    log = f'{root}/logs/eval_{stage}.log'
-    command = (f'setsid -f bash {shlex.quote(script)} {shlex.quote(DEPLOY)} {shlex.quote(stage)} '
+    marker_stage = segment or stage
+    script = f'{root}/deploy/{deploy}/scripts/v18_run_stage.sh'
+    log = f'{root}/logs/eval_{marker_stage}.log'
+    command = (f'setsid -f bash {shlex.quote(script)} {shlex.quote(deploy)} {shlex.quote(stage)} '
+               f'{shlex.quote(marker_stage)} {shlex.quote(budget_name)} '
                f'> {shlex.quote(log)} 2>&1 < /dev/null &')
     try:
         subprocess.run(['ssh', *SSH_OPTIONS, target, command], check=True, timeout=60)
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
         # Unknown dispatch result: read a marker, never issue a second launch.
-        if marker(host, stage, 'started') is None:
-            raise RuntimeError(f'{host}/{stage} launch uncertain and no marker; manual inspection required')
+        if marker(host, marker_stage, 'started') is None:
+            raise UncertainDispatch(f'{host}/{marker_stage} launch uncertain and no marker; manual inspection required')
     until = time.monotonic() + 15
-    while marker(host, stage, 'started') is None:
+    while marker(host, marker_stage, 'started') is None:
         if time.monotonic() >= until:
-            raise RuntimeError(f'{host}/{stage} dispatched but no started marker; no automatic retry')
+            raise UncertainDispatch(f'{host}/{marker_stage} dispatched but no started marker; no automatic retry')
         time.sleep(1)
 
 
@@ -77,30 +84,38 @@ def alive(host, pid):
     return result == 'yes'
 
 
-def wait_stage(stage, *, adopt, poll_seconds, deadline_epoch):
-    for host in HOSTS:
-        state = marker_state(marker(host, stage, 'started'), marker(host, stage, 'done'))
+def wait_stage(stage, *, adopt, poll_seconds, deadline_epoch, deploy=DEPLOY, segment=None,
+               budget_name='campaign_budget.json', hosts=None):
+    marker_stage = segment or stage
+    selected_hosts = tuple(HOSTS if hosts is None else hosts)
+    if not selected_hosts or not set(selected_hosts) <= set(HOSTS):
+        raise ValueError('continuation must name one or both assigned hosts')
+    for host in selected_hosts:
+        state = marker_state(marker(host, marker_stage, 'started'), marker(host, marker_stage, 'done'))
         if state == 'failed':
-            raise RuntimeError(f'{host}/{stage} failed; inspect immutable status and ledger, no automatic retry')
+            raise RuntimeError(f'{host}/{marker_stage} failed; inspect immutable status and ledger, no automatic retry')
         if state == 'absent':
             if adopt:
-                raise RuntimeError(f'{host}/{stage} has no started marker to adopt')
-            launch(host, stage)
+                raise RuntimeError(f'{host}/{marker_stage} has no started marker to adopt')
+            if deploy == DEPLOY and segment is None and budget_name == 'campaign_budget.json':
+                launch(host, stage)
+            else:
+                launch(host, stage, deploy=deploy, segment=segment, budget_name=budget_name)
     while True:
         if time.time() >= deadline_epoch:
             raise RuntimeError('campaign hard deadline reached; inspect live workers and preserve ledgers')
-        states = {host: marker_state(marker(host, stage, 'started'), marker(host, stage, 'done'))
-                  for host in HOSTS}
-        print(json.dumps({'stage': stage, 'states': states}), flush=True)
+        states = {host: marker_state(marker(host, marker_stage, 'started'), marker(host, marker_stage, 'done'))
+                  for host in selected_hosts}
+        print(json.dumps({'stage': marker_stage, 'states': states}), flush=True)
         if 'failed' in states.values() or 'absent' in states.values():
-            raise RuntimeError(f'{stage} failed or lost a started marker; no automatic retry')
+            raise RuntimeError(f'{marker_stage} failed or lost a started marker; no automatic retry')
         if all(state == 'complete' for state in states.values()):
             return
         for host, state in states.items():
             if state == 'running':
-                started = marker(host, stage, 'started')
+                started = marker(host, marker_stage, 'started')
                 if not alive(host, started.get('pid')):
-                    raise RuntimeError(f'{host}/{stage} started marker has no live supervisor; no retry')
+                    raise RuntimeError(f'{host}/{marker_stage} started marker has no live supervisor; no retry')
         time.sleep(poll_seconds)
 
 
@@ -199,24 +214,136 @@ def sync_all_ledgers(staging):
             for dataset in ('ruler', 'aime') for host in HOSTS]
 
 
-def aime_complete(staging):
-    """A clean rc=0 can still be a partial budget stop; never start remainder then."""
+def completion_detail(protocol, ledgers):
+    """Never retry a partly written block or a non-clean budget stop."""
+    from scripts.v13_seed_runs import execution_key
     from scripts.v18_stage_driver import completed_keys
 
+    done = completed_keys(protocol, ledgers)
+    blocks = {}
+    for entry in protocol['schedule']:
+        blocks.setdefault(entry['block'], []).append(entry)
+    partial, missing = [], []
+    state_by_block = {}
+    for block, entries in blocks.items():
+        count = sum(execution_key(entry) in done for entry in entries)
+        if 0 < count < len(entries):
+            partial.append(block)
+            state_by_block[block] = 'partial'
+        elif count == 0:
+            missing.append(block)
+            state_by_block[block] = 'missing'
+        else:
+            state_by_block[block] = 'full'
+    prefix_violations = []
+    for host in HOSTS:
+        assigned_blocks = [block for block in sorted(blocks)
+                           if protocol['block_assignments'][str(block)]['host'] == host]
+        seen_missing = False
+        for block in assigned_blocks:
+            if state_by_block[block] == 'missing':
+                seen_missing = True
+            elif seen_missing and state_by_block[block] == 'full':
+                prefix_violations.append(block)
+    last_end = {}
+    for host, path in zip(HOSTS, ledgers):
+        pending = None
+        for line in path.read_text().splitlines():
+            if line.strip():
+                event = json.loads(line)
+                if event.get('event') == 'start':
+                    if pending is not None or event.get('host') != host or \
+                            event.get('protocol_id') != protocol['protocol_id'] or \
+                            event.get('model_revision') != protocol['model_revision']:
+                        raise ValueError('AIME start/host/protocol identity mismatch')
+                    pending = event
+                elif event.get('event') == 'worker_end':
+                    if pending is None or event.get('host') != host:
+                        raise ValueError('AIME worker_end without matching host start')
+                    last_end[host] = event.get('status')
+                    pending = None
+        if pending is not None:
+            raise ValueError('AIME worker start has no terminal event')
+    missing_hosts = {protocol['block_assignments'][str(block)]['host'] for block in missing}
+    return dict(complete=len(done) == len(protocol['schedule']),
+                completed=len(done), planned=len(protocol['schedule']),
+                protocol_id=protocol['protocol_id'], partial_blocks=sorted(partial),
+                missing_blocks=sorted(missing), missing_hosts=sorted(missing_hosts),
+                prefix_violations=sorted(prefix_violations),
+                clean_stop=not partial and not prefix_violations and all(last_end.get(host) == 'stopped_before_block'
+                                               for host in missing_hosts),
+                latest_worker_end=last_end)
+
+
+def panel_complete(staging, dataset):
+    """Check the exact frozen panel against both latest host ledgers."""
     source, root = HOSTS['mpk']
-    path = f'{root}/evaluation/aime26_primary_protocol.json'
-    local = staging / 'aime26_primary_protocol.json'
+    if dataset not in ('ruler', 'aime'):
+        raise ValueError('unknown frozen panel')
+    name = 'aime26_primary_protocol.json' if dataset == 'aime' else 'ruler4k_primary_protocol.json'
+    path = f'{root}/evaluation/{name}'
+    local = staging / name
     subprocess.run(['scp', '-o', 'BatchMode=yes', '-o', 'ConnectTimeout=15',
                     f'{source}:{path}', str(local)], check=True, timeout=120)
     local_hash = hashlib.sha256(local.read_bytes()).hexdigest()
     if local_hash != remote('mpk', f'sha256sum {shlex.quote(path)}').split()[0]:
-        raise RuntimeError('AIME protocol changed during completion check')
+        raise RuntimeError('frozen protocol changed during completion check')
     protocol = json.loads(local.read_text())
-    ledgers = [staging / f'{host}_aime.jsonl' for host in HOSTS]
-    done = completed_keys(protocol, ledgers)
-    return dict(complete=len(done) == len(protocol['schedule']),
-                completed=len(done), planned=len(protocol['schedule']),
-                protocol_id=protocol['protocol_id'])
+    ledgers = [staging / f'{host}_{dataset}.jsonl' for host in HOSTS]
+    return completion_detail(protocol, ledgers)
+
+
+def aime_complete(staging):
+    return panel_complete(staging, 'aime')
+
+
+def orphan_private_receipts(host):
+    """Count missing-ledger receipts on the assigned host without reading them."""
+    root = HOSTS[host][1]
+    python = ('/home/exouser/miniconda3/envs/ljy_dlm/bin/python' if host == 'mpk' else
+              root + '/bridge/runtime/miniconda3/envs/ljy_dlm/bin/python')
+    code = ('import json,sys,pathlib; '
+            'p=json.load(open(sys.argv[1])); '
+            'done={e["execution_key"] for line in open(sys.argv[2]) if line.strip() '
+            'for e in [json.loads(line)] if e.get("event")=="run"}; '
+            'host=sys.argv[4]; base=pathlib.Path(sys.argv[3]); '
+            'missing=[e for e in p["schedule"] if '
+            'p["block_assignments"][str(e["block"])]["host"]==host and '
+            'f"{e[\'cell_id\']}:{e[\'role\']}:{e[\'repeat\']}" not in done]; '
+            'print(sum((base/"cells"/e["cell_id"]/(e["role"]+str(e["repeat"])+".json")).exists() '
+            'for e in missing))')
+    arguments = [python, '-c', code,
+                 root + '/evaluation/aime26_primary_protocol.json',
+                 root + f'/evaluation/ledgers/{host}_aime.jsonl',
+                 root + '/private_eval/aime', host]
+    return int(remote(host, ' '.join(shlex.quote(arg) for arg in arguments)))
+
+
+def continuation_ready(completion, *, orphan_counts):
+    if completion['complete']:
+        return True
+    if completion['partial_blocks'] or not completion['missing_blocks'] or not completion['clean_stop']:
+        return False
+    return all(count == 0 for count in orphan_counts.values())
+
+
+def discovered_segments():
+    """Read only numbered marker names; unknown launches require manual review."""
+    found = {}
+    for host, (_, root) in HOSTS.items():
+        directory = root + '/evaluation/status'
+        command = (f'if test -d {shlex.quote(directory)}; then '
+                   f'find {shlex.quote(directory)} -maxdepth 1 -type f '
+                   f'-name {shlex.quote(host + "_aime_c*.started.json")} -printf "%f\\n"; fi')
+        names = remote(host, command).splitlines()
+        segments = set()
+        for name in names:
+            match = re.fullmatch(re.escape(host) + r'_(aime_c\d{3})\.started\.json', name)
+            if not match:
+                raise ValueError('unexpected numbered continuation marker')
+            segments.add(match.group(1))
+        found[host] = segments
+    return found
 
 
 def persist_outcome(path, outcome):
@@ -226,12 +353,151 @@ def persist_outcome(path, outcome):
     os.replace(temp, path)
 
 
+def completion_main(args, budget):
+    """Adopt old AIME, then append only wholly unstarted frozen blocks."""
+    if args.start_at != 'aime' or not args.continuation_deploy or '/' in args.continuation_deploy:
+        raise ValueError('completion coordinator must adopt AIME with one immutable deploy')
+    if (budget.get('deadline_is_gpu_cutoff') is not True or
+            budget.get('request_cap') != 7000 or
+            budget.get('request_cap_by_host') != {'mpk': 3500, 'dllm': 3500} or
+            budget.get('gpu_cap_s_by_host') != {'mpk': 86400, 'dllm': 86400} or
+            budget.get('deadline_epoch') != 1790573520 or
+            args.budget.name != 'campaign_budget_extension_20260926.json'):
+        raise ValueError('approved bounded completion budget required')
+    deadline = budget['deadline_epoch']
+    cpu_deadline = deadline + 60 * budget['scoring_minutes_reserved']
+    budget_sha = hashlib.sha256(args.budget.read_bytes().replace(b'\r\n', b'\n')).hexdigest()
+    if args.outcome.exists():
+        outcome = json.loads(args.outcome.read_text())
+        if (outcome.get('schema') != 'v18_completion_coordinator_outcome_v1' or
+                outcome.get('original_deploy') != DEPLOY or
+                outcome.get('continuation_deploy') != args.continuation_deploy or
+                outcome.get('bounded_budget_sha256') != budget_sha or
+                not isinstance(outcome.get('segments'), list)):
+            raise ValueError('existing continuation outcome has a different frozen identity')
+    else:
+        outcome = dict(schema='v18_completion_coordinator_outcome_v1',
+                       original_deploy=DEPLOY, continuation_deploy=args.continuation_deploy,
+                       bounded_budget_sha256=budget_sha, started_epoch=time.time(),
+                       start_at='aime', segments=[], gpu_stop_reason='pending', finalization='pending')
+    persist_outcome(args.outcome, outcome)
+    with tempfile.TemporaryDirectory(prefix='v18_completion_') as folder:
+        staging = Path(folder)
+        known_stages = ['aime'] + [item['segment'] for item in outcome['segments']]
+        if outcome.get('remainder_intended'):
+            known_stages.append('remainder')
+        safe_to_finalize = False
+        try:
+            wait_stage('aime', adopt=True, poll_seconds=args.poll_seconds,
+                       deadline_epoch=deadline)
+            expected = {host: {item['segment'] for item in outcome['segments']
+                               if host in item['hosts']} for host in HOSTS}
+            if discovered_segments() != expected:
+                raise UncertainDispatch('numbered marker without matching durable launch intent')
+            for item in outcome['segments']:
+                if (not re.fullmatch(r'aime_c\d{3}', item['segment']) or
+                        not item['hosts'] or not set(item['hosts']) <= set(HOSTS)):
+                    raise ValueError('invalid persisted numbered segment assignment')
+                wait_stage('aime', adopt=True, poll_seconds=args.poll_seconds,
+                           deadline_epoch=deadline, deploy=args.continuation_deploy,
+                           segment=item['segment'], budget_name=args.budget.name,
+                           hosts=item['hosts'])
+            safe_to_finalize = True
+            sync_all_ledgers(staging)
+            completion = aime_complete(staging)
+            outcome['aime_completion'] = completion
+            persist_outcome(args.outcome, outcome)
+            if not completion['complete']:
+                wait_known_writers_quiet(known_stages, poll_seconds=args.poll_seconds,
+                                         deadline_epoch=cpu_deadline)
+                for host in HOSTS:
+                    root = HOSTS[host][1]
+                    remote_budget = (f'{root}/deploy/{args.continuation_deploy}/results/'
+                                     'junyu_frontier_v18_20260926/' + args.budget.name)
+                    if remote(host, f'sha256sum {shlex.quote(remote_budget)}').split()[0] != budget_sha:
+                        raise RuntimeError('remote bounded budget byte drift')
+                for index in range(len(outcome['segments']) + 1, 33):
+                    orphan_counts = {host: orphan_private_receipts(host) for host in HOSTS}
+                    if not continuation_ready(completion, orphan_counts=orphan_counts):
+                        raise RuntimeError('AIME has partial/uncertain block or orphan receipt; no retry')
+                    segment = f'aime_c{index:03d}'
+                    known_stages.append(segment)
+                    hosts = completion['missing_hosts']
+                    outcome['segments'].append(dict(segment=segment, hosts=hosts,
+                                                    status='planned'))
+                    persist_outcome(args.outcome, outcome)
+                    safe_to_finalize = False
+                    wait_stage('aime', adopt=False, poll_seconds=args.poll_seconds,
+                               deadline_epoch=deadline, deploy=args.continuation_deploy,
+                               segment=segment, budget_name=args.budget.name,
+                               hosts=hosts)
+                    safe_to_finalize = True
+                    sync_all_ledgers(staging)
+                    completion = aime_complete(staging)
+                    outcome['segments'][-1].update(status='closed', completion=completion)
+                    outcome['aime_completion'] = completion
+                    persist_outcome(args.outcome, outcome)
+                    if completion['complete']:
+                        break
+                    wait_known_writers_quiet(known_stages, poll_seconds=args.poll_seconds,
+                                             deadline_epoch=cpu_deadline)
+                else:
+                    raise RuntimeError('32 clean continuation segments exhausted')
+            remainder_adopt = bool(outcome.get('remainder_intended'))
+            outcome['remainder_intended'] = True
+            persist_outcome(args.outcome, outcome)
+            if 'remainder' not in known_stages:
+                known_stages.append('remainder')
+            safe_to_finalize = False
+            wait_stage('remainder', adopt=remainder_adopt, poll_seconds=args.poll_seconds,
+                       deadline_epoch=deadline, deploy=args.continuation_deploy,
+                       budget_name=args.budget.name)
+            safe_to_finalize = True
+            sync_all_ledgers(staging)
+            ruler = panel_complete(staging, 'ruler')
+            outcome['ruler_completion'] = ruler
+            if not ruler['complete']:
+                raise RuntimeError('RULER remainder incomplete under bounded extension')
+            outcome['gpu_stop_reason'] = 'all_frozen_panels_closed'
+            persist_outcome(args.outcome, outcome)
+        except (Exception, KeyboardInterrupt) as error:
+            outcome['gpu_stop_reason'] = 'stage_failure'
+            outcome['stage_error'] = dict(type=type(error).__name__, message=str(error)[:1000])
+            persist_outcome(args.outcome, outcome)
+        if not safe_to_finalize:
+            outcome['finalization'] = 'deferred_uncertain_writer'
+            outcome['finished_epoch'] = time.time()
+            persist_outcome(args.outcome, outcome)
+            raise SystemExit(1)
+        try:
+            outcome['known_writers'] = wait_known_writers_quiet(
+                known_stages, poll_seconds=args.poll_seconds, deadline_epoch=cpu_deadline)
+            outcome['ledger_copies_verified'] = sync_all_ledgers(staging)
+            argv = json.loads(args.after_stages_command_file.read_text())
+            if not isinstance(argv, list) or not argv or any(not isinstance(x, str) or not x for x in argv):
+                raise ValueError('finalization hook must be a JSON argv array')
+            remaining = cpu_deadline - time.time()
+            if remaining <= 0:
+                raise TimeoutError('bounded CPU finalization window exhausted')
+            subprocess.run(argv, check=True, timeout=remaining)
+            outcome['finalization'] = 'complete'
+        except (Exception, KeyboardInterrupt) as error:
+            outcome['finalization'] = 'failed'
+            outcome['finalization_error'] = dict(type=type(error).__name__, message=str(error)[:1000])
+        outcome['finished_epoch'] = time.time()
+        persist_outcome(args.outcome, outcome)
+    if outcome['gpu_stop_reason'] != 'all_frozen_panels_closed' or outcome['finalization'] != 'complete':
+        raise SystemExit(1)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--poll-seconds', type=int, default=60)
     parser.add_argument('--start-at', choices=STAGES, default='initial',
                         help='Adopt an already started stage when resuming a coordinator')
     parser.add_argument('--budget', type=Path, default=Path('results/junyu_frontier_v18_20260926/campaign_budget.json'))
+    parser.add_argument('--continuation-deploy',
+                        help='Use a new immutable driver only after adopted AIME cleanly stops')
     parser.add_argument('--after-stages-command-file', type=Path, required=True,
                         help='JSON argv for the vetted CPU-only finalization hook')
     parser.add_argument('--outcome', type=Path,
@@ -241,6 +507,9 @@ def main():
     if args.poll_seconds < 60:
         parser.error('status polling must be at least 60 seconds')
     budget = json.loads(args.budget.read_text())
+    if args.continuation_deploy:
+        completion_main(args, budget)
+        return
     deadline_epoch = budget['deadline_epoch']
     cpu_deadline = deadline_epoch + 60 * budget['scoring_minutes_reserved']
     outcome = dict(schema='v18_coordinator_outcome_v1', deploy=DEPLOY,

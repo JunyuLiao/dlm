@@ -36,6 +36,14 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def deployed_budget_digest(path: Path) -> str:
+    data = path.read_bytes()
+    if path.name == 'campaign_budget_extension_20260926.json':
+        # The checked-out Windows copy is CRLF; immutable remote deploys use LF.
+        data = data.replace(b'\r\n', b'\n')
+    return digest(data)
+
+
 def validate_config(config: dict, deploy: str, budget: dict, now: float) -> None:
     if set(config['hosts']) != set(EXPECTED):
         raise ValueError('exactly the two qualified hosts required')
@@ -46,15 +54,24 @@ def validate_config(config: dict, deploy: str, budget: dict, now: float) -> None
         for name in ('root', 'python', 'model', 'library', 'torch_library', 'draft',
                      'calibration_manifest', 'policy_file', 'primary_protocol',
                      'aime_protocol', 'primary_calibration', 'old_scope_policies',
-                     'ledger_inventory'):
+                     'ledger_inventory', 'budget_remote'):
             if not str(item[name]).startswith('/'):
                 raise ValueError(f'{host}/{name} must be an absolute host path')
+        if Path(item['budget_remote']).name != Path(config['budget_local']).name:
+            raise ValueError('host-local budget filename differs from frozen input')
     if not deploy or '/' in deploy or '\\' in deploy or config['deploy'] != deploy:
         raise ValueError('immutable deploy identity mismatch')
-    if config['budget_sha256'] != digest(Path(config['budget_local']).read_bytes()):
+    if config['budget_sha256'] != deployed_budget_digest(Path(config['budget_local'])):
         raise ValueError('frozen campaign budget byte drift')
     if budget.get('schema') != 'v18_frozen_campaign_budget_v1' or not budget.get('hard_timeout_required'):
         raise ValueError('frozen hard budget required')
+    if Path(config['budget_local']).name == 'campaign_budget_extension_20260926.json':
+        if (budget.get('deadline_is_gpu_cutoff') is not True or
+                budget.get('deadline_epoch') != 1790573520 or
+                budget.get('request_cap') != 7000 or
+                budget.get('request_cap_by_host') != {'mpk': 3500, 'dllm': 3500} or
+                budget.get('gpu_cap_s_by_host') != {'mpk': 86400, 'dllm': 86400}):
+            raise ValueError('approved bounded completion budget required')
     if (not Path(config['cpu_qualification']).is_absolute() or
             set(config['qualification_sources']) !=
             {'scripts.v18_secondary', 'scripts.v18_secondary_coordinate',
@@ -160,13 +177,11 @@ def freeze_config(inputs: dict, deploy: str, out: Path) -> dict:
     if set(inputs['hosts']) != set(EXPECTED):
         raise ValueError('both host input paths required')
     hosts = {}
-    source_root = Path(__file__).resolve().parent.parent
-    sources = {
-        'scripts.v18_secondary': digest((source_root / 'scripts/v18_secondary.py').read_bytes()),
-        'scripts.v18_secondary_coordinate': digest((source_root / 'scripts/v18_secondary_coordinate.py').read_bytes()),
-        'experiments.value_direction_hopper.frontier_scope': digest(
-            (source_root / 'experiments/value_direction_hopper/frontier_scope.py').read_bytes()),
-        'transformers.integrations.sdpa_attention': SDPA_SHA}
+    source_files = {'scripts.v18_secondary': 'scripts/v18_secondary.py',
+                    'scripts.v18_secondary_coordinate': 'scripts/v18_secondary_coordinate.py',
+                    'experiments.value_direction_hopper.frontier_scope':
+                    'experiments/value_direction_hopper/frontier_scope.py'}
+    sources = {'transformers.integrations.sdpa_attention': SDPA_SHA}
     for host in EXPECTED:
         root = ROOTS[host]
         target = EXPECTED[host]
@@ -200,6 +215,13 @@ def freeze_config(inputs: dict, deploy: str, out: Path) -> dict:
                    runtime + '/miniconda3/envs/ljy_dlm/lib',
                    'TRITON_CACHE_DIR': root + '/triton_cache'}
         host_input = inputs['hosts'][host]
+        for module, relative in source_files.items():
+            source_path = root + '/deploy/' + deploy + '/' + relative
+            actual_sha = subprocess.check_output(['ssh', *SSH, target,
+                'sha256sum ' + shlex.quote(source_path)], text=True, timeout=60).split()[0]
+            if module in sources and sources[module] != actual_sha:
+                raise ValueError('secondary source bytes differ across host deploys')
+            sources[module] = actual_sha
         hosts[host] = dict(ssh=target, hostname=host, gpu_uuid=uuid, root=root, python=python,
                            model=primary['model_path'], library=library, torch_library=torch_library,
                            draft=host_input['draft'],
@@ -208,15 +230,24 @@ def freeze_config(inputs: dict, deploy: str, out: Path) -> dict:
                            old_scope_policies=primary['policy_file'],
                            primary_protocol=proto_path, aime_protocol=aime_path,
                            primary_calibration=primary['calibration_file'],
+                           budget_remote=root + '/deploy/' + deploy +
+                           '/results/junyu_frontier_v18_20260926/' +
+                           Path(inputs['budget_local']).name,
                            ledger_inventory=root + '/secondary/campaign_ledger_inventory.json', env=env)
     budget_path = Path(inputs['budget_local']).resolve()
     config = dict(deploy=deploy, budget_local=str(budget_path),
-                  budget_sha256=digest(budget_path.read_bytes()), hosts=hosts,
+                  budget_sha256=deployed_budget_digest(budget_path), hosts=hosts,
                   cpu_qualification=str(Path(inputs['cpu_qualification']).resolve()),
                   qualification_sources=sources, torch_version='2.6.0+cu124',
                   torch_cuda='12.4', ruler_gold=inputs['ruler_gold'],
                   ruler_root=inputs['ruler_root'])
     validate_config(config, deploy, json.loads(budget_path.read_text()), time.time())
+    for host in EXPECTED:
+        actual = subprocess.check_output(['ssh', *SSH, hosts[host]['ssh'],
+            'sha256sum ' + shlex.quote(hosts[host]['budget_remote'])],
+            text=True, timeout=60).split()[0]
+        if actual != config['budget_sha256']:
+            raise ValueError('remote bounded budget differs from frozen local bytes')
     transport = Transport(config)
     for host in EXPECTED:
         path = hosts[host]['ledger_inventory']
@@ -460,8 +491,7 @@ def run_pipeline(t: Transport, budget: dict, *, poll: int, folder: Path,
     t.read_deadline = None
     qualify_cpu(t)
     for host in EXPECTED:
-        budget_path = t.path(host, 'deploy', t.config['deploy'],
-                             'results/junyu_frontier_v18_20260926/campaign_budget.json')
+        budget_path = t.config['hosts'][host]['budget_remote']
         remote_budget = t.read(host, budget_path)
         if remote_budget is None or digest(remote_budget) != t.config['budget_sha256']:
             raise ValueError('remote immutable campaign budget differs')
@@ -488,8 +518,7 @@ def run_pipeline(t: Transport, budget: dict, *, poll: int, folder: Path,
         inventory = t.config['hosts']['mpk']['ledger_inventory']
         cal_args = ['-m', 'scripts.v18_secondary_coordinate', 'calibrate-group',
                     '--spec', spec_path, '--ledger-inventory', inventory,
-                    '--budget', t.path('mpk', 'deploy', t.config['deploy'],
-                                       'results/junyu_frontier_v18_20260926/campaign_budget.json'),
+                    '--budget', t.config['hosts']['mpk']['budget_remote'],
                     '--execute', '--wait-for-prerequisites']
         # Calibration has a durable started marker; an uncertain dispatch is terminal.
         cal_stage = 'calibrate_' + group
@@ -553,8 +582,7 @@ def run_pipeline(t: Transport, budget: dict, *, poll: int, folder: Path,
                 f'{root}/secondary/{stage}_protocol.json', '--prerequisites',
                 f'{root}/secondary/{stage}_prerequisites.json', '--ledger-inventory',
                 t.config['hosts'][host]['ledger_inventory'], '--budget',
-                t.path(host, 'deploy', t.config['deploy'],
-                       'results/junyu_frontier_v18_20260926/campaign_budget.json'),
+                t.config['hosts'][host]['budget_remote'],
                 '--private', f'{root}/secondary/private/{stage}', '--ledger',
                 f'{root}/secondary/ledgers/{host}_{stage}.jsonl', '--lock', f'{root}/gpu.lock',
                 '--stage-ledger', f'{root}/secondary/ledgers/mpk_{stage}.jsonl',

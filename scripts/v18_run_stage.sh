@@ -26,6 +26,12 @@ else exit 4; fi
 DRIVER_DEPLOY=$1
 STAGE=$2
 case "$STAGE" in initial|aime|remainder) ;; *) exit 4;; esac
+SEGMENT=${3:-$STAGE}
+if [ "$SEGMENT" != "$STAGE" ]; then
+ case "$SEGMENT" in aime_c[0-9][0-9][0-9]) [ "$STAGE" = aime ] || exit 4 ;; *) exit 4 ;; esac
+fi
+BUDGET_NAME=${4:-campaign_budget.json}
+case "$BUDGET_NAME" in campaign_budget.json|campaign_budget_extension_20260926.json) ;; *) exit 4 ;; esac
 cd "$P/deploy/bridge_json"
 export HF_HUB_OFFLINE=1 HF_HUB_DISABLE_PROGRESS_BARS=1 OMP_NUM_THREADS=4
 mkdir -p "$P/evaluation/ledgers" "$P/evaluation/status" "$P/logs" "$P/private_eval"
@@ -34,7 +40,7 @@ for H in mpk dllm; do
 done
 if [ -n "$(nvidia-smi --query-compute-apps=pid --format=csv,noheader)" ]; then echo 'GPU process present: stage not launched'; exit 4; fi
 if [ "$STAGE" = aime ]; then DATASET=aime; else DATASET=ruler; fi
-STATUS="$P/evaluation/status/${HOST}_${STAGE}"
+STATUS="$P/evaluation/status/${HOST}_${SEGMENT}"
 if [ -e "$STATUS.started.json" ]; then echo 'Stage marker already exists: inspect before explicit recovery'; exit 4; fi
 start=$(date +%s)
 printf '{"host":"%s","stage":"%s","pid":%s,"pgid":%s,"start":%s}\n' "$HOST" "$STAGE" "$$" "$(ps -o pgid= -p $$ | tr -d ' ')" "$start" > "$STATUS.started.json"
@@ -42,7 +48,7 @@ set +e
 "$PY" "$P/deploy/$DRIVER_DEPLOY/scripts/v18_stage_driver.py" --stage "$STAGE" \
  --ruler-protocol "$P/evaluation/ruler4k_primary_protocol.json" \
  --aime-protocol "$P/evaluation/aime26_primary_protocol.json" \
- --budget "$P/deploy/$DRIVER_DEPLOY/results/junyu_frontier_v18_20260926/campaign_budget.json" \
+ --budget "$P/deploy/$DRIVER_DEPLOY/results/junyu_frontier_v18_20260926/$BUDGET_NAME" \
  --private "$P/private_eval/$DATASET" --ledger "$P/evaluation/ledgers/${HOST}_${DATASET}.jsonl" \
  --lock "$P/gpu.lock" \
  --ruler-ledger "$P/evaluation/ledgers/mpk_ruler.jsonl" "$P/evaluation/ledgers/dllm_ruler.jsonl" \

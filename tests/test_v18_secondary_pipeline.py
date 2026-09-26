@@ -52,6 +52,13 @@ def primary_fixture(transport):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_extension_budget_hash_matches_deployed_lf_bytes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder, 'campaign_budget_extension_20260926.json')
+            path.write_bytes(b'{"deadline_is_gpu_cutoff":true}\r\n')
+            self.assertEqual(cp.deployed_budget_digest(path),
+                             hashlib.sha256(b'{"deadline_is_gpu_cutoff":true}\n').hexdigest())
+
     def test_read_only_ssh_retries_then_returns_exact_bytes(self):
         t = cp.Transport({'hosts': {'mpk': {'root': '/mpk', 'ssh': cp.EXPECTED['mpk']}}})
         calls = []
@@ -152,7 +159,7 @@ class PipelineTests(unittest.TestCase):
                                          'torch_library', 'draft', 'calibration_manifest',
                                          'policy_file', 'primary_protocol', 'aime_protocol',
                                          'primary_calibration', 'old_scope_policies',
-                                         'ledger_inventory')})
+                                         'ledger_inventory', 'budget_remote')})
             config = dict(hosts=hosts, deploy='fixed', budget_local=str(budget_path),
                           budget_sha256=hashlib.sha256(budget_path.read_bytes()).hexdigest(),
                           cpu_qualification=str(gate_path), torch_version='2.6.0+cu124',
@@ -160,6 +167,8 @@ class PipelineTests(unittest.TestCase):
                               'scripts.v18_secondary', 'scripts.v18_secondary_coordinate',
                               'experiments.value_direction_hopper.frontier_scope',
                               'transformers.integrations.sdpa_attention')})
+            for item in hosts.values():
+                item['budget_remote'] = '/budget.json'
             cp.validate_config(config, 'fixed', budget, 0)
             budget_path.write_text('{}')
             with self.assertRaisesRegex(ValueError, 'budget byte drift'):
