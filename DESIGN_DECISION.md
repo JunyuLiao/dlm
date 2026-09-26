@@ -164,3 +164,21 @@ Stop at this cost/numerical gate and spend the remaining budget on Track A and
 complete native-adaptive AIME answers. No evaluation quality, calls or latency
 was used to choose this outcome. Source: ideal_ball_t60_12.json and
 ball_cost_t60_12.json. No fast-path E2E or parent-equivalence claim is made.
+
+## Prospective secondary allocation controls
+
+Before any official evaluation score is read, freeze reuse of the existing
+State allocation definitions: T60_shuffled permutes prior-step causal T weights
+within each physical Q128 tile; T60_uniform broadcasts the entire current
+canvas mean of those weights. Uniform therefore removes both within-tile and
+between-tile allocation; it is not a per-tile-mean control. Both keep the parent
+T history and initial no-history behavior. Allocation RNG seed424242 is separate
+from sampler/projection/schedule RNG and uses the existing per-canvas reset
+seed +7919*canvas +104729. It never consumes the sampling generator.
+Each control is independently calibrated toward60% on the same independent26
+calibration questions with at most5 complete policy pairs, starting from frozen
+T60 policy. Density-only selection; no quality/calls/time or evaluation tuning.
+The preselected26 mechanism questions use101/202/303 with first outputs only,
+no new timing claims. U70/T70 use their own density calibration then original
+130-question quality and26-question warm schedule. These are secondary work
+after the primary RULER/AIME sequence and remain budget-gated.

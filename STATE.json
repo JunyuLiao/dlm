@@ -3,7 +3,7 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP2_BRIDGE_QUALIFIED_PROTOCOLS_FROZEN_DRIVER_FINALIZING",
+  "status": "CP2_INITIAL_RUNNING_BOTH_HOSTS",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
   "candidate": "STOP_IMPLEMENTATION_THIS_ROUND: ideal GLOBAL opportunity but no demonstrated net cost headroom or finite-precision certificate; no CUDA candidate",
@@ -12,7 +12,24 @@
     "149.165.151.254": "mpk bridge qualified; original user-site runtime; private immutable deploy/bridge_json",
     "149.165.159.64": "dllm bridge qualified; private matching runtime and1047 tensor identity"
   },
-  "gpu_jobs": [],
+  "gpu_jobs": [
+    {
+      "host": "149.165.151.254",
+      "supervisor_pid": 1614993,
+      "pgid": 1614993,
+      "worker_pid": 1615015,
+      "stage": "ruler_initial",
+      "start_epoch": 1790451863
+    },
+    {
+      "host": "149.165.159.64",
+      "supervisor_pid": 8248,
+      "pgid": 8248,
+      "worker_pid": 8262,
+      "stage": "ruler_initial",
+      "start_epoch": 1790451864
+    }
+  ],
   "budget": {
     "wall_start_utc": "2026-09-26T18:02:00Z",
     "wall_hours_cap": 12,
@@ -35,7 +52,7 @@
     },
     "frozen_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json"
   },
-  "next": "Launch bounded initial RULER blocks from immutable bridge_json; automated AIME then RULER remainder; secondary only afterward",
+  "next": "Local CPU coordinator adopts initial, syncs peer ledgers, launches AIME then remainder; scorer CPU only",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -54,5 +71,8 @@
     "source_commit": "4d53b5c330a71a12424c267e7e03fc86094c2bdb",
     "construction": "archive e9f851c plus exact4d53b5c three-file overlay"
   },
-  "bridge_receipt": "results/junyu_frontier_v18_20260926/cross_host_bridge.json"
+  "bridge_receipt": "results/junyu_frontier_v18_20260926/cross_host_bridge.json",
+  "driver_deployment": "deploy/driver_5b14a21; launcher5b14a21, driver90171ff; child generation cwd bridge_json",
+  "stage_status": "ROOT/evaluation/status/HOST_STAGE.{started,done}.json",
+  "worker_ledgers": "ROOT/evaluation/ledgers/HOST_{ruler,aime}.jsonl"
 }

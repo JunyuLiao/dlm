@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import socket
 import subprocess
 import sys
@@ -147,6 +148,8 @@ def main():
     parser.add_argument('--stage', choices=('initial', 'aime', 'remainder'), required=True)
     for name in ('ruler-protocol', 'aime-protocol', 'budget', 'private', 'ledger', 'lock'):
         parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--worker-cwd', type=Path, default=Path.cwd(),
+                        help='Immutable code root; defaults to the current directory')
     parser.add_argument('--ruler-ledger', type=Path, nargs='+', required=True)
     parser.add_argument('--aime-ledger', type=Path, nargs='+', required=True)
     parser.add_argument('--execute', action='store_true', help='Launch the explicitly selected frozen stage')
@@ -167,6 +170,12 @@ def main():
         raise SystemExit('budget/deadline guard does not permit another complete block')
     protocol_path = args.aime_protocol if args.stage == 'aime' else args.ruler_protocol
     timeout_s = max(1, int(min(plan['deadline_epoch'] - time.time(), plan['gpu_remaining_s'])))
+    worker_cwd = args.worker_cwd.resolve()
+    if not (worker_cwd / 'scripts/v18_evaluate.py').is_file():
+        parser.error('--worker-cwd must contain the pinned evaluation source')
+    worker_env = dict(os.environ)
+    worker_env['PYTHONPATH'] = os.pathsep.join((str(worker_cwd / 'src'), str(worker_cwd),
+                                               worker_env.get('PYTHONPATH', '')))
     try:
         subprocess.run([sys.executable, '-m', 'scripts.v18_evaluate', 'run',
                     '--protocol', str(protocol_path), '--private', str(args.private),
@@ -175,7 +184,7 @@ def main():
                     '--gpu-budget-s', str(plan['gpu_remaining_s']),
                     '--remaining-requests', str(plan['requests_remaining']),
                     '--block-guard-s', str(plan['block_guard_s']), '--timeout', str(args.timeout)],
-                   check=True, timeout=timeout_s)
+                   check=True, timeout=timeout_s, cwd=worker_cwd, env=worker_env)
     except subprocess.TimeoutExpired:
         # The worker start has no matching end; the next plan conservatively
         # charges elapsed time until its next invocation.

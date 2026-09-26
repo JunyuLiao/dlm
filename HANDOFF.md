@@ -56,8 +56,9 @@ Budget / next action:
   conservative frozen baselines old1900s/new100s in campaign_budget.json.
 - Per-host quotas conservatively sum to caps; hard timeout required in addition
   to complete-block guards. Initial soft deadline21:03:20Z; AIME reserved1080.
-- Both GPUs free at this checkpoint. Sol-A finalizes recoverable driver and
-  coordinator; launch initial immediately after tests/commit/push/deploy.
+- Initial workers launched from driver_5b14a21: mpk supervisor1614993/child1615015;
+  dllm supervisor8248/child8262. Status under ROOT/evaluation/status and ledgers
+  under ROOT/evaluation/ledgers. Sol-A local coordinator adopts these workers.
 - Sol-B prepares secondary CPU protocol helpers, no GPU launches.
 - Scores only from first outputs; partial/failed/capped/unparsed retained.
   Warm accepted only if full required evidence matches, no JIT/new SO.
