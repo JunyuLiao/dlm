@@ -99,3 +99,15 @@ from .254 (Torch2.6/cu124, Triton3.2, Transformers5.11) including actual source
 hashes. .64 has an older text-export model, not yet verified against the pinned
 snapshot. It is NOT bridge-qualified. Do not allocate official shards to it
 until private environment/model qualification and two-prompt bridge pass.
+
+## CP1 prospective opportunity-state refinement (before any ball result)
+
+All four U/T50/60 points reached overall/LOCAL/GLOBAL density tolerance using
+at most five density-only policy pairs. This is calibration success, not quality,
+step-count, or latency success. Keep the predeclared T60 opportunity parent.
+The first12 T50 states remain the scope reference. Before seeing any ball
+opportunity output, predeclare twelve additional states at the same two prompts,
+seed101, layers0/5/29 and steps1/3 under the final calibrated T60 policy. Total24
+real states stays within v18. Analyze these T60 states for the selected parent;
+no evaluation output or answer informs this choice. The waiting T50 ball job was
+stopped before GPU execution. No CUDA implementation is authorized by this step.

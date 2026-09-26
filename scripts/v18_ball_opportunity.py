@@ -109,7 +109,8 @@ def audit_state(kernel, state: dict, deadline: float) -> dict:
                ideal_ball_pass_parent_skipped=0, apparent_false_certify=0,
                first_support_tiles=0, replay_calls=0,
                ball_metadata_bytes_fp64_naive_qblock=0,
-               ball_metadata_bytes_fp32_shared_uniform_mask=None)
+               ball_metadata_bytes_fp32_shared_uniform_mask=None,
+               ball_cpu_s=0.)
     try:
         nk = state['k'].shape[-2]
         full = replay(kernel, state, 0, nk, gpu_ms=gpu_ms)
@@ -186,6 +187,7 @@ def audit_state(kernel, state: dict, deadline: float) -> dict:
                         if first_support:
                             row['first_support_tiles'] += 1
                             continue
+                        ball_started = time.monotonic()
                         union = legal.any(axis=0)
                         if not union.any():
                             row['reason'] = f'eligible_without_legal_keys_tile_{j}'
@@ -193,6 +195,7 @@ def audit_state(kernel, state: dict, deadline: float) -> dict:
                         bound = ideal_ball_bound(z[batch, kvhead, start:end][union], previous[batch, head, sl],
                                                  previous_lse[batch, head, sl], block_lse[batch, head, sl],
                                                  sensitivity[batch, sl], ref[batch, kvhead])
+                        row['ball_cpu_s'] += time.monotonic() - ball_started
                         if not np.isfinite(bound[active]).all():
                             row['reason'] = f'nonfinite_ideal_bound_tile_{j}'
                             return row
@@ -226,12 +229,16 @@ def main() -> None:
     p.add_argument('--torch-library', type=Path, required=True)
     p.add_argument('--out', type=Path, required=True)
     p.add_argument('--max-minutes', type=float, default=15.)
+    p.add_argument('--expected-arm', choices=('T50', 'T60'), required=True)
     args = p.parse_args()
     if not torch.cuda.is_available():
         raise RuntimeError('CUDA is required')
     states = torch.load(args.states, map_location='cpu', weights_only=True)
     real = [s for s in states if not s.get('derived_mask')]
     derived = [s for s in states if s.get('derived_mask')]
+    if any(s.get('frontier_arm') != args.expected_arm and
+           not (args.expected_arm == 'T50' and s.get('frontier_arm') is None) for s in real):
+        raise ValueError('captured state arm differs from explicit diagnostic arm')
     keys = {(s['source_id'].split('/')[0], s['layer'], s['step']) for s in real}
     if len(keys) != len(real) or keys - expected_keys():
         raise ValueError('capture has duplicate or unplanned real states')
@@ -246,7 +253,8 @@ def main() -> None:
             rows.append(audit_state(kernel, state, deadline))
         print(json.dumps({k: rows[-1].get(k) for k in ('source_id', 'valid', 'reason', 'parent_skipped_tiles',
                                                         'ideal_ball_pass_parent_skipped', 'apparent_false_certify')}), flush=True)
-    report = dict(schema='v18_ideal_ball_opportunity_v1', claim='ideal normalized-P arithmetic opportunity only',
+    report = dict(schema='v18_ideal_ball_opportunity_v1', frontier_arm=args.expected_arm,
+                  claim='ideal normalized-P arithmetic opportunity only',
                   finite_precision_certificate=False, timing_claim=False,
                   states_sha256=file_sha(args.states), library_sha256=file_sha(args.library),
                   expected_real_states=12, present_real_states=len(real),

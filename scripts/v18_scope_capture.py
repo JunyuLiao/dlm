@@ -1,4 +1,4 @@
-"""Capture 12 predetermined real T50 native-legal attention states, without gold.
+"""Capture 12 predetermined real T50 or T60 native-legal states, without gold.
 
 Two complete requests (first RULER calibration row, first v15 LongBench selection
 row), seed 101; decoder layers 0/5/29 and denoising iterations 1/3. The
@@ -28,16 +28,22 @@ def file_sha(path: Path) -> str:
     return digest.hexdigest()
 
 
+def check_capture_config(config: dict, frontier_arm: str) -> None:
+    if (frontier_arm not in ('T50', 'T60') or config.get('condition') != 'native_legal_all_layers'
+            or config.get('frontier_arm') != frontier_arm or config.get('method') != 'T'
+            or config.get('target') != int(frontier_arm[1:])):
+        raise ValueError('capture requires the explicitly selected frozen native-legal T50/T60 config')
+
+
 def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
-            longbench_manifest: Path, longbench_id: str, out: Path) -> dict:
+            longbench_manifest: Path, longbench_id: str, out: Path, frontier_arm: str) -> dict:
     from dllm.models import create_adapter
     from experiments.numerical_qk_reuse.runner import GOLD_FIELDS, _fingerprint, _one, _rows
     from experiments.value_direction_hopper.integration import Attention
     from experiments.value_direction_hopper.masks import PackedMask
 
     config = json.loads(config_path.read_text())
-    if config.get('condition') != 'native_legal_all_layers' or config.get('frontier_arm') != 'T50':
-        raise ValueError('capture requires the frozen native-legal T50 config')
+    check_capture_config(config, frontier_arm)
     sources = ((calibration_manifest, calibration_id, 'ruler_calibration_first'),
                (longbench_manifest, longbench_id, 'v15_selection_first'))
     rows = []
@@ -118,6 +124,7 @@ def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
                                kernel_output=kernel_record['kernel_output'],
                                layer=layer, step=step, canvas_index=canvas_index,
                                native_iteration=native_iteration,
+                               frontier_arm=frontier_arm,
                                layer_kind='local' if module.is_sliding else 'global',
                                source_id=f'{current_label}/layer{layer}/iteration{step}', derived_mask=False))
         return result
@@ -147,7 +154,8 @@ def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
                 checkpoint = out.with_suffix('.unqualified.pt')
                 torch.save(states, checkpoint)
                 checkpoint.with_suffix('.json').write_text(json.dumps(dict(
-                    schema='v18_scope_capture_unqualified_v1', config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
+                    schema='v18_scope_capture_unqualified_v1', frontier_arm=frontier_arm,
+                    config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
                     state_file=str(checkpoint), state_file_sha256=file_sha(checkpoint),
                     requests=request_reports, captured_real_states=len(states),
                     valid_for_opportunity=False,
@@ -158,7 +166,8 @@ def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
                 checkpoint = out.with_suffix('.checkpoint.pt')
                 torch.save(states, checkpoint)
                 checkpoint.with_suffix('.json').write_text(json.dumps(dict(
-                    schema='v18_scope_capture_checkpoint_v1', config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
+                    schema='v18_scope_capture_checkpoint_v1', frontier_arm=frontier_arm,
+                    config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
                     state_file=str(checkpoint), state_file_sha256=file_sha(checkpoint),
                     requests=request_reports, captured_real_states=len(states),
                     valid_for_opportunity=False,
@@ -177,7 +186,8 @@ def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
     missing = sorted(expected - seen)
     out.parent.mkdir(parents=True, exist_ok=True)
     torch.save(states, out)
-    report = dict(schema='v18_scope_capture_v1', config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
+    report = dict(schema='v18_scope_capture_v1', frontier_arm=frontier_arm,
+                  config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
                   state_file=str(out), state_file_sha256=file_sha(out),
                   requests=request_reports, expected_real_states=12, captured_real_states=original_states,
                   missing_real_states=[dict(source=label, layer=layer, step=step) for label, layer, step in missing],
@@ -195,9 +205,10 @@ def main():
     p.add_argument('--longbench-manifest', type=Path, required=True)
     p.add_argument('--longbench-id', required=True)
     p.add_argument('--out', type=Path, required=True)
+    p.add_argument('--frontier-arm', choices=('T50', 'T60'), required=True)
     args = p.parse_args()
     result = capture(args.config, args.calibration_manifest, args.calibration_id,
-                     args.longbench_manifest, args.longbench_id, args.out)
+                     args.longbench_manifest, args.longbench_id, args.out, args.frontier_arm)
     print(json.dumps(dict(captured_real_states=result['captured_real_states'],
                           missing_real_states=result['missing_real_states'])))
 

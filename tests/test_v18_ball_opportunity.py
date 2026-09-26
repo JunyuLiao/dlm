@@ -1,8 +1,10 @@
 """CPU properties for the explicitly ideal-arithmetic ball diagnostic."""
 import numpy as np
+import pytest
 import torch
 
 from scripts.v18_ball_opportunity import ideal_ball_bound, packed_valid
+from scripts.v18_scope_capture import check_capture_config
 
 
 def test_ball_bound_dominates_convex_block_mean_and_handles_cancellation():
@@ -34,3 +36,12 @@ def test_packed_valid_preserves_high_bit_and_partial_edge():
     assert valid.shape == (1, 1, 1, 67)
     assert valid[0, 0, 0, 63] and valid[0, 0, 0, 64] and valid[0, 0, 0, 66]
     assert not valid[0, 0, 0, 65]
+
+
+def test_capture_arm_must_match_frozen_t_target():
+    config = dict(condition='native_legal_all_layers', frontier_arm='T60', method='T', target=60)
+    check_capture_config(config, 'T60')
+    with pytest.raises(ValueError, match='explicitly selected'):
+        check_capture_config(config, 'T50')
+    with pytest.raises(ValueError, match='explicitly selected'):
+        check_capture_config(dict(config, target=50), 'T60')
