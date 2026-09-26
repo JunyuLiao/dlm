@@ -30,9 +30,9 @@
   ],
   "budget": {
     "wall_start_utc": "2026-09-26T18:02:00Z",
-    "wall_hours_cap": 12,
-    "gpu_process_hours_single_host_cap": 10,
-    "gpu_process_hours_two_hosts_cap": 20,
+    "wall_hours_cap": 36,
+    "gpu_process_hours_single_host_cap": 24,
+    "gpu_process_hours_two_hosts_cap": 48,
     "generations_cap": 7000,
     "aime_core_reserved": 1080,
     "scoring_minutes_reserved": 30,
@@ -48,7 +48,7 @@
       "mpk": 1484,
       "dllm": 28
     },
-    "frozen_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json",
+    "frozen_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget_extension_20260926.json",
     "initial_wrapper_seconds_by_host": {
       "mpk": 625,
       "dllm": 613
@@ -56,9 +56,10 @@
     "initial_duration_note": "Wrapper elapsed; driver budget accounting uses worker_end values. Do not double-count wrappers.",
     "observed_completed_generations_snapshot": 1627,
     "snapshot_note": "475 preofficial +936 initialRULER +216 AIME completed events as of22:35UTC; two current in-flight requests not yet recorded. No extrapolation replaces final ledger accounting.",
-    "completion_risk": "AIME has216/1080 after~2h39; current pace risks incomplete primary by originalcutoff. Keep frozen completeblock order and caps; no threshold, max-token or fixed-step change."
+    "completion_risk": "User authorized bounded extension; existing AIME workers may still cleanly stop at old boundary, then numbered continuation runs wholly unstarted blocks.",
+    "original_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json"
   },
-  "next": "Scripts: AIME -> RULER remainder -> offline primary scoring -> CP3 CPU qualification -> density-only70 calibration/evaluation -> independently calibrated allocation controls -> offline secondary scoring; heartbeat handles terminal review and CP4.",
+  "next": "Adopt original AIME; after verified clean old-budget stop, numbered continuation of wholly unstarted blocks under extension; finish RULER remainder; primary offline scoring; gated CP3 calibration/eval/controls; CP4.",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -83,18 +84,22 @@
   "worker_ledgers": "ROOT/evaluation/ledgers/HOST_{ruler,aime}.jsonl",
   "coordinator": {
     "host": "Windows local",
-    "pid": 49924,
-    "exec_session": 14087,
-    "source_commit": "db79c828982a6e0494481b2780f2f579171a89e0",
-    "source": "E:/dlm/v18_private/coordinator_db79c82/scripts/v18_coordinate.py",
+    "pid": 41020,
+    "exec_session": 71433,
+    "source_commit": "6250b51ae322e37e5f79067bf8ebda3bf04b0add",
+    "source": "E:/dlm/v18_private/extension_6250b51/scripts/v18_coordinate.py",
     "command_file": "E:/dlm/v18_private/finalize_command.json",
     "previous_pid49208": "stopped after exact command verification; replacement uses escalated long exec session",
-    "output": "approved foreground TTY session14087; persistent primary_coordinator_outcome.json",
+    "output": "TTY71433 and completion_coordinator_outcome.json",
     "start_at": "aime",
     "command_file_installed": true,
     "previous_pid50660": "stopped after exact command verification; replaced by approved foreground TTY",
     "previous_pid39296": "stopped after exact command verification; remote GPU workers left unchanged",
-    "outcome": "E:/dlm/v18_private/primary_coordinator_outcome.json"
+    "outcome": "E:/dlm/v18_private/completion_coordinator_outcome.json",
+    "continuation_deploy": "extension_6250b51",
+    "local_cwd": "E:/dlm/v18_private/extension_6250b51",
+    "budget": "E:/dlm/v18_private/extension_6250b51/results/junyu_frontier_v18_20260926/campaign_budget_extension_20260926.json",
+    "previous_pid49924": "verified and stopped; prior primary_coordinator_outcome.json preserved"
   },
   "completed_primary_executions": {
     "ruler_initial": 936,
@@ -122,31 +127,47 @@
   "continuation_heartbeat": {
     "id": "v18-research-stage-continuation",
     "status": "ACTIVE",
-    "purpose": "hourly stage checkpoint; quiet unchanged; original budget enforced; disable at CP4 completion"
+    "purpose": "hourly stage checkpoint; amended finite limits per RESOURCE_AUTHORIZATION.md; quiet unchanged; disable atCP4"
   },
   "secondary_coordinator": {
-    "pid": 16656,
-    "exec_session": 57502,
+    "pid": 35304,
+    "exec_session": 7655,
     "status": "waiting_primary",
-    "source_commit": "01211245449027eb993940c7c55c38530b6c2913",
-    "deploy": "deploy/cp3_1c9a6e6",
-    "local_cwd": "E:/dlm/v18_private/controller_0121124",
-    "config": "E:/dlm/v18_private/secondary_config.json",
-    "config_sha256": "55bc72e47887648c697393be2cc574d34300260b631c9d7584c59451aeeea43a",
-    "outcome": "E:/dlm/v18_private/secondary_readretry.outcome.json",
-    "archive_sha256": "7204840b22b6b18078c2e89beb25524c5f88b4406faab5a857ad83c55a137aab",
-    "cpu_qualification": "E:/dlm/v18_private/secondary_cpu_qualification.json",
+    "source_commit": "6250b51ae322e37e5f79067bf8ebda3bf04b0add",
+    "deploy": "deploy/extension_6250b51",
+    "local_cwd": "E:/dlm/v18_private/extension_6250b51",
+    "config": "E:/dlm/v18_private/secondary_extension_config.json",
+    "config_sha256": "a99c6eef0853f96c5bab260927d5fea2bbc90ae391e612df6cdd6e165cf1ad6f",
+    "outcome": "E:/dlm/v18_private/secondary_extension.outcome.json",
+    "archive_sha256": "d827e54f4ed84b6222b98454b1b0e46b3a186ea7c62c195930a084a57f4527af",
+    "cpu_qualification": "E:/dlm/v18_private/secondary_extension_cpu_qualification.json",
     "qualification_status": "not_run; automatically after primary quiet",
     "gpu_started": false,
-    "tests": "22 local unittest cases across primary coordinator/secondary stdlib/pipeline passed",
+    "tests": "36 combined stdlib tests pass; bash -n on both hosts passes; Torch CPU qualification still gated after primary quiet",
     "previous_pid47716": "exited after read-only SSH timeout; both-host stage check confirmed no secondary GPU dispatch",
     "previous_outcome": "E:/dlm/v18_private/secondary_config.outcome.json",
-    "remote_generation_deploy_commit": "1c9a6e62bcc932cf7d3f5d0fc0f8fab97d12b5cd",
-    "local_controller_archive_sha256": "1596c0534c4aef80c87f7619a4d1fa039bf6a78af5fda3af2b7b520648ccf40f",
+    "remote_generation_deploy_commit": "6250b51ae322e37e5f79067bf8ebda3bf04b0add",
+    "local_controller_archive_sha256": "d827e54f4ed84b6222b98454b1b0e46b3a186ea7c62c195930a084a57f4527af",
     "previous_pid42488": "exited on repeated read-only SSH timeout; secondary_restart1.outcome.json preserved",
     "retry_semantics": "at most3 attempts for read-only transport; waiting-primary connection failures stay pending until original guard cutoff; no mutation/dispatch retries",
-    "read_retry_tests": "16 focused unittest cases passed"
+    "read_retry_tests": "16 focused unittest cases passed",
+    "previous_pid16656": "verified and stopped; old readretry outcome preserved"
   },
-  "updated_utc": "2026-09-26T22:40:00.519115+00:00",
-  "stage_check": "22:35UTC AIME216/1080 recorded, both GPU workers active (mpk1616572,dllm9130); noCP3 stage started. Localwaitingcontroller replaced only after confirmed exit."
+  "updated_utc": "2026-09-26T23:39:04.799159+00:00",
+  "stage_check": "New primary41020 and secondary35304 verified; both original AIME supervisors still live and unchanged; no continuation segment or CP3 GPU dispatched.",
+  "resource_authorization": "RESOURCE_AUTHORIZATION.md",
+  "budget_override": {
+    "status": "deployed_active_controllers_adopt_original_AIME",
+    "source_commit": "3d89e0d1c0e878c2ce1f2e64734c6f39f75405a6",
+    "budget_file": "results/junyu_frontier_v18_20260926/campaign_budget_extension_20260926.json",
+    "budget_sha256": "5a508a92ec822e428d76049902e1ebf1d199375b9c095537efa5a0de8696009e",
+    "gpu_cutoff_utc": "2026-09-28T05:32:00Z",
+    "final_handoff_utc": "2026-09-28T06:02:00Z",
+    "wall_hours": 36,
+    "gpu_hours_per_host": 24,
+    "gpu_hours_combined": 48,
+    "generation_cap": 7000,
+    "existing_workers": "unchanged old budgets; wait for clean stop before numbered continuation",
+    "scope": "existing frozen panels only; first results and native semantics unchanged"
+  }
 }

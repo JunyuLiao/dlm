@@ -1,123 +1,98 @@
-# v18 continuation: CP2 frozen primary evaluation
+# v18 continuation — bounded user resource extension active
 
-Sole execution authority: user v18 (SHA in cp0_identity.json).
-Branch research/astra-junyu-frontier-20260926; parent d2bef2189c046e9a4277ab16d751ebeab11c15d8.
-Read DESIGN_DECISION.md. Prior WSL v8 and remote v15 untouched.
-Ignore unrelated Windows case-collision third_party/dinfer/assets/Wechat.JPG.
+Authority: v18 plus later user “不必在乎预算 没事 gpu是自己的”, documented in
+RESOURCE_AUTHORIZATION.md. Scientific scope remains frozen. Branch
+research/astra-junyu-frontier-20260926; parent d2bef2189c046e9a4277ab16d751ebeab11c15d8.
+Read DESIGN_DECISION.md; ignore unrelated third_party/dinfer/assets/Wechat.JPG.
+Prior WSL v8, remote v15, peer branches and original immutable deployments untouched.
 
-Completed:
-- CP0 historical identities passed; 120 historical warm pairs lack strict phase evidence.
-- Native adaptive stopping preserved: stable argmax AND mean entropy<.005;
-  acceptance .1, B256/cap48, temperature .8 to .4 and normal EOS unchanged.
-- RULER thinking=False, exact156 calibration/eval token lists; AIME thinking=True
-  with30 exact token lists and8192 output budget frozen. Initial failed capture
-  remains counted/preserved (1 request,24 GPU seconds).
-- Native legal all-layer scope qualified13 states. LEGACY LOCAL omitted9.97%
-  of captured native-legal pairs; geometry diagnostic only.
-- Density-only calibration442 requests: U50/T50/U60/T60 all within2pp whole/G/L.
-  This does not establish T60 quality, calls or speed.
-- Strong B8 old/new16 requests equivalent,8 strict warm accepted; new/old wall
-  geomean1.000187, no speedup signal.
-- Bridge6 requests per host passed full tokens/canvas calls/stop/cap/termination.
-  All1047 model tensors identical; new index is declared shard repacking.
-- Single post-QK ball candidate stopped before implementation at cost/numerical
-  gate. Ideal GLOBAL skip coverage58.84%, LOCAL11.32%; no finite certificate
-  or demonstrated net execution headroom. No alternative candidate or CVM work.
+Completed evidence:
+- Historical identity checks passed;120 old warm pairs lack strict phase evidence.
+- Native stop is stable deterministic argmax AND mean entropy<.005; acceptance.1,
+  B256/cap48, native temperature.8→.4 and normal EOS unchanged.
+- RULER thinkingFalse/exact156 token lists; AIME thinkingTrue/exact30/8192 budget.
+- Native legal all-layer scope qualified13 states; legacyLOCAL geometry differed.
+- Density-only442 calibration runs: U50/T50/U60/T60 all within2pp whole/G/L.
+  This is not T60 quality/work/speed success.
+- Strong B8 full16 equivalent;8 strictwarm accepted; wallratio1.000187, no speedup.
+- Bridge6 requests/host passes tokens/calls/stop/termination;1047 tensors identical.
+- Only post-QK ball candidate stopped beforeCUDA implementation: no finite
+  numerical certificate or demonstrated net execution headroom. No replacement/CVM.
+- Initial RULER936 executions complete,468/host;468 strictwarm pairs, zero failures.
+- Latest redacted stage count22:35UTC: AIME216/1080 (mpk112,dllm104); quality unread.
 
-Hosts / immutable generation deployment:
-- mpk exouser@149.165.151.254, GPU-6139046a-b005-8fe5-a837-f8270472ab72
-  P=/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926
-  Python=/home/exouser/miniconda3/envs/ljy_dlm/bin/python, original user-site ON.
-- dllm exouser@149.165.159.64, GPU-fc12ad5c-5334-5509-8fc6-465498fd3915
-  N=/home/exouser/dyh/junyu_frontier_v18_20260926
-  Python=N/bridge/runtime/miniconda3/envs/ljy_dlm/bin/python; private old user-site
-  explicitly overlaid, PYTHONNOUSERSITE=1. See run_bridge.sh environment.
-- Both generation cwd=ROOT/deploy/bridge_json, exact4d53b5c code construction;
-  config paths/hashes bind these files. Never mutate this immutable deployment.
-- Local scorer/driver additions must not cause GPU workers to import unverified
-  source. New driver invokes pinned module from that cwd/PYTHONPATH.
+Hosts and current original AIME workers:
+- mpk exouser@149.165.151.254, GPU-6139046a-b005-8fe5-a837-f8270472ab72.
+  P=/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926.
+  Supervisor/PGID1616556, GPUworker1616572; originalruntime user-site ON.
+- dllm exouser@149.165.159.64, GPU-fc12ad5c-5334-5509-8fc6-465498fd3915.
+  N=/home/exouser/dyh/junyu_frontier_v18_20260926.
+  Supervisor/PGID9108, GPUworker9130; private copiedruntime/user-site overlay.
+- Primary generation remains ROOT/deploy/bridge_json, source4d53b5c construction.
+  Model/library/runtime paths are in frozen primary protocols/new CP3 config.
+  Never modify active worker code/configs or restart requests to change budgets.
 
-Frozen protocols in ROOT/evaluation on both hosts:
-- ruler4k_primary_protocol.json:390 blocks,2808 runs. Initial78 blocks=936 runs
-  (26 preselected timing questions x3seeds x6arms xfirst/warm).
-- aime26_primary_protocol.json:90 blocks,1080 runs.
-- Whole question-seed block (all arms and warm) stays on assigned GPU, ordered
-  round-robin mpk/dllm. IDs/digests are in RUN_MANIFEST.json.
-- Execution: RULER initial -> AIME complete -> RULER remaining -> secondary70/
-  allocation if budget. Generation processes have only gold-free manifests.
-- Scorer-only source gold byte hashes frozen. RULER original v15 code_cp1
-  results/query_adaptive_v3/configs/final_manifest.json; AIME
-  /media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/private/manifest_all30.json.
+Frozen panels and fairness:
+- ROOT/evaluation/ruler4k_primary_protocol.json:390 blocks/2808 executions.
+- ROOT/evaluation/aime26_primary_protocol.json:90 blocks/1080 executions.
+- Six arms D_native,D_matched,U50,U60,T50,T60; seeds101/202/303.
+- Whole question-seed arm/warm groups stay on frozen GPU. No cross-host absolute
+  time pooling; first output only for quality; failed/capped/unparsed remain.
+- Ledgers ROOT/evaluation/ledgers/HOST_{ruler,aime}.jsonl; privateROOT/private_eval.
+- Markers ROOT/evaluation/status/HOST_STAGE.{started,done}.json.
 
-Budget / next action:
-- Start2026-09-26T18:02Z; stop GPU by2026-09-27T05:32Z, final deadline06:02Z.
-- Cap7000 full requests and20 total GPU-process hours, two qualified hosts.
-- Before eval475 completed requests, measured old1484s/new28s plus120s reserve;
-  conservative frozen baselines old1900s/new100s in campaign_budget.json.
-- Per-host quotas conservatively sum to caps; hard timeout required in addition
-  to complete-block guards. Initial soft deadline21:03:20Z; AIME reserved1080.
-- Initial workers launched from driver_5b14a21: mpk supervisor1614993/child1615015;
-  dllm supervisor8248/child8262. Status under ROOT/evaluation/status and ledgers
-  under ROOT/evaluation/ledgers. Sol-A local coordinator adopts these workers.
-- Sol-B prepares secondary CPU protocol helpers, no GPU launches.
-- Scores only from first outputs; partial/failed/capped/unparsed retained.
-  Warm accepted only if full required evidence matches, no JIT/new SO.
-- No cross-host absolute-time pooling. Host strata and within-GPU ratios.
-- No raw answers/gold/credentials/large traces in Git. No peer branch edits.
+Approved finite extension (original budget file retained):
+- Start2026-09-26T18:02Z;36h window. GPUcutoff2026-09-28T05:32Z, final06:02Z.
+- GPU24h/host48h combined;7000 requests total3500/host; at most2 workers.
+- Newfile results/junyu_frontier_v18_20260926/campaign_budget_extension_20260926.json
+  SHA5a508a92ec822e428d76049902e1ebf1d199375b9c095537efa5a0de8696009e.
+- Same475 preofficial attempts and baselineGPU1900s/100s charged. Sum actual
+  worker_end durations; never additionally charge wrapper elapsed for same run.
+- Existing original workers retain oldguard. Newcontroller waits for clean stop,
+  verifies complete per-host block prefix, no partial/orphan results and quiet
+  writers; then launches only missing hosts with new aime_c001 etc markers.
+- Failed firstresult in a fully recorded block stays occupied and is never rerun.
+  Unknown dispatch/partialblock defers continuation/finalization for review.
+- No new questions/arms/seeds, at most5 densitycal policies/arm. Candidate remainsSTOP.
 
-Live checkpoint: initial RULER936 executed (468/host), zero first failures,
-468/468 strict warm accepted. Source ledgers SHA-verified and copied between hosts.
-Initial wrapper625s mpk/613s dllm; use worker_end for quota accounting, not both.
-AIME supervisors: mpk1616556 PGID1616556; dllm9108 PGID9108. Both active.
-One local primary coordinator: PID49924, approved TTY exec session14087,
-immutable db79c828 under E:/dlm/v18_private/coordinator_db79c82. Previous local
-PID39296 was verified/stopped; remote GPU workers unchanged. Earlier PIDs49208
-and50660 are stopped too. Tool session handles can disappear across compaction;
-verify actual OS PID/command before replacement, never infer process exit from
-an Unknown process id response. Persistent controller state:
-E:/dlm/v18_private/primary_coordinator_outcome.json.
-Final hook E:/dlm/v18_private/finalize_command.json uses immutable local
-scorer_f45fa83/scripts/v18_finalize.py and remote deploy/scorer_f45fa83.
-Primary failures/partial AIME stop downstream work; coordinator waits for own
-supervisors and ledger workers to exit, resyncs all four ledgers, then scores
-available outputs. Unreadable remote state blocks scoring, never pretends quiet.
-Recovery after confirmed controller exit: cwd coordinator_db79c82, local
-Python311 -u -m scripts.v18_coordinate --start-at aime
---budget results/junyu_frontier_v18_20260926/campaign_budget.json
+Active local supervision, all source6250b51:
+- Local cwd E:/dlm/v18_private/extension_6250b51; bothremote deploy/extension_6250b51.
+- Archive SHAd827e54f4ed84b6222b98454b1b0e46b3a186ea7c62c195930a084a57f4527af.
+- Primary controller PID41020, TTYsession71433; outcome
+  E:/dlm/v18_private/completion_coordinator_outcome.json.
+- CP3 waiting controller PID35304, TTYsession7655; outcome
+  E:/dlm/v18_private/secondary_extension.outcome.json.
+- Config E:/dlm/v18_private/secondary_extension_config.json,
+  SHAa99c6eef0853f96c5bab260927d5fea2bbc90ae391e612df6cdd6e165cf1ad6f.
+- Previous controllers49924/16656 verified/stopped; older47716/42488 exited on
+  readSSHtimeouts. Their outcome files are preserved; do not use as currentstate.
+- Tool session IDs may disappear across compaction: verify actual OS PID/command
+  before replacement; Unknown process id is not evidence that the process exited.
+-36 combined unittest cases pass; bothhost bash -n passes. CPU Torch/source/UUID
+  qualification remains automatic AFTER primary offline scoring/quiet, not runyet.
+
+Recovery only after verified exit, cwd extension_6250b51, local Python311:
+python -u -m scripts.v18_coordinate --start-at aime
+--continuation-deploy extension_6250b51
+--budget results/junyu_frontier_v18_20260926/campaign_budget_extension_20260926.json
 --after-stages-command-file E:/dlm/v18_private/finalize_command.json
---outcome E:/dlm/v18_private/primary_coordinator_outcome.json
-Use approved foreground TTY; adopt existing markers, do not relaunch GPU workers.
-Hourly task heartbeat v18-research-stage-continuation remains active; quiet when
-unchanged, original budgets apply, disable after CP4. CP3 core f64e0b9 committed;
-Windows CP3 pipeline is now deployed and waiting; no CP3 GPU work launched.
+--outcome E:/dlm/v18_private/completion_coordinator_outcome.json --poll-seconds 60
+Persisted segment intent must be reused; never invent a new outcome to bypass it.
 
-CP3 waiting controller: local PID16656, TTY session57502, local source012112454.
-Cwd E:/dlm/v18_private/controller_0121124; remote deploy/cp3_1c9a6e6 unchanged.
-Local read-only retries passed16 tests; transient network failures remain pending
-until original guard cutoff. Dispatch/mutation commands are never auto-retried.
-Config E:/dlm/v18_private/secondary_config.json;
-SHA55bc72e47887648c697393be2cc574d34300260b631c9d7584c59451aeeea43a.
-Durable status E:/dlm/v18_private/secondary_readretry.outcome.json.
-Earlier PIDs47716/42488 exited on read SSH timeouts before anyCP3 GPU dispatch;
-original secondary_config.outcome.json and secondary_restart1.outcome.json retained.
-Recovery only after verified controller exit: local Python311 -u -m
-scripts.v18_secondary_pipeline --deploy cp3_1c9a6e6
---config E:/dlm/v18_private/secondary_config.json
---outcome E:/dlm/v18_private/secondary_readretry.outcome.json --poll-seconds 60
-Gates: exact-ID complete primary summaries + closed primary stage markers;
-then actual-host CPU pytest/Torch/source/UUID checks, not yet run. All10 possible
-mpk calibration-point ledgers and both secondary stages are in frozen inventory.
-Sequence core70 calibration/eval -> independently calibrated allocation controls;
-whole question/seed retains primary GPU. T70/T60 timing is cross-stage descriptive.
-Failed/missing70 blocks prevent controls. Terminal errors preserve partial outputs;
-if peer writers are still live, partial scoring is deferred in outcome. Heartbeat
-should retry offline scoring after verified quiet, never duplicate GPU dispatch.
-Primary and secondary scripts do batch work; inspect only stage metadata/outcomes.
-Final CP4: fetch redacted summaries, answer v18 seven questions in morning_brief.md,
-report actual attained densities/missing cells/budgets, push, confirm own GPU idle,
-and disable heartbeat. Fast-path candidate remains stopped; no further CUDA work.
+python -u -m scripts.v18_secondary_pipeline --deploy extension_6250b51
+--config E:/dlm/v18_private/secondary_extension_config.json
+--outcome E:/dlm/v18_private/secondary_extension.outcome.json --poll-seconds 60
 
-22:35UTC stage aggregate: AIME216/1080 recorded (mpk112,dllm104), both GPU workers
-active after~2h39. Current pace risks incomplete primary by original cutoff.
-Do not extend budgets or alter stopping/output lengths. Preserve frozen block
-order, all first outputs and honest missing cells; incomplete AIME blocks CP3.
+Flow: originalAIME→clean numberedcontinuation ifneeded→RULERremainder→offline
+primary scoring→CP3 CPUqualification→70densitycal/eval→allocationcal/eval→scoring.
+Finalizer hook remains immutable scorer_f45fa83, exactgold/scorer identities; no
+prior private archives/summaries existed at newcontroller installation. CP3 all10
+possiblecal ledgers are budgeted; inherits exactprimary GPU. T70/T60 timing remains
+cross-stage descriptive; allocationcontrols have no warm latency claim.
+
+Heartbeat v18-research-stage-continuation updated to boundedextension through
+Sep28; quietunchanged. Scripts do batches; inspect stage-level metadata only.
+CP4: fetch redacted summaries, answer sevenv18 questions in morning_brief.md,
+report actualdensity/work/quality/timing/missingcells and candidateSTOP honestly,
+push all code/redactedresults, verify ownGPU jobsfinished, disable heartbeat.
+Never upload answers/gold/credentials/largetraces or archive theuser task.
