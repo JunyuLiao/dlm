@@ -32,3 +32,7 @@ Evidence: `cost_budget.csv`, `complete_forward_profile.json`, `adaptive_canvas_d
 - The decisions are unchanged:
   - Gate 5.1 still fails on AIME: the pilot's order-randomized per-call factor is CVM_T 1.003, B8_P 1.005 vs native.
   - The fused-planner repair is still unsupported. The launch inventory shows exactly 5 planner + 5 consumer kernels per ordinary step, and the GLOBAL-call timings are reproducible.
+
+
+---
+*Appended during v15:* scoped corrections to this report are in `corrections_v15.md` (LongBench phase-weighting used the AIME canvas mix; wording, divergence-cause, geometric-vs-pooled and drift clarifications). The text above is unchanged.

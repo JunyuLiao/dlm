@@ -54,3 +54,7 @@
 - Qualification:
   - v5 export+protect is clean under compute-sanitizer memcheck, racecheck and synccheck.
   - Ordinary CVM steps launch 0 value-direction/dense GLOBAL kernels (5 planner + 5 consumer).
+
+
+---
+*Appended during v15:* scoped corrections to this report are in `corrections_v15.md` (LongBench phase-weighting used the AIME canvas mix; wording, divergence-cause, geometric-vs-pooled and drift clarifications). The text above is unchanged.

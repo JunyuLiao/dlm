@@ -68,3 +68,7 @@ Correct out of 12 (6 dev IDs × seeds 17/29, first outputs, frozen scorer):
 - ~90% of divergent rows diverge while s = 1 (T bootstrap / no prior flip), so T's causal protection is structurally unavailable for them.
 
 Files: `cost_budget.csv`, `complete_forward_profile.json`, `adaptive_canvas_diagnostic.json`, `launch_inventory.json`, `overhead_attribution.json`, `sanitizer_receipt.txt`, `qualification.json`, `gate_decisions.md`, `frozen_protocol*.json`, `complete_request_results.{csv,json}`, `private_receipt_index.json`, `fan_update.md`.
+
+
+---
+*Appended during v15:* scoped corrections to this report are in `corrections_v15.md` (LongBench phase-weighting used the AIME canvas mix; wording, divergence-cause, geometric-vs-pooled and drift clarifications). The text above is unchanged.
