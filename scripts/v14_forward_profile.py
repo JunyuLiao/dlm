@@ -124,7 +124,9 @@ def main() -> None:
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
     model = adapter.model
-    report = dict(schema='v14_complete_forward_profile_v1', id=args.id, seed=args.seed, reps=args.reps, states={})
+    report = dict(schema='v14_complete_forward_profile_v1', id=args.id, seed=args.seed, reps=args.reps, states={},
+                  timing_note=('INVALID for every arm after the first: the --inventory torch.profiler pass leaves CUPTI tracing '
+                               'overhead in the process (+~30 ms/step observed); use launch counts only') if args.inventory else None)
     for canvas in args.canvases:
         seq = capture_sequence(adapter, row, canvas, args.steps, args.seed)
         state_report = dict(canvas=canvas, steps=len(seq), absolute=[s['absolute'] for s in seq],

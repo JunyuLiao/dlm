@@ -1,0 +1,151 @@
+{
+  "controls": {
+    "C_T_controller": "exact fast-T controller observing the native loop, no binding",
+    "N0_binding": "GLOBAL-only binding + _MaskGuard + pass-through native SDPA",
+    "N1_binding_T": "both",
+    "note": "profile-only controls; never used for answers"
+  },
+  "findings": [
+    "Order test (one process): N0 1332.6, D_native 1333.5, C_T 1332.7 ms (identical within 0.1%) -> GLOBAL binding + guard + fast-T controller cost ~0 when adjacent.",
+    "Same process, same untouched native configuration later in the sequence: D_native_b 1365.2 vs D_native 1333.5 ms (+2.4%): process/sequence-level drift of ~2% exists; hooks are removed on close and no device-limit or L2-persistence setting exists in the code (inspection); the no-op binding leaves no residue; cause not identified (a VM-level effect cannot be excluded).",
+    "T_G vs its adjacent controls (D_native_b, N1): +0.3..+0.6% (1368.7 vs 1365.2 / 1360.0 ms), inside the drift.",
+    "GLOBAL-call timings (per-call CUDA events) are reproducible across runs (e.g. CVM ordinary vs native -3.58/-3.59 ms per step for 5 layers at prefix 6275); complete-forward differences <=2% on AIME are NOT resolvable by these profiles.",
+    "Earlier CP2 statement \"every T-using arm pays ~1.2-1.8 ms/step outside the GLOBAL calls\" is NOT supported: it is within this drift (retracted; see gate_decisions.md correction).",
+    "Robust request-level measure: the pilot per-call factors vs D_native (order-randomized, 12 cells each): T_G 1.018, T_P 1.013, B8_P 1.005, CVM_T 1.003."
+  ],
+  "runs": [
+    {
+      "arms": {
+        "C_T_controller": {
+          "median_global_ms": 10.751,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1332.73
+        },
+        "D_native": {
+          "median_global_ms": 10.753,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1333.55
+        },
+        "D_native_b": {
+          "median_global_ms": 10.709,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1365.18
+        },
+        "N0_binding": {
+          "median_global_ms": 10.816,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1332.63
+        },
+        "N1_binding_T": {
+          "median_global_ms": 10.768,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1359.98
+        },
+        "T_G": {
+          "median_global_ms": 10.78,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1368.7
+        }
+      },
+      "file": "post/timing_order_q14_c24.json",
+      "order": [
+        "N0_binding",
+        "D_native",
+        "C_T_controller",
+        "T_G",
+        "D_native_b",
+        "N1_binding_T"
+      ],
+      "state": "aime26/14 s17 canvas 24 (prefix 6275)"
+    },
+    {
+      "arms": {
+        "CVM_T": {
+          "median_global_ms": 7.16,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1350.1
+        },
+        "C_T_controller": {
+          "median_global_ms": 10.756,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1344.34
+        },
+        "D_native": {
+          "median_global_ms": 10.753,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1369.62
+        },
+        "N0_binding": {
+          "median_global_ms": 10.807,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1347.33
+        },
+        "N1_binding_T": {
+          "median_global_ms": 10.811,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1345.8
+        },
+        "T_G": {
+          "median_global_ms": 10.801,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1377.73
+        }
+      },
+      "file": "post/timing_q14_c24.json",
+      "order": [
+        "D_native",
+        "N0_binding",
+        "C_T_controller",
+        "N1_binding_T",
+        "T_G",
+        "CVM_T"
+      ],
+      "state": "aime26/14 s17 canvas 24 (prefix 6275)"
+    },
+    {
+      "arms": {
+        "CVM_T": {
+          "median_global_ms": 2.117,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1099.59
+        },
+        "C_T_controller": {
+          "median_global_ms": 1.582,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1034.98
+        },
+        "D_native": {
+          "median_global_ms": 1.79,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1078.91
+        },
+        "N0_binding": {
+          "median_global_ms": 1.663,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1056.57
+        },
+        "N1_binding_T": {
+          "median_global_ms": 1.855,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1060.94
+        },
+        "T_G": {
+          "median_global_ms": 3.096,
+          "outputs_identical_across_reps": true,
+          "sequence_ms": 1097.37
+        }
+      },
+      "file": "post/timing_q2_c1.json",
+      "order": [
+        "D_native",
+        "N0_binding",
+        "C_T_controller",
+        "N1_binding_T",
+        "T_G",
+        "CVM_T"
+      ],
+      "state": "aime26/2 s17 canvas 1 (prefix 365)"
+    }
+  ],
+  "schema": "v14_overhead_attribution_v1"
+}

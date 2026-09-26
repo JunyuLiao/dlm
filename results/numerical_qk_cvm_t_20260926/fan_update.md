@@ -26,7 +26,9 @@
   - CVM_T c = 1.020 (prefix 365), 1.009 (2157), 0.989 (6275).
   - The request-level AIME estimate is **1.003**.
   - The measured request-level per-call factor in the pilot is **1.003**.
-  - GLOBAL attention is ≤8% of an AIME step, and every T-using arm pays ~1.2–1.8 ms/step outside the GLOBAL calls.
+  - GLOBAL attention is ≤8% of an AIME step, so even the per-call saving on ordinary steps is ≤~2.5% of a late step, before anchors.
+  - An order-controlled profile shows ~2% process-level drift, so AIME complete-forward differences ≤2% are not resolvable by profiles. The order-randomized pilot per-call factors are the robust measure: CVM_T 1.003, B8_P 1.005, T_P 1.013, T_G 1.018.
+  - The binding plus the exact fast-T controller cost ~0.
 - **Regime diagnostic** (real LongBench-v2 16–18K prompts, first canvas, not scored): CVM_T c = 0.93–0.94; B8_P 0.90–0.92.
 
 ## Pilot (6 dev IDs × seeds 17/29, attempt 0 + 1 accepted warm; 120/120, 0 failures)
@@ -49,3 +51,6 @@
 - The per-forward saving the method can produce on AIME is ~0 at request level. It exists only at long prefixes.
 - Most rows that later diverge from native do so during T's two-step bootstrap (s = 1). There the anchor is fresh, so stale margins are not the failure mechanism.
 - Extension and repair were not run (gate decisions were recorded before the scores).
+- Qualification:
+  - v5 export+protect is clean under compute-sanitizer memcheck, racecheck and synccheck.
+  - Ordinary CVM steps launch 0 value-direction/dense GLOBAL kernels (5 planner + 5 consumer).

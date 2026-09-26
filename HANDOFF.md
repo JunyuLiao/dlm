@@ -1,107 +1,54 @@
-# v13 (DONE): frozen GLOBAL-only 5-arm study, all-30 AIME26 x seeds 17/29
-
-- Authorized full 30 x seeds 17/29; methods frozen; protocol frozen before inference
-  (`results/numerical_qk_global_multiseed_20260925/frozen_protocol.json`).
-- Driver `scripts/v13_seed_runs.py` (seed in cell ID/request/receipts; validated resume), summarizer `scripts/v13_summarize.py`,
-  report `scripts/v13_report.py`, tests `tests/test_v13_seed_driver.py` (9). Seed-42 check reproduced the v12 hash.
-- 600/600 executions, 0 failures, all warm repeats accepted; 7.71 GPU-h. Private ledger/receipts:
-  /media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925 (index: private_receipt_index.json).
-- Quality (of 60): T_G 34, G3 34, B8 34, D 32, G1 30; all paired CIs include 0.
-- Time (candidate/reference, question-cluster 95% CI): G3/T_G 1.160 [1.071,1.259]; G3/D 1.091 [1.011,1.184];
-  B8/D summed 0.927 [0.856,0.997]; T_G/D 0.941 [0.868,1.019]; G1/B8 1.109 [1.016,1.208].
-  Almost entirely call count (G3/T_G calls x1.124, per call x1.003).
-- Conclusion: the v12 G3 signal was seed-specific; no benefit of M1 re-selection over the frozen bitmap.
-- Next: PI decision on a different model/workload regime or a B8 follow-up; no kernel work on this path.
-
-# (previous) v12 (DONE): GLOBAL-only scope, native LOCAL -- D_native / T_G / G1 / G3 / B8_G
-
-- Plug-in `experiments/numerical_qk_reuse/global_scope.py` (proxy adapter tags only GLOBAL layers 5,11,17,23,29;
-  LOCAL untagged -> original native SDPA). Conditions global_T / global_M1 / global_M3 / global_B8.
-  Tests: tests/test_v12_global_scope.py (6). Probe: scripts/v12_scope_probe.py (per-step dispatch 25 native LOCAL +
-  5 routed GLOBAL for all arms; GLOBAL summaries on/off decisions identical, 170 hits).
-- Costs (`same_state_costs.*`): 5 GLOBAL calls = native 3.7 ms of a ~132 ms step (<=3%); all bound arms pay
-  ~6-7 ms/step fixed overhead; G ordinary 6.6 ms, held 2.3 ms, anchors 10.6 ms (canvas 6).
-- Panel (40) + extension /23,/30 (10) + audit twins (4) = 54/64 requests, 0.70/4 GPU-h.
-  Quality: panel 3/4 in all arms; 6 questions: T_G 4, G3 4, D 3, G1 3, B8 3.
-  Warm summed time vs D_native: G3 0.779, B8 0.897, G1 0.912, T_G 1.030. Per call +2-6% vs native.
-  Achieved GLOBAL skip (/8): G1 21%, G3 20%, B8 31%, T_G 22%.
-- Conclusion (`history_increment.md`, `fan_update.md`): no numerical-history increment over the frozen bitmap B8;
-  no per-step headroom for GLOBAL fusion (skipped); E2E differences come from trajectory length.
-- Next: a frozen larger panel with seeds (D_native, T_G, G3, B8) before any kernel work.
-
-# (previous) v11 (DONE): preselected-support Hopper consumer -> H1/H3 (negative E2E)
-
-- Kernel `experiments/value_direction_hopper/csrc/support_consumer.{cu,h}`, ATen `vd_support_v1`, build/verify
-  `experiments/value_direction_hopper/support.py` (build e3c283b8cbb9b79c on /media/volume/dllm-1/dyh/...bridge_20260925/build).
-  Support read before any tile work (poisoning/counters/scaling); bit-identical to fresh T on its support;
-  sanitizer clean. vs O Triton consumer: rel-Fro <= 0.0025, max-abs envelope failed 60/660 -> H1 numerically != O.
-- Router: `integration.Attention(consumer='hopper', support_build=...)` (ordinary/held consumer only).
-  D_mask plug-in: `experiments/numerical_qk_reuse/dense_mask.py` (legacy-mask dense diagnostic).
-- Same inputs: consumer 0-25% faster, complete M1 call H1 ~= O (selector 0.6-1.4 ms/call = 2-3x fresh T whole call);
-  step: no gain; fresh-T step +14% vs native.
-- Panel (39 of 64 requests, 0.56 GPU-h): quality Dn 3/4, T 3/4, H1 2/4, H3 3/4.
-  H1/T geo 0.851 only via fewer calls (x0.81, per-call x1.10, two lost answers).
-  H3/T geo 1.225 (summed 1.348).
-- Bugs fixed: aligned cross-role barrier; `support` param shadowing; v10 guard_mode drop (v10 notes appended).
-- Results: `results/numerical_qk_hopper_support_bridge_20260925/` (decision.md, morning_brief.md).
-- Next: fused historical decision in the Hopper producer (anchor summaries + live T), GLOBAL layers first,
-  target complete call <= fresh T (`scripts/v11_same_support_calls.py`).
-
-# (previous) v10 overnight: bounded specialization + one warm repair + 4-question panel (DONE)
+# HANDOFF — v14 CVM-T (current only; v10–v13 archived verbatim in docs/handoff_archive/)
 
 ## Identity
-- Spec: user-supplied v10. Resumed from `af6dc69` (v9). Branch `research/numerical-qk-reuse-native-20260924`.
-- Host mpk (149.165.151.254), 1x H100. Interpreter: conda `ljy_dlm` with user site ENABLED:
-  torch 2.6.0+cu124 and triton 3.2.0 from `~/.local`, transformers 5.11.0 from conda.
-  Details: `results/numerical_qk_overnight_runtime_20260925/environment_and_storage_identity.json`.
-- Every model job ran from a read-only `../deploy/<sha12>/` snapshot. Triton caches were private dirs on the
-  large disk; `~/.triton` was never touched.
-- Started 06:57:30Z. Used 56/72 complete requests and 1.14/5 GPU-h (ledger:
-  `/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/resource_ledger.jsonl`).
-  No live jobs. Root 56 GB free; nothing migrated or deleted.
+- Repo `coconight01/dlm_test`, branch `research/numerical-qk-reuse-native-20260924`, based on v13 `73b6a668`.
+- Junyu reference `query-sensitivity-aware-v3@053441c6` was verified unchanged and never written.
+- Host mpk (149.165.151.254), 1× H100 80GB. Env: conda `ljy_dlm` with the user site ON; torch 2.6.0+cu124 and triton 3.2.0 from `~/.local`, transformers 5.11.0.
+- Model DiffusionGemma-26B-A4B `f7f5b7f5`. AIME26 dev IDs /2,/8,/14,/20,/23,/30 × seeds 17/29. Native adaptive schedule, thinking ON, 8192 output budget.
+- Every GPU job ran from a read-only `../deploy/<sha12>/`: tests/diagnostics `82b77afb907c`, pilot `8c0c44f907f3`, post-pilot profiles `d19acb240fd3`.
+- Private/bulky root: `/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926/`.
+  - Subdirs: `cp2/`, `cp3/` (ledgers, receipts), `post/`, `build/v5_be53e4c706032aef/`.
+  - `resource_ledger.jsonl`, `job_ledger.jsonl`.
 
-## CP1: length-generic kernels (commits 901e360, f03bdf6)
-- `experiments/numerical_qk_reuse/generic_kernels.py`: bodies textually identical to the static kernels, with
-  runtime K/KT/PREFIX_TILES (do_not_specialize). K is passed as K/KDIV, where KDIV (pow2 <= 16) is a constexpr.
-  This is the one fallback after the first mismatch: K%4==0, K%16!=0 lost constexpr alignment and changed the
-  reduction order by 1 ulp. `tl.multiple_of` on a scalar had no effect.
-- Flags: `kernel_variant='static'|'generic'` (runner `--kernel-variant`); `warmup_generic()` compiles the bounded
-  production set.
-- 35 tests: bit identity of every entry point/buffer/counter; variants bounded; 0 compiles for unseen lengths.
-- Cold (new process, empty cache) /2: 94.7 -> 32.5 s; /8 first-seen 85.2 -> 38.6 s; warm unchanged. Tokens
-  identical to static and v9.
+## Method (see results/numerical_qk_cvm_t_20260926/method_contract.md)
+- **Anchor (new canvas / A8 / new epoch).** Private v5 of Junyu's fresh value-direction kernel (ABI 5, `csrc/value_direction_v5.*`, `torch_bridge_v5.cpp`).
+  - It exports the unweighted `log rho[B,H,J,Q]` and enforces the mandatory tiles `j >= prefix//64` inside `decide()`.
+  - Export/protect off is bit-identical to v4.
+- **Ordinary step.** The Triton planner `experiments/value_direction_hopper/cvm.py:_plan` restores a tile iff `max_rows(log rho + log s_t) >= log tau` (add-only within an epoch). Then the v11 support consumer runs, then the fused guard.
+- **Arms** (`experiments/numerical_qk_reuse/global_scope.py`), all GLOBAL-only with LOCAL native:
+  - `global_TP` (T_P), `global_B8P` (B8_P), `global_CVM` (CVM_T);
+  - `global_T` + `fast_t` (T_G_original).
+- **Exact T-only fast path:** `query_adaptive.State(fast_t=True)` with a `t_history` sentinel.
+- Tests: `tests/test_v14_cvm.py` (14 pass). v12/v13 regressions pass (12 passed, 3 skipped).
 
-## CP2: one warm repair (commits 947cf49, 48ad289, 01efe39, e955c29)
-- Matched trace D vs P (4 windows): the largest added device cost is `_route` (32 CTAs, sequential tiles;
-  late ordinary 15 ms, anchor 26 ms). About +1.0-1.4k device events per step. LOCAL layers dominate. Syncs equal;
-  no allocations.
-- Repair: `telemetry='minimal'` + `guard_mode='fused'` (one Triton guard pass, same coverage) + no memset for
-  unused counters. Bit-identical. Same-state step -3.0 ms (~2%).
-- Counterfactual (routing removed, same support): still ~11% slower per step than native.
-- Not taken: T fast path (~1.6 ms), `_route` tile-parallel restructure (a new kernel design).
+## Results (results/numerical_qk_cvm_t_20260926/)
+- **Complete-forward cost** (`cost_budget.csv`, `complete_forward_profile.json`, `profiles/`):
+  - AIME phase-weighted CVM_T c = 1.020 / 1.009 / 0.989 at prefixes 365 / 2157 / 6275. The request-level estimate is 1.003, and the pilot measured per-call 1.003.
+  - LongBench-v2 16–18K regime (unscored): CVM_T 0.93–0.94, B8_P 0.90–0.92.
+- **Adaptive diagnostic** (`adaptive_canvas_diagnostic.json`, 5 identical canvas-start states):
+  - Calls to native stop: D 54, T_G 49, T_P 43, B8_P 43, CVM_T 46.
+  - Executed prefix fraction: CVM ≈ T_P ≈ 0.70–0.75 (late), B8_P ≈ 0.52–0.55.
+  - ~90% of divergent rows diverge while s = 1.
+- **Pilot** (`complete_request_results.{csv,json}`): 120/120 executions, 0 failures, 60/60 warm accepted.
+  - Correct out of 12: B8_P 9, T_G_original 8, D 6, CVM_T 6, T_P 5.
+  - CVM_T/B8_P geometric time 1.23 [1.08, 1.50], from calls ×1.27 (per call 0.998). Paired outcomes 1 vs 4.
+  - D_native and T_G_original tokens are identical to v13 in 12/12 cells each.
+- **Launch inventory** (`launch_inventory.json`): on ordinary CVM steps, 0 v5/value-direction launches and 5 planner + 5 consumer launches; the anchor steps launch v5.
+- **Overhead attribution** (`overhead_attribution.json`): the binding plus the fast-T controller cost ~0. Profiles drift ~2% within a process, so AIME forward differences ≤2% are unresolved. Use the pilot per-call factors (CVM_T 1.003, B8_P 1.005, T_P 1.013, T_G 1.018).
+- **Sanitizer** on v5 export+protect: memcheck 0 errors, racecheck 0 hazards, synccheck 0 errors (`sanitizer_receipt.txt`).
+- **Gates** (`gate_decisions.md`, recorded before scores): extension NOT run; no repair (no supported diagnosis).
 
-## CP3: panel (48 runs, 0 failures; all repeats token-identical to attempt 0)
-| warm s | D | T | P | O |
-|---|---:|---:|---:|---:|
-| /2 | 22.8 | 35.0 | 19.5 | 19.3 |
-| /8 | 20.3 | 32.7 | 33.5 | 33.3 |
-| /14 | 64.9 cap | 64.1 | 119.5 cap | 118.5 cap |
-| /20 | 55.6 | 21.7 wrong | 29.7 | 29.5 |
-Quality 3/4 in every arm. O/P geometric 0.992; O/D 1.078 (summed 1.226); O/T 1.091 (summed 1.307).
-P==O tokens on all 4 questions. The native-mask vs legacy-mask discrepancy remains.
-The 8-ID expansion was NOT triggered (P->O < 5%, not competitive).
+## Reports
+`morning_brief.md` (answers Q1–Q5), `fan_update.md`, `qualification.json`, `frozen_protocol*.json`, `smoke_protocol.json`, `private_receipt_index.json`.
 
-## Files (Git)
-`results/numerical_qk_overnight_runtime_20260925/`: environment_and_storage_identity.json,
-specialization_contract_and_tests.{json,md}, cold_disk_warm_process_comparison.{csv,json},
-matched_native_sparse_trace_delta.{json,md}, chosen_warm_repair.md, complete_request_results.{csv,json},
-decision.md, morning_brief.md. Tests: tests/test_v10_generic_kernels.py, tests/test_v10_minimal_telemetry.py.
-Private/bulky: `/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/`
-{cp1,cp2_trace,cp2_replay,cp3}/ (raw attempt-0 receipts under */private, never in Git).
-Job scripts: `../run_v10_{cp1,trace,replay,counterfactual,cp3}.sh`.
+## Reproduce
+- Profiles: `scripts/v14_forward_profile.py`. Cost tables: `scripts/v14_cost_budget.py`.
+- Adaptive diagnostic: `scripts/v14_adaptive_canvas.py` + `scripts/v14_adaptive_summary.py`.
+- Protocol: `scripts/v14_build_protocol.py`. Runs: `scripts/v13_seed_runs.py`. Scoring: `scripts/v14_summarize.py`.
+- Supervisors: `$R/cp3/run_pilot.sh`, `$R/post/run_post2.sh`.
 
-## Next (single decision; decision.md)
-Test historical (M1/M3) selection INSIDE Junyu's fused Hopper kernel: bitmap in place of fresh routing, same
-mask, same kernel, head-to-head vs fresh T. Stop tuning the Triton M1 pre-QK path. If that does not beat fresh T
-per call, the contribution must rest on selection quality vs a simple previous-bitmap baseline, not runtime.
-Reproduce the panel: `./run_v10_cp3.sh 01efe3960713` (from `numerical_qk_reuse_recovery_20260924/`).
+## Next (single action)
+Stop CVM-T on AIME (measured negative: no request-level execution saving; no quality or time gain over B8_P).
+If Fan/PI keep the runtime claim: run the SAME frozen five arms unchanged on a small scored LongBench-v2 10–20K panel with
+`scripts/v14_build_protocol.py` (new mode) + `scripts/v13_seed_runs.py`. That is the only regime with measured per-forward headroom
+(c 0.90–0.94). It needs PI approval because it makes a long-context benchmark primary.

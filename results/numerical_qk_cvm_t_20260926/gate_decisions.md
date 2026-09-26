@@ -22,3 +22,13 @@ Evidence: `cost_budget.csv`, `complete_forward_profile.json`, `adaptive_canvas_d
    - A2 requires "CVM-T is cheap but fails adaptive behavior with failures localized to stale anchor margins". CVM-T is not cheap at AIME request level. The divergences localize to the bootstrap iterations, which use a fresh anchor, not stale margins.
    - The fused margin check requires "the planner launch dominates". It does not: the CVM−B8_P ordinary-call gap is ≤0.085 ms/layer at the early state, and it is dominated by restored QK/PV work at late states. The larger loss is a fixed ~1.7–2.0 ms/step outside GLOBAL attention that all T-using arms pay; T_G included.
    - No supported diagnosis, so no repair is invented. The spare budget goes to isolating that fixed overhead with a no-op binding control (profile only, no answers), plus the pending bounded sanitizer and launch-inventory checks.
+
+## Correction appended after the pilot (07:58Z; the text above is left as recorded)
+- The statement above attributes a fixed ~1.7–2.0 ms/step outside-GLOBAL overhead to every T-using arm. It is **not supported**.
+- An order-controlled profile (`overhead_attribution.json`) shows two things:
+  - Binding + guard + fast-T controller cost ~0 when adjacent to native.
+  - The same untouched native configuration differs by 2.4% at two positions of one process.
+- Complete-forward differences ≤2% on AIME are therefore within profile drift.
+- The decisions are unchanged:
+  - Gate 5.1 still fails on AIME: the pilot's order-randomized per-call factor is CVM_T 1.003, B8_P 1.005 vs native.
+  - The fused-planner repair is still unsupported. The launch inventory shows exactly 5 planner + 5 consumer kernels per ordinary step, and the GLOBAL-call timings are reproducible.
