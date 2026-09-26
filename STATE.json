@@ -3,7 +3,7 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP2_INITIAL_RUNNING_BOTH_HOSTS",
+  "status": "CP2_RULER_INITIAL936_COMPLETE_AIME_RUNNING",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
   "candidate": "STOP_IMPLEMENTATION_THIS_ROUND: ideal GLOBAL opportunity but no demonstrated net cost headroom or finite-precision certificate; no CUDA candidate",
@@ -15,19 +15,15 @@
   "gpu_jobs": [
     {
       "host": "149.165.151.254",
-      "supervisor_pid": 1614993,
-      "pgid": 1614993,
-      "worker_pid": 1615015,
-      "stage": "ruler_initial",
-      "start_epoch": 1790451863
+      "stage": "aime",
+      "status": "started marker and ledger start confirmed",
+      "pid_source": "ROOT/evaluation/status/HOST_aime.started.json"
     },
     {
       "host": "149.165.159.64",
-      "supervisor_pid": 8248,
-      "pgid": 8248,
-      "worker_pid": 8262,
-      "stage": "ruler_initial",
-      "start_epoch": 1790451864
+      "stage": "aime",
+      "status": "started marker and ledger start confirmed",
+      "pid_source": "ROOT/evaluation/status/HOST_aime.started.json"
     }
   ],
   "budget": {
@@ -52,7 +48,7 @@
     },
     "frozen_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json"
   },
-  "next": "Local CPU coordinator adopts initial, syncs peer ledgers, launches AIME then remainder; scorer CPU only",
+  "next": "Automatic AIME then RULER remainder; CPU scorer/finalizer and separate gated secondary pipeline being prepared",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -74,5 +70,21 @@
   "bridge_receipt": "results/junyu_frontier_v18_20260926/cross_host_bridge.json",
   "driver_deployment": "deploy/driver_5b14a21; launcher5b14a21, driver90171ff; child generation cwd bridge_json",
   "stage_status": "ROOT/evaluation/status/HOST_STAGE.{started,done}.json",
-  "worker_ledgers": "ROOT/evaluation/ledgers/HOST_{ruler,aime}.jsonl"
+  "worker_ledgers": "ROOT/evaluation/ledgers/HOST_{ruler,aime}.jsonl",
+  "coordinator": {
+    "host": "Windows local",
+    "pid": 50660,
+    "exec_session": 45289,
+    "source_commit": "628311db2680d18b7fc8b41c48429325e7b53601",
+    "source": "E:/dlm/v18_private/coordinator_frozen/scripts/v18_coordinate.py",
+    "log": "E:/dlm/v18_private/coordinator.log",
+    "error_log": "E:/dlm/v18_private/coordinator.err",
+    "command_file": "E:/dlm/v18_private/finalize_command.json",
+    "previous_pid49208": "stopped after exact command verification; replacement uses escalated long exec session"
+  },
+  "completed_primary_executions": {
+    "ruler_initial": 936,
+    "mpk": 468,
+    "dllm": 468
+  }
 }

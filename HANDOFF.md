@@ -64,3 +64,14 @@ Budget / next action:
   Warm accepted only if full required evidence matches, no JIT/new SO.
 - No cross-host absolute-time pooling. Host strata and within-GPU ratios.
 - No raw answers/gold/credentials/large traces in Git. No peer branch edits.
+
+Live checkpoint: initial RULER936 executed (468/host), ledger copies SHA-verified.
+AIME started on both hosts. Local coordinator is PID50660, exec session45289,
+immutable628311d under E:/dlm/v18_private/coordinator_frozen; logs
+E:/dlm/v18_private/coordinator.{log,err}. Earlier hidden PID49208 was stopped
+after exact command verification; do not start a second coordinator.
+Finalization command file E:/dlm/v18_private/finalize_command.json is still being
+prepared; install it before the primary stages finish. Recovery after a confirmed
+controller exit: run the frozen coordinator with --start-at aime, the frozen
+campaign budget and finalization command file; existing stage markers are adopted.
+Do not restart remote GPU workers or overwrite receipts on coordinator recovery.
