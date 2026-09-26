@@ -47,3 +47,19 @@ identity passed; see model_bridge_identity.json. AIME exact token overlay30/30
 frozen privately under private_v3; no AIME generation yet. No accepted timing
 from capture/calibration/bridge. Ball opportunity script is being implemented,
 not GPU-run and not approved for CUDA integration.
+
+CP1 latest: calibration442requests completed; all four densitypoints attained
+within2pp inwhole/local/global (frozenresults inGit). StrongB8 full16passed
+token/call/phaseequivalence and8warmacceptance; requestgeomeannew/old1.000187,
+no speedup signal. T60capture2 requests+12states andball14s completed: ideal
+GLOBALskipcoverage58.84%,LOCAL11.32%; notfiniteprecisioncertificate/speedproof.
+OldwaitingT50ball1610494 was stoppedbeforeGPU, supersededbyT60job1611545 done.
+Standalonecostharness pending; CUDAunchanged. LegacyLOCALgeometry omits9.97%
+ofcapturednativelegalpairs, GLOBALmatches; geometry-onlyreport inGit.
+
+Twohostbridge launched oldPID1612677/newPID7478 fromdeploy/bridge_json exact
+4d53b5c sourceoverlay. Newhostearlierfreeze failedbeforeGPU because JSON -inf;
+fixedexplicitstring sentineldecode toactual-inf atkernelbinding. Logs preserved.
+Bridge/eval mathematical IDs bindcontent/tensors independentofhostlocalpaths;
+executionconfig hashes retainactualpaths. Newmodelindexdiff isdeclaredrepacking,
+all1047tensorhashesandnonindexmetadata remainrequired. Noofficialeval yet.

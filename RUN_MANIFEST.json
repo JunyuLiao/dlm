@@ -1,0 +1,44 @@
+{
+  "schema": "v18_run_manifest_index_v1",
+  "status": "evaluation_pending_request_bridge",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "generation_seeds": [
+    101,
+    202,
+    303
+  ],
+  "projection_seed": 1729,
+  "scope": "native_legal_all_layers",
+  "ruler": {
+    "questions": 130,
+    "construction": "development_replication",
+    "private_manifest_version": "private_v2",
+    "thinking": false,
+    "output_budget": "frozen_task30/32/50/120/128",
+    "timed_questions": 26
+  },
+  "aime": {
+    "questions": 30,
+    "construction": "existing_aime26_newseeds_not_cleanheldout",
+    "private_manifest_version": "private_v3_exact_tokens",
+    "thinking": true,
+    "output_budget": 8192,
+    "first_and_warm_executions": 1080
+  },
+  "calibration": {
+    "file": "results/junyu_frontier_v18_20260926/calibration_frozen.json",
+    "questions": 26,
+    "seed": 42,
+    "executions": 442,
+    "uses_quality": false,
+    "all_four_attained": true
+  },
+  "block_assignment": "freezeorderedroundrobin(mpK,dllm)onlyafterbridge; everyquestionseed allarms/repeats ononeGPU",
+  "primary_stage_order": [
+    "RULER26timedquestionsallseeds",
+    "AIME30allseeds",
+    "RULERremaining104questions"
+  ],
+  "secondary": "70/allocation onlyafterprimary andremainingbudget; noeval-basedthresholdselection",
+  "budget_state": "STATE.json"
+}

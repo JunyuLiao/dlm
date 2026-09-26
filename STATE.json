@@ -3,23 +3,27 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP1_SCOPE_QUALIFIED_CALIBRATION_RUNNING",
+  "status": "CP1_CALIBRATED_B8_EQUIVALENT_BRIDGE_RUNNING",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
-  "candidate": "post-QK ball screen opportunity only; no kernel qualification or success claim",
-  "scope": "native_legal_all_layers qualified13states; dense numerical path separate fromnative",
+  "candidate": "T60 idealball12valid; global skipcoverage58.84%,local11.32%; finitecertificate and wholecallcost pending",
+  "scope": "native_legal_all_layers qualified13states; Dmatched distinct numerical path",
   "hosts": {
     "149.165.151.254": "runtime inventoried; prior v15 tree clean",
-    "149.165.159.64": "CPUmodel1047/1047 exact; runtime relay active; not bridgequalified"
+    "149.165.159.64": "PrivateTorch2.6cu124/Triton3.2/Transformers5.11 and1047tensors qualified; requestbridge pending"
   },
   "gpu_jobs": [
     {
       "host": "149.165.151.254",
-      "supervisor_pid": 1608369,
-      "pgid": 1608369,
-      "deploy": "97a020f0133152a06e80d19fe348a78dc6bc1119",
-      "stage": "calibration_v2",
-      "resource_ledger": "/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926/resource_ledger.jsonl"
+      "supervisor_pid": 1612677,
+      "pgid": 1612677,
+      "stage": "bridge6"
+    },
+    {
+      "host": "149.165.159.64",
+      "supervisor_pid": 7478,
+      "pgid": 7478,
+      "stage": "bridge6"
     }
   ],
   "budget": {
@@ -32,11 +36,14 @@
     "scoring_minutes_reserved": 30,
     "known_generation_gpu_process_seconds": 88,
     "synthetic_qualification_seconds": "recover from job receipt, not zero",
-    "new_generations_before_live_calibration": 3,
-    "known_scope_gpu_process_seconds": 11
+    "known_scope_gpu_process_seconds": 11,
+    "completed_generations_before_bridge": 463,
+    "calibration_generations": 442,
+    "known_stage_gpu_process_seconds_before_bridge": 1450,
+    "additional_conservative_gpu_seconds_reserve": 120
   },
-  "next": "Commit immutable corrected deploy; calibration_v2 using private_v2; capture then scope then calibration; freeze AIME tokens before evaluation",
-  "strong_b8": "CPU17 tests and GPU3 prefix export parity pass; full16 pending",
+  "next": "compare bridge6/6, freezehostassigned primary protocol, RULERtimedsubset thenAIME; boundedcandidatecostdiagnostic first",
+  "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
     "pgid": 1606995,
@@ -48,13 +55,10 @@
     "runtime_exec_session": 98143,
     "missing_tensor_relay": "exit0"
   },
-  "queued_jobs": [
-    {
-      "pid": 1609409,
-      "pgid": 1609409,
-      "stage": "strong_b8_full16",
-      "condition": "CP1supervisor exit and runtime transport quiet; GPUfree",
-      "launcher": "/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926/run_b8_after_cp1.sh"
-    }
-  ]
+  "queued_jobs": [],
+  "deployment": {
+    "path_suffix": "deploy/bridge_json",
+    "source_commit": "4d53b5c330a71a12424c267e7e03fc86094c2bdb",
+    "construction": "archive e9f851c plus exact4d53b5c three-file overlay"
+  }
 }

@@ -111,3 +111,30 @@ seed101, layers0/5/29 and steps1/3 under the final calibrated T60 policy. Total2
 real states stays within v18. Analyze these T60 states for the selected parent;
 no evaluation output or answer informs this choice. The waiting T50 ball job was
 stopped before GPU execution. No CUDA implementation is authorized by this step.
+
+## Synchronization refinement from the actual router (implementation still gated)
+
+The initial card conservatively budgeted an extra cluster vote. Inspection of
+`router`, `projected_registers`, `decide`, and `consumer` shows another possible
+implementation of the same ball screen: a whole warp whose rows are certified
+can defer its PZ, contribute a sound below-limit upper bound to the existing
+physical Q128 vote, and compute exact parent PZ afterward only if the physical
+tile is retained because another warp/half rejects it. This avoids an additional
+cluster collective. It is not a per-half early return: every router/consumer
+still reaches both existing rendezvous on every tile. Deferred PZ must finish
+before the next QK overwrites Z/K scratch; current P and oldscale are already
+prepared before the vote, so the unchanged PV consumer can proceed. On physical
+skip the parent retains its previous projected state; on physical retain late
+PZ must produce the same update. First support, exceptional values and exact-risk
+export must fall back. This remains a design obligation, not implemented proof.
+
+A possible finite-precision proof should bound the actual TF32 high/residual
+operands, rather than assuming ideal normalized P. For high/low P components
+ph/pl and Z components zh/zl, the logical three-product sum is
+sum(ph*(zh+zl) + pl*zh). A convex ball for zh+zl can bound its first term using
+Wh=sum(ph), while sum(abs(pl))*max(norm(zh)) bounds the signed residual term.
+An independently justified MMA accumulation error must then be added, followed
+by outward bounds for the parent subtraction, alpha multiplication, squared norm,
+reference division, sensitivity and comparison. PTX accumulation/underflow
+semantics, metadata rounding and cost are unresolved gates; no empirical epsilon
+or real-arithmetic opportunity count is accepted as this certificate.
