@@ -37,7 +37,7 @@ def shuffle_within_tiles(values, generator, tile=128):
 
 
 class State:
-    def __init__(self,method,router,*,m_ref,beta=3.,gamma=.5,allocation='normal',bootstrap=False,seed=42,diagnostics=True,collect_margins=False):
+    def __init__(self,method,router,*,m_ref,beta=3.,gamma=.5,allocation='normal',bootstrap=False,seed=42,diagnostics=True,collect_margins=False,fast_t=False):
         if method not in METHODS+('unweighted','kernel_dense','native_dense'):raise ValueError(method)
         if allocation not in ('normal','shuffle','uniform'):raise ValueError(allocation)
         if not 0<=gamma<1:raise ValueError('Invalid gamma')
@@ -48,16 +48,21 @@ class State:
         self.margin=None;self.confidence=None;self.temporal=None;self.previous_top=None
         self.current=None;self.steps=[];self.canvases=[];self.used_weights=None
         self.margin_samples=[];self.profile_events=[]
+        # v14 exact T-only fast path (off by default): only argmax + flip EMA; no top2/logsumexp/
+        # confidence/margin. t_history replaces 'margin is not None' as the history sentinel.
+        if fast_t and (method!='T' or diagnostics or collect_margins):raise ValueError('fast_t is exact only for method T without diagnostics')
+        self.fast_t=fast_t;self.t_history=False
 
     def begin(self,cur_step,canvas):
         if cur_step==48 or self.canvas<0:
             if self.canvas>=0:self.finish_canvas()
-            self.canvas+=1;self.iteration=0;self.margin=self.confidence=self.temporal=self.previous_top=None
+            self.canvas+=1;self.iteration=0;self.margin=self.confidence=self.temporal=self.previous_top=None;self.t_history=False
             self.generator=torch.Generator(device=canvas.device).manual_seed(self.seed+7919*self.canvas+104729)
         self.iteration+=1
         chosen=None
-        if self.method in METHODS and self.margin is not None:
-            chosen=weight(self.method,self.margin,self.confidence,self.temporal,beta=self.beta,m_ref=self.m_ref)
+        if self.method in METHODS and (self.margin is not None or self.t_history):
+            if self.fast_t:chosen=(1+self.beta*self.temporal).clamp(1,1+self.beta).contiguous()   # == weight('T',...)
+            else:chosen=weight(self.method,self.margin,self.confidence,self.temporal,beta=self.beta,m_ref=self.m_ref)
             if self.allocation=='uniform':chosen=chosen.mean(-1,keepdim=True).expand_as(chosen).contiguous()
             elif self.allocation=='shuffle':chosen=shuffle_within_tiles(chosen,self.generator)
         self.used_weights=chosen
@@ -76,6 +81,13 @@ class State:
         # Native logits_processor has applied temperature by this point. The
         # frozen configuration contains no other prediction processor. Undo
         # ONLY that scalar for the raw-logit margin, without changing logits.
+        if self.fast_t:
+            top=logits.argmax(-1)
+            flip=None if self.previous_top is None else top!=self.previous_top
+            if self.temporal is None:self.temporal=torch.zeros(top.shape,device=top.device,dtype=torch.float32)
+            if flip is not None:self.temporal=self.gamma*self.temporal+(1-self.gamma)*flip.float()
+            self.previous_top=top.detach();self.t_history=True
+            return
         x=logits.float();two=x.topk(2,dim=-1).values
         logz=torch.logsumexp(x,dim=-1)
         probability=(two[...,0]-logz).exp()

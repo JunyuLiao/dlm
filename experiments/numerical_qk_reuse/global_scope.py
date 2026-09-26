@@ -25,7 +25,8 @@ from contextlib import contextmanager
 import torch
 
 SCOPE = 'global_only_native_local'
-CONDITIONS = ('global_T', 'global_M1', 'global_M3', 'global_B8')
+CONDITIONS = ('global_T', 'global_M1', 'global_M3', 'global_B8', 'global_TP', 'global_B8P', 'global_CVM')
+CVM_MODES = {'global_TP': 'TP', 'global_B8P': 'B8P', 'global_CVM': 'CVM'}
 DECISION_INTERVAL = {'global_M1': 1, 'global_M3': 2, 'global_B8': 8}
 
 
@@ -82,14 +83,17 @@ def install(adapter, config, condition):
                        torch_library=config['torch_library'], collect=collect) as (binding, router):
             binding.runtime.attention_override = _MaskGuard(router)
             state = State('T', router, m_ref=config['m_ref'], beta=config['beta'], gamma=config['gamma'],
-                          diagnostics=bool(config['diagnostic']))
-            effective.update(method='fresh Junyu T', collect=collect, precision=router.precision, tma=router.tma,
+                          diagnostics=bool(config['diagnostic']), fast_t=bool(config.get('fast_t', False)))
+            effective.update(method='fresh Junyu T', collect=collect, fast_t=state.fast_t, precision=router.precision, tma=router.tma,
                              projection='fused' if router.cache.fused else 'torch', library=config['library'],
                              bound_modules=sorted(int(m.layer_idx) for m in binding.modules))
             yield dict(binding=binding, router=router, state=state, counters=lambda: dict(effective, calls=router.calls))
         return
     from experiments.diffusion_gemma_solattn_blasst_multibench.runner import _install_dense
     from .integration import Attention, NativeReuseState
+    if condition in CVM_MODES:
+        yield from _install_cvm(adapter, scoped, config, condition, effective, _install_dense, NativeReuseState)
+        return
     interval = DECISION_INTERVAL[condition]
     if int(config['decision_interval']) != interval:
         raise ValueError(f'{condition} requires decision interval {interval}')
@@ -122,6 +126,36 @@ def install(adapter, config, condition):
                      history_layers=sorted(router.cache.entries), sketch_layers=sorted(router.sketches.entries),
                      summary_layers=sorted(router.summaries))
             return c
+        yield dict(binding=binding, router=router, state=state, counters=counters)
+    finally:
+        if router is not None:
+            router.close()
+        if binding is not None:
+            binding.close()
+        if getattr(adapter.model, '_value_direction_lease', False):
+            del adapter.model._value_direction_lease
+
+
+def _install_cvm(adapter, scoped, config, condition, effective, _install_dense, NativeReuseState):
+    """v14: T_P / B8_P / CVM_T on GLOBAL layers (experiments/value_direction_hopper/cvm.py)."""
+    from experiments.value_direction_hopper.cvm import CVMRouter
+    adapter.model._value_direction_lease = True
+    binding = router = None
+    try:
+        binding = _install_dense(scoped)
+        router = CVMRouter(scoped, config['library'], config['torch_library'], config['v5_build'], config['policy'],
+                           mode=CVM_MODES[condition], support_build=config.get('support_build'),
+                           period=int(config.get('period', 8)), guard_mode=config.get('guard_mode', 'fused'))
+        binding.runtime.attention_override = _MaskGuard(router)
+        state = NativeReuseState('T', router, m_ref=config['m_ref'], beta=config['beta'], gamma=config['gamma'],
+                                 diagnostics=bool(config['diagnostic']), fast_t=bool(config.get('fast_t', False)))
+        effective.update(method={'global_TP': 'fresh T with mandatory canvas/edge tiles',
+                                 'global_B8P': 'fresh anchor (A8/new epoch) + held bitmap, mandatory tiles',
+                                 'global_CVM': 'fresh anchor + cached log-risk margin + live add-only T protection'}[condition],
+                         fast_t=state.fast_t, bound_modules=sorted(int(m.layer_idx) for m in binding.modules))
+
+        def counters():
+            return dict(router.counters(), **effective)
         yield dict(binding=binding, router=router, state=state, counters=counters)
     finally:
         if router is not None:

@@ -33,6 +33,7 @@ LIBRARY = '/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_
 TORCH_LIBRARY = ('/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/torch_4c65c048754f9fb7/'
                  'value_direction_torch_4c65c048754f9fb7.so')
 PLUGIN = 'experiments.numerical_qk_reuse.integration:install'
+T_CONDITIONS = ('fresh_junyu_T', 'global_T', 'global_TP', 'global_B8P', 'global_CVM')
 
 
 class Timeout(Exception):
@@ -50,15 +51,20 @@ def arm_config(args, arm: dict) -> dict:
         output_mode='historical_route_preqk_current_output',
         selector=arm.get('selector', 'legacy_recompute'), selector_layers='local',
         kernel_variant=arm.get('kernel_variant', 'static'),
-        library=Path(LIBRARY) if condition in ('fresh_junyu_T', 'global_T') else None,
-        torch_library=Path(TORCH_LIBRARY) if condition in ('fresh_junyu_T', 'global_T') else None,
+        library=Path(LIBRARY) if condition in T_CONDITIONS else None,
+        torch_library=Path(TORCH_LIBRARY) if condition in T_CONDITIONS else None,
         plugin=arm.get('plugin', PLUGIN if condition in ('M1', 'M3') else None), diagnostic=False, timing_events=False,
         extra_source=[])
     config = _config(ns)
     config['telemetry'] = arm.get('telemetry', 'full')
-    for key in ('guard_mode', 'consumer', 'support_build', 'collect', 'selector_layers', 'kernel_variant'):   # v11/v12 arm keys
+    for key in ('guard_mode', 'consumer', 'support_build', 'collect', 'selector_layers', 'kernel_variant',
+                'v5_build', 'fast_t', 'period'):   # v11/v12/v14 arm keys
         if key in arm:
             config[key] = arm[key]
+    if arm.get('v5_build'):
+        v5 = json.loads(Path(arm['v5_build']).read_text())
+        config['v5_binary'] = dict(key=v5['key'], kernel_sha256=v5['kernel_sha256'], bridge_sha256=v5['bridge_sha256'],
+                                   sources=v5['sources'])
     if arm.get('support_build'):
         identity = json.loads(Path(arm['support_build']).read_text())
         config['support_binary'] = dict(key=identity['key'], kernel_sha256=identity['kernel_sha256'],
