@@ -89,4 +89,27 @@ Python311 -u -m scripts.v18_coordinate --start-at aime
 Use approved foreground TTY; adopt existing markers, do not relaunch GPU workers.
 Hourly task heartbeat v18-research-stage-continuation remains active; quiet when
 unchanged, original budgets apply, disable after CP4. CP3 core f64e0b9 committed;
-Windows pipeline final integration review pending, no CP3 GPU work launched.
+Windows CP3 pipeline is now deployed and waiting; no CP3 GPU work launched.
+
+CP3 waiting controller: local PID47716, approved TTY session18255, source1c9a6e62.
+Cwd E:/dlm/v18_private/cp3_1c9a6e6, both hosts deploy/cp3_1c9a6e6.
+Archive SHA7204840b22b6b18078c2e89beb25524c5f88b4406faab5a857ad83c55a137aab.
+Config E:/dlm/v18_private/secondary_config.json;
+SHA55bc72e47887648c697393be2cc574d34300260b631c9d7584c59451aeeea43a.
+Durable status E:/dlm/v18_private/secondary_config.outcome.json.
+Recovery only after verified controller exit: local Python311 -u -m
+scripts.v18_secondary_pipeline --deploy cp3_1c9a6e6
+--config E:/dlm/v18_private/secondary_config.json --poll-seconds60
+(use --poll-seconds 60 as separate CLI arguments).
+Gates: exact-ID complete primary summaries + closed primary stage markers;
+then actual-host CPU pytest/Torch/source/UUID checks, not yet run. All10 possible
+mpk calibration-point ledgers and both secondary stages are in frozen inventory.
+Sequence core70 calibration/eval -> independently calibrated allocation controls;
+whole question/seed retains primary GPU. T70/T60 timing is cross-stage descriptive.
+Failed/missing70 blocks prevent controls. Terminal errors preserve partial outputs;
+if peer writers are still live, partial scoring is deferred in outcome. Heartbeat
+should retry offline scoring after verified quiet, never duplicate GPU dispatch.
+Primary and secondary scripts do batch work; inspect only stage metadata/outcomes.
+Final CP4: fetch redacted summaries, answer v18 seven questions in morning_brief.md,
+report actual attained densities/missing cells/budgets, push, confirm own GPU idle,
+and disable heartbeat. Fast-path candidate remains stopped; no further CUDA work.

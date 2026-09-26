@@ -55,7 +55,7 @@
     },
     "initial_duration_note": "Wrapper elapsed; driver budget accounting uses worker_end values. Do not double-count wrappers."
   },
-  "next": "Automatic AIME then RULER remainder; primary finalizer includes partial-failure path. CP3 pipeline under final integration review, no CP3 GPU launched.",
+  "next": "Scripts: AIME -> RULER remainder -> offline primary scoring -> CP3 CPU qualification -> density-only70 calibration/evaluation -> independently calibrated allocation controls -> offline secondary scoring; heartbeat handles terminal review and CP4.",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -112,5 +112,22 @@
     "id": "v18-research-stage-continuation",
     "status": "ACTIVE",
     "purpose": "hourly stage checkpoint; quiet unchanged; original budget enforced; disable at CP4 completion"
-  }
+  },
+  "secondary_coordinator": {
+    "pid": 47716,
+    "exec_session": 18255,
+    "status": "waiting_for_closed_primary_stages_and_offline_summaries",
+    "source_commit": "1c9a6e62bcc932cf7d3f5d0fc0f8fab97d12b5cd",
+    "deploy": "deploy/cp3_1c9a6e6",
+    "local_cwd": "E:/dlm/v18_private/cp3_1c9a6e6",
+    "config": "E:/dlm/v18_private/secondary_config.json",
+    "config_sha256": "55bc72e47887648c697393be2cc574d34300260b631c9d7584c59451aeeea43a",
+    "outcome": "E:/dlm/v18_private/secondary_config.outcome.json",
+    "archive_sha256": "7204840b22b6b18078c2e89beb25524c5f88b4406faab5a857ad83c55a137aab",
+    "cpu_qualification": "E:/dlm/v18_private/secondary_cpu_qualification.json",
+    "qualification_status": "not_run; automatically after primary quiet",
+    "gpu_started": false,
+    "tests": "22 local unittest cases across primary coordinator/secondary stdlib/pipeline passed"
+  },
+  "updated_utc": "2026-09-26T20:46:00Z"
 }
