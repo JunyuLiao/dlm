@@ -1,0 +1,78 @@
+{
+  "arm_hashes": {
+    "CVM_T": "a6f320e89b16e650a65db6695515a7063ff7009081f69a8c25744670709bb0ec",
+    "D_native": "c8e9cb02751593ed7b9b9ca46b177d1cad74f6726489bf4fcb7e14074b629162",
+    "T_G_original": "bffc81aee219aa1ad4ca29c3d496a30b88934b23583fca7b632a154c4d10ae43"
+  },
+  "arms": {
+    "CVM_T": {
+      "condition": "global_CVM",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "name": "CVM_T",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "support_build": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build/support_e3c283b8cbb9b79c/build_identity.json",
+      "v5_build": "/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926/build/v5_be53e4c706032aef/build_identity.json"
+    },
+    "D_native": {
+      "condition": "native_dense",
+      "name": "D_native"
+    },
+    "T_G_original": {
+      "collect": false,
+      "condition": "global_T",
+      "fast_t": true,
+      "name": "T_G_original",
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install"
+    }
+  },
+  "development_ids": [
+    "longbench_v2/66f39aa7821e116aacb2da76"
+  ],
+  "ids": [
+    "longbench_v2/66f39aa7821e116aacb2da76"
+  ],
+  "model_path": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "policy_file": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/results/query_adaptive_v3/configs/frozen_policies.json",
+  "prompt_tokens_n": 17655,
+  "protocol_id": "v15_lbv2_smoke",
+  "purpose": "v15 setup/compatibility executions (<=10, never scored, never pooled with the panel).\n\nOne eligible NON-panel item (the excluded v14 cost-profile item 66f39aa7821e116aacb2da76, 17.6K tokens),\nseed 42 (not a panel seed), attempt 0 only, arms D_native / T_G_original / CVM_T copied from the\nfrozen v15 protocol. Purpose: complete long-context request path, memory headroom, request time.\n",
+  "schedule": [
+    {
+      "arm": "CVM_T",
+      "block": 0,
+      "cell_id": "3b269c316bda2a35fbe07a3d",
+      "id": "longbench_v2/66f39aa7821e116aacb2da76",
+      "index": 0,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 42
+    },
+    {
+      "arm": "D_native",
+      "block": 0,
+      "cell_id": "a3572a0ece447624cedf22a3",
+      "id": "longbench_v2/66f39aa7821e116aacb2da76",
+      "index": 1,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 42
+    },
+    {
+      "arm": "T_G_original",
+      "block": 0,
+      "cell_id": "5af96007e7c0917027900b04",
+      "id": "longbench_v2/66f39aa7821e116aacb2da76",
+      "index": 2,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 42
+    }
+  ],
+  "schema": "v15_smoke_protocol_v1",
+  "seeds": [
+    42
+  ]
+}
