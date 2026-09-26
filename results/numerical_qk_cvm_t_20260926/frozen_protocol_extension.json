@@ -1,0 +1,1086 @@
+{
+  "arm_hashes": {
+    "B8_P": "fb5fe0dc890f4191b7f2a308ff4e4210f69957293d3079d6553db154e469b64b",
+    "CVM_T": "a6f320e89b16e650a65db6695515a7063ff7009081f69a8c25744670709bb0ec",
+    "D_native": "c8e9cb02751593ed7b9b9ca46b177d1cad74f6726489bf4fcb7e14074b629162",
+    "T_G_original": "bffc81aee219aa1ad4ca29c3d496a30b88934b23583fca7b632a154c4d10ae43",
+    "T_P": "539c9c1542bfba49f5fd17153b03d3cb4adc254488254258c2cc4ca2a7cd0007"
+  },
+  "arms": {
+    "B8_P": {
+      "condition": "global_B8P",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "name": "B8_P",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "support_build": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build/support_e3c283b8cbb9b79c/build_identity.json",
+      "v5_build": "/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926/build/v5_be53e4c706032aef/build_identity.json"
+    },
+    "CVM_T": {
+      "condition": "global_CVM",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "name": "CVM_T",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "support_build": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build/support_e3c283b8cbb9b79c/build_identity.json",
+      "v5_build": "/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926/build/v5_be53e4c706032aef/build_identity.json"
+    },
+    "D_native": {
+      "condition": "native_dense",
+      "name": "D_native"
+    },
+    "T_G_original": {
+      "collect": false,
+      "condition": "global_T",
+      "fast_t": true,
+      "name": "T_G_original",
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install"
+    },
+    "T_P": {
+      "condition": "global_TP",
+      "fast_t": true,
+      "name": "T_P",
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "v5_build": "/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926/build/v5_be53e4c706032aef/build_identity.json"
+    }
+  },
+  "authorization": "User v14 spec 2026-09-26 (pasted): \"Initial six development questions: /2,/8,/14,/20,/23,/30; generation seeds17/29; five conditions; attempt0 plus one warm repetition =120 complete executions ... If both direct forward timing and adaptive/quality pilot are encouraging, freeze one extension to /1,/6,/16,/25 ... Pick and commit these IDs before the initial answer scores are read.\"",
+  "ceilings": {
+    "elapsed_h": 8,
+    "executions_total": 224,
+    "gpu_h": 6,
+    "this_protocol": 80
+  },
+  "development_ids": [
+    "aime26/2",
+    "aime26/8",
+    "aime26/14",
+    "aime26/20",
+    "aime26/23",
+    "aime26/30"
+  ],
+  "effective_arm_fields": {
+    "B8_P": {
+      "collect": null,
+      "condition": "global_B8P",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": {
+        "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+        "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+        "key": "e3c283b8cbb9b79c",
+        "sources": {
+          "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+          "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+          "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+        }
+      },
+      "v5_binary": {
+        "bridge_sha256": "7b7cf2b7c44623f19622b18b55d08086d04cd1eab340f51aab4e0942ca6ec1f1",
+        "kernel_sha256": "770724c9598fc567d38430cfd5e5cfa47cfb733ecc7ab952e570652288baa8ba",
+        "key": "be53e4c706032aef",
+        "sources": {
+          "torch_bridge_v5.cpp": "fb3741de02bbb47f1253ef90cb817a428912a74b8ed31a86ad2094266de4113e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10",
+          "value_direction_v5.cu": "645c957de3df9acd4bbd1172348812837aa2751d6795e115e5d08d497a1ff24e",
+          "value_direction_v5.h": "edd714c1e0c1515f1472f24c667ae1d85c7d1bffda3f7099bfc2ad48e9167182"
+        }
+      }
+    },
+    "CVM_T": {
+      "collect": null,
+      "condition": "global_CVM",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": {
+        "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+        "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+        "key": "e3c283b8cbb9b79c",
+        "sources": {
+          "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+          "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+          "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+        }
+      },
+      "v5_binary": {
+        "bridge_sha256": "7b7cf2b7c44623f19622b18b55d08086d04cd1eab340f51aab4e0942ca6ec1f1",
+        "kernel_sha256": "770724c9598fc567d38430cfd5e5cfa47cfb733ecc7ab952e570652288baa8ba",
+        "key": "be53e4c706032aef",
+        "sources": {
+          "torch_bridge_v5.cpp": "fb3741de02bbb47f1253ef90cb817a428912a74b8ed31a86ad2094266de4113e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10",
+          "value_direction_v5.cu": "645c957de3df9acd4bbd1172348812837aa2751d6795e115e5d08d497a1ff24e",
+          "value_direction_v5.h": "edd714c1e0c1515f1472f24c667ae1d85c7d1bffda3f7099bfc2ad48e9167182"
+        }
+      }
+    },
+    "D_native": {
+      "collect": null,
+      "condition": "native_dense",
+      "fast_t": null,
+      "guard_mode": null,
+      "library": null,
+      "period": null,
+      "plugin": null,
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": null,
+      "v5_binary": null
+    },
+    "T_G_original": {
+      "collect": false,
+      "condition": "global_T",
+      "fast_t": true,
+      "guard_mode": null,
+      "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+      "period": null,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": null,
+      "v5_binary": null
+    },
+    "T_P": {
+      "collect": null,
+      "condition": "global_TP",
+      "fast_t": true,
+      "guard_mode": null,
+      "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+      "period": null,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": null,
+      "v5_binary": {
+        "bridge_sha256": "7b7cf2b7c44623f19622b18b55d08086d04cd1eab340f51aab4e0942ca6ec1f1",
+        "kernel_sha256": "770724c9598fc567d38430cfd5e5cfa47cfb733ecc7ab952e570652288baa8ba",
+        "key": "be53e4c706032aef",
+        "sources": {
+          "torch_bridge_v5.cpp": "fb3741de02bbb47f1253ef90cb817a428912a74b8ed31a86ad2094266de4113e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10",
+          "value_direction_v5.cu": "645c957de3df9acd4bbd1172348812837aa2751d6795e115e5d08d497a1ff24e",
+          "value_direction_v5.h": "edd714c1e0c1515f1472f24c667ae1d85c7d1bffda3f7099bfc2ad48e9167182"
+        }
+      }
+    }
+  },
+  "exposure_note": "all ten IDs were examined in v13 (and six in v10-v12); development data, not a held-out test",
+  "extension_ids": [
+    "aime26/1",
+    "aime26/6",
+    "aime26/16",
+    "aime26/25"
+  ],
+  "extension_rule": "committed before any v14 answer score is read; run (80 executions) ONLY if both the direct complete-forward gate (5.1) and the adaptive/quality pilot are encouraging; additional development checks, not pristine validation (v13 used all 30)",
+  "failure_policy": "every scheduled execution runs once; failures recorded and count as incorrect/missing; no silent retries",
+  "frozen_utc": "2026-09-26T06:05:37Z",
+  "generation": {
+    "dtype": "bfloat16",
+    "eos": true,
+    "max_new_tokens": 8192,
+    "native_adaptive": true,
+    "temperature_sentinel": 0.0,
+    "thinking": true
+  },
+  "ids": [
+    "aime26/1",
+    "aime26/6",
+    "aime26/16",
+    "aime26/25"
+  ],
+  "manifest": "/media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/private/manifest_all30.json",
+  "manifest_sha256": "a253c357e1a2a2634d895e91620d7e91b1b10640755088a8d4ca7d2b0250b57c",
+  "method_notes": {
+    "B8_P": "fresh v5 anchor (A8 / new canvas / new epoch) + held anchor bitmap, same mandatory set, v11 current-output consumer",
+    "CVM_T": "B8_P + per-step add-only restoration: restore tile iff max_valid_rows(log rho_a + log s_t) >= log tau",
+    "T_G_original": "v13 fresh original GLOBAL T (Junyu v4 binary) with the exact T-only controller fast path",
+    "T_P": "fresh T every call through the private v5 binary with the mandatory set (current canvas + edge tiles)",
+    "fallback": "all *_P arms and CVM_T use native SDPA when no complete immutable-prefix tile exists"
+  },
+  "metrics": {
+    "aggregation": "per question mean over seeds of log(candidate/reference); geometric mean over questions; summed-time ratio = calls ratio x time/call ratio; question-cluster bootstrap (descriptive)",
+    "parity_checks": "D_native and T_G_original attempt-0 token hashes vs the v13 same (id, seed) cells",
+    "primary": "CVM_T vs B8_P (live protection attribution) and CVM_T vs T_P (vs fresh T, same mandatory set)",
+    "quality": "attempt-0 final-channel correctness (frozen v13 scorer); cap/unparsed/failure = incorrect",
+    "secondary": [
+      "CVM_T vs D_native",
+      "CVM_T vs T_G_original",
+      "B8_P vs T_P",
+      "T_P vs T_G_original",
+      "T_G_original vs D_native"
+    ],
+    "time": "accepted single warm API wall (same cell, no new compilation, tokens/calls/termination identical to attempt 0)"
+  },
+  "mode": "extension4",
+  "model_path": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "planned_executions": 80,
+  "policy_file": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/results/query_adaptive_v3/configs/frozen_policies.json",
+  "prompt_hashes": {
+    "aime26/1": "0293d5a9dad59388bc7f1af19a51ed90ce17d68f8c491cd0ab64e2e5b8d3aefc",
+    "aime26/16": "161f850c5a6cc102fa05d95d9adc2e3e5fb46e60b4307302885e5a8bfe9665cb",
+    "aime26/25": "4f53bbe47a13e46e7b5f716ddf20b5d58cd15ffeea69d2f975bc01d5366f35b3",
+    "aime26/6": "51ff97fa844208522b4ef63b541e12150644ae307b332f53b6decaf360cc13d9"
+  },
+  "protocol_id": "v14_cvm_t_extension4",
+  "schedule": [
+    {
+      "arm": "B8_P",
+      "block": 0,
+      "cell_id": "0403faf95f400a4fa43313d4",
+      "id": "aime26/16",
+      "index": 0,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 0,
+      "cell_id": "d60f873a78d0309bad1af137",
+      "id": "aime26/16",
+      "index": 1,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 0,
+      "cell_id": "fde3c8eb1edd247ec7fbc20c",
+      "id": "aime26/16",
+      "index": 2,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 0,
+      "cell_id": "7efcf61b20f55159a4418781",
+      "id": "aime26/16",
+      "index": 3,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 0,
+      "cell_id": "a664182abaa802829020c397",
+      "id": "aime26/16",
+      "index": 4,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 0,
+      "cell_id": "a664182abaa802829020c397",
+      "id": "aime26/16",
+      "index": 5,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 0,
+      "cell_id": "7efcf61b20f55159a4418781",
+      "id": "aime26/16",
+      "index": 6,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 0,
+      "cell_id": "fde3c8eb1edd247ec7fbc20c",
+      "id": "aime26/16",
+      "index": 7,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 0,
+      "cell_id": "d60f873a78d0309bad1af137",
+      "id": "aime26/16",
+      "index": 8,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 0,
+      "cell_id": "0403faf95f400a4fa43313d4",
+      "id": "aime26/16",
+      "index": 9,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 1,
+      "cell_id": "3da16938148a647d4eab1100",
+      "id": "aime26/1",
+      "index": 10,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 1,
+      "cell_id": "ae3e0f1fe193694e10deeb98",
+      "id": "aime26/1",
+      "index": 11,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 1,
+      "cell_id": "d12ab8e47987bb164f871182",
+      "id": "aime26/1",
+      "index": 12,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 1,
+      "cell_id": "16816d58ce70abd76dbcb17e",
+      "id": "aime26/1",
+      "index": 13,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 1,
+      "cell_id": "fd4853776efff9ca9bf5ef86",
+      "id": "aime26/1",
+      "index": 14,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 1,
+      "cell_id": "fd4853776efff9ca9bf5ef86",
+      "id": "aime26/1",
+      "index": 15,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 1,
+      "cell_id": "16816d58ce70abd76dbcb17e",
+      "id": "aime26/1",
+      "index": 16,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 1,
+      "cell_id": "d12ab8e47987bb164f871182",
+      "id": "aime26/1",
+      "index": 17,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 1,
+      "cell_id": "ae3e0f1fe193694e10deeb98",
+      "id": "aime26/1",
+      "index": 18,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 1,
+      "cell_id": "3da16938148a647d4eab1100",
+      "id": "aime26/1",
+      "index": 19,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 2,
+      "cell_id": "7618a24623bcf427b3704d1f",
+      "id": "aime26/25",
+      "index": 20,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 2,
+      "cell_id": "c43930d75aafa8d50b084b72",
+      "id": "aime26/25",
+      "index": 21,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 2,
+      "cell_id": "2b8616633f26d44e0f5d9a90",
+      "id": "aime26/25",
+      "index": 22,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 2,
+      "cell_id": "6e988194c4a29c6dc734f265",
+      "id": "aime26/25",
+      "index": 23,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 2,
+      "cell_id": "1eed69aea6d9eced02271041",
+      "id": "aime26/25",
+      "index": 24,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 2,
+      "cell_id": "1eed69aea6d9eced02271041",
+      "id": "aime26/25",
+      "index": 25,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 2,
+      "cell_id": "6e988194c4a29c6dc734f265",
+      "id": "aime26/25",
+      "index": 26,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 2,
+      "cell_id": "2b8616633f26d44e0f5d9a90",
+      "id": "aime26/25",
+      "index": 27,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 2,
+      "cell_id": "c43930d75aafa8d50b084b72",
+      "id": "aime26/25",
+      "index": 28,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 2,
+      "cell_id": "7618a24623bcf427b3704d1f",
+      "id": "aime26/25",
+      "index": 29,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 3,
+      "cell_id": "03c5a0c29c23b8efe74537b7",
+      "id": "aime26/16",
+      "index": 30,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 3,
+      "cell_id": "a4edd74b8b18327af594cff7",
+      "id": "aime26/16",
+      "index": 31,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 3,
+      "cell_id": "d51282aa9de2f69c23456cad",
+      "id": "aime26/16",
+      "index": 32,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 3,
+      "cell_id": "9da24b5c05fbddf38f3277c5",
+      "id": "aime26/16",
+      "index": 33,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 3,
+      "cell_id": "391e071e168d44038341392b",
+      "id": "aime26/16",
+      "index": 34,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 3,
+      "cell_id": "391e071e168d44038341392b",
+      "id": "aime26/16",
+      "index": 35,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 3,
+      "cell_id": "9da24b5c05fbddf38f3277c5",
+      "id": "aime26/16",
+      "index": 36,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 3,
+      "cell_id": "d51282aa9de2f69c23456cad",
+      "id": "aime26/16",
+      "index": 37,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 3,
+      "cell_id": "a4edd74b8b18327af594cff7",
+      "id": "aime26/16",
+      "index": 38,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 3,
+      "cell_id": "03c5a0c29c23b8efe74537b7",
+      "id": "aime26/16",
+      "index": 39,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 4,
+      "cell_id": "606cede8e16c6dde0357309c",
+      "id": "aime26/1",
+      "index": 40,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 4,
+      "cell_id": "de8a7d9b70436af360b0e196",
+      "id": "aime26/1",
+      "index": 41,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 4,
+      "cell_id": "87b9e648eb2a515ac0ba81c2",
+      "id": "aime26/1",
+      "index": 42,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 4,
+      "cell_id": "3f6f9296b8b7c80422e35773",
+      "id": "aime26/1",
+      "index": 43,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 4,
+      "cell_id": "2e323d5dbf7c9a275d24e6f8",
+      "id": "aime26/1",
+      "index": 44,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 4,
+      "cell_id": "2e323d5dbf7c9a275d24e6f8",
+      "id": "aime26/1",
+      "index": 45,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 4,
+      "cell_id": "3f6f9296b8b7c80422e35773",
+      "id": "aime26/1",
+      "index": 46,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 4,
+      "cell_id": "87b9e648eb2a515ac0ba81c2",
+      "id": "aime26/1",
+      "index": 47,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 4,
+      "cell_id": "de8a7d9b70436af360b0e196",
+      "id": "aime26/1",
+      "index": 48,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 4,
+      "cell_id": "606cede8e16c6dde0357309c",
+      "id": "aime26/1",
+      "index": 49,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 5,
+      "cell_id": "d61346ead4a0b23586b3e82f",
+      "id": "aime26/6",
+      "index": 50,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 5,
+      "cell_id": "27626da040ca52ac8abf99df",
+      "id": "aime26/6",
+      "index": 51,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 5,
+      "cell_id": "55b4a971dc6025c9f0089913",
+      "id": "aime26/6",
+      "index": 52,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 5,
+      "cell_id": "7404f82421ce699f253ed703",
+      "id": "aime26/6",
+      "index": 53,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 5,
+      "cell_id": "341813657f7254cf044177d4",
+      "id": "aime26/6",
+      "index": 54,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 5,
+      "cell_id": "341813657f7254cf044177d4",
+      "id": "aime26/6",
+      "index": 55,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 5,
+      "cell_id": "7404f82421ce699f253ed703",
+      "id": "aime26/6",
+      "index": 56,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 5,
+      "cell_id": "55b4a971dc6025c9f0089913",
+      "id": "aime26/6",
+      "index": 57,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 5,
+      "cell_id": "27626da040ca52ac8abf99df",
+      "id": "aime26/6",
+      "index": 58,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 5,
+      "cell_id": "d61346ead4a0b23586b3e82f",
+      "id": "aime26/6",
+      "index": 59,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 6,
+      "cell_id": "bc56e8cd486d191c89d51abc",
+      "id": "aime26/25",
+      "index": 60,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 6,
+      "cell_id": "be4fa859a606a8c356d74638",
+      "id": "aime26/25",
+      "index": 61,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 6,
+      "cell_id": "8aef32303da0462c3f784a45",
+      "id": "aime26/25",
+      "index": 62,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 6,
+      "cell_id": "865f6993c10fbd00f4df1a56",
+      "id": "aime26/25",
+      "index": 63,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 6,
+      "cell_id": "8621c5c5ddedfd669eefc8e0",
+      "id": "aime26/25",
+      "index": 64,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 6,
+      "cell_id": "8621c5c5ddedfd669eefc8e0",
+      "id": "aime26/25",
+      "index": 65,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 6,
+      "cell_id": "865f6993c10fbd00f4df1a56",
+      "id": "aime26/25",
+      "index": 66,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 6,
+      "cell_id": "8aef32303da0462c3f784a45",
+      "id": "aime26/25",
+      "index": 67,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 6,
+      "cell_id": "be4fa859a606a8c356d74638",
+      "id": "aime26/25",
+      "index": 68,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 6,
+      "cell_id": "bc56e8cd486d191c89d51abc",
+      "id": "aime26/25",
+      "index": 69,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 7,
+      "cell_id": "5b5ca406c1c548822069d7c6",
+      "id": "aime26/6",
+      "index": 70,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 7,
+      "cell_id": "3788880c7b4e9a1eac6e81d1",
+      "id": "aime26/6",
+      "index": 71,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 7,
+      "cell_id": "87985cbe0aedc7476287cf99",
+      "id": "aime26/6",
+      "index": 72,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 7,
+      "cell_id": "2ff1ad143fb063b8e65fcb7b",
+      "id": "aime26/6",
+      "index": 73,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 7,
+      "cell_id": "af2630e4f21401047c59b6f6",
+      "id": "aime26/6",
+      "index": 74,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 7,
+      "cell_id": "af2630e4f21401047c59b6f6",
+      "id": "aime26/6",
+      "index": 75,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 7,
+      "cell_id": "2ff1ad143fb063b8e65fcb7b",
+      "id": "aime26/6",
+      "index": 76,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 7,
+      "cell_id": "87985cbe0aedc7476287cf99",
+      "id": "aime26/6",
+      "index": 77,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 7,
+      "cell_id": "3788880c7b4e9a1eac6e81d1",
+      "id": "aime26/6",
+      "index": 78,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 7,
+      "cell_id": "5b5ca406c1c548822069d7c6",
+      "id": "aime26/6",
+      "index": 79,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    }
+  ],
+  "schedule_rule": "v13 plan_schedule: (question, seed) blocks shuffled by random.Random(schedule_seed); within a block all arms attempt 0 in cyclic rotation by block position, then one warm repeat per arm reversed",
+  "schedule_seed": 20260927,
+  "schema": "v14_frozen_protocol_v1",
+  "seed_semantics": "generation seed -> GenerationRequest.seed -> adapter.generate seed_everything (native sampler RNG)",
+  "seeds": [
+    17,
+    29
+  ],
+  "warm_repeats": 1
+}

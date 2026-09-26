@@ -54,7 +54,8 @@ def arm_config(args, arm: dict) -> dict:
         library=Path(LIBRARY) if condition in T_CONDITIONS else None,
         torch_library=Path(TORCH_LIBRARY) if condition in T_CONDITIONS else None,
         plugin=arm.get('plugin', PLUGIN if condition in ('M1', 'M3') else None), diagnostic=False, timing_events=False,
-        extra_source=[])
+        extra_source=[Path(__file__).resolve().parents[1] / 'experiments/value_direction_hopper' / f
+                      for f in ('cvm.py', 'support.py')] if condition in ('global_TP', 'global_B8P', 'global_CVM') else [])
     config = _config(ns)
     config['telemetry'] = arm.get('telemetry', 'full')
     for key in ('guard_mode', 'consumer', 'support_build', 'collect', 'selector_layers', 'kernel_variant',
