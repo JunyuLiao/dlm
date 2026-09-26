@@ -55,7 +55,7 @@
     },
     "initial_duration_note": "Wrapper elapsed; driver budget accounting uses worker_end values. Do not double-count wrappers."
   },
-  "next": "Automatic AIME then RULER remainder; CPU scorer/finalizer and separate gated secondary pipeline being prepared",
+  "next": "Automatic AIME then RULER remainder; primary finalizer includes partial-failure path. CP3 pipeline under final integration review, no CP3 GPU launched.",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -80,16 +80,18 @@
   "worker_ledgers": "ROOT/evaluation/ledgers/HOST_{ruler,aime}.jsonl",
   "coordinator": {
     "host": "Windows local",
-    "pid": 39296,
-    "exec_session": 34456,
-    "source_commit": "628311db2680d18b7fc8b41c48429325e7b53601",
-    "source": "E:/dlm/v18_private/coordinator_frozen/scripts/v18_coordinate.py",
+    "pid": 49924,
+    "exec_session": 14087,
+    "source_commit": "db79c828982a6e0494481b2780f2f579171a89e0",
+    "source": "E:/dlm/v18_private/coordinator_db79c82/scripts/v18_coordinate.py",
     "command_file": "E:/dlm/v18_private/finalize_command.json",
     "previous_pid49208": "stopped after exact command verification; replacement uses escalated long exec session",
-    "output": "live approved TTY session34456; prior log files are stale",
+    "output": "approved foreground TTY session14087; persistent primary_coordinator_outcome.json",
     "start_at": "aime",
     "command_file_installed": true,
-    "previous_pid50660": "stopped after exact command verification; replaced by approved foreground TTY"
+    "previous_pid50660": "stopped after exact command verification; replaced by approved foreground TTY",
+    "previous_pid39296": "stopped after exact command verification; remote GPU workers left unchanged",
+    "outcome": "E:/dlm/v18_private/primary_coordinator_outcome.json"
   },
   "completed_primary_executions": {
     "ruler_initial": 936,
