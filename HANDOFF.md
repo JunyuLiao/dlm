@@ -91,16 +91,18 @@ Hourly task heartbeat v18-research-stage-continuation remains active; quiet when
 unchanged, original budgets apply, disable after CP4. CP3 core f64e0b9 committed;
 Windows CP3 pipeline is now deployed and waiting; no CP3 GPU work launched.
 
-CP3 waiting controller: local PID47716, approved TTY session18255, source1c9a6e62.
+CP3 waiting controller: local PID42488, approved TTY session54685, source1c9a6e62.
 Cwd E:/dlm/v18_private/cp3_1c9a6e6, both hosts deploy/cp3_1c9a6e6.
 Archive SHA7204840b22b6b18078c2e89beb25524c5f88b4406faab5a857ad83c55a137aab.
 Config E:/dlm/v18_private/secondary_config.json;
 SHA55bc72e47887648c697393be2cc574d34300260b631c9d7584c59451aeeea43a.
-Durable status E:/dlm/v18_private/secondary_config.outcome.json.
+Durable status E:/dlm/v18_private/secondary_restart1.outcome.json.
+Previous PID47716 exited after SSH read timeout; its original outcome is preserved
+in secondary_config.outcome.json. Network recovered; no CP3 GPU stage had started.
 Recovery only after verified controller exit: local Python311 -u -m
 scripts.v18_secondary_pipeline --deploy cp3_1c9a6e6
---config E:/dlm/v18_private/secondary_config.json --poll-seconds60
-(use --poll-seconds 60 as separate CLI arguments).
+--config E:/dlm/v18_private/secondary_config.json
+--outcome E:/dlm/v18_private/secondary_restart1.outcome.json --poll-seconds 60
 Gates: exact-ID complete primary summaries + closed primary stage markers;
 then actual-host CPU pytest/Torch/source/UUID checks, not yet run. All10 possible
 mpk calibration-point ledgers and both secondary stages are in frozen inventory.

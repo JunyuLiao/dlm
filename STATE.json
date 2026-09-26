@@ -114,20 +114,23 @@
     "purpose": "hourly stage checkpoint; quiet unchanged; original budget enforced; disable at CP4 completion"
   },
   "secondary_coordinator": {
-    "pid": 47716,
-    "exec_session": 18255,
+    "pid": 42488,
+    "exec_session": 54685,
     "status": "waiting_for_closed_primary_stages_and_offline_summaries",
     "source_commit": "1c9a6e62bcc932cf7d3f5d0fc0f8fab97d12b5cd",
     "deploy": "deploy/cp3_1c9a6e6",
     "local_cwd": "E:/dlm/v18_private/cp3_1c9a6e6",
     "config": "E:/dlm/v18_private/secondary_config.json",
     "config_sha256": "55bc72e47887648c697393be2cc574d34300260b631c9d7584c59451aeeea43a",
-    "outcome": "E:/dlm/v18_private/secondary_config.outcome.json",
+    "outcome": "E:/dlm/v18_private/secondary_restart1.outcome.json",
     "archive_sha256": "7204840b22b6b18078c2e89beb25524c5f88b4406faab5a857ad83c55a137aab",
     "cpu_qualification": "E:/dlm/v18_private/secondary_cpu_qualification.json",
     "qualification_status": "not_run; automatically after primary quiet",
     "gpu_started": false,
-    "tests": "22 local unittest cases across primary coordinator/secondary stdlib/pipeline passed"
+    "tests": "22 local unittest cases across primary coordinator/secondary stdlib/pipeline passed",
+    "previous_pid47716": "exited after read-only SSH timeout; both-host stage check confirmed no secondary GPU dispatch",
+    "previous_outcome": "E:/dlm/v18_private/secondary_config.outcome.json"
   },
-  "updated_utc": "2026-09-26T20:46:00Z"
+  "updated_utc": "2026-09-26T21:34:38.107097+00:00",
+  "stage_check": "2026-09-26T21:33Z: both AIME supervisors and primary coordinator alive; secondary GPU stages absent; only CP3 waiting controller resumed."
 }
