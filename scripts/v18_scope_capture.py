@@ -33,6 +33,7 @@ def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
     from dllm.models import create_adapter
     from experiments.numerical_qk_reuse.runner import GOLD_FIELDS, _fingerprint, _one, _rows
     from experiments.value_direction_hopper.integration import Attention
+    from experiments.value_direction_hopper.masks import PackedMask
 
     config = json.loads(config_path.read_text())
     if config.get('condition') != 'native_legal_all_layers' or config.get('frontier_arm') != 'T50':
@@ -74,11 +75,17 @@ def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
         class TransparentKernel:
             def __call__(self, *args, **kw):
                 result = kernel(*args, **kw)
+                kernel_mask = kw.get('mask')
                 kernel_record.update(q=args[0].detach().cpu().clone(), k=args[1].detach().cpu().clone(),
                                      v=args[2].detach().cpu().clone(), z=args[3].detach().cpu().clone(),
                                      reference=args[4].detach().cpu().clone(),
                                      scale=kw.get('scale'), log_threshold=kw.get('log_threshold'),
                                      mode=kw.get('mode'), precision=kw.get('precision'), tma=kw.get('tma'),
+                                     kernel_mask_kind=('packed' if isinstance(kernel_mask, PackedMask)
+                                                       else 'none' if kernel_mask is None else 'tensor'),
+                                     kernel_mask=None if kernel_mask is None else
+                                     (kernel_mask.tensor if isinstance(kernel_mask, PackedMask) else kernel_mask).detach().cpu().clone(),
+                                     kernel_mask_keys=kernel_mask.keys if isinstance(kernel_mask, PackedMask) else None,
                                      sensitivity=None if kw.get('sensitivity') is None else kw['sensitivity'].detach().cpu().clone(),
                                      skipped=result.skipped.detach().cpu().clone(),
                                      eligible=result.eligible.detach().cpu().clone(),
@@ -105,6 +112,8 @@ def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
                                kernel_scale=kernel_record['scale'], kernel_log_threshold=kernel_record['log_threshold'],
                                kernel_mode=kernel_record['mode'], kernel_precision=kernel_record['precision'],
                                kernel_tma=kernel_record['tma'],
+                               kernel_mask_kind=kernel_record['kernel_mask_kind'],
+                               kernel_mask=kernel_record['kernel_mask'], kernel_mask_keys=kernel_record['kernel_mask_keys'],
                                skipped=kernel_record['skipped'], eligible=kernel_record['eligible'],
                                kernel_output=kernel_record['kernel_output'],
                                layer=layer, step=step, canvas_index=canvas_index,
