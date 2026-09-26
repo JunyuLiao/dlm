@@ -88,6 +88,11 @@ class DriverTests(unittest.TestCase):
             with patch('scripts.v18_stage_driver.logical_protocol_digest', return_value='digest'):
                 self.assertTrue(stage_plan('aime', ruler, aime, [ledger], [], budget,
                                            host='mpk', now=100)['ruler_initial_gate_ready'])
+                recovery = stage_plan('remainder', ruler, aime, [ledger], [], budget,
+                                      host='mpk', now=100)
+                self.assertTrue(recovery['allowed'])
+                self.assertEqual(recovery['next_block_requests'], 2)
+                self.assertEqual(recovery['eval_stage'], 'all')
                 row = dict(block[0], event='run', execution_key=execution_key(block[0]),
                            host='mpk', gpu_uuid='g')
                 ledger.write_text(start + json.dumps(row) + '\n' + json.dumps({'event': 'worker_end',

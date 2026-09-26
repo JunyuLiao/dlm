@@ -126,7 +126,7 @@ def stage_plan(stage, ruler, aime, ruler_ledgers, aime_ledgers, budget, *, host,
     done = a_done if stage == 'aime' else r_done
     selected = [e for e in protocol['schedule']
                 if protocol['block_assignments'][str(e['block'])]['host'] == host and
-                (stage == 'aime' or
+                (stage in ('aime', 'remainder') or
                  (e['block'] < ruler['initial_prefix_blocks']) == (stage == 'initial'))]
     outstanding = sorted({e['block'] for e in selected if execution_key(e) not in done})
     next_block_requests = (sum(execution_key(e) not in done for e in selected if e['block'] == outstanding[0])
@@ -140,7 +140,7 @@ def stage_plan(stage, ruler, aime, ruler_ledgers, aime_ledgers, budget, *, host,
                 aime_complete=all_aime <= a_done,
                 host_stage_complete=not outstanding, next_block_requests=next_block_requests,
                 protocol_id=protocol['protocol_id'],
-                eval_stage={'initial': 'initial', 'aime': 'all', 'remainder': 'remainder'}[stage])
+                eval_stage={'initial': 'initial', 'aime': 'all', 'remainder': 'all'}[stage])
 
 
 def main():
