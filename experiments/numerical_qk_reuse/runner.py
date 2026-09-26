@@ -64,7 +64,7 @@ def _member(value: Any, name: str, default: Any = None) -> Any:
     return value.get(name, default) if isinstance(value, Mapping) else getattr(value, name, default)
 
 
-def _rows(path: Path, *, allow_task_budgets: bool = False) -> list[dict[str, Any]]:
+def _rows(path: Path, *, allow_task_budgets: bool = False, allow_thinking_off: bool = False) -> list[dict[str, Any]]:
     text = path.read_text(encoding="utf-8")
     rows = json.loads(text) if text.lstrip().startswith("[") else [json.loads(line) for line in text.splitlines() if line.strip()]
     if not isinstance(rows, list) or not rows:
@@ -78,7 +78,8 @@ def _rows(path: Path, *, allow_task_budgets: bool = False) -> list[dict[str, Any
         identities.add(str(row["id"]))
         if not isinstance(row["prompt"], str) or not row["prompt"]:
             raise ValueError(f"Empty prompt: {row['id']}")
-        if row.get("thinking", True) is not True:
+        thinking = row.get("thinking", True)
+        if type(thinking) is not bool or (thinking is False and not allow_thinking_off):
             raise ValueError("This run requires thinking ON in every manifest row")
         budget = row.get("generation_budget", 8192)
         if allow_task_budgets:
@@ -335,6 +336,13 @@ def request_budget(row: Mapping[str, Any], config: Mapping[str, Any]) -> int:
     return budget
 
 
+def request_thinking(row: Mapping[str, Any], config: Mapping[str, Any]) -> bool:
+    thinking = row.get("thinking", config.get("thinking", True))
+    if type(thinking) is not bool or thinking is not config.get("thinking", True):
+        raise ValueError("Manifest/config thinking mode mismatch")
+    return thinking
+
+
 def _one(adapter: Any, row: Mapping[str, Any], seed: int, config: Mapping[str, Any]) -> dict[str, Any]:
     import torch
     from dllm.models import GenerationRequest
@@ -342,9 +350,7 @@ def _one(adapter: Any, row: Mapping[str, Any], seed: int, config: Mapping[str, A
 
     condition = str(config["condition"])
     max_new_tokens = request_budget(row, config)
-    thinking = config.get("thinking", True)
-    if thinking is not True:
-        raise ValueError("Unsupported generation budget or thinking mode")
+    thinking = request_thinking(row, config)
     request = GenerationRequest(prompt=row["prompt"], max_new_tokens=max_new_tokens,
                                 temperature=0.0, seed=seed, extra={"thinking": thinking})
     calls = CanvasCalls()

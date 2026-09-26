@@ -21,7 +21,11 @@ SHARD = 'missing.safetensors'
 
 
 def sha(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    digest = hashlib.sha256()
+    with path.open('rb') as stream:
+        for chunk in iter(lambda: stream.read(8 << 20), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def inputs(comparison: Path, old_inventory: Path, export_inventory: Path):
@@ -59,7 +63,7 @@ def extract(old_model: Path, comparison: Path, old_inventory: Path,
     for filename, names in sorted(groups.items()):
         with safe_open(old_model / filename, framework='pt', device='cpu') as reader:
             for name in names:
-                value = reader.get_tensor(name).contiguous()
+                value = reader.get_tensor(name).contiguous().clone()
                 raw = value.reshape(-1).view(torch.uint8).numpy()
                 observed = dict(shape=list(value.shape), dtype=str(value.dtype),
                                 sha256=hashlib.sha256(memoryview(raw)).hexdigest())

@@ -3,13 +3,39 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP0_IMPLEMENTATION_IN_PROGRESS",
+  "status": "CP1_REQUEST_CORRECTION_VERIFIED_CPU",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
   "candidate": "post-QK ball screen opportunity only; no kernel qualification or success claim",
   "scope": "native_legal_all_layers awaiting GPU qualification",
-  "hosts": {"149.165.151.254": "runtime inventoried; prior v15 tree clean", "149.165.159.64": "private runtime transport; not bridge-qualified"},
+  "hosts": {
+    "149.165.151.254": "runtime inventoried; prior v15 tree clean",
+    "149.165.159.64": "private runtime transport; not bridge-qualified"
+  },
   "gpu_jobs": [],
-  "budget": {"wall_start_utc": "2026-09-26T18:02:00Z", "wall_hours_cap": 12, "gpu_process_hours_single_host_cap": 10, "gpu_process_hours_two_hosts_cap": 20, "generations_cap": 7000, "aime_core_reserved": 1080, "scoring_minutes_reserved": 30, "new_generations": 0},
-  "next": "immutable deploy CP0 tests then strong B8 and scope GPU qualification; frozen U/T50/60 calibration"
+  "budget": {
+    "wall_start_utc": "2026-09-26T18:02:00Z",
+    "wall_hours_cap": 12,
+    "gpu_process_hours_single_host_cap": 10,
+    "gpu_process_hours_two_hosts_cap": 20,
+    "generations_cap": 7000,
+    "aime_core_reserved": 1080,
+    "scoring_minutes_reserved": 30,
+    "new_generations": 1,
+    "known_generation_gpu_process_seconds": 24,
+    "synthetic_qualification_seconds": "recover from job receipt, not zero"
+  },
+  "next": "Commit immutable corrected deploy; calibration_v2 using private_v2; capture then scope then calibration; freeze AIME tokens before evaluation",
+  "strong_b8": "CPU17 tests and GPU3 prefix export parity pass; full16 pending",
+  "last_job": {
+    "pid": 1606995,
+    "pgid": 1606995,
+    "status": "exited_rc1",
+    "gpu_process_seconds": 24,
+    "reason": "RULER thinking template mismatch; CPU156/156 exact after fix"
+  },
+  "cpu_transport": {
+    "runtime_exec_session": 98143,
+    "missing_tensor_relay": "exit0"
+  }
 }

@@ -48,9 +48,23 @@ def strip_gold(rows, *, unique=True):
     return result
 
 
-def generation_rows(rows):
+def generation_rows(rows, *, thinking=True):
     # Generation seed lives only in the frozen schedule, not in a question manifest row.
-    return [{k: v for k, v in row.items() if k not in ('seed', 'generator_seed')} for row in rows]
+    return [{**{k: v for k, v in row.items() if k not in ('seed', 'generator_seed')},
+             'thinking': thinking} for row in rows]
+
+
+def verify_prompt_tokens(adapter, rows):
+    """CPU tokenizer check of the exact frozen list; returns counts only."""
+    checked = 0
+    for row in rows:
+        if type(row.get('thinking')) is not bool or not isinstance(row.get('prompt_tokens'), list):
+            raise ValueError('prompt token list or thinking flag absent')
+        actual = adapter.encode_prompt(row['prompt'], {'thinking': row['thinking']})
+        if actual != row['prompt_tokens'] or len(actual) != row.get('prompt_token_count', len(actual)):
+            raise ValueError('frozen prompt token mismatch: ' + str(row['id']))
+        checked += 1
+    return checked
 
 
 def timing_subset(rows):
@@ -82,7 +96,11 @@ def build(name, rows, arms, warm_ids, *, schedule_seed, authorization, source_sh
         raise ValueError('warm IDs outside panel')
     specs = arm_specs(arms)
     arm_hashes = {k: sha(json.dumps(v, sort_keys=True)) for k, v in specs.items()}
-    protocol_id = 'v18_' + name + '_' + sha(json.dumps([ids, specs, source_sha], sort_keys=True))[:12]
+    generation = dict(max_new_tokens=('per_manifest_row' if name == 'ruler4k' else 8192),
+                      thinking=(name != 'ruler4k'), native_adaptive=True,
+                      temperature_schedule=[0.8, 0.4], confidence_threshold=0.005,
+                      stability_threshold=1, entropy_bound=0.1)
+    protocol_id = 'v18_' + name + '_' + sha(json.dumps([ids, specs, source_sha, generation], sort_keys=True))[:12]
     schedule = plan_schedule(protocol_id, REVISION, arm_hashes, ids, list(SEEDS), schedule_seed)
     schedule = [e for e in schedule if e['role'] == 'attempt0' or e['id'] in warm_ids]
     for i, e in enumerate(schedule):
@@ -92,9 +110,7 @@ def build(name, rows, arms, warm_ids, *, schedule_seed, authorization, source_sh
                 model_revision=REVISION, source_manifest_sha256=source_sha,
                 prompt_hashes={r['id']: r['prompt_hash'] for r in rows},
                 warm_ids=list(warm_ids), schedule_seed=schedule_seed, schedule=schedule,
-                authorization=authorization, generation=dict(max_new_tokens=('per_manifest_row' if name == 'ruler4k' else 8192), thinking=True,
-                native_adaptive=True, temperature_schedule=[0.8, 0.4], confidence_threshold=0.005,
-                stability_threshold=1, entropy_bound=0.1),
+                authorization=authorization, generation=generation,
                 planned_executions=len(schedule))
 
 
@@ -118,8 +134,9 @@ def freeze(ruler_final, ruler_cal, aime, private: Path, out: Path, authorization
     if {r['id'] for r in aime_rows} != {f'aime26/{i}' for i in range(1, 31)}:
         raise ValueError('AIME ID coverage mismatch')
     timing_ids = timing_subset(ruler)
-    manifests = {'ruler': generation_rows(ruler), 'ruler_calibration': generation_rows(cal),
-                 'aime': generation_rows(aime_rows)}
+    manifests = {'ruler': generation_rows(ruler, thinking=False),
+                 'ruler_calibration': generation_rows(cal, thinking=False),
+                 'aime': generation_rows(aime_rows, thinking=True)}
     protocols = {
         'ruler': build('ruler4k', ruler, RULER_ARMS, timing_ids, schedule_seed=2026092601,
                        authorization=authorization, source_sha=sha(Path(ruler_final).read_bytes()),
@@ -131,14 +148,20 @@ def freeze(ruler_final, ruler_cal, aime, private: Path, out: Path, authorization
     for name, value in manifests.items():
         path = private / f'{name}_generation_manifest.json'
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(value, sort_keys=True) + '\n')
+        payload = json.dumps(value, sort_keys=True) + '\n'
+        if path.exists() and path.read_text() != payload:
+            raise ValueError('generation manifest would overwrite a different frozen identity')
+        path.write_text(payload)
         if name in protocols:
             protocols[name]['generation_manifest_sha256'] = sha(path.read_bytes())
             protocols[name]['generation_manifest_path'] = str(path.resolve())
     for name, value in protocols.items():
         path = out / f'{name}_frozen_protocol.json'
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(json.dumps(value, indent=2, sort_keys=True) + '\n')
+        payload = json.dumps(value, indent=2, sort_keys=True) + '\n'
+        if path.exists() and path.read_text() != payload:
+            raise ValueError('protocol would overwrite a different frozen identity')
+        path.write_text(payload)
     return protocols
 
 

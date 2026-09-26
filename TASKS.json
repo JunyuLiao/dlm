@@ -1,0 +1,21 @@
+{
+  "schema": "v18_agent_tasks_v1",
+  "coordinator": "Astra",
+  "base": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
+  "tasks": [
+    {
+      "id": "sol_evidence",
+      "actual_model": "gpt-6-sol",
+      "scope": "evidence/protocol/calibration/eval/request validation/scoring",
+      "acceptance": "identity audit and CPU token156/156 passed; protocol12 tests passed",
+      "allowed_write": "v18 evidence/protocol/frontier/evaluate scripts, numerical_qk_reuse runner, v15 scorer length guard, focused tests"
+    },
+    {
+      "id": "sol_b8",
+      "actual_model": "gpt-6-sol",
+      "scope": "strong B8/native legality/scope capture/CPU model bridge",
+      "acceptance": "CPU17 and GPU3 export parity passed; scope pending; full1047 tensor identity in progress",
+      "allowed_write": "cvm/integration/frontier_scope; v18_b8/scope/bridge_model scripts and focused tests"
+    }
+  ]
+}

@@ -4,9 +4,9 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-from scripts.v18_protocol import RULER_ARMS, build, generation_rows, sha, strip_gold
+from scripts.v18_protocol import RULER_ARMS, build, generation_rows, sha, strip_gold, verify_prompt_tokens
 from scripts.v18_frontier import advance_calibration, midpoint_policy
-from experiments.numerical_qk_reuse.runner import _rows, request_budget
+from experiments.numerical_qk_reuse.runner import _rows, request_budget, request_thinking
 
 
 class ProtocolTests(unittest.TestCase):
@@ -53,6 +53,28 @@ class ProtocolTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, '8192-token'):
                 _rows(manifest)
             self.assertEqual(_rows(manifest, allow_task_budgets=True)[0]['generation_budget'], 30)
+
+    def test_thinking_off_requires_explicit_v18_opt_in_and_config_match(self):
+        self.assertTrue(request_thinking({}, {}))
+        self.assertFalse(request_thinking({'thinking': False}, {'thinking': False}))
+        with self.assertRaisesRegex(ValueError, 'thinking mode mismatch'):
+            request_thinking({'thinking': False}, {'thinking': True})
+        with tempfile.TemporaryDirectory() as folder:
+            manifest = Path(folder) / 'manifest.json'
+            manifest.write_text(json.dumps([{'id': 'ruler/q', 'prompt': 'question', 'thinking': False,
+                                             'generation_budget': 30}]))
+            with self.assertRaisesRegex(ValueError, 'thinking ON'):
+                _rows(manifest, allow_task_budgets=True)
+            self.assertFalse(_rows(manifest, allow_task_budgets=True, allow_thinking_off=True)[0]['thinking'])
+
+    def test_cpu_prompt_token_preflight_checks_exact_list(self):
+        class Adapter:
+            def encode_prompt(self, prompt, extra):
+                return [1, 2] if extra['thinking'] is False else [1, 2, 3]
+        row = {'id': 'r', 'prompt': 'x', 'thinking': False, 'prompt_tokens': [1, 2], 'prompt_token_count': 2}
+        self.assertEqual(verify_prompt_tokens(Adapter(), [row]), 1)
+        with self.assertRaisesRegex(ValueError, 'mismatch'):
+            verify_prompt_tokens(Adapter(), [dict(row, prompt_tokens=[1, 3])])
 
     def test_calibration_resume_after_history_write(self):
         with tempfile.TemporaryDirectory() as folder:

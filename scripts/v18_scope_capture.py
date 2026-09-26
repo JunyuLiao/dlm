@@ -20,10 +20,18 @@ STEPS = (1, 3)
 SEED = 101
 
 
+def file_sha(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open('rb') as stream:
+        for chunk in iter(lambda: stream.read(8 << 20), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
             longbench_manifest: Path, longbench_id: str, out: Path) -> dict:
     from dllm.models import create_adapter
-    from experiments.numerical_qk_reuse.runner import GOLD_FIELDS, _one, _rows
+    from experiments.numerical_qk_reuse.runner import GOLD_FIELDS, _fingerprint, _one, _rows
     from experiments.value_direction_hopper.integration import Attention
 
     config = json.loads(config_path.read_text())
@@ -33,13 +41,16 @@ def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
                (longbench_manifest, longbench_id, 'v15_selection_first'))
     rows = []
     for manifest, item_id, label in sources:
-        raw = _rows(manifest, allow_task_budgets=True)
+        raw = _rows(manifest, allow_task_budgets=True, allow_thinking_off=True)
         if any(any(k in r for k in GOLD_FIELDS) for r in raw):
             raise ValueError('generation manifest must be gold-free')
         row = next((r for r in raw if r['id'] == item_id), None)
         if row is None or raw[0]['id'] != item_id:
             raise ValueError(f'{label} must be the first row of its frozen manifest')
-        rows.append((row, label))
+        expected_thinking = label != 'ruler_calibration_first'
+        if row.get('thinking') is not expected_thinking:
+            raise ValueError(f'{label} has unexpected thinking mode')
+        rows.append((row, label, manifest))
     adapter = create_adapter('diffusion_gemma', config['model'], device='cuda', precision='bfloat16',
                              revision=config['revision']).load()
     original = Attention.__call__
@@ -104,14 +115,45 @@ def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
 
     Attention.__call__ = tapped
     try:
-        for row, label in rows:
+        for row, label, manifest in rows:
             current_label = label
             canvas_index = -1
-            receipt = _one(adapter, row, SEED, config)
-            request_reports.append(dict(label=label, id=row['id'], seed=SEED,
-                                        termination=receipt['termination_reason'],
-                                        decoder_calls=receipt['total_decoder_calls'],
-                                        output_tokens=receipt['output_tokens']))
+            request_config = dict(config, thinking=bool(row['thinking']),
+                                  manifest=str(manifest.resolve()), manifest_sha256=file_sha(manifest),
+                                  ids=[row['id']], seeds=[SEED], phase='v18_scope_capture')
+            request_config.pop('fingerprint', None)
+            request_config['fingerprint'] = _fingerprint(request_config)
+            try:
+                receipt = _one(adapter, row, SEED, request_config)
+                request_reports.append(dict(label=label, id=row['id'], seed=SEED, status='validated',
+                                            thinking=request_config['thinking'], fingerprint=request_config['fingerprint'],
+                                            termination=receipt['termination_reason'],
+                                            decoder_calls=receipt['total_decoder_calls'],
+                                            output_tokens=receipt['output_tokens']))
+            except Exception as exc:
+                request_reports.append(dict(label=label, id=row['id'], seed=SEED, status='validation_failed',
+                                            thinking=request_config['thinking'], fingerprint=request_config['fingerprint'],
+                                            error=f'{type(exc).__name__}: {exc}'[:500]))
+                out.parent.mkdir(parents=True, exist_ok=True)
+                checkpoint = out.with_suffix('.unqualified.pt')
+                torch.save(states, checkpoint)
+                checkpoint.with_suffix('.json').write_text(json.dumps(dict(
+                    schema='v18_scope_capture_unqualified_v1', config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
+                    state_file=str(checkpoint), state_file_sha256=file_sha(checkpoint),
+                    requests=request_reports, captured_real_states=len(states),
+                    valid_for_opportunity=False,
+                    note='A complete generation failed post-generate validation; these states are diagnostic only.'), indent=2) + '\n')
+                raise
+            else:
+                out.parent.mkdir(parents=True, exist_ok=True)
+                checkpoint = out.with_suffix('.checkpoint.pt')
+                torch.save(states, checkpoint)
+                checkpoint.with_suffix('.json').write_text(json.dumps(dict(
+                    schema='v18_scope_capture_checkpoint_v1', config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
+                    state_file=str(checkpoint), state_file_sha256=file_sha(checkpoint),
+                    requests=request_reports, captured_real_states=len(states),
+                    valid_for_opportunity=False,
+                    note='Intermediate checkpoint; only final validated capture file is qualified.'), indent=2) + '\n')
     finally:
         Attention.__call__ = original
     original_states = len(states)
@@ -122,12 +164,12 @@ def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
         padded[..., -min(5, nk - 1):] = False
         states.append(dict(source, mask=padded, source_id=source['source_id'] + '/derived_padded_mask',
                            derived_mask=True))
-    expected = {(label, layer, step) for _, label in rows for layer in LAYERS for step in STEPS}
+    expected = {(label, layer, step) for _, label, _ in rows for layer in LAYERS for step in STEPS}
     missing = sorted(expected - seen)
     out.parent.mkdir(parents=True, exist_ok=True)
     torch.save(states, out)
     report = dict(schema='v18_scope_capture_v1', config_sha256=hashlib.sha256(config_path.read_bytes()).hexdigest(),
-                  state_file=str(out), state_file_sha256=hashlib.sha256(out.read_bytes()).hexdigest(),
+                  state_file=str(out), state_file_sha256=file_sha(out),
                   requests=request_reports, expected_real_states=12, captured_real_states=original_states,
                   missing_real_states=[dict(source=label, layer=layer, step=step) for label, layer, step in missing],
                   derived_padded_states=len(states) - original_states,

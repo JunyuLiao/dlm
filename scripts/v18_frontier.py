@@ -49,7 +49,7 @@ def config_for(arm, manifest, model, policy_file, library, torch_library, phase,
     config = _config(args)
     config.update(frontier_arm=arm, method='unweighted' if arm.startswith('U') else 'T',
                   target=int(arm[1:]), support_geometry='native_legal', fast_t=arm.startswith('T'),
-                  policy=policy, collect=True, max_new_tokens=128)
+                  policy=policy, collect=True, max_new_tokens=128, thinking=False)
     config['fingerprint'] = _fingerprint({k: v for k, v in config.items() if k != 'fingerprint'})
     return config
 
@@ -57,7 +57,7 @@ def config_for(arm, manifest, model, policy_file, library, torch_library, phase,
 def plan_calibration(manifest, policy_file, model, library, torch_library, out, *, authorization,
                      point=0, policies=None, arms=METHOD_POINTS):
     from experiments.numerical_qk_reuse.runner import _rows
-    rows = _rows(manifest, allow_task_budgets=True)
+    rows = _rows(manifest, allow_task_budgets=True, allow_thinking_off=True)
     if len(rows) != 26 or len({r['id'] for r in rows}) != 26:
         raise ValueError('calibration requires 26 distinct questions')
     if any(k in r for r in rows for k in ('outputs', 'answer', 'expected', 'expected_answer', 'gold')):
@@ -119,7 +119,7 @@ def run_calibration(protocol_path, private, ledger, lock_path, max_executions, d
     manifest = Path(protocol['manifest'])
     if sha(manifest.read_bytes()) != protocol['manifest_sha256']:
         raise ValueError('generation manifest byte hash mismatch')
-    rows = _rows(manifest, allow_task_budgets=True)
+    rows = _rows(manifest, allow_task_budgets=True, allow_thinking_off=True)
     if any(k in r for r in rows for k in ('outputs', 'answer', 'expected', 'expected_answer', 'gold')):
         raise ValueError('generation manifest contains gold')
     if {r['id'] for r in rows} != set(protocol['ids']) or len(rows) != len(protocol['ids']):
