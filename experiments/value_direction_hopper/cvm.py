@@ -16,6 +16,8 @@ with the same mandatory set every step. Row-specific s is never averaged.
 """
 from __future__ import annotations
 
+from contextlib import contextmanager
+
 import hashlib
 import json
 import subprocess
@@ -30,7 +32,19 @@ FMHA = Path('/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/sour
 CUTLASS = Path('/home/exouser/chw/dlm_test/cutlass/include')
 NVCC = Path('/usr/local/cuda/bin/nvcc')
 _LOADED = None
-MODES = ('TP', 'B8P', 'CVM')
+MODES = ('TP', 'B8P', 'B8NR', 'CVM')
+
+
+@contextmanager
+def install_no_risk_export(adapter, config, condition):
+    """Opt-in B8 arm using the published GLOBAL scope and consumer unchanged."""
+    if condition != 'global_B8P':
+        raise ValueError('B8_no_risk_export requires global_B8P')
+    from experiments.numerical_qk_reuse.global_scope import install
+
+    with install(adapter, config, condition) as context:
+        context['router'].mode = 'B8NR'
+        yield context
 
 
 def sha256(path) -> str:
@@ -121,6 +135,8 @@ class V5Kernel:
         packed = isinstance(mask, PackedMask)
         kind = 3 if packed else 0 if mask is None else 1 if mask.dtype == torch.bool else 2
         tensor = mask.tensor if packed else q if mask is None else mask
+        self.last_export = None
+        self.last_masks = None
         out = torch.ops.value_direction_hopper_v5.attention(
             q, k, v, z, reference, tensor, kind, q.shape[-1] ** -.5 if scale is None else scale, log_threshold,
             {'dense': 0, 'value': 1, 'blasst': 2}[mode], {'ieee': 0, 'tf32x3': 1, 'tf32x3_register': 2, 'tf32x3_shared': 3}[precision],
@@ -264,12 +280,16 @@ class CVMRouter:
         ident = (self.canvas, self.epoch, b, h, nq, nk, d, str(q.dtype))
         st = self.layers.get(layer)
         if st is None or st['ident'] != ident or self.step % self.period == 0:
-            self.kernel.export = True
-            out = self.fresh(module, q, k, v, mask, **kw)
-            self.kernel.export = False
+            self.kernel.export = self.mode != 'B8NR'
+            try:
+                out = self.fresh(module, q, k, v, mask, **kw)
+            finally:
+                self.kernel.export = False
             skipped, eligible = self.kernel.last_masks        # this anchor call's own decision
-            self.layers[layer] = dict(ident=ident, anchor_step=self.step, skipped=skipped, eligible=eligible,
-                                      log_rho=self.kernel.last_export, protect=protect)
+            state = dict(ident=ident, anchor_step=self.step, skipped=skipped, eligible=eligible, protect=protect)
+            if self.mode != 'B8NR':
+                state['log_rho'] = self.kernel.last_export
+            self.layers[layer] = state
             self.counts['anchors'] += 1
             return out
         self.counts['ordinary'] += 1
@@ -298,7 +318,8 @@ class CVMRouter:
         return dict(self.counts, mode=self.mode, period=self.period, v5_build=self.v5_identity['key'],
                     support_build=None if self.support_identity is None else self.support_identity['key'],
                     guard_mode=self.guard_mode, live_layers=sorted(self.layers),
-                    metadata_bytes=sum(st['log_rho'].numel() * 4 + st['skipped'].numel() * 2 for st in self.layers.values()))
+                    metadata_bytes=sum((st['log_rho'].numel() * 4 if st.get('log_rho') is not None else 0)
+                                       + st['skipped'].numel() * 2 for st in self.layers.values()))
 
     def close(self):
         for handle in self.handles:
