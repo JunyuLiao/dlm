@@ -119,7 +119,11 @@ def stage_plan(stage, ruler, aime, ruler_ledgers, aime_ledgers, budget, *, host,
     requests_remaining = min(budget['request_cap'] - requests_used,
                              budget['request_cap_by_host'][host] - host_used)
     guard = budget['block_guard_s']
-    evaluation_deadline = budget['deadline_epoch'] - 60 * budget['scoring_minutes_reserved']
+    cutoff_flag = budget.get('deadline_is_gpu_cutoff', False)
+    if type(cutoff_flag) is not bool:
+        raise ValueError('deadline_is_gpu_cutoff must be boolean')
+    evaluation_deadline = (budget['deadline_epoch'] if cutoff_flag else
+                           budget['deadline_epoch'] - 60 * budget['scoring_minutes_reserved'])
     deadline = min(evaluation_deadline, budget['initial_soft_deadline_epoch']) if stage == 'initial' else evaluation_deadline
     if any(type(v) not in (int, float) for v in (gpu_remaining, requests_remaining, guard, deadline)) or guard <= 0:
         raise ValueError('invalid frozen budget')

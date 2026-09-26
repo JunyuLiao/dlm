@@ -58,6 +58,16 @@ class DriverTests(unittest.TestCase):
                 plan = stage_plan('aime', ruler, aime, [rledger], [aledger], budget, host='mpk', now=100)
                 self.assertTrue(plan['allowed'])
                 self.assertEqual(plan['next_block_requests'], 1)
+                self.assertEqual(plan['deadline_epoch'], 940)  # legacy reserve remains
+                extension = dict(budget, deadline_is_gpu_cutoff=True)
+                extended = stage_plan('aime', ruler, aime, [rledger], [aledger],
+                                      extension, host='mpk', now=100)
+                self.assertEqual(extended['deadline_epoch'], 1000)
+                self.assertEqual(extended['next_block_requests'], plan['next_block_requests'])
+                self.assertEqual(extended['requests_remaining'], plan['requests_remaining'])
+                with self.assertRaisesRegex(ValueError, 'boolean'):
+                    stage_plan('aime', ruler, aime, [rledger], [aledger],
+                               dict(budget, deadline_is_gpu_cutoff='true'), host='mpk', now=100)
                 with self.assertRaisesRegex(ValueError, 'both hosts'):
                     stage_plan('remainder', ruler, aime, [rledger], [aledger], budget, host='mpk', now=100)
                 write(aledger, aime_entries)
