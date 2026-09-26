@@ -1,89 +1,15 @@
 {
- "archive": {
-  "v14_handoff": "docs/handoff_archive/HANDOFF_v14.md",
-  "v14_state": "docs/handoff_archive/STATE_v14.json"
- },
- "branch": "research/numerical-qk-reuse-native-20260924",
- "budget_used": {
-  "cap": 250,
-  "executions": 243,
-  "gpu_h": 2.87,
-  "wall_h": 3.2
- },
- "decision": "A: simple reuse and CVM both below dense; CVM increment over B8_P not established",
- "deploys": {
-  "panel": "af1fc0d5f728",
-  "setup": "5f3e52c0decc"
- },
- "junyu_ref": {
-  "branch": "query-sensitivity-aware-v3",
-  "sha": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
-  "written": false
- },
- "live_jobs": [],
- "next_command": "Take Decision A to Fan: stop CVM-T as the contribution; keep B8_P long-context per-call saving as an engineering (prior-art) result; new round only for a mechanism with a plausible increment over B8_P.",
- "panel": {
-  "CVM_T_over_B8_P": {
-   "geometric": 0.953,
-   "geometric_ci95": [
-    0.817,
-    1.124
-   ],
-   "paired_quality": "2 vs 2",
-   "pooled_calls": 0.962,
-   "pooled_per_call": 1.021,
-   "summed": 0.981,
-   "summed_ci95": [
-    0.815,
-    1.18
-   ]
-  },
-  "bins": [
-   "10-15K",
-   "15-20K"
-  ],
-  "caps": 0,
-  "correct_of_24": {
-   "B8_P": 14,
-   "CVM_T": 14,
-   "D_native": 12,
-   "T_G_original": 14,
-   "T_P": 14
-  },
-  "domains": 4,
-  "eligible_pool": 49,
-  "executions": "240/240",
-  "failures": 0,
-  "questions": 12,
-  "seeds": [
-   17,
-   29
-  ],
-  "vs_D_native_summed": {
-   "B8_P": [
-    0.893,
-    "calls 0.967 x per-call 0.923"
-   ],
-   "CVM_T": [
-    0.876,
-    "calls 0.930 x per-call 0.942"
-   ],
-   "T_G_original": [
-    1.002,
-    "calls 1.015 x per-call 0.988"
-   ],
-   "T_P": [
-    0.933,
-    "calls 0.937 x per-call 0.996"
-   ]
-  },
-  "warm_accepted": "120/120"
- },
- "private_root": "/media/volume/dllm-1/dyh/numerical_qk_longcontext_scored_20260926",
- "protocol_id": "v15_lbv2_scored_28f30b0d703d",
- "results": "results/numerical_qk_longcontext_scored_20260926/",
- "reviewed_head_at_start": "fa92a1e2b8fe4b9e6fdfe3ef368139221e613bcc",
- "schema": 3,
- "status": "V15_DONE_DECISION_A",
- "task": "v15: frozen scored LongBench-v2 long-context development diagnostic (native adaptive, thinking ON, 8192), five v14 arms, GLOBAL-only"
+  "schema": 4,
+  "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
+  "branch": "research/astra-junyu-frontier-20260926",
+  "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
+  "status": "CP0_IMPLEMENTATION_IN_PROGRESS",
+  "design": "DESIGN_DECISION.md",
+  "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
+  "candidate": "post-QK ball screen opportunity only; no kernel qualification or success claim",
+  "scope": "native_legal_all_layers awaiting GPU qualification",
+  "hosts": {"149.165.151.254": "runtime inventoried; prior v15 tree clean", "149.165.159.64": "private runtime transport; not bridge-qualified"},
+  "gpu_jobs": [],
+  "budget": {"wall_start_utc": "2026-09-26T18:02:00Z", "wall_hours_cap": 12, "gpu_process_hours_single_host_cap": 10, "gpu_process_hours_two_hosts_cap": 20, "generations_cap": 7000, "aime_core_reserved": 1080, "scoring_minutes_reserved": 30, "new_generations": 0},
+  "next": "immutable deploy CP0 tests then strong B8 and scope GPU qualification; frozen U/T50/60 calibration"
 }
