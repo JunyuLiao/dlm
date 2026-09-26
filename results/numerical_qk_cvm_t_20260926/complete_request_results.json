@@ -1,0 +1,1895 @@
+{
+  "meta": {
+    "complete": true,
+    "executed": 120,
+    "note": "development questions (examined in v13); small pilot: intervals descriptive, not noninferiority",
+    "planned_executions": 120,
+    "protocols": [
+      "v14_cvm_t_dev6"
+    ],
+    "questions": [
+      "aime26/2",
+      "aime26/8",
+      "aime26/14",
+      "aime26/20",
+      "aime26/23",
+      "aime26/30"
+    ],
+    "scope": "GLOBAL-only (layers 5,11,17,23,29); LOCAL native in all arms",
+    "seeds": [
+      17,
+      29
+    ],
+    "time_definition": "accepted single warm API wall (same cell, no new compilation, reproduces attempt 0)"
+  },
+  "pairs": {
+    "B8_P/D_native": {
+      "amortized_time_per_call_factor": 1.004978751384775,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.6996147671891807,
+          1.2691402053096308
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          0,
+          0.5833333333333334
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.6792435425219384,
+          1.2118456423733428
+        ]
+      },
+      "call_factor": 0.8861696072851452,
+      "candidate_calls": 3114,
+      "candidate_correct": 9,
+      "candidate_time_s": 458.39816133258864,
+      "geometric_time_ratio": 0.9309254890263821,
+      "leave_one_question_out": {
+        "aime26/14": {
+          "geometric_time_ratio": 0.9558713745655044,
+          "quality_diff_mean_per_question": 0.2,
+          "summed_time_ratio": 0.908943951127731
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 0.923478062756518,
+          "quality_diff_mean_per_question": 0.3,
+          "summed_time_ratio": 0.883202486564642
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 0.8147975766269923,
+          "quality_diff_mean_per_question": 0.3,
+          "summed_time_ratio": 0.8140301212653395
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.0430580337598832,
+          "quality_diff_mean_per_question": 0.1,
+          "summed_time_ratio": 1.0179092238193685
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 0.9153880056171378,
+          "quality_diff_mean_per_question": 0.3,
+          "summed_time_ratio": 0.8461904831436635
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 0.9477637016523229,
+          "quality_diff_mean_per_question": 0.3,
+          "summed_time_ratio": 0.8936729294041366
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 6,
+      "outcomes": 12,
+      "paired_disagreements": {
+        "both": 6,
+        "candidate_only": 3,
+        "neither": 3,
+        "reference_only": 0
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.0072051749914683,
+          "call_factor": 0.770546056260342,
+          "candidate_calls": 1397,
+          "candidate_correct": 5,
+          "candidate_time_s": 205.9604869070463,
+          "geometric_time_ratio": 0.8171382488181295,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 3,
+            "candidate_only": 2,
+            "neither": 1,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.3333333333333333,
+          "reference_calls": 1813,
+          "reference_correct": 3,
+          "reference_time_s": 265.3794925720431,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 1.223783125372424,
+          "speedup_summed": 1.2884971120301034,
+          "summed_time_ratio": 0.7760979754346836,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.0029961983042537,
+          "call_factor": 1.0094062316284538,
+          "candidate_calls": 1717,
+          "candidate_correct": 4,
+          "candidate_time_s": 252.43767442554235,
+          "geometric_time_ratio": 1.060557705348453,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 3,
+            "candidate_only": 1,
+            "neither": 2,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.16666666666666666,
+          "reference_calls": 1701,
+          "reference_correct": 3,
+          "reference_time_s": 249.33824720140547,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.9429001316542636,
+          "speedup_summed": 0.9877220100716342,
+          "summed_time_ratio": 1.012430612867962,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": 0.25,
+      "reference_calls": 3514,
+      "reference_correct": 6,
+      "reference_time_s": 514.7177397734486,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 1.0741998277927272,
+      "speedup_summed": 1.1228617023182113,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.004978751384775,
+          "call_factor": 0.8861696072851452,
+          "candidate_calls": 3114,
+          "candidate_correct": 9,
+          "candidate_time_s": 458.39816133258864,
+          "geometric_time_ratio": 0.9309254890263821,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 6,
+            "candidate_only": 3,
+            "neither": 3,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.25,
+          "reference_calls": 3514,
+          "reference_correct": 6,
+          "reference_time_s": 514.7177397734486,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 1.0741998277927272,
+          "speedup_summed": 1.1228617023182113,
+          "summed_time_ratio": 0.8905816254445615,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 0.8905816254445615,
+      "timing_complete": true
+    },
+    "B8_P/T_P": {
+      "amortized_time_per_call_factor": 0.9924851131616796,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.6651404769729811,
+          1.0959198605583602
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          0.0,
+          0.6666666666666666
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.630452833702197,
+          1.0847369304250412
+        ]
+      },
+      "call_factor": 0.8400323711896412,
+      "candidate_calls": 3114,
+      "candidate_correct": 9,
+      "candidate_time_s": 458.39816133258864,
+      "geometric_time_ratio": 0.87541799371747,
+      "leave_one_question_out": {
+        "aime26/14": {
+          "geometric_time_ratio": 0.8676524074981827,
+          "quality_diff_mean_per_question": 0.4,
+          "summed_time_ratio": 0.817896226718689
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 0.8696518042887728,
+          "quality_diff_mean_per_question": 0.4,
+          "summed_time_ratio": 0.8269106862874068
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 0.8054979823743292,
+          "quality_diff_mean_per_question": 0.2,
+          "summed_time_ratio": 0.7766166348061391
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 0.9858390081382121,
+          "quality_diff_mean_per_question": 0.2,
+          "summed_time_ratio": 0.9600942444595284
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 0.8736387667235481,
+          "quality_diff_mean_per_question": 0.4,
+          "summed_time_ratio": 0.8135601223680514
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 0.8598036475517206,
+          "quality_diff_mean_per_question": 0.4,
+          "summed_time_ratio": 0.8259196585995341
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 6,
+      "outcomes": 12,
+      "paired_disagreements": {
+        "both": 5,
+        "candidate_only": 4,
+        "neither": 3,
+        "reference_only": 0
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 0.9938251360587401,
+          "call_factor": 0.8198356807511737,
+          "candidate_calls": 1397,
+          "candidate_correct": 5,
+          "candidate_time_s": 205.9604869070463,
+          "geometric_time_ratio": 0.8616001381448856,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 3,
+            "candidate_only": 2,
+            "neither": 1,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.3333333333333333,
+          "reference_calls": 1704,
+          "reference_correct": 3,
+          "reference_time_s": 252.78256558673456,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 1.16063119738247,
+          "speedup_summed": 1.2273352495074452,
+          "summed_time_ratio": 0.814773306968345,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 0.9914010253391847,
+          "call_factor": 0.8572141787319022,
+          "candidate_calls": 1717,
+          "candidate_correct": 4,
+          "candidate_time_s": 252.43767442554235,
+          "geometric_time_ratio": 0.8894574522403925,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 2,
+            "candidate_only": 2,
+            "neither": 2,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.3333333333333333,
+          "reference_calls": 2003,
+          "reference_correct": 2,
+          "reference_time_s": 297.0403589287307,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 1.1242808719868158,
+          "speedup_summed": 1.1766879076377488,
+          "summed_time_ratio": 0.849843015730095,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": 0.3333333333333333,
+      "reference_calls": 3707,
+      "reference_correct": 5,
+      "reference_time_s": 549.8229245154653,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 1.1423114525593556,
+      "speedup_summed": 1.1994440006414944,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 0.9924851131616796,
+          "call_factor": 0.8400323711896412,
+          "candidate_calls": 3114,
+          "candidate_correct": 9,
+          "candidate_time_s": 458.39816133258864,
+          "geometric_time_ratio": 0.87541799371747,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 5,
+            "candidate_only": 4,
+            "neither": 3,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.3333333333333333,
+          "reference_calls": 3707,
+          "reference_correct": 5,
+          "reference_time_s": 549.8229245154653,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 1.1423114525593556,
+          "speedup_summed": 1.1994440006414944,
+          "summed_time_ratio": 0.8337196229796252,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 0.8337196229796252,
+      "timing_complete": true
+    },
+    "CVM_T/B8_P": {
+      "amortized_time_per_call_factor": 0.9976860985014455,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          1.0813688131271435,
+          1.5012824433077592
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.5833333333333334,
+          0
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          1.0798650099951077,
+          1.592817480690158
+        ]
+      },
+      "call_factor": 1.2700706486833655,
+      "candidate_calls": 3955,
+      "candidate_correct": 6,
+      "candidate_time_s": 580.8509011783171,
+      "geometric_time_ratio": 1.2314641616575137,
+      "leave_one_question_out": {
+        "aime26/14": {
+          "geometric_time_ratio": 1.2329060426165637,
+          "quality_diff_mean_per_question": -0.3,
+          "summed_time_ratio": 1.2860973866104997
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.2661722988641961,
+          "quality_diff_mean_per_question": -0.3,
+          "summed_time_ratio": 1.2873003924422475
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 1.237534209223255,
+          "quality_diff_mean_per_question": -0.2,
+          "summed_time_ratio": 1.2551827591744338
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.1226309549212354,
+          "quality_diff_mean_per_question": -0.1,
+          "summed_time_ratio": 1.1417824209607783
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.2737484752332908,
+          "quality_diff_mean_per_question": -0.3,
+          "summed_time_ratio": 1.366149509478224
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.2624958882307127,
+          "quality_diff_mean_per_question": -0.3,
+          "summed_time_ratio": 1.2827874825995178
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 6,
+      "outcomes": 12,
+      "paired_disagreements": {
+        "both": 5,
+        "candidate_only": 1,
+        "neither": 2,
+        "reference_only": 4
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 0.993644163900851,
+          "call_factor": 1.3042233357193986,
+          "candidate_calls": 1822,
+          "candidate_correct": 3,
+          "candidate_time_s": 266.91117827105336,
+          "geometric_time_ratio": 1.2125906839753158,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 3,
+            "candidate_only": 0,
+            "neither": 1,
+            "reference_only": 2
+          },
+          "quality_diff_mean_per_question": -0.3333333333333333,
+          "reference_calls": 1397,
+          "reference_correct": 5,
+          "reference_time_s": 205.9604869070463,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 0.824680589431575,
+          "speedup_summed": 0.7716442909629267,
+          "summed_time_ratio": 1.2959339059608808,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.0010863500057074,
+          "call_factor": 1.2422830518345953,
+          "candidate_calls": 2133,
+          "candidate_correct": 3,
+          "candidate_time_s": 313.9397229072638,
+          "geometric_time_ratio": 1.2506313972949128,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 2,
+            "candidate_only": 1,
+            "neither": 1,
+            "reference_only": 2
+          },
+          "quality_diff_mean_per_question": -0.16666666666666666,
+          "reference_calls": 1717,
+          "reference_correct": 4,
+          "reference_time_s": 252.43767442554235,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.7995961097434282,
+          "speedup_summed": 0.8040959967978031,
+          "summed_time_ratio": 1.2436326060350462,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": -0.25,
+      "reference_calls": 3114,
+      "reference_correct": 9,
+      "reference_time_s": 458.39816133258864,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.81204149591656,
+      "speedup_summed": 0.7891838687048255,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 0.9976860985014455,
+          "call_factor": 1.2700706486833655,
+          "candidate_calls": 3955,
+          "candidate_correct": 6,
+          "candidate_time_s": 580.8509011783171,
+          "geometric_time_ratio": 1.2314641616575137,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 5,
+            "candidate_only": 1,
+            "neither": 2,
+            "reference_only": 4
+          },
+          "quality_diff_mean_per_question": -0.25,
+          "reference_calls": 3114,
+          "reference_correct": 9,
+          "reference_time_s": 458.39816133258864,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.81204149591656,
+          "speedup_summed": 0.7891838687048255,
+          "summed_time_ratio": 1.267131830306107,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.267131830306107,
+      "timing_complete": true
+    },
+    "CVM_T/D_native": {
+      "amortized_time_per_call_factor": 1.0026533295459303,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.9787954833354937,
+          1.4940414867554455
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.25,
+          0.25
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.9997279967435925,
+          1.5282170625112914
+        ]
+      },
+      "call_factor": 1.1254980079681276,
+      "candidate_calls": 3955,
+      "candidate_correct": 6,
+      "candidate_time_s": 580.8509011783171,
+      "geometric_time_ratio": 1.1464013769094845,
+      "leave_one_question_out": {
+        "aime26/14": {
+          "geometric_time_ratio": 1.1784995936660112,
+          "quality_diff_mean_per_question": -0.1,
+          "summed_time_ratio": 1.1689904401207964
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.1692823416710747,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1369469075606324
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 1.0083398746681096,
+          "quality_diff_mean_per_question": 0.1,
+          "summed_time_ratio": 1.0217565736609278
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.170969236478124,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1622308578907856
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.1659740764016724,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1560227134718573
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.1965477763503776,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.146392447377669
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 6,
+      "outcomes": 12,
+      "paired_disagreements": {
+        "both": 5,
+        "candidate_only": 1,
+        "neither": 5,
+        "reference_only": 1
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.000803543981008,
+          "call_factor": 1.0049641478212907,
+          "candidate_calls": 1822,
+          "candidate_correct": 3,
+          "candidate_time_s": 266.91117827105336,
+          "geometric_time_ratio": 0.9908542280367675,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 3,
+            "candidate_only": 0,
+            "neither": 3,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0,
+          "reference_calls": 1813,
+          "reference_correct": 3,
+          "reference_time_s": 265.3794925720431,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 1.0092301891685456,
+          "speedup_summed": 0.994261440420248,
+          "summed_time_ratio": 1.0057716807134012,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.0040858032300062,
+          "call_factor": 1.253968253968254,
+          "candidate_calls": 2133,
+          "candidate_correct": 3,
+          "candidate_time_s": 313.9397229072638,
+          "geometric_time_ratio": 1.326366764951822,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 2,
+            "candidate_only": 1,
+            "neither": 2,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": 0,
+          "reference_calls": 1701,
+          "reference_correct": 3,
+          "reference_time_s": 249.33824720140547,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.7539392771473155,
+          "speedup_summed": 0.7942233142476803,
+          "summed_time_ratio": 1.2590917215106427,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": 0.0,
+      "reference_calls": 3514,
+      "reference_correct": 6,
+      "reference_time_s": 514.7177397734486,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.8722948350741175,
+      "speedup_summed": 0.8861443422559722,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.0026533295459303,
+          "call_factor": 1.1254980079681276,
+          "candidate_calls": 3955,
+          "candidate_correct": 6,
+          "candidate_time_s": 580.8509011783171,
+          "geometric_time_ratio": 1.1464013769094845,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 5,
+            "candidate_only": 1,
+            "neither": 5,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": 0.0,
+          "reference_calls": 3514,
+          "reference_correct": 6,
+          "reference_time_s": 514.7177397734486,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.8722948350741175,
+          "speedup_summed": 0.8861443422559722,
+          "summed_time_ratio": 1.128484325086555,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.128484325086555,
+      "timing_complete": true
+    },
+    "CVM_T/T_G_original": {
+      "amortized_time_per_call_factor": 0.9852248774037023,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          1.1531040316929606,
+          1.7455805330510736
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.5833333333333334,
+          0.16666666666666666
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          1.094646389304951,
+          1.866208132004811
+        ]
+      },
+      "call_factor": 1.3761308281141267,
+      "candidate_calls": 3955,
+      "candidate_correct": 6,
+      "candidate_time_s": 580.8509011783171,
+      "geometric_time_ratio": 1.4082765723296657,
+      "leave_one_question_out": {
+        "aime26/14": {
+          "geometric_time_ratio": 1.4827352704536678,
+          "quality_diff_mean_per_question": -0.3,
+          "summed_time_ratio": 1.452975699619149
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.3457812361483892,
+          "quality_diff_mean_per_question": -0.2,
+          "summed_time_ratio": 1.3286876881689371
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 1.3364007037647678,
+          "quality_diff_mean_per_question": -0.1,
+          "summed_time_ratio": 1.2739123332681463
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.3123712349806809,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.2375754441644955
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.4934198003632306,
+          "quality_diff_mean_per_question": -0.2,
+          "summed_time_ratio": 1.5017193278918402
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.4924999888791388,
+          "quality_diff_mean_per_question": -0.2,
+          "summed_time_ratio": 1.3865642689631303
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 6,
+      "outcomes": 12,
+      "paired_disagreements": {
+        "both": 5,
+        "candidate_only": 1,
+        "neither": 3,
+        "reference_only": 3
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 0.9882309240768508,
+          "call_factor": 1.2750174947515744,
+          "candidate_calls": 1822,
+          "candidate_correct": 3,
+          "candidate_time_s": 266.91117827105336,
+          "geometric_time_ratio": 1.2444489945064487,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 3,
+            "candidate_only": 0,
+            "neither": 2,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": -0.16666666666666666,
+          "reference_calls": 1429,
+          "reference_correct": 4,
+          "reference_time_s": 211.8322985880077,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 0.8035684904840975,
+          "speedup_summed": 0.7936434133638569,
+          "summed_time_ratio": 1.2600117170524996,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 0.9819509443763189,
+          "call_factor": 1.4761245674740484,
+          "candidate_calls": 2133,
+          "candidate_correct": 3,
+          "candidate_time_s": 313.9397229072638,
+          "geometric_time_ratio": 1.5936715067692675,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 2,
+            "candidate_only": 1,
+            "neither": 1,
+            "reference_only": 2
+          },
+          "quality_diff_mean_per_question": -0.16666666666666666,
+          "reference_calls": 1445,
+          "reference_correct": 4,
+          "reference_time_s": 216.5875407489948,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.6274818842856933,
+          "speedup_summed": 0.6899016752109883,
+          "summed_time_ratio": 1.449481913048227,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": -0.16666666666666666,
+      "reference_calls": 2874,
+      "reference_correct": 8,
+      "reference_time_s": 428.4198393370025,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.710087790742505,
+      "speedup_summed": 0.737572823710711,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 0.9852248774037023,
+          "call_factor": 1.3761308281141267,
+          "candidate_calls": 3955,
+          "candidate_correct": 6,
+          "candidate_time_s": 580.8509011783171,
+          "geometric_time_ratio": 1.4082765723296657,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 5,
+            "candidate_only": 1,
+            "neither": 3,
+            "reference_only": 3
+          },
+          "quality_diff_mean_per_question": -0.16666666666666666,
+          "reference_calls": 2874,
+          "reference_correct": 8,
+          "reference_time_s": 428.4198393370025,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.710087790742505,
+          "speedup_summed": 0.737572823710711,
+          "summed_time_ratio": 1.3557983264201958,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.3557983264201958,
+      "timing_complete": true
+    },
+    "CVM_T/T_P": {
+      "amortized_time_per_call_factor": 0.9901886003710418,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.956099184122933,
+          1.2779155303608192
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          0.0,
+          0.25
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.9396410301754378,
+          1.3310597490364309
+        ]
+      },
+      "call_factor": 1.0669004585918533,
+      "candidate_calls": 3955,
+      "candidate_correct": 6,
+      "candidate_time_s": 580.8509011783171,
+      "geometric_time_ratio": 1.0780458857331867,
+      "leave_one_question_out": {
+        "aime26/14": {
+          "geometric_time_ratio": 1.0697338960953187,
+          "quality_diff_mean_per_question": 0.1,
+          "summed_time_ratio": 1.0518941997014946
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.1011290242477112,
+          "quality_diff_mean_per_question": 0.1,
+          "summed_time_ratio": 1.0644824509724669
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 0.996831308648543,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 0.9747958104967333
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.1067333871048046,
+          "quality_diff_mean_per_question": 0.1,
+          "summed_time_ratio": 1.0962187307895097
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.112796047018812,
+          "quality_diff_mean_per_question": 0.1,
+          "summed_time_ratio": 1.1114447621041572
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.0854985697198158,
+          "quality_diff_mean_per_question": 0.1,
+          "summed_time_ratio": 1.0594793996843497
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 6,
+      "outcomes": 12,
+      "paired_disagreements": {
+        "both": 4,
+        "candidate_only": 2,
+        "neither": 5,
+        "reference_only": 1
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 0.9875085463827364,
+          "call_factor": 1.0692488262910798,
+          "candidate_calls": 1822,
+          "candidate_correct": 3,
+          "candidate_time_s": 266.91117827105336,
+          "geometric_time_ratio": 1.0447683008263333,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 2,
+            "candidate_only": 1,
+            "neither": 2,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": 0,
+          "reference_calls": 1704,
+          "reference_correct": 3,
+          "reference_time_s": 252.78256558673456,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 0.9571500199700499,
+          "speedup_summed": 0.9470662383799792,
+          "summed_time_ratio": 1.0558923541721512,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 0.9924780338487206,
+          "call_factor": 1.0649026460309536,
+          "candidate_calls": 2133,
+          "candidate_correct": 3,
+          "candidate_time_s": 313.9397229072638,
+          "geometric_time_ratio": 1.1123834163297752,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 2,
+            "candidate_only": 1,
+            "neither": 3,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.16666666666666666,
+          "reference_calls": 2003,
+          "reference_correct": 2,
+          "reference_time_s": 297.0403589287307,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.898970611499607,
+          "speedup_summed": 0.9461700360118969,
+          "summed_time_ratio": 1.056892484373101,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": 0.08333333333333333,
+      "reference_calls": 3707,
+      "reference_correct": 5,
+      "reference_time_s": 549.8229245154653,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.9276043007389179,
+      "speedup_summed": 0.9465818567210478,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 0.9901886003710418,
+          "call_factor": 1.0669004585918533,
+          "candidate_calls": 3955,
+          "candidate_correct": 6,
+          "candidate_time_s": 580.8509011783171,
+          "geometric_time_ratio": 1.0780458857331867,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 4,
+            "candidate_only": 2,
+            "neither": 5,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": 0.08333333333333333,
+          "reference_calls": 3707,
+          "reference_correct": 5,
+          "reference_time_s": 549.8229245154653,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.9276043007389179,
+          "speedup_summed": 0.9465818567210478,
+          "summed_time_ratio": 1.05643267182829,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.05643267182829,
+      "timing_complete": true
+    },
+    "T_G_original/D_native": {
+      "amortized_time_per_call_factor": 1.0176898214224512,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.6379305150615808,
+          1.0160246120430005
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          0,
+          0.5
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.63260788455997,
+          1.0099081980092888
+        ]
+      },
+      "call_factor": 0.8178713716562322,
+      "candidate_calls": 2874,
+      "candidate_correct": 8,
+      "candidate_time_s": 428.4198393370025,
+      "geometric_time_ratio": 0.8140456210338218,
+      "leave_one_question_out": {
+        "aime26/14": {
+          "geometric_time_ratio": 0.7948145681497342,
+          "quality_diff_mean_per_question": 0.2,
+          "summed_time_ratio": 0.8045492023212845
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 0.868850233799921,
+          "quality_diff_mean_per_question": 0.2,
+          "summed_time_ratio": 0.8556916103644021
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 0.7545191137863967,
+          "quality_diff_mean_per_question": 0.2,
+          "summed_time_ratio": 0.802061921356607
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 0.8922545734518187,
+          "quality_diff_mean_per_question": 0,
+          "summed_time_ratio": 0.9391191974364229
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 0.7807410053878242,
+          "quality_diff_mean_per_question": 0.2,
+          "summed_time_ratio": 0.7697994505369506
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 0.8017070588047239,
+          "quality_diff_mean_per_question": 0.2,
+          "summed_time_ratio": 0.8267863762528214
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 6,
+      "outcomes": 12,
+      "paired_disagreements": {
+        "both": 6,
+        "candidate_only": 2,
+        "neither": 4,
+        "reference_only": 0
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.012722350209696,
+          "call_factor": 0.7881963596249311,
+          "candidate_calls": 1429,
+          "candidate_correct": 4,
+          "candidate_time_s": 211.8322985880077,
+          "geometric_time_ratio": 0.796219236313291,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 3,
+            "candidate_only": 1,
+            "neither": 2,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.16666666666666666,
+          "reference_calls": 1813,
+          "reference_correct": 3,
+          "reference_time_s": 265.3794925720431,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 1.2559354941363496,
+          "speedup_summed": 1.2527810647430082,
+          "summed_time_ratio": 0.798224069746087,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.0225417155311625,
+          "call_factor": 0.8495002939447384,
+          "candidate_calls": 1445,
+          "candidate_correct": 4,
+          "candidate_time_s": 216.5875407489948,
+          "geometric_time_ratio": 0.8322711169258885,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 3,
+            "candidate_only": 1,
+            "neither": 2,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.16666666666666666,
+          "reference_calls": 1701,
+          "reference_correct": 3,
+          "reference_time_s": 249.33824720140547,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 1.2015315438238947,
+          "speedup_summed": 1.151212328923231,
+          "summed_time_ratio": 0.8686494879144796,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": 0.16666666666666666,
+      "reference_calls": 3514,
+      "reference_correct": 6,
+      "reference_time_s": 514.7177397734486,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 1.2284323803990491,
+      "speedup_summed": 1.2014330161973723,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.0176898214224512,
+          "call_factor": 0.8178713716562322,
+          "candidate_calls": 2874,
+          "candidate_correct": 8,
+          "candidate_time_s": 428.4198393370025,
+          "geometric_time_ratio": 0.8140456210338218,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 6,
+            "candidate_only": 2,
+            "neither": 4,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.16666666666666666,
+          "reference_calls": 3514,
+          "reference_correct": 6,
+          "reference_time_s": 514.7177397734486,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 1.2284323803990491,
+          "speedup_summed": 1.2014330161973723,
+          "summed_time_ratio": 0.8323393701673663,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 0.8323393701673663,
+      "timing_complete": true
+    },
+    "T_P/D_native": {
+      "amortized_time_per_call_factor": 1.01258823740267,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.9494080047789848,
+          1.1910939425601337
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.5,
+          0.25
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.977538853468319,
+          1.1568191496719724
+        ]
+      },
+      "call_factor": 1.0549231644849175,
+      "candidate_calls": 3707,
+      "candidate_correct": 5,
+      "candidate_time_s": 549.8229245154653,
+      "geometric_time_ratio": 1.063406847594255,
+      "leave_one_question_out": {
+        "aime26/14": {
+          "geometric_time_ratio": 1.101675470850931,
+          "quality_diff_mean_per_question": -0.2,
+          "summed_time_ratio": 1.1113194087889555
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.0618940341436605,
+          "quality_diff_mean_per_question": -0.1,
+          "summed_time_ratio": 1.068074825021272
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 1.0115451490334602,
+          "quality_diff_mean_per_question": 0.1,
+          "summed_time_ratio": 1.04817497434695
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.0580409429423279,
+          "quality_diff_mean_per_question": -0.1,
+          "summed_time_ratio": 1.0602180251506312
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.0477877590644977,
+          "quality_diff_mean_per_question": -0.1,
+          "summed_time_ratio": 1.0401081123305727
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.102302490052313,
+          "quality_diff_mean_per_question": -0.1,
+          "summed_time_ratio": 1.0820337306409293
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 6,
+      "outcomes": 12,
+      "paired_disagreements": {
+        "both": 4,
+        "candidate_only": 1,
+        "neither": 5,
+        "reference_only": 2
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.0134631721892144,
+          "call_factor": 0.9398786541643684,
+          "candidate_calls": 1704,
+          "candidate_correct": 3,
+          "candidate_time_s": 252.78256558673456,
+          "geometric_time_ratio": 0.9483961441528003,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 2,
+            "candidate_only": 1,
+            "neither": 2,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": 0,
+          "reference_calls": 1813,
+          "reference_correct": 3,
+          "reference_time_s": 265.3794925720431,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 1.0544117098802603,
+          "speedup_summed": 1.0498330529879296,
+          "summed_time_ratio": 0.9525324023223505,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.0116957443745853,
+          "call_factor": 1.1775426219870664,
+          "candidate_calls": 2003,
+          "candidate_correct": 2,
+          "candidate_time_s": 297.0403589287307,
+          "geometric_time_ratio": 1.1923647417614949,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 2,
+            "candidate_only": 0,
+            "neither": 3,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": -0.16666666666666666,
+          "reference_calls": 1701,
+          "reference_correct": 3,
+          "reference_time_s": 249.33824720140547,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.8386695488183321,
+          "speedup_summed": 0.839408651742269,
+          "summed_time_ratio": 1.191314859484006,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": -0.08333333333333333,
+      "reference_calls": 3514,
+      "reference_correct": 6,
+      "reference_time_s": 514.7177397734486,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.9403738580979609,
+      "speedup_summed": 0.9361518351149993,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.01258823740267,
+          "call_factor": 1.0549231644849175,
+          "candidate_calls": 3707,
+          "candidate_correct": 5,
+          "candidate_time_s": 549.8229245154653,
+          "geometric_time_ratio": 1.063406847594255,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 4,
+            "candidate_only": 1,
+            "neither": 5,
+            "reference_only": 2
+          },
+          "quality_diff_mean_per_question": -0.08333333333333333,
+          "reference_calls": 3514,
+          "reference_correct": 6,
+          "reference_time_s": 514.7177397734486,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.9403738580979609,
+          "speedup_summed": 0.9361518351149993,
+          "summed_time_ratio": 1.0682027877210296,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.0682027877210296,
+      "timing_complete": true
+    },
+    "T_P/T_G_original": {
+      "amortized_time_per_call_factor": 0.9949870934027321,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          1.046808397406134,
+          1.683017665814907
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.6666666666666666,
+          0.16666666666666666
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          1.055659169260924,
+          1.72276157749005
+        ]
+      },
+      "call_factor": 1.289839944328462,
+      "candidate_calls": 3707,
+      "candidate_correct": 5,
+      "candidate_time_s": 549.8229245154653,
+      "geometric_time_ratio": 1.3063234051228596,
+      "leave_one_question_out": {
+        "aime26/14": {
+          "geometric_time_ratio": 1.3860786087697725,
+          "quality_diff_mean_per_question": -0.4,
+          "summed_time_ratio": 1.3812945256580678
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.222183056220704,
+          "quality_diff_mean_per_question": -0.3,
+          "summed_time_ratio": 1.2482006508938717
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 1.3406488060418138,
+          "quality_diff_mean_per_question": -0.1,
+          "summed_time_ratio": 1.3068504393950875
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.1858061302495095,
+          "quality_diff_mean_per_question": -0.1,
+          "summed_time_ratio": 1.1289493687753163
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.3420426900006628,
+          "quality_diff_mean_per_question": -0.3,
+          "summed_time_ratio": 1.351141666319814
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.3749442242603565,
+          "quality_diff_mean_per_question": -0.3,
+          "summed_time_ratio": 1.3087222548887965
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 6,
+      "outcomes": 12,
+      "paired_disagreements": {
+        "both": 4,
+        "candidate_only": 1,
+        "neither": 3,
+        "reference_only": 4
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.0007315153846117,
+          "call_factor": 1.192442267319804,
+          "candidate_calls": 1704,
+          "candidate_correct": 3,
+          "candidate_time_s": 252.78256558673456,
+          "geometric_time_ratio": 1.1911243799435558,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 2,
+            "candidate_only": 1,
+            "neither": 1,
+            "reference_only": 2
+          },
+          "quality_diff_mean_per_question": -0.16666666666666666,
+          "reference_calls": 1429,
+          "reference_correct": 4,
+          "reference_time_s": 211.8322985880077,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 0.8395428864006522,
+          "speedup_summed": 0.8380020121099845,
+          "summed_time_ratio": 1.1933145571836097,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 0.9893931259802508,
+          "call_factor": 1.386159169550173,
+          "candidate_calls": 2003,
+          "candidate_correct": 2,
+          "candidate_time_s": 297.0403589287307,
+          "geometric_time_ratio": 1.4326638489698686,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 6,
+          "paired_disagreements": {
+            "both": 2,
+            "candidate_only": 0,
+            "neither": 2,
+            "reference_only": 2
+          },
+          "quality_diff_mean_per_question": -0.3333333333333333,
+          "reference_calls": 1445,
+          "reference_correct": 4,
+          "reference_time_s": 216.5875407489948,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.6980004421267642,
+          "speedup_summed": 0.7291518954869057,
+          "summed_time_ratio": 1.371456353867434,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": -0.25,
+      "reference_calls": 2874,
+      "reference_correct": 8,
+      "reference_time_s": 428.4198393370025,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.7655072213193257,
+      "speedup_summed": 0.7791960288206426,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 0.9949870934027321,
+          "call_factor": 1.289839944328462,
+          "candidate_calls": 3707,
+          "candidate_correct": 5,
+          "candidate_time_s": 549.8229245154653,
+          "geometric_time_ratio": 1.3063234051228596,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 4,
+            "candidate_only": 1,
+            "neither": 3,
+            "reference_only": 4
+          },
+          "quality_diff_mean_per_question": -0.25,
+          "reference_calls": 2874,
+          "reference_correct": 8,
+          "reference_time_s": 428.4198393370025,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.7655072213193257,
+          "speedup_summed": 0.7791960288206426,
+          "summed_time_ratio": 1.2833740971621181,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.2833740971621181,
+      "timing_complete": true
+    }
+  },
+  "parity_vs_v13": {
+    "D_native": {
+      "cells": 12,
+      "identical": 12,
+      "rows": [
+        {
+          "id": "aime26/2",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/2",
+          "identical": true,
+          "seed": 29
+        },
+        {
+          "id": "aime26/8",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/8",
+          "identical": true,
+          "seed": 29
+        },
+        {
+          "id": "aime26/14",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/14",
+          "identical": true,
+          "seed": 29
+        },
+        {
+          "id": "aime26/20",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/20",
+          "identical": true,
+          "seed": 29
+        },
+        {
+          "id": "aime26/23",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/23",
+          "identical": true,
+          "seed": 29
+        },
+        {
+          "id": "aime26/30",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/30",
+          "identical": true,
+          "seed": 29
+        }
+      ],
+      "v13_arm": "D_native"
+    },
+    "T_G_original": {
+      "cells": 12,
+      "identical": 12,
+      "rows": [
+        {
+          "id": "aime26/2",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/2",
+          "identical": true,
+          "seed": 29
+        },
+        {
+          "id": "aime26/8",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/8",
+          "identical": true,
+          "seed": 29
+        },
+        {
+          "id": "aime26/14",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/14",
+          "identical": true,
+          "seed": 29
+        },
+        {
+          "id": "aime26/20",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/20",
+          "identical": true,
+          "seed": 29
+        },
+        {
+          "id": "aime26/23",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/23",
+          "identical": true,
+          "seed": 29
+        },
+        {
+          "id": "aime26/30",
+          "identical": true,
+          "seed": 17
+        },
+        {
+          "id": "aime26/30",
+          "identical": true,
+          "seed": 29
+        }
+      ],
+      "v13_arm": "T_G"
+    }
+  },
+  "per_arm": {
+    "B8_P": {
+      "anchors": 2515,
+      "attempt0_minus_warm_s": [
+        -0.035,
+        -0.003,
+        0.021,
+        0.001,
+        -0.053,
+        0.1,
+        -0.019,
+        -0.491,
+        2.149,
+        -0.053,
+        0.041,
+        -0.003
+      ],
+      "attempt0_time_total_s": 460.053898188984,
+      "calls_per_canvas": 11.885496183206106,
+      "canvases_total": 262,
+      "caps": 3,
+      "decoder_calls_total": 3114,
+      "eos": 9,
+      "eos_but_wrong_or_unparsed": 0,
+      "failures": 0,
+      "native_fallback": 0,
+      "ordinary": 13055,
+      "output_tokens_total": 65691,
+      "peak_allocated_gib": 50.442381381988525,
+      "planner_calls": 0,
+      "routed_global_calls": 15570,
+      "warm_accepted": 12,
+      "warm_time_total_s": 458.39816133258864
+    },
+    "CVM_T": {
+      "anchors": 3130,
+      "attempt0_minus_warm_s": [
+        -0.027,
+        -0.004,
+        0.007,
+        -0.013,
+        -0.056,
+        0.042,
+        -0.003,
+        -0.33,
+        -0.047,
+        -0.023,
+        -0.087,
+        -0.116
+      ],
+      "attempt0_time_total_s": 580.1938748075627,
+      "calls_per_canvas": 13.183333333333334,
+      "canvases_total": 300,
+      "caps": 6,
+      "decoder_calls_total": 3955,
+      "eos": 6,
+      "eos_but_wrong_or_unparsed": 0,
+      "failures": 0,
+      "native_fallback": 0,
+      "ordinary": 16645,
+      "output_tokens_total": 76183,
+      "peak_allocated_gib": 50.44180870056152,
+      "planner_calls": 16645,
+      "routed_global_calls": 19775,
+      "warm_accepted": 12,
+      "warm_time_total_s": 580.8509011783171
+    },
+    "D_native": {
+      "anchors": 0,
+      "attempt0_minus_warm_s": [
+        -0.029,
+        0.005,
+        0.018,
+        0.025,
+        -0.018,
+        0.038,
+        -0.009,
+        -0.006,
+        0.167,
+        0.127,
+        -0.155,
+        -0.019
+      ],
+      "attempt0_time_total_s": 514.8592672010418,
+      "calls_per_canvas": 12.505338078291816,
+      "canvases_total": 281,
+      "caps": 6,
+      "decoder_calls_total": 3514,
+      "eos": 6,
+      "eos_but_wrong_or_unparsed": 0,
+      "failures": 0,
+      "native_fallback": 0,
+      "ordinary": 0,
+      "output_tokens_total": 71005,
+      "peak_allocated_gib": 50.412211894989014,
+      "planner_calls": 0,
+      "routed_global_calls": 0,
+      "warm_accepted": 12,
+      "warm_time_total_s": 514.7177397734486
+    },
+    "T_G_original": {
+      "anchors": 0,
+      "attempt0_minus_warm_s": [
+        -0.007,
+        0.011,
+        0.025,
+        0.025,
+        0.228,
+        0.095,
+        0.046,
+        -0.038,
+        0.124,
+        -0.125,
+        0.111,
+        0.041
+      ],
+      "attempt0_time_total_s": 428.9573800689541,
+      "calls_per_canvas": 11.635627530364372,
+      "canvases_total": 247,
+      "caps": 4,
+      "decoder_calls_total": 2874,
+      "eos": 8,
+      "eos_but_wrong_or_unparsed": 0,
+      "failures": 0,
+      "native_fallback": 0,
+      "ordinary": 0,
+      "output_tokens_total": 62159,
+      "peak_allocated_gib": 50.430649757385254,
+      "planner_calls": 0,
+      "routed_global_calls": 14370,
+      "warm_accepted": 12,
+      "warm_time_total_s": 428.4198393370025
+    },
+    "T_P": {
+      "anchors": 18535,
+      "attempt0_minus_warm_s": [
+        -0.021,
+        -0.038,
+        0.15,
+        -0.025,
+        -0.075,
+        0.083,
+        0.075,
+        -0.125,
+        0.422,
+        0.141,
+        0.201,
+        -0.041
+      ],
+      "attempt0_time_total_s": 550.5704525760375,
+      "calls_per_canvas": 13.28673835125448,
+      "canvases_total": 279,
+      "caps": 5,
+      "decoder_calls_total": 3707,
+      "eos": 7,
+      "eos_but_wrong_or_unparsed": 2,
+      "failures": 0,
+      "native_fallback": 0,
+      "ordinary": 0,
+      "output_tokens_total": 70394,
+      "peak_allocated_gib": 50.43157720565796,
+      "planner_calls": 0,
+      "routed_global_calls": 18535,
+      "warm_accepted": 12,
+      "warm_time_total_s": 549.8229245154653
+    }
+  },
+  "quality": {
+    "B8_P": {
+      "caps": 3,
+      "combined": 9,
+      "failures": 0,
+      "mean_per_question": 0.75,
+      "not_executed": 0,
+      "outcomes": 12,
+      "per_seed": {
+        "17": 5,
+        "29": 4
+      }
+    },
+    "CVM_T": {
+      "caps": 6,
+      "combined": 6,
+      "failures": 0,
+      "mean_per_question": 0.5,
+      "not_executed": 0,
+      "outcomes": 12,
+      "per_seed": {
+        "17": 3,
+        "29": 3
+      }
+    },
+    "D_native": {
+      "caps": 6,
+      "combined": 6,
+      "failures": 0,
+      "mean_per_question": 0.5,
+      "not_executed": 0,
+      "outcomes": 12,
+      "per_seed": {
+        "17": 3,
+        "29": 3
+      }
+    },
+    "T_G_original": {
+      "caps": 4,
+      "combined": 8,
+      "failures": 0,
+      "mean_per_question": 0.6666666666666666,
+      "not_executed": 0,
+      "outcomes": 12,
+      "per_seed": {
+        "17": 4,
+        "29": 4
+      }
+    },
+    "T_P": {
+      "caps": 5,
+      "combined": 5,
+      "failures": 0,
+      "mean_per_question": 0.4166666666666667,
+      "not_executed": 0,
+      "outcomes": 12,
+      "per_seed": {
+        "17": 3,
+        "29": 2
+      }
+    }
+  }
+}
