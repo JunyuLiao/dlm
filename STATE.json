@@ -3,29 +3,16 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP1_CALIBRATED_B8_EQUIVALENT_BRIDGE_RUNNING",
+  "status": "CP2_BRIDGE_QUALIFIED_PROTOCOLS_FROZEN_DRIVER_FINALIZING",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
-  "candidate": "T60 idealball12valid; global skipcoverage58.84%,local11.32%; finitecertificate and wholecallcost pending",
+  "candidate": "STOP_IMPLEMENTATION_THIS_ROUND: ideal GLOBAL opportunity but no demonstrated net cost headroom or finite-precision certificate; no CUDA candidate",
   "scope": "native_legal_all_layers qualified13states; Dmatched distinct numerical path",
   "hosts": {
-    "149.165.151.254": "runtime inventoried; prior v15 tree clean",
-    "149.165.159.64": "PrivateTorch2.6cu124/Triton3.2/Transformers5.11 and1047tensors qualified; requestbridge pending"
+    "149.165.151.254": "mpk bridge qualified; original user-site runtime; private immutable deploy/bridge_json",
+    "149.165.159.64": "dllm bridge qualified; private matching runtime and1047 tensor identity"
   },
-  "gpu_jobs": [
-    {
-      "host": "149.165.151.254",
-      "supervisor_pid": 1612677,
-      "pgid": 1612677,
-      "stage": "bridge6"
-    },
-    {
-      "host": "149.165.159.64",
-      "supervisor_pid": 7478,
-      "pgid": 7478,
-      "stage": "bridge6"
-    }
-  ],
+  "gpu_jobs": [],
   "budget": {
     "wall_start_utc": "2026-09-26T18:02:00Z",
     "wall_hours_cap": 12,
@@ -40,9 +27,15 @@
     "completed_generations_before_bridge": 463,
     "calibration_generations": 442,
     "known_stage_gpu_process_seconds_before_bridge": 1450,
-    "additional_conservative_gpu_seconds_reserve": 120
+    "additional_conservative_gpu_seconds_reserve": 120,
+    "completed_generations_before_evaluation": 475,
+    "known_measured_gpu_seconds_by_host": {
+      "mpk": 1484,
+      "dllm": 28
+    },
+    "frozen_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json"
   },
-  "next": "compare bridge6/6, freezehostassigned primary protocol, RULERtimedsubset thenAIME; boundedcandidatecostdiagnostic first",
+  "next": "Launch bounded initial RULER blocks from immutable bridge_json; automated AIME then RULER remainder; secondary only afterward",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -52,13 +45,14 @@
     "reason": "RULER thinking template mismatch; CPU156/156 exact after fix"
   },
   "cpu_transport": {
-    "runtime_exec_session": 98143,
-    "missing_tensor_relay": "exit0"
+    "runtime_relay": "completed exit0",
+    "missing_tensor_relay": "completed exit0"
   },
   "queued_jobs": [],
   "deployment": {
     "path_suffix": "deploy/bridge_json",
     "source_commit": "4d53b5c330a71a12424c267e7e03fc86094c2bdb",
     "construction": "archive e9f851c plus exact4d53b5c three-file overlay"
-  }
+  },
+  "bridge_receipt": "results/junyu_frontier_v18_20260926/cross_host_bridge.json"
 }

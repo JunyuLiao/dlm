@@ -1,0 +1,1210 @@
+{
+  "schema": "v18_ball_cost_diagnostic_v1",
+  "states_sha256": "ce96ed3ae681ea9798dfdb9a19a5bdc6cdb448744f3c57bf9cecadcb81438e2a",
+  "library_sha256": "7ef4c8cf417c16175d6d1a5d7b4304df792c3a7c1a66a1da4f41312cf166d819",
+  "frontier_arm": "T60",
+  "expected_real_states": 12,
+  "measured_real_states": 12,
+  "trace": false,
+  "whole_call_warmups": 2,
+  "whole_call_repeats": 7,
+  "timing_buffer_fields": [
+    "qk",
+    "softmax",
+    "pz",
+    "decision",
+    "pv",
+    "risk"
+  ],
+  "warning": "Whole-call CUDA event spans include host launch gaps and allocations. Per-CTA PZ share is PZ/(QK+softmax+PZ+decision+risk), excludes overlapping PV, and is not whole-call latency fraction. Per-CTA fields cannot be summed as GPU wall time. Preallocated standalone metadata timing is a lower incremental cost, not integrated. No candidate/request speedup or finite-precision certificate.",
+  "rows": [
+    {
+      "source_id": "ruler_calibration_first/layer0/iteration1",
+      "layer": 0,
+      "step": 1,
+      "layer_kind": "local",
+      "queries": 256,
+      "keys": 1279,
+      "parent_whole_call_ms_samples": [
+        0.2950400114059448,
+        0.28889599442481995,
+        0.28169599175453186,
+        0.28755199909210205,
+        0.2844800055027008,
+        0.28255999088287354,
+        0.2850239872932434
+      ],
+      "parent_whole_call_ms_median": 0.2850239872932434,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 1280,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 1280,
+            "median_ns": 1952.0,
+            "p90_ns": 2304.0
+          },
+          "softmax": {
+            "nonzero_ctas": 1280,
+            "median_ns": 5984.0,
+            "p90_ns": 6272.0
+          },
+          "pz": {
+            "nonzero_ctas": 1280,
+            "median_ns": 1504.0,
+            "p90_ns": 1568.0
+          },
+          "decision": {
+            "nonzero_ctas": 1280,
+            "median_ns": 1664.0,
+            "p90_ns": 1792.0
+          },
+          "pv": {
+            "nonzero_ctas": 1280,
+            "median_ns": 192.0,
+            "p90_ns": 2400.0
+          },
+          "risk": {
+            "nonzero_ctas": 1280,
+            "median_ns": 512.0,
+            "p90_ns": 512.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.12745128812787898,
+        "pz_over_serial_router_stage_per_cta_p90": 0.13574447984884636
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 1.7465764656776628e-06,
+      "metadata_static_prefix_tiles": 15,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 21120,
+      "metadata_full_ms_samples": [
+        0.08329600095748901,
+        0.07606399804353714,
+        0.069023996591568,
+        0.0642239972949028,
+        0.10364799946546555,
+        0.06755200028419495,
+        0.06319999694824219
+      ],
+      "metadata_full_ms_median": 0.069023996591568,
+      "metadata_static_prefix_ms_samples": [
+        0.06620799750089645,
+        0.052960000932216644,
+        0.050464000552892685,
+        0.0607680007815361,
+        0.04947200044989586,
+        0.04956800118088722,
+        0.04646399989724159
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.1420159935951233,
+        0.09904000163078308,
+        0.09536000341176987,
+        0.08748800307512283,
+        0.088639996945858,
+        0.10732799768447876,
+        0.08867199718952179
+      ],
+      "metadata_static_prefix_ms_median": 0.050464000552892685,
+      "metadata_canvas_containing_ms_median": 0.09536000341176987
+    },
+    {
+      "source_id": "ruler_calibration_first/layer5/iteration1",
+      "layer": 5,
+      "step": 1,
+      "layer_kind": "global",
+      "queries": 256,
+      "keys": 4205,
+      "parent_whole_call_ms_samples": [
+        1.1070719957351685,
+        1.0984959602355957,
+        1.104640007019043,
+        1.1031359434127808,
+        1.108512043952942,
+        1.097983956336975,
+        1.1007039546966553
+      ],
+      "parent_whole_call_ms_median": 1.1031359434127808,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 4224,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 4224,
+            "median_ns": 3552.0,
+            "p90_ns": 4000.0
+          },
+          "softmax": {
+            "nonzero_ctas": 4224,
+            "median_ns": 7360.0,
+            "p90_ns": 7648.0
+          },
+          "pz": {
+            "nonzero_ctas": 4224,
+            "median_ns": 1760.0,
+            "p90_ns": 1856.0
+          },
+          "decision": {
+            "nonzero_ctas": 4224,
+            "median_ns": 1696.0,
+            "p90_ns": 2080.0
+          },
+          "pv": {
+            "nonzero_ctas": 4224,
+            "median_ns": 192.0,
+            "p90_ns": 3392.0
+          },
+          "risk": {
+            "nonzero_ctas": 4224,
+            "median_ns": 608.0,
+            "p90_ns": 640.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.11777301927194861,
+        "pz_over_serial_router_stage_per_cta_p90": 0.12394957983193278
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 2.256716879145415e-06,
+      "metadata_static_prefix_tiles": 61,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 17424,
+      "metadata_full_ms_samples": [
+        0.06678400188684464,
+        0.07753600180149078,
+        0.05407999828457832,
+        0.0568000003695488,
+        0.05276799947023392,
+        0.050624001771211624,
+        0.050144001841545105
+      ],
+      "metadata_full_ms_median": 0.05407999828457832,
+      "metadata_static_prefix_ms_samples": [
+        0.13177600502967834,
+        0.1276479959487915,
+        0.10012800246477127,
+        0.11347199976444244,
+        0.10211200267076492,
+        0.09772799909114838,
+        0.09180799871683121
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.14217600226402283,
+        0.09984000027179718,
+        0.09523200243711472,
+        0.0902400016784668,
+        0.08495999872684479,
+        0.10822399705648422,
+        0.08716800063848495
+      ],
+      "metadata_static_prefix_ms_median": 0.10211200267076492,
+      "metadata_canvas_containing_ms_median": 0.09523200243711472
+    },
+    {
+      "source_id": "ruler_calibration_first/layer29/iteration1",
+      "layer": 29,
+      "step": 1,
+      "layer_kind": "global",
+      "queries": 256,
+      "keys": 4205,
+      "parent_whole_call_ms_samples": [
+        1.1230720281600952,
+        1.1094399690628052,
+        1.1272640228271484,
+        1.1013439893722534,
+        1.1109119653701782,
+        1.1125439405441284,
+        1.1136640310287476
+      ],
+      "parent_whole_call_ms_median": 1.1125439405441284,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 4224,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 4224,
+            "median_ns": 3520.0,
+            "p90_ns": 4064.0
+          },
+          "softmax": {
+            "nonzero_ctas": 4224,
+            "median_ns": 7360.0,
+            "p90_ns": 7680.0
+          },
+          "pz": {
+            "nonzero_ctas": 4224,
+            "median_ns": 1760.0,
+            "p90_ns": 1856.0
+          },
+          "decision": {
+            "nonzero_ctas": 4224,
+            "median_ns": 1728.0,
+            "p90_ns": 2112.0
+          },
+          "pv": {
+            "nonzero_ctas": 4224,
+            "median_ns": 192.0,
+            "p90_ns": 3424.0
+          },
+          "risk": {
+            "nonzero_ctas": 4224,
+            "median_ns": 608.0,
+            "p90_ns": 640.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.11739130434782609,
+        "pz_over_serial_router_stage_per_cta_p90": 0.12391304347826088
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 2.131470786537193e-06,
+      "metadata_static_prefix_tiles": 61,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 17424,
+      "metadata_full_ms_samples": [
+        0.08553600311279297,
+        0.09843199700117111,
+        0.07369600236415863,
+        0.0658240020275116,
+        0.06524799764156342,
+        0.06841599941253662,
+        0.06294400244951248
+      ],
+      "metadata_full_ms_median": 0.06841599941253662,
+      "metadata_static_prefix_ms_samples": [
+        0.07187200337648392,
+        0.06780800223350525,
+        0.06880000233650208,
+        0.0822720006108284,
+        0.07097599655389786,
+        0.06412799656391144,
+        0.06371200084686279
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.06400000303983688,
+        0.06067200005054474,
+        0.0796160027384758,
+        0.0695360004901886,
+        0.06531199812889099,
+        0.06515199691057205,
+        0.06854400038719177
+      ],
+      "metadata_static_prefix_ms_median": 0.06880000233650208,
+      "metadata_canvas_containing_ms_median": 0.06531199812889099
+    },
+    {
+      "source_id": "ruler_calibration_first/layer0/iteration3",
+      "layer": 0,
+      "step": 3,
+      "layer_kind": "local",
+      "queries": 256,
+      "keys": 1279,
+      "parent_whole_call_ms_samples": [
+        0.3110719919204712,
+        0.3012160062789917,
+        0.3056640028953552,
+        0.3075520098209381,
+        0.29840001463890076,
+        0.30316799879074097,
+        0.30323201417922974
+      ],
+      "parent_whole_call_ms_median": 0.30323201417922974,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 1280,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 1280,
+            "median_ns": 1952.0,
+            "p90_ns": 2272.0
+          },
+          "softmax": {
+            "nonzero_ctas": 1280,
+            "median_ns": 6048.0,
+            "p90_ns": 6368.0
+          },
+          "pz": {
+            "nonzero_ctas": 1280,
+            "median_ns": 1504.0,
+            "p90_ns": 1568.0
+          },
+          "decision": {
+            "nonzero_ctas": 1280,
+            "median_ns": 1664.0,
+            "p90_ns": 1792.0
+          },
+          "pv": {
+            "nonzero_ctas": 1280,
+            "median_ns": 192.0,
+            "p90_ns": 2400.0
+          },
+          "risk": {
+            "nonzero_ctas": 1280,
+            "median_ns": 768.0,
+            "p90_ns": 800.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.12598425196850394,
+        "pz_over_serial_router_stage_per_cta_p90": 0.13314524571991623
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 1.9492864673509303e-06,
+      "metadata_static_prefix_tiles": 15,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 21120,
+      "metadata_full_ms_samples": [
+        0.08409599959850311,
+        0.0666240006685257,
+        0.05593600124120712,
+        0.05305600166320801,
+        0.052352000027894974,
+        0.05270399898290634,
+        0.050335999578237534
+      ],
+      "metadata_full_ms_median": 0.05305600166320801,
+      "metadata_static_prefix_ms_samples": [
+        0.0676800012588501,
+        0.05660799890756607,
+        0.05596800148487091,
+        0.05366399884223938,
+        0.05846399813890457,
+        0.057472001761198044,
+        0.05215999856591225
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.05331199988722801,
+        0.052639998495578766,
+        0.052191998809576035,
+        0.050335999578237534,
+        0.047040000557899475,
+        0.059167999774217606,
+        0.05721599981188774
+      ],
+      "metadata_static_prefix_ms_median": 0.05660799890756607,
+      "metadata_canvas_containing_ms_median": 0.052639998495578766
+    },
+    {
+      "source_id": "ruler_calibration_first/layer5/iteration3",
+      "layer": 5,
+      "step": 3,
+      "layer_kind": "global",
+      "queries": 256,
+      "keys": 4205,
+      "parent_whole_call_ms_samples": [
+        1.1130880117416382,
+        1.1151679754257202,
+        1.1171519756317139,
+        1.1189440488815308,
+        1.105855941772461,
+        1.1061439514160156,
+        1.1022720336914062
+      ],
+      "parent_whole_call_ms_median": 1.1130880117416382,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 4224,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 4224,
+            "median_ns": 3552.0,
+            "p90_ns": 4000.0
+          },
+          "softmax": {
+            "nonzero_ctas": 4224,
+            "median_ns": 7328.0,
+            "p90_ns": 7616.0
+          },
+          "pz": {
+            "nonzero_ctas": 4224,
+            "median_ns": 1760.0,
+            "p90_ns": 1856.0
+          },
+          "decision": {
+            "nonzero_ctas": 4224,
+            "median_ns": 1728.0,
+            "p90_ns": 2112.0
+          },
+          "pv": {
+            "nonzero_ctas": 4224,
+            "median_ns": 192.0,
+            "p90_ns": 3392.0
+          },
+          "risk": {
+            "nonzero_ctas": 4224,
+            "median_ns": 896.0,
+            "p90_ns": 928.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.11530398322851153,
+        "pz_over_serial_router_stage_per_cta_p90": 0.12159329140461216
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 2.256716879145415e-06,
+      "metadata_static_prefix_tiles": 61,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 17424,
+      "metadata_full_ms_samples": [
+        0.05395200103521347,
+        0.04553600028157234,
+        0.043807998299598694,
+        0.042208001017570496,
+        0.04179200157523155,
+        0.0414079986512661,
+        0.040863998234272
+      ],
+      "metadata_full_ms_median": 0.042208001017570496,
+      "metadata_static_prefix_ms_samples": [
+        0.03984000161290169,
+        0.05318399891257286,
+        0.040672000497579575,
+        0.04073600098490715,
+        0.040800001472234726,
+        0.04927999898791313,
+        0.05251200124621391
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.04403200000524521,
+        0.039872001856565475,
+        0.03929600119590759,
+        0.03961599990725517,
+        0.042080000042915344,
+        0.03932800143957138,
+        0.03999999910593033
+      ],
+      "metadata_static_prefix_ms_median": 0.040800001472234726,
+      "metadata_canvas_containing_ms_median": 0.039872001856565475
+    },
+    {
+      "source_id": "ruler_calibration_first/layer29/iteration3",
+      "layer": 29,
+      "step": 3,
+      "layer_kind": "global",
+      "queries": 256,
+      "keys": 4205,
+      "parent_whole_call_ms_samples": [
+        1.1068799495697021,
+        1.1015679836273193,
+        1.1019200086593628,
+        1.1037440299987793,
+        1.1025279760360718,
+        1.1072959899902344,
+        1.1108160018920898
+      ],
+      "parent_whole_call_ms_median": 1.1037440299987793,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 4224,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 4224,
+            "median_ns": 3520.0,
+            "p90_ns": 4064.0
+          },
+          "softmax": {
+            "nonzero_ctas": 4224,
+            "median_ns": 7328.0,
+            "p90_ns": 7616.0
+          },
+          "pz": {
+            "nonzero_ctas": 4224,
+            "median_ns": 1760.0,
+            "p90_ns": 1856.0
+          },
+          "decision": {
+            "nonzero_ctas": 4224,
+            "median_ns": 1696.0,
+            "p90_ns": 2048.0
+          },
+          "pv": {
+            "nonzero_ctas": 4224,
+            "median_ns": 192.0,
+            "p90_ns": 3424.0
+          },
+          "risk": {
+            "nonzero_ctas": 4224,
+            "median_ns": 896.0,
+            "p90_ns": 928.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.11530398322851153,
+        "pz_over_serial_router_stage_per_cta_p90": 0.12153518123667377
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 2.131470786537193e-06,
+      "metadata_static_prefix_tiles": 61,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 17424,
+      "metadata_full_ms_samples": [
+        0.053568001836538315,
+        0.04614400118589401,
+        0.04262400045990944,
+        0.04134399816393852,
+        0.042847998440265656,
+        0.0586559996008873,
+        0.04464000090956688
+      ],
+      "metadata_full_ms_median": 0.04464000090956688,
+      "metadata_static_prefix_ms_samples": [
+        0.04092799872159958,
+        0.04169600084424019,
+        0.058111999183893204,
+        0.04259200021624565,
+        0.04105599969625473,
+        0.04118400067090988,
+        0.04224000126123428
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.04259200021624565,
+        0.04102399945259094,
+        0.04572800174355507,
+        0.03948799893260002,
+        0.043136000633239746,
+        0.04505600035190582,
+        0.04214400053024292
+      ],
+      "metadata_static_prefix_ms_median": 0.04169600084424019,
+      "metadata_canvas_containing_ms_median": 0.04259200021624565
+    },
+    {
+      "source_id": "v15_selection_first/layer0/iteration1",
+      "layer": 0,
+      "step": 1,
+      "layer_kind": "local",
+      "queries": 256,
+      "keys": 1279,
+      "parent_whole_call_ms_samples": [
+        0.28787198662757874,
+        0.28512001037597656,
+        0.28118398785591125,
+        0.2850239872932434,
+        0.285504013299942,
+        0.2813119888305664,
+        0.2837119996547699
+      ],
+      "parent_whole_call_ms_median": 0.2850239872932434,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 1280,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 1280,
+            "median_ns": 1952.0,
+            "p90_ns": 2304.0
+          },
+          "softmax": {
+            "nonzero_ctas": 1280,
+            "median_ns": 5984.0,
+            "p90_ns": 6240.0
+          },
+          "pz": {
+            "nonzero_ctas": 1280,
+            "median_ns": 1472.0,
+            "p90_ns": 1539.2000000000044
+          },
+          "decision": {
+            "nonzero_ctas": 1280,
+            "median_ns": 1664.0,
+            "p90_ns": 1792.0
+          },
+          "pv": {
+            "nonzero_ctas": 1280,
+            "median_ns": 192.0,
+            "p90_ns": 2368.0
+          },
+          "risk": {
+            "nonzero_ctas": 1280,
+            "median_ns": 512.0,
+            "p90_ns": 512.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.1270718232044199,
+        "pz_over_serial_router_stage_per_cta_p90": 0.13507285089849444
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 1.7602610533629104e-06,
+      "metadata_static_prefix_tiles": 15,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 21120,
+      "metadata_full_ms_samples": [
+        0.05452800169587135,
+        0.04483199864625931,
+        0.048928000032901764,
+        0.04435199871659279,
+        0.041152000427246094,
+        0.040832001715898514,
+        0.04163200035691261
+      ],
+      "metadata_full_ms_median": 0.04435199871659279,
+      "metadata_static_prefix_ms_samples": [
+        0.042208001017570496,
+        0.04182400181889534,
+        0.04009599983692169,
+        0.03920000046491623,
+        0.038656000047922134,
+        0.03984000161290169,
+        0.04201599955558777
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.04028800129890442,
+        0.040608000010252,
+        0.044415999203920364,
+        0.042047999799251556,
+        0.040800001472234726,
+        0.04022400081157684,
+        0.04009599983692169
+      ],
+      "metadata_static_prefix_ms_median": 0.04009599983692169,
+      "metadata_canvas_containing_ms_median": 0.040608000010252
+    },
+    {
+      "source_id": "v15_selection_first/layer5/iteration1",
+      "layer": 5,
+      "step": 1,
+      "layer_kind": "global",
+      "queries": 256,
+      "keys": 13703,
+      "parent_whole_call_ms_samples": [
+        3.4205760955810547,
+        3.416543960571289,
+        3.4121599197387695,
+        3.4349119663238525,
+        3.4224960803985596,
+        3.4422719478607178,
+        3.440256118774414
+      ],
+      "parent_whole_call_ms_median": 3.4224960803985596,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 13760,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 13760,
+            "median_ns": 3520.0,
+            "p90_ns": 4032.0
+          },
+          "softmax": {
+            "nonzero_ctas": 13760,
+            "median_ns": 7392.0,
+            "p90_ns": 7680.0
+          },
+          "pz": {
+            "nonzero_ctas": 13760,
+            "median_ns": 1760.0,
+            "p90_ns": 1856.0
+          },
+          "decision": {
+            "nonzero_ctas": 13760,
+            "median_ns": 1728.0,
+            "p90_ns": 2144.0
+          },
+          "pv": {
+            "nonzero_ctas": 13760,
+            "median_ns": 192.0,
+            "p90_ns": 3328.0
+          },
+          "risk": {
+            "nonzero_ctas": 13760,
+            "median_ns": 608.0,
+            "p90_ns": 640.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.11688311688311688,
+        "pz_over_serial_router_stage_per_cta_p90": 0.12284482758620689
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 2.7341523569646142e-06,
+      "metadata_static_prefix_tiles": 210,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 56760,
+      "metadata_full_ms_samples": [
+        0.061344001442193985,
+        0.049855999648571014,
+        0.04940799996256828,
+        0.047168001532554626,
+        0.047359999269247055,
+        0.04678399860858917,
+        0.06172800064086914
+      ],
+      "metadata_full_ms_median": 0.04940799996256828,
+      "metadata_static_prefix_ms_samples": [
+        0.09286399930715561,
+        0.06985600292682648,
+        0.0809599980711937,
+        0.0711359977722168,
+        0.06684800237417221,
+        0.05999999865889549,
+        0.05878400057554245
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.09641599655151367,
+        0.08409599959850311,
+        0.07184000313282013,
+        0.06716799736022949,
+        0.06563200056552887,
+        0.06643199920654297,
+        0.06921599805355072
+      ],
+      "metadata_static_prefix_ms_median": 0.06985600292682648,
+      "metadata_canvas_containing_ms_median": 0.06921599805355072
+    },
+    {
+      "source_id": "v15_selection_first/layer29/iteration1",
+      "layer": 29,
+      "step": 1,
+      "layer_kind": "global",
+      "queries": 256,
+      "keys": 13703,
+      "parent_whole_call_ms_samples": [
+        3.47491192817688,
+        3.496767997741699,
+        3.4827840328216553,
+        3.4798080921173096,
+        3.453119993209839,
+        3.464224100112915,
+        3.4542078971862793
+      ],
+      "parent_whole_call_ms_median": 3.47491192817688,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 13760,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 13760,
+            "median_ns": 3584.0,
+            "p90_ns": 3808.0
+          },
+          "softmax": {
+            "nonzero_ctas": 13760,
+            "median_ns": 7392.0,
+            "p90_ns": 7712.0
+          },
+          "pz": {
+            "nonzero_ctas": 13760,
+            "median_ns": 1792.0,
+            "p90_ns": 1856.0
+          },
+          "decision": {
+            "nonzero_ctas": 13760,
+            "median_ns": 1728.0,
+            "p90_ns": 2144.0
+          },
+          "pv": {
+            "nonzero_ctas": 13760,
+            "median_ns": 192.0,
+            "p90_ns": 224.0
+          },
+          "risk": {
+            "nonzero_ctas": 13760,
+            "median_ns": 640.0,
+            "p90_ns": 640.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.11789473684210526,
+        "pz_over_serial_router_stage_per_cta_p90": 0.12473118279569892
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 2.8130202203158206e-06,
+      "metadata_static_prefix_tiles": 210,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 56760,
+      "metadata_full_ms_samples": [
+        0.05273599922657013,
+        0.047839999198913574,
+        0.04364800080657005,
+        0.04124800115823746,
+        0.041152000427246094,
+        0.046720001846551895,
+        0.042847998440265656
+      ],
+      "metadata_full_ms_median": 0.04364800080657005,
+      "metadata_static_prefix_ms_samples": [
+        0.04169600084424019,
+        0.04198399931192398,
+        0.04531199857592583,
+        0.041152000427246094,
+        0.04153599962592125,
+        0.04131200164556503,
+        0.04121600091457367
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.042367998510599136,
+        0.041152000427246094,
+        0.0395519994199276,
+        0.038015998899936676,
+        0.04848000034689903,
+        0.04588799923658371,
+        0.042688000947237015
+      ],
+      "metadata_static_prefix_ms_median": 0.04153599962592125,
+      "metadata_canvas_containing_ms_median": 0.042367998510599136
+    },
+    {
+      "source_id": "v15_selection_first/layer0/iteration3",
+      "layer": 0,
+      "step": 3,
+      "layer_kind": "local",
+      "queries": 256,
+      "keys": 1279,
+      "parent_whole_call_ms_samples": [
+        0.3028160035610199,
+        0.2977280020713806,
+        0.2967360019683838,
+        0.29366400837898254,
+        0.29817599058151245,
+        0.29795199632644653,
+        0.29232001304626465
+      ],
+      "parent_whole_call_ms_median": 0.2977280020713806,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 1280,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 1280,
+            "median_ns": 2048.0,
+            "p90_ns": 2368.0
+          },
+          "softmax": {
+            "nonzero_ctas": 1280,
+            "median_ns": 6080.0,
+            "p90_ns": 6368.0
+          },
+          "pz": {
+            "nonzero_ctas": 1280,
+            "median_ns": 1504.0,
+            "p90_ns": 1568.0
+          },
+          "decision": {
+            "nonzero_ctas": 1280,
+            "median_ns": 1664.0,
+            "p90_ns": 1760.0
+          },
+          "pv": {
+            "nonzero_ctas": 1280,
+            "median_ns": 224.0,
+            "p90_ns": 2432.0
+          },
+          "risk": {
+            "nonzero_ctas": 1280,
+            "median_ns": 768.0,
+            "p90_ns": 800.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.12365591397849462,
+        "pz_over_serial_router_stage_per_cta_p90": 0.1320754716981132
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 1.7602610533629104e-06,
+      "metadata_static_prefix_tiles": 15,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 21120,
+      "metadata_full_ms_samples": [
+        0.052000001072883606,
+        0.0459199994802475,
+        0.04960000142455101,
+        0.04153599962592125,
+        0.04118400067090988,
+        0.04182400181889534,
+        0.041728001087903976
+      ],
+      "metadata_full_ms_median": 0.04182400181889534,
+      "metadata_static_prefix_ms_samples": [
+        0.04243199899792671,
+        0.03984000161290169,
+        0.03948799893260002,
+        0.039583999663591385,
+        0.03929600119590759,
+        0.04032000154256821,
+        0.04044799879193306
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.040672000497579575,
+        0.03923200070858002,
+        0.046112000942230225,
+        0.041728001087903976,
+        0.04012800008058548,
+        0.04102399945259094,
+        0.039583999663591385
+      ],
+      "metadata_static_prefix_ms_median": 0.03984000161290169,
+      "metadata_canvas_containing_ms_median": 0.040672000497579575
+    },
+    {
+      "source_id": "v15_selection_first/layer5/iteration3",
+      "layer": 5,
+      "step": 3,
+      "layer_kind": "global",
+      "queries": 256,
+      "keys": 13703,
+      "parent_whole_call_ms_samples": [
+        3.5083200931549072,
+        3.528671979904175,
+        3.531359910964966,
+        3.5245120525360107,
+        3.5104639530181885,
+        3.51145601272583,
+        3.5110080242156982
+      ],
+      "parent_whole_call_ms_median": 3.51145601272583,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 13760,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 13760,
+            "median_ns": 3584.0,
+            "p90_ns": 4128.0
+          },
+          "softmax": {
+            "nonzero_ctas": 13760,
+            "median_ns": 7328.0,
+            "p90_ns": 7616.0
+          },
+          "pz": {
+            "nonzero_ctas": 13760,
+            "median_ns": 1760.0,
+            "p90_ns": 1824.0
+          },
+          "decision": {
+            "nonzero_ctas": 13760,
+            "median_ns": 1696.0,
+            "p90_ns": 2048.0
+          },
+          "pv": {
+            "nonzero_ctas": 13760,
+            "median_ns": 224.0,
+            "p90_ns": 3520.0
+          },
+          "risk": {
+            "nonzero_ctas": 13760,
+            "median_ns": 896.0,
+            "p90_ns": 928.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.11480426959537948,
+        "pz_over_serial_router_stage_per_cta_p90": 0.12040816326530612
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 2.7341523569646142e-06,
+      "metadata_static_prefix_tiles": 210,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 56760,
+      "metadata_full_ms_samples": [
+        0.053599998354911804,
+        0.04608000069856644,
+        0.042688000947237015,
+        0.042080000042915344,
+        0.04118400067090988,
+        0.03984000161290169,
+        0.03920000046491623
+      ],
+      "metadata_full_ms_median": 0.042080000042915344,
+      "metadata_static_prefix_ms_samples": [
+        0.05299200117588043,
+        0.04483199864625931,
+        0.042399998754262924,
+        0.04134399816393852,
+        0.03961599990725517,
+        0.041728001087903976,
+        0.05423999950289726
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.04089599847793579,
+        0.04044799879193306,
+        0.041120000183582306,
+        0.03929600119590759,
+        0.040031999349594116,
+        0.040800001472234726,
+        0.040031999349594116
+      ],
+      "metadata_static_prefix_ms_median": 0.042399998754262924,
+      "metadata_canvas_containing_ms_median": 0.04044799879193306
+    },
+    {
+      "source_id": "v15_selection_first/layer29/iteration3",
+      "layer": 29,
+      "step": 3,
+      "layer_kind": "global",
+      "queries": 256,
+      "keys": 13703,
+      "parent_whole_call_ms_samples": [
+        3.5024640560150146,
+        3.505664110183716,
+        3.487328052520752,
+        3.4854719638824463,
+        3.487231969833374,
+        3.4732160568237305,
+        3.4316160678863525
+      ],
+      "parent_whole_call_ms_median": 3.487231969833374,
+      "ordinary_capture_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "timing_buffer_parity": {
+        "output": true,
+        "skipped": true,
+        "eligible": true
+      },
+      "per_cta_timing_ns": {
+        "active_ctas": 13760,
+        "fields": {
+          "qk": {
+            "nonzero_ctas": 13760,
+            "median_ns": 3424.0,
+            "p90_ns": 3904.0
+          },
+          "softmax": {
+            "nonzero_ctas": 13760,
+            "median_ns": 7200.0,
+            "p90_ns": 7488.0
+          },
+          "pz": {
+            "nonzero_ctas": 13760,
+            "median_ns": 1728.0,
+            "p90_ns": 1792.0
+          },
+          "decision": {
+            "nonzero_ctas": 13760,
+            "median_ns": 1696.0,
+            "p90_ns": 2144.0
+          },
+          "pv": {
+            "nonzero_ctas": 13760,
+            "median_ns": 192.0,
+            "p90_ns": 3232.0
+          },
+          "risk": {
+            "nonzero_ctas": 13760,
+            "median_ns": 864.0,
+            "p90_ns": 928.0
+          }
+        },
+        "pz_over_serial_router_stage_per_cta_median": 0.11546840958605664,
+        "pz_over_serial_router_stage_per_cta_p90": 0.12195121951219512
+      },
+      "metadata_max_abs_error_vs_cpu_fp64": 2.8130202203158206e-06,
+      "metadata_static_prefix_tiles": 210,
+      "metadata_canvas_containing_tiles": 5,
+      "metadata_bytes": 56760,
+      "metadata_full_ms_samples": [
+        0.06393600255250931,
+        0.04975999891757965,
+        0.04310400038957596,
+        0.043616000562906265,
+        0.04057599976658821,
+        0.041120000183582306,
+        0.045152001082897186
+      ],
+      "metadata_full_ms_median": 0.043616000562906265,
+      "metadata_static_prefix_ms_samples": [
+        0.04227200150489807,
+        0.03936000168323517,
+        0.03977600112557411,
+        0.04012800008058548,
+        0.039103999733924866,
+        0.040608000010252,
+        0.040863998234272
+      ],
+      "metadata_canvas_containing_ms_samples": [
+        0.05056000128388405,
+        0.0427200011909008,
+        0.04032000154256821,
+        0.03939199820160866,
+        0.038816001266241074,
+        0.04044799879193306,
+        0.049855999648571014
+      ],
+      "metadata_static_prefix_ms_median": 0.04012800008058548,
+      "metadata_canvas_containing_ms_median": 0.04044799879193306
+    }
+  ]
+}

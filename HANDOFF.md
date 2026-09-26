@@ -1,65 +1,65 @@
-# v18 continuation ¡ª CP1 request correction
+# v18 continuation: CP2 frozen primary evaluation
 
-Sole authority: user v18 (SHA in cp0_identity.json). Branch research/astra-junyu-frontier-20260926,
-parent d2bef2189c046e9a4277ab16d751ebeab11c15d8. Read DESIGN_DECISION.md.
-Old WSL v8 and remote v15 trees untouched. Ignore Windows case-collision Wechat.JPG.
+Sole execution authority: user v18 (SHA in cp0_identity.json).
+Branch research/astra-junyu-frontier-20260926; parent d2bef2189c046e9a4277ab16d751ebeab11c15d8.
+Read DESIGN_DECISION.md. Prior WSL v8 and remote v15 untouched.
+Ignore unrelated Windows case-collision third_party/dinfer/assets/Wechat.JPG.
 
-CP0 identity passed. Historical 120 warm pairs lack phase evidence; preserve quality,
-label timing historical. Strong B8 GPU export parity passed three prefix shapes;
-full16 requests pending. No new CUDA implementation and no T60 success claim.
+Completed:
+- CP0 historical identities passed; 120 historical warm pairs lack strict phase evidence.
+- Native adaptive stopping preserved: stable argmax AND mean entropy<.005;
+  acceptance .1, B256/cap48, temperature .8 to .4 and normal EOS unchanged.
+- RULER thinking=False, exact156 calibration/eval token lists; AIME thinking=True
+  with30 exact token lists and8192 output budget frozen. Initial failed capture
+  remains counted/preserved (1 request,24 GPU seconds).
+- Native legal all-layer scope qualified13 states. LEGACY LOCAL omitted9.97%
+  of captured native-legal pairs; geometry diagnostic only.
+- Density-only calibration442 requests: U50/T50/U60/T60 all within2pp whole/G/L.
+  This does not establish T60 quality, calls or speed.
+- Strong B8 old/new16 requests equivalent,8 strict warm accepted; new/old wall
+  geomean1.000187, no speedup signal.
+- Bridge6 requests per host passed full tokens/canvas calls/stop/cap/termination.
+  All1047 model tensors identical; new index is declared shard repacking.
+- Single post-QK ball candidate stopped before implementation at cost/numerical
+  gate. Ideal GLOBAL skip coverage58.84%, LOCAL11.32%; no finite certificate
+  or demonstrated net execution headroom. No alternative candidate or CVM work.
 
-Old private P=/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926.
-New private N=/home/exouser/dyh/junyu_frontier_v18_20260926.
-Old runtime /home/exouser/miniconda3/envs/ljy_dlm/bin/python, user-site ON.
-Old UUID GPU-6139046a-b005-8fe5-a837-f8270472ab72.
-New host149.165.159.64 UUID GPU-fc12ad5c-5334-5509-8fc6-465498fd3915.
+Hosts / immutable generation deployment:
+- mpk exouser@149.165.151.254, GPU-6139046a-b005-8fe5-a837-f8270472ab72
+  P=/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926
+  Python=/home/exouser/miniconda3/envs/ljy_dlm/bin/python, original user-site ON.
+- dllm exouser@149.165.159.64, GPU-fc12ad5c-5334-5509-8fc6-465498fd3915
+  N=/home/exouser/dyh/junyu_frontier_v18_20260926
+  Python=N/bridge/runtime/miniconda3/envs/ljy_dlm/bin/python; private old user-site
+  explicitly overlaid, PYTHONNOUSERSITE=1. See run_bridge.sh environment.
+- Both generation cwd=ROOT/deploy/bridge_json, exact4d53b5c code construction;
+  config paths/hashes bind these files. Never mutate this immutable deployment.
+- Local scorer/driver additions must not cause GPU workers to import unverified
+  source. New driver invokes pinned module from that cwd/PYTHONPATH.
 
-Initial CP1 PID1606995 exited rc1 after24 GPU-process seconds and one diagnostic
-request: RULER template wrongly used thinking=True. Original protocol uses False;
-all26 calibration+130 eval token lists now match pinned tokenizer exactly on CPU.
-AIME/LB remain True. Preserve failed logs and old manifest hashes. Corrected private
-manifests P/private_v2, drafts P/protocols_v2, CPU receipt cpu_token_preflight.json.
-New calibration_v2 must use new immutable deploy, not the failed old launcher.
-AIME source has no token list; freeze exact lists before its official protocol.
-No calibration/eval yet. Native stop and original per-task budgets unchanged.
+Frozen protocols in ROOT/evaluation on both hosts:
+- ruler4k_primary_protocol.json:390 blocks,2808 runs. Initial78 blocks=936 runs
+  (26 preselected timing questions x3seeds x6arms xfirst/warm).
+- aime26_primary_protocol.json:90 blocks,1080 runs.
+- Whole question-seed block (all arms and warm) stays on assigned GPU, ordered
+  round-robin mpk/dllm. IDs/digests are in RUN_MANIFEST.json.
+- Execution: RULER initial -> AIME complete -> RULER remaining -> secondary70/
+  allocation if budget. Generation processes have only gold-free manifests.
+- Scorer-only source gold byte hashes frozen. RULER original v15 code_cp1
+  results/query_adaptive_v3/configs/final_manifest.json; AIME
+  /media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/private/manifest_all30.json.
 
-New-model CPU audit: shared661 tensors exact shape/dtype/payload SHA; missing386
-(1.07GiB) relay completed, full1047 verification pending. Runtime relay local exec
-session98143 remains active. Transport alone does not qualify new host. No official
-new-host shard before matching imports/model plus two-prompt bridge. No accepted
-timing while setup/transfer competes for resources. New private runtime path is
-N/bridge/runtime/miniconda3/envs/ljy_dlm/bin/python, user-site overlay under
-N/bridge/runtime/.local/lib/python3.10/site-packages.
-
-Next: corrected capture2 full requests, native scope qualification, automated
-bounded U/T50/60 calibration. Strong B8 full16 when setup quiet. Freeze complete
-question-seed-arm-repeat blocks on one host before outputs. RULER primary prefix
-then AIME core before secondary work. Preserve1080 AIME executions and final30min
-scoring. Wall starts2026-09-26T18:02Z; cap12h, GPU-process10h until two qualified
-hosts then20h. Count failed/load/compile/calibration jobs. No CVM expansion,
-cross-host absolute timing pooling, gold/raw answers in Git, peer branch edits.
-
-CP1 update: deploy97a020f remote25tests passed; corrected capture2 requests passed
-(12/12 states), native scope13states passed, density calibration_v2 running under
-supervisor1608369. StrongB8 supervisor1609409 waits CP1 exit and
-P/bridge_runtime_transport_quiet, then frozen16 from08f5c92. Model1047 complete
-identity passed; see model_bridge_identity.json. AIME exact token overlay30/30
-frozen privately under private_v3; no AIME generation yet. No accepted timing
-from capture/calibration/bridge. Ball opportunity script is being implemented,
-not GPU-run and not approved for CUDA integration.
-
-CP1 latest: calibration442requests completed; all four densitypoints attained
-within2pp inwhole/local/global (frozenresults inGit). StrongB8 full16passed
-token/call/phaseequivalence and8warmacceptance; requestgeomeannew/old1.000187,
-no speedup signal. T60capture2 requests+12states andball14s completed: ideal
-GLOBALskipcoverage58.84%,LOCAL11.32%; notfiniteprecisioncertificate/speedproof.
-OldwaitingT50ball1610494 was stoppedbeforeGPU, supersededbyT60job1611545 done.
-Standalonecostharness pending; CUDAunchanged. LegacyLOCALgeometry omits9.97%
-ofcapturednativelegalpairs, GLOBALmatches; geometry-onlyreport inGit.
-
-Twohostbridge launched oldPID1612677/newPID7478 fromdeploy/bridge_json exact
-4d53b5c sourceoverlay. Newhostearlierfreeze failedbeforeGPU because JSON -inf;
-fixedexplicitstring sentineldecode toactual-inf atkernelbinding. Logs preserved.
-Bridge/eval mathematical IDs bindcontent/tensors independentofhostlocalpaths;
-executionconfig hashes retainactualpaths. Newmodelindexdiff isdeclaredrepacking,
-all1047tensorhashesandnonindexmetadata remainrequired. Noofficialeval yet.
+Budget / next action:
+- Start2026-09-26T18:02Z; stop GPU by2026-09-27T05:32Z, final deadline06:02Z.
+- Cap7000 full requests and20 total GPU-process hours, two qualified hosts.
+- Before eval475 completed requests, measured old1484s/new28s plus120s reserve;
+  conservative frozen baselines old1900s/new100s in campaign_budget.json.
+- Per-host quotas conservatively sum to caps; hard timeout required in addition
+  to complete-block guards. Initial soft deadline21:03:20Z; AIME reserved1080.
+- Both GPUs free at this checkpoint. Sol-A finalizes recoverable driver and
+  coordinator; launch initial immediately after tests/commit/push/deploy.
+- Sol-B prepares secondary CPU protocol helpers, no GPU launches.
+- Scores only from first outputs; partial/failed/capped/unparsed retained.
+  Warm accepted only if full required evidence matches, no JIT/new SO.
+- No cross-host absolute-time pooling. Host strata and within-GPU ratios.
+- No raw answers/gold/credentials/large traces in Git. No peer branch edits.

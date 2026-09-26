@@ -138,3 +138,29 @@ by outward bounds for the parent subtraction, alpha multiplication, squared norm
 reference division, sensitivity and comparison. PTX accumulation/underflow
 semantics, metadata rounding and cost are unresolved gates; no empirical epsilon
 or real-arithmetic opportunity count is accepted as this certificate.
+
+## Pre-evaluation candidate cost gate: stop implementation this round
+
+Decision frozen after the predeclared T60 state/cost diagnostics and before any
+official evaluation output. Keep the single post-QK ball candidate as an
+opportunity report; do not integrate a new CUDA path or substitute a candidate.
+The twelve real states replay parent output/support/eligibility exactly. Ideal
+normalized-probability balls cover 58.84% of parent-skipped GLOBAL tiles but only
+11.32% of LOCAL tiles. This is neither a deployed certificate nor saved PZ count.
+
+Standalone metadata costs about 0.049 ms LOCAL / 0.044 ms GLOBAL versus parent
+whole-attention-call event spans about 0.291 / 2.268 ms (medians across states).
+The parent per-CTA PZ share of measured router components is about 12.65% LOCAL /
+11.62% GLOBAL; this is NOT a whole-call fraction, so multiplying these numbers
+into a speedup estimate would be invalid. The event spans include host launch
+gaps/allocations; the metadata kernel is not outward-rounded. Certified-screen,
+fallback and control costs remain unmeasured, and finite TF32/MMA qualification
+remains unresolved. LOCAL has little opportunity relative to metadata cost;
+GLOBAL has ideal opportunity but no demonstrated net execution headroom.
+
+The evidence does not prove that every ball implementation must be slower. It
+does not justify further implementation within this round's bounded budget.
+Stop at this cost/numerical gate and spend the remaining budget on Track A and
+complete native-adaptive AIME answers. No evaluation quality, calls or latency
+was used to choose this outcome. Source: ideal_ball_t60_12.json and
+ball_cost_t60_12.json. No fast-path E2E or parent-equivalence claim is made.

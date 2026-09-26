@@ -1,6 +1,6 @@
 {
   "schema": "v18_run_manifest_index_v1",
-  "status": "evaluation_pending_request_bridge",
+  "status": "primary_protocols_frozen_bridge_qualified_not_yet_launched",
   "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
   "generation_seeds": [
     101,
@@ -15,7 +15,9 @@
     "private_manifest_version": "private_v2",
     "thinking": false,
     "output_budget": "frozen_task30/32/50/120/128",
-    "timed_questions": 26
+    "timed_questions": 26,
+    "logical_protocol_sha256": "595fc6443c694bc17593cfd86b1fdda373d53302e80683b7fe4c8cec018af29e",
+    "protocol_id": "v18_ruler4k_primary_c05a6821d739"
   },
   "aime": {
     "questions": 30,
@@ -23,7 +25,9 @@
     "private_manifest_version": "private_v3_exact_tokens",
     "thinking": true,
     "output_budget": 8192,
-    "first_and_warm_executions": 1080
+    "first_and_warm_executions": 1080,
+    "logical_protocol_sha256": "a1bdd4ac60ee2eea0e429b787bc7790b5a1ca3699dabc7e3dbad6b7afb78fe0e",
+    "protocol_id": "v18_aime26_primary_9a9c78d202df"
   },
   "calibration": {
     "file": "results/junyu_frontier_v18_20260926/calibration_frozen.json",
@@ -33,12 +37,13 @@
     "uses_quality": false,
     "all_four_attained": true
   },
-  "block_assignment": "freezeorderedroundrobin(mpK,dllm)onlyafterbridge; everyquestionseed allarms/repeats ononeGPU",
+  "block_assignment": "orderedroundrobin(mpk,dllm); everyquestionseed allarms/repeats ononeGPU; frozen before outputs",
   "primary_stage_order": [
     "RULER26timedquestionsallseeds",
     "AIME30allseeds",
     "RULERremaining104questions"
   ],
   "secondary": "70/allocation onlyafterprimary andremainingbudget; noeval-basedthresholdselection",
-  "budget_state": "STATE.json"
+  "budget_state": "STATE.json",
+  "candidate_status": "stopped before kernel implementation at opportunity/cost/numerical gate"
 }
