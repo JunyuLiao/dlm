@@ -1,0 +1,97 @@
+{
+ "archive": {
+  "handoff": "docs/handoff_archive/HANDOFF_through_v13.md",
+  "state": "docs/handoff_archive/STATE_through_v13.json"
+ },
+ "branch": "research/numerical-qk-reuse-native-20260924",
+ "budget_used": {
+  "cap": 224,
+  "complete_executions": 123,
+  "gpu_h": 1.77,
+  "wall_h": 2.4
+ },
+ "builds": {
+  "junyu_v4": "db080045f7a5fbce",
+  "support": "e3c283b8cbb9b79c",
+  "v5": "be53e4c706032aef"
+ },
+ "cost": {
+  "aime_phase_weighted_c_CVM_T": {
+   "2157": 1.009,
+   "365": 1.02,
+   "6275": 0.989
+  },
+  "aime_request_estimate_CVM_T": 1.003,
+  "longbench_16_18k_c": {
+   "B8_P": [
+    0.901,
+    0.917
+   ],
+   "CVM_T": [
+    0.929,
+    0.942
+   ]
+  }
+ },
+ "deploys": {
+  "pilot": "8c0c44f907f3",
+  "post_profiles": "d19acb240fd3",
+  "tests_and_diagnostics": "82b77afb907c"
+ },
+ "gates": {
+  "extension": "not run (gate 5.1 fails on AIME)",
+  "repair": "none (no supported diagnosis)"
+ },
+ "junyu_ref": {
+  "branch": "query-sensitivity-aware-v3",
+  "sha": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
+  "written": false
+ },
+ "live_jobs": [],
+ "next_command": "PI decision. Recommended single action: stop CVM-T on AIME; if the runtime claim continues, run the frozen v14 five arms unchanged on a small scored LongBench-v2 10-20K panel (only regime with per-forward headroom, c 0.90-0.94).",
+ "pilot": {
+  "CVM_T_over_B8_P": {
+   "call_factor": 1.27,
+   "ci95": [
+    1.081,
+    1.501
+   ],
+   "geometric": 1.232,
+   "paired_cand_only": 1,
+   "paired_ref_only": 4,
+   "per_call": 0.998
+  },
+  "correct_of_12": {
+   "B8_P": 9,
+   "CVM_T": 6,
+   "D_native": 6,
+   "T_G_original": 8,
+   "T_P": 5
+  },
+  "executions": "120/120",
+  "failures": 0,
+  "per_call_vs_D": {
+   "B8_P": 1.005,
+   "CVM_T": 1.003,
+   "T_G_original": 1.018,
+   "T_P": 1.013
+  },
+  "token_parity_vs_v13": {
+   "D_native": "12/12",
+   "T_G_original": "12/12"
+  },
+  "warm_accepted": "60/60"
+ },
+ "private_root": "/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926",
+ "profile_drift": "~2% process-level drift in complete-forward profiles (order test); AIME forward differences <=2% unresolved",
+ "qualification": {
+  "launch_inventory": "ordinary CVM steps: 0 value-direction launches, 5 planner + 5 consumer",
+  "sanitizer": "memcheck/racecheck/synccheck clean on v5 export+protect",
+  "tests": "14 v14 + 12 regression pass (3 skipped)"
+ },
+ "results": "results/numerical_qk_cvm_t_20260926/",
+ "reviewed_head_at_start": "73b6a668bf82aa9c5412f1856f1bbc2e302e351b",
+ "schema": 2,
+ "status": "V14_DONE",
+ "task": "v14: CVM-T (cached value-risk margin + live temporal protection) under native adaptive denoising; GLOBAL-only, LOCAL native"
+}
