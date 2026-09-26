@@ -65,13 +65,23 @@ Budget / next action:
 - No cross-host absolute-time pooling. Host strata and within-GPU ratios.
 - No raw answers/gold/credentials/large traces in Git. No peer branch edits.
 
-Live checkpoint: initial RULER936 executed (468/host), ledger copies SHA-verified.
-AIME started on both hosts. Local coordinator is PID50660, exec session45289,
-immutable628311d under E:/dlm/v18_private/coordinator_frozen; logs
-E:/dlm/v18_private/coordinator.{log,err}. Earlier hidden PID49208 was stopped
-after exact command verification; do not start a second coordinator.
-Finalization command file E:/dlm/v18_private/finalize_command.json is still being
-prepared; install it before the primary stages finish. Recovery after a confirmed
-controller exit: run the frozen coordinator with --start-at aime, the frozen
-campaign budget and finalization command file; existing stage markers are adopted.
-Do not restart remote GPU workers or overwrite receipts on coordinator recovery.
+Live checkpoint: initial RULER936 executed (468/host), zero first failures,
+468/468 strict warm accepted. Source ledgers SHA-verified and copied between hosts.
+Initial wrapper625s mpk/613s dllm; use worker_end for quota accounting, not both.
+AIME supervisors: mpk1616556 PGID1616556; dllm9108 PGID9108. Both active.
+One local coordinator: PID39296 in approved foreground TTY exec session34456,
+immutable628311d under E:/dlm/v18_private/coordinator_frozen. Earlier local
+PIDs49208 and50660 were verified/stopped; their log files are stale. Do not
+start another controller while39296 is alive. Poll session34456 for stage output.
+Final hook is installed: E:/dlm/v18_private/finalize_command.json points to
+immutable local scorer_f45fa83/scripts/v18_finalize.py and remote deployment
+ROOT/deploy/scorer_f45fa83 (commit f45fa83). Private receipt transfer/scoring
+executes after primary GPU stages. No gold or raw answers enter Git.
+Recovery after a confirmed controller exit: run the frozen coordinator with
+--start-at aime --budget E:/dlm/v18_private/coordinator_frozen/results/junyu_frontier_v18_20260926/campaign_budget.json
+--after-stages-command-file E:/dlm/v18_private/finalize_command.json
+using the local Python311 in an approved foreground TTY exec session. Adopt
+existing markers; do not relaunch remote workers or overwrite first receipts.
+An hourly task heartbeat v18-research-stage-continuation is active for stage
+continuation, quiet when unchanged. Original resource/deadline caps apply;
+disable heartbeat after CP4. Sol-B secondary pipeline is still being prepared.

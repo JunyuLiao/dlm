@@ -15,15 +15,17 @@
   "gpu_jobs": [
     {
       "host": "149.165.151.254",
+      "supervisor_pid": 1616556,
+      "pgid": 1616556,
       "stage": "aime",
-      "status": "started marker and ledger start confirmed",
-      "pid_source": "ROOT/evaluation/status/HOST_aime.started.json"
+      "start_epoch": 1790452575
     },
     {
       "host": "149.165.159.64",
+      "supervisor_pid": 9108,
+      "pgid": 9108,
       "stage": "aime",
-      "status": "started marker and ledger start confirmed",
-      "pid_source": "ROOT/evaluation/status/HOST_aime.started.json"
+      "start_epoch": 1790452578
     }
   ],
   "budget": {
@@ -46,7 +48,12 @@
       "mpk": 1484,
       "dllm": 28
     },
-    "frozen_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json"
+    "frozen_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json",
+    "initial_wrapper_seconds_by_host": {
+      "mpk": 625,
+      "dllm": 613
+    },
+    "initial_duration_note": "Wrapper elapsed; driver budget accounting uses worker_end values. Do not double-count wrappers."
   },
   "next": "Automatic AIME then RULER remainder; CPU scorer/finalizer and separate gated secondary pipeline being prepared",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
@@ -73,18 +80,35 @@
   "worker_ledgers": "ROOT/evaluation/ledgers/HOST_{ruler,aime}.jsonl",
   "coordinator": {
     "host": "Windows local",
-    "pid": 50660,
-    "exec_session": 45289,
+    "pid": 39296,
+    "exec_session": 34456,
     "source_commit": "628311db2680d18b7fc8b41c48429325e7b53601",
     "source": "E:/dlm/v18_private/coordinator_frozen/scripts/v18_coordinate.py",
-    "log": "E:/dlm/v18_private/coordinator.log",
-    "error_log": "E:/dlm/v18_private/coordinator.err",
     "command_file": "E:/dlm/v18_private/finalize_command.json",
-    "previous_pid49208": "stopped after exact command verification; replacement uses escalated long exec session"
+    "previous_pid49208": "stopped after exact command verification; replacement uses escalated long exec session",
+    "output": "live approved TTY session34456; prior log files are stale",
+    "start_at": "aime",
+    "command_file_installed": true,
+    "previous_pid50660": "stopped after exact command verification; replaced by approved foreground TTY"
   },
   "completed_primary_executions": {
     "ruler_initial": 936,
     "mpk": 468,
-    "dllm": 468
+    "dllm": 468,
+    "strict_warm_accepted": 468,
+    "first_failures": 0
+  },
+  "scoring": {
+    "source_commit": "f45fa83c01f7bf9ea1950cc0b9d3ba52e6c0d338",
+    "old_host_deploy": "deploy/scorer_f45fa83",
+    "local_finalizer": "E:/dlm/v18_private/scorer_f45fa83/scripts/v18_finalize.py",
+    "archive_sha256": "1dce3388b7958d9576edcfbd586f5c836631a108cdb9adbe1ac856236c8bd732",
+    "hook": "E:/dlm/v18_private/finalize_command.json",
+    "state": "installed; executes after primary GPU stages"
+  },
+  "continuation_heartbeat": {
+    "id": "v18-research-stage-continuation",
+    "status": "ACTIVE",
+    "purpose": "hourly stage checkpoint; quiet unchanged; original budget enforced; disable at CP4 completion"
   }
 }
