@@ -64,7 +64,7 @@ def _member(value: Any, name: str, default: Any = None) -> Any:
     return value.get(name, default) if isinstance(value, Mapping) else getattr(value, name, default)
 
 
-def _rows(path: Path) -> list[dict[str, Any]]:
+def _rows(path: Path, *, allow_task_budgets: bool = False) -> list[dict[str, Any]]:
     text = path.read_text(encoding="utf-8")
     rows = json.loads(text) if text.lstrip().startswith("[") else [json.loads(line) for line in text.splitlines() if line.strip()]
     if not isinstance(rows, list) or not rows:
@@ -80,7 +80,11 @@ def _rows(path: Path) -> list[dict[str, Any]]:
             raise ValueError(f"Empty prompt: {row['id']}")
         if row.get("thinking", True) is not True:
             raise ValueError("This run requires thinking ON in every manifest row")
-        if row.get("generation_budget", 8192) != 8192:
+        budget = row.get("generation_budget", 8192)
+        if allow_task_budgets:
+            if type(budget) is not int or not 1 <= budget <= 8192:
+                raise ValueError("Task output budget must be an integer in 1..8192")
+        elif budget != 8192:
             raise ValueError("This run requires an 8192-token output budget")
     return rows
 

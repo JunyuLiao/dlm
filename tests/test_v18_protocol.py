@@ -6,7 +6,7 @@ from unittest.mock import patch
 
 from scripts.v18_protocol import RULER_ARMS, build, generation_rows, sha, strip_gold
 from scripts.v18_frontier import advance_calibration, midpoint_policy
-from experiments.numerical_qk_reuse.runner import request_budget
+from experiments.numerical_qk_reuse.runner import _rows, request_budget
 
 
 class ProtocolTests(unittest.TestCase):
@@ -46,6 +46,13 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(request_budget({'generation_budget': 8192}, {'max_new_tokens': 8192}), 8192)
         for budget in (30, 32, 50, 120, 128):
             self.assertEqual(request_budget({'generation_budget': budget}, {'max_new_tokens': 8192}), budget)
+        with tempfile.TemporaryDirectory() as folder:
+            manifest = Path(folder) / 'manifest.json'
+            manifest.write_text(json.dumps([{'id': 'ruler/q', 'prompt': 'question',
+                                             'generation_budget': 30, 'thinking': True}]))
+            with self.assertRaisesRegex(ValueError, '8192-token'):
+                _rows(manifest)
+            self.assertEqual(_rows(manifest, allow_task_budgets=True)[0]['generation_budget'], 30)
 
     def test_calibration_resume_after_history_write(self):
         with tempfile.TemporaryDirectory() as folder:

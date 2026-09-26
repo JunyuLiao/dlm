@@ -33,7 +33,7 @@ def capture(config_path: Path, calibration_manifest: Path, calibration_id: str,
                (longbench_manifest, longbench_id, 'v15_selection_first'))
     rows = []
     for manifest, item_id, label in sources:
-        raw = _rows(manifest)
+        raw = _rows(manifest, allow_task_budgets=True)
         if any(any(k in r for k in GOLD_FIELDS) for r in raw):
             raise ValueError('generation manifest must be gold-free')
         row = next((r for r in raw if r['id'] == item_id), None)
