@@ -3,6 +3,7 @@ import json
 import tempfile
 import unittest
 import sys
+import subprocess
 from pathlib import Path
 from unittest.mock import patch
 
@@ -51,6 +52,60 @@ def primary_fixture(transport):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_read_only_ssh_retries_then_returns_exact_bytes(self):
+        t = cp.Transport({'hosts': {'mpk': {'root': '/mpk', 'ssh': cp.EXPECTED['mpk']}}})
+        calls = []
+        def ssh(_host, _command, timeout=60):
+            calls.append(timeout)
+            if len(calls) < 3:
+                raise subprocess.TimeoutExpired('ssh', timeout)
+            return 'YWJj'
+        t.ssh = ssh
+        with patch.object(cp.time, 'sleep') as sleep:
+            self.assertEqual(t.read('mpk', '/mpk/status.json'), b'abc')
+        self.assertEqual(len(calls), 3)
+        self.assertEqual([x.args[0] for x in sleep.call_args_list], [2, 4])
+
+    def test_exhausted_read_is_bounded_and_mutation_is_not_retried(self):
+        t = cp.Transport({'hosts': {'mpk': {'root': '/mpk', 'ssh': cp.EXPECTED['mpk']}}})
+        calls = []
+        def fail(_host, _command, timeout=60):
+            calls.append(1)
+            raise subprocess.CalledProcessError(255, 'ssh')
+        t.ssh = fail
+        with patch.object(cp.time, 'sleep'):
+            with self.assertRaises(subprocess.CalledProcessError):
+                t.read('mpk', '/mpk/status.json')
+        self.assertEqual(len(calls), 3)
+        t.read = lambda *_args: None
+        calls.clear()
+        with self.assertRaises(subprocess.CalledProcessError):
+            t.write_immutable('mpk', '/mpk/new.json', b'{}')
+        self.assertEqual(len(calls), 1)
+
+    def test_read_cutoff_prevents_another_ssh_attempt(self):
+        t = cp.Transport({'hosts': {'mpk': {'root': '/mpk', 'ssh': cp.EXPECTED['mpk']}}})
+        t.read_deadline = 10
+        with patch.object(cp.time, 'time', return_value=10), \
+             patch.object(t, 'ssh') as ssh:
+            with self.assertRaises(cp.PrimaryPendingDeadline):
+                t.read('mpk', '/mpk/status.json')
+        ssh.assert_not_called()
+
+    def test_primary_read_outage_waits_until_original_deadline(self):
+        t = FakeTransport()
+        status = []
+        error = subprocess.TimeoutExpired('ssh', 60)
+        with patch.object(cp, 'primary_ready', side_effect=error), \
+             patch.object(cp.time, 'time', side_effect=[0, 0, 0, 95]), \
+             patch.object(cp.time, 'sleep'):
+            with self.assertRaises(cp.PrimaryPendingDeadline):
+                cp.run_pipeline(t, {'deadline_epoch': 100, 'block_guard_s': 10},
+                                poll=60, folder=Path('/unused'),
+                                status_callback=lambda **fields: status.append(fields))
+        self.assertEqual(len(status), 2)
+        self.assertTrue(all(x['connection_pending'] for x in status))
+
     def test_primary_requires_closed_workers_and_both_offline_summaries(self):
         t = FakeTransport()
         primary_fixture(t)
@@ -201,6 +256,23 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(outcome['partial_scoring'], 'deferred')
             self.assertEqual(outcome['partial_scoring_reason'], 'RuntimeError')
             self.assertEqual(outcome['deploy'], 'frozen')
+
+    def test_primary_deadline_never_calls_partial_scorer(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp)
+            budget = base / 'budget.json'
+            budget.write_text('{"deadline_epoch":100}')
+            config = base / 'config.json'
+            config.write_text(json.dumps(dict(budget_local=str(budget), deploy='frozen')))
+            with patch.object(sys, 'argv', ['pipeline', '--deploy', 'frozen', '--config', str(config)]), \
+                 patch.object(cp, 'validate_config'), \
+                 patch.object(cp, 'run_pipeline', side_effect=cp.PrimaryPendingDeadline('expired')), \
+                 patch.object(cp, 'score_secondary') as scorer:
+                with self.assertRaises(cp.PrimaryPendingDeadline):
+                    cp.main()
+            scorer.assert_not_called()
+            outcome = json.loads(config.with_suffix('.outcome.json').read_text())
+            self.assertEqual(outcome['partial_scoring'], 'not_started')
 
 
 if __name__ == '__main__':

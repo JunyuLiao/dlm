@@ -28,6 +28,10 @@ ROOTS = {'mpk': '/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926',
 SDPA_SHA = '87f933d1a2d8508df572da5c0748c6b24c22ff2b625796949957dcd86cc57564'
 
 
+class PrimaryPendingDeadline(RuntimeError):
+    """Primary never closed; no CP3 generation or receipt scoring may have begun."""
+
+
 def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
@@ -77,7 +81,25 @@ class Transport:
         subprocess.run(['scp', *SSH, source, destination], check=True, timeout=timeout)
 
     def read(self, host: str, path: str) -> bytes | None:
-        encoded = self.ssh(host, f'if test -f {shlex.quote(path)}; then base64 -w0 {shlex.quote(path)}; fi')
+        command = f'if test -f {shlex.quote(path)}; then base64 -w0 {shlex.quote(path)}; fi'
+        for attempt in range(3):
+            cutoff = getattr(self, 'read_deadline', None)
+            remaining = cutoff - time.time() if cutoff is not None else None
+            if remaining is not None and remaining <= 0:
+                raise PrimaryPendingDeadline('primary read reached original GPU cutoff')
+            timeout = min(60, max(1, int(remaining))) if remaining is not None else 60
+            try:
+                encoded = self.ssh(host, command, timeout=timeout)
+                break
+            except (subprocess.TimeoutExpired, subprocess.CalledProcessError):
+                if attempt == 2:
+                    raise
+                delay = 2 * (attempt + 1)
+                if cutoff is not None:
+                    delay = min(delay, max(0, cutoff - time.time()))
+                    if delay <= 0:
+                        raise PrimaryPendingDeadline('primary read reached original GPU cutoff')
+                time.sleep(delay)
         return base64.b64decode(encoded, validate=True) if encoded else None
 
     def write_immutable(self, host: str, path: str, data: bytes) -> None:
@@ -405,15 +427,37 @@ def make_input(t: Transport, group: str) -> dict:
     return source
 
 
-def run_pipeline(t: Transport, budget: dict, *, poll: int, folder: Path) -> None:
+def run_pipeline(t: Transport, budget: dict, *, poll: int, folder: Path,
+                 status_callback=None) -> None:
     if poll < 60:
         raise ValueError('poll interval must be at least 60 seconds')
     deadline = budget['deadline_epoch']
-    while not primary_ready(t):
-        if time.time() + budget['block_guard_s'] >= deadline:
-            raise RuntimeError('primary prerequisites did not close before GPU cutoff')
-        print(json.dumps({'primary': 'waiting_for_closed_stages_and_offline_summaries'}), flush=True)
-        time.sleep(poll)
+    t.read_deadline = deadline - budget['block_guard_s']
+    while True:
+        if time.time() >= t.read_deadline:
+            raise PrimaryPendingDeadline('primary prerequisites did not close before GPU cutoff')
+        try:
+            ready = primary_ready(t)
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as error:
+            ready = False
+            pending = dict(primary='connection_pending', error_type=type(error).__name__)
+            print(json.dumps(pending), flush=True)
+            if status_callback:
+                status_callback(status='waiting_primary', connection_pending=True,
+                                last_read_error=type(error).__name__)
+        else:
+            if ready:
+                break
+            print(json.dumps({'primary': 'waiting_for_closed_stages_and_offline_summaries'}), flush=True)
+            if status_callback:
+                status_callback(status='waiting_primary', connection_pending=False)
+        remaining = t.read_deadline - time.time()
+        if remaining <= 0:
+            raise PrimaryPendingDeadline('primary prerequisites did not close before GPU cutoff')
+        time.sleep(min(poll, remaining))
+    if status_callback:
+        status_callback(status='running_secondary', connection_pending=False)
+    t.read_deadline = None
     qualify_cpu(t)
     for host in EXPECTED:
         budget_path = t.path(host, 'deploy', t.config['deploy'],
@@ -706,19 +750,23 @@ def main() -> None:
     with tempfile.TemporaryDirectory(prefix='v18_secondary_relay_') as path:
         transport = Transport(config)
         try:
-            run_pipeline(transport, budget, poll=a.poll_seconds, folder=Path(path))
+            run_pipeline(transport, budget, poll=a.poll_seconds, folder=Path(path),
+                         status_callback=outcome)
             outcome(status='complete', end_epoch=time.time(), partial_scoring='not_needed')
         except Exception as error:
             # A failed or budget-stopped GPU stage still has immutable first
             # receipts. Publish a redacted partial if every writer has closed.
-            try:
-                scored = score_secondary(transport, Path(path), budget)
-                partial = 'published' if scored else 'deferred'
-                reason = None if scored else 'no_closed_secondary_stage'
-            except Exception as scoring_error:
-                partial, reason = 'deferred', type(scoring_error).__name__
-                print(json.dumps({'partial_scoring': 'deferred',
-                                  'reason': type(scoring_error).__name__}), flush=True)
+            if isinstance(error, PrimaryPendingDeadline):
+                partial, reason = 'not_started', 'primary_deadline'
+            else:
+                try:
+                    scored = score_secondary(transport, Path(path), budget)
+                    partial = 'published' if scored else 'deferred'
+                    reason = None if scored else 'no_closed_secondary_stage'
+                except Exception as scoring_error:
+                    partial, reason = 'deferred', type(scoring_error).__name__
+                    print(json.dumps({'partial_scoring': 'deferred',
+                                      'reason': type(scoring_error).__name__}), flush=True)
             outcome(status='error', error_type=type(error).__name__,
                     error_message=str(error), partial_scoring=partial,
                     partial_scoring_reason=reason, end_epoch=time.time())
