@@ -17,6 +17,7 @@ import argparse
 import json
 import statistics
 import time
+from contextlib import contextmanager
 from pathlib import Path
 from types import MethodType, SimpleNamespace
 
@@ -68,7 +69,31 @@ def arm_runtime(adapter, arm, ns):
     from scripts.v10_request_runs import arm_config
     if arm['condition'] == 'native_dense':
         return nullcontext(None)
+    if arm['condition'] in ('noop_binding', 'controller_only'):
+        return overhead_control(adapter, binding=arm['condition'] == 'noop_binding', controller=bool(arm.get('controller')))
     return install(adapter, arm_config(ns, arm), arm['condition'])
+
+
+@contextmanager
+def overhead_control(adapter, *, binding, controller):
+    """Overhead-isolation controls (profile only, never answer runs): the GLOBAL-only
+    binding with a pass-through override (same _MaskGuard, native SDPA on every call)
+    and/or the exact fast-T controller observing the native loop (no router)."""
+    from experiments.diffusion_gemma_solattn_blasst_multibench.runner import _install_dense
+    from experiments.numerical_qk_reuse.global_scope import GlobalScopeAdapter, _MaskGuard
+    from experiments.value_direction_hopper.query_adaptive import State
+    from transformers.integrations.sdpa_attention import sdpa_attention_forward
+    bound = None
+    if binding:
+        bound = _install_dense(GlobalScopeAdapter(adapter))
+        bound.runtime.attention_override = _MaskGuard(lambda module, q, k, v, mask, **kw:
+                                                      sdpa_attention_forward(module, q, k, v, mask, **kw))
+    try:
+        state = State('T', None, m_ref=14.258454322814941, beta=3., gamma=.5, diagnostics=False, fast_t=True) if controller else None
+        yield dict(binding=bound, router=None, state=state)
+    finally:
+        if bound is not None:
+            bound.close()
 
 
 def main() -> None:
@@ -84,6 +109,7 @@ def main() -> None:
     parser.add_argument('--steps', type=int, default=10)
     parser.add_argument('--reps', type=int, default=5)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--inventory', action='store_true', help='extra un-timed rep: per-step CUDA kernel launch inventory')
     args = parser.parse_args()
     from dllm.models import create_adapter
     from experiments.numerical_qk_reuse.runner import GOLD_FIELDS, _rows
@@ -161,6 +187,27 @@ def main() -> None:
                             per_rep.append(times)
                             phases.append(rep_phases)
                             digests.append(rep_digests)
+                    inventory = None
+                    if args.inventory:                               # un-timed: which kernels each real step launches
+                        from torch.profiler import ProfilerActivity, profile
+                        if router is not None and hasattr(router, 'invalidate'):
+                            router.invalidate()
+                        inventory = []
+                        for i, s in enumerate(seq):
+                            kw = s['snapshot'].prepare(controller=state)
+                            with profile(activities=[ProfilerActivity.CUDA]) as prof:
+                                step_fn(**kw)
+                                torch.cuda.synchronize()
+                            counts = {}
+                            for ev in prof.events():
+                                if ev.device_type.name == 'CUDA':
+                                    counts[ev.name] = counts.get(ev.name, 0) + 1
+                            pick = lambda *keys: sum(c for n, c in counts.items() if any(k in n.lower() for k in keys))
+                            inventory.append(dict(total_kernels=sum(counts.values()),
+                                                  value_direction_v4_or_v5=pick('value_direction'),
+                                                  support_consumer=pick('support'), planner=pick('_plan'),
+                                                  native_sdpa_like=pick('flash', 'efficient_attention', 'fmha_cutlass', 'attention_kernel'),
+                                                  top=sorted(counts.items(), key=lambda x: -x[1])[:12]))
                     step_medians = [statistics.median(r[i] for r in per_rep) for i in range(len(seq))]
                     per_step_calls = {}
                     for i, layer, e0, e1 in call_events:
@@ -169,7 +216,7 @@ def main() -> None:
                         global_call_ms_by_step={str(i): v for i, v in sorted(per_step_calls.items())},
                         step_median_ms=step_medians, sequence_total_median_ms=statistics.median(sum(r) for r in per_rep),
                         sequence_total_min_ms=min(sum(r) for r in per_rep), phases=phases[0] if phases else None,
-                        outputs_identical_across_reps=all(d == digests[0] for d in digests),
+                        outputs_identical_across_reps=all(d == digests[0] for d in digests), launch_inventory=inventory,
                         counters=router.counters() if router is not None and hasattr(router, 'counters') else None,
                         context=execution_context(model))
                 finally:
