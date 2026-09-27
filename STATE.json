@@ -3,7 +3,7 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP3_SECONDARY70_BOTH_GPU_RUNNING",
+  "status": "CP3_SECONDARY70_COMPLETE_CONTROLS_PENDING",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
   "candidate": "STOP_IMPLEMENTATION_THIS_ROUND: ideal GLOBAL opportunity but no demonstrated net cost headroom or finite-precision certificate; no CUDA candidate",
@@ -12,22 +12,7 @@
     "149.165.151.254": "mpk bridge qualified; original user-site runtime; private immutable deploy/bridge_json",
     "149.165.159.64": "dllm bridge qualified; private matching runtime and1047 tensor identity"
   },
-  "gpu_jobs": [
-    {
-      "host": "149.165.151.254",
-      "stage": "ruler_secondary70",
-      "supervisor_pid": 1702871,
-      "worker_pid": 1702923,
-      "start_epoch": 1790497898
-    },
-    {
-      "host": "149.165.159.64",
-      "stage": "ruler_secondary70",
-      "supervisor_pid": 105954,
-      "worker_pid": 106008,
-      "start_epoch": 1790497903
-    }
-  ],
+  "gpu_jobs": [],
   "budget": {
     "wall_start_utc": "2026-09-26T18:02:00Z",
     "wall_hours_cap": 36,
@@ -54,8 +39,8 @@
       "dllm": 613
     },
     "initial_duration_note": "Wrapper elapsed; driver budget accounting uses worker_end values. Do not double-count wrappers.",
-    "observed_completed_generations_snapshot": 4363,
-    "snapshot_note": "475 preofficial +3888 complete primary executions; CP3 not launched at snapshot.",
+    "observed_completed_generations_snapshot": 5507,
+    "snapshot_note": "475 preofficial +3888 primary +208 core70 calibration (4 policy points×52 requests) +936 secondary70; controls not started at snapshot.",
     "completion_risk": "Primary generation complete; offline scoring and secondary stages remain under finite amended limits.",
     "original_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json",
     "aime_original_worker_seconds_by_host": {
@@ -70,7 +55,7 @@
       "dllm": 38374.643763355
     }
   },
-  "next": "Adopt frozen core70 calibration/protocols; start same-GPU secondary70 workers once immutable empty ledgers verify, then controls calibration/eval, scoring, CP4.",
+  "next": "Adopt closed secondary70 in existing controller; complete controls calibration/eval, offline secondary scoring and CP4 Chinese brief.",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -124,7 +109,7 @@
     "strict_warm_accepted": 468,
     "first_failures": 0,
     "aime_snapshot": {
-      "utc": "2026-09-27T07:37:09.324980+00:00",
+      "utc": "2026-09-27T02:37:09.32498-05:00",
       "mpk": 540,
       "dllm": 540,
       "total": 1080,
@@ -161,12 +146,12 @@
     "purpose": "hourly stage checkpoint; amended finite limits per RESOURCE_AUTHORIZATION.md; quiet unchanged; disable atCP4"
   },
   "secondary_coordinator": {
-    "pid": 58796,
-    "exec_session": 40018,
+    "pid": 50088,
+    "exec_session": 63853,
     "status": "running_secondary",
-    "source_commit": "cc2e72837b7893364de9d304154f0bfbc753747d",
+    "source_commit": "447fe03f478ec2d6f399ae97d5e119ece1c11c3c",
     "deploy": "deploy/extension_6250b51",
-    "local_cwd": "E:/dlm/v18_private/controller_cc2e728",
+    "local_cwd": "E:/dlm/v18_private/controller_447fe03",
     "config": "E:/dlm/v18_private/secondary_extension_config.json",
     "config_sha256": "a99c6eef0853f96c5bab260927d5fea2bbc90ae391e612df6cdd6e165cf1ad6f",
     "outcome": "E:/dlm/v18_private/secondary_extension.outcome.json",
@@ -174,20 +159,21 @@
     "cpu_qualification": "E:/dlm/v18_private/secondary_extension_cpu_qualification.json",
     "qualification_status": "qualified both hosts; CPU tests/source hashes/GPU UUID passed",
     "gpu_started": true,
-    "tests": "41 combined stdlib tests passed; actual empty/absent remote read smoke passed",
+    "tests": "46 combined stdlib tests pass; liveness read-only retry + exact done adoption",
     "previous_pid47716": "exited after read-only SSH timeout; both-host stage check confirmed no secondary GPU dispatch",
     "previous_outcome": "E:/dlm/v18_private/secondary_config.outcome.json",
     "remote_generation_deploy_commit": "6250b51ae322e37e5f79067bf8ebda3bf04b0add",
-    "local_controller_archive_sha256": "2c4025411b1ad2de8eb2b3e722857c2493c5179071eb6d155aeff839470fc0d8",
+    "local_controller_archive_sha256": "77ce96d283820c25f5270f05af1825a459fd60176550dbbc9b9dba3bd93726c0",
     "previous_pid42488": "exited on repeated read-only SSH timeout; secondary_restart1.outcome.json preserved",
     "retry_semantics": "at most3 attempts for read-only transport; waiting-primary connection failures stay pending until original guard cutoff; no mutation/dispatch retries",
     "read_retry_tests": "16 focused unittest cases passed",
     "previous_pid16656": "verified and stopped; old readretry outcome preserved",
     "previous_pid35304": "exited after empty-ledger immutable verification bug; no secondary eval launched; original error archived as secondary_extension_empty_ledger_error.json",
-    "recovery_audit": "secondary_extension.outcome.json retains prior error SHA and reason"
+    "recovery_audit": "secondary_extension.outcome.json retains prior error SHA and reason",
+    "previous_pid58796": "exited on read-only kill-0 SSH timeout while dllm stage was completing; both70 stages later rc0,468runs/host, GPU idle; no retry"
   },
-  "updated_utc": "2026-09-27T08:33:26.823890+00:00",
-  "stage_check": "Both host secondary70 started markers and GPU worker PIDs verified; CPU controller58796 remains sole coordinator. No secondary quality result yet.",
+  "updated_utc": "2026-09-27T04:38:34.536587-05:00",
+  "stage_check": "09:38UTC: secondary70 both hosts rc0,468runs/host and worker_end complete; GPUs idle. Same-outcome controller resumed after read-only liveness timeout, immutable remote deploy unchanged.",
   "resource_authorization": "RESOURCE_AUTHORIZATION.md",
   "budget_override": {
     "status": "deployed_active_controllers_adopt_original_AIME",
@@ -238,6 +224,12 @@
     "calibration_rc": 0,
     "protocols_frozen_both_hosts": true,
     "eval_started": true,
-    "note": "Original calibration and protocols preserved; controller resumes with same config/outcome, no calibration rerun."
+    "note": "Original calibration and protocols preserved; controller resumes with same config/outcome, no calibration rerun.",
+    "eval_complete": true,
+    "mpk_executions": 468,
+    "dllm_executions": 468,
+    "mpk_worker_gpu_seconds": 892.6660581331234,
+    "dllm_worker_gpu_seconds": 770.3079620700009,
+    "calibration_executions": 208
   }
 }

@@ -127,3 +127,13 @@ Never upload answers/gold/credentials/large traces or archive the user's task.
 GPUworker1702923 start1790497898; dllm supervisor105954/GPUworker106008
 start1790497903. Primary CPU controller58796/session40018 supervises; do not
 duplicate workers or alter remote deploy. 70% outputs/score pending.
+
+09:38UTC: secondary70 BOTH CLOSED rc0,468 executions/host; worker_end
+mpk892.6660581331234s,dllm770.3079620700009s. Core70 calibration4 policy
+points×52=208 attempts; total generation snapshot5507 incl475preofficial.
+Previous CPU controller58796 exited on read-only kill-0 SSH timeout while worker
+completed; no GPU retry. Outcome error saved secondary_extension_liveness_timeout_error.json.
+New local-only controller snapshot447fe03 SHA77ce96d283820c25F5270F05AF1825A459FD60176550DBBC9B9DBA3BD93726C0,
+46 combined tests, handles bounded read-only retries and exact rc0 marker race.
+Session63853 adopts same outcome/config, remote extension_6250b51 untouched.
+Controls calibration/eval and secondary offline score pending.
