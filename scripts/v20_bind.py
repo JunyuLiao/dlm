@@ -179,7 +179,7 @@ def screen_config(protocol, policies, rows, manifests, chosen, host_args, identi
         gpu_uuid = next(iter(uuids))
         if host_args.gpu_uuid and host_args.gpu_uuid != gpu_uuid:
             raise ValueError('screen host/GPU assignment drift')
-    arms = [dict(name='D_native', plugin=None, condition='native_dense', config={})]
+    arms = []
     for scope in v20.SCOPES:
         # Screen uses one arm config per scope/policy with the same thresholds;
         # task metadata remains in each target's manifest row.
@@ -199,6 +199,9 @@ def screen_config(protocol, policies, rows, manifests, chosen, host_args, identi
         base.pop('manifest_sha256', None)
         base.pop('thinking', None)
         base.pop('max_new_tokens', None)
+        if scope == v20.ALL_NATIVE_LEGAL:
+            arms.append(dict(name='D_native', plugin=None, condition='native_dense',
+                             config=control_config(base, 'native_dense', scope)))
         for name, condition in (('D_matched', 'v20_dense_consumer'), ('T_scope', 'v20_fresh_T')):
             arms.append(dict(name=f'{scope}_{name}', plugin=CONTROLS, condition=condition,
                              config=control_config(base, condition, scope)))

@@ -1,7 +1,10 @@
 import unittest
+import json
+import tempfile
+from pathlib import Path
 
 from scripts.v13_seed_runs import execution_key
-from scripts.v20_score import summarize_subset
+from scripts.v20_score import _first_receipt, cluster_interval, summarize_subset
 
 
 def event(index, role, arm, qid="q1", seed=101, block=0):
@@ -25,6 +28,28 @@ def record(spec, *, seconds=1.0, calls=4, ok=True):
 
 
 class ScoreTests(unittest.TestCase):
+    def test_private_archive_host_remap_and_receipt_parity(self):
+        from scripts.v18_protocol import sha
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            cell = root / "cells" / "cell1"
+            cell.mkdir(parents=True)
+            receipt = dict(id="q1", seed=101, fingerprint="cfg", prompt_token_hash="prompt",
+                           completion_tokens=[2, 3], per_canvas=[dict(decoder_calls=2)],
+                           termination_reason="eos", total_decoder_calls=2, output_tokens=2)
+            (cell / "attempt00.json").write_text(json.dumps(receipt))
+            record = dict(host="h1", private_receipt="/remote/cells/cell1/attempt00.json",
+                          fingerprint="cfg", prompt_token_hash="prompt",
+                          completion_token_hash=sha(json.dumps([2, 3], separators=(",", ":"))), per_canvas_calls=[2],
+                          termination="eos", decoder_calls=2, output_tokens=2)
+            self.assertEqual(_first_receipt(record, dict(id="q1", seed=101, cell_id="cell1"), {"h1": root}), receipt)
+
+    def test_question_cluster_keeps_seed_repeats_together(self):
+        point, ci = cluster_interval({"q1": [0., 1.], "q2": [1., 1.]}, seed=9, resamples=500)
+        self.assertAlmostEqual(point, .75)
+        self.assertGreaterEqual(ci[0], .5)
+        self.assertLessEqual(ci[1], 1.)
+
     def protocol(self):
         schedule = [event(0, "attempt0", "D_native"), event(1, "attempt0", "T_scope"),
                     event(2, "warm", "T_scope"), event(3, "warm", "D_native")]

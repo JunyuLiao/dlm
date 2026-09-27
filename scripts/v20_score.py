@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import random
 import statistics
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -88,17 +89,23 @@ def load_records(protocol: dict, binding_path: Path, ledger_paths: list[Path]) -
     return found
 
 
-def _first_receipt(record: dict, spec: dict) -> dict:
-    from scripts.v9_clean_request_timing import token_hash
+def _first_receipt(record: dict, spec: dict, private_roots: dict[str, Path] | None = None) -> dict:
     path = record.get("private_receipt")
-    if not path or not Path(path).is_file():
+    if not path:
         raise ValueError("successful first execution lacks immutable private receipt")
-    receipt = _read(Path(path))
+    path = Path(path)
+    if private_roots and record["host"] in private_roots:
+        if path.name != "attempt00.json":
+            raise ValueError("first receipt filename differs from frozen execution role")
+        path = private_roots[record["host"]] / "cells" / spec["cell_id"] / path.name
+    if not path.is_file():
+        raise ValueError("successful first execution lacks immutable private receipt")
+    receipt = _read(path)
     if (receipt.get("id"), receipt.get("seed")) != (spec["id"], spec["seed"]):
         raise ValueError("receipt identity mismatch")
     if receipt.get("fingerprint") != record.get("fingerprint") or receipt.get("prompt_token_hash") != record.get("prompt_token_hash"):
         raise ValueError("receipt config/prompt identity mismatch")
-    if token_hash(receipt["completion_tokens"]) != record.get("completion_token_hash"):
+    if sha(json.dumps(receipt["completion_tokens"], separators=(",", ":"))) != record.get("completion_token_hash"):
         raise ValueError("first token hash mismatch")
     if [c["decoder_calls"] for c in receipt["per_canvas"]] != record.get("per_canvas_calls"):
         raise ValueError("first per-canvas calls mismatch")
@@ -109,7 +116,20 @@ def _first_receipt(record: dict, spec: dict) -> dict:
     return receipt
 
 
-def score_firsts(protocol: dict, records: dict[str, dict], gold: dict[str, dict], *, ruler_root: Path) -> dict[str, dict]:
+def cluster_interval(by_question: dict[str, list[float]], *, seed: int, resamples: int = 2000,
+                     transform=lambda x: x) -> tuple[float | None, list[float] | None]:
+    """Question-cluster exploratory interval; seed repeats stay within their question."""
+    values = [statistics.mean(rows) for _, rows in sorted(by_question.items()) if rows]
+    if not values:
+        return None, None
+    point = transform(statistics.mean(values))
+    rng = random.Random(seed)
+    boots = sorted(transform(statistics.mean(rng.choice(values) for _ in values)) for _ in range(resamples))
+    return point, [boots[int(.025 * (resamples - 1))], boots[int(.975 * (resamples - 1))]]
+
+
+def score_firsts(protocol: dict, records: dict[str, dict], gold: dict[str, dict], *, ruler_root: Path,
+                 private_roots: dict[str, Path] | None = None) -> dict[str, dict]:
     from dllm.evaluation.ruler import official
     from scripts.v18_summarize import score_one
     from scripts import v15_longbench_task as lb_task
@@ -123,7 +143,7 @@ def score_firsts(protocol: dict, records: dict[str, dict], gold: dict[str, dict]
         record = records.get(execution_key(spec))
         if record is None or not record.get("ok"):
             continue
-        receipt = _first_receipt(record, spec)
+        receipt = _first_receipt(record, spec, private_roots)
         dataset = spec["dataset"]
         if dataset == "longbench_v2":
             lb_pending.append((spec, record, receipt))
@@ -200,16 +220,23 @@ def summarize_subset(protocol: dict, records: dict[str, dict], quality: dict[str
                 if arm == reference:
                     continue
                 matched = []
+                score_by_question = defaultdict(list)
+                time_by_question = defaultdict(list)
                 for (d, qid, seed, a), c in cells.items():
                     if d != dataset or a != arm:
                         continue
                     other = cells.get((d, qid, seed, reference))
-                    if not other or c["warm_s"] is None or other["warm_s"] is None:
+                    if not other:
                         continue
                     f, g = c["first"], other["first"]
-                    if (f["host"], f["gpu_uuid"]) != (g["host"], g["gpu_uuid"]):
+                    if f and g and (f["host"], f["gpu_uuid"]) != (g["host"], g["gpu_uuid"]):
                         raise ValueError("timing pair crossed GPUs")
+                    if c["quality"] is not None and other["quality"] is not None:
+                        score_by_question[qid].append(c["quality"]["score"] - other["quality"]["score"])
+                    if c["warm_s"] is None or other["warm_s"] is None:
+                        continue
                     matched.append((f["host"], c["warm_s"], other["warm_s"], f.get("decoder_calls"), g.get("decoder_calls")))
+                    time_by_question[qid].append(math.log(c["warm_s"] / other["warm_s"]))
                 per_host = {}
                 for host in sorted({x[0] for x in matched}):
                     rows = [x for x in matched if x[0] == host]
@@ -219,9 +246,16 @@ def summarize_subset(protocol: dict, records: dict[str, dict], quality: dict[str
                                           geometric_request_time_ratio=math.exp(statistics.mean(math.log(x[1] / x[2]) for x in rows)),
                                           decoder_call_ratio=cm / cr if cr else None,
                                           amortized_wall_per_call_ratio=(tm / cm) / (tr / cr) if cm and cr else None)
+                draw_seed = int(sha(f"v20/{dataset}/{arm}/{reference}")[:12], 16)
+                score_delta, score_ci = cluster_interval(score_by_question, seed=draw_seed)
+                time_ratio, time_ci = cluster_interval(time_by_question, seed=draw_seed + 1, transform=math.exp)
                 ratios[f"{arm}/{reference}"] = dict(paired_cells=len(matched), by_host=per_host,
                                                       geometric_ratio=(math.exp(statistics.mean(math.log(x[1] / x[2]) for x in matched))
-                                                                       if matched else None))
+                                                                       if matched else None),
+                                                      paired_score_delta=score_delta, paired_score_delta_95_exploratory=score_ci,
+                                                      question_cluster_time_ratio=time_ratio,
+                                                      question_cluster_time_ratio_95_exploratory=time_ci,
+                                                      uncertainty_note="question-cluster bootstrap across seed repeats; small development panel, not noninferiority")
         by_dataset[dataset] = dict(questions=len({q for d, q, _, _ in cells if d == dataset}),
                                    seeds=sorted({s for d, _, s, _ in cells if d == dataset}),
                                    arms=arm_rows, paired_request_time_ratios=ratios,
@@ -233,7 +267,7 @@ def summarize_subset(protocol: dict, records: dict[str, dict], quality: dict[str
 
 
 def summarize(protocol_path: Path, binding_path: Path, ledgers: list[Path], gold_paths: dict[str, Path],
-              ruler_root: Path) -> dict:
+              ruler_root: Path, *, private_roots: dict[str, Path] | None = None) -> dict:
     protocol = _read(protocol_path)
     if protocol.get("schema") != "v20_fan_panel_v1" or len(protocol.get("schedule", [])) != 700:
         raise ValueError("wrong frozen v20 panel")
@@ -242,7 +276,7 @@ def summarize(protocol_path: Path, binding_path: Path, ledgers: list[Path], gold
         raise ValueError("bound protocol identity mismatch")
     gold = verify_sources(protocol, gold_paths)
     records = load_records(protocol, binding_path, ledgers)
-    quality = score_firsts(protocol, records, gold, ruler_root=ruler_root)
+    quality = score_firsts(protocol, records, gold, ruler_root=ruler_root, private_roots=private_roots)
     return dict(protocol_id=protocol["protocol_id"], panel_sha256=sha(protocol_path.read_bytes()),
                 binding_sha256=sha(binding_path.read_bytes()), first84=summarize_subset(protocol, records, quality, first84=True),
                 full=summarize_subset(protocol, records, quality, first84=False))
@@ -253,10 +287,12 @@ def main() -> None:
     for name in ("protocol", "binding", "ruler-gold", "aime-gold", "longbench-gold", "ruler-root", "out"):
         p.add_argument("--" + name, type=Path, required=True)
     p.add_argument("--ledger", type=Path, action="append", required=True)
+    p.add_argument("--private-roots", type=Path, help="JSON map of frozen host id to local private archive root")
     a = p.parse_args()
+    private_roots = {host: Path(path) for host, path in _read(a.private_roots).items()} if a.private_roots else None
     result = summarize(a.protocol, a.binding, a.ledger,
                        {"ruler4k": a.ruler_gold, "aime26": a.aime_gold, "longbench_v2": a.longbench_gold},
-                       a.ruler_root)
+                       a.ruler_root, private_roots=private_roots)
     payload = json.dumps(result, indent=2, sort_keys=True) + "\n"
     if a.out.exists() and a.out.read_text() != payload:
         raise ValueError("refusing to overwrite different scored summary")

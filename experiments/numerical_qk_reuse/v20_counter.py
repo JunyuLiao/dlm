@@ -120,11 +120,44 @@ class CounterTwin:
     def __getattr__(self, name):
         return getattr(self.delegate, name)
 
+    def _fresh_call(self, module, q, k, v, mask, **kwargs):
+        """Read one native-legal fresh kernel bitmap only in this untimed twin."""
+        router = self.router
+        if router.support_geometry != 'native_legal':
+            raise ValueError('fresh counter requires native-legal support')
+        pending = router.pending
+        before, old_collect, old_calls = len(pending), router.collect, router.calls
+        router.collect = True
+        try:
+            result = self.delegate(module, q, k, v, mask, **kwargs)
+            if len(pending) != before + 1 or router.calls != old_calls + 1:
+                raise ValueError('fresh counter expected exactly one new bitmap and call')
+            layer, step, kind, prefix, skipped, eligible = pending[before]
+            nq, nk, d = q.shape[-2], k.shape[-2], q.shape[-1]
+            if (layer != int(module.layer_idx) or prefix != nk - nq or v.shape != k.shape or
+                    kind != ('local' if bool(module.is_sliding) else 'global')):
+                raise ValueError('fresh bitmap/source geometry drift')
+            row = count_bitmap(_host_bitmap(skipped), _host_bitmap(eligible),
+                               nq=nq, nk=nk, prefix=prefix, phase='A',
+                               head_dim=d, full_current_qk=True)
+            if row['bitmap_shape'][:2] != [q.shape[0], q.shape[1]]:
+                raise ValueError('fresh bitmap batch/head dimensions differ')
+            row.update(layer=layer, kind=kind, canvas=None, decoder_call=step,
+                       method='fresh_T')
+            self.rows.append(row)
+            return result
+        finally:
+            # Do not change the router's persistent collection contract.
+            router.collect = old_collect
+            del pending[before:]
+
     def __call__(self, module, q, k, v, mask, **kwargs):
         # Attention infers causal=True for a multi-token canvas when this kwarg
         # is absent. The qualified native decoder passes False explicitly.
         if mask is not None or kwargs.get('is_causal') is not False:
             raise ValueError('counter twin requires explicit bidirectional is_causal=False and mask=None')
+        if getattr(self.router, 'support_geometry', None) == 'native_legal':
+            return self._fresh_call(module, q, k, v, mask, **kwargs)
         owner = getattr(self.router, 'owner', self.router)
         if owner.support != 'native_mask':
             raise ValueError('counter twin requires native-legal support')
@@ -184,13 +217,14 @@ class CounterTwin:
         if row['bitmap_shape'][:2] != [q.shape[0], q.shape[1]]:
             raise ValueError('physical bitmap batch/head dimensions differ from current query')
         row.update(layer=layer, kind='local' if bool(module.is_sliding) else 'global',
-                   canvas=owner.canvas, decoder_call=owner.step)
+                   canvas=owner.canvas, decoder_call=owner.step,
+                   method='historical_or_same_consumer_control')
         self.rows.append(row)
         if self.retain_support:
-            if not hasattr(bitmap if old_score is not None else self.router.maps[layer][1], 'detach'):
-                raise ValueError('prepared floor requires actual device support tensors')
             device_skipped = bitmap.skipped if old_score is not None else self.router.maps[layer][1]
             device_eligible = bitmap.eligible if old_score is not None else self.router.maps[layer][2]
+            if not hasattr(device_skipped, 'detach') or not hasattr(device_eligible, 'detach'):
+                raise ValueError('prepared floor requires actual device support tensors')
             self.support_calls.append(dict(layer=layer, canvas=owner.canvas, decoder_call=owner.step,
                                            q_shape=tuple(q.shape), k_shape=tuple(k.shape),
                                            prefix=prefix, skipped=device_skipped.detach().clone(),
@@ -247,9 +281,11 @@ class PreparedSupportFloor:
     def __init__(self, router, support_calls, *, qkv_digest=None):
         self.router, self.support_calls, self.qkv_digest = router, support_calls, qkv_digest
         self.cursor = 0
+        self.qkv_matches = []
 
     def reset(self):
         self.cursor = 0
+        self.qkv_matches = []
 
     def assert_complete(self):
         if self.cursor != len(self.support_calls):
@@ -270,8 +306,8 @@ class PreparedSupportFloor:
                     item['q_shape'], item['k_shape'], item['prefix'])
         if actual != expected or v.shape != k.shape:
             raise ValueError('prepared support call/source geometry drift')
-        if self.qkv_digest is not None and self.qkv_digest(q, k, v) != item['qkv_digest']:
-            raise ValueError('prepared support QKV digest drift')
+        if self.qkv_digest is not None:
+            self.qkv_matches.append(self.qkv_digest(q, k, v) == item['qkv_digest'])
         from .cached_executor import fused_guard
         scale = float(scaling) if scaling is not None else q.shape[-1] ** -.5
         owner._mask_present = False

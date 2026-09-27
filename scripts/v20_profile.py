@@ -270,7 +270,8 @@ def counter_snapshot(runtime):
         router = runtime.get('router')
         values = router.counters() if router is not None and hasattr(router, 'counters') else {}
     cumulative = {'attention_calls', 'score_refresh_calls', 'decision_refresh_calls',
-                  'held_decision_calls', 'current_qk_elements', 'reused_qk_elements',
+                  'held_decision_calls', 'bootstrap_calls', 'bitmap_observation_calls',
+                  'current_qk_elements', 'reused_qk_elements',
                   'projected_current_v_tokens', 'reused_current_v_tokens',
                   'unsupported_mask_refreshes', 'summary_builds', 'summary_hits',
                   'summary_misses', 'preqk_consumer_calls', 'calls'}
@@ -363,7 +364,7 @@ def replay_epoch(model, sequence, runtime, boundary):
                 definition='one outer span including per-step snapshot/RNG/controller restoration; no per-call synchronization or digest inside')
 
 
-def replay_untimed(model, sequence, runtime, boundary):
+def replay_untimed(model, sequence, runtime, boundary, *, require_finite=False):
     """Separate diagnostic replay; device-to-host bitmaps never enter accepted timing."""
     reset_arm(runtime)
     state = runtime.get('state') if runtime else None
@@ -380,6 +381,10 @@ def replay_untimed(model, sequence, runtime, boundary):
                 state.begin(int(kw['cur_step']), kw['current_canvas'])
             input_hash = StepSnapshot.digest(kw, controller=state)
             result = decoder_call(model, kw) if boundary == 'model_forward' else model._denoising_step(**kw)
+            if require_finite:
+                stats = scalar_stats(result)
+                if stats is None or not stats['all_finite']:
+                    raise ValueError('prepared support floor produced nonfinite or unsupported full-forward output')
             rows.append((input_hash, output_digest(result)))
     return rows
 
@@ -396,9 +401,10 @@ def counter_replay(model, sequence, runtime, boundary, accepted_rows, *, retain_
     router = runtime['router']
     owner = getattr(router, 'owner', router)
     retain_support = retain_support and hasattr(router, 'score_calls')
-    if (getattr(owner, 'support', None) != 'native_mask' or
-            getattr(owner, 'output_mode', None) != 'historical_route_preqk_current_output' or
-            not (hasattr(router, 'score_calls') or hasattr(router, 'bootstrap_calls'))):
+    fresh_native = getattr(router, 'support_geometry', None) == 'native_legal'
+    if not fresh_native and (getattr(owner, 'support', None) != 'native_mask' or
+                             getattr(owner, 'output_mode', None) != 'historical_route_preqk_current_output' or
+                             not (hasattr(router, 'score_calls') or hasattr(router, 'bootstrap_calls'))):
         return dict(status='N/A', reason='fresh or unsupported bitmap consumer'), []
     from experiments.numerical_qk_reuse.v20_counter import install_counter_twin
     with install_counter_twin(runtime['binding'], router, explicit_untimed=True,
@@ -420,11 +426,14 @@ def prepared_support_floor(model, sequence, runtime, boundary, accepted_rows, su
     with install_prepared_support_floor(runtime['binding'], runtime['router'], support_calls,
                                         explicit_untimed=True, qkv_digest=qkv_signature) as floor:
         floor.reset()
-        observed = replay_untimed(model, sequence, runtime, boundary)
+        observed = replay_untimed(model, sequence, runtime, boundary, require_finite=True)
         floor.assert_complete()
         expected_inputs = [r['input_digest'] for r in accepted_rows]
         if [x[0] for x in observed] != expected_inputs:
             raise AssertionError('prepared-support floor input snapshot drift')
+        qkv_matches = list(floor.qkv_matches)
+        if len(qkv_matches) != len(support_calls):
+            raise AssertionError('prepared-support floor QKV verification incomplete')
         # Only the verification pass digests QKV. Turn that work off for timing.
         floor.qkv_digest = None
         spans = []
@@ -433,12 +442,15 @@ def prepared_support_floor(model, sequence, runtime, boundary, accepted_rows, su
             span = replay_epoch(model, sequence, runtime, boundary)
             floor.assert_complete()
             spans.append(span)
-    return dict(status='qualified', definition='separate full-forward same-consumer replay; '
-                'each call receives its own frozen observed bitmap without selector, score cache, '
-                'sketch or support-construction work; not deployable',
+    return dict(status='same_qkv' if all(qkv_matches) else 'numerically_divergent_path',
+                definition='separate full-forward same-consumer replay; each call receives '
+                'its own frozen observed bitmap without selector, score cache, sketch or '
+                'support-construction work; later-layer QKV may change when a prior '
+                'attention output changes; not deployable',
                 repetitions=repetitions, event_median_ms=statistics.median(x['event_ms'] for x in spans),
                 wall_median_ms=statistics.median(x['wall_ms'] for x in spans),
-                verified_qkv_on_untimed_replay=True,
+                qkv_matches_reference_untimed=qkv_matches,
+                final_outputs_finite_on_untimed_replay=True,
                 output_digest_matches_reference=[a[1] == r['output_digest']
                                                  for a, r in zip(observed, accepted_rows)],
                 last_output_digests=[x['last_output_digest'] for x in spans],
@@ -606,8 +618,9 @@ def profile(config, checkpoint=None):
                                             prepared_support_floor(model, seq, runtime, boundary,
                                                                    accepted, support_calls,
                                                                    int(config.get('floor_reps', 3)))
-                                            if measured['status'] == 'qualified' and support_calls
-                                            else dict(status='N/A', reason='no same-support numerical bitmap'))
+                                            if measured['status'] == 'qualified' and support_calls and
+                                            boundary == 'model_forward'
+                                            else dict(status='N/A', reason='requires numerical bitmap and model_forward'))
                                     diagnostics[arm['name']] = measured
                         target_report['boundaries'].setdefault(boundary, {})[label] = dict(
                             reached_calls=len(seq), requested_calls=length,

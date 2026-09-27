@@ -79,6 +79,82 @@ class PairWeightsTests(unittest.TestCase):
 
 
 class TwinTests(unittest.TestCase):
+    def test_fresh_native_bitmap_is_collected_once_then_restored(self):
+        class DeviceBitmap:
+            def __init__(self, values):
+                self.values = values
+            def detach(self):
+                return self
+            def cpu(self):
+                return self
+            def tolist(self):
+                return self.values
+        skipped, eligible = bitmap(heads=2, qb=1, kt=4, drop_tiles=(1,))
+        router = SimpleNamespace(support_geometry='native_legal', collect=False,
+                                 calls=0, pending=['historical-entry'])
+        module = SimpleNamespace(layer_idx=3, is_sliding=False)
+        q = SimpleNamespace(shape=(1, 2, 128, 4))
+        k = v = SimpleNamespace(shape=(1, 1, 256, 4))
+        def delegate(*_a, **_kw):
+            self.assertTrue(router.collect)
+            router.calls += 1
+            router.pending.append((3, 7, 'global', 128,
+                                   DeviceBitmap(skipped), DeviceBitmap(eligible)))
+            return 'fresh output'
+        twin = CounterTwin(delegate, router)
+        self.assertEqual(twin(module, q, k, v, None, is_causal=False), 'fresh output')
+        self.assertFalse(router.collect)
+        self.assertEqual(router.pending, ['historical-entry'])
+        self.assertEqual(twin.rows[0]['method'], 'fresh_T')
+        self.assertEqual(twin.rows[0]['phase'], 'A')
+        self.assertEqual(twin.rows[0]['by_segment']['whole']['skipped_qk_pairs'], 0)
+        self.assertEqual(twin.rows[0]['by_segment']['whole']['skipped_pv_pairs'], 2 * 128 * 64)
+
+    def test_fresh_pending_cleanup_even_when_delegate_fails(self):
+        router = SimpleNamespace(support_geometry='native_legal', collect=False,
+                                 calls=0, pending=[])
+        def delegate(*_a, **_kw):
+            router.pending.append('unfinished')
+            raise RuntimeError('kernel failed')
+        twin = CounterTwin(delegate, router)
+        with self.assertRaisesRegex(RuntimeError, 'kernel failed'):
+            twin(None, None, None, None, None, is_causal=False)
+        self.assertFalse(router.collect)
+        self.assertEqual(router.pending, [])
+
+    def test_counter_retains_actual_decision_tensors_for_optional_floor(self):
+        class FakeBitmap:
+            def __init__(self, values):
+                self.values = values
+            def detach(self):
+                return self
+            def cpu(self):
+                return self
+            def tolist(self):
+                return self.values
+            def clone(self):
+                return self
+        skipped, eligible = bitmap(heads=2, qb=1, kt=4, drop_tiles=(1,))
+        decision = SimpleNamespace(skipped=FakeBitmap(skipped), eligible=FakeBitmap(eligible))
+        router = SimpleNamespace(support='native_mask',
+                                 output_mode='historical_route_preqk_current_output',
+                                 score_calls=0, decision_calls=0, held_calls=0,
+                                 sources={3: (None, None, 0, 128)}, canvas=0, step=0,
+                                 cache=SimpleNamespace(entries={3: SimpleNamespace(decision=decision)}))
+        def delegate(*_a, **_kw):
+            router.score_calls += 1
+            router.decision_calls += 1
+            return 'output'
+        twin = CounterTwin(delegate, router, retain_support=True,
+                           qkv_digest=lambda *_: ('q', 'k', 'v'))
+        module = SimpleNamespace(layer_idx=3, is_sliding=False)
+        q = SimpleNamespace(shape=(1, 2, 128, 4))
+        k = v = SimpleNamespace(shape=(1, 1, 256, 4))
+        self.assertEqual(twin(module, q, k, v, None, is_causal=False), 'output')
+        self.assertEqual(len(twin.support_calls), 1)
+        self.assertIs(twin.support_calls[0]['skipped'], decision.skipped)
+        self.assertEqual(twin.support_calls[0]['qkv_digest'], ('q', 'k', 'v'))
+
     def test_explicit_untimed_wrapper_restores_override_and_counts_a_d_h(self):
         skipped, eligible = bitmap(heads=2)
         decision = SimpleNamespace(skipped=skipped, eligible=eligible)
@@ -200,10 +276,16 @@ class TwinTests(unittest.TestCase):
                 self.assertEqual(floor(module, q, k, v, None, is_causal=False),
                                  ('same-consumer-output', None))
                 floor.assert_complete()
+                self.assertEqual(floor.qkv_matches, [True])
                 self.assertEqual(calls, [('frozen-skip', 'frozen-eligible', .5, None, False)])
                 self.assertFalse(owner._mask_present)
                 with self.assertRaisesRegex(ValueError, 'exceeded'):
                     floor(module, q, k, v, None, is_causal=False)
+                floor.reset()
+                floor.qkv_digest = lambda *_: ('different',)
+                self.assertEqual(floor(module, q, k, v, None, is_causal=False),
+                                 ('same-consumer-output', None))
+                self.assertEqual(floor.qkv_matches, [False])
                 floor.reset()
                 owner.step = 2
                 with self.assertRaisesRegex(ValueError, 'geometry drift'):

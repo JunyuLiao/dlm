@@ -209,6 +209,18 @@ class V20ProfileContract(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'at least three'):
             P.validate_config(cfg)
 
+    def test_control_phase_counters_are_visible_in_per_call_delta(self):
+        values = dict(attention_calls=7, bootstrap_calls=1,
+                      bitmap_observation_calls=1, held_decision_calls=5,
+                      noncumulative='ignore')
+        runtime = dict(counters=lambda: values)
+        before = P.counter_snapshot(runtime)
+        values.update(attention_calls=8, bitmap_observation_calls=2)
+        after = P.counter_snapshot(runtime)
+        self.assertEqual(after['bitmap_observation_calls'] - before['bitmap_observation_calls'], 1)
+        self.assertEqual(after['bootstrap_calls'] - before['bootstrap_calls'], 0)
+        self.assertNotIn('noncumulative', after)
+
 
 if __name__ == '__main__':
     unittest.main()

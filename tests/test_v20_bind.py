@@ -6,6 +6,7 @@ from pathlib import Path
 import tempfile
 from types import SimpleNamespace
 import unittest
+from unittest.mock import patch
 
 from scripts import v20_bind as B
 
@@ -74,6 +75,12 @@ class V20BindTests(unittest.TestCase):
             self.assertEqual(method['config']['selector'], 'prefix_block_summary')
             self.assertEqual(held['config']['selector'], 'legacy_recompute')
             self.assertEqual(method['config']['decision_interval'], 3)
+            native = screen['arms'][0]
+            self.assertEqual(native['name'], 'D_native')
+            self.assertEqual(native['config']['model'], str(args.model.resolve()))
+            self.assertEqual(native['config']['revision'], B.REVISION)
+            self.assertEqual(native['config']['manifest_sha256_by_dataset'],
+                             screen['manifest_sha256'])
             historical = next(a for a in screen['arms'] if a['name'] == 'G75L30_nativeQ128')
             self.assertEqual(historical['config']['v20_scope'], 'ALL_NATIVE_LEGAL')
             alternatives = [a for a in screen['arms'] if a.get('diagnostic_consumer_alternative')]
@@ -81,6 +88,27 @@ class V20BindTests(unittest.TestCase):
             self.assertTrue(all(a['config']['consumer'] == 'triton' for a in alternatives))
             self.assertTrue(screen['counter_twins'])
             self.assertFalse(screen['prepared_support_floor'])
+
+    def test_binder_screen_passes_profile_preflight_before_model_load(self):
+        from tests.test_v20_profile import P as profile
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            protocol_path, manifests_dir, calibration_path = self.fixture(root)
+            protocol, policies, rows, manifests, chosen = B.read_frozen(
+                protocol_path, manifests_dir, calibration_path)
+            args = self.args(protocol_path, calibration_path, host='host0')
+            args.model = root / 'model'
+            args.model.mkdir()
+            (args.model / 'config.json').write_bytes(b'{}')
+            source_path = root / 'source.py'
+            source_path.write_bytes(b'pass\n')
+            source = {str(source_path): B.sha_bytes(source_path.read_bytes())}
+            identity = dict(model={'config.json': B.sha_bytes(b'{}')},
+                            control=source, method=source)
+            screen = B.screen_config(protocol, policies, rows, manifests, chosen, args, identity)
+            with patch.object(profile.subprocess, 'check_output', return_value='GPU-0\n'):
+                proof = profile.preflight_identity(screen, screen['manifests'])
+            self.assertEqual(proof['gpu_uuid'], 'GPU-0')
 
     def test_generation_configs_and_lf_atomic_bytes(self):
         with tempfile.TemporaryDirectory() as directory:
