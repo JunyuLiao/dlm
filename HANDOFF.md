@@ -77,3 +77,18 @@ Generation hostfragments CPU-bound at ROOT/generation/binding_001.fragment.json.
 No finalbinding/bridge/answerlaunch yet. Commit00a2c4d LOCAL; GitHubpush twice
 blockedauto-review unverifiedexportdestination. User explicitremoteconfirmation
 pending async question. Do not workaroundpush; remoteGPUwork explicitlyauthorized.
+
+13:34UTC dllm selected_001 COMPLETE (1105.660951s), all AIME/LB actualQKV
+numerics+bothboundaries qualified. RULER native4calls: N16 intentionallyskipped.
+Supplement samepoint N4 bothboundaries/probe, stage ruler_selected_001 dllmPID121907
+RUNNING. mpk selected_001 stillactive; do notlaunch its supplement untilterminal.
+SupplementCPU setupscriptROOT/incoming/setup_ruler_selected_001.py (copiedboth).
+Local followupwrapper943df50 iscommitted, pushstillblockedpendinguserconfirmation.
+Standalone timelineparity script nowlocal tests pass, notyetcommitted/deployed;
+planned3 OFFcalls/host againstONbridge raw (native/R2/G75), separatesoutputparity
+fromoptionalfirst-encoder-enddevice span availability. Notdecodewalltime.
+
+13:37UTC BOTHselected001 COMPLETE; mpk1407.121633s/dllm1105.660951s.
+OnlymissingRULER<=4callN16. ruler_selected001 supplements running mpk1720599,
+dllm121907; watcher75743. Main numerical gates no failures. ClosedGPU4162.4535s,
+closednativecaptures20, reserve2active. Newselected001 tables publishedlocally.

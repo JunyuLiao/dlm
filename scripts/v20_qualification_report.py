@@ -177,30 +177,94 @@ def summarize(paths):
                                   else 'missing' if any(b['status'] == 'missing' for b in boundary_rows.values())
                                   else 'qualified')
             targets.append(redacted)
+        arm_identity = digest(json.dumps(profile.get('arms', []), sort_keys=True,
+                                         separators=(',', ':')).encode())
         hosts.append(dict(profile_sha256=digest(raw), source_sha256=source_receipt(profile),
+                          arm_identity_sha256=arm_identity,
                           hostname=identity.get('hostname'), gpu_uuid=identity.get('gpu_uuid'),
                           model_revision=profile.get('revision'), operator_probe=profile.get('operator_probe', False),
                           counter_twins=profile.get('counter_twins', False),
                           prepared_support_floor=profile.get('prepared_support_floor', False),
                           targets=targets))
+    return dict(schema='v20_qualification_gate_v1', status=gate_status(hosts), hosts=hosts)
+
+
+def gate_status(hosts):
     checks = [t['status'] for h in hosts for t in h['targets'] if not t.get('shared_canvas_profile')]
-    status = ('failed' if 'failed' in checks else 'missing' if 'missing' in checks or not checks
-              else 'qualified')
-    return dict(schema='v20_qualification_gate_v1', status=status, hosts=hosts)
+    return ('failed' if 'failed' in checks else 'missing' if 'missing' in checks or not checks
+            else 'qualified_with_native_short_sequence' if 'qualified_with_native_short_sequence' in checks
+            else 'qualified')
+
+
+def reconcile(main_gate, supplemental_gate):
+    """Preserve the N16 omission while attaching qualified same-host N4 proof."""
+    if main_gate.get('schema') != 'v20_qualification_gate_v1' or supplemental_gate.get('schema') != 'v20_qualification_gate_v1':
+        raise ValueError('qualification gate schema mismatch')
+    main_hosts = {(h['hostname'], h['gpu_uuid']): h for h in main_gate['hosts']}
+    if len(main_hosts) != len(main_gate['hosts']):
+        raise ValueError('duplicate main host identity')
+    used = set()
+    for supplement in supplemental_gate['hosts']:
+        host_key = (supplement['hostname'], supplement['gpu_uuid'])
+        main = main_hosts.get(host_key)
+        if main is None:
+            raise ValueError('supplemental host/GPU absent from main gate')
+        if (main.get('model_revision'), main.get('source_sha256'), main.get('arm_identity_sha256')) != (
+                supplement.get('model_revision'), supplement.get('source_sha256'),
+                supplement.get('arm_identity_sha256')) or not main.get('arm_identity_sha256'):
+            raise ValueError('supplemental model/source/arm identity conflict')
+        for target in main['targets']:
+            if target.get('shared_canvas_profile') or target.get('status') != 'missing':
+                continue
+            resolution = target.get('resolution') or {}
+            reached = resolution.get('reached_calls') or []
+            if (target.get('dataset') != 'ruler4k' or resolution.get('missing') or
+                    not 1 <= len(reached) <= 4):
+                continue
+            target_key = (target['dataset'], target['id_sha256'], target['canvas'], target['requested_call'])
+            matches = [s for s in supplement['targets'] if
+                       (s.get('dataset'), s.get('id_sha256'), s.get('canvas'), s.get('requested_call')) == target_key]
+            if len(matches) != 1:
+                raise ValueError('supplemental target missing or duplicated')
+            sample = matches[0]
+            if sample.get('shared_canvas_profile'):
+                continue
+            if sample.get('status') != 'qualified' or any(
+                    sample.get('boundaries', {}).get(boundary, {}).get('sequence') != 'N4' or
+                    sample['boundaries'][boundary].get('reached_calls') != len(reached)
+                    for boundary in ('model_forward', 'denoising_step')):
+                raise ValueError('supplemental N4 lacks complete qualified boundary evidence')
+            if not (supplement.get('operator_probe') and supplement.get('counter_twins')):
+                raise ValueError('supplemental numerical diagnostics absent')
+            marker = (host_key, target_key)
+            if marker in used:
+                raise ValueError('duplicate supplemental target')
+            used.add(marker)
+            target['supplemental_evidence'] = dict(profile_sha256=supplement['profile_sha256'],
+                sequence='N4', reached_native_calls=len(reached),
+                boundaries=sample['boundaries'])
+            target['status'] = 'qualified_with_native_short_sequence'
+        main.setdefault('supplemental_profile_sha256', []).append(supplement['profile_sha256'])
+    main_gate['status'] = gate_status(main_gate['hosts'])
+    return main_gate
 
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--profile', type=Path, action='append', required=True)
+    parser.add_argument('--supplemental-profile', type=Path, action='append', default=[])
     parser.add_argument('--out', type=Path, required=True)
     args = parser.parse_args(argv)
     report = summarize(args.profile)
+    if args.supplemental_profile:
+        report = reconcile(report, summarize(args.supplemental_profile))
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with args.out.open('x', encoding='utf-8', newline='\n') as stream:
         json.dump(report, stream, indent=2, sort_keys=True)
         stream.write('\n')
     print(f"{report['status']}: {len(report['hosts'])} host profile(s)")
-    return {'qualified': 0, 'failed': 1, 'missing': 2}[report['status']]
+    return {'qualified': 0, 'qualified_with_native_short_sequence': 0,
+            'failed': 1, 'missing': 2}[report['status']]
 
 
 if __name__ == '__main__':

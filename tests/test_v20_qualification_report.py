@@ -132,6 +132,52 @@ class QualificationTests(unittest.TestCase):
             method = Q.summarize([path])['hosts'][0]['targets'][0]['boundaries']['model_forward']['arms'][name]
             self.assertEqual(method['arm_over_native_event_ratio'], .5)
 
+    def reconciliation_fixtures(self, root):
+        supplement_path, supplement_profile, name = self.fixture(root)
+        for target in supplement_profile['targets'].values():
+            target['dataset'] = 'ruler4k'
+            target['resolution']['reached_calls'] = [0, 1, 2, 3]
+        supplement_path.write_text(json.dumps(supplement_profile), encoding='utf-8')
+        main_profile = copy.deepcopy(supplement_profile)
+        for target in main_profile['targets'].values():
+            target['boundaries'] = {}
+        main_path = root / 'main.json'
+        main_path.write_text(json.dumps(main_profile), encoding='utf-8')
+        return main_path, supplement_path, name
+
+    def test_reconcile_same_host_short_native_sequence(self):
+        with tempfile.TemporaryDirectory() as directory:
+            main_path, supplement_path, _ = self.reconciliation_fixtures(Path(directory))
+            report = Q.reconcile(Q.summarize([main_path]), Q.summarize([supplement_path]))
+            self.assertEqual(report['status'], 'qualified_with_native_short_sequence')
+            target = report['hosts'][0]['targets'][0]
+            self.assertEqual(target['boundaries']['model_forward']['status'], 'missing')
+            self.assertEqual(target['supplemental_evidence']['sequence'], 'N4')
+            self.assertEqual(target['supplemental_evidence']['reached_native_calls'], 4)
+
+    def test_reconcile_rejects_source_conflict_and_failed_supplement(self):
+        with tempfile.TemporaryDirectory() as directory:
+            main_path, supplement_path, name = self.reconciliation_fixtures(Path(directory))
+            main = Q.summarize([main_path])
+            supplement = Q.summarize([supplement_path])
+            supplement['hosts'][0]['source_sha256']['v20_profile.py'] = 'changed'
+            with self.assertRaisesRegex(ValueError, 'identity conflict'):
+                Q.reconcile(copy.deepcopy(main), supplement)
+            supplement = Q.summarize([supplement_path])
+            supplement['hosts'][0]['targets'][0]['boundaries']['denoising_step']['arms'][name]['status'] = 'failed'
+            supplement['hosts'][0]['targets'][0]['status'] = 'failed'
+            with self.assertRaisesRegex(ValueError, 'lacks complete qualified'):
+                Q.reconcile(copy.deepcopy(main), supplement)
+
+    def test_reconcile_does_not_fill_unreached_canvas(self):
+        with tempfile.TemporaryDirectory() as directory:
+            main_path, supplement_path, _ = self.reconciliation_fixtures(Path(directory))
+            main = Q.summarize([main_path])
+            main['hosts'][0]['targets'][0]['resolution']['missing'] = True
+            report = Q.reconcile(main, Q.summarize([supplement_path]))
+            self.assertEqual(report['status'], 'missing')
+            self.assertNotIn('supplemental_evidence', report['hosts'][0]['targets'][0])
+
 
 if __name__ == '__main__':
     unittest.main()

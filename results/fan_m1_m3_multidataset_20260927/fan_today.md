@@ -33,3 +33,20 @@ consumer 比较仅用 P0 的 R2 与 B，同题同状态，先各类等权，再�
 直接计时与自然 generation 分开运行，避免每 forward 同步干扰 E2E。decode-only 若没有已核验的 prefill 边界，将保留 N/A。
 
 物理计数见 screen002_physical.md：GLOBAL_ONLY 的分母仅覆盖被路由的 5 个 GLOBAL 层；25 个保持 native 的 LOCAL 层不在这些 counter twin 中，不能把该比例称为全模型 attention 的跳过率。数值/decision age 的逐层数据在下一阶段补齐。
+
+另外，LongBench 的同 consumer 全保留 D_matched/native 已达到 mpk 0.940、dllm 0.920，而 P0 R2 分别为 0.969、0.939。当前 N4 中 R2 的 native-relative 收益并不能归因于 M1/M3 本身：全保留 consumer 已更便宜。后续会同时保留 native、D_matched、fresh T 和 B 的比较，不把 backend 差异当作方法贡献。
+
+## 13:37 UTC 更新：选定 GLOBAL/P0/Triton 的较长完整序列
+
+AIME 自然达到 7–14 次调用；LongBench 达到捕获上限 16 次。未强迫任何 native canvas 多走一步。下面仅是 model_forward，whole denoising-step 明细见 selected001_forward.md。
+
+| GPU | 数据集 | 原生实际调用数 | native ms/forward | M1/native | R2/native | R3/native | B/native |
+|---|---|---|---:|---:|---:|---:|---:|
+| mpk | aime26 | 12,14 | 134.82 | 1.040 | 1.029 | 1.027 | 1.024 |
+| mpk | longbench_v2 | 16 | 161.99 | 0.989 | 0.958 | 0.950 | 0.932 |
+| dllm | aime26 | 7,8 | 120.14 | 1.031 | 1.023 | 1.020 | 1.017 |
+| dllm | longbench_v2 | 16 | 158.17 | 0.949 | 0.918 | 0.912 | 0.886 |
+
+两台机器的实际 QKV/支持集检查及计数 twin 均通过；R1/R2/R3 的真实 A/D/H 被观察到。此处选定 Triton 与上面 N4 首报的 Hopper 表是不同明确配置，不能直接相减当成 A8 收益。选定 Triton 的 LongBench D_matched/native 为 mpk0.984、dllm0.972，R2/R3 在较长序列确实低于它；仍未超过 B_A8。
+
+RULER 原生只有4次，主 N16 项保留 missing；同配置 N4 双边界补测正在完成。前84正式答案仍0/84，等待数值门槛与两机桥接放行。
