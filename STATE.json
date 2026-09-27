@@ -3,7 +3,7 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP2_RULER_INITIAL936_COMPLETE_AIME_RUNNING",
+  "status": "CP2_AIME_C001_RUNNING_AFTER_CLEAN_ORIGINAL_STOP",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
   "candidate": "STOP_IMPLEMENTATION_THIS_ROUND: ideal GLOBAL opportunity but no demonstrated net cost headroom or finite-precision certificate; no CUDA candidate",
@@ -15,17 +15,19 @@
   "gpu_jobs": [
     {
       "host": "149.165.151.254",
-      "supervisor_pid": 1616556,
-      "pgid": 1616556,
-      "stage": "aime",
-      "start_epoch": 1790452575
+      "supervisor_pid": 1671360,
+      "pgid": 1671360,
+      "worker_pid": 1671384,
+      "stage": "aime_c001",
+      "start_epoch": 1790484333
     },
     {
       "host": "149.165.159.64",
-      "supervisor_pid": 9108,
-      "pgid": 9108,
-      "stage": "aime",
-      "start_epoch": 1790452578
+      "supervisor_pid": 46382,
+      "pgid": 46382,
+      "worker_pid": 46416,
+      "stage": "aime_c001",
+      "start_epoch": 1790484284
     }
   ],
   "budget": {
@@ -54,12 +56,16 @@
       "dllm": 613
     },
     "initial_duration_note": "Wrapper elapsed; driver budget accounting uses worker_end values. Do not double-count wrappers.",
-    "observed_completed_generations_snapshot": 1627,
-    "snapshot_note": "475 preofficial +936 initialRULER +216 AIME completed events as of22:35UTC; two current in-flight requests not yet recorded. No extrapolation replaces final ledger accounting.",
+    "observed_completed_generations_snapshot": 2263,
+    "snapshot_note": "475 preofficial +936 initial RULER +852 closed original AIME; excludes future continuation. Count failed attempts once.",
     "completion_risk": "User authorized bounded extension; existing AIME workers may still cleanly stop at old boundary, then numbered continuation runs wholly unstarted blocks.",
-    "original_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json"
+    "original_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json",
+    "aime_original_worker_seconds_by_host": {
+      "mpk": 31008.756522101117,
+      "dllm": 31037.169668974
+    }
   },
-  "next": "Adopt original AIME; after verified clean old-budget stop, numbered continuation of wholly unstarted blocks under extension; finish RULER remainder; primary offline scoring; gated CP3 calibration/eval/controls; CP4.",
+  "next": "Finish c001 existing19 frozen AIME blocks; RULER remainder; primary offline scoring; qualified/gated CP3; CP4.",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -84,22 +90,26 @@
   "worker_ledgers": "ROOT/evaluation/ledgers/HOST_{ruler,aime}.jsonl",
   "coordinator": {
     "host": "Windows local",
-    "pid": 41020,
-    "exec_session": 71433,
-    "source_commit": "6250b51ae322e37e5f79067bf8ebda3bf04b0add",
-    "source": "E:/dlm/v18_private/extension_6250b51/scripts/v18_coordinate.py",
+    "pid": 51988,
+    "exec_session": 21704,
+    "source_commit": "3bfed7d646e598368d03a06032922bf49104edf9",
+    "source": "E:/dlm/v18_private/controller_3bfed7d/scripts/v18_coordinate.py",
     "command_file": "E:/dlm/v18_private/finalize_command.json",
     "previous_pid49208": "stopped after exact command verification; replacement uses escalated long exec session",
-    "output": "TTY71433 and completion_coordinator_outcome.json",
+    "output": "TTY21704 and completion_coordinator_outcome.json",
     "start_at": "aime",
     "command_file_installed": true,
     "previous_pid50660": "stopped after exact command verification; replaced by approved foreground TTY",
     "previous_pid39296": "stopped after exact command verification; remote GPU workers left unchanged",
     "outcome": "E:/dlm/v18_private/completion_coordinator_outcome.json",
     "continuation_deploy": "extension_6250b51",
-    "local_cwd": "E:/dlm/v18_private/extension_6250b51",
+    "local_cwd": "E:/dlm/v18_private/controller_3bfed7d",
     "budget": "E:/dlm/v18_private/extension_6250b51/results/junyu_frontier_v18_20260926/campaign_budget_extension_20260926.json",
-    "previous_pid49924": "verified and stopped; prior primary_coordinator_outcome.json preserved"
+    "previous_pid49924": "verified and stopped; prior primary_coordinator_outcome.json preserved",
+    "previous_pid41020": "exited at1790483717 after missing supervisor observation; both completion markers rc0 verified; outcome preserved as completion_coordinator_outcome_exit_1790483717.json",
+    "archive_sha256": "c0ef3d77ccfe817f986246d2d739fa23b468d78a7eafb00ce4d1505a16d92835",
+    "previous_pid49196": "replaced with committed race fix; replacement fell between host dispatches. dllm adopted; mpk first dispatch only after manual no-log/no-marker/no-process review. c001_dispatch_recovery.json preserves review.",
+    "recovery_note": "same outcome and segment intent retained; prior failure preserved under recovery_audit. No first output retried."
   },
   "completed_primary_executions": {
     "ruler_initial": 936,
@@ -108,12 +118,12 @@
     "strict_warm_accepted": 468,
     "first_failures": 0,
     "aime_snapshot": {
-      "utc": "2026-09-26T22:35:00Z",
-      "mpk": 112,
-      "dllm": 104,
-      "total": 216,
+      "utc": "2026-09-27T04:35:00Z",
+      "mpk": 396,
+      "dllm": 456,
+      "total": 852,
       "planned": 1080,
-      "scope": "redacted stage event counts only; no quality read"
+      "scope": "closed original stage; 71 complete blocks; quality unread"
     }
   },
   "scoring": {
@@ -153,8 +163,8 @@
     "read_retry_tests": "16 focused unittest cases passed",
     "previous_pid16656": "verified and stopped; old readretry outcome preserved"
   },
-  "updated_utc": "2026-09-26T23:39:04.799159+00:00",
-  "stage_check": "New primary41020 and secondary35304 verified; both original AIME supervisors still live and unchanged; no continuation segment or CP3 GPU dispatched.",
+  "updated_utc": "2026-09-27T04:46:34.133331+00:00",
+  "stage_check": "Both c001 supervisors and one GPU worker per host verified. Original AIME852/1080 clean block prefix, zero partial/prefix violations; orphan gate passed before durable c001 intent. Primary controller51988 adopts both c001 markers; CP3 controller35304 waiting unchanged.",
   "resource_authorization": "RESOURCE_AUTHORIZATION.md",
   "budget_override": {
     "status": "deployed_active_controllers_adopt_original_AIME",
@@ -169,5 +179,22 @@
     "generation_cap": 7000,
     "existing_workers": "unchanged old budgets; wait for clean stop before numbered continuation",
     "scope": "existing frozen panels only; first results and native semantics unchanged"
+  },
+  "closed_original_aime": {
+    "mpk": {
+      "rc": 0,
+      "end_epoch": 1790483587,
+      "executions": 396
+    },
+    "dllm": {
+      "rc": 0,
+      "end_epoch": 1790483618,
+      "executions": 456
+    },
+    "status": "stopped_before_block",
+    "partial_blocks": [],
+    "prefix_violations": [],
+    "remaining_blocks": 19,
+    "remaining_executions": 228
   }
 }

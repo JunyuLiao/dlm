@@ -19,15 +19,17 @@ Completed evidence:
 - Only post-QK ball candidate stopped beforeCUDA implementation: no finite
   numerical certificate or demonstrated net execution headroom. No replacement/CVM.
 - Initial RULER936 executions complete,468/host;468 strictwarm pairs, zero failures.
-- Latest redacted stage count22:35UTC: AIME216/1080 (mpk112,dllm104); quality unread.
+- Original AIME closed cleanly04:33UTC:852/1080 (mpk396,dllm456),71 whole blocks.
+  Nineteen wholly unstarted blocks remain; zero partial/prefix/orphan conflicts.
+  Quality unread. Numbered c001 continuation active under amended finite budget.
 
-Hosts and current original AIME workers:
+Hosts and current AIME c001 workers (original supervisors exited rc0):
 - mpk exouser@149.165.151.254, GPU-6139046a-b005-8fe5-a837-f8270472ab72.
   P=/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926.
-  Supervisor/PGID1616556, GPUworker1616572; originalruntime user-site ON.
+  Supervisor/PGID1671360, GPUworker1671384; originalruntime user-site ON.
 - dllm exouser@149.165.159.64, GPU-fc12ad5c-5334-5509-8fc6-465498fd3915.
   N=/home/exouser/dyh/junyu_frontier_v18_20260926.
-  Supervisor/PGID9108, GPUworker9130; private copiedruntime/user-site overlay.
+  Supervisor/PGID46382, GPUworker46416; private copiedruntime/user-site overlay.
 - Primary generation remains ROOT/deploy/bridge_json, source4d53b5c construction.
   Model/library/runtime paths are in frozen primary protocols/new CP3 config.
   Never modify active worker code/configs or restart requests to change budgets.
@@ -55,10 +57,10 @@ Approved finite extension (original budget file retained):
   Unknown dispatch/partialblock defers continuation/finalization for review.
 - No new questions/arms/seeds, at most5 densitycal policies/arm. Candidate remainsSTOP.
 
-Active local supervision, all source6250b51:
+Active supervision: remote drivers/CP3 source6250b51; primary CPU source3bfed7d:
 - Local cwd E:/dlm/v18_private/extension_6250b51; bothremote deploy/extension_6250b51.
 - Archive SHAd827e54f4ed84b6222b98454b1b0e46b3a186ea7c62c195930a084a57f4527af.
-- Primary controller PID41020, TTYsession71433; outcome
+- Primary controller PID51988, TTYsession21704; localcwd controller_3bfed7d; outcome
   E:/dlm/v18_private/completion_coordinator_outcome.json.
 - CP3 waiting controller PID35304, TTYsession7655; outcome
   E:/dlm/v18_private/secondary_extension.outcome.json.
@@ -68,22 +70,23 @@ Active local supervision, all source6250b51:
   readSSHtimeouts. Their outcome files are preserved; do not use as currentstate.
 - Tool session IDs may disappear across compaction: verify actual OS PID/command
   before replacement; Unknown process id is not evidence that the process exited.
--36 combined unittest cases pass; bothhost bash -n passes. CPU Torch/source/UUID
+-39 combined unittest cases pass; bothhost bash -n passes. CPU Torch/source/UUID
   qualification remains automatic AFTER primary offline scoring/quiet, not runyet.
 
-Recovery only after verified exit, cwd extension_6250b51, local Python311:
+Recovery only after verified exit, primary cwd controller_3bfed7d, local Python311:
 python -u -m scripts.v18_coordinate --start-at aime
 --continuation-deploy extension_6250b51
---budget results/junyu_frontier_v18_20260926/campaign_budget_extension_20260926.json
+--budget E:/dlm/v18_private/extension_6250b51/results/junyu_frontier_v18_20260926/campaign_budget_extension_20260926.json
 --after-stages-command-file E:/dlm/v18_private/finalize_command.json
 --outcome E:/dlm/v18_private/completion_coordinator_outcome.json --poll-seconds 60
 Persisted segment intent must be reused; never invent a new outcome to bypass it.
 
+CP3 recovery cwd remains extension_6250b51:
 python -u -m scripts.v18_secondary_pipeline --deploy extension_6250b51
 --config E:/dlm/v18_private/secondary_extension_config.json
 --outcome E:/dlm/v18_private/secondary_extension.outcome.json --poll-seconds 60
 
-Flow: originalAIME→clean numberedcontinuation ifneeded→RULERremainder→offline
+Flow: active aime_c001→RULERremainder→offline
 primary scoring→CP3 CPUqualification→70densitycal/eval→allocationcal/eval→scoring.
 Finalizer hook remains immutable scorer_f45fa83, exactgold/scorer identities; no
 prior private archives/summaries existed at newcontroller installation. CP3 all10
@@ -96,3 +99,18 @@ CP4: fetch redacted summaries, answer sevenv18 questions in morning_brief.md,
 report actualdensity/work/quality/timing/missingcells and candidateSTOP honestly,
 push all code/redactedresults, verify ownGPU jobsfinished, disable heartbeat.
 Never upload answers/gold/credentials/largetraces or archive theuser task.
+
+2026-09-27 recovery checkpoint:
+- Original AIME worker_end GPU seconds mpk31008.756522101117/dllm31037.169668974;
+  wrapper times are not added again. Snapshot2263 attempts incl475 preofficial.
+- PID41020 exited on completion-marker/liveness TOCTOU; both rc0 done verified.
+  Original failure saved completion_coordinator_outcome_exit_1790483717.json.
+- Recovery PID49196 passed clean prefix/orphan gate and wrote c001 launch intent.
+  Replacing CPU controller happened between host dispatches: dllm already started;
+  mpk had no log/marker/remote process or surviving local SSH child. Manual review
+  recorded c001_dispatch_recovery.json before its first dispatch. No request retry.
+- Source3bfed7d rechecks matching successful done after supervisor disappears;
+  unresolved absence still fails closed. Restart archives prior failure in outcome
+  recovery_audit and clears stale terminal fields. Both c001 markers now adopted.
+- Local controller archive SHA c0ef3d77ccfe817f986246d2d739fa23b468d78a7eafb00ce4d1505a16d92835.
+  Never overlay remote immutable extension_6250b51 or bridge_json.
