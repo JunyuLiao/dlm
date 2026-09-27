@@ -115,7 +115,18 @@ def wait_stage(stage, *, adopt, poll_seconds, deadline_epoch, deploy=DEPLOY, seg
             if state == 'running':
                 started = marker(host, marker_stage, 'started')
                 if not alive(host, started.get('pid')):
+                    # The wrapper writes done immediately before exiting. A
+                    # supervisor can disappear between the first done read and
+                    # this liveness check; accept only the matching fresh done.
+                    fresh_started = marker(host, marker_stage, 'started')
+                    fresh_done = marker(host, marker_stage, 'done')
+                    fresh_state = marker_state(fresh_started, fresh_done)
+                    if fresh_started == started and fresh_state == 'complete':
+                        states[host] = 'complete'
+                        continue
                     raise RuntimeError(f'{host}/{marker_stage} started marker has no live supervisor; no retry')
+        if all(state == 'complete' for state in states.values()):
+            return
         time.sleep(poll_seconds)
 
 
@@ -353,6 +364,19 @@ def persist_outcome(path, outcome):
     os.replace(temp, path)
 
 
+def recovery_audit(previous, previous_bytes):
+    """Keep the exact earlier failure visible when a clean status is adopted."""
+    history = list(previous.get('recovery_audit', []))
+    history.append(dict(previous_outcome_sha256=hashlib.sha256(previous_bytes).hexdigest(),
+                        previous_started_epoch=previous.get('started_epoch'),
+                        previous_finished_epoch=previous.get('finished_epoch'),
+                        gpu_stop_reason=previous.get('gpu_stop_reason'),
+                        stage_error=previous.get('stage_error'),
+                        finalization=previous.get('finalization'),
+                        finalization_error=previous.get('finalization_error')))
+    return history
+
+
 def completion_main(args, budget):
     """Adopt old AIME, then append only wholly unstarted frozen blocks."""
     if args.start_at != 'aime' or not args.continuation_deploy or '/' in args.continuation_deploy:
@@ -368,13 +392,20 @@ def completion_main(args, budget):
     cpu_deadline = deadline + 60 * budget['scoring_minutes_reserved']
     budget_sha = hashlib.sha256(args.budget.read_bytes().replace(b'\r\n', b'\n')).hexdigest()
     if args.outcome.exists():
-        outcome = json.loads(args.outcome.read_text())
+        previous_bytes = args.outcome.read_bytes()
+        outcome = json.loads(previous_bytes)
         if (outcome.get('schema') != 'v18_completion_coordinator_outcome_v1' or
                 outcome.get('original_deploy') != DEPLOY or
                 outcome.get('continuation_deploy') != args.continuation_deploy or
                 outcome.get('bounded_budget_sha256') != budget_sha or
                 not isinstance(outcome.get('segments'), list)):
             raise ValueError('existing continuation outcome has a different frozen identity')
+        outcome['recovery_audit'] = recovery_audit(outcome, previous_bytes)
+        outcome['resumed_epoch'] = time.time()
+        outcome['gpu_stop_reason'] = 'pending'
+        outcome['finalization'] = 'pending'
+        for terminal in ('stage_error', 'finalization_error', 'finished_epoch'):
+            outcome.pop(terminal, None)
     else:
         outcome = dict(schema='v18_completion_coordinator_outcome_v1',
                        original_deploy=DEPLOY, continuation_deploy=args.continuation_deploy,
@@ -516,6 +547,14 @@ def main():
                    started_epoch=time.time(), gpu_cutoff_epoch=deadline_epoch,
                    cpu_finalization_deadline_epoch=cpu_deadline,
                    start_at=args.start_at, stage_results=[], finalization='pending')
+    if args.outcome.exists():
+        previous_bytes = args.outcome.read_bytes()
+        previous = json.loads(previous_bytes)
+        if (previous.get('schema') != outcome['schema'] or previous.get('deploy') != DEPLOY or
+                previous.get('start_at') != args.start_at or
+                previous.get('gpu_cutoff_epoch') != deadline_epoch):
+            raise ValueError('existing coordinator outcome has a different frozen identity')
+        outcome['recovery_audit'] = recovery_audit(previous, previous_bytes)
     persist_outcome(args.outcome, outcome)
     with tempfile.TemporaryDirectory(prefix='v18_ledgers_') as folder:
         staging = Path(folder)

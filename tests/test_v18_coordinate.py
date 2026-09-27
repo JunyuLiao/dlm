@@ -13,6 +13,65 @@ from scripts import v18_coordinate
 
 
 class CoordinatorTests(unittest.TestCase):
+    def test_done_marker_wins_supervisor_exit_race_without_relaunch(self):
+        started = {'start': 10, 'pid': 123}
+        done_reads = []
+        def marked(_host, _stage, suffix):
+            if suffix == 'started':
+                return started
+            done_reads.append(1)
+            return {'start': 10, 'rc': 0} if len(done_reads) == 3 else None
+        with patch('scripts.v18_coordinate.marker', side_effect=marked), \
+             patch('scripts.v18_coordinate.alive', return_value=False), \
+             patch('scripts.v18_coordinate.launch') as launch, \
+             patch('scripts.v18_coordinate.time.time', return_value=0), \
+             patch('scripts.v18_coordinate.time.sleep') as sleep:
+            v18_coordinate.wait_stage('aime', adopt=True, poll_seconds=60,
+                                      deadline_epoch=1000, hosts=['dllm'])
+        self.assertEqual(len(done_reads), 3)
+        launch.assert_not_called()
+        sleep.assert_not_called()
+
+    def test_missing_supervisor_without_matching_done_still_fails_closed(self):
+        started = {'start': 10, 'pid': 123}
+        with patch('scripts.v18_coordinate.marker', side_effect=lambda _h, _s, suffix:
+                   started if suffix == 'started' else None), \
+             patch('scripts.v18_coordinate.alive', return_value=False), \
+             patch('scripts.v18_coordinate.launch') as launch, \
+             patch('scripts.v18_coordinate.time.time', return_value=0):
+            with self.assertRaisesRegex(RuntimeError, 'no live supervisor'):
+                v18_coordinate.wait_stage('aime', adopt=True, poll_seconds=60,
+                                          deadline_epoch=1000, hosts=['dllm'])
+        launch.assert_not_called()
+
+    def test_restarted_legacy_outcome_keeps_prior_error_audit(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            budget = root / 'budget.json'
+            budget.write_text(json.dumps(dict(deadline_epoch=2000000000,
+                                              scoring_minutes_reserved=30)))
+            hook = root / 'hook.json'
+            hook.write_text(json.dumps(['python', 'finalizer.py']))
+            outcome = root / 'outcome.json'
+            prior_error = dict(type='RuntimeError', message='dllm/aime supervisor vanished')
+            outcome.write_text(json.dumps(dict(schema='v18_coordinator_outcome_v1',
+                deploy=v18_coordinate.DEPLOY, start_at='aime', gpu_cutoff_epoch=2000000000,
+                started_epoch=12, finished_epoch=34, gpu_stop_reason='stage_failure',
+                stage_error=prior_error, finalization='complete')))
+            args = ['v18_coordinate', '--start-at', 'aime', '--budget', str(budget),
+                    '--outcome', str(outcome), '--after-stages-command-file', str(hook)]
+            with patch.object(sys, 'argv', args), \
+                 patch('scripts.v18_coordinate.wait_stage'), \
+                 patch('scripts.v18_coordinate.sync_ledger', return_value={'sha256': 'abc'}), \
+                 patch('scripts.v18_coordinate.aime_complete', return_value={'complete': True}), \
+                 patch('scripts.v18_coordinate.wait_known_writers_quiet', return_value={}), \
+                 patch('scripts.v18_coordinate.sync_all_ledgers', return_value=[]), \
+                 patch('scripts.v18_coordinate.subprocess.run'):
+                v18_coordinate.main()
+            saved = json.loads(outcome.read_text())
+            self.assertEqual(saved['gpu_stop_reason'], 'all_stages_closed')
+            self.assertEqual(saved['recovery_audit'][-1]['stage_error'], prior_error)
+            self.assertEqual(saved['recovery_audit'][-1]['previous_finished_epoch'], 34)
     def completion_args(self, root):
         budget = root / 'campaign_budget_extension_20260926.json'
         budget_data = dict(deadline_is_gpu_cutoff=True, request_cap=7000,
@@ -36,9 +95,14 @@ class CoordinatorTests(unittest.TestCase):
                 original_deploy=v18_coordinate.DEPLOY,
                 continuation_deploy=args.continuation_deploy,
                 bounded_budget_sha256=sha, segments=[dict(segment='aime_c001',
-                hosts=['mpk'], status='planned')])))
+                hosts=['mpk'], status='planned')],
+                gpu_stop_reason='stage_failure', finalization='deferred_uncertain_writer',
+                stage_error={'type': 'RuntimeError', 'message': 'old marker race'},
+                finalization_error={'type': 'TimeoutError'}, finished_epoch=77)))
             order = []
+            live_outcomes = []
             def stage(name, **kw):
+                live_outcomes.append(json.loads(args.outcome.read_text()))
                 order.append(('stage', kw.get('segment') or name, kw.get('adopt')))
             def sync(_staging):
                 order.append(('sync',))
@@ -56,6 +120,15 @@ class CoordinatorTests(unittest.TestCase):
             self.assertEqual(order[:3], [('stage', 'aime', True),
                                          ('stage', 'aime_c001', True), ('sync',)])
             self.assertIn(('stage', 'remainder', False), order)
+            live = live_outcomes[0]
+            self.assertEqual(live['gpu_stop_reason'], 'pending')
+            self.assertEqual(live['finalization'], 'pending')
+            self.assertNotIn('stage_error', live)
+            self.assertNotIn('finalization_error', live)
+            self.assertNotIn('finished_epoch', live)
+            self.assertIn('resumed_epoch', live)
+            self.assertEqual(live['recovery_audit'][-1]['stage_error']['message'],
+                             'old marker race')
 
     def test_uncertain_numbered_dispatch_keeps_intent_and_defers_finalizer(self):
         with tempfile.TemporaryDirectory() as folder:
