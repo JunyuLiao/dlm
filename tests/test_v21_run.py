@@ -10,7 +10,8 @@ from unittest.mock import patch
 from scripts.v13_seed_runs import execution_key
 from scripts.v18_protocol import sha
 from scripts.v21_run import (stage_entries, strict_v21_warm, validate_arm_config,
-                             validate_protocol, validate_resume_events, V20_PROTOCOL)
+                             validate_protocol, validate_resume_events, validate_inputs,
+                             read_task_rows, V20_PROTOCOL)
 
 
 def panel():
@@ -121,6 +122,60 @@ class V21RunTests(unittest.TestCase):
         p["schedule"][0]["role"] = "warm"
         with self.assertRaisesRegex(ValueError, "first/warm role"):
             validate_protocol(p)
+
+    def test_layout_pair_empty_tasks_require_canonical_manifest_and_no_configs(self):
+        p = panel()
+        p["ids"] = {"ruler4k": [], "aime26": [],
+                    "longbench_v2": [f"longbench_v2/{j}" for j in range(12)]}
+        for block in range(24):
+            qid, seed = p["ids"]["longbench_v2"][block // 2], [101, 202][block % 2]
+            assignment = p["block_assignments"][str(block)]
+            assignment.update(dataset="longbench_v2", id=qid, seed=seed)
+            for row in p["schedule"][block * 4:(block + 1) * 4]:
+                row.update(dataset="longbench_v2", id=qid, seed=seed)
+        validate_protocol(p)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            manifests = root / "manifests"
+            manifests.mkdir()
+            for dataset in ("ruler4k", "aime26"):
+                path = manifests / f"{dataset}_generation_manifest.json"
+                path.write_bytes(b"[]\n")
+                p["generation_manifest_sha256"][dataset] = sha(path.read_bytes())
+                self.assertEqual(read_task_rows(path, dataset, [], p["generation_manifest_sha256"][dataset]), [])
+            rows = [dict(id=q, prompt="question", prompt_hash=sha("question"), prompt_tokens=[1, 2],
+                         prompt_token_count=2, thinking=True, generation_budget=8192)
+                    for q in p["ids"]["longbench_v2"]]
+            (manifests / "longbench_v2_generation_manifest.json").write_text(json.dumps(rows) + "\n")
+            p["generation_manifest_sha256"]["longbench_v2"] = sha(
+                (manifests / "longbench_v2_generation_manifest.json").read_bytes())
+            protocol = root / "protocol.json"
+            protocol.write_text(json.dumps(p))
+            model = root / "model"
+            model.mkdir()
+            config = root / "config.json"
+            config.write_text("{}")
+            binding = root / "binding.json"
+            binding.write_text(json.dumps(dict(schema="v21_conditional_binding_v1", status="frozen",
+                                               panel_protocol_sha256=sha(protocol.read_bytes()),
+                                               policy_sha256="a" * 64,
+                                               host_models={"hostA": str(model)},
+                                               host_configs={"hostA": {"longbench_v2": {
+                                                   arm: {"path": str(config), "sha256": sha(config.read_bytes())}
+                                                   for arm in p["arms"]}}})))
+            with patch("scripts.v21_run.validate_arm_config") as check:
+                _, _, loaded, configs = validate_inputs(protocol, binding, manifests, "hostA", "gpuA", stage="all")
+            self.assertEqual(len(loaded), 12)
+            self.assertEqual(configs["ruler4k"], {})
+            self.assertEqual(configs["aime26"], {})
+            self.assertEqual(check.call_count, 2)
+            empty = manifests / "ruler4k_generation_manifest.json"
+            empty.write_bytes(b"[]")
+            with patch("scripts.v21_run.validate_arm_config"):
+                with self.assertRaisesRegex(ValueError, "byte drift"):
+                    validate_inputs(protocol, binding, manifests, "hostA", "gpuA", stage="all")
+            with self.assertRaisesRegex(ValueError, "canonical"):
+                read_task_rows(empty, "ruler4k", [], sha(empty.read_bytes()))
 
     def test_protocol_rejects_cross_gpu_and_partial_block(self):
         p = panel()

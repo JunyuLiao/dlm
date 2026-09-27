@@ -32,6 +32,20 @@ def _json(path: Path) -> dict:
     return json.loads(path.read_text())
 
 
+def read_task_rows(path: Path, dataset: str, ids: list[str], expected_sha: str) -> list[dict]:
+    raw = path.read_bytes()
+    if sha(raw) != expected_sha:
+        raise ValueError(f"generation manifest byte drift: {dataset}")
+    if not ids:
+        if raw != b"[]\n":
+            raise ValueError(f"empty task manifest is not canonical []: {dataset}")
+        return []
+    loaded = read_rows(path)
+    if len(loaded) != len(ids) or {r["id"] for r in loaded} != set(ids):
+        raise ValueError(f"manifest selected ID coverage drift: {dataset}")
+    return loaded
+
+
 def validate_protocol(protocol: dict) -> None:
     if protocol.get("schema") != SCHEMA or protocol.get("status") != "frozen" or protocol.get("execution_ready") is not True:
         raise ValueError("v21 conditional panel is not frozen and execution-ready")
@@ -211,6 +225,8 @@ def validate_inputs(protocol_path: Path, binding_path: Path, manifests_dir: Path
     configs = {}
     for dataset in protocol["ids"]:
         configs[dataset] = {}
+        if not protocol["ids"][dataset]:
+            continue
         for arm in protocol["arms"]:
             item = binding.get("host_configs", {}).get(host, {}).get(dataset, {}).get(arm)
             if not isinstance(item, dict) or not item.get("path") or not item.get("sha256"):
@@ -225,11 +241,7 @@ def validate_inputs(protocol_path: Path, binding_path: Path, manifests_dir: Path
     rows = {}
     for dataset, ids in protocol["ids"].items():
         path = manifests_dir / f"{dataset}_generation_manifest.json"
-        if sha(path.read_bytes()) != protocol["generation_manifest_sha256"][dataset]:
-            raise ValueError("generation manifest byte drift")
-        loaded = read_rows(path)
-        if len(loaded) != len(ids) or {r["id"] for r in loaded} != set(ids):
-            raise ValueError("manifest selected ID coverage drift")
+        loaded = read_task_rows(path, dataset, ids, protocol["generation_manifest_sha256"][dataset])
         for row in loaded:
             if any(k in row for k in GOLD_KEYS) or row.get("prompt_hash") != sha(row["prompt"]):
                 raise ValueError("gold/prompt identity drift")

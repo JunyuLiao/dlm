@@ -163,6 +163,8 @@ def bind(protocol_path: Path, old_native_config: Path, old_native_sha256: str, m
     if metadata != old["model_metadata_hashes"]:
         raise ValueError("old model metadata identity drift")
     source = source_hashes(CONTROLS, old["library"], old["torch_library"], old.get("support_build"))
+    for helper in (Path(__file__).resolve(), Path(__file__).with_name('v21_run.py').resolve()):
+        source[str(helper)] = sha(helper.read_bytes())
     base = dict(old)
     base.update(phase=protocol["protocol_id"], ids=protocol["ids"]["longbench_v2"], seeds=[101, 202],
                 manifest=str(manifest.resolve()),
@@ -172,7 +174,7 @@ def bind(protocol_path: Path, old_native_config: Path, old_native_sha256: str, m
     for k in ("condition", "plugin", "v20_scope", "output_mode", "fingerprint"):
         base.pop(k, None)
     native = control_config(base, "native_dense", scope)
-    legacy = control_config(base, "v20_dense_consumer", scope)
+    legacy = control_config(dict(base, control='D_matched'), "v20_dense_consumer", scope)
     newer = v21.effective_control_config(base, scope,
                                          output_score_precision="fp32_scores_bf16_pv",
                                          output_layout="head_major")
