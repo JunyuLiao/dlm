@@ -7,7 +7,7 @@ Preserve unrelated third_party/dinfer/assets/Wechat.JPG; never stage/reset it.
 Astra methods/numerics/stopping/timing/interpretation; actual Sol implementation/tests.
 Root alone integrates/deploys/launches. No CVM/ball/fresh-T/phase-calibration expansion.
 
-## Live work (14:06 UTC)
+## Live work (14:10 UTC)
 FIRST84 initial_001 RUNNING since13:47UTC,42 executions/host, whole question-seed
 seven-arm first/warm blocks stay on one GPU. No retries or duplicate coordinators.
 mpk supervisor1722376; dllm123615; ROOT/primary/initial_001.stage.json outerreceipt,
@@ -16,8 +16,8 @@ Production source00a2c4d deploy/cp3_00a2c4d unchanged; wrapper standalone CP5.
 Outer5400s/host, worker5300s,42requests. Read-only watcher exec76623 local
 E:/dlm/v20_private/watch_initial_001/{initial_001.status,initial_001.outcome}.json.
 CPU collector config E:/dlm/v20_private/collect_initial_001.config.json; intended
-output E:/dlm/v20_private/collect_initial_001. CHECK STATE.postprocessor before any
-launch. Bounded local-outcome wait only, one lock, no GPU launch; scores on idle mpk.
+output E:/dlm/v20_private/collect_initial_001. LIVE exec30708 from CP6 8ded8b9,
+waiting existing watcher only. Do not create another collector. Bounded local-outcome wait only, one lock, no GPU launch; scores on idle mpk.
 
 ## Frozen identities and semantics
 GLOBAL_ONLY_NATIVE_LOCAL/P0/Triton for main7; GLOBAL5layers/nativeLOCAL25.
@@ -81,6 +81,6 @@ Optional separateG75100 after corepriority/budget. Final honest brief and slides
 Automatic approval rejected GitHubpush twice: needs explicit USER authorization
 for exporting to coconight01/dlm_test despite existingorigin/branch evidence.
 Async exactremote confirmation PENDING; do not retry/bypass. Localcommits/GPU continue.
-Lastremote3f2b4db; latestlocal CP5 05f9947 plus nextreport/scorercheckpoint pending.
+Lastremote3f2b4db; latest runnable CP6 8ded8b9 committed with19 focused tests passed.
 Existing heartbeat v18-research-stage-continuation now v20/30min until19:58Z,
 quiet unchanged, adopts STATE. Pauseatcompletion, noarchive/no newautomation.
