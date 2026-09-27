@@ -28,8 +28,8 @@
   ],
   "coordinator": null,
   "prior_campaign": "v18 CP4 complete and unchanged",
-  "next": "Adopt historical001workers and watcher53584. SolC adding historical work/timeline/decomposition sidefields to singleCPUcollector; review/test/commit/start once ready. Full700negativeM3gate published. ScoreG75 then finalbrief; no extraGPUgrid.",
-  "updated_utc": "2026-09-27T16:38:22Z",
+  "next": "Adopt historical001 GPUworkers and hidden watcher53584/collector53896. After terminal score audit all100rows/50validwarm, actualouterbudget, fullworkmetrics; update Chinese finalbrief/slides including negativeM3gate and G75limits, commit, pause existingheartbeat. Push only after explicit pending remoteauthorization.",
+  "updated_utc": "2026-09-27T16:44:49Z",
   "qualification": {
     "mpk": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
     "dllm": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
@@ -110,7 +110,7 @@
     "remainder_001/dllm": 5919.138600826263,
     "remainder_001/mpk": 5630.491504430771
   },
-  "latest_local_commit": "67be400",
+  "latest_local_commit": "33edb5b",
   "generation_executions_reserved_active_bridge_max": 0,
   "binding_sha256": "ee06c936e500fecfd219c6a9e277f99e77baed7b39d405ad96625f94e50734b5",
   "execution_protocol_sha256": "99e1d287867b0906b8c5a2715d4cf962ec31e6d1f473c1fe0ce2df5891f1aa17",
@@ -118,7 +118,7 @@
   "auxiliary_deployment": "deploy/cp5_05f9947; production CP3 unchanged",
   "generation_executions_reserved_active_primary_max": 0,
   "timeline_qualification": "ON/OFF exacttokens/calls/termination/phase for native/R2/G75 bothhosts; optionaldeviceclockspan measured, notdecodewall",
-  "latest_runnable_commit": "67be400",
+  "latest_runnable_commit": "33edb5b",
   "completed_first84_postprocessor": {
     "status": "complete",
     "config": "E:/dlm/v20_private/collect_initial_001.config.json",
@@ -146,12 +146,17 @@
   },
   "postprocessor": {
     "stage": "historical_001",
-    "status": "under_development_by_sol_profile",
+    "status": "waiting_existing_watcher",
     "config": "E:/dlm/v20_private/collect_historical_001.config.json",
     "output": "E:/dlm/v20_private/collect_historical_001",
     "cpu_only": true,
     "consume_existing_watcher_only": true,
-    "must_not_duplicate": true
+    "must_not_duplicate": true,
+    "pid": 53896,
+    "source_commit": "33edb5b",
+    "detached_hidden": true,
+    "deadline_epoch": 1790537280,
+    "command": "python -u -m scripts.v20_collect_historical collect --config E:/dlm/v20_private/collect_historical_001.config.json --out-dir E:/dlm/v20_private/collect_historical_001 --wait-until-epoch 1790537280"
   },
   "active_gpu_seconds_reserved_max": {
     "149.165.151.254": 4000,

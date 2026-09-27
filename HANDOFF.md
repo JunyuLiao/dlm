@@ -7,7 +7,7 @@ Preserve unrelated third_party/dinfer/assets/Wechat.JPG; never stage/reset it.
 Astra methods/numerics/stopping/timing/interpretation; actual Sol implementation/tests.
 Root alone integrates/deploys/launches. No CVM/ball/fresh-T/phase-calibration expansion.
 
-## Current checkpoint (16:38 UTC)
+## Current checkpoint (16:44 UTC)
 FULL700 COMPLETE and scored:700rows/50validblocks/350acceptedwarm; no failures.
 Exact summary E:/dlm/v20_private/collect_remainder_002/remainder_001.redacted_summary.json
 SHA25f5483e6650c118744fd642ecd3ec62d3178514eb8e8b2a0d730f1227ee9d5f.
@@ -21,10 +21,10 @@ G75L30_nativeQ128 newport ALL/Triton. CoreCP3production/CP5wrapper unchanged.
 New ROOT/primary/historical_001.{stage,json,ledger.jsonl,private.tar.gz},
 ROOT/private_historical_001. Max4000s/host, worker3900,guard900,globaldeadline19:28.
 Hidden read-only watcherPID53584 E:/dlm/v20_private/watch_historical_001.
-SolCnewCPUcollector scripts/v20_collect_historical.py/tests awaiting finalworkmetrics
-addition: CP5originalscoring+redactedledger calls/canvas/caps/timeline/decomposition.
+SingleCPUcollector LIVE hiddenPID53896, CP10 33edb5b; CP5originalscoring plus
+redactedledger calls/canvas/caps/timeline/decomposition.13 unittest invocations pass.
 Config E:/dlm/v20_private/collect_historical_001.config.json, remote_stage_dir=primary.
-Review/test/commit then startONCE hidden localcollector, record STATE. Notlaunchedyet.
+Do not duplicate collector. Output E:/dlm/v20_private/collect_historical_001.
 Coreprivate4ledgers/roots already mpk ROOT/offline_scoring/remainder_001; neverrewrite.
 Previous localwatcher/collector died15:54beforedispatch; recovered onlylocalhelpers,
 then full700 finishednormally. Preserve olddirs/locks; noGPUrequest everretried.
@@ -90,6 +90,6 @@ Finish separateG75100 then final honest brief and slides; no new optionalgrid.
 Automatic approval rejected GitHubpush twice: needs explicit USER authorization
 for exporting to coconight01/dlm_test despite existingorigin/branch evidence.
 Async exactremote confirmation PENDING; do not retry/bypass. Localcommits/GPU continue.
-Lastremote3f2b4db; latest runnable CP8 67be400; CPUcollector and21 unittest invocations passed.
+Lastremote3f2b4db; latest runnable CP10 33edb5b; full700report and historical collector committed.
 Existing heartbeat v18-research-stage-continuation now v20/30min until19:58Z,
 quiet unchanged, adopts STATE. Pauseatcompletion, noarchive/no newautomation.
