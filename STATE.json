@@ -3,7 +3,7 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP2_AIME_DLLM_COMPLETE_MPK_C001_RUNNING",
+  "status": "CP2_PRIMARY3888_COMPLETE_OFFLINE_SCORING_RECOVERY",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
   "candidate": "STOP_IMPLEMENTATION_THIS_ROUND: ideal GLOBAL opportunity but no demonstrated net cost headroom or finite-precision certificate; no CUDA candidate",
@@ -12,16 +12,7 @@
     "149.165.151.254": "mpk bridge qualified; original user-site runtime; private immutable deploy/bridge_json",
     "149.165.159.64": "dllm bridge qualified; private matching runtime and1047 tensor identity"
   },
-  "gpu_jobs": [
-    {
-      "host": "149.165.151.254",
-      "supervisor_pid": 1671360,
-      "pgid": 1671360,
-      "worker_pid": 1671384,
-      "stage": "aime_c001",
-      "start_epoch": 1790484333
-    }
-  ],
+  "gpu_jobs": [],
   "budget": {
     "wall_start_utc": "2026-09-26T18:02:00Z",
     "wall_hours_cap": 36,
@@ -48,9 +39,9 @@
       "dllm": 613
     },
     "initial_duration_note": "Wrapper elapsed; driver budget accounting uses worker_end values. Do not double-count wrappers.",
-    "observed_completed_generations_snapshot": 2460,
-    "snapshot_note": "475 preofficial +936 initial RULER +1049 AIME executions as of06:34UTC; mpk worker ongoing, no ongoing duration treated as final accounting.",
-    "completion_risk": "Both hosts continuing within bounded amended budget; dllm AIME complete; mpk remaining31 executions at snapshot. Subsequent stages still budget-gated.",
+    "observed_completed_generations_snapshot": 4363,
+    "snapshot_note": "475 preofficial +3888 complete primary executions; CP3 not launched at snapshot.",
+    "completion_risk": "Primary generation complete; offline scoring and secondary stages remain under finite amended limits.",
     "original_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json",
     "aime_original_worker_seconds_by_host": {
       "mpk": 31008.756522101117,
@@ -58,9 +49,13 @@
     },
     "aime_c001_closed_worker_seconds_by_host": {
       "dllm": 5478.743522106997
+    },
+    "charged_gpu_seconds_by_host_before_cp3": {
+      "mpk": 42391.68853012589,
+      "dllm": 38374.643763355
     }
   },
-  "next": "Adopt existing mpk c001 until complete; keep dllm AIME results immutable; automatic RULER remainder, primary offline scoring, gated CP3, CP4.",
+  "next": "Complete primary offline scoring; existing CP3 controller35304 automatically qualifies and runs frozen secondary panels after exact complete-summary gates.",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -104,7 +99,8 @@
     "previous_pid41020": "exited at1790483717 after missing supervisor observation; both completion markers rc0 verified; outcome preserved as completion_coordinator_outcome_exit_1790483717.json",
     "archive_sha256": "c0ef3d77ccfe817f986246d2d739fa23b468d78a7eafb00ce4d1505a16d92835",
     "previous_pid49196": "replaced with committed race fix; replacement fell between host dispatches. dllm adopted; mpk first dispatch only after manual no-log/no-marker/no-process review. c001_dispatch_recovery.json preserves review.",
-    "recovery_note": "same outcome and segment intent retained; prior failure preserved under recovery_audit. No first output retried."
+    "recovery_note": "same outcome and segment intent retained; prior failure preserved under recovery_audit. No first output retried.",
+    "status": "exited after all_frozen_panels_closed; CPU finalizer SSH timeout; no GPU retry"
   },
   "completed_primary_executions": {
     "ruler_initial": 936,
@@ -113,12 +109,19 @@
     "strict_warm_accepted": 468,
     "first_failures": 0,
     "aime_snapshot": {
-      "utc": "2026-09-27T06:34:59.755976+00:00",
-      "mpk": 509,
+      "utc": "2026-09-27T07:37:09.324980+00:00",
+      "mpk": 540,
       "dllm": 540,
-      "total": 1049,
+      "total": 1080,
       "planned": 1080,
-      "scope": "stage aggregate execution counts; dllm complete; mpk still executing its frozen prefix; quality unread"
+      "scope": "all frozen execution keys complete, no missing or partial blocks; quality awaits offline score"
+    },
+    "ruler_full": {
+      "total": 2808,
+      "mpk": 1404,
+      "dllm": 1404,
+      "planned": 2808,
+      "missing_blocks": []
     }
   },
   "scoring": {
@@ -127,7 +130,11 @@
     "local_finalizer": "E:/dlm/v18_private/scorer_f45fa83/scripts/v18_finalize.py",
     "archive_sha256": "1dce3388b7958d9576edcfbd586f5c836631a108cdb9adbe1ac856236c8bd732",
     "hook": "E:/dlm/v18_private/finalize_command.json",
-    "state": "installed; executes after primary GPU stages"
+    "state": "same immutable CPU finalizer recovery active after verified archive/snapshot hashes",
+    "recovery_pid": 37724,
+    "recovery_exec_session": 8508,
+    "original_failure": "cp -n dllm_ruler snapshot SSH timeout; copy actually completed and hash verified",
+    "private_archive_sha256": "9bd11b0eb49cf213e391c1835f6067e3ec57b460829fcf59add465a17b8a46b39"
   },
   "continuation_heartbeat": {
     "id": "v18-research-stage-continuation",
@@ -158,8 +165,8 @@
     "read_retry_tests": "16 focused unittest cases passed",
     "previous_pid16656": "verified and stopped; old readretry outcome preserved"
   },
-  "updated_utc": "2026-09-27T06:34:59.755976+00:00",
-  "stage_check": "06:34UTC: primary51988 and secondary35304 alive; dllm c001 rc0/worker_end complete and GPU empty; mpk GPU1671384 remains active. Primary scoring/CP3 not started.",
+  "updated_utc": "2026-09-27T07:37:09.324980+00:00",
+  "stage_check": "Both primary panels closed, both GPUs empty. All four copied ledger hashes verified; CPU finalizer37724/session8508 recovery; CP3 waiting.",
   "resource_authorization": "RESOURCE_AUTHORIZATION.md",
   "budget_override": {
     "status": "deployed_active_controllers_adopt_original_AIME",
@@ -202,5 +209,6 @@
       "c001_executions": 84,
       "total_aime_executions": 540
     }
-  }
+  },
+  "primary_closed_receipt": "results/junyu_frontier_v18_20260926/primary_closed_receipt.json"
 }

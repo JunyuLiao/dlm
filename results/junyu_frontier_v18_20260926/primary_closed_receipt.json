@@ -1,0 +1,197 @@
+{
+  "schema": "v18_primary_closed_receipt_v1",
+  "observed_utc": "2026-09-27T07:37:09.324980+00:00",
+  "aime": {
+    "clean_stop": true,
+    "complete": true,
+    "completed": 1080,
+    "latest_worker_end": {
+      "dllm": "complete",
+      "mpk": "complete"
+    },
+    "missing_blocks": [],
+    "missing_hosts": [],
+    "partial_blocks": [],
+    "planned": 1080,
+    "prefix_violations": [],
+    "protocol_id": "v18_aime26_primary_9a9c78d202df"
+  },
+  "ruler": {
+    "clean_stop": true,
+    "complete": true,
+    "completed": 2808,
+    "latest_worker_end": {
+      "dllm": "complete",
+      "mpk": "complete"
+    },
+    "missing_blocks": [],
+    "missing_hosts": [],
+    "partial_blocks": [],
+    "planned": 2808,
+    "prefix_violations": [],
+    "protocol_id": "v18_ruler4k_primary_c05a6821d739"
+  },
+  "ledger_copies_verified": [
+    {
+      "dataset": "ruler",
+      "sha256": "86b3ff975fd96d04724ae8eb74355f0d56267f8e7c08ef191c438723839c0489",
+      "source": "mpk"
+    },
+    {
+      "dataset": "ruler",
+      "sha256": "2b583e3c5e807df7acda44f56bd15b5d958cdf9b02fa1183196af9330d8f54e3",
+      "source": "dllm"
+    },
+    {
+      "dataset": "aime",
+      "sha256": "343980cc45ff277c6365428f1fca88bcd167c26eda46a07c41998e6f1a5bf173",
+      "source": "mpk"
+    },
+    {
+      "dataset": "aime",
+      "sha256": "955d0e518d188e933e97156fab6e6756dcf06bab6251c2ba05adeeb71fd7bea3",
+      "source": "dllm"
+    }
+  ],
+  "known_writers": {
+    "dllm": {
+      "open_workers": [],
+      "stages": {
+        "aime": {
+          "done_marker": true,
+          "state": "complete",
+          "supervisor_live": false
+        },
+        "aime_c001": {
+          "done_marker": true,
+          "state": "complete",
+          "supervisor_live": false
+        },
+        "remainder": {
+          "done_marker": true,
+          "state": "complete",
+          "supervisor_live": false
+        }
+      }
+    },
+    "mpk": {
+      "open_workers": [],
+      "stages": {
+        "aime": {
+          "done_marker": true,
+          "state": "complete",
+          "supervisor_live": false
+        },
+        "aime_c001": {
+          "done_marker": true,
+          "state": "complete",
+          "supervisor_live": false
+        },
+        "remainder": {
+          "done_marker": true,
+          "state": "complete",
+          "supervisor_live": false
+        }
+      }
+    }
+  },
+  "usage_by_host": {
+    "mpk": {
+      "ruler": {
+        "completed_executions": 1404,
+        "worker_ends": [
+          {
+            "event": "worker_end",
+            "gpu_process_seconds": 622.5048325047828,
+            "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+            "host": "mpk",
+            "status": "complete",
+            "when": 1790452487.376963
+          },
+          {
+            "event": "worker_end",
+            "gpu_process_seconds": 1302.3671535870526,
+            "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+            "host": "mpk",
+            "status": "complete",
+            "when": 1790493405.6084383
+          }
+        ]
+      },
+      "aime": {
+        "completed_executions": 540,
+        "worker_ends": [
+          {
+            "event": "worker_end",
+            "gpu_process_seconds": 31008.756522101117,
+            "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+            "host": "mpk",
+            "status": "stopped_before_block",
+            "when": 1790483585.999818
+          },
+          {
+            "event": "worker_end",
+            "gpu_process_seconds": 7558.060021932935,
+            "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+            "host": "mpk",
+            "status": "complete",
+            "when": 1790491893.966168
+          }
+        ]
+      }
+    },
+    "dllm": {
+      "ruler": {
+        "completed_executions": 1404,
+        "worker_ends": [
+          {
+            "event": "worker_end",
+            "gpu_process_seconds": 610.2486746930008,
+            "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+            "host": "dllm",
+            "status": "complete",
+            "when": 1790452476.4044232
+          },
+          {
+            "event": "worker_end",
+            "gpu_process_seconds": 1148.481897581005,
+            "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+            "host": "dllm",
+            "status": "complete",
+            "when": 1790493255.7482252
+          }
+        ]
+      },
+      "aime": {
+        "completed_executions": 540,
+        "worker_ends": [
+          {
+            "event": "worker_end",
+            "gpu_process_seconds": 31037.169668974,
+            "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+            "host": "dllm",
+            "status": "stopped_before_block",
+            "when": 1790483617.627983
+          },
+          {
+            "event": "worker_end",
+            "gpu_process_seconds": 5478.743522106997,
+            "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+            "host": "dllm",
+            "status": "complete",
+            "when": 1790489765.3674493
+          }
+        ]
+      }
+    }
+  },
+  "primary_generation_count": 3888,
+  "preofficial_generation_count": 475,
+  "total_generation_count_before_cp3": 4363,
+  "charged_gpu_seconds_by_host": {
+    "mpk": 42391.68853012589,
+    "dllm": 38374.643763355
+  },
+  "accounting_note": "Includes approved baseline1900/100s once and actual worker_end intervals. Wrapper durations not added. No secondary work yet.",
+  "scoring_state": "CPU recovery in progress after snapshot-copy SSH timeout; no generation retry"
+}
