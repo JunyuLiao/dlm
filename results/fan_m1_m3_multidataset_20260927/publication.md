@@ -27,7 +27,7 @@ output, not benchmark gold or a correctness guarantee.
 ## Remote verification
 
 Normal fast-forward push succeeded from 3f2b4db to
-45046b297e6f1e6a13fa3bcb68138bc444d2095. Independent git ls-remote
+e45046b297e6f1e6a13fa3bcb68138bc444d2095. Independent git ls-remote
 returned that exact branch SHA at 2026-09-27T21:36:42Z.
 
 All800 generation-record SHA checks passed; exported token counts and per-canvas
