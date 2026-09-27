@@ -7,7 +7,7 @@ Preserve unrelated third_party/dinfer/assets/Wechat.JPG; never stage/reset it.
 Astra methods/numerics/stopping/timing/interpretation; actual Sol implementation/tests.
 Root alone integrates/deploys/launches. No CVM/ball/fresh-T/phase-calibration expansion.
 
-## Current checkpoint (14:41 UTC)
+## Current checkpoint (15:08 UTC)
 FIRST84 initial_001 COMPLETE bothhosts,84recorded/6validblocks/42acceptedwarm.
 Closedprocess mpk2006.235885s,dllm1100.644642s. PrivateSHAverified archives and
 CP5offline scored summary at E:/dlm/v20_private/collect_initial_001/.
@@ -20,8 +20,10 @@ REMAINDER LIVE since14:40:52UTC mpk1745246/dllm127469: only frozen22wholeblocks/
 wrapper unchanged, newprivate/ledger paths. Resourceplan reservesmpk11500s/dllm9000s,
 worker100sless, guard1800s beforeblock. No tuning or retries; first84 neverrepeated.
 Read-only watcher exec70176 E:/dlm/v20_private/watch_remainder_001.
-Sol-C implementing new single CPU postprocessor combining initial+remainder;
-check STATE before starting it, preserve first84 collector outputs.
+Single CPU postprocessor LIVE exec17065 from CP8 67be400, combines initial+remainder
+only after existing watcher terminal; private config/output collect_remainder_001.
+No GPU work, no duplicate collector. Scoredcomplete requires700rows AND50validpairs;
+failed/finalized archives can scorepartial. Original first84 outputs unchanged.
 
 ## Frozen identities and semantics
 GLOBAL_ONLY_NATIVE_LOCAL/P0/Triton for main7; GLOBAL5layers/nativeLOCAL25.
@@ -57,7 +59,7 @@ selected001_forward/ruler_selected001_forward tables and selected_physical files
 retain ages/counts/missing; duplicate RULER aliases deduplicated. GLOBALdenominator
 only5routedlayers, not whole-model sparsity. LB R2/R3forward/native mpk.958/.950,
 dllm.918/.912; whole-step improves, Bstillcheaper(.932/.886). AIME/RULER noheadroom.
-No quality/E2E claim yet. G75 historical adaptive tiny oldLB cap1024 exists but lacks
+First84 quality/E2E exploratory only. G75 historical adaptive tiny oldLB cap1024 exists but lacks
 qualified directforward/decode-onlytime, differs grouping/runtime; see
 held_bitmap_evidence.md. Current nativeQ128 directly qualified,100answers NOTSTARTED.
 Three local English slide drafts/Chinese notes only; shared slides/messages untouched.
@@ -84,6 +86,6 @@ Optional separateG75100 after corepriority/budget. Final honest brief and slides
 Automatic approval rejected GitHubpush twice: needs explicit USER authorization
 for exporting to coconight01/dlm_test despite existingorigin/branch evidence.
 Async exactremote confirmation PENDING; do not retry/bypass. Localcommits/GPU continue.
-Lastremote3f2b4db; latest runnable CP7 05cdd03; first84 report and bounded remainder setup committed.
+Lastremote3f2b4db; latest runnable CP8 67be400; CPUcollector and21 unittest invocations passed.
 Existing heartbeat v18-research-stage-continuation now v20/30min until19:58Z,
 quiet unchanged, adopts STATE. Pauseatcompletion, noarchive/no newautomation.
