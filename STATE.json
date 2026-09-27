@@ -3,7 +3,7 @@
   "task": "Fan M1/M3 same-day native-adaptive multi-dataset cost study",
   "parent": "e3f14520eea98e45998fb369f9027f3b2707ec4a",
   "branch": "research/fan-m1-m3-cost-refresh-20260927",
-  "status": "CP7_FIRST84_PUBLISHED_REMAINDER_RUNNING",
+  "status": "CP9_FULL700_SCORED_HISTORICAL_PREPARING",
   "authority": "E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md",
   "budget_file": "results/fan_m1_m3_multidataset_20260927/campaign_budget.json",
   "panel_file": "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json",
@@ -15,7 +15,7 @@
       "stage": "remainder_001",
       "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.stage.json",
       "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.json",
-      "status": "running"
+      "status": "complete"
     },
     {
       "host": "149.165.159.64",
@@ -23,13 +23,13 @@
       "stage": "remainder_001",
       "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.stage.json",
       "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.json",
-      "status": "running"
+      "status": "complete"
     }
   ],
   "coordinator": null,
   "prior_campaign": "v18 CP4 complete and unchanged",
-  "next": "Adopt original remote remainder workers and recovered hidden local watcher45904/collector6656. No GPU retry. Score terminal complete/partial archives; audit budget then separateG75 if feasible.",
-  "updated_utc": "2026-09-27T15:55:52Z",
+  "next": "Publish full700 interpretation; launch frozen separateG75historical100 with atmost8000aggregateadditionalGPUseconds, then score/finalreport.",
+  "updated_utc": "2026-09-27T16:38:00Z",
   "qualification": {
     "mpk": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
     "dllm": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
@@ -40,7 +40,7 @@
   "private_manifests": "E:/dlm/v20_private/frozen_panel_lf",
   "deployment": "deploy/cp3_00a2c4d",
   "deployment_commit": "00a2c4d3c93a7f685a4f75fba8ea47991fa5c383",
-  "charged_gpu_seconds_closed_stages": 7596.435208320618,
+  "charged_gpu_seconds_closed_stages": 19146.065313577652,
   "failed_stages": [
     {
       "stage": "screen_001",
@@ -54,9 +54,9 @@
       "preserved": true
     }
   ],
-  "generation_executions_closed_stages": 128,
+  "generation_executions_closed_stages": 744,
   "generation_executions_reserved_active_captures_max": 0,
-  "generation_note": "44 qualification/capture/bridge/timeline +84 primary; all84 recorded, six valid blocks,42 accepted warm",
+  "generation_note": "44qualification+700primary closed; 50validblocks/350acceptedwarm; no primary failure",
   "screen002_artifacts": {
     "dllm": {
       "artifacts": {
@@ -106,7 +106,9 @@
     "timeline_001/dllm": 21.552814483642578,
     "timeline_001/mpk": 26.169574737548828,
     "initial_001/dllm": 1100.6446421146393,
-    "initial_001/mpk": 2006.2358846664429
+    "initial_001/mpk": 2006.2358846664429,
+    "remainder_001/dllm": 5919.138600826263,
+    "remainder_001/mpk": 5630.491504430771
   },
   "latest_local_commit": "67be400",
   "generation_executions_reserved_active_bridge_max": 0,
@@ -114,7 +116,7 @@
   "execution_protocol_sha256": "99e1d287867b0906b8c5a2715d4cf962ec31e6d1f473c1fe0ce2df5891f1aa17",
   "execution_protocol_note": "Git/deploy LF bytes; local checkout CRLF logically identical, private frozen_protocol_deployed.json exactGitblob retained",
   "auxiliary_deployment": "deploy/cp5_05f9947; production CP3 unchanged",
-  "generation_executions_reserved_active_primary_max": 616,
+  "generation_executions_reserved_active_primary_max": 0,
   "timeline_qualification": "ON/OFF exacttokens/calls/termination/phase for native/R2/G75 bothhosts; optionaldeviceclockspan measured, notdecodewall",
   "latest_runnable_commit": "67be400",
   "completed_first84_postprocessor": {
@@ -139,11 +141,11 @@
     "pid": 45904,
     "path": "E:/dlm/v20_private/watch_remainder_002/remainder_001.status.json",
     "read_only": true,
-    "status": "running",
+    "status": "complete",
     "detached_hidden": true
   },
   "postprocessor": {
-    "status": "waiting_existing_watcher",
+    "status": "scored_complete",
     "cpu_only": true,
     "consume_existing_watcher_only": true,
     "stage": "remainder_001",
@@ -156,10 +158,7 @@
     "pid": 6656,
     "detached_hidden": true
   },
-  "active_gpu_seconds_reserved_max": {
-    "149.165.151.254": 11500,
-    "149.165.159.64": 9000
-  },
+  "active_gpu_seconds_reserved_max": {},
   "first84_report": "results/fan_m1_m3_multidataset_20260927/first84_report.md",
   "local_monitor_recovery": {
     "observed_utc": "2026-09-27T15:54:35Z",
@@ -168,5 +167,6 @@
     "old_collector_pid": 58084,
     "evidence": "No matching live local watcher/collector; old collector dir only lock. Remote remainder scorer root/payload/helper/archive absent, no dispatch. Both original remote GPU workers verified active. Old artifacts preserved.",
     "gpu_relaunches": 0
-  }
+  },
+  "full700_summary_sha256": "25f5483e6650c118744fd642ecd3ec62d3178514eb8e8b2a0d730f1227ee9d5f"
 }
