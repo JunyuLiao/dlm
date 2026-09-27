@@ -96,7 +96,8 @@ def source_hashes(plugin, library, torch_library, support_build):
     """Use the established source inventory plus explicit support binaries."""
     from experiments.numerical_qk_reuse.runner import _source_hashes
     extras = [Path(__file__), Path(__file__).with_name('v20_profile.py'),
-              Path(__file__).with_name('v20_run.py')]
+              Path(__file__).with_name('v20_run.py'),
+              Path(__file__).with_name('v20_operator_probe.py')]
     if support_build:
         identity = read_json(support_build)
         for field in ('kernel', 'bridge'):

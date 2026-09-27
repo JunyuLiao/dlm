@@ -3,11 +3,11 @@
   "task": "Fan M1/M3 same-day native-adaptive multi-dataset cost study",
   "parent": "e3f14520eea98e45998fb369f9027f3b2707ec4a",
   "branch": "research/fan-m1-m3-cost-refresh-20260927",
-  "status": "CP1_DIRECT_COST_SCREEN_RUNNING",
+  "status": "CP2_DIRECT_SCREEN_COMPLETE_SELECTED_FOLLOWUP_PENDING",
   "authority": "E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md",
   "budget_file": "results/fan_m1_m3_multidataset_20260927/campaign_budget.json",
   "panel_file": "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json",
-  "scope_policy_consumer": "pending_cost_and_numerical_qualification",
+  "scope_policy_consumer": "GLOBAL_ONLY_NATIVE_LOCAL / P0 / triton; pending selected longer-step numerical qualification",
   "gpu_jobs": [
     {
       "host": "149.165.151.254",
@@ -15,7 +15,7 @@
       "stage": "screen_002",
       "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/cost/screen_002.stage.json",
       "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/cost/screen_002.json",
-      "status": "running"
+      "status": "complete"
     },
     {
       "host": "149.165.159.64",
@@ -23,13 +23,13 @@
       "stage": "screen_002",
       "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/cost/screen_002.stage.json",
       "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/cost/screen_002.json",
-      "status": "running"
+      "status": "complete"
     }
   ],
   "coordinator": null,
   "prior_campaign": "v18 CP4 complete and unchanged",
-  "next": "Adopt screen_002 workers; cost selection and N16/whole-step followup; freeze generation binding, bridge, first84 and publish before remainder",
-  "updated_utc": "2026-09-27T12:50:00Z",
+  "next": "Publish N4 screen; qualified selected N16+whole-step, freeze generation binding, bridge and first84",
+  "updated_utc": "2026-09-27T13:05:00Z",
   "qualification": {
     "mpk": "10/10 GPU tests passed",
     "dllm": "10/10 GPU tests passed",
@@ -40,7 +40,7 @@
   "private_manifests": "E:/dlm/v20_private/frozen_panel_lf",
   "deployment": "deploy/cp2_699a9ec",
   "deployment_commit": "699a9ec1c4d5b31d0a12cd046256ba59bfdfb203",
-  "charged_gpu_seconds_closed_stages": 42.792436599731445,
+  "charged_gpu_seconds_closed_stages": 1649.6709160804749,
   "failed_stages": [
     {
       "stage": "screen_001",
@@ -54,7 +54,45 @@
       "preserved": true
     }
   ],
-  "generation_executions_closed_stages": 0,
-  "generation_executions_reserved_active_captures_max": 10,
-  "generation_note": "screen002 contains at most5 native generate captures/host; actual invocations audited at terminal, not assumed zero while running"
+  "generation_executions_closed_stages": 10,
+  "generation_executions_reserved_active_captures_max": 0,
+  "generation_note": "screen002: exactly five native captures/host, one per unique selected dataset/id/canvas; formal scored executions0",
+  "screen002_artifacts": {
+    "dllm": {
+      "artifacts": {
+        "screen_002.json": {
+          "bytes": 41746249,
+          "path": "E:\\dlm\\v20_private\\watch_screen_002\\dllm\\screen_002.json",
+          "sha256": "a908b1597ba347b762d692f28a80ce3cc33fcf7e32207aa2fe83139718c987f4"
+        },
+        "screen_002.stage.json": {
+          "bytes": 703,
+          "path": "E:\\dlm\\v20_private\\watch_screen_002\\dllm\\screen_002.stage.json",
+          "sha256": "0250880abcbd328e20410a963c9cf4a760ee5d30088568e6bbd8d774e3e8c472"
+        }
+      },
+      "charged_process_seconds": 793.0866017341614,
+      "end_epoch": 1790513946.26548,
+      "returncode": 0,
+      "status": "complete"
+    },
+    "mpk": {
+      "artifacts": {
+        "screen_002.json": {
+          "bytes": 41770489,
+          "path": "E:\\dlm\\v20_private\\watch_screen_002\\mpk\\screen_002.json",
+          "sha256": "e781f09bc473f2724cd5f4af2374d2ef2e41cc33e16fbae9b1b69844f299d1ef"
+        },
+        "screen_002.stage.json": {
+          "bytes": 687,
+          "path": "E:\\dlm\\v20_private\\watch_screen_002\\mpk\\screen_002.stage.json",
+          "sha256": "5d875967c7fee1c43e0c6a8bb8fbe6b1721f8d0f06804027177623757e0d0336"
+        }
+      },
+      "charged_process_seconds": 813.791877746582,
+      "end_epoch": 1790513962.8003254,
+      "returncode": 0,
+      "status": "complete"
+    }
+  }
 }

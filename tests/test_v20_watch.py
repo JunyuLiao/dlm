@@ -39,7 +39,8 @@ class V20WatchTests(unittest.TestCase):
 
     def test_terminal_fetch_sha_and_no_repoll(self):
         hosts = self.hosts()
-        payloads = {key: {f'/private/{key}/cost/screen_002.json': b'{"ok":true}\n'}
+        payloads = {key: {f'/private/{key}/cost/screen_002.stage.json': b'{"status":"complete"}\n',
+                          f'/private/{key}/cost/screen_002.json': b'{"ok":true}\n'}
                     for key in hosts}
         transport = FakeTransport(dict(mpk=[{'status': 'started'},
                                            {'status': 'complete', 'returncode': 0}],
@@ -51,7 +52,7 @@ class V20WatchTests(unittest.TestCase):
             result = W.watch(hosts, 'screen_002', 'cost', directory, 180,
                              transport=transport, clock=lambda: now[0], sleep=sleep)
             self.assertTrue(result['all_complete'])
-            self.assertEqual(len(transport.copies), 2)
+            self.assertEqual(len(transport.copies), 4)
             self.assertEqual([key for key, _ in transport.reads].count('dllm'), 1)
             self.assertTrue((Path(directory)/'screen_002.outcome.json').exists())
             self.assertTrue((Path(directory)/'mpk'/'screen_002.json').exists())
@@ -61,8 +62,10 @@ class V20WatchTests(unittest.TestCase):
 
     def test_failure_and_missing_final_return_unsuccessful(self):
         hosts = self.hosts()
+        payloads = {key: {f'/private/{key}/cost/screen_003.stage.json': b'{}\n'}
+                    for key in hosts}
         transport = FakeTransport(dict(mpk=[{'status': 'complete', 'returncode': 0}],
-                                       dllm=[{'status': 'failed', 'returncode': 2}]), {})
+                                       dllm=[{'status': 'failed', 'returncode': 2}]), payloads)
         with tempfile.TemporaryDirectory() as directory:
             result = W.watch(hosts, 'screen_003', 'cost', directory, 120,
                              transport=transport, clock=lambda: 0., sleep=lambda _: None)

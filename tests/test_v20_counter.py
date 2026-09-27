@@ -107,6 +107,9 @@ class TwinTests(unittest.TestCase):
         self.assertEqual(router.pending, ['historical-entry'])
         self.assertEqual(twin.rows[0]['method'], 'fresh_T')
         self.assertEqual(twin.rows[0]['phase'], 'A')
+        self.assertEqual((twin.rows[0]['anchor_step'], twin.rows[0]['decision_step'],
+                          twin.rows[0]['numeric_age'], twin.rows[0]['decision_age']),
+                         (7, 7, 0, 0))
         self.assertEqual(twin.rows[0]['by_segment']['whole']['skipped_qk_pairs'], 0)
         self.assertEqual(twin.rows[0]['by_segment']['whole']['skipped_pv_pairs'], 2 * 128 * 64)
 
@@ -140,7 +143,8 @@ class TwinTests(unittest.TestCase):
                                  output_mode='historical_route_preqk_current_output',
                                  score_calls=0, decision_calls=0, held_calls=0,
                                  sources={3: (None, None, 0, 128)}, canvas=0, step=0,
-                                 cache=SimpleNamespace(entries={3: SimpleNamespace(decision=decision)}))
+                                 cache=SimpleNamespace(entries={3: SimpleNamespace(
+                                     decision=decision, score_step=0, decision_step=0)}))
         def delegate(*_a, **_kw):
             router.score_calls += 1
             router.decision_calls += 1
@@ -158,19 +162,23 @@ class TwinTests(unittest.TestCase):
     def test_explicit_untimed_wrapper_restores_override_and_counts_a_d_h(self):
         skipped, eligible = bitmap(heads=2)
         decision = SimpleNamespace(skipped=skipped, eligible=eligible)
+        entry = SimpleNamespace(decision=decision, score_step=0, decision_step=0)
         router = SimpleNamespace(support='native_mask',
                                  output_mode='historical_route_preqk_current_output', score_calls=0,
                                  decision_calls=0, held_calls=0, canvas=0, step=0,
                                  sources={2: (object(), object(), 0, 130)},
-                                 cache=SimpleNamespace(entries={2: SimpleNamespace(decision=decision)}))
+                                 cache=SimpleNamespace(entries={2: entry}))
         phases = iter(('A', 'D', 'H'))
         def delegate(*_args, **_kwargs):
-            phase = next(phases)
+            phase = next(phases, 'held')
             if phase == 'A':
                 router.score_calls += 1
                 router.decision_calls += 1
+                entry.score_step = router.step + 1
+                entry.decision_step = router.step + 1
             elif phase == 'D':
                 router.decision_calls += 1
+                entry.decision_step = router.step + 1
             else:
                 router.held_calls += 1
             router.step += 1
@@ -194,6 +202,9 @@ class TwinTests(unittest.TestCase):
             self.assertEqual(result['by_phase_kind']['A/local']['whole']['skipped_qk_pairs'], 0)
             self.assertEqual(result['by_phase_kind']['D/local']['whole']['skipped_qk_pairs'], 2 * 130 * 64)
             self.assertEqual(result['by_phase_kind']['H/local']['whole']['skipped_pv_pairs'], 2 * 130 * 64)
+            self.assertEqual([(r['anchor_step'], r['decision_step'],
+                               r['numeric_age'], r['decision_age']) for r in result['rows']],
+                             [(1, 1, 0, 0), (1, 2, 1, 0), (1, 2, 2, 1)])
             self.assertFalse(result['accepted_timing'])
         self.assertIs(runtime.attention_override, delegate)
 
@@ -221,14 +232,25 @@ class TwinTests(unittest.TestCase):
 
     def test_control_bootstrap_observation_held_distinguish_full_qk(self):
         skipped, eligible = bitmap(heads=2, qb=1, kt=4, drop_tiles=(1,))
+        class DeviceBitmap:
+            def __init__(self, values):
+                self.values = values
+            def detach(self):
+                return self
+            def cpu(self):
+                return self
+            def tolist(self):
+                return self.values
+        physical_skipped, physical_eligible = DeviceBitmap(skipped), DeviceBitmap(eligible)
         owner = SimpleNamespace(support='native_mask',
                                 output_mode='historical_route_preqk_current_output',
-                                sources={3: (object(), object(), 0, 128)}, canvas=0, step=0)
+                                sources={3: (object(), object(), 0, 128)}, canvas=0,
+                                epoch=0, step=0)
         control = SimpleNamespace(owner=owner, bootstrap_calls=0, observation_calls=0,
-                                  held_calls=0, maps={3: (object(), skipped, eligible)})
+                                  held_calls=0, maps={3: (object(), physical_skipped, physical_eligible)})
         phases = iter(('bootstrap', 'observe', 'held'))
         def delegate(*_args, **_kwargs):
-            phase = next(phases)
+            phase = next(phases, 'held')
             if phase == 'bootstrap':
                 control.bootstrap_calls += 1
             elif phase == 'observe':
@@ -236,7 +258,9 @@ class TwinTests(unittest.TestCase):
             else:
                 control.held_calls += 1
             return 'output'
-        twin = CounterTwin(delegate, control)
+        probe_calls = []
+        probe = SimpleNamespace(observe=lambda *_a, **kw: probe_calls.append(kw['phase']))
+        twin = CounterTwin(delegate, control, operator_probe=probe)
         module = SimpleNamespace(layer_idx=3, is_sliding=False)
         q = SimpleNamespace(shape=(1, 2, 128, 4))
         k = v = SimpleNamespace(shape=(1, 1, 256, 4))
@@ -250,6 +274,14 @@ class TwinTests(unittest.TestCase):
         self.assertEqual(observe['by_segment']['whole']['skipped_qk_pairs'], 0)
         self.assertTrue(observe['full_current_qk'])
         self.assertEqual(held['by_segment']['whole']['skipped_qk_pairs'], 2 * 128 * 64)
+        self.assertEqual([(r['anchor_step'], r['decision_step'],
+                           r['numeric_age'], r['decision_age']) for r in twin.rows],
+                         [(None, None, None, None), (1, 1, 0, 0), (1, 1, 1, 1)])
+        self.assertEqual(probe_calls, ['A', 'H'])
+        owner.epoch = 1
+        owner.step = 3
+        with self.assertRaisesRegex(ValueError, 'same-canvas observed bitmap age'):
+            twin(module, q, k, v, None, is_causal=False)
 
     def test_prepared_floor_consumes_each_frozen_map_only_at_matching_call(self):
         output = SimpleNamespace(transpose=lambda *_: SimpleNamespace(contiguous=lambda: 'same-consumer-output'))

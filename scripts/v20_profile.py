@@ -38,6 +38,12 @@ class CaptureDone(Exception):
 
 
 def validate_config(config):
+    if type(config.get('operator_probe', False)) is not bool:
+        raise ValueError('operator_probe must be an explicit boolean')
+    if config.get('operator_probe', False) and not config.get('counter_twins', False):
+        raise ValueError('operator probe requires an untimed counter twin')
+    if type(config.get('operator_probe_reps', 3)) is not int or config.get('operator_probe_reps', 3) < 3:
+        raise ValueError('operator probe needs at least three repetitions')
     if type(config.get('counter_twins', False)) is not bool or type(config.get('prepared_support_floor', False)) is not bool:
         raise ValueError('counter_twins and prepared_support_floor must be explicit booleans')
     if config.get('prepared_support_floor', False) and not config.get('counter_twins', False):
@@ -394,7 +400,8 @@ def qkv_signature(q, k, v):
     return (output_digest(q), output_digest(k), output_digest(v))
 
 
-def counter_replay(model, sequence, runtime, boundary, accepted_rows, *, retain_support=False):
+def counter_replay(model, sequence, runtime, boundary, accepted_rows, *, retain_support=False,
+                   operator_probe=False, operator_probe_reps=3):
     """Actual router decisions, but with an explicit untimed physical counter twin."""
     if runtime is None or not all(k in runtime for k in ('binding', 'router')):
         return dict(status='N/A', reason='no numerical native-legal router/bitmap'), []
@@ -407,16 +414,25 @@ def counter_replay(model, sequence, runtime, boundary, accepted_rows, *, retain_
                              not (hasattr(router, 'score_calls') or hasattr(router, 'bootstrap_calls'))):
         return dict(status='N/A', reason='fresh or unsupported bitmap consumer'), []
     from experiments.numerical_qk_reuse.v20_counter import install_counter_twin
+    probe = None
+    if operator_probe and (hasattr(router, 'score_calls') or hasattr(router, 'bootstrap_calls')):
+        from scripts.v20_operator_probe import OperatorProbe
+        probe = OperatorProbe(repetitions=operator_probe_reps, digest=qkv_signature)
     with install_counter_twin(runtime['binding'], router, explicit_untimed=True,
                               retain_support=retain_support,
-                              qkv_digest=qkv_signature if retain_support else None) as twin:
+                              qkv_digest=qkv_signature if retain_support else None,
+                              operator_probe=probe) as twin:
         observed = replay_untimed(model, sequence, runtime, boundary)
     expected = [(r['input_digest'], r['output_digest']) for r in accepted_rows]
     if observed != expected:
         raise AssertionError('untimed physical-counter replay input/output digest drift')
     if not twin.rows:
         raise AssertionError('numerical router counter twin saw no attention calls')
-    return dict(status='qualified', input_output_digests=observed, physical=twin.summary()), twin.support_calls
+    result = dict(status='qualified', input_output_digests=observed, physical=twin.summary())
+    if operator_probe:
+        result['operator_probe'] = (dict(status='qualified', rows=probe.rows)
+                                    if probe is not None else dict(status='N/A', reason='not numerical historical'))
+    return result, twin.support_calls
 
 
 def prepared_support_floor(model, sequence, runtime, boundary, accepted_rows, support_calls,
@@ -506,6 +522,7 @@ def profile(config, checkpoint=None):
                   selected_boundaries=config.get('boundaries', ['model_forward', 'denoising_step']),
                   selected_sequence_lengths=config.get('sequence_lengths', [4, 16]),
                   counter_twins=bool(config.get('counter_twins', False)),
+                  operator_probe=bool(config.get('operator_probe', False)),
                   prepared_support_floor=bool(config.get('prepared_support_floor', False)),
                   arms=config['arms'],
                   runtime_identity=dict(python=sys.version.split()[0], executable=sys.executable,
@@ -516,6 +533,7 @@ def profile(config, checkpoint=None):
                                  for path in (Path(__file__),
                                               Path(__file__).with_name('replay_harness.py'),
                                               Path(__file__).with_name('v9_step_replay_profile.py'),
+                                              Path(__file__).with_name('v20_operator_probe.py'),
                                               Path(__file__).resolve().parents[1] / 'experiments' /
                                               'numerical_qk_reuse' / 'v20_counter.py')},
                   boundaries={'model_forward': 'full model.forward decoder/logits; state.begin outside timer; sampler excluded',
@@ -612,7 +630,9 @@ def profile(config, checkpoint=None):
                                     accepted = timing[arm['name']][0]['rows']
                                     measured, support_calls = counter_replay(
                                         model, seq, runtime, boundary, accepted,
-                                        retain_support=bool(config.get('prepared_support_floor', False)))
+                                        retain_support=bool(config.get('prepared_support_floor', False)),
+                                        operator_probe=bool(config.get('operator_probe', False)),
+                                        operator_probe_reps=int(config.get('operator_probe_reps', 3)))
                                     if config.get('prepared_support_floor', False):
                                         measured['prepared_support_floor'] = (
                                             prepared_support_floor(model, seq, runtime, boundary,

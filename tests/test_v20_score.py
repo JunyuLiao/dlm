@@ -4,6 +4,7 @@ import tempfile
 from pathlib import Path
 
 from scripts.v13_seed_runs import execution_key
+from scripts.v20_panel import ARMS
 from scripts.v20_score import _first_receipt, cluster_interval, summarize_subset
 
 
@@ -82,6 +83,85 @@ class ScoreTests(unittest.TestCase):
         self.assertEqual(ratio["paired_cells"], 0)
         self.assertIsNone(ratio["geometric_ratio"])
         self.assertFalse(summary["executions_complete"])
+
+    def test_descriptive_columns_use_first_work_and_accepted_warm_latency(self):
+        p = self.protocol()
+        records = {execution_key(e): record(e) for e in p["schedule"]}
+        for e in p["schedule"]:
+            row = records[execution_key(e)]
+            row["phase_evidence"]["prefill_end_to_finish_gpu_s"] = 100. if e["role"] == "attempt0" else .25
+            row["phase_evidence"]["per_canvas"] = [dict(decoder_calls=4, iteration_cap=False, native_stop=True)]
+            if e["arm"] == "T_scope":
+                row["phase_evidence"]["phase"] = "fresh_T_decoder"
+                row["router_phase_evidence"] = dict(phase="fresh_T", attention_calls=4)
+            if e["role"] == "warm":
+                row["api_wall_s"] = .8
+        first_native = next(e for e in p["schedule"] if e["arm"] == "D_native" and e["role"] == "attempt0")
+        records[execution_key(first_native)]["router_phase_evidence"] = dict(phase="native_dense", A=2, D=1, H=1)
+        # Warm phase evidence must match first for an accepted timing pair.
+        warm_native = next(e for e in p["schedule"] if e["arm"] == "D_native" and e["role"] == "warm")
+        records[execution_key(warm_native)]["router_phase_evidence"] = dict(phase="native_dense", A=2, D=1, H=1)
+        quality = {"q1-101-D_native": dict(score=1., correct=True, task_correct=True,
+                                               strict_correct=True, parsed=True, eos=True, capped=False),
+                   "q1-101-T_scope": dict(score=0., correct=False, task_correct=False,
+                                           strict_correct=False, parsed=False, eos=True, capped=False)}
+        summary = summarize_subset(p, records, quality, first84=False)
+        native = summary["datasets"]["aime26"]["arms"]["D_native"]
+        self.assertNotIn("warm_request_s_mean", native)
+        self.assertAlmostEqual(native["absolute_latency_by_host"]["h1"]["warm_prefill_end_to_finish_cuda_event_span_s_mean"], .25)
+        self.assertEqual(native["decoder_call_positions"], dict(call0=1, call1=1, call2plus=2))
+        self.assertEqual(native["native_stop_canvases"], 1)
+        self.assertEqual(native["router_phase_layer_calls"]["A"], 2)
+        self.assertEqual(native["output_tokens_per_canvas_per_request"]["median"], 10)
+        self.assertEqual(summary["datasets"]["aime26"]["arms"]["T_scope"]["eos_wrong"], 1)
+        self.assertEqual(summary["datasets"]["aime26"]["arms"]["T_scope"]["unparsed"], 1)
+
+    def test_failed_first_and_warm_are_not_scored_or_timed(self):
+        p = self.protocol()
+        records = {execution_key(e): record(e, ok=False) for e in p["schedule"]}
+        from scripts.v20_run import strict_v20_warm
+        for e in p["schedule"]:
+            if e["role"] == "warm":
+                first = next(x for x in p["schedule"] if x["arm"] == e["arm"] and x["role"] == "attempt0")
+                records[execution_key(e)]["acceptance"] = strict_v20_warm(records[execution_key(first)],
+                                                                            records[execution_key(e)])
+        summary = summarize_subset(p, records, {}, first84=False)
+        native = summary["datasets"]["aime26"]["arms"]["D_native"]
+        self.assertEqual(native["first_failed"], 1)
+        self.assertEqual(native["warm_failed"], 1)
+        self.assertEqual(native["scored"], 0)
+        self.assertEqual(native["warm_accepted"], 0)
+        self.assertEqual(native["absolute_latency_by_host"], {})
+        self.assertEqual(native["decoder_calls_total"], 0)
+
+    def test_fourteen_ledger_rows_do_not_imply_valid_paired_block(self):
+        from scripts.v20_run import strict_v20_warm
+        schedule = []
+        for role in ("attempt0", "warm"):
+            schedule += [event(len(schedule) + i, role, arm) for i, arm in enumerate(ARMS)]
+        p = dict(ids={"aime26": ["q1"]}, schedule=schedule)
+        records = {execution_key(e): record(e) for e in schedule}
+        valid = summarize_subset(p, records, {}, first84=False)
+        self.assertEqual(valid["recorded_all14_blocks"], 1)
+        self.assertEqual(valid["successful_first_all7_blocks"], 1)
+        self.assertEqual(valid["strictwarm_all7_blocks"], 1)
+        self.assertEqual(valid["complete_valid_pair_blocks"], 1)
+        warm = next(e for e in schedule if e["role"] == "warm")
+        first = next(e for e in schedule if e["role"] == "attempt0" and e["arm"] == warm["arm"])
+        records[execution_key(warm)]["new_shared_objects"] = ["new-jit.so"]
+        records[execution_key(warm)]["acceptance"] = strict_v20_warm(records[execution_key(first)],
+                                                                        records[execution_key(warm)])
+        rejected = summarize_subset(p, records, {}, first84=False)
+        self.assertTrue(rejected["executions_complete"])
+        self.assertEqual(rejected["recorded_all14_blocks"], 1)
+        self.assertEqual(rejected["strictwarm_all7_blocks"], 0)
+        self.assertEqual(rejected["complete_valid_pair_blocks"], 0)
+        self.assertEqual(rejected["failed_block_ids"], [0])
+        self.assertEqual(rejected["partial_block_ids"], [])
+        del records[execution_key(warm)]
+        partial = summarize_subset(p, records, {}, first84=False)
+        self.assertFalse(partial["executions_complete"])
+        self.assertEqual(partial["partial_block_ids"], [0])
 
     def test_wrong_gpu_pair_rejected(self):
         p = self.protocol()

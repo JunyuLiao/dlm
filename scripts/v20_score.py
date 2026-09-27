@@ -128,6 +128,18 @@ def cluster_interval(by_question: dict[str, list[float]], *, seed: int, resample
     return point, [boots[int(.025 * (resamples - 1))], boots[int(.975 * (resamples - 1))]]
 
 
+def _distribution(values: list[float]) -> dict | None:
+    if not values:
+        return None
+    ordered = sorted(values)
+    def quantile(p):
+        index = (len(ordered) - 1) * p
+        lo = int(index)
+        hi = min(lo + 1, len(ordered) - 1)
+        return ordered[lo] + (ordered[hi] - ordered[lo]) * (index - lo)
+    return dict(n=len(ordered), min=ordered[0], median=quantile(.5), p90=quantile(.9), max=ordered[-1])
+
+
 def score_firsts(protocol: dict, records: dict[str, dict], gold: dict[str, dict], *, ruler_root: Path,
                  private_roots: dict[str, Path] | None = None) -> dict[str, dict]:
     from dllm.evaluation.ruler import official
@@ -148,14 +160,25 @@ def score_firsts(protocol: dict, records: dict[str, dict], gold: dict[str, dict]
         if dataset == "longbench_v2":
             lb_pending.append((spec, record, receipt))
         else:
-            scored[spec["cell_id"]] = score_one(dataset, gold[dataset][spec["id"]], receipt, record,
-                                                 ruler_scorers=ruler_scorers)
+            row = score_one(dataset, gold[dataset][spec["id"]], receipt, record,
+                            ruler_scorers=ruler_scorers)
+            if dataset == "aime26":
+                from experiments.diffusion_gemma_aime26_modes.protocol import final_response, numeric_score
+                answer = gold[dataset][spec["id"]]
+                expected = answer.get("expected", answer.get("answer"))
+                row["task_correct"] = bool(numeric_score(final_response(receipt["raw_completion"], True),
+                                                          str(expected))["correct"])
+            else:
+                row["task_correct"] = bool(row["correct"])
+            row["strict_correct"] = bool(row["task_correct"] and row["eos"])
+            scored[spec["cell_id"]] = row
     if lb_pending:
         results = lb_task.score([receipt["raw_completion"] for _, _, receipt in lb_pending],
                                 [gold["longbench_v2"][spec["id"]] for spec, _, _ in lb_pending],
                                 [record["termination"] for _, record, _ in lb_pending])
         for (spec, record, _), row in zip(lb_pending, results):
             scored[spec["cell_id"]] = dict(score=float(row["task_correct"]), correct=bool(row["task_correct"]),
+                                           task_correct=bool(row["task_correct"]),
                                            strict_correct=bool(row["strict_correct"]), parsed=bool(row["parsed"]),
                                            capped=record["termination"] == "length", eos=record["termination"] == "eos")
     return scored
@@ -164,6 +187,37 @@ def score_firsts(protocol: dict, records: dict[str, dict], gold: dict[str, dict]
 def summarize_subset(protocol: dict, records: dict[str, dict], quality: dict[str, dict],
                      *, first84: bool) -> dict:
     schedule = protocol["schedule"][:84] if first84 else protocol["schedule"]
+    by_block = defaultdict(list)
+    for spec in schedule:
+        by_block[spec["block"]].append(spec)
+    block_counts = Counter()
+    failed_blocks, partial_blocks = [], []
+    for block, entries in sorted(by_block.items()):
+        rows = [(spec, records.get(execution_key(spec))) for spec in entries]
+        missing = any(record is None for _, record in rows)
+        failed = any(record is not None and not record.get("ok") for _, record in rows)
+        firsts = {spec["cell_id"]: record for spec, record in rows if spec["role"] == "attempt0"}
+        warms = {spec["cell_id"]: record for spec, record in rows if spec["role"] == "warm"}
+        if len(entries) == 2 * len(ARMS) and not missing:
+            block_counts["recorded_all14_blocks"] += 1
+        if len(firsts) == len(ARMS) and all(row is not None and row.get("ok") for row in firsts.values()):
+            block_counts["successful_first_all7_blocks"] += 1
+        strict_pairs = (len(firsts) == len(warms) == len(ARMS) and
+                        all(firsts[cell] is not None and warm is not None and
+                            strict_v20_warm(firsts[cell], warm)["accepted"] and
+                            warm.get("acceptance", {}).get("accepted")
+                            for cell, warm in warms.items()))
+        if strict_pairs:
+            block_counts["strictwarm_all7_blocks"] += 1
+        if any(record is not None and spec["role"] == "warm" and
+               not record.get("acceptance", {}).get("accepted") for spec, record in rows):
+            failed = True
+        if failed:
+            failed_blocks.append(block)
+        if missing:
+            partial_blocks.append(block)
+        if len(entries) == 2 * len(ARMS) and not missing and not failed and strict_pairs:
+            block_counts["complete_valid_pair_blocks"] += 1
     groups = defaultdict(dict)
     for spec in schedule:
         groups[(spec["dataset"], spec["id"], spec["seed"], spec["arm"])][spec["role"]] = (
@@ -190,27 +244,79 @@ def summarize_subset(protocol: dict, records: dict[str, dict], quality: dict[str
             warm_s = [c["warm_s"] for c in selected if c["warm_s"] is not None]
             per_canvas = [n for r in first_ok for n in r.get("per_canvas_calls", [])]
             term = Counter(r.get("termination", "unknown") for r in first_ok)
-            gpu_timeline = [(r.get("phase_evidence") or {}).get("prefill_end_to_finish_gpu_s") for r in first_ok]
-            gpu_timeline = [s for s in gpu_timeline if isinstance(s, (int, float)) and s > 0]
+            by_host_latency = defaultdict(lambda: dict(warm_request_s=[], prefill_end_to_finish_gpu_s=[]))
+            for c in selected:
+                if c["warm_s"] is None:
+                    continue
+                warm = c["warm"]
+                host = warm["host"]
+                by_host_latency[host]["warm_request_s"].append(c["warm_s"])
+                span = (warm.get("phase_evidence") or {}).get("prefill_end_to_finish_gpu_s")
+                if type(span) in (int, float) and math.isfinite(span) and span > 0:
+                    by_host_latency[host]["prefill_end_to_finish_gpu_s"].append(span)
+            host_latency = {host: dict(accepted_warm_requests=len(v["warm_request_s"]),
+                                       warm_whole_request_s_mean=statistics.mean(v["warm_request_s"]),
+                                       warm_prefill_end_to_finish_cuda_event_span_s_mean=(
+                                           statistics.mean(v["prefill_end_to_finish_gpu_s"])
+                                           if v["prefill_end_to_finish_gpu_s"] else None),
+                                       qualified_cuda_spans=len(v["prefill_end_to_finish_gpu_s"]))
+                            for host, v in sorted(by_host_latency.items())}
             cap_canvases = sum(sum(bool(x.get("iteration_cap")) for x in (r.get("phase_evidence") or {}).get("per_canvas", []))
                                for r in first_ok)
+            native_stop_canvases = sum(sum(bool(x.get("native_stop")) for x in (r.get("phase_evidence") or {}).get("per_canvas", []))
+                                       for r in first_ok)
+            router_totals = Counter()
+            router_present = 0
+            for r in first_ok:
+                evidence = r.get("router_phase_evidence")
+                if not evidence:
+                    continue
+                if all(type(evidence.get(k)) is int for k in ("A", "D", "H")):
+                    router_present += 1
+                    router_totals.update({k: evidence[k] for k in ("A", "D", "H")})
+            fallback = [(r.get("counters") or {}).get("unsupported_mask_refreshes") for r in first_ok]
+            fallback = [x for x in fallback if type(x) is int]
+            total_canvases = sum(r.get("canvases", 0) for r in first_ok)
+            total_calls = sum(r.get("decoder_calls", 0) for r in first_ok)
+            early_counts = dict(call0=sum(n >= 1 for n in per_canvas), call1=sum(n >= 2 for n in per_canvas),
+                                call2plus=sum(max(0, n - 2) for n in per_canvas))
+            scored_rows = [c["quality"] for c in selected if c["quality"] is not None]
+            eos_wrong = sum(bool(q.get("eos")) and not bool(q.get("strict_correct", q["correct"])) for q in scored_rows)
+            task_at_cap = sum(bool(q.get("capped")) and bool(q.get("task_correct", q["correct"])) for q in scored_rows)
             arm_rows[arm] = dict(planned_cells=len(selected), first_present=sum(c["first"] is not None for c in selected),
                                  first_success=len(first_ok), first_failed=sum(c["first"] is not None and not c["first"].get("ok") for c in selected),
+                                 first_missing=sum(c["first"] is None for c in selected),
+                                 warm_failed=sum(c["warm"] is not None and not c["warm"].get("ok") for c in selected),
                                  scored=len(scores), score_mean=statistics.mean(scores) if scores else None,
                                  ruler_official_task_macro=(statistics.mean(scores) if dataset == "ruler4k" and
                                                              len({q for d, q, _, a in cells if d == dataset and a == arm}) == 13
                                                              and len(scores) == len(selected) else None),
                                  correct=sum(correct), parsed=sum(bool(c["quality"]["parsed"]) for c in selected if c["quality"]),
-                                 termination=dict(sorted(term.items())), iteration_cap_canvases=cap_canvases,
-                                 warm_accepted=len(warm_s), warm_request_s_mean=statistics.mean(warm_s) if warm_s else None,
-                                 decoder_calls_total=sum(r.get("decoder_calls", 0) for r in first_ok),
+                                 strict_correct=sum(bool(q.get("strict_correct", q["correct"] and q.get("eos"))) for q in scored_rows),
+                                 task_at_cap=task_at_cap, eos_wrong=eos_wrong,
+                                 unparsed=sum(not bool(q["parsed"]) for q in scored_rows),
+                                 termination=dict(sorted(term.items())), request_output_cap=term["length"],
+                                 iteration_cap_canvases=cap_canvases, native_stop_canvases=native_stop_canvases,
+                                 warm_accepted=len(warm_s), absolute_latency_by_host=host_latency,
+                                 decoder_calls_total=total_calls,
                                  decoder_calls_per_request_mean=(statistics.mean(r["decoder_calls"] for r in first_ok) if first_ok else None),
-                                 canvases_total=sum(r.get("canvases", 0) for r in first_ok),
+                                 canvases_total=total_canvases,
+                                 decoder_calls_per_canvas_pooled=(total_calls / total_canvases if total_canvases else None),
+                                 decoder_calls_per_canvas_per_request=_distribution([
+                                     r["decoder_calls"] / r["canvases"] for r in first_ok if r.get("canvases", 0) > 0]),
                                  calls_per_canvas_distribution=dict(sorted(Counter(per_canvas).items())),
+                                 decoder_call_positions=early_counts,
+                                 router_phase_layer_calls=(dict(A=router_totals["A"], D=router_totals["D"],
+                                                                H=router_totals["H"], measured_requests=router_present)
+                                                           if router_present else None),
+                                 unsupported_mask_refreshes_total=(sum(fallback) if len(fallback) == len(first_ok) and fallback else None),
+                                 phase_by_early_call_position="N/A: aggregate request counters do not identify per-call router phase",
                                  output_tokens_total=sum(r.get("output_tokens", 0) for r in first_ok),
-                                 first_encoder_forward_end_to_finish_gpu_timeline_s_mean=(
-                                     statistics.mean(gpu_timeline) if gpu_timeline else None),
-                                 gpu_timeline_note="CUDA event span includes host gaps and later commit work; not prefill-excluded generation",
+                                 output_tokens_per_canvas_pooled=(sum(r.get("output_tokens", 0) for r in first_ok) / total_canvases
+                                                                  if total_canvases else None),
+                                 output_tokens_per_canvas_per_request=_distribution([
+                                     r["output_tokens"] / r["canvases"] for r in first_ok if r.get("canvases", 0) > 0]),
+                                 gpu_timeline_note="accepted warm CUDA event span from first actual encoder forward end to final event after generate; includes host launch gaps and later encoder/commit work, not synchronized prefill-excluded generation wall",
                                  initial_prefill_excluded_generation_s="N/A: no qualified boundary")
         ratios = {}
         for arm in ARMS:
@@ -263,6 +369,12 @@ def summarize_subset(protocol: dict, records: dict[str, dict], quality: dict[str
     return dict(schema="v20_fan_scored_summary_v1", subset="first84" if first84 else "full700",
                 planned_executions=len(schedule), recorded_executions=sum(execution_key(e) in records for e in schedule),
                 executions_complete=all(execution_key(e) in records for e in schedule),
+                planned_blocks=len(by_block), recorded_all14_blocks=block_counts["recorded_all14_blocks"],
+                successful_first_all7_blocks=block_counts["successful_first_all7_blocks"],
+                strictwarm_all7_blocks=block_counts["strictwarm_all7_blocks"],
+                complete_valid_pair_blocks=block_counts["complete_valid_pair_blocks"],
+                failed_block_ids=failed_blocks, partial_block_ids=partial_blocks,
+                block_completeness_note="ledger-row completeness includes failures; valid paired blocks require seven successful first outputs and seven accepted warm executions",
                 datasets=by_dataset, timing_note="accepted warm whole request; model load excluded; ratios method/reference <1 faster")
 
 

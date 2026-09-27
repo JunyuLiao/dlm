@@ -12,6 +12,20 @@ from scripts import v20_bind as B
 
 
 class V20BindTests(unittest.TestCase):
+    def test_probe_is_in_source_inventory(self):
+        captured = {}
+
+        def fake_hashes(plugin, **kwargs):
+            captured['extra_sources'] = kwargs['extra_sources']
+            return {'checked': 'yes'}
+
+        import sys
+        with patch.dict(sys.modules, {'experiments.numerical_qk_reuse.runner':
+                                      SimpleNamespace(_source_hashes=fake_hashes)}):
+            self.assertEqual(B.source_hashes('plugin', None, None, None), {'checked': 'yes'})
+        self.assertIn(Path(B.__file__).with_name('v20_operator_probe.py'),
+                      captured['extra_sources'])
+
     def fixture(self, root):
         manifests = root / 'manifests'
         manifests.mkdir()

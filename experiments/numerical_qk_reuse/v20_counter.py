@@ -111,11 +111,14 @@ def _host_bitmap(tensor):
 class CounterTwin:
     """Callable runtime override delegating the real attention call unchanged."""
 
-    def __init__(self, delegate, router, *, retain_support=False, qkv_digest=None):
+    def __init__(self, delegate, router, *, retain_support=False, qkv_digest=None,
+                 operator_probe=None):
         self.delegate, self.router = delegate, router
         self.rows = []
         self.retain_support, self.qkv_digest = retain_support, qkv_digest
         self.support_calls = []
+        self.control_observation_steps = {}
+        self.operator_probe = operator_probe
 
     def __getattr__(self, name):
         return getattr(self.delegate, name)
@@ -143,7 +146,8 @@ class CounterTwin:
             if row['bitmap_shape'][:2] != [q.shape[0], q.shape[1]]:
                 raise ValueError('fresh bitmap batch/head dimensions differ')
             row.update(layer=layer, kind=kind, canvas=None, decoder_call=step,
-                       method='fresh_T')
+                       method='fresh_T', anchor_step=step, decision_step=step,
+                       numeric_age=0, decision_age=0)
             self.rows.append(row)
             return result
         finally:
@@ -182,14 +186,21 @@ class CounterTwin:
                 phase, full_qk = 'H', False
             else:
                 raise ValueError('router phase counters do not identify one A/D/H call')
-            bitmap = self.router.cache.entries[layer].decision
+            entry = self.router.cache.entries[layer]
+            bitmap = entry.decision
             skipped, eligible = bitmap.skipped, bitmap.eligible
+            anchor_step, decision_step = entry.score_step, entry.decision_step
+            if (type(anchor_step) is not int or type(decision_step) is not int or
+                    not 0 <= anchor_step <= owner.step or not 0 <= decision_step <= owner.step):
+                raise ValueError('numerical score/decision anchor age is unavailable or invalid')
+            numeric_age, decision_age = owner.step-anchor_step, owner.step-decision_step
         elif old_bootstrap is not None:
             bootstrap = self.router.bootstrap_calls - old_bootstrap
             observation = self.router.observation_calls - old_observation
             held = self.router.held_calls - old_held
             if (bootstrap, observation, held) == (1, 0, 0):
                 phase, full_qk = 'A', False
+                anchor_step = decision_step = numeric_age = decision_age = None
                 b, h, nq = q.shape[:3]
                 nk = k.shape[-2]
                 shape_q, shape_k = (nq + Q_TILE - 1) // Q_TILE, (nk + K_TILE - 1) // K_TILE
@@ -198,9 +209,19 @@ class CounterTwin:
             elif (bootstrap, observation, held) == (0, 1, 0):
                 phase, full_qk = 'A', True
                 _, skipped, eligible = self.router.maps[layer]
+                key = (owner.canvas, owner.epoch, layer)
+                self.control_observation_steps[key] = owner.step
+                anchor_step = decision_step = owner.step
+                numeric_age = decision_age = 0
             elif (bootstrap, observation, held) == (0, 0, 1):
                 phase, full_qk = 'H', False
                 _, skipped, eligible = self.router.maps[layer]
+                key = (owner.canvas, owner.epoch, layer)
+                observed_step = self.control_observation_steps.get(key)
+                if type(observed_step) is not int or not 0 <= observed_step <= owner.step:
+                    raise ValueError('held control lacks a same-canvas observed bitmap age')
+                anchor_step = decision_step = observed_step
+                numeric_age = decision_age = owner.step-observed_step
             else:
                 raise ValueError('control phase counters do not identify one A/H call')
         else:
@@ -209,6 +230,7 @@ class CounterTwin:
         nq, nk, d = q.shape[-2], k.shape[-2], q.shape[-1]
         if nk != prefix + nq or v.shape != k.shape:
             raise ValueError('counter twin source/canvas geometry differs')
+        physical_skipped, physical_eligible = skipped, eligible
         if not isinstance(skipped, list):
             skipped = _host_bitmap(skipped)
             eligible = _host_bitmap(eligible)
@@ -218,8 +240,22 @@ class CounterTwin:
             raise ValueError('physical bitmap batch/head dimensions differ from current query')
         row.update(layer=layer, kind='local' if bool(module.is_sliding) else 'global',
                    canvas=owner.canvas, decoder_call=owner.step,
-                   method='historical_or_same_consumer_control')
+                   method='historical_or_same_consumer_control',
+                   anchor_step=anchor_step, decision_step=decision_step,
+                   numeric_age=numeric_age, decision_age=decision_age)
         self.rows.append(row)
+        if self.operator_probe is not None and old_score is not None:
+            self.operator_probe.observe(self.router, module, q, k, v,
+                                        bitmap.skipped, bitmap.eligible,
+                                        phase=phase, canvas=owner.canvas, step=owner.step,
+                                        scale=kwargs.get('scaling'), actual_output=result)
+        elif self.operator_probe is not None and old_bootstrap is not None and hasattr(physical_skipped, 'detach'):
+            # Held-map reference: observe/H use the same prepared consumer on
+            # the actual current QKV and recorded physical support. Bootstrap
+            # has only synthetic all-kept lists and is intentionally omitted.
+            self.operator_probe.observe(owner, module, q, k, v, physical_skipped, physical_eligible,
+                                        phase=phase, canvas=owner.canvas, step=owner.step,
+                                        scale=kwargs.get('scaling'), actual_output=result)
         if self.retain_support:
             device_skipped = bitmap.skipped if old_score is not None else self.router.maps[layer][1]
             device_eligible = bitmap.eligible if old_score is not None else self.router.maps[layer][2]
@@ -252,7 +288,7 @@ class CounterTwin:
 
 @contextmanager
 def install_counter_twin(binding, router, *, explicit_untimed: bool = False,
-                         retain_support: bool = False, qkv_digest=None):
+                         retain_support: bool = False, qkv_digest=None, operator_probe=None):
     """Profiler API: ``with install_counter_twin(binding, router, explicit_untimed=True) as twin``.
 
     The binding must already be installed; this wraps its exact prior override
@@ -263,7 +299,8 @@ def install_counter_twin(binding, router, *, explicit_untimed: bool = False,
         raise ValueError('counter twin is only permitted in an explicit untimed pass')
     runtime = binding.runtime
     delegate = runtime.attention_override
-    twin = CounterTwin(delegate, router, retain_support=retain_support, qkv_digest=qkv_digest)
+    twin = CounterTwin(delegate, router, retain_support=retain_support,
+                       qkv_digest=qkv_digest, operator_probe=operator_probe)
     runtime.attention_override = twin
     try:
         yield twin

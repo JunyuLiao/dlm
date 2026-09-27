@@ -13,13 +13,37 @@ def sha(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
-def _phase(delta: dict, arm: str) -> str | None:
+METHOD_ARMS = frozenset(("M1_R1_A8_current_output", "M3_R2_A8_current_output",
+                         "M3_R3_A8_current_output", "B_A8_matched"))
+CONTROL_CONDITIONS = {"v20_dense_consumer": "D_matched", "v20_fresh_T": "T_scope",
+                      "v20_G75L30_nativeQ128": "G75L30_nativeQ128"}
+
+
+def canonical_arm(arm: dict | str) -> str | None:
+    """Use frozen execution identity, never a scope/policy-prefixed display name."""
+    if isinstance(arm, str):
+        return arm if arm in METHOD_ARMS | {"D_native", "D_matched", "T_scope", "G75L30_nativeQ128"} else None
+    config = arm.get("config", {})
+    condition = arm.get("condition")
+    if condition == "native_dense":
+        return "D_native"
+    if condition in CONTROL_CONDITIONS and arm.get("plugin") == "experiments.numerical_qk_reuse.v20_controls:install":
+        return CONTROL_CONDITIONS[condition]
+    method = config.get("v20_arm")
+    if (method in METHOD_ARMS and arm.get("plugin") == "experiments.numerical_qk_reuse.v20:install"
+            and condition == config.get("condition")):
+        return method
+    return None
+
+
+def _phase(delta: dict, arm: dict | str) -> str | None:
     """Classify a complete model call from all of its routed-layer counters."""
+    method = canonical_arm(arm)
     a = delta.get("score_refresh_calls")
     d = delta.get("decision_refresh_calls")
     h = delta.get("held_decision_calls")
     calls = delta.get("attention_calls")
-    if arm.startswith(("M1_", "M3_")) and all(type(x) is int and x >= 0 for x in (a, d, h, calls)):
+    if method in METHOD_ARMS and all(type(x) is int and x >= 0 for x in (a, d, h, calls)):
         if a > 0 and d == a and h == 0 and calls == a:
             return "A"
         if a == 0 and d > 0 and h == 0 and calls == d:
@@ -30,16 +54,18 @@ def _phase(delta: dict, arm: str) -> str | None:
             return "MIXED"
     if type(calls) is not int or calls <= 0:
         return None
-    if arm == "T_scope":
+    if method == "T_scope":
         return "FRESH"
-    if arm in ("D_matched", "G75L30_nativeQ128"):
+    if method in ("D_matched", "G75L30_nativeQ128"):
         bootstrap = delta.get("bootstrap_calls")
         observation = delta.get("bitmap_observation_calls")
         held = delta.get("held_decision_calls")
         if all(type(x) is int and x >= 0 for x in (bootstrap, observation, held)):
-            if arm == "D_matched" and bootstrap == calls and observation == held == 0:
+            if method == "D_matched" and bootstrap == calls and observation == held == 0:
                 return "FRESH"
-            if arm == "G75L30_nativeQ128":
+            if method == "G75L30_nativeQ128":
+                if bootstrap == calls and observation == held == 0:
+                    return "FRESH"
                 if observation == calls and bootstrap == held == 0:
                     return "A"
                 if held == calls and bootstrap == observation == 0:
@@ -48,7 +74,7 @@ def _phase(delta: dict, arm: str) -> str | None:
     return None
 
 
-def _phase_costs(summary: dict, arm: str) -> dict:
+def _phase_costs(summary: dict, arm: dict | str) -> dict:
     phases = summary.get("phase_deltas", [])
     costs = summary.get("per_call_event_median_ms", [])
     if len(phases) != len(costs):
@@ -72,6 +98,9 @@ def extract_profile(path: Path) -> list[dict]:
     if data.get("schema") != "v20_direct_full_forward_v1" or not isinstance(data.get("targets"), dict):
         raise ValueError("not a completed v20 direct profile")
     identity = sha(path.read_bytes())
+    environment = data.get("runtime_identity", {})
+    host_identity = dict(host=environment.get("hostname"), gpu_uuid=environment.get("gpu_uuid"),
+                         gpu_name=environment.get("gpu"), torch_version=environment.get("torch"))
     seen = set()
     rows = []
     for target in data["targets"].values():
@@ -79,7 +108,7 @@ def extract_profile(path: Path) -> list[dict]:
         state_hash = hashlib.sha256(json.dumps(state, separators=(",", ":")).encode()).hexdigest()[:12]
         resolution = target.get("resolution", {})
         if resolution.get("missing"):
-            rows.append(dict(profile_sha256=identity, dataset=state[0], state=state_hash,
+            rows.append(dict(host_identity, profile_sha256=identity, dataset=state[0], state=state_hash,
                              canvas=state[2], requested_call=target.get("requested_call"),
                              status="missing_native_state", reason="native stopped before requested/fallback call"))
             continue
@@ -91,7 +120,7 @@ def extract_profile(path: Path) -> list[dict]:
             for length in data.get("selected_sequence_lengths", (4, 16)):
                 sequence = f"N{length}"
                 if sequence not in available.get(boundary, {}):
-                    rows.append(dict(profile_sha256=identity, dataset=state[0], state=state_hash,
+                    rows.append(dict(host_identity, profile_sha256=identity, dataset=state[0], state=state_hash,
                                      boundary=boundary, sequence=sequence, status="missing_timing",
                                      reason="native sequence too short or profile checkpoint incomplete"))
         for boundary, sequences in available.items():
@@ -111,7 +140,7 @@ def extract_profile(path: Path) -> list[dict]:
                     name = arm["name"]
                     item = result.get("arms", {}).get(name)
                     if item is None or item.get("summary") is None:
-                        rows.append(dict(profile_sha256=identity, dataset=state[0], state=state_hash,
+                        rows.append(dict(host_identity, profile_sha256=identity, dataset=state[0], state=state_hash,
                                          boundary=boundary, sequence=sequence, arm=name,
                                          status="missing_timing", reason="no accepted complete-call summary"))
                         continue
@@ -127,10 +156,13 @@ def extract_profile(path: Path) -> list[dict]:
                     nepoch = None if native_epoch is None else native_epoch.get("event_median_ms")
                     scope = arm.get("config", {}).get("v20_scope", "NATIVE" if arm.get("condition") == "native_dense" else "unknown")
                     policy = arm.get("config", {}).get("policy_sha256")
-                    rows.append(dict(profile_sha256=identity, dataset=state[0], state=state_hash,
+                    rows.append(dict(host_identity, profile_sha256=identity, dataset=state[0], state=state_hash,
                                      canvas=state[2], requested_call=target.get("requested_call"),
                                      selected_call=resolution.get("selected_call"), fallback_used=resolution.get("fallback_used"),
-                                     scope=scope, policy_sha256=policy, arm=name, boundary=boundary, sequence=sequence,
+                                     scope=scope, policy_sha256=policy, arm=name,
+                                     canonical_arm=canonical_arm(arm), condition=arm.get("condition"),
+                                     plugin=arm.get("plugin"), consumer=arm.get("config", {}).get("consumer"),
+                                     boundary=boundary, sequence=sequence,
                                      reached_calls=result.get("reached_calls"), requested_calls=result.get("requested_calls"),
                                      status="measured" if jit_ok else "invalid_new_jit_or_missing_blocks",
                                      complete_call_event_sum_median_ms=value,
@@ -141,7 +173,7 @@ def extract_profile(path: Path) -> list[dict]:
                                                                                 1.0 if jit_ok and native_valid and native_name == name else None),
                                      within_gpu_direct_epoch_ratio_to_native=(epoch / nepoch if jit_ok and native_valid and nepoch and native_name != name else
                                                                                1.0 if jit_ok and native_valid and native_name == name else None),
-                                     phase_complete_call_costs=_phase_costs(summary, name),
+                                     phase_complete_call_costs=_phase_costs(summary, arm),
                                      native_bracket_max_abs_drift= max(drift) if drift else None,
                                      peak_allocated_bytes=max((b["peak_allocated_bytes"] for b in blocks
                                                                if isinstance(b.get("peak_allocated_bytes"), int)), default=None),
@@ -158,14 +190,20 @@ def render(rows: list[dict], scored: dict | None = None) -> str:
     else:
         for subset in ("first84", "full"):
             value = scored.get(subset, {})
-            lines += [f"{subset}: {value.get('recorded_executions', 0)}/{value.get('planned_executions', '?')} executions recorded; complete={value.get('executions_complete', False)}. Scored results remain dataset-separated in the bound summary.", ""]
-    lines += ["| Dataset | State | Scope | Policy SHA | Arm | Boundary | Sequence | Phase complete-call ms (count) | Sum of calls ms | Direct epoch ms | Sum ratio/native | Epoch ratio/native | Bracket drift | Peak GiB | Validity |",
-              "|---|---|---|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---|"]
+            lines += [f"{subset}: {value.get('recorded_executions', 0)}/{value.get('planned_executions', '?')} execution rows recorded (including failures); "
+                      f"{value.get('recorded_all14_blocks', 'N/A')}/{value.get('planned_blocks', '?')} blocks have all 14 rows, "
+                      f"{value.get('successful_first_all7_blocks', 'N/A')} have seven successful first outputs, "
+                      f"{value.get('strictwarm_all7_blocks', 'N/A')} have seven accepted warm runs, "
+                      f"and {value.get('complete_valid_pair_blocks', 'N/A')} are complete valid paired blocks. "
+                      f"Failed blocks: {value.get('failed_block_ids', 'N/A')}; partial blocks: {value.get('partial_block_ids', 'N/A')}. "
+                      "Scored results remain dataset-separated in the bound summary.", ""]
+    lines += ["| Host | GPU UUID | Dataset | State | Scope | Policy SHA | Arm | Boundary | Sequence | Phase complete-call ms (count) | Sum of calls ms | Direct epoch ms | Sum ratio/native | Epoch ratio/native | Bracket drift | Peak GiB | Validity |",
+              "|---|---|---|---|---|---|---|---|---|---|---:|---:|---:|---:|---:|---:|---|"]
     def fmt(v, digits=3):
         return "N/A" if v is None else f"{v:.{digits}f}"
     for r in rows:
         if r["status"] != "measured":
-            lines.append(f"| {r['dataset']} | {r['state']} | N/A | N/A | {r.get('arm', 'N/A')} | {r.get('boundary', 'N/A')} | {r.get('sequence', 'N/A')} | N/A | N/A | N/A | N/A | N/A | N/A | N/A | {r['status']} |")
+            lines.append(f"| {r.get('host') or 'N/A'} | {r.get('gpu_uuid') or 'N/A'} | {r['dataset']} | {r['state']} | N/A | N/A | {r.get('arm', 'N/A')} | {r.get('boundary', 'N/A')} | {r.get('sequence', 'N/A')} | N/A | N/A | N/A | N/A | N/A | N/A | N/A | {r['status']} |")
             continue
         phases = r["phase_complete_call_costs"]
         phase_parts = []
@@ -179,7 +217,7 @@ def render(rows: list[dict], scored: dict | None = None) -> str:
                 phase_parts.append(part)
         phase_text = "; ".join(phase_parts) or "N/A"
         peak = r["peak_allocated_bytes"] / 1024**3 if r["peak_allocated_bytes"] is not None else None
-        lines.append(f"| {r['dataset']} | {r['state']} | {r['scope']} | {(r['policy_sha256'] or 'N/A')[:12]} | {r['arm']} | {r['boundary']} | {r['sequence']} ({r['reached_calls']}/{r['requested_calls']}) | {phase_text} | {fmt(r['complete_call_event_sum_median_ms'])} | {fmt(r['direct_epoch_event_median_ms'])} | {fmt(r['within_gpu_complete_call_ratio_to_native'])} | {fmt(r['within_gpu_direct_epoch_ratio_to_native'])} | {fmt(r['native_bracket_max_abs_drift'])} | {fmt(peak)} | valid, no new JIT |")
+        lines.append(f"| {r.get('host') or 'N/A'} | {r.get('gpu_uuid') or 'N/A'} | {r['dataset']} | {r['state']} | {r['scope']} | {(r['policy_sha256'] or 'N/A')[:12]} | {r['arm']} | {r['boundary']} | {r['sequence']} ({r['reached_calls']}/{r['requested_calls']}) | {phase_text} | {fmt(r['complete_call_event_sum_median_ms'])} | {fmt(r['direct_epoch_event_median_ms'])} | {fmt(r['within_gpu_complete_call_ratio_to_native'])} | {fmt(r['within_gpu_direct_epoch_ratio_to_native'])} | {fmt(r['native_bracket_max_abs_drift'])} | {fmt(peak)} | valid, no new JIT |")
     lines += ["", "Phase entries are medians of directly timed complete model calls classified by aggregate routed-layer counter deltas. MIXED shows the measured layer counts rather than assigning a pure phase; FRESH marks T or dense-consumer full-QK calls. N4/N16 sums and direct epochs are distinct measurements; neither is an observed whole-request time. N/A means the profiler did not expose classifying counters. No winner is selected from task scores or missing rows.", ""]
     return "\n".join(lines)
 

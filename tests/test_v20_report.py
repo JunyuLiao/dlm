@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from scripts.v20_report import _phase, extract_profile, render
+from scripts.v20_report import _phase, canonical_arm, extract_profile, render
 
 
 def sample(event_sum, epoch, phase=None, jit=0):
@@ -23,9 +23,13 @@ class ReportTests(unittest.TestCase):
         self.path = Path(self.tmp.name) / "profile.json"
         self.profile = dict(schema="v20_direct_full_forward_v1",
                             selected_boundaries=["model_forward"], selected_sequence_lengths=[4],
+                            runtime_identity=dict(hostname="mpk", gpu_uuid="GPU-123", gpu="H100",
+                                                  torch="2.6.0+cu124"),
                             arms=[dict(name="D_native", condition="native_dense", config={}),
                                   dict(name="M1_R1_A8_current_output", condition="M1",
-                                       config=dict(v20_scope="ALL_NATIVE_LEGAL", policy_sha256="a" * 64))],
+                                       plugin="experiments.numerical_qk_reuse.v20:install",
+                                       config=dict(v20_arm="M1_R1_A8_current_output", condition="M1",
+                                                   v20_scope="ALL_NATIVE_LEGAL", policy_sha256="a" * 64))],
                             targets={"one": dict(dataset="aime26", id="aime26/2", canvas=0, requested_call=1,
                                                   resolution=dict(missing=False, selected_call=1, fallback_used=False),
                                                   boundaries=dict(model_forward=dict(N4=dict(reached_calls=4, requested_calls=4,
@@ -43,6 +47,8 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(len(rows), 2)
         m1 = next(r for r in rows if r.get("arm", "").startswith("M1"))
         self.assertEqual(m1["status"], "measured")
+        self.assertEqual((m1["host"], m1["gpu_uuid"]), ("mpk", "GPU-123"))
+        self.assertEqual(m1["canonical_arm"], "M1_R1_A8_current_output")
         self.assertAlmostEqual(m1["within_gpu_complete_call_ratio_to_native"], .8)
         self.assertAlmostEqual(m1["within_gpu_direct_epoch_ratio_to_native"], 30 / 38)
         self.assertEqual(m1["phase_complete_call_costs"]["H"]["calls"], 2)
@@ -73,6 +79,28 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(row["phase_complete_call_costs"]["MIXED"]["calls"], 1)
         self.assertEqual(row["phase_complete_call_costs"]["MIXED"]["counter_totals"]["score_refresh_calls"], 5)
         self.assertIn("MIXED:", render([row]))
+
+    def test_prefixed_screen_names_use_frozen_method_identity(self):
+        method = dict(name="GLOBAL_ONLY_NATIVE_LOCAL_P1_M3_R3_A8_current_output",
+                      condition="v20_global_M3_R3",
+                      plugin="experiments.numerical_qk_reuse.v20:install",
+                      config=dict(v20_arm="M3_R3_A8_current_output",
+                                  condition="v20_global_M3_R3"))
+        anchor = dict(attention_calls=5, score_refresh_calls=5,
+                      decision_refresh_calls=5, held_decision_calls=0)
+        held = dict(attention_calls=5, score_refresh_calls=0,
+                    decision_refresh_calls=0, held_decision_calls=5)
+        self.assertEqual(canonical_arm(method), "M3_R3_A8_current_output")
+        self.assertEqual(_phase(anchor, method), "A")
+        self.assertEqual(_phase(held, method), "H")
+        b = dict(method, name="ALL_NATIVE_LEGAL_P0_B_A8_matched",
+                 condition="M3", config=dict(v20_arm="B_A8_matched", condition="M3"))
+        self.assertEqual(_phase(held | {'attention_calls': 30, 'held_decision_calls': 30}, b), "H")
+        dense = dict(name="ALL_NATIVE_LEGAL_D_matched", condition="v20_dense_consumer",
+                     plugin="experiments.numerical_qk_reuse.v20_controls:install", config={})
+        self.assertEqual(_phase(dict(attention_calls=30, bootstrap_calls=30,
+                                     bitmap_observation_calls=0, held_decision_calls=0), dense), "FRESH")
+        self.assertIsNone(canonical_arm(dict(name="M3_fake", condition="unknown", config={})))
 
     def test_new_jit_disables_ratio(self):
         self.profile["targets"]["one"]["boundaries"]["model_forward"]["N4"]["arms"]["M1_R1_A8_current_output"]["blocks"][0]["triton_misses"] = 1

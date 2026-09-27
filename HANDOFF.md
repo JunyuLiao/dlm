@@ -1,69 +1,71 @@
-# v20 Fan M1/M3 continuation — CP0
+# v20 Fan M1/M3 continuation
 
-Sole current specification: E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md.
-Parent e3f14520eea98e45998fb369f9027f3b2707ec4a, branch research/fan-m1-m3-cost-refresh-20260927.
-Worktree E:/dlm/fan_m1_m3_20260927. Prior v18 CP4 is COMPLETE; no v18 work relaunch.
-Preserve unrelated third_party/dinfer/assets/Wechat.JPG. No peer branch edits.
+Sole spec E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md.
+Parent e3f14520eea98e45998fb369f9027f3b2707ec4a. Worktree E:/dlm/fan_m1_m3_20260927,
+branch research/fan-m1-m3-cost-refresh-20260927. v18 CP4 complete unchanged.
+Preserve unrelated third_party/dinfer/assets/Wechat.JPG; no peer branch edits.
+Root Astra owns method/numerics/timing/stopping/selection. Actual Sol agents own
+bounded implementation/tests/scoring. Root alone commits/deploys/launches.
 
-Priority: qualified current-output M1 A8/R1 and M3 R2/R3, matched B_A8;
-common fast_t, native legality, exact original adaptive stopping/output budgets.
-Direct full decoder-forward and denoising-step costs on RULER/AIME/LongBench,
-then first84 core first/warm executions; publish preliminary before remaining700.
-All question×seed arms remain together on assigned original H100 UUID.
-No cross-GPU absolute latency pooling. Missing/failures are retained.
+Current 13:10UTC: screen002 COMPLETE both hosts, no active GPU jobs.
+Source cp2_699a9ec immutable. SHA-verified result copies:
+E:/dlm/v20_private/watch_screen_002/{mpk,dllm}/screen_002.json.
+Read-only watcher exec70362 is terminal; do not restart it or screen002.
+Full outputs stay private; public screen002_cost_table.json/per_forward.md/fan_today.md.
+260 measured N4 model-forward rows, 26arms x5 real canvases/host, no new JIT.
+Five native capture generate invocations/host =10 executions (not scored requests).
+Resource total closed GPU stages 1649.6709160804749 seconds including loads/failures.
+Charge outer v20_stage receipt only, not child worker time a second time.
+Screen001 failed pre-model-load native config identity; preserved, fixed in cp2.
+GPU qualification11/11 each; same kernelSHA8d5332405, newhost ATen privately relinked.
 
-Read results/fan_m1_m3_multidataset_20260927/{method_contract,campaign_budget,frozen_protocol}.json.
-Frozen gold-free inputs live E:/dlm/v20_private/frozen_panel_lf, never Git.
-Panel has 13 RULER tasks +6 AIME +6 LongBench, seeds101/202, seven arms,
-700 executions including first84. Optional G75L30 nativeQ128 port up to100,
-separately qualified and clearly different grouping from old vLLM FIXED16.
-Scope/policy/consumer binding is PENDING GPU cost/numerical qualification.
-No quality-driven tuning. No phase calibration/fresh-T matrix/CVM/ball expansion.
+Pre-answer cost decision: GLOBAL_ONLY_NATIVE_LOCAL, P0, Triton, conditional on
+selected longer-sequence/whole-step actual-QKV numerical qualification.
+ALL loses; GLOBAL P0 R2/R3 has LB ~3-7% N4 headroom, AIME/RULER ~2-4% slower;
+B_A8 remains cheaper. No whole-request or quality claim. Consumer difference
+GLOBAL Triton/Hopper=.9996876 equal-family/equal-host, effectively a tie.
+P1 lacks repeatable cross-family savings, keepP0. No quality-driven tuning.
 
-Resource start2026-09-27T11:58Z, GPU stop19:28Z, final19:58Z.
-8 aggregate GPU-process hours, max2 workers,1000 generation execution cap.
-Charge loads/capture/replay/qualification/compilation/parity/failures. No autoextension.
-At CP0 no v20 GPU worker has started. Both hosts were idle on preflight.
-mpk exouser@149.165.151.254 GPU-6139046a-b005-8fe5-a837-f8270472ab72.
-dllm exouser@149.165.159.64 GPU-fc12ad5c-5334-5509-8fc6-465498fd3915.
-Old qualified environments/model1047-tensor identities reused privately.
-New immutable deploy roots: mpk /media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927;
-dllm /home/exouser/dyh/fan_m1_m3_v20_20260927.
-Never overwrite deploys, first outputs, or relaunch uncertain/failed requests.
+Next immutable deployment: selected main7 plus ALL G75 nativeQ128 reference,
+N16(max native reached), both model_forward and denoising_step, counter_twins=true,
+operator_probe=true/operator_probe_reps3, prepared_support_floor=false.
+Same5canvas targets/host, reserve10capture executions. Operator diagnostics are
+untimed and check actualQKV against pinned v11 envelope; never loosen on failure.
+Source counter adds actual numeric/decision ages. Production math unchanged.
+Then bind generation source/model/config hashes, common binding on both hosts;
+bridge7(+G75if qualified) same RULER question/seed bothhosts before first84.
+Launch first84 complete question-seed seven-arm first/warm blocks; report before
+remaining700. Frozen first84=6blocks, all700=50blocks. Failure rows !=validpairs.
 
-Astra: design/numerics/stopping/synchronization/cost selection/final interpretation.
-Actual Sol-A: explicit methods and GPU qualification tests; physical counter twin.
-Actual Sol-B: panel/worker/scorer. Actual Sol-C: state-correct direct profiler.
-Root alone integrates/commits/pushes and deploys; agents do not start GPU work.
-Local CPU tests pass for methods/cache/panel/profile; GPU qualification pending.
-Capture/replay one canvas at a time; stop before next encoder commit. Preserve
-arm controller static settings and restore native pre-step history/RNG/state.
-Separate per-forward profiling from clean adaptive E2E. Event spans include
-launch gaps. Outer replay epoch explicitly includes fixture restoration.
+Frozen panel/manifests: results/fan_m1_m3_multidataset_20260927/{frozen_protocol,
+panel_identity,method_contract,campaign_budget}.json. Private manifests exact LF:
+E:/dlm/v20_private/frozen_panel_lf. Remote ROOT/private_inputs. No gold/answers Git.
+13RULER +6AIME +6LB, seeds101/202; outputs native original budgets/thinking.
+Scope/policy execution binding not yet frozen; no primary answer started.
+Optional G75L30_nativeQ128 up to100 separate ALLscope, not oldvLLMgrouping.
+Historical adaptive oldLB cap1024, current8192; see held_bitmap_evidence.md.
+A8 numeric clock and R1/2/3 decision clock, anchors reset decision age;
+R3 AHH DHH DH AHH D. Current projectedV/history selection; currentQK/PVoutput.
+Common fast_t; native masks; no QKVlinearprojection skipping. NativeB256 cap48,
+.8->.4 temp,.005confidence,stability1,.1acceptanceentropy,EOS/selfconditioning unchanged.
 
-Read-only Fan speaker notes corroborated M1 then held decisions with periodic M1.
-Named ASR transcript not found; documented missing. Shared slides untouched.
-Existing v18 heartbeat is paused; only update it to v20 after durable coordinator.
-Next: CP0 commit/push; immutable mpk deployment and GPU numerical qualification;
-qualify support bridge on dllm; direct cost screen then freeze generation binding.
+Budget start2026-09-27T11:58Z GPUstop19:28Z final19:58Z,8aggregateGPUhours,
+1000generationexecutions,max2GPUworkers. No autoextension or CVM/ball/freshTgrid.
+Host descriptors E:/dlm/v20_private/hosts.json (root/model/env/library/UUID).
+mpk149.165.151.254 UUID GPU-6139046a-b005-8fe5-a837-f8270472ab72,
+ROOT /media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927.
+dllm149.165.159.64 UUID GPU-fc12ad5c-5334-5509-8fc6-465498fd3915,
+ROOT /home/exouser/dyh/fan_m1_m3_v20_20260927.
+Never mutate deploys or rerun failed/uncertain requests. SameGPU wholearmgroups.
 
-CP1: bothhost CP0 GPU tests10/10; same CUDA kernel SHA8d5332405, dllm ATen
-bridge privately relinked after CPU header-path fixes. Qual GPU seconds use outer
-stage receipts only; do not add internal worker durations again. Counter twins
-are separate from accepted timers. CP1 profile has immutable checkpoints/JIT
-guards/source+GPUidentity checks; main cost screen uses floor=false.
+Scripts v20_stage/launch supervise immutable exclusive launches; v20_watch is
+read-only transport+hash verification. v20_bind CPUpreflight beforemodel.
+v20_run strictwarm (tokens/calls/termination/phases/noJIT) immutable firstoutputs.
+v20_bridge sameinputcrosshost equality. v20_score firstonlyquality, hostratios,
+completevalidblocks separatefrom recorded14; private-roots relocates archivedrows.
+v20_report explicithostUUID, canonicalarm phases, sumdirectcalls !=outerreplayepoch.
+Direct profiler separate from cleanadaptiveE2E; decode-only remainsN/A unlessqualified.
 
-12:49UTC current workers: screen_002 on BOTH hosts, cp2_699a9ec immutable.
-mpk supervisor1716604, dllm117433; stage receipts ROOT/cost/screen_002.stage.json,
-results ROOT/cost/screen_002.json with partial/failure siblings. Hard2400s each.
-26arm whole comparisons perGPU, one metadata-selected question/family/host.
-DO NOT launch another worker. Root/private host paths E:/dlm/v20_private/hosts.json.
-Screen001 failed pre-model-load native-config identity check; retained. CP2
-fixed native identity and adds CPU bind-to-profile preflight. All11 GPU tests
-passed on both hosts at screen001. CP2 has60 CPU tests, source699a9ec pushed.
-Original CRLF private manifests preserved; frozen_panel_lf matches all3 hashes.
-Current profile uses model_forward/N4, counter_twins=true, floor=false. Later
-N16 and denoising_step selected configurations still required before finalclaim.
-First84/core generation NOT_STARTED; policy/scope/consumer unselected.
-Existing heartbeat v18-research-stage-continuation now uses v20 prompt/30min
-interval, active until19:58UTC. Pause it at v20 completion; do not archive task.
+Existing heartbeat v18-research-stage-continuation now v20/30min, ACTIVE until19:58Z.
+Adopt durable workers; no duplicate coordinators. Pause at v20 completion; noarchive.
+Read-only Fan notes seen, named ASR transcript unavailable. Shared slides untouched.

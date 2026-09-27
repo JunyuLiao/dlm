@@ -208,6 +208,12 @@ class V20ProfileContract(unittest.TestCase):
         cfg['floor_reps'] = 2
         with self.assertRaisesRegex(ValueError, 'at least three'):
             P.validate_config(cfg)
+        cfg['floor_reps'] = 3
+        cfg['counter_twins'] = False
+        cfg['prepared_support_floor'] = False
+        cfg['operator_probe'] = True
+        with self.assertRaisesRegex(ValueError, 'requires an untimed counter'):
+            P.validate_config(cfg)
 
     def test_control_phase_counters_are_visible_in_per_call_delta(self):
         values = dict(attention_calls=7, bootstrap_calls=1,
