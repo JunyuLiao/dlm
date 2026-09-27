@@ -1,95 +1,90 @@
-# v20 Fan M1/M3 continuation
+# v20 Fan M1/M3 — research complete
 
 Sole spec E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md.
-Continue parent e3f14520eea98e45998fb369f9027f3b2707ec4a; v18 CP4 untouched.
+Continued e3f14520eea98e45998fb369f9027f3b2707ec4a; v18 closed and untouched.
 Worktree E:/dlm/fan_m1_m3_20260927; branch research/fan-m1-m3-cost-refresh-20260927.
 Preserve unrelated third_party/dinfer/assets/Wechat.JPG; never stage/reset it.
-Astra methods/numerics/stopping/timing/interpretation; actual Sol implementation/tests.
-Root alone integrates/deploys/launches. No CVM/ball/fresh-T/phase-calibration expansion.
+Astra owns methods/numerics/stopping/timing/interpretation; actual Sol implemented,
+verified and assembled reports. Root integrated; no shared PPT/messages modified.
 
-## Current checkpoint (16:44 UTC)
-FULL700 COMPLETE and scored:700rows/50validblocks/350acceptedwarm; no failures.
-Exact summary E:/dlm/v20_private/collect_remainder_002/remainder_001.redacted_summary.json
-SHA25f5483e6650c118744fd642ecd3ec62d3178514eb8e8b2a0d730f1227ee9d5f.
-Public adaptive_panel.json/csv/report.md and updated fan_today/slide drafts.
-AllRULERmacro.9231. AIMEstrict native/T/M1/R2/R3/B =5/8/7/6/5/7 of12;
-LB6/6/6/6/5/4 of12. LB R2/R3 E2E/native1.111/1.031 and/freshT1.224/1.136.
-Earlyfirst84R3.636native did notpersist. M3incrementalgate NOTPASSED atfrozenpoint.
-First84 and alloriginaloutputs preserved; no policy/stopping/output rescue.
-HISTORICAL_001 LIVE since16:38UTC mpk1789128/dllm133395,50exec/host, frozen
-G75L30_nativeQ128 newport ALL/Triton. CoreCP3production/CP5wrapper unchanged.
-New ROOT/primary/historical_001.{stage,json,ledger.jsonl,private.tar.gz},
-ROOT/private_historical_001. Max4000s/host, worker3900,guard900,globaldeadline19:28.
-Hidden read-only watcherPID53584 E:/dlm/v20_private/watch_historical_001.
-SingleCPUcollector LIVE hiddenPID53896, CP10 33edb5b; CP5originalscoring plus
-redactedledger calls/canvas/caps/timeline/decomposition.13 unittest invocations pass.
-Config E:/dlm/v20_private/collect_historical_001.config.json, remote_stage_dir=primary.
-Do not duplicate collector. Output E:/dlm/v20_private/collect_historical_001.
-Coreprivate4ledgers/roots already mpk ROOT/offline_scoring/remainder_001; neverrewrite.
-Previous localwatcher/collector died15:54beforedispatch; recovered onlylocalhelpers,
-then full700 finishednormally. Preserve olddirs/locks; noGPUrequest everretried.
+## Final checkpoint
+700/700 main executions:50 valid blocks,350 accepted warm; separate G75 100/100:
+50 successful first,50 accepted warm. No scored execution failure or missing cell.
+Both H100 final stages ended by2026-09-27T16:56:14Z; read-only nvidia-smi around
+17:10Z returned no compute processes on either host. No GPU/scoring work remains.
+No rerun, retry, new grid, v18 relaunch or automatic budget extension.
 
-## Frozen identities and semantics
-GLOBAL_ONLY_NATIVE_LOCAL/P0/Triton for main7; GLOBAL5layers/nativeLOCAL25.
-ALL cost-rejected; P1 not consistently cheaper; no score-driven tuning.
+Final Chinese report results/fan_m1_m3_multidataset_20260927/morning_or_final_brief.md.
+fan_today.md and three local English slide drafts updated; first84 preserved.
+adaptive_panel.json/csv/report.md retain complete main700; historical_panel.json/
+csv/report.md separate G75 reference with work, quality, caps and same-GPU ratios.
+
+M3 incremental gate NOT_PASSED for frozen GLOBAL5/P0/Triton/A8 point.
+LongBench R2/R3 direct forward/native mpk.958/.950,dllm.918/.912; whole-step
+also cheaper. B_A8 remains cheaper. AIME/RULER have no direct-forward headroom.
+LB native/T/R2/R3 calls2360/2223/2842/2514; extra work erases savings.
+LB R2/R3 E2E/native1.111/1.031; /freshT1.224/1.136; /B1.111/1.031.
+LB strict correct native/T/R2/R3=6/6/6/5 of12; AIME=5/8/6/5 of12.
+RULER all24/26 exact,official macro.9231. Earlyfirst84 R3gain did not persist.
+No R picked from outcomes, no noninferiority or independent paper contribution.
+
+G75L30_nativeQ128 new ALL-scope port, NOT old vLLM grouping equivalence:
+RULER24/26,106calls,E2E/native1.093; AIME8/12,3367calls,.978;
+LB3/12,2838calls,1.067. Same GPU question-seed pairing, later-stage drift caveat.
+Old adaptive G75 evidence exists but small/different contract; held_bitmap_evidence.md.
+
+## Immutable identities and semantics
+Production CP3 00a2c4d3c93a7f685a4f75fba8ea47991fa5c383, deploy/cp3_00a2c4d.
+Auxiliary CP5 05f99473406ef9b21d75b20d52d8e36b0124ddd1, deploy/cp5_05f9947.
+Last runnable CPU collector CP10 33edb5b. Never overwrite deploys/first outputs.
+Main GLOBAL_ONLY_NATIVE_LOCAL/P0/Triton; fiveGLOBAL and25nativeLOCAL layers.
 D_native,D_matched,T_scope,M1_R1_A8_current_output,M3_R2_A8_current_output,
-M3_R3_A8_current_output,B_A8_matched. Optional G75L30_nativeQ128 ALL/Triton separate.
-A8 numeric vs R1/2/3 decision clocks, R3 reset8 then D11. HistoryQK/currentV selection;
-currentQK/PV output, no QKV projection skip. Common fast_t; unchanged native B256,
-48max,.8->.4temperature,.005confidence,stability1,.1entropy,EOS/self-conditioning.
-Binding ROOT/generation/binding_001.json, private local binding_001.json SHA
- ee06c936e500fecfd219c6a9e277f99e77baed7b39d405ad96625f94e50734b5.
-Protocol deploy/Git LF SHA99e1d287867b0906b8c5a2715d4cf962ec31e6d1f473c1fe0ce2df5891f1aa17.
-Use private frozen_protocol_deployed.json for local checks (checkout CRLF differs).
-Manifests private frozen_panel_lf -> ROOT/private_inputs. 13RULER+6AIME+6LB,
-seeds101/202,700primary,first84 six blocks. RULERtaskcaps/thinkingOFF; AIME/LB8192/ON.
-Development inputs. Gold/scorer paths in collectorconfig, never gold/answers Git.
+M3_R3_A8_current_output,B_A8_matched. G75 ALL/Triton separately named.
+A8 numerical vs R1/2/3 decision clocks; R3 anchor8,nextD11. HistoricalQK/currentV
+selection, currentQK/PV output; no QKV projection skipping. Common fast_t.
+Native B256,max48,.8->.4temperature,.005confidence,stability1,.1entropy,
+EOS/self-conditioning unchanged. RULERtaskcaps/OFF; AIME/LB8192/ON.
+Binding SHA ee06c936e500fecfd219c6a9e277f99e77baed7b39d405ad96625f94e50734b5.
+Protocol LF SHA99e1d287867b0906b8c5a2715d4cf962ec31e6d1f473c1fe0ce2df5891f1aa17.
+Git/deploy LF; checkoutCRLF logicallyequal. Private frozen_protocol_deployed.json exact.
+Main summarySHA25f5483e6650c118744fd642ecd3ec62d3178514eb8e8b2a0d730f1227ee9d5f.
+HistoricalSHAae013630235ba0ba5212ea35ae627d5e4c7edf9dd1b56718b6bedb5514237107;
+embedded first84/full exactly equal published main. No gold/answers committed.
+Private summaries E:/dlm/v20_private/collect_remainder_002 and collect_historical_001.
+Collectors/watcher terminal; all old dirs/locks preserved. No duplicates.
 
-## Closed evidence
-GPU11/11 both. Same kernelSHA8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75.
-Newhost support ATen privately relinked; index repack CP0 verified1047 tensors equal.
-screen_001 failed before load, preserved. screen_002 CP2:26arms*5states/host,N4,
-260 measured rows,noJIT. selected_001 CP3:8arms,N<=16 native, both model-forward/
-whole denoising-step, counter twins+actualQKVprobes passed for AIME/LB.
-RULER native4calls -> N16 remainsmissing; ruler_selected_001 N4 supplement passed.
-qualified_numerical_gate.json qualified_with_native_short_sequence.
-bridge_001 eightarms/twohosts exact tokens/calls/termination/routerphases;
-sourcehash diffs only known support relocation/buildJSON, no active-code mismatch.
-timeline_001 three OFFcalls/host exact ONoutputparity. Device span initial encoder
-end through generation includes host gaps/latercommit; NOT decode-only wall/TBT.
+## Qualification, limits and honest missing evidence
+GPU11/11 each, real QKV same-support envelope, physical counters, native brackets,
+same-code eight-arm bridge passed. Newhost privateATen relink, kernelSHA same.
+Direct full model-forward AND denoising-step separate from clean request timing.
+Optional first-prefill-end CUDA span includes host gaps/latercommits; NOT puredecode
+wall/TBT/GPUactive. RULER32 N16missing rows retained, naturalN4 supplement passed.
+Physical skip denominators GLOBAL5 only. Detailed phase/age/state/memory tables
+remain in selected001_forward/ruler_selected001_forward/selected_physical artifacts.
+No full-trajectory per-state repricing or new GPUactive trace. M2/A4/earlyphase NOT_RUN.
+Screen001 pre-load configfailure and two CPU missing-header buildfailures preserved.
+No failed/uncertain scored request retried. NamedASRtranscript unavailable; speaker
+notes read-only corroboration available. Development13/6/6questions×2seed, notheldout.
 
-Public results/fan_m1_m3_multidataset_20260927/fan_today.md is direct report.
-selected001_forward/ruler_selected001_forward tables and selected_physical files
-retain ages/counts/missing; duplicate RULER aliases deduplicated. GLOBALdenominator
-only5routedlayers, not whole-model sparsity. LB R2/R3forward/native mpk.958/.950,
-dllm.918/.912; whole-step improves, Bstillcheaper(.932/.886). AIME/RULER noheadroom.
-First84 quality/E2E exploratory only. G75 historical adaptive tiny oldLB cap1024 exists but lacks
-qualified directforward/decode-onlytime, differs grouping/runtime; see
-held_bitmap_evidence.md. Current nativeQ128 directly qualified,100answers NOWRUNNING.
-Three local English slide drafts/Chinese notes only; shared slides/messages untouched.
-
-## Budget and hosts
-Start2026-09-27T11:58Z,GPUstop19:28Z,final19:58Z. Aggregate28800 GPU-process seconds,
-1000generationexec,max2workers,noautomaticextension. Closed19146.065313577652s,
-744generations=44qualification+700primary; historical100reservedactive,8000sreserved. Charge outer receipts
-only. STATE.closed_new_stage_charges plus earlierbase1649.670916s idempotent.
-Descriptors E:/dlm/v20_private/hosts.json pinned model/env/libs/UUID.
+## Final resources and operations
+Start2026-09-27T11:58Z; GPUstop19:28Z; final19:58Z unchanged.
+844generations=44qualification+700main+100G75, cap1000.
+21256.63526892662GPU-process seconds=5.904621h, cap28800seconds; max2workers.
+resource_final.json outer receipts charged once, base1649.6709160804749 plus
+STATE.closed_new_stage_charges; no inner-worker doublecount. All reservations zero.
+Descriptors E:/dlm/v20_private/hosts.json retain pinned model/env/libs/UUID.
 mpk exouser@149.165.151.254 UUID GPU-6139046a-b005-8fe5-a837-f8270472ab72,
 ROOT /media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927.
 dllm exouser@149.165.159.64 UUID GPU-fc12ad5c-5334-5509-8fc6-465498fd3915,
 ROOT /home/exouser/dyh/fan_m1_m3_v20_20260927.
-Auxiliary/scorer deploy/cp5_05f9947 immutable, production CP3 unchanged.
-LocalPython D:/Users/30128/AppData/Local/Programs/Python/Python311/python.exe; unittest.
+Python D:/Users/30128/AppData/Local/Programs/Python/Python311/python.exe.
 
-## Continue
-Adopt historical workers/watcher. Terminal archive verify and CPU score with
-CP5 originalgold on idle mpk; preserve failed/partial/unaccepted outputs.
-First84 published before remainder launch. Recompute feasibility
-from actual durations, only wholly unstarted blocks, no failed/uncertain retries.
-Finish separateG75100 then final honest brief and slides; no new optionalgrid.
-Automatic approval rejected GitHubpush twice: needs explicit USER authorization
-for exporting to coconight01/dlm_test despite existingorigin/branch evidence.
-Async exactremote confirmation PENDING; do not retry/bypass. Localcommits/GPU continue.
-Lastremote3f2b4db; latest runnable CP10 33edb5b; full700report and historical collector committed.
-Existing heartbeat v18-research-stage-continuation now v20/30min until19:58Z,
-quiet unchanged, adopts STATE. Pauseatcompletion, noarchive/no newautomation.
+Existing heartbeat v18-research-stage-continuation PAUSED at completion; task not
+archived. Deletion was rejected by auto-review; authorized safer pause succeeded.
+GitHub push remains blocked by auto-review requiring explicit USER confirmation
+for coconight01/dlm_test branch research/fan-m1-m3-cost-refresh-20260927.
+Pending async question unanswered. Do not retry/bypass; local finalcommit retained.
+Last remote3f2b4db. Once explicitly authorized, push existing reviewed branch only.
+Research complete; no additional GPU experiment is implied by pending push.
+Suggested next research step only: offline paired-trajectory divergence analysis
+before proposing another frozen validation; do not automatically start a new round.

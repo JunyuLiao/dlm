@@ -3,33 +3,15 @@
   "task": "Fan M1/M3 same-day native-adaptive multi-dataset cost study",
   "parent": "e3f14520eea98e45998fb369f9027f3b2707ec4a",
   "branch": "research/fan-m1-m3-cost-refresh-20260927",
-  "status": "CP9_FULL700_PUBLISHED_G75_RUNNING",
+  "status": "CP11_RESEARCH_COMPLETE_PUSH_AUTH_PENDING",
   "authority": "E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md",
   "budget_file": "results/fan_m1_m3_multidataset_20260927/campaign_budget.json",
   "panel_file": "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json",
   "scope_policy_consumer": "FROZEN GLOBAL_ONLY_NATIVE_LOCAL / P0 / triton; G75 ALL/Triton separate",
-  "gpu_jobs": [
-    {
-      "host": "149.165.151.254",
-      "supervisor_pid": 1789128,
-      "stage": "historical_001",
-      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/historical_001.stage.json",
-      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/historical_001.json",
-      "status": "running"
-    },
-    {
-      "host": "149.165.159.64",
-      "supervisor_pid": 133395,
-      "stage": "historical_001",
-      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/historical_001.stage.json",
-      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/historical_001.json",
-      "status": "running"
-    }
-  ],
   "coordinator": null,
   "prior_campaign": "v18 CP4 complete and unchanged",
-  "next": "Adopt historical001 GPUworkers and hidden watcher53584/collector53896. After terminal score audit all100rows/50validwarm, actualouterbudget, fullworkmetrics; update Chinese finalbrief/slides including negativeM3gate and G75limits, commit, pause existingheartbeat. Push only after explicit pending remoteauthorization.",
-  "updated_utc": "2026-09-27T16:44:49Z",
+  "next": "Research complete. No GPU or scoring relaunch. Await explicit pending authorization for coconight01/dlm_test branch push; retain all immutable deployments and private first outputs.",
+  "updated_utc": "2026-09-27T17:13:08.041104+00:00",
   "qualification": {
     "mpk": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
     "dllm": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
@@ -40,7 +22,7 @@
   "private_manifests": "E:/dlm/v20_private/frozen_panel_lf",
   "deployment": "deploy/cp3_00a2c4d",
   "deployment_commit": "00a2c4d3c93a7f685a4f75fba8ea47991fa5c383",
-  "charged_gpu_seconds_closed_stages": 19146.065313577652,
+  "charged_gpu_seconds_closed_stages": 21256.63526892662,
   "failed_stages": [
     {
       "stage": "screen_001",
@@ -54,9 +36,9 @@
       "preserved": true
     }
   ],
-  "generation_executions_closed_stages": 744,
+  "generation_executions_closed_stages": 844,
   "generation_executions_reserved_active_captures_max": 0,
-  "generation_note": "44qualification+700primary closed; 50validblocks/350acceptedwarm; no primary failure",
+  "generation_note": "44 qualification + 700 primary + 100 separately named G75 reference; 400 successful first and 400 accepted warm; no scored execution failure or missing cell",
   "screen002_artifacts": {
     "dllm": {
       "artifacts": {
@@ -108,9 +90,11 @@
     "initial_001/dllm": 1100.6446421146393,
     "initial_001/mpk": 2006.2358846664429,
     "remainder_001/dllm": 5919.138600826263,
-    "remainder_001/mpk": 5630.491504430771
+    "remainder_001/mpk": 5630.491504430771,
+    "historical_001/dllm": 1085.0229887962341,
+    "historical_001/mpk": 1025.5469665527344
   },
-  "latest_local_commit": "33edb5b",
+  "latest_local_commit": "final checkpoint: resolve git HEAD (self hash not embedded)",
   "generation_executions_reserved_active_bridge_max": 0,
   "binding_sha256": "ee06c936e500fecfd219c6a9e277f99e77baed7b39d405ad96625f94e50734b5",
   "execution_protocol_sha256": "99e1d287867b0906b8c5a2715d4cf962ec31e6d1f473c1fe0ce2df5891f1aa17",
@@ -140,13 +124,13 @@
   "watcher": {
     "pid": 53584,
     "path": "E:/dlm/v20_private/watch_historical_001/historical_001.status.json",
-    "status": "running",
+    "status": "complete",
     "read_only": true,
     "detached_hidden": true
   },
   "postprocessor": {
     "stage": "historical_001",
-    "status": "waiting_existing_watcher",
+    "status": "scored_complete",
     "config": "E:/dlm/v20_private/collect_historical_001.config.json",
     "output": "E:/dlm/v20_private/collect_historical_001",
     "cpu_only": true,
@@ -156,12 +140,10 @@
     "source_commit": "33edb5b",
     "detached_hidden": true,
     "deadline_epoch": 1790537280,
-    "command": "python -u -m scripts.v20_collect_historical collect --config E:/dlm/v20_private/collect_historical_001.config.json --out-dir E:/dlm/v20_private/collect_historical_001 --wait-until-epoch 1790537280"
+    "command": "python -u -m scripts.v20_collect_historical collect --config E:/dlm/v20_private/collect_historical_001.config.json --out-dir E:/dlm/v20_private/collect_historical_001 --wait-until-epoch 1790537280",
+    "summary_sha256": "ae013630235ba0ba5212ea35ae627d5e4c7edf9dd1b56718b6bedb5514237107"
   },
-  "active_gpu_seconds_reserved_max": {
-    "149.165.151.254": 4000,
-    "149.165.159.64": 4000
-  },
+  "active_gpu_seconds_reserved_max": {},
   "first84_report": "results/fan_m1_m3_multidataset_20260927/first84_report.md",
   "local_monitor_recovery": {
     "observed_utc": "2026-09-27T15:54:35Z",
@@ -211,5 +193,29 @@
     "pid": 6656,
     "detached_hidden": true
   },
-  "generation_executions_reserved_active_historical_max": 100
+  "generation_executions_reserved_active_historical_max": 0,
+  "final_report": "results/fan_m1_m3_multidataset_20260927/morning_or_final_brief.md",
+  "historical_summary_sha256": "ae013630235ba0ba5212ea35ae627d5e4c7edf9dd1b56718b6bedb5514237107",
+  "final_gate": "M3 incremental advantage NOT_PASSED; G75 reference no cross-dataset quality/time success",
+  "gpu_idle_verification": "2026-09-27 approximately17:10UTC: nvidia-smi compute-apps empty on both authorized hosts",
+  "heartbeat": "PAUSED at completion; deletion rejected, authorized safer pause succeeded",
+  "completed_historical_gpu_jobs": [
+    {
+      "host": "149.165.151.254",
+      "supervisor_pid": 1789128,
+      "stage": "historical_001",
+      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/historical_001.stage.json",
+      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/historical_001.json",
+      "status": "complete"
+    },
+    {
+      "host": "149.165.159.64",
+      "supervisor_pid": 133395,
+      "stage": "historical_001",
+      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/historical_001.stage.json",
+      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/historical_001.json",
+      "status": "complete"
+    }
+  ],
+  "gpu_jobs": []
 }

@@ -1,4 +1,4 @@
-# Local English slide text and Chinese notes — full700, G75 pending
+# Local English slide text and Chinese notes — full700 + separate G75 reference complete
 
 Draft only; no shared slides/messages edited. First84 archived unchanged.
 
@@ -49,8 +49,10 @@ RULER13q×2seeds; AIME/LB6q×2seeds. Exposed development inputs, not noninferior
   kept separate from strictEOS. No output-budget or stopping rescue.
 - First84 R3 .636/native did not persist: full-panel ratio1.031. Do not select R
   from early outcomes or turn non-significance into quality equivalence.
-- Separate G75L30_nativeQ128100 is running; new port, not old grouping equivalence.
+- Separate G75L30_nativeQ128:100/100 complete, new port, not old grouping equivalence.
+  AIME8/12,E2E/native.978; LB3/12,1.067; RULER24/26,1.093.
+  Same-GPU pairing retained; extension follows core and may have temporal drift.
 
 讲稿：完整面板推翻了早期两题的乐观点估计。R2多出来的调用吃掉单次节省；
 R3没有超过fresh-T，且LB正确数更低。今天交付实现和可复核的负结果，
-不把方向判死刑，也不靠继续扫参数硬找正结果。G75参考完成后补最终表。
+不把方向判死刑，也不靠继续扫参数硬找正结果。G75参考同样未形成跨任务质量和时间收益；无需继续追加矩阵。

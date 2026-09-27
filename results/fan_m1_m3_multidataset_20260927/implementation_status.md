@@ -1,4 +1,4 @@
-# v20 implementation and qualification status — first84 running
+# v20 implementation and qualification status — final research checkpoint
 
 Parent e3f14520eea98e45998fb369f9027f3b2707ec4a; branch
 research/fan-m1-m3-cost-refresh-20260927. Production deployment is immutable
@@ -20,9 +20,9 @@ at the single preflight ref check; no peer branch/environment changes.
 | physical work | Separate untimed exact input/output-matched twins | QK/PV legal-pair counts, partial tiles, GLOBAL/LOCAL/prefix/canvas, A/D/H ages; GLOBAL denominator only routed5layers |
 | samehost/crosshost bridge | Immutable frozen config/manifest/source checks | All8 bridge arms exact tokens, calls, termination, router phases across original H100 UUIDs |
 | initial-prefill-excluded span | Existing two-event InitialPrefillTimeline | ON/OFF parity passed native/R2/G75 bothhosts. Device-clock span includes host gaps/later commits, NOT decode wall/TBT |
-| adaptive first84 | Frozen task-aware sevenarm first/warm worker | RUNNING42executions perhost, first outputs immutable; not yet a scored quality/E2E claim |
-| remaining700 | Same frozen panel/policy/source | NOT_STARTED, follows first84 publication and remaining budget |
-| G75/L30 reference | Explicit ALL native-Q128/KV64 transplant | Direct and operator+bridge+timeline qualified; optional100answer executions NOT_STARTED; not oldvLLMgrouping |
+| adaptive first84 | Frozen task-aware sevenarm first/warm worker | COMPLETE84/84,42acceptedwarm; report published before remainder launch and preserved |
+| complete primary700 | Same frozen panel/policy/source | COMPLETE700/700,50validblocks,350acceptedwarm; first-output task scores and full work/E2E reported |
+| G75/L30 reference | Explicit ALL native-Q128/KV64 transplant | Direct and operator+bridge+timeline qualified; 100/100answer executions complete,50acceptedwarm; separate quality/work/E2E report; not oldvLLMgrouping |
 | M2 / ball / CVM expansion | No new implementation | M2 NOT_RUN; ball stopped beforeCUDA; noCVM expansion |
 
 Selected answer point BEFORE task outcomes: GLOBAL_ONLY_NATIVE_LOCAL, P0,

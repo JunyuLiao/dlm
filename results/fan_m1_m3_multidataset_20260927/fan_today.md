@@ -1,6 +1,6 @@
-# Fan 今日汇报：完整700次主面板
+# Fan 今日汇报：完整700次主面板与100次G75参考
 
-**700/700执行、50/50完整有效配对、350/350 warm通过；主面板无执行失败。** RULER13题×2seed，AIME和LongBench各6题×2seed；均为已暴露开发集。生产00a2c4d、评分CP5。G75/L30单独100次参考已于16:38 UTC启动，尚未评分。
+**700/700执行、50/50完整有效配对、350/350 warm通过；主面板无执行失败。** RULER13题×2seed，AIME和LongBench各6题×2seed；均为已暴露开发集。生产00a2c4d、评分CP5。G75/L30单独100次参考也已完成评分，50次warm全部有效；两台GPU已空闲。
 
 **当前判断：M1与周期调用M1的R2/R3已真实执行，但这一冻结配置未通过“比强dense及fresh-T更快、且答案质量可接受”的整体门槛。** LongBench的完整forward确实变便宜，native-adaptive增加的工作量抵消了收益。不能把早期两题R3快36%的结果当成完整结论，也不能据此断言整个方向不可行。
 
@@ -43,10 +43,21 @@ M3 的实际刷新执行 M1：用历史数值QK与当前投影V重决策，保�
 
 调用总量是工作统计，不与几何时间比值相乘作精确分解。各GPU上的配对时间=调用数×摊销时间分解、每canvas分布、A/D/H、caps、错误/未解析和探索性区间见[完整表](adaptive_panel_report.md)与[JSON](adaptive_panel.json)。此样本不足以证明质量等价或非劣。
 
-## G75/L30与剩余边界
+## G75/L30完整结果与边界
 
-旧adaptive证据已核对：小样本、LBcap1024、旧grouping/runtime，缺合格直接forward/生成段计时。本轮G75L30_nativeQ128是明确标注的新移植，已直接计时/数值/桥接合格；正在跑冻结100次，与同题同seed同GPU的native配对，跨阶段计时局限会单列。不能冒充旧实现等价。
+旧adaptive证据已核对：小样本、LBcap1024、旧grouping/runtime，缺合格直接forward/生成段计时。本轮G75L30_nativeQ128是明确标注的新移植，已直接计时/数值/桥接合格；冻结100次已完成，与同题同seed同GPU的native配对；参考运行晚于主面板，仍有跨阶段时间漂移局限。不能冒充旧实现等价。
 
-逐forward计时与干净generation分开；请求E2E含prefill和后续commit。另测首次prefill结束到生成结束的CUDA跨度（含CPU等待/commit），不是decode-only墙钟或TBT。RULER N16仍missing，以自然4次补测；M2/A4/新phase规则未运行。G75完成后交最终简报，不因本轮负结果开启新调参矩阵。
+
+| G75L30_nativeQ128 | 严格正确 / native | 调用数 / native | E2E/native |
+|---|---|---|---:|
+| RULER | 24/26 / 24/26，macro均92.31% | 106 / 99 | 1.093 |
+| AIME | 8/12 / 5/12 | 3367 / 3600 | 0.978 |
+| LongBench | 3/12 / 6/12 | 2838 / 2360 | 1.067 |
+
+G75在LongBench直接forward/native为mpk0.960、dllm0.920，但额外调用及质量下降使整体无优势。AIME直接forward反而慢8%–9%，请求点估计略快来自工作量减少，不能称单次成本改善。RULER/AIME/LB输出cap分别2/4/0，LB另有1个canvas达到iteration cap。详见[独立参考统计](historical_panel_report.md)。
+
+最终共844次generation（含44次资格验证）、5.905 GPU进程小时。完整结论与缺项见[最终简报](morning_or_final_brief.md)，不再追加GPU实验。
+
+逐forward计时与干净generation分开；请求E2E含prefill和后续commit。另测首次prefill结束到生成结束的CUDA跨度（含CPU等待/commit），不是decode-only墙钟或TBT。RULER N16仍missing，以自然4次补测；M2/A4/新phase规则未运行。最终简报已交，不因本轮负结果开启新调参矩阵。
 
 [早期84次](first84_report.md)保留不变；[三页英文草稿](fan_slide_drafts.md)随完整结果更新。所有运行检查点已本地提交；GitHubpush仍被自动审批阻止，等待指定现有远端授权。
