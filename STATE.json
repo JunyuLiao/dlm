@@ -3,18 +3,33 @@
   "task": "Fan M1/M3 same-day native-adaptive multi-dataset cost study",
   "parent": "e3f14520eea98e45998fb369f9027f3b2707ec4a",
   "branch": "research/fan-m1-m3-cost-refresh-20260927",
-  "status": "CP0_GPU_QUALIFIED_COST_PROFILE_PENDING",
+  "status": "CP1_DIRECT_COST_SCREEN_RUNNING",
   "authority": "E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md",
   "budget_file": "results/fan_m1_m3_multidataset_20260927/campaign_budget.json",
   "panel_file": "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json",
   "scope_policy_consumer": "pending_cost_and_numerical_qualification",
-  "gpu_jobs": [],
-  "charged_gpu_seconds": 28.997408866882324,
-  "generation_executions": 0,
+  "gpu_jobs": [
+    {
+      "host": "149.165.151.254",
+      "supervisor_pid": 1716604,
+      "stage": "screen_002",
+      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/cost/screen_002.stage.json",
+      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/cost/screen_002.json",
+      "status": "running"
+    },
+    {
+      "host": "149.165.159.64",
+      "supervisor_pid": 117433,
+      "stage": "screen_002",
+      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/cost/screen_002.stage.json",
+      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/cost/screen_002.json",
+      "status": "running"
+    }
+  ],
   "coordinator": null,
   "prior_campaign": "v18 CP4 complete and unchanged",
-  "next": "CP1 immutable cost-screen deploy to both GPUs with complete arm sets; bind method before first84",
-  "updated_utc": "2026-09-27T12:35:00Z",
+  "next": "Adopt screen_002 workers; cost selection and N16/whole-step followup; freeze generation binding, bridge, first84 and publish before remainder",
+  "updated_utc": "2026-09-27T12:50:00Z",
   "qualification": {
     "mpk": "10/10 GPU tests passed",
     "dllm": "10/10 GPU tests passed",
@@ -22,5 +37,24 @@
     "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
     "bridge_note": "same CUDA kernel; newhost private bridge relink after two CPU missing-header failures, no GPU request retry"
   },
-  "private_manifests": "E:/dlm/v20_private/frozen_panel_lf"
+  "private_manifests": "E:/dlm/v20_private/frozen_panel_lf",
+  "deployment": "deploy/cp2_699a9ec",
+  "deployment_commit": "699a9ec1c4d5b31d0a12cd046256ba59bfdfb203",
+  "charged_gpu_seconds_closed_stages": 42.792436599731445,
+  "failed_stages": [
+    {
+      "stage": "screen_001",
+      "source": "7c0286b",
+      "reason": "native arm config lacked required model/revision identity; both failed before model load after11/11 GPU qualification tests",
+      "generations": 0,
+      "seconds": {
+        "mpk": 7.174681663513184,
+        "dllm": 6.6203460693359375
+      },
+      "preserved": true
+    }
+  ],
+  "generation_executions_closed_stages": 0,
+  "generation_executions_reserved_active_captures_max": 10,
+  "generation_note": "screen002 contains at most5 native generate captures/host; actual invocations audited at terminal, not assumed zero while running"
 }

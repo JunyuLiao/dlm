@@ -52,3 +52,18 @@ bridge privately relinked after CPU header-path fixes. Qual GPU seconds use oute
 stage receipts only; do not add internal worker durations again. Counter twins
 are separate from accepted timers. CP1 profile has immutable checkpoints/JIT
 guards/source+GPUidentity checks; main cost screen uses floor=false.
+
+12:49UTC current workers: screen_002 on BOTH hosts, cp2_699a9ec immutable.
+mpk supervisor1716604, dllm117433; stage receipts ROOT/cost/screen_002.stage.json,
+results ROOT/cost/screen_002.json with partial/failure siblings. Hard2400s each.
+26arm whole comparisons perGPU, one metadata-selected question/family/host.
+DO NOT launch another worker. Root/private host paths E:/dlm/v20_private/hosts.json.
+Screen001 failed pre-model-load native-config identity check; retained. CP2
+fixed native identity and adds CPU bind-to-profile preflight. All11 GPU tests
+passed on both hosts at screen001. CP2 has60 CPU tests, source699a9ec pushed.
+Original CRLF private manifests preserved; frozen_panel_lf matches all3 hashes.
+Current profile uses model_forward/N4, counter_twins=true, floor=false. Later
+N16 and denoising_step selected configurations still required before finalclaim.
+First84/core generation NOT_STARTED; policy/scope/consumer unselected.
+Existing heartbeat v18-research-stage-continuation now uses v20 prompt/30min
+interval, active until19:58UTC. Pause it at v20 completion; do not archive task.
