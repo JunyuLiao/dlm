@@ -1,0 +1,2026 @@
+{
+  "no_quality_based_selection": true,
+  "profiles": [
+    "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+    "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032"
+  ],
+  "rows": [
+    {
+      "accepted_repetitions": 6,
+      "arm": "D_native",
+      "boundary": "denoising_step",
+      "canonical_arm": "D_native",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 580.4848556518555,
+      "complete_call_wall_sum_median_ms": 580.6593116139993,
+      "condition": "native_dense",
+      "consumer": "hopper",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 579.7865905761719,
+      "direct_epoch_wall_median_ms": 579.8164304578677,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002457374078941754,
+      "peak_allocated_bytes": 55392769536,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": null,
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": null,
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "G75L30_nativeQ128",
+      "boundary": "denoising_step",
+      "canonical_arm": "G75L30_nativeQ128",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 633.4329528808594,
+      "complete_call_wall_sum_median_ms": 633.6016419809312,
+      "condition": "v20_G75L30_nativeQ128",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 631.9943237304688,
+      "direct_epoch_wall_median_ms": 632.0256311446428,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002457374078941754,
+      "peak_allocated_bytes": 55392850944,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 176.2890167236328
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 146.87603759765625
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 155.21734619140625
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "ALL_NATIVE_LEGAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0912135720914646,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0900464653768804
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "D_matched",
+      "boundary": "denoising_step",
+      "canonical_arm": "D_matched",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 580.8101196289062,
+      "complete_call_wall_sum_median_ms": 580.9791567735374,
+      "condition": "v20_dense_consumer",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 578.7544555664062,
+      "direct_epoch_wall_median_ms": 578.7867680191994,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002457374078941754,
+      "peak_allocated_bytes": 55392774144,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 4,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 147.17324829101562
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0005603315467817,
+      "within_gpu_direct_epoch_ratio_to_native": 0.9982198018606468
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "T_scope",
+      "boundary": "denoising_step",
+      "canonical_arm": "T_scope",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 592.0521240234375,
+      "complete_call_wall_sum_median_ms": 592.220245860517,
+      "condition": "v20_fresh_T",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 587.0579223632812,
+      "direct_epoch_wall_median_ms": 587.0899008587003,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002457374078941754,
+      "peak_allocated_bytes": 55400447488,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 4,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 149.00888061523438
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.019926908099252,
+      "within_gpu_direct_epoch_ratio_to_native": 1.012541393514954
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M1_R1_A8_current_output",
+      "boundary": "denoising_step",
+      "canonical_arm": "M1_R1_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 599.9110717773438,
+      "complete_call_wall_sum_median_ms": 600.0803660135716,
+      "condition": "global_M1",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 595.8456420898438,
+      "direct_epoch_wall_median_ms": 595.8792290184647,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002457374078941754,
+      "peak_allocated_bytes": 55913794048,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 147.1893768310547
+        },
+        "D": {
+          "calls": 3,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 151.60928344726562
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0334655003250233,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0276982113327473
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M3_R2_A8_current_output",
+      "boundary": "denoising_step",
+      "canonical_arm": "M3_R2_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 593.8053131103516,
+      "complete_call_wall_sum_median_ms": 593.9850499853492,
+      "condition": "global_M3",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 590.3719482421875,
+      "direct_epoch_wall_median_ms": 590.4086050577462,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002457374078941754,
+      "peak_allocated_bytes": 55913794048,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 147.127197265625
+        },
+        "D": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 151.2914581298828
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 147.63777923583984
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0229471231312968,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0182573344021224
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M3_R3_A8_current_output",
+      "boundary": "denoising_step",
+      "canonical_arm": "M3_R3_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 593.6585235595703,
+      "complete_call_wall_sum_median_ms": 593.826801981777,
+      "condition": "v20_global_M3_R3",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 590.3695678710938,
+      "direct_epoch_wall_median_ms": 590.4025549534708,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002457374078941754,
+      "peak_allocated_bytes": 55913794048,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 146.76162719726562
+        },
+        "D": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 149.6261749267578
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 148.75440216064453
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0226942490909974,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0182532288033859
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "B_A8_matched",
+      "boundary": "denoising_step",
+      "canonical_arm": "B_A8_matched",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 589.4349517822266,
+      "complete_call_wall_sum_median_ms": 589.6113279741257,
+      "condition": "global_B8",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 584.1485595703125,
+      "direct_epoch_wall_median_ms": 584.1821171343327,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002457374078941754,
+      "peak_allocated_bytes": 55745915392,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 146.55142211914062
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 3,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 147.5966033935547
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0154183111638986,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0075234044130028
+    },
+    {
+      "accepted_repetitions": 6,
+      "arm": "D_native",
+      "boundary": "model_forward",
+      "canonical_arm": "D_native",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 557.2514877319336,
+      "complete_call_wall_sum_median_ms": 557.4319364968687,
+      "condition": "native_dense",
+      "consumer": "hopper",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 554.1966247558594,
+      "direct_epoch_wall_median_ms": 554.2312699835747,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002326083602594897,
+      "peak_allocated_bytes": 55526982656,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": null,
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": null,
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "G75L30_nativeQ128",
+      "boundary": "model_forward",
+      "canonical_arm": "G75L30_nativeQ128",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 609.1988525390625,
+      "complete_call_wall_sum_median_ms": 609.3761599622667,
+      "condition": "v20_G75L30_nativeQ128",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 605.543701171875,
+      "direct_epoch_wall_median_ms": 605.5781340692192,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002326083602594897,
+      "peak_allocated_bytes": 55527063040,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 169.6452178955078
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 141.1248321533203
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 149.28465270996094
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "ALL_NATIVE_LEGAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.093220683929548,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0926513697889004
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "D_matched",
+      "boundary": "model_forward",
+      "canonical_arm": "D_matched",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 554.85791015625,
+      "complete_call_wall_sum_median_ms": 555.0348646938801,
+      "condition": "v20_dense_consumer",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 551.8409423828125,
+      "direct_epoch_wall_median_ms": 551.8758359830827,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002326083602594897,
+      "peak_allocated_bytes": 55526986240,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 4,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 140.8362274169922
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 0.9957046726148266,
+      "within_gpu_direct_epoch_ratio_to_native": 0.9957493743775783
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "T_scope",
+      "boundary": "model_forward",
+      "canonical_arm": "T_scope",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 564.8314208984375,
+      "complete_call_wall_sum_median_ms": 565.009439829737,
+      "condition": "v20_fresh_T",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 557.8696899414062,
+      "direct_epoch_wall_median_ms": 557.9051491804421,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002326083602594897,
+      "peak_allocated_bytes": 55534659584,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 4,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 142.5338897705078
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0136023560876526,
+      "within_gpu_direct_epoch_ratio_to_native": 1.006627729259746
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M1_R1_A8_current_output",
+      "boundary": "model_forward",
+      "canonical_arm": "M1_R1_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 573.6467742919922,
+      "complete_call_wall_sum_median_ms": 573.8235760945827,
+      "condition": "global_M1",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 568.2948608398438,
+      "direct_epoch_wall_median_ms": 568.3295801281929,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002326083602594897,
+      "peak_allocated_bytes": 56048006144,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 140.67091369628906
+        },
+        "D": {
+          "calls": 3,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 144.81651306152344
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.029421700831682,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0254390507885087
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M3_R2_A8_current_output",
+      "boundary": "model_forward",
+      "canonical_arm": "M3_R2_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 568.6686248779297,
+      "complete_call_wall_sum_median_ms": 568.8465088605881,
+      "condition": "global_M3",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 563.5912475585938,
+      "direct_epoch_wall_median_ms": 563.627579016611,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002326083602594897,
+      "peak_allocated_bytes": 56048006144,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 140.5196533203125
+        },
+        "D": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 145.4469757080078
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 141.39901733398438
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0204883026736544,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0169517863932733
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M3_R3_A8_current_output",
+      "boundary": "model_forward",
+      "canonical_arm": "M3_R3_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 567.5752563476562,
+      "complete_call_wall_sum_median_ms": 567.7531196270138,
+      "condition": "v20_global_M3_R3",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 562.2835083007812,
+      "direct_epoch_wall_median_ms": 562.3207869939506,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002326083602594897,
+      "peak_allocated_bytes": 56048006144,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 140.20816040039062
+        },
+        "D": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 143.4246368408203
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 141.93993377685547
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0185262288984482,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0145920837184534
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "B_A8_matched",
+      "boundary": "model_forward",
+      "canonical_arm": "B_A8_matched",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 562.6828460693359,
+      "complete_call_wall_sum_median_ms": 562.8569237887859,
+      "condition": "global_B8",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 556.78076171875,
+      "direct_epoch_wall_median_ms": 556.8150479812175,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "host": "mpk",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.002326083602594897,
+      "peak_allocated_bytes": 55880127488,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 139.57852172851562
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 3,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 140.98243713378906
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "835eb919ebf2",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0097466914974216,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0046628522215
+    },
+    {
+      "accepted_repetitions": 6,
+      "arm": "D_native",
+      "boundary": "denoising_step",
+      "canonical_arm": "D_native",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 545.2716331481934,
+      "complete_call_wall_sum_median_ms": 545.4252750059823,
+      "condition": "native_dense",
+      "consumer": "hopper",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 544.9107360839844,
+      "direct_epoch_wall_median_ms": 544.9436389972107,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0019774521868232142,
+      "peak_allocated_bytes": 55411894784,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": null,
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": null,
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "G75L30_nativeQ128",
+      "boundary": "denoising_step",
+      "canonical_arm": "G75L30_nativeQ128",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 589.34716796875,
+      "complete_call_wall_sum_median_ms": 589.4963210012065,
+      "condition": "v20_G75L30_nativeQ128",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 588.7479858398438,
+      "direct_epoch_wall_median_ms": 588.7881779926829,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0019774521868232142,
+      "peak_allocated_bytes": 55411976192,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 162.69932556152344
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 135.27670288085938
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 145.74944305419922
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "ALL_NATIVE_LEGAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0808322533964971,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0804484970710926
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "D_matched",
+      "boundary": "denoising_step",
+      "canonical_arm": "D_matched",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 539.8578109741211,
+      "complete_call_wall_sum_median_ms": 540.0096239900449,
+      "condition": "v20_dense_consumer",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 536.8192138671875,
+      "direct_epoch_wall_median_ms": 536.8520570045803,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0019774521868232142,
+      "peak_allocated_bytes": 55411899392,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 4,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 136.37804412841797
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 0.9900713298749563,
+      "within_gpu_direct_epoch_ratio_to_native": 0.9851507381283275
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "T_scope",
+      "boundary": "denoising_step",
+      "canonical_arm": "T_scope",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 548.3375244140625,
+      "complete_call_wall_sum_median_ms": 548.4954900020966,
+      "condition": "v20_fresh_T",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 545.2158813476562,
+      "direct_epoch_wall_median_ms": 545.248481008457,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0019774521868232142,
+      "peak_allocated_bytes": 55419591680,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 4,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 137.81351470947266
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0056226861613318,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0005599912856642
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M1_R1_A8_current_output",
+      "boundary": "denoising_step",
+      "canonical_arm": "M1_R1_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 567.1502380371094,
+      "complete_call_wall_sum_median_ms": 567.2990059974836,
+      "condition": "global_M1",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 563.8277587890625,
+      "direct_epoch_wall_median_ms": 563.8621429970954,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0019774521868232142,
+      "peak_allocated_bytes": 55943959552,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 141.03897094726562
+        },
+        "D": {
+          "calls": 3,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 141.1510467529297
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.040124230858292,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0347158194037904
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M3_R2_A8_current_output",
+      "boundary": "denoising_step",
+      "canonical_arm": "M3_R2_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 558.2516784667969,
+      "complete_call_wall_sum_median_ms": 558.3997659850866,
+      "condition": "global_M3",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 554.2467041015625,
+      "direct_epoch_wall_median_ms": 554.2812610074179,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0019774521868232142,
+      "peak_allocated_bytes": 55943959552,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 141.55941772460938
+        },
+        "D": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 144.63865661621094
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 136.00852966308594
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0238047324113702,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0171330227124378
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M3_R3_A8_current_output",
+      "boundary": "denoising_step",
+      "canonical_arm": "M3_R3_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 556.9448394775391,
+      "complete_call_wall_sum_median_ms": 557.1111490135081,
+      "condition": "v20_global_M3_R3",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 554.7691040039062,
+      "direct_epoch_wall_median_ms": 554.8016690008808,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0019774521868232142,
+      "peak_allocated_bytes": 55943959552,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 141.32794189453125
+        },
+        "D": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 140.6879425048828
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 137.6645278930664
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.021408057231859,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0180917116641328
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "B_A8_matched",
+      "boundary": "denoising_step",
+      "canonical_arm": "B_A8_matched",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 552.6403503417969,
+      "complete_call_wall_sum_median_ms": 552.7886139898328,
+      "condition": "global_B8",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 548.7701416015625,
+      "direct_epoch_wall_median_ms": 548.8036339957034,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0019774521868232142,
+      "peak_allocated_bytes": 55770871808,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 141.9101104736328
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 3,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 135.98471069335938
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0135138465778226,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0070826380579576
+    },
+    {
+      "accepted_repetitions": 6,
+      "arm": "D_native",
+      "boundary": "model_forward",
+      "canonical_arm": "D_native",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 521.4568557739258,
+      "complete_call_wall_sum_median_ms": 521.6167815015069,
+      "condition": "native_dense",
+      "consumer": "hopper",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 520.0010986328125,
+      "direct_epoch_wall_median_ms": 520.0363420008216,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0014000018830435668,
+      "peak_allocated_bytes": 55546107904,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": null,
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": null,
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "G75L30_nativeQ128",
+      "boundary": "model_forward",
+      "canonical_arm": "G75L30_nativeQ128",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 565.7952880859375,
+      "complete_call_wall_sum_median_ms": 565.9571510041133,
+      "condition": "v20_G75L30_nativeQ128",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 562.9566040039062,
+      "direct_epoch_wall_median_ms": 562.9927720001433,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0014000018830435668,
+      "peak_allocated_bytes": 55546188288,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 156.48963928222656
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 129.31248474121094
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 140.00621795654297
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "ALL_NATIVE_LEGAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.085027997658994,
+      "within_gpu_direct_epoch_ratio_to_native": 1.082606566570787
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "D_matched",
+      "boundary": "model_forward",
+      "canonical_arm": "D_matched",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 514.5077667236328,
+      "complete_call_wall_sum_median_ms": 514.6642199979397,
+      "condition": "v20_dense_consumer",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 512.2145385742188,
+      "direct_epoch_wall_median_ms": 512.2518720017979,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0014000018830435668,
+      "peak_allocated_bytes": 55546111488,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 4,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 130.38652801513672
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 0.986673702774548,
+      "within_gpu_direct_epoch_ratio_to_native": 0.9850258776778238
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "T_scope",
+      "boundary": "model_forward",
+      "canonical_arm": "T_scope",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 524.0351028442383,
+      "complete_call_wall_sum_median_ms": 524.1979569982504,
+      "condition": "v20_fresh_T",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 519.1644897460938,
+      "direct_epoch_wall_median_ms": 519.1995500063058,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0014000018830435668,
+      "peak_allocated_bytes": 55553803776,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 4,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 131.9072494506836
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20_controls:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0049443152233295,
+      "within_gpu_direct_epoch_ratio_to_native": 0.9983911401554374
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M1_R1_A8_current_output",
+      "boundary": "model_forward",
+      "canonical_arm": "M1_R1_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 543.4144592285156,
+      "complete_call_wall_sum_median_ms": 543.5720719979145,
+      "condition": "global_M1",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 538.5654907226562,
+      "direct_epoch_wall_median_ms": 538.6025780026102,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0014000018830435668,
+      "peak_allocated_bytes": 56078171648,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 135.2845458984375
+        },
+        "D": {
+          "calls": 3,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 134.84515380859375
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.042108188264207,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0357006785921286
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M3_R2_A8_current_output",
+      "boundary": "model_forward",
+      "canonical_arm": "M3_R2_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 534.4947052001953,
+      "complete_call_wall_sum_median_ms": 534.657354990486,
+      "condition": "global_M3",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 530.0535888671875,
+      "direct_epoch_wall_median_ms": 530.0906339980429,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0014000018830435668,
+      "peak_allocated_bytes": 56078171648,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 135.00547790527344
+        },
+        "D": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 138.8221435546875
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 130.11297607421875
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0250027385428067,
+      "within_gpu_direct_epoch_ratio_to_native": 1.01933167114609
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "M3_R3_A8_current_output",
+      "boundary": "model_forward",
+      "canonical_arm": "M3_R3_A8_current_output",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 534.7809906005859,
+      "complete_call_wall_sum_median_ms": 534.9366139998892,
+      "condition": "v20_global_M3_R3",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 529.3058471679688,
+      "direct_epoch_wall_median_ms": 529.3421820097137,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0014000018830435668,
+      "peak_allocated_bytes": 56078171648,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 135.32518005371094
+        },
+        "D": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 135.00714111328125
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 2,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 132.1808624267578
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0255517492561967,
+      "within_gpu_direct_epoch_ratio_to_native": 1.0178937093779614
+    },
+    {
+      "accepted_repetitions": 3,
+      "arm": "B_A8_matched",
+      "boundary": "model_forward",
+      "canonical_arm": "B_A8_matched",
+      "canvas": 0,
+      "complete_call_event_sum_median_ms": 529.6874237060547,
+      "complete_call_wall_sum_median_ms": 529.845782002667,
+      "condition": "global_B8",
+      "consumer": "triton",
+      "dataset": "ruler4k",
+      "direct_epoch_event_median_ms": 525.6132202148438,
+      "direct_epoch_wall_median_ms": 525.6485150021035,
+      "fallback_used": false,
+      "gpu_name": "NVIDIA H100 80GB HBM3",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "host": "dllm",
+      "jit_valid": true,
+      "native_bracket_max_abs_drift": 0.0014000018830435668,
+      "peak_allocated_bytes": 55905083904,
+      "phase_complete_call_costs": {
+        "A": {
+          "calls": 1,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 135.60018920898438
+        },
+        "D": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "FRESH": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        },
+        "H": {
+          "calls": 3,
+          "counter_totals": {},
+          "median_complete_call_event_ms": 130.07781982421875
+        },
+        "MIXED": {
+          "calls": 0,
+          "counter_totals": {},
+          "median_complete_call_event_ms": null
+        }
+      },
+      "plugin": "experiments.numerical_qk_reuse.v20:install",
+      "policy_sha256": "816970d5b9653dc3a73d51799f9f0347afc5c3d8ec06de97c36951e63c3062ca",
+      "profile_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "reached_calls": 4,
+      "requested_call": 0,
+      "requested_calls": 4,
+      "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+      "selected_call": 0,
+      "sequence": "N4",
+      "state": "faf0cd54dd80",
+      "status": "measured",
+      "timing_definition": "CUDA stream elapsed span including host launch gaps; model load and snapshot prep excluded",
+      "torch_version": "2.6.0+cu124",
+      "within_gpu_complete_call_ratio_to_native": 1.0157837946533725,
+      "within_gpu_direct_epoch_ratio_to_native": 1.010792518701954
+    }
+  ],
+  "schema": "v20_cost_selection_input_v1"
+}

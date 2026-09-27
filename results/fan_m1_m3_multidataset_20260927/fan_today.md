@@ -1,52 +1,34 @@
-# v20 今日直接计时初报（screen002）
+# Fan 今日汇报：M1 与周期调用 M1 的 M3
 
-2026-09-27 13:05 UTC。两台 H100 各自完成整套同 GPU 对照；每类两题分配在两台机器。下面是前 4 次完整 decoder forward 的直接 CUDA-stream span 之和除以 4，仅为捕获状态的平均直接成本；包含投影、注意力、MLP/MoE、logits，未包含 sampler。AIME/LongBench 分别覆盖两个真实 canvas（0/8 与 0/4）；RULER 为 canvas0。不是 request 时间除以调用数，也不是自然答案的加速比。
+**14:03 UTC：直接计时、数值核验、两机桥接已完成；前84次正式答案对照正在运行，尚未评分。** 原生 adaptive stopping、阈值、输出长度和seed未改。生产代码00a2c4d；本地最新已提交检查点05f9947。
 
-## GLOBAL、P0、Hopper 的初步实测
+M3 的实际刷新执行 M1：用历史数值QK与当前投影V重决策，保留块计算当前QK/PV输出。数值锚点A8与决策间隔R1/R2/R3分离；锚点重置决策年龄。未跳过Q/K/V线性投影。根据预先冻结的成本规则，答案面板选 **GLOBAL五层/P0/Triton**，其余25层保持native；全层路径已测且较慢。公共fast-T不是新贡献。
 
-| GPU | 数据集 | native ms/forward | M1/native | R2/native | R3/native | B_A8/native | 最大 bracket 漂移 |
+## 直接完整 decoder forward
+
+每个比值均为同GPU的method/native，<1更快；每台机器分别列绝对时间，不跨机拼接。ms列为该GPU真实状态的直接完整调用均值，比值按状态几何平均。序列最长16次，以native实际停止为限。
+
+| 数据集 / GPU | 实际调用数 | native ms | T/native | M1/native | R2/native | R3/native | B_A8/native |
 |---|---|---:|---:|---:|---:|---:|---:|
-| mpk | ruler4k | 139.32 | 1.032 | 1.018 | 1.017 | 1.008 | 0.49% |
-| mpk | aime26 | 126.94 | 1.046 | 1.035 | 1.036 | 1.030 | 0.66% |
-| mpk | longbench_v2 | 147.13 | 1.007 | 0.969 | 0.968 | 0.943 | 2.47% |
-| dllm | ruler4k | 129.64 | 1.044 | 1.024 | 1.021 | 1.008 | 1.05% |
-| dllm | aime26 | 119.38 | 1.038 | 1.027 | 1.027 | 1.021 | 0.93% |
-| dllm | longbench_v2 | 149.74 | 0.972 | 0.939 | 0.933 | 0.906 | 0.30% |
+| ruler4k / mpk | 4 | 139.31 | 1.014 | 1.029 | 1.020 | 1.019 | 1.010 |
+| ruler4k / dllm | 4 | 130.36 | 1.005 | 1.042 | 1.025 | 1.026 | 1.016 |
+| aime26 / mpk | 12,14 | 134.82 | 1.014 | 1.040 | 1.029 | 1.027 | 1.024 |
+| aime26 / dllm | 7,8 | 120.14 | 1.010 | 1.031 | 1.023 | 1.020 | 1.017 |
+| longbench_v2 / mpk | 16 | 161.99 | 0.989 | 0.989 | 0.958 | 0.950 | 0.932 |
+| longbench_v2 / dllm | 16 | 158.17 | 0.972 | 0.949 | 0.918 | 0.912 | 0.886 |
 
-比值均为 method/native，<1 更快；每格只在本 GPU 内配对。多个 canvas 的比值用几何平均，绝对 ms 是本 GPU 状态平均，未跨机拼接。全部 260 行无新 JIT；括号漂移最大 2.48%。完整明细随后附 per_forward 文件。
+**判断：** LongBench的R2/R3完整forward约便宜4%–9%，完整denoising-step也改善；AIME和RULER尚无forward优势。LongBench上简单B_A8仍更便宜，不能把native-relative收益当成M3的独有贡献。选定Triton的LongBench D_matched/native为mpk0.984、dllm0.972；R2/R3在较长序列低于它。consumer选择差距仅约0.03%，不宣传为backend优势。
 
-当前结论：R2/R3 减少 M1 重决策成本，但 GLOBAL 的收益主要出现在 LongBench，且仍慢于更简单的 B_A8。AIME/RULER 尚无单次 forward 优势；全层 M1/R2/R3 在三类任务均较慢。不能据此声称质量保持或整请求加速。
+数值误差遵守预先固定的v11容差，真实A/D/H与物理计数twin通过。例：mpk/P0/R2，AIME早canvas的GLOBAL QK/PV仅跳过0.8%/1.1%，晚canvas为13.6%/16.0%；LongBench早canvas为49.8%/57.5%。分母仅为被路由的五层，不能叫全模型跳过率。更高P1稀疏度未产生稳定跨任务成本收益，保留P0。
 
-## 冻结的后续选择（不看答案）
+## 答案与整请求：下一道门槛
 
-按已提交的 cost_selection_rule，选择 GLOBAL_ONLY_NATIVE_LOCAL 做基本答案对照；全层路径作为已测负结果保留。P1 在 LongBench 有约 0.5%–1% 的额外成本下降，但其他数据集不稳定，保留 P0，不继续找阈值。
+前84由每类两题、seed101、七方法×first/warm组成，各完整题目×seed组固定在一台GPU。首次输出用于质量，warm须匹配tokens/calls/终止/phase且无新JIT。会单列分数、EOS/未解析/封顶/失败、调用数/画布、输出长度、E2E及相对freshT/B比值。**当前不能声明质量保持、整请求加速或论文贡献。** 先发布84次结果，再在剩余预算内完成700计划。
 
-consumer 比较仅用 P0 的 R2 与 B，同题同状态，先各类等权，再两台等权。ALL 的 Triton/Hopper=1.0130，因此 ALL 选 Hopper；GLOBAL 的比值为 0.9996876，因此按预定规则选 Triton，但差异仅约 0.03%，不足以声称 consumer 性能优势。两台分别 1.0006874 与 0.9986879，方向不一致。选定 consumer 后须完成同 QKV 数值检查及较长完整序列、whole denoising step 才放行答案阶段。
+逐forward计时与答案generation分开，避免同步干扰E2E。两事件计时开关已通过三方法、两机输出一致性检查；可报告首次prefill结束到生成结束的CUDA跨度（包括CPU等待和后续commit），不是decode-only墙钟时间/TBT。
 
-## 尚未完成
+G75/L30：旧adaptive小样本存在，但旧LB输出上限1024、grouping/runtime不同，且缺直接forward与合格decode-only统计。本轮native-Q128移植已完成直接计时/数值/桥接，单独100次答案扩展尚未开始，不冒充旧实现。
 
-- 前 84 次正式 first/warm：0/84，不能提供 accuracy、调用数或 E2E 结论。
-- 较长（最多 16 次、以 native 停止为上限）和 whole denoising step：下一阶段。
-- G75L30 native-Q128 当代移植已测 N4，尚待数值与完整 adaptive 对照；不等同旧 vLLM grouping。旧 adaptive 小面板有证据但缺直接 forward 和合格 decode-only 时间，见 held_bitmap_evidence.md。
-- 原始输出/失败保存在不可变私有结果；screen001 的配置身份失败已保留，没有重试任何正式答案。
+完整证据：[长序列与whole-step](selected001_forward.md)、[RULER原生N4](ruler_selected001_forward.md)、[物理稀疏与年龄](selected_physical.md)、[原始N4双scope筛选](per_forward.md)、[旧G75/L30证据](held_bitmap_evidence.md)、[三页英文草稿及讲稿](fan_slide_drafts.md)。RULER的N16保持missing，用原生4次补测，未强制多走step。
 
-直接计时与自然 generation 分开运行，避免每 forward 同步干扰 E2E。decode-only 若没有已核验的 prefill 边界，将保留 N/A。
-
-物理计数见 screen002_physical.md：GLOBAL_ONLY 的分母仅覆盖被路由的 5 个 GLOBAL 层；25 个保持 native 的 LOCAL 层不在这些 counter twin 中，不能把该比例称为全模型 attention 的跳过率。数值/decision age 的逐层数据在下一阶段补齐。
-
-另外，LongBench 的同 consumer 全保留 D_matched/native 已达到 mpk 0.940、dllm 0.920，而 P0 R2 分别为 0.969、0.939。当前 N4 中 R2 的 native-relative 收益并不能归因于 M1/M3 本身：全保留 consumer 已更便宜。后续会同时保留 native、D_matched、fresh T 和 B 的比较，不把 backend 差异当作方法贡献。
-
-## 13:37 UTC 更新：选定 GLOBAL/P0/Triton 的较长完整序列
-
-AIME 自然达到 7–14 次调用；LongBench 达到捕获上限 16 次。未强迫任何 native canvas 多走一步。下面仅是 model_forward，whole denoising-step 明细见 selected001_forward.md。
-
-| GPU | 数据集 | 原生实际调用数 | native ms/forward | M1/native | R2/native | R3/native | B/native |
-|---|---|---|---:|---:|---:|---:|---:|
-| mpk | aime26 | 12,14 | 134.82 | 1.040 | 1.029 | 1.027 | 1.024 |
-| mpk | longbench_v2 | 16 | 161.99 | 0.989 | 0.958 | 0.950 | 0.932 |
-| dllm | aime26 | 7,8 | 120.14 | 1.031 | 1.023 | 1.020 | 1.017 |
-| dllm | longbench_v2 | 16 | 158.17 | 0.949 | 0.918 | 0.912 | 0.886 |
-
-两台机器的实际 QKV/支持集检查及计数 twin 均通过；R1/R2/R3 的真实 A/D/H 被观察到。此处选定 Triton 与上面 N4 首报的 Hopper 表是不同明确配置，不能直接相减当成 A8 收益。选定 Triton 的 LongBench D_matched/native 为 mpk0.984、dllm0.972，R2/R3 在较长序列确实低于它；仍未超过 B_A8。
-
-RULER 原生只有4次，主 N16 项保留 missing；同配置 N4 双边界补测正在完成。前84正式答案仍0/84，等待数值门槛与两机桥接放行。
+提交/推送：本地检查点已保存；自动审批阻止GitHubpush，正在等待对指定现有远端的明确确认。GPU工作和本地报告继续。
