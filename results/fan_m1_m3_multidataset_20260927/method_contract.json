@@ -1,0 +1,21 @@
+{
+  "schema": "v20_method_contract_v1",
+  "parent": "e3f14520eea98e45998fb369f9027f3b2707ec4a",
+  "authority": "E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md plus user's explicit adaptive G75/L30 evidence/reference request",
+  "model": "google/diffusiongemma-26B-A4B-it",
+  "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "native": {"block_size": 256, "max_denoising_steps": 48, "fixed_steps": false, "temperature_start": 0.8, "temperature_end": 0.4, "confidence_threshold": 0.005, "stability_threshold": 1, "acceptance_entropy_bound": 0.1, "self_conditioning": true, "eos": "native"},
+  "output_mode": "historical_route_preqk_current_output",
+  "score_period_A": 8,
+  "decision_intervals_R": {"M1_R1_A8_current_output": 1, "M3_R2_A8_current_output": 2, "M3_R3_A8_current_output": 3, "B_A8_matched": 8},
+  "phase_clock": "zero-based actual decoder call in current canvas; score anchor takes precedence and resets decision age; R3 A8 has A,H,H,D,H,H,D,H,A,H,H,D",
+  "scopes_to_qualify": ["ALL_NATIVE_LEGAL", "GLOBAL_ONLY_NATIVE_LOCAL"],
+  "mask_rule": "native_mask; keep GLOBAL/LOCAL threshold kind but no extra LOCAL query-relative crop; explicit mask invalidation remains fail-closed/forced real anchor",
+  "fast_t": true,
+  "policy_proposals": {"P0": "v18 T50 frozen RULER calibration thresholds", "P1": "v18 T60 frozen RULER calibration thresholds"},
+  "policy_selection": "cost/physical-work on predeclared development captures only, before new answer outcomes; one common selected policy/scope/consumer for all R variants",
+  "capture_plan": {"inputs_per_dataset": 2, "seed": 101, "RULER4K": {"canvases": [0], "early_call": 0, "late_call": 2, "late_fallback_call": 1}, "AIME26": {"canvases": [0, 8], "late_fallback_canvas": 1}, "LongBench-v2": {"canvases": [0, 4], "late_fallback_canvas": 1}, "max_real_calls_per_canvas": 16, "sequence_lengths": [4, 16], "unreachable": "report missing or named predeclared earlier fallback; never force native calls"},
+  "timing": {"direct_profile": "separate state-restored replay job; full model_forward and native denoising_step boundaries, CUDA stream elapsed and synchronized wall where possible", "request": "clean adaptive first/warm, no per-forward synchronization profiler", "decode_time": "retain existing qualified initial-prefill-end boundary if identity/overhead checks pass; otherwise N/A", "aggregation": "same-GPU complete question-seed arm blocks; absolute milliseconds host-separated; only within-host paired ratios aggregate"},
+  "held_bitmap_reference": {"name": "G75L30_first_bitmap_native_adaptive", "status": "historical FIXED16 evidence identified; native-adaptive transplant qualification pending", "extra_executions_max": 100, "first84_unchanged": true},
+  "excluded": ["CVM expansion", "ball CUDA", "M2 main generation", "fresh-T frontier sweep", "stop threshold tuning", "fixed-step scored answers"]
+}

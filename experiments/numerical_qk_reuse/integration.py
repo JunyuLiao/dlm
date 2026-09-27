@@ -494,6 +494,8 @@ def install(adapter, config, condition):
         binding = _install_dense(adapter)
         router = Attention(adapter, config['policy'], score_period=config['score_refresh_period'],
                            decision_interval=config['decision_interval'], trace=False,
+                           max_cache_bytes=config.get('max_cache_bytes', 2 * 1024**3),
+                           max_summary_bytes=config.get('max_summary_bytes', 1024**3),
                            support=config.get('support', 'legacy_junyu_mask'),
                            output_mode=config.get('output_mode', 'cached_scores'),
                            selector=config.get('selector', 'legacy_recompute'),
@@ -505,7 +507,8 @@ def install(adapter, config, condition):
                            support_build=config.get('support_build'))
         binding.runtime.attention_override = router
         state = NativeReuseState('T', router, m_ref=config['m_ref'], beta=config['beta'],
-                                 gamma=config['gamma'], diagnostics=config['diagnostic'])
+                                 gamma=config['gamma'], diagnostics=config['diagnostic'],
+                                 fast_t=bool(config.get('fast_t', False)))
         yield dict(binding=binding, router=router, state=state, counters=router.counters)
     finally:
         if router is not None:

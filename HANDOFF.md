@@ -1,170 +1,48 @@
-# v18 continuation — CP4 complete, all frozen panels closed
+# v20 Fan M1/M3 continuation — CP0
 
-Authority: E:/Downloads/dllm_astra_sol_master_v18_20260926.md plus later user
-resource authorization in RESOURCE_AUTHORIZATION.md. Native semantics and frozen
-panels remain unchanged. Branch research/astra-junyu-frontier-20260926; parent
-d2bef2189c046e9a4277ab16d751ebeab11c15d8. Read DESIGN_DECISION.md.
-Do not touch unrelated third_party/dinfer/assets/Wechat.JPG or peer/old branches.
+Sole current specification: E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md.
+Parent e3f14520eea98e45998fb369f9027f3b2707ec4a, branch research/fan-m1-m3-cost-refresh-20260927.
+Worktree E:/dlm/fan_m1_m3_20260927. Prior v18 CP4 is COMPLETE; no v18 work relaunch.
+Preserve unrelated third_party/dinfer/assets/Wechat.JPG. No peer branch edits.
 
-Science/evidence completed:
-- Historical identity checks passed;120 old warm pairs lack strict phase evidence.
-- Native stop stable deterministic argmax AND mean entropy<.005; acceptance.1,
-  B256/cap48, temperature.8→.4 and normal EOS unchanged.
-- RULER thinkingFalse/exact156 token lists; AIME thinkingTrue/exact30/8192 budget.
-- Native legal all-layer scope qualified13 states; legacyLOCAL geometry differed.
-- Density-only442 calibration runs: U50/T50/U60/T60 within2pp whole/G/L.
-  Calibration is not T60 quality/work/speed success.
-- Strong B8 full16 equivalent;8 strictwarm; wallratio1.000187, no speedup signal.
-- Bridge6/host passes tokens/calls/stopping/termination;1047 tensors identical.
-- Sole post-QK ball candidate STOP beforeCUDA: no finite numerical certificate or
-  demonstrated net execution headroom. No replacement or CVM expansion.
+Priority: qualified current-output M1 A8/R1 and M3 R2/R3, matched B_A8;
+common fast_t, native legality, exact original adaptive stopping/output budgets.
+Direct full decoder-forward and denoising-step costs on RULER/AIME/LongBench,
+then first84 core first/warm executions; publish preliminary before remaining700.
+All question×seed arms remain together on assigned original H100 UUID.
+No cross-GPU absolute latency pooling. Missing/failures are retained.
 
-Primary generation CLOSED:
-- AIME1080/1080,540/host;90 complete question-seed blocks, no missing/partial keys.
-- RULER2808/2808,1404/host;390 complete blocks. Initial936 plus remainder1872.
-- Six arms D_native,D_matched,U50,U60,T50,T60; seeds101/202/303. Whole block with
-  arms/warm stays on assignedGPU; never pool cross-host absolute times.
-- First outputs immutable. Warm acceptance and failures remain scorer decisions.
-- Original AIME852 stopped_before_block at old budget. Numbered c001 completed
-  the remaining228 without retries. All primary supervisors/workers now closed.
-- Machine-readable counts, ledger hashes and all worker_end resource receipts:
-  results/junyu_frontier_v18_20260926/primary_closed_receipt.json.
+Read results/fan_m1_m3_multidataset_20260927/{method_contract,campaign_budget,frozen_protocol}.json.
+Frozen gold-free inputs live E:/dlm/v20_private/frozen_panel, never Git.
+Panel has 13 RULER tasks +6 AIME +6 LongBench, seeds101/202, seven arms,
+700 executions including first84. Optional G75L30 nativeQ128 port up to100,
+separately qualified and clearly different grouping from old vLLM FIXED16.
+Scope/policy/consumer binding is PENDING GPU cost/numerical qualification.
+No quality-driven tuning. No phase calibration/fresh-T matrix/CVM/ball expansion.
 
-Resource amendment (never extend automatically):
-- Start2026-09-26T18:02Z;36hwindow; GPUstop2026-09-28T05:32Z/final06:02Z.
--24GPU-processh/host48hcombined,7000 attempts total3500/host, at most2GPUworkers.
-- Existing frozen panels ONLY; max5 independent densitycal policies per arm.
-- Budget results/junyu_frontier_v18_20260926/campaign_budget_extension_20260926.json
-  SHA5a508a92ec822e428d76049902e1ebf1d199375b9c095537efa5a0de8696009e.
-- Before CP3:4363 attempts=475 preofficial+3888primary.
-- ChargedGPU seconds including baseline1900/100 once: mpk42391.68853012589,
-  dllm38374.643763355. Never add wrapper durations again.
-- All continuing loads/calibration/failures charged; native output budgets retained.
+Resource start2026-09-27T11:58Z, GPU stop19:28Z, final19:58Z.
+8 aggregate GPU-process hours, max2 workers,1000 generation execution cap.
+Charge loads/capture/replay/qualification/compilation/parity/failures. No autoextension.
+At CP0 no v20 GPU worker has started. Both hosts were idle on preflight.
+mpk exouser@149.165.151.254 GPU-6139046a-b005-8fe5-a837-f8270472ab72.
+dllm exouser@149.165.159.64 GPU-fc12ad5c-5334-5509-8fc6-465498fd3915.
+Old qualified environments/model1047-tensor identities reused privately.
+New immutable deploy roots: mpk /media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927;
+dllm /home/exouser/dyh/fan_m1_m3_v20_20260927.
+Never overwrite deploys, first outputs, or relaunch uncertain/failed requests.
 
-Hosts/private deployment:
-- mpk exouser@149.165.151.254;GPU-6139046a-b005-8fe5-a837-f8270472ab72.
-  P=/media/volume/dllm-1/dyh/junyu_frontier_v18_20260926.
-- dllm exouser@149.165.159.64;GPU-fc12ad5c-5334-5509-8fc6-465498fd3915.
-  N=/home/exouser/dyh/junyu_frontier_v18_20260926.
-- Primary generation immutable ROOT/deploy/bridge_json (4d53b5c construction).
-- CP3/extension driver ROOT/deploy/extension_6250b51, source6250b51;
-  archive SHAd827e54f4ed84b6222b98454b1b0e46b3a186ea7c62c195930a084a57f4527af.
-- Both original runtime/source/model/binary identities frozen; no environment edits.
-- Ledgers ROOT/evaluation/ledgers/HOST_{ruler,aime}.jsonl; privateROOT/private_eval.
-- Protocols ROOT/evaluation/{ruler4k,aime26}_primary_protocol.json.
+Astra: design/numerics/stopping/synchronization/cost selection/final interpretation.
+Actual Sol-A: explicit methods and GPU qualification tests; physical counter twin.
+Actual Sol-B: panel/worker/scorer. Actual Sol-C: state-correct direct profiler.
+Root alone integrates/commits/pushes and deploys; agents do not start GPU work.
+Local CPU tests pass for methods/cache/panel/profile; GPU qualification pending.
+Capture/replay one canvas at a time; stop before next encoder commit. Preserve
+arm controller static settings and restore native pre-step history/RNG/state.
+Separate per-forward profiling from clean adaptive E2E. Event spans include
+launch gaps. Outer replay epoch explicitly includes fixture restoration.
 
-Primary CPU scoring COMPLETE by07:48UTC:
-- Primary coordinator51988/session21704 exited after all_frozen_panels_closed.
-  E:/dlm/v18_private/completion_coordinator_outcome.json preserves exact closure.
-- Initial finalizer failed on SSH timeout during cp -n dllm_ruler snapshot. Copy
-  actually completed; source/destination hashes verified. No GPU generation retry.
-- Same immutable finalizer now PID37724/session8508, cwd scorer_f45fa83:
-  localPython311 -u E:/dlm/v18_private/scorer_f45fa83/scripts/v18_finalize.py
-  --scorer-deploy scorer_f45fa83 --archive-dir E:/dlm/v18_private
-- Existing new-host private archive already transferred/extracted and hash-checked:
-  E:/dlm/v18_private/dllm_private_eval.tar.gz;SHA
-  9bd11b0eb49cf213e391c1835f6067e3ec57b460829fcf59add465a17b8a46b39.
-- Remote scoring ROOT/scoring/{ruler,aime}_redacted_summary.json plus scorer locks.
-  Both RULER and AIME complete; local redacted copies SHA6ee11dfc/C3CB6CDC.
-  Finalizer recovery exited0. Do not launch another finalizer.
-- CPU recovery may reuse identical snapshots/archives. Differing bytes fail closed;
-  never overwrite unmarked/uncertain extraction or generate replacement outputs.
-- Scorer sourcef45fa83; official RULER13task macro/partial credit, exact AIME source
-  and final-response extractor; caps/errors retained. Question-cluster bootstrap,
-  task strata, paired seeds/arms, sameGPU ratios and perhost timing decomposition.
-- Generation latency/TBT/direct full-forward are N/A without qualified events;
-  wall/call is amortized, support/PV sparsity is not QK skipping.
-
-CP3 CPU controller (closed; do not duplicate):
-- Historical PID58796/session40018 used local sourcecc2e728; final controller
-  source447fe03 resumed the same outcome/config. Remote generation deploy stayed
-  immutable extension_6250b51.
-- Outcome E:/dlm/v18_private/secondary_extension.outcome.json is `complete`.
-- Config E:/dlm/v18_private/secondary_extension_config.json,
-  SHAa99c6eef0853f96c5bab260927d5fea2bbc90ae391e612df6cdd6e165cf1ad6f.
-- Exact complete primary summaries and CPU Torch/source/UUID qualification PASSED
-  E:/dlm/v18_private/secondary_extension_cpu_qualification.json.
-- Final controller passed46 combined stdlib tests; remote CPU Torch tests
-  qualified both hosts.
-- Recovery ONLY after OS command/PID exit verified; tool session disappearance alone
-  is not exit. Command: localPython311 -u -m scripts.v18_secondary_pipeline
-  --deploy extension_6250b51 --config E:/dlm/v18_private/secondary_extension_config.json
-  --outcome E:/dlm/v18_private/secondary_extension.outcome.json --poll-seconds 60
-- CP3 frozen70:936 executions, allocation156 first-only, up to520calibration.
-  CPU+budget gates, same primaryhost/UUID per question-seed. No control latency claim.
-  T70/T60 cross-stage timing descriptive due temporal drift. All10cal ledgers charged.
-- Read-only network retries are bounded; no uncertain launch or failedrequest retry.
-
-Recovery history lives in STATE.json/git and private outcome recovery_audit:
--3bfed7d local primary controller fixes done/liveness race (strict matching rc0 only).
-- c001 interruption between host dispatches was manually reviewed; dllm adopted,
-  mpk first dispatch only after no-log/no-marker/no-process proof. Receipt
-  E:/dlm/v18_private/c001_dispatch_recovery.json. No first result replaced.
-- Never mutate immutable deploys or recreate generation coordinators for CPU recovery.
-
-CP4 Chinese morning_brief.md answers all seven v18 questions, includes honest
-N/A cells and candidate STOP. Both primary and CP3 scoring are closed; do not
-relaunch their controllers or GPU workers. Heartbeat v18-research-stage-continuation
-was paused after CP4. Future work is only the prospective independent 70%-support
-four-arm allocation experiment in the brief; it is not launched this round.
-Commit/push the final redacted checkpoint and verify remote SHA.
-Never upload answers/gold/credentials/large traces or archive the user's task.
-08:31UTC CP3 recovery checkpoint:
-- Previous PID35304 completed core70 calibration rc0 in590s, froze bothhost
-  secondary70 protocols/prerequisites, then failed on empty-ledger verification.
-  No secondary eval marker/GPU had started. Error outcome preserved private.
-- Root cause: Transport.read returned None for both absent and zero-byte existing
-  files. Local controllercc2e728 frames presence; actual remote smoke: mpk empty
-  ledger returns b'', dllm missing returns None. Remote generation deploy untouched.
-- Controller58796/session40018 resumed SAME config/outcome; original calibration
-  and first outputs preserved. Sourcecc2e728/41tests pushed; archiveSHA
-  2c4025411b1ad2de8eb2b3e722857c2493c5179071eb6d155aeff839470fc0d8.
-- CPU qualification bothhost Torch2.6.0+cu124/CUDA12.4/source/UUID passed.
-- AIME90 first outputs/arm scored: Dnative46,Dmatched49,U50 45,U60 48,
-  T50 57,T60 49 correct. T60/U50 quality+4.44pp CI[-3.33,+13.33];
-  timedrequest ratio0.9887 CI[0.9283,1.0529]. T60/native ratio1.3102.
-  AIME actual whole PV support skipped T60 40.30%,U50 39.22%,U60 49.68%;
-  60% RULER calibration does not transfer to AIME. Full details in primary_checkpoint.md.
-
-08:32UTC: secondary70 started on both frozen GPUs: mpk supervisor1702871/
-GPUworker1702923 start1790497898; dllm supervisor105954/GPUworker106008
-start1790497903. Primary CPU controller58796/session40018 supervises; do not
-duplicate workers or alter remote deploy. 70% outputs/score pending.
-
-09:38UTC: secondary70 BOTH CLOSED rc0,468 executions/host; worker_end
-mpk892.6660581331234s,dllm770.3079620700009s. Core70 calibration4 policy
-points×52=208 attempts; total generation snapshot5507 incl475preofficial.
-Previous CPU controller58796 exited on read-only kill-0 SSH timeout while worker
-completed; no GPU retry. Outcome error saved secondary_extension_liveness_timeout_error.json.
-New local-only controller snapshot447fe03 SHA77ce96d283820c25F5270F05AF1825A459FD60176550DBBC9B9DBA3BD93726C0,
-46 combined tests, handles bounded read-only retries and exact rc0 marker race.
-Session63853 adopts same outcome/config, remote extension_6250b51 untouched.
-Controls calibration/eval and secondary offline score pending.
-
-CP3 closeout (redacted audit, 2026-09-27):
-- Existing local controller outcome secondary_extension.outcome.json is `complete`,
-  end epoch1790502742.3727834. Both secondary70 and allocation supervisors
-  exited rc0 on both hosts; every GPU worker interval closed.
-- Secondary70 936/936 executions, paired 390 question-seed blocks, 468/host;
-  allocation156/156 first-only executions, paired78 blocks, mpk62/dllm94.
-  No duplicate/foreign execution keys, host/GPU assignment drift or failed runs.
-- Core70 calibration208 attempts and control calibration130, four density points
-  each. All frozen calibrated files and relayed ledger SHA-256 values match on
-  mpk/dllm. Both scorer locks match exact summary source identity; summaries
-  report complete with no unfinished blocks.
-- Campaign total5793/7000 attempts; mpk3281/3500, dllm2512/3500. Charged GPU
-  seconds44228.464/86400 mpk and39285.493/86400 dllm; combined83513.957/172800.
-  This includes the pre-CP3 conservative baseline once, with no wrapper double count.
-- Machine-readable hashes, worker receipts and paired-key checks are in
-  results/junyu_frontier_v18_20260926/secondary_closed_receipt.json; concise
-  descriptive scores in secondary_checkpoint.md. Only redacted summaries and
-  scorer locks are tracked. No raw answers, gold or private receipts were copied.
-
-CP4 finalization:
-- morning_brief.md covers T60/U50 and T60/U60, matched T70/U70 and allocation
-  controls, AIME native adaptive, work/length/latency distinctions, fast-path
-  STOP and one future action. Primary checkpoint heading was corrected.
-- Both host allocation markers have matching rc0 done; nvidia-smi compute-app
-  inventory is empty on both. No active coordinator or GPU worker remains.
-- Heartbeat was paused using Codex automation_update, not archived. Report and
-  redacted receipts are staged for final commit/push in this checkpoint.
+Read-only Fan speaker notes corroborated M1 then held decisions with periodic M1.
+Named ASR transcript not found; documented missing. Shared slides untouched.
+Existing v18 heartbeat is paused; only update it to v20 after durable coordinator.
+Next: CP0 commit/push; immutable mpk deployment and GPU numerical qualification;
+qualify support bridge on dllm; direct cost screen then freeze generation binding.

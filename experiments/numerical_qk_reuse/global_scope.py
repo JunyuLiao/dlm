@@ -25,9 +25,11 @@ from contextlib import contextmanager
 import torch
 
 SCOPE = 'global_only_native_local'
-CONDITIONS = ('global_T', 'global_M1', 'global_M3', 'global_B8', 'global_TP', 'global_B8P', 'global_CVM')
+CONDITIONS = ('global_T', 'global_M1', 'global_M3', 'global_B8',
+              'v20_global_M3_R3', 'global_TP', 'global_B8P', 'global_CVM')
 CVM_MODES = {'global_TP': 'TP', 'global_B8P': 'B8P', 'global_CVM': 'CVM'}
-DECISION_INTERVAL = {'global_M1': 1, 'global_M3': 2, 'global_B8': 8}
+DECISION_INTERVAL = {'global_M1': 1, 'global_M3': 2, 'global_B8': 8,
+                     'v20_global_M3_R3': 3}
 
 
 class GlobalScopeAdapter:
@@ -105,7 +107,10 @@ def install(adapter, config, condition):
     try:
         binding = _install_dense(scoped)
         router = Attention(scoped, config['policy'], score_period=config['score_refresh_period'],
-                           decision_interval=interval, trace=False, support='legacy_junyu_mask',
+                           decision_interval=interval, trace=False,
+                           max_cache_bytes=config.get('max_cache_bytes', 2 * 1024**3),
+                           max_summary_bytes=config.get('max_summary_bytes', 1024**3),
+                           support=config.get('support', 'legacy_junyu_mask'),
                            output_mode=config.get('output_mode', 'historical_route_preqk_current_output'),
                            selector=selector, selector_layers=config.get('selector_layers', 'all'),
                            kernel_variant=config.get('kernel_variant', 'generic'),
@@ -114,10 +119,13 @@ def install(adapter, config, condition):
                            consumer=config.get('consumer', 'hopper'), support_build=config.get('support_build'))
         binding.runtime.attention_override = _MaskGuard(router)
         state = NativeReuseState('T', router, m_ref=config['m_ref'], beta=config['beta'], gamma=config['gamma'],
-                                 diagnostics=config['diagnostic'])
+                                 diagnostics=config['diagnostic'],
+                                 fast_t=bool(config.get('fast_t', False)))
         effective.update(method={'global_M1': 'M1 historical-QK + current projected V, decision every step',
                                  'global_M3': 'M3 decision interval 2',
+                                 'v20_global_M3_R3': 'v20 M3 decision interval 3',
                                  'global_B8': 'anchor bitmap held to the next A8 observation / canvas reset'}[condition],
+                         fast_t=state.fast_t,
                          bound_modules=sorted(int(m.layer_idx) for m in binding.modules))
 
         def counters():
