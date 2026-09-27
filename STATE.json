@@ -28,8 +28,8 @@
   ],
   "coordinator": null,
   "prior_campaign": "v18 CP4 complete and unchanged",
-  "next": "Adopt remainder workers/watcher70176 and singleCPUcollector17065. After terminal score, audit actual outerresource usage/validpairs; preserve missing/failedcells. Only then plan separateG75 from remainingbudget, unchanged frozencontracts.",
-  "updated_utc": "2026-09-27T15:08:43Z",
+  "next": "Adopt original remote remainder workers and recovered hidden local watcher45904/collector6656. No GPU retry. Score terminal complete/partial archives; audit budget then separateG75 if feasible.",
+  "updated_utc": "2026-09-27T15:55:52Z",
   "qualification": {
     "mpk": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
     "dllm": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
@@ -136,10 +136,11 @@
     "status": "complete"
   },
   "watcher": {
-    "session_id": 70176,
-    "path": "E:/dlm/v20_private/watch_remainder_001/remainder_001.status.json",
+    "pid": 45904,
+    "path": "E:/dlm/v20_private/watch_remainder_002/remainder_001.status.json",
     "read_only": true,
-    "status": "running"
+    "status": "running",
+    "detached_hidden": true
   },
   "postprocessor": {
     "status": "waiting_existing_watcher",
@@ -147,16 +148,25 @@
     "consume_existing_watcher_only": true,
     "stage": "remainder_001",
     "must_not_duplicate": true,
-    "session_id": 17065,
     "source_commit": "67be400",
-    "config": "E:/dlm/v20_private/collect_remainder_001.config.json",
-    "output": "E:/dlm/v20_private/collect_remainder_001",
+    "config": "E:/dlm/v20_private/collect_remainder_002.config.json",
+    "output": "E:/dlm/v20_private/collect_remainder_002",
     "deadline_epoch": 1790537280,
-    "command": "python -u -m scripts.v20_collect_remainder collect --config E:/dlm/v20_private/collect_remainder_001.config.json --out-dir E:/dlm/v20_private/collect_remainder_001 --wait-until-epoch 1790537280"
+    "command": "python -u -m scripts.v20_collect_remainder collect --config E:/dlm/v20_private/collect_remainder_002.config.json --out-dir E:/dlm/v20_private/collect_remainder_002 --wait-until-epoch 1790537280",
+    "pid": 6656,
+    "detached_hidden": true
   },
   "active_gpu_seconds_reserved_max": {
     "149.165.151.254": 11500,
     "149.165.159.64": 9000
   },
-  "first84_report": "results/fan_m1_m3_multidataset_20260927/first84_report.md"
+  "first84_report": "results/fan_m1_m3_multidataset_20260927/first84_report.md",
+  "local_monitor_recovery": {
+    "observed_utc": "2026-09-27T15:54:35Z",
+    "old_watcher_session": 70176,
+    "old_collector_session": 17065,
+    "old_collector_pid": 58084,
+    "evidence": "No matching live local watcher/collector; old collector dir only lock. Remote remainder scorer root/payload/helper/archive absent, no dispatch. Both original remote GPU workers verified active. Old artifacts preserved.",
+    "gpu_relaunches": 0
+  }
 }

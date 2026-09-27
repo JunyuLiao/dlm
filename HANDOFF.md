@@ -7,7 +7,7 @@ Preserve unrelated third_party/dinfer/assets/Wechat.JPG; never stage/reset it.
 Astra methods/numerics/stopping/timing/interpretation; actual Sol implementation/tests.
 Root alone integrates/deploys/launches. No CVM/ball/fresh-T/phase-calibration expansion.
 
-## Current checkpoint (15:08 UTC)
+## Current checkpoint (15:55 UTC)
 FIRST84 initial_001 COMPLETE bothhosts,84recorded/6validblocks/42acceptedwarm.
 Closedprocess mpk2006.235885s,dllm1100.644642s. PrivateSHAverified archives and
 CP5offline scored summary at E:/dlm/v20_private/collect_initial_001/.
@@ -19,11 +19,14 @@ R3 calls483/E2E.636native but1.030freshT. No independentM3advantage established.
 REMAINDER LIVE since14:40:52UTC mpk1745246/dllm127469: only frozen22wholeblocks/308exec perhost, CP3production/CP5
 wrapper unchanged, newprivate/ledger paths. Resourceplan reservesmpk11500s/dllm9000s,
 worker100sless, guard1800s beforeblock. No tuning or retries; first84 neverrepeated.
-Read-only watcher exec70176 E:/dlm/v20_private/watch_remainder_001.
-Single CPU postprocessor LIVE exec17065 from CP8 67be400, combines initial+remainder
-only after existing watcher terminal; private config/output collect_remainder_001.
+Read-only watcher recovered hidden PID45904 E:/dlm/v20_private/watch_remainder_002.
+Single CPU postprocessor recovered hidden PID6656 from CP8 67be400, combines initial+remainder
+only after existing watcher terminal; private config/output collect_remainder_002.
 No GPU work, no duplicate collector. Scoredcomplete requires700rows AND50validpairs;
 failed/finalized archives can scorepartial. Original first84 outputs unchanged.
+15:54 found both old local monitors absent; old collector onlylock, remote scorer
+neverdispatched (root/payload/helper/archive absent). Preserved old dirs/locks.
+Both original remote GPUworkers verifiedactive; recovery does NOT retry generation.
 
 ## Frozen identities and semantics
 GLOBAL_ONLY_NATIVE_LOCAL/P0/Triton for main7; GLOBAL5layers/nativeLOCAL25.
