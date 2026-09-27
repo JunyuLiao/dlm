@@ -122,3 +122,8 @@ Never upload answers/gold/credentials/large traces or archive the user's task.
   timedrequest ratio0.9887 CI[0.9283,1.0529]. T60/native ratio1.3102.
   AIME actual whole PV support skipped T60 40.30%,U50 39.22%,U60 49.68%;
   60% RULER calibration does not transfer to AIME. Full details in primary_checkpoint.md.
+
+08:32UTC: secondary70 started on both frozen GPUs: mpk supervisor1702871/
+GPUworker1702923 start1790497898; dllm supervisor105954/GPUworker106008
+start1790497903. Primary CPU controller58796/session40018 supervises; do not
+duplicate workers or alter remote deploy. 70% outputs/score pending.
