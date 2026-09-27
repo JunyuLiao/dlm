@@ -14,18 +14,18 @@
   "charged_gpu_process_seconds": 1996.672402381897,
   "generation_executions": 12,
   "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
-  "push_status": "6555abe4340778dda4199df9dc5d167ddc3fbdbf verified remote",
+  "push_status": "525880efbfc9781976a3b45d131bd56eb96a6346 verified remote",
   "agents": {
     "source_crosswalk": "/root/sol_profile",
     "geometry_diagnostic": "/root/sol_v21_kernel"
   },
-  "next": "Common-input geometry G0/G1 opportunity; one qualified candidate before any full panel",
+  "next": "CPU geometry diagnostic implementation while frozen12natural isolation runs; no fullpanel",
   "peer_refs": {
     "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
     "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
   },
   "preflight": "1047 tensor payloads perhost verified; operator19/19 perhost; all CP1/CP2 workers complete; no active GPU worker",
-  "generation_reserved": 0,
+  "generation_reserved": 12,
   "completed_gpu_jobs": [
     {
       "host": "mpk",
@@ -58,5 +58,30 @@
       "charged_process_seconds": 833.4864563941956
     }
   ],
-  "gpu_jobs": []
+  "gpu_jobs": [
+    {
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/natural_525880e",
+      "sha": "525880efbfc9781976a3b45d131bd56eb96a6346",
+      "supervisor_pid": 1805502,
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/natural_zero_pruning_natural_525880e.json",
+      "log": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/worker.log",
+      "ledger": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/ledger.jsonl",
+      "private": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/private",
+      "host": "mpk",
+      "stage": "zero_pruning_diagnostic",
+      "maximum_seconds": 1800
+    },
+    {
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/natural_525880e",
+      "sha": "525880efbfc9781976a3b45d131bd56eb96a6346",
+      "supervisor_pid": 142080,
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/natural_zero_pruning_natural_525880e.json",
+      "log": "/home/exouser/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/worker.log",
+      "ledger": "/home/exouser/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/ledger.jsonl",
+      "private": "/home/exouser/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/private",
+      "host": "dllm",
+      "stage": "zero_pruning_diagnostic",
+      "maximum_seconds": 1800
+    }
+  ]
 }

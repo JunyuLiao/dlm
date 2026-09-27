@@ -1,0 +1,18 @@
+# Bounded v21b geometry opportunity contract
+
+Freeze before new task outcomes: compare the existing per-head Q128/K64 selector, a per-head Q16/K64 selector, and the exact historical GLOBAL 8-query-head × Q2/K32 mapping. A separate LOCAL diagnostic uses 2 heads × Q8/K32; it does not enable sparse LOCAL in production. All comparisons in a state use identical Q/K/V, cached scores, current projected V, reference norm, live row-specific T and legal mask. Native canvas remains 256.
+
+Two distinct experiments:
+
+1. G0 runs one independent per-row K32 sequential logical-support diagnostic and computes physical closure for Q128/K64, Q16/K64, Q16/K32 and old GQA/K32. Closure extra legal pairs describe representational loss only. Q16/K32 is a closure diagnostic, not a fourth policy candidate.
+2. G1 independently reruns Junyu's retained-state recurrence for each of the three physical groupings. Each row maintains its own retained log mass and projected accumulator; only the group keep/drop reduction is shared. Splitting a coarse bitmap cannot produce G1. The inherited threshold is reported without interpreting it as equal work or equal error. Any later matched-work calibration must be frozen on diagnostic states, without task answers.
+
+Capture the same six input/seed assignments used in v21 and their previously frozen target calls. Also inspect the actual last captured call per input, deduplicated. Capture ends at native stopping or the existing 16-call diagnostic bound. A last captured state is called near-stop only when the native criterion with its actual stopping history verifies it. Missing later states remain missing.
+
+GLOBAL historical scores come from the actual A8/R3 cache after replay from canvas start, with score and decision ages recorded. LOCAL remains native; its diagnostic score producer is explicitly current-score oracle arithmetic and must not be described as a deployable historical policy. Current-V projection is recomputed for the diagnostic and its cost is labeled separately from the production prefix-lease cost. No new mandatory canvas protection is added.
+
+The common current-output contract is `fp32_scores_bf16_pv`: FP32 QK accumulation/scaling without the two explicit BF16 score round trips; BF16 probabilities for PV and all other consumer arithmetic retained. Historical observation/selector scores retain their legacy convention. The same-support independent mathematical FP32 reference measures support loss independently of consumer rounding. The original v20 consumer remains an explicit historical baseline. This contract is justified by lower attention error on all 17 reached v21 states and near-neutral complete-forward cost, not by task answers; downstream logits were mixed and no quality or root-cause claim follows.
+
+No geometry is promoted yet. A readable support/error/cost opportunity card must precede its production implementation. The cheapest physically faithful candidate may parameterize Q16 decision mapping in the existing Q16 consumer; historical KV32/GQA would require an explicitly priced consumer mapping. Changing only BLOCK_M cannot expose new selectivity. Projected work counts are not actual traffic. Full forward, denoising step, A/D/H and complete requests stay separate.
+
+Natural numerical isolation is limited to the already frozen 12 first-only executions (two LB inputs × two seeds × native/legacy-all-kept/new-all-kept), not a quality claim or a second full panel. Geometry selection must not use these answers. Native stopping, A8/R3, original output budgets, current Q/K/V, masks, seeds and scorers remain fixed.
