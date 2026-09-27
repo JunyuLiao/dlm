@@ -1,0 +1,111 @@
+{
+  "caveats": [
+    "Captured snapshot inventory lists Python types and dimensions, not tensors or tokens.",
+    "model_forward is full model.forward with state.begin outside that timer.",
+    "denoising_step includes the native sampler, observer, T and control path.",
+    "Direct replay timing is not a generated request or answer-quality measurement.",
+    "Missing native target calls and absent N16 sequences remain missing; no padding."
+  ],
+  "entries": [
+    {
+      "absent_sequence_lengths": [
+        "N16"
+      ],
+      "file": "screen_002_mpk.json.gz",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "gzip_bytes": 1264491,
+      "gzip_sha256": "cd6e818b4d13c8075bf03ede5395c10d02d56294c452c39938ebeb00bcee8439",
+      "host": "mpk",
+      "missing_target_resolutions": 0,
+      "source_bytes": 41770489,
+      "source_sha256": "e781f09bc473f2724cd5f4af2374d2ef2e41cc33e16fbae9b1b69844f299d1ef",
+      "stage": "screen_002",
+      "targets": 6,
+      "targets_without_profiled_boundary": 0
+    },
+    {
+      "absent_sequence_lengths": [
+        "N16"
+      ],
+      "file": "screen_002_dllm.json.gz",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "gzip_bytes": 1243002,
+      "gzip_sha256": "c315190c207fe6df87966668c392d935de2a358107b41eff6a038b0bd040ac5d",
+      "host": "dllm",
+      "missing_target_resolutions": 0,
+      "source_bytes": 41746249,
+      "source_sha256": "a908b1597ba347b762d692f28a80ce3cc33fcf7e32207aa2fe83139718c987f4",
+      "stage": "screen_002",
+      "targets": 6,
+      "targets_without_profiled_boundary": 0
+    },
+    {
+      "absent_sequence_lengths": [
+        "N4"
+      ],
+      "file": "selected_001_mpk.json.gz",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "gzip_bytes": 656085,
+      "gzip_sha256": "5ace2e2a6def3603493cf19bd526b92ab1f62cb4aa6893d4840010d8ffbceb45",
+      "host": "mpk",
+      "missing_target_resolutions": 0,
+      "source_bytes": 28103288,
+      "source_sha256": "b299725104289f06495e56fa13a4a678e3cd87d0b71f1e3b1b78ccc68eeed9d8",
+      "stage": "selected_001",
+      "targets": 6,
+      "targets_without_profiled_boundary": 2
+    },
+    {
+      "absent_sequence_lengths": [
+        "N4"
+      ],
+      "file": "selected_001_dllm.json.gz",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "gzip_bytes": 555137,
+      "gzip_sha256": "146c79ca0fa04dccbe8196ecd7c7f0503e63ff31cad4d27a7c53e3f1c7200fdd",
+      "host": "dllm",
+      "missing_target_resolutions": 0,
+      "source_bytes": 22978053,
+      "source_sha256": "3bb85aa1584de9e07c465d97c45b2588b06abd184b0dfe7858e2d27b481268f5",
+      "stage": "selected_001",
+      "targets": 6,
+      "targets_without_profiled_boundary": 2
+    },
+    {
+      "absent_sequence_lengths": [
+        "N16"
+      ],
+      "file": "ruler_selected_001_mpk.json.gz",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "gzip_bytes": 128894,
+      "gzip_sha256": "e462fe366c125b70211a0ba7ff93b2e2095d57e0e9d73ece932b81f1b41c0e2c",
+      "host": "mpk",
+      "missing_target_resolutions": 0,
+      "source_bytes": 4267277,
+      "source_sha256": "522b73aaed26c7e57a83c0e2c09d067c7304175765533e54d45cddf13e8affa3",
+      "stage": "ruler_selected_001",
+      "targets": 2,
+      "targets_without_profiled_boundary": 0
+    },
+    {
+      "absent_sequence_lengths": [
+        "N16"
+      ],
+      "file": "ruler_selected_001_dllm.json.gz",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "gzip_bytes": 131224,
+      "gzip_sha256": "a33f6f1dbe5ea4c90007f9e86abc3c480ba25e90a6652dacb1dc2a3a8da646cd",
+      "host": "dllm",
+      "missing_target_resolutions": 0,
+      "source_bytes": 4262587,
+      "source_sha256": "216b28db57caa7d143d6a947e895c86997be11f2162f686010c9a65f7c76b032",
+      "stage": "ruler_selected_001",
+      "targets": 2,
+      "targets_without_profiled_boundary": 0
+    }
+  ],
+  "format": "gzip of exact UTF-8 source JSON bytes",
+  "omitted_fields": [],
+  "payload_audit": "no prompt, gold, answer, completion token, input ID, hidden state or raw tensor fields; strings <=200 characters",
+  "schema": "v20_profile_record_export_v1"
+}

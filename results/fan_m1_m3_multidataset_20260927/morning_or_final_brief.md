@@ -50,4 +50,4 @@ G75 的 LongBench 直接 forward/native 为 mpk 0.960、dllm 0.920，但调用�
 
 [今日完整汇报](fan_today.md) · [主面板逐方法统计](adaptive_panel_report.md) · [三页草稿](fan_slide_drafts.md) · [资源终账](resource_final.json)
 
-所有报告与可运行检查点本地提交。自动审批两次拒绝向既有 GitHub 远端推送，要求用户明确授权 `coconight01/dlm_test` 的 `research/fan-m1-m3-cost-refresh-20260927` 分支；该确认仍待回复，因此推送尚未完成。
+所有报告与可运行检查点本地提交。此前自动审批要求指定远端授权；用户随后已明确授权代码与可分享数据推送至 `coconight01/dlm_test` 的 `research/fan-m1-m3-cost-refresh-20260927` 分支。800条生成记录见 [数据目录](generation_records/README.md)，远端核验见 [发布记录](publication.md)。

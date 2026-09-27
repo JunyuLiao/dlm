@@ -10,7 +10,7 @@
   "scope_policy_consumer": "FROZEN GLOBAL_ONLY_NATIVE_LOCAL / P0 / triton; G75 ALL/Triton separate",
   "coordinator": null,
   "prior_campaign": "v18 CP4 complete and unchanged",
-  "next": "Research complete. No GPU or scoring relaunch. Await explicit pending authorization for coconight01/dlm_test branch push; retain all immutable deployments and private first outputs.",
+  "next": "Publish authorized code and shareable generation records to existing branch, verify remote SHA; no GPU/scoring relaunch.",
   "updated_utc": "2026-09-27T17:13:08.041104+00:00",
   "qualification": {
     "mpk": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
@@ -77,7 +77,7 @@
       "status": "complete"
     }
   },
-  "push_status": "blocked_auto_review_explicit_remote_confirmation_pending",
+  "push_status": "explicit_user_authorization_received_publication_prepared",
   "closed_new_stage_charges": {
     "selected_001/dllm": 1105.6609513759613,
     "selected_001/mpk": 1407.1216332912445,
@@ -217,5 +217,11 @@
       "status": "complete"
     }
   ],
-  "gpu_jobs": []
+  "gpu_jobs": [],
+  "publication_authorization": {
+    "user_instruction": "授权 代码 数据 能push的都push",
+    "remote": "git@github.com:coconight01/dlm_test.git",
+    "branch": "research/fan-m1-m3-cost-refresh-20260927",
+    "scope": "code, reports and shareable generated request data; excludes credentials, source prompts/gold and unrecorded tensors"
+  }
 }

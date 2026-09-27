@@ -60,4 +60,4 @@ G75在LongBench直接forward/native为mpk0.960、dllm0.920，但额外调用及�
 
 逐forward计时与干净generation分开；请求E2E含prefill和后续commit。另测首次prefill结束到生成结束的CUDA跨度（含CPU等待/commit），不是decode-only墙钟或TBT。RULER N16仍missing，以自然4次补测；M2/A4/新phase规则未运行。最终简报已交，不因本轮负结果开启新调参矩阵。
 
-[早期84次](first84_report.md)保留不变；[三页英文草稿](fan_slide_drafts.md)随完整结果更新。所有运行检查点已本地提交；GitHubpush仍被自动审批阻止，等待指定现有远端授权。
+[早期84次](first84_report.md)保留不变；[三页英文草稿](fan_slide_drafts.md)随完整结果更新。所有运行检查点已本地提交。用户随后明确授权推送代码与可分享数据；800条生成记录见 [数据目录](generation_records/README.md)，发布状态见 [发布记录](publication.md)。

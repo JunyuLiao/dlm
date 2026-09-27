@@ -81,10 +81,10 @@ Python D:/Users/30128/AppData/Local/Programs/Python/Python311/python.exe.
 
 Existing heartbeat v18-research-stage-continuation PAUSED at completion; task not
 archived. Deletion was rejected by auto-review; authorized safer pause succeeded.
-GitHub push remains blocked by auto-review requiring explicit USER confirmation
-for coconight01/dlm_test branch research/fan-m1-m3-cost-refresh-20260927.
-Pending async question unanswered. Do not retry/bypass; local finalcommit retained.
-Last remote3f2b4db. Once explicitly authorized, push existing reviewed branch only.
-Research complete; no additional GPU experiment is implied by pending push.
+User subsequently explicitly authorized code and all shareable data push to
+coconight01/dlm_test branch research/fan-m1-m3-cost-refresh-20260927.
+Export800 generated request records with provenance/manifest; omit source prompts,
+gold and credentials. Per-canvas telemetry exists; full per-step tensors unrecorded.
+Publication prepared; verify exact remote SHA after push. No GPU work implied.
 Suggested next research step only: offline paired-trajectory divergence analysis
 before proposing another frozen validation; do not automatically start a new round.

@@ -47,5 +47,5 @@ bit-identical paths. No cross-machine absolute latency pooling is used.
 The read-only Fan speaker notes corroborate periodic M1 intent. Named ASR
 transcript remains unavailable; this is documented missing corroboration.
 Shared slides/messages untouched. Drafts remain local. Runnable checkpoints are
-committed; GitHubpush is currently blocked by automatic review pending explicit
-user confirmation of the named remote destination.
+committed. The user subsequently explicitly authorized code and shareable generated
+request data publication to the existing branch; see publication.md for verification.
