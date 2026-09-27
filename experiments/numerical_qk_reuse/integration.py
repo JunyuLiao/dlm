@@ -122,6 +122,10 @@ class Attention:
         self.peak_score_transient_bytes = 0
         self.support = support
         self.output_mode = output_mode
+        # v21 wrapper may set these after the parent v20 installer binds.
+        self.output_score_precision = 'legacy_bf16_scores'
+        self.output_layout = 'head_major'
+        self.output_precision_extra_qk_elements_upper_bound = 0
         self.thresholds = thresholds
         self.cache = ScoreCache(score_period, decision_interval, max_cache_bytes)
         self.projections = Projections()
@@ -267,13 +271,14 @@ class Attention:
             # score anchors where the cached tensor IS the current one, so the
             # same QK is never observed twice.
             fused = (self.output_mode == 'cached_scores'
-                     or current_for_output is entry.scores)
+                     or (current_for_output is entry.scores
+                         and self.output_score_precision == 'legacy_bf16_scores'))
             if fused:
                 result = attention(entry.scores, v, projected.contiguous(), ref.contiguous(),
                                    sensitivity=self.query_sensitivity,
                                    log_threshold=threshold, trace=self.trace,
                                    summary=summary, store_summary=store_summary,
-                                   variant=self.kernel_variant)
+                                   variant=self.kernel_variant, output_layout=self.output_layout)
                 decision = Decision(result.skipped, result.eligible)
             else:
                 # Selector only: no discarded PV, no discarded [B,H,Q,D]
@@ -293,12 +298,21 @@ class Attention:
                 # Same retained tiles as the stale-score routing decision;
                 # the final softmax/PV consumes current, not cached, scores.
                 if self.output_mode == PREQK_MODE:
+                    if current_for_output is entry.scores and self.output_score_precision != 'legacy_bf16_scores':
+                        # The anchor's old arithmetic publishes the cache and
+                        # chooses support. Current FP32 scores are formed in
+                        # the retained-tile consumer as a second QK pass.
+                        # Full geometry is a conservative dispatch charge;
+                        # sparse retained-tile physical counts are separate.
+                        duplicate = b*h*nq*nk
+                        self.current_qk_elements += duplicate
+                        self.output_precision_extra_qk_elements_upper_bound += duplicate
                     result = self._consume(q, k, v, route.skipped, route.eligible, scale, window, causal)
                     self.preqk_calls += 1
                 else:
                     result = attention(current_for_output, v, skipped=route.skipped,
                                        eligible=route.eligible, trace=self.trace,
-                                       variant=self.kernel_variant)
+                                       variant=self.kernel_variant, output_layout=self.output_layout)
             self.cache.publish_decision(identity, self.step, decision)
             self.decision_calls += 1
         elif self.output_mode == PREQK_MODE:
@@ -311,7 +325,7 @@ class Attention:
             scores_for_pv = current_for_output if self.output_mode == 'routing_only_current_output' else entry.scores
             result = attention(scores_for_pv, v, skipped=entry.decision.skipped,
                                eligible=entry.decision.eligible, trace=self.trace,
-                               variant=self.kernel_variant)
+                               variant=self.kernel_variant, output_layout=self.output_layout)
             self.held_calls += 1
         # Explicit asynchronous error, never consume zeroed invalid rows. This
         # is a measured device guard, not a steady-path host tensor read.
@@ -346,7 +360,9 @@ class Attention:
     def _consume(self, q, k, v, skipped, eligible, scale, window, causal):
         if self.consumer == 'triton':
             return preqk_attention(q, k, v, skipped, eligible, scale=scale, window=window,
-                                   is_causal=causal, trace=self.trace, variant=self.kernel_variant)
+                                   is_causal=causal, trace=self.trace, variant=self.kernel_variant,
+                                   output_score_precision=self.output_score_precision,
+                                   output_layout=self.output_layout)
         if causal or self.trace:
             raise ValueError('hopper consumer is qualified for the bidirectional decoder with trace off')
         if self._mask_present:
@@ -467,6 +483,9 @@ class Attention:
                     summary_prefix_tiles_served=self.summary_prefix_tiles,
                     summary_prefix_tiles_recomputed=self.summary_recomputed_tiles,
                     routing_only_extra_qk_elements=self.routing_only_extra_qk_elements,
+                    output_precision_extra_qk_elements_upper_bound=self.output_precision_extra_qk_elements_upper_bound,
+                    output_score_precision=self.output_score_precision,
+                    output_layout=self.output_layout,
                     preqk_consumer_calls=self.preqk_calls,
                     work_counter_scope='dispatch elements, not measured DRAM bytes',
                     cuda_graph_qualified=False, publication='same current CUDA stream')

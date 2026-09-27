@@ -17,3 +17,5 @@ Peerrefs checked once unchanged053441c6/47c47d9; no wait for Junyu.
 Hostdescriptors E:/dlm/v20_private/hosts.json; immutablev20 deploy/read-onlyscorers.
 Next: CP0 CPUaudit+percell qualifiedscoreexport; review kernels/tests; initialcommit/push;
 private immutablev21deploy and bounded CP1 qualification before conditional newpanel.
+
+22:42 UTC: CP0 800 record audit and400 original-scorer score joins complete;4CPU tests pass. Preflight passed both hosts as STATE records.6dcbcf7 verified remote. GPU operator prototype pending actual qualification; no numeric mode promoted. Sol diagnostic/profile/panel helper implementations active. Only coordinator commits/deploys. No v21 GPU job yet.

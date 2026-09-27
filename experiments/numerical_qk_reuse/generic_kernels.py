@@ -289,3 +289,162 @@ def _preqk_pv_generic(QQ, KK, V, SKIP, ELIGIBLE, O, LSE, INVALID, COUNTERS,
         tl.store(COUNTERS+base+0, visited)
         tl.store(COUNTERS+base+1, kvloads)
         tl.store(COUNTERS+base+2, qkdots)
+
+
+
+# v21 output variants preserve the established generic kernels byte-for-byte.
+@tr.jit(do_not_specialize=['K', 'KT'])
+def _pv_generic_output(S, V, SKIP, ELIGIBLE, O, LSE, INVALID, COUNTERS,
+        SOB: tl.constexpr, SOH: tl.constexpr, SOQ: tl.constexpr,
+        Q: tl.constexpr, K, H: tl.constexpr, HK: tl.constexpr,
+        D: tl.constexpr, QB: tl.constexpr, KT,
+        TRACE: tl.constexpr, KDIV: tl.constexpr):
+    q16, h, batch = tl.program_id(0), tl.program_id(1), tl.program_id(2)
+    K = K * KDIV  # v10: K arrives as K/KDIV; the product carries K's pow2 alignment
+    kh = h // (H // HK)
+    qb = q16 // 8
+    qi = q16*16+tl.arange(0, 16)
+    ki = tl.arange(0, 64)
+    di = tl.arange(0, D)
+    maximum = tl.full((16,), -float('inf'), tl.float32)
+    denom = tl.full((16,), 0., tl.float32)
+    output = tl.full((16, D), 0., tl.float32)
+    invalid = tl.full((16,), False, tl.int1)
+    visited = 0
+    vloads = 0
+    pvops = 0
+    for j in range(KT):
+        dest = ((batch*H+h)*QB+qb)*KT+j
+        eligible = tl.load(ELIGIBLE+dest)
+        drop = tl.load(SKIP+dest)
+        kk = j*64+ki
+        valid = (qi[:, None]<Q) & (kk[None, :]<K)
+        score = tl.load(S+((batch*H+h)*Q+qi[:, None])*K+kk[None, :],
+                        valid, other=-float('inf'))
+        bad = valid & ((score != score) | (score == float('inf')))
+        bad_row = tl.sum(bad.to(tl.int32), 1)>0
+        invalid = invalid | bad_row
+        # A stale held decision cannot hide invalid scores; execute the V
+        # tile and flag affected rows for fallback instead.
+        bad_tile = tl.sum(bad_row.to(tl.int32), 0)>0
+        if (eligible | bad_tile) & (~drop | bad_tile):
+            visited += 1
+            finite = valid & (score > -float('inf')) & (score < float('inf'))
+            clean = tl.where(finite, score, -float('inf'))
+            tile_max = tl.max(clean, 1)
+            next_max = tl.maximum(maximum, tile_max)
+            safe = tl.where(next_max > -float('inf'), next_max, 0.)
+            old_scale = tl.where(maximum > -float('inf'), lib.exp(maximum-safe), 0.)
+            p = lib.exp(clean-safe[:, None])
+            denom = old_scale*denom+tl.sum(p, 1)
+            output = old_scale[:, None]*output
+            # No V read or tensor-core PV is issued for a deleted block.
+            v = tl.load(V+((batch*HK+kh)*K+kk[:, None])*D+di[None, :],
+                        kk[:, None]<K, other=0.)
+            output += tl.dot(p.to(tl.bfloat16), v)
+            maximum = next_max
+            vloads += 1
+            pvops += 1
+    normalized = output/tl.maximum(denom[:, None], 1.e-30)
+    normalized = tl.where((denom>0)[:, None] & ~invalid[:, None], normalized, 0.)
+    logz = tl.where((denom>0) & ~invalid, maximum+lib.log(tl.maximum(denom, 1.e-30)), -float('inf'))
+    tl.store(O+batch*SOB+h*SOH+qi[:, None]*SOQ+di[None, :], normalized.to(tl.bfloat16), qi[:, None]<Q)
+    tl.store(LSE+(batch*H+h)*Q+qi, logz, qi<Q)
+    tl.store(INVALID+(batch*H+h)*Q+qi, invalid, qi<Q)
+    if TRACE:
+        base = ((batch*H+h)*tr.cdiv(Q, 16)+q16)*3
+        tl.store(COUNTERS+base+0, visited)
+        tl.store(COUNTERS+base+1, vloads)
+        tl.store(COUNTERS+base+2, pvops)
+
+
+@tr.jit(do_not_specialize=['K', 'KT'])
+def _preqk_pv_generic_output(QQ, KK, V, SKIP, ELIGIBLE, O, LSE, INVALID, COUNTERS,
+              SQB, SQH, SQL, SKB, SKH, SKL, SVB, SVH, SVL,
+              SOB: tl.constexpr, SOH: tl.constexpr, SOQ: tl.constexpr,
+              SCORE_FP32: tl.constexpr,
+              Q: tl.constexpr, K, H: tl.constexpr, HK: tl.constexpr,
+              D: tl.constexpr, QB: tl.constexpr, KT,
+              SCALE, WINDOW: tl.constexpr, TRACE: tl.constexpr, KDIV: tl.constexpr):
+    """Current-QK/PV consumer that never touches a dropped tile.
+
+    Same 16-row output program and online-softmax accumulation as ``_pv``,
+    but the scores are formed here from current Q/K instead of read from a
+    materialized [B,H,Q,K] tensor. A dropped tile issues no K load, no V
+    load and no dot: the branch is taken before any of them. GQA is handled
+    by indexing the KV head, so no repeated K/V is materialized. Q/K/V
+    strides are explicit because the model hands us transposed (non
+    contiguous) [B,H,L,D] views; forcing a copy would re-introduce the
+    layout cost this consumer exists to avoid. The last dimension is
+    contiguous in every native layout we accept.
+    """
+    q16, h, batch = tl.program_id(0), tl.program_id(1), tl.program_id(2)
+    K = K * KDIV  # v10: K arrives as K/KDIV; the product carries K's pow2 alignment
+    kh = h // (H // HK)
+    qb = q16 // 8
+    qi = q16*16 + tl.arange(0, 16)
+    ki = tl.arange(0, 64)
+    di = tl.arange(0, D)
+    rows = qi < Q
+    # The query tile is loaded once per program; dropped tiles cost nothing.
+    q_tile = tl.load(QQ+batch*SQB+h*SQH+qi[:, None]*SQL+di[None, :],
+                     rows[:, None], other=0.)
+    # Absolute query position inside this compact tensor, matching
+    # _attention_validity's ``arange(q_len) + (kv_len - q_len)``.
+    qpos = qi + (K - Q)
+    maximum = tl.full((16,), -float('inf'), tl.float32)
+    denom = tl.full((16,), 0., tl.float32)
+    output = tl.full((16, D), 0., tl.float32)
+    invalid = tl.full((16,), False, tl.int1)
+    visited = 0
+    kvloads = 0
+    qkdots = 0
+    for j in range(KT):
+        dest = ((batch*H+h)*QB+qb)*KT+j
+        eligible = tl.load(ELIGIBLE+dest)
+        drop = tl.load(SKIP+dest)
+        if eligible & ~drop:
+            visited += 1
+            kk = j*64+ki
+            k_tile = tl.load(KK+batch*SKB+kh*SKH+kk[:, None]*SKL+di[None, :],
+                             kk[:, None] < K, other=0.)
+            kvloads += 1
+            score = tl.dot(q_tile, tl.trans(k_tile))
+            qkdots += 1
+            # Reference rounding (observe_scores): BF16 matmul output, then
+            # BF16 scaling, then FP32 for the softmax. Torch computes the
+            # scalar multiply in FP32 opmath and rounds back to BF16.
+            if SCORE_FP32:
+                score = score*SCALE
+            else:
+                score = (score.to(tl.bfloat16).to(tl.float32)*SCALE).to(tl.bfloat16).to(tl.float32)
+            valid = rows[:, None] & (kk[None, :] < K)
+            if WINDOW > 0:
+                valid = valid & (kk[None, :] >= (qpos[:, None] - WINDOW + 1))
+            bad = valid & ((score != score) | (score == float('inf')))
+            invalid = invalid | (tl.sum(bad.to(tl.int32), 1) > 0)
+            finite = valid & (score > -float('inf')) & (score < float('inf'))
+            clean = tl.where(finite, score, -float('inf'))
+            tile_max = tl.max(clean, 1)
+            next_max = tl.maximum(maximum, tile_max)
+            safe = tl.where(next_max > -float('inf'), next_max, 0.)
+            old_scale = tl.where(maximum > -float('inf'), lib.exp(maximum-safe), 0.)
+            p = lib.exp(clean-safe[:, None])
+            denom = old_scale*denom+tl.sum(p, 1)
+            output = old_scale[:, None]*output
+            v = tl.load(V+batch*SVB+kh*SVH+kk[:, None]*SVL+di[None, :],
+                        kk[:, None] < K, other=0.)
+            output += tl.dot(p.to(tl.bfloat16), v)
+            maximum = next_max
+    normalized = output/tl.maximum(denom[:, None], 1.e-30)
+    normalized = tl.where((denom > 0)[:, None] & ~invalid[:, None], normalized, 0.)
+    logz = tl.where((denom > 0) & ~invalid,
+                    maximum+lib.log(tl.maximum(denom, 1.e-30)), -float('inf'))
+    tl.store(O+batch*SOB+h*SOH+qi[:, None]*SOQ+di[None, :], normalized.to(tl.bfloat16), rows[:, None])
+    tl.store(LSE+(batch*H+h)*Q+qi, logz, rows)
+    tl.store(INVALID+(batch*H+h)*Q+qi, invalid, rows)
+    if TRACE:
+        base = ((batch*H+h)*tr.cdiv(Q, 16)+q16)*3
+        tl.store(COUNTERS+base+0, visited)
+        tl.store(COUNTERS+base+1, kvloads)
+        tl.store(COUNTERS+base+2, qkdots)

@@ -413,16 +413,36 @@ def _extra(variant, nk):
     return {} if variant != 'generic' else {'KDIV': _kdiv(nk)}
 
 
+OUTPUT_PRECISIONS = ('legacy_bf16_scores', 'fp32_scores_bf16_pv')
+OUTPUT_LAYOUTS = ('head_major', 'model_major')
+
+
+def _output_buffer(b, h, nq, d, device, layout):
+    if layout == 'head_major':
+        return torch.empty((b, h, nq, d), device=device, dtype=torch.bfloat16)
+    # The logical [B,H,Q,D] view has physical [B,Q,H,D] storage.  The
+    # integration transpose therefore returns contiguous storage as-is.
+    return torch.empty((b, nq, h, d), device=device, dtype=torch.bfloat16).transpose(1, 2)
+
+
+def _check_output_modes(variant, precision, layout):
+    if precision not in OUTPUT_PRECISIONS or layout not in OUTPUT_LAYOUTS:
+        raise ValueError('unknown output precision or layout')
+    if (precision != OUTPUT_PRECISIONS[0] or layout != OUTPUT_LAYOUTS[0]) and variant != 'generic':
+        raise ValueError('v21 output modes require the qualified generic Triton variant')
+
+
 def attention(scores, v, z=None, reference=None, *, sensitivity=None,
               log_threshold=-math.inf, skipped=None, eligible=None,
               trace=False, num_warps=8, summary=None, store_summary=False,
-              variant='static'):
+              variant='static', output_layout='head_major'):
     """Run M1, or consume a held M3 bitmap without projected-V routing.
 
     Output rows flagged in ``invalid_scores`` are zero and require caller
     fallback; they are never silently treated as valid numerical reuse.
     ``trace`` is diagnostic and must be false in timed runs.
     """
+    _check_output_modes(variant, OUTPUT_PRECISIONS[0], output_layout)
     if tr is None:
         raise RuntimeError('Triton is required for the CUDA cached-score executor')
     if scores.ndim != 4 or scores.dtype != torch.float32 or not scores.is_cuda or not scores.is_contiguous():
@@ -456,7 +476,7 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
         raise ValueError('sensitivity must be contiguous CUDA FP32 [B,Q]')
     skip = skipped if skipped is not None else torch.empty(shape, device=scores.device, dtype=torch.bool)
     elig = eligible if eligible is not None else torch.empty(shape, device=scores.device, dtype=torch.bool)
-    out = torch.empty((b, h, nq, d), device=scores.device, dtype=torch.bfloat16)
+    out = _output_buffer(b, h, nq, d, scores.device, output_layout)
     lse = torch.empty((b, h, nq), device=scores.device, dtype=torch.float32)
     invalid = torch.empty((b, h, nq), device=scores.device, dtype=torch.bool)
     state = torch.empty((b, h, nq, 32) if trace and skipped is None else (1,), device=scores.device, dtype=torch.float32)
@@ -478,9 +498,16 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
     elif eligible is None:
         _kernels(variant)['held'][(qb, h, b)](scores, skip, elig, nq, _karg(variant, nk), h, qb, kt,
                                     num_warps=4, num_stages=1, **_extra(variant, nk))
-    _kernels(variant)['pv'][(tr.cdiv(nq, 16), h, b)](scores, v, skip, elig, out, lse, invalid, counters,
-                                 nq, _karg(variant, nk), h, hk, d, qb, kt, trace,
-                                 num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
+    if output_layout == 'head_major':
+        _kernels(variant)['pv'][(tr.cdiv(nq, 16), h, b)](scores, v, skip, elig, out, lse, invalid, counters,
+                                     nq, _karg(variant, nk), h, hk, d, qb, kt, trace,
+                                     num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
+    else:
+        from .generic_kernels import _pv_generic_output
+        _pv_generic_output[(tr.cdiv(nq, 16), h, b)](scores, v, skip, elig, out, lse, invalid, counters,
+                                      out.stride(0), out.stride(1), out.stride(2),
+                                      nq, _karg(variant, nk), h, hk, d, qb, kt, trace,
+                                      num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
     return Output(out, skip, elig, lse, state, risk, invalid, counters)
 
 
@@ -565,7 +592,8 @@ def _summary_arguments(summary, store_summary, shape, kt, device):
 
 
 def preqk_attention(q, k, v, skipped, eligible, *, scale, window=None,
-                    is_causal=False, trace=False, num_warps=8, variant='static'):
+                    is_causal=False, trace=False, num_warps=8, variant='static',
+                    output_score_precision='legacy_bf16_scores', output_layout='head_major'):
     """Current attention on a preselected support, skipping dropped tiles' QK.
 
     ``skipped``/``eligible`` are the [B,H,Qtiles,Ktiles] bitmaps produced
@@ -580,6 +608,7 @@ def preqk_attention(q, k, v, skipped, eligible, *, scale, window=None,
     separately checked via ``route_only``'s ``invalid_tiles``. Retained tiles
     are still checked and still zero + flag their rows.
     """
+    _check_output_modes(variant, output_score_precision, output_layout)
     if tr is None:
         raise RuntimeError('Triton is required for the CUDA cached-score executor')
     if is_causal:
@@ -605,19 +634,26 @@ def preqk_attention(q, k, v, skipped, eligible, *, scale, window=None,
     bound = 0 if not window else int(window)
     if bound < 0:
         raise ValueError('window must be nonnegative')
-    out = torch.empty((b, h, nq, d), device=q.device, dtype=torch.bfloat16)
+    out = _output_buffer(b, h, nq, d, q.device, output_layout)
     lse = torch.empty((b, h, nq), device=q.device, dtype=torch.float32)
     invalid = torch.empty((b, h, nq), device=q.device, dtype=torch.bool)
     # v10 glue: the one-element stand-in is never written when trace=False, so
     # it needs no memset; trace=True keeps the zero-initialized counters.
     counters = (torch.zeros if trace else torch.empty)((b, h, tr.cdiv(nq, 16), 3) if trace else (1,),
                            device=q.device, dtype=torch.int32)
-    _kernels(variant)['preqk'][(tr.cdiv(nq, 16), h, b)](q, k, v, skipped, eligible, out, lse, invalid, counters,
-                                       q.stride(0), q.stride(1), q.stride(2),
-                                       k.stride(0), k.stride(1), k.stride(2),
-                                       v.stride(0), v.stride(1), v.stride(2),
-                                       nq, _karg(variant, nk), h, hk, d, qb, kt, float(scale), bound, trace,
-                                       num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
+    kernel = _kernels(variant)['preqk']
+    extra_output = ()
+    if output_score_precision != OUTPUT_PRECISIONS[0] or output_layout != OUTPUT_LAYOUTS[0]:
+        from .generic_kernels import _preqk_pv_generic_output
+        kernel = _preqk_pv_generic_output
+        extra_output = (out.stride(0), out.stride(1), out.stride(2),
+                        output_score_precision == 'fp32_scores_bf16_pv')
+    kernel[(tr.cdiv(nq, 16), h, b)](q, k, v, skipped, eligible, out, lse, invalid, counters,
+                                   q.stride(0), q.stride(1), q.stride(2),
+                                   k.stride(0), k.stride(1), k.stride(2),
+                                   v.stride(0), v.stride(1), v.stride(2), *extra_output,
+                                   nq, _karg(variant, nk), h, hk, d, qb, kt, float(scale), bound, trace,
+                                   num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
     state = torch.empty((1,), device=q.device, dtype=torch.float32)
     return Output(out, skipped, eligible, lse, state, state, invalid, counters)
 
