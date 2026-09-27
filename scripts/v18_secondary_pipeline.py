@@ -98,7 +98,9 @@ class Transport:
         subprocess.run(['scp', *SSH, source, destination], check=True, timeout=timeout)
 
     def read(self, host: str, path: str) -> bytes | None:
-        command = f'if test -f {shlex.quote(path)}; then base64 -w0 {shlex.quote(path)}; fi'
+        # Frame presence separately from payload: base64 of an empty file is empty.
+        command = (f'if test -f {shlex.quote(path)}; then printf P; '
+                   f'base64 -w0 {shlex.quote(path)}; else printf A; fi')
         for attempt in range(3):
             cutoff = getattr(self, 'read_deadline', None)
             remaining = cutoff - time.time() if cutoff is not None else None
@@ -117,7 +119,11 @@ class Transport:
                     if delay <= 0:
                         raise PrimaryPendingDeadline('primary read reached original GPU cutoff')
                 time.sleep(delay)
-        return base64.b64decode(encoded, validate=True) if encoded else None
+        if encoded == 'A':
+            return None
+        if encoded.startswith('P'):
+            return base64.b64decode(encoded[1:], validate=True)
+        raise ValueError('invalid framed remote read response')
 
     def write_immutable(self, host: str, path: str, data: bytes) -> None:
         old = self.read(host, path)

@@ -1,4 +1,5 @@
 import hashlib
+import base64
 import json
 import tempfile
 import unittest
@@ -66,12 +67,39 @@ class PipelineTests(unittest.TestCase):
             calls.append(timeout)
             if len(calls) < 3:
                 raise subprocess.TimeoutExpired('ssh', timeout)
-            return 'YWJj'
+            return 'PYWJj'
         t.ssh = ssh
         with patch.object(cp.time, 'sleep') as sleep:
             self.assertEqual(t.read('mpk', '/mpk/status.json'), b'abc')
         self.assertEqual(len(calls), 3)
         self.assertEqual([x.args[0] for x in sleep.call_args_list], [2, 4])
+
+    def test_framed_remote_read_distinguishes_absent_empty_and_binary(self):
+        t = cp.Transport({'hosts': {'mpk': {'root': '/mpk', 'ssh': cp.EXPECTED['mpk']}}})
+        for response, expected in [('A', None), ('P', b''),
+                                   ('P' + base64.b64encode(b'\x00\xff').decode(), b'\x00\xff')]:
+            t.ssh = lambda _host, command, timeout=60, response=response: response
+            self.assertEqual(t.read('mpk', '/mpk/ledger.jsonl'), expected)
+        t.ssh = lambda *_args, **_kwargs: ''
+        with self.assertRaisesRegex(ValueError, 'framed remote read'):
+            t.read('mpk', '/mpk/ledger.jsonl')
+
+    def test_write_immutable_accepts_existing_and_new_empty_file(self):
+        t = cp.Transport({'hosts': {'mpk': {'root': '/mpk', 'ssh': cp.EXPECTED['mpk']}}})
+        present = False
+        writes = []
+        def ssh(_host, command, timeout=60):
+            nonlocal present
+            if command.startswith('if test -f '):
+                return 'P' if present else 'A'
+            writes.append(command)
+            present = True
+            return ''
+        t.ssh = ssh
+        t.write_immutable('mpk', '/mpk/ledger.jsonl', b'')
+        self.assertEqual(len(writes), 1)
+        t.write_immutable('mpk', '/mpk/ledger.jsonl', b'')
+        self.assertEqual(len(writes), 1)
 
     def test_exhausted_read_is_bounded_and_mutation_is_not_retried(self):
         t = cp.Transport({'hosts': {'mpk': {'root': '/mpk', 'ssh': cp.EXPECTED['mpk']}}})
