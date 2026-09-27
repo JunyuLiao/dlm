@@ -19,6 +19,7 @@ CONTROL_PLUGIN = 'experiments.numerical_qk_reuse.v20_controls:install'
 CONTROL_CONDITION = 'v20_dense_consumer'
 SOURCES = ('v21.py', 'generic_kernels.py', 'cached_executor.py', 'integration.py',
            'v20_controls.py')
+REQUEST_ENVELOPE = ('phase', 'diagnostic', 'timing_events', 'thinking', 'max_new_tokens')
 
 
 def _fingerprint(config):
@@ -83,6 +84,7 @@ def _wrap(parent, parent_kind, output_score_precision, output_layout):
                   output_score_precision=output_score_precision, output_layout=output_layout,
                   output_precision_status=('diagnostic' if output_score_precision == 'fp32_scores_bf16_pv'
                                            else 'legacy'), source_hashes=source_hashes)
+    result.update({name: parent[name] for name in REQUEST_ENVELOPE if name in parent})
     result['fingerprint'] = _fingerprint(result)
     return result
 
@@ -112,6 +114,9 @@ def validate_effective(config: dict, condition: str):
     parent = config.get('parent_config')
     if not isinstance(parent, dict):
         raise ValueError('v21 requires intact parent v20 config')
+    for name in REQUEST_ENVELOPE:
+        if (name in config) != (name in parent) or (name in parent and config[name] != parent[name]):
+            raise ValueError(f'v21 request envelope {name} differs from parent')
     parent_kind = config.get('parent_kind')
     if parent_kind == 'v20_method':
         scope, interval = v20.validate_effective(parent, condition)

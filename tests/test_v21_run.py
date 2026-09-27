@@ -1,3 +1,6 @@
+import ast
+import hashlib
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -187,6 +190,27 @@ class V21RunTests(unittest.TestCase):
         self.assertTrue(strict_v21_warm(first, warm)["accepted"])
         warm = dict(warm, router_phase_evidence={"A": 1, "D": 2, "H": 0})
         self.assertIn("router_phase_evidence_mismatch", strict_v21_warm(first, warm)["reasons"])
+
+    def test_actual_wrapper_shape_satisfies_one_request_fields_without_gpu(self):
+        from experiments.numerical_qk_reuse.runner import request_budget, request_thinking
+        source = V20_PROTOCOL.parents[2] / "experiments/numerical_qk_reuse/v21.py"
+        function = next(n for n in ast.parse(source.read_text()).body
+                        if isinstance(n, ast.FunctionDef) and n.name == "_wrap")
+        namespace = {"Path": Path, "__file__": str(source), "hashlib": hashlib,
+                     "SOURCES": (), "PLUGIN": "v21-test", "REQUEST_ENVELOPE":
+                         ("phase", "diagnostic", "timing_events", "thinking", "max_new_tokens"),
+                     "_fingerprint": lambda value: hashlib.sha256(json.dumps(value, sort_keys=True,
+                                                      separators=(",", ":")).encode()).hexdigest()}
+        exec(compile(ast.Module(body=[function], type_ignores=[]), str(source), "exec"), namespace)
+        for thinking, budget in ((True, 8192), (False, 128)):
+            parent = dict(condition="v20_dense_consumer", phase="v21_test", diagnostic=False,
+                          timing_events=False, thinking=thinking, max_new_tokens=budget)
+            config = namespace["_wrap"](parent, "v20_control", "legacy_bf16_scores", "head_major")
+            row = dict(thinking=thinking, generation_budget=budget)
+            self.assertEqual(request_budget(row, config), budget)
+            self.assertIs(request_thinking(row, config), thinking)
+            self.assertEqual((config["phase"], config["diagnostic"], config["timing_events"]),
+                             ("v21_test", False, False))
 
 
 if __name__ == "__main__":

@@ -4,27 +4,53 @@
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
   "authority": "User-provided complete v21 specification in current task",
-  "status": "CP1_OPERATOR_QUALIFIED_DIAGNOSTIC_READY",
+  "status": "CP1_REAL_STATE_DONE_CP2_PROFILE_ACTIVE",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "gpu_stop_utc": "2026-09-28T05:52:00Z",
   "final_deadline_utc": "2026-09-28T06:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 520,
   "max_gpu_workers": 2,
-  "charged_gpu_process_seconds": 20.965452432632446,
-  "generation_executions": 0,
-  "gpu_jobs": [],
+  "charged_gpu_process_seconds": 165.74683356285095,
+  "generation_executions": 6,
+  "gpu_jobs": [
+    {
+      "host": "mpk",
+      "stage": "profile",
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/cp1_f65de1e",
+      "sha": "f65de1e431c1e1cbdb980692d5bb03df47ad0fca",
+      "supervisor_pid": 1804239,
+      "config": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/bindings/cp1_f65de1e/profile.json",
+      "config_sha256": "c7251200ed645285f1c0aac91f4dcfc3ea97d838cc0c06f146d373087fa9272e",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/profile_cp1_f65de1e.json",
+      "log": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/profile_cp1_f65de1e.log",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/profile_cp1_f65de1e.json"
+    },
+    {
+      "host": "dllm",
+      "stage": "profile",
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/cp1_f65de1e",
+      "sha": "f65de1e431c1e1cbdb980692d5bb03df47ad0fca",
+      "supervisor_pid": 141156,
+      "config": "/home/exouser/dyh/m3_output_numerics_v21_20260927/bindings/cp1_f65de1e/profile.json",
+      "config_sha256": "074795bb89ea48a5bcd43c22c356196f67469883a4f66c203e05251b4b9a39d8",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/profile_cp1_f65de1e.json",
+      "log": "/home/exouser/dyh/m3_output_numerics_v21_20260927/profile_cp1_f65de1e.log",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/profile_cp1_f65de1e.json"
+    }
+  ],
   "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
-  "push_status": "f2fe318ab3e1bdd801696d7f82741970d5f82cc0 verified remote",
+  "push_status": "f65de1e431c1e1cbdb980692d5bb03df47ad0fca verified remote",
   "agents": {
     "trajectory": "/root/sol_b8",
     "historical": "/root/sol_profile",
     "kernel": "/root/sol_v21_kernel"
   },
-  "next": "Run bounded isolated GPU operator qualification, then frozen actual-state diagnostic",
+  "next": "Finish native-bracketed full-forward/step costs; bounded12natural diagnostic after output wrapper envelope validation; decide numerical promotion using errors/cost, never known-answer success",
   "peer_refs": {
     "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
     "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
   },
-  "preflight": "Both hosts: all1047tensorpayloads freshly hash-matched original snapshot. Private runtime/source/model metadata checks passed. GPU operator tests19/19 on eachhost. No model diagnostic generation launched yet."
+  "preflight": "Both hosts: all1047tensorpayloads freshly hash-matched original snapshot. Private runtime/source/model metadata checks passed. GPU operator tests19/19 on eachhost. No model diagnostic generation launched yet.",
+  "generation_reserved": 6
 }

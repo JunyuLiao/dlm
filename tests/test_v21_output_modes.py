@@ -113,3 +113,28 @@ def test_controls_exclude_fresh_and_g75():
     parent = dict(config['parent_config'], fingerprint='0' * 64)
     with pytest.raises(ValueError, match='parent control fingerprint'):
         v21.validate_effective({**config, 'parent_config': parent}, config['condition'])
+
+
+@pytest.mark.parametrize('kind', ('method', 'control'))
+def test_runner_request_envelope_is_inherited_and_bound(kind):
+    request = dict(phase='v21_natural_lb', diagnostic=False, timing_events=False,
+                   thinking=True, max_new_tokens=8192)
+    original = base(**request)
+    if kind == 'method':
+        config = v21.effective_config(original, 'M3_R2_A8_current_output', v20.ALL_NATIVE_LEGAL)
+    else:
+        config = v21.effective_control_config(original, v20.ALL_NATIVE_LEGAL)
+    assert {k: config[k] for k in request} == request
+    assert {k: config['parent_config'][k] for k in request} == request
+    assert v21.validate_effective(config, config['condition'])
+    for key in request:
+        drift = dict(config)
+        drift[key] = (not request[key]) if isinstance(request[key], bool) else 'drift'
+        drift['fingerprint'] = v21._fingerprint({k: v for k, v in drift.items() if k != 'fingerprint'})
+        with pytest.raises(ValueError, match='request envelope'):
+            v21.validate_effective(drift, drift['condition'])
+        absent = dict(config)
+        absent.pop(key)
+        absent['fingerprint'] = v21._fingerprint({k: v for k, v in absent.items() if k != 'fingerprint'})
+        with pytest.raises(ValueError, match='request envelope'):
+            v21.validate_effective(absent, absent['condition'])
