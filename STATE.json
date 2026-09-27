@@ -1,229 +1,30 @@
 {
-  "schema": 20,
-  "task": "Fan M1/M3 same-day native-adaptive multi-dataset cost study",
-  "parent": "e3f14520eea98e45998fb369f9027f3b2707ec4a",
-  "branch": "research/fan-m1-m3-cost-refresh-20260927",
-  "status": "CP11_RESEARCH_COMPLETE_PUSH_AUTH_PENDING",
-  "authority": "E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md",
-  "budget_file": "results/fan_m1_m3_multidataset_20260927/campaign_budget.json",
-  "panel_file": "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json",
-  "scope_policy_consumer": "FROZEN GLOBAL_ONLY_NATIVE_LOCAL / P0 / triton; G75 ALL/Triton separate",
-  "coordinator": null,
-  "prior_campaign": "v18 CP4 complete and unchanged",
-  "next": "Research and authorized code/data publication complete. No GPU, scorer or heartbeat relaunch.",
-  "updated_utc": "2026-09-27T17:13:08.041104+00:00",
-  "qualification": {
-    "mpk": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
-    "dllm": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
-    "source": "59329118dc8578fb014abaa48241d2e611a0d432",
-    "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
-    "bridge_note": "same CUDA kernel; newhost private bridge relink after two CPU missing-header failures, no GPU request retry"
-  },
-  "private_manifests": "E:/dlm/v20_private/frozen_panel_lf",
-  "deployment": "deploy/cp3_00a2c4d",
-  "deployment_commit": "00a2c4d3c93a7f685a4f75fba8ea47991fa5c383",
-  "charged_gpu_seconds_closed_stages": 21256.63526892662,
-  "failed_stages": [
-    {
-      "stage": "screen_001",
-      "source": "7c0286b",
-      "reason": "native arm config lacked required model/revision identity; both failed before model load after11/11 GPU qualification tests",
-      "generations": 0,
-      "seconds": {
-        "mpk": 7.174681663513184,
-        "dllm": 6.6203460693359375
-      },
-      "preserved": true
-    }
-  ],
-  "generation_executions_closed_stages": 844,
-  "generation_executions_reserved_active_captures_max": 0,
-  "generation_note": "44 qualification + 700 primary + 100 separately named G75 reference; 400 successful first and 400 accepted warm; no scored execution failure or missing cell",
-  "screen002_artifacts": {
-    "dllm": {
-      "artifacts": {
-        "screen_002.json": {
-          "bytes": 41746249,
-          "path": "E:\\dlm\\v20_private\\watch_screen_002\\dllm\\screen_002.json",
-          "sha256": "a908b1597ba347b762d692f28a80ce3cc33fcf7e32207aa2fe83139718c987f4"
-        },
-        "screen_002.stage.json": {
-          "bytes": 703,
-          "path": "E:\\dlm\\v20_private\\watch_screen_002\\dllm\\screen_002.stage.json",
-          "sha256": "0250880abcbd328e20410a963c9cf4a760ee5d30088568e6bbd8d774e3e8c472"
-        }
-      },
-      "charged_process_seconds": 793.0866017341614,
-      "end_epoch": 1790513946.26548,
-      "returncode": 0,
-      "status": "complete"
-    },
-    "mpk": {
-      "artifacts": {
-        "screen_002.json": {
-          "bytes": 41770489,
-          "path": "E:\\dlm\\v20_private\\watch_screen_002\\mpk\\screen_002.json",
-          "sha256": "e781f09bc473f2724cd5f4af2374d2ef2e41cc33e16fbae9b1b69844f299d1ef"
-        },
-        "screen_002.stage.json": {
-          "bytes": 687,
-          "path": "E:\\dlm\\v20_private\\watch_screen_002\\mpk\\screen_002.stage.json",
-          "sha256": "5d875967c7fee1c43e0c6a8bb8fbe6b1721f8d0f06804027177623757e0d0336"
-        }
-      },
-      "charged_process_seconds": 813.791877746582,
-      "end_epoch": 1790513962.8003254,
-      "returncode": 0,
-      "status": "complete"
-    }
-  },
-  "push_status": "published_verified",
-  "closed_new_stage_charges": {
-    "selected_001/dllm": 1105.6609513759613,
-    "selected_001/mpk": 1407.1216332912445,
-    "ruler_selected_001/dllm": 102.43606305122375,
-    "ruler_selected_001/mpk": 111.77833843231201,
-    "bridge_001/dllm": 33.48004722595215,
-    "bridge_001/mpk": 31.684342861175537,
-    "timeline_001/dllm": 21.552814483642578,
-    "timeline_001/mpk": 26.169574737548828,
-    "initial_001/dllm": 1100.6446421146393,
-    "initial_001/mpk": 2006.2358846664429,
-    "remainder_001/dllm": 5919.138600826263,
-    "remainder_001/mpk": 5630.491504430771,
-    "historical_001/dllm": 1085.0229887962341,
-    "historical_001/mpk": 1025.5469665527344
-  },
-  "latest_local_commit": "final checkpoint: resolve git HEAD (self hash not embedded)",
-  "generation_executions_reserved_active_bridge_max": 0,
-  "binding_sha256": "ee06c936e500fecfd219c6a9e277f99e77baed7b39d405ad96625f94e50734b5",
-  "execution_protocol_sha256": "99e1d287867b0906b8c5a2715d4cf962ec31e6d1f473c1fe0ce2df5891f1aa17",
-  "execution_protocol_note": "Git/deploy LF bytes; local checkout CRLF logically identical, private frozen_protocol_deployed.json exactGitblob retained",
-  "auxiliary_deployment": "deploy/cp5_05f9947; production CP3 unchanged",
-  "generation_executions_reserved_active_primary_max": 0,
-  "timeline_qualification": "ON/OFF exacttokens/calls/termination/phase for native/R2/G75 bothhosts; optionaldeviceclockspan measured, notdecodewall",
-  "latest_runnable_commit": "33edb5b",
-  "completed_first84_postprocessor": {
-    "status": "complete",
-    "config": "E:/dlm/v20_private/collect_initial_001.config.json",
-    "output": "E:/dlm/v20_private/collect_initial_001",
-    "cpu_only": true,
-    "consume_existing_watcher_only": true,
-    "session_id": 30708,
-    "source_commit": "8ded8b9",
-    "deadline_epoch": 1790537280,
-    "command": "python -u -m scripts.v20_collect_score collect --config E:/dlm/v20_private/collect_initial_001.config.json --out-dir E:/dlm/v20_private/collect_initial_001 --wait-until-epoch 1790537280",
-    "summary_sha256": "6fa30c9328d4c875612c087cc83268d57d0d198a80e3a0a9c2478de9c0650ece"
-  },
-  "completed_first84_watcher": {
-    "session_id": 76623,
-    "path": "E:/dlm/v20_private/watch_initial_001/initial_001.status.json",
-    "read_only": true,
-    "status": "complete"
-  },
-  "watcher": {
-    "pid": 53584,
-    "path": "E:/dlm/v20_private/watch_historical_001/historical_001.status.json",
-    "status": "complete",
-    "read_only": true,
-    "detached_hidden": true
-  },
-  "postprocessor": {
-    "stage": "historical_001",
-    "status": "scored_complete",
-    "config": "E:/dlm/v20_private/collect_historical_001.config.json",
-    "output": "E:/dlm/v20_private/collect_historical_001",
-    "cpu_only": true,
-    "consume_existing_watcher_only": true,
-    "must_not_duplicate": true,
-    "pid": 53896,
-    "source_commit": "33edb5b",
-    "detached_hidden": true,
-    "deadline_epoch": 1790537280,
-    "command": "python -u -m scripts.v20_collect_historical collect --config E:/dlm/v20_private/collect_historical_001.config.json --out-dir E:/dlm/v20_private/collect_historical_001 --wait-until-epoch 1790537280",
-    "summary_sha256": "ae013630235ba0ba5212ea35ae627d5e4c7edf9dd1b56718b6bedb5514237107"
-  },
-  "active_gpu_seconds_reserved_max": {},
-  "first84_report": "results/fan_m1_m3_multidataset_20260927/first84_report.md",
-  "local_monitor_recovery": {
-    "observed_utc": "2026-09-27T15:54:35Z",
-    "old_watcher_session": 70176,
-    "old_collector_session": 17065,
-    "old_collector_pid": 58084,
-    "evidence": "No matching live local watcher/collector; old collector dir only lock. Remote remainder scorer root/payload/helper/archive absent, no dispatch. Both original remote GPU workers verified active. Old artifacts preserved.",
-    "gpu_relaunches": 0
-  },
-  "full700_summary_sha256": "25f5483e6650c118744fd642ecd3ec62d3178514eb8e8b2a0d730f1227ee9d5f",
-  "completed_main_gpu_jobs": [
-    {
-      "host": "149.165.151.254",
-      "supervisor_pid": 1745246,
-      "stage": "remainder_001",
-      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.stage.json",
-      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.json",
-      "status": "complete"
-    },
-    {
-      "host": "149.165.159.64",
-      "supervisor_pid": 127469,
-      "stage": "remainder_001",
-      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.stage.json",
-      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.json",
-      "status": "complete"
-    }
-  ],
-  "completed_main_watcher": {
-    "pid": 45904,
-    "path": "E:/dlm/v20_private/watch_remainder_002/remainder_001.status.json",
-    "read_only": true,
-    "status": "complete",
-    "detached_hidden": true
-  },
-  "completed_main_postprocessor": {
-    "status": "scored_complete",
-    "cpu_only": true,
-    "consume_existing_watcher_only": true,
-    "stage": "remainder_001",
-    "must_not_duplicate": true,
-    "source_commit": "67be400",
-    "config": "E:/dlm/v20_private/collect_remainder_002.config.json",
-    "output": "E:/dlm/v20_private/collect_remainder_002",
-    "deadline_epoch": 1790537280,
-    "command": "python -u -m scripts.v20_collect_remainder collect --config E:/dlm/v20_private/collect_remainder_002.config.json --out-dir E:/dlm/v20_private/collect_remainder_002 --wait-until-epoch 1790537280",
-    "pid": 6656,
-    "detached_hidden": true
-  },
-  "generation_executions_reserved_active_historical_max": 0,
-  "final_report": "results/fan_m1_m3_multidataset_20260927/morning_or_final_brief.md",
-  "historical_summary_sha256": "ae013630235ba0ba5212ea35ae627d5e4c7edf9dd1b56718b6bedb5514237107",
-  "final_gate": "M3 incremental advantage NOT_PASSED; G75 reference no cross-dataset quality/time success",
-  "gpu_idle_verification": "2026-09-27 approximately17:10UTC: nvidia-smi compute-apps empty on both authorized hosts",
-  "heartbeat": "PAUSED at completion; deletion rejected, authorized safer pause succeeded",
-  "completed_historical_gpu_jobs": [
-    {
-      "host": "149.165.151.254",
-      "supervisor_pid": 1789128,
-      "stage": "historical_001",
-      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/historical_001.stage.json",
-      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/historical_001.json",
-      "status": "complete"
-    },
-    {
-      "host": "149.165.159.64",
-      "supervisor_pid": 133395,
-      "stage": "historical_001",
-      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/historical_001.stage.json",
-      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/historical_001.json",
-      "status": "complete"
-    }
-  ],
+  "schema": 21,
+  "task": "M3 output numerics and trajectory isolation",
+  "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
+  "branch": "research/m3-output-numerics-20260927",
+  "authority": "User-provided complete v21 specification in current task",
+  "status": "CP0_CPU_AUDIT_CP1_PROTOTYPE",
+  "wall_start_utc": "2026-09-27T22:22:00Z",
+  "gpu_stop_utc": "2026-09-28T05:52:00Z",
+  "final_deadline_utc": "2026-09-28T06:22:00Z",
+  "max_gpu_process_seconds": 21600,
+  "max_generation_executions": 520,
+  "max_gpu_workers": 2,
+  "charged_gpu_process_seconds": 0,
+  "generation_executions": 0,
   "gpu_jobs": [],
-  "publication_authorization": {
-    "user_instruction": "鎺堟潈 浠ｇ爜 鏁版嵁 鑳絧ush鐨勯兘push",
-    "remote": "git@github.com:coconight01/dlm_test.git",
-    "branch": "research/fan-m1-m3-cost-refresh-20260927",
-    "scope": "code, reports and shareable generated request data; excludes credentials, source prompts/gold and unrecorded tensors"
+  "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
+  "push_status": "newbranch authorized by v21, initialcheckpoint pending",
+  "agents": {
+    "trajectory": "/root/sol_b8",
+    "historical": "/root/sol_profile",
+    "kernel": "/root/sol_v21_kernel"
   },
-  "published_data_commit": "e45046b297e6f1e6a13fa3bcb68138bc444d2095",
-  "publication_verified_utc": "2026-09-27T21:36:42Z"
+  "next": "Finish CP0 audit and qualified CPU tests, publish checkpoint, deploy immutable CP1 diagnostic only after code/numeric review",
+  "peer_refs": {
+    "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
+    "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
+  },
+  "preflight": "Both hosts idle;24configs+31sourcefiles each verified against frozen binding, importednativeSHA equal;1047tensorindex entries with shardstat inventory, modelmetadata unchanged; weighttensorbytes not rehashed this read-only preflight. Actual mounted mpk path912GBfree, dllm1.4TBfree."
 }
