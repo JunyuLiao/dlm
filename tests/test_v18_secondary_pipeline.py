@@ -231,6 +231,84 @@ class PipelineTests(unittest.TestCase):
                              deadline=10**12, poll=60)
         self.assertEqual(ticks, [1])
 
+    def test_worker_liveness_transient_ssh_errors_retry_read_only(self):
+        t = FakeTransport()
+        stage = 'ruler_secondary70'
+        prefix = f'/dllm/secondary/status/dllm_{stage}'
+        t.files[('dllm', prefix + '.started.json')] = b'{"pid":123,"start":1}'
+        calls = []
+        def ssh(_host, command, timeout=60):
+            calls.append(command)
+            if len(calls) == 1:
+                raise subprocess.TimeoutExpired('ssh', timeout)
+            if len(calls) == 2:
+                raise subprocess.CalledProcessError(255, 'ssh')
+            return 'yes'
+        t.ssh = ssh
+        with patch.object(cp.time, 'sleep') as sleep:
+            self.assertEqual(cp.worker_state(t, stage, 'dllm'), 'running')
+        self.assertEqual(len(calls), 3)
+        self.assertEqual([x.args[0] for x in sleep.call_args_list], [2, 4])
+
+    def test_worker_liveness_timeout_accepts_matching_done_race(self):
+        t = FakeTransport()
+        stage = 'ruler_secondary70'
+        prefix = f'/dllm/secondary/status/dllm_{stage}'
+        t.files[('dllm', prefix + '.started.json')] = b'{"pid":123,"start":1}'
+        calls = []
+        def ssh(_host, _command, timeout=60):
+            calls.append(1)
+            if len(calls) == 3:
+                t.files[('dllm', prefix + '.done.json')] = b'{"start":1,"rc":0}'
+            raise subprocess.TimeoutExpired('ssh', timeout)
+        t.ssh = ssh
+        with patch.object(cp.time, 'sleep'):
+            self.assertEqual(cp.worker_state(t, stage, 'dllm'), 'complete')
+        self.assertEqual(len(calls), 3)
+
+    def test_worker_liveness_unresolved_timeout_fails_closed(self):
+        t = FakeTransport()
+        stage = 'ruler_secondary70'
+        prefix = f'/dllm/secondary/status/dllm_{stage}'
+        t.files[('dllm', prefix + '.started.json')] = b'{"pid":123,"start":1}'
+        calls = []
+        def ssh(_host, _command, timeout=60):
+            calls.append(1)
+            raise subprocess.TimeoutExpired('ssh', timeout)
+        t.ssh = ssh
+        with patch.object(cp.time, 'sleep'):
+            with self.assertRaises(subprocess.TimeoutExpired):
+                cp.worker_state(t, stage, 'dllm')
+        self.assertEqual(len(calls), 3)
+        t.ssh = lambda *_args, **_kwargs: 'no'
+        t.files[('dllm', prefix + '.done.json')] = b'{"start":2,"rc":0}'
+        self.assertEqual(cp.worker_state(t, stage, 'dllm'), 'failed')
+
+    def test_worker_liveness_marker_replacement_same_epoch_fails_closed(self):
+        t = FakeTransport()
+        stage = 'ruler_secondary70'
+        prefix = f'/dllm/secondary/status/dllm_{stage}'
+        t.files[('dllm', prefix + '.started.json')] = b'{"pid":123,"start":1}'
+        def ssh(_host, _command, timeout=60):
+            t.files[('dllm', prefix + '.started.json')] = b'{"pid":456,"start":1}'
+            t.files[('dllm', prefix + '.done.json')] = b'{"start":1,"rc":0}'
+            raise subprocess.TimeoutExpired('ssh', timeout)
+        t.ssh = ssh
+        with patch.object(cp.time, 'sleep'):
+            with self.assertRaises(subprocess.TimeoutExpired):
+                cp.worker_state(t, stage, 'dllm')
+
+    def test_worker_liveness_no_rechecks_completion_before_orphan(self):
+        t = FakeTransport()
+        stage = 'ruler_secondary70'
+        prefix = f'/dllm/secondary/status/dllm_{stage}'
+        t.files[('dllm', prefix + '.started.json')] = b'{"pid":123,"start":1}'
+        def ssh(_host, _command, timeout=60):
+            t.files[('dllm', prefix + '.done.json')] = b'{"start":1,"rc":0}'
+            return 'no'
+        t.ssh = ssh
+        self.assertEqual(cp.worker_state(t, stage, 'dllm'), 'complete')
+
     def test_partial_closed_stage_is_scored_without_unlocking_controls(self):
         t = FakeTransport()
         t.files[('mpk', '/mpk/secondary/ruler_secondary70_protocol.json')] = b'{}'

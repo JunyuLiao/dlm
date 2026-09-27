@@ -373,9 +373,30 @@ def worker_state(t: Transport, stage: str, host: str) -> str:
         return 'complete' if started and done.get('start') == started.get('start') and done.get('rc') == 0 else 'failed'
     if started:
         pid = started.get('pid')
-        if type(pid) is not int or pid <= 0 or t.ssh(host, f'kill -0 {pid} 2>/dev/null && echo yes || echo no') != 'yes':
+        if type(pid) is not int or pid <= 0:
             return 'orphaned'
-        return 'running'
+        last_error = None
+        for attempt in range(3):
+            try:
+                alive = t.ssh(host, f'kill -0 {pid} 2>/dev/null && echo yes || echo no')
+                if alive == 'yes':
+                    return 'running'
+                last_error = None
+                break
+            except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as error:
+                last_error = error
+                if attempt < 2:
+                    time.sleep(2 * (attempt + 1))
+        # The supervisor may have exited after the first marker read.
+        fresh_started = marker(t, stage, host, 'started')
+        fresh_done = marker(t, stage, host, 'done')
+        if (fresh_started == started and fresh_done and
+                started.get('start') == fresh_done.get('start') and
+                fresh_done.get('rc') == 0):
+            return 'complete'
+        if last_error is not None:
+            raise last_error
+        return 'orphaned'
     return 'absent'
 
 
