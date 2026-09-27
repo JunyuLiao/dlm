@@ -3,7 +3,7 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP2_PRIMARY3888_COMPLETE_OFFLINE_SCORING_RECOVERY",
+  "status": "CP3_CORE70_CALIBRATED_SECONDARY70_STARTING",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
   "candidate": "STOP_IMPLEMENTATION_THIS_ROUND: ideal GLOBAL opportunity but no demonstrated net cost headroom or finite-precision certificate; no CUDA candidate",
@@ -55,7 +55,7 @@
       "dllm": 38374.643763355
     }
   },
-  "next": "Complete primary offline scoring; existing CP3 controller35304 automatically qualifies and runs frozen secondary panels after exact complete-summary gates.",
+  "next": "Adopt frozen core70 calibration/protocols; start same-GPU secondary70 workers once immutable empty ledgers verify, then controls calibration/eval, scoring, CP4.",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -130,11 +130,15 @@
     "local_finalizer": "E:/dlm/v18_private/scorer_f45fa83/scripts/v18_finalize.py",
     "archive_sha256": "1dce3388b7958d9576edcfbd586f5c836631a108cdb9adbe1ac856236c8bd732",
     "hook": "E:/dlm/v18_private/finalize_command.json",
-    "state": "same immutable CPU finalizer recovery active after verified archive/snapshot hashes",
-    "recovery_pid": 37724,
-    "recovery_exec_session": 8508,
+    "state": "primary offline scoring complete, both summaries immutable/verified",
+    "recovery_pid": null,
+    "recovery_exec_session": null,
     "original_failure": "cp -n dllm_ruler snapshot SSH timeout; copy actually completed and hash verified",
-    "private_archive_sha256": "9bd11b0eb49cf213e391c1835f6067e3ec57b460829fcf59add465a17b8a46b39"
+    "private_archive_sha256": "9bd11b0eb49cf213e391c1835f6067e3ec57b460829fcf59add465a17b8a46b39",
+    "primary_summary_sha256": {
+      "ruler": "6ee11dfca05d2d958a9c0a40917abc64546c33ca2bf9d62fcf576dca97d35049",
+      "aime": "c3cb6cdc70d9699635439e74672b8a832140caf2c99a48957d78120b2ecc1c88"
+    }
   },
   "continuation_heartbeat": {
     "id": "v18-research-stage-continuation",
@@ -142,31 +146,33 @@
     "purpose": "hourly stage checkpoint; amended finite limits per RESOURCE_AUTHORIZATION.md; quiet unchanged; disable atCP4"
   },
   "secondary_coordinator": {
-    "pid": 35304,
-    "exec_session": 7655,
-    "status": "waiting_primary",
-    "source_commit": "6250b51ae322e37e5f79067bf8ebda3bf04b0add",
+    "pid": 58796,
+    "exec_session": 40018,
+    "status": "running_secondary",
+    "source_commit": "cc2e72837b7893364de9d304154f0bfbc753747d",
     "deploy": "deploy/extension_6250b51",
-    "local_cwd": "E:/dlm/v18_private/extension_6250b51",
+    "local_cwd": "E:/dlm/v18_private/controller_cc2e728",
     "config": "E:/dlm/v18_private/secondary_extension_config.json",
     "config_sha256": "a99c6eef0853f96c5bab260927d5fea2bbc90ae391e612df6cdd6e165cf1ad6f",
     "outcome": "E:/dlm/v18_private/secondary_extension.outcome.json",
     "archive_sha256": "d827e54f4ed84b6222b98454b1b0e46b3a186ea7c62c195930a084a57f4527af",
     "cpu_qualification": "E:/dlm/v18_private/secondary_extension_cpu_qualification.json",
-    "qualification_status": "not_run; automatically after primary quiet",
+    "qualification_status": "qualified both hosts; CPU tests/source hashes/GPU UUID passed",
     "gpu_started": false,
-    "tests": "36 combined stdlib tests pass; bash -n on both hosts passes; Torch CPU qualification still gated after primary quiet",
+    "tests": "41 combined stdlib tests passed; actual empty/absent remote read smoke passed",
     "previous_pid47716": "exited after read-only SSH timeout; both-host stage check confirmed no secondary GPU dispatch",
     "previous_outcome": "E:/dlm/v18_private/secondary_config.outcome.json",
     "remote_generation_deploy_commit": "6250b51ae322e37e5f79067bf8ebda3bf04b0add",
-    "local_controller_archive_sha256": "d827e54f4ed84b6222b98454b1b0e46b3a186ea7c62c195930a084a57f4527af",
+    "local_controller_archive_sha256": "2c4025411b1ad2de8eb2b3e722857c2493c5179071eb6d155aeff839470fc0d8",
     "previous_pid42488": "exited on repeated read-only SSH timeout; secondary_restart1.outcome.json preserved",
     "retry_semantics": "at most3 attempts for read-only transport; waiting-primary connection failures stay pending until original guard cutoff; no mutation/dispatch retries",
     "read_retry_tests": "16 focused unittest cases passed",
-    "previous_pid16656": "verified and stopped; old readretry outcome preserved"
+    "previous_pid16656": "verified and stopped; old readretry outcome preserved",
+    "previous_pid35304": "exited after empty-ledger immutable verification bug; no secondary eval launched; original error archived as secondary_extension_empty_ledger_error.json",
+    "recovery_audit": "secondary_extension.outcome.json retains prior error SHA and reason"
   },
-  "updated_utc": "2026-09-27T07:37:09.324980+00:00",
-  "stage_check": "Both primary panels closed, both GPUs empty. All four copied ledger hashes verified; CPU finalizer37724/session8508 recovery; CP3 waiting.",
+  "updated_utc": "2026-09-27T08:32:28.457965+00:00",
+  "stage_check": "08:31UTC: primary redacted summaries complete; CPU qualification both hosts passed; core70 calibration rc0, protocols frozen, no secondary GPU yet; only one new CP3 controller58796 running.",
   "resource_authorization": "RESOURCE_AUTHORIZATION.md",
   "budget_override": {
     "status": "deployed_active_controllers_adopt_original_AIME",
@@ -210,5 +216,13 @@
       "total_aime_executions": 540
     }
   },
-  "primary_closed_receipt": "results/junyu_frontier_v18_20260926/primary_closed_receipt.json"
+  "primary_closed_receipt": "results/junyu_frontier_v18_20260926/primary_closed_receipt.json",
+  "secondary_core70": {
+    "calibration_host": "mpk",
+    "calibration_done_epoch": 1790495894,
+    "calibration_rc": 0,
+    "protocols_frozen_both_hosts": true,
+    "eval_started": false,
+    "note": "Original calibration and protocols preserved; controller resumes with same config/outcome, no calibration rerun."
+  }
 }

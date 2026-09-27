@@ -53,7 +53,7 @@ Hosts/private deployment:
 - Ledgers ROOT/evaluation/ledgers/HOST_{ruler,aime}.jsonl; privateROOT/private_eval.
 - Protocols ROOT/evaluation/{ruler4k,aime26}_primary_protocol.json.
 
-Primary CPU scoring recovery ACTIVE at07:37UTC:
+Primary CPU scoring COMPLETE by07:48UTC:
 - Primary coordinator51988/session21704 exited after all_frozen_panels_closed.
   E:/dlm/v18_private/completion_coordinator_outcome.json preserves exact closure.
 - Initial finalizer failed on SSH timeout during cp -n dllm_ruler snapshot. Copy
@@ -65,7 +65,8 @@ Primary CPU scoring recovery ACTIVE at07:37UTC:
   E:/dlm/v18_private/dllm_private_eval.tar.gz;SHA
   9bd11b0eb49cf213e391c1835f6067e3ec57b460829fcf59add465a17b8a46b39.
 - Remote scoring ROOT/scoring/{ruler,aime}_redacted_summary.json plus scorer locks.
-  RULER summary generated; AIME scoring underway. Do not launch another finalizer.
+  Both RULER and AIME complete; local redacted copies SHA6ee11dfc/C3CB6CDC.
+  Finalizer recovery exited0. Do not launch another finalizer.
 - CPU recovery may reuse identical snapshots/archives. Differing bytes fail closed;
   never overwrite unmarked/uncertain extraction or generate replacement outputs.
 - Scorer sourcef45fa83; official RULER13task macro/partial credit, exact AIME source
@@ -74,14 +75,15 @@ Primary CPU scoring recovery ACTIVE at07:37UTC:
 - Generation latency/TBT/direct full-forward are N/A without qualified events;
   wall/call is amortized, support/PV sparsity is not QK skipping.
 
-Existing CP3 CPU controller (do not duplicate):
-- PID35304/session7655, source6250b51, cwd E:/dlm/v18_private/extension_6250b51.
+Active CP3 CPU controller (do not duplicate):
+- PID58796/session40018, local sourcecc2e728, cwd E:/dlm/v18_private/controller_cc2e728.
+  Remote generation deploy stays immutable extension_6250b51.
 - Outcome E:/dlm/v18_private/secondary_extension.outcome.json; currently waiting_primary.
 - Config E:/dlm/v18_private/secondary_extension_config.json,
   SHAa99c6eef0853f96c5bab260927d5fea2bbc90ae391e612df6cdd6e165cf1ad6f.
-- Requires exact complete primary summaries then CPU Torch/source/UUID qualification
-  E:/dlm/v18_private/secondary_extension_cpu_qualification.json (not yet run).
--39 combined stdlib tests pass; bothhost bash-n pass. FullTorch tests still gated.
+- Exact complete primary summaries and CPU Torch/source/UUID qualification PASSED
+  E:/dlm/v18_private/secondary_extension_cpu_qualification.json.
+-41 combined stdlib tests pass; remote CPU Torch tests qualified bothhosts.
 - Recovery ONLY after OS command/PID exit verified; tool session disappearance alone
   is not exit. Command: localPython311 -u -m scripts.v18_secondary_pipeline
   --deploy extension_6250b51 --config E:/dlm/v18_private/secondary_extension_config.json
@@ -104,3 +106,19 @@ answering all seven v18 questions with honest missing cells and candidateSTOP.
 Commit/push runnable checkpoints and redacted results, verify remote SHA.
 Heartbeat v18-research-stage-continuation stays quiet unchanged; disable whenCP4done.
 Never upload answers/gold/credentials/large traces or archive the user's task.
+08:31UTC CP3 recovery checkpoint:
+- Previous PID35304 completed core70 calibration rc0 in590s, froze bothhost
+  secondary70 protocols/prerequisites, then failed on empty-ledger verification.
+  No secondary eval marker/GPU had started. Error outcome preserved private.
+- Root cause: Transport.read returned None for both absent and zero-byte existing
+  files. Local controllercc2e728 frames presence; actual remote smoke: mpk empty
+  ledger returns b'', dllm missing returns None. Remote generation deploy untouched.
+- Controller58796/session40018 resumed SAME config/outcome; original calibration
+  and first outputs preserved. Sourcecc2e728/41tests pushed; archiveSHA
+  2c4025411b1ad2de8eb2b3e722857c2493c5179071eb6d155aeff839470fc0d8.
+- CPU qualification bothhost Torch2.6.0+cu124/CUDA12.4/source/UUID passed.
+- AIME90 first outputs/arm scored: Dnative46,Dmatched49,U50 45,U60 48,
+  T50 57,T60 49 correct. T60/U50 quality+4.44pp CI[-3.33,+13.33];
+  timedrequest ratio0.9887 CI[0.9283,1.0529]. T60/native ratio1.3102.
+  AIME actual whole PV support skipped T60 40.30%,U50 39.22%,U60 49.68%;
+  60% RULER calibration does not transfer to AIME. Full details in primary_checkpoint.md.

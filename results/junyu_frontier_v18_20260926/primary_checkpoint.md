@@ -46,3 +46,31 @@ Source: ruler_redacted_summary.json SHA256
 6ee11dfca05d2d958a9c0a40917abc64546c33ca2bf9d62fcf576dca97d35049.
 Frozen primary scorer sourcef45fa83; identities and missing metric fields are
 preserved in the summary. Final interpretation awaits AIME and frozenCP3 panels.
+## AIME complete primary score (90 first outputs/arm, 90 strict warm/arm)
+
+| Arm | Correct/90 | Calls/canvas | Length-capped | Whole PV support skipped |
+|---|---:|---:|---:|---:|
+| D_native |46|13.349|35|N/A|
+| D_matched |49|13.237|33|0%|
+| U50 |45|15.320|39|39.216%|
+| U60 |48|18.388|40|49.680%|
+| T50 |57|14.218|31|28.913%|
+| T60 |49|15.396|37|40.302%|
+
+T60/U50 first-answer quality difference +4.44 percentage points, bootstrap95%
+interval[-3.33,+13.33]pp; accepted-warm request-wall geomean0.9887
+[0.9283,1.0529]. T60/U60 quality+1.11pp[-6.67,+8.89]pp; wall
+ratio0.8238[0.7680,0.8848]. T60/native quality+3.33pp[-6.67,+13.33]pp;
+wall ratio1.3102[1.2380,1.3912]. These are paired withinGPU and clustered
+by question. The intervals are descriptive, not a proved noninferiority claim.
+
+The actual AIME PV support skip rate differs sharply from RULER calibration:
+T60 40.30% versus U50 39.22%, only1.09pp apart. The selected70% RULER
+controls still need to run; their outcomes cannot repair this AIME work point.
+T50 has57/90 correct, an exploratory arm total; it was not the prespecified
+T60-versus-U50/U60 gate and needs paired uncertainty before interpretation.
+Many AIME outputs hit the8192-token cap or remained unparsed; all count under
+the frozen scorer. The candidate remains stopped beforeCUDA implementation.
+
+Source: aime_redacted_summary.json SHA256
+c3cb6cdc70d9699635439e74672b8a832140caf2c99a48957d78120b2ecc1c88.
