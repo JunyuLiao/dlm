@@ -85,6 +85,8 @@ User subsequently explicitly authorized code and all shareable data push to
 coconight01/dlm_test branch research/fan-m1-m3-cost-refresh-20260927.
 Export800 generated request records with provenance/manifest; omit source prompts,
 gold and credentials. Per-canvas telemetry exists; full per-step tensors unrecorded.
-Publication prepared; verify exact remote SHA after push. No GPU work implied.
+Publication COMPLETE: remote independently verified e45046b297e6f1e6a13fa3bcb68138bc444d2095
+at2026-09-27T21:36:42Z. 800request records and six raw profiles published.
+This follow-up receipt commits metadata only. No GPU work implied.
 Suggested next research step only: offline paired-trajectory divergence analysis
 before proposing another frozen validation; do not automatically start a new round.

@@ -26,5 +26,13 @@ output, not benchmark gold or a correctness guarantee.
 
 ## Remote verification
 
-Prepared for a normal fast-forward push to the existing authorized branch.
-The follow-up publication receipt records the independently checked remote SHA.
+Normal fast-forward push succeeded from 3f2b4db to
+45046b297e6f1e6a13fa3bcb68138bc444d2095. Independent git ls-remote
+returned that exact branch SHA at 2026-09-27T21:36:42Z.
+
+All800 generation-record SHA checks passed; exported token counts and per-canvas
+call totals were conserved. All24 dataset/method first-output work groups match
+the published core/historical summaries. Six profile gzip roundtrips and source
+SHA checks passed. Raw profile JSON143,127,943bytes compresses to3,978,833bytes;
+exported generation records total24,026,799bytes. This follow-up commit records
+publication verification only; the cited data commit is immutable.
