@@ -38,7 +38,7 @@ class PanelTests(unittest.TestCase):
             self.data["longbench_v2"].append(x)
         for dataset, path in self.paths.items():
             path.write_text(json.dumps(self.data[dataset]))
-        self.identity = dict(model_revision=panel.REVISION, scope="all_native_legal", policy_sha256="a" * 64,
+        self.identity = dict(model_revision=panel.REVISION, scope="ALL_NATIVE_LEGAL", policy_sha256="a" * 64,
                              datasets={d: dict(source_manifest_sha256=panel.sha(p.read_bytes()),
                                                gold_sha256="b" * 64, scorer_sha256="c" * 64,
                                                task_contract_sha256="d" * 64) for d, p in self.paths.items()})
@@ -66,11 +66,14 @@ class PanelTests(unittest.TestCase):
             self.assertEqual(len(events), 14)
             self.assertEqual([e["arm"] for e in events[7:]], [e["arm"] for e in events[:7]][::-1])
             self.assertEqual(len({(e["host"], e["gpu_uuid"], e["id"], e["seed"]) for e in events}), 1)
-            self.assertEqual(p["block_assignments"][str(block)]["scope"], "all_native_legal")
+            self.assertEqual(p["block_assignments"][str(block)]["scope"], "ALL_NATIVE_LEGAL")
         self.assertEqual(Counter(e["dataset"] for e in p["schedule"][:84]),
                          {"ruler4k": 28, "aime26": 28, "longbench_v2": 28})
         for path in (self.root / "out" / "frozen_protocol.json", *(self.root / "private").glob("*.json")):
             self.assertNotIn("SECRET", path.read_text())
+            self.assertNotIn(b"\r\n", path.read_bytes())
+        for dataset, digest in p["generation_manifest_sha256"].items():
+            self.assertEqual(panel.sha((self.root / "private" / f"{dataset}_generation_manifest.json").read_bytes()), digest)
         self.assertEqual(p["ids"]["ruler4k"], self.freeze()["ids"]["ruler4k"])
 
     def test_source_drift_fails_closed(self):
@@ -106,6 +109,22 @@ class PanelTests(unittest.TestCase):
         binding_path.write_text(json.dumps({"status": "pending", "panel_protocol_sha256": panel.sha(protocol_path.read_bytes())}))
         with self.assertRaisesRegex(ValueError, "method binding not frozen"):
             v20_run.validate_inputs(protocol_path, binding_path, self.root / "private", host, uuid, stage="initial")
+
+    def test_router_phase_evidence_and_warm_identity(self):
+        arm = "M3_R2_A8_current_output"
+        counters = dict(attention_calls=16, score_refresh_calls=2,
+                        decision_refresh_calls=8, held_decision_calls=8)
+        phase = v20_run.router_phase_evidence(arm, counters)
+        self.assertEqual((phase["A"], phase["D"], phase["H"]), (2, 6, 8))
+        self.assertIsNone(v20_run.router_phase_evidence(arm, dict(counters, held_decision_calls=7)))
+        base = dict(ok=True, completion_token_hash="h", per_canvas_calls=[4], termination="eos",
+                    phase_evidence=dict(phase="M1_M3_decoder", fresh_decoder_calls=4,
+                                        per_canvas=[dict(decoder_calls=4)], initial_prefill_end_observed=True),
+                    router_phase_evidence=phase, triton_misses=0, triton_disk_entries_added=0,
+                    new_shared_objects=[])
+        self.assertTrue(v20_run.strict_v20_warm(base, dict(base))["accepted"])
+        changed = dict(base, router_phase_evidence=dict(phase, H=7))
+        self.assertIn("router_phase_evidence_mismatch", v20_run.strict_v20_warm(base, changed)["reasons"])
 
 
 if __name__ == "__main__":

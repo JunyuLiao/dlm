@@ -1,1 +1,26 @@
-{"schema":20,"task":"Fan M1/M3 same-day native-adaptive multi-dataset cost study","parent":"e3f14520eea98e45998fb369f9027f3b2707ec4a","branch":"research/fan-m1-m3-cost-refresh-20260927","status":"CP0_CPU_IMPLEMENTED_GPU_PENDING","authority":"E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md","budget_file":"results/fan_m1_m3_multidataset_20260927/campaign_budget.json","panel_file":"results/fan_m1_m3_multidataset_20260927/frozen_protocol.json","scope_policy_consumer":"pending_cost_and_numerical_qualification","gpu_jobs":[],"charged_gpu_seconds":0,"generation_executions":0,"coordinator":null,"prior_campaign":"v18 CP4 complete and unchanged","next":"immutable CP0 deploy, GPU qualification and direct full-forward cost screen; freeze binding then first84","updated_utc":"2026-09-27T12:21:00Z"}
+{
+  "schema": 20,
+  "task": "Fan M1/M3 same-day native-adaptive multi-dataset cost study",
+  "parent": "e3f14520eea98e45998fb369f9027f3b2707ec4a",
+  "branch": "research/fan-m1-m3-cost-refresh-20260927",
+  "status": "CP0_GPU_QUALIFIED_COST_PROFILE_PENDING",
+  "authority": "E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md",
+  "budget_file": "results/fan_m1_m3_multidataset_20260927/campaign_budget.json",
+  "panel_file": "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json",
+  "scope_policy_consumer": "pending_cost_and_numerical_qualification",
+  "gpu_jobs": [],
+  "charged_gpu_seconds": 28.997408866882324,
+  "generation_executions": 0,
+  "coordinator": null,
+  "prior_campaign": "v18 CP4 complete and unchanged",
+  "next": "CP1 immutable cost-screen deploy to both GPUs with complete arm sets; bind method before first84",
+  "updated_utc": "2026-09-27T12:35:00Z",
+  "qualification": {
+    "mpk": "10/10 GPU tests passed",
+    "dllm": "10/10 GPU tests passed",
+    "source": "59329118dc8578fb014abaa48241d2e611a0d432",
+    "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+    "bridge_note": "same CUDA kernel; newhost private bridge relink after two CPU missing-header failures, no GPU request retry"
+  },
+  "private_manifests": "E:/dlm/v20_private/frozen_panel_lf"
+}

@@ -75,7 +75,7 @@ class Consumer:
                  is_causal=None, sliding_window=None, **kwargs):
         import torch
         from .cached_executor import attention, fused_guard
-        if mask is not None or bool(is_causal) or dropout or module.training:
+        if mask is not None or is_causal is not False or dropout or module.training:
             raise ValueError('v20 control requires observed bidirectional native mask=None inference')
         b, h, nq, d = q.shape
         layer, nk = int(module.layer_idx), k.shape[-2]

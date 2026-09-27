@@ -13,7 +13,7 @@ All question×seed arms remain together on assigned original H100 UUID.
 No cross-GPU absolute latency pooling. Missing/failures are retained.
 
 Read results/fan_m1_m3_multidataset_20260927/{method_contract,campaign_budget,frozen_protocol}.json.
-Frozen gold-free inputs live E:/dlm/v20_private/frozen_panel, never Git.
+Frozen gold-free inputs live E:/dlm/v20_private/frozen_panel_lf, never Git.
 Panel has 13 RULER tasks +6 AIME +6 LongBench, seeds101/202, seven arms,
 700 executions including first84. Optional G75L30 nativeQ128 port up to100,
 separately qualified and clearly different grouping from old vLLM FIXED16.
@@ -46,3 +46,9 @@ Named ASR transcript not found; documented missing. Shared slides untouched.
 Existing v18 heartbeat is paused; only update it to v20 after durable coordinator.
 Next: CP0 commit/push; immutable mpk deployment and GPU numerical qualification;
 qualify support bridge on dllm; direct cost screen then freeze generation binding.
+
+CP1: bothhost CP0 GPU tests10/10; same CUDA kernel SHA8d5332405, dllm ATen
+bridge privately relinked after CPU header-path fixes. Qual GPU seconds use outer
+stage receipts only; do not add internal worker durations again. Counter twins
+are separate from accepted timers. CP1 profile has immutable checkpoints/JIT
+guards/source+GPUidentity checks; main cost screen uses floor=false.

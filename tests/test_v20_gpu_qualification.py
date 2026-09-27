@@ -193,3 +193,37 @@ def test_ported_held_control_observes_step1_then_holds(support):
         assert counts['phase_counts'] == {'A': 2, 'D': 0, 'H': 1}
     finally:
         control.close()
+
+
+def test_fast_t_exact_completed_logit_history_gpu():
+    """Same fixed completed logits yield identical chosen T weights at every step."""
+    from experiments.value_direction_hopper.query_adaptive import State
+    reference_router, fast_router = SimpleNamespace(query_sensitivity=None), SimpleNamespace(query_sensitivity=None)
+    reference = State('T', reference_router, m_ref=14.258454322814941,
+                      beta=3., gamma=.5, diagnostics=False, fast_t=False)
+    fast = State('T', fast_router, m_ref=14.258454322814941,
+                 beta=3., gamma=.5, diagnostics=False, fast_t=True)
+    canvas = torch.zeros((1, 4), device='cuda', dtype=torch.long)
+    generator = torch.Generator(device='cuda').manual_seed(20260927)
+    completed = [torch.randn((1, 4, 97), device='cuda', generator=generator)
+                 for _ in range(5)]
+    # Force both no-flip and flip transitions without relying on random ties.
+    completed[1] = completed[0].clone()
+    completed[2][..., 0] = 50.
+    accepted = torch.ones_like(canvas, dtype=torch.bool)
+    for step, logits in enumerate(completed):
+        for state in (reference, fast):
+            state.begin(48-step, canvas)
+        if step == 0:
+            assert reference.used_weights is None and fast.used_weights is None
+        else:
+            assert torch.equal(reference.used_weights.view(torch.int32),
+                               fast.used_weights.view(torch.int32))
+            assert torch.equal(reference_router.query_sensitivity.view(torch.int32),
+                               fast_router.query_sensitivity.view(torch.int32))
+            if step == 1:
+                assert torch.equal(fast.used_weights, torch.ones_like(fast.used_weights))
+        for state in (reference, fast):
+            state.observe_logits(logits, accepted, 48-step)
+        assert torch.equal(reference.temporal.view(torch.int32), fast.temporal.view(torch.int32))
+        assert torch.equal(reference.previous_top, fast.previous_top)

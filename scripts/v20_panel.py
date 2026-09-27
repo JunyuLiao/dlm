@@ -19,7 +19,7 @@ ARMS = (
     "D_native", "D_matched", "T_scope", "M1_R1_A8_current_output",
     "M3_R2_A8_current_output", "M3_R3_A8_current_output", "B_A8_matched",
 )
-HISTORICAL = "G75L30_first_bitmap_native_adaptive"
+HISTORICAL = "G75L30_nativeQ128"
 REVISION = "f7f5b7f5fa82ffc52addd066915886d497f5517b"
 PANEL_SEED = "v20/fan-panel/20260927"
 SCHEDULE_SEED = "v20/fan-schedule/20260927"
@@ -120,7 +120,7 @@ def _select_lb(rows: list[dict]) -> list[dict]:
 def _identity(identity: dict, source_paths: dict[str, Path]) -> dict:
     if identity.get("model_revision") != REVISION:
         raise ValueError("model revision identity missing or changed")
-    if identity.get("scope") not in ("all_native_legal", "global_only", "pending"):
+    if identity.get("scope") not in ("ALL_NATIVE_LEGAL", "GLOBAL_ONLY_NATIVE_LOCAL", "pending"):
         raise ValueError("one qualified common scope must be frozen")
     if identity.get("policy_sha256") != "pending" and (
         not isinstance(identity.get("policy_sha256"), str) or len(identity["policy_sha256"]) != 64
@@ -205,11 +205,11 @@ def freeze(ruler: Path, aime: Path, longbench: Path, identity_file: Path, hosts_
     files = {private / f"{d}_generation_manifest.json": payload for d, payload in manifests.items()}
     files[out / "frozen_protocol.json"] = json.dumps(protocol, indent=2, sort_keys=True) + "\n"
     for path, payload in files.items():
-        if path.exists() and path.read_text() != payload:
+        if path.exists() and path.read_bytes() != payload.encode("utf-8"):
             raise ValueError(f"refusing to overwrite different frozen file: {path}")
     for path, payload in files.items():
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text(payload)
+        path.write_bytes(payload.encode("utf-8"))
     return protocol
 
 
