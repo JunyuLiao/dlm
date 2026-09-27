@@ -3,7 +3,7 @@
   "task": "Fan M1/M3 same-day native-adaptive multi-dataset cost study",
   "parent": "e3f14520eea98e45998fb369f9027f3b2707ec4a",
   "branch": "research/fan-m1-m3-cost-refresh-20260927",
-  "status": "CP2_DIRECT_SCREEN_COMPLETE_SELECTED_FOLLOWUP_PENDING",
+  "status": "CP2_SELECTED_LONGER_STEP_PROFILE_RUNNING",
   "authority": "E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md",
   "budget_file": "results/fan_m1_m3_multidataset_20260927/campaign_budget.json",
   "panel_file": "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json",
@@ -11,25 +11,25 @@
   "gpu_jobs": [
     {
       "host": "149.165.151.254",
-      "supervisor_pid": 1716604,
-      "stage": "screen_002",
-      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/cost/screen_002.stage.json",
-      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/cost/screen_002.json",
-      "status": "complete"
+      "supervisor_pid": 1717943,
+      "stage": "selected_001",
+      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/cost/selected_001.stage.json",
+      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/cost/selected_001.json",
+      "status": "running"
     },
     {
       "host": "149.165.159.64",
-      "supervisor_pid": 117433,
-      "stage": "screen_002",
-      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/cost/screen_002.stage.json",
-      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/cost/screen_002.json",
-      "status": "complete"
+      "supervisor_pid": 119774,
+      "stage": "selected_001",
+      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/cost/selected_001.stage.json",
+      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/cost/selected_001.json",
+      "status": "running"
     }
   ],
   "coordinator": null,
   "prior_campaign": "v18 CP4 complete and unchanged",
   "next": "Publish N4 screen; qualified selected N16+whole-step, freeze generation binding, bridge and first84",
-  "updated_utc": "2026-09-27T13:05:00Z",
+  "updated_utc": "2026-09-27T13:11:00Z",
   "qualification": {
     "mpk": "10/10 GPU tests passed",
     "dllm": "10/10 GPU tests passed",
@@ -38,8 +38,8 @@
     "bridge_note": "same CUDA kernel; newhost private bridge relink after two CPU missing-header failures, no GPU request retry"
   },
   "private_manifests": "E:/dlm/v20_private/frozen_panel_lf",
-  "deployment": "deploy/cp2_699a9ec",
-  "deployment_commit": "699a9ec1c4d5b31d0a12cd046256ba59bfdfb203",
+  "deployment": "deploy/cp3_00a2c4d",
+  "deployment_commit": "00a2c4d3c93a7f685a4f75fba8ea47991fa5c383",
   "charged_gpu_seconds_closed_stages": 1649.6709160804749,
   "failed_stages": [
     {
@@ -55,7 +55,7 @@
     }
   ],
   "generation_executions_closed_stages": 10,
-  "generation_executions_reserved_active_captures_max": 0,
+  "generation_executions_reserved_active_captures_max": 10,
   "generation_note": "screen002: exactly five native captures/host, one per unique selected dataset/id/canvas; formal scored executions0",
   "screen002_artifacts": {
     "dllm": {
@@ -94,5 +94,11 @@
       "returncode": 0,
       "status": "complete"
     }
+  },
+  "push_status": "blocked_auto_review_explicit_remote_confirmation_pending",
+  "watcher": {
+    "session_id": 19638,
+    "path": "E:/dlm/v20_private/watch_selected_001/selected_001.status.json",
+    "read_only": true
   }
 }

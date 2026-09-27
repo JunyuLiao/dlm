@@ -11,7 +11,7 @@ from pathlib import Path
 
 from scripts.v13_seed_runs import execution_key
 from scripts.v18_protocol import sha
-from scripts.v20_panel import ARMS
+from scripts.v20_panel import ARMS, HISTORICAL
 from scripts.v20_run import strict_v20_warm
 
 
@@ -56,10 +56,14 @@ def verify_sources(protocol: dict, gold_paths: dict[str, Path]) -> dict[str, dic
     return gold
 
 
-def load_records(protocol: dict, binding_path: Path, ledger_paths: list[Path]) -> dict[str, dict]:
-    expected = {execution_key(e): e for e in protocol["schedule"]}
-    if len(expected) != 700:
-        raise ValueError("duplicate or incomplete core schedule")
+def load_records(protocol: dict, binding_path: Path, ledger_paths: list[Path], *, historical: bool = False) -> dict[str, dict]:
+    schedule = protocol["historical_extension"]["schedule"] if historical else protocol["schedule"]
+    expected = {execution_key(e): e for e in schedule}
+    if len(expected) != (100 if historical else 700):
+        raise ValueError("duplicate or incomplete frozen schedule")
+    if historical and (protocol["historical_extension"].get("arm") != HISTORICAL or
+                       any(e["arm"] != HISTORICAL for e in schedule)):
+        raise ValueError("historical arm differs from frozen extension")
     binding_sha = sha(binding_path.read_bytes())
     found, starts = {}, []
     for path in ledger_paths:
@@ -68,7 +72,8 @@ def load_records(protocol: dict, binding_path: Path, ledger_paths: list[Path]) -
                 continue
             event = json.loads(line)
             if event.get("event") == "start":
-                if event.get("protocol_id") != protocol["protocol_id"] or event.get("binding_sha256") != binding_sha:
+                protocol_id = protocol["protocol_id"] + ("/historical" if historical else "")
+                if event.get("protocol_id") != protocol_id or event.get("binding_sha256") != binding_sha:
                     raise ValueError("worker protocol/binding identity drift")
                 starts.append(event)
             elif event.get("event") == "run":
@@ -79,7 +84,9 @@ def load_records(protocol: dict, binding_path: Path, ledger_paths: list[Path]) -
                 if any(event.get(k) != spec[k] for k in ("arm", "id", "seed", "block", "role", "repeat", "cell_id")):
                     raise ValueError("run differs from frozen schedule")
                 assignment = protocol["block_assignments"][str(spec["block"])]
-                if event.get("host") != assignment["host"] or event.get("gpu_uuid") != assignment["gpu_uuid"]:
+                if (event.get("host") != assignment["host"] or event.get("gpu_uuid") != assignment["gpu_uuid"] or
+                    (historical and (spec.get("host"), spec.get("gpu_uuid")) !=
+                     (assignment["host"], assignment["gpu_uuid"]))):
                     raise ValueError("run on wrong host/GPU")
                 if event.get("generation_seed") != spec["seed"]:
                     raise ValueError("actual generation seed differs")
@@ -141,7 +148,8 @@ def _distribution(values: list[float]) -> dict | None:
 
 
 def score_firsts(protocol: dict, records: dict[str, dict], gold: dict[str, dict], *, ruler_root: Path,
-                 private_roots: dict[str, Path] | None = None) -> dict[str, dict]:
+                 private_roots: dict[str, Path] | None = None,
+                 schedule: list[dict] | None = None) -> dict[str, dict]:
     from dllm.evaluation.ruler import official
     from scripts.v18_summarize import score_one
     from scripts import v15_longbench_task as lb_task
@@ -149,7 +157,7 @@ def score_firsts(protocol: dict, records: dict[str, dict], gold: dict[str, dict]
     official.verify_checkout(ruler_root)
     ruler_scorers = official.load_scorers(ruler_root)
     scored, lb_pending = {}, []
-    for spec in protocol["schedule"]:
+    for spec in protocol["schedule"] if schedule is None else schedule:
         if spec["role"] != "attempt0":
             continue
         record = records.get(execution_key(spec))
@@ -378,8 +386,129 @@ def summarize_subset(protocol: dict, records: dict[str, dict], quality: dict[str
                 datasets=by_dataset, timing_note="accepted warm whole request; model load excluded; ratios method/reference <1 faster")
 
 
+def summarize_historical(protocol: dict, binding: dict, core_records: dict[str, dict],
+                         historical_records: dict[str, dict], core_quality: dict[str, dict],
+                         historical_quality: dict[str, dict]) -> dict:
+    """Separate G75/native comparison on frozen question-seed/GPU pairs."""
+    if binding.get("historical_qualified") is not True or binding.get("historical_scope") != "ALL_NATIVE_LEGAL":
+        raise ValueError("historical transplant lacks independently qualified ALL_NATIVE_LEGAL scope")
+    extension = protocol["historical_extension"]
+    schedule = extension["schedule"]
+    if extension.get("arm") != HISTORICAL or len(schedule) != 100:
+        raise ValueError("historical extension inventory drift")
+    native = {(e["dataset"], e["id"], e["seed"], e["role"]): e for e in protocol["schedule"]
+              if e["arm"] == "D_native"}
+    if len(native) != 100:
+        raise ValueError("native comparator inventory drift")
+    grouped = defaultdict(dict)
+    for spec in schedule:
+        key = (spec["dataset"], spec["id"], spec["seed"], spec["role"])
+        reference = native.get(key)
+        if reference is None or (spec["host"], spec["gpu_uuid"], spec["block"]) != (
+                reference["host"], reference["gpu_uuid"], reference["block"]):
+            raise ValueError("historical/native comparison is not frozen on the same question-seed GPU")
+        grouped[(spec["dataset"], spec["id"], spec["seed"])][spec["role"]] = (spec, reference)
+    if len(grouped) != 50 or any(set(pair) != {"attempt0", "warm"} for pair in grouped.values()):
+        raise ValueError("historical first/warm pairing drift")
+    output = {}
+    for dataset in protocol["ids"]:
+        selected = [(key, pair) for key, pair in grouped.items() if key[0] == dataset]
+        scores, native_scores, paired_score_deltas, ratios = [], [], [], []
+        host_times = defaultdict(list)
+        first_present = first_success = first_failed = warm_present = warm_accepted = 0
+        native_warm_accepted = paired_quality = paired_time = 0
+        strict_correct = task_at_cap = eos_wrong = unparsed = 0
+        missing_blocks, failed_blocks = [], []
+        for (_, qid, seed), pair in selected:
+            first_spec, ref_first_spec = pair["attempt0"]
+            warm_spec, ref_warm_spec = pair["warm"]
+            first = historical_records.get(execution_key(first_spec))
+            warm = historical_records.get(execution_key(warm_spec))
+            ref_first = core_records.get(execution_key(ref_first_spec))
+            ref_warm = core_records.get(execution_key(ref_warm_spec))
+            if first is not None: first_present += 1
+            if warm is not None: warm_present += 1
+            if first is not None and first.get("ok"): first_success += 1
+            if first is not None and not first.get("ok"): first_failed += 1
+            if first is None or warm is None:
+                missing_blocks.append(first_spec["block"])
+            for row in (first, warm, ref_first, ref_warm):
+                if row and (row["host"], row["gpu_uuid"]) != (first_spec["host"], first_spec["gpu_uuid"]):
+                    raise ValueError("historical/native receipt crossed GPUs")
+            if any(row is not None and not row.get("ok") for row in (first, warm)):
+                failed_blocks.append(first_spec["block"])
+            hist_q = historical_quality.get(first_spec["cell_id"])
+            native_q = core_quality.get(ref_first_spec["cell_id"])
+            if hist_q is not None and (first is None or not first.get("ok")):
+                raise ValueError("historical quality lacks a successful first receipt")
+            if native_q is not None and (ref_first is None or not ref_first.get("ok")):
+                raise ValueError("native quality lacks a successful first receipt")
+            if hist_q is not None:
+                scores.append(hist_q["score"])
+                strict_correct += bool(hist_q.get("strict_correct", hist_q["correct"] and hist_q.get("eos")))
+                task_at_cap += bool(hist_q.get("task_correct", hist_q["correct"])) and bool(hist_q.get("capped"))
+                eos_wrong += bool(hist_q.get("eos")) and not bool(hist_q.get("strict_correct", hist_q["correct"]))
+                unparsed += not bool(hist_q["parsed"])
+            if native_q is not None:
+                native_scores.append(native_q["score"])
+            if hist_q is not None and native_q is not None:
+                paired_quality += 1
+                paired_score_deltas.append(hist_q["score"] - native_q["score"])
+            def accepted(a, b):
+                if b is None:
+                    return False
+                expected = strict_v20_warm(a, b)
+                if b.get("acceptance") and b["acceptance"] != expected:
+                    raise ValueError("historical/native warm acceptance drift")
+                return expected["accepted"] and b.get("acceptance", {}).get("accepted") is True
+            hist_ok, native_ok = accepted(first, warm), accepted(ref_first, ref_warm)
+            warm_accepted += hist_ok
+            native_warm_accepted += native_ok
+            if hist_ok:
+                host_times[first_spec["host"]].append(warm["api_wall_s"])
+            if hist_ok and native_ok:
+                paired_time += 1
+                ratios.append((first_spec["host"], warm["api_wall_s"], ref_warm["api_wall_s"]))
+        by_host = {}
+        for host in sorted({x[0] for x in ratios} | set(host_times)):
+            matched = [x for x in ratios if x[0] == host]
+            by_host[host] = dict(accepted_historical_warm=len(host_times[host]),
+                                 historical_warm_whole_request_s_mean=(statistics.mean(host_times[host])
+                                                                      if host_times[host] else None),
+                                 paired_native_warm_cells=len(matched),
+                                 paired_total_request_ratio=(sum(x[1] for x in matched) / sum(x[2] for x in matched)
+                                                             if matched else None),
+                                 paired_geometric_request_ratio=(math.exp(statistics.mean(math.log(x[1] / x[2])
+                                                                                           for x in matched)) if matched else None))
+        output[dataset] = dict(planned_cells=len(selected), first_present=first_present,
+                               first_success=first_success, first_failed=first_failed,
+                               first_missing=len(selected) - first_present, warm_present=warm_present,
+                               warm_accepted=warm_accepted, native_warm_accepted=native_warm_accepted,
+                               paired_quality_cells=paired_quality, paired_accepted_warm_cells=paired_time,
+                               historical_score_mean=statistics.mean(scores) if scores else None,
+                               native_score_mean=statistics.mean(native_scores) if native_scores else None,
+                               paired_score_delta_mean=(statistics.mean(paired_score_deltas)
+                                                        if paired_score_deltas else None),
+                               ruler_official_task_macro=(statistics.mean(scores) if dataset == "ruler4k" and
+                                                          len(selected) == 26 and len(scores) == 26 else None),
+                               strict_correct=strict_correct, task_at_cap=task_at_cap,
+                               eos_wrong=eos_wrong, unparsed=unparsed,
+                               missing_block_ids=sorted(set(missing_blocks)),
+                               failed_block_ids=sorted(set(failed_blocks)), by_host=by_host,
+                               same_gpu_request_time_ratio=(math.exp(statistics.mean(math.log(x[1] / x[2])
+                                                                                     for x in ratios)) if ratios else None))
+    return dict(schema="v20_historical_nativeQ128_separate_v1", arm=HISTORICAL,
+                historical_scope="ALL_NATIVE_LEGAL", core_scope=binding["scope"],
+                planned_executions=100, recorded_executions=sum(execution_key(e) in historical_records for e in schedule),
+                execution_rows_complete=all(execution_key(e) in historical_records for e in schedule),
+                datasets=output, temporal_note="historical/native first and warm requests share frozen question-seed GPU; extension runs after core and may have temporal drift",
+                accounting_note="historical 100 executions are outside core700 and first84; ratios require both accepted warm requests")
+
+
 def summarize(protocol_path: Path, binding_path: Path, ledgers: list[Path], gold_paths: dict[str, Path],
-              ruler_root: Path, *, private_roots: dict[str, Path] | None = None) -> dict:
+              ruler_root: Path, *, private_roots: dict[str, Path] | None = None,
+              historical_ledgers: list[Path] | None = None,
+              historical_private_roots: dict[str, Path] | None = None) -> dict:
     protocol = _read(protocol_path)
     if protocol.get("schema") != "v20_fan_panel_v1" or len(protocol.get("schedule", [])) != 700:
         raise ValueError("wrong frozen v20 panel")
@@ -389,9 +518,19 @@ def summarize(protocol_path: Path, binding_path: Path, ledgers: list[Path], gold
     gold = verify_sources(protocol, gold_paths)
     records = load_records(protocol, binding_path, ledgers)
     quality = score_firsts(protocol, records, gold, ruler_root=ruler_root, private_roots=private_roots)
-    return dict(protocol_id=protocol["protocol_id"], panel_sha256=sha(protocol_path.read_bytes()),
+    result = dict(protocol_id=protocol["protocol_id"], panel_sha256=sha(protocol_path.read_bytes()),
                 binding_sha256=sha(binding_path.read_bytes()), first84=summarize_subset(protocol, records, quality, first84=True),
                 full=summarize_subset(protocol, records, quality, first84=False))
+    if historical_ledgers is not None:
+        if historical_private_roots is None:
+            raise ValueError("historical private archive roots must be explicit")
+        historical_records = load_records(protocol, binding_path, historical_ledgers, historical=True)
+        historical_quality = score_firsts(protocol, historical_records, gold, ruler_root=ruler_root,
+                                          private_roots=historical_private_roots,
+                                          schedule=protocol["historical_extension"]["schedule"])
+        result["historical_extension"] = summarize_historical(protocol, binding, records, historical_records,
+                                                              quality, historical_quality)
+    return result
 
 
 def main() -> None:
@@ -400,11 +539,18 @@ def main() -> None:
         p.add_argument("--" + name, type=Path, required=True)
     p.add_argument("--ledger", type=Path, action="append", required=True)
     p.add_argument("--private-roots", type=Path, help="JSON map of frozen host id to local private archive root")
+    p.add_argument("--historical-ledger", type=Path, action="append",
+                   help="separate optional G75L30_nativeQ128 worker ledger")
+    p.add_argument("--historical-private-roots", type=Path,
+                   help="JSON map of host id to separate historical private archive root")
     a = p.parse_args()
     private_roots = {host: Path(path) for host, path in _read(a.private_roots).items()} if a.private_roots else None
+    historical_roots = ({host: Path(path) for host, path in _read(a.historical_private_roots).items()}
+                        if a.historical_private_roots else None)
     result = summarize(a.protocol, a.binding, a.ledger,
                        {"ruler4k": a.ruler_gold, "aime26": a.aime_gold, "longbench_v2": a.longbench_gold},
-                       a.ruler_root, private_roots=private_roots)
+                       a.ruler_root, private_roots=private_roots,
+                       historical_ledgers=a.historical_ledger, historical_private_roots=historical_roots)
     payload = json.dumps(result, indent=2, sort_keys=True) + "\n"
     if a.out.exists() and a.out.read_text() != payload:
         raise ValueError("refusing to overwrite different scored summary")

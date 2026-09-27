@@ -69,3 +69,11 @@ Direct profiler separate from cleanadaptiveE2E; decode-only remainsN/A unlessqua
 Existing heartbeat v18-research-stage-continuation now v20/30min, ACTIVE until19:58Z.
 Adopt durable workers; no duplicate coordinators. Pause at v20 completion; noarchive.
 Read-only Fan notes seen, named ASR transcript unavailable. Shared slides untouched.
+
+13:11UTC selected_001 now RUNNING bothhosts cp3_00a2c4d, mpk1717943/dllm119774.
+Readonly watcher19638, local E:/dlm/v20_private/watch_selected_001. Adopt, do notduplicate.
+Both CPUmodel/source/manifests preflightpassed; max2400s each, reserved10captures.
+Generation hostfragments CPU-bound at ROOT/generation/binding_001.fragment.json.
+No finalbinding/bridge/answerlaunch yet. Commit00a2c4d LOCAL; GitHubpush twice
+blockedauto-review unverifiedexportdestination. User explicitremoteconfirmation
+pending async question. Do not workaroundpush; remoteGPUwork explicitlyauthorized.

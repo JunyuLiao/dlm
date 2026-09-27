@@ -4,8 +4,8 @@ import tempfile
 from pathlib import Path
 
 from scripts.v13_seed_runs import execution_key
-from scripts.v20_panel import ARMS
-from scripts.v20_score import _first_receipt, cluster_interval, summarize_subset
+from scripts.v20_panel import ARMS, HISTORICAL
+from scripts.v20_score import _first_receipt, cluster_interval, load_records, summarize_historical, summarize_subset
 
 
 def event(index, role, arm, qid="q1", seed=101, block=0):
@@ -162,6 +162,82 @@ class ScoreTests(unittest.TestCase):
         partial = summarize_subset(p, records, {}, first84=False)
         self.assertFalse(partial["executions_complete"])
         self.assertEqual(partial["partial_block_ids"], [0])
+
+    def historical_fixture(self):
+        core, optional = [], []
+        for block in range(50):
+            qid = f"q{block}"
+            for role in ("attempt0", "warm"):
+                native = event(len(core), role, "D_native", qid=qid, block=block)
+                hist = event(len(optional), role, HISTORICAL, qid=qid, block=block)
+                core.append(native)
+                optional.append(hist)
+        protocol = dict(ids={"aime26": [f"q{x}" for x in range(50)]}, schedule=core,
+                        historical_extension=dict(arm=HISTORICAL, schedule=optional))
+        core_records = {execution_key(e): record(e, seconds=1.) for e in core}
+        hist_records = {execution_key(e): record(e, seconds=.8) for e in optional}
+        quality_core = {e["cell_id"]: dict(score=1., correct=True, parsed=True)
+                        for e in core if e["role"] == "attempt0"}
+        quality_hist = {e["cell_id"]: dict(score=0., correct=False, parsed=True)
+                        for e in optional if e["role"] == "attempt0"}
+        binding = dict(scope="GLOBAL_ONLY_NATIVE_LOCAL", historical_qualified=True,
+                       historical_scope="ALL_NATIVE_LEGAL")
+        return protocol, binding, core_records, hist_records, quality_core, quality_hist
+
+    def test_historical_extension_is_separate_same_gpu_and_uses_accepted_warm(self):
+        args = self.historical_fixture()
+        report = summarize_historical(*args)
+        self.assertEqual(report["planned_executions"], 100)
+        self.assertEqual(report["core_scope"], "GLOBAL_ONLY_NATIVE_LOCAL")
+        self.assertEqual(report["historical_scope"], "ALL_NATIVE_LEGAL")
+        row = report["datasets"]["aime26"]
+        self.assertEqual(row["paired_accepted_warm_cells"], 50)
+        self.assertEqual(row["paired_quality_cells"], 50)
+        self.assertAlmostEqual(row["paired_score_delta_mean"], -1.)
+        self.assertAlmostEqual(row["same_gpu_request_time_ratio"], .8)
+        self.assertEqual(row["by_host"]["h1"]["paired_native_warm_cells"], 50)
+
+    def test_historical_missing_failed_or_wrong_gpu_cannot_create_ratio(self):
+        from scripts.v20_run import strict_v20_warm
+        args = list(self.historical_fixture())
+        protocol, _, _, historical, _, _ = args
+        warm0 = next(e for e in protocol["historical_extension"]["schedule"] if e["role"] == "warm")
+        del historical[execution_key(warm0)]
+        first1 = next(e for e in protocol["historical_extension"]["schedule"]
+                      if e["role"] == "attempt0" and e["block"] == 1)
+        warm1 = next(e for e in protocol["historical_extension"]["schedule"]
+                     if e["role"] == "warm" and e["block"] == 1)
+        historical[execution_key(first1)]["ok"] = False
+        del args[5][first1["cell_id"]]
+        historical[execution_key(warm1)]["acceptance"] = strict_v20_warm(
+            historical[execution_key(first1)], historical[execution_key(warm1)])
+        row = summarize_historical(*args)["datasets"]["aime26"]
+        self.assertEqual(row["paired_accepted_warm_cells"], 48)
+        self.assertEqual(row["missing_block_ids"], [0])
+        self.assertEqual(row["failed_block_ids"], [1])
+        historical[execution_key(first1)]["host"] = "h2"
+        with self.assertRaisesRegex(ValueError, "crossed GPUs"):
+            summarize_historical(*args)
+
+    def test_historical_ledger_has_separate_protocol_identity(self):
+        from scripts.v18_protocol import sha
+        protocol = self.historical_fixture()[0]
+        protocol["protocol_id"] = "core-id"
+        protocol["block_assignments"] = {str(i): dict(host="h1", gpu_uuid="GPU-1") for i in range(50)}
+        spec = protocol["historical_extension"]["schedule"][0]
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            binding = root / "binding.json"
+            binding.write_text("{}")
+            ledger = root / "history.jsonl"
+            start = dict(event="start", protocol_id="core-id/historical", binding_sha256=sha(binding.read_bytes()))
+            run = dict(spec, event="run", execution_key=execution_key(spec), generation_seed=spec["seed"])
+            ledger.write_text(json.dumps(start) + "\n" + json.dumps(run) + "\n")
+            self.assertEqual(len(load_records(protocol, binding, [ledger], historical=True)), 1)
+            start["protocol_id"] = "core-id"
+            ledger.write_text(json.dumps(start) + "\n" + json.dumps(run) + "\n")
+            with self.assertRaisesRegex(ValueError, "identity drift"):
+                load_records(protocol, binding, [ledger], historical=True)
 
     def test_wrong_gpu_pair_rejected(self):
         p = self.protocol()

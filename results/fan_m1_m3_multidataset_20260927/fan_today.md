@@ -31,3 +31,5 @@ consumer 比较仅用 P0 的 R2 与 B，同题同状态，先各类等权，再�
 - 原始输出/失败保存在不可变私有结果；screen001 的配置身份失败已保留，没有重试任何正式答案。
 
 直接计时与自然 generation 分开运行，避免每 forward 同步干扰 E2E。decode-only 若没有已核验的 prefill 边界，将保留 N/A。
+
+物理计数见 screen002_physical.md：GLOBAL_ONLY 的分母仅覆盖被路由的 5 个 GLOBAL 层；25 个保持 native 的 LOCAL 层不在这些 counter twin 中，不能把该比例称为全模型 attention 的跳过率。数值/decision age 的逐层数据在下一阶段补齐。
