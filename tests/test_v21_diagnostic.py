@@ -23,7 +23,7 @@ def test_frozen_eighteen_states_are_first_two_protocol_ids():
 def test_config_rejects_target_drift_before_any_model_work():
     protocol = json.loads(diagnostic.PROTOCOL.read_text())
     targets = diagnostic.frozen_targets(protocol)
-    with pytest.raises(ValueError, match='eighteen-state'):
+    with pytest.raises(ValueError, match='eighteen states'):
         diagnostic.validate_config(dict(seed=202, targets=targets, arms=[]))
     with pytest.raises(ValueError, match='question triple'):
         diagnostic.validate_config(dict(seed=101, targets=targets[:-1], arms=[]))

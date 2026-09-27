@@ -1,6 +1,5 @@
 import tempfile
 import unittest
-import sys
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import patch
@@ -169,8 +168,9 @@ class V21RunTests(unittest.TestCase):
             config = {"parent_kind": "v20_method", "parent_config": parent, "condition": "M3",
                       "output_score_precision": "legacy_bf16_scores", "output_layout": "model_major"}
             contract = panel()["arm_contracts"]["M3_layout"]
+            import experiments.numerical_qk_reuse as package
             stub = SimpleNamespace(validate_effective=lambda *_: ("ALL_NATIVE_LEGAL", 2))
-            with patch.dict(sys.modules, {"experiments.numerical_qk_reuse.v21": stub}):
+            with patch.object(package, "v21", stub, create=True):
                 validate_arm_config(config, contract, model=str(model), manifest_sha="m" * 64,
                                     policy_sha="p" * 64)
                 changed = dict(config, parent_config=dict(parent, manifest_sha256="other"))
