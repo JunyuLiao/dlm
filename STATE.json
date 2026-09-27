@@ -3,7 +3,7 @@
   "task": "Fan M1/M3 same-day native-adaptive multi-dataset cost study",
   "parent": "e3f14520eea98e45998fb369f9027f3b2707ec4a",
   "branch": "research/fan-m1-m3-cost-refresh-20260927",
-  "status": "CP7_FIRST84_SCORED_REMAINDER_PREPARING",
+  "status": "CP7_FIRST84_PUBLISHED_REMAINDER_RUNNING",
   "authority": "E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md",
   "budget_file": "results/fan_m1_m3_multidataset_20260927/campaign_budget.json",
   "panel_file": "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json",
@@ -11,25 +11,25 @@
   "gpu_jobs": [
     {
       "host": "149.165.151.254",
-      "supervisor_pid": 1722376,
-      "stage": "initial_001",
-      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/initial_001.stage.json",
-      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/initial_001.json",
-      "status": "complete"
+      "supervisor_pid": 1745246,
+      "stage": "remainder_001",
+      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.stage.json",
+      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.json",
+      "status": "running"
     },
     {
       "host": "149.165.159.64",
-      "supervisor_pid": 123615,
-      "stage": "initial_001",
-      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/initial_001.stage.json",
-      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/initial_001.json",
-      "status": "complete"
+      "supervisor_pid": 127469,
+      "stage": "remainder_001",
+      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.stage.json",
+      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.json",
+      "status": "running"
     }
   ],
   "coordinator": null,
   "prior_campaign": "v18 CP4 complete and unchanged",
-  "next": "Publish first84 Chinese report then launch only unstarted remainder blocks under frozen CP3 binding, budget allocation <=21203s total.",
-  "updated_utc": "2026-09-27T14:38:00Z",
+  "next": "Adopt remainder_001 workers/watcher; CPU collector for combined initial+remainder in development by existingSol. Score on bothterminal/idlemachine, retain partial/failedcells; consider separateG75only after main within actual remainingbudget.",
+  "updated_utc": "2026-09-27T14:41:38Z",
   "qualification": {
     "mpk": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
     "dllm": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
@@ -96,12 +96,6 @@
     }
   },
   "push_status": "blocked_auto_review_explicit_remote_confirmation_pending",
-  "watcher": {
-    "session_id": 76623,
-    "path": "E:/dlm/v20_private/watch_initial_001/initial_001.status.json",
-    "read_only": true,
-    "status": "complete"
-  },
   "closed_new_stage_charges": {
     "selected_001/dllm": 1105.6609513759613,
     "selected_001/mpk": 1407.1216332912445,
@@ -114,15 +108,16 @@
     "initial_001/dllm": 1100.6446421146393,
     "initial_001/mpk": 2006.2358846664429
   },
-  "latest_local_commit": "8ded8b9",
+  "latest_local_commit": "05cdd03",
   "generation_executions_reserved_active_bridge_max": 0,
   "binding_sha256": "ee06c936e500fecfd219c6a9e277f99e77baed7b39d405ad96625f94e50734b5",
   "execution_protocol_sha256": "99e1d287867b0906b8c5a2715d4cf962ec31e6d1f473c1fe0ce2df5891f1aa17",
   "execution_protocol_note": "Git/deploy LF bytes; local checkout CRLF logically identical, private frozen_protocol_deployed.json exactGitblob retained",
   "auxiliary_deployment": "deploy/cp5_05f9947; production CP3 unchanged",
-  "generation_executions_reserved_active_primary_max": 0,
+  "generation_executions_reserved_active_primary_max": 616,
   "timeline_qualification": "ON/OFF exacttokens/calls/termination/phase for native/R2/G75 bothhosts; optionaldeviceclockspan measured, notdecodewall",
-  "postprocessor": {
+  "latest_runnable_commit": "05cdd03",
+  "completed_first84_postprocessor": {
     "status": "complete",
     "config": "E:/dlm/v20_private/collect_initial_001.config.json",
     "output": "E:/dlm/v20_private/collect_initial_001",
@@ -134,5 +129,28 @@
     "command": "python -u -m scripts.v20_collect_score collect --config E:/dlm/v20_private/collect_initial_001.config.json --out-dir E:/dlm/v20_private/collect_initial_001 --wait-until-epoch 1790537280",
     "summary_sha256": "6fa30c9328d4c875612c087cc83268d57d0d198a80e3a0a9c2478de9c0650ece"
   },
-  "latest_runnable_commit": "8ded8b9"
+  "completed_first84_watcher": {
+    "session_id": 76623,
+    "path": "E:/dlm/v20_private/watch_initial_001/initial_001.status.json",
+    "read_only": true,
+    "status": "complete"
+  },
+  "watcher": {
+    "session_id": 70176,
+    "path": "E:/dlm/v20_private/watch_remainder_001/remainder_001.status.json",
+    "read_only": true,
+    "status": "running"
+  },
+  "postprocessor": {
+    "status": "under_development_by_sol_profile",
+    "cpu_only": true,
+    "consume_existing_watcher_only": true,
+    "stage": "remainder_001",
+    "must_not_duplicate": true
+  },
+  "active_gpu_seconds_reserved_max": {
+    "149.165.151.254": 11500,
+    "149.165.159.64": 9000
+  },
+  "first84_report": "results/fan_m1_m3_multidataset_20260927/first84_report.md"
 }

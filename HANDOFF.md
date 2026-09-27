@@ -7,7 +7,7 @@ Preserve unrelated third_party/dinfer/assets/Wechat.JPG; never stage/reset it.
 Astra methods/numerics/stopping/timing/interpretation; actual Sol implementation/tests.
 Root alone integrates/deploys/launches. No CVM/ball/fresh-T/phase-calibration expansion.
 
-## Current checkpoint (14:40 UTC)
+## Current checkpoint (14:41 UTC)
 FIRST84 initial_001 COMPLETE bothhosts,84recorded/6validblocks/42acceptedwarm.
 Closedprocess mpk2006.235885s,dllm1100.644642s. PrivateSHAverified archives and
 CP5offline scored summary at E:/dlm/v20_private/collect_initial_001/.
@@ -16,10 +16,12 @@ adaptive_panel_first84.json/csv, fan_today.md now published. No execution failur
 RULER subsetall.5; AIMEall1/2 with onecapped/unparsed each; LBnative/T/M1/R2/R3 2/2,
 D_matched/B1/2. LB R2morecalls836vs707native eraseforwardbenefit(E2E1.106);
 R3 calls483/E2E.636native but1.030freshT. No independentM3advantage established.
-REMAINDER preparing: only frozen22wholeblocks/308exec perhost, CP3production/CP5
+REMAINDER LIVE since14:40:52UTC mpk1745246/dllm127469: only frozen22wholeblocks/308exec perhost, CP3production/CP5
 wrapper unchanged, newprivate/ledger paths. Resourceplan reservesmpk11500s/dllm9000s,
 worker100sless, guard1800s beforeblock. No tuning or retries; first84 neverrepeated.
-Check STATE for actuallaunchPID/watcher before starting anything.
+Read-only watcher exec70176 E:/dlm/v20_private/watch_remainder_001.
+Sol-C implementing new single CPU postprocessor combining initial+remainder;
+check STATE before starting it, preserve first84 collector outputs.
 
 ## Frozen identities and semantics
 GLOBAL_ONLY_NATIVE_LOCAL/P0/Triton for main7; GLOBAL5layers/nativeLOCAL25.
@@ -63,7 +65,7 @@ Three local English slide drafts/Chinese notes only; shared slides/messages unto
 ## Budget and hosts
 Start2026-09-27T11:58Z,GPUstop19:28Z,final19:58Z. Aggregate28800 GPU-process seconds,
 1000generationexec,max2workers,noautomaticextension. Closed7596.435208320618s,
-128generations=44qualification+84primary; remainder616 toreserve. Charge outer receipts
+128generations=44qualification+84primary; remainder616 reservedactive. Charge outer receipts
 only. STATE.closed_new_stage_charges plus earlierbase1649.670916s idempotent.
 Descriptors E:/dlm/v20_private/hosts.json pinned model/env/libs/UUID.
 mpk exouser@149.165.151.254 UUID GPU-6139046a-b005-8fe5-a837-f8270472ab72,
@@ -74,15 +76,14 @@ Auxiliary/scorer deploy/cp5_05f9947 immutable, production CP3 unchanged.
 LocalPython D:/Users/30128/AppData/Local/Programs/Python/Python311/python.exe; unittest.
 
 ## Continue
-Adopt initial workers/watcher/collector. Terminal archive verify and CPU score with
+Adopt remainder workers/watcher. Terminal archive verify and CPU score with
 CP5 originalgold on idle mpk; preserve failed/partial/unaccepted outputs.
-Publish first84 actual vs validblocks, separate task quality/calls/caps/E2E/native/
-freshT/B host-paired ratios BEFORE any remaining frozen blocks. Recompute feasibility
+First84 published before remainder launch. Recompute feasibility
 from actual durations, only wholly unstarted blocks, no failed/uncertain retries.
 Optional separateG75100 after corepriority/budget. Final honest brief and slides.
 Automatic approval rejected GitHubpush twice: needs explicit USER authorization
 for exporting to coconight01/dlm_test despite existingorigin/branch evidence.
 Async exactremote confirmation PENDING; do not retry/bypass. Localcommits/GPU continue.
-Lastremote3f2b4db; latest runnable CP6 8ded8b9 committed with19 focused tests passed.
+Lastremote3f2b4db; latest runnable CP7 05cdd03; first84 report and bounded remainder setup committed.
 Existing heartbeat v18-research-stage-continuation now v20/30min until19:58Z,
 quiet unchanged, adopts STATE. Pauseatcompletion, noarchive/no newautomation.
