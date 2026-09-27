@@ -50,3 +50,5 @@ An initial broad git-add/push was rejected by automaticreview; no mutationoccurr
 After compressedJSON fieldinspection, explicitfilelist commit/push succeeded, remoteverified525880ef.
 Tests:local20runner/scorer/profilepass; localTorch/pytest unavailable, GPUqualificationonprivatehosts.
 No sharedPPT/Slack messages, runtimeupgrades, vLLMmigration, R/A/thresholdgrid or weakenedstopping.
+
+Latest checkpoint: allGPUworkers complete. 30generation/capture executions,2598.384231aggregateGPUseconds consumed; no fullpanel launched. Natural12complete, workdirectionsmixed. Geometry34layerstatesqualified/allcoarsebitmapmatches;12bootstraplayerdiagnosticfailures retained(TNone actuallymeansones). Bootstrapfix + fiveoffset matchedworkscreen code are added, syntaxchecked but NOTGPUexecuted. New script flag --bootstrap-calibration --qualify-tests; mustusefreshimmutabledeploy and freshoutput. Offsets[0,-.25,-.5,-1,-2] only onthetwoLBcall3states; selectioncontract frozeninmatched_work_calibration_contract.md. No candidatekernelimplemented. Deadlineunchanged. Do not rerun completedv20 or fullv21profiles.

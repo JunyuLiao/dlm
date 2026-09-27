@@ -205,7 +205,7 @@ def _project_full(owner, record, legal):
                          valid_key_count=int(valid.sum()), cached_norm_reference_comparison=parity)
 
 
-def _geometry(owner, record, layer):
+def _geometry(owner, record, layer, *, matched_screen=False):
     from dllm.attention.blasst.core import _attention_validity
     from experiments.numerical_qk_reuse.geometry_diagnostic import compare_geometries
     from experiments.numerical_qk_reuse.integration import Attention
@@ -219,15 +219,27 @@ def _geometry(owner, record, layer):
         score_source = 'current_score_oracle_LOCAL_not_historical'
     sensitivity = record['sensitivity']
     if sensitivity is None:
-        raise RuntimeError(f'layer {layer} live T unavailable')
+        # The qualified production route maps None to neutral all-ones at
+        # bootstrap (cached_executor.py route_only/attention). Preserve this
+        # exact convention; do not invent a sensitivity history.
+        sensitivity = torch.ones((q.shape[0], q.shape[2]), device=q.device,
+                                 dtype=torch.float32)
+        sensitivity_source = 'production_none_means_neutral_ones'
+    else:
+        sensitivity_source = 'live_T'
     legal = _attention_validity(None, q, k, is_causal=False, sliding_window=None)
     z, ref, projection = _project_full(owner, record, legal)
     kind = 'GLOBAL' if layer == 5 else 'LOCAL'
     threshold = float(owner.thresholds[kind.lower()]['log_threshold'])
     comparison = compare_geometries(scores, z, ref, sensitivity, q, k, v,
                                     scale=scale, threshold=threshold, kind=kind, legal=legal)
+    if matched_screen:
+        from experiments.numerical_qk_reuse.geometry_diagnostic import matched_q16_screen
+        comparison['matched_q16_calibration'] = matched_q16_screen(
+            scores, z, ref, sensitivity, q, k, v, scale=scale,
+            threshold=threshold, kind='GLOBAL', legal=legal)
     return dict(score_source=score_source, threshold=threshold, scale=scale,
-                query_sensitivity='live_T',
+                query_sensitivity=sensitivity_source,
                 score_age=record.get('score_age'),
                 decision_age=record.get('decision_age'),
                 source_qkv_digest=output_digest((q, k, v)),
@@ -275,7 +287,7 @@ def _replay(model, sequence, selected, runtime, *, native):
 
 
 @torch.inference_mode()
-def run(config, checkpoint=None):
+def run(config, checkpoint=None, *, bootstrap_calibration=False):
     from dllm.models import create_adapter
     paths, proof = diagnostic.preflight(config)
     rows = {(dataset, id_): row for dataset, path in paths.items()
@@ -288,6 +300,8 @@ def run(config, checkpoint=None):
     torch.backends.cuda.matmul.allow_tf32 = False
     torch.backends.cudnn.allow_tf32 = False
     report = dict(schema='v21b_geometry_capture_v1', quality_eligible=False,
+                  screen=('missing_bootstrap_and_two_LB_calibration_states' if bootstrap_calibration
+                          else 'inherited_threshold_opportunity'),
                   source_config_sha256=hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest(),
                   source_sha256={
                       str(Path(__file__).resolve()): hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
@@ -319,6 +333,10 @@ def run(config, checkpoint=None):
             captured, capture_proof = diagnostic.capture_checked(adapter, row, targets, 101)
             sequence = captured[canvas]
             selected, missing = _selected(sequence, targets)
+            if bootstrap_calibration:
+                wanted = {0, 3} if dataset == 'longbench_v2' else {0}
+                reached = {int(s['call_index']) for s in sequence}
+                selected, missing = sorted(wanted & reached), sorted(wanted - reached)
             group.update(status='captured', reached_calls=len(sequence), missing_requested_calls=missing,
                          selected_calls=selected, native_path_proof=capture_proof)
             if not selected:
@@ -350,7 +368,9 @@ def run(config, checkpoint=None):
                     for layer in (0, 5):
                         record = method['records'][idx][layer]
                         try:
-                            geometry = _geometry(owner, record, layer)
+                            geometry = _geometry(owner, record, layer,
+                                matched_screen=bootstrap_calibration and dataset == 'longbench_v2'
+                                               and idx == 3 and layer == 5)
                             layer_result = dict(status='geometry_qualified_timing_pending',
                                 attention_kind=('LOCAL' if layer == 0 else 'GLOBAL'),
                                 native_observed_qkv_digest=native_qkv_hashes[idx][layer],
@@ -399,6 +419,8 @@ def main(argv=None):
     parser.add_argument('--out', type=Path, required=True)
     parser.add_argument('--qualify-tests', action='store_true',
                         help='run the geometry parity test under this billed stage before model capture')
+    parser.add_argument('--bootstrap-calibration', action='store_true',
+                        help='separate missing-bootstrap and frozen two-LB-state work/error screen')
     args = parser.parse_args(argv)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     partial = args.out.with_name(args.out.name + '.partial.json')
@@ -423,7 +445,8 @@ def main(argv=None):
                                         timeout=600, check=False)
             if result.returncode:
                 raise RuntimeError(f'geometry qualification tests failed; exit={result.returncode}')
-        report = run(config, checkpoint=lambda data: base.atomic_json(partial, data))
+        report = run(config, checkpoint=lambda data: base.atomic_json(partial, data),
+                     bootstrap_calibration=args.bootstrap_calibration)
         report['qualification_tests'] = dict(status=('passed' if args.qualify_tests else 'not_requested'),
                                              log=str(test_log) if args.qualify_tests else None)
         base.atomic_json(args.out, report)

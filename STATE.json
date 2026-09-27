@@ -4,28 +4,28 @@
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
   "authority": "User v21b request and both v21b attachments; supersedes geometry prohibition and precision-only panel",
-  "status": "V21B_GEOMETRY_OPPORTUNITY",
+  "status": "V21B_OPPORTUNITY_SAVED_CALIBRATION_NOT_RUN",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "gpu_stop_utc": "2026-09-28T05:52:00Z",
   "final_deadline_utc": "2026-09-28T06:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 512,
   "max_gpu_workers": 2,
-  "charged_gpu_process_seconds": 1996.672402381897,
-  "generation_executions": 12,
+  "charged_gpu_process_seconds": 2598.384230852127,
+  "generation_executions": 30,
   "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
-  "push_status": "525880efbfc9781976a3b45d131bd56eb96a6346 verified remote",
+  "push_status": "b85fa23c33e704a28ddeb27719f4f01654df1611 verified remote",
   "agents": {
     "source_crosswalk": "/root/sol_profile",
     "geometry_diagnostic": "/root/sol_v21_kernel"
   },
-  "next": "CPU geometry diagnostic implementation while frozen12natural isolation runs; no fullpanel",
+  "next": "Fresh immutable deploy of current checkpoint; run --bootstrap-calibration --qualify-tests to fill only missing bootstrap and perform frozen two-state work/error screen; no full panel or geometry production mode is authorized by evidence yet",
   "peer_refs": {
     "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
     "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
   },
   "preflight": "1047 tensor payloads perhost verified; operator19/19 perhost; all CP1/CP2 workers complete; no active GPU worker",
-  "generation_reserved": 12,
+  "generation_reserved": 0,
   "completed_gpu_jobs": [
     {
       "host": "mpk",
@@ -56,20 +56,6 @@
       "status": "complete",
       "returncode": 0,
       "charged_process_seconds": 833.4864563941956
-    }
-  ],
-  "gpu_jobs": [
-    {
-      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/natural_525880e",
-      "sha": "525880efbfc9781976a3b45d131bd56eb96a6346",
-      "supervisor_pid": 1805502,
-      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/natural_zero_pruning_natural_525880e.json",
-      "log": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/worker.log",
-      "ledger": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/ledger.jsonl",
-      "private": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/private",
-      "host": "mpk",
-      "stage": "zero_pruning_diagnostic",
-      "maximum_seconds": 1800
     },
     {
       "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/natural_525880e",
@@ -81,7 +67,60 @@
       "private": "/home/exouser/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/private",
       "host": "dllm",
       "stage": "zero_pruning_diagnostic",
-      "maximum_seconds": 1800
+      "maximum_seconds": 1800,
+      "status": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 140.06544661521912
+    },
+    {
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/natural_525880e",
+      "sha": "525880efbfc9781976a3b45d131bd56eb96a6346",
+      "supervisor_pid": 1805502,
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/natural_zero_pruning_natural_525880e.json",
+      "log": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/worker.log",
+      "ledger": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/ledger.jsonl",
+      "private": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/private",
+      "host": "mpk",
+      "stage": "zero_pruning_diagnostic",
+      "maximum_seconds": 1800,
+      "status": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 346.1123697757721
+    },
+    {
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/geometry_b85fa23",
+      "sha": "b85fa23c33e704a28ddeb27719f4f01654df1611",
+      "supervisor_pid": 1806084,
+      "config": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/bindings/geometry_b85fa23/diagnostic.json",
+      "config_sha256": "12e36692f0bac791981514ee1320488b98d346d338f90d0d70359e5ecd904ab8",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/geometry_geometry_b85fa23.json",
+      "log": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/geometry_geometry_b85fa23.log",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_geometry_b85fa23.json",
+      "host": "mpk",
+      "stage": "geometry_opportunity",
+      "maximum_seconds": 900,
+      "generation_reservation": 3,
+      "status": "complete_with_bootstrap_diagnostic_missing",
+      "returncode": 0,
+      "charged_process_seconds": 58.596675395965576
+    },
+    {
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/geometry_b85fa23",
+      "sha": "b85fa23c33e704a28ddeb27719f4f01654df1611",
+      "supervisor_pid": 142552,
+      "config": "/home/exouser/dyh/m3_output_numerics_v21_20260927/bindings/geometry_b85fa23/diagnostic.json",
+      "config_sha256": "e2c85830579648403275c08be71898d92a225fe3c082491f554b070506736327",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/geometry_geometry_b85fa23.json",
+      "log": "/home/exouser/dyh/m3_output_numerics_v21_20260927/geometry_geometry_b85fa23.log",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_geometry_b85fa23.json",
+      "host": "dllm",
+      "stage": "geometry_opportunity",
+      "maximum_seconds": 900,
+      "generation_reservation": 3,
+      "status": "complete_with_bootstrap_diagnostic_missing",
+      "returncode": 0,
+      "charged_process_seconds": 56.937336683273315
     }
-  ]
+  ],
+  "gpu_jobs": []
 }

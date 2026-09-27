@@ -5,6 +5,7 @@ import torch
 
 from experiments.numerical_qk_reuse.geometry_diagnostic import (
     _group_any, _historical_mass_budget, _select, compare_geometries,
+    matched_q16_screen,
 )
 
 
@@ -104,6 +105,35 @@ def test_illegal_scores_cannot_change_selection_or_mass_reference():
             second['independent_sequential'][name]['support_sha256'])
         assert first['historical_mass_argmax_matched_tile_budget'][name]['support_sha256'] == (
             second['historical_mass_argmax_matched_tile_budget'][name]['support_sha256'])
+
+
+def test_matched_screen_uses_only_five_frozen_offsets_and_reports_work_error():
+    args = _inputs(queries=33)
+    screen = matched_q16_screen(*args[:-1], scale=.25, threshold=-3.18,
+                                kind='GLOBAL', legal=args[-1])
+    assert screen['schema'] == 'v21b_matched_q16_screen_001'
+    assert screen['offsets'] == [0., -.25, -.5, -1., -2.]
+    assert [row['offset'] for row in screen['q16_candidates']] == screen['offsets']
+    assert screen['coarse_baseline']['bitmap_bytes'] == 8*1*2
+    assert all(row['bitmap_bytes'] == 8*3*2 for row in screen['q16_candidates'])
+    assert all(row['output_vs_full_fp32']['finite'] for row in screen['q16_candidates'])
+    assert screen['denominator_legal_pairs'] == 8*33*93
+    assert all(set(x) == {'previous_offset', 'current_offset', 'previous_pairs', 'current_pairs'}
+               for x in screen['nonmonotonic_retained_work_samples'])
+
+
+def test_matched_screen_rejects_local_and_illegal_score_perturbation():
+    args = list(_inputs())
+    with pytest.raises(ValueError, match='GLOBAL'):
+        matched_q16_screen(*args[:-1], scale=.25, threshold=-3.18,
+                           kind='LOCAL', legal=args[-1])
+    first = matched_q16_screen(*args[:-1], scale=.25, threshold=-3.18,
+                               kind='GLOBAL', legal=args[-1])
+    args[0][..., -3:] = float('nan')
+    second = matched_q16_screen(*args[:-1], scale=.25, threshold=-3.18,
+                                kind='GLOBAL', legal=args[-1])
+    assert [x['support_sha256'] for x in first['q16_candidates']] == [
+        x['support_sha256'] for x in second['q16_candidates']]
 
 
 def test_fail_closed_gqa_and_explicit_legality():

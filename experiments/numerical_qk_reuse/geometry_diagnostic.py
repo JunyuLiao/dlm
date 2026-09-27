@@ -243,7 +243,8 @@ def _metrics(observed, reference):
     diff = (observed-reference).float()
     flat = diff.abs().flatten().cpu()
     den = float(torch.linalg.vector_norm(reference.float()))
-    return dict(reference_l2=den, relative_l2=float(torch.linalg.vector_norm(diff))/(den or 1.),
+    err = float(torch.linalg.vector_norm(diff))
+    return dict(reference_l2=den, absolute_error_l2=err, relative_l2=err/(den or 1.),
                 max_abs=float(flat.max()), p99_abs=float(torch.kthvalue(flat, max(1, math.ceil(flat.numel()*.99))).values),
                 finite=bool(torch.isfinite(observed).all()))
 
@@ -411,3 +412,85 @@ def compare_geometries(scores, projected, reference, sensitivity, q, k, v, *,
                                        closures=g0),
                 projected_v_setup_seconds=None,
                 timing_note='Torch reference selection and full FP32 attention are diagnostic, not production cost; projected-V setup is external and must be reported separately. Output error uses full FP32 QK, softmax, and PV and does not claim actual BF16-P production error.')
+
+
+@torch.inference_mode()
+def matched_q16_screen(scores, projected, reference, sensitivity, q, k, v, *,
+                       scale, threshold, kind, legal=None):
+    """Fixed five-point GLOBAL Q16 work/error screen on one frozen input.
+
+    Cross-host selection is intentionally external: the caller combines the
+    two predeclared LongBench call-3 receipts once, without quality answers.
+    Every candidate reruns the Q16 retained-state recurrence; none is a mask
+    split from the coarse selector.  This is diagnostic FP32 math, not a
+    production-kernel timing or BF16-P error claim.
+    """
+    if kind != 'GLOBAL':
+        raise ValueError('matched Q16 screen is frozen to GLOBAL geometry')
+    sensitivity, legal = _validate(scores, projected, reference, sensitivity,
+                                   q, k, v, legal, kind, threshold)
+    if not math.isfinite(float(threshold)) or not math.isfinite(float(scale)) or float(scale) <= 0:
+        raise ValueError('matched screen needs finite inherited threshold and positive scale')
+    masked_illegal = int((~legal).sum())
+    scores = scores.masked_fill(~legal, -math.inf).contiguous()
+    b, h, nq, nk = scores.shape
+    kt = math.ceil(nk/64)
+    coarse = _select(scores, projected, reference, sensitivity,
+                     heads=1, queries=128, keys=64, threshold=float(threshold))
+    current_score, current_values = _attention_inputs(q, k, v, scale)
+    full, full_out = _attention(current_score, current_values, legal,
+                                torch.ones_like(legal))
+
+    def receipt(item, bitmap_bytes):
+        support = _expand_tiles(item['bits'], 64, nk) & legal
+        _, out = _attention(current_score, current_values, legal, support)
+        removed = full.masked_fill(support, 0.).sum(-1)
+        return dict(support_sha256=_digest(support),
+                    retained_legal_pairs=int(support.sum()),
+                    bitmap_bytes=bitmap_bytes,
+                    removed_mass_per_row=_scalar_distribution(removed),
+                    output_vs_full_fp32=_metrics(out, full_out),
+                    output_relative_l2_per_row=_row_output_error(out, full_out),
+                    torch_reference_selection_seconds=item['torch_reference_selection_seconds'],
+                    risk_groups_within_1e_3_of_threshold=item['risk_groups_within_1e_3_of_threshold'],
+                    minimum_finite_risk_distance_to_threshold=item['minimum_finite_risk_distance_to_threshold'])
+
+    baseline = receipt(coarse, b*h*math.ceil(nq/128)*kt)
+    offsets = (0., -.25, -.5, -1., -2.)
+    candidates = []
+    previous_pairs = None
+    nonmonotonic = []
+    for offset in offsets:
+        value = float(threshold) + offset
+        selected = _select(scores, projected, reference, sensitivity,
+                           heads=1, queries=16, keys=64, threshold=value)
+        measured = receipt(selected, b*h*math.ceil(nq/16)*kt)
+        pairs = measured['retained_legal_pairs']
+        if previous_pairs is not None and pairs < previous_pairs:
+            nonmonotonic.append(dict(previous_offset=candidates[-1]['offset'],
+                                     current_offset=offset,
+                                     previous_pairs=previous_pairs, current_pairs=pairs))
+        candidates.append(dict(offset=offset, threshold=value,
+                               retained_pair_ratio_to_coarse=(pairs/baseline['retained_legal_pairs']
+                                                              if baseline['retained_legal_pairs'] else None),
+                               error_ratio_to_coarse=(measured['output_vs_full_fp32']['relative_l2']/
+                                                      baseline['output_vs_full_fp32']['relative_l2']
+                                                      if baseline['output_vs_full_fp32']['relative_l2'] else None),
+                               **measured))
+        previous_pairs = pairs
+    return dict(schema='v21b_matched_q16_screen_001', kind='GLOBAL',
+                inherited_threshold=float(threshold), offsets=list(offsets),
+                shape=dict(batch=b, query_heads=h, kv_heads=projected.shape[1],
+                           queries=nq, keys=nk, head_dim=q.shape[-1]),
+                masked_illegal_score_positions=masked_illegal,
+                denominator_legal_pairs=int(legal.sum()),
+                full_fp32_reference_l2=float(torch.linalg.vector_norm(full_out)),
+                coarse_baseline=baseline, q16_candidates=candidates,
+                nonmonotonic_retained_work_samples=nonmonotonic,
+                selection_contract=('Cross-host root combines exactly the two frozen LongBench call-3 '
+                                    'GLOBAL states. Choose one fixed threshold by aggregate legal-work '
+                                    'distance, report mismatch; separately report best retained work with '
+                                    'aggregate error <=1.05x coarse and each state <=1.15x coarse. '
+                                    'No answer or quality labels are used.'),
+                timing_note=('Torch selection and full FP32 attention are diagnostic only; '
+                             'projected-V setup and production BF16-P error are not measured here.'))
