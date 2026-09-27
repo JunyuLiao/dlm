@@ -1,7 +1,7 @@
 # Local English slide text and Chinese speaker notes — preliminary
 
 Draft only. No shared slides or messages were edited/sent. Updated after direct
-numerical qualification, before the first84 scored outputs. Replace PENDING with
+numerical qualification, after the first84 scored outputs. Replace PENDING with
 actual scored evidence when available; retain failures and missing cells.
 
 ## Slide 1 — Periodic M1 is executed, with two separate clocks
@@ -59,8 +59,14 @@ AIME还没有forward收益，RULER不能强迫跑16步。这里是共同输入�
 - Observer ON/OFF token/call/phase parity is qualified on the bounded bridge.
   Optional device span starts after initial encoder prefill; includes host gaps
   and later commits. It is not decode-only wall time or GPU-active time.
-- Current scored status: PENDING. No quality, noninferiority, E2E or paper-novelty
-  claim is supported by direct forward measurements alone.
+- First84: all84 recorded, six valid blocks, all42 warm pairs accepted. Two
+  questions/family, seed101; not a noninferiority trial.
+- LongBench: native/T/M1/R2/R3 each2/2; matched dense/B1/2. R2 calls836 vs
+  native707 erase its cheaper forward: E2E/native1.106. R3 calls483, E2E/native
+  .636, but E2E/freshT1.030: no demonstrated incremental advantage over freshT.
+- AIME all1/2 with one capped/unparsed answer each; R2/R3 E2E/B1.170/1.248.
+- RULER two-task subset score mean.5 for all, R2/R3 E2E/native1.013.
+- Keep all frozen arms for the remainder; do not select a winning R on these data.
 
 中文讲稿：接下来最关键的是原生adaptive是否增加调用数、是否保持完整答案质量，
 以及能否超过freshT和B的整请求时间。先发布84次完整配对，再按预算完成剩余块。

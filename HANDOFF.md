@@ -7,17 +7,19 @@ Preserve unrelated third_party/dinfer/assets/Wechat.JPG; never stage/reset it.
 Astra methods/numerics/stopping/timing/interpretation; actual Sol implementation/tests.
 Root alone integrates/deploys/launches. No CVM/ball/fresh-T/phase-calibration expansion.
 
-## Live work (14:04 UTC)
-FIRST84 initial_001 RUNNING since13:47UTC,42 executions/host, whole question-seed
-seven-arm first/warm blocks stay on one GPU. No retries or duplicate coordinators.
-mpk supervisor1722376; dllm123615; ROOT/primary/initial_001.stage.json outerreceipt,
-initial_001.json wrapperfinal, initial_001.private.tar.gz terminal private archive.
-Production source00a2c4d deploy/cp3_00a2c4d unchanged; wrapper standalone CP5.
-Outer5400s/host, worker5300s,42requests. Read-only watcher exec76623 local
-E:/dlm/v20_private/watch_initial_001/{initial_001.status,initial_001.outcome}.json.
-CPU collector config E:/dlm/v20_private/collect_initial_001.config.json; intended
-output E:/dlm/v20_private/collect_initial_001. LIVE exec30708 from CP6 8ded8b9,
-waiting existing watcher only. Do not create another collector. Bounded local-outcome wait only, one lock, no GPU launch; scores on idle mpk.
+## Current checkpoint (14:40 UTC)
+FIRST84 initial_001 COMPLETE bothhosts,84recorded/6validblocks/42acceptedwarm.
+Closedprocess mpk2006.235885s,dllm1100.644642s. PrivateSHAverified archives and
+CP5offline scored summary at E:/dlm/v20_private/collect_initial_001/.
+Watcher76623 and collector30708 terminal; do not restart. Public first84_report.md,
+adaptive_panel_first84.json/csv, fan_today.md now published. No execution failures.
+RULER subsetall.5; AIMEall1/2 with onecapped/unparsed each; LBnative/T/M1/R2/R3 2/2,
+D_matched/B1/2. LB R2morecalls836vs707native eraseforwardbenefit(E2E1.106);
+R3 calls483/E2E.636native but1.030freshT. No independentM3advantage established.
+REMAINDER preparing: only frozen22wholeblocks/308exec perhost, CP3production/CP5
+wrapper unchanged, newprivate/ledger paths. Resourceplan reservesmpk11500s/dllm9000s,
+worker100sless, guard1800s beforeblock. No tuning or retries; first84 neverrepeated.
+Check STATE for actuallaunchPID/watcher before starting anything.
 
 ## Frozen identities and semantics
 GLOBAL_ONLY_NATIVE_LOCAL/P0/Triton for main7; GLOBAL5layers/nativeLOCAL25.
@@ -60,8 +62,8 @@ Three local English slide drafts/Chinese notes only; shared slides/messages unto
 
 ## Budget and hosts
 Start2026-09-27T11:58Z,GPUstop19:28Z,final19:58Z. Aggregate28800 GPU-process seconds,
-1000generationexec,max2workers,noautomaticextension. Closed4489.5546815395355s,
-44generations=22captures+16bridge+6timeline; active84reserved. Charge outer receipts
+1000generationexec,max2workers,noautomaticextension. Closed7596.435208320618s,
+128generations=44qualification+84primary; remainder616 toreserve. Charge outer receipts
 only. STATE.closed_new_stage_charges plus earlierbase1649.670916s idempotent.
 Descriptors E:/dlm/v20_private/hosts.json pinned model/env/libs/UUID.
 mpk exouser@149.165.151.254 UUID GPU-6139046a-b005-8fe5-a837-f8270472ab72,
