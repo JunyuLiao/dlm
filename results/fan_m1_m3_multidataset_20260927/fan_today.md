@@ -1,6 +1,8 @@
-# Fan 今日汇报：M1 与周期调用 M1 的 M3
+# Fan 今日汇报：完整700次主面板
 
-**14:38 UTC：直接计时与前84次答案对照均已完成；84/84执行、6/6有效完整配对块、42/42 warm通过。** 原生adaptive停止、阈值、输出长度和seed未改。生产代码00a2c4d，评分CP5；剩余616次于14:40 UTC开始，继续同一冻结面板，按预算在完整组间停止。
+**700/700执行、50/50完整有效配对、350/350 warm通过；主面板无执行失败。** RULER13题×2seed，AIME和LongBench各6题×2seed；均为已暴露开发集。生产00a2c4d、评分CP5。G75/L30单独100次参考已于16:38 UTC启动，尚未评分。
+
+**当前判断：M1与周期调用M1的R2/R3已真实执行，但这一冻结配置未通过“比强dense及fresh-T更快、且答案质量可接受”的整体门槛。** LongBench的完整forward确实变便宜，native-adaptive增加的工作量抵消了收益。不能把早期两题R3快36%的结果当成完整结论，也不能据此断言整个方向不可行。
 
 M3 的实际刷新执行 M1：用历史数值QK与当前投影V重决策，保留块计算当前QK/PV输出。数值锚点A8与决策间隔R1/R2/R3分离；锚点重置决策年龄。未跳过Q/K/V线性投影。根据预先冻结的成本规则，答案面板选 **GLOBAL五层/P0/Triton**，其余25层保持native；全层路径已测且较慢。公共fast-T不是新贡献。
 
@@ -21,29 +23,30 @@ M3 的实际刷新执行 M1：用历史数值QK与当前投影V重决策，保�
 
 数值误差遵守预先固定的v11容差，真实A/D/H与物理计数twin通过。例：mpk/P0/R2，AIME早canvas的GLOBAL QK/PV仅跳过0.8%/1.1%，晚canvas为13.6%/16.0%；LongBench早canvas为49.8%/57.5%。分母仅为被路由的五层，不能叫全模型跳过率。更高P1稀疏度未产生稳定跨任务成本收益，保留P0。
 
-## 前84次：收益是否经得住adaptive
+## 完整native-adaptive答案与E2E
 
-每类仅两题、seed101，所有七方法均保留；各题完整方法组固定同一GPU。下表E2E比值为同题同GPU比值的几何平均，method/reference<1更快；正确数均为首次输出。不是独立留出集，也不足以证明质量等价。
+时间均为同题同seed同GPU的method/native比值，再取几何平均；<1更快。质量为首次输出，AIME列严格EOS正确数；RULER列官方13任务macro。每个方法另有一次通过一致性校验的warm计时。没有跨机拼接绝对秒数。
 
-| 数据集 / 方法 | 正确/2 | decoder调用总数 | E2E/native | E2E/freshT | E2E/B |
-|---|---:|---:|---:|---:|---:|
-| RULER R2 | 1/2 | 8 | 1.013 | 1.006 | 1.006 |
-| RULER R3 | 1/2 | 8 | 1.013 | 1.006 | 1.005 |
-| AIME R2 | 1/2 | 651 | 0.980 | 0.968 | 1.170 |
-| AIME R3 | 1/2 | 718 | 1.045 | 1.032 | 1.248 |
-| LongBench R2 | 2/2 | 836 | 1.106 | 1.790 | 1.007 |
-| LongBench R3 | 2/2 | 483 | 0.636 | 1.030 | 0.579 |
+| 方法 | RULER macro / E2E | AIME 正确/12 / E2E | LongBench 正确/12 / E2E |
+|---|---|---|---|
+| native | 92.31% / 1.000 | 5/12 / 1.000 | 6/12 / 1.000 |
+| matched dense | 92.31% / 1.014 | 7/12 / 0.915 | 4/12 / 1.072 |
+| fresh-T | 92.31% / 1.004 | 8/12 / 1.011 | 6/12 / 0.908 |
+| M1 R1 | 92.31% / 1.054 | 7/12 / 1.042 | 6/12 / 1.025 |
+| M3 R2 | 92.31% / 1.075 | 6/12 / 1.096 | 6/12 / 1.111 |
+| M3 R3 | 92.31% / 1.048 | 5/12 / 1.135 | 5/12 / 1.031 |
+| B_A8 | 92.31% / 1.068 | 7/12 / 1.057 | 4/12 / 1.001 |
 
-RULER是两任务子集：各方法官方分数均值0.5，不能称13任务macro；native也是8次调用。AIME所有方法均1/2，且各有一题到8192输出上限而未解析，不能把这一题的截断时间当作成功解题加速。native668次、freshT689次、B621次；R2/R3没有超过B。
+- **LongBench：** native/fresh-T/R2/R3总decoder调用分别2360/2223/2842/2514。R2多20.4%调用，E2E慢11.1%；R3多6.5%调用，E2E慢3.1%。相对fresh-T，R2/R3的E2E比值为1.224/1.136；相对B为1.111/1.031。fresh-T点估计快9.2%，正确数同为6/12；探索性时间区间跨1，不能宣称已证明稳定加速。
+- **AIME：** native/fresh-T/R2/R3严格正确5/8/6/5（分母12）；请求输出封顶5/4/5/6次。R3另有1个到cap时任务答案正确，按冻结口径单列，未改算严格成功。R2/R3相对fresh-T慢8.4%/12.2%，相对B慢3.6%/7.3%。不把封顶时间当完整成功解题加速。
+- **RULER：** 所有方法macro92.31%，R2/R3的E2E慢7.5%/4.8%；短canvas没有足够刷新摊销空间。
 
-LongBench的native/freshT/M1/R2/R3均2/2，D_matched和B均1/2（EOS错误）；未遇请求输出封顶。native707次、freshT474次、M1 700次、R2 836次、R3 483次。**R2更便宜的forward被额外调用吞掉，E2E反而慢约10.6%。R3相对native快约36.4%，但比freshT慢约3.0%，尚不支持M3的增量贡献。** 两题样本不作最佳R选择或质量非劣结论，后续固定协议不变。
+调用总量是工作统计，不与几何时间比值相乘作精确分解。各GPU上的配对时间=调用数×摊销时间分解、每canvas分布、A/D/H、caps、错误/未解析和探索性区间见[完整表](adaptive_panel_report.md)与[JSON](adaptive_panel.json)。此样本不足以证明质量等价或非劣。
 
-全七方法、各主机秒数/调用数/每canvas分布、A/D/H、置信区间、EOS/封顶/未解析见[first84详细表](first84_report.md)和[评分JSON](adaptive_panel_first84.json)。全部首次输出和失败记录保留；这84次无执行失败或warm拒收。D_matched的LongBench有一个canvas达到48上限，单独记录。
+## G75/L30与剩余边界
 
-逐forward计时与答案generation分开，避免同步干扰E2E。两事件计时开关已通过三方法、两机输出一致性检查；可报告首次prefill结束到生成结束的CUDA跨度（包括CPU等待和后续commit），不是decode-only墙钟时间/TBT。
+旧adaptive证据已核对：小样本、LBcap1024、旧grouping/runtime，缺合格直接forward/生成段计时。本轮G75L30_nativeQ128是明确标注的新移植，已直接计时/数值/桥接合格；正在跑冻结100次，与同题同seed同GPU的native配对，跨阶段计时局限会单列。不能冒充旧实现等价。
 
-G75/L30：旧adaptive小样本存在，但旧LB输出上限1024、grouping/runtime不同，且缺直接forward与合格decode-only统计。本轮native-Q128移植已完成直接计时/数值/桥接，单独100次答案扩展尚未开始，不冒充旧实现。
+逐forward计时与干净generation分开；请求E2E含prefill和后续commit。另测首次prefill结束到生成结束的CUDA跨度（含CPU等待/commit），不是decode-only墙钟或TBT。RULER N16仍missing，以自然4次补测；M2/A4/新phase规则未运行。G75完成后交最终简报，不因本轮负结果开启新调参矩阵。
 
-完整证据：[长序列与whole-step](selected001_forward.md)、[RULER原生N4](ruler_selected001_forward.md)、[物理稀疏与年龄](selected_physical.md)、[原始N4双scope筛选](per_forward.md)、[旧G75/L30证据](held_bitmap_evidence.md)、[三页英文草稿及讲稿](fan_slide_drafts.md)。RULER的N16保持missing，用原生4次补测，未强制多走step。
-
-提交/推送：本地检查点已保存；自动审批阻止GitHubpush，正在等待对指定现有远端的明确确认。GPU工作和本地报告继续。
+[早期84次](first84_report.md)保留不变；[三页英文草稿](fan_slide_drafts.md)随完整结果更新。所有运行检查点已本地提交；GitHubpush仍被自动审批阻止，等待指定现有远端授权。

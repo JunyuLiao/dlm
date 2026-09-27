@@ -3,7 +3,7 @@
   "task": "Fan M1/M3 same-day native-adaptive multi-dataset cost study",
   "parent": "e3f14520eea98e45998fb369f9027f3b2707ec4a",
   "branch": "research/fan-m1-m3-cost-refresh-20260927",
-  "status": "CP9_FULL700_SCORED_HISTORICAL_PREPARING",
+  "status": "CP9_FULL700_PUBLISHED_G75_RUNNING",
   "authority": "E:/Downloads/dllm_astra_sol_v20_fan_m1_m3_multidataset_same_day_20260927.md",
   "budget_file": "results/fan_m1_m3_multidataset_20260927/campaign_budget.json",
   "panel_file": "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json",
@@ -11,25 +11,25 @@
   "gpu_jobs": [
     {
       "host": "149.165.151.254",
-      "supervisor_pid": 1745246,
-      "stage": "remainder_001",
-      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.stage.json",
-      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.json",
-      "status": "complete"
+      "supervisor_pid": 1789128,
+      "stage": "historical_001",
+      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/historical_001.stage.json",
+      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/historical_001.json",
+      "status": "running"
     },
     {
       "host": "149.165.159.64",
-      "supervisor_pid": 127469,
-      "stage": "remainder_001",
-      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.stage.json",
-      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.json",
-      "status": "complete"
+      "supervisor_pid": 133395,
+      "stage": "historical_001",
+      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/historical_001.stage.json",
+      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/historical_001.json",
+      "status": "running"
     }
   ],
   "coordinator": null,
   "prior_campaign": "v18 CP4 complete and unchanged",
-  "next": "Publish full700 interpretation; launch frozen separateG75historical100 with atmost8000aggregateadditionalGPUseconds, then score/finalreport.",
-  "updated_utc": "2026-09-27T16:38:00Z",
+  "next": "Adopt historical001workers and watcher53584. SolC adding historical work/timeline/decomposition sidefields to singleCPUcollector; review/test/commit/start once ready. Full700negativeM3gate published. ScoreG75 then finalbrief; no extraGPUgrid.",
+  "updated_utc": "2026-09-27T16:38:22Z",
   "qualification": {
     "mpk": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
     "dllm": "11/11 GPU tests; selected actual-QKV + both timing boundaries qualified",
@@ -138,13 +138,61 @@
     "status": "complete"
   },
   "watcher": {
+    "pid": 53584,
+    "path": "E:/dlm/v20_private/watch_historical_001/historical_001.status.json",
+    "status": "running",
+    "read_only": true,
+    "detached_hidden": true
+  },
+  "postprocessor": {
+    "stage": "historical_001",
+    "status": "under_development_by_sol_profile",
+    "config": "E:/dlm/v20_private/collect_historical_001.config.json",
+    "output": "E:/dlm/v20_private/collect_historical_001",
+    "cpu_only": true,
+    "consume_existing_watcher_only": true,
+    "must_not_duplicate": true
+  },
+  "active_gpu_seconds_reserved_max": {
+    "149.165.151.254": 4000,
+    "149.165.159.64": 4000
+  },
+  "first84_report": "results/fan_m1_m3_multidataset_20260927/first84_report.md",
+  "local_monitor_recovery": {
+    "observed_utc": "2026-09-27T15:54:35Z",
+    "old_watcher_session": 70176,
+    "old_collector_session": 17065,
+    "old_collector_pid": 58084,
+    "evidence": "No matching live local watcher/collector; old collector dir only lock. Remote remainder scorer root/payload/helper/archive absent, no dispatch. Both original remote GPU workers verified active. Old artifacts preserved.",
+    "gpu_relaunches": 0
+  },
+  "full700_summary_sha256": "25f5483e6650c118744fd642ecd3ec62d3178514eb8e8b2a0d730f1227ee9d5f",
+  "completed_main_gpu_jobs": [
+    {
+      "host": "149.165.151.254",
+      "supervisor_pid": 1745246,
+      "stage": "remainder_001",
+      "receipt": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.stage.json",
+      "result": "/media/volume/dllm-1/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.json",
+      "status": "complete"
+    },
+    {
+      "host": "149.165.159.64",
+      "supervisor_pid": 127469,
+      "stage": "remainder_001",
+      "receipt": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.stage.json",
+      "result": "/home/exouser/dyh/fan_m1_m3_v20_20260927/primary/remainder_001.json",
+      "status": "complete"
+    }
+  ],
+  "completed_main_watcher": {
     "pid": 45904,
     "path": "E:/dlm/v20_private/watch_remainder_002/remainder_001.status.json",
     "read_only": true,
     "status": "complete",
     "detached_hidden": true
   },
-  "postprocessor": {
+  "completed_main_postprocessor": {
     "status": "scored_complete",
     "cpu_only": true,
     "consume_existing_watcher_only": true,
@@ -158,15 +206,5 @@
     "pid": 6656,
     "detached_hidden": true
   },
-  "active_gpu_seconds_reserved_max": {},
-  "first84_report": "results/fan_m1_m3_multidataset_20260927/first84_report.md",
-  "local_monitor_recovery": {
-    "observed_utc": "2026-09-27T15:54:35Z",
-    "old_watcher_session": 70176,
-    "old_collector_session": 17065,
-    "old_collector_pid": 58084,
-    "evidence": "No matching live local watcher/collector; old collector dir only lock. Remote remainder scorer root/payload/helper/archive absent, no dispatch. Both original remote GPU workers verified active. Old artifacts preserved.",
-    "gpu_relaunches": 0
-  },
-  "full700_summary_sha256": "25f5483e6650c118744fd642ecd3ec62d3178514eb8e8b2a0d730f1227ee9d5f"
+  "generation_executions_reserved_active_historical_max": 100
 }

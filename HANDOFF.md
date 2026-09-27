@@ -7,26 +7,27 @@ Preserve unrelated third_party/dinfer/assets/Wechat.JPG; never stage/reset it.
 Astra methods/numerics/stopping/timing/interpretation; actual Sol implementation/tests.
 Root alone integrates/deploys/launches. No CVM/ball/fresh-T/phase-calibration expansion.
 
-## Current checkpoint (15:55 UTC)
-FIRST84 initial_001 COMPLETE bothhosts,84recorded/6validblocks/42acceptedwarm.
-Closedprocess mpk2006.235885s,dllm1100.644642s. PrivateSHAverified archives and
-CP5offline scored summary at E:/dlm/v20_private/collect_initial_001/.
-Watcher76623 and collector30708 terminal; do not restart. Public first84_report.md,
-adaptive_panel_first84.json/csv, fan_today.md now published. No execution failures.
-RULER subsetall.5; AIMEall1/2 with onecapped/unparsed each; LBnative/T/M1/R2/R3 2/2,
-D_matched/B1/2. LB R2morecalls836vs707native eraseforwardbenefit(E2E1.106);
-R3 calls483/E2E.636native but1.030freshT. No independentM3advantage established.
-REMAINDER LIVE since14:40:52UTC mpk1745246/dllm127469: only frozen22wholeblocks/308exec perhost, CP3production/CP5
-wrapper unchanged, newprivate/ledger paths. Resourceplan reservesmpk11500s/dllm9000s,
-worker100sless, guard1800s beforeblock. No tuning or retries; first84 neverrepeated.
-Read-only watcher recovered hidden PID45904 E:/dlm/v20_private/watch_remainder_002.
-Single CPU postprocessor recovered hidden PID6656 from CP8 67be400, combines initial+remainder
-only after existing watcher terminal; private config/output collect_remainder_002.
-No GPU work, no duplicate collector. Scoredcomplete requires700rows AND50validpairs;
-failed/finalized archives can scorepartial. Original first84 outputs unchanged.
-15:54 found both old local monitors absent; old collector onlylock, remote scorer
-neverdispatched (root/payload/helper/archive absent). Preserved old dirs/locks.
-Both original remote GPUworkers verifiedactive; recovery does NOT retry generation.
+## Current checkpoint (16:38 UTC)
+FULL700 COMPLETE and scored:700rows/50validblocks/350acceptedwarm; no failures.
+Exact summary E:/dlm/v20_private/collect_remainder_002/remainder_001.redacted_summary.json
+SHA25f5483e6650c118744fd642ecd3ec62d3178514eb8e8b2a0d730f1227ee9d5f.
+Public adaptive_panel.json/csv/report.md and updated fan_today/slide drafts.
+AllRULERmacro.9231. AIMEstrict native/T/M1/R2/R3/B =5/8/7/6/5/7 of12;
+LB6/6/6/6/5/4 of12. LB R2/R3 E2E/native1.111/1.031 and/freshT1.224/1.136.
+Earlyfirst84R3.636native did notpersist. M3incrementalgate NOTPASSED atfrozenpoint.
+First84 and alloriginaloutputs preserved; no policy/stopping/output rescue.
+HISTORICAL_001 LIVE since16:38UTC mpk1789128/dllm133395,50exec/host, frozen
+G75L30_nativeQ128 newport ALL/Triton. CoreCP3production/CP5wrapper unchanged.
+New ROOT/primary/historical_001.{stage,json,ledger.jsonl,private.tar.gz},
+ROOT/private_historical_001. Max4000s/host, worker3900,guard900,globaldeadline19:28.
+Hidden read-only watcherPID53584 E:/dlm/v20_private/watch_historical_001.
+SolCnewCPUcollector scripts/v20_collect_historical.py/tests awaiting finalworkmetrics
+addition: CP5originalscoring+redactedledger calls/canvas/caps/timeline/decomposition.
+Config E:/dlm/v20_private/collect_historical_001.config.json, remote_stage_dir=primary.
+Review/test/commit then startONCE hidden localcollector, record STATE. Notlaunchedyet.
+Coreprivate4ledgers/roots already mpk ROOT/offline_scoring/remainder_001; neverrewrite.
+Previous localwatcher/collector died15:54beforedispatch; recovered onlylocalhelpers,
+then full700 finishednormally. Preserve olddirs/locks; noGPUrequest everretried.
 
 ## Frozen identities and semantics
 GLOBAL_ONLY_NATIVE_LOCAL/P0/Triton for main7; GLOBAL5layers/nativeLOCAL25.
@@ -64,13 +65,13 @@ only5routedlayers, not whole-model sparsity. LB R2/R3forward/native mpk.958/.950
 dllm.918/.912; whole-step improves, Bstillcheaper(.932/.886). AIME/RULER noheadroom.
 First84 quality/E2E exploratory only. G75 historical adaptive tiny oldLB cap1024 exists but lacks
 qualified directforward/decode-onlytime, differs grouping/runtime; see
-held_bitmap_evidence.md. Current nativeQ128 directly qualified,100answers NOTSTARTED.
+held_bitmap_evidence.md. Current nativeQ128 directly qualified,100answers NOWRUNNING.
 Three local English slide drafts/Chinese notes only; shared slides/messages untouched.
 
 ## Budget and hosts
 Start2026-09-27T11:58Z,GPUstop19:28Z,final19:58Z. Aggregate28800 GPU-process seconds,
-1000generationexec,max2workers,noautomaticextension. Closed7596.435208320618s,
-128generations=44qualification+84primary; remainder616 reservedactive. Charge outer receipts
+1000generationexec,max2workers,noautomaticextension. Closed19146.065313577652s,
+744generations=44qualification+700primary; historical100reservedactive,8000sreserved. Charge outer receipts
 only. STATE.closed_new_stage_charges plus earlierbase1649.670916s idempotent.
 Descriptors E:/dlm/v20_private/hosts.json pinned model/env/libs/UUID.
 mpk exouser@149.165.151.254 UUID GPU-6139046a-b005-8fe5-a837-f8270472ab72,
@@ -81,11 +82,11 @@ Auxiliary/scorer deploy/cp5_05f9947 immutable, production CP3 unchanged.
 LocalPython D:/Users/30128/AppData/Local/Programs/Python/Python311/python.exe; unittest.
 
 ## Continue
-Adopt remainder workers/watcher. Terminal archive verify and CPU score with
+Adopt historical workers/watcher. Terminal archive verify and CPU score with
 CP5 originalgold on idle mpk; preserve failed/partial/unaccepted outputs.
 First84 published before remainder launch. Recompute feasibility
 from actual durations, only wholly unstarted blocks, no failed/uncertain retries.
-Optional separateG75100 after corepriority/budget. Final honest brief and slides.
+Finish separateG75100 then final honest brief and slides; no new optionalgrid.
 Automatic approval rejected GitHubpush twice: needs explicit USER authorization
 for exporting to coconight01/dlm_test despite existingorigin/branch evidence.
 Async exactremote confirmation PENDING; do not retry/bypass. Localcommits/GPU continue.

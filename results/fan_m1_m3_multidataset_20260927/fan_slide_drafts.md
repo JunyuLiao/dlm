@@ -1,74 +1,56 @@
-# Local English slide text and Chinese speaker notes — preliminary
+# Local English slide text and Chinese notes — full700, G75 pending
 
-Draft only. No shared slides or messages were edited/sent. Updated after direct
-numerical qualification, after the first84 scored outputs. Replace PENDING with
-actual scored evidence when available; retain failures and missing cells.
+Draft only; no shared slides/messages edited. First84 archived unchanged.
 
-## Slide 1 — Periodic M1 is executed, with two separate clocks
+## Slide 1 — Periodic M1, with distinct numeric and decision clocks
 
-- M1 redecides support from observed historical QK and current projected V.
-- M3 invokes that same M1 at decision interval R2/R3; held calls bypass selection.
-- A8 refreshes actual numerical QK, invalidates/rebuilds the bitmap, and resets
-  decision age. A8 is our controlled engineering choice, not a meeting mandate.
-- Current output uses current QK/PV on retained tiles. Q/K/V projections remain.
-- Common fast-T and unchanged native adaptive sampler/stopping across T arms.
-- Selected answer point: GLOBAL-only (5 layers), native LOCAL (25 layers), P0,
-  generic Triton; all-layer execution was measured and slower at this point.
+- M1 uses observed historical QK and current projected V to redecide support.
+- M3 invokes M1 at R2/R3; held calls skip selection. A8 numeric anchors reset
+  decision age (R3: A H H D H H D H A H H D).
+- Current kept-tile QK/PV output; Q/K/V linear projections remain. Common fast-T.
+- Primary GLOBAL5/nativeLOCAL25, frozen P0/Triton; ALL measured and cost-rejected.
+- Native B256/adaptive48max/thresholds/outputcaps/seeds unchanged. Source00a2c4d.
 
-R3 first12 phases: A H H D H H D H A H H D.
-A = numeric anchor + decision; D = M1 decision; H = held support.
+讲稿：这是真正周期执行M1，不是每2/3步重算全QK，也不使用旧的最终attention权重。
+A8和GLOBAL-only是工程控制点，不声称是Fan明确指定或已知最优。
 
-中文讲稿：我们实现的 M3 在刷新时调用真正的 M1，而不是每两三步重新算全部QK。
-数值锚点A和决策间隔R分别控制，当前输出不用旧的最终attention权重。五层GLOBAL
-是明确的受限实验；公共fast-T不算方法创新。原生停止阈值和输出预算没有变。
+## Slide 2 — Full-forward savings exist in long context
 
-## Slide 2 — Long-context forward savings survive full-step timing
-
-Qualified actual-QKV/support references; separate untimed physical counter twins.
-Direct full-network decoder costs, not attention-kernel latency or request/calls.
-Same-input teacher-forced sequences, native-reached lengths only; three bracketed
-blocks, no accepted new JIT. Ratios method/native; lower than1 is faster.
-
-| LongBench, selected GLOBAL/P0/Triton | mpk | dllm |
+| Selected GLOBAL/P0/Triton, method/native | mpk | dllm |
 |---|---:|---:|
-| R2 full model-forward ratio | 0.958 | 0.918 |
-| R3 full model-forward ratio | 0.950 | 0.912 |
-| B_A8 full model-forward ratio | 0.932 | 0.886 |
-| R2 whole denoising-step ratio | 0.957 | 0.924 |
-| R3 whole denoising-step ratio | 0.948 | 0.916 |
+| LongBench R2 model-forward | .958 | .918 |
+| LongBench R3 model-forward | .950 | .912 |
+| LongBench B_A8 model-forward | .932 | .886 |
+| LongBench R2 whole denoising step | .957 | .924 |
+| LongBench R3 whole denoising step | .948 | .916 |
 
-AIME model-forward R2/R3 remain ~2–3% slower than native. RULER naturally stops
-at4 calls, so qualified N4 is retained and an unavailable N16 is not fabricated.
-Each host has its own questions/states and absolute ms table. Never splice
-native from one GPU with candidate latency from the other.
+- Same-input state-correct teacher-forced replay, native-reached N<=16, brackets,
+  no accepted JIT. Actual QKV and separate untimed counter twins qualified.
+- AIME/RULER no forward headroom. RULER natural4 calls, N16 missing retained.
+- Physical sparsity denominators refer to routed layers, not the whole model.
 
-中文讲稿：长上下文上已经直接测到完整forward和完整step变便宜，但简单B仍更便宜。
-AIME还没有forward收益，RULER不能强迫跑16步。这里是共同输入的重放计时，不能
-推出自然生成更快或答案正确。Triton选择差距接近零，不宣传为consumer突破。
+讲稿：单次成本是真实完整调用计时，不是总时间除调用数。LongBench有4–9%收益，
+但简单B仍更便宜；不能从这种重放直接推导完整答案与请求收益。
 
-## Slide 3 — Adaptive answers, work and E2E are the remaining gate
+## Slide 3 — Full700 does not support an incremental M3 gain
 
-- Frozen first84: two questions/family, seed101, all7 arms and first/warm repeats.
-- Full plan: 13 RULER +6 AIME +6 LongBench questions, seeds101/202,700 executions.
-- All comparator arms for one question-seed stay on one GPU; exposed development
-  inputs, not independent held-out validation.
-- Report first-output quality separately by task, EOS/cap/parse/failure outcomes,
-  total decoder calls, calls/canvas, output lengths and accepted warm E2E.
-- Report both native and fresh-T/B references. B is a substantive competing
-  baseline, not evidence that periodic redecisions add value by themselves.
-- Observer ON/OFF token/call/phase parity is qualified on the bounded bridge.
-  Optional device span starts after initial encoder prefill; includes host gaps
-  and later commits. It is not decode-only wall time or GPU-active time.
-- First84: all84 recorded, six valid blocks, all42 warm pairs accepted. Two
-  questions/family, seed101; not a noninferiority trial.
-- LongBench: native/T/M1/R2/R3 each2/2; matched dense/B1/2. R2 calls836 vs
-  native707 erase its cheaper forward: E2E/native1.106. R3 calls483, E2E/native
-  .636, but E2E/freshT1.030: no demonstrated incremental advantage over freshT.
-- AIME all1/2 with one capped/unparsed answer each; R2/R3 E2E/B1.170/1.248.
-- RULER two-task subset score mean.5 for all, R2/R3 E2E/native1.013.
-- Keep all frozen arms for the remainder; do not select a winning R on these data.
+700 executions,50 valid question-seed blocks,350 accepted warm pairs.
+RULER13q×2seeds; AIME/LB6q×2seeds. Exposed development inputs, not noninferiority.
 
-中文讲稿：接下来最关键的是原生adaptive是否增加调用数、是否保持完整答案质量，
-以及能否超过freshT和B的整请求时间。先发布84次完整配对，再按预算完成剩余块。
-旧G75/L30已有小样本adaptive证据，但缺完整直接计时，新的native-Q128移植要独立
-标注，不能混成旧vLLM实现。正负结果和未完成项都会留在表里。
+| Dataset | native/T/R2/R3 correct | R2/native E2E | R3/native E2E |
+|---|---|---:|---:|
+| RULER | all24/26, macro92.31% | 1.075 | 1.048 |
+| AIME | 5/8/6/5 of12 (strictEOS) | 1.096 | 1.135 |
+| LongBench | 6/6/6/5 of12 | 1.111 | 1.031 |
+
+- LB calls native2360,T2223,R2 2842,R3 2514; extra adaptive work consumes savings.
+- LB R2/R3 E2E/freshT1.224/1.136, versusB1.111/1.031. No added M3 advantage.
+- AIME capped requests remain counted; R3 has one additional task-correct at cap,
+  kept separate from strictEOS. No output-budget or stopping rescue.
+- First84 R3 .636/native did not persist: full-panel ratio1.031. Do not select R
+  from early outcomes or turn non-significance into quality equivalence.
+- Separate G75L30_nativeQ128100 is running; new port, not old grouping equivalence.
+
+讲稿：完整面板推翻了早期两题的乐观点估计。R2多出来的调用吃掉单次节省；
+R3没有超过fresh-T，且LB正确数更低。今天交付实现和可复核的负结果，
+不把方向判死刑，也不靠继续扫参数硬找正结果。G75参考完成后补最终表。
