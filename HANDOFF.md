@@ -21,7 +21,8 @@ Completed evidence:
 - Initial RULER936 executions complete,468/host;468 strictwarm pairs, zero failures.
 - Original AIME closed cleanly04:33UTC:852/1080 (mpk396,dllm456),71 whole blocks.
   Nineteen wholly unstarted blocks remain; zero partial/prefix/orphan conflicts.
-  Quality unread. Numbered c001 continuation active under amended finite budget.
+  At06:34UTC AIME1049/1080 (mpk509,dllm540); quality unread.
+  dllm complete; mpk c001 still running under amended finite budget.
 
 Hosts and current AIME c001 workers (original supervisors exited rc0):
 - mpk exouser@149.165.151.254, GPU-6139046a-b005-8fe5-a837-f8270472ab72.
@@ -29,7 +30,8 @@ Hosts and current AIME c001 workers (original supervisors exited rc0):
   Supervisor/PGID1671360, GPUworker1671384; originalruntime user-site ON.
 - dllm exouser@149.165.159.64, GPU-fc12ad5c-5334-5509-8fc6-465498fd3915.
   N=/home/exouser/dyh/junyu_frontier_v18_20260926.
-  Supervisor/PGID46382, GPUworker46416; private copiedruntime/user-site overlay.
+  c001 supervisor46382/worker46416 finished rc0 at1790489766; GPU now idle.
+  Private copiedruntime/user-site overlay; no further AIME launch.
 - Primary generation remains ROOT/deploy/bridge_json, source4d53b5c construction.
   Model/library/runtime paths are in frozen primary protocols/new CP3 config.
   Never modify active worker code/configs or restart requests to change budgets.
@@ -114,3 +116,8 @@ Never upload answers/gold/credentials/largetraces or archive theuser task.
   recovery_audit and clears stale terminal fields. Both c001 markers now adopted.
 - Local controller archive SHA c0ef3d77ccfe817f986246d2d739fa23b468d78a7eafb00ce4d1505a16d92835.
   Never overlay remote immutable extension_6250b51 or bridge_json.
+
+06:34UTC stage checkpoint: dllm AIME540/540 complete, c00184 executions,
+worker_end5478.743522106997 GPU seconds (wrapper5482s is not added). mpk509/540
+ongoing; combined1049/1080 and2460 campaign attempts incl475 preofficial.
+Both CPU coordinators alive; primary awaits mpk before RULER remainder/scoring.

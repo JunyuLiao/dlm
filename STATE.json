@@ -3,7 +3,7 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP2_AIME_C001_RUNNING_AFTER_CLEAN_ORIGINAL_STOP",
+  "status": "CP2_AIME_DLLM_COMPLETE_MPK_C001_RUNNING",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
   "candidate": "STOP_IMPLEMENTATION_THIS_ROUND: ideal GLOBAL opportunity but no demonstrated net cost headroom or finite-precision certificate; no CUDA candidate",
@@ -20,14 +20,6 @@
       "worker_pid": 1671384,
       "stage": "aime_c001",
       "start_epoch": 1790484333
-    },
-    {
-      "host": "149.165.159.64",
-      "supervisor_pid": 46382,
-      "pgid": 46382,
-      "worker_pid": 46416,
-      "stage": "aime_c001",
-      "start_epoch": 1790484284
     }
   ],
   "budget": {
@@ -56,16 +48,19 @@
       "dllm": 613
     },
     "initial_duration_note": "Wrapper elapsed; driver budget accounting uses worker_end values. Do not double-count wrappers.",
-    "observed_completed_generations_snapshot": 2263,
-    "snapshot_note": "475 preofficial +936 initial RULER +852 closed original AIME; excludes future continuation. Count failed attempts once.",
-    "completion_risk": "User authorized bounded extension; existing AIME workers may still cleanly stop at old boundary, then numbered continuation runs wholly unstarted blocks.",
+    "observed_completed_generations_snapshot": 2460,
+    "snapshot_note": "475 preofficial +936 initial RULER +1049 AIME executions as of06:34UTC; mpk worker ongoing, no ongoing duration treated as final accounting.",
+    "completion_risk": "Both hosts continuing within bounded amended budget; dllm AIME complete; mpk remaining31 executions at snapshot. Subsequent stages still budget-gated.",
     "original_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json",
     "aime_original_worker_seconds_by_host": {
       "mpk": 31008.756522101117,
       "dllm": 31037.169668974
+    },
+    "aime_c001_closed_worker_seconds_by_host": {
+      "dllm": 5478.743522106997
     }
   },
-  "next": "Finish c001 existing19 frozen AIME blocks; RULER remainder; primary offline scoring; qualified/gated CP3; CP4.",
+  "next": "Adopt existing mpk c001 until complete; keep dllm AIME results immutable; automatic RULER remainder, primary offline scoring, gated CP3, CP4.",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -118,12 +113,12 @@
     "strict_warm_accepted": 468,
     "first_failures": 0,
     "aime_snapshot": {
-      "utc": "2026-09-27T04:35:00Z",
-      "mpk": 396,
-      "dllm": 456,
-      "total": 852,
+      "utc": "2026-09-27T06:34:59.755976+00:00",
+      "mpk": 509,
+      "dllm": 540,
+      "total": 1049,
       "planned": 1080,
-      "scope": "closed original stage; 71 complete blocks; quality unread"
+      "scope": "stage aggregate execution counts; dllm complete; mpk still executing its frozen prefix; quality unread"
     }
   },
   "scoring": {
@@ -163,8 +158,8 @@
     "read_retry_tests": "16 focused unittest cases passed",
     "previous_pid16656": "verified and stopped; old readretry outcome preserved"
   },
-  "updated_utc": "2026-09-27T04:46:34.133331+00:00",
-  "stage_check": "Both c001 supervisors and one GPU worker per host verified. Original AIME852/1080 clean block prefix, zero partial/prefix violations; orphan gate passed before durable c001 intent. Primary controller51988 adopts both c001 markers; CP3 controller35304 waiting unchanged.",
+  "updated_utc": "2026-09-27T06:34:59.755976+00:00",
+  "stage_check": "06:34UTC: primary51988 and secondary35304 alive; dllm c001 rc0/worker_end complete and GPU empty; mpk GPU1671384 remains active. Primary scoring/CP3 not started.",
   "resource_authorization": "RESOURCE_AUTHORIZATION.md",
   "budget_override": {
     "status": "deployed_active_controllers_adopt_original_AIME",
@@ -196,5 +191,16 @@
     "prefix_violations": [],
     "remaining_blocks": 19,
     "remaining_executions": 228
+  },
+  "closed_aime_c001_hosts": {
+    "dllm": {
+      "rc": 0,
+      "start_epoch": 1790484284,
+      "end_epoch": 1790489766,
+      "worker_status": "complete",
+      "gpu_process_seconds": 5478.743522106997,
+      "c001_executions": 84,
+      "total_aime_executions": 540
+    }
   }
 }
