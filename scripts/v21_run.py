@@ -316,6 +316,19 @@ def strict_v21_warm(first: dict | None, warm: dict) -> dict:
     return {"accepted": not reasons, "reasons": sorted(set(reasons))}
 
 
+def per_canvas_stopping(receipt: dict) -> list[dict] | None:
+    canvases = receipt.get("per_canvas")
+    if not isinstance(canvases, list) or not canvases:
+        return None
+    out = []
+    for canvas in canvases:
+        native, cap = canvas.get("native_stop_final_call"), canvas.get("iteration_cap_final_call")
+        if type(native) is not bool or type(cap) is not bool:
+            return None
+        out.append({"native_stop": native, "iteration_cap": cap})
+    return out
+
+
 def phase_for(config: dict, receipt: dict, contract: dict) -> dict | None:
     parent = config.get("parent_config", config)
     arm = contract.get("parent_v20_arm", "D_native")
@@ -409,6 +422,7 @@ def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: P
                     if receipt.get("seed") != seed:
                         raise ValueError("actual generation seed differs")
                     record.update(redacted(receipt))
+                    record["per_canvas_stopping"] = per_canvas_stopping(receipt)
                     parent = config.get("parent_config", config)
                     native = parent.get("condition") == "native_dense"
                     record["phase_evidence"] = native_phase_evidence(receipt, sparse=not native)

@@ -24,3 +24,5 @@ private immutablev21deploy and bounded CP1 qualification before conditional newp
 
 22:57 UTC: f65de1e real-state diagnostic complete bothhosts, sixcaptures, no stageerrors, nativebackend actually traced. Scalar/hash-only reports copied intoresults diagnostic_{mpk,dllm}_001.json. Numericattention error drops; downstreamlogits mixed; no promotionyet. Layoutfullforward exact on reachedstates. CP2profilesactive separateimmutable workers, STATE ownsPIDs/configs. Conservativegeneration6complete+6reserved. 12naturalfirst-only protocol frozenbeforeoutcomes; wrapper requestenvelopefixneeded beforelaunch; Sol_b8 fixing. No v20 rerun, noheartbeat.
 
+
+V21b supersedes numerical-only priority. Both f65 profiles complete, all first results preserved; charged total1996.672402 GPUseconds,12 captures,512 combined generation ceiling. No fullpanel or natural12 launched. CurrentGPUworkers0. Two Sol: profile sourcecrosswalk, kernel geometry reference. Reuse branch6555abe; geometry contracts/opportunity next. See v21b_activation.md; original448panel must not launch.

@@ -1,0 +1,17 @@
+{
+  "schema": "v21_shareable_artifact_allowlist_v1",
+  "allowed": [
+    "source code and tests committed on the v21 branch",
+    "per-cell task score and trajectory statistics without original prompts or gold",
+    "scalar/hashes-only numerical diagnostics and direct profiles",
+    "immutable configuration fingerprints and resource receipts without credentials",
+    "reports and slide text drafts"
+  ],
+  "excluded": [
+    "original task prompts and gold/reference answers",
+    "credentials and private host authentication material",
+    "full Q/K/V, hidden-state, logits, model-weight or obsolete cache dumps"
+  ],
+  "first_outputs": "retained privately; no replacement or overwrite",
+  "provenance": "Published v20 800-record export remains unchanged and is cited by manifest SHA."
+}

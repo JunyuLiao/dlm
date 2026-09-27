@@ -167,6 +167,8 @@ def _input_provenance(path, report, digest):
                 manifest_sha256=_path(report, 'preflight', 'manifest_sha256'),
                 protocol_sha256=report.get('protocol_sha256'),
                 source_sha256=report.get('source_sha256'),
+                native_kernel_trace=report.get('native_kernel_trace'),
+                trace_status=report.get('trace_status'),
                 arm_fingerprints={a.get('name'): a.get('fingerprint')
                                   for a in report.get('arms', []) if isinstance(a, dict)})
 
@@ -358,6 +360,9 @@ def state_csv(summary):
               'M3_old_logits_rel_l2', 'M3_new_logits_rel_l2',
               'D_old_top1_mismatch', 'D_new_top1_mismatch',
               'M3_old_top1_mismatch', 'M3_new_top1_mismatch',
+              'D_old_stop', 'D_new_stop', 'M3_old_stop', 'M3_new_stop',
+              'D_old_step_stop_changed', 'D_new_step_stop_changed',
+              'M3_old_step_stop_changed', 'M3_new_step_stop_changed',
               'M3_bitmap_identical_descriptive', 'layout_legacy_exact', 'layout_combined_exact']
     writer = csv.DictWriter(stream, fieldnames=fields, lineterminator='\n')
     writer.writeheader()
@@ -392,6 +397,14 @@ def state_csv(summary):
                              D_new_top1_mismatch=arm_metric('D_matched_new', 'top1_mismatch_positions'),
                              M3_old_top1_mismatch=arm_metric('M3_R3_legacy', 'top1_mismatch_positions'),
                              M3_new_top1_mismatch=arm_metric('M3_R3_new', 'top1_mismatch_positions'),
+                             D_old_stop=_path(state, 'arms', 'D_matched_legacy', 'same_history_signal', 'effective_stop'),
+                             D_new_stop=_path(state, 'arms', 'D_matched_new', 'same_history_signal', 'effective_stop'),
+                             M3_old_stop=_path(state, 'arms', 'M3_R3_legacy', 'same_history_signal', 'effective_stop'),
+                             M3_new_stop=_path(state, 'arms', 'M3_R3_new', 'same_history_signal', 'effective_stop'),
+                             D_old_step_stop_changed=_path(state, 'arms', 'D_matched_legacy', 'step_vs_native', 'return_stop_changed'),
+                             D_new_step_stop_changed=_path(state, 'arms', 'D_matched_new', 'step_vs_native', 'return_stop_changed'),
+                             M3_old_step_stop_changed=_path(state, 'arms', 'M3_R3_legacy', 'step_vs_native', 'return_stop_changed'),
+                             M3_new_step_stop_changed=_path(state, 'arms', 'M3_R3_new', 'step_vs_native', 'return_stop_changed'),
                              M3_bitmap_identical_descriptive=_path(state, 'm3_support_identity', 'identical_bitmaps'),
                              layout_legacy_exact=exact('M3_R3_legacy|M3_R3_layout'),
                              layout_combined_exact=exact('M3_R3_new|M3_R3_combined')))

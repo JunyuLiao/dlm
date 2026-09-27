@@ -11,7 +11,7 @@ from scripts.v13_seed_runs import execution_key
 from scripts.v18_protocol import sha
 from scripts.v21_run import (stage_entries, strict_v21_warm, validate_arm_config,
                              validate_protocol, validate_resume_events, validate_inputs,
-                             read_task_rows, V20_PROTOCOL)
+                             read_task_rows, per_canvas_stopping, V20_PROTOCOL)
 
 
 def panel():
@@ -266,6 +266,17 @@ class V21RunTests(unittest.TestCase):
             self.assertIs(request_thinking(row, config), thinking)
             self.assertEqual((config["phase"], config["diagnostic"], config["timing_events"]),
                              ("v21_test", False, False))
+
+    def test_native_stopping_flags_do_not_depend_on_timing_events(self):
+        receipt = {"per_canvas": [{"native_stop_final_call": True,
+                                    "iteration_cap_final_call": False},
+                                   {"native_stop_final_call": False,
+                                    "iteration_cap_final_call": True}]}
+        self.assertEqual(per_canvas_stopping(receipt), [
+            {"native_stop": True, "iteration_cap": False},
+            {"native_stop": False, "iteration_cap": True}])
+        receipt["per_canvas"][0].pop("native_stop_final_call")
+        self.assertIsNone(per_canvas_stopping(receipt))
 
 
 if __name__ == "__main__":
