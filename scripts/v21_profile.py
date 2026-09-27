@@ -24,6 +24,22 @@ MODES = {
     'numeric_only': ('fp32_scores_bf16_pv', 'head_major'),
     'combined': ('fp32_scores_bf16_pv', 'model_major'),
 }
+PROTOCOL = (Path(__file__).resolve().parents[1] / 'results' /
+            'fan_m1_m3_multidataset_20260927' / 'frozen_protocol.json')
+
+
+def frozen_targets(protocol):
+    result = []
+    for dataset in ('aime26', 'longbench_v2', 'ruler4k'):
+        ids = protocol['ids'][dataset]
+        if len(ids) < 2:
+            raise ValueError('frozen protocol has fewer than two diagnostic IDs')
+        for index, id_ in enumerate(ids[:2]):
+            canvas = 1 if index == 1 and dataset != 'ruler4k' else 0
+            calls = (0, 3, 6) if canvas == 1 else (0, 1, 3)
+            result.extend(dict(dataset=dataset, id=id_, canvas=canvas,
+                               call_index=call) for call in calls)
+    return result
 
 
 def validate_config(config):
@@ -35,6 +51,15 @@ def validate_config(config):
         raise ValueError('v21 profile requires frozen GLOBAL_ONLY_NATIVE_LOCAL scope')
     if set(config.get('boundaries', ['model_forward', 'denoising_step'])) != {'model_forward', 'denoising_step'}:
         raise ValueError('v21 requires both complete-forward and native-step boundaries')
+    frozen = frozen_targets(json.loads(PROTOCOL.read_text(encoding='utf-8')))
+    allowed = [frozen[i:i+3] for i in range(0, len(frozen), 3)]
+    targets = config.get('targets', [])
+    groups = [targets[i:i+3] for i in range(0, len(targets), 3)]
+    if (config.get('seed') != 101 or not targets or len(targets) % 3 or
+            len(targets) > len(frozen) or any(group not in allowed for group in groups) or
+            [allowed.index(group) for group in groups] !=
+            sorted(set(allowed.index(group) for group in groups))):
+        raise ValueError('v21 targets must be ordered complete frozen seed-101 question triples')
     arms = config['arms']
     if len(arms) != 5 or arms[0]['name'] != 'D_native':
         raise ValueError('v21 requires native plus four exact output modes')
@@ -118,6 +143,19 @@ def profile(config, checkpoint=None):
     validate_config(config)
     original_preflight = base.preflight_identity
     original_counter = base.counter_replay
+    traced = set()
+
+    def mode_name(runtime):
+        if runtime is None:
+            return 'D_native'
+        router = runtime.get('router')
+        owner = getattr(router, 'owner', router)
+        modes = (getattr(owner, 'output_score_precision', None),
+                 getattr(owner, 'output_layout', None))
+        for name, pair in MODES.items():
+            if pair == modes:
+                return name
+        raise ValueError(f'v21 profile runtime has no frozen output mode: {modes}')
 
     def inherited_preflight(_config, paths):
         # This call is before create_adapter(...).load() in base.profile.
@@ -129,8 +167,16 @@ def profile(config, checkpoint=None):
     def counted(model, sequence, runtime, boundary, accepted_rows, **kwargs):
         physical, support = original_counter(model, sequence, runtime, boundary,
                                              accepted_rows, **kwargs)
-        physical['copy_allocation_trace'] = copy_allocation_trace(
-            model, sequence, runtime, boundary, accepted_rows)
+        key = (mode_name(runtime), boundary)
+        if key not in traced and len(sequence) <= 4:
+            physical['copy_allocation_trace'] = copy_allocation_trace(
+                model, sequence, runtime, boundary, accepted_rows)
+            traced.add(key)
+        else:
+            physical['copy_allocation_trace'] = dict(
+                status='skipped', reason=('first_N4_trace_already_recorded' if key in traced
+                                          else 'awaiting_first_N4'),
+                trace_key=dict(arm=key[0], boundary=key[1]))
         return physical, support
 
     # One isolated process runs one profile; temporary hooks reuse v20's exact
@@ -143,6 +189,7 @@ def profile(config, checkpoint=None):
     report['v21_modes'] = MODES
     report['source_sha256'][str(Path(__file__).resolve())] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     report['diagnostic_note'] = ('copy/allocation and physical counters are separate replay passes after accepted timing; '
+                                 'at most first N4 copy/allocation trace per arm/boundary (10 total); '
                                  'no profiler hooks or device-to-host tensor export in accepted intervals')
     return report
 

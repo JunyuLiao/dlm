@@ -43,8 +43,9 @@ def config():
                        condition=common['condition'], output_score_precision=precision,
                        output_layout=layout)
         arms.append(dict(name=name, plugin=P.PLUGIN, condition=common['condition'], config=wrapper))
+    frozen = P.frozen_targets(json.loads(P.PROTOCOL.read_text(encoding='utf-8')))
     return dict(scope='GLOBAL_ONLY_NATIVE_LOCAL', counter_twins=True, arms=arms,
-                targets=[dict(id='a', dataset='ruler4k', canvas=0, call_index=0)],
+                seed=101, targets=frozen[:3],
                 boundaries=['model_forward', 'denoising_step'], sequence_lengths=[4, 16])
 
 
@@ -62,6 +63,21 @@ class V21ProfileContract(unittest.TestCase):
         cfg = config()
         cfg['counter_twins'] = False
         with self.assertRaisesRegex(ValueError, 'counter pass'):
+            P.validate_config(cfg)
+
+    def test_frozen_targets_require_ordered_complete_triples(self):
+        cfg = config()
+        cfg['targets'] = cfg['targets'][:2]
+        with self.assertRaisesRegex(ValueError, 'ordered complete frozen'):
+            P.validate_config(cfg)
+        cfg = config()
+        cfg['targets'][1]['call_index'] = 2
+        with self.assertRaisesRegex(ValueError, 'ordered complete frozen'):
+            P.validate_config(cfg)
+        cfg = config()
+        frozen = P.frozen_targets(json.loads(P.PROTOCOL.read_text(encoding='utf-8')))
+        cfg['targets'] = frozen[3:6] + frozen[:3]
+        with self.assertRaisesRegex(ValueError, 'ordered complete frozen'):
             P.validate_config(cfg)
 
     def test_parent_preflight_flatten_but_installer_retains_wrapper(self):
@@ -86,8 +102,10 @@ class V21ProfileContract(unittest.TestCase):
         visited = []
         def fake_profile(config, checkpoint=None):
             visited.append(B.preflight_identity(config, {'*': 'manifest'}))
-            physical, _ = B.counter_replay('model', [], 'runtime', 'model_forward', [])
+            physical, _ = B.counter_replay('model', [], None, 'model_forward', [])
             self.assertIn('copy_allocation_trace', physical)
+            physical2, _ = B.counter_replay('model', [], None, 'model_forward', [])
+            self.assertEqual(physical2['copy_allocation_trace']['status'], 'skipped')
             return {'schema': 'v20', 'source_sha256': {}, 'targets': {}}
         with patch.dict(sys.modules, {'experiments': types.ModuleType('experiments'),
                                       'experiments.numerical_qk_reuse': types.ModuleType('experiments.numerical_qk_reuse'),
