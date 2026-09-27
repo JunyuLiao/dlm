@@ -1,9 +1,10 @@
-# Primary frontier checkpoint — RULER complete, AIME scoring pending
+# Primary frontier checkpoint — RULER and AIME complete
 
-Generation is complete for RULER2808/2808 and AIME1080/1080. This checkpoint
-interprets only the verified RULER offline summary. AIME quality and secondary70/
-allocation results remain pending. No policy, question, seed or gate is changed
-in response to these results. The single ball candidate remains STOP beforeCUDA.
+Generation and offline scoring are complete for RULER2808/2808 and AIME1080/1080.
+This checkpoint interprets the verified primary summaries; secondary results
+are interpreted separately in morning_brief.md. No policy, question, seed or gate
+is changed in response to these results. The single ball candidate remains STOP
+before CUDA implementation.
 
 RULER:130 questions,13 official task strata,3 paired seeds;390 first outputs/arm.
 Official task macro includes partial credit. Timing uses the preselected26 questions,
@@ -45,7 +46,8 @@ No inference of zero overhead or full-forward speedup is warranted.
 Source: ruler_redacted_summary.json SHA256
 6ee11dfca05d2d958a9c0a40917abc64546c33ca2bf9d62fcf576dca97d35049.
 Frozen primary scorer sourcef45fa83; identities and missing metric fields are
-preserved in the summary. Final interpretation awaits AIME and frozenCP3 panels.
+preserved in the summary. Final interpretation is in morning_brief.md.
+
 ## AIME complete primary score (90 first outputs/arm, 90 strict warm/arm)
 
 | Arm | Correct/90 | Calls/canvas | Length-capped | Whole PV support skipped |

@@ -3,7 +3,7 @@
   "task": "v18 Junyu native-adaptive frontier and one bounded low-cost candidate",
   "branch": "research/astra-junyu-frontier-20260926",
   "parent": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
-  "status": "CP3_SECONDARY70_COMPLETE_CONTROLS_PENDING",
+  "status": "CP4_COMPLETE",
   "design": "DESIGN_DECISION.md",
   "historical_evidence": "identity passed; strict warm phase evidence absent in 120 pairs",
   "candidate": "STOP_IMPLEMENTATION_THIS_ROUND: ideal GLOBAL opportunity but no demonstrated net cost headroom or finite-precision certificate; no CUDA candidate",
@@ -39,9 +39,9 @@
       "dllm": 613
     },
     "initial_duration_note": "Wrapper elapsed; driver budget accounting uses worker_end values. Do not double-count wrappers.",
-    "observed_completed_generations_snapshot": 5507,
-    "snapshot_note": "475 preofficial +3888 primary +208 core70 calibration (4 policy points×52 requests) +936 secondary70; controls not started at snapshot.",
-    "completion_risk": "Primary generation complete; offline scoring and secondary stages remain under finite amended limits.",
+    "observed_completed_generations_snapshot": 5793,
+    "snapshot_note": "475 preofficial +3888 primary +208 core70 calibration +936 secondary70 +130 control calibration +156 allocation controls; all frozen cells closed.",
+    "completion_risk": "No frozen GPU panel remains incomplete; CP4 write-up pending.",
     "original_budget_file": "results/junyu_frontier_v18_20260926/campaign_budget.json",
     "aime_original_worker_seconds_by_host": {
       "mpk": 31008.756522101117,
@@ -53,9 +53,13 @@
     "charged_gpu_seconds_by_host_before_cp3": {
       "mpk": 42391.68853012589,
       "dllm": 38374.643763355
+    },
+    "charged_gpu_seconds_by_host_after_cp3": {
+      "dllm": 39285.49311166166,
+      "mpk": 44228.464012445416
     }
   },
-  "next": "Adopt closed secondary70 in existing controller; complete controls calibration/eval, offline secondary scoring and CP4 Chinese brief.",
+  "next": "Future work only: prospective independent 70%-support T70/U70/shuffled/uniform matched-GPU allocation experiment; no current GPU job remains.",
   "strong_b8": "full16 equivalent; strictwarm8/8; new/old requesttime geomean1.000187 no speedup signal",
   "last_job": {
     "pid": 1606995,
@@ -142,13 +146,13 @@
   },
   "continuation_heartbeat": {
     "id": "v18-research-stage-continuation",
-    "status": "ACTIVE",
+    "status": "PAUSED_CP4_COMPLETE",
     "purpose": "hourly stage checkpoint; amended finite limits per RESOURCE_AUTHORIZATION.md; quiet unchanged; disable atCP4"
   },
   "secondary_coordinator": {
     "pid": 50088,
     "exec_session": 63853,
-    "status": "running_secondary",
+    "status": "complete",
     "source_commit": "447fe03f478ec2d6f399ae97d5e119ece1c11c3c",
     "deploy": "deploy/extension_6250b51",
     "local_cwd": "E:/dlm/v18_private/controller_447fe03",
@@ -170,10 +174,12 @@
     "previous_pid16656": "verified and stopped; old readretry outcome preserved",
     "previous_pid35304": "exited after empty-ledger immutable verification bug; no secondary eval launched; original error archived as secondary_extension_empty_ledger_error.json",
     "recovery_audit": "secondary_extension.outcome.json retains prior error SHA and reason",
-    "previous_pid58796": "exited on read-only kill-0 SSH timeout while dllm stage was completing; both70 stages later rc0,468runs/host, GPU idle; no retry"
+    "previous_pid58796": "exited on read-only kill-0 SSH timeout while dllm stage was completing; both70 stages later rc0,468runs/host, GPU idle; no retry",
+    "outcome_end_epoch": 1790502742.3727834,
+    "gpu_active": false
   },
-  "updated_utc": "2026-09-27T04:38:34.536587-05:00",
-  "stage_check": "09:38UTC: secondary70 both hosts rc0,468runs/host and worker_end complete; GPUs idle. Same-outcome controller resumed after read-only liveness timeout, immutable remote deploy unchanged.",
+  "updated_utc": "2026-09-27T10:43:27.511984+00:00",
+  "stage_check": "CP4: all primary/secondary panels and offline summaries complete; both GPU hosts idle, morning_brief.md written and verified, heartbeat paused.",
   "resource_authorization": "RESOURCE_AUTHORIZATION.md",
   "budget_override": {
     "status": "deployed_active_controllers_adopt_original_AIME",
@@ -230,6 +236,15 @@
     "dllm_executions": 468,
     "mpk_worker_gpu_seconds": 892.6660581331234,
     "dllm_worker_gpu_seconds": 770.3079620700009,
-    "calibration_executions": 208
-  }
+    "calibration_executions": 208,
+    "redacted_summary_sha256": "0c9828ec8ebcfeea2b07b8d053c823051ab929f91b644eda19712cfc15ef01e5"
+  },
+  "secondary_controls": {
+    "eval_complete": true,
+    "mpk_executions": 62,
+    "dllm_executions": 94,
+    "calibration_executions": 130,
+    "redacted_summary_sha256": "b56b864dc37a38dfc883da1c0e3b18383adc26d162e96beb45e7045840b8913c"
+  },
+  "secondary_closed_receipt": "results/junyu_frontier_v18_20260926/secondary_closed_receipt.json"
 }

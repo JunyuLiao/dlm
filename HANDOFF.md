@@ -1,4 +1,4 @@
-# v18 continuation — primary generation complete, offline scoring recovery
+# v18 continuation — CP4 complete, all frozen panels closed
 
 Authority: E:/Downloads/dllm_astra_sol_master_v18_20260926.md plus later user
 resource authorization in RESOURCE_AUTHORIZATION.md. Native semantics and frozen
@@ -75,15 +75,17 @@ Primary CPU scoring COMPLETE by07:48UTC:
 - Generation latency/TBT/direct full-forward are N/A without qualified events;
   wall/call is amortized, support/PV sparsity is not QK skipping.
 
-Active CP3 CPU controller (do not duplicate):
-- PID58796/session40018, local sourcecc2e728, cwd E:/dlm/v18_private/controller_cc2e728.
-  Remote generation deploy stays immutable extension_6250b51.
-- Outcome E:/dlm/v18_private/secondary_extension.outcome.json; currently waiting_primary.
+CP3 CPU controller (closed; do not duplicate):
+- Historical PID58796/session40018 used local sourcecc2e728; final controller
+  source447fe03 resumed the same outcome/config. Remote generation deploy stayed
+  immutable extension_6250b51.
+- Outcome E:/dlm/v18_private/secondary_extension.outcome.json is `complete`.
 - Config E:/dlm/v18_private/secondary_extension_config.json,
   SHAa99c6eef0853f96c5bab260927d5fea2bbc90ae391e612df6cdd6e165cf1ad6f.
 - Exact complete primary summaries and CPU Torch/source/UUID qualification PASSED
   E:/dlm/v18_private/secondary_extension_cpu_qualification.json.
--41 combined stdlib tests pass; remote CPU Torch tests qualified bothhosts.
+- Final controller passed46 combined stdlib tests; remote CPU Torch tests
+  qualified both hosts.
 - Recovery ONLY after OS command/PID exit verified; tool session disappearance alone
   is not exit. Command: localPython311 -u -m scripts.v18_secondary_pipeline
   --deploy extension_6250b51 --config E:/dlm/v18_private/secondary_extension_config.json
@@ -100,11 +102,12 @@ Recovery history lives in STATE.json/git and private outcome recovery_audit:
   E:/dlm/v18_private/c001_dispatch_recovery.json. No first result replaced.
 - Never mutate immutable deploys or recreate generation coordinators for CPU recovery.
 
-Next: finish primary scoring, retain redacted summaries, let existing CP3 controller
-qualify/run70/allocation/score within finite limits, then CP4 Chinese morning_brief.md
-answering all seven v18 questions with honest missing cells and candidateSTOP.
-Commit/push runnable checkpoints and redacted results, verify remote SHA.
-Heartbeat v18-research-stage-continuation stays quiet unchanged; disable whenCP4done.
+CP4 Chinese morning_brief.md answers all seven v18 questions, includes honest
+N/A cells and candidate STOP. Both primary and CP3 scoring are closed; do not
+relaunch their controllers or GPU workers. Heartbeat v18-research-stage-continuation
+was paused after CP4. Future work is only the prospective independent 70%-support
+four-arm allocation experiment in the brief; it is not launched this round.
+Commit/push the final redacted checkpoint and verify remote SHA.
 Never upload answers/gold/credentials/large traces or archive the user's task.
 08:31UTC CP3 recovery checkpoint:
 - Previous PID35304 completed core70 calibration rc0 in590s, froze bothhost
@@ -137,3 +140,31 @@ New local-only controller snapshot447fe03 SHA77ce96d283820c25F5270F05AF1825A459F
 46 combined tests, handles bounded read-only retries and exact rc0 marker race.
 Session63853 adopts same outcome/config, remote extension_6250b51 untouched.
 Controls calibration/eval and secondary offline score pending.
+
+CP3 closeout (redacted audit, 2026-09-27):
+- Existing local controller outcome secondary_extension.outcome.json is `complete`,
+  end epoch1790502742.3727834. Both secondary70 and allocation supervisors
+  exited rc0 on both hosts; every GPU worker interval closed.
+- Secondary70 936/936 executions, paired 390 question-seed blocks, 468/host;
+  allocation156/156 first-only executions, paired78 blocks, mpk62/dllm94.
+  No duplicate/foreign execution keys, host/GPU assignment drift or failed runs.
+- Core70 calibration208 attempts and control calibration130, four density points
+  each. All frozen calibrated files and relayed ledger SHA-256 values match on
+  mpk/dllm. Both scorer locks match exact summary source identity; summaries
+  report complete with no unfinished blocks.
+- Campaign total5793/7000 attempts; mpk3281/3500, dllm2512/3500. Charged GPU
+  seconds44228.464/86400 mpk and39285.493/86400 dllm; combined83513.957/172800.
+  This includes the pre-CP3 conservative baseline once, with no wrapper double count.
+- Machine-readable hashes, worker receipts and paired-key checks are in
+  results/junyu_frontier_v18_20260926/secondary_closed_receipt.json; concise
+  descriptive scores in secondary_checkpoint.md. Only redacted summaries and
+  scorer locks are tracked. No raw answers, gold or private receipts were copied.
+
+CP4 finalization:
+- morning_brief.md covers T60/U50 and T60/U60, matched T70/U70 and allocation
+  controls, AIME native adaptive, work/length/latency distinctions, fast-path
+  STOP and one future action. Primary checkpoint heading was corrected.
+- Both host allocation markers have matching rc0 done; nvidia-smi compute-app
+  inventory is empty on both. No active coordinator or GPU worker remains.
+- Heartbeat was paused using Codex automation_update, not archived. Report and
+  redacted receipts are staged for final commit/push in this checkpoint.

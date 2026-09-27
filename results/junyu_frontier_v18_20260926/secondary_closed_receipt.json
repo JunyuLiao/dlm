@@ -1,0 +1,213 @@
+{
+  "calibration": {
+    "controls": {
+      "attempts": 130,
+      "calibrated_sha256": "9f40c60a39712e34c6d55b7acb3d5c790c65098675b26f4dd48cd415eb6dcb00",
+      "charged_gpu_seconds": 259.77834122488275,
+      "host": "mpk",
+      "ledger_sha256": [
+        "af14a5db780768b0aafd09f3aec9c57fc84c3ffed01e4c12b37d3b04691156ce",
+        "3e1afbc31c3f6317716cd0f20b81df4a5340149d5f19fb0eb2452217bf6509dd",
+        "490e0d88ced7422a0e3bb7e07911e6acecb0c6444f011a42b5a01cf995c51f80",
+        "0afa09db960c314442906f07db6b93c482e1bdc47145ea0f4623dec10f567cbe"
+      ],
+      "point_attempts": [
+        52,
+        26,
+        26,
+        26
+      ],
+      "point_failed_runs": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "points": 4,
+      "supervisor_end": 1790502239,
+      "supervisor_rc": 0,
+      "supervisor_start": 1790501960
+    },
+    "core70": {
+      "attempts": 208,
+      "calibrated_sha256": "700b13b472e079bc2105cc1abd132753e209cca873c437be5bc9046cc9555d4a",
+      "charged_gpu_seconds": 569.5757834629621,
+      "host": "mpk",
+      "ledger_sha256": [
+        "ee1103648aa9873dfcb1dca28d2263602f89f0653fdc1228f2b2886c393f0f0d",
+        "e591b7c834990fb9276335dafd4f8100d2ee3730d02565184aca222a6009bdd8",
+        "86b693fdc92c48121095889787c3a21a046be1b653c4793a2f0ed6972a8c956e",
+        "6d5075032faa1c59b4533e38036f11eb3343a887d5cdeb338c4de684c5b3a61b"
+      ],
+      "point_attempts": [
+        52,
+        52,
+        52,
+        52
+      ],
+      "point_failed_runs": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "points": 4,
+      "supervisor_end": 1790495894,
+      "supervisor_rc": 0,
+      "supervisor_start": 1790495304
+    }
+  },
+  "notes": [
+    "No raw answers, prompts, gold or completion token lists are included.",
+    "GPU seconds charge max(worker_end duration, start-to-end wall interval) per worker.",
+    "Secondary calibration runs were executed on mpk and relayed byte-identically to dllm."
+  ],
+  "observed_utc": "2026-09-27T10:41:40.938305+00:00",
+  "resource": {
+    "charged_gpu_seconds_by_host": {
+      "dllm": 39285.49311166166,
+      "mpk": 44228.464012445416
+    },
+    "cp3_attempts": 1430,
+    "cp3_attempts_by_host": {
+      "dllm": 562,
+      "mpk": 868
+    },
+    "gpu_cap_s_by_host": {
+      "dllm": 86400,
+      "mpk": 86400
+    },
+    "gpu_cap_s_total": 172800,
+    "pre_cp3_attempts": 4363,
+    "request_cap": 7000,
+    "request_cap_by_host": {
+      "dllm": 3500,
+      "mpk": 3500
+    },
+    "total_attempts": 5793,
+    "total_attempts_by_host": {
+      "dllm": 2512,
+      "mpk": 3281
+    }
+  },
+  "schema": "v18_cp3_closed_redacted_receipt_v1",
+  "source": "verified redacted summaries, scorer locks, frozen protocols, relayed ledger hashes, stage markers and worker_end events on both qualified hosts",
+  "stages": {
+    "ruler_secondary70": {
+      "first": 780,
+      "first_question_seed_sha256": "8fad7840ddfb229f77be953544e45b21ebe67bdc3c86ac5cb33fe0bddae8bc08",
+      "host": {
+        "dllm": {
+          "charged_gpu_seconds": 771.0282945632935,
+          "executions": 468,
+          "failed_runs": 0,
+          "first": 390,
+          "gpu_process_seconds": 770.3079620700009,
+          "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+          "ledger_sha256": "17e48e698636e6fe2921e9462059f8f3d195aeebb89e4975f8f489246214fb11",
+          "supervisor_end": 1790498677,
+          "supervisor_rc": 0,
+          "supervisor_start": 1790497903,
+          "warm": 78
+        },
+        "mpk": {
+          "charged_gpu_seconds": 893.3979072570801,
+          "executions": 468,
+          "failed_runs": 0,
+          "first": 390,
+          "gpu_process_seconds": 892.6660581331234,
+          "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+          "ledger_sha256": "69e111894a0e65fb846bc3ef026fcea3f50489add2d79ac3c05f97e954c4e03c",
+          "supervisor_end": 1790498795,
+          "supervisor_rc": 0,
+          "supervisor_start": 1790497898,
+          "warm": 78
+        }
+      },
+      "logical_sha256": "011a81a1d9cd9e9165d7188e2722b8738494035bef0f45f69dba7e78792eeec6",
+      "observed": 936,
+      "pair_counts": {
+        "T70/T60": {
+          "paired_cells": 390,
+          "questions": 130
+        },
+        "T70/U70": {
+          "paired_cells": 390,
+          "questions": 130
+        },
+        "U70/U60": {
+          "paired_cells": 390,
+          "questions": 130
+        }
+      },
+      "paired_question_seed_blocks": 390,
+      "planned": 936,
+      "protocol_id": "v18_ruler_secondary70_5a913afb3efe",
+      "redacted_summary_sha256": "0c9828ec8ebcfeea2b07b8d053c823051ab929f91b644eda19712cfc15ef01e5",
+      "same_primary_host_gpu_assignment": true,
+      "scorer_lock_sha256": "99e0dbce7aabbd6d0c2d57ec1354890cf071abf86a2fb433192862748897eb29",
+      "warm": 156,
+      "warm_question_seed_sha256": "c0ab386e4404d685c38ad1064fddae8c325ab970ab5eb43878a45355f9d51e20"
+    },
+    "ruler_secondary_allocation": {
+      "first": 156,
+      "first_question_seed_sha256": "365ed946cfc1bd1e06e71fa496f195fd794f25abc276237f77bd245b10ceec01",
+      "host": {
+        "dllm": {
+          "charged_gpu_seconds": 139.82105374336243,
+          "executions": 94,
+          "failed_runs": 0,
+          "first": 94,
+          "gpu_process_seconds": 139.10051998699782,
+          "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+          "ledger_sha256": "4ec1d4398144cbd0425cf516c05094133b0acd6fd58a025bba008cb79cf27576",
+          "supervisor_end": 1790502505,
+          "supervisor_rc": 0,
+          "supervisor_start": 1790502362,
+          "warm": 0
+        },
+        "mpk": {
+          "charged_gpu_seconds": 114.02345037460327,
+          "executions": 62,
+          "failed_runs": 0,
+          "first": 62,
+          "gpu_process_seconds": 113.29330266895704,
+          "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+          "ledger_sha256": "61f307c259a6b576a3ab24000f93adce73665dc91c2207be558032a083be4783",
+          "supervisor_end": 1790502474,
+          "supervisor_rc": 0,
+          "supervisor_start": 1790502356,
+          "warm": 0
+        }
+      },
+      "logical_sha256": "2ec92c1f4fe5279b01486ff0dc0a314e53cebfe43952cbbc606a25be4326435c",
+      "observed": 156,
+      "pair_counts": {
+        "T60_shuffled/T60": {
+          "paired_cells": 78,
+          "questions": 26
+        },
+        "T60_shuffled/T60_uniform": {
+          "paired_cells": 78,
+          "questions": 26
+        },
+        "T60_uniform/T60": {
+          "paired_cells": 78,
+          "questions": 26
+        }
+      },
+      "paired_question_seed_blocks": 78,
+      "planned": 156,
+      "protocol_id": "v18_ruler_secondary_allocation_d887d17b3c16",
+      "redacted_summary_sha256": "b56b864dc37a38dfc883da1c0e3b18383adc26d162e96beb45e7045840b8913c",
+      "same_primary_host_gpu_assignment": true,
+      "scorer_lock_sha256": "c7fb6d84cbb6a3a7f32084a9d77aab224edb3c89b2f4db31841b3a6818e42d79",
+      "warm": 0,
+      "warm_question_seed_sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    }
+  },
+  "transport_audit_sha256": {
+    "dllm": "c3448113bf6b7b2bbb3537782bdd3a2600634ed87a5b8592d9864c86220b0cee",
+    "mpk": "6dabdcd414b616e3fe73c8851a084a7fd6d38a9f6524fd6942a956b6197fa101"
+  }
+}
