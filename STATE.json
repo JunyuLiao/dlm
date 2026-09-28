@@ -4,13 +4,13 @@
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
   "authority": "User v25 handoff dllm_claude_v25_route_preparation_20260928.md",
-  "status": "V25_CPU_IMPLEMENTATION_READY_AWAITING_GPU_RENEWAL",
+  "status": "V25_QUALIFIED_AND_COST_GATE_PASSED_PILOT_RUNNING",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 512,
   "max_gpu_workers": 2,
-  "charged_gpu_process_seconds": 13278.775212192535,
-  "generation_executions": 408,
+  "charged_gpu_process_seconds": 14807.645190620422,
+  "generation_executions": 420,
   "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
   "push_status": "4ab56f6d verified remote at takeover",
   "agents": {
@@ -167,7 +167,22 @@
       "charged_process_seconds": 74.35434293746948
     }
   ],
-  "gpu_jobs": [],
+  "gpu_jobs": [
+    {
+      "host": "mpk",
+      "stage": "v25 aligned6 pilot (all)",
+      "deploy": "v25_qual_3ee9857",
+      "run_dir": "v23/aligned6_pilot_001",
+      "reserved_executions": 48
+    },
+    {
+      "host": "dllm",
+      "stage": "v25 aligned6 pilot (all)",
+      "deploy": "v25_qual_3ee9857",
+      "run_dir": "v23/aligned6_pilot_001",
+      "reserved_executions": 42
+    }
+  ],
   "takeover": {
     "utc": "2026-09-28T00:10:31Z",
     "verified_remote": "4ab56f6d27253baeae210724ea58d1bd6cb0f626",
@@ -189,7 +204,9 @@
     "v24 direct-cost profile 3ae5e1d mpk+dllm: 952.35 s, 6 executions",
     "v24 RULER stage 5cedc12 mpk+dllm (first launch refused by stale 05:52 deadline, 0 s): 132.17 s, 90 executions",
     "v24 observation components d12b0be mpk+dllm: 80.98 s, 6 executions",
-    "v24 route alignment probe 526580d mpk+dllm: 81.00 s, 6 executions"
+    "v24 route alignment probe 526580d mpk+dllm: 81.00 s, 6 executions",
+    "v25 aligned16 qualification 3ee9857 mpk+dllm: 717.86 s, 6 captures",
+    "v25 direct-cost profile (arm-set v25) mpk+dllm: 811.01 s, 6 captures"
   ],
   "decision": "Direct cost measured; BO/A observation dominated by route kernel (odd-K 2.6x slower/key). Candidate aligned_route_k16 is not bit-exact (summary z/mu, producer) -> numerical variant, not applied. No M3-specific E2E gain plausible; LB expansion not run.",
   "panel": {
@@ -203,13 +220,12 @@
     "report": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/bootstrap6_report.md"
   },
   "remaining": {
-    "gpu_process_seconds": 8321.224787807465,
-    "executions": 104
+    "gpu_process_seconds": 6792.354809379578,
+    "executions": 92
   },
   "gpu_authorization": {
-    "single_source": "E:/dlm/gpu_authorization.json (read by every launcher via E:/dlm/gpu_auth.py)",
-    "current": null,
-    "note": "09:30Z renewal expired; no GPU activity after 07:33Z; renewal required"
+    "single_source": "E:/dlm/gpu_authorization.json",
+    "current": "user standing authorization (GPUs are the user own; no approval needed), recorded 2026-09-28T15:42Z"
   },
   "v24_cpu": {
     "audit": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/v24_audit.md (PASS, 120/120)",
