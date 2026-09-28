@@ -1,22 +1,25 @@
-# v23 continuation (cheap anchor + native bootstrap)
+# v23 continuation (cheap anchor + native bootstrap) — COMPLETE for this window
 
-Authority: user v23 handoff `dllm_claude_v23_cheap_anchor_native_bootstrap_20260928.md`; starts from `6b795ca6`.
+Authority: user v23 handoff `dllm_claude_v23_cheap_anchor_native_bootstrap_20260928.md`; started at `6b795ca6`.
 Worktree `E:/dlm/m3_output_numerics_20260927`, branch `research/m3-output-numerics-20260927`.
-Limits unchanged: GPU stop 2026-09-28T05:52Z, final 06:22Z, 21,600 GPU-process s, 512 executions.
+GPU window closed 2026-09-28T05:52Z. Charged 12,032.3 / 21,600 GPU-process s, 300 / 512 executions
+(see STATE.json). No active jobs; both GPUs 0 MiB.
 
-## Done in v23
-- `R/v23_corrections.md`: narrows six v22 claims (zero-attention oracle is not a ceiling, AIME share scope,
-  interpolated Q16 saving, all-kept attribution, no sample-size guarantee, residual is not all MoE).
-- Track E (`R/anchor_memory_cost.md`): grouped-Q observation producer is bitwise identical to
-  repeat_interleave on 23 real GLOBAL states (scores + bitmaps); LB producer 0.83x, -210..270 MiB peak.
-  Accepted and applied to every method arm of the v23 panel; effect on requests is ~0.1% (A-frequency).
-- Track P: `native_bootstrap2_observe1` (call0 native; call1 native + charged observation/selection;
-  score origin 1 -> A at 9, R3 D at 4,7,12). Qualified on 6 real states x M1/M3/B on both hosts:
-  native logits equal at calls 0 and 1, exact per-call A/D/H schedule (stage `v23_boot_6af4d42`).
-- Frozen panel `v21_bootstrap6_b8b2c59449fd0ebf` (private `E:/dlm/v23_private/bootstrap6_001`):
-  D_native, T_scope, M3_R3_A8_incumbent, M1/M3/B_native_bootstrap2_observe1; LB 6 q x 2 seeds and
-  AIME first 4 x 2 seeds, first+warm (240); stages lb_preview (48), aime (96), lb_rest (96). RULER deferred.
+## Results (R = results/m3_numeric_trajectory_bridge_20260927)
+- `R/v23_corrections.md`: six v22 claims narrowed.
+- Track E `R/anchor_memory_cost.md`: grouped-Q observation producer bitwise identical on 23 states; applied to all
+  method arms; ~0.1% of request time.
+- Track P `native_bootstrap2_observe1`: qualified (native logits at calls 0/1, exact A/D/H) on both hosts.
+- Panel `v21_bootstrap6_b8b2c59449fd0ebf` 240/240, report `R/v23_bootstrap6/bootstrap6_report.md`:
+  LB M3-bootstrap 6/12 correct, 2415 calls vs native 2360, paired warm 0.990 [0.94,1.05]; incumbent M3
+  2604 calls, 5/12; B-bootstrap 4/12; fresh T 0.904. AIME: no speed gain.
+- LB blocks 4-11 ran under a second binding (deploy dc52522, run dir bootstrap6_001_lbrest) because the
+  prefix-resume rule refused stage order preview->aime->lb_rest; method sources byte-identical.
 
-## Running / next
-See `STATE.json` gpu_jobs. Collect+score: `python E:/dlm/v23_score_transport.py --tag v23_boot_6af4d42 --label <label>`.
-Next stage: `python E:/dlm/v23_transport.py --tag v23_boot_6af4d42 --action launch --stage aime --max-seconds 3000 --remaining-requests 48`.
+## Not done
+RULER stage; direct forward/step pricing of bootstrap arms. Next action needs a user decision and a GPU
+window extension (morning_brief_zh.md).
+
+## Resume helpers (private, coordinator)
+E:/dlm/v23_transport.py (bind/launch, --run-dir), E:/dlm/v23_score_transport.py (closed-ledger scoring),
+scripts/v23_bootstrap6_reduce.py (report).

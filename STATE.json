@@ -4,21 +4,21 @@
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
   "authority": "User v23 handoff dllm_claude_v23_cheap_anchor_native_bootstrap_20260928.md",
-  "status": "V23_AIME_COMPLETE_LB_REST_RUNNING",
+  "status": "V23_PANEL_240_OF_240_COMPLETE_NO_ACTIVE_JOBS",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "gpu_stop_utc": "2026-09-28T05:52:00Z",
   "final_deadline_utc": "2026-09-28T06:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 512,
   "max_gpu_workers": 2,
-  "charged_gpu_process_seconds": 8630.983514213562,
-  "generation_executions": 204,
+  "charged_gpu_process_seconds": 12032.272545480728,
+  "generation_executions": 300,
   "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
   "push_status": "4ab56f6d verified remote at takeover",
   "agents": {
     "lead": "Claude Opus 5.5 (this session)"
   },
-  "next": "After lb_preview: collect/score (E:/dlm/v23_score_transport.py), then launch stage aime, then lb_rest if window allows. Resume: python E:/dlm/v23_transport.py --tag v23_boot_6af4d42 --action launch --stage <stage> --max-seconds N --remaining-requests N",
+  "next": "GPU window closed. Next justified action needs user decision (see morning_brief_zh.md). RULER stage for bootstrap6 not frozen/run.",
   "peer_refs": {
     "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
     "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
@@ -169,28 +169,7 @@
       "charged_process_seconds": 74.35434293746948
     }
   ],
-  "gpu_jobs": [
-    {
-      "host": "mpk",
-      "stage": "bootstrap6 lb_rest",
-      "deploy_sha": "6af4d42374c0a2d6d71ce91b4f020255b120b800",
-      "protocol": "v21_bootstrap6_b8b2c59449fd0ebf",
-      "reserved_seconds": 2500,
-      "reserved_executions": 48,
-      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/v23_bootstrap6_lb_rest_v23_boot_6af4d42.json",
-      "ledger": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/v23/bootstrap6_001/ledger.jsonl"
-    },
-    {
-      "host": "dllm",
-      "stage": "bootstrap6 lb_rest",
-      "deploy_sha": "6af4d42374c0a2d6d71ce91b4f020255b120b800",
-      "protocol": "v21_bootstrap6_b8b2c59449fd0ebf",
-      "reserved_seconds": 2500,
-      "reserved_executions": 48,
-      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/v23_bootstrap6_lb_rest_v23_boot_6af4d42.json",
-      "ledger": "/home/exouser/dyh/m3_output_numerics_v21_20260927/v23/bootstrap6_001/ledger.jsonl"
-    }
-  ],
+  "gpu_jobs": [],
   "takeover": {
     "utc": "2026-09-28T00:10:31Z",
     "verified_remote": "4ab56f6d27253baeae210724ea58d1bd6cb0f626",
@@ -206,7 +185,23 @@
     "Track P qualification 71e277c (harness bug after first group) mpk+dllm: 66.40 s, 6 captures",
     "Track P qualification 6af4d42 complete mpk+dllm: 98.84 s, 6 captures",
     "bootstrap6 lb_preview mpk 968.91 s + dllm 1065.28 s, 48 executions, 0 failures",
-    "bootstrap6 aime mpk 1836.97 s + dllm 1643.41 s, 96 executions, 0 failures"
+    "bootstrap6 aime mpk 1836.97 s + dllm 1643.41 s, 96 executions, 0 failures",
+    "lb_rest launch refused by prefix rule before generation (6af4d42): 3.82 s, 0 executions",
+    "bootstrap6 lb_rest (separate run dir bootstrap6_001_lbrest, deploy dc52522, same protocol, method sources byte-identical): mpk 1782.23 s + dllm 1615.24 s, 96 executions (48 per host)"
   ],
-  "decision": "Production fine geometry not promoted: frozen rule candidate (-1.0) costs 1.158x work; validated equal-error saving 4-5% of retained GLOBAL pairs; GLOBAL deletion ceiling 0.84x on LB"
+  "decision": "Production fine geometry not promoted: frozen rule candidate (-1.0) costs 1.158x work; validated equal-error saving 4-5% of retained GLOBAL pairs; GLOBAL deletion ceiling 0.84x on LB",
+  "panel": {
+    "protocol": "v21_bootstrap6_b8b2c59449fd0ebf",
+    "executions": "240/240",
+    "failures": 0,
+    "bindings": {
+      "lb_preview+aime": "6af4d42 run dir bootstrap6_001",
+      "lb_rest": "dc52522 run dir bootstrap6_001_lbrest"
+    },
+    "report": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/bootstrap6_report.md"
+  },
+  "remaining": {
+    "gpu_process_seconds": 9567.727454519272,
+    "executions": 212
+  }
 }
