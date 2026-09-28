@@ -4,19 +4,19 @@
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
   "authority": "User v25 handoff dllm_claude_v25_route_preparation_20260928.md",
-  "status": "V25_QUALIFIED_AND_COST_GATE_PASSED_PILOT_RUNNING",
+  "status": "V25_COMPLETE_NO_ACTIVE_JOBS",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 512,
   "max_gpu_workers": 2,
-  "charged_gpu_process_seconds": 14807.645190620422,
-  "generation_executions": 420,
+  "charged_gpu_process_seconds": 17655.500942611696,
+  "generation_executions": 510,
   "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
   "push_status": "4ab56f6d verified remote at takeover",
   "agents": {
     "lead": "Claude Opus 5.5 (this session)"
   },
-  "next": "After renewal: (1) qualification ~300 GPU-s/host + 3 captures; (2) v25 direct cost ~500 GPU-s/host + 3 captures; (3) only if (1)-(2) qualify: pilot 90 executions (~2800 GPU-s). Total <=102 of 104 remaining executions.",
+  "next": "Decision for user: (a) stop and write up the quality-time frontier; (b) any new direction needs a new frozen proposal and a raised execution cap.",
   "peer_refs": {
     "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
     "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
@@ -167,22 +167,7 @@
       "charged_process_seconds": 74.35434293746948
     }
   ],
-  "gpu_jobs": [
-    {
-      "host": "mpk",
-      "stage": "v25 aligned6 pilot (all)",
-      "deploy": "v25_qual_3ee9857",
-      "run_dir": "v23/aligned6_pilot_001",
-      "reserved_executions": 48
-    },
-    {
-      "host": "dllm",
-      "stage": "v25 aligned6 pilot (all)",
-      "deploy": "v25_qual_3ee9857",
-      "run_dir": "v23/aligned6_pilot_001",
-      "reserved_executions": 42
-    }
-  ],
+  "gpu_jobs": [],
   "takeover": {
     "utc": "2026-09-28T00:10:31Z",
     "verified_remote": "4ab56f6d27253baeae210724ea58d1bd6cb0f626",
@@ -206,7 +191,8 @@
     "v24 observation components d12b0be mpk+dllm: 80.98 s, 6 executions",
     "v24 route alignment probe 526580d mpk+dllm: 81.00 s, 6 executions",
     "v25 aligned16 qualification 3ee9857 mpk+dllm: 717.86 s, 6 captures",
-    "v25 direct-cost profile (arm-set v25) mpk+dllm: 811.01 s, 6 captures"
+    "v25 direct-cost profile (arm-set v25) mpk+dllm: 811.01 s, 6 captures",
+    "v25 aligned6 pilot 90/90: mpk 1457.59 s + dllm 1390.27 s"
   ],
   "decision": "Direct cost measured; BO/A observation dominated by route kernel (odd-K 2.6x slower/key). Candidate aligned_route_k16 is not bit-exact (summary z/mu, producer) -> numerical variant, not applied. No M3-specific E2E gain plausible; LB expansion not run.",
   "panel": {
@@ -220,8 +206,8 @@
     "report": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/bootstrap6_report.md"
   },
   "remaining": {
-    "gpu_process_seconds": 6792.354809379578,
-    "executions": 92
+    "gpu_process_seconds": 3944.499057388304,
+    "executions": 2
   },
   "gpu_authorization": {
     "single_source": "E:/dlm/gpu_authorization.json",
@@ -253,10 +239,8 @@
     },
     "cpu_tests": "43 passed, 3 GPU-only skipped on both hosts at deploy v25_cpu_6fa9043",
     "not_run": [
-      "aligned16 GPU qualification",
-      "v25 direct cost",
-      "pilot generation",
-      "parallel-summary builder probe (only if alignment too small)"
-    ]
+      "parallel-summary builder probe (ceiling <=2-4%, cannot change M3 vs T/B ordering; 2 executions left)"
+    ],
+    "result": "aligned16 qualified (logits/decisions/tokens identical on all tested); direct odd-K LB BO/A -8-9%; request effect ~0 (LB 1.001); builder probe not run"
   }
 }
