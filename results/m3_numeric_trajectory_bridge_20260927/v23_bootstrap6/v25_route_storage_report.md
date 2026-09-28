@@ -1,3 +1,5 @@
+> **v25b correction (append-only):** the pilot LB inputs never exercised the odd-K path. On the odd-K LB request, aligned16 measured about 2.6% faster (bridge), with tokens identical. The v23 matched B was 4/12, not equal quality. The "2–4% ceiling" is a local estimate. See [v25b_memory_and_gate_audit.md](v25b_memory_and_gate_audit.md).
+
 # v25: aligned route storage — qualified, exact on tested runs, no measurable request gain
 
 **Candidate.** `route_storage=aligned16`:
