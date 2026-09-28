@@ -225,6 +225,63 @@ def test_completeness_rejects_zero_exit_with_failed_layers():
     assert verdict['failed_layers'] == ['longbench_v2|x|canvas0:0:0']
 
 
+def test_validation_completeness_requires_every_screen_and_share():
+    from scripts.v21b_geometry_capture import completeness
+    screen = {'status': 'qualified', 'geometry': {'comparison': {'matched_q16_calibration': {
+        'q16_candidates': [{}]*5}}}}
+    group = dict(dataset='aime26', status='complete', selected_calls=[0, 4],
+                 missing_requested_calls=[], calls={'0': {'layers': {'5': screen}},
+                                                    '4': {'layers': {'5': screen}}},
+                 attention_share={'0': {'status': 'qualified'}, '4': {'status': 'qualified'}})
+    report = dict(errors=[], groups={'aime26|a|canvas0': group})
+    assert completeness(report, bootstrap_calibration=False, q16_validation=True)['status'] == 'complete'
+    group['attention_share']['4'] = {'status': 'failed'}
+    verdict = completeness(report, bootstrap_calibration=False, q16_validation=True)
+    assert verdict['status'] == 'incomplete'
+    assert verdict['failed_layers'] == ['aime26|a|canvas0:4:attention_share']
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='requires CUDA event timing')
+def test_attention_share_oracles_visit_every_layer_and_zero_only_dropped_kind():
+    pytest.importorskip('triton')
+    from types import SimpleNamespace
+    from scripts import v21b_geometry_capture as capture
+    modules = [SimpleNamespace(layer_idx=i, is_sliding=(i % 6 != 5)) for i in range(30)]
+    registry = {}
+    def native(module, q, k, v, *args, **kwargs):
+        out = torch.nn.functional.scaled_dot_product_attention(q, k, v)
+        return (out.transpose(1, 2).contiguous(), None)
+    registry['sdpa'] = native
+    seen = []
+    class Model:
+        def modules(self):
+            return modules + modules  # encoder and decoder share indices
+        def forward(self, decoder_input_ids, **kwargs):
+            total = torch.zeros((), device='cuda')
+            for module in modules:
+                out = registry['sdpa'](module, decoder_input_ids, decoder_input_ids, decoder_input_ids)[0]
+                seen.append((module.layer_idx, bool(out.abs().sum() > 0)))
+                total = total + out.float().sum()
+            return SimpleNamespace(logits=total.reshape(1))
+    x = torch.randn(1, 2, 16, 8, device='cuda', generator=torch.Generator('cuda').manual_seed(3))
+    snapshot = SimpleNamespace(prepare=lambda controller=None: dict(
+        current_canvas=x, self_conditioning_logits=None, mask_mapping=None,
+        past_key_values=None, decoder_position_ids=None))
+    model = Model()
+    kinds = capture._layer_kinds(model)
+    result = capture._attention_share(model, snapshot, registry, native, kinds, reps=2)
+    assert registry['sdpa'] is native
+    assert result['status'] == 'qualified'
+    assert {r['attention_calls'] for r in result['samples']['native']} == {30}
+    digests = {name: {r['output_digest'] for r in rows} for name, rows in result['samples'].items()}
+    assert all(len(d) == 1 for d in digests.values())
+    assert len({next(iter(d)) for d in digests.values()}) == 4
+    seen.clear()
+    registry['sdpa'] = native
+    result = capture._attention_share(model, snapshot, registry, native, kinds, reps=1)
+    assert result['summary']['native']['GLOBAL_attention_in_forward_median_ms'] > 0
+
+
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='requires CUDA/Triton qualification host')
 def test_actual_coarse_route_only_bitmap_parity_cuda():
     pytest.importorskip('triton')

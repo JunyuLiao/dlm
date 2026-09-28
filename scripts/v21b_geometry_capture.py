@@ -246,6 +246,120 @@ def _geometry(owner, record, layer, *, matched_screen=False):
                 projection=projection, comparison=comparison)
 
 
+def _layer_kinds(model):
+    """GLOBAL/LOCAL identity from the loaded attention modules, not from a formula."""
+    kinds = {}
+    for module in model.modules():
+        layer = getattr(module, 'layer_idx', None)
+        if layer is None or not hasattr(module, 'is_sliding'):
+            continue
+        kind = 'LOCAL' if bool(module.is_sliding) else 'GLOBAL'
+        # Encoder and decoder attention modules share an index; they must agree.
+        if kinds.setdefault(int(layer), kind) != kind:
+            raise RuntimeError(f'conflicting attention kind at layer {layer}')
+    counts = {kind: sum(value == kind for value in kinds.values()) for kind in ('GLOBAL', 'LOCAL')}
+    if counts != {'GLOBAL': 5, 'LOCAL': 25} or kinds.get(0) != 'LOCAL' or kinds.get(5) != 'GLOBAL':
+        raise RuntimeError(f'unexpected attention layer identity {counts}')
+    return kinds
+
+
+def _attention_share(model, snapshot, registry, native_fn, kinds, reps=3):
+    """Native complete-forward price with attention calls timed in place, plus
+    timing-only oracles whose GLOBAL/LOCAL/all attention returns zeros.
+
+    The oracles bound what ANY support policy could save on that layer class at
+    this state (zero selection and zero consumer cost). Their logits are
+    invalid and are never used for anything but elapsed time.
+    """
+    variants = ('native', 'no_global_attention', 'no_local_attention', 'no_attention')
+    dropped = {'native': (), 'no_global_attention': ('GLOBAL',),
+               'no_local_attention': ('LOCAL',), 'no_attention': ('GLOBAL', 'LOCAL')}
+    templates, spans = {}, []
+
+    def spy_for(name):
+        def spy(module, q, k, v, *args, **kwargs):
+            layer = int(module.layer_idx)
+            if kinds[layer] in dropped[name]:
+                return (torch.zeros_like(templates[layer]), None)
+            start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+            start.record()
+            result = native_fn(module, q, k, v, *args, **kwargs)
+            end.record()
+            if name == 'native':
+                spans.append((kinds[layer], start, end))
+                value = result[0] if isinstance(result, (tuple, list)) else result
+                templates.setdefault(layer, torch.empty_like(value))
+            return result
+        return spy
+
+    def forward(name):
+        kw = base.prepare_step(snapshot, None)  # restoration outside the timer
+        registry['sdpa'] = spy_for(name)
+        try:
+            spans.clear()
+            logits, event_ms, wall_ms = _event(lambda: decoder_call(model, kw))
+            per_kind = ({kind: sum(s.elapsed_time(e) for k, s, e in spans if k == kind)
+                         for kind in ('GLOBAL', 'LOCAL')} if name == 'native' else None)
+            return dict(event_ms=event_ms, synchronized_wall_ms=wall_ms,
+                        output_digest=output_digest(logits), attention_event_ms=per_kind,
+                        attention_calls=len(spans) if name == 'native' else None)
+        finally:
+            registry['sdpa'] = native_fn
+
+    if registry['sdpa'] is not native_fn:
+        raise RuntimeError('attention-share pass must start from the native registry')
+    forward('native')  # warm native and build output templates for the oracles
+    if set(templates) != set(kinds):
+        raise RuntimeError('native pass did not visit every attention layer')
+    for name in variants[1:]:
+        forward(name)
+    rows = {name: [] for name in variants}
+    with base.no_compile_during_accepted() as misses:
+        for repeat in range(reps):
+            order = variants if repeat % 2 == 0 else tuple(reversed(variants))
+            for name in order:
+                rows[name].append(forward(name))
+    templates.clear()
+    if misses:
+        raise RuntimeError(f'JIT specialization during accepted share timing: {misses}')
+    if any(len({r['output_digest'] for r in samples}) != 1 for samples in rows.values()):
+        raise RuntimeError('forward output drift across repeated same-state timing')
+    median = lambda values: sorted(values)[len(values)//2]
+    native = median([r['event_ms'] for r in rows['native']])
+    summary = {name: dict(median_event_ms=median([r['event_ms'] for r in rows[name]]),
+                          ratio_to_native=median([r['event_ms'] for r in rows[name]])/native)
+               for name in variants}
+    for kind in ('GLOBAL', 'LOCAL'):
+        summary['native'][f'{kind}_attention_in_forward_median_ms'] = median(
+            [r['attention_event_ms'][kind] for r in rows['native']])
+    return dict(status='qualified', boundary='complete_model_forward_logits', reps=reps,
+                rotation='alternating forward/reversed variant order', warmup=1,
+                samples=rows, summary=summary,
+                oracle_note='zero-attention variants are timing oracles with invalid logits')
+
+
+def _validation_geometry(owner, record):
+    """Frozen five-offset Q16 screen on a GLOBAL state; selection is not redone here."""
+    from dllm.attention.blasst.core import _attention_validity
+    from experiments.numerical_qk_reuse.geometry_diagnostic import matched_q16_screen
+    scale = _mask_contract(record)
+    q, k, v = (record[key] for key in ('q', 'k', 'v'))
+    sensitivity, source = record['sensitivity'], 'live_T'
+    if sensitivity is None:
+        sensitivity = torch.ones((q.shape[0], q.shape[2]), device=q.device, dtype=torch.float32)
+        source = 'production_none_means_neutral_ones'
+    legal = _attention_validity(None, q, k, is_causal=False, sliding_window=None)
+    z, ref, projection = _project_full(owner, record, legal)
+    threshold = float(owner.thresholds['global']['log_threshold'])
+    screen = matched_q16_screen(record['scores'], z, ref, sensitivity, q, k, v, scale=scale,
+                                threshold=threshold, kind='GLOBAL', legal=legal)
+    return dict(score_source='historical_M3_cache', threshold=threshold, scale=scale,
+                query_sensitivity=source, score_age=record.get('score_age'),
+                decision_age=record.get('decision_age'),
+                source_qkv_digest=output_digest((q, k, v)), projection=projection,
+                comparison=dict(matched_q16_calibration=screen))
+
+
 def _native_stop(model, snapshot):
     kw = base.prepare_step(snapshot, None)
     result = model._denoising_step(**kw)
@@ -287,7 +401,9 @@ def _replay(model, sequence, selected, runtime, *, native):
 
 
 @torch.inference_mode()
-def run(config, checkpoint=None, *, bootstrap_calibration=False):
+def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=False):
+    if bootstrap_calibration and q16_validation:
+        raise ValueError('calibration and validation are separate stages')
     from dllm.models import create_adapter
     paths, proof = diagnostic.preflight(config)
     rows = {(dataset, id_): row for dataset, path in paths.items()
@@ -301,6 +417,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False):
     torch.backends.cudnn.allow_tf32 = False
     report = dict(schema='v21b_geometry_capture_v1', quality_eligible=False,
                   screen=('missing_bootstrap_and_two_LB_calibration_states' if bootstrap_calibration
+                          else 'frozen_q16_offsets_validation_and_attention_share' if q16_validation
                           else 'inherited_threshold_opportunity'),
                   source_config_sha256=hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest(),
                   source_sha256={
@@ -337,6 +454,9 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False):
                 wanted = {0, 3} if dataset == 'longbench_v2' else {0}
                 reached = {int(s['call_index']) for s in sequence}
                 selected, missing = sorted(wanted & reached), sorted(wanted - reached)
+            elif q16_validation:
+                # Same states as the inherited-threshold capture plus bootstrap call 0.
+                selected = sorted(set(selected) | {0})
             group.update(status='captured', reached_calls=len(sequence), missing_requested_calls=missing,
                          selected_calls=selected, native_path_proof=capture_proof)
             if not selected:
@@ -350,22 +470,48 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False):
             except Exception as exc:
                 group['last_capture'] = dict(call_index=last, native_stop_verified=None,
                     label='last_captured_native_stop_unknown', error=_error(exc, 'native_stop_probe'))
-            native = _replay(model, sequence, selected, None, native=True)
-            native_qkv_hashes = {idx: {layer: output_digest(tuple(record[name] for name in ('q', 'k', 'v')))
-                                       for layer, record in layers.items()}
-                                 for idx, layers in native['records'].items()}
-            native['records'].clear()  # large native QKV clones are not needed for geometry/cost
             registry, native_fn = native_registry(model)
+            if q16_validation:
+                kinds = _layer_kinds(model)
+                by_index = {int(s['call_index']): s for s in sequence}
+                shares = {}
+                for idx in selected:
+                    try:
+                        shares[str(idx)] = _attention_share(model, by_index[idx]['snapshot'],
+                                                            registry, native_fn, kinds)
+                    except Exception as exc:
+                        shares[str(idx)] = dict(status='failed', error=_error(exc, 'attention_share'))
+                        report['errors'].append(dict(group=key, call_index=idx,
+                                                     **_error(exc, 'attention_share')))
+                group['attention_share'] = shares
+                native = dict(records={}, input_digests={}, output_digests={})
+                native_qkv_hashes = {}
+            else:
+                native = _replay(model, sequence, selected, None, native=True)
+                native_qkv_hashes = {idx: {layer: output_digest(tuple(record[name] for name in ('q', 'k', 'v')))
+                                           for layer, record in layers.items()}
+                                     for idx, layers in native['records'].items()}
+                native['records'].clear()  # large native QKV clones are not needed for geometry/cost
             with base.arm_context(adapter, selected_arm) as runtime:
                 method = _replay(model, sequence, selected, runtime, native=False)
                 owner = getattr(runtime['router'], 'owner', runtime['router'])
                 results = {}
                 for idx in selected:
-                    target_result = dict(call_index=idx, input_digest_native=native['input_digests'][idx],
+                    target_result = dict(call_index=idx, input_digest_native=native['input_digests'].get(idx),
                                          input_digest_method=method['input_digests'][idx],
-                                         native_forward_digest=native['output_digests'][idx],
+                                         native_forward_digest=native['output_digests'].get(idx),
                                          method_forward_digest=method['output_digests'][idx], layers={})
-                    for layer in (0, 5):
+                    for layer in ((5,) if q16_validation else (0, 5)):
+                        if q16_validation:
+                            try:
+                                target_result['layers']['5'] = dict(
+                                    status='qualified', attention_kind='GLOBAL',
+                                    geometry=_validation_geometry(owner, method['records'][idx][5]))
+                            except Exception as exc:
+                                target_result['layers']['5'] = dict(status='failed', error=_error(exc, 'layer'))
+                                report['errors'].append(dict(group=key, call_index=idx, layer=5,
+                                                             **_error(exc, 'validation_geometry')))
+                            continue
                         record = method['records'][idx][layer]
                         try:
                             geometry = _geometry(owner, record, layer,
@@ -413,7 +559,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False):
     return report
 
 
-def completeness(report, *, bootstrap_calibration):
+def completeness(report, *, bootstrap_calibration, q16_validation=False):
     """Stage verdict from saved per-layer records; process exit 0 alone proves nothing.
 
     Natively unreachable requested calls are listed separately and are not
@@ -429,11 +575,20 @@ def completeness(report, *, bootstrap_calibration):
             for layer, item in call.get('layers', {}).items():
                 if item.get('status') != 'qualified':
                     failed_layers.append(f'{key}:{idx}:{layer}')
+        if q16_validation:
+            for idx in group.get('selected_calls', []):
+                layer = group.get('calls', {}).get(str(idx), {}).get('layers', {}).get('5', {})
+                screen = layer.get('geometry', {}).get('comparison', {}).get('matched_q16_calibration')
+                screens[f'{key}:{idx}'] = len(screen['q16_candidates']) if screen else 0
+                share = group.get('attention_share', {}).get(str(idx), {})
+                if share.get('status') != 'qualified':
+                    failed_layers.append(f'{key}:{idx}:attention_share')
         if bootstrap_calibration and group.get('dataset') == 'longbench_v2':
             layer = group.get('calls', {}).get('3', {}).get('layers', {}).get('5', {})
             screen = layer.get('geometry', {}).get('comparison', {}).get('matched_q16_calibration')
             screens[key] = len(screen['q16_candidates']) if screen else 0
-    calibration_ok = (not bootstrap_calibration) or (screens and all(n == 5 for n in screens.values()))
+    calibration_ok = (not (bootstrap_calibration or q16_validation)) or (
+        screens and all(n == 5 for n in screens.values()))
     ok = not (failed_layers or failed_groups or report.get('errors')) and calibration_ok
     return dict(status='complete' if ok else 'incomplete', failed_layers=failed_layers,
                 failed_groups=failed_groups, error_count=len(report.get('errors', [])),
@@ -449,6 +604,8 @@ def main(argv=None):
                         help='run the geometry parity test under this billed stage before model capture')
     parser.add_argument('--bootstrap-calibration', action='store_true',
                         help='separate missing-bootstrap and frozen two-LB-state work/error screen')
+    parser.add_argument('--q16-validation', action='store_true',
+                        help='frozen five-offset Q16 screen on every reached GLOBAL state plus native attention-share oracles')
     args = parser.parse_args(argv)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     partial = args.out.with_name(args.out.name + '.partial.json')
@@ -474,10 +631,12 @@ def main(argv=None):
             if result.returncode:
                 raise RuntimeError(f'geometry qualification tests failed; exit={result.returncode}')
         report = run(config, checkpoint=lambda data: base.atomic_json(partial, data),
-                     bootstrap_calibration=args.bootstrap_calibration)
+                     bootstrap_calibration=args.bootstrap_calibration,
+                     q16_validation=args.q16_validation)
         report['qualification_tests'] = dict(status=('passed' if args.qualify_tests else 'not_requested'),
                                              log=str(test_log) if args.qualify_tests else None)
-        report['completeness'] = completeness(report, bootstrap_calibration=args.bootstrap_calibration)
+        report['completeness'] = completeness(report, bootstrap_calibration=args.bootstrap_calibration,
+                                              q16_validation=args.q16_validation)
         base.atomic_json(args.out, report)
         partial.unlink(missing_ok=True)
     except BaseException as exc:
