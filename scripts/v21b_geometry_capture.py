@@ -413,6 +413,34 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False):
     return report
 
 
+def completeness(report, *, bootstrap_calibration):
+    """Stage verdict from saved per-layer records; process exit 0 alone proves nothing.
+
+    Natively unreachable requested calls are listed separately and are not
+    implementation failures, but a calibration stage lacking either frozen
+    LongBench call-3 five-point screen is still incomplete.
+    """
+    failed_layers, failed_groups, unreachable, screens = [], [], [], {}
+    for key, group in report['groups'].items():
+        unreachable += [f'{key}:{idx}' for idx in group.get('missing_requested_calls', [])]
+        if group.get('status') not in ('complete', 'missing_canvas'):
+            failed_groups.append(key)
+        for idx, call in group.get('calls', {}).items():
+            for layer, item in call.get('layers', {}).items():
+                if item.get('status') != 'qualified':
+                    failed_layers.append(f'{key}:{idx}:{layer}')
+        if bootstrap_calibration and group.get('dataset') == 'longbench_v2':
+            layer = group.get('calls', {}).get('3', {}).get('layers', {}).get('5', {})
+            screen = layer.get('geometry', {}).get('comparison', {}).get('matched_q16_calibration')
+            screens[key] = len(screen['q16_candidates']) if screen else 0
+    calibration_ok = (not bootstrap_calibration) or (screens and all(n == 5 for n in screens.values()))
+    ok = not (failed_layers or failed_groups or report.get('errors')) and calibration_ok
+    return dict(status='complete' if ok else 'incomplete', failed_layers=failed_layers,
+                failed_groups=failed_groups, error_count=len(report.get('errors', [])),
+                native_unreachable=unreachable, calibration_candidates=screens,
+                rule='every selected layer qualified, no recorded error, and (calibration) five points per LB call-3 state')
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path, required=True)
@@ -449,6 +477,7 @@ def main(argv=None):
                      bootstrap_calibration=args.bootstrap_calibration)
         report['qualification_tests'] = dict(status=('passed' if args.qualify_tests else 'not_requested'),
                                              log=str(test_log) if args.qualify_tests else None)
+        report['completeness'] = completeness(report, bootstrap_calibration=args.bootstrap_calibration)
         base.atomic_json(args.out, report)
         partial.unlink(missing_ok=True)
     except BaseException as exc:
@@ -460,6 +489,10 @@ def main(argv=None):
         raise
     finally:
         lock.unlink(missing_ok=True)
+    if report['completeness']['status'] != 'complete':
+        # Results are already saved; a distinct code keeps partial evidence
+        # while preventing a zero exit from reading as full qualification.
+        raise SystemExit(3)
 
 
 if __name__ == '__main__':

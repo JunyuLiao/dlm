@@ -154,6 +154,77 @@ def test_fail_closed_gqa_and_explicit_legality():
         compare_geometries(*args[:-1], scale=.25, threshold=-1., kind='GLOBAL', legal=args[-1])
 
 
+def test_bootstrap_none_sensitivity_equals_explicit_ones_and_live_t_is_used():
+    # At threshold .5 neutral T drops tiles while this live T keeps them all.
+    args = list(_inputs(queries=33))
+    ones = compare_geometries(*args[:-1], scale=.25, threshold=.5,
+                              kind='GLOBAL', legal=args[-1])
+    args[3] = None
+    none = compare_geometries(*args[:-1], scale=.25, threshold=.5,
+                              kind='GLOBAL', legal=args[-1])
+    live = list(_inputs(queries=33))
+    live[3] = torch.linspace(.05, 20., 33).reshape(1, 33)
+    varied = compare_geometries(*live[:-1], scale=.25, threshold=.5,
+                                kind='GLOBAL', legal=live[-1])
+    hashes = lambda out: {k: v['support_sha256'] for k, v in out['independent_sequential'].items()}
+    assert hashes(ones) == hashes(none)
+    assert hashes(varied) != hashes(ones)
+    screen_ones = matched_q16_screen(*_inputs(queries=33)[:-1], scale=.25, threshold=.5,
+                                     kind='GLOBAL', legal=args[-1])
+    screen_none = matched_q16_screen(*args[:-1], scale=.25, threshold=.5,
+                                     kind='GLOBAL', legal=args[-1])
+    assert [x['support_sha256'] for x in screen_ones['q16_candidates']] == [
+        x['support_sha256'] for x in screen_none['q16_candidates']]
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='capture timing helper synchronizes CUDA')
+def test_capture_maps_only_absent_t_to_ones_and_passes_live_t_through():
+    pytest.importorskip('dllm.attention.blasst.core')
+    from types import SimpleNamespace
+    from scripts import v21b_geometry_capture as capture
+    scores, _, _, _, q, k, v, _ = _inputs(heads=8, queries=33, keys=96)
+    matrix = torch.randn(16, 32, generator=torch.Generator().manual_seed(7))
+    owner = SimpleNamespace(
+        thresholds={'global': {'log_threshold': .5}},
+        projections=SimpleNamespace(get=lambda *a, **kw: matrix))
+    def record(sensitivity):
+        return dict(module=SimpleNamespace(layer_idx=5), q=q, k=k, v=v, args=(),
+                    kwargs=dict(attention_mask=None, is_causal=False, scaling=.25),
+                    scores=scores.clone(), sensitivity=sensitivity, production_norm=None)
+    absent = capture._geometry(owner, record(None), 5)
+    explicit = capture._geometry(owner, record(torch.ones(1, 33)), 5)
+    live_t = torch.linspace(.05, 20., 33).reshape(1, 33)
+    live = capture._geometry(owner, record(live_t), 5)
+    assert absent['query_sensitivity'] == 'production_none_means_neutral_ones'
+    assert explicit['query_sensitivity'] == live['query_sensitivity'] == 'live_T'
+    hashes = lambda out: {k: v['support_sha256']
+                          for k, v in out['comparison']['independent_sequential'].items()}
+    assert hashes(absent) == hashes(explicit)
+    assert hashes(live) != hashes(absent)
+
+
+def test_completeness_rejects_zero_exit_with_failed_layers():
+    from scripts.v21b_geometry_capture import completeness
+    ok_call = {'layers': {'0': {'status': 'qualified'}, '5': {'status': 'qualified',
+               'geometry': {'comparison': {'matched_q16_calibration': {
+                   'q16_candidates': [{}]*5}}}}}}
+    report = dict(errors=[], groups={
+        'longbench_v2|x|canvas0': dict(dataset='longbench_v2', status='complete',
+                                       selected_calls=[0, 3], missing_requested_calls=[],
+                                       calls={'0': ok_call, '3': ok_call}),
+        'ruler4k|y|canvas0': dict(dataset='ruler4k', status='missing_canvas',
+                                  selected_calls=[], missing_requested_calls=[0], calls={})})
+    verdict = completeness(report, bootstrap_calibration=True)
+    assert verdict['status'] == 'complete'
+    assert verdict['native_unreachable'] == ['ruler4k|y|canvas0:0']
+    report['groups']['longbench_v2|x|canvas0']['calls']['0'] = {
+        'layers': {'0': {'status': 'failed'}, '5': {'status': 'qualified'}}}
+    report['errors'].append({'group': 'longbench_v2|x|canvas0'})
+    verdict = completeness(report, bootstrap_calibration=True)
+    assert verdict['status'] == 'incomplete'
+    assert verdict['failed_layers'] == ['longbench_v2|x|canvas0:0:0']
+
+
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='requires CUDA/Triton qualification host')
 def test_actual_coarse_route_only_bitmap_parity_cuda():
     pytest.importorskip('triton')
