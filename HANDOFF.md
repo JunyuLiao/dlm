@@ -1,29 +1,22 @@
-# v22 continuation (Claude Code takeover of the v21b campaign)
+# v23 continuation (cheap anchor + native bootstrap)
 
-Authority: user v22 handoff `dllm_claude_v22_resume_4ab56f6d_20260927.md` (sole continuation spec).
+Authority: user v23 handoff `dllm_claude_v23_cheap_anchor_native_bootstrap_20260928.md`; starts from `6b795ca6`.
 Worktree `E:/dlm/m3_output_numerics_20260927`, branch `research/m3-output-numerics-20260927`.
-Takeover verified remote `4ab56f6d` at 2026-09-28T00:10Z; peer refs unchanged. No Codex/Sol/Astra agents.
+Limits unchanged: GPU stop 2026-09-28T05:52Z, final 06:22Z, 21,600 GPU-process s, 512 executions.
 
-## Status: CP-A complete; fine-geometry promotion STOPPED (v22 section 6.3)
-- Bootstrap: 6 call-0 states x 2 layers qualified (T=None -> ones), coarse parity 12/12.
-- Frozen calibration: both rules select Q16 offset -1.0 = 1.158x coarse work, 0.918x pooled error;
-  no Q16 point saves work inside the error band.
-- Validation (20 other states, no reselection): LB equal-work error ~0.91x; equal-error saving ~4-5%
-  of retained GLOBAL pairs (<0.5% of a forward).
-- Attention-share ceiling (native forward): deleting all GLOBAL attention = 0.84x on LB (14-18K keys),
-  0.97x RULER-4K, 0.98x AIME. Coarse M3 already realises 5-9% on LB.
-- CP-B/C/D NOT run (conditional on a useful CP-A candidate). No new panel launched.
-Reports: `results/m3_numeric_trajectory_bridge_20260927/q16_calibration.md`, `q16_validation.{json,csv}`, `q16_calibration.{json,csv}`,
-`morning_brief_zh.md`, `fan_update_zh.md`, novelty addendum in `novelty_gap.md` (SparseD, PulseCol).
+## Done in v23
+- `R/v23_corrections.md`: narrows six v22 claims (zero-attention oracle is not a ceiling, AIME share scope,
+  interpolated Q16 saving, all-kept attribution, no sample-size guarantee, residual is not all MoE).
+- Track E (`R/anchor_memory_cost.md`): grouped-Q observation producer is bitwise identical to
+  repeat_interleave on 23 real GLOBAL states (scores + bitmaps); LB producer 0.83x, -210..270 MiB peak.
+  Accepted and applied to every method arm of the v23 panel; effect on requests is ~0.1% (A-frequency).
+- Track P: `native_bootstrap2_observe1` (call0 native; call1 native + charged observation/selection;
+  score origin 1 -> A at 9, R3 D at 4,7,12). Qualified on 6 real states x M1/M3/B on both hosts:
+  native logits equal at calls 0 and 1, exact per-call A/D/H schedule (stage `v23_boot_6af4d42`).
+- Frozen panel `v21_bootstrap6_b8b2c59449fd0ebf` (private `E:/dlm/v23_private/bootstrap6_001`):
+  D_native, T_scope, M3_R3_A8_incumbent, M1/M3/B_native_bootstrap2_observe1; LB 6 q x 2 seeds and
+  AIME first 4 x 2 seeds, first+warm (240); stages lb_preview (48), aime (96), lb_rest (96). RULER deferred.
 
-## Next single justified action (needs user decision; not started)
-Either (a) a frozen, answer-free price experiment at longer contexts (16K/32K/64K keys) where GLOBAL
-attention dominates, after a full-text novelty check against SparseD; or (b) reposition the work as a
-measurement study of approximation error vs adaptive call count. Do not revive the 440 panel.
-
-## Fixed campaign limits
-GPU stop 2026-09-28T05:52Z; final 06:22Z; 21,600 GPU-process s; 512 executions; one worker per host.
-Charge in `STATE.json`. Private receipts: E:/dlm/v22_private and host `diagnostics/*v22_*`.
-
-## Publication
-Only explicit allowlisted source/tests/scalar reports; no prompts, gold, credentials or tensors.
+## Running / next
+See `STATE.json` gpu_jobs. Collect+score: `python E:/dlm/v23_score_transport.py --tag v23_boot_6af4d42 --label <label>`.
+Next stage: `python E:/dlm/v23_transport.py --tag v23_boot_6af4d42 --action launch --stage aime --max-seconds 3000 --remaining-requests 48`.

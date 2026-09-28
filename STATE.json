@@ -1,24 +1,24 @@
 {
-  "schema": 22,
+  "schema": 23,
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
-  "authority": "User v22 handoff dllm_claude_v22_resume_4ab56f6d_20260927.md (Claude Code takeover; no Codex agents)",
-  "status": "V22_CPA_COMPLETE_FINE_GEOMETRY_STOPPED",
+  "authority": "User v23 handoff dllm_claude_v23_cheap_anchor_native_bootstrap_20260928.md",
+  "status": "V23_TRACK_E_ACCEPTED_TRACK_P_QUALIFIED_LB_PREVIEW_RUNNING",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "gpu_stop_utc": "2026-09-28T05:52:00Z",
   "final_deadline_utc": "2026-09-28T06:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 512,
   "max_gpu_workers": 2,
-  "charged_gpu_process_seconds": 2860.725968618393,
-  "generation_executions": 42,
+  "charged_gpu_process_seconds": 3116.412668848038,
+  "generation_executions": 60,
   "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
   "push_status": "4ab56f6d verified remote at takeover",
   "agents": {
     "lead": "Claude Opus 5.5 (this session)"
   },
-  "next": "User decision: long-context price experiment after SparseD full-text check, or measurement-study repositioning. CP-B/C/D not run.",
+  "next": "After lb_preview: collect/score (E:/dlm/v23_score_transport.py), then launch stage aime, then lb_rest if window allows. Resume: python E:/dlm/v23_transport.py --tag v23_boot_6af4d42 --action launch --stage <stage> --max-seconds N --remaining-requests N",
   "peer_refs": {
     "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
     "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
@@ -169,7 +169,28 @@
       "charged_process_seconds": 74.35434293746948
     }
   ],
-  "gpu_jobs": [],
+  "gpu_jobs": [
+    {
+      "host": "mpk",
+      "stage": "bootstrap6 lb_preview",
+      "deploy_sha": "6af4d42374c0a2d6d71ce91b4f020255b120b800",
+      "protocol": "v21_bootstrap6_b8b2c59449fd0ebf",
+      "reserved_seconds": 1800,
+      "reserved_executions": 24,
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/v23_bootstrap6_lb_preview_v23_boot_6af4d42.json",
+      "ledger": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/v23/bootstrap6_001/ledger.jsonl"
+    },
+    {
+      "host": "dllm",
+      "stage": "bootstrap6 lb_preview",
+      "deploy_sha": "6af4d42374c0a2d6d71ce91b4f020255b120b800",
+      "protocol": "v21_bootstrap6_b8b2c59449fd0ebf",
+      "reserved_seconds": 1800,
+      "reserved_executions": 24,
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/v23_bootstrap6_lb_preview_v23_boot_6af4d42.json",
+      "ledger": "/home/exouser/dyh/m3_output_numerics_v21_20260927/v23/bootstrap6_001/ledger.jsonl"
+    }
+  ],
   "takeover": {
     "utc": "2026-09-28T00:10:31Z",
     "verified_remote": "4ab56f6d27253baeae210724ea58d1bd6cb0f626",
@@ -179,7 +200,11 @@
   "charge_notes": [
     "v22 precheck: 4 pytest runs on dllm scratch copy, 16.52 s, no generation",
     "v22 CP-A calibration 372acfa: mpk 46.17 s + dllm 47.17 s, 3 captures each",
-    "v22 validation 4cfbf7a: mpk 78.14 s + dllm 74.35 s, 3 captures each"
+    "v22 validation 4cfbf7a: mpk 78.14 s + dllm 74.35 s, 3 captures each",
+    "v23 precheck pytest x2 on dllm scratch: 10.38 s, 0 captures",
+    "Track E observation parity b80d116 mpk+dllm: 80.07 s, 6 captures",
+    "Track P qualification 71e277c (harness bug after first group) mpk+dllm: 66.40 s, 6 captures",
+    "Track P qualification 6af4d42 complete mpk+dllm: 98.84 s, 6 captures"
   ],
   "decision": "Production fine geometry not promoted: frozen rule candidate (-1.0) costs 1.158x work; validated equal-error saving 4-5% of retained GLOBAL pairs; GLOBAL deletion ceiling 0.84x on LB"
 }
