@@ -21,6 +21,14 @@ from scripts.v21_run import validate_protocol
 NUMERIC_ARMS = ('D_native', 'D_matched_legacy', 'D_matched_new', 'T_scope',
                 'M3_R3_A8_legacy', 'M3_R3_A8_new', 'B_A8_matched_new')
 LAYOUT_ARMS = ('M3_R3_A8_legacy', 'M3_R3_A8_layout')
+# v23 Track P: six frozen arms; every method arm shares the selected output
+# contract and the exact grouped-Q observation producer (bitwise-qualified).
+BOOTSTRAP_ARMS = ('D_native', 'T_scope', 'M3_R3_A8_incumbent',
+                  'M1_native_bootstrap2_observe1', 'M3_native_bootstrap2_observe1',
+                  'B_native_bootstrap2_observe1')
+BOOTSTRAP = 'native_bootstrap2_observe1'
+PRODUCER = "grouped_q"
+
 SCOPE = v20.GLOBAL_ONLY_NATIVE_LOCAL
 
 
@@ -53,6 +61,21 @@ def _contracts(mode, output_layout):
     def method(parent, precision, layout):
         return dict(kind='v21_method', parent_v20_arm=parent, scope=SCOPE,
                     output_score_precision=precision, output_layout=layout)
+    if mode == 'bootstrap6':
+        updated = ('fp32_scores_bf16_pv', output_layout)
+        def v23(parent, bootstrap):
+            contract = dict(method(parent, *updated), observation_producer=PRODUCER)
+            if bootstrap:
+                contract['bootstrap_policy'] = BOOTSTRAP
+            return contract
+        return {
+            'D_native': dict(kind='native'),
+            'T_scope': dict(kind='v20_legacy', parent_v20_arm='T_scope', scope=SCOPE),
+            'M3_R3_A8_incumbent': v23('M3_R3_A8_current_output', False),
+            'M1_native_bootstrap2_observe1': v23('M1_R1_A8_current_output', True),
+            'M3_native_bootstrap2_observe1': v23('M3_R3_A8_current_output', True),
+            'B_native_bootstrap2_observe1': v23('B_A8_matched', True),
+        }
     if mode == 'numeric7':
         return {
             'D_native': dict(kind='native'),
@@ -70,7 +93,7 @@ def _contracts(mode, output_layout):
 
 def freeze(mode, v20_protocol_path, v20_binding_path, manifests_dir, output_layout,
            out_dir):
-    if mode not in ('numeric7', 'layout_pair') or output_layout not in ('head_major', 'model_major'):
+    if mode not in ('numeric7', 'layout_pair', 'bootstrap6') or output_layout not in ('head_major', 'model_major'):
         raise ValueError('explicit numeric7/layout_pair and qualified output layout required')
     if mode == 'layout_pair' and output_layout != 'model_major':
         raise ValueError('layout_pair requires model_major successor')
@@ -92,9 +115,13 @@ def freeze(mode, v20_protocol_path, v20_binding_path, manifests_dir, output_layo
     if set(host_uuids) != set(binding['host_models']) or any(len(v) != 1 for v in host_uuids.values()) or len(host_uuids) != 2:
         raise ValueError('expected two pinned old host/GPU identities')
     host_ids = sorted(host_uuids)
+    # bootstrap6: first six LB and first four AIME IDs in frozen v20 order,
+    # chosen before any v23 output; RULER is a separate later stage.
     ids = {dataset: list(original['ids'][dataset][:count]) for dataset, count in
            (('ruler4k', 4 if mode == 'numeric7' else 0),
-            ('aime26', 6), ('longbench_v2', 6))}
+            ('aime26', 4 if mode == 'bootstrap6' else 6), ('longbench_v2', 6))}
+    if mode == 'bootstrap6':
+        ids.pop('ruler4k')
     if mode == 'numeric7':
         ruler_rows = _json(Path(manifests_dir) / 'ruler4k_generation_manifest.json')
         tasks = [next(row['task'] for row in ruler_rows if row['id'] == id_)
@@ -102,7 +129,7 @@ def freeze(mode, v20_protocol_path, v20_binding_path, manifests_dir, output_layo
         if len(set(tasks)) != 4:
             raise ValueError('first four ordered RULER IDs are not distinct tasks')
     manifests, hashes = {}, {}
-    for dataset in old.DATASETS:
+    for dataset in [d for d in old.DATASETS if d in ids]:
         source = Path(manifests_dir) / f'{dataset}_generation_manifest.json'
         raw = source.read_bytes()
         if _sha(raw) != original['generation_manifest_sha256'][dataset]:
@@ -125,14 +152,15 @@ def freeze(mode, v20_protocol_path, v20_binding_path, manifests_dir, output_layo
             clean.append(row)
         manifests[dataset] = _bytes(clean)
         hashes[dataset] = _sha(manifests[dataset])
-    arms = list(NUMERIC_ARMS if mode == 'numeric7' else LAYOUT_ARMS)
+    arms = list(NUMERIC_ARMS if mode == 'numeric7' else BOOTSTRAP_ARMS if mode == 'bootstrap6'
+                else LAYOUT_ARMS)
     contracts = _contracts(mode, output_layout)
     protocol_id = 'v21_' + mode + '_' + _sha(_bytes(dict(old_protocol=_sha(original_bytes),
         old_binding=_sha(binding_bytes), ids=ids, arms=contracts, output_layout=output_layout)))[:16]
     assignments, schedule = {}, []
     block = 0
     # Whole question-seed blocks alternate old hosts within each task family.
-    for dataset in ('longbench_v2', 'aime26', 'ruler4k'):
+    for dataset in [d for d in ('longbench_v2', 'aime26', 'ruler4k') if d in ids]:
         for item_index, id_ in enumerate(ids[dataset]):
             for seed_index, seed in enumerate((101, 202)):
                 host = host_ids[(item_index * 2 + seed_index) % 2]
@@ -158,8 +186,12 @@ def freeze(mode, v20_protocol_path, v20_binding_path, manifests_dir, output_layo
                     arms=arms, arm_contracts=contracts, block_assignments=assignments,
                     schedule=schedule, planned_executions=len(schedule),
                     generation_manifest_sha256=hashes,
-                    stages={'main': list(range(block))},
-                    selection_rule='ordered first six LB/AIME and first four distinct-task RULER v20 IDs; no scores',
+                    stages=({'lb_preview': [0, 1, 2, 3], 'lb_rest': list(range(4, 12)),
+                             'aime': list(range(12, block))} if mode == 'bootstrap6'
+                            else {'main': list(range(block))}),
+                    selection_rule=('ordered first six LB and first four AIME v20 IDs; RULER deferred; no scores'
+                                    if mode == 'bootstrap6' else
+                                    'ordered first six LB/AIME and first four distinct-task RULER v20 IDs; no scores'),
                     host_assignment_rule='whole question-seed blocks alternate two old pinned hosts per task',
                     quality_eligible=True, timing_eligible=True)
     validate_protocol(protocol)
@@ -256,7 +288,9 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                 base['selector_layers'] = 'all'
                 result = v21.effective_config(base, parent, SCOPE,
                     output_score_precision=contract['output_score_precision'],
-                    output_layout=contract['output_layout'])
+                    output_layout=contract['output_layout'],
+                    bootstrap_policy=contract.get('bootstrap_policy'),
+                    observation_producer=contract.get('observation_producer', 'repeat_interleave'))
             path = config_dir / dataset / f'{arm}.json'
             _new(path, _bytes(result))
             configs[dataset][arm] = dict(path=str(path.resolve()), sha256=_sha(path.read_bytes()))
@@ -274,7 +308,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     fr = sub.add_parser('freeze')
-    fr.add_argument('--mode', choices=('numeric7', 'layout_pair'), required=True)
+    fr.add_argument('--mode', choices=('numeric7', 'layout_pair', 'bootstrap6'), required=True)
     fr.add_argument('--v20-protocol', type=Path, required=True)
     fr.add_argument('--v20-binding', type=Path, required=True)
     fr.add_argument('--manifests-dir', type=Path, required=True)

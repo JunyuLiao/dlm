@@ -47,6 +47,12 @@ PREQK_MODE = 'historical_route_preqk_current_output'
 # the frozen prefix projected V. Decisions, risk, alpha and the retained scan
 # state are still recomputed every step from live T and the live full-V RMS.
 SELECTORS = ('legacy_recompute', 'prefix_block_summary')
+# v23 Track P. native_bootstrap2_observe1: canvas call 0 returns true native
+# attention with no observation; call 1 returns true native attention and ALSO
+# observes current scores and runs the unchanged selector, publishing a map for
+# later calls only; calls >= 2 follow the ordinary clocks with score origin 1.
+BOOTSTRAP_POLICIES = ('native_bootstrap2_observe1',)
+OBSERVATION_PRODUCERS = ('repeat_interleave', 'grouped_q')
 
 
 @dataclass
@@ -143,6 +149,10 @@ class Attention:
         self.current_qk_elements = self.reused_qk_elements = 0
         self.routing_only_extra_qk_elements = 0
         self.preqk_calls = 0
+        # v23: None keeps the original M1/M3 behaviour at every call.
+        self.bootstrap = None
+        self.bootstrap_dense_calls = self.bootstrap_observation_calls = 0
+        self.observation_producer = 'repeat_interleave'
         self.summary_prefix_tiles = self.summary_recomputed_tiles = 0
         self.peak_score_bytes = 0
         self.unsupported_mask_refreshes = 0
@@ -193,6 +203,9 @@ class Attention:
         b, h, nq, d = q.shape
         hk, source_nk = k.shape[1], k.shape[-2]
         layer = int(module.layer_idx)
+        native_args = (module, q, k, v, mask)
+        native_kwargs = dict(kwargs, dropout=dropout, scaling=scaling, is_causal=is_causal,
+                             sliding_window=sliding_window)
         prefix_k, prefix_v, absolute, prefix = self.sources[layer]
         if source_nk != prefix + nq or v.shape != k.shape or b != 1:
             raise ValueError('Unsupported native KV concatenation or batched request')
@@ -219,6 +232,10 @@ class Attention:
         identity = Identity(0, self.canvas, self.epoch, layer, b, h, hk, nq, nk, d,
                             absolute, absolute-prefix+crop, source_nk, scale,
                             str(q.dtype), str(q.device), signature, id(prefix_k))
+        if self.bootstrap is not None and self.step <= 1:
+            return self._bootstrap_call(native_args, native_kwargs, identity, layer, kind,
+                                        q, k, v, mask, scale, causal, window, crop, prefix,
+                                        b, h, nq, nk)
         # Arbitrary mask contents are not inferred from pointers/shape.
         plan = self.cache.plan(identity, self.step, force_refresh=mask is not None)
         self.cache.reserve(identity)  # before allocation
@@ -228,7 +245,7 @@ class Attention:
             # score tensor transiently coexists with it.
             self.peak_score_transient_bytes = max(
                 self.peak_score_transient_bytes, self.cache.storage_bytes + identity.storage_bytes)
-            score = self.observe_scores(q, k, mask, scale, causal, window, crop)
+            score = self._observe(q, k, mask, scale, causal, window, crop)
             self.cache.publish_scores(identity, self.step, score)
             valid = torch.isfinite(score).reshape(b, hk, h//hk, nq, nk).any((2, 3))
             self.valid_keys[layer] = valid
@@ -357,6 +374,56 @@ class Attention:
             self.pending.append(((result.skipped & result.eligible).sum(), result.eligible.sum()))
         return returned, None
 
+    def _observe(self, q, k, mask, scale, causal, window, crop):
+        if self.observation_producer == 'grouped_q':
+            return self.observe_scores_grouped(q, k, mask, scale, causal, window, crop)
+        if self.observation_producer != 'repeat_interleave':
+            raise ValueError(self.observation_producer)
+        return self.observe_scores(q, k, mask, scale, causal, window, crop)
+
+    def _bootstrap_call(self, native_args, native_kwargs, identity, layer, kind,
+                        q, k, v, mask, scale, causal, window, crop, prefix, b, h, nq, nk):
+        """True native output at canvas calls 0 and 1; call 1 also observes.
+
+        The observation uses the same current Q/K/V/mask as the native output
+        and publishes scores and a decision stamped at call 1 for FUTURE calls.
+        No sparse output is formed and no discarded PV is issued here.
+        """
+        from transformers.integrations.sdpa_attention import sdpa_attention_forward
+        if self.bootstrap not in BOOTSTRAP_POLICIES:
+            raise ValueError(self.bootstrap)
+        output = sdpa_attention_forward(*native_args, **native_kwargs)
+        if self.step == 0:
+            self.bootstrap_dense_calls += 1
+            return output
+        from .cache import Plan
+        self.cache.reserve(identity)
+        self.peak_score_transient_bytes = max(
+            self.peak_score_transient_bytes, self.cache.storage_bytes + identity.storage_bytes)
+        score = self._observe(q, k, mask, scale, causal, window, crop)
+        self.cache.publish_scores(identity, self.step, score)
+        valid = torch.isfinite(score).reshape(b, k.shape[1], h // k.shape[1], nq, nk).any((2, 3))
+        self.valid_keys[layer] = valid
+        projected, ref = self.sketches.get(layer, v, valid, prefix - crop)
+        threshold = float(self.thresholds[kind]['log_threshold'])
+        prefix_tiles = max(0, (prefix - crop)) // 64
+        plan = Plan(True, True, 'bootstrap_observation', None, None)
+        summary, store_summary = self._summary_for(
+            layer, kind, identity, prefix_tiles, b, h, nq, nk, plan, v.device)
+        route = route_only(score, projected.contiguous(), ref.contiguous(),
+                           sensitivity=self.query_sensitivity, log_threshold=threshold,
+                           summary=summary, store_summary=store_summary,
+                           variant=self.kernel_variant)
+        torch._assert_async(~route.invalid_tiles.any(),
+                            'Invalid scores in bootstrap observation: request must fail')
+        self.cache.publish_decision(identity, self.step, Decision(route.skipped, route.eligible))
+        self.bootstrap_observation_calls += 1
+        self.current_qk_elements += b*h*nq*nk
+        score_bytes = self.cache.storage_bytes
+        self.peak_score_bytes = max(self.peak_score_bytes, score_bytes)
+        self.peak_total_bytes = max(self.peak_total_bytes, score_bytes + self.summary_bytes)
+        return output
+
     def _consume(self, q, k, v, skipped, eligible, scale, window, causal):
         if self.consumer == 'triton':
             return preqk_attention(q, k, v, skipped, eligible, scale=scale, window=window,
@@ -470,6 +537,11 @@ class Attention:
 
     def counters(self):
         return dict(attention_calls=self.calls, score_refresh_calls=self.score_calls,
+                    bootstrap_policy=self.bootstrap,
+                    bootstrap_dense_calls=self.bootstrap_dense_calls,
+                    bootstrap_observation_calls=self.bootstrap_observation_calls,
+                    observation_producer=self.observation_producer,
+                    score_clock_origin=self.cache.origin,
                     decision_refresh_calls=self.decision_calls, held_decision_calls=self.held_calls,
                     current_qk_elements=self.current_qk_elements, reused_qk_elements=self.reused_qk_elements,
                     projected_current_v_tokens=self.sketches.projected_tokens,

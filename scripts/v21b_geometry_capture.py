@@ -418,6 +418,49 @@ def _observation_parity(owner, record, reps=5):
                 boundary='score producer only (anchor observation), not a complete A call')
 
 
+def _bootstrap_arm(selected_arm, parent_arm, arm_name):
+    """Frozen v23 bootstrap arm rebuilt through the v20/v21 config builders
+    from the bound M3 arm's own base (same model, policy, sources, numerics)."""
+    from experiments.numerical_qk_reuse import v20, v21
+    wrapped = selected_arm['config']
+    base_config = dict(wrapped['parent_config'])
+    for key in ('fingerprint', 'condition', 'plugin', 'v20_arm', 'v20_scope',
+                'decision_interval', 'score_refresh_period', 'output_mode'):
+        base_config.pop(key, None)
+    if parent_arm == 'B_A8_matched':
+        base_config['selector'] = 'legacy_recompute'
+    config = v21.effective_config(base_config, parent_arm, v20.GLOBAL_ONLY_NATIVE_LOCAL,
+                                  output_score_precision=wrapped['output_score_precision'],
+                                  output_layout=wrapped['output_layout'],
+                                  bootstrap_policy='native_bootstrap2_observe1',
+                                  observation_producer='grouped_q')
+    return dict(selected_arm, name=arm_name, condition=config['condition'], config=config)
+
+
+def _bootstrap_replay(model, sequence, runtime, upto):
+    """Per-call phase and logits digest of the bootstrap arm on native states."""
+    base.reset_arm(runtime)
+    state = runtime['state']
+    owner = getattr(runtime['router'], 'owner', runtime['router'])
+    names = ('bootstrap_dense_calls', 'bootstrap_observation_calls', 'score_calls',
+             'decision_calls', 'held_calls')
+    rows = []
+    for step in sequence[:upto]:
+        idx = int(step['call_index'])
+        kw = base.prepare_step(step['snapshot'], state)
+        state.begin(int(kw['cur_step']), kw['current_canvas'])
+        before = {n: getattr(owner, n) for n in names}
+        result = decoder_call(model, kw)
+        delta = {n: getattr(owner, n)-before[n] for n in names}
+        phase = ('native' if delta['bootstrap_dense_calls'] else
+                 'native+observe' if delta['bootstrap_observation_calls'] else
+                 'A' if delta['score_calls'] else 'D' if delta['decision_calls'] else
+                 'H' if delta['held_calls'] else '?')
+        rows.append(dict(call_index=idx, phase=phase, per_layer_delta=delta,
+                         output_digest=output_digest(result)))
+    return rows
+
+
 def _native_stop(model, snapshot):
     kw = base.prepare_step(snapshot, None)
     result = model._denoising_step(**kw)
@@ -460,8 +503,8 @@ def _replay(model, sequence, selected, runtime, *, native):
 
 @torch.inference_mode()
 def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=False,
-        observation_parity=False):
-    if sum(map(bool, (bootstrap_calibration, q16_validation, observation_parity))) > 1:
+        observation_parity=False, bootstrap_parity=False):
+    if sum(map(bool, (bootstrap_calibration, q16_validation, observation_parity, bootstrap_parity))) > 1:
         raise ValueError('calibration, validation and observation parity are separate stages')
     from dllm.models import create_adapter
     paths, proof = diagnostic.preflight(config)
@@ -478,6 +521,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                   screen=('missing_bootstrap_and_two_LB_calibration_states' if bootstrap_calibration
                           else 'frozen_q16_offsets_validation_and_attention_share' if q16_validation
                           else 'v23_gqa_observation_producer_parity' if observation_parity
+                          else 'v23_native_bootstrap_qualification' if bootstrap_parity
                           else 'inherited_threshold_opportunity'),
                   source_config_sha256=hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest(),
                   source_sha256={
@@ -531,6 +575,37 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                 group['last_capture'] = dict(call_index=last, native_stop_verified=None,
                     label='last_captured_native_stop_unknown', error=_error(exc, 'native_stop_probe'))
             registry, native_fn = native_registry(model)
+            if bootstrap_parity:
+                upto = min(len(sequence), 13)
+                native = _replay(model, sequence, [0, 1], None, native=True)
+                native['records'].clear()
+                expected = {1: 'ADDDDDDDADDDD', 3: 'AHHDHHDHAHHDH', 8: 'AHHHHHHHAHHHH'}
+                results = {}
+                for arm_name, interval, parent_arm in (
+                        ('M1_native_bootstrap2_observe1', 1, 'M1_R1_A8_current_output'),
+                        ('M3_native_bootstrap2_observe1', 3, 'M3_R3_A8_current_output'),
+                        ('B_native_bootstrap2_observe1', 8, 'B_A8_matched')):
+                    arm = _bootstrap_arm(selected_arm, parent_arm, arm_name)
+                    with base.arm_context(adapter, arm) as runtime:
+                        rows = _bootstrap_replay(model, sequence, runtime, upto)
+                    phases = ''.join('N' if r['phase'] == 'native' else 'A' if r['phase'] == 'native+observe'
+                                     else r['phase'] for r in rows)
+                    want = ('N' + expected[interval])[:upto]
+                    logits_equal = {str(i): rows[i]['output_digest'] == native['output_digests'][i]
+                                    for i in (0, 1) if i < len(rows)}
+                    ok = phases == want and all(logits_equal.values())
+                    results[arm_name] = dict(status='qualified' if ok else 'failed',
+                                             phases=phases, expected=want,
+                                             native_logits_equal=logits_equal, calls=rows)
+                    if not ok:
+                        report['errors'].append(dict(group=key, arm=arm_name, stage='bootstrap_parity',
+                                                     phases=phases, expected=want,
+                                                     native_logits_equal=logits_equal))
+                group['bootstrap'] = results
+                group['calls'] = {}
+                group['status'] = 'complete' if all(r['status'] == 'qualified'
+                                                    for r in results.values()) else 'failed'
+                continue
             if observation_parity:
                 native = dict(records={}, input_digests={}, output_digests={})
                 native_qkv_hashes = {}
@@ -677,6 +752,8 @@ def main(argv=None):
                         help='run the geometry parity test under this billed stage before model capture')
     parser.add_argument('--bootstrap-calibration', action='store_true',
                         help='separate missing-bootstrap and frozen two-LB-state work/error screen')
+    parser.add_argument('--bootstrap-parity', action='store_true',
+                        help='v23 Track P: native logits at calls 0/1 and origin-1 A/D/H schedule')
     parser.add_argument('--observation-parity', action='store_true',
                         help='v23 Track E: grouped-Q versus repeat_interleave score producer on real GLOBAL states')
     parser.add_argument('--q16-validation', action='store_true',
@@ -708,7 +785,8 @@ def main(argv=None):
         report = run(config, checkpoint=lambda data: base.atomic_json(partial, data),
                      bootstrap_calibration=args.bootstrap_calibration,
                      q16_validation=args.q16_validation,
-                     observation_parity=args.observation_parity)
+                     observation_parity=args.observation_parity,
+                     bootstrap_parity=args.bootstrap_parity)
         report['qualification_tests'] = dict(status=('passed' if args.qualify_tests else 'not_requested'),
                                              log=str(test_log) if args.qualify_tests else None)
         report['completeness'] = completeness(report, bootstrap_calibration=args.bootstrap_calibration,

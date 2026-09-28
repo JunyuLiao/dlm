@@ -23,7 +23,7 @@ from scripts.v20_run import router_phase_evidence
 
 SCHEMA = "v21_conditional_panel_v1"
 BINDING_SCHEMA = "v21_conditional_binding_v1"
-PANEL_COUNTS = {"numeric7": (7, 448), "layout_pair": (2, 96),
+PANEL_COUNTS = {"numeric7": (7, 448), "layout_pair": (2, 96), "bootstrap6": (6, 240),
                 "zero_pruning_diagnostic": (3, 12)}
 V20_PROTOCOL = Path(__file__).resolve().parents[1] / "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json"
 
@@ -84,11 +84,15 @@ def validate_protocol(protocol: dict) -> None:
                 raise ValueError("unrecognized v20 parent arm")
             if c["kind"] == "v21_control" and c.get("parent_v20_arm") != "D_matched":
                 raise ValueError("v21 control must be D_matched parent")
+            if c.get("bootstrap_policy", "native_bootstrap2_observe1") != "native_bootstrap2_observe1" or \
+                    c.get("observation_producer", "grouped_q") not in ("grouped_q", "repeat_interleave"):
+                raise ValueError(f"unknown v23 method field: {arm}")
         else:
             raise ValueError(f"unknown arm contract: {arm}")
     diagnostic = protocol["panel_kind"] == "zero_pruning_diagnostic"
     ids = protocol.get("ids")
-    required_tasks = {"longbench_v2"} if diagnostic else {"ruler4k", "aime26", "longbench_v2"}
+    required_tasks = ({"longbench_v2"} if diagnostic else {"aime26", "longbench_v2"}
+                      if protocol["panel_kind"] == "bootstrap6" else {"ruler4k", "aime26", "longbench_v2"})
     if not isinstance(ids, dict) or set(ids) != required_tasks:
         raise ValueError("task ID inventory differs from frozen panel kind")
     if any(not isinstance(v, list) or len(v) != len(set(v)) for v in ids.values()):
@@ -187,6 +191,10 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
         if (config.get("output_score_precision") != contract["output_score_precision"] or
                 config.get("output_layout") != contract["output_layout"]):
             raise ValueError("v21 numeric/layout mode differs from arm contract")
+        if (config.get("bootstrap_policy") != contract.get("bootstrap_policy") or
+                config.get("observation_producer", "repeat_interleave") !=
+                contract.get("observation_producer", "repeat_interleave")):
+            raise ValueError("v23 bootstrap/producer differs from arm contract")
         v21.validate_effective(config, config["condition"])
         parent = config["parent_config"]
         if (parent.get("v20_scope") != contract["scope"] or
@@ -335,7 +343,13 @@ def phase_for(config: dict, receipt: dict, contract: dict) -> dict | None:
     counters = receipt.get("counters")
     if arm == "D_native":
         return {"phase": "native_dense"}
-    return router_phase_evidence(arm, counters)
+    evidence = router_phase_evidence(arm, counters)
+    if evidence is not None and contract.get("bootstrap_policy"):
+        dense, observed = counters.get("bootstrap_dense_calls"), counters.get("bootstrap_observation_calls")
+        if type(dense) is not int or type(observed) is not int or counters.get("score_clock_origin") != 1:
+            return None
+        evidence = dict(evidence, bootstrap_dense=dense, bootstrap_observe=observed)
+    return evidence
 
 
 def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: Path, ledger: Path, lock_path: Path,

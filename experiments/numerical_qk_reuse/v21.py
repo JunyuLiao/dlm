@@ -20,6 +20,10 @@ CONTROL_CONDITION = 'v20_dense_consumer'
 SOURCES = ('v21.py', 'generic_kernels.py', 'cached_executor.py', 'integration.py',
            'v20_controls.py')
 REQUEST_ENVELOPE = ('phase', 'diagnostic', 'timing_events', 'thinking', 'max_new_tokens')
+# v23 optional method fields. Absent keys mean the original behaviour, so
+# every previously bound v21 config keeps its fingerprint.
+BOOTSTRAP_POLICIES = ('native_bootstrap2_observe1',)
+OBSERVATION_PRODUCERS = ('repeat_interleave', 'grouped_q')
 
 
 def _fingerprint(config):
@@ -36,7 +40,8 @@ def _check_modes(precision, layout, parent):
 
 
 def effective_config(base: dict, arm: str, scope: str, *,
-                     output_score_precision='legacy_bf16_scores', output_layout='head_major') -> dict:
+                     output_score_precision='legacy_bf16_scores', output_layout='head_major',
+                     bootstrap_policy=None, observation_producer='repeat_interleave') -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     prepared = dict(base)
     if output_score_precision not in OUTPUT_PRECISIONS or output_layout not in OUTPUT_LAYOUTS:
@@ -48,7 +53,16 @@ def effective_config(base: dict, arm: str, scope: str, *,
         prepared['kernel_variant'] = 'generic'
     parent = v20.effective_config(prepared, arm, scope)
     _check_modes(output_score_precision, output_layout, parent)
-    return _wrap(parent, 'v20_method', output_score_precision, output_layout)
+    extra = {}
+    if bootstrap_policy is not None:
+        if bootstrap_policy not in BOOTSTRAP_POLICIES:
+            raise ValueError('unknown v23 bootstrap policy')
+        extra['bootstrap_policy'] = bootstrap_policy
+    if observation_producer != 'repeat_interleave':
+        if observation_producer not in OBSERVATION_PRODUCERS:
+            raise ValueError('unknown v23 observation producer')
+        extra['observation_producer'] = observation_producer
+    return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
 def effective_control_config(base: dict, scope: str, *,
@@ -75,7 +89,7 @@ def effective_control_config(base: dict, scope: str, *,
     return _wrap(parent, 'v20_control', output_score_precision, output_layout)
 
 
-def _wrap(parent, parent_kind, output_score_precision, output_layout):
+def _wrap(parent, parent_kind, output_score_precision, output_layout, extra=None):
     root = Path(__file__).resolve().parent
     source_hashes = {str(root / name): hashlib.sha256((root / name).read_bytes()).hexdigest()
                      for name in SOURCES}
@@ -85,6 +99,7 @@ def _wrap(parent, parent_kind, output_score_precision, output_layout):
                   output_precision_status=('diagnostic' if output_score_precision == 'fp32_scores_bf16_pv'
                                            else 'legacy'), source_hashes=source_hashes)
     result.update({name: parent[name] for name in REQUEST_ENVELOPE if name in parent})
+    result.update(extra or {})
     result['fingerprint'] = _fingerprint(result)
     return result
 
@@ -126,6 +141,12 @@ def validate_effective(config: dict, condition: str):
         raise ValueError('v21 parent kind must name a qualified method or D_matched control')
     precision, layout = config.get('output_score_precision'), config.get('output_layout')
     _check_modes(precision, layout, parent)
+    if 'bootstrap_policy' in config and (config['bootstrap_policy'] not in BOOTSTRAP_POLICIES
+                                         or parent_kind != 'v20_method'):
+        raise ValueError('v23 bootstrap policy identity drift')
+    if 'observation_producer' in config and (config['observation_producer'] not in OBSERVATION_PRODUCERS[1:]
+                                             or parent_kind != 'v20_method'):
+        raise ValueError('v23 observation producer identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -156,12 +177,21 @@ def install(adapter, config: dict, condition: str):
             raise ValueError('v21 requires parent current-output mode')
         owner.output_score_precision = config['output_score_precision']
         owner.output_layout = config['output_layout']
+        if 'observation_producer' in config:
+            owner.observation_producer = config['observation_producer']
+        if 'bootstrap_policy' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('bootstrap must be bound before any routed call')
+            owner.bootstrap = config['bootstrap_policy']
+            owner.cache.origin = 1
         owner.output_precision_extra_qk_elements_upper_bound = 0
         parent_counters = runtime['counters']
 
         def counters():
             values = parent_counters()
             return dict(values, v21_scope=scope, v21_decision_interval=interval,
+                        v23_bootstrap_policy=config.get('bootstrap_policy'),
+                        v23_observation_producer=config.get('observation_producer', 'repeat_interleave'),
                         output_score_precision=owner.output_score_precision,
                         output_layout=owner.output_layout,
                         output_precision_status=config['output_precision_status'],

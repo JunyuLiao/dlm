@@ -53,9 +53,14 @@ class Entry:
 
 
 class ScoreCache:
-    def __init__(self, score_period=8, decision_interval=1, max_bytes=2 * 1024**3):
+    def __init__(self, score_period=8, decision_interval=1, max_bytes=2 * 1024**3, origin=0):
         if min(score_period, decision_interval, max_bytes) < 1:
             raise ValueError("Positive periods and storage budget required")
+        if origin not in (0, 1):
+            raise ValueError("score clock origin must be 0 (native M3) or 1 (bootstrap observation)")
+        # origin=1: the first true observation is canvas call 1, so later
+        # anchors fall at 9, 17, ... and never at a call index divisible by 8.
+        self.origin = origin
         self.score_period = score_period
         self.decision_interval = decision_interval
         self.max_bytes = max_bytes
@@ -78,7 +83,8 @@ class ScoreCache:
         decision_age = None if old.decision_step is None else step - old.decision_step
         if age < 0 or (decision_age is not None and decision_age < 0):
             raise ValueError("Decoder iteration went backwards without reset")
-        fresh = force_refresh or step % self.score_period == 0 or age >= self.score_period
+        fresh = (force_refresh or (step - self.origin) % self.score_period == 0
+                 or age >= self.score_period)
         decision = fresh or old.decision is None or decision_age >= self.decision_interval
         return Plan(fresh, decision, "forced_mask_refresh" if force_refresh else
                     "score_schedule" if fresh else "decision_schedule" if decision else "held_decision", age, decision_age)
