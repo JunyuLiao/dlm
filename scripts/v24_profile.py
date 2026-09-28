@@ -27,12 +27,17 @@ METHODS = {'M3_R3_A8_incumbent': ('M3_R3_A8_current_output', None),
            'M1_native_bootstrap2_observe1': ('M1_R1_A8_current_output', 'native_bootstrap2_observe1'),
            'M3_native_bootstrap2_observe1': ('M3_R3_A8_current_output', 'native_bootstrap2_observe1'),
            'B_native_bootstrap2_observe1': ('B_A8_matched', 'native_bootstrap2_observe1')}
+ARMS_V25 = ('D_native', 'M3_native_bootstrap2_observe1', 'M3_boot_aligned16',
+            'B_native_bootstrap2_observe1', 'B_boot_aligned16')
+METHODS.update({'M3_boot_aligned16': ('M3_R3_A8_current_output', 'native_bootstrap2_observe1'),
+                'B_boot_aligned16': ('B_A8_matched', 'native_bootstrap2_observe1')})
+STORAGE = {'M3_boot_aligned16': 'aligned16', 'B_boot_aligned16': 'aligned16'}
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls')
 WRAPPER_DROP = ('fingerprint', 'condition', 'plugin', 'v20_arm', 'v20_scope', 'decision_interval',
                 'score_refresh_period', 'output_mode', 'control')
 
 
-def build_arms(v21_profile_config):
+def build_arms(v21_profile_config, arm_set='v24'):
     """Six arms with the panel's selectors, output contract and grouped-Q producer."""
     from experiments.numerical_qk_reuse import v21
     from scripts import v20_bind as old
@@ -42,25 +47,29 @@ def build_arms(v21_profile_config):
         raise ValueError('bound v21 profile config lacks untouched native arm')
     method_base = {k: v for k, v in combined['config']['parent_config'].items() if k not in WRAPPER_DROP}
     result = [native]
+    names = ARMS if arm_set == 'v24' else ARMS_V25
     control_base = {k: v for k, v in native['config'].items() if k not in WRAPPER_DROP}
     t_config = old.control_config(dict(control_base, control='T_scope'), 'v20_fresh_T', SCOPE)
-    result.append(dict(name='T_scope', plugin=t_config['plugin'], condition=t_config['condition'],
-                       config=t_config))
-    for name in ARMS[2:]:
+    if 'T_scope' in names:
+        result.append(dict(name='T_scope', plugin=t_config['plugin'], condition=t_config['condition'],
+                           config=t_config))
+    for name in [n for n in names if n in METHODS]:
         parent_arm, bootstrap = METHODS[name]
         selector = 'legacy_recompute' if parent_arm == 'B_A8_matched' else 'prefix_block_summary'
         config = v21.effective_config(dict(method_base, selector=selector, selector_layers='all'),
                                       parent_arm, SCOPE,
                                       output_score_precision='fp32_scores_bf16_pv',
                                       output_layout='model_major', bootstrap_policy=bootstrap,
-                                      observation_producer='grouped_q')
+                                      observation_producer='grouped_q',
+                                      route_storage=STORAGE.get(name, 'logical'))
         result.append(dict(name=name, plugin=PLUGIN, condition=config['condition'], config=config))
     return result
 
 
-def derive_config(v21_profile_config):
+def derive_config(v21_profile_config, arm_set='v24'):
     config = {k: v for k, v in v21_profile_config.items() if k != 'arms'}
-    config.update(schema='v24_bootstrap_direct_cost_v1', arms=build_arms(v21_profile_config),
+    config.update(schema='v24_bootstrap_direct_cost_v1', arm_set=arm_set,
+                  arms=build_arms(v21_profile_config, arm_set),
                   boundaries=['model_forward', 'denoising_step'], sequence_lengths=[16],
                   reps=3, blocks=3, warmup=1, counter_twins=False, operator_probe=False,
                   prepared_support_floor=False,
@@ -71,14 +80,17 @@ def derive_config(v21_profile_config):
 
 def validate_config(config):
     base.validate_config(config)
-    if [arm['name'] for arm in config['arms']] != list(ARMS):
-        raise ValueError('v24 requires the six frozen bootstrap6 arms in order')
+    expected = ARMS if config.get('arm_set', 'v24') == 'v24' else ARMS_V25
+    if [arm['name'] for arm in config['arms']] != list(expected):
+        raise ValueError('arm inventory differs from the declared arm set')
     if config.get('scope') != SCOPE or config.get('sequence_lengths') != [16]:
         raise ValueError('v24 is GLOBAL-only and replays N16 from canvas start')
     from experiments.numerical_qk_reuse import v21
-    for arm in config['arms'][2:]:
+    for arm in [a for a in config['arms'] if a['name'] in METHODS]:
         v21.validate_effective(arm['config'], arm['condition'])
         want = METHODS[arm['name']][1]
+        if arm['config'].get('route_storage', 'logical') != STORAGE.get(arm['name'], 'logical'):
+            raise ValueError(f'route storage drift: {arm["name"]}')
         if (arm['config'].get('bootstrap_policy') != want or
                 arm['config'].get('observation_producer') != 'grouped_q' or
                 arm['config'].get('output_score_precision') != 'fp32_scores_bf16_pv' or
@@ -153,7 +165,7 @@ def profile(config, checkpoint=None):
 
     def preflight(_config, paths):
         from experiments.numerical_qk_reuse import v21
-        for arm in _config['arms'][2:]:
+        for arm in [a for a in _config['arms'] if a['name'] in METHODS]:
             v21.validate_effective(arm['config'], arm['condition'])
         return original_preflight(_flatten(_config), paths)
 
@@ -173,6 +185,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--v21-profile-config', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--arm-set', choices=('v24', 'v25'), default='v24')
     args = parser.parse_args(argv)
     out = args.out
     derived = out.with_name(out.name + '.config.json')
@@ -183,7 +196,7 @@ def main(argv=None):
         raise FileExistsError(f'v24 output exists: {occupied}')
     out.parent.mkdir(parents=True, exist_ok=True)
     try:
-        config = derive_config(json.loads(args.v21_profile_config.read_bytes()))
+        config = derive_config(json.loads(args.v21_profile_config.read_bytes()), args.arm_set)
         validate_config(config)
         with derived.open('x', encoding='utf-8') as stream:
             json.dump(config, stream, indent=1)

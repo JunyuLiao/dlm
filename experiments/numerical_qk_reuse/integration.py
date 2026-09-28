@@ -53,6 +53,13 @@ SELECTORS = ('legacy_recompute', 'prefix_block_summary')
 # later calls only; calls >= 2 follow the ordinary clocks with score origin 1.
 BOOTSTRAP_POLICIES = ('native_bootstrap2_observe1',)
 OBSERVATION_PRODUCERS = ('repeat_interleave', 'grouped_q')
+# v25 named numerical-implementation variant. aligned16 keeps the producer at
+# the real K, copies its FP32 bits into a 16-key-pitch buffer whose tail is
+# -inf, and pads only the projected-V sketch passed to the route. Tile count,
+# prefix boundary, reference RMS, legal pairs and the output consumer keep the
+# real K. The route's load layout (hence reduction order) can differ, so stored
+# summaries are NOT claimed bit-identical; qualification is by measurement.
+ROUTE_STORAGES = ('logical', 'aligned16')
 
 
 @dataclass
@@ -153,6 +160,8 @@ class Attention:
         self.bootstrap = None
         self.bootstrap_dense_calls = self.bootstrap_observation_calls = 0
         self.observation_producer = 'repeat_interleave'
+        self.route_storage = 'logical'
+        self.aligned_score_copies = self.aligned_pad_bytes = self.aligned_sketch_pads = 0
         self.summary_prefix_tiles = self.summary_recomputed_tiles = 0
         self.peak_score_bytes = 0
         self.unsupported_mask_refreshes = 0
@@ -246,7 +255,7 @@ class Attention:
             self.peak_score_transient_bytes = max(
                 self.peak_score_transient_bytes, self.cache.storage_bytes + identity.storage_bytes)
             score = self._observe(q, k, mask, scale, causal, window, crop)
-            self.cache.publish_scores(identity, self.step, score)
+            self.cache.publish_scores(identity, self.step, self._store_scores(score))
             valid = torch.isfinite(score).reshape(b, hk, h//hk, nq, nk).any((2, 3))
             self.valid_keys[layer] = valid
             self.score_calls += 1
@@ -301,11 +310,11 @@ class Attention:
                 # Selector only: no discarded PV, no discarded [B,H,Q,D]
                 # output. Malformed cached scores stay detectable through the
                 # route's own per-tile flag instead of through that PV pass.
-                route = route_only(entry.scores, projected.contiguous(), ref.contiguous(),
-                                   sensitivity=self.query_sensitivity,
-                                   log_threshold=threshold,
-                                   summary=summary, store_summary=store_summary,
-                                   variant=self.kernel_variant)
+                route = self._route(entry.scores, projected, ref,
+                                    sensitivity=self.query_sensitivity,
+                                    log_threshold=threshold,
+                                    summary=summary, store_summary=store_summary,
+                                    variant=self.kernel_variant)
                 if self.guard_mode == 'fused':
                     route_invalid = route.invalid_tiles     # checked in the final fused guard
                 else:
@@ -315,7 +324,8 @@ class Attention:
                 # Same retained tiles as the stale-score routing decision;
                 # the final softmax/PV consumes current, not cached, scores.
                 if self.output_mode == PREQK_MODE:
-                    if current_for_output is entry.scores and self.output_score_precision != 'legacy_bf16_scores':
+                    # plan.score_refresh, not tensor identity: aligned16 stores a pitched copy.
+                    if plan.score_refresh and self.output_score_precision != 'legacy_bf16_scores':
                         # The anchor's old arithmetic publishes the cache and
                         # chooses support. Current FP32 scores are formed in
                         # the retained-tile consumer as a second QK pass.
@@ -374,6 +384,36 @@ class Attention:
             self.pending.append(((result.skipped & result.eligible).sum(), result.eligible.sum()))
         return returned, None
 
+    def _store_scores(self, score):
+        """The tensor the score cache keeps (see ROUTE_STORAGES)."""
+        if self.route_storage == 'logical':
+            return score
+        if self.route_storage != 'aligned16':
+            raise ValueError(self.route_storage)
+        if self.output_score_precision == 'legacy_bf16_scores' or self.output_mode != PREQK_MODE:
+            raise ValueError('aligned16 storage is qualified only for the pre-QK FP32 current-output path')
+        b, h, nq, nk = score.shape
+        pitch = -(-nk // 16) * 16
+        if pitch == nk:
+            return score  # already aligned: the identical tensor is stored
+        stored = torch.empty((b, h, nq, pitch), device=score.device, dtype=score.dtype)
+        stored[..., :nk].copy_(score)
+        stored[..., nk:].fill_(-math.inf)
+        self.aligned_score_copies += 1
+        self.aligned_pad_bytes += stored.numel() * stored.element_size()
+        return stored
+
+    def _route(self, scores, projected, ref, **kwargs):
+        """route_only on the stored scores; pads only the sketch to the stored pitch."""
+        nk, pitch = projected.shape[2], scores.shape[-1]
+        if pitch != nk:
+            if (self.route_storage != 'aligned16' or pitch % 16 or not 0 < pitch - nk < 16
+                    or -(-pitch // 64) != -(-nk // 64)):
+                raise ValueError('stored score pitch violates the aligned16 tile/extent invariant')
+            projected = torch.nn.functional.pad(projected, (0, 0, 0, pitch - nk))
+            self.aligned_sketch_pads += 1
+        return route_only(scores, projected.contiguous(), ref.contiguous(), **kwargs)
+
     def _observe(self, q, k, mask, scale, causal, window, crop):
         if self.observation_producer == 'grouped_q':
             return self.observe_scores_grouped(q, k, mask, scale, causal, window, crop)
@@ -401,7 +441,8 @@ class Attention:
         self.peak_score_transient_bytes = max(
             self.peak_score_transient_bytes, self.cache.storage_bytes + identity.storage_bytes)
         score = self._observe(q, k, mask, scale, causal, window, crop)
-        self.cache.publish_scores(identity, self.step, score)
+        stored = self._store_scores(score)
+        self.cache.publish_scores(identity, self.step, stored)
         valid = torch.isfinite(score).reshape(b, k.shape[1], h // k.shape[1], nq, nk).any((2, 3))
         self.valid_keys[layer] = valid
         projected, ref = self.sketches.get(layer, v, valid, prefix - crop)
@@ -410,10 +451,10 @@ class Attention:
         plan = Plan(True, True, 'bootstrap_observation', None, None)
         summary, store_summary = self._summary_for(
             layer, kind, identity, prefix_tiles, b, h, nq, nk, plan, v.device)
-        route = route_only(score, projected.contiguous(), ref.contiguous(),
-                           sensitivity=self.query_sensitivity, log_threshold=threshold,
-                           summary=summary, store_summary=store_summary,
-                           variant=self.kernel_variant)
+        route = self._route(stored, projected, ref,
+                            sensitivity=self.query_sensitivity, log_threshold=threshold,
+                            summary=summary, store_summary=store_summary,
+                            variant=self.kernel_variant)
         torch._assert_async(~route.invalid_tiles.any(),
                             'Invalid scores in bootstrap observation: request must fail')
         self.cache.publish_decision(identity, self.step, Decision(route.skipped, route.eligible))
@@ -541,6 +582,10 @@ class Attention:
                     bootstrap_dense_calls=self.bootstrap_dense_calls,
                     bootstrap_observation_calls=self.bootstrap_observation_calls,
                     observation_producer=self.observation_producer,
+                    route_storage=self.route_storage,
+                    aligned_score_copies=self.aligned_score_copies,
+                    aligned_pad_bytes=self.aligned_pad_bytes,
+                    aligned_sketch_pads=self.aligned_sketch_pads,
                     score_clock_origin=self.cache.origin,
                     decision_refresh_calls=self.decision_calls, held_decision_calls=self.held_calls,
                     current_qk_elements=self.current_qk_elements, reused_qk_elements=self.reused_qk_elements,

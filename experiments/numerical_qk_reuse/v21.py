@@ -24,6 +24,7 @@ REQUEST_ENVELOPE = ('phase', 'diagnostic', 'timing_events', 'thinking', 'max_new
 # every previously bound v21 config keeps its fingerprint.
 BOOTSTRAP_POLICIES = ('native_bootstrap2_observe1',)
 OBSERVATION_PRODUCERS = ('repeat_interleave', 'grouped_q')
+ROUTE_STORAGES = ('logical', 'aligned16')
 
 
 def _fingerprint(config):
@@ -41,8 +42,12 @@ def _check_modes(precision, layout, parent):
 
 def effective_config(base: dict, arm: str, scope: str, *,
                      output_score_precision='legacy_bf16_scores', output_layout='head_major',
-                     bootstrap_policy=None, observation_producer='repeat_interleave') -> dict:
+                     bootstrap_policy=None, observation_producer='repeat_interleave',
+                     route_storage='logical') -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
+    if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
+                                       or output_score_precision != 'fp32_scores_bf16_pv'):
+        raise ValueError('v25 route storage requires a known variant and FP32 current-output scores')
     prepared = dict(base)
     if output_score_precision not in OUTPUT_PRECISIONS or output_layout not in OUTPUT_LAYOUTS:
         raise ValueError('unknown v21 output precision or layout')
@@ -62,6 +67,10 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if observation_producer not in OBSERVATION_PRODUCERS:
             raise ValueError('unknown v23 observation producer')
         extra['observation_producer'] = observation_producer
+    if route_storage != 'logical':
+        if route_storage not in ROUTE_STORAGES or output_score_precision != 'fp32_scores_bf16_pv':
+            raise ValueError('v25 route storage requires a known variant and FP32 current-output scores')
+        extra['route_storage'] = route_storage
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -147,6 +156,10 @@ def validate_effective(config: dict, condition: str):
     if 'observation_producer' in config and (config['observation_producer'] not in OBSERVATION_PRODUCERS[1:]
                                              or parent_kind != 'v20_method'):
         raise ValueError('v23 observation producer identity drift')
+    if 'route_storage' in config and (config['route_storage'] not in ROUTE_STORAGES[1:]
+                                      or parent_kind != 'v20_method'
+                                      or precision != 'fp32_scores_bf16_pv'):
+        raise ValueError('v25 route storage identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -179,6 +192,8 @@ def install(adapter, config: dict, condition: str):
         owner.output_layout = config['output_layout']
         if 'observation_producer' in config:
             owner.observation_producer = config['observation_producer']
+        if 'route_storage' in config:
+            owner.route_storage = config['route_storage']
         if 'bootstrap_policy' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('bootstrap must be bound before any routed call')
@@ -192,6 +207,7 @@ def install(adapter, config: dict, condition: str):
             return dict(values, v21_scope=scope, v21_decision_interval=interval,
                         v23_bootstrap_policy=config.get('bootstrap_policy'),
                         v23_observation_producer=config.get('observation_producer', 'repeat_interleave'),
+                        v25_route_storage=config.get('route_storage', 'logical'),
                         output_score_precision=owner.output_score_precision,
                         output_layout=owner.output_layout,
                         output_precision_status=config['output_precision_status'],

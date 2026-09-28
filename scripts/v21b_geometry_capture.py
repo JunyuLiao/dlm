@@ -418,7 +418,7 @@ def _observation_parity(owner, record, reps=5):
                 boundary='score producer only (anchor observation), not a complete A call')
 
 
-def _bootstrap_arm(selected_arm, parent_arm, arm_name):
+def _bootstrap_arm(selected_arm, parent_arm, arm_name, route_storage='logical', panel_selector=False):
     """Frozen v23 bootstrap arm rebuilt through the v20/v21 config builders
     from the bound M3 arm's own base (same model, policy, sources, numerics)."""
     from experiments.numerical_qk_reuse import v20, v21
@@ -429,11 +429,14 @@ def _bootstrap_arm(selected_arm, parent_arm, arm_name):
         base_config.pop(key, None)
     if parent_arm == 'B_A8_matched':
         base_config['selector'] = 'legacy_recompute'
+    elif panel_selector:
+        # Same selector as the scored bootstrap6 panel binder (M1/M3 use stored prefix summaries).
+        base_config.update(selector='prefix_block_summary', selector_layers='all')
     config = v21.effective_config(base_config, parent_arm, v20.GLOBAL_ONLY_NATIVE_LOCAL,
                                   output_score_precision=wrapped['output_score_precision'],
                                   output_layout=wrapped['output_layout'],
                                   bootstrap_policy='native_bootstrap2_observe1',
-                                  observation_producer='grouped_q')
+                                  observation_producer='grouped_q', route_storage=route_storage)
     return dict(selected_arm, name=arm_name, condition=config['condition'], config=config)
 
 
@@ -599,6 +602,104 @@ def _route_alignment(owner, record, reps=5):
                 note='diagnostic probe of an exact alignment candidate; JIT warm for both alignment classes before timing')
 
 
+def _float_ulp_gap(a, b):
+    """Max ULP distance between equal-shape FP32 tensors (finite, same-sign lanes)."""
+    ai, bi = a.contiguous().view(torch.int32).long(), b.contiguous().view(torch.int32).long()
+    ai = torch.where(ai < 0, -(ai & 0x7fffffff), ai)
+    bi = torch.where(bi < 0, -(bi & 0x7fffffff), bi)
+    both = torch.isfinite(a) & torch.isfinite(b)
+    gap = (ai - bi).abs().masked_fill(~both, 0)
+    return int(gap.max()) if gap.numel() else 0
+
+
+def _tensor_delta(a, b):
+    a, b = a.float(), b.float()
+    same_bits = bool(torch.equal(a.contiguous().view(torch.int32), b.contiguous().view(torch.int32)))
+    finite = torch.isfinite(a) & torch.isfinite(b)
+    diff = (a - b).abs().masked_fill(~finite, 0)
+    scale = a.abs().masked_fill(~finite, 0)
+    return dict(bitwise_equal=same_bits,
+                differing_elements=int((a.contiguous().view(torch.int32) != b.contiguous().view(torch.int32)).sum()),
+                elements=a.numel(), nonfinite_mismatch=int((torch.isfinite(a) != torch.isfinite(b)).sum()),
+                max_abs=float(diff.max()) if diff.numel() else 0.,
+                max_rel=float((diff / scale.clamp_min(1e-30)).max()) if diff.numel() else 0.,
+                max_ulp=_float_ulp_gap(a, b))
+
+
+def _aligned_replay(model, sequence, runtime, upto, parent=None):
+    """Replay native states through one runtime; with ``parent`` compare per call."""
+    base.reset_arm(runtime)
+    state = runtime['state']
+    owner = getattr(runtime['router'], 'owner', runtime['router'])
+    rows, keep = [], {}
+    for step in sequence[:upto]:
+        idx = int(step['call_index'])
+        kw = base.prepare_step(step['snapshot'], state)
+        state.begin(int(kw['cur_step']), kw['current_canvas'])
+        before = (owner.bootstrap_observation_calls, owner.score_calls, owner.decision_calls,
+                  owner.held_calls, owner.bootstrap_dense_calls)
+        logits = decoder_call(model, kw)
+        after = (owner.bootstrap_observation_calls, owner.score_calls, owner.decision_calls,
+                 owner.held_calls, owner.bootstrap_dense_calls)
+        delta = [x - y for x, y in zip(after, before)]
+        phase = ('BO' if delta[0] else 'A' if delta[1] else 'D' if delta[2] else 'H' if delta[3]
+                 else 'B0' if delta[4] else '?')
+        decisions = {layer: (entry.decision.skipped.clone(), entry.decision.eligible.clone())
+                     for layer, entry in owner.cache.entries.items() if entry.decision is not None}
+        summaries = ({layer: (summary.z.clone(), summary.mu.clone()) for layer, summary in owner.summaries.items()}
+                     if phase in ('BO', 'A') else {})
+        record = dict(call_index=idx, phase=phase, logits_digest=output_digest(logits))
+        if parent is None:
+            keep[idx] = dict(logits=logits.detach().to('cpu'), argmax=logits.argmax(-1).to('cpu'),
+                             decisions={l: (a.cpu(), b.cpu()) for l, (a, b) in decisions.items()},
+                             summaries={l: (z.cpu(), m.cpu()) for l, (z, m) in summaries.items()})
+        else:
+            ref = parent[idx]
+            cpu_logits = logits.detach().to('cpu')
+            record['logits'] = _tensor_delta(ref['logits'], cpu_logits)
+            record['argmax_equal'] = bool(torch.equal(ref['argmax'], logits.argmax(-1).to('cpu')))
+            record['decisions_equal'] = {str(l): bool(torch.equal(ref['decisions'][l][0], a.cpu()) and
+                                                      torch.equal(ref['decisions'][l][1], b.cpu()))
+                                         for l, (a, b) in decisions.items() if l in ref['decisions']}
+            record['decision_tiles_differing'] = {str(l): int((ref['decisions'][l][0] != a.cpu()).sum())
+                                                  for l, (a, _) in decisions.items() if l in ref['decisions']}
+            record['summaries'] = {str(l): dict(z=_tensor_delta(ref['summaries'][l][0], z.cpu()),
+                                                mu=_tensor_delta(ref['summaries'][l][1], m.cpu()))
+                                   for l, (z, m) in summaries.items() if l in ref['summaries']}
+        rows.append(record)
+    return rows, keep
+
+
+def _aligned_qualification(adapter, model, sequence, selected_arm):
+    upto = min(len(sequence), 16)
+    out = {}
+    for arm_name, parent_arm in (('M3', 'M3_R3_A8_current_output'), ('M1', 'M1_R1_A8_current_output'),
+                                 ('B', 'B_A8_matched')):
+        parent_cfg = _bootstrap_arm(selected_arm, parent_arm, arm_name + '_boot', panel_selector=True)
+        aligned_cfg = _bootstrap_arm(selected_arm, parent_arm, arm_name + '_boot_aligned16',
+                                     route_storage='aligned16', panel_selector=True)
+        if parent_cfg['config']['parent_config'].get('selector') != (
+                'legacy_recompute' if parent_arm == 'B_A8_matched' else 'prefix_block_summary'):
+            raise AssertionError('qualification selector differs from the scored panel')
+        with base.arm_context(adapter, parent_cfg) as runtime:
+            parent_rows, kept = _aligned_replay(model, sequence, runtime, upto)
+        with base.arm_context(adapter, aligned_cfg) as runtime:
+            rows, _ = _aligned_replay(model, sequence, runtime, upto, parent=kept)
+            owner = getattr(runtime['router'], 'owner', runtime['router'])
+            counters = dict(copies=owner.aligned_score_copies, pad_bytes=owner.aligned_pad_bytes,
+                            sketch_pads=owner.aligned_sketch_pads)
+        kept.clear()
+        out[arm_name] = dict(
+            phases=''.join(r['phase'] for r in rows),
+            parent_phases=''.join(r['phase'] for r in parent_rows),
+            logits_bitwise_equal_calls=sum(r['logits']['bitwise_equal'] for r in rows),
+            argmax_equal_calls=sum(r['argmax_equal'] for r in rows), calls=len(rows),
+            decision_mismatch_calls=sum(not all(r['decisions_equal'].values()) for r in rows),
+            aligned_counters=counters, rows=rows)
+    return dict(status='qualified', sequence_calls=upto, arms=out,
+                note='teacher-forced native states; complete A/D/H cycles with live causal T and current V')
+
+
 def _native_stop(model, snapshot):
     kw = base.prepare_step(snapshot, None)
     result = model._denoising_step(**kw)
@@ -642,9 +743,9 @@ def _replay(model, sequence, selected, runtime, *, native):
 @torch.inference_mode()
 def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=False,
         observation_parity=False, bootstrap_parity=False, observation_components=False,
-        route_alignment=False):
+        route_alignment=False, aligned_qualification=False):
     if sum(map(bool, (bootstrap_calibration, q16_validation, observation_parity, bootstrap_parity,
-                      observation_components, route_alignment))) > 1:
+                      observation_components, route_alignment, aligned_qualification))) > 1:
         raise ValueError('calibration, validation and observation parity are separate stages')
     from dllm.models import create_adapter
     paths, proof = diagnostic.preflight(config)
@@ -664,6 +765,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                           else 'v23_native_bootstrap_qualification' if bootstrap_parity
                           else 'v24_observation_components' if observation_components
                           else 'v24_route_alignment_probe' if route_alignment
+                          else 'v25_aligned16_qualification' if aligned_qualification
                           else 'inherited_threshold_opportunity'),
                   source_config_sha256=hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest(),
                   source_sha256={
@@ -717,6 +819,16 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                 group['last_capture'] = dict(call_index=last, native_stop_verified=None,
                     label='last_captured_native_stop_unknown', error=_error(exc, 'native_stop_probe'))
             registry, native_fn = native_registry(model)
+            if aligned_qualification:
+                try:
+                    group['aligned16'] = _aligned_qualification(adapter, model, sequence, selected_arm)
+                    group['status'] = 'complete'
+                except Exception as exc:
+                    group['status'] = 'failed'
+                    group['error'] = _error(exc, 'aligned_qualification')
+                    report['errors'].append(dict(group=key, **group['error']))
+                group['calls'] = {}
+                continue
             if bootstrap_parity:
                 upto = min(len(sequence), 13)
                 native = _replay(model, sequence, [0, 1], None, native=True)
@@ -915,6 +1027,8 @@ def main(argv=None):
                         help='run the geometry parity test under this billed stage before model capture')
     parser.add_argument('--bootstrap-calibration', action='store_true',
                         help='separate missing-bootstrap and frozen two-LB-state work/error screen')
+    parser.add_argument('--aligned-qualification', action='store_true',
+                        help='v25: parent vs aligned16 full A/D/H replay: logits, decisions, anchor summaries')
     parser.add_argument('--route-alignment', action='store_true',
                         help='v24: exactness/timing probe of a 16-aligned route key extent')
     parser.add_argument('--observation-components', action='store_true',
@@ -955,7 +1069,8 @@ def main(argv=None):
                      observation_parity=args.observation_parity,
                      bootstrap_parity=args.bootstrap_parity,
                      observation_components=args.observation_components,
-                     route_alignment=args.route_alignment)
+                     route_alignment=args.route_alignment,
+                     aligned_qualification=args.aligned_qualification)
         report['qualification_tests'] = dict(status=('passed' if args.qualify_tests else 'not_requested'),
                                              log=str(test_log) if args.qualify_tests else None)
         report['completeness'] = completeness(report, bootstrap_calibration=args.bootstrap_calibration,
