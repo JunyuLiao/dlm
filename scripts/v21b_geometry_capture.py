@@ -461,6 +461,71 @@ def _bootstrap_replay(model, sequence, runtime, upto):
     return rows
 
 
+def _observation_components(owner, record, native_fn, reps=5):
+    """v24: time each production piece of an observation (BO/A) on one real
+    GLOBAL state, in isolation, on the same Q/K/V. Pieces are run exactly as
+    the router runs them; the full-V projection is the diagnostic proxy for a
+    fresh lease at canvas start. Sum of pieces is not a forward price."""
+    from experiments.numerical_qk_reuse.cached_executor import (
+        allocate_summary, preqk_attention, route_only)
+    from experiments.numerical_qk_reuse.integration import Attention
+    from dllm.attention.blasst.core import _attention_validity
+    scale = _mask_contract(record)
+    q, k, v = (record[key] for key in ('q', 'k', 'v'))
+    module, args, kwargs = (record[key] for key in ('module', 'args', 'kwargs'))
+    b, h, nq, nk, hk = q.shape[0], q.shape[1], q.shape[2], k.shape[-2], k.shape[1]
+    prefix_tiles = max(0, nk - nq) // 64
+    sensitivity = record['sensitivity']
+    if sensitivity is None:
+        sensitivity = torch.ones((b, nq), device=q.device, dtype=torch.float32)
+    sensitivity = sensitivity.contiguous()
+    threshold = float(owner.thresholds['global']['log_threshold'])
+    score = Attention.observe_scores_grouped(q, k, None, scale, False, None, 0)
+    legal = _attention_validity(None, q, k, is_causal=False, sliding_window=None)
+    z, ref, _ = _project_full(owner, record, legal)
+    z, ref = z.contiguous(), ref.contiguous()
+    routed = route_only(score, z, ref, sensitivity=sensitivity, log_threshold=threshold,
+                        variant=owner.kernel_variant)
+    identity = ('v24_component_probe',)
+
+    def with_summary():
+        summary = allocate_summary(b, h, (nq + 127) // 128, (nk + 63) // 64, prefix_tiles, 32,
+                                   q.device, identity)
+        return route_only(score, z, ref, sensitivity=sensitivity, log_threshold=threshold,
+                          summary=summary, store_summary=True, variant=owner.kernel_variant)
+
+    pieces = {
+        'native_attention': lambda: native_fn(module, q, k, v, *args, **kwargs),
+        'score_producer_grouped_q': lambda: Attention.observe_scores_grouped(q, k, None, scale, False, None, 0),
+        'valid_key_map': lambda: torch.isfinite(score).reshape(b, hk, h // hk, nq, nk).any((2, 3)),
+        'full_current_v_projection_proxy': lambda: _project_full(owner, record, legal),
+        'route_only_no_summary': lambda: route_only(score, z, ref, sensitivity=sensitivity,
+                                                    log_threshold=threshold, variant=owner.kernel_variant),
+        'route_with_summary_alloc_store': with_summary,
+        'retained_consumer_fp32_model_major': lambda: preqk_attention(
+            q, k, v, routed.skipped, routed.eligible, scale=scale, is_causal=False, window=None,
+            variant=owner.kernel_variant, output_score_precision='fp32_scores_bf16_pv',
+            output_layout='model_major'),
+    }
+    for fn in pieces.values():
+        fn()
+    samples = {name: [] for name in pieces}
+    with base.no_compile_during_accepted() as misses:
+        for repeat in range(reps):
+            order = list(pieces) if repeat % 2 == 0 else list(reversed(list(pieces)))
+            for name in order:
+                _, event_ms, _ = _event(pieces[name])
+                samples[name].append(event_ms)
+    if misses:
+        raise RuntimeError(f'JIT specialization during component timing: {misses}')
+    median = lambda values: sorted(values)[len(values)//2]
+    kept = float((routed.eligible & ~routed.skipped).sum()) / max(1., float(routed.eligible.sum()))
+    return dict(status='qualified', keys=nk, queries=nq, prefix_tiles=prefix_tiles,
+                kept_tile_fraction_of_eligible=kept, reps=reps,
+                median_event_ms={name: median(v) for name, v in samples.items()}, samples=samples,
+                note='isolated per-piece CUDA events on one GLOBAL layer; not additive to a forward price')
+
+
 def _native_stop(model, snapshot):
     kw = base.prepare_step(snapshot, None)
     result = model._denoising_step(**kw)
@@ -503,8 +568,9 @@ def _replay(model, sequence, selected, runtime, *, native):
 
 @torch.inference_mode()
 def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=False,
-        observation_parity=False, bootstrap_parity=False):
-    if sum(map(bool, (bootstrap_calibration, q16_validation, observation_parity, bootstrap_parity))) > 1:
+        observation_parity=False, bootstrap_parity=False, observation_components=False):
+    if sum(map(bool, (bootstrap_calibration, q16_validation, observation_parity, bootstrap_parity,
+                      observation_components))) > 1:
         raise ValueError('calibration, validation and observation parity are separate stages')
     from dllm.models import create_adapter
     paths, proof = diagnostic.preflight(config)
@@ -522,6 +588,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                           else 'frozen_q16_offsets_validation_and_attention_share' if q16_validation
                           else 'v23_gqa_observation_producer_parity' if observation_parity
                           else 'v23_native_bootstrap_qualification' if bootstrap_parity
+                          else 'v24_observation_components' if observation_components
                           else 'inherited_threshold_opportunity'),
                   source_config_sha256=hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest(),
                   source_sha256={
@@ -558,7 +625,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                 wanted = {0, 3} if dataset == 'longbench_v2' else {0}
                 reached = {int(s['call_index']) for s in sequence}
                 selected, missing = sorted(wanted & reached), sorted(wanted - reached)
-            elif q16_validation or observation_parity:
+            elif q16_validation or observation_parity or observation_components:
                 # Same states as the inherited-threshold capture plus bootstrap call 0.
                 selected = sorted(set(selected) | {0})
             group.update(status='captured', reached_calls=len(sequence), missing_requested_calls=missing,
@@ -606,7 +673,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                 group['status'] = 'complete' if all(r['status'] == 'qualified'
                                                     for r in results.values()) else 'failed'
                 continue
-            if observation_parity:
+            if observation_parity or observation_components:
                 native = dict(records={}, input_digests={}, output_digests={})
                 native_qkv_hashes = {}
             elif q16_validation:
@@ -639,7 +706,18 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                                          input_digest_method=method['input_digests'][idx],
                                          native_forward_digest=native['output_digests'].get(idx),
                                          method_forward_digest=method['output_digests'][idx], layers={})
-                    for layer in ((5,) if (q16_validation or observation_parity) else (0, 5)):
+                    for layer in ((5,) if (q16_validation or observation_parity or observation_components)
+                                  else (0, 5)):
+                        if observation_components:
+                            try:
+                                target_result['layers']['5'] = dict(
+                                    status='qualified', attention_kind='GLOBAL',
+                                    components=_observation_components(owner, method['records'][idx][5], native_fn))
+                            except Exception as exc:
+                                target_result['layers']['5'] = dict(status='failed', error=_error(exc, 'layer'))
+                                report['errors'].append(dict(group=key, call_index=idx, layer=5,
+                                                             **_error(exc, 'observation_components')))
+                            continue
                         if observation_parity:
                             try:
                                 target_result['layers']['5'] = dict(
@@ -752,6 +830,8 @@ def main(argv=None):
                         help='run the geometry parity test under this billed stage before model capture')
     parser.add_argument('--bootstrap-calibration', action='store_true',
                         help='separate missing-bootstrap and frozen two-LB-state work/error screen')
+    parser.add_argument('--observation-components', action='store_true',
+                        help='v24: isolated per-piece timing of observation work on real GLOBAL states')
     parser.add_argument('--bootstrap-parity', action='store_true',
                         help='v23 Track P: native logits at calls 0/1 and origin-1 A/D/H schedule')
     parser.add_argument('--observation-parity', action='store_true',
@@ -786,7 +866,8 @@ def main(argv=None):
                      bootstrap_calibration=args.bootstrap_calibration,
                      q16_validation=args.q16_validation,
                      observation_parity=args.observation_parity,
-                     bootstrap_parity=args.bootstrap_parity)
+                     bootstrap_parity=args.bootstrap_parity,
+                     observation_components=args.observation_components)
         report['qualification_tests'] = dict(status=('passed' if args.qualify_tests else 'not_requested'),
                                              log=str(test_log) if args.qualify_tests else None)
         report['completeness'] = completeness(report, bootstrap_calibration=args.bootstrap_calibration,
