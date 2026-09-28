@@ -1,10 +1,10 @@
 {
-  "schema": 23,
+  "schema": 24,
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
-  "authority": "User v23 handoff dllm_claude_v23_cheap_anchor_native_bootstrap_20260928.md",
-  "status": "V23_PANEL_240_OF_240_COMPLETE_NO_ACTIVE_JOBS",
+  "authority": "User v24 handoff dllm_claude_v24_close_bootstrap_measurement_20260928.md",
+  "status": "V24_CPU_AUDIT_COMPLETE_DIRECT_COST_PREPARED_AWAITING_GPU_AUTHORIZATION",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "gpu_stop_utc": "2026-09-28T05:52:00Z",
   "final_deadline_utc": "2026-09-28T06:22:00Z",
@@ -18,7 +18,7 @@
   "agents": {
     "lead": "Claude Opus 5.5 (this session)"
   },
-  "next": "GPU window closed. Next justified action needs user decision (see morning_brief_zh.md). RULER stage for bootstrap6 not frozen/run.",
+  "next": "After authorization: python -m scripts.v24_profile --v21-profile-config <root>/bindings/v24_cpu_3ae5e1d/profile.json --out <root>/diagnostics/v24_profile_<host>.json under scripts/v20_stage.py with --max-seconds 1500 and the renewed deadline, one per host; estimated ~700 GPU-s and 3 captures per host",
   "peer_refs": {
     "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
     "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
@@ -203,5 +203,16 @@
   "remaining": {
     "gpu_process_seconds": 9567.727454519272,
     "executions": 212
+  },
+  "gpu_authorization": {
+    "previous_window_end": "2026-09-28T05:52:00Z",
+    "status": "expired; no GPU activity since",
+    "renewed": null,
+    "note": "Direct-cost profile requires explicit renewed deadline from user before launch"
+  },
+  "v24_cpu": {
+    "audit": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/v24_audit.md (PASS, 120/120)",
+    "errata": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/v24_errata_and_audit.md",
+    "direct_cost_harness": "scripts/v24_profile.py; CPU-validated derived configs on both hosts at deploy v24_cpu_3ae5e1d (bindings/v24_cpu_3ae5e1d/profile.json)"
   }
 }

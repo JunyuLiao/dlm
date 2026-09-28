@@ -1,25 +1,21 @@
-# v23 continuation (cheap anchor + native bootstrap) — COMPLETE for this window
+# v24 continuation (close bootstrap measurement)
 
-Authority: user v23 handoff `dllm_claude_v23_cheap_anchor_native_bootstrap_20260928.md`; started at `6b795ca6`.
+Authority: user v24 handoff `dllm_claude_v24_close_bootstrap_measurement_20260928.md`; started at `ca297e05`.
 Worktree `E:/dlm/m3_output_numerics_20260927`, branch `research/m3-output-numerics-20260927`.
-GPU window closed 2026-09-28T05:52Z. Charged 12,032.3 / 21,600 GPU-process s, 300 / 512 executions
-(see STATE.json). No active jobs; both GPUs 0 MiB.
+GPU window ended 2026-09-28T05:52Z; **no GPU activity until the user renews a deadline** (STATE.gpu_authorization).
+Budget recorded: 12,032.3 / 21,600 GPU-process s, 300 / 512 executions (no v24 GPU use).
 
-## Results (R = results/m3_numeric_trajectory_bridge_20260927)
-- `R/v23_corrections.md`: six v22 claims narrowed.
-- Track E `R/anchor_memory_cost.md`: grouped-Q observation producer bitwise identical on 23 states; applied to all
-  method arms; ~0.1% of request time.
-- Track P `native_bootstrap2_observe1`: qualified (native logits at calls 0/1, exact A/D/H) on both hosts.
-- Panel `v21_bootstrap6_b8b2c59449fd0ebf` 240/240, report `R/v23_bootstrap6/bootstrap6_report.md`:
-  LB M3-bootstrap 6/12 correct, 2415 calls vs native 2360, paired warm 0.990 [0.94,1.05]; incumbent M3
-  2604 calls, 5/12; B-bootstrap 4/12; fresh T 0.904. AIME: no speed gain.
-- LB blocks 4-11 ran under a second binding (deploy dc52522, run dir bootstrap6_001_lbrest) because the
-  prefix-resume rule refused stage order preview->aime->lb_rest; method sources byte-identical.
+## Done (CPU)
+- Strict union audit of the two v23 segments: PASS, 120/120 cells, lineage for both bindings, method
+  sources byte-identical (`scripts/v24_bootstrap6_audit.py`, tests 8/8, `R/v23_bootstrap6/v24_audit.*`).
+- Five-phase B0/BO/A/D/H conservation from raw receipts holds for every first run.
+- Errata `R/v23_bootstrap6/v24_errata_and_audit.md`: W = N x W/N on the same cells (LB M3-boot/native
+  0.990 = 1.040 x 0.952); W/N is amortized, not direct forward; preview 0.77 does not carry to full panel
+  (0.9997); host = seed confounded.
+- Direct-cost harness `scripts/v24_profile.py` (six frozen arms, N16 from canvas start, model_forward +
+  denoising_step, per-call B0/BO/A/D/H prices); derived configs CPU-validated on both hosts.
 
-## Not done
-RULER stage; direct forward/step pricing of bootstrap arms. Next action needs a user decision and a GPU
-window extension (morning_brief_zh.md).
-
-## Resume helpers (private, coordinator)
-E:/dlm/v23_transport.py (bind/launch, --run-dir), E:/dlm/v23_score_transport.py (closed-ledger scoring),
-scripts/v23_bootstrap6_reduce.py (report).
+## Next (needs authorization)
+1. v24 direct-cost profile, one worker per host (~700 GPU-s + 3 captures each). Command in STATE.next.
+2. Only if a phase is materially dominant: at most one exact execution change (none chosen yet).
+3. RULER 13-task stage (90 executions) needs a small frozen protocol extension (1 seed, warm on 2 tasks).
