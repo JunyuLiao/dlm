@@ -24,7 +24,7 @@ from scripts.v20_run import router_phase_evidence
 SCHEMA = "v21_conditional_panel_v1"
 BINDING_SCHEMA = "v21_conditional_binding_v1"
 PANEL_COUNTS = {"numeric7": (7, 448), "layout_pair": (2, 96), "bootstrap6": (6, 240),
-                "bootstrap6_ruler": (6, 90),
+                "bootstrap6_ruler": (6, 90), "aligned6_pilot": (6, 90),
                 "zero_pruning_diagnostic": (3, 12)}
 V20_PROTOCOL = Path(__file__).resolve().parents[1] / "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json"
 
@@ -85,6 +85,8 @@ def validate_protocol(protocol: dict) -> None:
                 raise ValueError("unrecognized v20 parent arm")
             if c["kind"] == "v21_control" and c.get("parent_v20_arm") != "D_matched":
                 raise ValueError("v21 control must be D_matched parent")
+            if c.get("route_storage", "aligned16") != "aligned16":
+                raise ValueError(f"unknown v25 route storage: {arm}")
             if c.get("bootstrap_policy", "native_bootstrap2_observe1") != "native_bootstrap2_observe1" or \
                     c.get("observation_producer", "grouped_q") not in ("grouped_q", "repeat_interleave"):
                 raise ValueError(f"unknown v23 method field: {arm}")
@@ -95,6 +97,10 @@ def validate_protocol(protocol: dict) -> None:
     required_tasks = ({"longbench_v2"} if diagnostic else {"aime26", "longbench_v2"}
                       if protocol["panel_kind"] == "bootstrap6" else {"ruler4k"}
                       if protocol["panel_kind"] == "bootstrap6_ruler" else {"ruler4k", "aime26", "longbench_v2"})
+    pilot = protocol["panel_kind"] == "aligned6_pilot"
+    if pilot and protocol.get("seeds_by_dataset") != {"longbench_v2": [101, 202], "aime26": [101, 202],
+                                                       "ruler4k": [101]}:
+        raise ValueError("aligned6 pilot seed contract drift")
     if not isinstance(ids, dict) or set(ids) != required_tasks:
         raise ValueError("task ID inventory differs from frozen panel kind")
     if any(not isinstance(v, list) or len(v) != len(set(v)) for v in ids.values()):
@@ -150,12 +156,14 @@ def validate_protocol(protocol: dict) -> None:
         blocks.setdefault(block, []).append(entry)
     if sorted(blocks) != list(range(len(blocks))) or set(assignments) != {str(b) for b in blocks}:
         raise ValueError("blocks not contiguous or assignments foreign")
-    expected_qseeds = {(d, q, seed) for d, questions in ids.items() for q in questions for seed in protocol["seeds"]}
+    seeds_by = protocol.get("seeds_by_dataset") if pilot else None
+    expected_qseeds = {(d, q, seed) for d, questions in ids.items() for q in questions
+                       for seed in (seeds_by[d] if seeds_by else protocol["seeds"])}
     actual_qseeds = {(a["dataset"], a["id"], a["seed"]) for a in assignments.values()}
     if len(actual_qseeds) != len(assignments) or actual_qseeds != expected_qseeds:
         raise ValueError("frozen panel omits or duplicates a task question-seed block")
     for block, entries in blocks.items():
-        warm = not diagnostic and (not ruler_stage or block in protocol.get("warm_blocks", []))
+        warm = not diagnostic and (not (ruler_stage or pilot) or block in protocol.get("warm_blocks", []))
         required_roles = ["attempt0"] * len(arms) + (["warm"] * len(arms) if warm else [])
         if len(entries) != len(required_roles) or [e["role"] for e in entries] != required_roles:
             raise ValueError("incomplete or interleaved question-seed block")
@@ -195,6 +203,8 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
         if (config.get("output_score_precision") != contract["output_score_precision"] or
                 config.get("output_layout") != contract["output_layout"]):
             raise ValueError("v21 numeric/layout mode differs from arm contract")
+        if config.get("route_storage", "logical") != contract.get("route_storage", "logical"):
+            raise ValueError("v25 route storage differs from arm contract")
         if (config.get("bootstrap_policy") != contract.get("bootstrap_policy") or
                 config.get("observation_producer", "repeat_interleave") !=
                 contract.get("observation_producer", "repeat_interleave")):

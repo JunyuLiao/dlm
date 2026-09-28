@@ -1,13 +1,11 @@
 {
-  "schema": 24,
+  "schema": 25,
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
-  "authority": "User v24 handoff dllm_claude_v24_close_bootstrap_measurement_20260928.md",
-  "status": "V24_COMPLETE_NO_ACTIVE_JOBS",
+  "authority": "User v25 handoff dllm_claude_v25_route_preparation_20260928.md",
+  "status": "V25_CPU_IMPLEMENTATION_READY_AWAITING_GPU_RENEWAL",
   "wall_start_utc": "2026-09-27T22:22:00Z",
-  "gpu_stop_utc": "2026-09-28T05:52:00Z",
-  "final_deadline_utc": "2026-09-28T06:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 512,
   "max_gpu_workers": 2,
@@ -18,7 +16,7 @@
   "agents": {
     "lead": "Claude Opus 5.5 (this session)"
   },
-  "next": "User decision: (a) qualify aligned_route_k16 as a new numerical variant, or (b) stop and write up. GPU window ends 09:30Z.",
+  "next": "After renewal: (1) qualification ~300 GPU-s/host + 3 captures; (2) v25 direct cost ~500 GPU-s/host + 3 captures; (3) only if (1)-(2) qualify: pilot 90 executions (~2800 GPU-s). Total <=102 of 104 remaining executions.",
   "peer_refs": {
     "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
     "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
@@ -209,16 +207,9 @@
     "executions": 104
   },
   "gpu_authorization": {
-    "previous_window_end": "2026-09-28T05:52:00Z",
-    "status": "expired; no GPU activity since",
-    "renewed": {
-      "granted_by": "user in chat (option: 3h, profile + RULER)",
-      "granted_observed_utc": "2026-09-28T07:12Z",
-      "gpu_stop_utc": "2026-09-28T09:30:00Z",
-      "report_reserve": "last GPU launch must finish by ~09:00Z",
-      "budget": "remaining 9,567.7 s / 212 executions; no new quota"
-    },
-    "note": "Direct-cost profile requires explicit renewed deadline from user before launch"
+    "single_source": "E:/dlm/gpu_authorization.json (read by every launcher via E:/dlm/gpu_auth.py)",
+    "current": null,
+    "note": "09:30Z renewal expired; no GPU activity after 07:33Z; renewal required"
   },
   "v24_cpu": {
     "audit": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/v24_audit.md (PASS, 120/120)",
@@ -230,5 +221,26 @@
     "private": "E:/dlm/v23_private/bootstrap6_ruler_001",
     "planned": 90,
     "status": "complete 90/90, all arms 12/13; scored ruler_scored.*"
+  },
+  "gpu_stop_utc_history": [
+    "2026-09-28T05:52:00Z",
+    "2026-09-28T09:30:00Z"
+  ],
+  "v25": {
+    "candidate": "route_storage=aligned16 (named numerical-implementation variant)",
+    "qualification": "scripts/v21b_geometry_capture.py --aligned-qualification (parent vs aligned16 M1/M3/B, full A/D/H)",
+    "direct_cost": "scripts/v24_profile.py --arm-set v25 (native, M3 boot, M3 boot aligned16, B boot, B boot aligned16)",
+    "pilot": {
+      "protocol": "v25_aligned6_pilot_56d3b98fe1261756",
+      "private": "E:/dlm/v25_private/aligned6_pilot_001",
+      "planned": 90
+    },
+    "cpu_tests": "43 passed, 3 GPU-only skipped on both hosts at deploy v25_cpu_6fa9043",
+    "not_run": [
+      "aligned16 GPU qualification",
+      "v25 direct cost",
+      "pilot generation",
+      "parallel-summary builder probe (only if alignment too small)"
+    ]
   }
 }
