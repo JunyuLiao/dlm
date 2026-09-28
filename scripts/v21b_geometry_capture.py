@@ -587,16 +587,16 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                         ('B_native_bootstrap2_observe1', 8, 'B_A8_matched')):
                     arm = _bootstrap_arm(selected_arm, parent_arm, arm_name)
                     with base.arm_context(adapter, arm) as runtime:
-                        rows = _bootstrap_replay(model, sequence, runtime, upto)
+                        call_rows = _bootstrap_replay(model, sequence, runtime, upto)
                     phases = ''.join('N' if r['phase'] == 'native' else 'A' if r['phase'] == 'native+observe'
-                                     else r['phase'] for r in rows)
+                                     else r['phase'] for r in call_rows)
                     want = ('N' + expected[interval])[:upto]
-                    logits_equal = {str(i): rows[i]['output_digest'] == native['output_digests'][i]
-                                    for i in (0, 1) if i < len(rows)}
+                    logits_equal = {str(i): call_rows[i]['output_digest'] == native['output_digests'][i]
+                                    for i in (0, 1) if i < len(call_rows)}
                     ok = phases == want and all(logits_equal.values())
                     results[arm_name] = dict(status='qualified' if ok else 'failed',
                                              phases=phases, expected=want,
-                                             native_logits_equal=logits_equal, calls=rows)
+                                             native_logits_equal=logits_equal, calls=call_rows)
                     if not ok:
                         report['errors'].append(dict(group=key, arm=arm_name, stage='bootstrap_parity',
                                                      phases=phases, expected=want,
