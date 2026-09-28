@@ -5,13 +5,14 @@
     "per-cell task score and trajectory statistics without original prompts or gold",
     "scalar/hashes-only numerical diagnostics and direct profiles",
     "immutable configuration fingerprints and resource receipts without credentials",
-    "reports and slide text drafts"
+    "reports and slide text drafts",
+    "redacted generated completions/predictions with per-canvas trajectories (user-approved 2026-09-28)"
   ],
   "excluded": [
     "original task prompts and gold/reference answers",
     "credentials and private host authentication material",
     "full Q/K/V, hidden-state, logits, model-weight or obsolete cache dumps"
   ],
-  "first_outputs": "retained privately; no replacement or overwrite",
+  "first_outputs": "v21-v25b generated outputs published at the user request (2026-09-28) in generation_records_v21_v25b/, redacted like the v20 export: no prompts, prompt tokens/hashes, gold, credentials or server paths",
   "provenance": "Published v20 800-record export remains unchanged and is cited by manifest SHA."
 }
