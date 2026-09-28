@@ -399,8 +399,18 @@ def score(protocol_path: Path, binding_path: Path, ledgers: list[Path], gold_pat
     if diagnostic:
         quality = {}
     else:
+        # A panel without some task (v23 bootstrap6 defers RULER) binds only its own gold.
+        gold_paths = ({d: p for d, p in gold_paths.items() if d in protocol["ids"]}
+                      if gold_paths else gold_paths)
         if not gold_paths or not ruler_root or not private_roots or set(gold_paths) != set(protocol["ids"]):
             raise ValueError("eligible panel requires exact pinned gold/scorer paths and private receipt roots")
+        if "source_identity" not in protocol:
+            # v21/v23 panels inherit gold/scorer identity from the v20 protocol they pin by hash.
+            from scripts.v21_run import V20_PROTOCOL
+            raw = V20_PROTOCOL.read_bytes()
+            if sha(raw) != protocol.get("v20_protocol_sha256"):
+                raise ValueError("pinned v20 protocol identity drift")
+            protocol = dict(protocol, source_identity=json.loads(raw)["source_identity"])
         gold = verify_sources(protocol, gold_paths)
         quality = score_firsts(protocol, records, gold, ruler_root=ruler_root, private_roots=private_roots)
     task_by_id = ({qid: row["task"] for qid, row in gold["ruler4k"].items()}
