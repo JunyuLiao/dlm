@@ -227,6 +227,92 @@ def freeze_bridge(v20_protocol_path, v20_binding_path, manifests_dir, out_dir):
     return protocol
 
 
+SEVEN_ARMS = ('D_native', 'T_scope', 'M1_R1_A8', 'M2_pool_R1_A8', 'M3_R3_A8', 'M3_R3_A16', 'B_A8')
+
+
+def freeze_seven(v20_protocol_path, v20_binding_path, manifests_dir, out_dir):
+    """v26 quick seven-arm panel (84): LB odd-K + KDIV-8, AIME first two by sha256,
+    RULER first two tasks by sha256; seed 101; first + warm; hosts alternate by block.
+    Inputs follow fixed ID rules chosen before any v26 output."""
+    out_dir = Path(out_dir)
+    if out_dir.exists():
+        raise FileExistsError(out_dir)
+    original_bytes, binding_bytes = Path(v20_protocol_path).read_bytes(), Path(v20_binding_path).read_bytes()
+    original, binding = json.loads(original_bytes), json.loads(binding_bytes)
+    if binding.get('panel_protocol_sha256') != _sha(original_bytes) or binding.get('status') != 'frozen':
+        raise ValueError('old frozen v20 protocol/binding identity drift')
+    host_uuids = {}
+    for entry in original['block_assignments'].values():
+        host_uuids.setdefault(entry['host'], set()).add(entry['gpu_uuid'])
+    host_ids = sorted(host_uuids)
+    order = lambda values: sorted(values, key=lambda v: _sha(v.encode()))
+    ids = {'longbench_v2': list(BRIDGE_IDS),
+           'aime26': order(original['ids']['aime26'][:4])[:2],
+           'ruler4k': order(original['ids']['ruler4k'])[:2]}
+    manifests, hashes = {}, {}
+    for dataset in ids:
+        raw = (Path(manifests_dir) / f'{dataset}_generation_manifest.json').read_bytes()
+        if _sha(raw) != original['generation_manifest_sha256'][dataset]:
+            raise ValueError(f'old frozen generation manifest drift: {dataset}')
+        rows = {r['id']: r for r in json.loads(raw)}
+        clean = [rows[i] for i in ids[dataset]]
+        if any(set(r) & old.GOLD or _sha(r['prompt'].encode()) != r.get('prompt_hash') for r in clean):
+            raise ValueError(f'gold/prompt drift: {dataset}')
+        manifests[dataset] = _bytes(clean)
+        hashes[dataset] = _sha(manifests[dataset])
+
+    def method(parent, **extra):
+        contract = dict(kind='v21_method', parent_v20_arm=parent, scope=SCOPE,
+                        output_score_precision='fp32_scores_bf16_pv', output_layout='model_major',
+                        observation_producer=PRODUCER, bootstrap_policy=BOOTSTRAP,
+                        route_storage='aligned16_odd')
+        contract.update(extra)
+        return contract
+    contracts = {'D_native': dict(kind='native'),
+                 'T_scope': dict(kind='v20_legacy', parent_v20_arm='T_scope', scope=SCOPE),
+                 'M1_R1_A8': method('M1_R1_A8_current_output'),
+                 'M2_pool_R1_A8': method('M1_R1_A8_current_output', mu_mode='pooled'),
+                 'M3_R3_A8': method('M3_R3_A8_current_output'),
+                 'M3_R3_A16': method('M3_R3_A8_current_output', score_period=16),
+                 'B_A8': method('B_A8_matched')}
+    arms = list(SEVEN_ARMS)
+    protocol_id = 'v26_seven_' + _sha(_bytes(dict(old_protocol=_sha(original_bytes), ids=ids,
+                                                   arms=contracts)))[:16]
+    assignments, schedule, block, stages = {}, [], 0, {}
+    for dataset in ('longbench_v2', 'aime26', 'ruler4k'):
+        stages[dataset] = []
+        for id_ in ids[dataset]:
+            host = host_ids[block % 2]
+            assignment = dict(dataset=dataset, id=id_, seed=101, host=host,
+                              gpu_uuid=next(iter(host_uuids[host])))
+            assignments[str(block)] = assignment
+            first = arms[block % len(arms):] + arms[:block % len(arms)]
+            for role, arm_order in (('attempt0', first), ('warm', first[::-1])):
+                for arm in arm_order:
+                    schedule.append(dict(index=len(schedule), block=block, arm=arm,
+                        cell_id=cell_id(protocol_id, old.REVISION, old.sha_json(contracts[arm]), id_, 101),
+                        role=role, repeat=0 if role == 'attempt0' else 1, **assignment))
+            stages[dataset].append(block)
+            block += 1
+    protocol = dict(schema='v21_conditional_panel_v1', status='frozen', execution_ready=True,
+                    panel_kind='v26_seven', protocol_id=protocol_id, model_revision=old.REVISION,
+                    v20_protocol_sha256=_sha(original_bytes), v20_binding_sha256=_sha(binding_bytes),
+                    selected_scope=SCOPE, policy_point='P0', policy_sha256=binding['policy_sha256'],
+                    output_layout='model_major', ids=ids, seeds=[101],
+                    arms=arms, arm_contracts=contracts, block_assignments=assignments,
+                    schedule=schedule, planned_executions=len(schedule),
+                    generation_manifest_sha256=hashes, stages=stages,
+                    selection_rule='LB: only odd-K frozen input + highest-KDIV (sha tie); AIME/RULER: first two by sha256(id); no outcomes used',
+                    host_assignment_rule='host = block mod 2 (each host one LB, one AIME, one RULER)',
+                    quality_eligible=True, timing_eligible=True)
+    validate_protocol(protocol)
+    out_dir.mkdir(parents=True, exist_ok=False)
+    for dataset, content in manifests.items():
+        _new(out_dir / f'{dataset}_generation_manifest.json', content)
+    _new(out_dir / 'protocol.json', _bytes(protocol))
+    return protocol
+
+
 def _contracts(mode, output_layout):
     legacy = ('legacy_bf16_scores', 'head_major')
     updated = ('fp32_scores_bf16_pv', output_layout)
@@ -479,7 +565,9 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                     output_layout=contract['output_layout'],
                     bootstrap_policy=contract.get('bootstrap_policy'),
                     observation_producer=contract.get('observation_producer', 'repeat_interleave'),
-                    route_storage=contract.get('route_storage', 'logical'))
+                    route_storage=contract.get('route_storage', 'logical'),
+                    mu_mode=contract.get('mu_mode', 'exact'),
+                    score_period=contract.get('score_period', 8))
             path = config_dir / dataset / f'{arm}.json'
             _new(path, _bytes(result))
             configs[dataset][arm] = dict(path=str(path.resolve()), sha256=_sha(path.read_bytes()))
@@ -498,7 +586,7 @@ def main(argv=None):
     sub = parser.add_subparsers(dest='command', required=True)
     fr = sub.add_parser('freeze')
     fr.add_argument('--mode', choices=('numeric7', 'layout_pair', 'bootstrap6', 'bootstrap6_ruler',
-                                        'aligned6_pilot', 'aligned_bridge'), required=True)
+                                        'aligned6_pilot', 'aligned_bridge', 'v26_seven'), required=True)
     fr.add_argument('--v20-protocol', type=Path, required=True)
     fr.add_argument('--v20-binding', type=Path, required=True)
     fr.add_argument('--manifests-dir', type=Path, required=True)
@@ -512,8 +600,9 @@ def main(argv=None):
     hb.add_argument('--manifests-dir', type=Path, required=True)
     hb.add_argument('--out', type=Path, required=True)
     args = parser.parse_args(argv)
-    if args.command == 'freeze' and args.mode in ('aligned6_pilot', 'aligned_bridge'):
-        result = (freeze_pilot if args.mode == 'aligned6_pilot' else freeze_bridge)(
+    if args.command == 'freeze' and args.mode in ('aligned6_pilot', 'aligned_bridge', 'v26_seven'):
+        result = dict(aligned6_pilot=freeze_pilot, aligned_bridge=freeze_bridge,
+                      v26_seven=freeze_seven)[args.mode](
             args.v20_protocol, args.v20_binding, args.manifests_dir, args.out_dir)
         print(json.dumps(dict(protocol=str((args.out_dir / 'protocol.json').resolve()),
                               planned_executions=result['planned_executions']), sort_keys=True))

@@ -1,10 +1,10 @@
 {
-  "schema": "25b",
+  "schema": 26,
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
-  "authority": "User v25b doc dllm_v25b_audit_and_alignment_exposure_20260928.md",
-  "status": "V25B_COMPLETE_NO_ACTIVE_JOBS",
+  "authority": "User v26 doc dllm_claude_v26_m1_m2_m3_frontier_20260928.md",
+  "status": "V26_M2_IMPLEMENTED_SEVEN_PANEL_FROZEN",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 512,
@@ -259,5 +259,19 @@
     "extra_allocations": {
       "v25b_bridge": 16
     }
+  },
+  "v26_budget": {
+    "gpu_process_hours_max": 12,
+    "executions_max": 1800,
+    "used_gpu_process_seconds": 419.2,
+    "used_executions": 0,
+    "note": "independent v26 allocation; historical 512 ledger and v25b 16 are closed and not reset",
+    "charges": [
+      "M2 kernel/regression test suite on dllm: 419.2 s (incl. failed first run 4.4 s)"
+    ]
+  },
+  "v26": {
+    "seven_panel": "v26_seven_99cf56d6ef8412d7 (84)",
+    "results_dir": "results/m1_m2_m3_frontier_v26_20260928"
   }
 }

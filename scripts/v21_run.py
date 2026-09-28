@@ -24,7 +24,7 @@ from scripts.v20_run import router_phase_evidence
 SCHEMA = "v21_conditional_panel_v1"
 BINDING_SCHEMA = "v21_conditional_binding_v1"
 PANEL_COUNTS = {"numeric7": (7, 448), "layout_pair": (2, 96), "bootstrap6": (6, 240),
-                "bootstrap6_ruler": (6, 90), "aligned6_pilot": (6, 90), "aligned_bridge": (2, 16),
+                "bootstrap6_ruler": (6, 90), "aligned6_pilot": (6, 90), "aligned_bridge": (2, 16), "v26_seven": (7, 84),
                 "zero_pruning_diagnostic": (3, 12)}
 V20_PROTOCOL = Path(__file__).resolve().parents[1] / "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json"
 
@@ -85,7 +85,8 @@ def validate_protocol(protocol: dict) -> None:
                 raise ValueError("unrecognized v20 parent arm")
             if c["kind"] == "v21_control" and c.get("parent_v20_arm") != "D_matched":
                 raise ValueError("v21 control must be D_matched parent")
-            if c.get("route_storage", "aligned16") != "aligned16":
+            if c.get("route_storage", "aligned16") not in ("aligned16", "aligned16_odd") or \
+                    c.get("mu_mode", "pooled") != "pooled" or c.get("score_period", 16) != 16:
                 raise ValueError(f"unknown v25 route storage: {arm}")
             if c.get("bootstrap_policy", "native_bootstrap2_observe1") != "native_bootstrap2_observe1" or \
                     c.get("observation_producer", "grouped_q") not in ("grouped_q", "repeat_interleave"):
@@ -107,7 +108,8 @@ def validate_protocol(protocol: dict) -> None:
     if any(not isinstance(v, list) or len(v) != len(set(v)) for v in ids.values()):
         raise ValueError("task IDs missing or duplicated")
     ruler_stage = protocol["panel_kind"] == "bootstrap6_ruler"
-    if protocol.get("seeds") != ([101] if ruler_stage else [101, 202]):
+    single_seed = ruler_stage or protocol["panel_kind"] == "v26_seven"
+    if protocol.get("seeds") != ([101] if single_seed else [101, 202]):
         raise ValueError("frozen v20 generation seeds changed")
     if diagnostic:
         frozen_v20 = _json(V20_PROTOCOL)
@@ -206,6 +208,9 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
             raise ValueError("v21 numeric/layout mode differs from arm contract")
         if config.get("route_storage", "logical") != contract.get("route_storage", "logical"):
             raise ValueError("v25 route storage differs from arm contract")
+        if (config.get("mu_mode", "exact") != contract.get("mu_mode", "exact") or
+                config.get("score_period", 8) != contract.get("score_period", 8)):
+            raise ValueError("v26 mu mode / score period differs from arm contract")
         if (config.get("bootstrap_policy") != contract.get("bootstrap_policy") or
                 config.get("observation_producer", "repeat_interleave") !=
                 contract.get("observation_producer", "repeat_interleave")):
