@@ -526,6 +526,79 @@ def _observation_components(owner, record, native_fn, reps=5):
                 note='isolated per-piece CUDA events on one GLOBAL layer; not additive to a forward price')
 
 
+def _route_alignment(owner, record, reps=5):
+    """v24 candidate probe: does a 16-aligned key extent reproduce the route
+    exactly and faster? Padded keys carry -inf scores and zero sketches, which
+    the unpadded kernel already loads for out-of-range lanes; tile count is
+    unchanged. Bitwise identity of bitmaps, invalid flags and stored prefix
+    summaries is measured, never assumed (alignment changes load layout)."""
+    import torch.nn.functional as F
+    from experiments.numerical_qk_reuse.cached_executor import allocate_summary, route_only
+    from experiments.numerical_qk_reuse.integration import Attention
+    from dllm.attention.blasst.core import _attention_validity
+    scale = _mask_contract(record)
+    q, k = record['q'], record['k']
+    b, h, nq, nk = q.shape[0], q.shape[1], q.shape[2], k.shape[-2]
+    pad = (-nk) % 16
+    if (nk + pad + 63) // 64 != (nk + 63) // 64:
+        raise AssertionError('alignment pad changed tile count')
+    sens = record['sensitivity']
+    if sens is None:
+        sens = torch.ones((b, nq), device=q.device, dtype=torch.float32)
+    sens = sens.contiguous()
+    threshold = float(owner.thresholds['global']['log_threshold'])
+    score = Attention.observe_scores_grouped(q, k, None, scale, False, None, 0)
+    legal = _attention_validity(None, q, k, is_causal=False, sliding_window=None)
+    z, ref, _ = _project_full(owner, record, legal)
+    z, ref = z.contiguous(), ref.contiguous()
+    score_pad = F.pad(score, (0, pad), value=-float('inf')).contiguous()
+    z_pad = F.pad(z, (0, 0, 0, pad)).contiguous()
+    prefix_tiles = max(0, nk - nq) // 64
+    qb, kt = (nq + 127) // 128, (nk + 63) // 64
+
+    def run(sc, zz):
+        summary = allocate_summary(b, h, qb, kt, prefix_tiles, 32, q.device, ('probe',))
+        routed = route_only(sc, zz, ref, sensitivity=sens, log_threshold=threshold,
+                            summary=summary, store_summary=True, variant=owner.kernel_variant)
+        return routed, summary
+
+    base_r, base_s = run(score, z)
+    pad_r, pad_s = run(score_pad, z_pad)
+    same = dict(skipped=bool(torch.equal(base_r.skipped, pad_r.skipped)),
+                eligible=bool(torch.equal(base_r.eligible, pad_r.eligible)),
+                invalid=bool(torch.equal(base_r.invalid_tiles, pad_r.invalid_tiles)),
+                summary_z=bool(torch.equal(base_s.z.view(torch.int32), pad_s.z.view(torch.int32))),
+                summary_mu=bool(torch.equal(base_s.mu.view(torch.int32), pad_s.mu.view(torch.int32))),
+                summary_active=bool(torch.equal(base_s.active, pad_s.active)),
+                summary_bad=bool(torch.equal(base_s.bad, pad_s.bad)))
+    # Producer on zero-padded K, masked to -inf beyond K (candidate aligned producer).
+    k_pad = F.pad(k, (0, 0, 0, pad))
+    aligned = Attention.observe_scores_grouped(q, k_pad, None, scale, False, None, 0)
+    aligned[..., nk:] = -float('inf')
+    producer_equal = bool(torch.equal(aligned[..., :nk].contiguous().view(torch.int32), score.view(torch.int32)))
+    del base_s, pad_s, aligned
+    pieces = {'route_store_K': lambda: run(score, z), 'route_store_K16': lambda: run(score_pad, z_pad),
+              'pad_scores_and_sketch_copy': lambda: (F.pad(score, (0, pad), value=-float('inf')).contiguous(),
+                                                     F.pad(z, (0, 0, 0, pad)).contiguous()),
+              'producer_K': lambda: Attention.observe_scores_grouped(q, k, None, scale, False, None, 0),
+              'producer_zero_padded_K16': lambda: Attention.observe_scores_grouped(
+                  q, F.pad(k, (0, 0, 0, pad)), None, scale, False, None, 0)}
+    for fn in pieces.values():
+        fn()
+    samples = {n: [] for n in pieces}
+    with base.no_compile_during_accepted() as misses:
+        for repeat in range(reps):
+            for n in (list(pieces) if repeat % 2 == 0 else list(reversed(list(pieces)))):
+                samples[n].append(_event(pieces[n])[1])
+    if misses:
+        raise RuntimeError(f'JIT specialization during alignment timing: {misses}')
+    median = lambda v: sorted(v)[len(v)//2]
+    return dict(status='qualified', keys=nk, pad=pad, kdiv_before=next(d for d in (16, 8, 4, 2, 1) if nk % d == 0),
+                route_outputs_bitwise_equal=same, producer_first_K_bitwise_equal=producer_equal,
+                median_event_ms={n: median(v) for n, v in samples.items()}, samples=samples,
+                note='diagnostic probe of an exact alignment candidate; JIT warm for both alignment classes before timing')
+
+
 def _native_stop(model, snapshot):
     kw = base.prepare_step(snapshot, None)
     result = model._denoising_step(**kw)
@@ -568,9 +641,10 @@ def _replay(model, sequence, selected, runtime, *, native):
 
 @torch.inference_mode()
 def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=False,
-        observation_parity=False, bootstrap_parity=False, observation_components=False):
+        observation_parity=False, bootstrap_parity=False, observation_components=False,
+        route_alignment=False):
     if sum(map(bool, (bootstrap_calibration, q16_validation, observation_parity, bootstrap_parity,
-                      observation_components))) > 1:
+                      observation_components, route_alignment))) > 1:
         raise ValueError('calibration, validation and observation parity are separate stages')
     from dllm.models import create_adapter
     paths, proof = diagnostic.preflight(config)
@@ -589,6 +663,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                           else 'v23_gqa_observation_producer_parity' if observation_parity
                           else 'v23_native_bootstrap_qualification' if bootstrap_parity
                           else 'v24_observation_components' if observation_components
+                          else 'v24_route_alignment_probe' if route_alignment
                           else 'inherited_threshold_opportunity'),
                   source_config_sha256=hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest(),
                   source_sha256={
@@ -625,7 +700,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                 wanted = {0, 3} if dataset == 'longbench_v2' else {0}
                 reached = {int(s['call_index']) for s in sequence}
                 selected, missing = sorted(wanted & reached), sorted(wanted - reached)
-            elif q16_validation or observation_parity or observation_components:
+            elif q16_validation or observation_parity or observation_components or route_alignment:
                 # Same states as the inherited-threshold capture plus bootstrap call 0.
                 selected = sorted(set(selected) | {0})
             group.update(status='captured', reached_calls=len(sequence), missing_requested_calls=missing,
@@ -673,7 +748,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                 group['status'] = 'complete' if all(r['status'] == 'qualified'
                                                     for r in results.values()) else 'failed'
                 continue
-            if observation_parity or observation_components:
+            if observation_parity or observation_components or route_alignment:
                 native = dict(records={}, input_digests={}, output_digests={})
                 native_qkv_hashes = {}
             elif q16_validation:
@@ -706,8 +781,18 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                                          input_digest_method=method['input_digests'][idx],
                                          native_forward_digest=native['output_digests'].get(idx),
                                          method_forward_digest=method['output_digests'][idx], layers={})
-                    for layer in ((5,) if (q16_validation or observation_parity or observation_components)
-                                  else (0, 5)):
+                    for layer in ((5,) if (q16_validation or observation_parity or observation_components
+                                           or route_alignment) else (0, 5)):
+                        if route_alignment:
+                            try:
+                                target_result['layers']['5'] = dict(
+                                    status='qualified', attention_kind='GLOBAL',
+                                    alignment=_route_alignment(owner, method['records'][idx][5]))
+                            except Exception as exc:
+                                target_result['layers']['5'] = dict(status='failed', error=_error(exc, 'layer'))
+                                report['errors'].append(dict(group=key, call_index=idx, layer=5,
+                                                             **_error(exc, 'route_alignment')))
+                            continue
                         if observation_components:
                             try:
                                 target_result['layers']['5'] = dict(
@@ -830,6 +915,8 @@ def main(argv=None):
                         help='run the geometry parity test under this billed stage before model capture')
     parser.add_argument('--bootstrap-calibration', action='store_true',
                         help='separate missing-bootstrap and frozen two-LB-state work/error screen')
+    parser.add_argument('--route-alignment', action='store_true',
+                        help='v24: exactness/timing probe of a 16-aligned route key extent')
     parser.add_argument('--observation-components', action='store_true',
                         help='v24: isolated per-piece timing of observation work on real GLOBAL states')
     parser.add_argument('--bootstrap-parity', action='store_true',
@@ -867,7 +954,8 @@ def main(argv=None):
                      q16_validation=args.q16_validation,
                      observation_parity=args.observation_parity,
                      bootstrap_parity=args.bootstrap_parity,
-                     observation_components=args.observation_components)
+                     observation_components=args.observation_components,
+                     route_alignment=args.route_alignment)
         report['qualification_tests'] = dict(status=('passed' if args.qualify_tests else 'not_requested'),
                                              log=str(test_log) if args.qualify_tests else None)
         report['completeness'] = completeness(report, bootstrap_calibration=args.bootstrap_calibration,
