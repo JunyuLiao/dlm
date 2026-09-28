@@ -4,21 +4,21 @@
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
   "authority": "User v24 handoff dllm_claude_v24_close_bootstrap_measurement_20260928.md",
-  "status": "V24_CPU_AUDIT_COMPLETE_DIRECT_COST_PREPARED_AWAITING_GPU_AUTHORIZATION",
+  "status": "V24_COMPLETE_NO_ACTIVE_JOBS",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "gpu_stop_utc": "2026-09-28T05:52:00Z",
   "final_deadline_utc": "2026-09-28T06:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 512,
   "max_gpu_workers": 2,
-  "charged_gpu_process_seconds": 12032.272545480728,
-  "generation_executions": 300,
+  "charged_gpu_process_seconds": 13278.775212192535,
+  "generation_executions": 408,
   "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
   "push_status": "4ab56f6d verified remote at takeover",
   "agents": {
     "lead": "Claude Opus 5.5 (this session)"
   },
-  "next": "After authorization: python -m scripts.v24_profile --v21-profile-config <root>/bindings/v24_cpu_3ae5e1d/profile.json --out <root>/diagnostics/v24_profile_<host>.json under scripts/v20_stage.py with --max-seconds 1500 and the renewed deadline, one per host; estimated ~700 GPU-s and 3 captures per host",
+  "next": "User decision: (a) qualify aligned_route_k16 as a new numerical variant, or (b) stop and write up. GPU window ends 09:30Z.",
   "peer_refs": {
     "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
     "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
@@ -187,9 +187,13 @@
     "bootstrap6 lb_preview mpk 968.91 s + dllm 1065.28 s, 48 executions, 0 failures",
     "bootstrap6 aime mpk 1836.97 s + dllm 1643.41 s, 96 executions, 0 failures",
     "lb_rest launch refused by prefix rule before generation (6af4d42): 3.82 s, 0 executions",
-    "bootstrap6 lb_rest (separate run dir bootstrap6_001_lbrest, deploy dc52522, same protocol, method sources byte-identical): mpk 1782.23 s + dllm 1615.24 s, 96 executions (48 per host)"
+    "bootstrap6 lb_rest (separate run dir bootstrap6_001_lbrest, deploy dc52522, same protocol, method sources byte-identical): mpk 1782.23 s + dllm 1615.24 s, 96 executions (48 per host)",
+    "v24 direct-cost profile 3ae5e1d mpk+dllm: 952.35 s, 6 executions",
+    "v24 RULER stage 5cedc12 mpk+dllm (first launch refused by stale 05:52 deadline, 0 s): 132.17 s, 90 executions",
+    "v24 observation components d12b0be mpk+dllm: 80.98 s, 6 executions",
+    "v24 route alignment probe 526580d mpk+dllm: 81.00 s, 6 executions"
   ],
-  "decision": "Production fine geometry not promoted: frozen rule candidate (-1.0) costs 1.158x work; validated equal-error saving 4-5% of retained GLOBAL pairs; GLOBAL deletion ceiling 0.84x on LB",
+  "decision": "Direct cost measured; BO/A observation dominated by route kernel (odd-K 2.6x slower/key). Candidate aligned_route_k16 is not bit-exact (summary z/mu, producer) -> numerical variant, not applied. No M3-specific E2E gain plausible; LB expansion not run.",
   "panel": {
     "protocol": "v21_bootstrap6_b8b2c59449fd0ebf",
     "executions": "240/240",
@@ -201,18 +205,30 @@
     "report": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/bootstrap6_report.md"
   },
   "remaining": {
-    "gpu_process_seconds": 9567.727454519272,
-    "executions": 212
+    "gpu_process_seconds": 8321.224787807465,
+    "executions": 104
   },
   "gpu_authorization": {
     "previous_window_end": "2026-09-28T05:52:00Z",
     "status": "expired; no GPU activity since",
-    "renewed": null,
+    "renewed": {
+      "granted_by": "user in chat (option: 3h, profile + RULER)",
+      "granted_observed_utc": "2026-09-28T07:12Z",
+      "gpu_stop_utc": "2026-09-28T09:30:00Z",
+      "report_reserve": "last GPU launch must finish by ~09:00Z",
+      "budget": "remaining 9,567.7 s / 212 executions; no new quota"
+    },
     "note": "Direct-cost profile requires explicit renewed deadline from user before launch"
   },
   "v24_cpu": {
     "audit": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/v24_audit.md (PASS, 120/120)",
     "errata": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/v24_errata_and_audit.md",
     "direct_cost_harness": "scripts/v24_profile.py; CPU-validated derived configs on both hosts at deploy v24_cpu_3ae5e1d (bindings/v24_cpu_3ae5e1d/profile.json)"
+  },
+  "ruler_stage": {
+    "protocol": "v21_bootstrap6_ruler_4dbecd0c10841a11",
+    "private": "E:/dlm/v23_private/bootstrap6_ruler_001",
+    "planned": 90,
+    "status": "complete 90/90, all arms 12/13; scored ruler_scored.*"
   }
 }

@@ -1,21 +1,21 @@
-# v24 continuation (close bootstrap measurement)
+# v24 continuation (close bootstrap measurement) — complete for this window
 
 Authority: user v24 handoff `dllm_claude_v24_close_bootstrap_measurement_20260928.md`; started at `ca297e05`.
-Worktree `E:/dlm/m3_output_numerics_20260927`, branch `research/m3-output-numerics-20260927`.
-GPU window ended 2026-09-28T05:52Z; **no GPU activity until the user renews a deadline** (STATE.gpu_authorization).
-Budget recorded: 12,032.3 / 21,600 GPU-process s, 300 / 512 executions (no v24 GPU use).
+GPU window renewed by the user at ~07:12Z until 09:30Z (STATE.gpu_authorization). No active jobs; GPUs 0 MiB.
+Budget: 13,278.8 / 21,600 GPU-process s, 408 / 512 executions (v24: 1,246.5 s, 108 executions).
 
-## Done (CPU)
-- Strict union audit of the two v23 segments: PASS, 120/120 cells, lineage for both bindings, method
-  sources byte-identical (`scripts/v24_bootstrap6_audit.py`, tests 8/8, `R/v23_bootstrap6/v24_audit.*`).
-- Five-phase B0/BO/A/D/H conservation from raw receipts holds for every first run.
-- Errata `R/v23_bootstrap6/v24_errata_and_audit.md`: W = N x W/N on the same cells (LB M3-boot/native
-  0.990 = 1.040 x 0.952); W/N is amortized, not direct forward; preview 0.77 does not carry to full panel
-  (0.9997); host = seed confounded.
-- Direct-cost harness `scripts/v24_profile.py` (six frozen arms, N16 from canvas start, model_forward +
-  denoising_step, per-call B0/BO/A/D/H prices); derived configs CPU-validated on both hosts.
+## Results (R = results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6)
+- CPU: strict union audit PASS (`R/v24_audit.*`), five-phase conservation, errata (`R/v24_errata_and_audit.md`).
+- Direct cost (`R/v24_direct_cost.md`, `R/direct_cost_extract.json`): LB N16 model_forward vs native
+  M3-boot 0.988/0.941, B-boot 0.965/0.919, incumbent 0.976/0.930, T 0.991/0.977; AIME/RULER 1.009-1.037.
+  Per-call: BO +19-31% (LB), A +5-16%, H -8-12%, B0 ~1.00.
+- Observation breakdown (`R/observation_probe_extract.json`): route kernel dominates; odd K ~2.6x slower/key.
+- Candidate `aligned_route_k16`: route 6.6->3.1 ms at odd K, bitmaps identical but summary z/mu and
+  padded producer differ in last bits -> numerical variant, NOT applied.
+- RULER stage `v21_bootstrap6_ruler_4dbecd0c10841a11`: 90/90, every arm 12/13 (`R/ruler_scored.*`).
+- LB expansion not run (no plausible M3-specific E2E gain).
 
-## Next (needs authorization)
-1. v24 direct-cost profile, one worker per host (~700 GPU-s + 3 captures each). Command in STATE.next.
-2. Only if a phase is materially dominant: at most one exact execution change (none chosen yet).
-3. RULER 13-task stage (90 executions) needs a small frozen protocol extension (1 seed, warm on 2 tasks).
+## Next (user decision)
+(a) qualify `aligned_route_k16` as a new numerical variant with token-level paired outputs, or (b) stop/write up.
+Helpers: E:/dlm/v23_transport.py, v23_score_transport.py, v24_launch_profile.py, v24_launch_components.py,
+v24_launch_alignment.py (private coordinator).
