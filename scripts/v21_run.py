@@ -24,7 +24,7 @@ from scripts.v20_run import router_phase_evidence
 SCHEMA = "v21_conditional_panel_v1"
 BINDING_SCHEMA = "v21_conditional_binding_v1"
 PANEL_COUNTS = {"numeric7": (7, 448), "layout_pair": (2, 96), "bootstrap6": (6, 240),
-                "bootstrap6_ruler": (6, 90), "aligned6_pilot": (6, 90),
+                "bootstrap6_ruler": (6, 90), "aligned6_pilot": (6, 90), "aligned_bridge": (2, 16),
                 "zero_pruning_diagnostic": (3, 12)}
 V20_PROTOCOL = Path(__file__).resolve().parents[1] / "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json"
 
@@ -96,7 +96,8 @@ def validate_protocol(protocol: dict) -> None:
     ids = protocol.get("ids")
     required_tasks = ({"longbench_v2"} if diagnostic else {"aime26", "longbench_v2"}
                       if protocol["panel_kind"] == "bootstrap6" else {"ruler4k"}
-                      if protocol["panel_kind"] == "bootstrap6_ruler" else {"ruler4k", "aime26", "longbench_v2"})
+                      if protocol["panel_kind"] == "bootstrap6_ruler" else {"longbench_v2"}
+                      if protocol["panel_kind"] == "aligned_bridge" else {"ruler4k", "aime26", "longbench_v2"})
     pilot = protocol["panel_kind"] == "aligned6_pilot"
     if pilot and protocol.get("seeds_by_dataset") != {"longbench_v2": [101, 202], "aime26": [101, 202],
                                                        "ruler4k": [101]}:

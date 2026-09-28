@@ -1,10 +1,10 @@
 {
-  "schema": 25,
+  "schema": "25b",
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
-  "authority": "User v25 handoff dllm_claude_v25_route_preparation_20260928.md",
-  "status": "V25_COMPLETE_NO_ACTIVE_JOBS",
+  "authority": "User v25b doc dllm_v25b_audit_and_alignment_exposure_20260928.md",
+  "status": "V25B_CP0_CP1_DONE_BRIDGE_READY",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 512,
@@ -242,5 +242,13 @@
       "parallel-summary builder probe (ceiling <=2-4%, cannot change M3 vs T/B ordering; 2 executions left)"
     ],
     "result": "aligned16 qualified (logits/decisions/tokens identical on all tested); direct odd-K LB BO/A -8-9%; request effect ~0 (LB 1.001); builder probe not run"
+  },
+  "v25b_bridge_allocation": {
+    "executions": 16,
+    "gpu_process_seconds_max": 1800,
+    "source": "v25b CP2 (16-execution bridge) under the user standing GPU authorization; separate from the exhausted 512-execution campaign ledger, which is NOT reset",
+    "protocol": "v25b_aligned_bridge_2dafaf7cd531bff3",
+    "used_executions": 0,
+    "used_seconds": 0.0
   }
 }

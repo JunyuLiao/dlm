@@ -151,6 +151,82 @@ def freeze_pilot(v20_protocol_path, v20_binding_path, manifests_dir, out_dir):
     return protocol
 
 
+BRIDGE_ARMS = ('M3_boot_logical', 'M3_boot_aligned16')
+BRIDGE_IDS = ('longbench_v2/66f9625fbb02136c067c5456',   # v25b-predeclared odd-K (K%16=7) profile input
+              'longbench_v2/66f8c6b4bb02136c067c4480')   # control: highest KDIV (8) in the frozen LB six
+
+
+def freeze_bridge(v20_protocol_path, v20_binding_path, manifests_dir, out_dir):
+    """v25b CP2: logical vs aligned16 bootstrapped M3 on one odd-K and one
+    aligned-class LB input x seeds 101/202 x first/warm (16). No frozen LB input
+    has K%16==0; the control is the highest-KDIV input (ties by sha256)."""
+    out_dir = Path(out_dir)
+    if out_dir.exists():
+        raise FileExistsError(out_dir)
+    original_bytes, binding_bytes = Path(v20_protocol_path).read_bytes(), Path(v20_binding_path).read_bytes()
+    original, binding = json.loads(original_bytes), json.loads(binding_bytes)
+    if binding.get('panel_protocol_sha256') != _sha(original_bytes) or binding.get('status') != 'frozen':
+        raise ValueError('old frozen v20 protocol/binding identity drift')
+    host_uuids = {}
+    for entry in original['block_assignments'].values():
+        host_uuids.setdefault(entry['host'], set()).add(entry['gpu_uuid'])
+    host_ids = sorted(host_uuids)
+    ids = {'longbench_v2': list(BRIDGE_IDS)}
+    if any(i not in original['ids']['longbench_v2'][:6] for i in BRIDGE_IDS):
+        raise ValueError('bridge inputs must come from the frozen LB six')
+    raw = (Path(manifests_dir) / 'longbench_v2_generation_manifest.json').read_bytes()
+    if _sha(raw) != original['generation_manifest_sha256']['longbench_v2']:
+        raise ValueError('old frozen generation manifest drift')
+    rows = {r['id']: r for r in json.loads(raw)}
+    clean = [rows[i] for i in BRIDGE_IDS]
+    if any(set(r) & old.GOLD or _sha(r['prompt'].encode()) != r.get('prompt_hash') for r in clean):
+        raise ValueError('gold/prompt drift')
+    manifest = _bytes(clean)
+
+    def method(storage):
+        contract = dict(kind='v21_method', parent_v20_arm='M3_R3_A8_current_output', scope=SCOPE,
+                        output_score_precision='fp32_scores_bf16_pv', output_layout='model_major',
+                        observation_producer=PRODUCER, bootstrap_policy=BOOTSTRAP)
+        if storage != 'logical':
+            contract['route_storage'] = storage
+        return contract
+    contracts = {'M3_boot_logical': method('logical'), 'M3_boot_aligned16': method('aligned16')}
+    arms = list(BRIDGE_ARMS)
+    protocol_id = 'v25b_aligned_bridge_' + _sha(_bytes(dict(old_protocol=_sha(original_bytes), ids=ids,
+                                                             arms=contracts)))[:16]
+    assignments, schedule, block = {}, [], 0
+    for item_index, id_ in enumerate(ids['longbench_v2']):
+        for seed_index, seed in enumerate((101, 202)):
+            host = host_ids[(item_index + seed_index) % 2]
+            assignment = dict(dataset='longbench_v2', id=id_, seed=seed, host=host,
+                              gpu_uuid=next(iter(host_uuids[host])))
+            assignments[str(block)] = assignment
+            first = arms[block % 2:] + arms[:block % 2]
+            for role, order in (('attempt0', first), ('warm', first[::-1])):
+                for arm in order:
+                    schedule.append(dict(index=len(schedule), block=block, arm=arm,
+                        cell_id=cell_id(protocol_id, old.REVISION, old.sha_json(contracts[arm]), id_, seed),
+                        role=role, repeat=0 if role == 'attempt0' else 1, **assignment))
+            block += 1
+    protocol = dict(schema='v21_conditional_panel_v1', status='frozen', execution_ready=True,
+                    panel_kind='aligned_bridge', protocol_id=protocol_id, model_revision=old.REVISION,
+                    v20_protocol_sha256=_sha(original_bytes), v20_binding_sha256=_sha(binding_bytes),
+                    selected_scope=SCOPE, policy_point='P0', policy_sha256=binding['policy_sha256'],
+                    output_layout='model_major', ids=ids, seeds=[101, 202], arms=arms,
+                    arm_contracts=contracts, block_assignments=assignments, schedule=schedule,
+                    planned_executions=len(schedule),
+                    generation_manifest_sha256={'longbench_v2': _sha(manifest)},
+                    stages={'bridge': list(range(block))},
+                    selection_rule='v25b-predeclared odd-K profile input + highest-KDIV frozen LB control',
+                    host_assignment_rule='host = (item_index + seed_index) mod 2',
+                    quality_eligible=True, timing_eligible=True)
+    validate_protocol(protocol)
+    out_dir.mkdir(parents=True, exist_ok=False)
+    _new(out_dir / 'longbench_v2_generation_manifest.json', manifest)
+    _new(out_dir / 'protocol.json', _bytes(protocol))
+    return protocol
+
+
 def _contracts(mode, output_layout):
     legacy = ('legacy_bf16_scores', 'head_major')
     updated = ('fp32_scores_bf16_pv', output_layout)
@@ -422,7 +498,7 @@ def main(argv=None):
     sub = parser.add_subparsers(dest='command', required=True)
     fr = sub.add_parser('freeze')
     fr.add_argument('--mode', choices=('numeric7', 'layout_pair', 'bootstrap6', 'bootstrap6_ruler',
-                                        'aligned6_pilot'), required=True)
+                                        'aligned6_pilot', 'aligned_bridge'), required=True)
     fr.add_argument('--v20-protocol', type=Path, required=True)
     fr.add_argument('--v20-binding', type=Path, required=True)
     fr.add_argument('--manifests-dir', type=Path, required=True)
@@ -436,8 +512,9 @@ def main(argv=None):
     hb.add_argument('--manifests-dir', type=Path, required=True)
     hb.add_argument('--out', type=Path, required=True)
     args = parser.parse_args(argv)
-    if args.command == 'freeze' and args.mode == 'aligned6_pilot':
-        result = freeze_pilot(args.v20_protocol, args.v20_binding, args.manifests_dir, args.out_dir)
+    if args.command == 'freeze' and args.mode in ('aligned6_pilot', 'aligned_bridge'):
+        result = (freeze_pilot if args.mode == 'aligned6_pilot' else freeze_bridge)(
+            args.v20_protocol, args.v20_binding, args.manifests_dir, args.out_dir)
         print(json.dumps(dict(protocol=str((args.out_dir / 'protocol.json').resolve()),
                               planned_executions=result['planned_executions']), sort_keys=True))
     elif args.command == 'freeze':
