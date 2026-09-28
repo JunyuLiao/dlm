@@ -71,7 +71,38 @@ class ScoreCache:
 
     @property
     def storage_bytes(self):
+        """LOGICAL payload: real-K FP32 scores per identity (unchanged semantics)."""
         return sum(x.identity.storage_bytes for x in self.entries.values())
+
+    @staticmethod
+    def _resident(tensor):
+        storage = getattr(tensor, 'untyped_storage', None)
+        if storage is None:
+            return None, 0
+        storage = storage()
+        return storage.data_ptr(), storage.nbytes()
+
+    @property
+    def physical_bytes(self):
+        """PHYSICAL resident bytes of the cached score storages (a padded pitch
+        counts in full; one storage shared by several views counts once)."""
+        seen, total = set(), 0
+        for entry in self.entries.values():
+            key, nbytes = self._resident(entry.scores)
+            if key is None or key in seen:
+                continue
+            seen.add(key)
+            total += nbytes
+        return total
+
+    def reserve_physical(self, identity, physical_bytes):
+        """Budget check on physical residency BEFORE allocating a (possibly padded) buffer."""
+        old = self.entries.get(identity.layer)
+        old_bytes = self._resident(old.scores)[1] if old is not None else 0
+        total = self.physical_bytes - old_bytes + int(physical_bytes)
+        if total > self.max_bytes:
+            raise MemoryError(f"Score cache would need {total} physical bytes; bound is {self.max_bytes}")
+        return total
 
     def plan(self, identity, step, *, force_refresh=False):
         if step < 0:

@@ -12,6 +12,7 @@ def _owner(storage='aligned16', precision='fp32_scores_bf16_pv', mode=PREQK_MODE
     owner = Attention.__new__(Attention)
     owner.route_storage, owner.output_score_precision, owner.output_mode = storage, precision, mode
     owner.aligned_score_copies = owner.aligned_pad_bytes = owner.aligned_sketch_pads = 0
+    owner.aligned_extra_pad_bytes = owner.aligned_copy_bytes = 0
     return owner
 
 

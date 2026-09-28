@@ -161,7 +161,11 @@ class Attention:
         self.bootstrap_dense_calls = self.bootstrap_observation_calls = 0
         self.observation_producer = 'repeat_interleave'
         self.route_storage = 'logical'
+        # aligned_pad_bytes (historical name, kept for traceability) = total bytes of
+        # newly ALLOCATED pitched buffers, not only the extra pad and not DRAM traffic.
         self.aligned_score_copies = self.aligned_pad_bytes = self.aligned_sketch_pads = 0
+        self.aligned_extra_pad_bytes = self.aligned_copy_bytes = 0
+        self.peak_score_physical_bytes = 0
         self.summary_prefix_tiles = self.summary_recomputed_tiles = 0
         self.peak_score_bytes = 0
         self.unsupported_mask_refreshes = 0
@@ -251,11 +255,13 @@ class Attention:
         current_for_output = None
         if plan.score_refresh:
             # The replaced entry stays referenced until publish, so the new
-            # score tensor transiently coexists with it.
-            self.peak_score_transient_bytes = max(
-                self.peak_score_transient_bytes, self.cache.storage_bytes + identity.storage_bytes)
+            # score tensor transiently coexists with it (and, for aligned16,
+            # with the logical producer output being copied from).
+            self._reserve_observation(identity, b, h, nq, nk)
             score = self._observe(q, k, mask, scale, causal, window, crop)
             self.cache.publish_scores(identity, self.step, self._store_scores(score))
+            # Physical residency changes only at publication; no per-call host work.
+            self.peak_score_physical_bytes = max(self.peak_score_physical_bytes, self.cache.physical_bytes)
             valid = torch.isfinite(score).reshape(b, hk, h//hk, nq, nk).any((2, 3))
             self.valid_keys[layer] = valid
             self.score_calls += 1
@@ -384,6 +390,19 @@ class Attention:
             self.pending.append(((result.skipped & result.eligible).sum(), result.eligible.sum()))
         return returned, None
 
+    def _pitch(self, nk):
+        return -(-nk // 16) * 16 if self.route_storage == 'aligned16' else nk
+
+    def _reserve_observation(self, identity, b, h, nq, nk):
+        """Physical budget check and transient-peak bound, before any allocation."""
+        logical_new = b * h * nq * nk * 4
+        pitch = self._pitch(nk)
+        stored_new = b * h * nq * pitch * 4
+        self.cache.reserve_physical(identity, stored_new)
+        # Old entry + logical producer output + (if copied) the new pitched buffer.
+        transient = self.cache.physical_bytes + logical_new + (stored_new if pitch != nk else 0)
+        self.peak_score_transient_bytes = max(self.peak_score_transient_bytes, transient)
+
     def _store_scores(self, score):
         """The tensor the score cache keeps (see ROUTE_STORAGES)."""
         if self.route_storage == 'logical':
@@ -401,6 +420,8 @@ class Attention:
         stored[..., nk:].fill_(-math.inf)
         self.aligned_score_copies += 1
         self.aligned_pad_bytes += stored.numel() * stored.element_size()
+        self.aligned_extra_pad_bytes += b * h * nq * (pitch - nk) * stored.element_size()
+        self.aligned_copy_bytes += score.numel() * score.element_size()
         return stored
 
     def _route(self, scores, projected, ref, **kwargs):
@@ -438,8 +459,7 @@ class Attention:
             return output
         from .cache import Plan
         self.cache.reserve(identity)
-        self.peak_score_transient_bytes = max(
-            self.peak_score_transient_bytes, self.cache.storage_bytes + identity.storage_bytes)
+        self._reserve_observation(identity, b, h, nq, nk)
         score = self._observe(q, k, mask, scale, causal, window, crop)
         stored = self._store_scores(score)
         self.cache.publish_scores(identity, self.step, stored)
@@ -462,6 +482,7 @@ class Attention:
         self.current_qk_elements += b*h*nq*nk
         score_bytes = self.cache.storage_bytes
         self.peak_score_bytes = max(self.peak_score_bytes, score_bytes)
+        self.peak_score_physical_bytes = max(self.peak_score_physical_bytes, self.cache.physical_bytes)
         self.peak_total_bytes = max(self.peak_total_bytes, score_bytes + self.summary_bytes)
         return output
 
@@ -585,6 +606,14 @@ class Attention:
                     route_storage=self.route_storage,
                     aligned_score_copies=self.aligned_score_copies,
                     aligned_pad_bytes=self.aligned_pad_bytes,
+                    aligned_buffer_bytes_allocated=self.aligned_pad_bytes,
+                    aligned_extra_pad_bytes=self.aligned_extra_pad_bytes,
+                    aligned_copy_bytes=self.aligned_copy_bytes,
+                    score_physical_live_bytes=self.cache.physical_bytes,
+                    score_physical_peak_bytes=self.peak_score_physical_bytes,
+                    aligned_byte_fields_note=('aligned_pad_bytes == aligned_buffer_bytes_allocated: sum of '
+                                              'allocated pitched buffers; extra_pad counts only pitch-K lanes; '
+                                              'copy counts logical bytes copied; none is measured DRAM traffic'),
                     aligned_sketch_pads=self.aligned_sketch_pads,
                     score_clock_origin=self.cache.origin,
                     decision_refresh_calls=self.decision_calls, held_decision_calls=self.held_calls,

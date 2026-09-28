@@ -626,7 +626,72 @@ def _tensor_delta(a, b):
                 max_ulp=_float_ulp_gap(a, b))
 
 
-def _aligned_replay(model, sequence, runtime, upto, parent=None):
+GLOBAL_LAYERS = (5, 11, 17, 23, 29)
+
+
+def _call_record(idx, phase, logits, owner):
+    """CPU-side record of one replayed call (logits, decisions, clocks, anchor summaries)."""
+    decisions = {int(layer): (entry.decision.skipped.detach().cpu(), entry.decision.eligible.detach().cpu())
+                 for layer, entry in owner.cache.entries.items() if entry.decision is not None}
+    clocks = {int(layer): (entry.score_step, entry.decision_step) for layer, entry in owner.cache.entries.items()}
+    summaries = ({int(layer): (summary.z.detach().cpu(), summary.mu.detach().cpu())
+                  for layer, summary in owner.summaries.items()} if phase in ('BO', 'A') else {})
+    return dict(call_index=int(idx), phase=phase, logits=logits.detach().to('cpu'),
+                argmax=logits.argmax(-1).to('cpu'), decisions=decisions, clocks=clocks, summaries=summaries)
+
+
+def _compare_call(ref, cand, *, expect_summaries):
+    """Functional comparison of one call. Missing or extra layers are failures,
+    never skipped: the only legal empty decision set is bootstrap call 0 (B0)."""
+    failures = []
+    if ref['call_index'] != cand['call_index'] or ref['phase'] != cand['phase']:
+        failures.append('call_index_or_phase')
+    expected = set() if cand['phase'] == 'B0' else set(GLOBAL_LAYERS)
+    for name in ('decisions', 'clocks'):
+        if set(ref[name]) != expected or set(cand[name]) != expected:
+            failures.append(f'{name}_layer_set')
+    want_summary = set(GLOBAL_LAYERS) if (expect_summaries and cand['phase'] in ('BO', 'A')) else set()
+    if set(ref['summaries']) != want_summary or set(cand['summaries']) != want_summary:
+        failures.append('summary_layer_set')
+    logits = _tensor_delta(ref['logits'], cand['logits'])
+    argmax_equal = bool(torch.equal(ref['argmax'], cand['argmax']))
+    if not logits['bitwise_equal']:
+        failures.append('logits')
+    common = set(ref['decisions']) & set(cand['decisions'])
+    decisions_equal = {str(l): bool(torch.equal(ref['decisions'][l][0], cand['decisions'][l][0]) and
+                                    torch.equal(ref['decisions'][l][1], cand['decisions'][l][1])) for l in common}
+    tiles = {str(l): int((ref['decisions'][l][0] != cand['decisions'][l][0]).sum()) for l in common}
+    if not all(decisions_equal.values()):
+        failures.append('decisions')
+    if any(ref['clocks'][l] != cand['clocks'][l] for l in set(ref['clocks']) & set(cand['clocks'])):
+        failures.append('clocks')
+    summaries = {str(l): dict(z=_tensor_delta(ref['summaries'][l][0], cand['summaries'][l][0]),
+                              mu=_tensor_delta(ref['summaries'][l][1], cand['summaries'][l][1]))
+                 for l in set(ref['summaries']) & set(cand['summaries'])}
+    return dict(call_index=cand['call_index'], phase=cand['phase'], parent_phase=ref['phase'],
+                logits={k: v for k, v in logits.items()}, argmax_equal=argmax_equal,
+                decisions_equal=decisions_equal, decision_tiles_differing=tiles, summaries=summaries,
+                level2_failures=failures)
+
+
+def _sequence_verdict(parent_rows, rows, *, expected_calls):
+    """Machine-readable gate for one arm. Execution, level 1 (intermediate bits),
+    level 2 (functional identity) and pilot eligibility are separate fields."""
+    structural = []
+    if len(parent_rows) != expected_calls or len(rows) != expected_calls:
+        structural.append('call_count')
+    if [r['call_index'] for r in parent_rows] != [r['call_index'] for r in rows]:
+        structural.append('call_indices')
+    level2_failures = sorted({f for r in rows for f in r['level2_failures']} | set(structural))
+    summary_bits = [d['bitwise_equal'] for r in rows for v in r['summaries'].values() for d in v.values()]
+    return dict(executed=len(rows) == expected_calls,
+                level1_summaries_bitwise_equal=(all(summary_bits) if summary_bits else None),
+                level1_summary_records=len(summary_bits),
+                level2_functional_identity=not level2_failures, level2_failures=level2_failures,
+                pilot_eligible=not level2_failures)
+
+
+def _aligned_replay(model, sequence, runtime, upto, parent=None, expect_summaries=False):
     """Replay native states through one runtime; with ``parent`` compare per call."""
     base.reset_arm(runtime)
     state = runtime['state']
@@ -644,29 +709,18 @@ def _aligned_replay(model, sequence, runtime, upto, parent=None):
         delta = [x - y for x, y in zip(after, before)]
         phase = ('BO' if delta[0] else 'A' if delta[1] else 'D' if delta[2] else 'H' if delta[3]
                  else 'B0' if delta[4] else '?')
-        decisions = {layer: (entry.decision.skipped.clone(), entry.decision.eligible.clone())
-                     for layer, entry in owner.cache.entries.items() if entry.decision is not None}
-        summaries = ({layer: (summary.z.clone(), summary.mu.clone()) for layer, summary in owner.summaries.items()}
-                     if phase in ('BO', 'A') else {})
-        record = dict(call_index=idx, phase=phase, logits_digest=output_digest(logits))
+        record = _call_record(idx, phase, logits, owner)
         if parent is None:
-            keep[idx] = dict(logits=logits.detach().to('cpu'), argmax=logits.argmax(-1).to('cpu'),
-                             decisions={l: (a.cpu(), b.cpu()) for l, (a, b) in decisions.items()},
-                             summaries={l: (z.cpu(), m.cpu()) for l, (z, m) in summaries.items()})
+            keep[idx] = record
+            rows.append(dict(call_index=idx, phase=phase))
         else:
-            ref = parent[idx]
-            cpu_logits = logits.detach().to('cpu')
-            record['logits'] = _tensor_delta(ref['logits'], cpu_logits)
-            record['argmax_equal'] = bool(torch.equal(ref['argmax'], logits.argmax(-1).to('cpu')))
-            record['decisions_equal'] = {str(l): bool(torch.equal(ref['decisions'][l][0], a.cpu()) and
-                                                      torch.equal(ref['decisions'][l][1], b.cpu()))
-                                         for l, (a, b) in decisions.items() if l in ref['decisions']}
-            record['decision_tiles_differing'] = {str(l): int((ref['decisions'][l][0] != a.cpu()).sum())
-                                                  for l, (a, _) in decisions.items() if l in ref['decisions']}
-            record['summaries'] = {str(l): dict(z=_tensor_delta(ref['summaries'][l][0], z.cpu()),
-                                                mu=_tensor_delta(ref['summaries'][l][1], m.cpu()))
-                                   for l, (z, m) in summaries.items() if l in ref['summaries']}
-        rows.append(record)
+            ref = parent.get(idx)
+            if ref is None:
+                rows.append(dict(call_index=idx, phase=phase, level2_failures=['missing_parent_call'],
+                                 summaries={}, logits={}, decisions_equal={}, decision_tiles_differing={},
+                                 argmax_equal=False))
+            else:
+                rows.append(_compare_call(ref, record, expect_summaries=expect_summaries))
     return rows, keep
 
 
@@ -681,22 +735,32 @@ def _aligned_qualification(adapter, model, sequence, selected_arm):
         if parent_cfg['config']['parent_config'].get('selector') != (
                 'legacy_recompute' if parent_arm == 'B_A8_matched' else 'prefix_block_summary'):
             raise AssertionError('qualification selector differs from the scored panel')
+        expect_summaries = parent_arm != 'B_A8_matched'
         with base.arm_context(adapter, parent_cfg) as runtime:
             parent_rows, kept = _aligned_replay(model, sequence, runtime, upto)
+            parent_storage = getattr(runtime['router'], 'owner', runtime['router']).route_storage
         with base.arm_context(adapter, aligned_cfg) as runtime:
-            rows, _ = _aligned_replay(model, sequence, runtime, upto, parent=kept)
+            rows, _ = _aligned_replay(model, sequence, runtime, upto, parent=kept,
+                                      expect_summaries=expect_summaries)
             owner = getattr(runtime['router'], 'owner', runtime['router'])
-            counters = dict(copies=owner.aligned_score_copies, pad_bytes=owner.aligned_pad_bytes,
+            counters = dict(route_storage=owner.route_storage, copies=owner.aligned_score_copies,
+                            buffer_bytes_allocated=owner.aligned_pad_bytes,
                             sketch_pads=owner.aligned_sketch_pads)
         kept.clear()
+        verdict = _sequence_verdict(parent_rows, rows, expected_calls=upto)
+        if parent_storage != 'logical' or counters['route_storage'] != 'aligned16':
+            verdict['level2_failures'].append('route_storage_exposure')
+            verdict.update(level2_functional_identity=False, pilot_eligible=False)
         out[arm_name] = dict(
             phases=''.join(r['phase'] for r in rows),
             parent_phases=''.join(r['phase'] for r in parent_rows),
-            logits_bitwise_equal_calls=sum(r['logits']['bitwise_equal'] for r in rows),
+            logits_bitwise_equal_calls=sum(bool(r['logits'].get('bitwise_equal')) for r in rows),
             argmax_equal_calls=sum(r['argmax_equal'] for r in rows), calls=len(rows),
-            decision_mismatch_calls=sum(not all(r['decisions_equal'].values()) for r in rows),
-            aligned_counters=counters, rows=rows)
-    return dict(status='qualified', sequence_calls=upto, arms=out,
+            decision_mismatch_calls=sum(not all(r['decisions_equal'].values()) or not r['decisions_equal']
+                                        for r in rows if r['phase'] != 'B0'),
+            verdict=verdict, aligned_counters=counters, rows=rows)
+    ok = all(a['verdict']['level2_functional_identity'] for a in out.values())
+    return dict(status='qualified' if ok else 'level2_failed', sequence_calls=upto, arms=out,
                 note='teacher-forced native states; complete A/D/H cycles with live causal T and current V')
 
 
@@ -823,6 +887,12 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                 try:
                     group['aligned16'] = _aligned_qualification(adapter, model, sequence, selected_arm)
                     group['status'] = 'complete'
+                    if group['aligned16']['status'] != 'qualified':
+                        # Keep the full report; the recorded error makes the stage exit nonzero.
+                        group['status'] = 'failed'
+                        report['errors'].append(dict(group=key, stage='aligned_qualification_gate',
+                            failures={a: v['verdict']['level2_failures']
+                                      for a, v in group['aligned16']['arms'].items()}))
                 except Exception as exc:
                     group['status'] = 'failed'
                     group['error'] = _error(exc, 'aligned_qualification')
