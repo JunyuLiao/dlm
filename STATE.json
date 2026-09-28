@@ -4,21 +4,21 @@
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
   "authority": "User v22 handoff dllm_claude_v22_resume_4ab56f6d_20260927.md (Claude Code takeover; no Codex agents)",
-  "status": "V22_CPA_PENDING_LAUNCH",
+  "status": "V22_CPA_COMPLETE_FINE_GEOMETRY_STOPPED",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "gpu_stop_utc": "2026-09-28T05:52:00Z",
   "final_deadline_utc": "2026-09-28T06:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 512,
   "max_gpu_workers": 2,
-  "charged_gpu_process_seconds": 2609.984230852127,
-  "generation_executions": 30,
+  "charged_gpu_process_seconds": 2860.725968618393,
+  "generation_executions": 42,
   "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
   "push_status": "4ab56f6d verified remote at takeover",
   "agents": {
     "lead": "Claude Opus 5.5 (this session)"
   },
-  "next": "Commit v22 CP-A guard/tests, push, fresh deploy both hosts, bind, run --bootstrap-calibration --qualify-tests",
+  "next": "User decision: long-context price experiment after SparseD full-text check, or measurement-study repositioning. CP-B/C/D not run.",
   "peer_refs": {
     "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
     "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
@@ -119,6 +119,54 @@
       "status": "complete_with_bootstrap_diagnostic_missing",
       "returncode": 0,
       "charged_process_seconds": 56.937336683273315
+    },
+    {
+      "host": "mpk",
+      "stage": "bootstrap_calibration",
+      "sha": "372acfa32c75b00a3e1715ab8c836eecfcca1345",
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/v22_cpa_372acfa",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_cpa_372acfa.json",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_cpa_372acfa.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 46.16507577896118
+    },
+    {
+      "host": "mpk",
+      "stage": "q16_validation_attention_share",
+      "sha": "4cfbf7a96918f6387609a8699c35b18df0d0fe78",
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/v22_val_4cfbf7a",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_val_4cfbf7a.json",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_val_4cfbf7a.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 78.13708424568176
+    },
+    {
+      "host": "dllm",
+      "stage": "bootstrap_calibration",
+      "sha": "372acfa32c75b00a3e1715ab8c836eecfcca1345",
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/v22_cpa_372acfa",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_cpa_372acfa.json",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_cpa_372acfa.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 47.16523480415344
+    },
+    {
+      "host": "dllm",
+      "stage": "q16_validation_attention_share",
+      "sha": "4cfbf7a96918f6387609a8699c35b18df0d0fe78",
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/v22_val_4cfbf7a",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_val_4cfbf7a.json",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_val_4cfbf7a.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 74.35434293746948
     }
   ],
   "gpu_jobs": [],
@@ -129,6 +177,9 @@
     "hosts_idle": true
   },
   "charge_notes": [
-    "v22 precheck of new geometry tests on dllm scratch copy: 3 pytest runs, 11.6 s, no generation"
-  ]
+    "v22 precheck: 4 pytest runs on dllm scratch copy, 16.52 s, no generation",
+    "v22 CP-A calibration 372acfa: mpk 46.17 s + dllm 47.17 s, 3 captures each",
+    "v22 validation 4cfbf7a: mpk 78.14 s + dllm 74.35 s, 3 captures each"
+  ],
+  "decision": "Production fine geometry not promoted: frozen rule candidate (-1.0) costs 1.158x work; validated equal-error saving 4-5% of retained GLOBAL pairs; GLOBAL deletion ceiling 0.84x on LB"
 }
