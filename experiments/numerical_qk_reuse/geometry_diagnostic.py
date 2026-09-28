@@ -110,7 +110,7 @@ def _group_rows(risk, active, heads, queries):
     return rr.amax(dim=(2, 4)), aa.any(dim=(2, 4))
 
 
-def _select(scores, projected, reference, sensitivity, *, heads, queries, keys, threshold):
+def _select(scores, projected, reference, sensitivity, *, heads, queries, keys, threshold, pool=False):
     """Rerun the Junyu online retained-state rule; no geometry reuses another's state."""
     b, h, nq, nk = scores.shape
     hk = projected.shape[1]
@@ -138,7 +138,13 @@ def _select(scores, projected, reference, sensitivity, *, heads, queries, keys, 
         weights = weights / ell.clamp_min(1e-30)[..., None]
         block_z = torch.where(active, maximum + ell.clamp_min(1e-30).log(), -math.inf)
         sketch = projected[:, kv_for_head, lo:hi, :]
-        mu = torch.matmul(weights, sketch)
+        if pool:
+            # v26 M2 reference: per-row mean of current projected V over finite keys.
+            legal_w = finite.float()
+            legal_w = legal_w / legal_w.sum(-1, keepdim=True).clamp_min(1.)
+            mu = torch.matmul(legal_w, sketch)
+        else:
+            mu = torch.matmul(weights, sketch)
         combined = torch.logaddexp(previous, block_z)
         safe = torch.where(torch.isfinite(combined), combined, 0.)
         alpha = torch.where(active, torch.exp(block_z-safe), 0.)

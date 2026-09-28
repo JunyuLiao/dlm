@@ -59,7 +59,10 @@ OBSERVATION_PRODUCERS = ('repeat_interleave', 'grouped_q')
 # prefix boundary, reference RMS, legal pairs and the output consumer keep the
 # real K. The route's load layout (hence reduction order) can differ, so stored
 # summaries are NOT claimed bit-identical; qualification is by measurement.
-ROUTE_STORAGES = ('logical', 'aligned16')
+ROUTE_STORAGES = ('logical', 'aligned16', 'aligned16_odd')
+# v26 M2: 'exact' is M1's weighted projected value; 'pooled' replaces only mu by
+# the per-row mean of current projected V over real legal keys of the tile.
+MU_MODES = ('exact', 'pooled')
 
 
 @dataclass
@@ -161,6 +164,7 @@ class Attention:
         self.bootstrap_dense_calls = self.bootstrap_observation_calls = 0
         self.observation_producer = 'repeat_interleave'
         self.route_storage = 'logical'
+        self.mu_mode = 'exact'
         # aligned_pad_bytes (historical name, kept for traceability) = total bytes of
         # newly ALLOCATED pitched buffers, not only the extra pad and not DRAM traffic.
         self.aligned_score_copies = self.aligned_pad_bytes = self.aligned_sketch_pads = 0
@@ -305,6 +309,8 @@ class Attention:
             fused = (self.output_mode == 'cached_scores'
                      or (current_for_output is entry.scores
                          and self.output_score_precision == 'legacy_bf16_scores'))
+            if fused and self.mu_mode != 'exact':
+                raise ValueError('pooled mu is qualified only on the route_only pre-QK path')
             if fused:
                 result = attention(entry.scores, v, projected.contiguous(), ref.contiguous(),
                                    sensitivity=self.query_sensitivity,
@@ -391,7 +397,9 @@ class Attention:
         return returned, None
 
     def _pitch(self, nk):
-        return -(-nk // 16) * 16 if self.route_storage == 'aligned16' else nk
+        if self.route_storage == 'aligned16' or (self.route_storage == 'aligned16_odd' and nk % 2):
+            return -(-nk // 16) * 16
+        return nk
 
     def _reserve_observation(self, identity, b, h, nq, nk):
         """Physical budget check and transient-peak bound, before any allocation."""
@@ -407,8 +415,10 @@ class Attention:
         """The tensor the score cache keeps (see ROUTE_STORAGES)."""
         if self.route_storage == 'logical':
             return score
-        if self.route_storage != 'aligned16':
+        if self.route_storage not in ('aligned16', 'aligned16_odd'):
             raise ValueError(self.route_storage)
+        if self.route_storage == 'aligned16_odd' and score.shape[-1] % 2 == 0:
+            return score  # v26 odd_only policy: KDIV>=2 keeps logical storage
         if self.output_score_precision == 'legacy_bf16_scores' or self.output_mode != PREQK_MODE:
             raise ValueError('aligned16 storage is qualified only for the pre-QK FP32 current-output path')
         b, h, nq, nk = score.shape
@@ -428,12 +438,15 @@ class Attention:
         """route_only on the stored scores; pads only the sketch to the stored pitch."""
         nk, pitch = projected.shape[2], scores.shape[-1]
         if pitch != nk:
-            if (self.route_storage != 'aligned16' or pitch % 16 or not 0 < pitch - nk < 16
+            if (self.route_storage not in ('aligned16', 'aligned16_odd') or pitch % 16 or not 0 < pitch - nk < 16
                     or -(-pitch // 64) != -(-nk // 64)):
                 raise ValueError('stored score pitch violates the aligned16 tile/extent invariant')
             projected = torch.nn.functional.pad(projected, (0, 0, 0, pitch - nk))
             self.aligned_sketch_pads += 1
-        return route_only(scores, projected.contiguous(), ref.contiguous(), **kwargs)
+        if self.mu_mode not in MU_MODES:
+            raise ValueError(self.mu_mode)
+        return route_only(scores, projected.contiguous(), ref.contiguous(),
+                          pool=self.mu_mode == 'pooled', **kwargs)
 
     def _observe(self, q, k, mask, scale, causal, window, crop):
         if self.observation_producer == 'grouped_q':
@@ -604,6 +617,7 @@ class Attention:
                     bootstrap_observation_calls=self.bootstrap_observation_calls,
                     observation_producer=self.observation_producer,
                     route_storage=self.route_storage,
+                    mu_mode=self.mu_mode,
                     aligned_score_copies=self.aligned_score_copies,
                     aligned_pad_bytes=self.aligned_pad_bytes,
                     aligned_buffer_bytes_allocated=self.aligned_pad_bytes,

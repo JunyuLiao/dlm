@@ -98,7 +98,13 @@ class ScoreCache:
     def reserve_physical(self, identity, physical_bytes):
         """Budget check on physical residency BEFORE allocating a (possibly padded) buffer."""
         old = self.entries.get(identity.layer)
-        old_bytes = self._resident(old.scores)[1] if old is not None else 0
+        old_bytes = 0
+        if old is not None:
+            key, nbytes = self._resident(old.scores)
+            # A storage still held by another entry stays resident after replacement.
+            shared = any(self._resident(e.scores)[0] == key for layer, e in self.entries.items()
+                         if layer != identity.layer)
+            old_bytes = 0 if shared else nbytes
         total = self.physical_bytes - old_bytes + int(physical_bytes)
         if total > self.max_bytes:
             raise MemoryError(f"Score cache would need {total} physical bytes; bound is {self.max_bytes}")

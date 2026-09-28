@@ -13,6 +13,7 @@ def _owner(storage='aligned16', precision='fp32_scores_bf16_pv', mode=PREQK_MODE
     owner.route_storage, owner.output_score_precision, owner.output_mode = storage, precision, mode
     owner.aligned_score_copies = owner.aligned_pad_bytes = owner.aligned_sketch_pads = 0
     owner.aligned_extra_pad_bytes = owner.aligned_copy_bytes = 0
+    owner.mu_mode = 'exact'
     return owner
 
 
@@ -59,7 +60,7 @@ def test_route_pads_only_the_sketch_and_keeps_reference(monkeypatch):
     assert owner._route(stored, z, ref, log_threshold=-3.) == 'routed'
     assert seen['z'].shape == (1, 2, 48, 32)
     assert torch.equal(seen['z'][:, :, :37], z) and not seen['z'][:, :, 37:].any()
-    assert torch.equal(seen['ref'], ref) and seen['kwargs'] == {'log_threshold': -3.}
+    assert torch.equal(seen['ref'], ref) and seen['kwargs'] == {'log_threshold': -3., 'pool': False}
     assert owner.aligned_sketch_pads == 1
 
 

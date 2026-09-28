@@ -33,7 +33,7 @@ def _route_generic(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, LSE, STATE, RISK,
            Q: tl.constexpr, K, H: tl.constexpr, HK: tl.constexpr,
            R: tl.constexpr, RP: tl.constexpr, QB: tl.constexpr,
            KT, THRESHOLD: tl.constexpr, TRACE: tl.constexpr,
-           PREFIX_TILES, STORE: tl.constexpr, LOAD: tl.constexpr, KDIV: tl.constexpr):
+           PREFIX_TILES, STORE: tl.constexpr, LOAD: tl.constexpr, POOL: tl.constexpr, KDIV: tl.constexpr):
     """Selector. Optionally stores or reuses exact per-row prefix summaries.
 
     For a KV tile lying WHOLLY inside the immutable prefix, ``block_z`` and
@@ -85,7 +85,14 @@ def _route_generic(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, LSE, STATE, RISK,
             block_z = tl.where(active, maximum+lib.log(tl.maximum(ell, 1.e-30)), -float('inf'))
             sketch = tl.load(Z+((batch*HK+kh)*K+kk[:, None])*R+ri[None, :],
                              (kk[:, None]<K) & (ri[None, :]<R), other=0.)
-            mu = tl.dot(weights, sketch, input_precision='tf32x3')
+            if POOL:
+                # v26 M2: per-row mean of the current projected V over the
+                # tile's real, legal (finite-score) keys; replaces only mu.
+                legal_w = finite.to(tl.float32)
+                legal_w = legal_w / tl.maximum(tl.sum(legal_w, 1), 1.)[:, None]
+                mu = tl.dot(legal_w, sketch, input_precision='tf32x3')
+            else:
+                mu = tl.dot(weights, sketch, input_precision='tf32x3')
             if STORE and j < PREFIX_TILES:
                 base = (((batch*H+h)*QB+qb)*PREFIX_TILES+j)*128 + tl.arange(0, 128)
                 tl.store(ZSUM+base, block_z, rows)

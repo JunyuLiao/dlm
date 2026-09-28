@@ -24,7 +24,9 @@ REQUEST_ENVELOPE = ('phase', 'diagnostic', 'timing_events', 'thinking', 'max_new
 # every previously bound v21 config keeps its fingerprint.
 BOOTSTRAP_POLICIES = ('native_bootstrap2_observe1',)
 OBSERVATION_PRODUCERS = ('repeat_interleave', 'grouped_q')
-ROUTE_STORAGES = ('logical', 'aligned16')
+ROUTE_STORAGES = ('logical', 'aligned16', 'aligned16_odd')
+MU_MODES = ('exact', 'pooled')
+SCORE_PERIODS = (8, 16)
 
 
 def _fingerprint(config):
@@ -43,7 +45,7 @@ def _check_modes(precision, layout, parent):
 def effective_config(base: dict, arm: str, scope: str, *,
                      output_score_precision='legacy_bf16_scores', output_layout='head_major',
                      bootstrap_policy=None, observation_producer='repeat_interleave',
-                     route_storage='logical') -> dict:
+                     route_storage='logical', mu_mode='exact', score_period=8) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -71,6 +73,14 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if route_storage not in ROUTE_STORAGES or output_score_precision != 'fp32_scores_bf16_pv':
             raise ValueError('v25 route storage requires a known variant and FP32 current-output scores')
         extra['route_storage'] = route_storage
+    if mu_mode != 'exact':
+        if mu_mode not in MU_MODES or bootstrap_policy is None:
+            raise ValueError('v26 pooled mu requires the bootstrap mainline')
+        extra['mu_mode'] = mu_mode
+    if score_period != 8:
+        if score_period not in SCORE_PERIODS or bootstrap_policy is None:
+            raise ValueError('v26 score period must be 8 or 16 on the bootstrap mainline')
+        extra['score_period'] = score_period
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -160,6 +170,11 @@ def validate_effective(config: dict, condition: str):
                                       or parent_kind != 'v20_method'
                                       or precision != 'fp32_scores_bf16_pv'):
         raise ValueError('v25 route storage identity drift')
+    if 'mu_mode' in config and (config['mu_mode'] not in MU_MODES[1:] or 'bootstrap_policy' not in config):
+        raise ValueError('v26 mu mode identity drift')
+    if 'score_period' in config and (config['score_period'] not in SCORE_PERIODS[1:]
+                                     or 'bootstrap_policy' not in config):
+        raise ValueError('v26 score period identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -194,6 +209,12 @@ def install(adapter, config: dict, condition: str):
             owner.observation_producer = config['observation_producer']
         if 'route_storage' in config:
             owner.route_storage = config['route_storage']
+        if 'mu_mode' in config:
+            owner.mu_mode = config['mu_mode']
+        if 'score_period' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('score period must be bound before any routed call')
+            owner.cache.score_period = config['score_period']
         if 'bootstrap_policy' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('bootstrap must be bound before any routed call')
@@ -208,6 +229,8 @@ def install(adapter, config: dict, condition: str):
                         v23_bootstrap_policy=config.get('bootstrap_policy'),
                         v23_observation_producer=config.get('observation_producer', 'repeat_interleave'),
                         v25_route_storage=config.get('route_storage', 'logical'),
+                        v26_mu_mode=config.get('mu_mode', 'exact'),
+                        v26_score_period=config.get('score_period', 8),
                         output_score_precision=owner.output_score_precision,
                         output_layout=owner.output_layout,
                         output_precision_status=config['output_precision_status'],

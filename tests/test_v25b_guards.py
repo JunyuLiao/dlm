@@ -19,6 +19,7 @@ def _owner(storage='aligned16', max_bytes=10**9):
         storage, 'fp32_scores_bf16_pv', PREQK_MODE)
     owner.aligned_score_copies = owner.aligned_pad_bytes = owner.aligned_sketch_pads = 0
     owner.aligned_extra_pad_bytes = owner.aligned_copy_bytes = 0
+    owner.mu_mode = 'exact'
     owner.peak_score_transient_bytes = owner.peak_score_physical_bytes = 0
     owner.cache = ScoreCache(8, 3, max_bytes)
     return owner

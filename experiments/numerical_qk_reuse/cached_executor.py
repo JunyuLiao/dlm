@@ -117,7 +117,7 @@ if tr is not None:
                Q: tl.constexpr, K: tl.constexpr, H: tl.constexpr, HK: tl.constexpr,
                R: tl.constexpr, RP: tl.constexpr, QB: tl.constexpr,
                KT: tl.constexpr, THRESHOLD: tl.constexpr, TRACE: tl.constexpr,
-               PREFIX_TILES: tl.constexpr, STORE: tl.constexpr, LOAD: tl.constexpr):
+               PREFIX_TILES: tl.constexpr, STORE: tl.constexpr, LOAD: tl.constexpr, POOL: tl.constexpr):
         """Selector. Optionally stores or reuses exact per-row prefix summaries.
 
         For a KV tile lying WHOLLY inside the immutable prefix, ``block_z`` and
@@ -168,7 +168,14 @@ if tr is not None:
                 block_z = tl.where(active, maximum+lib.log(tl.maximum(ell, 1.e-30)), -float('inf'))
                 sketch = tl.load(Z+((batch*HK+kh)*K+kk[:, None])*R+ri[None, :],
                                  (kk[:, None]<K) & (ri[None, :]<R), other=0.)
-                mu = tl.dot(weights, sketch, input_precision='tf32x3')
+                if POOL:
+                    # v26 M2: per-row mean of the current projected V over the
+                    # tile's real, legal (finite-score) keys; replaces only mu.
+                    legal_w = finite.to(tl.float32)
+                    legal_w = legal_w / tl.maximum(tl.sum(legal_w, 1), 1.)[:, None]
+                    mu = tl.dot(legal_w, sketch, input_precision='tf32x3')
+                else:
+                    mu = tl.dot(weights, sketch, input_precision='tf32x3')
                 if STORE and j < PREFIX_TILES:
                     base = (((batch*H+h)*QB+qb)*PREFIX_TILES+j)*128 + tl.arange(0, 128)
                     tl.store(ZSUM+base, block_z, rows)
@@ -435,7 +442,7 @@ def _check_output_modes(variant, precision, layout):
 def attention(scores, v, z=None, reference=None, *, sensitivity=None,
               log_threshold=-math.inf, skipped=None, eligible=None,
               trace=False, num_warps=8, summary=None, store_summary=False,
-              variant='static', output_layout='head_major'):
+              variant='static', output_layout='head_major', pool=False):
     """Run M1, or consume a held M3 bitmap without projected-V routing.
 
     Output rows flagged in ``invalid_scores`` are zero and require caller
@@ -491,7 +498,7 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
                            zs, mus, acts, bads,
                            nq, _karg(variant, nk), h, hk, 32, 32, qb, kt, log_threshold, trace,
                            prefix_tiles, bool(store_summary),
-                           bool(summary is not None and not store_summary),
+                           bool(summary is not None and not store_summary), bool(pool),
                            num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
     elif summary is not None or store_summary:
         raise ValueError('summaries apply to the selector, not the held-bitmap path')
@@ -512,7 +519,7 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
 
 
 def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.inf,
-               num_warps=8, summary=None, store_summary=False, variant='static'):
+               num_warps=8, summary=None, store_summary=False, variant='static', pool=False):
     """Selector only: the SAME ``_route`` decision, with no PV and no output.
 
     ``attention(...)`` with ``skipped=None`` also produces a bitmap, but it
@@ -561,7 +568,7 @@ def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.in
                        dummy, dummy, dummy, zs, mus, acts, bads,
                        nq, _karg(variant, nk), h, hk, 32, 32, qb, kt, log_threshold, False,
                        prefix_tiles, bool(store_summary),
-                       bool(summary is not None and not store_summary),
+                       bool(summary is not None and not store_summary), bool(pool),
                        num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
     return Routing(skip, elig, bad_tiles)
 
