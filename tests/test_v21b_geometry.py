@@ -293,3 +293,20 @@ def test_actual_coarse_route_only_bitmap_parity_cuda():
     assert parity['status'] == 'match', parity
     assert parity['kept_mismatch_tiles'] == 0
     assert parity['eligible_mismatch_tiles'] == 0
+
+
+def test_grouped_q_producer_preserves_gqa_head_order_and_mask():
+    pytest.importorskip('dllm.attention.blasst.core')
+    from experiments.numerical_qk_reuse.integration import Attention
+    gen = torch.Generator().manual_seed(23)
+    device = 'cuda' if torch.cuda.is_available() else 'cpu'
+    # Small integers make every product/sum exact, so any mismatch is a
+    # head/row mapping error rather than GEMM rounding.
+    q = torch.randint(-3, 4, (1, 8, 5, 16), generator=gen).to(device, torch.bfloat16)
+    q = q.transpose(1, 2).contiguous().transpose(1, 2)        # native non-contiguous view
+    k = torch.randint(-3, 4, (1, 2, 70, 16), generator=gen).to(device, torch.bfloat16)
+    legacy = Attention.observe_scores(q, k, None, .25, False, None, 0)
+    grouped = Attention.observe_scores_grouped(q, k, None, .25, False, None, 0)
+    assert grouped.shape == legacy.shape == (1, 8, 5, 70)
+    assert grouped.dtype == legacy.dtype == torch.float32 and grouped.is_contiguous()
+    assert torch.equal(legacy, grouped)

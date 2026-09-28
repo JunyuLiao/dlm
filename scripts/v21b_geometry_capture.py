@@ -360,6 +360,64 @@ def _validation_geometry(owner, record):
                 comparison=dict(matched_q16_calibration=screen))
 
 
+def _observation_parity(owner, record, reps=5):
+    """v23 Track E: legacy repeat_interleave producer versus grouped-Q producer
+    on one real GLOBAL state. Bitwise score identity (including -inf and NaN
+    payloads), route bitmap identity, event time and peak transient memory."""
+    from dllm.attention.blasst.core import _attention_validity
+    from experiments.numerical_qk_reuse.cached_executor import route_only
+    from experiments.numerical_qk_reuse.integration import Attention
+    scale = _mask_contract(record)
+    q, k = record['q'], record['k']
+    producers = {'repeat_interleave': Attention.observe_scores,
+                 'grouped_q': Attention.observe_scores_grouped}
+    call = {name: (lambda f=f: f(q, k, None, scale, False, None, 0)) for name, f in producers.items()}
+    outputs = {name: fn() for name, fn in call.items()}   # warmup and values
+    legacy, grouped = outputs['repeat_interleave'], outputs['grouped_q']
+    bits_l, bits_g = legacy.view(torch.int32), grouped.view(torch.int32)
+    differing = int((bits_l != bits_g).sum())
+    finite = torch.isfinite(legacy) & torch.isfinite(grouped)
+    max_abs = float((legacy-grouped).abs().masked_fill(~finite, 0).max()) if differing else 0.
+    legal = _attention_validity(None, q, k, is_causal=False, sliding_window=None)
+    z, ref, _ = _project_full(owner, record, legal)
+    sensitivity = record['sensitivity']
+    if sensitivity is None:
+        sensitivity = torch.ones((q.shape[0], q.shape[2]), device=q.device, dtype=torch.float32)
+    threshold = float(owner.thresholds['global']['log_threshold'])
+    routes = {name: route_only(value, z, ref, sensitivity=sensitivity.contiguous(),
+                               log_threshold=threshold, variant=owner.kernel_variant)
+              for name, value in outputs.items()}
+    bitmap_equal = bool(torch.equal(routes['repeat_interleave'].skipped, routes['grouped_q'].skipped)
+                        and torch.equal(routes['repeat_interleave'].eligible, routes['grouped_q'].eligible))
+    del outputs, legacy, grouped, bits_l, bits_g, routes
+    samples = {name: [] for name in call}
+    memory = {}
+    with base.no_compile_during_accepted() as misses:
+        for repeat in range(reps):
+            order = list(call) if repeat % 2 == 0 else list(reversed(list(call)))
+            for name in order:
+                torch.cuda.synchronize()
+                torch.cuda.reset_peak_memory_stats()
+                before = torch.cuda.memory_allocated()
+                value, event_ms, wall_ms = _event(call[name])
+                memory[name] = max(memory.get(name, 0), torch.cuda.max_memory_allocated()-before)
+                samples[name].append(dict(event_ms=event_ms, synchronized_wall_ms=wall_ms))
+                del value
+    if misses:
+        raise RuntimeError(f'JIT specialization during accepted producer timing: {misses}')
+    median = lambda values: sorted(values)[len(values)//2]
+    return dict(status='qualified', scores_bitwise_equal=(differing == 0),
+                differing_score_elements=differing, max_abs_finite_difference=max_abs,
+                route_bitmap_equal=bitmap_equal,
+                shape=dict(query_heads=q.shape[1], kv_heads=k.shape[1], queries=q.shape[2],
+                           keys=k.shape[-2], head_dim=q.shape[-1]),
+                repeated_k_bytes=k.numel()*k.element_size()*(q.shape[1]//k.shape[1]),
+                peak_transient_bytes=memory,
+                median_event_ms={name: median([r['event_ms'] for r in rows]) for name, rows in samples.items()},
+                samples=samples, reps=reps,
+                boundary='score producer only (anchor observation), not a complete A call')
+
+
 def _native_stop(model, snapshot):
     kw = base.prepare_step(snapshot, None)
     result = model._denoising_step(**kw)
@@ -401,9 +459,10 @@ def _replay(model, sequence, selected, runtime, *, native):
 
 
 @torch.inference_mode()
-def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=False):
-    if bootstrap_calibration and q16_validation:
-        raise ValueError('calibration and validation are separate stages')
+def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=False,
+        observation_parity=False):
+    if sum(map(bool, (bootstrap_calibration, q16_validation, observation_parity))) > 1:
+        raise ValueError('calibration, validation and observation parity are separate stages')
     from dllm.models import create_adapter
     paths, proof = diagnostic.preflight(config)
     rows = {(dataset, id_): row for dataset, path in paths.items()
@@ -418,6 +477,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
     report = dict(schema='v21b_geometry_capture_v1', quality_eligible=False,
                   screen=('missing_bootstrap_and_two_LB_calibration_states' if bootstrap_calibration
                           else 'frozen_q16_offsets_validation_and_attention_share' if q16_validation
+                          else 'v23_gqa_observation_producer_parity' if observation_parity
                           else 'inherited_threshold_opportunity'),
                   source_config_sha256=hashlib.sha256(json.dumps(config, sort_keys=True).encode()).hexdigest(),
                   source_sha256={
@@ -454,7 +514,7 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                 wanted = {0, 3} if dataset == 'longbench_v2' else {0}
                 reached = {int(s['call_index']) for s in sequence}
                 selected, missing = sorted(wanted & reached), sorted(wanted - reached)
-            elif q16_validation:
+            elif q16_validation or observation_parity:
                 # Same states as the inherited-threshold capture plus bootstrap call 0.
                 selected = sorted(set(selected) | {0})
             group.update(status='captured', reached_calls=len(sequence), missing_requested_calls=missing,
@@ -471,7 +531,10 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                 group['last_capture'] = dict(call_index=last, native_stop_verified=None,
                     label='last_captured_native_stop_unknown', error=_error(exc, 'native_stop_probe'))
             registry, native_fn = native_registry(model)
-            if q16_validation:
+            if observation_parity:
+                native = dict(records={}, input_digests={}, output_digests={})
+                native_qkv_hashes = {}
+            elif q16_validation:
                 kinds = _layer_kinds(model)
                 by_index = {int(s['call_index']): s for s in sequence}
                 shares = {}
@@ -501,7 +564,17 @@ def run(config, checkpoint=None, *, bootstrap_calibration=False, q16_validation=
                                          input_digest_method=method['input_digests'][idx],
                                          native_forward_digest=native['output_digests'].get(idx),
                                          method_forward_digest=method['output_digests'][idx], layers={})
-                    for layer in ((5,) if q16_validation else (0, 5)):
+                    for layer in ((5,) if (q16_validation or observation_parity) else (0, 5)):
+                        if observation_parity:
+                            try:
+                                target_result['layers']['5'] = dict(
+                                    status='qualified', attention_kind='GLOBAL',
+                                    observation=_observation_parity(owner, method['records'][idx][5]))
+                            except Exception as exc:
+                                target_result['layers']['5'] = dict(status='failed', error=_error(exc, 'layer'))
+                                report['errors'].append(dict(group=key, call_index=idx, layer=5,
+                                                             **_error(exc, 'observation_parity')))
+                            continue
                         if q16_validation:
                             try:
                                 target_result['layers']['5'] = dict(
@@ -604,6 +677,8 @@ def main(argv=None):
                         help='run the geometry parity test under this billed stage before model capture')
     parser.add_argument('--bootstrap-calibration', action='store_true',
                         help='separate missing-bootstrap and frozen two-LB-state work/error screen')
+    parser.add_argument('--observation-parity', action='store_true',
+                        help='v23 Track E: grouped-Q versus repeat_interleave score producer on real GLOBAL states')
     parser.add_argument('--q16-validation', action='store_true',
                         help='frozen five-offset Q16 screen on every reached GLOBAL state plus native attention-share oracles')
     args = parser.parse_args(argv)
@@ -632,7 +707,8 @@ def main(argv=None):
                 raise RuntimeError(f'geometry qualification tests failed; exit={result.returncode}')
         report = run(config, checkpoint=lambda data: base.atomic_json(partial, data),
                      bootstrap_calibration=args.bootstrap_calibration,
-                     q16_validation=args.q16_validation)
+                     q16_validation=args.q16_validation,
+                     observation_parity=args.observation_parity)
         report['qualification_tests'] = dict(status=('passed' if args.qualify_tests else 'not_requested'),
                                              log=str(test_log) if args.qualify_tests else None)
         report['completeness'] = completeness(report, bootstrap_calibration=args.bootstrap_calibration,

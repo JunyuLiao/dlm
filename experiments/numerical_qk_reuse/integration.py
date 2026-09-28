@@ -435,6 +435,23 @@ class Attention:
         repeated = k.repeat_interleave(q.shape[1] // k.shape[1], dim=1)
         # Both matmul and multiplication preserve Junyu BF16 score transforms.
         scores = torch.matmul(q, repeated.transpose(-1, -2)) * scale
+        return Attention._finish_scores(scores, q, k, mask, causal, window, crop)
+
+    @staticmethod
+    def observe_scores_grouped(q, k, mask, scale, causal, window, crop):
+        """v23 Track E candidate: same BF16 matmul/scale convention without
+        materializing K over the GQA group. Query head i = kv*G + j (the
+        repeat_interleave order) becomes row j*Q+q of KV head kv; only the
+        small Q tensor may be copied. Different GEMM shapes may round
+        differently, so exactness is a measured property, never assumed."""
+        b, h, nq, d = q.shape
+        hk, nk = k.shape[1], k.shape[-2]
+        grouped = q.reshape(b, hk, (h // hk) * nq, d)
+        scores = torch.matmul(grouped, k.transpose(-1, -2)).view(b, h, nq, nk) * scale
+        return Attention._finish_scores(scores, q, k, mask, causal, window, crop)
+
+    @staticmethod
+    def _finish_scores(scores, q, k, mask, causal, window, crop):
         cropped_mask = None if mask is None else mask[..., crop:crop+k.shape[-2]]
         valid = _attention_validity(cropped_mask, q, k, is_causal=causal, sliding_window=window)
         if cropped_mask is not None and cropped_mask.dtype != torch.bool:
