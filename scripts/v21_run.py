@@ -24,6 +24,7 @@ from scripts.v20_run import router_phase_evidence
 SCHEMA = "v21_conditional_panel_v1"
 BINDING_SCHEMA = "v21_conditional_binding_v1"
 PANEL_COUNTS = {"numeric7": (7, 448), "layout_pair": (2, 96), "bootstrap6": (6, 240),
+                "bootstrap6_ruler": (6, 90),
                 "zero_pruning_diagnostic": (3, 12)}
 V20_PROTOCOL = Path(__file__).resolve().parents[1] / "results/fan_m1_m3_multidataset_20260927/frozen_protocol.json"
 
@@ -92,12 +93,14 @@ def validate_protocol(protocol: dict) -> None:
     diagnostic = protocol["panel_kind"] == "zero_pruning_diagnostic"
     ids = protocol.get("ids")
     required_tasks = ({"longbench_v2"} if diagnostic else {"aime26", "longbench_v2"}
-                      if protocol["panel_kind"] == "bootstrap6" else {"ruler4k", "aime26", "longbench_v2"})
+                      if protocol["panel_kind"] == "bootstrap6" else {"ruler4k"}
+                      if protocol["panel_kind"] == "bootstrap6_ruler" else {"ruler4k", "aime26", "longbench_v2"})
     if not isinstance(ids, dict) or set(ids) != required_tasks:
         raise ValueError("task ID inventory differs from frozen panel kind")
     if any(not isinstance(v, list) or len(v) != len(set(v)) for v in ids.values()):
         raise ValueError("task IDs missing or duplicated")
-    if protocol.get("seeds") != [101, 202]:
+    ruler_stage = protocol["panel_kind"] == "bootstrap6_ruler"
+    if protocol.get("seeds") != ([101] if ruler_stage else [101, 202]):
         raise ValueError("frozen v20 generation seeds changed")
     if diagnostic:
         frozen_v20 = _json(V20_PROTOCOL)
@@ -152,12 +155,13 @@ def validate_protocol(protocol: dict) -> None:
     if len(actual_qseeds) != len(assignments) or actual_qseeds != expected_qseeds:
         raise ValueError("frozen panel omits or duplicates a task question-seed block")
     for block, entries in blocks.items():
-        required_roles = ["attempt0"] * len(arms) + ([] if diagnostic else ["warm"] * len(arms))
+        warm = not diagnostic and (not ruler_stage or block in protocol.get("warm_blocks", []))
+        required_roles = ["attempt0"] * len(arms) + (["warm"] * len(arms) if warm else [])
         if len(entries) != len(required_roles) or [e["role"] for e in entries] != required_roles:
             raise ValueError("incomplete or interleaved question-seed block")
         first_arms = [e["arm"] for e in entries[:len(arms)]]
         warm_arms = [e["arm"] for e in entries[len(arms):]]
-        if set(first_arms) != set(arms) or (not diagnostic and warm_arms != first_arms[::-1]):
+        if set(first_arms) != set(arms) or (warm and warm_arms != first_arms[::-1]):
             raise ValueError("frozen balanced first/reverse warm order drift")
     stages = protocol.get("stages")
     if not isinstance(stages, dict) or not stages:

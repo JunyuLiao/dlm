@@ -61,7 +61,7 @@ def _contracts(mode, output_layout):
     def method(parent, precision, layout):
         return dict(kind='v21_method', parent_v20_arm=parent, scope=SCOPE,
                     output_score_precision=precision, output_layout=layout)
-    if mode == 'bootstrap6':
+    if mode in ('bootstrap6', 'bootstrap6_ruler'):
         updated = ('fp32_scores_bf16_pv', output_layout)
         def v23(parent, bootstrap):
             contract = dict(method(parent, *updated), observation_producer=PRODUCER)
@@ -93,7 +93,7 @@ def _contracts(mode, output_layout):
 
 def freeze(mode, v20_protocol_path, v20_binding_path, manifests_dir, output_layout,
            out_dir):
-    if mode not in ('numeric7', 'layout_pair', 'bootstrap6') or output_layout not in ('head_major', 'model_major'):
+    if mode not in ('numeric7', 'layout_pair', 'bootstrap6', 'bootstrap6_ruler') or output_layout not in ('head_major', 'model_major'):
         raise ValueError('explicit numeric7/layout_pair and qualified output layout required')
     if mode == 'layout_pair' and output_layout != 'model_major':
         raise ValueError('layout_pair requires model_major successor')
@@ -122,12 +122,15 @@ def freeze(mode, v20_protocol_path, v20_binding_path, manifests_dir, output_layo
             ('aime26', 4 if mode == 'bootstrap6' else 6), ('longbench_v2', 6))}
     if mode == 'bootstrap6':
         ids.pop('ruler4k')
-    if mode == 'numeric7':
+    if mode == 'bootstrap6_ruler':
+        # v24: the RULER stage omitted by bootstrap6; all 13 frozen task-balanced IDs.
+        ids = {'ruler4k': list(original['ids']['ruler4k'])}
+    if mode in ('numeric7', 'bootstrap6_ruler'):
         ruler_rows = _json(Path(manifests_dir) / 'ruler4k_generation_manifest.json')
         tasks = [next(row['task'] for row in ruler_rows if row['id'] == id_)
                  for id_ in ids['ruler4k']]
-        if len(set(tasks)) != 4:
-            raise ValueError('first four ordered RULER IDs are not distinct tasks')
+        if len(set(tasks)) != len(ids['ruler4k']):
+            raise ValueError('ordered RULER IDs are not distinct tasks')
     manifests, hashes = {}, {}
     for dataset in [d for d in old.DATASETS if d in ids]:
         source = Path(manifests_dir) / f'{dataset}_generation_manifest.json'
@@ -152,8 +155,11 @@ def freeze(mode, v20_protocol_path, v20_binding_path, manifests_dir, output_layo
             clean.append(row)
         manifests[dataset] = _bytes(clean)
         hashes[dataset] = _sha(manifests[dataset])
-    arms = list(NUMERIC_ARMS if mode == 'numeric7' else BOOTSTRAP_ARMS if mode == 'bootstrap6'
-                else LAYOUT_ARMS)
+    arms = list(NUMERIC_ARMS if mode == 'numeric7' else
+                BOOTSTRAP_ARMS if mode in ('bootstrap6', 'bootstrap6_ruler') else LAYOUT_ARMS)
+    seeds = [101] if mode == 'bootstrap6_ruler' else [101, 202]
+    # Warm timing repeats only on the first two frozen RULER tasks (predeclared).
+    warm_blocks = {0, 1} if mode == 'bootstrap6_ruler' else None
     contracts = _contracts(mode, output_layout)
     protocol_id = 'v21_' + mode + '_' + _sha(_bytes(dict(old_protocol=_sha(original_bytes),
         old_binding=_sha(binding_bytes), ids=ids, arms=contracts, output_layout=output_layout)))[:16]
@@ -162,14 +168,17 @@ def freeze(mode, v20_protocol_path, v20_binding_path, manifests_dir, output_layo
     # Whole question-seed blocks alternate old hosts within each task family.
     for dataset in [d for d in ('longbench_v2', 'aime26', 'ruler4k') if d in ids]:
         for item_index, id_ in enumerate(ids[dataset]):
-            for seed_index, seed in enumerate((101, 202)):
-                host = host_ids[(item_index * 2 + seed_index) % 2]
+            for seed_index, seed in enumerate(seeds):
+                host = host_ids[(item_index * 2 + seed_index) % 2] if len(seeds) == 2 else host_ids[item_index % 2]
                 assignment = dict(dataset=dataset, id=id_, seed=seed, host=host,
                                   gpu_uuid=next(iter(host_uuids[host])))
                 assignments[str(block)] = assignment
                 rotation = block % len(arms)
                 first = arms[rotation:] + arms[:rotation]
-                for role, order in (('attempt0', first), ('warm', first[::-1])):
+                roles = (('attempt0', first), ('warm', first[::-1]))
+                if warm_blocks is not None and block not in warm_blocks:
+                    roles = roles[:1]
+                for role, order in roles:
                     for arm in order:
                         schedule.append(dict(index=len(schedule), block=block, arm=arm,
                             cell_id=cell_id(protocol_id, old.REVISION,
@@ -182,15 +191,19 @@ def freeze(mode, v20_protocol_path, v20_binding_path, manifests_dir, output_layo
                     model_revision=old.REVISION, v20_protocol_sha256=_sha(original_bytes),
                     v20_binding_sha256=_sha(binding_bytes), selected_scope=SCOPE,
                     policy_point='P0', policy_sha256=binding['policy_sha256'],
-                    output_layout=output_layout, ids=ids, seeds=[101, 202],
+                    output_layout=output_layout, ids=ids, seeds=seeds,
+                    warm_blocks=(sorted(warm_blocks) if warm_blocks is not None else None),
                     arms=arms, arm_contracts=contracts, block_assignments=assignments,
                     schedule=schedule, planned_executions=len(schedule),
                     generation_manifest_sha256=hashes,
                     stages=({'lb_preview': [0, 1, 2, 3], 'lb_rest': list(range(4, 12)),
                              'aime': list(range(12, block))} if mode == 'bootstrap6'
+                            else {'ruler': list(range(block))} if mode == 'bootstrap6_ruler'
                             else {'main': list(range(block))}),
                     selection_rule=('ordered first six LB and first four AIME v20 IDs; RULER deferred; no scores'
                                     if mode == 'bootstrap6' else
+                                    'all 13 frozen task-balanced v20 RULER IDs, seed 101, warm on first two tasks; no scores'
+                                    if mode == 'bootstrap6_ruler' else
                                     'ordered first six LB/AIME and first four distinct-task RULER v20 IDs; no scores'),
                     host_assignment_rule='whole question-seed blocks alternate two old pinned hosts per task',
                     quality_eligible=True, timing_eligible=True)
@@ -308,7 +321,7 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest='command', required=True)
     fr = sub.add_parser('freeze')
-    fr.add_argument('--mode', choices=('numeric7', 'layout_pair', 'bootstrap6'), required=True)
+    fr.add_argument('--mode', choices=('numeric7', 'layout_pair', 'bootstrap6', 'bootstrap6_ruler'), required=True)
     fr.add_argument('--v20-protocol', type=Path, required=True)
     fr.add_argument('--v20-binding', type=Path, required=True)
     fr.add_argument('--manifests-dir', type=Path, required=True)
