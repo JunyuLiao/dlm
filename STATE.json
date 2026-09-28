@@ -4,15 +4,15 @@
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",
   "authority": "User v23 handoff dllm_claude_v23_cheap_anchor_native_bootstrap_20260928.md",
-  "status": "V23_LB_PREVIEW_COMPLETE_AIME_RUNNING",
+  "status": "V23_AIME_COMPLETE_LB_REST_RUNNING",
   "wall_start_utc": "2026-09-27T22:22:00Z",
   "gpu_stop_utc": "2026-09-28T05:52:00Z",
   "final_deadline_utc": "2026-09-28T06:22:00Z",
   "max_gpu_process_seconds": 21600,
   "max_generation_executions": 512,
   "max_gpu_workers": 2,
-  "charged_gpu_process_seconds": 5150.607787752151,
-  "generation_executions": 108,
+  "charged_gpu_process_seconds": 8630.983514213562,
+  "generation_executions": 204,
   "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
   "push_status": "4ab56f6d verified remote at takeover",
   "agents": {
@@ -172,22 +172,22 @@
   "gpu_jobs": [
     {
       "host": "mpk",
-      "stage": "bootstrap6 aime",
+      "stage": "bootstrap6 lb_rest",
       "deploy_sha": "6af4d42374c0a2d6d71ce91b4f020255b120b800",
       "protocol": "v21_bootstrap6_b8b2c59449fd0ebf",
-      "reserved_seconds": 3600,
+      "reserved_seconds": 2500,
       "reserved_executions": 48,
-      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/v23_bootstrap6_aime_v23_boot_6af4d42.json",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/v23_bootstrap6_lb_rest_v23_boot_6af4d42.json",
       "ledger": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/v23/bootstrap6_001/ledger.jsonl"
     },
     {
       "host": "dllm",
-      "stage": "bootstrap6 aime",
+      "stage": "bootstrap6 lb_rest",
       "deploy_sha": "6af4d42374c0a2d6d71ce91b4f020255b120b800",
       "protocol": "v21_bootstrap6_b8b2c59449fd0ebf",
-      "reserved_seconds": 3600,
+      "reserved_seconds": 2500,
       "reserved_executions": 48,
-      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/v23_bootstrap6_aime_v23_boot_6af4d42.json",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/v23_bootstrap6_lb_rest_v23_boot_6af4d42.json",
       "ledger": "/home/exouser/dyh/m3_output_numerics_v21_20260927/v23/bootstrap6_001/ledger.jsonl"
     }
   ],
@@ -205,7 +205,8 @@
     "Track E observation parity b80d116 mpk+dllm: 80.07 s, 6 captures",
     "Track P qualification 71e277c (harness bug after first group) mpk+dllm: 66.40 s, 6 captures",
     "Track P qualification 6af4d42 complete mpk+dllm: 98.84 s, 6 captures",
-    "bootstrap6 lb_preview mpk 968.91 s + dllm 1065.28 s, 48 executions, 0 failures"
+    "bootstrap6 lb_preview mpk 968.91 s + dllm 1065.28 s, 48 executions, 0 failures",
+    "bootstrap6 aime mpk 1836.97 s + dllm 1643.41 s, 96 executions, 0 failures"
   ],
   "decision": "Production fine geometry not promoted: frozen rule candidate (-1.0) costs 1.158x work; validated equal-error saving 4-5% of retained GLOBAL pairs; GLOBAL deletion ceiling 0.84x on LB"
 }

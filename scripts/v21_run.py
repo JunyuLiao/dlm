@@ -271,7 +271,7 @@ def stage_entries(protocol: dict, host: str, gpu_uuid: str, stage: str) -> list[
 
 
 def validate_resume_events(events: list[dict], identity: dict, full_entries: list[dict], private: Path) -> set[str]:
-    """Require closed launches and a prefix of complete local blocks before continuation."""
+    """Require closed launches and only whole complete local blocks before continuation."""
     expected = {execution_key(e): e for e in full_entries}
     done, starts, ends = set(), 0, 0
     for event in events:
@@ -304,8 +304,9 @@ def validate_resume_events(events: list[dict], identity: dict, full_entries: lis
         present = [execution_key(e) in done for e in entries]
         if any(present) and not all(present):
             raise ValueError("partial question-seed block: preserve first/failure and stop")
-        if any(present) and seen_incomplete:
-            raise ValueError("completed block after missing block is not a prefix")
+        # v23: frozen stages may run in their declared order (e.g. lb_preview,
+        # aime, lb_rest), so whole completed blocks may follow a gap. Partial
+        # blocks, duplicates, foreign rows and unclosed launches still fail.
         if not any(present):
             seen_incomplete = True
     for entry in full_entries:
