@@ -132,7 +132,17 @@ for _name in ('M1_R1_A64_one_c64_fused', 'M3_R6_A64_one_c64_fused', 'M3_R3_A64_o
               'M2c_R1_A64_one_c64_fused', 'M3_R6_A64_c64_fused', 'B_A64_c64_fused'):
     V27[_name + '_rp'] = (V27[_name][0], dict(V27[_name][1], route_pipeline=True))
     V27[_name + '_rp_long'] = (V27[_name][0], dict(V27[_name][1], route_pipeline=True, memory_caps='long'))
-_RP = ('M1_R1_A64_one_c64_fused', 'M3_R6_A64_one_c64_fused', 'M3_R3_A64_one_c64_fused', 'M2c_R1_A64_one_c64_fused')
+# Fan's plain M1 / M2 (compact) / M3 on the 64-row consumer: every routed layer selects, so the
+# selector latency matters most here.
+V27['M1_R1_A8_c64'] = ('M1_R1_A8_current_output', dict(consumer64=2))
+V27['M2c_R1_A8_c64'] = ('M1_R1_A8_current_output', dict(consumer64=2, mu_mode='pooled_compact'))
+V27['M3_R3_A8_c64'] = ('M3_R3_A8_current_output', dict(consumer64=2))
+for _name in ('M1_R1_A8_c64', 'M2c_R1_A8_c64', 'M3_R3_A8_c64'):
+    V27[_name + '_long'] = (V27[_name][0], dict(V27[_name][1], memory_caps='long'))
+    V27[_name + '_rp'] = (V27[_name][0], dict(V27[_name][1], route_pipeline=True))
+    V27[_name + '_rp_long'] = (V27[_name][0], dict(V27[_name][1], route_pipeline=True, memory_caps='long'))
+_RP = ('M1_R1_A8_c64', 'M2c_R1_A8_c64', 'M3_R3_A8_c64',
+       'M1_R1_A64_one_c64_fused', 'M3_R6_A64_one_c64_fused', 'M3_R3_A64_one_c64_fused', 'M2c_R1_A64_one_c64_fused')
 ARM_SETS['v27rp'] = ('D_native', 'D_c64') + tuple(x for n in _RP for x in (n, n + '_rp'))
 ARM_SETS['v27rplong'] = ('D_native', 'D_c64') + tuple(x for n in _RP for x in (n + '_long', n + '_rp_long'))
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls', 'fresh_fused_calls')
