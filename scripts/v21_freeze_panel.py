@@ -347,9 +347,8 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
     manifests, hashes = {}, {}
     for dataset, wanted in ids.items():
         pool = {r['id']: r for r in json.loads((Path(pool_dir) / f'{dataset}_pool_manifest.json').read_bytes())}
-        frozen = {r['id']: r for r in json.loads((Path(pool_dir).parent / 'v20_frozen' /
-                                                   f'{dataset}_generation_manifest.json').read_bytes())} \
-            if (Path(pool_dir).parent / 'v20_frozen').is_dir() else {}
+        frozen_path = Path(pool_dir).parent / 'v20_frozen' / f'{dataset}_generation_manifest.json'
+        frozen = {r['id']: r for r in json.loads(frozen_path.read_bytes())} if frozen_path.is_file() else {}
         if len(set(wanted)) != len(wanted) or any(i not in pool for i in wanted):
             raise ValueError(f'v27 ids missing from pool or duplicated: {dataset}')
         clean = [pool[i] for i in wanted]
