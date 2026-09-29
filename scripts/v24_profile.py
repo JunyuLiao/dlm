@@ -72,8 +72,18 @@ V27['M1_R1_A8_one'] = ('M1_R1_A8_current_output', dict(share_layers='one'))
 V27['B_A64_mid3'] = ('B_A8_matched', dict(hold_only=True, score_period=64, route_layers='mid3'))
 ARMS_V27LAYERS = ('D_native', 'D_matched', 'M3_R6_A64', 'M3_R6_A64_mid3', 'M3_R6_A64_pairs', 'M3_R6_A64_one',
                   'M3_R3_A64', 'M3_R3_A64_pairs', 'M3_R3_A64_one', 'M1_R1_A8', 'M1_R1_A8_one', 'B_A64', 'B_A64_mid3')
+V27['M3_R6_A64_ALL_lshare'] = ('M3_R3_A8_current_output', dict(score_period=64, decision_interval=6,
+                                share_layers='local_blocks', scope=ALL_SCOPE))
+V27['M3_R6_A64_ALL_lshare_mid'] = ('M3_R3_A8_current_output', dict(
+    score_period=64, decision_interval=6, share_layers='local_blocks',
+    route_layers='global_plus_local_mid', scope=ALL_SCOPE))
+V27['B_A64_ALL_lshare'] = ('B_A8_matched', dict(hold_only=True, score_period=64,
+                                                share_layers='local_blocks', scope=ALL_SCOPE))
 ARMS_V27ALL = ('D_native', 'D_matched', 'D_matched_ALL', 'M1_R1_A8_ALL', 'M2c_pool_R1_A8_ALL',
                'M3_R3_A64_ALL', 'M3_R6_A64_ALL', 'B_A64_ALL', 'M3_R6_A64', 'B_A64')
+# Shared-support arms (GLOBAL groups and LOCAL blocks) run without the counter twin.
+ARMS_V27LAYERS = ARMS_V27LAYERS + ('D_matched_ALL', 'M3_R6_A64_ALL', 'M3_R6_A64_ALL_lshare',
+                                   'M3_R6_A64_ALL_lshare_mid', 'B_A64_ALL_lshare')
 ARM_SETS = {'v24': ARMS, 'v25': ARMS_V25, 'v27': ARMS_V27, 'v27thr': ARMS_V27THR, 'v27attr': ARMS_V27ATTR,
             'v27all': ARMS_V27ALL, 'v27layers': ARMS_V27LAYERS}
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls')

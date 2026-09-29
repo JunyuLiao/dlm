@@ -36,6 +36,12 @@ MIN_ROUTE_KEYS = (8192,)
 ROUTE_LAYER_SETS = {'mid3': (11, 17, 23), 'no_first': (11, 17, 23, 29), 'no_last': (5, 11, 17, 23)}
 SHARE_GROUPS = {'pairs': {11: 5, 23: 17}, 'one': {11: 5, 17: 5, 23: 5, 29: 5},
                 'mid3_one': {17: 11, 23: 11}}
+# LOCAL blocks: the five consecutive sliding layers between GLOBAL layers; each block's
+# first layer selects, the other four consume its support (all-layer scope only).
+_LOCAL_BLOCKS = [list(range(s, s + 5)) for s in (0, 6, 12, 18, 24)]
+SHARE_GROUPS['local_blocks'] = {l: blk[0] for blk in _LOCAL_BLOCKS for l in blk[1:]}
+ROUTE_LAYER_SETS['global_plus_local_mid'] = tuple(sorted((5, 11, 17, 23, 29) +
+                                                         tuple(l for blk in _LOCAL_BLOCKS[1:4] for l in blk)))
 _LN2 = 0.6931471805599453
 # Named log-threshold shifts in ln2 units; larger shifts allow more deletion.
 # The realized sparsity is measured, never inferred from the shift.
