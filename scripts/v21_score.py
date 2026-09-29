@@ -411,12 +411,35 @@ def score(protocol_path: Path, binding_path: Path, ledgers: list[Path], gold_pat
             if sha(raw) != protocol.get("v20_protocol_sha256"):
                 raise ValueError("pinned v20 protocol identity drift")
             protocol = dict(protocol, source_identity=json.loads(raw)["source_identity"])
-        gold = verify_sources(protocol, gold_paths)
+        long_sets = [d for d in protocol["ids"] if d in ("ruler32k", "ruler64k")]
+        gold = verify_sources(protocol, {d: p for d, p in gold_paths.items() if d not in long_sets})
+        gold.update(_long_ruler_gold(protocol, gold_paths, ruler_root, long_sets))
         quality = score_firsts(protocol, records, gold, ruler_root=ruler_root, private_roots=private_roots)
     task_by_id = ({qid: row["task"] for qid, row in gold["ruler4k"].items()}
                   if not diagnostic and "ruler4k" in gold and protocol["ids"].get("ruler4k") else None)
     return summarize(protocol, records, quality, protocol_sha=sha(protocol_path.read_bytes()),
                      binding_sha=sha(binding_path.read_bytes()), ruler_task_by_id=task_by_id)
+
+
+def _long_ruler_gold(protocol: dict, gold_paths: dict, ruler_root, datasets) -> dict:
+    """v27 RULER 32K/64K: id -> outputs gold, sha pinned in the frozen protocol; the task base
+    (official scorer key) comes from RULER's own synthetic.yaml for the task named in the id."""
+    if not datasets:
+        return {}
+    import yaml
+    config = yaml.safe_load((Path(ruler_root) / "scripts" / "synthetic.yaml").read_text())
+    out = {}
+    for dataset in datasets:
+        raw = gold_paths[dataset].read_bytes()
+        if sha(raw) != protocol.get("extra_gold_sha256", {}).get(dataset):
+            raise ValueError(f"{dataset} gold identity drift")
+        rows = json.loads(raw)
+        table = {}
+        for qid in protocol["ids"][dataset]:
+            task = qid.split("/", 1)[1].split("_", 2)[2].rsplit("_p", 1)[0]
+            table[qid] = dict(outputs=rows[qid], task_base=str(config[task]["task"]), task=task)
+        out[dataset] = table
+    return out
 
 
 def write_redacted(summary: dict, out_prefix: Path) -> None:
@@ -488,10 +511,13 @@ def main() -> None:
     p.add_argument("--aime-gold", type=Path)
     p.add_argument("--longbench-gold", type=Path)
     p.add_argument("--ruler-root", type=Path)
+    p.add_argument("--extra-gold", action="append", default=[], help="v27 long RULER: dataset=path")
     p.add_argument("--out-prefix", type=Path, required=True)
     a = p.parse_args()
     gold_paths = ({"ruler4k": a.ruler_gold, "aime26": a.aime_gold, "longbench_v2": a.longbench_gold}
                   if all((a.ruler_gold, a.aime_gold, a.longbench_gold)) else None)
+    if gold_paths is not None:
+        gold_paths.update({d: Path(p) for d, p in (x.split("=", 1) for x in a.extra_gold)})
     private_roots = {h: Path(v) for h, v in _read(a.private_roots).items()} if a.private_roots else None
     result = score(a.protocol, a.binding, a.ledger, gold_paths, a.ruler_root, private_roots)
     write_redacted(result, a.out_prefix)

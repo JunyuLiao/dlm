@@ -76,3 +76,17 @@ def test_gold_or_prompt_drift_rejected(tmp_path):
     (pool / 'longbench_v2_pool_manifest.json').write_text(json.dumps(rows))
     with pytest.raises(ValueError):
         freeze_v27(sp, op, bp, pool, tmp_path / 'out')
+
+
+def test_long_ruler_and_dense_c64_panel(tmp_path):
+    sp, op, bp, pool = _setup(tmp_path, dict(ARMS, D_c64=dict(kind='dense_c64')))
+    (pool / 'ruler32k_pool_manifest.json').write_text(json.dumps([_row('ruler32k/ruler_32768_cwe_p0000')]))
+    spec = json.loads(sp.read_text())
+    spec['ids'] = {'ruler32k': ['ruler32k/ruler_32768_cwe_p0000']}
+    spec['extra_gold_sha256'] = {'ruler32k': 'a' * 64}
+    sp.write_text(json.dumps(spec))
+    protocol = freeze_v27(sp, op, bp, pool, tmp_path / 'out')
+    assert protocol['arm_contracts']['D_c64'] == dict(kind='v27_dense', control='D_c64',
+                                                      scope='GLOBAL_ONLY_NATIVE_LOCAL')
+    assert protocol['extra_gold_sha256'] == {'ruler32k': 'a' * 64}
+    validate_protocol(json.loads((tmp_path / 'out' / 'protocol.json').read_bytes()))

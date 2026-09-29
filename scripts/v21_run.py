@@ -81,6 +81,8 @@ def validate_protocol(protocol: dict) -> None:
             if c.get("parent_v20_arm") not in ("T_scope", "D_matched") or c.get("scope") not in (
                     "ALL_NATIVE_LEGAL", "GLOBAL_ONLY_NATIVE_LOCAL"):
                 raise ValueError("legacy task/control identity drift")
+        elif c.get("kind") == "v27_dense":
+            pass
         elif c.get("kind") in ("v21_method", "v21_control"):
             if (c.get("scope") not in ("ALL_NATIVE_LEGAL", "GLOBAL_ONLY_NATIVE_LOCAL") or
                     c.get("output_score_precision") not in ("legacy_bf16_scores", "fp32_scores_bf16_pv") or
@@ -110,10 +112,12 @@ def validate_protocol(protocol: dict) -> None:
                 raise ValueError(f"unknown v23 method field: {arm}")
         else:
             raise ValueError(f"unknown arm contract: {arm}")
+        if c.get("kind") == "v27_dense" and (not v27 or c.get("control") not in ("D_c64", "D_fast")):
+            raise ValueError(f"v27 dense control outside a v27 panel: {arm}")
     diagnostic = protocol["panel_kind"] == "zero_pruning_diagnostic"
     ids = protocol.get("ids")
     required_tasks = (set(ids) if v27 and isinstance(ids, dict) and ids and
-                      set(ids) <= {"ruler4k", "aime26", "longbench_v2"} else
+                      set(ids) <= {"ruler4k", "aime26", "longbench_v2", "ruler32k", "ruler64k"} else
                       {"longbench_v2"} if diagnostic else {"aime26", "longbench_v2"}
                       if protocol["panel_kind"] == "bootstrap6" else {"ruler4k"}
                       if protocol["panel_kind"] == "bootstrap6_ruler" else {"longbench_v2"}
@@ -215,6 +219,12 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
     if contract["kind"] == "native":
         if config.get("condition") != "native_dense" or config.get("plugin"):
             raise ValueError("native config is not native_dense")
+        parent = config
+    elif contract["kind"] == "v27_dense":
+        from experiments.numerical_qk_reuse import v27_fast_dense as fast
+        if (config.get("plugin") != fast.PLUGIN or config.get("condition") != fast.CONDITION or
+                config.get("control") != contract["control"]):
+            raise ValueError("v27 dense control config differs from its contract")
         parent = config
     elif contract["kind"] == "v20_legacy":
         if (config.get("v20_scope") != contract["scope"] or
@@ -467,7 +477,9 @@ def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: P
                 before = time.perf_counter()
                 signal.alarm(timeout)
                 try:
-                    receipt = _one(adapter, row, seed, config)
+                    from experiments.numerical_qk_reuse.v27_long import prefill_dense64
+                    with prefill_dense64(adapter.model, os.environ.get("V27_PREFILL_DENSE64") == "1"):
+                        receipt = _one(adapter, row, seed, config)
                 except Timeout:
                     execution_error = f"timeout>{timeout}s"
                 except Exception as exc:

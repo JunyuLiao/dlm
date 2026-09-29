@@ -341,7 +341,7 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
         host_uuids.setdefault(entry['host'], set()).add(entry['gpu_uuid'])
     host_ids = sorted(host_uuids)
     ids, seeds = spec['ids'], list(spec['seeds'])
-    if not ids or not set(ids) <= {'longbench_v2', 'aime26', 'ruler4k'} or not seeds or \
+    if not ids or not set(ids) <= {'longbench_v2', 'aime26', 'ruler4k', 'ruler32k', 'ruler64k'} or not seeds or \
             not set(seeds) <= {101, 202, 303} or len(set(seeds)) != len(seeds):
         raise ValueError('v27 spec ids/seeds outside the allowed tasks/seeds')
     manifests, hashes = {}, {}
@@ -375,6 +375,9 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
             if name != 'D_native':
                 raise ValueError('native arm must be D_native')
             contracts[name] = dict(kind='native')
+        elif arm['kind'] == 'dense_c64':
+            # strongest dense: native model with GLOBAL attention through the 64-row kernel (all kept)
+            contracts[name] = dict(kind='v27_dense', control='D_c64', scope=SCOPE)
         elif arm['kind'] == 'dense_matched':
             # Same Triton consumer, FP32 scores, model-major output, every legal tile kept.
             contracts[name] = dict(kind='v21_control', parent_v20_arm='D_matched', scope=SCOPE,
@@ -389,7 +392,7 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
     protocol_id = 'v27_' + spec['name'] + '_' + _sha(_bytes(dict(old_protocol=_sha(original_bytes), ids=ids,
                                                               seeds=seeds, arms=contracts)))[:16]
     assignments, schedule, block, stages = {}, [], 0, {}
-    for dataset in ('longbench_v2', 'aime26', 'ruler4k'):
+    for dataset in ('longbench_v2', 'aime26', 'ruler4k', 'ruler32k', 'ruler64k'):
         if dataset not in ids:
             continue
         stages[dataset] = []
@@ -420,6 +423,8 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
                     generation_manifest_sha256=hashes, stages=stages,
                     selection_rule=spec.get('selection_rule', ''),
                     host_assignment_rule='host = (question index + seed index) mod 2 within each dataset',
+                    extra_gold_sha256=spec.get('extra_gold_sha256', {}),
+                    long_context_execution=spec.get('long_context_execution'),
                     quality_eligible=True, timing_eligible=bool(spec.get('warm', True)))
     validate_protocol(protocol)
     out_dir.mkdir(parents=True, exist_ok=False)
@@ -658,7 +663,8 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
             source_arm = ('D_native' if contract['kind'] == 'native' else
                           'T_scope' if parent == 'T_scope' else
                           'D_matched' if parent == 'D_matched' else parent)
-            inherited = _old_config(binding, host, dataset, source_arm)
+            inherited = _old_config(binding, host, 'ruler4k' if dataset in ('ruler32k', 'ruler64k') else dataset,
+                                    'D_native' if contract['kind'] == 'v27_dense' else source_arm)
             plugin = (old.CONTROLS if source_arm in ('D_native', 'D_matched', 'T_scope')
                       else v20.PLUGIN)
             base = _base(inherited, protocol=protocol, dataset=dataset,
@@ -666,6 +672,13 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                          source=_source(plugin, inherited), source_commit=source_commit)
             if contract['kind'] == 'native':
                 result = old.control_config(base, 'native_dense', SCOPE)
+            elif contract['kind'] == 'v27_dense':
+                from experiments.numerical_qk_reuse import v27_fast_dense as fast
+                result = old.control_config(base, 'native_dense', SCOPE)
+                result = {k: v for k, v in result.items() if k not in ('fingerprint', 'condition', 'plugin')}
+                result.update(control=contract['control'], plugin=fast.PLUGIN, condition=fast.CONDITION)
+                for src in (Path(fast.__file__).resolve(), Path(fast.__file__).resolve().with_name('v27_consumer64.py')):
+                    result['source_hashes'][str(src)] = _sha(src.read_bytes())
             elif contract['kind'] == 'v20_legacy':
                 result = old.control_config(dict(base, control='T_scope'), 'v20_fresh_T', SCOPE)
             elif contract['kind'] == 'v21_control':
