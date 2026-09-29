@@ -215,7 +215,8 @@ def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_leng
                       counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long', 'v27fused', 'v27fresh', 'v27freshlong',
                                                     'v27fusedlong'), operator_probe=False,
                       prepared_support_floor=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long',
-                                                             'v27fused', 'v27fusedlong'),
+                                                             'v27fused', 'v27fusedlong', 'v27fresh',
+                                                             'v27freshlong'),
                       derived_from_v21_profile_config_sha256=hashlib.sha256(
                           json.dumps(v21_profile_config, sort_keys=True).encode()).hexdigest())
         return config
