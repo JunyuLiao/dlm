@@ -1,0 +1,65 @@
+{
+ "name": "dev_lb",
+ "ids": {
+  "longbench_v2": [
+   "longbench_v2/66f9625fbb02136c067c5456",
+   "longbench_v2/66f2aac2821e116aacb2a9de",
+   "longbench_v2/66ed2c87821e116aacb1f149",
+   "longbench_v2/66f8c6b4bb02136c067c4480",
+   "longbench_v2/66f120a9821e116aacb26d02",
+   "longbench_v2/67040276bb02136c067cd8ae"
+  ]
+ },
+ "seeds": [
+  101,
+  202
+ ],
+ "warm": true,
+ "arms": {
+  "D_native": {
+   "kind": "native"
+  },
+  "T_scope": {
+   "kind": "fresh_T"
+  },
+  "M1_R1_A8": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output"
+  },
+  "M2c_pool_R1_A8": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R3_A8": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output"
+  },
+  "M3_R3_A64": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "score_period": 64
+   }
+  },
+  "M3_R6_A64": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "score_period": 64,
+    "decision_interval": 6
+   }
+  },
+  "B_A64": {
+   "kind": "method",
+   "parent": "B_A8_matched",
+   "extra": {
+    "hold_only": true,
+    "score_period": 64
+   }
+  }
+ },
+ "selection_rule": "Tier2 dev (exposed): LB = the six v20-frozen exposed ids; AIME = first four new pool ids by sha256(id). Arms/threshold (P0) chosen from v27 direct cost before any Tier2 output."
+}

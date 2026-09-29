@@ -31,6 +31,7 @@ SCORE_PERIODS = (8, 16, 64)
 # parent arm stays as namespaced provenance; the effective values are bound on
 # the runtime and reported through one authoritative effective_method record.
 DECISION_INTERVALS = (6,)
+MIN_ROUTE_KEYS = (8192,)
 _LN2 = 0.6931471805599453
 # Named log-threshold shifts in ln2 units; larger shifts allow more deletion.
 # The realized sparsity is measured, never inferred from the shift.
@@ -55,7 +56,8 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      output_score_precision='legacy_bf16_scores', output_layout='head_major',
                      bootstrap_policy=None, observation_producer='repeat_interleave',
                      route_storage='logical', mu_mode='exact', score_period=8,
-                     decision_interval=None, hold_only=False, threshold_shift=None) -> dict:
+                     decision_interval=None, hold_only=False, threshold_shift=None,
+                     min_route_keys=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -104,6 +106,10 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if threshold_shift not in THRESHOLD_SHIFTS or bootstrap_policy is None:
             raise ValueError('v27 threshold shift must be a named shift on the bootstrap mainline')
         extra['threshold_shift'] = threshold_shift
+    if min_route_keys is not None:
+        if min_route_keys not in MIN_ROUTE_KEYS or bootstrap_policy is None:
+            raise ValueError('v27 length gate must be a named extent on the bootstrap mainline')
+        extra['min_route_keys'] = min_route_keys
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -209,6 +215,9 @@ def validate_effective(config: dict, condition: str):
     if 'threshold_shift' in config and (config['threshold_shift'] not in THRESHOLD_SHIFTS
                                         or 'bootstrap_policy' not in config):
         raise ValueError('v27 threshold shift identity drift')
+    if 'min_route_keys' in config and (config['min_route_keys'] not in MIN_ROUTE_KEYS
+                                       or 'bootstrap_policy' not in config):
+        raise ValueError('v27 length gate identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -257,6 +266,10 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('hold_only must be bound before any routed call')
             owner.cache.hold_only = True
+        if 'min_route_keys' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('length gate must be bound before any routed call')
+            owner.min_route_keys = config['min_route_keys']
         if 'threshold_shift' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('threshold shift must be bound before any routed call')
@@ -283,6 +296,7 @@ def install(adapter, config: dict, condition: str):
                         route_storage=getattr(owner, 'route_storage', 'logical'),
                         scope=scope, bootstrap_policy=getattr(owner, 'bootstrap', None),
                         threshold_shift=config.get('threshold_shift'),
+                        min_route_keys=getattr(owner, 'min_route_keys', 0),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
                         output_score_precision=owner.output_score_precision,
                         output_layout=owner.output_layout,

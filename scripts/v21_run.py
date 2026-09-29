@@ -100,7 +100,10 @@ def validate_protocol(protocol: dict) -> None:
                     c.get("threshold_shift", "plus_ln2") not in (
                         "minus_ln2", "plus_ln2", "plus_2ln2", "plus_3ln2", "plus_4ln2"):
                 raise ValueError(f"unknown v27 clock/threshold field: {arm}")
-            if not v27 and any(k in c for k in ("decision_interval", "hold_only", "threshold_shift")):
+            if c.get("min_route_keys", 8192) != 8192:
+                raise ValueError(f"unknown v27 length gate: {arm}")
+            if not v27 and any(k in c for k in ("decision_interval", "hold_only", "threshold_shift",
+                                                "min_route_keys")):
                 raise ValueError(f"v27 fields outside a v27 panel: {arm}")
             if c.get("bootstrap_policy", "native_bootstrap2_observe1") != "native_bootstrap2_observe1" or \
                     c.get("observation_producer", "grouped_q") not in ("grouped_q", "repeat_interleave"):
@@ -235,7 +238,8 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
             raise ValueError("v26 mu mode / score period differs from arm contract")
         if (config.get("decision_interval") != contract.get("decision_interval") or
                 bool(config.get("hold_only", False)) != bool(contract.get("hold_only", False)) or
-                config.get("threshold_shift") != contract.get("threshold_shift")):
+                config.get("threshold_shift") != contract.get("threshold_shift") or
+                config.get("min_route_keys") != contract.get("min_route_keys")):
             raise ValueError("v27 clock/threshold differs from arm contract")
         if (config.get("bootstrap_policy") != contract.get("bootstrap_policy") or
                 config.get("observation_producer", "repeat_interleave") !=

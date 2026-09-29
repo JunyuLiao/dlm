@@ -165,6 +165,8 @@ class Attention:
         self.observation_producer = 'repeat_interleave'
         self.route_storage = 'logical'
         self.mu_mode = 'exact'
+        self.min_route_keys = 0
+        self.gated_native_calls = 0
         self.compact_pool_builds = 0
         # aligned_pad_bytes (historical name, kept for traceability) = total bytes of
         # newly ALLOCATED pitched buffers, not only the extra pad and not DRAM traffic.
@@ -250,6 +252,12 @@ class Attention:
         identity = Identity(0, self.canvas, self.epoch, layer, b, h, hk, nq, nk, d,
                             absolute, absolute-prefix+crop, source_nk, scale,
                             str(q.dtype), str(q.device), signature, id(prefix_k))
+        if self.min_route_keys and nk < self.min_route_keys:
+            # v27 length gate: below the frozen key extent the routed path has no
+            # measured saving, so the call is exactly native SDPA (no cache, no bitmap).
+            from transformers.integrations.sdpa_attention import sdpa_attention_forward
+            self.gated_native_calls += 1
+            return sdpa_attention_forward(*native_args, **native_kwargs)
         if self.bootstrap is not None and self.step <= 1:
             return self._bootstrap_call(native_args, native_kwargs, identity, layer, kind,
                                         q, k, v, mask, scale, causal, window, crop, prefix,
@@ -626,6 +634,7 @@ class Attention:
         return dict(attention_calls=self.calls, score_refresh_calls=self.score_calls,
                     bootstrap_policy=self.bootstrap,
                     bootstrap_dense_calls=self.bootstrap_dense_calls,
+                    gated_native_calls=self.gated_native_calls, min_route_keys=self.min_route_keys,
                     bootstrap_observation_calls=self.bootstrap_observation_calls,
                     observation_producer=self.observation_producer,
                     route_storage=self.route_storage,

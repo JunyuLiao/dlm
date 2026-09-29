@@ -47,6 +47,8 @@ V27 = {'M1_R1_A8': ('M1_R1_A8_current_output', {}),
        'B_A8': ('B_A8_matched', dict(hold_only=True)),
        'B_A16': ('B_A8_matched', dict(hold_only=True, score_period=16)),
        'B_A64': ('B_A8_matched', dict(hold_only=True, score_period=64))}
+V27['M3_R3_A64_G8k'] = ('M3_R3_A8_current_output', dict(score_period=64, min_route_keys=8192))
+V27['M3_R6_A64'] = ('M3_R3_A8_current_output', dict(score_period=64, decision_interval=6))
 ARMS_V27 = ('D_native', 'T_scope') + tuple(V27)
 SHIFTS = ('minus_ln2', None, 'plus_ln2', 'plus_2ln2', 'plus_3ln2', 'plus_4ln2')
 for _shift in SHIFTS:

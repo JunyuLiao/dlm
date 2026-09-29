@@ -176,6 +176,7 @@ class CounterTwin:
         # v27: numerical-router native bootstrap (call 0 dense, call 1 dense + observation).
         old_b0 = getattr(self.router, 'bootstrap_dense_calls', None)
         old_bo = getattr(self.router, 'bootstrap_observation_calls', None)
+        old_gate = getattr(self.router, 'gated_native_calls', None)
         result = self.delegate(module, q, k, v, mask, **kwargs)
         router_phase = None
         if old_score is not None:
@@ -184,6 +185,8 @@ class CounterTwin:
             held = self.router.held_calls - old_held
             b0 = self.router.bootstrap_dense_calls - old_b0 if old_b0 is not None else 0
             bo = self.router.bootstrap_observation_calls - old_bo if old_bo is not None else 0
+            # v27 length-gated native call: counted like B0 (all-kept dense, no observation).
+            b0 += self.router.gated_native_calls - old_gate if old_gate is not None else 0
             if (b0 or bo) and (score, decision, held) != (0, 0, 0):
                 raise ValueError('bootstrap and routed phase counters both advanced')
             if (b0, bo) in ((1, 0), (0, 1)):

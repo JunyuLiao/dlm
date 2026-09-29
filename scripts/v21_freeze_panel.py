@@ -313,7 +313,8 @@ def freeze_seven(v20_protocol_path, v20_binding_path, manifests_dir, out_dir):
     return protocol
 
 
-V27_EXTRA_KEYS = ('mu_mode', 'score_period', 'decision_interval', 'hold_only', 'threshold_shift')
+V27_EXTRA_KEYS = ('mu_mode', 'score_period', 'decision_interval', 'hold_only', 'threshold_shift',
+                  'min_route_keys')
 
 
 def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir):
@@ -681,7 +682,8 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                     score_period=contract.get('score_period', 8),
                     decision_interval=contract.get('decision_interval'),
                     hold_only=contract.get('hold_only', False),
-                    threshold_shift=contract.get('threshold_shift'))
+                    threshold_shift=contract.get('threshold_shift'),
+                    min_route_keys=contract.get('min_route_keys'))
             path = config_dir / dataset / f'{arm}.json'
             _new(path, _bytes(result))
             configs[dataset][arm] = dict(path=str(path.resolve()), sha256=_sha(path.read_bytes()))

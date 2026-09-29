@@ -22,7 +22,9 @@ def test_controls_build_and_validate():
                        (M3, dict(score_period=64)), (M3, dict(decision_interval=6)),
                        (M3, dict(score_period=16, decision_interval=6, threshold_shift='plus_ln2')),
                        (B, dict(hold_only=True)), (B, dict(hold_only=True, score_period=16)),
-                       (B, dict(hold_only=True, score_period=64, threshold_shift='minus_ln2'))):
+                       (B, dict(hold_only=True, score_period=64, threshold_shift='minus_ln2')),
+                       (M3, dict(score_period=64, min_route_keys=8192)),
+                       (B, dict(hold_only=True, score_period=64, min_route_keys=8192))):
         config = build(arm, **extra)
         v21.validate_effective(config, config['condition'])
 
@@ -43,6 +45,8 @@ def test_old_configs_keep_their_fingerprint_without_new_keys():
     (B, dict(hold_only='yes')),
     (M3, dict(threshold_shift='plus_ln3')),
     (M3, dict(score_period=16, bootstrap_policy=None)),
+    (M3, dict(min_route_keys=4096)),
+    (M3, dict(min_route_keys=8192, bootstrap_policy=None)),
 ])
 def test_single_bad_field_is_rejected(arm, extra):
     kwargs = dict(MAIN)
