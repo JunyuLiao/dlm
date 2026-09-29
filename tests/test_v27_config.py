@@ -141,3 +141,26 @@ def test_dense_prefix_risk_is_a_named_m1_m3_variant():
                        (M1, dict(risk_state='dense_prefix', consumer64=2, fresh_fused=True))):
         with pytest.raises(ValueError):
             build(arm, **extra)
+
+
+def test_density_gate_decision_and_config():
+    from experiments.numerical_qk_reuse.integration import DENSITY_GATES, density_gate_fires
+    ent = DENSITY_GATES['ent0.05']
+    assert density_gate_fires(ent, 5, 0.04, 100, 90, 0) == (True, 0)
+    assert density_gate_fires(ent, 5, 0.06, 100, 90, 0) == (False, 0)
+    assert density_gate_fires(ent, 5, None, None, None, 0) == (False, 0)
+    cap = DENSITY_GATES['cap12']
+    assert density_gate_fires(cap, 11, 1.0, 10, 5, 0)[0] is False and density_gate_fires(cap, 12, 1.0, 10, 5, 0)[0]
+    stall = DENSITY_GATES['stall2']
+    fire, n = density_gate_fires(stall, 4, 1.0, 50, 50, 0)
+    assert (fire, n) == (False, 1)
+    assert density_gate_fires(stall, 5, 1.0, 50, 50, n) == (True, 2)
+    assert density_gate_fires(stall, 5, 1.0, 51, 50, n) == (False, 0)
+    both = DENSITY_GATES['ent0.05_stall2']
+    assert density_gate_fires(both, 3, 0.01, 60, 50, 0)[0]
+    for preset in DENSITY_GATES:
+        config = build(M3, score_period=64, consumer64=2, fused_observe=True, density_gate=preset)
+        v21.validate_effective(config, config['condition'])
+        assert config['density_gate'] == preset
+    with pytest.raises(ValueError):
+        build(M3, density_gate='ent0.5')

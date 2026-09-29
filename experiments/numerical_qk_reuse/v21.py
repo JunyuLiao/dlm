@@ -71,7 +71,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      decision_interval=None, hold_only=False, threshold_shift=None,
                      min_route_keys=None, route_layers=None, share_layers=None,
                      consumer64=None, memory_caps=None, fused_observe=False, fresh_fused=False,
-                     route_pipeline=False, risk_state=None) -> dict:
+                     route_pipeline=False, risk_state=None, density_gate=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -165,6 +165,12 @@ def effective_config(base: dict, arm: str, scope: str, *,
                 or arm not in ('M1_R1_A8_current_output', 'M3_R3_A8_current_output')):
             raise ValueError('v27 dense-prefix risk needs the bootstrap M1/M3 mainline with prefix summaries')
         extra['risk_state'] = risk_state
+    if density_gate is not None:
+        # v27 density gate: sampler-state return to dense within a canvas (named variant)
+        from .integration import DENSITY_GATES
+        if density_gate not in DENSITY_GATES or bootstrap_policy is None or fresh_fused:
+            raise ValueError('v27 density gate must be a named preset on the bootstrap mainline')
+        extra['density_gate'] = density_gate
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -295,6 +301,10 @@ def validate_effective(config: dict, condition: str):
     if 'risk_state' in config and (config['risk_state'] != 'dense_prefix' or 'bootstrap_policy' not in config
                                    or 'fresh_fused' in config):
         raise ValueError('v27 dense-prefix risk identity drift')
+    if 'density_gate' in config:
+        from .integration import DENSITY_GATES
+        if config['density_gate'] not in DENSITY_GATES or 'bootstrap_policy' not in config:
+            raise ValueError('v27 density gate identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -365,6 +375,11 @@ def install(adapter, config: dict, condition: str):
             if owner.selector != 'prefix_block_summary':
                 raise ValueError('dense-prefix risk needs the prefix-summary selector')
             owner.risk_state = config['risk_state']
+        if 'density_gate' in config:
+            from .integration import DENSITY_GATES
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('density gate must be bound before any routed call')
+            owner.density_gate = dict(DENSITY_GATES[config['density_gate']])
         if 'consumer64' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('consumer must be bound before any routed call')
@@ -414,6 +429,7 @@ def install(adapter, config: dict, condition: str):
                         fresh_fused=bool(getattr(owner, 'fresh_fused', False)),
                         route_pipeline=bool(getattr(owner, 'route_pipeline', False)),
                         risk_state=getattr(owner, 'risk_state', 'kept'),
+                        density_gate=config.get('density_gate'),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
                         output_score_precision=owner.output_score_precision,
                         output_layout=owner.output_layout,

@@ -71,10 +71,39 @@ class Decision:
     eligible: torch.Tensor
 
 
+# v27 density gate (named variants): sampler-state-adaptive return to dense attention within a
+# canvas. DiffusionGemma stops a canvas when the argmax is stable and the mean token entropy of the
+# processed logits falls below 0.005; sparse attention error that keeps the entropy up inflates the
+# denoising calls per canvas. The gate watches the SAME statistic (and the accepted-token count) and,
+# once it fires, runs the rest of the canvas dense (hysteresis: it never switches back).
+DENSITY_GATES = {
+    'ent0.05': dict(entropy=0.05), 'ent0.02': dict(entropy=0.02), 'cap12': dict(cap=12),
+    'stall2': dict(stall=2), 'ent0.05_stall2': dict(entropy=0.05, stall=2),
+}
+
+
+def density_gate_fires(preset, step, entropy, accepted, previous_accepted, stalled_steps):
+    """Pure decision for step ``step`` (0-based in the canvas) from the PREVIOUS step's sampler
+    statistics. Returns (fire, stalled_steps)."""
+    if accepted is not None and previous_accepted is not None and accepted <= previous_accepted:
+        stalled_steps += 1
+    else:
+        stalled_steps = 0
+    fire = ((preset.get('entropy') and entropy is not None and entropy < preset['entropy'])
+            or (preset.get('cap') and step >= preset['cap'])
+            or (preset.get('stall') and stalled_steps >= preset['stall']))
+    return bool(fire), stalled_steps
+
+
 class NativeReuseState(State):
     def begin(self, cur_step, canvas):
         super().begin(cur_step, canvas)
         self.router.begin_step(self.canvas, self.iteration - 1)
+
+    def observe_logits(self, logits, accepted, cur_step):
+        super().observe_logits(logits, accepted, cur_step)
+        if getattr(self.router, 'density_gate', None) is not None:
+            self.router.observe_sampler(logits, accepted)
 
 
 class Attention:
@@ -173,6 +202,11 @@ class Attention:
         self.route_pipeline = False    # v27: pipelined summary-LOAD selector on decision calls
         self.pipelined_routes = 0
         self.risk_state = 'kept'       # v27 M1-DP: 'dense_prefix' (named variant)
+        self.density_gate = None       # v27 density gate preset (DENSITY_GATES), named variant
+        self.gate_dense = False
+        self.gate_stalled, self.gate_previous_accepted = 0, None
+        self.gate_entries, self.gate_dense_calls = [], 0
+        self._sampler_entropy = self._sampler_accepted = None
         self.dp_states = {}
         self.dp_builds = self.dp_routes = 0
         self.fresh_fused_calls = 0
@@ -212,7 +246,29 @@ class Attention:
             self.cache.clear()
             self.valid_keys.clear()
             self.summaries.clear()
+        if self.density_gate is not None:
+            if canvas != self.canvas or step == 0:
+                self.gate_dense, self.gate_stalled, self.gate_previous_accepted = False, 0, None
+            elif not self.gate_dense and self._sampler_entropy is not None:
+                # one host read per step (the native stop check already synchronizes every step)
+                entropy, accepted = (float(x) for x in torch.stack([self._sampler_entropy,
+                                                                    self._sampler_accepted.float()]).tolist())
+                fire, self.gate_stalled = density_gate_fires(self.density_gate, step, entropy, accepted,
+                                                             self.gate_previous_accepted, self.gate_stalled)
+                self.gate_previous_accepted = accepted
+                if fire:
+                    self.gate_dense = True
+                    self.gate_entries.append(step)
+            self._sampler_entropy = self._sampler_accepted = None
         self.canvas, self.step = canvas, step
+
+    def observe_sampler(self, logits, accepted):
+        """Mean token entropy of the processed logits (the native stop statistic) and the accepted
+        token count, kept on device until the next step's gate decision."""
+        x = logits.float()
+        logp = torch.log_softmax(x, -1)
+        self._sampler_entropy = -(logp.exp() * logp).sum(-1).mean()
+        self._sampler_accepted = accepted.sum()
 
     def identify(self, module, args, kwargs):
         cache = kwargs.get('past_key_values', args[3] if len(args) > 3 else None)
@@ -277,6 +333,10 @@ class Attention:
             # v27 layer subset: this routed-scope layer stays exact native SDPA.
             from transformers.integrations.sdpa_attention import sdpa_attention_forward
             self.layer_native_calls += 1
+            return self._dense_native(native_args, native_kwargs, q, k, v, scale, window, causal)
+        if self.gate_dense:
+            # v27 density gate fired in this canvas: the rest of the canvas runs dense (64-row kernel)
+            self.gate_dense_calls += 1
             return self._dense_native(native_args, native_kwargs, q, k, v, scale, window, causal)
         leader = self.share_leader.get(layer, layer)
         if leader != layer:
@@ -812,6 +872,7 @@ class Attention:
                     fresh_fused_calls=self.fresh_fused_calls,
                     pipelined_routes=self.pipelined_routes,
                     risk_state=self.risk_state, dp_builds=self.dp_builds, dp_routes=self.dp_routes,
+                    density_gate_dense_calls=self.gate_dense_calls, density_gate_entry_steps=list(self.gate_entries),
                     fresh_fused_tiles=(dict(zip(('pv_kept', 'visited'), self.fresh_tile_total.tolist()))
                                        if self.fresh_tile_total is not None else None),
                     shared_native_calls=self.shared_native_calls,
