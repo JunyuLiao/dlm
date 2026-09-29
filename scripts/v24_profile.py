@@ -160,6 +160,22 @@ _DP = ('M1_R1_A8_c64', 'M1_R1_A8_c64_dp', 'M1_R1_A8_c64_dp_minus_ln2', 'M1_R1_A8
 ARM_SETS['v27dp'] = ('D_native', 'D_c64') + _DP
 ARM_SETS['v27dplong'] = ('D_native', 'D_c64') + tuple(n + '_long' for n in _DP)
 ARM_SETS['v27rplong'] = ('D_native', 'D_c64') + tuple(x for n in _RP for x in (n + '_long', n + '_rp_long'))
+# v27b unshared A64 + fused observation (RULER 64K: the one-group shared support lost quality,
+# the unshared B/A64 did not). Every GLOBAL layer selects, so the decision call is timed with the
+# generic, the pipelined (bit-identical) and the M1-DP (named variant) selectors.
+V27['M1_R1_A64_c64_fused'] = ('M1_R1_A8_current_output', dict(score_period=64, consumer64=2, fused_observe=True))
+V27['M3_R3_A64_c64_fused'] = ('M3_R3_A8_current_output', dict(score_period=64, consumer64=2, fused_observe=True))
+for _name in ('M1_R1_A64_c64_fused', 'M3_R3_A64_c64_fused', 'M3_R6_A64_c64_fused'):
+    V27.setdefault(_name + '_rp', (V27[_name][0], dict(V27[_name][1], route_pipeline=True)))
+for _name in ('M1_R1_A64_c64_fused', 'M3_R3_A64_c64_fused'):
+    V27[_name + '_dp'] = (V27[_name][0], dict(V27[_name][1], risk_state='dense_prefix'))
+_NS = ('M1_R1_A64_c64_fused', 'M1_R1_A64_c64_fused_rp', 'M1_R1_A64_c64_fused_dp',
+       'M3_R3_A64_c64_fused', 'M3_R3_A64_c64_fused_rp', 'M3_R3_A64_c64_fused_dp',
+       'M3_R6_A64_c64_fused', 'M3_R6_A64_c64_fused_rp', 'B_A64_c64_fused')
+for _name in _NS:
+    V27.setdefault(_name + '_long', (V27[_name][0], dict(V27[_name][1], memory_caps='long')))
+ARM_SETS['v27ns'] = ('D_native', 'D_c64') + _NS
+ARM_SETS['v27nslong'] = ('D_native', 'D_c64') + tuple(n + '_long' for n in _NS)
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls', 'fresh_fused_calls')
 WRAPPER_DROP = ('fingerprint', 'condition', 'plugin', 'v20_arm', 'v20_scope', 'decision_interval',
                 'score_refresh_period', 'output_mode', 'control')
@@ -246,12 +262,12 @@ def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_leng
                       sequence_lengths=[sequence_length], reps=3, blocks=3, warmup=1,
                       # Shared-support followers are not modelled by the counter twin.
                       counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long', 'v27fused', 'v27fresh', 'v27freshlong',
-                                                    'v27rp', 'v27rplong', 'v27dp', 'v27dplong',
+                                                    'v27rp', 'v27rplong', 'v27dp', 'v27dplong', 'v27ns', 'v27nslong',
                                                     'v27fusedlong'), operator_probe=False,
                       prepared_support_floor=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long',
                                                              'v27fused', 'v27fusedlong', 'v27fresh',
                                                              'v27freshlong', 'v27rp', 'v27rplong', 'v27dp',
-                                                             'v27dplong'),
+                                                             'v27dplong', 'v27ns', 'v27nslong'),
                       derived_from_v21_profile_config_sha256=hashlib.sha256(
                           json.dumps(v21_profile_config, sort_keys=True).encode()).hexdigest())
         return config
