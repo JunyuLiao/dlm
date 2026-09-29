@@ -38,7 +38,7 @@ class CaptureDone(Exception):
 
 
 # v27: N24/N32 reach A17 and R6 decisions when the canvas naturally gets there.
-SEQUENCE_LENGTHS = (4, 16, 24, 32)
+SEQUENCE_LENGTHS = (4, 8, 16, 24, 32)
 
 
 def validate_config(config):
