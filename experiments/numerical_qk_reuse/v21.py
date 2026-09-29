@@ -67,7 +67,8 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      bootstrap_policy=None, observation_producer='repeat_interleave',
                      route_storage='logical', mu_mode='exact', score_period=8,
                      decision_interval=None, hold_only=False, threshold_shift=None,
-                     min_route_keys=None, route_layers=None, share_layers=None) -> dict:
+                     min_route_keys=None, route_layers=None, share_layers=None,
+                     consumer64=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -130,6 +131,10 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if share_layers == 'mid3_one' and route_layers != 'mid3':
             raise ValueError('mid3_one sharing requires the mid3 routed-layer subset')
         extra['share_layers'] = share_layers
+    if consumer64 is not None:
+        if consumer64 not in (1, 2, 4) or bootstrap_policy is None or output_layout != 'model_major':
+            raise ValueError('v27 64-row consumer needs a split count, bootstrap and model-major output')
+        extra['consumer64'] = consumer64
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -244,6 +249,8 @@ def validate_effective(config: dict, condition: str):
     if 'share_layers' in config and (config['share_layers'] not in SHARE_GROUPS
                                      or 'bootstrap_policy' not in config):
         raise ValueError('v27 shared-support identity drift')
+    if 'consumer64' in config and (config['consumer64'] not in (1, 2, 4) or 'bootstrap_policy' not in config):
+        raise ValueError('v27 64-row consumer identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -292,6 +299,11 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('hold_only must be bound before any routed call')
             owner.cache.hold_only = True
+        if 'consumer64' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('consumer must be bound before any routed call')
+            owner.consumer = 'triton64'
+            owner.c64_splits = config['consumer64']
         if 'route_layers' in config or 'share_layers' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('layer variants must be bound before any routed call')
@@ -331,6 +343,7 @@ def install(adapter, config: dict, condition: str):
                         threshold_shift=config.get('threshold_shift'),
                         min_route_keys=getattr(owner, 'min_route_keys', 0),
                         route_layers=config.get('route_layers'), share_layers=config.get('share_layers'),
+                        consumer64=config.get('consumer64'),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
                         output_score_precision=owner.output_score_precision,
                         output_layout=owner.output_layout,

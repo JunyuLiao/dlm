@@ -20,7 +20,7 @@ def install(adapter, config: dict, condition: str):
     import importlib
 
     import torch
-    if condition != CONDITION or config.get('control') != 'D_fast':
+    if condition != CONDITION or config.get('control') not in ('D_fast', 'D_c64'):
         raise ValueError('v27 fast dense control identity drift')
     model = adapter.model
     modeling = importlib.import_module(type(model).__module__.replace('generation_', 'modeling_'))
@@ -37,6 +37,12 @@ def install(adapter, config: dict, condition: str):
             counts['native_calls'] += 1
             return native(module, query, key, value, attention_mask, dropout=dropout,
                           scaling=scaling, is_causal=is_causal, **kwargs)
+        if config['control'] == 'D_c64':
+            # Same 64-row kernel as the sparse consumer, every tile kept.
+            from .v27_consumer64 import dense64
+            counts['fast_dense_global_calls'] += 1
+            scale = scaling if scaling is not None else query.shape[-1] ** -.5
+            return dense64(query, key, value, scale, splits=config.get('c64_splits', 2)), None
         groups = heads // kv_heads
         k = key.repeat_interleave(groups, dim=1)
         v = value.repeat_interleave(groups, dim=1)

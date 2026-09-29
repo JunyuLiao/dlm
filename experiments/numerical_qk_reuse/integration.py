@@ -166,6 +166,7 @@ class Attention:
         self.route_storage = 'logical'
         self.mu_mode = 'exact'
         self.min_route_keys = 0
+        self.c64_splits = 2
         self.route_layers = None       # v27: routed-layer subset (others native)
         self.share_leader = {}         # v27: follower layer -> leader layer
         self.layer_native_calls = self.shared_calls = self.shared_native_calls = 0
@@ -260,12 +261,12 @@ class Attention:
             # measured saving, so the call is exactly native SDPA (no cache, no bitmap).
             from transformers.integrations.sdpa_attention import sdpa_attention_forward
             self.gated_native_calls += 1
-            return sdpa_attention_forward(*native_args, **native_kwargs)
+            return self._dense_native(native_args, native_kwargs, q, k, v, scale, window, causal)
         if self.route_layers is not None and layer not in self.route_layers:
             # v27 layer subset: this routed-scope layer stays exact native SDPA.
             from transformers.integrations.sdpa_attention import sdpa_attention_forward
             self.layer_native_calls += 1
-            return sdpa_attention_forward(*native_args, **native_kwargs)
+            return self._dense_native(native_args, native_kwargs, q, k, v, scale, window, causal)
         leader = self.share_leader.get(layer, layer)
         if leader != layer:
             # v27 cross-layer sharing: a follower consumes its leader's CURRENT-call
@@ -273,7 +274,7 @@ class Attention:
             if self.bootstrap is not None and self.step <= 1:
                 from transformers.integrations.sdpa_attention import sdpa_attention_forward
                 self.shared_native_calls += 1
-                return sdpa_attention_forward(*native_args, **native_kwargs)
+                return self._dense_native(native_args, native_kwargs, q, k, v, scale, window, causal)
             lead = self.cache.entries.get(leader)
             if (lead is None or lead.decision is None or lead.identity.canvas != self.canvas or
                     lead.identity.encoder_epoch != self.epoch or lead.identity.keys != nk or
@@ -515,7 +516,7 @@ class Attention:
         from transformers.integrations.sdpa_attention import sdpa_attention_forward
         if self.bootstrap not in BOOTSTRAP_POLICIES:
             raise ValueError(self.bootstrap)
-        output = sdpa_attention_forward(*native_args, **native_kwargs)
+        output = self._dense_native(native_args, native_kwargs, q, k, v, scale, window, causal)
         if self.step == 0:
             self.bootstrap_dense_calls += 1
             return output
@@ -548,7 +549,25 @@ class Attention:
         self.peak_total_bytes = max(self.peak_total_bytes, score_bytes + self.summary_bytes)
         return output
 
+    def _dense_native(self, native_args, native_kwargs, q, k, v, scale, window, causal):
+        """Native dense output; with the v27 64-row consumer, the same kernel all-kept."""
+        if self.consumer == 'triton64' and not causal and window is None and self._mask_present is False:
+            from .v27_consumer64 import dense64
+            return dense64(q, k, v, scale, splits=self.c64_splits), None
+        from transformers.integrations.sdpa_attention import sdpa_attention_forward
+        return sdpa_attention_forward(*native_args, **native_kwargs)
+
     def _consume(self, q, k, v, skipped, eligible, scale, window, causal):
+        if self.consumer == 'triton64':
+            # v27 64-row / split-KV consumer (named numerical variant). NaN/inf scores
+            # propagate to the output and fail the finite-output guard.
+            if causal or window is not None or self.trace or self.output_layout != 'model_major':
+                raise ValueError('triton64 consumer is qualified for bidirectional GLOBAL model-major only')
+            from .v27_consumer64 import consume64
+            out = consume64(q, k, v, skipped, eligible, scale, splits=self.c64_splits)
+            return SimpleNamespace(output=out.transpose(1, 2), skipped=skipped, eligible=eligible,
+                                   invalid_scores=torch.zeros(out.shape[:1] + (out.shape[2], out.shape[1]),
+                                                              dtype=torch.bool, device=out.device))
         if self.consumer == 'triton':
             return preqk_attention(q, k, v, skipped, eligible, scale=scale, window=window,
                                    is_causal=causal, trace=self.trace, variant=self.kernel_variant,

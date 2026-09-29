@@ -61,6 +61,14 @@ def _consume64(Q, K, V, SKIP, ELIG, PO, PM, PL,
     tl.store(PO + base[:, None] * D + di[None, :], acc, rows[:, None])
 
 
+def dense64(q, k, v, scale, splits=2):
+    """Dense attention with the same kernel (every tile kept): [1,Q,H,D] model-major."""
+    h, nq, nk = q.shape[1], q.shape[2], k.shape[2]
+    shape = (1, h, math.ceil(nq / 128), math.ceil(nk / 64))
+    keep = torch.zeros(shape, dtype=torch.bool, device=q.device)
+    return consume64(q, k, v, keep, torch.ones_like(keep), scale, splits=splits)
+
+
 def consume64(q, k, v, skipped, eligible, scale, block_m=64, splits=1, num_warps=8, num_stages=1):
     """q [1,H,Q,D], k/v [1,HK,K,D] (strided views allowed), bitmap [1,H,QB128,KT64]."""
     b, h, nq, d = q.shape
@@ -81,4 +89,4 @@ def consume64(q, k, v, skipped, eligible, scale, block_m=64, splits=1, num_warps
         mx = pm.amax(1, keepdim=True)
         w = torch.exp(pm - mx)
         out = (po * w[..., None]).sum(1) / (pl * w).sum(1)[..., None]
-    return out.to(torch.bfloat16).transpose(0, 1).unsqueeze(0)  # [1,Q,H,D] model-major
+    return out.to(torch.bfloat16).transpose(0, 1).contiguous().unsqueeze(0)  # [1,Q,H,D] model-major

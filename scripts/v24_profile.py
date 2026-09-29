@@ -89,6 +89,10 @@ ARMS_V27LAYERS = ARMS_V27LAYERS + ('D_matched_ALL', 'M3_R6_A64_ALL', 'M3_R6_A64_
 ARM_SETS = {'v24': ARMS, 'v25': ARMS_V25, 'v27': ARMS_V27, 'v27thr': ARMS_V27THR, 'v27attr': ARMS_V27ATTR,
             'v27all': ARMS_V27ALL, 'v27layers': ARMS_V27LAYERS}
 # v27 strongest dense baseline (GLOBAL repeat-KV SDPA) against the best sparse variants.
+for _name in ('M3_R6_A64_one', 'M3_R3_A64_one', 'M3_R6_A64', 'B_A64', 'M1_R1_A8_one', 'M3_R6_A64_mid3'):
+    V27[_name + '_c64'] = (V27[_name][0], dict(V27[_name][1], consumer64=2))
+ARM_SETS['v27c64'] = ('D_native', 'D_fast', 'D_c64', 'M3_R6_A64_one_c64', 'M3_R3_A64_one_c64', 'M3_R6_A64_c64',
+                      'B_A64_c64', 'M1_R1_A8_one_c64', 'M3_R6_A64_mid3_c64', 'M3_R6_A64_one')
 ARM_SETS['v27fast'] = ('D_native', 'D_fast', 'D_matched', 'M3_R6_A64_one', 'M3_R3_A64_one',
                        'M1_R1_A8_one', 'M3_R6_A64', 'B_A64')
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls')
@@ -109,13 +113,15 @@ def build_arms(v21_profile_config, arm_set='v24'):
     names = ARM_SETS[arm_set]
     control_base = {k: v for k, v in native['config'].items() if k not in WRAPPER_DROP}
     t_config = old.control_config(dict(control_base, control='T_scope'), 'v20_fresh_T', SCOPE)
-    if 'D_fast' in names:
+    for dense_name in ('D_fast', 'D_c64'):
+        if dense_name not in names:
+            continue
         from experiments.numerical_qk_reuse import v27_fast_dense as fast
-        source = Path(fast.__file__).resolve()
-        cfg = dict(control_base, control='D_fast', plugin=fast.PLUGIN, condition=fast.CONDITION)
-        cfg['source_hashes'] = dict(cfg.get('source_hashes', {}),
-                                    **{str(source): hashlib.sha256(source.read_bytes()).hexdigest()})
-        result.append(dict(name='D_fast', plugin=fast.PLUGIN, condition=fast.CONDITION, config=cfg))
+        cfg = dict(control_base, control=dense_name, plugin=fast.PLUGIN, condition=fast.CONDITION)
+        cfg['source_hashes'] = dict(cfg.get('source_hashes', {}))
+        for source in (Path(fast.__file__).resolve(), Path(fast.__file__).resolve().with_name('v27_consumer64.py')):
+            cfg['source_hashes'][str(source)] = hashlib.sha256(source.read_bytes()).hexdigest()
+        result.append(dict(name=dense_name, plugin=fast.PLUGIN, condition=fast.CONDITION, config=cfg))
     for dense, dense_scope in (('D_matched', SCOPE), ('D_matched_ALL', 'ALL_NATIVE_LEGAL')):
         if dense not in names:
             continue
@@ -162,8 +168,8 @@ def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_leng
                                   else ['model_forward']),
                       sequence_lengths=[sequence_length], reps=3, blocks=3, warmup=1,
                       # Shared-support followers are not modelled by the counter twin.
-                      counter_twins=arm_set not in ('v27layers', 'v27fast'), operator_probe=False,
-                      prepared_support_floor=arm_set not in ('v27layers', 'v27fast'),
+                      counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64'), operator_probe=False,
+                      prepared_support_floor=arm_set not in ('v27layers', 'v27fast', 'v27c64'),
                       derived_from_v21_profile_config_sha256=hashlib.sha256(
                           json.dumps(v21_profile_config, sort_keys=True).encode()).hexdigest())
         return config
