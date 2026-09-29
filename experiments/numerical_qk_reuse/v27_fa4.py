@@ -10,9 +10,9 @@ into the project's pinned environment and exposes:
                                                 FA4 "full blocks" (block_size (128, 64))
 Both take the model's [1, heads, len, D] views and return the output in model-major [1, Q, H, D].
 
-Compatibility shim (documented): the pinned torch 2.12 lacks ``torch.float4_e2m1fn_x2``, which quack's
-FP4 block-scaled GEMM table references at import time. A placeholder attribute is installed only when
-missing; no FP4 path is reachable from bf16 attention.
+Compatibility shim (documented): the pinned torch 2.12 lacks some low-precision dtypes (e.g.
+``float4_e2m1fn_x2``, ``float8_e8m0fnu``) that quack's dtype tables reference at import time. A unique
+sentinel attribute is installed only when missing; no FP8/FP4 path is reachable from bf16 attention.
 """
 from __future__ import annotations
 
@@ -23,6 +23,7 @@ import torch
 
 _FWD = None
 _BST = None
+_LOW_PRECISION_DTYPES = ('float4_e2m1fn_x2', 'float8_e8m0fnu', 'float8_e4m3fnuz', 'float8_e5m2fnuz')
 
 
 def load():
@@ -34,8 +35,11 @@ def load():
         for path in (overlay, os.path.join(overlay, 'nvidia_cutlass_dsl', 'dsl_packages')):
             if path not in sys.path:
                 sys.path.append(path)
-    if not hasattr(torch, 'float4_e2m1fn_x2'):
-        torch.float4_e2m1fn_x2 = torch.uint8   # import-time FP4 table key only (quack.blockscaled)
+    for name in _LOW_PRECISION_DTYPES:
+        if not hasattr(torch, name):
+            # import-time dtype-table keys only (quack's FP8/FP4 maps); a unique sentinel, never a real
+            # dtype, so no existing table entry is shadowed and no low-precision path becomes reachable
+            setattr(torch, name, type(f'missing_{name}', (), {})())
     from vllm.vllm_flash_attn.cute.block_sparsity import BlockSparseTensorsTorch
     from vllm.vllm_flash_attn.cute.interface import _flash_attn_fwd
     _FWD, _BST = _flash_attn_fwd, BlockSparseTensorsTorch

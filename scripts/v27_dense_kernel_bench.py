@@ -87,6 +87,10 @@ def main(argv=None):
             record(f'sdpa_{bname}_repeat_kv', rep, False)
         if flex is not None:
             record('flex_attention_gqa', lambda: flex(q, k, v, scale=scale, enable_gqa=True), False)
+            for bm, bn, st in ((64, 32, 1), (64, 64, 1), (32, 64, 1), (64, 32, 2)):
+                opts = dict(BLOCK_M=bm, BLOCK_N=bn, num_stages=st)
+                record(f'flex_attention_gqa_m{bm}_n{bn}_s{st}',
+                       lambda opts=opts: flex(q, k, v, scale=scale, enable_gqa=True, kernel_options=opts), False)
         else:
             row['impl']['flex_attention_gqa'] = dict(error=flex_error)
         try:
