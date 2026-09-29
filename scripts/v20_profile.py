@@ -37,6 +37,10 @@ class CaptureDone(Exception):
     """Private interruption after all requested native calls are observed."""
 
 
+# v27: N24/N32 reach A17 and R6 decisions when the canvas naturally gets there.
+SEQUENCE_LENGTHS = (4, 16, 24, 32)
+
+
 def validate_config(config):
     if type(config.get('operator_probe', False)) is not bool:
         raise ValueError('operator_probe must be an explicit boolean')
@@ -59,8 +63,8 @@ def validate_config(config):
     if not boundaries or len(set(boundaries)) != len(boundaries) or any(
             b not in ('model_forward', 'denoising_step') for b in boundaries):
         raise ValueError('boundaries must select model_forward and/or denoising_step')
-    if not lengths or len(set(lengths)) != len(lengths) or any(type(n) is not int or n not in (4, 16) for n in lengths):
-        raise ValueError('sequence_lengths must select N4 and/or N16')
+    if not lengths or len(set(lengths)) != len(lengths) or any(type(n) is not int or n not in SEQUENCE_LENGTHS for n in lengths):
+        raise ValueError('sequence_lengths must select from N4/N16/N24/N32')
     if not config.get('model') or not config.get('revision') or not (config.get('manifest') or config.get('manifests')):
         raise ValueError('model, revision, and gold-free manifest(s) are required')
     targets = config.get('targets', [])
@@ -152,7 +156,7 @@ def _prefix(cache):
                                  for i, layer in enumerate(cache.layers)})
 
 
-def capture(adapter, row, targets, seed):
+def capture(adapter, row, targets, seed, max_calls=16):
     """Capture native calls outside observe's wrapper; never extend a canvas."""
     from experiments.value_direction_hopper.query_adaptive import State, observe
     model = adapter.model
@@ -175,14 +179,14 @@ def capture(adapter, row, targets, seed):
             canvas = count['canvas']
             if canvas > max_canvas:
                 raise CaptureDone()
-            if canvas in wanted and len(captured[canvas]) < 16:
+            if canvas in wanted and len(captured[canvas]) < max_calls:
                 cache = kwargs['past_key_values']
                 captured[canvas].append(dict(snapshot=StepSnapshot(kwargs, controller=controller),
                                              canvas=canvas, call_index=48-cur,
                                              cur_step=cur, prefix=_prefix(cache),
                                              context=execution_context(model)))
             result = inner(**kwargs)
-            if canvas == max_canvas and (len(captured.get(canvas, ())) >= 16 or bool(result[3].all())):
+            if canvas == max_canvas and (len(captured.get(canvas, ())) >= max_calls or bool(result[3].all())):
                 raise CaptureDone()
             return result
 
@@ -211,7 +215,7 @@ def resolve_target(target, captured):
     return dict(requested_call=desired, selected_call=selected,
                 missing=selected is None, fallback_used=selected is not None and selected != desired,
                 reached_calls=actual, reached_canvas=bool(steps),
-                sequence_lengths={str(n): min(n, len(steps)) for n in (4, 16)})
+                sequence_lengths={str(n): min(n, len(steps)) for n in SEQUENCE_LENGTHS})
 
 
 def arm_context(adapter, arm):
@@ -547,7 +551,8 @@ def profile(config, checkpoint=None):
     for (dataset, id_, target_canvas), targets in grouped.items():
         with torch.inference_mode():
             row = selected_row(targets[0])
-            captured, capture_proof = capture(adapter, row, targets, report['seed'])
+            captured, capture_proof = capture(adapter, row, targets, report['seed'],
+                                              max_calls=max(report['selected_sequence_lengths']))
             shared_boundaries = None
             for target in targets:
                 canvas = target_canvas
@@ -575,7 +580,7 @@ def profile(config, checkpoint=None):
                 for boundary in report['selected_boundaries']:
                     for length in report['selected_sequence_lengths']:
                         seq = sequence[:length]
-                        if not seq or (length == 16 and len(seq) <= 4):
+                        if not seq or (length >= 16 and len(seq) <= 4):
                             continue
                         label = f'N{length}'
                         timing = {arm['name']: [] for arm in config['arms']}
