@@ -1,0 +1,126 @@
+"""v27 Tier-3 summary from scored.csv files (no gold, no text; CPU only).
+
+Per task and arm:
+- first-output quality: strict correct, caps, EOS, unparsed; paired discordance vs native
+  (arm-only-correct / native-only-correct cells);
+- calls, canvases;
+- paired ratios vs native (and vs D_matched) per question x seed cell: accepted warm
+  request wall W, decoder calls N, and amortized per-call cost (W/N). Geometric means with
+  a question-clustered bootstrap 95% interval (resample questions, keep both seeds and
+  host of each question together), per-seed geometric means, and leave-one-question-out
+  range.
+W/N is amortized request cost, not a direct forward price.
+usage: python -m scripts.v27_panel_summary OUT.md OUT.csv SCORED.csv [...]
+"""
+from __future__ import annotations
+
+import csv
+import math
+import random
+import statistics
+import sys
+from collections import defaultdict
+
+
+def geo(values):
+    return math.exp(statistics.mean(math.log(v) for v in values)) if values else None
+
+
+def cluster_ci(cells, reps=4000, seed=7):
+    """cells: {question: [ratio,...]} -> 95% interval of the geometric mean."""
+    questions = list(cells)
+    if len(questions) < 2:
+        return None, None
+    rng = random.Random(seed)
+    draws = []
+    for _ in range(reps):
+        sample = [r for q in (rng.choice(questions) for _ in questions) for r in cells[q]]
+        draws.append(geo(sample))
+    draws.sort()
+    return draws[int(.025 * reps)], draws[int(.975 * reps) - 1]
+
+
+def summarize(rows):
+    by = defaultdict(dict)
+    for r in rows:
+        by[(r['dataset'], r['id'], r['seed'])][r['arm']] = r
+    arms = sorted({r['arm'] for r in rows}, key=lambda a: (a != 'D_native', a != 'D_matched', a))
+    out = []
+    for dataset in sorted({k[0] for k in by}):
+        cells = {k: v for k, v in by.items() if k[0] == dataset and 'D_native' in v}
+        for arm in arms:
+            present = {k: v for k, v in cells.items() if arm in v}
+            if not present:
+                continue
+            first = [v[arm] for v in present.values()]
+            ok = lambda r: r.get('first_status') == 'success'
+            row = dict(dataset=dataset, arm=arm, cells=len(present),
+                       correct=sum(r['strict_correct'] == 'True' for r in first),
+                       native_correct=sum(v['D_native']['strict_correct'] == 'True' for v in present.values()),
+                       arm_only=sum(v[arm]['strict_correct'] == 'True' and v['D_native']['strict_correct'] != 'True'
+                                    for v in present.values()),
+                       native_only=sum(v[arm]['strict_correct'] != 'True' and v['D_native']['strict_correct'] == 'True'
+                                       for v in present.values()),
+                       capped=sum(r['capped'] == 'True' for r in first),
+                       unparsed=sum(r['parsed'] != 'True' for r in first),
+                       failed=sum(not ok(r) for r in first),
+                       calls=sum(int(r['decoder_calls'] or 0) for r in first))
+            for base in ('D_native', 'D_matched'):
+                ratios = defaultdict(lambda: defaultdict(list))
+                per_seed = defaultdict(lambda: defaultdict(list))
+                for (d, q, s), v in present.items():
+                    if base not in v:
+                        continue
+                    a, b = v[arm], v[base]
+                    try:
+                        wa, wb = float(a['accepted_warm_request_wall_s']), float(b['accepted_warm_request_wall_s'])
+                    except (TypeError, ValueError):
+                        continue
+                    na, nb = int(a['decoder_calls']), int(b['decoder_calls'])
+                    for key, value in (('W', wa / wb), ('N', na / nb), ('WN', (wa / na) / (wb / nb))):
+                        ratios[key][q].append(value)
+                        per_seed[key][s].append(value)
+                tag = 'nat' if base == 'D_native' else 'dm'
+                for key in ('W', 'N', 'WN'):
+                    flat = [x for v in ratios[key].values() for x in v]
+                    if not flat:
+                        continue
+                    lo, hi = cluster_ci(ratios[key])
+                    loo = [geo([x for q2, v in ratios[key].items() if q2 != q for x in v]) for q in ratios[key]]
+                    row[f'{key}_{tag}'] = round(geo(flat), 4)
+                    row[f'{key}_{tag}_ci'] = f'[{lo:.3f},{hi:.3f}]' if lo else ''
+                    if tag == 'nat':
+                        row[f'{key}_{tag}_by_seed'] = ' '.join(f'{s}:{geo(v):.3f}' for s, v in sorted(per_seed[key].items()))
+                        row[f'{key}_{tag}_loo'] = f'{min(loo):.3f}-{max(loo):.3f}' if len(loo) > 1 else ''
+            out.append(row)
+    return out
+
+
+def main(argv=None):
+    argv = argv or sys.argv[1:]
+    md, csv_out, paths = argv[0], argv[1], argv[2:]
+    rows = [r for p in paths for r in csv.DictReader(open(p, encoding='utf-8'))]
+    summary = summarize(rows)
+    fields = []
+    for r in summary:
+        fields += [k for k in r if k not in fields]
+    with open(csv_out, 'w', newline='', encoding='utf-8') as stream:
+        w = csv.DictWriter(stream, fieldnames=fields)
+        w.writeheader()
+        w.writerows(summary)
+    lines = []
+    for dataset in sorted({r['dataset'] for r in summary}):
+        lines += [f'### {dataset}', '',
+                  '| arm | correct (native) | +/- vs native | cap | calls | W/native [CI] | N/native [CI] | (W/N)/native [CI] | (W/N)/D_matched | W by seed | W leave-one-question-out |',
+                  '|---|---|---|---:|---:|---|---|---|---:|---|---|']
+        for r in [x for x in summary if x['dataset'] == dataset]:
+            lines.append(f"| {r['arm']} | {r['correct']}/{r['cells']} ({r['native_correct']}) | +{r['arm_only']}/-{r['native_only']} | "
+                         f"{r['capped']} | {r['calls']} | {r.get('W_nat')} {r.get('W_nat_ci','')} | {r.get('N_nat')} {r.get('N_nat_ci','')} | "
+                         f"{r.get('WN_nat')} {r.get('WN_nat_ci','')} | {r.get('WN_dm')} | {r.get('W_nat_by_seed','')} | {r.get('W_nat_loo','')} |")
+        lines.append('')
+    open(md, 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
+    print('\n'.join(lines))
+
+
+if __name__ == '__main__':
+    main()
