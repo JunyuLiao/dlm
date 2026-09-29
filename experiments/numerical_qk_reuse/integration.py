@@ -203,6 +203,7 @@ class Attention:
         self.pipelined_routes = 0
         self.risk_state = 'kept'       # v27 M1-DP: 'dense_prefix' (named variant)
         self.density_gate = None       # v27 density gate preset (DENSITY_GATES), named variant
+        self._fa4_lists, self.fa4_list_builds = {}, 0   # v27 FA4 consumer: block lists per keep map
         self.gate_dense = False
         self.gate_stalled, self.gate_previous_accepted = 0, None
         self.gate_entries, self.gate_dense_calls = [], 0
@@ -674,7 +675,7 @@ class Attention:
         is formed by the route in LOAD mode on those summaries and the tail."""
         from .cache import Plan
         from .v27_consumer64 import fused_observe
-        if (mask is not None or causal or window is not None or self.consumer != 'triton64'
+        if (mask is not None or causal or window is not None or self.consumer not in ('triton64', 'fa4')
                 or self.mu_mode not in ('exact', 'pooled_compact') or b != 1):
             raise ValueError('fused observation is qualified for bidirectional GLOBAL, triton64, exact/compact mu')
         self.cache.reserve(identity)
@@ -737,10 +738,31 @@ class Attention:
         if self.consumer == 'triton64' and not causal and window is None and self._mask_present is False:
             from .v27_consumer64 import dense64
             return dense64(q, k, v, scale, splits=self.c64_splits), None
+        if self.consumer == 'fa4' and not causal and window is None and self._mask_present is False:
+            from . import v27_fa4
+            return v27_fa4.dense(q, k, v, scale), None
         from transformers.integrations.sdpa_attention import sdpa_attention_forward
         return sdpa_attention_forward(*native_args, **native_kwargs)
 
     def _consume(self, q, k, v, skipped, eligible, scale, window, causal):
+        if self.consumer == 'fa4':
+            # v27: the official FlashAttention-4 kernel through its block-sparse interface; the M1/M2/M3
+            # keep map becomes FA4 full-block lists, built once per map object and reused while held
+            if causal or window is not None or self.trace or self.output_layout != 'model_major':
+                raise ValueError('fa4 consumer is qualified for bidirectional GLOBAL model-major only')
+            from . import v27_fa4
+            key = (skipped.data_ptr(), eligible.data_ptr(), skipped._version, eligible._version, tuple(skipped.shape))
+            lists = self._fa4_lists.get(key)
+            if lists is None:
+                lists = v27_fa4.block_sparse_tensors(eligible & ~skipped)
+                if len(self._fa4_lists) >= 16:
+                    self._fa4_lists.pop(next(iter(self._fa4_lists)))
+                self._fa4_lists[key] = lists
+                self.fa4_list_builds += 1
+            out = v27_fa4.sparse_lists(q, k, v, lists, scale)
+            return SimpleNamespace(output=out.transpose(1, 2), skipped=skipped, eligible=eligible,
+                                   invalid_scores=torch.zeros(out.shape[:1] + (out.shape[2], out.shape[1]),
+                                                              dtype=torch.bool, device=out.device))
         if self.consumer == 'triton64':
             # v27 64-row / split-KV consumer (named numerical variant). NaN/inf scores
             # propagate to the output and fail the finite-output guard.
@@ -873,6 +895,7 @@ class Attention:
                     pipelined_routes=self.pipelined_routes,
                     risk_state=self.risk_state, dp_builds=self.dp_builds, dp_routes=self.dp_routes,
                     density_gate_dense_calls=self.gate_dense_calls, density_gate_entry_steps=list(self.gate_entries),
+                    fa4_list_builds=self.fa4_list_builds,
                     fresh_fused_tiles=(dict(zip(('pv_kept', 'visited'), self.fresh_tile_total.tolist()))
                                        if self.fresh_tile_total is not None else None),
                     shared_native_calls=self.shared_native_calls,

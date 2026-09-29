@@ -164,3 +164,13 @@ def test_density_gate_decision_and_config():
         assert config['density_gate'] == preset
     with pytest.raises(ValueError):
         build(M3, density_gate='ent0.5')
+
+
+def test_fa4_consumer_is_an_execution_variant():
+    config = build(M3, score_period=64, consumer64=2, fused_observe=True, route_pipeline=True, fa4_consumer=True)
+    v21.validate_effective(config, config['condition'])
+    assert config['fa4_consumer'] is True
+    assert config['fingerprint'] != build(M3, score_period=64, consumer64=2, fused_observe=True,
+                                          route_pipeline=True)['fingerprint']
+    with pytest.raises(ValueError):
+        build(M3, fa4_consumer=True)            # needs the 64-row consumer plumbing (consumer64)

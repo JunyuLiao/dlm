@@ -71,7 +71,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      decision_interval=None, hold_only=False, threshold_shift=None,
                      min_route_keys=None, route_layers=None, share_layers=None,
                      consumer64=None, memory_caps=None, fused_observe=False, fresh_fused=False,
-                     route_pipeline=False, risk_state=None, density_gate=None) -> dict:
+                     route_pipeline=False, risk_state=None, density_gate=None, fa4_consumer=False) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -171,6 +171,11 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if density_gate not in DENSITY_GATES or bootstrap_policy is None or fresh_fused:
             raise ValueError('v27 density gate must be a named preset on the bootstrap mainline')
         extra['density_gate'] = density_gate
+    if fa4_consumer:
+        # v27: sparse execution (and the dense bootstrap calls) through official FlashAttention-4
+        if fa4_consumer is not True or consumer64 is None or fresh_fused:
+            raise ValueError('v27 FA4 consumer replaces the 64-row consumer (consumer64 required)')
+        extra['fa4_consumer'] = True
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -301,6 +306,8 @@ def validate_effective(config: dict, condition: str):
     if 'risk_state' in config and (config['risk_state'] != 'dense_prefix' or 'bootstrap_policy' not in config
                                    or 'fresh_fused' in config):
         raise ValueError('v27 dense-prefix risk identity drift')
+    if 'fa4_consumer' in config and (config['fa4_consumer'] is not True or 'consumer64' not in config):
+        raise ValueError('v27 FA4 consumer identity drift')
     if 'density_gate' in config:
         from .integration import DENSITY_GATES
         if config['density_gate'] not in DENSITY_GATES or 'bootstrap_policy' not in config:
@@ -383,7 +390,7 @@ def install(adapter, config: dict, condition: str):
         if 'consumer64' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('consumer must be bound before any routed call')
-            owner.consumer = 'triton64'
+            owner.consumer = 'fa4' if config.get('fa4_consumer') else 'triton64'
             owner.c64_splits = config['consumer64']
         if 'route_layers' in config or 'share_layers' in config:
             if owner.cache.entries or owner.calls:
@@ -430,6 +437,7 @@ def install(adapter, config: dict, condition: str):
                         route_pipeline=bool(getattr(owner, 'route_pipeline', False)),
                         risk_state=getattr(owner, 'risk_state', 'kept'),
                         density_gate=config.get('density_gate'),
+                        consumer=getattr(owner, 'consumer', None),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
                         output_score_precision=owner.output_score_precision,
                         output_layout=owner.output_layout,

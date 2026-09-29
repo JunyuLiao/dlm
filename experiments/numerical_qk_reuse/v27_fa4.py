@@ -71,7 +71,10 @@ def block_sparse_tensors(kept):
 
 
 def sparse(q, k, v, skipped, eligible, scale):
+    return sparse_lists(q, k, v, block_sparse_tensors(eligible & ~skipped), scale)
+
+
+def sparse_lists(q, k, v, lists, scale):
     fwd = load()
     qs, ks, vs = _layout(q, k, v)
-    kept = eligible & ~skipped
-    return fwd(qs, ks, vs, softmax_scale=scale, causal=False, block_sparse_tensors=block_sparse_tensors(kept))[0]
+    return fwd(qs, ks, vs, softmax_scale=scale, causal=False, block_sparse_tensors=lists)[0]
