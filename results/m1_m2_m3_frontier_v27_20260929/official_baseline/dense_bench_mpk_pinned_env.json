@@ -1,0 +1,188 @@
+{
+ "schema": "v27_dense_kernel_bench_v1",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "torch": "2.6.0+cu124",
+ "h100_bf16_dense_peak_tflops": 989.4,
+ "shape": {
+  "H": 16,
+  "HK": 2,
+  "D": 512,
+  "NQ": 256,
+  "bidirectional": true
+ },
+ "rows": [
+  {
+   "keys": 16640,
+   "gflop": 139.6,
+   "impl": {
+    "dense64_s1": {
+     "ms": 2.4274,
+     "tflops": 57.5,
+     "max_abs_err": 0.00017
+    },
+    "dense64_s2": {
+     "ms": 1.4044,
+     "tflops": 99.4,
+     "max_abs_err": 0.00018
+    },
+    "dense64_s4": {
+     "ms": 1.4449,
+     "tflops": 96.6,
+     "max_abs_err": 0.00018
+    },
+    "sdpa_flash_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_flash_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_repeat_kv": {
+     "ms": 1.6357,
+     "tflops": 85.3,
+     "max_abs_err": 0.00017
+    },
+    "sdpa_cudnn_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_cudnn_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_math_gqa": {
+     "ms": 5.0253,
+     "tflops": 27.8,
+     "max_abs_err": 0.00012
+    },
+    "sdpa_math_repeat_kv": {
+     "ms": 4.8969,
+     "tflops": 28.5,
+     "max_abs_err": 0.00012
+    },
+    "flex_attention_gqa": {
+     "error": "BackendCompilerFailed: backend='inductor' raised:\nOutOfResources: out of resource: shared memory, Required: 262656, Hardware limit: 232448. Reducing block sizes or `num_stages` may help.\n\nSet TORCH_LOGS=\"+dynamo\" and TORCHDYNAMO_VERBOSE=1 f"
+    },
+    "flashinfer": {
+     "error": "ModuleNotFoundError: No module named 'flashinfer'"
+    },
+    "vllm_triton_unified": {
+     "error": "ModuleNotFoundError: No module named 'vllm'"
+    }
+   }
+  },
+  {
+   "keys": 32768,
+   "gflop": 274.9,
+   "impl": {
+    "dense64_s1": {
+     "ms": 4.6741,
+     "tflops": 58.8,
+     "max_abs_err": 0.00015
+    },
+    "dense64_s2": {
+     "ms": 2.6736,
+     "tflops": 102.8,
+     "max_abs_err": 0.00015
+    },
+    "dense64_s4": {
+     "ms": 2.7562,
+     "tflops": 99.7,
+     "max_abs_err": 0.00014
+    },
+    "sdpa_flash_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_flash_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_repeat_kv": {
+     "ms": 3.1106,
+     "tflops": 88.4,
+     "max_abs_err": 0.00015
+    },
+    "sdpa_cudnn_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_cudnn_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_math_gqa": {
+     "ms": 9.5593,
+     "tflops": 28.8,
+     "max_abs_err": 0.00012
+    },
+    "sdpa_math_repeat_kv": {
+     "ms": 9.4764,
+     "tflops": 29.0,
+     "max_abs_err": 0.00012
+    },
+    "flex_attention_gqa": {
+     "error": "BackendCompilerFailed: backend='inductor' raised:\nOutOfResources: out of resource: shared memory, Required: 262656, Hardware limit: 232448. Reducing block sizes or `num_stages` may help.\n\nSet TORCH_LOGS=\"+dynamo\" and TORCHDYNAMO_VERBOSE=1 f"
+    },
+    "flashinfer": {
+     "error": "ModuleNotFoundError: No module named 'flashinfer'"
+    },
+    "vllm_triton_unified": {
+     "error": "ModuleNotFoundError: No module named 'vllm'"
+    }
+   }
+  },
+  {
+   "keys": 65536,
+   "gflop": 549.8,
+   "impl": {
+    "dense64_s1": {
+     "ms": 9.0656,
+     "tflops": 60.6,
+     "max_abs_err": 9e-05
+    },
+    "dense64_s2": {
+     "ms": 4.9007,
+     "tflops": 112.2,
+     "max_abs_err": 9e-05
+    },
+    "dense64_s4": {
+     "ms": 4.8773,
+     "tflops": 112.7,
+     "max_abs_err": 9e-05
+    },
+    "sdpa_flash_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_flash_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_repeat_kv": {
+     "ms": 6.1834,
+     "tflops": 88.9,
+     "max_abs_err": 9e-05
+    },
+    "sdpa_cudnn_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_cudnn_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_math_gqa": {
+     "skipped": "math backend materializes scores; skipped above 40K"
+    },
+    "flex_attention_gqa": {
+     "error": "BackendCompilerFailed: backend='inductor' raised:\nOutOfResources: out of resource: shared memory, Required: 262656, Hardware limit: 232448. Reducing block sizes or `num_stages` may help.\n\nSet TORCH_LOGS=\"+dynamo\" and TORCHDYNAMO_VERBOSE=1 f"
+    },
+    "flashinfer": {
+     "error": "ModuleNotFoundError: No module named 'flashinfer'"
+    },
+    "vllm_triton_unified": {
+     "error": "ModuleNotFoundError: No module named 'vllm'"
+    }
+   }
+  }
+ ]
+}
