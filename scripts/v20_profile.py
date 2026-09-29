@@ -252,11 +252,28 @@ def _prefill_dense64(model, enabled):
             return dense64(query, key, value, scale, splits=1, causal=True, window=window), None
         return inner(module, query, key, value, attention_mask, dropout=dropout, scaling=scaling,
                      is_causal=is_causal, **kw)
+    # MoE experts are per-token: chunking the token axis is the same computation with bounded
+    # activation memory (grouped_mm over 64K tokens at once does not fit next to the weights).
+    import torch
+    patched = []
+    for name, mod in model.named_modules():
+        if name.endswith('.experts') and hasattr(mod, 'forward'):
+            original = mod.forward
+            def chunked(hidden, top_k_index, top_k_weights, *a, _orig=original, **kw):
+                if hidden.shape[0] <= 16384:
+                    return _orig(hidden, top_k_index, top_k_weights, *a, **kw)
+                return torch.cat([_orig(hidden[i:i + 16384], top_k_index[i:i + 16384],
+                                        top_k_weights[i:i + 16384], *a, **kw)
+                                  for i in range(0, hidden.shape[0], 16384)], 0)
+            mod.forward = chunked
+            patched.append((mod, original))
     registry['sdpa'] = attention
     try:
         yield
     finally:
         registry['sdpa'] = inner
+        for mod, original in patched:
+            mod.forward = original
 
 
 def resolve_target(target, captured):
