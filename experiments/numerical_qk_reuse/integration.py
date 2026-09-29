@@ -203,7 +203,7 @@ class Attention:
         self.pipelined_routes = 0
         self.risk_state = 'kept'       # v27 M1-DP: 'dense_prefix' (named variant)
         self.density_gate = None       # v27 density gate preset (DENSITY_GATES), named variant
-        self._fa4_lists, self.fa4_list_builds = {}, 0   # v27 FA4 consumer: block lists per keep map
+        self._fa4_lists, self.fa4_list_builds = [], 0   # v27 FA4 consumer: block lists per keep map
         self.gate_dense = False
         self.gate_stalled, self.gate_previous_accepted = 0, None
         self.gate_entries, self.gate_dense_calls = [], 0
@@ -247,6 +247,7 @@ class Attention:
             self.cache.clear()
             self.valid_keys.clear()
             self.summaries.clear()
+            self._fa4_lists = []
         if self.density_gate is not None:
             if canvas != self.canvas or step == 0:
                 self.gate_dense, self.gate_stalled, self.gate_previous_accepted = False, 0, None
@@ -751,13 +752,12 @@ class Attention:
             if causal or window is not None or self.trace or self.output_layout != 'model_major':
                 raise ValueError('fa4 consumer is qualified for bidirectional GLOBAL model-major only')
             from . import v27_fa4
-            key = (skipped.data_ptr(), eligible.data_ptr(), skipped._version, eligible._version, tuple(skipped.shape))
-            lists = self._fa4_lists.get(key)
+            # keyed by the map OBJECTS (the entry keeps a reference, so a freed map's storage can never be
+            # reused under a cached key); a held decision passes the same objects every call
+            lists = next((l for s_ref, e_ref, l in self._fa4_lists if s_ref is skipped and e_ref is eligible), None)
             if lists is None:
                 lists = v27_fa4.block_sparse_tensors(eligible & ~skipped)
-                if len(self._fa4_lists) >= 16:
-                    self._fa4_lists.pop(next(iter(self._fa4_lists)))
-                self._fa4_lists[key] = lists
+                self._fa4_lists = self._fa4_lists[-15:] + [(skipped, eligible, lists)]
                 self.fa4_list_builds += 1
             out = v27_fa4.sparse_lists(q, k, v, lists, scale)
             return SimpleNamespace(output=out.transpose(1, 2), skipped=skipped, eligible=eligible,

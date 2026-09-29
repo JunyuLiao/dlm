@@ -33,3 +33,26 @@ def test_fa4_dense_and_block_sparse_match_reference(keys):
     eligible = torch.ones_like(skipped)
     got = v27_fa4.sparse(q, k, v, skipped, eligible, 512 ** -.5).float()
     torch.testing.assert_close(got, _ref(q, k, v, ~skipped), atol=2e-2, rtol=2e-2)
+
+
+def test_fa4_consumer_under_inference_mode_caches_by_map_object():
+    from types import SimpleNamespace
+    from experiments.numerical_qk_reuse.integration import Attention
+    g = torch.Generator(device='cuda').manual_seed(9)
+    keys = 2049
+    fake = SimpleNamespace(consumer='fa4', trace=False, output_layout='model_major', _fa4_lists=[], fa4_list_builds=0)
+    with torch.inference_mode():
+        q = torch.randn(1, 256, 16, 512, device='cuda', dtype=torch.bfloat16, generator=g).transpose(1, 2)
+        k = torch.randn(1, 2, keys, 512, device='cuda', dtype=torch.bfloat16, generator=g)
+        v = torch.randn(1, 2, keys, 512, device='cuda', dtype=torch.bfloat16, generator=g)
+        skipped = torch.rand(1, 16, 2, math.ceil(keys / 64), device='cuda', generator=g) > .5
+        skipped[..., 0] = False
+        eligible = torch.ones_like(skipped)
+        first = Attention._consume(fake, q, k, v, skipped, eligible, 512 ** -.5, None, False)
+        again = Attention._consume(fake, q, k, v, skipped, eligible, 512 ** -.5, None, False)
+        assert fake.fa4_list_builds == 1 and torch.equal(first.output, again.output)
+        other = skipped.clone()
+        other[..., 1] = ~other[..., 1]
+        Attention._consume(fake, q, k, v, other, eligible, 512 ** -.5, None, False)
+        assert fake.fa4_list_builds == 2
+    torch.testing.assert_close(first.output.transpose(1, 2).float(), _ref(q, k, v, ~skipped), atol=2e-2, rtol=2e-2)
