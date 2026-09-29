@@ -43,6 +43,8 @@ def main(argv=None):
     for arm in a.arm:
         config = configs[a.dataset][arm]
         started = time.perf_counter()
+        torch.cuda.empty_cache()
+        torch.cuda.reset_peak_stats()
         try:
             with prefill_dense64(adapter.model, os.environ.get('V27_PREFILL_DENSE64') == '1'):
                 receipt = _one(adapter, row, protocol['seeds'][0], config)
@@ -50,12 +52,15 @@ def main(argv=None):
             print(json.dumps(dict(arm=arm, ok=True, decoder_calls=receipt['total_decoder_calls'],
                                   request_wall_s=round(receipt['request_wall_seconds'], 3),
                                   fingerprint=bool(receipt.get('fingerprint')),
+                                  peak_allocated_gib=round(torch.cuda.max_memory_allocated() / 2**30, 2),
+                                  peak_reserved_gib=round(torch.cuda.max_memory_reserved() / 2**30, 2),
                                   counters={k: v for k, v in counters.items()
                                             if isinstance(v, (int, float, dict)) and
                                             ('calls' in k or k in ('fresh_fused_tiles',))})), flush=True)
         except Exception as exc:  # report and keep going: the point is to see every arm
             failures += 1
             print(json.dumps(dict(arm=arm, ok=False, error=f'{type(exc).__name__}: {exc}'[:400],
+                                  peak_allocated_gib=round(torch.cuda.max_memory_allocated() / 2**30, 2),
                                   seconds=round(time.perf_counter() - started, 1))), flush=True)
     raise SystemExit(1 if failures else 0)
 
