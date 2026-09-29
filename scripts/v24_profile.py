@@ -190,7 +190,7 @@ def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_leng
         config['manifests'] = dict(config['manifests'], **{d: str(p) for d, p in extra_manifests.items()})
         config['manifest_sha256'] = dict(config['manifest_sha256'], **extra_sha)
     if arm_set.startswith('v27'):
-        if not targets or sequence_length not in (8, 24, 32):
+        if not targets or sequence_length not in (4, 8, 24, 32):
             raise ValueError('v27 direct cost needs predeclared targets and N24/N32')
         config.update(schema='v27_direct_cost_v1', arm_set=arm_set,
                       arms=build_arms(v21_profile_config, arm_set, extra_sha), targets=targets,
@@ -222,7 +222,7 @@ def validate_config(config):
     if [arm['name'] for arm in config['arms']] != list(expected):
         raise ValueError('arm inventory differs from the declared arm set')
     lengths = (config.get('sequence_lengths') if arm_set.startswith('v27') and
-               config.get('sequence_lengths') in ([8], [24], [32]) else [16])
+               config.get('sequence_lengths') in ([4], [8], [24], [32]) else [16])
     if config.get('scope') != SCOPE or config.get('sequence_lengths') != lengths:
         raise ValueError('v24/v27 are GLOBAL-only and replay from canvas start')
     from experiments.numerical_qk_reuse import v21
