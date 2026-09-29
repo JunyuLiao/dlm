@@ -136,7 +136,7 @@ def build_arms(v21_profile_config, arm_set='v24'):
                                       observation_producer='grouped_q',
                                       route_storage='aligned16_odd', **extra)
         result.append(dict(name=name, plugin=PLUGIN, condition=config['condition'], config=config))
-    return result
+    return sorted(result, key=lambda arm: list(names).index(arm['name']))
 
 
 def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_length=None):
