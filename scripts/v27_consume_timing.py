@@ -2,7 +2,8 @@
 split by path (dense bootstrap / FA4-or-c64 sparse consume / fused observation / other), plus the kept
 fraction of every consumed map and the FA4 block-list cache builds. Uses the arm configs of an
 existing direct-cost profile config (.config.json) and one of its targets. Numbers only.
-usage: python -m scripts.v27_consume_timing CONFIG_JSON TARGET_INDEX ARM [ARM ...]
+usage: python -m scripts.v27_consume_timing CONFIG_JSON MANIFEST ROW_INDEX BUDGET ARM [ARM ...]
+(the row must match the arm configs' thinking mode; BUDGET caps generation to bound the run)
 """
 from __future__ import annotations
 
@@ -15,7 +16,7 @@ from collections import defaultdict
 
 def main(argv=None):
     argv = argv or sys.argv[1:]
-    config_path, target_index, arm_names = argv[0], int(argv[1]), argv[2:]
+    config_path, manifest, row_index, budget, arm_names = argv[0], argv[1], int(argv[2]), int(argv[3]), argv[4:]
     import torch
     from dllm.models import create_adapter
     from experiments.numerical_qk_reuse import integration
@@ -23,9 +24,7 @@ def main(argv=None):
     from experiments.numerical_qk_reuse.v27_long import prefill_dense64
     config = json.load(open(config_path))
     arms = {a['name']: a for a in config['arms']}
-    target = config['targets'][target_index]
-    rows = {r['id']: r for r in json.load(open(config['manifests'][target['dataset']]))}
-    row = rows[target['id']]
+    row = dict(json.load(open(manifest))[row_index], generation_budget=budget)
     adapter = create_adapter('diffusion_gemma', config['model'], device='cuda', precision='bfloat16',
                              revision=config.get('revision')).load()
     torch.backends.cuda.matmul.allow_tf32 = False
@@ -56,14 +55,15 @@ def main(argv=None):
             records.clear()
             kept_fraction.clear()
             arm = arms[name]
-            cfg = dict(arm['config'], condition=arm['condition'], plugin=arm['plugin'], thinking=row['thinking'])
+            cfg = dict(arm['config'], condition=arm['condition'], plugin=arm['plugin'])
             with prefill_dense64(adapter.model, os.environ.get('V27_PREFILL_DENSE64') == '1'):
                 receipt = _one(adapter, row, 101, cfg)
             torch.cuda.synchronize()
             summary = {k: dict(n=len(v), median_ms=round(statistics.median(s.elapsed_time(e) for s, e in v), 4),
                                total_ms=round(sum(s.elapsed_time(e) for s, e in v), 1)) for k, v in records.items()}
             kf = [float(x) for x in kept_fraction]
-            print(json.dumps(dict(arm=name, calls=receipt['total_decoder_calls'], paths=summary,
+            print(json.dumps(dict(arm=name, prompt_tokens=row['prompt_token_count'], calls=receipt['total_decoder_calls'],
+                                  paths=summary,
                                   kept_fraction_median=round(statistics.median(kf), 4) if kf else None,
                                   fa4_list_builds=(receipt.get('counters') or {}).get('fa4_list_builds'))), flush=True)
     finally:
