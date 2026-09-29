@@ -205,8 +205,8 @@ def validate_config(config):
     expected = ARM_SETS[arm_set]
     if [arm['name'] for arm in config['arms']] != list(expected):
         raise ValueError('arm inventory differs from the declared arm set')
-    lengths = [24] if arm_set.startswith('v27') and config.get('sequence_lengths') == [24] else \
-        [32] if arm_set.startswith('v27') else [16]
+    lengths = (config.get('sequence_lengths') if arm_set.startswith('v27') and
+               config.get('sequence_lengths') in ([8], [24], [32]) else [16])
     if config.get('scope') != SCOPE or config.get('sequence_lengths') != lengths:
         raise ValueError('v24/v27 are GLOBAL-only and replay from canvas start')
     from experiments.numerical_qk_reuse import v21

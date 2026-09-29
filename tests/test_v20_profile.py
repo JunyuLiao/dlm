@@ -60,7 +60,7 @@ class V20ProfileContract(unittest.TestCase):
         cfg['boundaries'] = ['model_forward']
         cfg['sequence_lengths'] = [4]
         P.validate_config(cfg)
-        cfg['sequence_lengths'] = [8]
+        cfg['sequence_lengths'] = [12]
         with self.assertRaisesRegex(ValueError, 'sequence_lengths'):
             P.validate_config(cfg)
 
