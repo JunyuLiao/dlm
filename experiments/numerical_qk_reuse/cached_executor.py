@@ -87,6 +87,9 @@ class Routing:
     skipped: torch.Tensor
     eligible: torch.Tensor
     invalid_tiles: torch.Tensor
+    # v27 compact M2: tiles where some query row's legal-key set differed from
+    # the shared pool's (the caller must fail the request); None otherwise.
+    pool_mismatch: torch.Tensor = None
 
 
 @dataclass
@@ -113,11 +116,12 @@ if tr is not None:
 
     @tr.jit
     def _route(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, LSE, STATE, RISK,
-               ZSUM, MUSUM, ACTSUM, BADSUM,
+               ZSUM, MUSUM, ACTSUM, BADSUM, POOLED, POOLCNT, POOLBAD,
                Q: tl.constexpr, K: tl.constexpr, H: tl.constexpr, HK: tl.constexpr,
                R: tl.constexpr, RP: tl.constexpr, QB: tl.constexpr,
                KT: tl.constexpr, THRESHOLD: tl.constexpr, TRACE: tl.constexpr,
-               PREFIX_TILES: tl.constexpr, STORE: tl.constexpr, LOAD: tl.constexpr, POOL: tl.constexpr):
+               PREFIX_TILES: tl.constexpr, STORE: tl.constexpr, LOAD: tl.constexpr, POOL: tl.constexpr,
+               COMPACT: tl.constexpr):
         """Selector. Optionally stores or reuses exact per-row prefix summaries.
 
         For a KV tile lying WHOLLY inside the immutable prefix, ``block_z`` and
@@ -495,10 +499,10 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
                                                                scores.device)
         kernels = _kernels(variant)
         kernels['route'][(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles, lse, state, risk,
-                           zs, mus, acts, bads,
+                           zs, mus, acts, bads, *_pool_arguments(None, None, shape, scores.device),
                            nq, _karg(variant, nk), h, hk, 32, 32, qb, kt, log_threshold, trace,
                            prefix_tiles, bool(store_summary),
-                           bool(summary is not None and not store_summary), bool(pool),
+                           bool(summary is not None and not store_summary), bool(pool), False,
                            num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
     elif summary is not None or store_summary:
         raise ValueError('summaries apply to the selector, not the held-bitmap path')
@@ -519,7 +523,8 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
 
 
 def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.inf,
-               num_warps=8, summary=None, store_summary=False, variant='static', pool=False):
+               num_warps=8, summary=None, store_summary=False, variant='static', pool=False,
+               pooled=None, pool_count=None):
     """Selector only: the SAME ``_route`` decision, with no PV and no output.
 
     ``attention(...)`` with ``skipped=None`` also produces a bitmap, but it
@@ -562,18 +567,58 @@ def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.in
     # TRACE=False: LSE/STATE/RISK are never written, so one-element stand-ins
     # keep the launch signature without allocating per-query buffers.
     dummy = torch.empty((1,), device=scores.device, dtype=torch.float32)
+    compact = pool == 'compact'
+    if pool not in (False, True, 'compact'):
+        raise ValueError(f'unknown pool mode {pool!r}')
+    if compact and variant != 'generic':
+        raise ValueError('compact pooled mu is implemented only in the generic selector')
+    if compact != (pooled is not None):
+        raise ValueError('compact pooled mu requires (and only accepts) a [B,KVH,KT,32] pool')
     prefix_tiles, zs, mus, acts, bads = _summary_arguments(summary, store_summary, shape, kt,
-                                                           scores.device)
+                                                           scores.device, mu_rank=0 if compact else 32)
+    pool_args = _pool_arguments(pooled, pool_count, shape, scores.device, hk)
     _kernels(variant)['route'][(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles,
-                       dummy, dummy, dummy, zs, mus, acts, bads,
+                       dummy, dummy, dummy, zs, mus, acts, bads, *pool_args,
                        nq, _karg(variant, nk), h, hk, 32, 32, qb, kt, log_threshold, False,
                        prefix_tiles, bool(store_summary),
-                       bool(summary is not None and not store_summary), bool(pool),
+                       bool(summary is not None and not store_summary), pool is True, compact,
                        num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
-    return Routing(skip, elig, bad_tiles)
+    return Routing(skip, elig, bad_tiles, pool_args[2] if compact else None)
 
 
-def _summary_arguments(summary, store_summary, shape, kt, device):
+def tile_pool(projected, valid):
+    """v27 compact M2 pool: per (batch, KV head, KV64 tile) mean of the CURRENT
+    projected V over REAL legal keys. ``valid`` [B,KVH,K] marks keys that are
+    finite for at least one query row; padding never counts. Returns the FP32
+    pool [B,KVH,KT,32] and the int32 legal-key count [B,KVH,KT]."""
+    b, hk, nk, rank = projected.shape
+    if valid.shape != (b, hk, nk):
+        raise ValueError('valid key mask must be [B,KVH,K]')
+    kt = -(-nk // 64)
+    pad = kt * 64 - nk
+    legal = valid.to(torch.float32)
+    total = torch.nn.functional.pad(projected * legal[..., None], (0, 0, 0, pad)).view(b, hk, kt, 64, rank).sum(3)
+    count = torch.nn.functional.pad(legal, (0, pad)).view(b, hk, kt, 64).sum(3)
+    pooled = (total / count.clamp_min(1.)[..., None]).contiguous()
+    return pooled, count.to(torch.int32).contiguous()
+
+
+def _pool_arguments(pooled, pool_count, shape, device, hk=None):
+    """Kernel arguments for the compact pool; one-element stand-ins otherwise."""
+    if pooled is None:
+        dummy = torch.empty((1,), device=device, dtype=torch.float32)
+        return dummy, torch.empty((1,), device=device, dtype=torch.int32), torch.empty((1,), device=device, dtype=torch.bool)
+    b, _, _, kt = shape
+    if (tuple(pooled.shape) != (b, hk, kt, 32) or pooled.dtype != torch.float32 or
+            tuple(pool_count.shape) != (b, hk, kt) or pool_count.dtype != torch.int32 or
+            not pooled.is_contiguous() or not pool_count.is_contiguous() or
+            pooled.device != device or pool_count.device != device):
+        raise ValueError('compact pool must be contiguous FP32 [B,KVH,KT,32] with int32 [B,KVH,KT] counts')
+    # Zero-initialised: summarized (LOAD) tiles never write it.
+    return pooled, pool_count, torch.zeros(shape, device=device, dtype=torch.bool)
+
+
+def _summary_arguments(summary, store_summary, shape, kt, device, mu_rank=32):
     """Validate and unpack summary buffers for a ``_route`` launch."""
     if summary is None:
         dummy = torch.empty((1,), device=device, dtype=torch.float32)
@@ -586,7 +631,7 @@ def _summary_arguments(summary, store_summary, shape, kt, device):
     expected = shape[:3] + (summary.prefix_tiles, 128)
     for name, tensor, want_shape, want_dtype in (
             ('z', summary.z, expected, torch.float32),
-            ('mu', summary.mu, expected + (32,), torch.float32),
+            ('mu', summary.mu, expected + (mu_rank,), torch.float32),
             ('active', summary.active, expected, torch.int8),
             ('bad', summary.bad, expected, torch.int8)):
         if tuple(tensor.shape) != want_shape:
@@ -595,7 +640,8 @@ def _summary_arguments(summary, store_summary, shape, kt, device):
             raise ValueError(f'summary {name} dtype {tensor.dtype} != {want_dtype}')
         if tensor.device != device or not tensor.is_contiguous():
             raise ValueError('summary buffers must be contiguous and co-located')
-    return summary.prefix_tiles, summary.z, summary.mu, summary.active, summary.bad
+    mu = summary.mu if mu_rank else torch.empty((1,), device=device, dtype=torch.float32)
+    return summary.prefix_tiles, summary.z, mu, summary.active, summary.bad
 
 
 def preqk_attention(q, k, v, skipped, eligible, *, scale, window=None,

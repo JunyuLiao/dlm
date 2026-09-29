@@ -38,6 +38,7 @@ STORAGE = {'M3_boot_aligned16': 'aligned16', 'B_boot_aligned16': 'aligned16'}
 BOOT = 'native_bootstrap2_observe1'
 V27 = {'M1_R1_A8': ('M1_R1_A8_current_output', {}),
        'M2_pool_R1_A8': ('M1_R1_A8_current_output', dict(mu_mode='pooled')),
+       'M2c_pool_R1_A8': ('M1_R1_A8_current_output', dict(mu_mode='pooled_compact')),
        'M3_R3_A8': ('M3_R3_A8_current_output', {}),
        'M3_R6_A8': ('M3_R3_A8_current_output', dict(decision_interval=6)),
        'M3_R3_A16': ('M3_R3_A8_current_output', dict(score_period=16)),

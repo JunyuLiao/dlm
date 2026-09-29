@@ -29,11 +29,12 @@ from .cached_executor import _logadd
 
 @tr.jit(do_not_specialize=['K', 'KT', 'PREFIX_TILES'])
 def _route_generic(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, LSE, STATE, RISK,
-           ZSUM, MUSUM, ACTSUM, BADSUM,
+           ZSUM, MUSUM, ACTSUM, BADSUM, POOLED, POOLCNT, POOLBAD,
            Q: tl.constexpr, K, H: tl.constexpr, HK: tl.constexpr,
            R: tl.constexpr, RP: tl.constexpr, QB: tl.constexpr,
            KT, THRESHOLD: tl.constexpr, TRACE: tl.constexpr,
-           PREFIX_TILES, STORE: tl.constexpr, LOAD: tl.constexpr, POOL: tl.constexpr, KDIV: tl.constexpr):
+           PREFIX_TILES, STORE: tl.constexpr, LOAD: tl.constexpr, POOL: tl.constexpr,
+           COMPACT: tl.constexpr, KDIV: tl.constexpr):
     """Selector. Optionally stores or reuses exact per-row prefix summaries.
 
     For a KV tile lying WHOLLY inside the immutable prefix, ``block_z`` and
@@ -62,8 +63,13 @@ def _route_generic(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, LSE, STATE, RISK,
         if summarized:
             base = (((batch*H+h)*QB+qb)*PREFIX_TILES+j)*128 + tl.arange(0, 128)
             block_z = tl.load(ZSUM+base, rows, other=-float('inf'))
-            mu = tl.load(MUSUM+base[:, None]*RP+ri[None, :],
-                         rows[:, None] & (ri[None, :] < R), other=0.)
+            if COMPACT:
+                # v27 compact M2: one shared FP32 pool vector per (KV head, tile).
+                pooled = tl.load(POOLED+((batch*HK+kh)*KT+j)*RP+ri, ri < R, other=0.)
+                mu = tl.zeros((128, RP), tl.float32) + pooled[None, :]
+            else:
+                mu = tl.load(MUSUM+base[:, None]*RP+ri[None, :],
+                             rows[:, None] & (ri[None, :] < R), other=0.)
             active = tl.load(ACTSUM+base, rows, other=0) != 0
             bad_row = tl.load(BADSUM+base, rows, other=0) != 0
             eligible = tl.sum((active | bad_row).to(tl.int32), 0)>0
@@ -83,21 +89,33 @@ def _route_generic(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, LSE, STATE, RISK,
             ell = tl.sum(weights, 1)
             weights = weights / tl.maximum(ell, 1.e-30)[:, None]
             block_z = tl.where(active, maximum+lib.log(tl.maximum(ell, 1.e-30)), -float('inf'))
-            sketch = tl.load(Z+((batch*HK+kh)*K+kk[:, None])*R+ri[None, :],
-                             (kk[:, None]<K) & (ri[None, :]<R), other=0.)
-            if POOL:
+            if COMPACT:
+                # v27 compact M2: shared pool, no per-row uniform dot. The pool
+                # is valid only when every real query row's legal set is the
+                # tile's pooled legal set; any other row fails the request.
+                pooled = tl.load(POOLED+((batch*HK+kh)*KT+j)*RP+ri, ri < R, other=0.)
+                mu = tl.zeros((128, RP), tl.float32) + pooled[None, :]
+                count = tl.load(POOLCNT+(batch*HK+kh)*KT+j)
+                mismatch = rows & (tl.sum(finite.to(tl.int32), 1) != count)
+                tl.store(POOLBAD+((batch*H+h)*QB+qb)*KT+j, tl.sum(mismatch.to(tl.int32), 0) > 0)
+            elif POOL:
+                sketch = tl.load(Z+((batch*HK+kh)*K+kk[:, None])*R+ri[None, :],
+                                 (kk[:, None]<K) & (ri[None, :]<R), other=0.)
                 # v26 M2: per-row mean of the current projected V over the
                 # tile's real, legal (finite-score) keys; replaces only mu.
                 legal_w = finite.to(tl.float32)
                 legal_w = legal_w / tl.maximum(tl.sum(legal_w, 1), 1.)[:, None]
                 mu = tl.dot(legal_w, sketch, input_precision='tf32x3')
             else:
+                sketch = tl.load(Z+((batch*HK+kh)*K+kk[:, None])*R+ri[None, :],
+                                 (kk[:, None]<K) & (ri[None, :]<R), other=0.)
                 mu = tl.dot(weights, sketch, input_precision='tf32x3')
             if STORE and j < PREFIX_TILES:
                 base = (((batch*H+h)*QB+qb)*PREFIX_TILES+j)*128 + tl.arange(0, 128)
                 tl.store(ZSUM+base, block_z, rows)
-                tl.store(MUSUM+base[:, None]*RP+ri[None, :], mu,
-                         rows[:, None] & (ri[None, :] < R))
+                if not COMPACT:
+                    tl.store(MUSUM+base[:, None]*RP+ri[None, :], mu,
+                             rows[:, None] & (ri[None, :] < R))
                 tl.store(ACTSUM+base, active.to(tl.int8), rows)
                 tl.store(BADSUM+base, bad_row.to(tl.int8), rows)
         combined = _logadd(previous, block_z)

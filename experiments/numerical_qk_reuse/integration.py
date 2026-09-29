@@ -18,7 +18,7 @@ from experiments.value_direction_hopper.integration import Sketches
 from experiments.value_direction_hopper.query_adaptive import State
 from .cache import Identity, ScoreCache
 from .cached_executor import (allocate_summary, attention, preqk_attention,
-                              route_only, summary_bytes as summary_nbytes, fused_guard)
+                              route_only, summary_bytes as summary_nbytes, fused_guard, tile_pool)
 
 SUPPORT_MODES = ('legacy_junyu_mask', 'native_mask')
 # cached_scores: production M1/M3 -- the routing decision AND the final
@@ -62,7 +62,7 @@ OBSERVATION_PRODUCERS = ('repeat_interleave', 'grouped_q')
 ROUTE_STORAGES = ('logical', 'aligned16', 'aligned16_odd')
 # v26 M2: 'exact' is M1's weighted projected value; 'pooled' replaces only mu by
 # the per-row mean of current projected V over real legal keys of the tile.
-MU_MODES = ('exact', 'pooled')
+MU_MODES = ('exact', 'pooled', 'pooled_compact')
 
 
 @dataclass
@@ -165,6 +165,7 @@ class Attention:
         self.observation_producer = 'repeat_interleave'
         self.route_storage = 'logical'
         self.mu_mode = 'exact'
+        self.compact_pool_builds = 0
         # aligned_pad_bytes (historical name, kept for traceability) = total bytes of
         # newly ALLOCATED pitched buffers, not only the extra pad and not DRAM traffic.
         self.aligned_score_copies = self.aligned_pad_bytes = self.aligned_sketch_pads = 0
@@ -322,7 +323,7 @@ class Attention:
                 # Selector only: no discarded PV, no discarded [B,H,Q,D]
                 # output. Malformed cached scores stay detectable through the
                 # route's own per-tile flag instead of through that PV pass.
-                route = self._route(entry.scores, projected, ref,
+                route = self._route(entry.scores, projected, ref, valid=valid,
                                     sensitivity=self.query_sensitivity,
                                     log_threshold=threshold,
                                     summary=summary, store_summary=store_summary,
@@ -434,9 +435,16 @@ class Attention:
         self.aligned_copy_bytes += score.numel() * score.element_size()
         return stored
 
-    def _route(self, scores, projected, ref, **kwargs):
+    def _route(self, scores, projected, ref, valid=None, **kwargs):
         """route_only on the stored scores; pads only the sketch to the stored pitch."""
         nk, pitch = projected.shape[2], scores.shape[-1]
+        pool = dict(pool=self.mu_mode == 'pooled')
+        if self.mu_mode == 'pooled_compact':
+            # Built from the UNPADDED current projection over real legal keys;
+            # alignment padding never enters the mean (tile extents are equal).
+            pooled, count = tile_pool(projected, valid)
+            pool = dict(pool='compact', pooled=pooled, pool_count=count)
+            self.compact_pool_builds += 1
         if pitch != nk:
             if (self.route_storage not in ('aligned16', 'aligned16_odd') or pitch % 16 or not 0 < pitch - nk < 16
                     or -(-pitch // 64) != -(-nk // 64)):
@@ -445,8 +453,11 @@ class Attention:
             self.aligned_sketch_pads += 1
         if self.mu_mode not in MU_MODES:
             raise ValueError(self.mu_mode)
-        return route_only(scores, projected.contiguous(), ref.contiguous(),
-                          pool=self.mu_mode == 'pooled', **kwargs)
+        route = route_only(scores, projected.contiguous(), ref.contiguous(), **pool, **kwargs)
+        if getattr(route, 'pool_mismatch', None) is not None:
+            torch._assert_async(~route.pool_mismatch.any(),
+                                'compact pooled mu: row-varying legal key set; request must fail')
+        return route
 
     def _observe(self, q, k, mask, scale, causal, window, crop):
         if self.observation_producer == 'grouped_q':
@@ -484,7 +495,7 @@ class Attention:
         plan = Plan(True, True, 'bootstrap_observation', None, None)
         summary, store_summary = self._summary_for(
             layer, kind, identity, prefix_tiles, b, h, nq, nk, plan, v.device)
-        route = self._route(stored, projected, ref,
+        route = self._route(stored, projected, ref, valid=valid,
                             sensitivity=self.query_sensitivity, log_threshold=threshold,
                             summary=summary, store_summary=store_summary,
                             variant=self.kernel_variant)
@@ -539,14 +550,15 @@ class Attention:
             # (same-stream caching-allocator reuse is ordered after queued
             # readers), so a rebuild never transiently holds two summaries.
             self.summaries.pop(layer, None)
-            needed = summary_nbytes(b, h, qb, prefix_tiles, 32)
+            rank = 0 if self.mu_mode == 'pooled_compact' else 32
+            needed = summary_nbytes(b, h, qb, prefix_tiles, rank)
             if self.summary_bytes + needed > self.max_summary_bytes:
                 # Exact fallback: the legacy recompute path yields the same
                 # decisions, so a declined summary costs time, not semantics.
                 self.summary_budget_declines += 1
                 self.summary_recomputed_tiles += prefix_tiles
                 return None, False
-            summary = allocate_summary(b, h, qb, kt, prefix_tiles, 32, device, wanted)
+            summary = allocate_summary(b, h, qb, kt, prefix_tiles, rank, device, wanted)
             if summary is None:
                 return None, False
             if summary.bytes != needed:
@@ -617,7 +629,7 @@ class Attention:
                     bootstrap_observation_calls=self.bootstrap_observation_calls,
                     observation_producer=self.observation_producer,
                     route_storage=self.route_storage,
-                    mu_mode=self.mu_mode,
+                    mu_mode=self.mu_mode, compact_pool_builds=self.compact_pool_builds,
                     aligned_score_copies=self.aligned_score_copies,
                     aligned_pad_bytes=self.aligned_pad_bytes,
                     aligned_buffer_bytes_allocated=self.aligned_pad_bytes,

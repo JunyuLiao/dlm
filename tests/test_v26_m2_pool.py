@@ -98,3 +98,71 @@ def test_pooled_route_only_matches_independent_reference(variant):
                            sensitivity=sens.cuda().contiguous(), log_threshold=thr, variant=variant, pool=False)
         want_exact = _select(scores, projected, ref, sens, heads=1, queries=128, keys=64, threshold=thr)
         assert torch.equal((exact.eligible & ~exact.skipped).cpu(), want_exact['bits'][:, :, ::128, :])
+
+
+def _compact_case(seed=11, k=200, legal=190):
+    g = torch.Generator().manual_seed(seed)
+    scores = torch.randn(1, 8, 256, k, generator=g)
+    scores[..., legal:] = -math.inf
+    projected = torch.randn(1, 2, k, 32, generator=g)
+    ref = torch.rand(1, 2, generator=g) + .5
+    sens = torch.rand(1, 256, generator=g) + .5
+    valid = torch.isfinite(scores).reshape(1, 2, 4, 256, k).any(2).any(2)
+    return scores, projected, ref, sens, valid
+
+
+def test_tile_pool_counts_only_real_legal_keys():
+    from experiments.numerical_qk_reuse.cached_executor import tile_pool
+    scores, projected, _, _, valid = _compact_case()
+    pooled, count = tile_pool(projected, valid)
+    assert count.tolist() == [[[64, 64, 62, 0]] * 2][0] or count[0, 0].tolist() == [64, 64, 62, 0]
+    assert torch.allclose(pooled[0, 1, 2], projected[0, 1, 128:190].mean(0), atol=1e-6)
+    assert torch.equal(pooled[0, :, 3], torch.zeros(2, 32))
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='requires CUDA/Triton')
+def test_compact_pool_matches_rowwise_reference_and_flags_row_varying_legality():
+    pytest.importorskip('triton')
+    from experiments.numerical_qk_reuse.cached_executor import route_only, tile_pool
+    scores, projected, ref, sens, valid = _compact_case()
+    pooled, count = tile_pool(projected.cuda(), valid.cuda())
+    c = lambda x: x.cuda().contiguous()
+    for thr in (-2., -.5, .5):
+        want = _select(scores, projected, ref, sens, heads=1, queries=128, keys=64, threshold=thr, pool=True)
+        got = route_only(c(scores), c(projected), c(ref), sensitivity=c(sens), log_threshold=thr,
+                         variant='generic', pool='compact', pooled=pooled, pool_count=count)
+        assert torch.equal((got.eligible & ~got.skipped).cpu(), want['bits'][:, :, ::128, :]), thr
+        assert not got.pool_mismatch.any()
+    broken = scores.clone()
+    broken[0, 3, 7, 70] = -math.inf        # one row loses one legal key of tile 1
+    got = route_only(c(broken), c(projected), c(ref), sensitivity=c(sens), log_threshold=0.,
+                     variant='generic', pool='compact', pooled=pooled, pool_count=count)
+    assert got.pool_mismatch.cpu()[0, 3, 0].tolist() == [False, True, False, False]
+    with pytest.raises(ValueError):
+        route_only(c(scores), c(projected), c(ref), variant='static', pool='compact',
+                   pooled=pooled, pool_count=count)
+    with pytest.raises(ValueError):
+        route_only(c(scores), c(projected), c(ref), variant='generic', pool='compact')
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='requires CUDA/Triton')
+def test_compact_summary_store_load_and_aligned_pitch_are_bit_identical():
+    pytest.importorskip('triton')
+    from experiments.numerical_qk_reuse.cached_executor import allocate_summary, route_only, tile_pool
+    scores, projected, ref, sens, valid = _compact_case(seed=5)
+    c = lambda x: x.cuda().contiguous()
+    pooled, count = tile_pool(c(projected), c(valid))
+    kw = dict(sensitivity=c(sens), log_threshold=-.5, variant='generic', pool='compact',
+              pooled=pooled, pool_count=count)
+    plain = route_only(c(scores), c(projected), c(ref), **kw)
+    summary = allocate_summary(1, 8, 2, 4, 2, 0, 'cuda', ('test',))
+    assert summary.mu.numel() == 0
+    stored = route_only(c(scores), c(projected), c(ref), summary=summary, store_summary=True, **kw)
+    loaded = route_only(c(scores), c(projected), c(ref), summary=summary, store_summary=False, **kw)
+    for other in (stored, loaded):
+        assert torch.equal(other.skipped, plain.skipped) and torch.equal(other.eligible, plain.eligible)
+    # aligned16 pitch: -inf tail and zero-padded sketch; pool from the unpadded projection
+    padded = torch.nn.functional.pad(scores, (0, 8), value=-math.inf)
+    zpad = torch.nn.functional.pad(projected, (0, 0, 0, 8))
+    aligned = route_only(c(padded), c(zpad), c(ref), **kw)
+    assert torch.equal(aligned.skipped, plain.skipped) and torch.equal(aligned.eligible, plain.eligible)

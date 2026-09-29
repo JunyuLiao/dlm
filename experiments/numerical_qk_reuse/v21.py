@@ -25,7 +25,7 @@ REQUEST_ENVELOPE = ('phase', 'diagnostic', 'timing_events', 'thinking', 'max_new
 BOOTSTRAP_POLICIES = ('native_bootstrap2_observe1',)
 OBSERVATION_PRODUCERS = ('repeat_interleave', 'grouped_q')
 ROUTE_STORAGES = ('logical', 'aligned16', 'aligned16_odd')
-MU_MODES = ('exact', 'pooled')
+MU_MODES = ('exact', 'pooled', 'pooled_compact')
 SCORE_PERIODS = (8, 16, 64)
 # v27 optional clock/threshold overrides on top of a named parent arm. The
 # parent arm stays as namespaced provenance; the effective values are bound on

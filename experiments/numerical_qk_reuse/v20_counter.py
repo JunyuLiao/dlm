@@ -173,12 +173,36 @@ class CounterTwin:
         old_held = getattr(self.router, 'held_calls', None)
         old_bootstrap = getattr(self.router, 'bootstrap_calls', None)
         old_observation = getattr(self.router, 'observation_calls', None)
+        # v27: numerical-router native bootstrap (call 0 dense, call 1 dense + observation).
+        old_b0 = getattr(self.router, 'bootstrap_dense_calls', None)
+        old_bo = getattr(self.router, 'bootstrap_observation_calls', None)
         result = self.delegate(module, q, k, v, mask, **kwargs)
+        router_phase = None
         if old_score is not None:
             score = self.router.score_calls - old_score
             decision = self.router.decision_calls - old_decision
             held = self.router.held_calls - old_held
-            if (score, decision, held) == (1, 1, 0):
+            b0 = self.router.bootstrap_dense_calls - old_b0 if old_b0 is not None else 0
+            bo = self.router.bootstrap_observation_calls - old_bo if old_bo is not None else 0
+            if (b0 or bo) and (score, decision, held) != (0, 0, 0):
+                raise ValueError('bootstrap and routed phase counters both advanced')
+            if (b0, bo) in ((1, 0), (0, 1)):
+                # Native SDPA output: every legal pair executed (all-kept bitmap).
+                # BO additionally computes one full observation QK for LATER calls.
+                import torch
+                from types import SimpleNamespace
+                router_phase = 'B0' if b0 else 'BO'
+                phase, full_qk = 'A', bool(bo)
+                b, h, nq = q.shape[:3]
+                shape_q, shape_k = (nq + Q_TILE - 1) // Q_TILE, (k.shape[-2] + K_TILE - 1) // K_TILE
+                bitmap = SimpleNamespace(
+                    skipped=torch.zeros((b, h, shape_q, shape_k), dtype=torch.bool, device=q.device),
+                    eligible=torch.ones((b, h, shape_q, shape_k), dtype=torch.bool, device=q.device))
+                skipped, eligible = bitmap.skipped, bitmap.eligible
+                anchor_step = decision_step = numeric_age = decision_age = None
+            elif (b0, bo) != (0, 0):
+                raise ValueError('bootstrap counters do not identify one B0/BO call')
+            elif (score, decision, held) == (1, 1, 0):
                 phase, full_qk = 'A', True
             elif (score, decision, held) == (0, 1, 0):
                 phase, full_qk = 'D', False
@@ -186,14 +210,16 @@ class CounterTwin:
                 phase, full_qk = 'H', False
             else:
                 raise ValueError('router phase counters do not identify one A/D/H call')
-            entry = self.router.cache.entries[layer]
-            bitmap = entry.decision
-            skipped, eligible = bitmap.skipped, bitmap.eligible
-            anchor_step, decision_step = entry.score_step, entry.decision_step
-            if (type(anchor_step) is not int or type(decision_step) is not int or
-                    not 0 <= anchor_step <= owner.step or not 0 <= decision_step <= owner.step):
-                raise ValueError('numerical score/decision anchor age is unavailable or invalid')
-            numeric_age, decision_age = owner.step-anchor_step, owner.step-decision_step
+            if router_phase is None:
+                router_phase = phase
+                entry = self.router.cache.entries[layer]
+                bitmap = entry.decision
+                skipped, eligible = bitmap.skipped, bitmap.eligible
+                anchor_step, decision_step = entry.score_step, entry.decision_step
+                if (type(anchor_step) is not int or type(decision_step) is not int or
+                        not 0 <= anchor_step <= owner.step or not 0 <= decision_step <= owner.step):
+                    raise ValueError('numerical score/decision anchor age is unavailable or invalid')
+                numeric_age, decision_age = owner.step-anchor_step, owner.step-decision_step
         elif old_bootstrap is not None:
             bootstrap = self.router.bootstrap_calls - old_bootstrap
             observation = self.router.observation_calls - old_observation
@@ -242,9 +268,9 @@ class CounterTwin:
                    canvas=owner.canvas, decoder_call=owner.step,
                    method='historical_or_same_consumer_control',
                    anchor_step=anchor_step, decision_step=decision_step,
-                   numeric_age=numeric_age, decision_age=decision_age)
+                   numeric_age=numeric_age, decision_age=decision_age, router_phase=router_phase)
         self.rows.append(row)
-        if self.operator_probe is not None and old_score is not None:
+        if self.operator_probe is not None and old_score is not None and router_phase in ('A', 'D', 'H'):
             self.operator_probe.observe(self.router, module, q, k, v,
                                         bitmap.skipped, bitmap.eligible,
                                         phase=phase, canvas=owner.canvas, step=owner.step,
@@ -275,7 +301,7 @@ class CounterTwin:
             executed_pv_pairs=0, executed_qk_multiply_accumulates=0,
             executed_pv_multiply_accumulates=0) for segment in SEGMENTS})
         for row in self.rows:
-            aggregate = by_phase_kind[(row['phase'], row['kind'])]
+            aggregate = by_phase_kind[(row.get('router_phase') or row['phase'], row['kind'])]
             for segment, counts in row['by_segment'].items():
                 for key, value in counts.items():
                     aggregate[segment][key] += value
