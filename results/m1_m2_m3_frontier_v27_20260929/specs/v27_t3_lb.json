@@ -1,0 +1,68 @@
+{
+ "name": "t3_lb",
+ "ids": {
+  "longbench_v2": [
+   "longbench_v2/66ebe0fb5a08c7b9b35e14f5",
+   "longbench_v2/66fab4bfbb02136c067c754c",
+   "longbench_v2/66f41e45821e116aacb30ec3",
+   "longbench_v2/6704a442bb02136c067cdd91",
+   "longbench_v2/66f245cc821e116aacb28698",
+   "longbench_v2/66f2b676821e116aacb2b27a"
+  ]
+ },
+ "seeds": [
+  101,
+  202
+ ],
+ "warm": true,
+ "arms": {
+  "D_native": {
+   "kind": "native"
+  },
+  "D_matched": {
+   "kind": "dense_matched"
+  },
+  "T_scope": {
+   "kind": "fresh_T"
+  },
+  "M1_R1_A8": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output"
+  },
+  "M2c_pool_R1_A8": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R6_A64": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "score_period": 64,
+    "decision_interval": 6
+   }
+  },
+  "M3_R3_A64": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "score_period": 64
+   }
+  },
+  "B_A64": {
+   "kind": "method",
+   "parent": "B_A8_matched",
+   "extra": {
+    "hold_only": true,
+    "score_period": 64
+   }
+  },
+  "M3_R3_A8": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output"
+  }
+ },
+ "selection_rule": "Tier3 confirmation, frozen after Tier2 dev and before any Tier3 output. Primary M3 = M3_R6_A64 (announced before AIME dev scoring); pre-declared secondary = M3_R3_A64; both share matched hold-only B_A64. D_matched is the same-consumer dense baseline for attribution. M3_R3_A8 kept on LB only as the current-reference sub-panel. LB/AIME ids are new (not used in any earlier v20-v27 run); RULER ids are the thirteen v20 tasks (exposed). Seeds 101/202; first output scores quality, accepted warm scores time."
+}
