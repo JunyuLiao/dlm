@@ -313,6 +313,117 @@ def freeze_seven(v20_protocol_path, v20_binding_path, manifests_dir, out_dir):
     return protocol
 
 
+V27_EXTRA_KEYS = ('mu_mode', 'score_period', 'decision_interval', 'hold_only', 'threshold_shift')
+
+
+def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir):
+    """v27 generic frozen panel from a committed spec (ids, seeds, named arms).
+
+    spec: {"name", "ids": {dataset: [...]}, "seeds": [...], "warm": bool,
+           "arms": {name: {"kind": "native"|"fresh_T"|"method", "parent": v20 arm,
+                           "extra": {v21 optional keys}}}}
+    Pool rows must carry a consistent prompt hash and no gold; any id also in the
+    frozen v20 manifest must be byte-identical to it. Host = (question index + seed
+    index) mod 2 within each dataset; every arm of a question-seed block on one GPU.
+    """
+    out_dir = Path(out_dir)
+    if out_dir.exists():
+        raise FileExistsError(out_dir)
+    spec_bytes = Path(spec_path).read_bytes()
+    spec = json.loads(spec_bytes)
+    original_bytes, binding_bytes = Path(v20_protocol_path).read_bytes(), Path(v20_binding_path).read_bytes()
+    original, binding = json.loads(original_bytes), json.loads(binding_bytes)
+    if binding.get('panel_protocol_sha256') != _sha(original_bytes) or binding.get('status') != 'frozen':
+        raise ValueError('old frozen v20 protocol/binding identity drift')
+    host_uuids = {}
+    for entry in original['block_assignments'].values():
+        host_uuids.setdefault(entry['host'], set()).add(entry['gpu_uuid'])
+    host_ids = sorted(host_uuids)
+    ids, seeds = spec['ids'], list(spec['seeds'])
+    if not ids or not set(ids) <= {'longbench_v2', 'aime26', 'ruler4k'} or not seeds or \
+            not set(seeds) <= {101, 202, 303} or len(set(seeds)) != len(seeds):
+        raise ValueError('v27 spec ids/seeds outside the allowed tasks/seeds')
+    manifests, hashes = {}, {}
+    for dataset, wanted in ids.items():
+        pool = {r['id']: r for r in json.loads((Path(pool_dir) / f'{dataset}_pool_manifest.json').read_bytes())}
+        frozen = {r['id']: r for r in json.loads((Path(pool_dir).parent / 'v20_frozen' /
+                                                   f'{dataset}_generation_manifest.json').read_bytes())} \
+            if (Path(pool_dir).parent / 'v20_frozen').is_dir() else {}
+        if len(set(wanted)) != len(wanted) or any(i not in pool for i in wanted):
+            raise ValueError(f'v27 ids missing from pool or duplicated: {dataset}')
+        clean = [pool[i] for i in wanted]
+        if any(set(r) & old.GOLD or _sha(r['prompt'].encode()) != r.get('prompt_hash') for r in clean):
+            raise ValueError(f'gold/prompt drift: {dataset}')
+        if any(r['id'] in frozen and r != frozen[r['id']] for r in clean):
+            raise ValueError(f'pool row differs from the frozen v20 row: {dataset}')
+        manifests[dataset] = _bytes(clean)
+        hashes[dataset] = _sha(manifests[dataset])
+
+    def method(parent, extra):
+        if set(extra) - set(V27_EXTRA_KEYS):
+            raise ValueError(f'unknown v27 arm key: {sorted(set(extra) - set(V27_EXTRA_KEYS))}')
+        contract = dict(kind='v21_method', parent_v20_arm=parent, scope=SCOPE,
+                        output_score_precision='fp32_scores_bf16_pv', output_layout='model_major',
+                        observation_producer=PRODUCER, bootstrap_policy=BOOTSTRAP,
+                        route_storage='aligned16_odd')
+        contract.update(extra)
+        return contract
+    contracts = {}
+    for name, arm in spec['arms'].items():
+        if arm['kind'] == 'native':
+            if name != 'D_native':
+                raise ValueError('native arm must be D_native')
+            contracts[name] = dict(kind='native')
+        elif arm['kind'] == 'fresh_T':
+            contracts[name] = dict(kind='v20_legacy', parent_v20_arm='T_scope', scope=SCOPE)
+        elif arm['kind'] == 'method':
+            contracts[name] = method(arm['parent'], arm.get('extra', {}))
+        else:
+            raise ValueError(f'unknown v27 arm kind: {arm["kind"]}')
+    arms = list(spec['arms'])
+    protocol_id = 'v27_' + spec['name'] + '_' + _sha(_bytes(dict(old_protocol=_sha(original_bytes), ids=ids,
+                                                              seeds=seeds, arms=contracts)))[:16]
+    assignments, schedule, block, stages = {}, [], 0, {}
+    for dataset in ('longbench_v2', 'aime26', 'ruler4k'):
+        if dataset not in ids:
+            continue
+        stages[dataset] = []
+        for q_index, id_ in enumerate(ids[dataset]):
+            for s_index, seed in enumerate(seeds):
+                host = host_ids[(q_index + s_index) % 2]
+                assignment = dict(dataset=dataset, id=id_, seed=seed, host=host,
+                                  gpu_uuid=next(iter(host_uuids[host])))
+                assignments[str(block)] = assignment
+                first = arms[block % len(arms):] + arms[:block % len(arms)]
+                roles = (('attempt0', first), ('warm', first[::-1])) if spec.get('warm', True) else \
+                    (('attempt0', first),)
+                for role, arm_order in roles:
+                    for arm in arm_order:
+                        schedule.append(dict(index=len(schedule), block=block, arm=arm,
+                            cell_id=cell_id(protocol_id, old.REVISION, old.sha_json(contracts[arm]), id_, seed),
+                            role=role, repeat=0 if role == 'attempt0' else 1, **assignment))
+                stages[dataset].append(block)
+                block += 1
+    protocol = dict(schema='v21_conditional_panel_v1', status='frozen', execution_ready=True,
+                    panel_kind='v27_panel', panel_name=spec['name'], protocol_id=protocol_id,
+                    model_revision=old.REVISION, spec_sha256=_sha(spec_bytes),
+                    v20_protocol_sha256=_sha(original_bytes), v20_binding_sha256=_sha(binding_bytes),
+                    selected_scope=SCOPE, policy_point='P0', policy_sha256=binding['policy_sha256'],
+                    output_layout='model_major', ids=ids, seeds=seeds, warm=bool(spec.get('warm', True)),
+                    arms=arms, arm_contracts=contracts, block_assignments=assignments,
+                    schedule=schedule, planned_executions=len(schedule),
+                    generation_manifest_sha256=hashes, stages=stages,
+                    selection_rule=spec.get('selection_rule', ''),
+                    host_assignment_rule='host = (question index + seed index) mod 2 within each dataset',
+                    quality_eligible=True, timing_eligible=bool(spec.get('warm', True)))
+    validate_protocol(protocol)
+    out_dir.mkdir(parents=True, exist_ok=False)
+    for dataset, content in manifests.items():
+        _new(out_dir / f'{dataset}_generation_manifest.json', content)
+    _new(out_dir / 'protocol.json', _bytes(protocol))
+    return protocol
+
+
 def _contracts(mode, output_layout):
     legacy = ('legacy_bf16_scores', 'head_major')
     updated = ('fp32_scores_bf16_pv', output_layout)
@@ -504,7 +615,7 @@ def _base(old_config, *, protocol, dataset, manifest_path, model, source, source
                 model_metadata_hashes=old.model_hashes(model),
                 manifest=str(Path(manifest_path).resolve()),
                 manifest_sha256=protocol['generation_manifest_sha256'][dataset],
-                ids=protocol['ids'][dataset], seeds=[101, 202],
+                ids=protocol['ids'][dataset], seeds=sorted(set(protocol['seeds']) | {101, 202}),
                 phase='v21_generation', policy_name='P0',
                 policy_sha256=protocol['policy_sha256'],
                 consumer='triton', kernel_variant='generic',
@@ -567,7 +678,10 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                     observation_producer=contract.get('observation_producer', 'repeat_interleave'),
                     route_storage=contract.get('route_storage', 'logical'),
                     mu_mode=contract.get('mu_mode', 'exact'),
-                    score_period=contract.get('score_period', 8))
+                    score_period=contract.get('score_period', 8),
+                    decision_interval=contract.get('decision_interval'),
+                    hold_only=contract.get('hold_only', False),
+                    threshold_shift=contract.get('threshold_shift'))
             path = config_dir / dataset / f'{arm}.json'
             _new(path, _bytes(result))
             configs[dataset][arm] = dict(path=str(path.resolve()), sha256=_sha(path.read_bytes()))
@@ -586,8 +700,9 @@ def main(argv=None):
     sub = parser.add_subparsers(dest='command', required=True)
     fr = sub.add_parser('freeze')
     fr.add_argument('--mode', choices=('numeric7', 'layout_pair', 'bootstrap6', 'bootstrap6_ruler',
-                                        'aligned6_pilot', 'aligned_bridge', 'v26_seven'), required=True)
+                                        'aligned6_pilot', 'aligned_bridge', 'v26_seven', 'v27_panel'), required=True)
     fr.add_argument('--v20-protocol', type=Path, required=True)
+    fr.add_argument('--spec', type=Path, help='v27_panel: committed arm/id/seed spec')
     fr.add_argument('--v20-binding', type=Path, required=True)
     fr.add_argument('--manifests-dir', type=Path, required=True)
     fr.add_argument('--output-layout', choices=('head_major', 'model_major'), required=True)
@@ -600,7 +715,9 @@ def main(argv=None):
     hb.add_argument('--manifests-dir', type=Path, required=True)
     hb.add_argument('--out', type=Path, required=True)
     args = parser.parse_args(argv)
-    if args.command == 'freeze' and args.mode in ('aligned6_pilot', 'aligned_bridge', 'v26_seven'):
+    if args.command == 'freeze' and args.mode == 'v27_panel':
+        result = freeze_v27(args.spec, args.v20_protocol, args.v20_binding, args.manifests_dir, args.out_dir)
+    elif args.command == 'freeze' and args.mode in ('aligned6_pilot', 'aligned_bridge', 'v26_seven'):
         result = dict(aligned6_pilot=freeze_pilot, aligned_bridge=freeze_bridge,
                       v26_seven=freeze_seven)[args.mode](
             args.v20_protocol, args.v20_binding, args.manifests_dir, args.out_dir)

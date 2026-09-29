@@ -50,10 +50,17 @@ def read_task_rows(path: Path, dataset: str, ids: list[str], expected_sha: str) 
 def validate_protocol(protocol: dict) -> None:
     if protocol.get("schema") != SCHEMA or protocol.get("status") != "frozen" or protocol.get("execution_ready") is not True:
         raise ValueError("v21 conditional panel is not frozen and execution-ready")
-    if protocol.get("panel_kind") not in PANEL_COUNTS:
+    v27 = protocol.get("panel_kind") == "v27_panel"
+    if protocol.get("panel_kind") not in PANEL_COUNTS and not v27:
         raise ValueError("unknown conditional panel kind")
-    arm_count, expected = PANEL_COUNTS[protocol["panel_kind"]]
     arms, schedule = protocol.get("arms"), protocol.get("schedule")
+    if v27:
+        # v27 generic panel: counts follow from the frozen ids x seeds x arms x roles.
+        blocks_expected = sum(len(v) for v in (protocol.get("ids") or {}).values()) * len(protocol.get("seeds") or [])
+        arm_count = len(arms) if isinstance(arms, list) else -1
+        expected = blocks_expected * arm_count * (2 if protocol.get("warm") else 1)
+    else:
+        arm_count, expected = PANEL_COUNTS[protocol["panel_kind"]]
     if (not isinstance(arms, list) or len(arms) != arm_count or len(set(arms)) != len(arms) or
             not all(isinstance(a, str) and a for a in arms)):
         raise ValueError("explicit frozen arm inventory differs from panel kind")
@@ -86,8 +93,15 @@ def validate_protocol(protocol: dict) -> None:
             if c["kind"] == "v21_control" and c.get("parent_v20_arm") != "D_matched":
                 raise ValueError("v21 control must be D_matched parent")
             if c.get("route_storage", "aligned16") not in ("aligned16", "aligned16_odd") or \
-                    c.get("mu_mode", "pooled") != "pooled" or c.get("score_period", 16) != 16:
+                    c.get("mu_mode", "pooled") not in ("pooled", "pooled_compact") or \
+                    c.get("score_period", 16) not in (16, 64):
                 raise ValueError(f"unknown v25 route storage: {arm}")
+            if c.get("decision_interval", 6) != 6 or c.get("hold_only", True) is not True or \
+                    c.get("threshold_shift", "plus_ln2") not in (
+                        "minus_ln2", "plus_ln2", "plus_2ln2", "plus_3ln2", "plus_4ln2"):
+                raise ValueError(f"unknown v27 clock/threshold field: {arm}")
+            if not v27 and any(k in c for k in ("decision_interval", "hold_only", "threshold_shift")):
+                raise ValueError(f"v27 fields outside a v27 panel: {arm}")
             if c.get("bootstrap_policy", "native_bootstrap2_observe1") != "native_bootstrap2_observe1" or \
                     c.get("observation_producer", "grouped_q") not in ("grouped_q", "repeat_interleave"):
                 raise ValueError(f"unknown v23 method field: {arm}")
@@ -95,7 +109,9 @@ def validate_protocol(protocol: dict) -> None:
             raise ValueError(f"unknown arm contract: {arm}")
     diagnostic = protocol["panel_kind"] == "zero_pruning_diagnostic"
     ids = protocol.get("ids")
-    required_tasks = ({"longbench_v2"} if diagnostic else {"aime26", "longbench_v2"}
+    required_tasks = (set(ids) if v27 and isinstance(ids, dict) and ids and
+                      set(ids) <= {"ruler4k", "aime26", "longbench_v2"} else
+                      {"longbench_v2"} if diagnostic else {"aime26", "longbench_v2"}
                       if protocol["panel_kind"] == "bootstrap6" else {"ruler4k"}
                       if protocol["panel_kind"] == "bootstrap6_ruler" else {"longbench_v2"}
                       if protocol["panel_kind"] == "aligned_bridge" else {"ruler4k", "aime26", "longbench_v2"})
@@ -109,7 +125,12 @@ def validate_protocol(protocol: dict) -> None:
         raise ValueError("task IDs missing or duplicated")
     ruler_stage = protocol["panel_kind"] == "bootstrap6_ruler"
     single_seed = ruler_stage or protocol["panel_kind"] == "v26_seven"
-    if protocol.get("seeds") != ([101] if single_seed else [101, 202]):
+    if v27:
+        seeds = protocol.get("seeds")
+        if (not isinstance(seeds, list) or not seeds or len(set(seeds)) != len(seeds) or
+                not set(seeds) <= {101, 202, 303}):
+            raise ValueError("v27 seeds outside the allowed set")
+    elif protocol.get("seeds") != ([101] if single_seed else [101, 202]):
         raise ValueError("frozen v20 generation seeds changed")
     if diagnostic:
         frozen_v20 = _json(V20_PROTOCOL)
@@ -166,7 +187,8 @@ def validate_protocol(protocol: dict) -> None:
     if len(actual_qseeds) != len(assignments) or actual_qseeds != expected_qseeds:
         raise ValueError("frozen panel omits or duplicates a task question-seed block")
     for block, entries in blocks.items():
-        warm = not diagnostic and (not (ruler_stage or pilot) or block in protocol.get("warm_blocks", []))
+        warm = (bool(protocol.get("warm")) if v27 else
+                not diagnostic and (not (ruler_stage or pilot) or block in protocol.get("warm_blocks", [])))
         required_roles = ["attempt0"] * len(arms) + (["warm"] * len(arms) if warm else [])
         if len(entries) != len(required_roles) or [e["role"] for e in entries] != required_roles:
             raise ValueError("incomplete or interleaved question-seed block")
@@ -211,6 +233,10 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
         if (config.get("mu_mode", "exact") != contract.get("mu_mode", "exact") or
                 config.get("score_period", 8) != contract.get("score_period", 8)):
             raise ValueError("v26 mu mode / score period differs from arm contract")
+        if (config.get("decision_interval") != contract.get("decision_interval") or
+                bool(config.get("hold_only", False)) != bool(contract.get("hold_only", False)) or
+                config.get("threshold_shift") != contract.get("threshold_shift")):
+            raise ValueError("v27 clock/threshold differs from arm contract")
         if (config.get("bootstrap_policy") != contract.get("bootstrap_policy") or
                 config.get("observation_producer", "repeat_interleave") !=
                 contract.get("observation_producer", "repeat_interleave")):
