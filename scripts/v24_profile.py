@@ -176,6 +176,29 @@ for _name in _NS:
     V27.setdefault(_name + '_long', (V27[_name][0], dict(V27[_name][1], memory_caps='long')))
 ARM_SETS['v27ns'] = ('D_native', 'D_c64') + _NS
 ARM_SETS['v27nslong'] = ('D_native', 'D_c64') + tuple(n + '_long' for n in _NS)
+# v27 official-baseline profile: every sparse arm executes through FA4's block-sparse interface (same
+# kernel as the D_fa4 dense control); Fan's plain M1/M2c/M3 first, then the A64 fused variants.
+_F = dict(consumer64=2, fa4_consumer=True)
+V27['M1_R1_A8_fa4_rp'] = ('M1_R1_A8_current_output', dict(_F, route_pipeline=True))
+V27['M2c_R1_A8_fa4_rp'] = ('M1_R1_A8_current_output', dict(_F, route_pipeline=True, mu_mode='pooled_compact'))
+V27['M3_R3_A8_fa4_rp'] = ('M3_R3_A8_current_output', dict(_F, route_pipeline=True))
+_A64 = dict(_F, score_period=64, fused_observe=True)
+V27['B_A64_fused_fa4'] = ('B_A8_matched', dict(_A64, hold_only=True))
+V27['M3_R6_A64_fused_rp_fa4'] = ('M3_R3_A8_current_output', dict(_A64, route_pipeline=True, decision_interval=6))
+V27['M3_R3_A64_fused_rp_fa4'] = ('M3_R3_A8_current_output', dict(_A64, route_pipeline=True))
+V27['M1_R1_A64_fused_rp_fa4'] = ('M1_R1_A8_current_output', dict(_A64, route_pipeline=True))
+V27['M1_R1_A64_fused_dp_fa4'] = ('M1_R1_A8_current_output', dict(_A64, risk_state='dense_prefix'))
+V27['M3_R6_A64_one_fused_rp_fa4'] = ('M3_R3_A8_current_output', dict(_A64, route_pipeline=True, decision_interval=6,
+                                                                     share_layers='one'))
+V27['M3_R6_A64_pairs_fused_rp_fa4'] = ('M3_R3_A8_current_output', dict(_A64, route_pipeline=True, decision_interval=6,
+                                                                       share_layers='pairs'))
+_FA4 = ('M1_R1_A8_fa4_rp', 'M2c_R1_A8_fa4_rp', 'M3_R3_A8_fa4_rp', 'B_A64_fused_fa4', 'M3_R6_A64_fused_rp_fa4',
+        'M3_R3_A64_fused_rp_fa4', 'M1_R1_A64_fused_rp_fa4', 'M1_R1_A64_fused_dp_fa4', 'M3_R6_A64_one_fused_rp_fa4',
+        'M3_R6_A64_pairs_fused_rp_fa4')
+for _name in _FA4:
+    V27[_name + '_long'] = (V27[_name][0], dict(V27[_name][1], memory_caps='long'))
+ARM_SETS['v27fa4'] = ('D_native', 'D_c64', 'D_fa4') + _FA4
+ARM_SETS['v27fa4long'] = ('D_native', 'D_c64', 'D_fa4') + tuple(n + '_long' for n in _FA4)
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls', 'fresh_fused_calls')
 WRAPPER_DROP = ('fingerprint', 'condition', 'plugin', 'v20_arm', 'v20_scope', 'decision_interval',
                 'score_refresh_period', 'output_mode', 'control')
@@ -201,13 +224,14 @@ def build_arms(v21_profile_config, arm_set='v24', extra_manifests=None):
     if extra_manifests:
         control_base['manifest_sha256_by_dataset'] = native['config']['manifest_sha256_by_dataset']
     t_config = old.control_config(dict(control_base, control='T_scope'), 'v20_fresh_T', SCOPE)
-    for dense_name in ('D_fast', 'D_c64'):
+    for dense_name in ('D_fast', 'D_c64', 'D_fa4'):
         if dense_name not in names:
             continue
         from experiments.numerical_qk_reuse import v27_fast_dense as fast
         cfg = dict(control_base, control=dense_name, plugin=fast.PLUGIN, condition=fast.CONDITION)
         cfg['source_hashes'] = dict(cfg.get('source_hashes', {}))
-        for source in (Path(fast.__file__).resolve(), Path(fast.__file__).resolve().with_name('v27_consumer64.py')):
+        for source in (Path(fast.__file__).resolve(), Path(fast.__file__).resolve().with_name('v27_consumer64.py'),
+                       Path(fast.__file__).resolve().with_name('v27_fa4.py')):
             cfg['source_hashes'][str(source)] = hashlib.sha256(source.read_bytes()).hexdigest()
         result.append(dict(name=dense_name, plugin=fast.PLUGIN, condition=fast.CONDITION, config=cfg))
     for dense, dense_scope in (('D_matched', SCOPE), ('D_matched_ALL', 'ALL_NATIVE_LEGAL')):
@@ -263,11 +287,12 @@ def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_leng
                       # Shared-support followers are not modelled by the counter twin.
                       counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long', 'v27fused', 'v27fresh', 'v27freshlong',
                                                     'v27rp', 'v27rplong', 'v27dp', 'v27dplong', 'v27ns', 'v27nslong',
+                                                    'v27fa4', 'v27fa4long',
                                                     'v27fusedlong'), operator_probe=False,
                       prepared_support_floor=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long',
                                                              'v27fused', 'v27fusedlong', 'v27fresh',
                                                              'v27freshlong', 'v27rp', 'v27rplong', 'v27dp',
-                                                             'v27dplong', 'v27ns', 'v27nslong'),
+                                                             'v27dplong', 'v27ns', 'v27nslong', 'v27fa4', 'v27fa4long'),
                       derived_from_v21_profile_config_sha256=hashlib.sha256(
                           json.dumps(v21_profile_config, sort_keys=True).encode()).hexdigest())
         return config
