@@ -93,6 +93,10 @@ for _name in ('M3_R6_A64_one', 'M3_R3_A64_one', 'M3_R6_A64', 'B_A64', 'M1_R1_A8_
     V27[_name + '_c64'] = (V27[_name][0], dict(V27[_name][1], consumer64=2))
 ARM_SETS['v27c64'] = ('D_native', 'D_fast', 'D_c64', 'M3_R6_A64_one_c64', 'M3_R3_A64_one_c64', 'M3_R6_A64_c64',
                       'B_A64_c64', 'M1_R1_A8_one_c64', 'M3_R6_A64_mid3_c64', 'M3_R6_A64_one')
+for _name in ('M3_R6_A64_one_c64', 'M3_R3_A64_one_c64', 'B_A64_c64', 'M3_R6_A64_c64', 'M1_R1_A8_one_c64'):
+    V27[_name + '_long'] = (V27[_name][0], dict(V27[_name][1], memory_caps='long'))
+ARM_SETS['v27long'] = ('D_native', 'D_fast', 'D_c64', 'M3_R6_A64_one_c64_long', 'M3_R3_A64_one_c64_long',
+                       'B_A64_c64_long', 'M3_R6_A64_c64_long', 'M1_R1_A8_one_c64_long')
 ARM_SETS['v27fast'] = ('D_native', 'D_fast', 'D_matched', 'M3_R6_A64_one', 'M3_R3_A64_one',
                        'M1_R1_A8_one', 'M3_R6_A64', 'B_A64')
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls')
@@ -100,7 +104,7 @@ WRAPPER_DROP = ('fingerprint', 'condition', 'plugin', 'v20_arm', 'v20_scope', 'd
                 'score_refresh_period', 'output_mode', 'control')
 
 
-def build_arms(v21_profile_config, arm_set='v24'):
+def build_arms(v21_profile_config, arm_set='v24', extra_manifests=None):
     """Six arms with the panel's selectors, output contract and grouped-Q producer."""
     from experiments.numerical_qk_reuse import v21
     from scripts import v20_bind as old
@@ -109,9 +113,16 @@ def build_arms(v21_profile_config, arm_set='v24'):
     if native['condition'] != 'native_dense':
         raise ValueError('bound v21 profile config lacks untouched native arm')
     method_base = {k: v for k, v in combined['config']['parent_config'].items() if k not in WRAPPER_DROP}
+    if extra_manifests:
+        # v27 long context: extra gold-free manifests join every arm's manifest identity.
+        full = dict(native['config'].get('manifest_sha256_by_dataset', {}), **extra_manifests)
+        native = dict(native, config=dict(native['config'], manifest_sha256_by_dataset=full))
+        method_base['manifest_sha256_by_dataset'] = full
     result = [native]
     names = ARM_SETS[arm_set]
     control_base = {k: v for k, v in native['config'].items() if k not in WRAPPER_DROP}
+    if extra_manifests:
+        control_base['manifest_sha256_by_dataset'] = native['config']['manifest_sha256_by_dataset']
     t_config = old.control_config(dict(control_base, control='T_scope'), 'v20_fresh_T', SCOPE)
     for dense_name in ('D_fast', 'D_c64'):
         if dense_name not in names:
@@ -157,19 +168,24 @@ def build_arms(v21_profile_config, arm_set='v24'):
     return sorted(result, key=lambda arm: list(names).index(arm['name']))
 
 
-def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_length=None):
+def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_length=None, extra_manifests=None):
     config = {k: v for k, v in v21_profile_config.items() if k != 'arms'}
+    extra_sha = None
+    if extra_manifests:
+        extra_sha = {d: hashlib.sha256(Path(p).read_bytes()).hexdigest() for d, p in extra_manifests.items()}
+        config['manifests'] = dict(config['manifests'], **{d: str(p) for d, p in extra_manifests.items()})
+        config['manifest_sha256'] = dict(config['manifest_sha256'], **extra_sha)
     if arm_set.startswith('v27'):
         if not targets or sequence_length not in (24, 32):
             raise ValueError('v27 direct cost needs predeclared targets and N24/N32')
         config.update(schema='v27_direct_cost_v1', arm_set=arm_set,
-                      arms=build_arms(v21_profile_config, arm_set), targets=targets,
+                      arms=build_arms(v21_profile_config, arm_set, extra_sha), targets=targets,
                       boundaries=(['model_forward', 'denoising_step'] if arm_set == 'v27'
                                   else ['model_forward']),
                       sequence_lengths=[sequence_length], reps=3, blocks=3, warmup=1,
                       # Shared-support followers are not modelled by the counter twin.
-                      counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64'), operator_probe=False,
-                      prepared_support_floor=arm_set not in ('v27layers', 'v27fast', 'v27c64'),
+                      counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long'), operator_probe=False,
+                      prepared_support_floor=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long'),
                       derived_from_v21_profile_config_sha256=hashlib.sha256(
                           json.dumps(v21_profile_config, sort_keys=True).encode()).hexdigest())
         return config
@@ -305,6 +321,8 @@ def main(argv=None):
     parser.add_argument('--arm-set', choices=tuple(ARM_SETS), default='v24')
     parser.add_argument('--targets', type=Path, help='v27: predeclared targets JSON list')
     parser.add_argument('--sequence-length', type=int, help='v27: 24 or 32')
+    parser.add_argument('--extra-manifest', action='append', default=[],
+                        help='v27 long context: dataset=path of an extra gold-free manifest')
     args = parser.parse_args(argv)
     out = args.out
     derived = out.with_name(out.name + '.config.json')
@@ -317,7 +335,8 @@ def main(argv=None):
     try:
         config = derive_config(json.loads(args.v21_profile_config.read_bytes()), args.arm_set,
                                targets=json.loads(args.targets.read_bytes()) if args.targets else None,
-                               sequence_length=args.sequence_length)
+                               sequence_length=args.sequence_length,
+                               extra_manifests=dict(x.split('=', 1) for x in args.extra_manifest) or None)
         validate_config(config)
         with derived.open('x', encoding='utf-8') as stream:
             json.dump(config, stream, indent=1)

@@ -32,6 +32,8 @@ SCORE_PERIODS = (8, 16, 64)
 # the runtime and reported through one authoritative effective_method record.
 DECISION_INTERVALS = (6, 12)
 MIN_ROUTE_KEYS = (8192,)
+# v27 long-context residency: score cache and prefix-summary budgets (bytes).
+MEMORY_CAPS = {'long': (16 * 1024**3, 8 * 1024**3)}
 # v27 GLOBAL layer variants (DiffusionGemma GLOBAL layers 5, 11, 17, 23, 29).
 ROUTE_LAYER_SETS = {'mid3': (11, 17, 23), 'no_first': (11, 17, 23, 29), 'no_last': (5, 11, 17, 23)}
 SHARE_GROUPS = {'pairs': {11: 5, 23: 17}, 'one': {11: 5, 17: 5, 23: 5, 29: 5},
@@ -68,7 +70,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      route_storage='logical', mu_mode='exact', score_period=8,
                      decision_interval=None, hold_only=False, threshold_shift=None,
                      min_route_keys=None, route_layers=None, share_layers=None,
-                     consumer64=None) -> dict:
+                     consumer64=None, memory_caps=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -135,6 +137,10 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if consumer64 not in (1, 2, 4) or bootstrap_policy is None or output_layout != 'model_major':
             raise ValueError('v27 64-row consumer needs a split count, bootstrap and model-major output')
         extra['consumer64'] = consumer64
+    if memory_caps is not None:
+        if memory_caps not in MEMORY_CAPS or bootstrap_policy is None:
+            raise ValueError('v27 memory caps must be a named long-context setting')
+        extra['memory_caps'] = memory_caps
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -251,6 +257,8 @@ def validate_effective(config: dict, condition: str):
         raise ValueError('v27 shared-support identity drift')
     if 'consumer64' in config and (config['consumer64'] not in (1, 2, 4) or 'bootstrap_policy' not in config):
         raise ValueError('v27 64-row consumer identity drift')
+    if 'memory_caps' in config and (config['memory_caps'] not in MEMORY_CAPS or 'bootstrap_policy' not in config):
+        raise ValueError('v27 memory caps identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -299,6 +307,10 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('hold_only must be bound before any routed call')
             owner.cache.hold_only = True
+        if 'memory_caps' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('memory caps must be bound before any routed call')
+            owner.cache.max_bytes, owner.max_summary_bytes = MEMORY_CAPS[config['memory_caps']]
         if 'consumer64' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('consumer must be bound before any routed call')
