@@ -113,7 +113,21 @@ for _name in [n for n in FUSED16 if n not in ('D_native', 'D_fast', 'D_c64')]:
 ARM_SETS['v27fusedlong'] = FUSED16[:3] + tuple(n + '_long' for n in FUSED16[3:])
 ARM_SETS['v27fast'] = ('D_native', 'D_fast', 'D_matched', 'M3_R6_A64_one', 'M3_R3_A64_one',
                        'M1_R1_A8_one', 'M3_R6_A64', 'B_A64')
-PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls')
+# v27 fused fresh T: Junyu fresh-T information (current QK + current projected V) selected
+# inside the 64-row output kernel; PV skipped per tile. A named variant beside Fan's M1-M3.
+for _shift in (None, 'minus_ln2', 'plus_ln2', 'plus_2ln2'):
+    _extra = dict(consumer64=2, fresh_fused=True)
+    if _shift is not None:
+        _extra['threshold_shift'] = _shift
+    V27['T_fused_c64' + ('' if _shift is None else '_' + _shift)] = ('M1_R1_A8_current_output', _extra)
+_FRESH = ('T_fused_c64', 'T_fused_c64_minus_ln2', 'T_fused_c64_plus_ln2', 'T_fused_c64_plus_2ln2')
+ARM_SETS['v27fresh'] = ('D_native', 'D_c64', 'T_scope') + _FRESH + (
+    'M1_R1_A64_one_c64_fused', 'M3_R6_A64_one_c64_fused', 'M3_R3_A64_one_c64_fused')
+for _name in _FRESH:
+    V27[_name + '_long'] = (V27[_name][0], dict(V27[_name][1], memory_caps='long'))
+ARM_SETS['v27freshlong'] = ('D_native', 'D_c64') + tuple(n + '_long' for n in _FRESH) + (
+    'M1_R1_A64_one_c64_fused_long', 'M3_R6_A64_one_c64_fused_long', 'M3_R3_A64_one_c64_fused_long')
+PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls', 'fresh_fused_calls')
 WRAPPER_DROP = ('fingerprint', 'condition', 'plugin', 'v20_arm', 'v20_scope', 'decision_interval',
                 'score_refresh_period', 'output_mode', 'control')
 
@@ -198,7 +212,7 @@ def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_leng
                                   else ['model_forward']),
                       sequence_lengths=[sequence_length], reps=3, blocks=3, warmup=1,
                       # Shared-support followers are not modelled by the counter twin.
-                      counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long', 'v27fused',
+                      counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long', 'v27fused', 'v27fresh', 'v27freshlong',
                                                     'v27fusedlong'), operator_probe=False,
                       prepared_support_floor=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long',
                                                              'v27fused', 'v27fusedlong'),
@@ -263,6 +277,8 @@ def classify(delta):
         return 'B0'
     if delta.get('bootstrap_observation_calls'):
         return 'BO'
+    if delta.get('fresh_fused_calls'):
+        return 'F'
     if delta.get('score_refresh_calls'):
         return 'A'
     if delta.get('decision_refresh_calls'):

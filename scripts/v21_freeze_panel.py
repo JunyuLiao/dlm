@@ -314,7 +314,8 @@ def freeze_seven(v20_protocol_path, v20_binding_path, manifests_dir, out_dir):
 
 
 V27_EXTRA_KEYS = ('mu_mode', 'score_period', 'decision_interval', 'hold_only', 'threshold_shift',
-                  'min_route_keys', 'share_layers', 'route_layers', 'consumer64', 'memory_caps', 'fused_observe')
+                  'min_route_keys', 'share_layers', 'route_layers', 'consumer64', 'memory_caps', 'fused_observe',
+                  'fresh_fused')
 
 
 def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir):
@@ -678,6 +679,8 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                 result.update(control=contract['control'], plugin=fast.PLUGIN, condition=fast.CONDITION)
                 for src in (Path(fast.__file__).resolve(), Path(fast.__file__).resolve().with_name('v27_consumer64.py')):
                     result['source_hashes'][str(src)] = _sha(src.read_bytes())
+                # the runner records the config fingerprint in every receipt
+                result['fingerprint'] = old.sha_json(result)
             elif contract['kind'] == 'v20_legacy':
                 result = old.control_config(dict(base, control='T_scope'), 'v20_fresh_T', SCOPE)
             elif contract['kind'] == 'v21_control':
@@ -702,7 +705,8 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                     min_route_keys=contract.get('min_route_keys'),
                     share_layers=contract.get('share_layers'), route_layers=contract.get('route_layers'),
                     consumer64=contract.get('consumer64'), memory_caps=contract.get('memory_caps'),
-                    fused_observe=contract.get('fused_observe', False))
+                    fused_observe=contract.get('fused_observe', False),
+                    fresh_fused=contract.get('fresh_fused', False))
             path = config_dir / dataset / f'{arm}.json'
             _new(path, _bytes(result))
             configs[dataset][arm] = dict(path=str(path.resolve()), sha256=_sha(path.read_bytes()))

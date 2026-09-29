@@ -87,3 +87,25 @@ def test_new_keys_change_the_fingerprint():
               build(M3, threshold_shift='plus_ln2')['fingerprint'],
               build(M3, threshold_shift='minus_ln2')['fingerprint'], build(M3, score_period=64)['fingerprint']}
     assert len(prints) == 5
+
+
+def test_fresh_fused_is_an_m1_parent_execution_variant():
+    config = build(M1, consumer64=2, fresh_fused=True)
+    v21.validate_effective(config, config['condition'])
+    assert config['fresh_fused'] is True
+    shifted = build(M1, consumer64=2, fresh_fused=True, threshold_shift='plus_ln2')
+    v21.validate_effective(shifted, shifted['condition'])
+    assert shifted['fingerprint'] != config['fingerprint'] != build(M1, consumer64=2)['fingerprint']
+
+
+@pytest.mark.parametrize('arm,extra', [
+    (M1, dict(fresh_fused=True)),
+    (M3, dict(consumer64=2, fresh_fused=True)),
+    (B, dict(consumer64=2, fresh_fused=True, hold_only=True)),
+    (M1, dict(consumer64=2, fresh_fused=True, share_layers='one')),
+    (M1, dict(consumer64=2, fresh_fused=True, score_period=64, fused_observe=True)),
+    (M1, dict(consumer64=2, fresh_fused=True, mu_mode='pooled_compact')),
+    (M1, dict(consumer64=2, fresh_fused='yes'))])
+def test_fresh_fused_guards(arm, extra):
+    with pytest.raises(ValueError):
+        build(arm, **extra)

@@ -168,6 +168,10 @@ class Attention:
         self.min_route_keys = 0
         self.fused_observe = False
         self.fused_observations = 0
+        # v27 fused fresh T (Junyu fresh-T information, not M1): selection inside the output kernel
+        self.fresh_fused = False
+        self.fresh_fused_calls = 0
+        self.fresh_tile_total = None   # device [pv_kept, visited] tiles; summed without host sync
         self.c64_splits = 2
         self.route_layers = None       # v27: routed-layer subset (others native)
         self.share_leader = {}         # v27: follower layer -> leader layer
@@ -291,6 +295,8 @@ class Attention:
             self.shared_calls += 1
             self.preqk_calls += 1
             return returned, None
+        if self.fresh_fused:
+            return self._fresh_fused_call(layer, kind, q, k, v, scale, causal, window, prefix - crop, b, hk, nk)
         if self.bootstrap is not None and self.step <= 1:
             return self._bootstrap_call(native_args, native_kwargs, identity, layer, kind,
                                         q, k, v, mask, scale, causal, window, crop, prefix,
@@ -609,6 +615,27 @@ class Attention:
         self.current_qk_elements += b*h*nq*nk
         return output, None
 
+    def _fresh_fused_call(self, layer, kind, q, k, v, scale, causal, window, prefix, b, hk, nk):
+        """v27 fused fresh T. Every call (no bootstrap, no score cache, no bitmap): the 64-row
+        output kernel forms the CURRENT scores, derives the block log-mass and weighted CURRENT
+        projected V per KV64 tile, and issues V load + PV only for tiles the retained-state
+        risk keeps. This is Junyu's fresh-T information executed inside the consumer; it is a
+        named variant and never a substitute for Fan's M1 (historical QK)."""
+        if causal or window is not None or self._mask_present or self.trace:
+            raise ValueError('fused fresh T is qualified for bidirectional unmasked GLOBAL only')
+        from .v27_consumer64 import consume64_fresh_t
+        valid = torch.ones((b, hk, nk), dtype=torch.bool, device=q.device)
+        projected, ref = self.sketches.get(layer, v, valid, prefix)
+        threshold = float(self.thresholds[kind]['log_threshold'])
+        out, counts = consume64_fresh_t(q, k, v, projected, ref, self.query_sensitivity, scale, threshold,
+                                        splits=self.c64_splits, mu_precision='tf32')
+        torch._assert_async(torch.isfinite(out).all(), 'Invalid fused fresh-T attention output')
+        tiles = counts.sum((0, 1, 2))
+        self.fresh_tile_total = tiles if self.fresh_tile_total is None else self.fresh_tile_total + tiles
+        self.fresh_fused_calls += 1
+        self.calls += 1
+        return out, None
+
     def _dense_native(self, native_args, native_kwargs, q, k, v, scale, window, causal):
         """Native dense output; with the v27 64-row consumer, the same kernel all-kept."""
         if self.consumer == 'triton64' and not causal and window is None and self._mask_present is False:
@@ -746,6 +773,9 @@ class Attention:
                     gated_native_calls=self.gated_native_calls, min_route_keys=self.min_route_keys,
                     layer_native_calls=self.layer_native_calls, shared_calls=self.shared_calls,
                     fused_observations=self.fused_observations,
+                    fresh_fused_calls=self.fresh_fused_calls,
+                    fresh_fused_tiles=(dict(zip(('pv_kept', 'visited'), self.fresh_tile_total.tolist()))
+                                       if self.fresh_tile_total is not None else None),
                     shared_native_calls=self.shared_native_calls,
                     bootstrap_observation_calls=self.bootstrap_observation_calls,
                     observation_producer=self.observation_producer,
