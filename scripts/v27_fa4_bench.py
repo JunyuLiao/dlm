@@ -4,7 +4,7 @@ report serves the canvas with FA4) -- and its official block-sparse interface, a
 
 Per key extent: FA4 dense vs our dense64; FA4 block-sparse with a Q128 x KV64 keep map (the M1/M2/M3
 tile geometry) at several keep fractions, each checked against a masked FP32 reference. Runs in the
-vLLM environment (vllm.vllm_flash_attn.cute). usage: python -m scripts.v27_fa4_bench OUT.json
+pinned environment with the vendored overlay (V27_FA4_OVERLAY). usage: python -m scripts.v27_fa4_bench OUT.json
 """
 from __future__ import annotations
 
@@ -36,22 +36,11 @@ def keep_map(h, qb, kt, keep, g):
     return kept
 
 
-def block_sparse(kept):
-    from vllm.vllm_flash_attn.cute.block_sparsity import BlockSparseTensorsTorch
-    b, h, qb, kt = kept.shape
-    cnt = kept.sum(-1).to(torch.int32)
-    order = torch.argsort((~kept).to(torch.int8), dim=-1, stable=True).to(torch.int32)   # kept first, ascending
-    zeros = torch.zeros((b, h, qb), device=kept.device, dtype=torch.int32)
-    return BlockSparseTensorsTorch(mask_block_cnt=zeros, mask_block_idx=torch.zeros((b, h, qb, 1), device=kept.device,
-                                                                                    dtype=torch.int32),
-                                   full_block_cnt=cnt.contiguous(), full_block_idx=order.contiguous(),
-                                   block_size=(128, 64))
-
-
 def main(argv=None):
     argv = argv or sys.argv[1:]
-    from vllm.vllm_flash_attn.cute.interface import _flash_attn_fwd
+    from experiments.numerical_qk_reuse import v27_fa4 as fa4
     from experiments.numerical_qk_reuse.v27_consumer64 import consume64, dense64
+    fwd = fa4.load()
     torch.backends.cuda.matmul.allow_tf32 = False
     g = torch.Generator(device='cuda').manual_seed(0)
     H, HK, D, NQ = 16, 2, 512, 256
@@ -86,16 +75,19 @@ def main(argv=None):
             torch.cuda.empty_cache()
 
         dense_ref = reference()
-        record('fa4_dense', lambda: _flash_attn_fwd(qs, ks, vs, softmax_scale=scale, causal=False)[0], dense_ref)
+        record('fa4_dense_contiguous', lambda: fwd(qs, ks, vs, softmax_scale=scale, causal=False)[0], dense_ref)
+        record('fa4_dense_model_views', lambda: fa4.dense(q, k, v, scale), dense_ref)
         record('dense64_s2', lambda: dense64(q, k, v, scale, splits=2), dense_ref)
         for keep in (1.0, 0.5, 0.25, 0.1):
             kept = keep_map(H, qb, kt, keep, g)
             want = reference(kept)
-            tensors = block_sparse(kept)
+            tensors = fa4.block_sparse_tensors(kept)
             record(f'fa4_block_sparse_keep{keep}',
-                   lambda tensors=tensors: _flash_attn_fwd(qs, ks, vs, softmax_scale=scale, causal=False,
-                                                          block_sparse_tensors=tensors)[0], want, keep)
+                   lambda tensors=tensors: fwd(qs, ks, vs, softmax_scale=scale, causal=False,
+                                               block_sparse_tensors=tensors)[0], want, keep)
             skipped = ~kept
+            record(f'fa4_sparse_model_views_keep{keep}',
+                   lambda skipped=skipped: fa4.sparse(q, k, v, skipped, torch.ones_like(skipped), scale), want, keep)
             record(f'consume64_s2_keep{keep}',
                    lambda skipped=skipped: consume64(q, k, v, skipped, torch.ones_like(skipped), scale, splits=2),
                    want, keep)
