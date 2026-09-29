@@ -497,8 +497,39 @@ def _observation_components(owner, record, native_fn, reps=5):
         return route_only(score, z, ref, sensitivity=sensitivity, log_threshold=threshold,
                           summary=summary, store_summary=True, variant=owner.kernel_variant)
 
+    # v27: decision (D) pieces and the sparsity/consumer curve on the same state.
+    from experiments.numerical_qk_reuse.cached_executor import tile_pool
+    from experiments.numerical_qk_reuse.v21 import THRESHOLD_SHIFTS
+    qb_, kt_ = (nq + 127) // 128, (nk + 63) // 64
+    valid_keys = torch.isfinite(score).reshape(b, hk, h // hk, nq, nk).any((2, 3))
+    stored_exact = allocate_summary(b, h, qb_, kt_, prefix_tiles, 32, q.device, identity)
+    route_only(score, z, ref, sensitivity=sensitivity, log_threshold=threshold,
+               summary=stored_exact, store_summary=True, variant=owner.kernel_variant)
+    pooled, pool_count = tile_pool(z, valid_keys)
+    stored_compact = allocate_summary(b, h, qb_, kt_, prefix_tiles, 0, q.device, identity)
+    route_only(score, z, ref, sensitivity=sensitivity, log_threshold=threshold, summary=stored_compact,
+               store_summary=True, variant='generic', pool='compact', pooled=pooled, pool_count=pool_count)
+    matrix = owner.projections.get(int(record['module'].layer_idx), hk, v.shape[-1], 'gaussian', 32, 1729, v.device)
+    suffix = max(0, nk - nq) // 64 * 64
+    curve = {}
+    for label, shift in [('P0', 0.)] + sorted(THRESHOLD_SHIFTS.items(), key=lambda kv: kv[1]):
+        bits = route_only(score, z, ref, sensitivity=sensitivity, log_threshold=threshold + shift,
+                          variant=owner.kernel_variant)
+        curve[label] = bits
     pieces = {
         'native_attention': lambda: native_fn(module, q, k, v, *args, **kwargs),
+        'route_load_exact_summary': lambda: route_only(
+            score, z, ref, sensitivity=sensitivity, log_threshold=threshold, summary=stored_exact,
+            store_summary=False, variant=owner.kernel_variant),
+        'tile_pool_compact': lambda: tile_pool(z, valid_keys),
+        'route_load_compact_summary': lambda: route_only(
+            score, z, ref, sensitivity=sensitivity, log_threshold=threshold, summary=stored_compact,
+            store_summary=False, variant='generic', pool='compact', pooled=pooled, pool_count=pool_count),
+        'route_store_compact': lambda: route_only(
+            score, z, ref, sensitivity=sensitivity, log_threshold=threshold,
+            summary=allocate_summary(b, h, qb_, kt_, prefix_tiles, 0, q.device, identity), store_summary=True,
+            variant='generic', pool='compact', pooled=pooled, pool_count=pool_count),
+        'lease_suffix_projection_proxy': lambda: torch.matmul(v[..., suffix:, :].float(), matrix),
         'score_producer_grouped_q': lambda: Attention.observe_scores_grouped(q, k, None, scale, False, None, 0),
         'valid_key_map': lambda: torch.isfinite(score).reshape(b, hk, h // hk, nq, nk).any((2, 3)),
         'full_current_v_projection_proxy': lambda: _project_full(owner, record, legal),
@@ -510,6 +541,11 @@ def _observation_components(owner, record, native_fn, reps=5):
             variant=owner.kernel_variant, output_score_precision='fp32_scores_bf16_pv',
             output_layout='model_major'),
     }
+    for label, bits in curve.items():
+        pieces[f'consumer_at_{label}'] = (lambda bits=bits: preqk_attention(
+            q, k, v, bits.skipped, bits.eligible, scale=scale, is_causal=False, window=None,
+            variant=owner.kernel_variant, output_score_precision='fp32_scores_bf16_pv',
+            output_layout='model_major'))
     for fn in pieces.values():
         fn()
     samples = {name: [] for name in pieces}
@@ -523,8 +559,11 @@ def _observation_components(owner, record, native_fn, reps=5):
         raise RuntimeError(f'JIT specialization during component timing: {misses}')
     median = lambda values: sorted(values)[len(values)//2]
     kept = float((routed.eligible & ~routed.skipped).sum()) / max(1., float(routed.eligible.sum()))
+    kept_by_threshold = {label: float((bits.eligible & ~bits.skipped).sum()) / max(1., float(bits.eligible.sum()))
+                         for label, bits in curve.items()}
     return dict(status='qualified', keys=nk, queries=nq, prefix_tiles=prefix_tiles,
                 kept_tile_fraction_of_eligible=kept, reps=reps,
+                kept_tile_fraction_by_threshold=kept_by_threshold,
                 median_event_ms={name: median(v) for name, v in samples.items()}, samples=samples,
                 note='isolated per-piece CUDA events on one GLOBAL layer; not additive to a forward price')
 
