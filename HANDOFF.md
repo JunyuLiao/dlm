@@ -1,4 +1,4 @@
-# v27b (M1/M2/M3 frontier): strongest dense = D_c64; long-context panel running; selector latency found
+# v27c (M1/M2/M3 frontier): strongest dense = FA4; the eager pipeline hides attention savings; move to a graph-captured substrate
 
 Authority: user v27 doc + A64 doc + chat. GPUs are the user's own: no time window and no budget stop. Record GPU seconds only.
 Results: `results/m1_m2_m3_frontier_v27_20260929/`.
@@ -41,13 +41,34 @@ Results: `results/m1_m2_m3_frontier_v27_20260929/`.
 - **LongBench-v2 32K/64K bins** (24 each, natural length, no truncation) built by a subagent. The long-generation panel `specs/v27_long_lb.json` (432 executions) is frozen and running.
 - `scripts/v27_datasets.py`: one map from each dataset to its base task, used by freeze/run/score.
 
+- **LB-long panel** scored (420/432; `long_lb_panel/README.md`). Cross-layer shared support collapses quality. Unshared B/A64 at 64K: per call 0.935 vs D_c64, wall 0.94 [0.87, 1.02].
+- **Official SOTA dense = FlashAttention-4** (vLLM fork, CuTe DSL, SM90 hd512). `official_baseline/README.md`: 64K kernel 2.91 ms, vs 4.9–5.5 ms for D_c64.
+  - `v27_fa4.py` loads it from a dyh overlay. D_fa4 control; `fa4_consumer` makes M1/M2/M3 maps into FA4 block-sparse lists.
+- **Substrate diagnosis** (`substrate/README.md`; read this first).
+  - In-model FA4 sparse saves about 11 ms of GPU per call at 64K. But every eager forward is host-bound, so none of it reaches wall time.
+  - On the pinned torch-2.6 `.local` overlay, transformers' MoE falls back to a per-expert loop with 60 host syncs per forward.
+  - Under CUDA graphs the saving appears: common-state keep 0.1 is 0.77× per forward at 60K keys.
+  - Piecewise inductor graphs (GLOBAL attention eager, vLLM split) on the conda env's own torch 2.12, 64K: in-harness FA4 dense 37.6 ms, held FA4 sparse 29.4 ms, observation call 66–78 ms.
+  - The official HF compiled path is 44/55.7 ms per step at 17K/32K and OOMs at 64K.
+  - All v21–v27 end-to-end ratios hold for the eager substrate only.
+
 ## Running
-- dllm and mpk: the LB-long panel (run-dir `v27_long_lb_001`, 216 executions per host).
-- Afterwards, dllm runs the rp/dp/fresh direct-cost profiles, and mpk runs the unshared A64 profiles (`v27nslong`/`v27ns`).
+- Nothing. Both GPUs are idle.
 
 ## Next
-1. Score the LB-long panel on mpk: the v15 LB scorer needs the NeMo checkout, which only mpk has. Report decode span, calls, quality and wall vs D_c64.
-2. From the ns/dp profiles, choose an unshared A64 variant with a cheap decision call. Calibrate the M1-DP threshold and freeze a follow-up panel.
-3. Short-context no-regression panel (AIME, LB) with the length gate.
+1. **Make the piecewise substrate a fingerprinted runner option.**
+   - `v27_piecewise_bench.piecewise` becomes a plugin-independent install recorded in configs and receipts.
+   - Tests: LOCAL binding is semantically the native path; no recompiles across requests; tokens are stable across repeats.
+   - Also compile the post-prefill encoder (the official path does); it is currently eager.
+2. **Dense reference.** Use in-harness FA4 dense, which avoids HF's 60K-key concat. Report the D_fa4 plugin and the official compiled path as context.
+3. **Re-measure quality on the new substrate.** The numerics change, so no earlier quality result transfers. Then re-freeze the unshared LB follow-up (`specs/v27_long_lb_unshared.json`) with FA4 execution and `substrate=piecewise`:
+   - plain M1/M2c/M3 always;
+   - B, M3 R6/R3 A64, M1-DP, pairs/no_last;
+   - density gate, G75 F/S15/S30.
+4. **Cut the observation-call overhead** (+28–40 ms at 64K). This is now the main cost of B/M3.
+5. **Ported sparse baselines** (MAGE, SparseD, Quest, BLASST rules) on FA4 block-sparse, labelled as ports. Keep the MAGE/PulseCol/VATP collision in view.
 
-Operational note: on Windows, TaskStop leaves the chain's bash script running as an orphan. After every stop, list `bash` processes with `v27_` in the command line and kill the leftovers.
+Operational notes:
+- On Windows, TaskStop leaves the chain's bash script running as an orphan. After every stop, list `bash` processes with `v27_` in the command line and kill the leftovers.
+- **Diagnostics that must use a frozen config's source hashes** run with cwd in that deploy dir, via the private `v27_deploy_diag.py`.
+- **Caches outside dyh.** Every host run must pin TMPDIR, TORCHINDUCTOR_CACHE_DIR, CUDA_CACHE_PATH and XDG_CACHE_HOME inside dyh (both helpers now do). Earlier runs left files in /tmp/torchinductor_exouser, ~/.nv/ComputeCache, /tmp/pytest-of-exouser and /tmp/exouser; they are awaiting the user's decision.
