@@ -32,6 +32,10 @@ SCORE_PERIODS = (8, 16, 64)
 # the runtime and reported through one authoritative effective_method record.
 DECISION_INTERVALS = (6,)
 MIN_ROUTE_KEYS = (8192,)
+# v27 GLOBAL layer variants (DiffusionGemma GLOBAL layers 5, 11, 17, 23, 29).
+ROUTE_LAYER_SETS = {'mid3': (11, 17, 23), 'no_first': (11, 17, 23, 29), 'no_last': (5, 11, 17, 23)}
+SHARE_GROUPS = {'pairs': {11: 5, 23: 17}, 'one': {11: 5, 17: 5, 23: 5, 29: 5},
+                'mid3_one': {17: 11, 23: 11}}
 _LN2 = 0.6931471805599453
 # Named log-threshold shifts in ln2 units; larger shifts allow more deletion.
 # The realized sparsity is measured, never inferred from the shift.
@@ -57,7 +61,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      bootstrap_policy=None, observation_producer='repeat_interleave',
                      route_storage='logical', mu_mode='exact', score_period=8,
                      decision_interval=None, hold_only=False, threshold_shift=None,
-                     min_route_keys=None) -> dict:
+                     min_route_keys=None, route_layers=None, share_layers=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -110,6 +114,16 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if min_route_keys not in MIN_ROUTE_KEYS or bootstrap_policy is None:
             raise ValueError('v27 length gate must be a named extent on the bootstrap mainline')
         extra['min_route_keys'] = min_route_keys
+    if route_layers is not None:
+        if route_layers not in ROUTE_LAYER_SETS or bootstrap_policy is None:
+            raise ValueError('v27 routed-layer subset must be a named set on the bootstrap mainline')
+        extra['route_layers'] = route_layers
+    if share_layers is not None:
+        if share_layers not in SHARE_GROUPS or bootstrap_policy is None:
+            raise ValueError('v27 shared-support groups must be named on the bootstrap mainline')
+        if share_layers == 'mid3_one' and route_layers != 'mid3':
+            raise ValueError('mid3_one sharing requires the mid3 routed-layer subset')
+        extra['share_layers'] = share_layers
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -218,6 +232,12 @@ def validate_effective(config: dict, condition: str):
     if 'min_route_keys' in config and (config['min_route_keys'] not in MIN_ROUTE_KEYS
                                        or 'bootstrap_policy' not in config):
         raise ValueError('v27 length gate identity drift')
+    if 'route_layers' in config and (config['route_layers'] not in ROUTE_LAYER_SETS
+                                     or 'bootstrap_policy' not in config):
+        raise ValueError('v27 routed-layer identity drift')
+    if 'share_layers' in config and (config['share_layers'] not in SHARE_GROUPS
+                                     or 'bootstrap_policy' not in config):
+        raise ValueError('v27 shared-support identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -266,6 +286,13 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('hold_only must be bound before any routed call')
             owner.cache.hold_only = True
+        if 'route_layers' in config or 'share_layers' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('layer variants must be bound before any routed call')
+            if 'route_layers' in config:
+                owner.route_layers = frozenset(ROUTE_LAYER_SETS[config['route_layers']])
+            if 'share_layers' in config:
+                owner.share_leader = dict(SHARE_GROUPS[config['share_layers']])
         if 'min_route_keys' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('length gate must be bound before any routed call')
@@ -297,6 +324,7 @@ def install(adapter, config: dict, condition: str):
                         scope=scope, bootstrap_policy=getattr(owner, 'bootstrap', None),
                         threshold_shift=config.get('threshold_shift'),
                         min_route_keys=getattr(owner, 'min_route_keys', 0),
+                        route_layers=config.get('route_layers'), share_layers=config.get('share_layers'),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
                         output_score_precision=owner.output_score_precision,
                         output_layout=owner.output_layout,

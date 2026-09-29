@@ -24,7 +24,11 @@ def test_controls_build_and_validate():
                        (B, dict(hold_only=True)), (B, dict(hold_only=True, score_period=16)),
                        (B, dict(hold_only=True, score_period=64, threshold_shift='minus_ln2')),
                        (M3, dict(score_period=64, min_route_keys=8192)),
-                       (B, dict(hold_only=True, score_period=64, min_route_keys=8192))):
+                       (B, dict(hold_only=True, score_period=64, min_route_keys=8192)),
+                       (M3, dict(score_period=64, route_layers='mid3')),
+                       (M3, dict(score_period=64, share_layers='pairs')),
+                       (M3, dict(score_period=64, route_layers='mid3', share_layers='mid3_one')),
+                       (M1, dict(share_layers='one'))):
         config = build(arm, **extra)
         v21.validate_effective(config, config['condition'])
 
@@ -47,6 +51,9 @@ def test_old_configs_keep_their_fingerprint_without_new_keys():
     (M3, dict(score_period=16, bootstrap_policy=None)),
     (M3, dict(min_route_keys=4096)),
     (M3, dict(min_route_keys=8192, bootstrap_policy=None)),
+    (M3, dict(route_layers='first2')),
+    (M3, dict(share_layers='triples')),
+    (M3, dict(share_layers='mid3_one')),
 ])
 def test_single_bad_field_is_rejected(arm, extra):
     kwargs = dict(MAIN)

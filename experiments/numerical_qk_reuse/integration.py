@@ -166,6 +166,9 @@ class Attention:
         self.route_storage = 'logical'
         self.mu_mode = 'exact'
         self.min_route_keys = 0
+        self.route_layers = None       # v27: routed-layer subset (others native)
+        self.share_leader = {}         # v27: follower layer -> leader layer
+        self.layer_native_calls = self.shared_calls = self.shared_native_calls = 0
         self.gated_native_calls = 0
         self.compact_pool_builds = 0
         # aligned_pad_bytes (historical name, kept for traceability) = total bytes of
@@ -258,6 +261,33 @@ class Attention:
             from transformers.integrations.sdpa_attention import sdpa_attention_forward
             self.gated_native_calls += 1
             return sdpa_attention_forward(*native_args, **native_kwargs)
+        if self.route_layers is not None and layer not in self.route_layers:
+            # v27 layer subset: this routed-scope layer stays exact native SDPA.
+            from transformers.integrations.sdpa_attention import sdpa_attention_forward
+            self.layer_native_calls += 1
+            return sdpa_attention_forward(*native_args, **native_kwargs)
+        leader = self.share_leader.get(layer, layer)
+        if leader != layer:
+            # v27 cross-layer sharing: a follower consumes its leader's CURRENT-call
+            # support on its own current Q/K/V (no score observation, no selector).
+            if self.bootstrap is not None and self.step <= 1:
+                from transformers.integrations.sdpa_attention import sdpa_attention_forward
+                self.shared_native_calls += 1
+                return sdpa_attention_forward(*native_args, **native_kwargs)
+            lead = self.cache.entries.get(leader)
+            if (lead is None or lead.decision is None or lead.identity.canvas != self.canvas or
+                    lead.identity.encoder_epoch != self.epoch or lead.identity.keys != nk or
+                    lead.identity.queries != nq or lead.identity.query_heads != h or
+                    lead.decision_step is None or not 0 <= self.step - lead.decision_step or
+                    lead.identity.mask_signature != signature):
+                raise ValueError('shared-support follower has no compatible leader decision this call')
+            result = self._consume(q, k, v, lead.decision.skipped, lead.decision.eligible, scale, window, causal)
+            returned = result.output.transpose(1, 2).contiguous()
+            torch._assert_async(~result.invalid_scores.any(), 'Invalid shared-support attention: request must fail')
+            torch._assert_async(torch.isfinite(result.output).all(), 'Invalid shared-support attention output')
+            self.shared_calls += 1
+            self.preqk_calls += 1
+            return returned, None
         if self.bootstrap is not None and self.step <= 1:
             return self._bootstrap_call(native_args, native_kwargs, identity, layer, kind,
                                         q, k, v, mask, scale, causal, window, crop, prefix,
@@ -635,6 +665,8 @@ class Attention:
                     bootstrap_policy=self.bootstrap,
                     bootstrap_dense_calls=self.bootstrap_dense_calls,
                     gated_native_calls=self.gated_native_calls, min_route_keys=self.min_route_keys,
+                    layer_native_calls=self.layer_native_calls, shared_calls=self.shared_calls,
+                    shared_native_calls=self.shared_native_calls,
                     bootstrap_observation_calls=self.bootstrap_observation_calls,
                     observation_producer=self.observation_producer,
                     route_storage=self.route_storage,

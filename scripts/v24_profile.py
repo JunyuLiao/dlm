@@ -63,10 +63,19 @@ ARMS_V27ATTR = ('D_native', 'D_matched', 'M3_R3_A64', 'M3_R6_A64', 'B_A64', 'M3_
 ALL_SCOPE = 'ALL_NATIVE_LEGAL'
 for _name in ('M1_R1_A8', 'M2c_pool_R1_A8', 'M3_R3_A64', 'M3_R6_A64', 'B_A64'):
     V27[_name + '_ALL'] = (V27[_name][0], dict(V27[_name][1], scope=ALL_SCOPE))
+V27['M3_R6_A64_mid3'] = ('M3_R3_A8_current_output', dict(score_period=64, decision_interval=6, route_layers='mid3'))
+V27['M3_R6_A64_pairs'] = ('M3_R3_A8_current_output', dict(score_period=64, decision_interval=6, share_layers='pairs'))
+V27['M3_R6_A64_one'] = ('M3_R3_A8_current_output', dict(score_period=64, decision_interval=6, share_layers='one'))
+V27['M3_R3_A64_pairs'] = ('M3_R3_A8_current_output', dict(score_period=64, share_layers='pairs'))
+V27['M3_R3_A64_one'] = ('M3_R3_A8_current_output', dict(score_period=64, share_layers='one'))
+V27['M1_R1_A8_one'] = ('M1_R1_A8_current_output', dict(share_layers='one'))
+V27['B_A64_mid3'] = ('B_A8_matched', dict(hold_only=True, score_period=64, route_layers='mid3'))
+ARMS_V27LAYERS = ('D_native', 'D_matched', 'M3_R6_A64', 'M3_R6_A64_mid3', 'M3_R6_A64_pairs', 'M3_R6_A64_one',
+                  'M3_R3_A64', 'M3_R3_A64_pairs', 'M3_R3_A64_one', 'M1_R1_A8', 'M1_R1_A8_one', 'B_A64', 'B_A64_mid3')
 ARMS_V27ALL = ('D_native', 'D_matched', 'D_matched_ALL', 'M1_R1_A8_ALL', 'M2c_pool_R1_A8_ALL',
                'M3_R3_A64_ALL', 'M3_R6_A64_ALL', 'B_A64_ALL', 'M3_R6_A64', 'B_A64')
 ARM_SETS = {'v24': ARMS, 'v25': ARMS_V25, 'v27': ARMS_V27, 'v27thr': ARMS_V27THR, 'v27attr': ARMS_V27ATTR,
-            'v27all': ARMS_V27ALL}
+            'v27all': ARMS_V27ALL, 'v27layers': ARMS_V27LAYERS}
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls')
 WRAPPER_DROP = ('fingerprint', 'condition', 'plugin', 'v20_arm', 'v20_scope', 'decision_interval',
                 'score_refresh_period', 'output_mode', 'control')
@@ -130,7 +139,9 @@ def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_leng
                       boundaries=(['model_forward', 'denoising_step'] if arm_set == 'v27'
                                   else ['model_forward']),
                       sequence_lengths=[sequence_length], reps=3, blocks=3, warmup=1,
-                      counter_twins=True, operator_probe=False, prepared_support_floor=True,
+                      # Shared-support followers are not modelled by the counter twin.
+                      counter_twins=arm_set != 'v27layers', operator_probe=False,
+                      prepared_support_floor=arm_set != 'v27layers',
                       derived_from_v21_profile_config_sha256=hashlib.sha256(
                           json.dumps(v21_profile_config, sort_keys=True).encode()).hexdigest())
         return config
