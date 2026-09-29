@@ -32,3 +32,16 @@ def test_consume64_matches_masked_dense(keys, splits):
     dense = dense64(q, k, v, 512 ** -.5, splits=splits).float()
     torch.testing.assert_close(dense, _ref(q, k, v, torch.zeros_like(skipped), 512 ** -.5), atol=2e-2, rtol=2e-2)
     assert dense.is_contiguous() and dense.shape == (1, 256, 16, 512)
+
+
+def test_causal_dense64_matches_causal_reference():
+    from experiments.numerical_qk_reuse.v27_consumer64 import dense64
+    g = torch.Generator(device='cuda').manual_seed(3)
+    q = torch.randn(1, 16, 700, 512, device='cuda', dtype=torch.bfloat16, generator=g)
+    k = torch.randn(1, 2, 700, 512, device='cuda', dtype=torch.bfloat16, generator=g)
+    v = torch.randn(1, 2, 700, 512, device='cuda', dtype=torch.bfloat16, generator=g)
+    want = torch.nn.functional.scaled_dot_product_attention(
+        q.float(), k.repeat_interleave(8, 1).float(), v.repeat_interleave(8, 1).float(),
+        is_causal=True, scale=512 ** -.5).transpose(1, 2)
+    got = dense64(q, k, v, 512 ** -.5, splits=1, causal=True).float()
+    torch.testing.assert_close(got, want, atol=2e-2, rtol=2e-2)

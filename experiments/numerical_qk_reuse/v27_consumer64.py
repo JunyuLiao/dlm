@@ -23,7 +23,7 @@ def _consume64(Q, K, V, SKIP, ELIG, PO, PM, PL,
                SQH, SQL, SKH, SKL, SVH, SVL,
                NQ, NK, H: tl.constexpr, HK: tl.constexpr, D: tl.constexpr,
                QB: tl.constexpr, KT, SPLITS: tl.constexpr, SCALE,
-               BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr):
+               BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, CAUSAL: tl.constexpr = False):
     mb, h, sp = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     kh = h // (H // HK)
     qi = mb * BLOCK_M + tl.arange(0, BLOCK_M)
@@ -38,15 +38,23 @@ def _consume64(Q, K, V, SKIP, ELIG, PO, PM, PL,
     per = tl.cdiv(KT, SPLITS)
     lo = sp * per
     hi = tl.minimum(lo + per, KT)
+    if CAUSAL:
+        # queries sit at the end of the key extent; tiles past the last row's position are empty
+        last = (mb * BLOCK_M + BLOCK_M - 1) + (NK - NQ)
+        hi = tl.minimum(hi, last // BLOCK_N + 1)
     for j in range(lo, hi):
         dest = (h * QB + qb) * KT + j
         keep = tl.load(ELIG + dest) & (tl.load(SKIP + dest) == 0)
         if keep:
             kk = j * BLOCK_N + ki
             kv_ok = kk < NK
+            qpos = qi + (NK - NQ)
             k = tl.load(K + kh * SKH + kk[:, None] * SKL + di[None, :], kv_ok[:, None], other=0.)
             s = tl.dot(q, tl.trans(k)) * SCALE
-            s = tl.where(kv_ok[None, :], s, -float('inf'))
+            if CAUSAL:
+                s = tl.where(kv_ok[None, :] & (kk[None, :] <= qpos[:, None]), s, -float('inf'))
+            else:
+                s = tl.where(kv_ok[None, :], s, -float('inf'))
             m_new = tl.maximum(m, tl.max(s, 1))
             safe = tl.where(m_new > -float('inf'), m_new, 0.)
             alpha = tl.where(m > -float('inf'), tl.exp(m - safe), 0.)
@@ -61,15 +69,15 @@ def _consume64(Q, K, V, SKIP, ELIG, PO, PM, PL,
     tl.store(PO + base[:, None] * D + di[None, :], acc, rows[:, None])
 
 
-def dense64(q, k, v, scale, splits=2):
+def dense64(q, k, v, scale, splits=2, causal=False):
     """Dense attention with the same kernel (every tile kept): [1,Q,H,D] model-major."""
     h, nq, nk = q.shape[1], q.shape[2], k.shape[2]
     shape = (1, h, math.ceil(nq / 128), math.ceil(nk / 64))
     keep = torch.zeros(shape, dtype=torch.bool, device=q.device)
-    return consume64(q, k, v, keep, torch.ones_like(keep), scale, splits=splits)
+    return consume64(q, k, v, keep, torch.ones_like(keep), scale, splits=splits, causal=causal)
 
 
-def consume64(q, k, v, skipped, eligible, scale, block_m=64, splits=1, num_warps=8, num_stages=1):
+def consume64(q, k, v, skipped, eligible, scale, block_m=64, splits=1, num_warps=8, num_stages=1, causal=False):
     """q [1,H,Q,D], k/v [1,HK,K,D] (strided views allowed), bitmap [1,H,QB128,KT64]."""
     b, h, nq, d = q.shape
     hk, nk = k.shape[1], k.shape[2]
@@ -82,7 +90,7 @@ def consume64(q, k, v, skipped, eligible, scale, block_m=64, splits=1, num_warps
     _consume64[grid](q, k, v, skipped, eligible, po, pm, pl,
                      q.stride(1), q.stride(2), k.stride(1), k.stride(2), v.stride(1), v.stride(2),
                      nq, nk, h, hk, d, qb, kt, splits, scale,
-                     BLOCK_M=block_m, BLOCK_N=64, num_warps=num_warps, num_stages=num_stages)
+                     BLOCK_M=block_m, BLOCK_N=64, CAUSAL=bool(causal), num_warps=num_warps, num_stages=num_stages)
     if splits == 1:
         out = po[:, 0] / pl[:, 0, :, None]
     else:

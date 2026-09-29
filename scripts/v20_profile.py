@@ -167,6 +167,7 @@ def capture(adapter, row, targets, seed, max_calls=16):
     max_canvas = max(wanted)
     controller = State('T', None, m_ref=14.258454322814941, beta=3., gamma=.5,
                        diagnostics=False, fast_t=True)
+    prefill64 = os.environ.get('V27_PREFILL_DENSE64') == '1'
     captured = {canvas: [] for canvas in wanted}
     count = {'canvas': -1}
     with observe(model, controller):
@@ -192,17 +193,47 @@ def capture(adapter, row, targets, seed, max_calls=16):
 
         model._denoising_step = MethodType(outer, model)
         try:
-            with dispatch_spy(model) as counts:
+            with dispatch_spy(model) as counts, _prefill_dense64(model, prefill64):
                 try:
                     adapter.generate(request_for(row, seed))
                 except CaptureDone:
                     pass
-            assert_native_path(counts)
+            if prefill64:
+                counts = dict(counts, v27_prefill_dense64=True,
+                              note='long-context capture: causal GLOBAL prefill ran the 64-row kernel; '
+                                   'canvas denoising calls stayed native')
+            else:
+                assert_native_path(counts)
         finally:
             model._denoising_step = inner
     if '_denoising_step' in vars(model):
         raise RuntimeError('capture observer leaked')
     return captured, counts
+
+
+@contextmanager
+def _prefill_dense64(model, enabled):
+    """v27: memory-linear causal GLOBAL prefill for 32K-128K prompts (native SDPA at head_dim 512
+    materializes O(n^2) scores and does not fit on one H100 at 64K). Canvas calls are untouched."""
+    if not enabled:
+        yield
+        return
+    import importlib
+    from experiments.numerical_qk_reuse.v27_consumer64 import dense64
+    registry = importlib.import_module(type(model).__module__.replace('generation_', 'modeling_')).ALL_ATTENTION_FUNCTIONS
+    inner = registry['sdpa']
+    def attention(module, query, key, value, attention_mask, dropout=0.0, scaling=None, is_causal=None, **kw):
+        if (query.shape[-1] == 512 and is_causal and query.shape[2] > 256 and attention_mask is None
+                and not getattr(module, 'is_sliding', False)):
+            scale = scaling if scaling is not None else query.shape[-1] ** -.5
+            return dense64(query, key, value, scale, splits=1, causal=True), None
+        return inner(module, query, key, value, attention_mask, dropout=dropout, scaling=scaling,
+                     is_causal=is_causal, **kw)
+    registry['sdpa'] = attention
+    try:
+        yield
+    finally:
+        registry['sdpa'] = inner
 
 
 def resolve_target(target, captured):
