@@ -20,13 +20,14 @@ import json
 import statistics
 import sys
 
-LETTER = {'native': 'N', 'B0': '0', 'BO': 'O', 'A': 'A', 'D': 'D', 'H': 'H', 'routed_other': '?'}
+LETTER = {'native': 'N', 'B0': '0', 'BO': 'O', 'A': 'A', 'D': 'D', 'H': 'H', 'F': 'F', 'routed_other': '?'}
 
 
 def classify(delta):
     if not delta:
         return 'native'
     for key, phase in (('bootstrap_dense_calls', 'B0'), ('bootstrap_observation_calls', 'BO'),
+                       ('fresh_fused_calls', 'F'),
                        ('score_refresh_calls', 'A'), ('decision_refresh_calls', 'D'),
                        ('held_decision_calls', 'H')):
         if delta.get(key):
@@ -57,6 +58,8 @@ def rows_for(host, report):
                 native = arms.get('D_native')
                 native_mean = (statistics.mean(native['summary']['per_call_event_median_ms'])
                                if native else None)
+                c64 = arms.get('D_c64')   # strongest correctness-equivalent dense path
+                c64_mean = (statistics.mean(c64['summary']['per_call_event_median_ms']) if c64 else None)
                 for arm, data in arms.items():
                     summary = data['summary']
                     phases = [classify(d) for d in summary['phase_deltas']]
@@ -76,8 +79,9 @@ def rows_for(host, report):
                                sequence=''.join(LETTER[p] for p in phases),
                                mean_ms_per_call=round(mean, 3),
                                mean_over_native=round(mean / native_mean, 4) if native_mean else None,
+                               mean_over_c64=round(mean / c64_mean, 4) if c64_mean else None,
                                total_ms=round(sum(medians), 2))
-                    for p in ('native', 'B0', 'BO', 'A', 'D', 'H'):
+                    for p in ('native', 'B0', 'BO', 'A', 'D', 'H', 'F'):
                         row[f'{p}_ms'] = round(ph[p], 3) if p in ph else None
                         row[f'{p}_n'] = len(by.get(p, []))
                     row['select_overhead_D_minus_H_ms'] = (round(ph['D'] - ph['H'], 3)
