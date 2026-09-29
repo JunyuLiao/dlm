@@ -1,25 +1,41 @@
-# v27 (M1/M2/M3 frontier) — Tiers 1–3 done; strong-dense correction; next = kernel or long context
+# v27b (M1/M2/M3 frontier): strongest dense = D_c64; long-context panel running; selector latency found
 
 Authority: user v27 doc + A64 doc + chat. GPUs are the user's own: no time window and no budget stop. Record GPU seconds only.
 Results: `results/m1_m2_m3_frontier_v27_20260929/`.
 
-## Done
-- **CP0:** effective A/R identity, hold-only B, R6/R12, A64, threshold shifts, length gate, layer subsets and cross-layer shared support (GLOBAL pairs/one, LOCAL blocks), compact M2, D_fast.
-- **Tier 1 direct cost** (`direct_cost_report.md`, with erratum), component probe, 45-point composed screen.
-- **Tier 2 dev** (288 executions) and **Tier 3 frozen comparison** (888/888), in `tier3_report.md`:
-  - The per-call ranking reproduces.
-  - On new LB questions most sparse arms took more calls (×1.25–1.45), so the primary M3 R6/A64 is slower per request (1.23).
-  - M3 R3/A64 is request-neutral.
-  - AIME keeps quality for the primary (7/16 = native).
-- **Strong dense:** `D_fast` (GLOBAL repeated-KV SDPA) is 0.917–0.926 of native on LB, which equals the best sparse variant. The v27 per-forward gains "vs native" are not sparsity gains.
-- **LOCAL sparsity is not viable** (the native LOCAL call is 0.04–0.07 ms; our consumer needs ≥ 0.13 ms).
-- **Cross-layer sharing** removes most selection overhead.
-- 1,176 redacted generation records are in `generation_records_v27/`.
+## Fan's methods (always present; variants are layered on top, never substituted)
+- **M1**: historical (observed) QK + current rank-32 projected V, current reference and causal T decide which KV64 tiles to keep; redecide every call.
+- **M2**: M1 with the tile mean of V (pooling V) in place of the weighted projected V (`pooled` reference, `pooled_compact` execution).
+- **M3**: M1 every R calls, the bitmap held in between.
+- Output always uses current QK and original V. Junyu's fresh T (current QK + projected V) and B (bootstrap bitmap held) are separate arms.
+
+## Done (before this handoff)
+- Tiers 1–3, D_fast, compact M2, R6/R12/A64/B-hold, length gate, layer subsets, cross-layer shared support (see `tier3_report.md`, `direct_cost_report.md`).
+- **c64 consumer** (`v27_consumer64.py`): 64-row, split-KV. The old 16-row consumer reloaded each K/V tile about 128 times. **D_c64** (the same kernel, all tiles kept) is the strongest dense baseline.
+- **Fused observation**: the call-1 dense pass writes the M1 prefix summaries plus a compact FP32 score tail.
+- **Long context vs D_c64**, per call, from `long_context/`:
+  - 32K: held −6.7%.
+  - 64K: held −15% to −17%; M1 shared D −5%.
+  - BO fused: +5.5% at 32K, +9% at 64K.
+- **Disk.** mpk root went from 97% to 76% by moving an inactive dyh directory to the attached volume (verified, symlinked).
+
+## New in this session
+- **Long RULER panel** (`specs/v27_long_ruler.json`): 1,144 executions, 11 arms including D_native, D_c64, T_scope and plain M1/M2c/M3, plus A64 shared/fused variants and B.
+  - Two plumbing bugs cost two launches, both fixed with tests: long-RULER rows failed the ruler4k-only task check, and D_c64 lacked the runner branch and its bound fingerprint.
+  - `scripts/v27_smoke_arm.py` now runs one real request per bound arm before every launch.
+  - Run-dir `v27_long_ruler_006`: all 11 arms passed the smoke.
+- **Fused fresh T** (`consume64_fresh_t`, v21 key `fresh_fused`): Junyu's fresh-T information selected inside the 64-row output kernel. QK is always computed; V load and PV are skipped per tile. It is a named variant, not M1. GPU tests pass against an independent torch reference. Profile queued (arm sets `v27fresh`/`v27freshlong`).
+- **Selector latency is a root cause of weak M1 D-steps.** The generic summary-LOAD route has only 32 programs and a branchy loop that Triton cannot pipeline.
+  - 64K: 5.1 ms per routed layer, vs 5.4 ms for dense attention of that layer.
+  - 17.5K: 1.8 ms vs 1.5 ms.
+  - `v27_route.py` implements the same decision as two branch-free loops (v21 key `route_pipeline`).
+  - Bit-identity tests (`tests/test_v27_route_pipelined.py`) and `scripts/v27_route_bench.py` are **pending a free GPU**.
 
 ## Running
-- mpk: `v27layers` rerun under deploy `v27_lay2_1cdae21` (consistency copy of the dllm run; not needed for conclusions).
+- dllm: long RULER panel (its half: ruler32k, then ruler64k), then the fused fresh-T profiles (16K LB, 32K, 64K ×2).
+- mpk: its half of the panel starts when another user's job frees the GPU.
 
-## Next (needs the user's direction)
-Two options:
-- (a) A block-sparse kernel matching SDPA per-tile cost (BF16 scores, tile sizes, or a FlashAttention-style block-sparse kernel), benchmarked against the repeated-KV SDPA.
-- (b) Long-context (RULER 32K/64K) direct cost against D_fast. The score cache needs more than the 4 GiB cap at 64K.
+## Next
+1. GPU: pipelined-route bit-identity tests and bench. If it holds, run the `v27rp`/`v27rplong` profiles and add `_rp` arms to the next panel.
+2. Score the long panel (`--extra-gold`) and summarize decode-only and E2E against D_c64 with clustered CIs.
+3. Short-context no-regression panel (AIME, LB) with plain M1/M2/M3, variants and D_c64/D_fast.
