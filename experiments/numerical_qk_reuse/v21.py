@@ -30,7 +30,7 @@ SCORE_PERIODS = (8, 16, 64)
 # v27 optional clock/threshold overrides on top of a named parent arm. The
 # parent arm stays as namespaced provenance; the effective values are bound on
 # the runtime and reported through one authoritative effective_method record.
-DECISION_INTERVALS = (6,)
+DECISION_INTERVALS = (6, 12)
 MIN_ROUTE_KEYS = (8192,)
 # v27 GLOBAL layer variants (DiffusionGemma GLOBAL layers 5, 11, 17, 23, 29).
 ROUTE_LAYER_SETS = {'mid3': (11, 17, 23), 'no_first': (11, 17, 23, 29), 'no_last': (5, 11, 17, 23)}

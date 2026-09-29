@@ -70,7 +70,9 @@ V27['M3_R3_A64_pairs'] = ('M3_R3_A8_current_output', dict(score_period=64, share
 V27['M3_R3_A64_one'] = ('M3_R3_A8_current_output', dict(score_period=64, share_layers='one'))
 V27['M1_R1_A8_one'] = ('M1_R1_A8_current_output', dict(share_layers='one'))
 V27['B_A64_mid3'] = ('B_A8_matched', dict(hold_only=True, score_period=64, route_layers='mid3'))
-ARMS_V27LAYERS = ('D_native', 'D_matched', 'M3_R6_A64', 'M3_R6_A64_mid3', 'M3_R6_A64_pairs', 'M3_R6_A64_one',
+V27['M3_R12_A64'] = ('M3_R3_A8_current_output', dict(score_period=64, decision_interval=12))
+V27['M3_R12_A64_one'] = ('M3_R3_A8_current_output', dict(score_period=64, decision_interval=12, share_layers='one'))
+ARMS_V27LAYERS = ('D_native', 'D_matched', 'M3_R12_A64', 'M3_R12_A64_one', 'M3_R6_A64', 'M3_R6_A64_mid3', 'M3_R6_A64_pairs', 'M3_R6_A64_one',
                   'M3_R3_A64', 'M3_R3_A64_pairs', 'M3_R3_A64_one', 'M1_R1_A8', 'M1_R1_A8_one', 'B_A64', 'B_A64_mid3')
 V27['M3_R6_A64_ALL_lshare'] = ('M3_R3_A8_current_output', dict(score_period=64, decision_interval=6,
                                 share_layers='local_blocks', scope=ALL_SCOPE))

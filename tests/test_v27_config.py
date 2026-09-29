@@ -28,7 +28,8 @@ def test_controls_build_and_validate():
                        (M3, dict(score_period=64, route_layers='mid3')),
                        (M3, dict(score_period=64, share_layers='pairs')),
                        (M3, dict(score_period=64, route_layers='mid3', share_layers='mid3_one')),
-                       (M1, dict(share_layers='one'))):
+                       (M1, dict(share_layers='one')),
+                       (M3, dict(score_period=64, decision_interval=12))):
         config = build(arm, **extra)
         v21.validate_effective(config, config['condition'])
 
@@ -43,6 +44,7 @@ def test_old_configs_keep_their_fingerprint_without_new_keys():
     (M3, dict(score_period=12)),
     (M3, dict(score_period=32)),
     (M3, dict(decision_interval=4)),
+    (M3, dict(decision_interval=24)),
     (M1, dict(decision_interval=6)),
     (B, dict(decision_interval=6)),
     (M3, dict(hold_only=True)),

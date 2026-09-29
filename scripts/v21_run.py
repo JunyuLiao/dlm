@@ -96,7 +96,7 @@ def validate_protocol(protocol: dict) -> None:
                     c.get("mu_mode", "pooled") not in ("pooled", "pooled_compact") or \
                     c.get("score_period", 16) not in (16, 64):
                 raise ValueError(f"unknown v25 route storage: {arm}")
-            if c.get("decision_interval", 6) != 6 or c.get("hold_only", True) is not True or \
+            if c.get("decision_interval", 6) not in (6, 12) or c.get("hold_only", True) is not True or \
                     c.get("threshold_shift", "plus_ln2") not in (
                         "minus_ln2", "plus_ln2", "plus_2ln2", "plus_3ln2", "plus_4ln2"):
                 raise ValueError(f"unknown v27 clock/threshold field: {arm}")
