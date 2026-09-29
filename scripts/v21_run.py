@@ -104,8 +104,14 @@ def validate_protocol(protocol: dict) -> None:
                 raise ValueError(f"unknown v27 clock/threshold field: {arm}")
             if c.get("min_route_keys", 8192) != 8192:
                 raise ValueError(f"unknown v27 length gate: {arm}")
+            if (c.get("share_layers", "one") not in ("pairs", "one", "mid3_one", "local_blocks") or
+                    c.get("route_layers", "mid3") not in ("mid3", "no_first", "no_last", "global_plus_local_mid") or
+                    c.get("consumer64", 2) not in (1, 2, 4) or c.get("memory_caps", "long") != "long" or
+                    c.get("fused_observe", True) is not True):
+                raise ValueError(f"unknown v27 execution field: {arm}")
             if not v27 and any(k in c for k in ("decision_interval", "hold_only", "threshold_shift",
-                                                "min_route_keys")):
+                                                "min_route_keys", "share_layers", "route_layers",
+                                                "consumer64", "memory_caps", "fused_observe")):
                 raise ValueError(f"v27 fields outside a v27 panel: {arm}")
             if c.get("bootstrap_policy", "native_bootstrap2_observe1") != "native_bootstrap2_observe1" or \
                     c.get("observation_producer", "grouped_q") not in ("grouped_q", "repeat_interleave"):
@@ -249,7 +255,10 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
         if (config.get("decision_interval") != contract.get("decision_interval") or
                 bool(config.get("hold_only", False)) != bool(contract.get("hold_only", False)) or
                 config.get("threshold_shift") != contract.get("threshold_shift") or
-                config.get("min_route_keys") != contract.get("min_route_keys")):
+                config.get("min_route_keys") != contract.get("min_route_keys") or
+                any(config.get(k) != contract.get(k) for k in ("share_layers", "route_layers", "consumer64",
+                                                                "memory_caps")) or
+                bool(config.get("fused_observe", False)) != bool(contract.get("fused_observe", False))):
             raise ValueError("v27 clock/threshold differs from arm contract")
         if (config.get("bootstrap_policy") != contract.get("bootstrap_policy") or
                 config.get("observation_producer", "repeat_interleave") !=

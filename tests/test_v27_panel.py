@@ -90,3 +90,13 @@ def test_long_ruler_and_dense_c64_panel(tmp_path):
                                                       scope='GLOBAL_ONLY_NATIVE_LOCAL')
     assert protocol['extra_gold_sha256'] == {'ruler32k': 'a' * 64}
     validate_protocol(json.loads((tmp_path / 'out' / 'protocol.json').read_bytes()))
+
+
+def test_execution_variant_fields_freeze(tmp_path):
+    arms = dict(ARMS, M3f=dict(kind='method', parent='M3_R3_A8_current_output',
+                               extra=dict(score_period=64, decision_interval=6, share_layers='one',
+                                          consumer64=2, memory_caps='long', fused_observe=True)))
+    sp, op, bp, pool = _setup(tmp_path, arms)
+    protocol = freeze_v27(sp, op, bp, pool, tmp_path / 'out')
+    assert protocol['arm_contracts']['M3f']['fused_observe'] is True
+    validate_protocol(json.loads((tmp_path / 'out' / 'protocol.json').read_bytes()))
