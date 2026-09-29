@@ -524,7 +524,7 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
 
 def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.inf,
                num_warps=8, summary=None, store_summary=False, variant='static', pool=False,
-               pooled=None, pool_count=None, key_offset=0):
+               pooled=None, pool_count=None, key_offset=0, num_stages=1):
     """Selector only: the SAME ``_route`` decision, with no PV and no output.
 
     ``attention(...)`` with ``skipped=None`` also produces a bitmap, but it
@@ -591,7 +591,7 @@ def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.in
                        nq, _karg(variant, nk), h, hk, 32, 32, qb, kt, log_threshold, False,
                        prefix_tiles, bool(store_summary),
                        bool(summary is not None and not store_summary), pool is True, compact,
-                       num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk), **extra)
+                       num_warps=num_warps, num_stages=num_stages, enable_fp_fusion=False, **_extra(variant, nk), **extra)
     return Routing(skip, elig, bad_tiles, pool_args[2] if compact else None)
 
 

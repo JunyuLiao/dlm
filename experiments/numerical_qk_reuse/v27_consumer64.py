@@ -114,14 +114,14 @@ def _fused_observe(Q, K, V, Z, PO, PM, PL, ZSUM, MUSUM, ACTSUM, BADSUM, TAIL,
                    SQH, SQL, SKH, SKL, SVH, SVL,
                    NQ, NK, H: tl.constexpr, HK: tl.constexpr, D: tl.constexpr, R: tl.constexpr,
                    QB, PT, KT, KOFF, KSTORE, SPLITS: tl.constexpr, SCALE,
-                   MU: tl.constexpr, BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr):
+                   MU: tl.constexpr, BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, MU_PREC: tl.constexpr = 0):
     """v27 fused observation: one dense pass that (a) forms the dense attention output
     (online softmax over every legal tile, FP32 scores, like ``consume64``) and (b)
     writes the M1 prefix summaries of every WHOLLY-prefix KV64 tile -- block log-mass
-    ``z``, weighted projected-V ``mu`` (optional), active/bad flags -- from the
-    observation-rounded scores (BF16 GEMM output, BF16 scale, then FP32), with the
-    same formulas as the route STORE body; (c) keeps the observation scores of the
-    remaining (canvas/boundary) tiles in a compact tail buffer for later decisions."""
+    ``z``, weighted projected-V ``mu`` (optional), active/bad flags -- from the FP32
+    current scores with the route STORE formulas, sharing one exponential per score with
+    the output; (c) keeps those FP32 scores of the remaining (canvas/boundary) tiles in
+    a compact tail buffer for later decisions. Named variant: FP32 observation scores."""
     mb, h, sp = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     kh = h // (H // HK)
     qi = mb * BLOCK_M + tl.arange(0, BLOCK_M)
@@ -142,43 +142,42 @@ def _fused_observe(Q, K, V, Z, PO, PM, PL, ZSUM, MUSUM, ACTSUM, BADSUM, TAIL,
         kk = j * BLOCK_N + ki
         kv_ok = kk < NK
         k = tl.load(K + kh * SKH + kk[:, None] * SKL + di[None, :], kv_ok[:, None], other=0.)
-        raw = tl.dot(q, tl.trans(k))
         valid = rows[:, None] & kv_ok[None, :]
-        # (b) observation-rounded scores, route STORE formulas
-        obs = ((raw.to(tl.bfloat16).to(tl.float32) * SCALE).to(tl.bfloat16)).to(tl.float32)
-        obs = tl.where(valid, obs, -float('inf'))
+        # One FP32 score tile serves the summary and the output (single exp per element).
+        s = tl.where(valid, tl.dot(q, tl.trans(k)) * SCALE, -float('inf'))
+        tile_max = tl.max(s, 1)
+        active = tile_max > -float('inf')
+        safe_tile = tl.where(active, tile_max, 0.)
+        p = tl.exp(s - safe_tile[:, None])
+        ell = tl.sum(p, 1)
         if j < PT:
-            finite = valid & (obs > -float('inf')) & (obs < float('inf'))
-            invalid = valid & ((obs != obs) | (obs == float('inf')))
-            clean = tl.where(finite, obs, -float('inf'))
-            active = tl.sum(finite.to(tl.int32), 1) > 0
-            bad_row = tl.sum(invalid.to(tl.int32), 1) > 0
-            maximum = tl.max(clean, 1)
-            safe_max = tl.where(active, maximum, 0.)
-            weights = tl.exp(clean - safe_max[:, None])
-            ell = tl.sum(weights, 1)
-            block_z = tl.where(active, maximum + tl.log(tl.maximum(ell, 1.e-30)), -float('inf'))
+            bad_row = tl.sum(((s != s) | (s == float('inf'))).to(tl.int32), 1) > 0
+            block_z = tl.where(active, tile_max + tl.log(tl.maximum(ell, 1.e-30)), -float('inf'))
             base = (((h * QB + qb) * PT + j) * 128) + r128
             tl.store(ZSUM + base, block_z, rows)
             tl.store(ACTSUM + base, active.to(tl.int8), rows)
             tl.store(BADSUM + base, bad_row.to(tl.int8), rows)
             if MU:
-                weights = weights / tl.maximum(ell, 1.e-30)[:, None]
                 sketch = tl.load(Z + (kh * NK + kk[:, None]) * R + ri[None, :], kv_ok[:, None], other=0.)
-                mu = tl.dot(weights, sketch, input_precision='tf32x3')
+                w = p / tl.maximum(ell, 1.e-30)[:, None]
+                if MU_PREC == 0:
+                    mu = tl.dot(w, sketch, input_precision='tf32x3')
+                elif MU_PREC == 1:
+                    mu = tl.dot(w, sketch, input_precision='tf32')
+                else:
+                    mu = tl.dot(w.to(tl.bfloat16), sketch.to(tl.bfloat16))
                 tl.store(MUSUM + base[:, None] * R + ri[None, :], mu, rows[:, None])
         else:
-            tl.store(TAIL + (h * NQ + qi[:, None]) * KSTORE + (kk[None, :] - KOFF), obs,
+            tl.store(TAIL + (h * NQ + qi[:, None]) * KSTORE + (kk[None, :] - KOFF), s,
                      rows[:, None] & kv_ok[None, :])
-        # (a) dense output with FP32 scores
-        s = tl.where(valid, raw * SCALE, -float('inf'))
-        m_new = tl.maximum(m, tl.max(s, 1))
+        # online softmax from the same exponentials, rescaled by exp(tile_max - m_new)
+        m_new = tl.maximum(m, tile_max)
         safe = tl.where(m_new > -float('inf'), m_new, 0.)
         alpha = tl.where(m > -float('inf'), tl.exp(m - safe), 0.)
-        p = tl.exp(s - safe[:, None])
-        l = alpha * l + tl.sum(p, 1)
+        beta = tl.where(active, tl.exp(safe_tile - safe), 0.)
+        l = alpha * l + beta * ell
         v = tl.load(V + kh * SVH + kk[:, None] * SVL + di[None, :], kv_ok[:, None], other=0.)
-        acc = alpha[:, None] * acc + tl.dot(p.to(tl.bfloat16), v)
+        acc = alpha[:, None] * acc + tl.dot((p * beta[:, None]).to(tl.bfloat16), v)
         m = m_new
     base = (h * SPLITS + sp) * NQ + qi
     tl.store(PM + base, m, rows)
@@ -186,7 +185,7 @@ def _fused_observe(Q, K, V, Z, PO, PM, PL, ZSUM, MUSUM, ACTSUM, BADSUM, TAIL,
     tl.store(PO + base[:, None] * D + di[None, :], acc, rows[:, None])
 
 
-def fused_observe(q, k, v, sketch, scale, prefix_tiles, summary, splits=2, mu=True):
+def fused_observe(q, k, v, sketch, scale, prefix_tiles, summary, splits=2, mu=True, mu_precision='tf32x3'):
     """Dense output [1,Q,H,D] plus summaries written into ``summary`` (PrefixSummary with
     z/mu/active/bad sized for ``prefix_tiles``) and a compact observation-score tail
     [1,H,Q,K-64*prefix_tiles] (FP32) for the remaining tiles."""
@@ -211,7 +210,8 @@ def fused_observe(q, k, v, sketch, scale, prefix_tiles, summary, splits=2, mu=Tr
     _fused_observe[grid](q, k, v, sketch.contiguous(), po, pm, pl, zs, mus, acts, bads, tail,
                          q.stride(1), q.stride(2), k.stride(1), k.stride(2), v.stride(1), v.stride(2),
                          nq, nk, h, hk, d, 32, qb, pt, kt, koff, nk - koff, splits, scale,
-                         MU=bool(mu), BLOCK_M=64, BLOCK_N=64, num_warps=8, num_stages=1)
+                         MU=bool(mu), BLOCK_M=64, BLOCK_N=64, num_warps=8, num_stages=1,
+                         MU_PREC={'tf32x3': 0, 'tf32': 1, 'bf16': 2}[mu_precision])
     if splits == 1:
         out = po[:, 0] / pl[:, 0, :, None]
     else:

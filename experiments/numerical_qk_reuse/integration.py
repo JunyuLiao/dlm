@@ -487,6 +487,7 @@ class Attention:
             key_offset = summary.prefix_tiles * 64
         if key_offset:
             kwargs['key_offset'] = key_offset
+            kwargs.setdefault('num_stages', 3)   # tail/LOAD route: prefetch the next tile's summary
             pitch = nk
         pool = dict(pool=self.mu_mode == 'pooled')
         if self.mu_mode == 'pooled_compact':
@@ -586,8 +587,9 @@ class Attention:
         summary = allocate_summary(b, h, qb, kt, prefix_tiles, rank, q.device, None) if prefix_tiles else None
         if summary is None:
             raise ValueError('fused observation needs at least one wholly-prefix tile')
+        # Named variant: BF16 inputs for the rank-32 mu estimate (1.9 vs 3.4 ms at 17.5K keys).
         output, tail = fused_observe(q, k, v, projected.contiguous(), scale, prefix_tiles, summary,
-                                     splits=self.c64_splits, mu=rank > 0)
+                                     splits=self.c64_splits, mu=rank > 0, mu_precision='bf16')
         self.cache.publish_scores(identity, self.step, tail)
         lease = self.sketches.entries.get(layer)
         summary.identity = (identity, self.step, None if lease is None else lease['identity'], prefix_tiles)

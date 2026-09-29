@@ -25,7 +25,7 @@ def test_fused_observe_matches_store_path(keys, splits, mu):
     qb, kt = math.ceil(nq / 128), math.ceil(keys / 64)
     rank = 32 if mu else 0
     pool_kw = {} if mu else None
-    scores = Attention.observe_scores_grouped(q, k, None, scale, False, None, 0)
+    scores = (torch.einsum('bhqd,bhkd->bhqk', q.float(), k.repeat_interleave(8, 1).float()) * scale).contiguous()
     old = allocate_summary(1, h, qb, kt, pt, rank, 'cuda', ('a',))
     new = allocate_summary(1, h, qb, kt, pt, rank, 'cuda', ('b',))
     if mu:
@@ -40,10 +40,7 @@ def test_fused_observe_matches_store_path(keys, splits, mu):
                           store_summary=True, variant='generic', **pool_kw)
     out, tail = fused_observe(q, k, v, z, scale, pt, new, splits=splits, mu=mu)
     assert tail.shape == (1, h, nq, keys - pt * 64)
-    # GEMM accumulation order may move a BF16-rounded score by one ULP
-    diff = (tail - scores[..., pt * 64:]).abs()
-    assert (diff > 0).float().mean().item() < 1e-3
-    torch.testing.assert_close(tail, scores[..., pt * 64:], atol=4e-3, rtol=8e-3)
+    torch.testing.assert_close(tail, scores[..., pt * 64:], atol=1e-4, rtol=1e-4)
     torch.testing.assert_close(new.z, old.z, atol=1e-2, rtol=1e-3)
     assert torch.equal(new.active, old.active) and torch.equal(new.bad, old.bad)
     if mu:
