@@ -9,6 +9,8 @@ applied to every arm; it is not part of any method.
 """
 from contextlib import contextmanager
 
+_SEMANTICS_CHECKED = []   # the model's prefill mask builder, verified once per process
+
 
 @contextmanager
 def prefill_dense64(model, enabled, canvas=False):
@@ -21,17 +23,47 @@ def prefill_dense64(model, enabled, canvas=False):
     from experiments.numerical_qk_reuse.v27_consumer64 import dense64
     registry = importlib.import_module(type(model).__module__.replace('generation_', 'modeling_')).ALL_ATTENTION_FUNCTIONS
     inner = registry['sdpa']
-    def expected(window, q, k):
+    def expected(window, q, k, device):
         # spot-check rows of an explicit prefill mask against causal / sliding-causal semantics
         import torch
-        rows = torch.tensor(sorted({0, q // 3, q // 2, q - 1}), device=attention_mask_holder[0].device)
+        rows = torch.tensor(sorted({0, q // 3, q // 2, q - 1}), device=device)
         cols = torch.arange(k, device=rows.device)
         pos = rows[:, None] + (k - q)
         want = cols[None, :] <= pos
         if window:
             want = want & (cols[None, :] > pos - window)
         return rows, want
-    attention_mask_holder = [None]
+    # v27b: generate() builds the prefill mask mapping (two [1,1,n,n] bool masks, 7.9 GiB at 64K)
+    # and keeps it in a local until the NEXT canvas, i.e. through the whole first canvas. The
+    # kernel above never reads mask values, so for a batch-1, unpadded, empty-cache prefill the
+    # mapping is elided -- after the model's own builder has been checked once per process, on a
+    # small synthetic prefill, to produce exactly causal / sliding-causal masks.
+    elided = [False]
+    encoder = next((m for m in model.modules() if type(m).__name__ == 'DiffusionGemmaEncoderModel'), None)
+    builder = getattr(encoder, 'create_masks_for_generate', None) if encoder is not None else None
+
+    def masks_for_generate(*args, **kw):
+        import torch
+        embeds, mask, cache = kw.get('inputs_embeds'), kw.get('attention_mask'), kw.get('past_key_values')
+        if (args or embeds is None or embeds.shape[0] != 1 or embeds.shape[1] <= 256 or mask is None
+                or not bool(mask.all()) or cache is None or cache.get_seq_length() != 0):
+            return builder(*args, **kw)
+        if not _SEMANTICS_CHECKED:
+            n = 1500
+            small = builder(**dict(kw, inputs_embeds=embeds[:, :n], attention_mask=mask[:, :n],
+                                   position_ids=(kw['position_ids'][:, :n] if kw.get('position_ids') is not None
+                                                 else None)))
+            window = int(getattr(kw['config'].get_text_config(), 'sliding_window', 0) or 0)
+            for key, w in (('full_attention', 0), ('sliding_attention', window)):
+                got = small[key]
+                got = got if got.dtype == torch.bool else got == 0
+                rows, want = expected(w, n, n, got.device)
+                if tuple(got.shape[-2:]) != (n, n) or not bool((got[0, 0, rows, :n] == want).all()):
+                    raise RuntimeError('model prefill masks are not plain causal / sliding-causal')
+            _SEMANTICS_CHECKED.append(True)
+        elided[0] = True
+        return {'full_attention': None, 'sliding_attention': None}
+
     def attention(module, query, key, value, attention_mask, dropout=0.0, scaling=None, is_causal=None, **kw):
         nq, nk = query.shape[2], key.shape[2]
         if (canvas and nq <= 256 and query.shape[-1] == 512 and attention_mask is None and is_causal is False
@@ -43,13 +75,14 @@ def prefill_dense64(model, enabled, canvas=False):
             window = int(kw.get('sliding_window') or 0) if getattr(module, 'is_sliding', False) else 0
             if attention_mask is not None:
                 import torch
-                attention_mask_holder[0] = attention_mask
-                rows, want = expected(window, nq, nk)
+                # (v27b: no reference to the mask is kept; holding it pinned an O(n^2) bool
+                # mask, 4 GiB at 64K, for the whole request)
+                rows, want = expected(window, nq, nk, attention_mask.device)
                 got = attention_mask[0, 0, rows, :nk]
                 got = got if got.dtype == torch.bool else got == 0
                 if got.shape != want.shape or not bool((got == want).all()):
                     raise RuntimeError('long-context prefill mask is not plain causal/sliding-causal')
-            elif not is_causal:
+            elif is_causal is False or not (is_causal or elided[0]):
                 return inner(module, query, key, value, attention_mask, dropout=dropout, scaling=scaling,
                              is_causal=is_causal, **kw)
             scale = scaling if scaling is not None else query.shape[-1] ** -.5
@@ -72,10 +105,14 @@ def prefill_dense64(model, enabled, canvas=False):
             mod.forward = chunked
             patched.append((mod, original))
     registry['sdpa'] = attention
+    if builder is not None:
+        encoder.create_masks_for_generate = masks_for_generate
     try:
         yield
     finally:
         registry['sdpa'] = inner
+        if builder is not None:
+            del encoder.create_masks_for_generate
         for mod, original in patched:
             mod.forward = original
 

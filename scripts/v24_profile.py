@@ -326,7 +326,7 @@ def phase_table(report):
                         by.setdefault(phase, []).append(ms)
                     table.setdefault(key, {}).setdefault(boundary, {})[arm] = dict(
                         sequence=''.join({'native': 'N', 'B0': '0', 'BO': 'O', 'A': 'A', 'D': 'D',
-                                          'H': 'H', 'routed_other': '?'}[p] for p in phases),
+                                          'H': 'H', 'F': 'F', 'routed_other': '?'}[p] for p in phases),
                         per_phase_median_ms={p: statistics.median(v) for p, v in by.items()},
                         per_phase_calls={p: len(v) for p, v in by.items()},
                         sequence_event_median_ms=data['direct_epoch']['event_median_ms'])
