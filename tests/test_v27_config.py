@@ -109,3 +109,20 @@ def test_fresh_fused_is_an_m1_parent_execution_variant():
 def test_fresh_fused_guards(arm, extra):
     with pytest.raises(ValueError):
         build(arm, **extra)
+
+
+def test_route_pipeline_is_a_selector_execution_variant():
+    for arm, extra in ((M1, dict(route_pipeline=True)),
+                       (M3, dict(score_period=64, consumer64=2, fused_observe=True, share_layers='one',
+                                 route_pipeline=True)),
+                       (B, dict(hold_only=True, score_period=64, route_pipeline=True))):
+        config = build(arm, **extra)
+        v21.validate_effective(config, config['condition'])
+        assert config['route_pipeline'] is True
+        assert config['fingerprint'] != build(arm, **{k: v for k, v in extra.items() if k != 'route_pipeline'})['fingerprint']
+    with pytest.raises(ValueError):
+        v21.effective_config(copy.deepcopy(BASE), M1, SCOPE, **dict(MAIN, bootstrap_policy=None), route_pipeline=True)
+    for arm, extra in ((M1, dict(route_pipeline='yes')),
+                       (M1, dict(route_pipeline=True, consumer64=2, fresh_fused=True))):
+        with pytest.raises(ValueError):
+            build(arm, **extra)

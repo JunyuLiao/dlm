@@ -170,6 +170,8 @@ class Attention:
         self.fused_observations = 0
         # v27 fused fresh T (Junyu fresh-T information, not M1): selection inside the output kernel
         self.fresh_fused = False
+        self.route_pipeline = False    # v27: pipelined summary-LOAD selector on decision calls
+        self.pipelined_routes = 0
         self.fresh_fused_calls = 0
         self.fresh_tile_total = None   # device [pv_kept, visited] tiles; summed without host sync
         self.c64_splits = 2
@@ -495,6 +497,11 @@ class Attention:
             kwargs['key_offset'] = key_offset
             kwargs.setdefault('num_stages', 3)   # tail/LOAD route: prefetch the next tile's summary
             pitch = nk
+        if (self.route_pipeline and kwargs.get('summary') is not None and not kwargs.get('store_summary')
+                and kwargs.get('variant') == 'generic'):
+            # v27 pipelined summary-LOAD selector (bit-identical decisions; v27_route.py)
+            kwargs.update(pipelined=True, num_stages=3)
+            self.pipelined_routes += 1
         pool = dict(pool=self.mu_mode == 'pooled')
         if self.mu_mode == 'pooled_compact':
             # Built from the UNPADDED current projection over real legal keys;
@@ -774,6 +781,7 @@ class Attention:
                     layer_native_calls=self.layer_native_calls, shared_calls=self.shared_calls,
                     fused_observations=self.fused_observations,
                     fresh_fused_calls=self.fresh_fused_calls,
+                    pipelined_routes=self.pipelined_routes,
                     fresh_fused_tiles=(dict(zip(('pv_kept', 'visited'), self.fresh_tile_total.tolist()))
                                        if self.fresh_tile_total is not None else None),
                     shared_native_calls=self.shared_native_calls,

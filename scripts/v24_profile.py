@@ -127,6 +127,14 @@ for _name in _FRESH:
     V27[_name + '_long'] = (V27[_name][0], dict(V27[_name][1], memory_caps='long'))
 ARM_SETS['v27freshlong'] = ('D_native', 'D_c64') + tuple(n + '_long' for n in _FRESH) + (
     'M1_R1_A64_one_c64_fused_long', 'M3_R6_A64_one_c64_fused_long', 'M3_R3_A64_one_c64_fused_long')
+# v27 pipelined summary-LOAD selector on the fused-observation arms (same decisions).
+for _name in ('M1_R1_A64_one_c64_fused', 'M3_R6_A64_one_c64_fused', 'M3_R3_A64_one_c64_fused',
+              'M2c_R1_A64_one_c64_fused', 'M3_R6_A64_c64_fused', 'B_A64_c64_fused'):
+    V27[_name + '_rp'] = (V27[_name][0], dict(V27[_name][1], route_pipeline=True))
+    V27[_name + '_rp_long'] = (V27[_name][0], dict(V27[_name][1], route_pipeline=True, memory_caps='long'))
+_RP = ('M1_R1_A64_one_c64_fused', 'M3_R6_A64_one_c64_fused', 'M3_R3_A64_one_c64_fused', 'M2c_R1_A64_one_c64_fused')
+ARM_SETS['v27rp'] = ('D_native', 'D_c64') + tuple(x for n in _RP for x in (n, n + '_rp'))
+ARM_SETS['v27rplong'] = ('D_native', 'D_c64') + tuple(x for n in _RP for x in (n + '_long', n + '_rp_long'))
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls', 'fresh_fused_calls')
 WRAPPER_DROP = ('fingerprint', 'condition', 'plugin', 'v20_arm', 'v20_scope', 'decision_interval',
                 'score_refresh_period', 'output_mode', 'control')
@@ -213,10 +221,11 @@ def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_leng
                       sequence_lengths=[sequence_length], reps=3, blocks=3, warmup=1,
                       # Shared-support followers are not modelled by the counter twin.
                       counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long', 'v27fused', 'v27fresh', 'v27freshlong',
+                                                    'v27rp', 'v27rplong',
                                                     'v27fusedlong'), operator_probe=False,
                       prepared_support_floor=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long',
                                                              'v27fused', 'v27fusedlong', 'v27fresh',
-                                                             'v27freshlong'),
+                                                             'v27freshlong', 'v27rp', 'v27rplong'),
                       derived_from_v21_profile_config_sha256=hashlib.sha256(
                           json.dumps(v21_profile_config, sort_keys=True).encode()).hexdigest())
         return config

@@ -524,7 +524,7 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
 
 def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.inf,
                num_warps=8, summary=None, store_summary=False, variant='static', pool=False,
-               pooled=None, pool_count=None, key_offset=0, num_stages=1):
+               pooled=None, pool_count=None, key_offset=0, num_stages=1, pipelined=False):
     """Selector only: the SAME ``_route`` decision, with no PV and no output.
 
     ``attention(...)`` with ``skipped=None`` also produces a bitmap, but it
@@ -585,6 +585,19 @@ def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.in
     prefix_tiles, zs, mus, acts, bads = _summary_arguments(summary, store_summary, shape, kt,
                                                            scores.device, mu_rank=0 if compact else 32)
     pool_args = _pool_arguments(pooled, pool_count, shape, scores.device, hk)
+    if pipelined:
+        # v27: the same decision split into branch-free prefix-summary and tail loops so the
+        # summary loads can be software-pipelined (v27_route.py). LOAD path only.
+        if variant != 'generic' or summary is None or store_summary:
+            raise ValueError('the pipelined selector serves only the generic summary-LOAD path')
+        from .v27_route import _route_load_pipelined
+        _route_load_pipelined[(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles,
+                           zs, mus, acts, bads, *pool_args, key_offset, nk - key_offset,
+                           nq, _karg(variant, nk), h, hk, 32, 32, qb, kt, log_threshold,
+                           prefix_tiles, pool is True, compact, TAIL=tail,
+                           num_warps=num_warps, num_stages=num_stages, enable_fp_fusion=False,
+                           **_extra(variant, nk))
+        return Routing(skip, elig, bad_tiles, pool_args[2] if compact else None)
     extra = dict(TAIL=True) if tail else {}
     _kernels(variant)['route'][(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles,
                        dummy, dummy, dummy, zs, mus, acts, bads, *pool_args, key_offset, nk - key_offset,

@@ -70,7 +70,8 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      route_storage='logical', mu_mode='exact', score_period=8,
                      decision_interval=None, hold_only=False, threshold_shift=None,
                      min_route_keys=None, route_layers=None, share_layers=None,
-                     consumer64=None, memory_caps=None, fused_observe=False, fresh_fused=False) -> dict:
+                     consumer64=None, memory_caps=None, fused_observe=False, fresh_fused=False,
+                     route_pipeline=False) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -153,6 +154,11 @@ def effective_config(base: dict, arm: str, scope: str, *,
                 or hold_only or decision_interval is not None):
             raise ValueError('v27 fused fresh T needs consumer64 on the M1 parent and no history variants')
         extra['fresh_fused'] = True
+    if route_pipeline:
+        # v27 pipelined summary-LOAD selector: same decisions, branch-free prefetchable loops
+        if route_pipeline is not True or bootstrap_policy is None or fresh_fused:
+            raise ValueError('v27 pipelined selector needs the bootstrap mainline and a routed selector')
+        extra['route_pipeline'] = True
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -277,6 +283,9 @@ def validate_effective(config: dict, condition: str):
     if 'fresh_fused' in config and (config['fresh_fused'] is not True or 'consumer64' not in config
                                     or 'fused_observe' in config or 'share_layers' in config):
         raise ValueError('v27 fused fresh T identity drift')
+    if 'route_pipeline' in config and (config['route_pipeline'] is not True or 'bootstrap_policy' not in config
+                                       or 'fresh_fused' in config):
+        raise ValueError('v27 pipelined selector identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -337,6 +346,10 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('fused fresh T must be bound before any routed call')
             owner.fresh_fused = True
+        if config.get('route_pipeline'):
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('pipelined selector must be bound before any routed call')
+            owner.route_pipeline = True
         if 'consumer64' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('consumer must be bound before any routed call')
@@ -384,6 +397,7 @@ def install(adapter, config: dict, condition: str):
                         consumer64=config.get('consumer64'),
                         fused_observe=bool(getattr(owner, 'fused_observe', False)),
                         fresh_fused=bool(getattr(owner, 'fresh_fused', False)),
+                        route_pipeline=bool(getattr(owner, 'route_pipeline', False)),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
                         output_score_precision=owner.output_score_precision,
                         output_layout=owner.output_layout,
