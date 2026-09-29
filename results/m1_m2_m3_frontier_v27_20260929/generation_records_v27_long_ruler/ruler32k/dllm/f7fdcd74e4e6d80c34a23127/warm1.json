@@ -1,0 +1,81 @@
+{
+ "attempt": 0,
+ "completion_tokens": [
+  100,
+  45518,
+  107,
+  101,
+  31756,
+  106
+ ],
+ "condition": "v27_fast_dense_global_repeat_kv",
+ "counters": {
+  "fast_dense_global_calls": 10,
+  "native_calls": 80
+ },
+ "diagnostics": null,
+ "fingerprint": "ff5adc52681634731e5e406266538d6e3ec20e35cb79c30f9da1bce496b143d7",
+ "generation_excluding_initial_prefill_seconds": null,
+ "generation_gpu_timeline_note": "First actual DiffusionGemmaEncoderModel forward end to final CUDA event after generate; device timeline includes host gaps and later encoder/commit work; no token emission boundary",
+ "generation_gpu_timeline_seconds": 0.26544757080078124,
+ "generation_time_note": "No nonintrusive synchronized wall boundary after initial prefill; separate profile required",
+ "id": "ruler32k/ruler_32768_qa_1_p0000",
+ "max_new_tokens": 32,
+ "metadata": {
+  "actual_denoising_step_count": 2,
+  "block_size_applied": false,
+  "denoising_configuration": {
+   "confidence_threshold": 0.005,
+   "entropy_bound": 0.1,
+   "max_denoising_steps": 48,
+   "stability_threshold": 1,
+   "t_max": 0.8,
+   "t_min": 0.4
+  },
+  "native_canvas_length": 256,
+  "requested_block_size": 32,
+  "sampling": {
+   "native_temperature_schedule": true,
+   "temperature": null,
+   "top_p": null
+  },
+  "special_token_ids": {
+   "boi_token_id": 255999,
+   "eoi_token_id": 258882,
+   "eos_token_ids": [
+    1,
+    106,
+    50
+   ],
+   "image_token_id": 258880,
+   "mask_token_id": 4,
+   "pad_token_id": 0
+  },
+  "thinking": false,
+  "tokens_per_forward": 3.0
+ },
+ "output_tokens": 6,
+ "per_canvas": [
+  {
+   "canvas_index": 0,
+   "completion_slice_tokens": 6,
+   "decoder_calls": 2,
+   "iteration_cap_final_call": false,
+   "native_stop_final_call": true,
+   "schedule_steps": [
+    48,
+    47
+   ]
+  }
+ ],
+ "phase": "v21_generation",
+ "prediction": "thought\nFrance",
+ "raw_completion": "<|channel>thought\n<channel|>France<turn|>",
+ "request_wall_seconds": 3.3466278449923266,
+ "routing": null,
+ "schema": "numerical_qk_attempt0_v1",
+ "seed": 202,
+ "source_id": "ruler_32768_qa_1_p0000",
+ "termination_reason": "eos",
+ "total_decoder_calls": 2
+}

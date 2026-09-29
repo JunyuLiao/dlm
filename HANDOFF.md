@@ -29,13 +29,25 @@ Results: `results/m1_m2_m3_frontier_v27_20260929/`.
   - 64K: 5.1 ms per routed layer, vs 5.4 ms for dense attention of that layer.
   - 17.5K: 1.8 ms vs 1.5 ms.
   - `v27_route.py` implements the same decision as two branch-free loops (v21 key `route_pipeline`).
-  - Bit-identity tests (`tests/test_v27_route_pipelined.py`) and `scripts/v27_route_bench.py` are **pending a free GPU**.
+  - Bit-identity tests (`tests/test_v27_route_pipelined.py`) pass on GPU.
+  - Bench (`selector/route_bench.json`): 1.7–1.9× faster; 64K exact mu 5.08 → 2.95 ms, which is still 0.54× a dense layer.
+- **M1-DP** (`v27_dense_prefix.py`, v21 key `risk_state='dense_prefix'`): a named variant. The risk is computed against the dense prefix state and precomputed per summary, so decision calls run in parallel. GPU tests pass against a torch reference. Profiles are queued (`v27dp*`, `v27ns*`). Its threshold must be calibrated separately.
+- **64K memory fix** (`v27_long.py`): generate() kept the O(n²) prefill mask mapping (7.9 GiB) through the first canvas. It is now elided after a semantic check. Tokens are unchanged.
+- **Long RULER panel complete** (572 cells / 1,144 executions; `long_ruler_panel/README.md`):
+  - No end-to-end effect: the initial prefill dominates and a request needs about 5 calls.
+  - Per call vs D_c64: M3 R6/A64 shared+fused is 0.965 at 64K.
+  - Quality at 64K: the plain A8 arms keep it. The shared-support A64 variants lose it (4–5 of 26 cells worse, none better); the unshared B does not.
+  - Redacted records are in `generation_records_v27_long_ruler/`.
+- **LongBench-v2 32K/64K bins** (24 each, natural length, no truncation) built by a subagent. The long-generation panel `specs/v27_long_lb.json` (432 executions) is frozen and running.
+- `scripts/v27_datasets.py`: one map from each dataset to its base task, used by freeze/run/score.
 
 ## Running
-- dllm: long RULER panel (its half: ruler32k, then ruler64k), then the fused fresh-T profiles (16K LB, 32K, 64K ×2).
-- mpk: its half of the panel starts when another user's job frees the GPU.
+- dllm and mpk: the LB-long panel (run-dir `v27_long_lb_001`, 216 executions per host).
+- Afterwards, dllm runs the rp/dp/fresh direct-cost profiles, and mpk runs the unshared A64 profiles (`v27nslong`/`v27ns`).
 
 ## Next
-1. GPU: pipelined-route bit-identity tests and bench. If it holds, run the `v27rp`/`v27rplong` profiles and add `_rp` arms to the next panel.
-2. Score the long panel (`--extra-gold`) and summarize decode-only and E2E against D_c64 with clustered CIs.
-3. Short-context no-regression panel (AIME, LB) with plain M1/M2/M3, variants and D_c64/D_fast.
+1. Score the LB-long panel on mpk: the v15 LB scorer needs the NeMo checkout, which only mpk has. Report decode span, calls, quality and wall vs D_c64.
+2. From the ns/dp profiles, choose an unshared A64 variant with a cheap decision call. Calibrate the M1-DP threshold and freeze a follow-up panel.
+3. Short-context no-regression panel (AIME, LB) with the length gate.
+
+Operational note: on Windows, TaskStop leaves the chain's bash script running as an orphan. After every stop, list `bash` processes with `v27_` in the command line and kill the leftovers.
