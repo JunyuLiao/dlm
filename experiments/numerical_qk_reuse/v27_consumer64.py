@@ -219,3 +219,137 @@ def fused_observe(q, k, v, sketch, scale, prefix_tiles, summary, splits=2, mu=Tr
         w = torch.exp(pm - mx)
         out = (po * w[..., None]).sum(1) / (pl * w).sum(1)[..., None]
     return out.to(torch.bfloat16).transpose(0, 1).contiguous().unsqueeze(0), tail
+
+
+@triton.jit
+def _consume64_fresh_t(Q, K, V, Z, REF, T, SKIP, ELIG, PO, PM, PL, CNT,
+                       SQH, SQL, SKH, SKL, SVH, SVL,
+                       NQ, NK, H: tl.constexpr, HK: tl.constexpr, D: tl.constexpr, R: tl.constexpr,
+                       QB, KT, SPLITS: tl.constexpr, SCALE, THRESHOLD,
+                       BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, HELD: tl.constexpr,
+                       MU_PREC: tl.constexpr):
+    """v27 fused fresh-T consumer (current-QK reuse inside the output kernel). NOT Fan's M1:
+    M1 selects from HISTORICAL (observed) QK; this selects from the CURRENT scores the output
+    kernel already forms, i.e. Junyu's fresh-T information (current QK + current projected V).
+    Per visited KV64 tile the current scores give the block log-mass and the weighted current
+    projected V (rank 32); the selector's sequential retained-state risk (alpha x projected-V
+    deviation / reference x sensitivity, max over the program's rows, first support kept)
+    decides whether the tile's V load and PV product are issued. QK is always computed; only
+    PV is skipped. With HELD, only tiles kept by a held (M3) bitmap are visited. Named variant:
+    64-row decision granularity; with SPLITS>1 each KV split keeps its own retained state."""
+    mb, h, sp = tl.program_id(0), tl.program_id(1), tl.program_id(2)
+    kh = h // (H // HK)
+    qi = mb * BLOCK_M + tl.arange(0, BLOCK_M)
+    di = tl.arange(0, D)
+    ki = tl.arange(0, BLOCK_N)
+    ri = tl.arange(0, R)
+    rows = qi < NQ
+    qb = (mb * BLOCK_M) // 128
+    q = tl.load(Q + h * SQH + qi[:, None] * SQL + di[None, :], rows[:, None], other=0.)
+    ref = tl.maximum(tl.load(REF + kh), 1e-12)
+    sens = tl.load(T + qi, rows, other=1.)
+    m = tl.full((BLOCK_M,), -float('inf'), tl.float32)
+    l = tl.zeros((BLOCK_M,), tl.float32)
+    acc = tl.zeros((BLOCK_M, D), tl.float32)
+    previous = tl.full((BLOCK_M,), -float('inf'), tl.float32)
+    projected = tl.zeros((BLOCK_M, R), tl.float32)
+    kept = sp * 0
+    visited = sp * 0
+    per = tl.cdiv(KT, SPLITS)
+    lo = sp * per
+    hi = tl.minimum(lo + per, KT)
+    for j in range(lo, hi):
+        go = True
+        if HELD:
+            dest = (h * QB + qb) * KT + j
+            go = tl.load(ELIG + dest) & (tl.load(SKIP + dest) == 0)
+        if go:
+            visited += 1
+            kk = j * BLOCK_N + ki
+            kv_ok = kk < NK
+            k = tl.load(K + kh * SKH + kk[:, None] * SKL + di[None, :], kv_ok[:, None], other=0.)
+            s = tl.where(rows[:, None] & kv_ok[None, :], tl.dot(q, tl.trans(k)) * SCALE, -float('inf'))
+            tile_max = tl.max(s, 1)
+            active = tile_max > -float('inf')
+            safe_tile = tl.where(active, tile_max, 0.)
+            p = tl.exp(s - safe_tile[:, None])
+            ell = tl.sum(p, 1)
+            block_z = tl.where(active, tile_max + tl.log(tl.maximum(ell, 1.e-30)), -float('inf'))
+            sketch = tl.load(Z + (kh * NK + kk[:, None]) * R + ri[None, :], kv_ok[:, None], other=0.)
+            weights = p / tl.maximum(ell, 1.e-30)[:, None]
+            if MU_PREC == 0:
+                mu = tl.dot(weights, sketch, input_precision='tf32x3')
+            elif MU_PREC == 1:
+                mu = tl.dot(weights, sketch, input_precision='tf32')
+            else:
+                mu = tl.dot(weights.to(tl.bfloat16), sketch.to(tl.bfloat16))
+            mx = tl.maximum(previous, block_z)
+            safe_mx = tl.where(mx > -float('inf'), mx, 0.)
+            combined = tl.where(mx > -float('inf'),
+                                safe_mx + tl.log(tl.exp(previous - safe_mx) + tl.exp(block_z - safe_mx)),
+                                -float('inf'))
+            safe_c = tl.where(combined > -float('inf'), combined, 0.)
+            alpha = tl.where(active, tl.exp(block_z - safe_c), 0.)
+            delta = alpha[:, None] * (mu - projected)
+            norm = tl.sqrt(tl.sum(delta * delta, 1))
+            risk = tl.log(norm / ref) + tl.log(sens)
+            risk = tl.where(active, tl.where(previous > -float('inf'), risk, float('inf')), -float('inf'))
+            worst = tl.max(risk, 0)
+            if worst >= THRESHOLD:
+                kept += 1
+                old = tl.where(previous > -float('inf'), tl.exp(previous - safe_c), 0.)
+                projected = old[:, None] * projected + alpha[:, None] * mu
+                previous = combined
+                m_new = tl.maximum(m, tile_max)
+                safe = tl.where(m_new > -float('inf'), m_new, 0.)
+                am = tl.where(m > -float('inf'), tl.exp(m - safe), 0.)
+                beta = tl.where(active, tl.exp(safe_tile - safe), 0.)
+                l = am * l + beta * ell
+                v = tl.load(V + kh * SVH + kk[:, None] * SVL + di[None, :], kv_ok[:, None], other=0.)
+                acc = am[:, None] * acc + tl.dot((p * beta[:, None]).to(tl.bfloat16), v)
+                m = m_new
+    base = (h * SPLITS + sp) * NQ + qi
+    tl.store(PM + base, m, rows)
+    tl.store(PL + base, l, rows)
+    tl.store(PO + base[:, None] * D + di[None, :], acc, rows[:, None])
+    cbase = ((h * tl.cdiv(NQ, BLOCK_M) + mb) * SPLITS + sp) * 2
+    tl.store(CNT + cbase, kept)
+    tl.store(CNT + cbase + 1, visited)
+
+
+MU_PRECISIONS = {'tf32x3': 0, 'tf32': 1, 'bf16': 2}
+
+
+def consume64_fresh_t(q, k, v, sketch, reference, sensitivity, scale, log_threshold, splits=2,
+                      skipped=None, eligible=None, mu_precision='tf32', num_warps=8):
+    """Fused fresh-T consumer (see _consume64_fresh_t). q [1,H,Q,D], k/v [1,HK,K,D], sketch
+    [1,HK,K,32] current projected V, reference [1,HK], sensitivity [1,Q] or None.
+    Returns ([1,Q,H,D] model-major output, counts [H, ceil(Q/64), splits, 2] of
+    (PV-kept tiles, visited tiles))."""
+    b, h, nq, d = q.shape
+    hk, nk = k.shape[1], k.shape[2]
+    if b != 1 or tuple(sketch.shape) != (1, hk, nk, 32) or tuple(reference.shape) != (1, hk):
+        raise ValueError('fused fresh T expects batch 1, [1,KVH,K,32] projected V and [1,KVH] reference')
+    kt, qb = math.ceil(nk / 64), math.ceil(nq / 128)
+    held = skipped is not None
+    if held != (eligible is not None):
+        raise ValueError('held support needs both skipped and eligible')
+    dummy = torch.zeros((1,), device=q.device, dtype=torch.bool)
+    sens = (torch.ones((nq,), device=q.device, dtype=torch.float32) if sensitivity is None
+            else sensitivity.reshape(-1).float().contiguous())
+    po = torch.empty((h, splits, nq, d), device=q.device, dtype=torch.float32)
+    pm = torch.empty((h, splits, nq), device=q.device, dtype=torch.float32)
+    pl = torch.empty((h, splits, nq), device=q.device, dtype=torch.float32)
+    cnt = torch.empty((h, math.ceil(nq / 64), splits, 2), device=q.device, dtype=torch.int32)
+    _consume64_fresh_t[(math.ceil(nq / 64), h, splits)](
+        q, k, v, sketch.float().contiguous(), reference.float().contiguous(), sens,
+        skipped if held else dummy, eligible if held else dummy, po, pm, pl, cnt,
+        q.stride(1), q.stride(2), k.stride(1), k.stride(2), v.stride(1), v.stride(2),
+        nq, nk, h, hk, d, 32, qb, kt, splits, scale, float(log_threshold),
+        BLOCK_M=64, BLOCK_N=64, HELD=held, MU_PREC=MU_PRECISIONS[mu_precision],
+        num_warps=num_warps, num_stages=1)
+    mx = pm.amax(1, keepdim=True)
+    safe = torch.where(torch.isfinite(mx), mx, torch.zeros_like(mx))
+    w = torch.where(torch.isfinite(pm), torch.exp(pm - safe), torch.zeros_like(pm))
+    out = (po * w[..., None]).sum(1) / (pl * w).sum(1)[..., None]
+    return out.to(torch.bfloat16).transpose(0, 1).contiguous().unsqueeze(0), cnt
