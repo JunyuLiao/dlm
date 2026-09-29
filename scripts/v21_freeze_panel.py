@@ -375,6 +375,10 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
             if name != 'D_native':
                 raise ValueError('native arm must be D_native')
             contracts[name] = dict(kind='native')
+        elif arm['kind'] == 'dense_matched':
+            # Same Triton consumer, FP32 scores, model-major output, every legal tile kept.
+            contracts[name] = dict(kind='v21_control', parent_v20_arm='D_matched', scope=SCOPE,
+                                   output_score_precision='fp32_scores_bf16_pv', output_layout='model_major')
         elif arm['kind'] == 'fresh_T':
             contracts[name] = dict(kind='v20_legacy', parent_v20_arm='T_scope', scope=SCOPE)
         elif arm['kind'] == 'method':

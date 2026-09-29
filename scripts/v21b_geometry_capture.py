@@ -541,6 +541,11 @@ def _observation_components(owner, record, native_fn, reps=5):
             variant=owner.kernel_variant, output_score_precision='fp32_scores_bf16_pv',
             output_layout='model_major'),
     }
+    all_kept = torch.zeros_like(routed.skipped)
+    pieces['consumer_all_kept_dense_matched'] = lambda: preqk_attention(
+        q, k, v, all_kept, routed.eligible, scale=scale, is_causal=False, window=None,
+        variant=owner.kernel_variant, output_score_precision='fp32_scores_bf16_pv',
+        output_layout='model_major')
     for label, bits in curve.items():
         pieces[f'consumer_at_{label}'] = (lambda bits=bits: preqk_attention(
             q, k, v, bits.skipped, bits.eligible, scale=scale, is_causal=False, window=None,

@@ -56,7 +56,10 @@ for _shift in SHIFTS:
     V27['M3_R3_A8_' + _label] = ('M3_R3_A8_current_output',
                                  {} if _shift is None else dict(threshold_shift=_shift))
 ARMS_V27THR = ('D_native',) + tuple('M3_R3_A8_' + ('P0' if s is None else s) for s in SHIFTS)
-ARM_SETS = {'v24': ARMS, 'v25': ARMS_V25, 'v27': ARMS_V27, 'v27thr': ARMS_V27THR}
+# v27 attribution: the same-consumer all-kept dense control separates kernel efficiency
+# from sparsity; the length-gated variant shows the short-context fallback.
+ARMS_V27ATTR = ('D_native', 'D_matched', 'M3_R3_A64', 'M3_R6_A64', 'B_A64', 'M3_R3_A64_G8k')
+ARM_SETS = {'v24': ARMS, 'v25': ARMS_V25, 'v27': ARMS_V27, 'v27thr': ARMS_V27THR, 'v27attr': ARMS_V27ATTR}
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls')
 WRAPPER_DROP = ('fingerprint', 'condition', 'plugin', 'v20_arm', 'v20_scope', 'decision_interval',
                 'score_refresh_period', 'output_mode', 'control')
@@ -75,6 +78,11 @@ def build_arms(v21_profile_config, arm_set='v24'):
     names = ARM_SETS[arm_set]
     control_base = {k: v for k, v in native['config'].items() if k not in WRAPPER_DROP}
     t_config = old.control_config(dict(control_base, control='T_scope'), 'v20_fresh_T', SCOPE)
+    if 'D_matched' in names:
+        matched = v21.effective_control_config(dict(control_base, consumer='triton'), SCOPE,
+                                               output_score_precision='fp32_scores_bf16_pv',
+                                               output_layout='model_major')
+        result.append(dict(name='D_matched', plugin=PLUGIN, condition=matched['condition'], config=matched))
     if 'T_scope' in names:
         result.append(dict(name='T_scope', plugin=t_config['plugin'], condition=t_config['condition'],
                            config=t_config))
