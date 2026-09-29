@@ -200,8 +200,8 @@ def capture(adapter, row, targets, seed, max_calls=16):
                     pass
             if prefill64:
                 counts = dict(counts, v27_prefill_dense64=True,
-                              note='long-context capture: causal GLOBAL prefill ran the 64-row kernel; '
-                                   'canvas denoising calls stayed native')
+                              note='long-context capture: prefill (GLOBAL causal, LOCAL sliding) and canvas '
+                                   'GLOBAL calls ran the 64-row dense kernel; timed replays use each arm path')
             else:
                 assert_native_path(counts)
         finally:
@@ -235,6 +235,11 @@ def _prefill_dense64(model, enabled):
     attention_mask_holder = [None]
     def attention(module, query, key, value, attention_mask, dropout=0.0, scaling=None, is_causal=None, **kw):
         nq, nk = query.shape[2], key.shape[2]
+        if (nq <= 256 and query.shape[-1] == 512 and attention_mask is None and is_causal is False
+                and query.shape[0] == 1 and not dropout and not getattr(module, 'is_sliding', False)):
+            # long-context capture: canvas GLOBAL calls through the memory-linear kernel too
+            scale = scaling if scaling is not None else query.shape[-1] ** -.5
+            return dense64(query, key, value, scale, splits=2), None
         if nq > 256 and query.shape[0] == 1 and not dropout:
             window = int(kw.get('sliding_window') or 0) if getattr(module, 'is_sliding', False) else 0
             if attention_mask is not None:
