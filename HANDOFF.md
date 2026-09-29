@@ -1,26 +1,25 @@
-# v27 (M1/M2/M3 frontier, BRISK-guided) — Tier 1 done, Tier 2 dev panel running
+# v27 (M1/M2/M3 frontier) — Tiers 1–3 done; strong-dense correction; next = kernel or long context
 
-Authority: user v27 doc + request to also cover the v26 A64 document. Standing GPU authorization.
-Independent v26/v27 budget: 12 GPU-h, 1,800 executions (see STATE). Old ledgers are closed, not reset.
+Authority: user v27 doc + A64 doc + chat. GPUs are the user's own: no time window and no budget stop. Record GPU seconds only.
+Results: `results/m1_m2_m3_frontier_v27_20260929/`.
 
-## Done (see results/m1_m2_m3_frontier_v27_20260929/)
-- **CP0:** effective A/R identity, hold-only B (B16/B64 without D9), R6, A64, named threshold shifts; clock and config tests (`v27_contract_audit.md`).
-- **Compact M2** (`pooled_compact`): a shared per-KV-head tile pool with a row-legality guard (`m2_compact_contract.md`).
-- **Tier 1 direct cost** (`direct_cost_report.md`, CSVs):
-  - H ≈ 0.91 of native per forward on LB; the ceiling is set by the ~10% GLOBAL-attention share;
-  - D costs +8–14 ms, A costs +25–40 ms;
-  - D_matched (all-kept consumer) is 0.982, so about 2% of any gain is kernel efficiency;
-  - AIME and RULER show no gain;
-  - the threshold saving saturates beyond P0.
-- **Composed 45-point screen:** B A64 < M3 R6/A64 < M3 R3/A64 < M3 R3/A8 < M2c < M1.
-- **Parallel prefix-summary builder:** not built. With A64 its ceiling is ≤ 0.5%, which is below its own stop rule.
+## Done
+- **CP0:** effective A/R identity, hold-only B, R6/R12, A64, threshold shifts, length gate, layer subsets and cross-layer shared support (GLOBAL pairs/one, LOCAL blocks), compact M2, D_fast.
+- **Tier 1 direct cost** (`direct_cost_report.md`, with erratum), component probe, 45-point composed screen.
+- **Tier 2 dev** (288 executions) and **Tier 3 frozen comparison** (888/888), in `tier3_report.md`:
+  - The per-call ranking reproduces.
+  - On new LB questions most sparse arms took more calls (×1.25–1.45), so the primary M3 R6/A64 is slower per request (1.23).
+  - M3 R3/A64 is request-neutral.
+  - AIME keeps quality for the primary (7/16 = native).
+- **Strong dense:** `D_fast` (GLOBAL repeated-KV SDPA) is 0.917–0.926 of native on LB, which equals the best sparse variant. The v27 per-forward gains "vs native" are not sparsity gains.
+- **LOCAL sparsity is not viable** (the native LOCAL call is 0.04–0.07 ms; our consumer needs ≥ 0.13 ms).
+- **Cross-layer sharing** removes most selection overhead.
+- 1,176 redacted generation records are in `generation_records_v27/`.
 
 ## Running
-Tier 2 dev panels, frozen specs in `results/.../specs/`, runs `v23_private/v27_dev_{lb,aime}_001`, deploy `v27_dev_f66bfba`:
-- LB: the six exposed ids × seeds 101/202, first + warm, 216 executions;
-- AIME: four new ids × two seeds, first only, 72 executions; launched automatically after LB by `E:/dlm/v27_chain_dev.sh`.
-- Arms: native, D_matched, fresh T, M1, compact M2, M3 R3/A8, M3 R3/A64, M3 R6/A64, B A64.
+- mpk: `v27layers` rerun under deploy `v27_lay2_1cdae21` (consistency copy of the dllm run; not needed for conclusions).
 
-## Next
-1. Score Tier 2 on mpk via `E:/dlm/v23_score_transport.py` (`--tag v27_dev_f66bfba --run-dir v27_dev_lb_001 --label dev_lb --worker-ends 1`).
-2. Freeze Tier 3 (one primary M3 plus pre-declared secondary). Ids are reserved in `specs/tier3_reserved_ids.json`: only six new LB (short of 12; reported, not fabricated), eight new AIME, 13 RULER.
+## Next (needs the user's direction)
+Two options:
+- (a) A block-sparse kernel matching SDPA per-tile cost (BF16 scores, tile sizes, or a FlashAttention-style block-sparse kernel), benchmarked against the repeated-KV SDPA.
+- (b) Long-context (RULER 32K/64K) direct cost against D_fast. The score cache needs more than the 4 GiB cap at 64K.

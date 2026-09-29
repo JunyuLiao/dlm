@@ -1,5 +1,7 @@
 # v27 Tier 1: direct per-forward cost, time breakdown and sparsity sweep
 
+> **Erratum (2026-09-29, see [tier3_report.md](tier3_report.md) §4):** every per-forward ratio below is relative to the *native* dense path, whose GLOBAL SDPA dispatch (`enable_gqa`) is about 2× slower than a repeated-KV SDPA call. Against that strongest dense path (`D_fast`), the best sparse variants are within ±0.5% on LB and 1.5–2.5% slower on AIME; the ~8–10% gains are not sparsity gains.
+
 **Setup.**
 - H100; DiffusionGemma-26B-A4B, BF16.
 - Only the 5 GLOBAL layers are routed; the 25 LOCAL layers stay native.
