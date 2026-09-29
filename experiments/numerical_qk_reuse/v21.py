@@ -71,7 +71,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      decision_interval=None, hold_only=False, threshold_shift=None,
                      min_route_keys=None, route_layers=None, share_layers=None,
                      consumer64=None, memory_caps=None, fused_observe=False, fresh_fused=False,
-                     route_pipeline=False) -> dict:
+                     route_pipeline=False, risk_state=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -159,6 +159,12 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if route_pipeline is not True or bootstrap_policy is None or fresh_fused:
             raise ValueError('v27 pipelined selector needs the bootstrap mainline and a routed selector')
         extra['route_pipeline'] = True
+    if risk_state is not None:
+        # v27 M1-DP: dense-prefix risk from the prefix summary (named variant, not M1)
+        if (risk_state != 'dense_prefix' or bootstrap_policy is None or fresh_fused
+                or arm not in ('M1_R1_A8_current_output', 'M3_R3_A8_current_output')):
+            raise ValueError('v27 dense-prefix risk needs the bootstrap M1/M3 mainline with prefix summaries')
+        extra['risk_state'] = risk_state
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -286,6 +292,9 @@ def validate_effective(config: dict, condition: str):
     if 'route_pipeline' in config and (config['route_pipeline'] is not True or 'bootstrap_policy' not in config
                                        or 'fresh_fused' in config):
         raise ValueError('v27 pipelined selector identity drift')
+    if 'risk_state' in config and (config['risk_state'] != 'dense_prefix' or 'bootstrap_policy' not in config
+                                   or 'fresh_fused' in config):
+        raise ValueError('v27 dense-prefix risk identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -350,6 +359,12 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('pipelined selector must be bound before any routed call')
             owner.route_pipeline = True
+        if 'risk_state' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('risk state must be bound before any routed call')
+            if owner.selector != 'prefix_block_summary':
+                raise ValueError('dense-prefix risk needs the prefix-summary selector')
+            owner.risk_state = config['risk_state']
         if 'consumer64' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('consumer must be bound before any routed call')
@@ -398,6 +413,7 @@ def install(adapter, config: dict, condition: str):
                         fused_observe=bool(getattr(owner, 'fused_observe', False)),
                         fresh_fused=bool(getattr(owner, 'fresh_fused', False)),
                         route_pipeline=bool(getattr(owner, 'route_pipeline', False)),
+                        risk_state=getattr(owner, 'risk_state', 'kept'),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
                         output_score_precision=owner.output_score_precision,
                         output_layout=owner.output_layout,

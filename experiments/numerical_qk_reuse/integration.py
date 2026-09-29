@@ -172,6 +172,9 @@ class Attention:
         self.fresh_fused = False
         self.route_pipeline = False    # v27: pipelined summary-LOAD selector on decision calls
         self.pipelined_routes = 0
+        self.risk_state = 'kept'       # v27 M1-DP: 'dense_prefix' (named variant)
+        self.dp_states = {}
+        self.dp_builds = self.dp_routes = 0
         self.fresh_fused_calls = 0
         self.fresh_tile_total = None   # device [pv_kept, visited] tiles; summed without host sync
         self.c64_splits = 2
@@ -517,11 +520,37 @@ class Attention:
             self.aligned_sketch_pads += 1
         if self.mu_mode not in MU_MODES:
             raise ValueError(self.mu_mode)
-        route = route_only(scores, projected.contiguous(), ref.contiguous(), **pool, **kwargs)
+        if (self.risk_state == 'dense_prefix' and kwargs.get('summary') is not None
+                and kwargs.get('variant') == 'generic'):
+            route = self._route_dense_prefix(scores, projected.contiguous(), ref.contiguous(), pool, kwargs)
+        else:
+            route = route_only(scores, projected.contiguous(), ref.contiguous(), **pool, **kwargs)
         if getattr(route, 'pool_mismatch', None) is not None:
             torch._assert_async(~route.pool_mismatch.any(),
                                 'compact pooled mu: row-varying legal key set; request must fail')
         return route
+
+    def _route_dense_prefix(self, scores, projected, ref, pool, kwargs):
+        """v27 M1-DP (named variant): the M1 risk against the dense prefix state, precomputed
+        once per prefix summary; decisions differ from M1's kept-state scan by construction."""
+        from . import v27_dense_prefix as dp
+        summary = kwargs['summary']
+        if kwargs.get('store_summary'):
+            # anchor: fill the summary with the unchanged STORE pass (its decisions are discarded)
+            route_only(scores, projected, ref, **pool, **dict(kwargs, pipelined=False))
+        live = {s.identity for s in self.summaries.values()}
+        self.dp_states = {k: v for k, v in self.dp_states.items() if k in live}
+        state = self.dp_states.get(summary.identity)
+        if state is None:
+            nq = scores.shape[2]
+            kt = -(-(scores.shape[-1] + kwargs.get('key_offset', 0)) // 64)
+            state = dp.build(summary, nq, kt, projected.shape[1],
+                             pooled=pool.get('pooled') if pool.get('pool') == 'compact' else None)
+            self.dp_states[summary.identity] = state
+            self.dp_builds += 1
+        self.dp_routes += 1
+        return dp.route(scores, projected, ref, state, sensitivity=kwargs.get('sensitivity'),
+                        log_threshold=kwargs['log_threshold'], key_offset=kwargs.get('key_offset', 0), **pool)
 
     def _observe(self, q, k, mask, scale, causal, window, crop):
         if self.observation_producer == 'grouped_q':
@@ -782,6 +811,7 @@ class Attention:
                     fused_observations=self.fused_observations,
                     fresh_fused_calls=self.fresh_fused_calls,
                     pipelined_routes=self.pipelined_routes,
+                    risk_state=self.risk_state, dp_builds=self.dp_builds, dp_routes=self.dp_routes,
                     fresh_fused_tiles=(dict(zip(('pv_kept', 'visited'), self.fresh_tile_total.tolist()))
                                        if self.fresh_tile_total is not None else None),
                     shared_native_calls=self.shared_native_calls,

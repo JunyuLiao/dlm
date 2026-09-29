@@ -144,6 +144,21 @@ for _name in ('M1_R1_A8_c64', 'M2c_R1_A8_c64', 'M3_R3_A8_c64'):
 _RP = ('M1_R1_A8_c64', 'M2c_R1_A8_c64', 'M3_R3_A8_c64',
        'M1_R1_A64_one_c64_fused', 'M3_R6_A64_one_c64_fused', 'M3_R3_A64_one_c64_fused', 'M2c_R1_A64_one_c64_fused')
 ARM_SETS['v27rp'] = ('D_native', 'D_c64') + tuple(x for n in _RP for x in (n, n + '_rp'))
+# v27 M1-DP (dense-prefix risk, parallel selector): named variant beside plain M1/M2c/M3
+for _name in ('M1_R1_A8_c64', 'M2c_R1_A8_c64', 'M3_R3_A8_c64', 'M1_R1_A64_one_c64_fused', 'M3_R6_A64_one_c64_fused'):
+    for _shift in (None, 'minus_ln2', 'plus_ln2'):
+        _extra = dict(V27[_name][1], risk_state='dense_prefix')
+        if _shift:
+            _extra['threshold_shift'] = _shift
+        _dpn = _name + '_dp' + ('' if _shift is None else '_' + _shift)
+        V27[_dpn] = (V27[_name][0], _extra)
+        V27[_dpn + '_long'] = (V27[_name][0], dict(_extra, memory_caps='long'))
+_DP = ('M1_R1_A8_c64', 'M1_R1_A8_c64_dp', 'M1_R1_A8_c64_dp_minus_ln2', 'M1_R1_A8_c64_dp_plus_ln2',
+       'M2c_R1_A8_c64', 'M2c_R1_A8_c64_dp', 'M3_R3_A8_c64', 'M3_R3_A8_c64_dp',
+       'M1_R1_A64_one_c64_fused', 'M1_R1_A64_one_c64_fused_dp', 'M3_R6_A64_one_c64_fused',
+       'M3_R6_A64_one_c64_fused_dp')
+ARM_SETS['v27dp'] = ('D_native', 'D_c64') + _DP
+ARM_SETS['v27dplong'] = ('D_native', 'D_c64') + tuple(n + '_long' for n in _DP)
 ARM_SETS['v27rplong'] = ('D_native', 'D_c64') + tuple(x for n in _RP for x in (n + '_long', n + '_rp_long'))
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls', 'fresh_fused_calls')
 WRAPPER_DROP = ('fingerprint', 'condition', 'plugin', 'v20_arm', 'v20_scope', 'decision_interval',
@@ -231,11 +246,12 @@ def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_leng
                       sequence_lengths=[sequence_length], reps=3, blocks=3, warmup=1,
                       # Shared-support followers are not modelled by the counter twin.
                       counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long', 'v27fused', 'v27fresh', 'v27freshlong',
-                                                    'v27rp', 'v27rplong',
+                                                    'v27rp', 'v27rplong', 'v27dp', 'v27dplong',
                                                     'v27fusedlong'), operator_probe=False,
                       prepared_support_floor=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long',
                                                              'v27fused', 'v27fusedlong', 'v27fresh',
-                                                             'v27freshlong', 'v27rp', 'v27rplong'),
+                                                             'v27freshlong', 'v27rp', 'v27rplong', 'v27dp',
+                                                             'v27dplong'),
                       derived_from_v21_profile_config_sha256=hashlib.sha256(
                           json.dumps(v21_profile_config, sort_keys=True).encode()).hexdigest())
         return config

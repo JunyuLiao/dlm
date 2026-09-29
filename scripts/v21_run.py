@@ -108,12 +108,12 @@ def validate_protocol(protocol: dict) -> None:
                     c.get("route_layers", "mid3") not in ("mid3", "no_first", "no_last", "global_plus_local_mid") or
                     c.get("consumer64", 2) not in (1, 2, 4) or c.get("memory_caps", "long") != "long" or
                     c.get("fused_observe", True) is not True or c.get("fresh_fused", True) is not True or
-                    c.get("route_pipeline", True) is not True):
+                    c.get("route_pipeline", True) is not True or c.get("risk_state", "dense_prefix") != "dense_prefix"):
                 raise ValueError(f"unknown v27 execution field: {arm}")
             if not v27 and any(k in c for k in ("decision_interval", "hold_only", "threshold_shift",
                                                 "min_route_keys", "share_layers", "route_layers",
                                                 "consumer64", "memory_caps", "fused_observe", "fresh_fused",
-                                                "route_pipeline")):
+                                                "route_pipeline", "risk_state")):
                 raise ValueError(f"v27 fields outside a v27 panel: {arm}")
             if c.get("bootstrap_policy", "native_bootstrap2_observe1") != "native_bootstrap2_observe1" or \
                     c.get("observation_producer", "grouped_q") not in ("grouped_q", "repeat_interleave"):
@@ -262,7 +262,8 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
                                                                 "memory_caps")) or
                 bool(config.get("fused_observe", False)) != bool(contract.get("fused_observe", False)) or
                 bool(config.get("fresh_fused", False)) != bool(contract.get("fresh_fused", False)) or
-                bool(config.get("route_pipeline", False)) != bool(contract.get("route_pipeline", False))):
+                bool(config.get("route_pipeline", False)) != bool(contract.get("route_pipeline", False)) or
+                config.get("risk_state") != contract.get("risk_state")):
             raise ValueError("v27 clock/threshold differs from arm contract")
         if (config.get("bootstrap_policy") != contract.get("bootstrap_policy") or
                 config.get("observation_producer", "repeat_interleave") !=

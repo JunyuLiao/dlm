@@ -126,3 +126,18 @@ def test_route_pipeline_is_a_selector_execution_variant():
                        (M1, dict(route_pipeline=True, consumer64=2, fresh_fused=True))):
         with pytest.raises(ValueError):
             build(arm, **extra)
+
+
+def test_dense_prefix_risk_is_a_named_m1_m3_variant():
+    for arm, extra in ((M1, dict(risk_state='dense_prefix')),
+                       (M3, dict(risk_state='dense_prefix', consumer64=2)),
+                       (M1, dict(risk_state='dense_prefix', score_period=64, consumer64=2, fused_observe=True,
+                                 share_layers='one', threshold_shift='minus_ln2'))):
+        config = build(arm, **extra)
+        v21.validate_effective(config, config['condition'])
+        assert config['risk_state'] == 'dense_prefix'
+    for arm, extra in ((B, dict(risk_state='dense_prefix', hold_only=True)),
+                       (M1, dict(risk_state='sequential')),
+                       (M1, dict(risk_state='dense_prefix', consumer64=2, fresh_fused=True))):
+        with pytest.raises(ValueError):
+            build(arm, **extra)
