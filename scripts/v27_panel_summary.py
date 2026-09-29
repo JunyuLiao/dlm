@@ -9,7 +9,8 @@ Per task and arm:
   a question-clustered bootstrap 95% interval (resample questions, keep both seeds and
   host of each question together), per-seed geometric means, and leave-one-question-out
   range.
-W/N is amortized request cost, not a direct forward price.
+W/N and S/N are amortized costs, not direct forward prices. S is the decode span that excludes
+the initial prefill (first encoder forward end to the final CUDA event).
 usage: python -m scripts.v27_panel_summary OUT.md OUT.csv SCORED.csv [...]
 """
 from __future__ import annotations
@@ -64,8 +65,11 @@ def summarize(rows):
                        capped=sum(r['capped'] == 'True' for r in first),
                        unparsed=sum(r['parsed'] != 'True' for r in first),
                        failed=sum(not ok(r) for r in first),
-                       calls=sum(int(r['decoder_calls'] or 0) for r in first))
-            for base in ('D_native', 'D_matched'):
+                       calls=sum(int(r['decoder_calls'] or 0) for r in first),
+                       score_mean=(round(statistics.mean(float(r['first_score']) for r in first
+                                                         if r.get('first_score') not in ('', 'None', None)), 4)
+                                   if any(r.get('first_score') not in ('', 'None', None) for r in first) else None))
+            for base in ('D_native', 'D_matched', 'D_c64'):
                 ratios = defaultdict(lambda: defaultdict(list))
                 per_seed = defaultdict(lambda: defaultdict(list))
                 for (d, q, s), v in present.items():
@@ -77,11 +81,18 @@ def summarize(rows):
                     except (TypeError, ValueError):
                         continue
                     na, nb = int(a['decoder_calls']), int(b['decoder_calls'])
-                    for key, value in (('W', wa / wb), ('N', na / nb), ('WN', (wa / na) / (wb / nb))):
+                    pairs = [('W', wa / wb), ('N', na / nb), ('WN', (wa / na) / (wb / nb))]
+                    try:   # decode span: first encoder forward end -> final event (excludes the initial prefill)
+                        sa = float(a['accepted_warm_prefill_end_to_finish_cuda_span_s'])
+                        sb = float(b['accepted_warm_prefill_end_to_finish_cuda_span_s'])
+                        pairs += [('S', sa / sb), ('SN', (sa / na) / (sb / nb))]
+                    except (TypeError, ValueError, KeyError, ZeroDivisionError):
+                        pass
+                    for key, value in pairs:
                         ratios[key][q].append(value)
                         per_seed[key][s].append(value)
-                tag = 'nat' if base == 'D_native' else 'dm'
-                for key in ('W', 'N', 'WN'):
+                tag = {'D_native': 'nat', 'D_matched': 'dm', 'D_c64': 'c64'}[base]
+                for key in ('W', 'N', 'WN', 'S', 'SN'):
                     flat = [x for v in ratios[key].values() for x in v]
                     if not flat:
                         continue
@@ -89,7 +100,7 @@ def summarize(rows):
                     loo = [geo([x for q2, v in ratios[key].items() if q2 != q for x in v]) for q in ratios[key]]
                     row[f'{key}_{tag}'] = round(geo(flat), 4)
                     row[f'{key}_{tag}_ci'] = f'[{lo:.3f},{hi:.3f}]' if lo else ''
-                    if tag == 'nat':
+                    if tag in ('nat', 'c64'):
                         row[f'{key}_{tag}_by_seed'] = ' '.join(f'{s}:{geo(v):.3f}' for s, v in sorted(per_seed[key].items()))
                         row[f'{key}_{tag}_loo'] = f'{min(loo):.3f}-{max(loo):.3f}' if len(loo) > 1 else ''
             out.append(row)
@@ -118,6 +129,16 @@ def main(argv=None):
                          f"{r['capped']} | {r['calls']} | {r.get('W_nat')} {r.get('W_nat_ci','')} | {r.get('N_nat')} {r.get('N_nat_ci','')} | "
                          f"{r.get('WN_nat')} {r.get('WN_nat_ci','')} | {r.get('WN_dm')} | {r.get('W_nat_by_seed','')} | {r.get('W_nat_loo','')} |")
         lines.append('')
+        if any('W_c64' in x for x in summary if x['dataset'] == dataset):
+            lines += [f'#### {dataset}: paired vs D_c64 (strongest dense)', '',
+                      '| arm | score mean | W/D_c64 [CI] | decode span S/D_c64 [CI] | N/D_c64 [CI] | S per call [CI] | W by seed | W leave-one-question-out |',
+                      '|---|---:|---|---|---|---|---|---|']
+            for r in [x for x in summary if x['dataset'] == dataset]:
+                lines.append(f"| {r['arm']} | {r.get('score_mean')} | {r.get('W_c64')} {r.get('W_c64_ci', '')} | "
+                             f"{r.get('S_c64')} {r.get('S_c64_ci', '')} | {r.get('N_c64')} {r.get('N_c64_ci', '')} | "
+                             f"{r.get('SN_c64')} {r.get('SN_c64_ci', '')} | {r.get('W_c64_by_seed', '')} | "
+                             f"{r.get('W_c64_loo', '')} |")
+            lines.append('')
     open(md, 'w', encoding='utf-8').write('\n'.join(lines) + '\n')
     print('\n'.join(lines))
 
