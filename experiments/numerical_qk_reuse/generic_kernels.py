@@ -29,12 +29,12 @@ from .cached_executor import _logadd
 
 @tr.jit(do_not_specialize=['K', 'KT', 'PREFIX_TILES'])
 def _route_generic(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, LSE, STATE, RISK,
-           ZSUM, MUSUM, ACTSUM, BADSUM, POOLED, POOLCNT, POOLBAD,
+           ZSUM, MUSUM, ACTSUM, BADSUM, POOLED, POOLCNT, POOLBAD, KOFF, KSTORE,
            Q: tl.constexpr, K, H: tl.constexpr, HK: tl.constexpr,
            R: tl.constexpr, RP: tl.constexpr, QB: tl.constexpr,
            KT, THRESHOLD: tl.constexpr, TRACE: tl.constexpr,
            PREFIX_TILES, STORE: tl.constexpr, LOAD: tl.constexpr, POOL: tl.constexpr,
-           COMPACT: tl.constexpr, KDIV: tl.constexpr):
+           COMPACT: tl.constexpr, KDIV: tl.constexpr, TAIL: tl.constexpr = False):
     """Selector. Optionally stores or reuses exact per-row prefix summaries.
 
     For a KV tile lying WHOLLY inside the immutable prefix, ``block_z`` and
@@ -75,8 +75,13 @@ def _route_generic(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, LSE, STATE, RISK,
             eligible = tl.sum((active | bad_row).to(tl.int32), 0)>0
         else:
             valid_position = (qi[:, None]<Q) & (kk[None, :]<K)
-            score = tl.load(S+((batch*H+h)*Q+qi[:, None])*K+kk[None, :],
-                            valid_position, other=-float('inf'))
+            if TAIL:
+                # v27 fused observation: only the non-summarized tail of the scores is stored
+                score = tl.load(S+((batch*H+h)*Q+qi[:, None])*KSTORE+(kk[None, :]-KOFF),
+                                valid_position, other=-float('inf'))
+            else:
+                score = tl.load(S+((batch*H+h)*Q+qi[:, None])*K+kk[None, :],
+                                valid_position, other=-float('inf'))
             finite = valid_position & (score > -float('inf')) & (score < float('inf'))
             invalid = valid_position & ((score != score) | (score == float('inf')))
             clean = tl.where(finite, score, -float('inf'))

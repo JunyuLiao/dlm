@@ -166,6 +166,8 @@ class Attention:
         self.route_storage = 'logical'
         self.mu_mode = 'exact'
         self.min_route_keys = 0
+        self.fused_observe = False
+        self.fused_observations = 0
         self.c64_splits = 2
         self.route_layers = None       # v27: routed-layer subset (others native)
         self.share_leader = {}         # v27: follower layer -> leader layer
@@ -474,10 +476,18 @@ class Attention:
         self.aligned_copy_bytes += score.numel() * score.element_size()
         return stored
 
-    def _route(self, scores, projected, ref, valid=None, **kwargs):
+    def _route(self, scores, projected, ref, valid=None, key_offset=None, **kwargs):
         """route_only on the stored scores; pads only the sketch to the stored pitch."""
         nk, pitch = projected.shape[2], scores.shape[-1]
-        pool = dict(pool=self.mu_mode == 'pooled')
+        if key_offset is None and pitch < nk and getattr(self, 'fused_observe', False):
+            # a fused-observation tail: keys [key_offset, K) only; the prefix comes from the summary
+            summary = kwargs.get('summary')
+            if summary is None or kwargs.get('store_summary'):
+                raise ValueError('fused-observation tail scores need the held prefix summary')
+            key_offset = summary.prefix_tiles * 64
+        if key_offset:
+            kwargs['key_offset'] = key_offset
+            pitch = nk
         if self.mu_mode == 'pooled_compact':
             # Built from the UNPADDED current projection over real legal keys;
             # alignment padding never enters the mean (tile extents are equal).
@@ -516,6 +526,9 @@ class Attention:
         from transformers.integrations.sdpa_attention import sdpa_attention_forward
         if self.bootstrap not in BOOTSTRAP_POLICIES:
             raise ValueError(self.bootstrap)
+        if self.fused_observe and self.step == 1:
+            return self._fused_bootstrap_observation(identity, layer, kind, q, k, v, mask, scale,
+                                                     causal, window, crop, prefix, b, h, nq, nk)
         output = self._dense_native(native_args, native_kwargs, q, k, v, scale, window, causal)
         if self.step == 0:
             self.bootstrap_dense_calls += 1
@@ -548,6 +561,50 @@ class Attention:
         self.peak_score_physical_bytes = max(self.peak_score_physical_bytes, self.cache.physical_bytes)
         self.peak_total_bytes = max(self.peak_total_bytes, score_bytes + self.summary_bytes)
         return output
+
+    def _fused_bootstrap_observation(self, identity, layer, kind, q, k, v, mask, scale, causal,
+                                     window, crop, prefix, b, h, nq, nk):
+        """v27 fused observation (call 1): ONE dense pass returns the dense output and writes
+        the M1 prefix summaries plus the compact observation-score tail. No full [B,H,Q,K]
+        score tensor and no separate route STORE pass exist. The decision for FUTURE calls
+        is formed by the route in LOAD mode on those summaries and the tail."""
+        from .cache import Plan
+        from .v27_consumer64 import fused_observe
+        if (mask is not None or causal or window is not None or self.consumer != 'triton64'
+                or self.mu_mode not in ('exact', 'pooled_compact') or b != 1):
+            raise ValueError('fused observation is qualified for bidirectional GLOBAL, triton64, exact/compact mu')
+        self.cache.reserve(identity)
+        hk = k.shape[1]
+        valid = torch.ones((b, hk, nk), dtype=torch.bool, device=q.device)   # native legal: every real key
+        self.valid_keys[layer] = valid
+        projected, ref = self.sketches.get(layer, v, valid, prefix - crop)
+        prefix_tiles = max(0, (prefix - crop)) // 64
+        rank = 0 if self.mu_mode == 'pooled_compact' else 32
+        qb, kt = (nq + 127) // 128, (nk + 63) // 64
+        self.summaries.pop(layer, None)
+        summary = allocate_summary(b, h, qb, kt, prefix_tiles, rank, q.device, None) if prefix_tiles else None
+        if summary is None:
+            raise ValueError('fused observation needs at least one wholly-prefix tile')
+        output, tail = fused_observe(q, k, v, projected.contiguous(), scale, prefix_tiles, summary,
+                                     splits=self.c64_splits, mu=rank > 0)
+        self.cache.publish_scores(identity, self.step, tail)
+        lease = self.sketches.entries.get(layer)
+        summary.identity = (identity, self.step, None if lease is None else lease['identity'], prefix_tiles)
+        self.summaries[layer] = summary
+        self.summary_builds += 1
+        self.summary_prefix_tiles += prefix_tiles
+        self.peak_summary_bytes = max(self.peak_summary_bytes, self.summary_bytes)
+        threshold = float(self.thresholds[kind]['log_threshold'])
+        route = self._route(tail, projected, ref, valid=valid, sensitivity=self.query_sensitivity,
+                            log_threshold=threshold, summary=summary, store_summary=False,
+                            variant=self.kernel_variant, key_offset=prefix_tiles * 64)
+        torch._assert_async(~route.invalid_tiles.any(), 'Invalid scores in fused observation: request must fail')
+        torch._assert_async(torch.isfinite(output).all(), 'Invalid fused-observation output')
+        self.cache.publish_decision(identity, self.step, Decision(route.skipped, route.eligible))
+        self.bootstrap_observation_calls += 1
+        self.fused_observations += 1
+        self.current_qk_elements += b*h*nq*nk
+        return output, None
 
     def _dense_native(self, native_args, native_kwargs, q, k, v, scale, window, causal):
         """Native dense output; with the v27 64-row consumer, the same kernel all-kept."""
@@ -685,6 +742,7 @@ class Attention:
                     bootstrap_dense_calls=self.bootstrap_dense_calls,
                     gated_native_calls=self.gated_native_calls, min_route_keys=self.min_route_keys,
                     layer_native_calls=self.layer_native_calls, shared_calls=self.shared_calls,
+                    fused_observations=self.fused_observations,
                     shared_native_calls=self.shared_native_calls,
                     bootstrap_observation_calls=self.bootstrap_observation_calls,
                     observation_producer=self.observation_producer,

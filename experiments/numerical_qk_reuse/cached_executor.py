@@ -116,7 +116,7 @@ if tr is not None:
 
     @tr.jit
     def _route(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, LSE, STATE, RISK,
-               ZSUM, MUSUM, ACTSUM, BADSUM, POOLED, POOLCNT, POOLBAD,
+               ZSUM, MUSUM, ACTSUM, BADSUM, POOLED, POOLCNT, POOLBAD, KOFF, KSTORE,
                Q: tl.constexpr, K: tl.constexpr, H: tl.constexpr, HK: tl.constexpr,
                R: tl.constexpr, RP: tl.constexpr, QB: tl.constexpr,
                KT: tl.constexpr, THRESHOLD: tl.constexpr, TRACE: tl.constexpr,
@@ -499,7 +499,7 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
                                                                scores.device)
         kernels = _kernels(variant)
         kernels['route'][(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles, lse, state, risk,
-                           zs, mus, acts, bads, *_pool_arguments(None, None, shape, scores.device),
+                           zs, mus, acts, bads, *_pool_arguments(None, None, shape, scores.device), 0, 1,
                            nq, _karg(variant, nk), h, hk, 32, 32, qb, kt, log_threshold, trace,
                            prefix_tiles, bool(store_summary),
                            bool(summary is not None and not store_summary), bool(pool), False,
@@ -524,7 +524,7 @@ def attention(scores, v, z=None, reference=None, *, sensitivity=None,
 
 def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.inf,
                num_warps=8, summary=None, store_summary=False, variant='static', pool=False,
-               pooled=None, pool_count=None):
+               pooled=None, pool_count=None, key_offset=0):
     """Selector only: the SAME ``_route`` decision, with no PV and no output.
 
     ``attention(...)`` with ``skipped=None`` also produces a bitmap, but it
@@ -543,6 +543,14 @@ def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.in
     if scores.ndim != 4 or scores.dtype != torch.float32 or not scores.is_cuda or not scores.is_contiguous():
         raise ValueError('scores must be contiguous CUDA FP32 [B,H,Q,K]')
     b, h, nq, nk = scores.shape
+    tail = key_offset > 0
+    if tail:
+        # v27 fused observation: ``scores`` holds only keys [key_offset, K); every earlier
+        # tile must come from a LOADed prefix summary covering exactly key_offset keys.
+        if (variant != 'generic' or summary is None or store_summary or
+                summary.prefix_tiles * 64 != key_offset):
+            raise ValueError('tail scores need the generic selector and a LOADed summary of the prefix')
+        nk = nk + key_offset
     if z is None or reference is None or z.ndim != 4 or reference.ndim != 2:
         raise ValueError('route_only requires projected V [B,KVH,K,32] and reference [B,KVH]')
     hk = z.shape[1]
@@ -577,12 +585,13 @@ def route_only(scores, z, reference, *, sensitivity=None, log_threshold=-math.in
     prefix_tiles, zs, mus, acts, bads = _summary_arguments(summary, store_summary, shape, kt,
                                                            scores.device, mu_rank=0 if compact else 32)
     pool_args = _pool_arguments(pooled, pool_count, shape, scores.device, hk)
+    extra = dict(TAIL=True) if tail else {}
     _kernels(variant)['route'][(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad_tiles,
-                       dummy, dummy, dummy, zs, mus, acts, bads, *pool_args,
+                       dummy, dummy, dummy, zs, mus, acts, bads, *pool_args, key_offset, nk - key_offset,
                        nq, _karg(variant, nk), h, hk, 32, 32, qb, kt, log_threshold, False,
                        prefix_tiles, bool(store_summary),
                        bool(summary is not None and not store_summary), pool is True, compact,
-                       num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk))
+                       num_warps=num_warps, num_stages=1, enable_fp_fusion=False, **_extra(variant, nk), **extra)
     return Routing(skip, elig, bad_tiles, pool_args[2] if compact else None)
 
 

@@ -107,3 +107,115 @@ def consume64(q, k, v, skipped, eligible, scale, block_m=64, splits=1, num_warps
         w = torch.exp(pm - mx)
         out = (po * w[..., None]).sum(1) / (pl * w).sum(1)[..., None]
     return out.to(torch.bfloat16).transpose(0, 1).contiguous().unsqueeze(0)  # [1,Q,H,D] model-major
+
+
+@triton.jit
+def _fused_observe(Q, K, V, Z, PO, PM, PL, ZSUM, MUSUM, ACTSUM, BADSUM, TAIL,
+                   SQH, SQL, SKH, SKL, SVH, SVL,
+                   NQ, NK, H: tl.constexpr, HK: tl.constexpr, D: tl.constexpr, R: tl.constexpr,
+                   QB, PT, KT, KOFF, KSTORE, SPLITS: tl.constexpr, SCALE,
+                   MU: tl.constexpr, BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr):
+    """v27 fused observation: one dense pass that (a) forms the dense attention output
+    (online softmax over every legal tile, FP32 scores, like ``consume64``) and (b)
+    writes the M1 prefix summaries of every WHOLLY-prefix KV64 tile -- block log-mass
+    ``z``, weighted projected-V ``mu`` (optional), active/bad flags -- from the
+    observation-rounded scores (BF16 GEMM output, BF16 scale, then FP32), with the
+    same formulas as the route STORE body; (c) keeps the observation scores of the
+    remaining (canvas/boundary) tiles in a compact tail buffer for later decisions."""
+    mb, h, sp = tl.program_id(0), tl.program_id(1), tl.program_id(2)
+    kh = h // (H // HK)
+    qi = mb * BLOCK_M + tl.arange(0, BLOCK_M)
+    di = tl.arange(0, D)
+    ki = tl.arange(0, BLOCK_N)
+    ri = tl.arange(0, R)
+    rows = qi < NQ
+    qb = (mb * BLOCK_M) // 128
+    r128 = (mb * BLOCK_M) % 128 + tl.arange(0, BLOCK_M)
+    q = tl.load(Q + h * SQH + qi[:, None] * SQL + di[None, :], rows[:, None], other=0.)
+    m = tl.full((BLOCK_M,), -float('inf'), tl.float32)
+    l = tl.zeros((BLOCK_M,), tl.float32)
+    acc = tl.zeros((BLOCK_M, D), tl.float32)
+    per = tl.cdiv(KT, SPLITS)
+    lo = sp * per
+    hi = tl.minimum(lo + per, KT)
+    for j in range(lo, hi):
+        kk = j * BLOCK_N + ki
+        kv_ok = kk < NK
+        k = tl.load(K + kh * SKH + kk[:, None] * SKL + di[None, :], kv_ok[:, None], other=0.)
+        raw = tl.dot(q, tl.trans(k))
+        valid = rows[:, None] & kv_ok[None, :]
+        # (b) observation-rounded scores, route STORE formulas
+        obs = ((raw.to(tl.bfloat16).to(tl.float32) * SCALE).to(tl.bfloat16)).to(tl.float32)
+        obs = tl.where(valid, obs, -float('inf'))
+        if j < PT:
+            finite = valid & (obs > -float('inf')) & (obs < float('inf'))
+            invalid = valid & ((obs != obs) | (obs == float('inf')))
+            clean = tl.where(finite, obs, -float('inf'))
+            active = tl.sum(finite.to(tl.int32), 1) > 0
+            bad_row = tl.sum(invalid.to(tl.int32), 1) > 0
+            maximum = tl.max(clean, 1)
+            safe_max = tl.where(active, maximum, 0.)
+            weights = tl.exp(clean - safe_max[:, None])
+            ell = tl.sum(weights, 1)
+            block_z = tl.where(active, maximum + tl.log(tl.maximum(ell, 1.e-30)), -float('inf'))
+            base = (((h * QB + qb) * PT + j) * 128) + r128
+            tl.store(ZSUM + base, block_z, rows)
+            tl.store(ACTSUM + base, active.to(tl.int8), rows)
+            tl.store(BADSUM + base, bad_row.to(tl.int8), rows)
+            if MU:
+                weights = weights / tl.maximum(ell, 1.e-30)[:, None]
+                sketch = tl.load(Z + (kh * NK + kk[:, None]) * R + ri[None, :], kv_ok[:, None], other=0.)
+                mu = tl.dot(weights, sketch, input_precision='tf32x3')
+                tl.store(MUSUM + base[:, None] * R + ri[None, :], mu, rows[:, None])
+        else:
+            tl.store(TAIL + (h * NQ + qi[:, None]) * KSTORE + (kk[None, :] - KOFF), obs,
+                     rows[:, None] & kv_ok[None, :])
+        # (a) dense output with FP32 scores
+        s = tl.where(valid, raw * SCALE, -float('inf'))
+        m_new = tl.maximum(m, tl.max(s, 1))
+        safe = tl.where(m_new > -float('inf'), m_new, 0.)
+        alpha = tl.where(m > -float('inf'), tl.exp(m - safe), 0.)
+        p = tl.exp(s - safe[:, None])
+        l = alpha * l + tl.sum(p, 1)
+        v = tl.load(V + kh * SVH + kk[:, None] * SVL + di[None, :], kv_ok[:, None], other=0.)
+        acc = alpha[:, None] * acc + tl.dot(p.to(tl.bfloat16), v)
+        m = m_new
+    base = (h * SPLITS + sp) * NQ + qi
+    tl.store(PM + base, m, rows)
+    tl.store(PL + base, l, rows)
+    tl.store(PO + base[:, None] * D + di[None, :], acc, rows[:, None])
+
+
+def fused_observe(q, k, v, sketch, scale, prefix_tiles, summary, splits=2, mu=True):
+    """Dense output [1,Q,H,D] plus summaries written into ``summary`` (PrefixSummary with
+    z/mu/active/bad sized for ``prefix_tiles``) and a compact observation-score tail
+    [1,H,Q,K-64*prefix_tiles] (FP32) for the remaining tiles."""
+    b, h, nq, d = q.shape
+    hk, nk = k.shape[1], k.shape[2]
+    if b != 1 or sketch.shape != (1, hk, nk, 32):
+        raise ValueError('fused observation expects batch 1 and a [1,KVH,K,32] projected V')
+    kt, qb = math.ceil(nk / 64), math.ceil(nq / 128)
+    pt = int(prefix_tiles)
+    koff = pt * 64
+    tail = torch.empty((1, h, nq, nk - koff), device=q.device, dtype=torch.float32)
+    po = torch.empty((h, splits, nq, d), device=q.device, dtype=torch.float32)
+    pm = torch.empty((h, splits, nq), device=q.device, dtype=torch.float32)
+    pl = torch.empty((h, splits, nq), device=q.device, dtype=torch.float32)
+    dummy = torch.empty((1,), device=q.device, dtype=torch.float32)
+    small = torch.empty((1,), device=q.device, dtype=torch.int8)
+    zs = summary.z if pt else dummy
+    mus = summary.mu if (pt and mu) else dummy
+    acts = summary.active if pt else small
+    bads = summary.bad if pt else small
+    grid = (math.ceil(nq / 64), h, splits)
+    _fused_observe[grid](q, k, v, sketch.contiguous(), po, pm, pl, zs, mus, acts, bads, tail,
+                         q.stride(1), q.stride(2), k.stride(1), k.stride(2), v.stride(1), v.stride(2),
+                         nq, nk, h, hk, d, 32, qb, pt, kt, koff, nk - koff, splits, scale,
+                         MU=bool(mu), BLOCK_M=64, BLOCK_N=64, num_warps=8, num_stages=1)
+    if splits == 1:
+        out = po[:, 0] / pl[:, 0, :, None]
+    else:
+        mx = pm.amax(1, keepdim=True)
+        w = torch.exp(pm - mx)
+        out = (po * w[..., None]).sum(1) / (pl * w).sum(1)[..., None]
+    return out.to(torch.bfloat16).transpose(0, 1).contiguous().unsqueeze(0), tail

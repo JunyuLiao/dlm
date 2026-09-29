@@ -97,6 +97,20 @@ for _name in ('M3_R6_A64_one_c64', 'M3_R3_A64_one_c64', 'B_A64_c64', 'M3_R6_A64_
     V27[_name + '_long'] = (V27[_name][0], dict(V27[_name][1], memory_caps='long'))
 ARM_SETS['v27long'] = ('D_native', 'D_fast', 'D_c64', 'M3_R6_A64_one_c64_long', 'M3_R3_A64_one_c64_long',
                        'B_A64_c64_long', 'M3_R6_A64_c64_long', 'M1_R1_A8_one_c64_long')
+# v27 fused observation (call-1 dense pass writes the M1 summaries; A64 only)
+V27['M1_R1_A64_one_c64'] = ('M1_R1_A8_current_output', dict(score_period=64, share_layers='one', consumer64=2))
+V27['M2c_R1_A64_one_c64'] = ('M1_R1_A8_current_output', dict(score_period=64, share_layers='one', consumer64=2,
+                                                             mu_mode='pooled_compact'))
+for _name in ('M3_R6_A64_one_c64', 'M3_R3_A64_one_c64', 'M1_R1_A64_one_c64', 'M2c_R1_A64_one_c64', 'B_A64_c64',
+              'M3_R6_A64_c64'):
+    V27[_name + '_fused'] = (V27[_name][0], dict(V27[_name][1], fused_observe=True))
+FUSED16 = ('D_native', 'D_fast', 'D_c64', 'M3_R6_A64_one_c64', 'M3_R6_A64_one_c64_fused', 'M3_R3_A64_one_c64_fused',
+           'M1_R1_A64_one_c64', 'M1_R1_A64_one_c64_fused', 'M2c_R1_A64_one_c64_fused', 'B_A64_c64',
+           'B_A64_c64_fused', 'M3_R6_A64_c64_fused')
+ARM_SETS['v27fused'] = FUSED16
+for _name in [n for n in FUSED16 if n not in ('D_native', 'D_fast', 'D_c64')]:
+    V27[_name + '_long'] = (V27[_name][0], dict(V27[_name][1], memory_caps='long'))
+ARM_SETS['v27fusedlong'] = FUSED16[:3] + tuple(n + '_long' for n in FUSED16[3:])
 ARM_SETS['v27fast'] = ('D_native', 'D_fast', 'D_matched', 'M3_R6_A64_one', 'M3_R3_A64_one',
                        'M1_R1_A8_one', 'M3_R6_A64', 'B_A64')
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls')
@@ -184,8 +198,10 @@ def derive_config(v21_profile_config, arm_set='v24', targets=None, sequence_leng
                                   else ['model_forward']),
                       sequence_lengths=[sequence_length], reps=3, blocks=3, warmup=1,
                       # Shared-support followers are not modelled by the counter twin.
-                      counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long'), operator_probe=False,
-                      prepared_support_floor=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long'),
+                      counter_twins=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long', 'v27fused',
+                                                    'v27fusedlong'), operator_probe=False,
+                      prepared_support_floor=arm_set not in ('v27layers', 'v27fast', 'v27c64', 'v27long',
+                                                             'v27fused', 'v27fusedlong'),
                       derived_from_v21_profile_config_sha256=hashlib.sha256(
                           json.dumps(v21_profile_config, sort_keys=True).encode()).hexdigest())
         return config

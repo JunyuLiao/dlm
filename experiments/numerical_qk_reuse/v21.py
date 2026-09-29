@@ -70,7 +70,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      route_storage='logical', mu_mode='exact', score_period=8,
                      decision_interval=None, hold_only=False, threshold_shift=None,
                      min_route_keys=None, route_layers=None, share_layers=None,
-                     consumer64=None, memory_caps=None) -> dict:
+                     consumer64=None, memory_caps=None, fused_observe=False) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -141,6 +141,11 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if memory_caps not in MEMORY_CAPS or bootstrap_policy is None:
             raise ValueError('v27 memory caps must be a named long-context setting')
         extra['memory_caps'] = memory_caps
+    if fused_observe:
+        if (fused_observe is not True or consumer64 is None or score_period != 64
+                or mu_mode not in ('exact', 'pooled_compact')):
+            raise ValueError('v27 fused observation needs consumer64, A64 and exact or compact mu')
+        extra['fused_observe'] = True
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -259,6 +264,9 @@ def validate_effective(config: dict, condition: str):
         raise ValueError('v27 64-row consumer identity drift')
     if 'memory_caps' in config and (config['memory_caps'] not in MEMORY_CAPS or 'bootstrap_policy' not in config):
         raise ValueError('v27 memory caps identity drift')
+    if 'fused_observe' in config and (config['fused_observe'] is not True or 'consumer64' not in config
+                                      or config.get('score_period') != 64):
+        raise ValueError('v27 fused observation identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -311,6 +319,10 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('memory caps must be bound before any routed call')
             owner.cache.max_bytes, owner.max_summary_bytes = MEMORY_CAPS[config['memory_caps']]
+        if config.get('fused_observe'):
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('fused observation must be bound before any routed call')
+            owner.fused_observe = True
         if 'consumer64' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('consumer must be bound before any routed call')
