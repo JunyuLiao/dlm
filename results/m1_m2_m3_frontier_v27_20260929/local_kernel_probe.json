@@ -1,0 +1,64 @@
+{
+ "schema": "v27_local_kernel_probe_v1",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "torch": "2.6.0+cu124",
+ "rows": [
+  {
+   "heads": 16,
+   "kv_heads": 8,
+   "head_dim": 256,
+   "keys": 1024,
+   "queries": 256,
+   "native_sdpa_repeat_kv_ms": 0.06876799836754799,
+   "native_sdpa_enable_gqa_ms": 0.04206399992108345,
+   "consumer_kept_1.0_ms": 0.42924800515174866,
+   "consumer_kept_0.7_ms": 0.4099840074777603,
+   "consumer_kept_0.5_ms": 0.39819200336933136,
+   "consumer_kept_0.3_ms": 0.32553599774837494,
+   "consumer_kept_0.1_ms": 0.2747039943933487
+  },
+  {
+   "heads": 16,
+   "kv_heads": 8,
+   "head_dim": 256,
+   "keys": 1280,
+   "queries": 256,
+   "native_sdpa_repeat_kv_ms": 0.13470399379730225,
+   "native_sdpa_enable_gqa_ms": 0.06454399973154068,
+   "consumer_kept_1.0_ms": 0.27326400578022003,
+   "consumer_kept_0.7_ms": 0.23814399540424347,
+   "consumer_kept_0.5_ms": 0.19219200313091278,
+   "consumer_kept_0.3_ms": 0.15984000265598297,
+   "consumer_kept_0.1_ms": 0.13195200264453888
+  },
+  {
+   "heads": 16,
+   "kv_heads": 2,
+   "head_dim": 512,
+   "keys": 4096,
+   "queries": 256,
+   "native_sdpa_repeat_kv_ms": 0.5615040063858032,
+   "native_sdpa_enable_gqa_ms": 1.2550559639930725,
+   "consumer_kept_1.0_ms": 0.8076799809932709,
+   "consumer_kept_0.7_ms": 0.6498880088329315,
+   "consumer_kept_0.5_ms": 0.491552010178566,
+   "consumer_kept_0.3_ms": 0.3654399961233139,
+   "consumer_kept_0.1_ms": 0.20849599689245224
+  },
+  {
+   "heads": 16,
+   "kv_heads": 2,
+   "head_dim": 512,
+   "keys": 17536,
+   "queries": 256,
+   "native_sdpa_repeat_kv_ms": 2.3258880376815796,
+   "native_sdpa_enable_gqa_ms": 5.237663984298706,
+   "consumer_kept_1.0_ms": 4.488271951675415,
+   "consumer_kept_0.7_ms": 2.3346080780029297,
+   "consumer_kept_0.5_ms": 1.7483360171318054,
+   "consumer_kept_0.3_ms": 1.1640480160713196,
+   "consumer_kept_0.1_ms": 0.5295199751853943
+  }
+ ],
+ "note": "synthetic microbenchmark; LOCAL rows = 16q/8kv/d256 at window-sized key extents; GLOBAL rows = 16q/2kv/d512 reference"
+}
