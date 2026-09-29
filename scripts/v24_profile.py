@@ -121,7 +121,7 @@ for _shift in (None, 'minus_ln2', 'plus_ln2', 'plus_2ln2'):
         _extra['threshold_shift'] = _shift
     V27['T_fused_c64' + ('' if _shift is None else '_' + _shift)] = ('M1_R1_A8_current_output', _extra)
 _FRESH = ('T_fused_c64', 'T_fused_c64_minus_ln2', 'T_fused_c64_plus_ln2', 'T_fused_c64_plus_2ln2')
-ARM_SETS['v27fresh'] = ('D_native', 'D_c64', 'T_scope') + _FRESH + (
+ARM_SETS['v27fresh'] = ('D_native', 'D_c64') + _FRESH + (
     'M1_R1_A64_one_c64_fused', 'M3_R6_A64_one_c64_fused', 'M3_R3_A64_one_c64_fused')
 for _name in _FRESH:
     V27[_name + '_long'] = (V27[_name][0], dict(V27[_name][1], memory_caps='long'))
