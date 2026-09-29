@@ -43,7 +43,7 @@ def main(argv=None):
     torch.backends.cuda.matmul.allow_tf32 = False
     g = torch.Generator(device='cuda').manual_seed(0)
     rows = []
-    for keys in (8192, 17536):
+    for keys in [int(x) for x in __import__("os").environ.get("BENCH_KEYS", "8192,17536").split(",")]:
         h, hk, d, nq = 16, 2, 512, 256
         q = torch.randn(1, h, nq, d, device='cuda', dtype=torch.bfloat16, generator=g)
         k = torch.randn(1, hk, keys, d, device='cuda', dtype=torch.bfloat16, generator=g)
