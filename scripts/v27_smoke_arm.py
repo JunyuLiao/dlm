@@ -44,7 +44,7 @@ def main(argv=None):
         config = configs[a.dataset][arm]
         started = time.perf_counter()
         torch.cuda.empty_cache()
-        torch.cuda.reset_peak_stats()
+        torch.cuda.reset_peak_memory_stats()
         try:
             with prefill_dense64(adapter.model, os.environ.get('V27_PREFILL_DENSE64') == '1'):
                 receipt = _one(adapter, row, protocol['seeds'][0], config)
