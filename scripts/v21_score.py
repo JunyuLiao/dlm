@@ -411,9 +411,12 @@ def score(protocol_path: Path, binding_path: Path, ledgers: list[Path], gold_pat
             if sha(raw) != protocol.get("v20_protocol_sha256"):
                 raise ValueError("pinned v20 protocol identity drift")
             protocol = dict(protocol, source_identity=json.loads(raw)["source_identity"])
-        long_sets = [d for d in protocol["ids"] if d in ("ruler32k", "ruler64k")]
+        from scripts.v27_datasets import EXTRA_GOLD, base_task
+        long_sets = [d for d in protocol["ids"] if d in EXTRA_GOLD]
         gold = verify_sources(protocol, {d: p for d, p in gold_paths.items() if d not in long_sets})
-        gold.update(_long_ruler_gold(protocol, gold_paths, ruler_root, long_sets))
+        gold.update(_long_ruler_gold(protocol, gold_paths, ruler_root,
+                                     [d for d in long_sets if base_task(d) == "ruler4k"]))
+        gold.update(_long_lb_gold(protocol, gold_paths, [d for d in long_sets if base_task(d) == "longbench_v2"]))
         quality = score_firsts(protocol, records, gold, ruler_root=ruler_root, private_roots=private_roots)
     task_by_id = ({qid: row["task"] for qid, row in gold["ruler4k"].items()}
                   if not diagnostic and "ruler4k" in gold and protocol["ids"].get("ruler4k") else None)
@@ -438,6 +441,21 @@ def _long_ruler_gold(protocol: dict, gold_paths: dict, ruler_root, datasets) -> 
         for qid in protocol["ids"][dataset]:
             task = qid.split("/", 1)[1].split("_", 2)[2].rsplit("_p", 1)[0]
             table[qid] = dict(outputs=rows[qid], task_base=str(config[task]["task"]), task=task)
+        out[dataset] = table
+    return out
+
+
+def _long_lb_gold(protocol: dict, gold_paths: dict, datasets) -> dict:
+    """v27 LongBench-v2 32K/64K bins: scorer-only gold (id -> gold entry, the base LB format),
+    sha pinned in the frozen protocol; scored by the unchanged v15 LB contract."""
+    out = {}
+    for dataset in datasets:
+        raw = gold_paths[dataset].read_bytes()
+        if sha(raw) != protocol.get("extra_gold_sha256", {}).get(dataset):
+            raise ValueError(f"{dataset} gold identity drift")
+        table = json.loads(raw)
+        if not isinstance(table, dict) or not set(protocol["ids"][dataset]) <= set(table):
+            raise ValueError(f"{dataset} scorer-only gold must cover the selected ids")
         out[dataset] = table
     return out
 

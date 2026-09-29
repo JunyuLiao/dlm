@@ -125,3 +125,34 @@ def test_score_gold_paths_accept_long_only_panels():
     assert gold_paths_from(None, None, None, ['ruler32k=/g/32.json', 'ruler64k=/g/64.json']) == {
         'ruler32k': Path('/g/32.json'), 'ruler64k': Path('/g/64.json')}
     assert set(gold_paths_from('r', 'a', 'l', [])) == {'ruler4k', 'aime26', 'longbench_v2'}
+
+
+def test_long_longbench_bins_use_the_lb_contract(tmp_path):
+    from scripts.v21_run import check_task_row
+    from scripts.v27_datasets import EXTRA_GOLD, base_task
+    assert base_task('longbench_v2_64k') == 'longbench_v2' and 'longbench_v2_32k' in EXTRA_GOLD
+    check_task_row('longbench_v2_32k', dict(thinking=True, generation_budget=8192))
+    with pytest.raises(ValueError):
+        check_task_row('longbench_v2_64k', dict(thinking=False, generation_budget=128))
+    sp, op, bp, pool = _setup(tmp_path, ARMS)
+    (pool / 'longbench_v2_64k_pool_manifest.json').write_text(json.dumps([_row('longbench_v2/x64')]))
+    spec = json.loads(sp.read_text())
+    spec['ids'] = {'longbench_v2_64k': ['longbench_v2/x64']}
+    spec['extra_gold_sha256'] = {'longbench_v2_64k': 'b' * 64}
+    sp.write_text(json.dumps(spec))
+    protocol = freeze_v27(sp, op, bp, pool, tmp_path / 'out')
+    assert set(protocol['ids']) == {'longbench_v2_64k'}
+    validate_protocol(json.loads((tmp_path / 'out' / 'protocol.json').read_bytes()))
+
+
+def test_long_lb_gold_is_sha_pinned(tmp_path):
+    import hashlib
+    from scripts.v21_score import _long_lb_gold
+    gold = tmp_path / 'g.json'
+    gold.write_text(json.dumps({'longbench_v2/x64': {'answer': 'A'}}))
+    protocol = dict(ids={'longbench_v2_64k': ['longbench_v2/x64']},
+                    extra_gold_sha256={'longbench_v2_64k': hashlib.sha256(gold.read_bytes()).hexdigest()})
+    assert _long_lb_gold(protocol, {'longbench_v2_64k': gold}, ['longbench_v2_64k'])['longbench_v2_64k']
+    protocol['extra_gold_sha256']['longbench_v2_64k'] = 'c' * 64
+    with pytest.raises(ValueError):
+        _long_lb_gold(protocol, {'longbench_v2_64k': gold}, ['longbench_v2_64k'])

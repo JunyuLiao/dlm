@@ -116,7 +116,7 @@ def score_one(dataset, gold_row, receipt, record, *, ruler_scorers=None):
         parsed = result['extracted'] is not None
         correct = bool(result['correct']) and record['termination'] == 'eos'
         score = float(correct)
-    elif dataset in ('ruler4k', 'ruler32k', 'ruler64k'):
+    elif __import__('scripts.v27_datasets', fromlist=['x']).base_task(dataset) == 'ruler4k':
         from dllm.evaluation.ruler import official
         if ruler_scorers is None:
             raise ValueError('pinned official RULER scorer was not loaded')

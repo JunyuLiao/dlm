@@ -342,7 +342,8 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
         host_uuids.setdefault(entry['host'], set()).add(entry['gpu_uuid'])
     host_ids = sorted(host_uuids)
     ids, seeds = spec['ids'], list(spec['seeds'])
-    if not ids or not set(ids) <= {'longbench_v2', 'aime26', 'ruler4k', 'ruler32k', 'ruler64k'} or not seeds or \
+    from scripts.v27_datasets import DATASETS, base_task
+    if not ids or not set(ids) <= set(DATASETS) or not seeds or \
             not set(seeds) <= {101, 202, 303} or len(set(seeds)) != len(seeds):
         raise ValueError('v27 spec ids/seeds outside the allowed tasks/seeds')
     manifests, hashes = {}, {}
@@ -392,7 +393,7 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
     protocol_id = 'v27_' + spec['name'] + '_' + _sha(_bytes(dict(old_protocol=_sha(original_bytes), ids=ids,
                                                               seeds=seeds, arms=contracts)))[:16]
     assignments, schedule, block, stages = {}, [], 0, {}
-    for dataset in ('longbench_v2', 'aime26', 'ruler4k', 'ruler32k', 'ruler64k'):
+    for dataset in DATASETS:
         if dataset not in ids:
             continue
         stages[dataset] = []
@@ -663,7 +664,8 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
             source_arm = ('D_native' if contract['kind'] == 'native' else
                           'T_scope' if parent == 'T_scope' else
                           'D_matched' if parent == 'D_matched' else parent)
-            inherited = _old_config(binding, host, 'ruler4k' if dataset in ('ruler32k', 'ruler64k') else dataset,
+            from scripts.v27_datasets import base_task
+            inherited = _old_config(binding, host, base_task(dataset),
                                     'D_native' if contract['kind'] == 'v27_dense' else source_arm)
             plugin = (old.CONTROLS if source_arm in ('D_native', 'D_matched', 'T_scope')
                       else v20.PLUGIN)

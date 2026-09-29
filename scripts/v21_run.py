@@ -125,7 +125,7 @@ def validate_protocol(protocol: dict) -> None:
     diagnostic = protocol["panel_kind"] == "zero_pruning_diagnostic"
     ids = protocol.get("ids")
     required_tasks = (set(ids) if v27 and isinstance(ids, dict) and ids and
-                      set(ids) <= {"ruler4k", "aime26", "longbench_v2", "ruler32k", "ruler64k"} else
+                      set(ids) <= set(__import__("scripts.v27_datasets", fromlist=["x"]).DATASETS) else
                       {"longbench_v2"} if diagnostic else {"aime26", "longbench_v2"}
                       if protocol["panel_kind"] == "bootstrap6" else {"ruler4k"}
                       if protocol["panel_kind"] == "bootstrap6_ruler" else {"longbench_v2"}
@@ -286,13 +286,11 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
             raise ValueError(f"model metadata drift: {filename}")
 
 
-RULER_SETS = ("ruler4k", "ruler32k", "ruler64k")
-
-
 def check_task_row(dataset: str, row: dict) -> None:
     """Task contract per row: RULER (any length) runs without thinking at its task budget;
-    AIME/LB run with thinking at 8192."""
-    ruler = dataset in RULER_SETS
+    AIME/LB (any length) run with thinking at 8192."""
+    from scripts.v27_datasets import base_task
+    ruler = base_task(dataset) == "ruler4k"
     if row.get("thinking") is not (not ruler):
         raise ValueError("task thinking setting drift")
     if ruler and row.get("generation_budget") not in (30, 32, 50, 120, 128):

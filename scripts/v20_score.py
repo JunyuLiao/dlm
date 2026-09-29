@@ -165,12 +165,13 @@ def score_firsts(protocol: dict, records: dict[str, dict], gold: dict[str, dict]
             continue
         receipt = _first_receipt(record, spec, private_roots)
         dataset = spec["dataset"]
-        if dataset == "longbench_v2":
+        from scripts.v27_datasets import base_task
+        if base_task(dataset) == "longbench_v2":
             lb_pending.append((spec, record, receipt))
         else:
             row = score_one(dataset, gold[dataset][spec["id"]], receipt, record,
                             ruler_scorers=ruler_scorers)
-            if dataset == "aime26":
+            if base_task(dataset) == "aime26":
                 from experiments.diffusion_gemma_aime26_modes.protocol import final_response, numeric_score
                 answer = gold[dataset][spec["id"]]
                 expected = answer.get("expected", answer.get("answer"))
@@ -182,7 +183,7 @@ def score_firsts(protocol: dict, records: dict[str, dict], gold: dict[str, dict]
             scored[spec["cell_id"]] = row
     if lb_pending:
         results = lb_task.score([receipt["raw_completion"] for _, _, receipt in lb_pending],
-                                [gold["longbench_v2"][spec["id"]] for spec, _, _ in lb_pending],
+                                [gold[spec["dataset"]][spec["id"]] for spec, _, _ in lb_pending],
                                 [record["termination"] for _, record, _ in lb_pending])
         for (spec, record, _), row in zip(lb_pending, results):
             scored[spec["cell_id"]] = dict(score=float(row["task_correct"]), correct=bool(row["task_correct"]),
