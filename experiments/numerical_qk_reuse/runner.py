@@ -316,6 +316,15 @@ def _runtime(adapter: Any, condition: str, config: Mapping[str, Any]):
                           gamma=config["gamma"], diagnostics=bool(config["diagnostic"]))
             yield dict(binding=binding, router=router, state=state, counters=None)
         return
+    if condition == "v27_fast_dense_global_repeat_kv":
+        # v27 dense controls (D_fast / D_c64): dense attention by design, so no router and
+        # no Junyu State; only the dispatch counters are reported.
+        from experiments.numerical_qk_reuse import v27_fast_dense as fast
+        if config.get("plugin") != fast.PLUGIN:
+            raise ValueError("v27 dense control plugin identity drift")
+        with fast.install(adapter, config, condition) as value:
+            yield dict(binding=None, router=None, state=None, counters=value["counters"])
+        return
     module_name, function_name = str(config["plugin"]).split(":", 1)
     factory = getattr(importlib.import_module(module_name), function_name)
     with factory(adapter, config, condition) as value:

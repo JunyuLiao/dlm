@@ -48,3 +48,17 @@ def test_identity_guard():
     with pytest.raises(ValueError):
         with fast.install(adapter, dict(control='other'), fast.CONDITION):
             pass
+
+
+def test_runner_accepts_dense_control_without_router():
+    from experiments.numerical_qk_reuse.runner import _runtime
+    adapter, mod = _fake_adapter(_native)
+    config = dict(control='D_c64', plugin=fast.PLUGIN, diagnostic=False)
+    with _runtime(adapter, fast.CONDITION, config) as runtime:
+        assert runtime['router'] is None and runtime['state'] is None
+        assert mod.ALL_ATTENTION_FUNCTIONS['sdpa'] is not _native
+        assert runtime['counters']() == dict(fast_dense_global_calls=0, native_calls=0)
+    assert mod.ALL_ATTENTION_FUNCTIONS['sdpa'] is _native
+    with pytest.raises(ValueError):
+        with _runtime(adapter, fast.CONDITION, dict(config, plugin='x:y')):
+            pass
