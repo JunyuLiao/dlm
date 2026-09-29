@@ -100,3 +100,19 @@ def test_execution_variant_fields_freeze(tmp_path):
     protocol = freeze_v27(sp, op, bp, pool, tmp_path / 'out')
     assert protocol['arm_contracts']['M3f']['fused_observe'] is True
     validate_protocol(json.loads((tmp_path / 'out' / 'protocol.json').read_bytes()))
+
+
+@pytest.mark.parametrize('dataset,row,ok', [
+    ('ruler32k', dict(thinking=False, generation_budget=128), True),
+    ('ruler64k', dict(thinking=False, generation_budget=30), True),
+    ('ruler64k', dict(thinking=True, generation_budget=30), False),
+    ('ruler32k', dict(thinking=False, generation_budget=8192), False),
+    ('aime26', dict(thinking=True, generation_budget=8192), True),
+    ('longbench_v2', dict(thinking=False, generation_budget=8192), False)])
+def test_long_ruler_task_contract(dataset, row, ok):
+    from scripts.v21_run import check_task_row
+    if ok:
+        check_task_row(dataset, row)
+    else:
+        with pytest.raises(ValueError):
+            check_task_row(dataset, row)

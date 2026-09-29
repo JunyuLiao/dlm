@@ -282,6 +282,21 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
             raise ValueError(f"model metadata drift: {filename}")
 
 
+RULER_SETS = ("ruler4k", "ruler32k", "ruler64k")
+
+
+def check_task_row(dataset: str, row: dict) -> None:
+    """Task contract per row: RULER (any length) runs without thinking at its task budget;
+    AIME/LB run with thinking at 8192."""
+    ruler = dataset in RULER_SETS
+    if row.get("thinking") is not (not ruler):
+        raise ValueError("task thinking setting drift")
+    if ruler and row.get("generation_budget") not in (30, 32, 50, 120, 128):
+        raise ValueError("RULER task generation budget drift")
+    if not ruler and row.get("generation_budget") != 8192:
+        raise ValueError("AIME/LB generation budget drift")
+
+
 def validate_inputs(protocol_path: Path, binding_path: Path, manifests_dir: Path,
                     host: str, gpu_uuid: str, *, stage: str) -> tuple[dict, dict, dict, dict]:
     protocol, binding = _json(protocol_path), _json(binding_path)
@@ -324,12 +339,7 @@ def validate_inputs(protocol_path: Path, binding_path: Path, manifests_dir: Path
                 raise ValueError("gold/prompt identity drift")
             if not isinstance(row.get("prompt_tokens"), list) or row.get("prompt_token_count") != len(row["prompt_tokens"]):
                 raise ValueError("exact prompt token list missing")
-            if row.get("thinking") is not (dataset != "ruler4k"):
-                raise ValueError("task thinking setting drift")
-            if dataset == "ruler4k" and row.get("generation_budget") not in (30, 32, 50, 120, 128):
-                raise ValueError("RULER task generation budget drift")
-            if dataset != "ruler4k" and row.get("generation_budget") != 8192:
-                raise ValueError("AIME/LB generation budget drift")
+            check_task_row(dataset, row)
             rows[row["id"]] = row
     return protocol, binding, rows, configs
 
