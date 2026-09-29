@@ -34,12 +34,12 @@ def classify(delta):
     return 'routed_other' if delta.get('calls') or delta.get('attention_calls') else 'native'
 
 
-def physical(diag):
+def physical(diag, want='global'):
     out = {}
     phys = (diag or {}).get('physical') or {}
     for key, seg in (phys.get('by_phase_kind') or {}).items():
         phase, kind = key.split('/')
-        if kind != 'global':
+        if kind != want:
             continue
         whole = seg.get('whole') or {}
         legal = whole.get('eligible_pairs') or 0
@@ -66,6 +66,7 @@ def rows_for(host, report):
                         by.setdefault(p, []).append(ms)
                     diag = (entry.get('diagnostic_replays') or {}).get(arm) or {}
                     work = physical(diag)
+                    local = physical(diag, 'local')
                     floor = diag.get('prepared_support_floor') or {}
                     mean = statistics.mean(medians)
                     ph = {p: statistics.median(v) for p, v in by.items()}
@@ -83,6 +84,8 @@ def rows_for(host, report):
                                                            if 'D' in ph and 'H' in ph else None)
                     row['observe_overhead_A_minus_D_ms'] = (round(ph['A'] - ph['D'], 3)
                                                             if 'A' in ph and 'D' in ph else None)
+                    for p in ('A', 'D', 'H'):
+                        row[f'{p}_local_qk_skip'] = round(local[p][0], 4) if p in local else None
                     for p in ('A', 'D', 'H'):
                         row[f'{p}_qk_skip'] = round(work[p][0], 4) if p in work else None
                         row[f'{p}_pv_skip'] = round(work[p][1], 4) if p in work else None

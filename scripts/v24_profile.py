@@ -59,7 +59,14 @@ ARMS_V27THR = ('D_native',) + tuple('M3_R3_A8_' + ('P0' if s is None else s) for
 # v27 attribution: the same-consumer all-kept dense control separates kernel efficiency
 # from sparsity; the length-gated variant shows the short-context fallback.
 ARMS_V27ATTR = ('D_native', 'D_matched', 'M3_R3_A64', 'M3_R6_A64', 'B_A64', 'M3_R3_A64_G8k')
-ARM_SETS = {'v24': ARMS, 'v25': ARMS_V25, 'v27': ARMS_V27, 'v27thr': ARMS_V27THR, 'v27attr': ARMS_V27ATTR}
+# v27 all-layer scope (GLOBAL + LOCAL routed with their own frozen P0 thresholds).
+ALL_SCOPE = 'ALL_NATIVE_LEGAL'
+for _name in ('M1_R1_A8', 'M2c_pool_R1_A8', 'M3_R3_A64', 'M3_R6_A64', 'B_A64'):
+    V27[_name + '_ALL'] = (V27[_name][0], dict(V27[_name][1], scope=ALL_SCOPE))
+ARMS_V27ALL = ('D_native', 'D_matched', 'D_matched_ALL', 'M1_R1_A8_ALL', 'M2c_pool_R1_A8_ALL',
+               'M3_R3_A64_ALL', 'M3_R6_A64_ALL', 'B_A64_ALL', 'M3_R6_A64', 'B_A64')
+ARM_SETS = {'v24': ARMS, 'v25': ARMS_V25, 'v27': ARMS_V27, 'v27thr': ARMS_V27THR, 'v27attr': ARMS_V27ATTR,
+            'v27all': ARMS_V27ALL}
 PHASE_KEYS = ('bootstrap_dense_calls', 'bootstrap_observation_calls')
 WRAPPER_DROP = ('fingerprint', 'condition', 'plugin', 'v20_arm', 'v20_scope', 'decision_interval',
                 'score_refresh_period', 'output_mode', 'control')
@@ -78,11 +85,13 @@ def build_arms(v21_profile_config, arm_set='v24'):
     names = ARM_SETS[arm_set]
     control_base = {k: v for k, v in native['config'].items() if k not in WRAPPER_DROP}
     t_config = old.control_config(dict(control_base, control='T_scope'), 'v20_fresh_T', SCOPE)
-    if 'D_matched' in names:
-        matched = v21.effective_control_config(dict(control_base, consumer='triton'), SCOPE,
+    for dense, dense_scope in (('D_matched', SCOPE), ('D_matched_ALL', 'ALL_NATIVE_LEGAL')):
+        if dense not in names:
+            continue
+        matched = v21.effective_control_config(dict(control_base, consumer='triton'), dense_scope,
                                                output_score_precision='fp32_scores_bf16_pv',
                                                output_layout='model_major')
-        result.append(dict(name='D_matched', plugin=PLUGIN, condition=matched['condition'], config=matched))
+        result.append(dict(name=dense, plugin=PLUGIN, condition=matched['condition'], config=matched))
     if 'T_scope' in names:
         result.append(dict(name='T_scope', plugin=t_config['plugin'], condition=t_config['condition'],
                            config=t_config))
@@ -98,9 +107,11 @@ def build_arms(v21_profile_config, arm_set='v24'):
         result.append(dict(name=name, plugin=PLUGIN, condition=config['condition'], config=config))
     for name in [n for n in names if n in V27]:
         parent_arm, extra = V27[name]
+        extra = dict(extra)
+        scope = extra.pop('scope', SCOPE)
         selector = 'legacy_recompute' if parent_arm == 'B_A8_matched' else 'prefix_block_summary'
         config = v21.effective_config(dict(method_base, selector=selector, selector_layers='all'),
-                                      parent_arm, SCOPE,
+                                      parent_arm, scope,
                                       output_score_precision='fp32_scores_bf16_pv',
                                       output_layout='model_major', bootstrap_policy=BOOT,
                                       observation_producer='grouped_q',
@@ -147,6 +158,7 @@ def validate_config(config):
     for arm in [a for a in config['arms'] if a['name'] in V27]:
         v21.validate_effective(arm['config'], arm['condition'])
         parent_arm, extra = V27[arm['name']]
+        extra = {k: v for k, v in extra.items() if k != 'scope'}
         c = arm['config']
         if (c['parent_config'].get('v20_arm') != parent_arm or c.get('bootstrap_policy') != BOOT or
                 c.get('route_storage') != 'aligned16_odd' or c.get('observation_producer') != 'grouped_q' or

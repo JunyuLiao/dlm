@@ -9,7 +9,9 @@ BASE = {'diagnostic': False, 'policy': {'local': {'log_threshold': -3.0}, 'globa
 
 def test_every_v27_point_builds_and_validates():
     for name, (parent, extra) in V27.items():
-        config = v21.effective_config(copy.deepcopy(BASE), parent, 'GLOBAL_ONLY_NATIVE_LOCAL',
+        extra = dict(extra)
+        scope = extra.pop('scope', 'GLOBAL_ONLY_NATIVE_LOCAL')
+        config = v21.effective_config(copy.deepcopy(BASE), parent, scope,
                                       output_score_precision='fp32_scores_bf16_pv', output_layout='model_major',
                                       bootstrap_policy=BOOT, observation_producer='grouped_q',
                                       route_storage='aligned16_odd', **extra)
