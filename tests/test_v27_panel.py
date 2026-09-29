@@ -116,3 +116,12 @@ def test_long_ruler_task_contract(dataset, row, ok):
     else:
         with pytest.raises(ValueError):
             check_task_row(dataset, row)
+
+
+def test_score_gold_paths_accept_long_only_panels():
+    from pathlib import Path
+    from scripts.v21_score import gold_paths_from
+    assert gold_paths_from(None, None, None, []) is None
+    assert gold_paths_from(None, None, None, ['ruler32k=/g/32.json', 'ruler64k=/g/64.json']) == {
+        'ruler32k': Path('/g/32.json'), 'ruler64k': Path('/g/64.json')}
+    assert set(gold_paths_from('r', 'a', 'l', [])) == {'ruler4k', 'aime26', 'longbench_v2'}

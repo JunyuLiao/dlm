@@ -501,6 +501,14 @@ def write_redacted(summary: dict, out_prefix: Path) -> None:
     (out_prefix.with_suffix(".md")).write_bytes(("\n".join(lines) + "\n").encode())
 
 
+def gold_paths_from(ruler, aime, longbench, extra) -> dict[str, Path] | None:
+    """Gold paths actually given (a long-RULER-only panel passes only --extra-gold); the scorer
+    still requires them to equal the panel's datasets exactly."""
+    paths = {d: Path(p) for d, p in (("ruler4k", ruler), ("aime26", aime), ("longbench_v2", longbench)) if p}
+    paths.update({d: Path(p) for d, p in (x.split("=", 1) for x in extra)})
+    return paths or None
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--protocol", type=Path, required=True)
@@ -514,10 +522,7 @@ def main() -> None:
     p.add_argument("--extra-gold", action="append", default=[], help="v27 long RULER: dataset=path")
     p.add_argument("--out-prefix", type=Path, required=True)
     a = p.parse_args()
-    gold_paths = ({"ruler4k": a.ruler_gold, "aime26": a.aime_gold, "longbench_v2": a.longbench_gold}
-                  if all((a.ruler_gold, a.aime_gold, a.longbench_gold)) else None)
-    if gold_paths is not None:
-        gold_paths.update({d: Path(p) for d, p in (x.split("=", 1) for x in a.extra_gold)})
+    gold_paths = gold_paths_from(a.ruler_gold, a.aime_gold, a.longbench_gold, a.extra_gold)
     private_roots = {h: Path(v) for h, v in _read(a.private_roots).items()} if a.private_roots else None
     result = score(a.protocol, a.binding, a.ledger, gold_paths, a.ruler_root, private_roots)
     write_redacted(result, a.out_prefix)
