@@ -488,6 +488,7 @@ class Attention:
         if key_offset:
             kwargs['key_offset'] = key_offset
             pitch = nk
+        pool = dict(pool=self.mu_mode == 'pooled')
         if self.mu_mode == 'pooled_compact':
             # Built from the UNPADDED current projection over real legal keys;
             # alignment padding never enters the mean (tile extents are equal).
