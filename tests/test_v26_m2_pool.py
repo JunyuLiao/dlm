@@ -52,9 +52,16 @@ def test_pool_excludes_illegal_and_padding_keys():
 
 def test_v21_config_rejects_pooled_without_bootstrap_and_bad_period():
     from experiments.numerical_qk_reuse import v21
-    with pytest.raises(ValueError):
-        v21.effective_config({'diagnostic': False}, 'M1_R1_A8_current_output', 'GLOBAL_ONLY_NATIVE_LOCAL',
+    # v27: a valid minimal base, a passing control, then one broken field at a time.
+    base = {'diagnostic': False, 'policy': {'local': {'log_threshold': -3.0}, 'global': {'log_threshold': -2.0}}}
+    ok = dict(output_score_precision='fp32_scores_bf16_pv', bootstrap_policy='native_bootstrap2_observe1')
+    v21.effective_config(dict(base), 'M1_R1_A8_current_output', 'GLOBAL_ONLY_NATIVE_LOCAL', mu_mode='pooled', **ok)
+    with pytest.raises(ValueError, match='pooled mu requires the bootstrap'):
+        v21.effective_config(dict(base), 'M1_R1_A8_current_output', 'GLOBAL_ONLY_NATIVE_LOCAL',
                              output_score_precision='fp32_scores_bf16_pv', mu_mode='pooled')
+    with pytest.raises(ValueError, match='score period must be'):
+        v21.effective_config(dict(base), 'M3_R3_A8_current_output', 'GLOBAL_ONLY_NATIVE_LOCAL',
+                             score_period=12, **ok)
 
 
 def test_reserve_physical_keeps_storage_shared_with_another_entry():

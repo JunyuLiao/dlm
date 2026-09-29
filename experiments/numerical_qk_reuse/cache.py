@@ -64,6 +64,9 @@ class ScoreCache:
         self.score_period = score_period
         self.decision_interval = decision_interval
         self.max_bytes = max_bytes
+        # v27 anchor-held B: decisions refresh only with a true score anchor,
+        # the first decision, or an identity change; never on a hidden R clock.
+        self.hold_only = False
         self.entries = {}
 
     def clear(self):
@@ -122,7 +125,8 @@ class ScoreCache:
             raise ValueError("Decoder iteration went backwards without reset")
         fresh = (force_refresh or (step - self.origin) % self.score_period == 0
                  or age >= self.score_period)
-        decision = fresh or old.decision is None or decision_age >= self.decision_interval
+        decision = (fresh or old.decision is None or
+                    (not self.hold_only and decision_age >= self.decision_interval))
         return Plan(fresh, decision, "forced_mask_refresh" if force_refresh else
                     "score_schedule" if fresh else "decision_schedule" if decision else "held_decision", age, decision_age)
 

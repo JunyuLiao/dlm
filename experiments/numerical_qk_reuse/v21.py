@@ -26,7 +26,16 @@ BOOTSTRAP_POLICIES = ('native_bootstrap2_observe1',)
 OBSERVATION_PRODUCERS = ('repeat_interleave', 'grouped_q')
 ROUTE_STORAGES = ('logical', 'aligned16', 'aligned16_odd')
 MU_MODES = ('exact', 'pooled')
-SCORE_PERIODS = (8, 16)
+SCORE_PERIODS = (8, 16, 64)
+# v27 optional clock/threshold overrides on top of a named parent arm. The
+# parent arm stays as namespaced provenance; the effective values are bound on
+# the runtime and reported through one authoritative effective_method record.
+DECISION_INTERVALS = (6,)
+_LN2 = 0.6931471805599453
+# Named log-threshold shifts in ln2 units; larger shifts allow more deletion.
+# The realized sparsity is measured, never inferred from the shift.
+THRESHOLD_SHIFTS = {'minus_ln2': -_LN2, 'plus_ln2': _LN2, 'plus_2ln2': 2 * _LN2,
+                    'plus_3ln2': 3 * _LN2, 'plus_4ln2': 4 * _LN2}
 
 
 def _fingerprint(config):
@@ -45,7 +54,8 @@ def _check_modes(precision, layout, parent):
 def effective_config(base: dict, arm: str, scope: str, *,
                      output_score_precision='legacy_bf16_scores', output_layout='head_major',
                      bootstrap_policy=None, observation_producer='repeat_interleave',
-                     route_storage='logical', mu_mode='exact', score_period=8) -> dict:
+                     route_storage='logical', mu_mode='exact', score_period=8,
+                     decision_interval=None, hold_only=False, threshold_shift=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -81,6 +91,19 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if score_period not in SCORE_PERIODS or bootstrap_policy is None:
             raise ValueError('v26 score period must be 8 or 16 on the bootstrap mainline')
         extra['score_period'] = score_period
+    if decision_interval is not None:
+        if (decision_interval not in DECISION_INTERVALS or bootstrap_policy is None
+                or arm != 'M3_R3_A8_current_output'):
+            raise ValueError('v27 decision interval override requires the bootstrap M3 parent')
+        extra['decision_interval'] = decision_interval
+    if hold_only:
+        if hold_only is not True or bootstrap_policy is None or arm != 'B_A8_matched':
+            raise ValueError('v27 hold_only requires the bootstrap matched-B parent')
+        extra['hold_only'] = True
+    if threshold_shift is not None:
+        if threshold_shift not in THRESHOLD_SHIFTS or bootstrap_policy is None:
+            raise ValueError('v27 threshold shift must be a named shift on the bootstrap mainline')
+        extra['threshold_shift'] = threshold_shift
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -175,6 +198,17 @@ def validate_effective(config: dict, condition: str):
     if 'score_period' in config and (config['score_period'] not in SCORE_PERIODS[1:]
                                      or 'bootstrap_policy' not in config):
         raise ValueError('v26 score period identity drift')
+    arm = parent.get('v20_arm')
+    if 'decision_interval' in config and (config['decision_interval'] not in DECISION_INTERVALS
+                                          or 'bootstrap_policy' not in config
+                                          or arm != 'M3_R3_A8_current_output'):
+        raise ValueError('v27 decision interval identity drift')
+    if 'hold_only' in config and (config['hold_only'] is not True or 'bootstrap_policy' not in config
+                                  or arm != 'B_A8_matched'):
+        raise ValueError('v27 hold_only identity drift')
+    if 'threshold_shift' in config and (config['threshold_shift'] not in THRESHOLD_SHIFTS
+                                        or 'bootstrap_policy' not in config):
+        raise ValueError('v27 threshold shift identity drift')
     status = 'diagnostic' if precision == 'fp32_scores_bf16_pv' else 'legacy'
     if config.get('output_precision_status') != status:
         raise ValueError('v21 output precision status drift')
@@ -215,6 +249,20 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('score period must be bound before any routed call')
             owner.cache.score_period = config['score_period']
+        if 'decision_interval' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('decision interval must be bound before any routed call')
+            owner.cache.decision_interval = config['decision_interval']
+        if config.get('hold_only'):
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('hold_only must be bound before any routed call')
+            owner.cache.hold_only = True
+        if 'threshold_shift' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('threshold shift must be bound before any routed call')
+            shift = THRESHOLD_SHIFTS[config['threshold_shift']]
+            owner.thresholds = {kind: dict(value, log_threshold=float(value['log_threshold']) + shift)
+                                for kind, value in owner.thresholds.items()}
         if 'bootstrap_policy' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('bootstrap must be bound before any routed call')
@@ -223,14 +271,45 @@ def install(adapter, config: dict, condition: str):
         owner.output_precision_extra_qk_elements_upper_bound = 0
         parent_counters = runtime['counters']
 
+        def effective_method():
+            # Read from the BOUND runtime, never from the parent arm name.
+            cache = getattr(owner, 'cache', None)
+            if cache is None:
+                return None
+            return dict(score_period=cache.score_period,
+                        decision_interval=None if cache.hold_only else cache.decision_interval,
+                        hold_only=bool(cache.hold_only), score_clock_origin=cache.origin,
+                        mu_mode=getattr(owner, 'mu_mode', 'exact'),
+                        route_storage=getattr(owner, 'route_storage', 'logical'),
+                        scope=scope, bootstrap_policy=getattr(owner, 'bootstrap', None),
+                        threshold_shift=config.get('threshold_shift'),
+                        log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
+                        output_score_precision=owner.output_score_precision,
+                        output_layout=owner.output_layout,
+                        observation_producer=getattr(owner, 'observation_producer', 'repeat_interleave'),
+                        selector=getattr(owner, 'selector', None),
+                        parent_v20_arm=config['parent_config'].get('v20_arm'))
+
         def counters():
             values = parent_counters()
-            return dict(values, v21_scope=scope, v21_decision_interval=interval,
+            effective = effective_method() if config['parent_kind'] == 'v20_method' else None
+            clock = {}
+            if effective is not None and 'score_refresh_period' in values:
+                # v20 writes its constant parent A8 here; keep it namespaced.
+                clock = dict(parent_v20_score_refresh_period=values['score_refresh_period'],
+                             parent_v20_decision_interval=values.get('decision_interval'),
+                             score_refresh_period=effective['score_period'],
+                             decision_interval=effective['decision_interval'])
+            return dict(values, **clock, effective_method=effective,
+                        v21_scope=scope, v21_decision_interval=interval,
                         v23_bootstrap_policy=config.get('bootstrap_policy'),
                         v23_observation_producer=config.get('observation_producer', 'repeat_interleave'),
                         v25_route_storage=config.get('route_storage', 'logical'),
                         v26_mu_mode=config.get('mu_mode', 'exact'),
                         v26_score_period=config.get('score_period', 8),
+                        v27_decision_interval=config.get('decision_interval'),
+                        v27_hold_only=bool(config.get('hold_only', False)),
+                        v27_threshold_shift=config.get('threshold_shift'),
                         output_score_precision=owner.output_score_precision,
                         output_layout=owner.output_layout,
                         output_precision_status=config['output_precision_status'],
