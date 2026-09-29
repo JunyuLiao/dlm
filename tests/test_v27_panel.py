@@ -156,3 +156,20 @@ def test_long_lb_gold_is_sha_pinned(tmp_path):
     protocol['extra_gold_sha256']['longbench_v2_64k'] = 'c' * 64
     with pytest.raises(ValueError):
         _long_lb_gold(protocol, {'longbench_v2_64k': gold}, ['longbench_v2_64k'])
+
+
+def test_g75_port_arms_freeze_and_validate(tmp_path):
+    arms = dict(ARMS, G75L0_c64=dict(kind='g75_c64', local_fraction=0.0),
+                G75L15_c64=dict(kind='g75_c64', local_fraction=0.15),
+                G75L30_c64=dict(kind='g75_c64', local_fraction=0.3))
+    sp, op, bp, pool = _setup(tmp_path, arms)
+    protocol = freeze_v27(sp, op, bp, pool, tmp_path / 'out')
+    c = protocol['arm_contracts']
+    assert c['G75L0_c64'] == dict(kind='v27_g75', parent_v20_arm='D_matched', local_fraction=0.0,
+                                  scope='GLOBAL_ONLY_NATIVE_LOCAL')
+    assert c['G75L30_c64']['scope'] == 'ALL_NATIVE_LEGAL'
+    validate_protocol(json.loads((tmp_path / 'out' / 'protocol.json').read_bytes()))
+    (tmp_path / 'bad').mkdir()
+    sp2, op2, bp2, pool2 = _setup(tmp_path / 'bad', dict(ARMS, G=dict(kind='g75_c64', local_fraction=0.5)))
+    with pytest.raises(ValueError):
+        freeze_v27(sp2, op2, bp2, pool2, tmp_path / 'bad' / 'out')

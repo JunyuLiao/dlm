@@ -90,10 +90,37 @@ def main(argv=None):
         else:
             row['impl']['flex_attention_gqa'] = dict(error=flex_error)
         try:
-            import flashinfer  # noqa: F401
-            row['impl']['flashinfer'] = dict(note=f'importable ({flashinfer.__version__}); no d=512 GQA wrapper timed')
+            import flashinfer
+            qn, kn, vn = (x[0].transpose(0, 1).contiguous() for x in (q, k, v))   # NHD layout
+            record(f'flashinfer_{flashinfer.__version__}_single_prefill',
+                   lambda: flashinfer.single_prefill_with_kv_cache(qn, kn, vn, causal=False, sm_scale=scale)[None],
+                   True)
         except Exception as exc:
-            row['impl']['flashinfer'] = dict(error=f'{type(exc).__name__}: {exc}'[:160])
+            row['impl']['flashinfer'] = dict(error=f'{type(exc).__name__}: {exc}'[:240])
+        try:   # vLLM's Triton unified attention (paged KV), the backend vLLM uses for head sizes FA lacks
+            import math
+            from vllm.attention.ops.triton_unified_attention import unified_attention
+            bs = 64
+            nb = math.ceil(keys / bs)
+            kc = torch.zeros(nb * bs, HK, D, device='cuda', dtype=torch.bfloat16)
+            vc = torch.zeros_like(kc)
+            kc[:keys], vc[:keys] = k[0].transpose(0, 1), v[0].transpose(0, 1)
+            kc, vc = kc.view(nb, bs, HK, D), vc.view(nb, bs, HK, D)
+            qn = q[0].transpose(0, 1).contiguous()
+            out = torch.empty_like(qn)
+            cu_q = torch.tensor([0, NQ], device='cuda', dtype=torch.int32)
+            used = torch.tensor([keys], device='cuda', dtype=torch.int32)
+            table = torch.arange(nb, device='cuda', dtype=torch.int32)[None]
+
+            def vllm_fn():
+                unified_attention(q=qn, k=kc, v=vc, out=out, cu_seqlens_q=cu_q, max_seqlen_q=NQ, seqused_k=used,
+                                  max_seqlen_k=keys, softmax_scale=scale, causal=False, window_size=(-1, -1),
+                                  block_table=table, softcap=0, q_descale=None, k_descale=None, v_descale=None)
+                return out[None]
+            import vllm
+            record(f'vllm_{vllm.__version__}_triton_unified', vllm_fn, True)
+        except Exception as exc:
+            row['impl']['vllm_triton_unified'] = dict(error=f'{type(exc).__name__}: {exc}'[:240])
         rows.append(row)
         print(json.dumps(dict(keys=keys, **{n: (x.get('ms'), x.get('tflops')) if 'ms' in x else x.get('error', x.get('skipped', x.get('note')))[:90]
                                             for n, x in row['impl'].items()})), flush=True)

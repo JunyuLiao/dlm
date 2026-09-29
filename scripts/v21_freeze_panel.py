@@ -379,6 +379,15 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
         elif arm['kind'] == 'dense_c64':
             # strongest dense: native model with GLOBAL attention through the 64-row kernel (all kept)
             contracts[name] = dict(kind='v27_dense', control='D_c64', scope=SCOPE)
+        elif arm['kind'] == 'g75_c64':
+            # v27 port of the vLLM-era observe-once-then-reuse mass ranking (F = G75L0, S15, S30) on
+            # the 64-row consumer; step 0 dense, step 1 observes and ranks, held for the canvas
+            from experiments.numerical_qk_reuse.v20_controls import G75_LOCAL_FRACTIONS
+            lf = float(arm.get('local_fraction', 0.0))
+            if lf not in G75_LOCAL_FRACTIONS:
+                raise ValueError(f'unknown G75 local fraction: {name}')
+            contracts[name] = dict(kind='v27_g75', parent_v20_arm='D_matched', local_fraction=lf,
+                                   scope=SCOPE if lf == 0.0 else 'ALL_NATIVE_LEGAL')
         elif arm['kind'] == 'dense_matched':
             # Same Triton consumer, FP32 scores, model-major output, every legal tile kept.
             contracts[name] = dict(kind='v21_control', parent_v20_arm='D_matched', scope=SCOPE,
@@ -683,6 +692,14 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                     result['source_hashes'][str(src)] = _sha(src.read_bytes())
                 # the runner records the config fingerprint in every receipt
                 result['fingerprint'] = old.sha_json(result)
+            elif contract['kind'] == 'v27_g75':
+                from experiments.numerical_qk_reuse import v20_controls as controls
+                hashes = dict(base['source_hashes'])
+                for src in (Path(controls.__file__).resolve(), Path(controls.__file__).resolve().with_name('v27_consumer64.py')):
+                    hashes[str(src)] = _sha(src.read_bytes())
+                result = old.control_config(dict(base, consumer='triton64', support_build=None, source_hashes=hashes,
+                                                 g75_local_fraction=contract['local_fraction']),
+                                            'v27_G75_c64', contract['scope'])
             elif contract['kind'] == 'v20_legacy':
                 result = old.control_config(dict(base, control='T_scope'), 'v20_fresh_T', SCOPE)
             elif contract['kind'] == 'v21_control':

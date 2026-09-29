@@ -83,6 +83,11 @@ def validate_protocol(protocol: dict) -> None:
                 raise ValueError("legacy task/control identity drift")
         elif c.get("kind") == "v27_dense":
             pass
+        elif c.get("kind") == "v27_g75":
+            if (not v27 or c.get("parent_v20_arm") != "D_matched" or c.get("local_fraction") not in (0.0, 0.15, 0.3)
+                    or c.get("scope") != ("GLOBAL_ONLY_NATIVE_LOCAL" if c.get("local_fraction") == 0.0
+                                          else "ALL_NATIVE_LEGAL")):
+                raise ValueError(f"v27 G75 port contract drift: {arm}")
         elif c.get("kind") in ("v21_method", "v21_control"):
             if (c.get("scope") not in ("ALL_NATIVE_LEGAL", "GLOBAL_ONLY_NATIVE_LOCAL") or
                     c.get("output_score_precision") not in ("legacy_bf16_scores", "fp32_scores_bf16_pv") or
@@ -228,6 +233,13 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
     if contract["kind"] == "native":
         if config.get("condition") != "native_dense" or config.get("plugin"):
             raise ValueError("native config is not native_dense")
+        parent = config
+    elif contract["kind"] == "v27_g75":
+        if (config.get("plugin") != "experiments.numerical_qk_reuse.v20_controls:install" or
+                config.get("condition") != "v27_G75_c64" or config.get("consumer") != "triton64" or
+                config.get("v20_scope") != contract["scope"] or
+                config.get("g75_local_fraction") != contract["local_fraction"]):
+            raise ValueError("v27 G75 port config differs from its contract")
         parent = config
     elif contract["kind"] == "v27_dense":
         from experiments.numerical_qk_reuse import v27_fast_dense as fast
