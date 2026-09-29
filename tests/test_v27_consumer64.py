@@ -45,3 +45,19 @@ def test_causal_dense64_matches_causal_reference():
         is_causal=True, scale=512 ** -.5).transpose(1, 2)
     got = dense64(q, k, v, 512 ** -.5, splits=1, causal=True).float()
     torch.testing.assert_close(got, want, atol=2e-2, rtol=2e-2)
+
+
+def test_sliding_causal_dense64_matches_masked_reference():
+    from experiments.numerical_qk_reuse.v27_consumer64 import dense64
+    g = torch.Generator(device='cuda').manual_seed(4)
+    n, w = 900, 256
+    q = torch.randn(1, 16, n, 256, device='cuda', dtype=torch.bfloat16, generator=g)
+    k = torch.randn(1, 8, n, 256, device='cuda', dtype=torch.bfloat16, generator=g)
+    v = torch.randn(1, 8, n, 256, device='cuda', dtype=torch.bfloat16, generator=g)
+    i = torch.arange(n, device='cuda')
+    mask = (i[None, :] <= i[:, None]) & (i[None, :] > i[:, None] - w)
+    want = torch.nn.functional.scaled_dot_product_attention(
+        q.float(), k.repeat_interleave(2, 1).float(), v.repeat_interleave(2, 1).float(),
+        attn_mask=mask, scale=256 ** -.5).transpose(1, 2)
+    got = dense64(q, k, v, 256 ** -.5, splits=1, causal=True, window=w).float()
+    torch.testing.assert_close(got, want, atol=2e-2, rtol=2e-2)
