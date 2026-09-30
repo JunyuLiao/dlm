@@ -205,6 +205,7 @@ class Attention:
         self.pipelined_routes = 0
         self.risk_state = 'kept'       # v27 M1-DP: 'dense_prefix' (named variant)
         self.risk_budget_shift = None  # v27 risk budget on M1-DP: summed-risk bound (log shift over the threshold)
+        self.risk_topk = None          # v27 target sparsity on M1-DP: kept fraction of prefix tiles by risk rank
         self.density_gate = None       # v27 density gate preset (DENSITY_GATES), named variant
         self._fa4_lists, self.fa4_list_builds = [], 0   # v27 FA4 consumer: block lists per keep map
         # v27 async observation route: the observation call's selector (whose decision serves only LATER calls)
@@ -625,7 +626,7 @@ class Attention:
                   else float(kwargs['log_threshold']) + float(self.risk_budget_shift))
         return dp.route(scores, projected, ref, state, sensitivity=kwargs.get('sensitivity'),
                         log_threshold=kwargs['log_threshold'], key_offset=kwargs.get('key_offset', 0),
-                        risk_budget=budget, **pool)
+                        risk_budget=budget, risk_topk=self.risk_topk, **pool)
 
     def _observe(self, q, k, mask, scale, causal, window, crop):
         if self.observation_producer == 'grouped_q':

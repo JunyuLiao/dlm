@@ -42,7 +42,7 @@ def test_rejects_unnamed_settings_and_bad_geometry():
         sparsed_bitmap(scores, prefix, 1.0)
     with pytest.raises(ValueError):
         sparsed_bitmap(scores, scores.shape[-1], 0.3)
-    assert SPARSED_KEEPS == (0.1, 0.2, 0.3) and SPARSED_SKIPS == (1, 10)
+    assert SPARSED_KEEPS == (0.1, 0.2, 0.3, 0.5, 0.6, 0.7) and SPARSED_SKIPS == (1, 10)
 
 
 def test_sparsed_arm_freezes_as_a_labelled_port(tmp_path):

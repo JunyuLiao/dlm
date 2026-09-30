@@ -57,7 +57,7 @@ G75_LOCAL_FRACTIONS = (0.0, 0.15, 0.30)   # v27 port of the vLLM-era F (G75L0) /
 # (SparseD applies the same ratio to generation keys; 4 tiles here), the ratio applies to the prefix keys, and the
 # canvas has an adaptive length, so skip is a number of steps: 10 = 20% of the 48-step cap (SparseD's default
 # skip=0.2) or 1 (matched to B/G75). Kernel: FA4 block-sparse (SparseD uses FlexAttention).
-SPARSED_KEEPS = (0.1, 0.2, 0.3)
+SPARSED_KEEPS = (0.1, 0.2, 0.3, 0.5, 0.6, 0.7)   # 0.5-0.7: target sparsity 30-50% (AIME comparison)
 SPARSED_SKIPS = (1, 10)
 
 

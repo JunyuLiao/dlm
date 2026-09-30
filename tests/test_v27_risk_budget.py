@@ -49,3 +49,19 @@ def test_sensitivity_and_reference_scale_the_risk():
     assert budget_skip(lognorm, eligible, t, ref, 100, math.log(0.7))[0, 0, 0].sum().item() == 1
     ref = torch.full((1, 1), 4.0)             # and a 4x reference halves it again: 0.15 + 0.15
     assert budget_skip(lognorm, eligible, t, ref, 100, math.log(0.7))[0, 0, 0].tolist() == [True, True]
+
+
+def test_topk_keeps_the_highest_risk_fraction():
+    from experiments.numerical_qk_reuse.v27_dense_prefix import topk_skip
+    lognorm, eligible, t, ref = _state([math.log(v) for v in (0.5, 0.1, 0.4, 0.2, 0.3, 0.05, 0.6, 0.15, 0.25, 0.35)])
+    drop = topk_skip(lognorm, eligible, t, ref, 100, 0.6)       # keep 60%: drop the 4 lowest-risk tiles
+    assert drop[0, 0, 0].tolist() == [False, True, False, True, False, True, False, True, False, False]
+    assert torch.equal(drop[0, 0], drop[0, 1])
+
+
+def test_topk_never_drops_infinite_risk_and_respects_eligibility():
+    from experiments.numerical_qk_reuse.v27_dense_prefix import topk_skip
+    lognorm, eligible, t, ref = _state([float('inf'), math.log(0.1), math.log(0.2), math.log(0.3)])
+    eligible[0, :, 0, 1] = 0
+    drop = topk_skip(lognorm, eligible, t, ref, 100, 0.5)       # 2 to drop; tile 0 infinite, tile 1 ineligible
+    assert drop[0, 0, 0].tolist() == [False, False, True, True]
