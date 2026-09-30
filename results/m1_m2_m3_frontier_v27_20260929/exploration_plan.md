@@ -65,3 +65,18 @@ The paper's identifiable contribution stays Fan's M1/M2/M3 selector. Items marke
   - `ent0.05` therefore turned 140 of B's 157 calls dense. `stall2` rarely fires (2 canvases for B, never for M3).
   - **Conclusion so far:** per-canvas step counts are set by the model's own low-entropy tail (a few uncertain tokens). Entropy/stall gates give little forward-count gain and cost per-forward savings.
   - Sparse-induced step inflation is judged from the v3 panel's paired calls, not from one item.
+
+- **Keep-map drift** (`substrate/map_drift_75k.jsonl`, 75K item, 7 canvases). Recall = the share of the newer map's kept tiles that the older map already kept.
+
+  | arm | cross-canvas recall | cross-canvas Jaccard | within-canvas recall |
+  |---|---:|---:|---:|
+  | B | 0.54 | 0.37 | — |
+  | M3 R6 | 0.64 | — | 0.68 between decisions 6 calls apart |
+  | M1-DP | 0.72 | — | 0.95 between consecutive calls |
+
+  - **Carrying B maps across canvases would drop about half of the tiles the next canvas keeps.** It is dropped as a clean negative, besides being a Prefilling-dLLM/PulseCol collision.
+- **Decision cost** (`observe_profile_3`):
+  - The dense-prefix (DP) risk decides in 0.27 ms per layer, against 4.24 ms for the sequential pipelined route.
+  - M1-DP's observation call is 8.55 ms per layer.
+  - Hence M3 R6 + DP and M2c + DP are cheap-decision combinations; both go into the supplement panel with the async observation route.
+  - The async route itself is verified exact: identical output-token hashes and calls for B, M3 R6 and M1-DP at 75K.

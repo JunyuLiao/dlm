@@ -53,7 +53,7 @@ def main(argv=None):
             return out
         return wrapper
     patches = [(integration.Attention, '_fused_bootstrap_observation'), (integration.Attention, '_bootstrap_call'),
-               (integration.Attention, '_route'), (integration.Attention, '_consume'),
+               (integration.Attention, '_route'), (integration.Attention, '_route_dense_prefix'), (integration.Attention, '_consume'),
                (integration.Attention, '_dense_native'), (integration.Attention, '__call__'),
                (integration, 'allocate_summary'), (v27_consumer64, 'fused_observe')]
     for owner_name in ('Sketches', 'ScoreCache'):
