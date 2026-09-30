@@ -45,22 +45,24 @@ def summarize(rows):
     by = defaultdict(dict)
     for r in rows:
         by[(r['dataset'], r['id'], r['seed'])][r['arm']] = r
-    arms = sorted({r['arm'] for r in rows}, key=lambda a: (a != 'D_native', a != 'D_matched', a))
+    # quality reference: D_native when the panel has it, else the fastest official dense (FA4 panels)
+    ref = 'D_native' if any(r['arm'] == 'D_native' for r in rows) else 'D_fa4_allkept'
+    arms = sorted({r['arm'] for r in rows}, key=lambda a: (a != ref, a != 'D_matched', a))
     out = []
     for dataset in sorted({k[0] for k in by}):
-        cells = {k: v for k, v in by.items() if k[0] == dataset and 'D_native' in v}
+        cells = {k: v for k, v in by.items() if k[0] == dataset and ref in v}
         for arm in arms:
             present = {k: v for k, v in cells.items() if arm in v}
             if not present:
                 continue
             first = [v[arm] for v in present.values()]
             ok = lambda r: r.get('first_status') == 'success'
-            row = dict(dataset=dataset, arm=arm, cells=len(present),
+            row = dict(dataset=dataset, arm=arm, cells=len(present), quality_reference=ref,
                        correct=sum(r['strict_correct'] == 'True' for r in first),
-                       native_correct=sum(v['D_native']['strict_correct'] == 'True' for v in present.values()),
-                       arm_only=sum(v[arm]['strict_correct'] == 'True' and v['D_native']['strict_correct'] != 'True'
+                       native_correct=sum(v[ref]['strict_correct'] == 'True' for v in present.values()),
+                       arm_only=sum(v[arm]['strict_correct'] == 'True' and v[ref]['strict_correct'] != 'True'
                                     for v in present.values()),
-                       native_only=sum(v[arm]['strict_correct'] != 'True' and v['D_native']['strict_correct'] == 'True'
+                       native_only=sum(v[arm]['strict_correct'] != 'True' and v[ref]['strict_correct'] == 'True'
                                        for v in present.values()),
                        capped=sum(r['capped'] == 'True' for r in first),
                        unparsed=sum(r['parsed'] != 'True' for r in first),
@@ -69,7 +71,15 @@ def summarize(rows):
                        score_mean=(round(statistics.mean(float(r['first_score']) for r in first
                                                          if r.get('first_score') not in ('', 'None', None)), 4)
                                    if any(r.get('first_score') not in ('', 'None', None) for r in first) else None))
-            for base in ('D_native', 'D_matched', 'D_c64'):
+            fak = {k: v for k, v in present.items() if 'D_fa4_allkept' in v}
+            if fak:
+                row.update(fak_cells=len(fak),
+                           fak_correct=sum(v['D_fa4_allkept']['strict_correct'] == 'True' for v in fak.values()),
+                           arm_only_vs_fak=sum(v[arm]['strict_correct'] == 'True' and
+                                               v['D_fa4_allkept']['strict_correct'] != 'True' for v in fak.values()),
+                           fak_only=sum(v[arm]['strict_correct'] != 'True' and
+                                        v['D_fa4_allkept']['strict_correct'] == 'True' for v in fak.values()))
+            for base in ('D_native', 'D_matched', 'D_c64', 'D_fa4', 'D_fa4_allkept'):
                 ratios = defaultdict(lambda: defaultdict(list))
                 per_seed = defaultdict(lambda: defaultdict(list))
                 for (d, q, s), v in present.items():
@@ -91,7 +101,8 @@ def summarize(rows):
                     for key, value in pairs:
                         ratios[key][q].append(value)
                         per_seed[key][s].append(value)
-                tag = {'D_native': 'nat', 'D_matched': 'dm', 'D_c64': 'c64'}[base]
+                tag = {'D_native': 'nat', 'D_matched': 'dm', 'D_c64': 'c64', 'D_fa4': 'fa4',
+                       'D_fa4_allkept': 'fak'}[base]
                 for key in ('W', 'N', 'WN', 'S', 'SN'):
                     flat = [x for v in ratios[key].values() for x in v]
                     if not flat:
@@ -100,7 +111,7 @@ def summarize(rows):
                     loo = [geo([x for q2, v in ratios[key].items() if q2 != q for x in v]) for q in ratios[key]]
                     row[f'{key}_{tag}'] = round(geo(flat), 4)
                     row[f'{key}_{tag}_ci'] = f'[{lo:.3f},{hi:.3f}]' if lo else ''
-                    if tag in ('nat', 'c64'):
+                    if tag in ('nat', 'c64', 'fa4', 'fak'):
                         row[f'{key}_{tag}_by_seed'] = ' '.join(f'{s}:{geo(v):.3f}' for s, v in sorted(per_seed[key].items()))
                         row[f'{key}_{tag}_loo'] = f'{min(loo):.3f}-{max(loo):.3f}' if len(loo) > 1 else ''
             out.append(row)
@@ -129,6 +140,19 @@ def main(argv=None):
                          f"{r['capped']} | {r['calls']} | {r.get('W_nat')} {r.get('W_nat_ci','')} | {r.get('N_nat')} {r.get('N_nat_ci','')} | "
                          f"{r.get('WN_nat')} {r.get('WN_nat_ci','')} | {r.get('WN_dm')} | {r.get('W_nat_by_seed','')} | {r.get('W_nat_loo','')} |")
         lines.append('')
+        for tag, base in (('fak', 'D_fa4_allkept (fastest official dense)'), ('fa4', 'D_fa4 (FA4 plain dense path)')):
+            if not any(f'W_{tag}' in x for x in summary if x['dataset'] == dataset):
+                continue
+            lines += [f'#### {dataset}: paired vs {base}', '',
+                      f'| arm | correct (D_fa4_allkept) | +/- vs D_fa4_allkept | score mean | W [CI] | decode span S [CI] | calls N [CI] | S per call [CI] | W by seed | W leave-one-question-out |',
+                      '|---|---|---|---:|---|---|---|---|---|---|']
+            for r in [x for x in summary if x['dataset'] == dataset]:
+                lines.append(f"| {r['arm']} | {r['correct']}/{r['cells']} ({r.get('fak_correct')}) | "
+                             f"+{r.get('arm_only_vs_fak')}/-{r.get('fak_only')} | {r.get('score_mean')} | {r.get(f'W_{tag}')} {r.get(f'W_{tag}_ci', '')} | "
+                             f"{r.get(f'S_{tag}')} {r.get(f'S_{tag}_ci', '')} | {r.get(f'N_{tag}')} {r.get(f'N_{tag}_ci', '')} | "
+                             f"{r.get(f'SN_{tag}')} {r.get(f'SN_{tag}_ci', '')} | {r.get(f'W_{tag}_by_seed', '')} | "
+                             f"{r.get(f'W_{tag}_loo', '')} |")
+            lines.append('')
         if any('W_c64' in x for x in summary if x['dataset'] == dataset):
             lines += [f'#### {dataset}: paired vs D_c64 (strongest dense)', '',
                       '| arm | score mean | W/D_c64 [CI] | decode span S/D_c64 [CI] | N/D_c64 [CI] | S per call [CI] | W by seed | W leave-one-question-out |',
