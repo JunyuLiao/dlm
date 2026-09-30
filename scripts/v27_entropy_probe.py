@@ -34,6 +34,10 @@ def main(argv=None):
     adapter = create_adapter('diffusion_gemma', binding['host_models'][a.host], device='cuda',
                              precision='bfloat16', revision=protocol['model_revision']).load()
     torch.backends.cuda.matmul.allow_tf32 = False
+    substrate = protocol.get('substrate', 'eager')
+    if substrate != 'eager':
+        from experiments.numerical_qk_reuse import v27_substrate
+        v27_substrate.install(adapter.model)
     trace = []
     original = gen.StableAndConfidentStoppingCriteria.__call__
 
@@ -47,6 +51,8 @@ def main(argv=None):
     try:
         for arm in a.arm:
             trace.clear()
+            if substrate != 'eager':
+                v27_substrate.set_local(adapter.model, v27_substrate.local_mode_for(configs[a.dataset][arm]))
             with prefill_dense64(adapter.model, os.environ.get('V27_PREFILL_DENSE64') == '1'):
                 receipt = _one(adapter, row, protocol['seeds'][0], configs[a.dataset][arm])
             canvases, current = [], []
@@ -58,7 +64,10 @@ def main(argv=None):
             if current:
                 canvases.append(current + ['cap'])
             steps = [len(c) for c in canvases]
+            counters = receipt.get('counters') or {}
             print(json.dumps(dict(arm=arm, calls=receipt['total_decoder_calls'], canvases=len(canvases),
+                                  gate_entry_steps=counters.get('density_gate_entry_steps'),
+                                  gate_dense_calls=counters.get('density_gate_dense_calls'),
                                   steps_per_canvas=steps, first_canvases=canvases[:3],
                                   median_last3=[c[-4:-1] for c in canvases[:6]])), flush=True)
     finally:
