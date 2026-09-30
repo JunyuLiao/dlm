@@ -77,9 +77,9 @@ def install(model, backend: str = 'inductor', name: str = 'piecewise_v1') -> dic
     if not (hasattr(torch.nn.functional, 'grouped_mm') or hasattr(torch, '_grouped_mm')):
         raise RuntimeError('piecewise_v1 needs torch grouped_mm (>= 2.8); this torch would run the per-expert '
                            'MoE fallback with host syncs')
-    for name in ('recompile_limit', 'cache_size_limit'):
-        if hasattr(dynamo.config, name):
-            setattr(dynamo.config, name, 256)
+    for option in ('recompile_limit', 'cache_size_limit'):      # (never reuse `name`: it is the substrate id)
+        if hasattr(dynamo.config, option):
+            setattr(dynamo.config, option, 256)
     if hasattr(dynamo.config, 'accumulated_recompile_limit'):
         dynamo.config.accumulated_recompile_limit = 4096
     decoder = model.model.decoder
