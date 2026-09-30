@@ -256,6 +256,36 @@ def test_compact_sliding_cache_releases_the_prompt_buffer_and_keeps_values():
     assert not dense.keys.is_contiguous()            # full-attention layers are left alone
 
 
+def test_joined_kv_matches_concat_and_reuses_the_prefix_within_a_canvas():
+    import torch
+    from types import SimpleNamespace
+    from experiments.numerical_qk_reuse.v27_substrate import joined_kv
+    attn = SimpleNamespace()
+    ek, ev = torch.randn(1, 2, 700, 16), torch.randn(1, 2, 700, 16)
+    for step in range(3):                                  # same encoder cache objects: one build, rows rewritten
+        k = torch.randn(1, 256, 2, 16).transpose(1, 2)     # the module's transposed (non-contiguous) canvas K/V
+        v = torch.randn(1, 256, 2, 16).transpose(1, 2)
+        jk, jv = joined_kv(attn, ek, ev, k, v)
+        ck, cv = torch.cat([ek, k], dim=2), torch.cat([ev, v], dim=2)
+        assert torch.equal(jk, ck) and torch.equal(jv, cv)
+        assert jk.stride() == ck.stride() and jv.stride() == cv.stride() and jk.is_contiguous()
+    assert attn._v27_kv_builds == 1
+    ek2 = torch.cat([ek, torch.randn(1, 2, 256, 16)], dim=2)   # encoder append: new, longer cache object
+    ev2 = torch.cat([ev, torch.randn(1, 2, 256, 16)], dim=2)
+    jk, jv = joined_kv(attn, ek2, ev2, k, v)
+    assert torch.equal(jk, torch.cat([ek2, k], dim=2)) and torch.equal(jv, torch.cat([ev2, v], dim=2))
+    ek3, ev3 = ek2.clone(), ev2.clone()                        # same shape, different objects (new request/copy)
+    ek3[:, :, 0] += 1
+    jk, _ = joined_kv(attn, ek3, ev3, k, v)
+    assert torch.equal(jk, torch.cat([ek3, k], dim=2)) and attn._v27_kv_builds == 3
+
+
+def test_piecewise_v3_is_a_known_substrate_with_fa4_prefill():
+    from experiments.numerical_qk_reuse.v27_substrate import SUBSTRATES, prefill_kernel
+    assert 'piecewise_v3' in SUBSTRATES and prefill_kernel('piecewise_v3') == 'fa4'
+    assert prefill_kernel('piecewise_v1') == 'dense64'
+
+
 def test_compiled_sampler_state_is_mirrored_to_the_current_sampler():
     from types import SimpleNamespace
     from experiments.numerical_qk_reuse.v27_substrate import mirrored_accept

@@ -20,13 +20,131 @@ host sync per call, which cannot be graph-captured.
 """
 from __future__ import annotations
 
-SUBSTRATES = ('eager', 'piecewise_v1', 'piecewise_v2')
+SUBSTRATES = ('eager', 'piecewise_v1', 'piecewise_v2', 'piecewise_v3')
 # piecewise_v2 = piecewise_v1 + the shared (all-arm) prompt prefill and the GLOBAL canvas append on official FA4
 # causal instead of the 64-row Triton kernel / HF SDPA (substrate/prefill_append_bench.jsonl)
+# piecewise_v3 = piecewise_v2 + two value-identical, all-arm host/copy fixes (substrate/time_breakdown.json):
+#   * GLOBAL decoder attention no longer torch.cat-s the whole encoder cache with the 256 canvas K/V on every call
+#     (modeling_diffusion_gemma.py:450-451; 2.15 ms per forward at 32K, growing with context). Each GLOBAL layer
+#     keeps one [prefix + canvas] K and V buffer: the encoder cache is copied in once per canvas (when the encoder
+#     cache tensor changes) and each call writes only its canvas rows. Same values, same contiguous layout, same
+#     attention kernels.
+#   * the denoising step's `if finished_denoising.any():` host sync is skipped for batch size 1: with one item, a
+#     finished item ends the canvas loop before the next step, so the guarded torch.where never changes anything.
+V3_SUBSTRATES = ('piecewise_v3',)
 
 
 def prefill_kernel(substrate: str) -> str:
-    return 'fa4' if substrate == 'piecewise_v2' else 'dense64'
+    return 'fa4' if substrate in ('piecewise_v2', 'piecewise_v3') else 'dense64'
+
+
+def joined_kv(attn, encoder_keys, encoder_values, keys, values):
+    """[encoder cache | canvas] K and V, value-identical to torch.cat(dim=2), from a per-layer persistent buffer.
+    The buffer is rebuilt whenever the encoder cache tensors are different objects (new canvas, new request, a
+    copied cache) or the geometry differs; otherwise only the canvas rows are written."""
+    import weakref
+
+    import torch
+    n, m = encoder_keys.shape[2], keys.shape[2]
+    state = attn.__dict__.get('_v27_kv')
+    fresh = (state is None or state['keys_src']() is not encoder_keys or state['values_src']() is not encoder_values
+             or state['n'] != n or state['k'].shape[2] != n + m or state['k'].dtype != keys.dtype
+             or state['k'].shape[:2] != encoder_keys.shape[:2] or state['k'].shape[3] != encoder_keys.shape[3]
+             or state['v'].shape[3] != encoder_values.shape[3])
+    if fresh:
+        attn.__dict__['_v27_kv'] = None                     # release the old buffers before allocating
+        k = torch.empty((*encoder_keys.shape[:2], n + m, encoder_keys.shape[3]), dtype=keys.dtype,
+                        device=keys.device)
+        v = torch.empty((*encoder_values.shape[:2], n + m, encoder_values.shape[3]), dtype=values.dtype,
+                        device=values.device)
+        k[:, :, :n].copy_(encoder_keys)
+        v[:, :, :n].copy_(encoder_values)
+        state = dict(keys_src=weakref.ref(encoder_keys), values_src=weakref.ref(encoder_values), n=n, k=k, v=v)
+        attn.__dict__['_v27_kv'] = state
+        attn.__dict__['_v27_kv_builds'] = attn.__dict__.get('_v27_kv_builds', 0) + 1
+    state['k'][:, :, n:].copy_(keys)
+    state['v'][:, :, n:].copy_(values)
+    return state['k'], state['v']
+
+
+def denoising_step_batch1(model):
+    """generation_diffusion_gemma._denoising_step (transformers 5.x), line for line, minus the host sync of
+    `if finished_denoising.any():` for batch size 1. With one item, generate() leaves the canvas loop as soon as
+    the item finishes (`if torch.all(finished_denoising): break`), so every step starts with it unfinished and the
+    guarded torch.where calls would be identities. Batch > 1 falls back to the official step."""
+    import torch
+    official = model._denoising_step
+
+    def step(decoder_forward, current_canvas, argmax_canvas, input_ids, decoder_position_ids,
+             self_conditioning_logits, mask_mapping, past_key_values, finished_denoising, cur_step, sampler,
+             logits_processor, diffusion_stopping_criteria, **model_kwargs):
+        if current_canvas.shape[0] != 1:
+            return official(decoder_forward=decoder_forward, current_canvas=current_canvas,
+                            argmax_canvas=argmax_canvas, input_ids=input_ids,
+                            decoder_position_ids=decoder_position_ids,
+                            self_conditioning_logits=self_conditioning_logits, mask_mapping=mask_mapping,
+                            past_key_values=past_key_values, finished_denoising=finished_denoising,
+                            cur_step=cur_step, sampler=sampler, logits_processor=logits_processor,
+                            diffusion_stopping_criteria=diffusion_stopping_criteria, **model_kwargs)
+        cur_step = torch.tensor(cur_step, device=current_canvas.device, dtype=torch.int32)
+        torch.compiler.cudagraph_mark_step_begin()
+        decoder_outputs = decoder_forward(
+            decoder_input_ids=current_canvas, self_conditioning_logits=self_conditioning_logits,
+            decoder_attention_mask=mask_mapping, past_key_values=past_key_values,
+            decoder_position_ids=decoder_position_ids, **model_kwargs)
+        raw_logits = decoder_outputs.logits
+        processed_logits = logits_processor(input_ids, raw_logits, cur_step=cur_step)
+        probs = torch.softmax(processed_logits, dim=-1, dtype=torch.float32)
+        vocab_size = model.config.text_config.vocab_size
+        batch_size, canvas_length = current_canvas.shape
+        denoiser_canvas = torch.multinomial(probs.view(-1, vocab_size), num_samples=1)
+        denoiser_canvas = denoiser_canvas.squeeze(-1).view(batch_size, canvas_length)
+        new_argmax_canvas = torch.argmax(processed_logits, dim=-1)
+        accepted_canvas = sampler.accept_canvas(current_canvas, denoiser_canvas, processed_logits, cur_step)
+        accepted_canvas = accepted_canvas.clone()
+        new_current_canvas = sampler.renoise_canvas(accepted_canvas, cur_step)
+        new_current_canvas = new_current_canvas.clone()
+        if diffusion_stopping_criteria is not None:
+            finished_denoising |= diffusion_stopping_criteria(new_argmax_canvas, processed_logits)
+        embeddings_dtype = model.model.decoder.embed_tokens.weight.dtype
+        self_conditioning_logits = processed_logits.to(embeddings_dtype)
+        return new_current_canvas, new_argmax_canvas, self_conditioning_logits, finished_denoising
+    return step
+
+
+def no_concat_forward(attn, modeling):
+    """DiffusionGemmaDecoderTextAttention.forward (transformers 5.x), line for line, except that the encoder
+    cache and the canvas K/V are joined by joined_kv instead of torch.cat."""
+    rotary = modeling.apply_rotary_pos_emb
+    fallback = modeling.eager_attention_forward
+
+    def forward(hidden_states, position_embeddings, attention_mask, past_key_values=None, **kwargs):
+        input_shape = hidden_states.shape[:-1]
+        hidden_shape = (*input_shape, -1, attn.head_dim)
+        cos, sin = position_embeddings
+        query_states = attn.q_proj(hidden_states).view(hidden_shape)
+        query_states = attn.q_norm(query_states)
+        query_states = rotary(query_states, cos, sin, unsqueeze_dim=2)
+        query_states = query_states.transpose(1, 2)
+        key_states = attn.k_proj(hidden_states).view(hidden_shape)
+        value_states = attn.v_proj(hidden_states).view(hidden_shape) if attn.v_proj is not None else key_states
+        key_states = attn.k_norm(key_states)
+        key_states = rotary(key_states, cos, sin, unsqueeze_dim=2)
+        key_states = key_states.transpose(1, 2)
+        value_states = attn.v_norm(value_states)
+        value_states = value_states.transpose(1, 2)
+        if past_key_values is not None:
+            layer = past_key_values.layers[attn.layer_idx]
+            key_states, value_states = joined_kv(attn, layer.keys, layer.values, key_states, value_states)
+        interface = modeling.ALL_ATTENTION_FUNCTIONS.get_interface(attn.config._attn_implementation, fallback)
+        attn_output, attn_weights = interface(
+            attn, query_states, key_states, value_states, attention_mask,
+            dropout=attn.attention_dropout if attn.training else 0.0, scaling=attn.scaling,
+            sliding_window=attn.sliding_window, is_causal=attn.is_causal, **kwargs)
+        attn_output = attn_output.reshape(*input_shape, -1).contiguous()
+        attn_output = attn.o_proj(attn_output)
+        return attn_output, attn_weights
+    return forward
 LOCAL_KEY = 'v27_local_sdpa'
 
 
@@ -100,6 +218,8 @@ def install(model, backend: str = 'inductor', name: str = 'piecewise_v1') -> dic
             attn._v27_graph_config = graph_config
             local_layers.append(int(attn.layer_idx))
         else:
+            if name in V3_SUBSTRATES:
+                attn._v27_eager_forward = dynamo.disable(no_concat_forward(attn, modeling))
             attn.forward = attn._v27_eager_forward
             global_layers.append(int(attn.layer_idx))
     encoder = model.model.encoder
@@ -151,6 +271,9 @@ def install(model, backend: str = 'inductor', name: str = 'piecewise_v1') -> dic
             stop.__call__ = model._v27_stop    # assigned exactly as the official _compile_functions does
         return stop
     model._prepare_sampler, model._prepare_diffusion_stopping_criteria = compiled_sampler, compiled_stop
+    if name in V3_SUBSTRATES:
+        model._v27_official_denoising_step = model._denoising_step
+        model._denoising_step = denoising_step_batch1(model)
     model._v27_substrate = dict(substrate=name if backend == 'inductor' else name + '_eager_backend',
                                 global_layers=global_layers, local_layers=local_layers,
                                 local=None, torch=torch.__version__)
