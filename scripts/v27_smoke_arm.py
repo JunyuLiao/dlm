@@ -76,6 +76,7 @@ def main(argv=None):
             sub = v27_substrate.identity(adapter.model) if substrate != 'eager' else {}
             print(json.dumps(dict(arm=arm, ok=True, decoder_calls=receipt['total_decoder_calls'],
                                   substrate_local=sub.get('local'),
+                                  tokens_sha=__import__('hashlib').sha256(json.dumps(receipt.get('output_tokens')).encode()).hexdigest()[:16],
                                   new_graphs=(None if graphs is None else sub.get('dynamo_unique_graphs') - graphs),
                                   request_wall_s=round(receipt['request_wall_seconds'], 3),
                                   fingerprint=bool(receipt.get('fingerprint')),
@@ -83,7 +84,7 @@ def main(argv=None):
                                   peak_reserved_gib=round(torch.cuda.max_memory_reserved() / 2**30, 2),
                                   counters={k: v for k, v in counters.items()
                                             if isinstance(v, (int, float, dict)) and
-                                            ('calls' in k or k in ('fresh_fused_tiles',))})), flush=True)
+                                            ('calls' in k or 'routes' in k or k in ('fresh_fused_tiles',))})), flush=True)
         except Exception as exc:  # report and keep going: the point is to see every arm
             failures += 1
             print(json.dumps(dict(arm=arm, ok=False, error=f'{type(exc).__name__}: {exc}'[:400],
