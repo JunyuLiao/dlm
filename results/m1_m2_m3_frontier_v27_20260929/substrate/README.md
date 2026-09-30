@@ -100,3 +100,20 @@ At 64K the forward is GPU-bound (host about 15–18 ms).
 2. **Quality must be re-measured on the new substrate.** torch 2.12's `grouped_mm` and inductor change numerics, so no v21–v27 quality result carries over.
 3. **Host-side cost of our method matters again.** The observation call (+28–40 ms at 64K) is now the main overhead to cut. The selection logic runs eagerly at the GLOBAL boundary.
 4. **Environment.** The substrate uses the existing `ljy_dlm` conda env's own torch 2.12.1 (no new env, nothing installed) by leaving the `.local` torch-2.6 overlay off PYTHONPATH. Junyu's torch-2.6 value-direction binaries are not used by the FA4 paths.
+
+## 6. Correctness of the piecewise substrate (`equivalence.jsonl`, `scripts/v27_substrate_equivalence.py`)
+
+**Method.**
+- The inputs of real decoder calls (0, 1, 4, 9) of a D_fa4_allkept request are captured, with the cache deep-copied, on the LongBench-v2 row 0 prompt (13,447 tokens, mpk, torch 2.12.1).
+- They are evaluated by the eager forward and by the substrate forward. Eager-vs-eager repeats are bitwise exact.
+
+| comparison | argmax agreement (calls 0/1/4/9) | mean KL (calls 0/1/4/9) |
+|---|---|---|
+| substrate, dynamo **eager** backend (same graph split, LOCAL binding, eager GLOBAL, hooks; no codegen) | **bitwise equal**, both LOCAL modes | 0 |
+| substrate, inductor + CUDA graphs (the panel setting) | 0.934 / 0.938 / 0.836 / 1.000 | 0.048 / 0.078 / 0.037 / 0.0008 |
+| noise floor: GLOBAL attention via HF SDPA instead of FA4 (both exact), eager | 0.926 / 0.961 / 0.855 / 0.996 | 0.030 / 0.040 / 0.022 / 0.0007 |
+
+**Conclusion.**
+- **The split is semantically exact.** Graph capture, the LOCAL-attention binding and the eager GLOBAL boundary reproduce eager bit for bit.
+- **The inductor difference is numerics.** Fused elementwise kernels keep a different intermediate precision, and MoE routing near-ties amplify it. Its size matches swapping one exact attention kernel for another. It is largest on early, uncertain calls and vanishes on converged calls.
+- **Fairness holds.** Every arm of a substrate panel runs on the same numerics, and quality is re-measured on that substrate.
