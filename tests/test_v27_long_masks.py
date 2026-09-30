@@ -74,6 +74,16 @@ def test_long_unpadded_prefill_is_elided_after_one_semantic_check(monkeypatch):
     assert encoder.create_masks_for_generate is build   # restored
 
 
+def test_prompt_shorter_than_the_probe_is_its_own_semantic_check(monkeypatch):
+    monkeypatch.setattr(v27_long, '_SEMANTICS_CHECKED', [])
+    build, calls = _builder()
+    model, encoder = _model(build)
+    with v27_long.prefill_dense64(model, True, kernel='fa4'):
+        out = encoder.create_masks_for_generate(**_kw(700))
+        assert out == {'full_attention': None, 'sliding_attention': None}
+        assert calls == [700]
+
+
 def test_non_causal_builder_refuses_elision(monkeypatch):
     monkeypatch.setattr(v27_long, '_SEMANTICS_CHECKED', [])
     build, _ = _builder(broken=True)

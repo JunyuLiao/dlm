@@ -51,7 +51,9 @@ def prefill_dense64(model, enabled, canvas=False, kernel='dense64'):
                 or not bool(mask.all()) or cache is None or cache.get_seq_length() != 0):
             return builder(*args, **kw)
         if not _SEMANTICS_CHECKED:
-            n = 1500
+            # (a prompt shorter than the 1500-token probe is its own probe: a fixed n=1500 failed the shape check
+            # for every 257-1499-token prompt -- aime26/17 in the v27 quality preview)
+            n = min(1500, embeds.shape[1])
             small = builder(**dict(kw, inputs_embeds=embeds[:, :n], attention_mask=mask[:, :n],
                                    position_ids=(kw['position_ids'][:, :n] if kw.get('position_ids') is not None
                                                  else None)))
