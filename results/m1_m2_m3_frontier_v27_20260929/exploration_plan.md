@@ -45,3 +45,23 @@ The paper's identifiable contribution stays Fan's M1/M2/M3 selector. Items marke
    - the calibrated gate variants of B_rp and M3 R6;
    - any observation-call fix that is exact.
 3. If a cross-canvas carry is built, label it as a Prefilling-dLLM/PulseCol-style engineering stack and never as the contribution.
+
+## Findings so far (2026-09-30, mpk diagnostics)
+
+- **Observation-call breakdown at 75K** (`substrate/observe_profile_64k.jsonl`, per GLOBAL layer):
+
+  | part | B | B + pipelined route |
+  |---|---:|---:|
+  | whole call | 13.1 ms | 10.0 ms |
+  | route (selector) | 7.3 ms | 4.3 ms |
+  | fused kernel | 5.1 ms | 5.1 ms |
+  | sketch projection | 0.6 ms | 0.6 ms |
+
+  For comparison, the bootstrap-dense call (FA4 all-kept) is 3.1 ms and a held FA4-sparse call is 0.47 ms.
+  - **The selector is the largest part.** M3 decision calls pay the same 4.3 ms per layer.
+  - **Fix under test: async observation route.** The observation call's decision serves only later calls, so it now runs on a side stream (v21 key `async_route`). It is bit-identical, and dev spec v2 checks that tokens and calls are identical.
+- **Density-gate calibration** (`substrate/entropy_probe_32k_dev.jsonl`, one 32K item, seed 101):
+  - In every canvas the mean entropy falls below 0.05 around step 7, but the stop needs 0.005 plus stability, and the tail lasts several to 15+ steps.
+  - `ent0.05` therefore turned 140 of B's 157 calls dense. `stall2` rarely fires (2 canvases for B, never for M3).
+  - **Conclusion so far:** per-canvas step counts are set by the model's own low-entropy tail (a few uncertain tokens). Entropy/stall gates give little forward-count gain and cost per-forward savings.
+  - Sparse-induced step inflation is judged from the v3 panel's paired calls, not from one item.
