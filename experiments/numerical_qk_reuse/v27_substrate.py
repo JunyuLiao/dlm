@@ -55,8 +55,11 @@ def compact_sliding_cache(cache) -> int:
     return copied
 
 
-def install(model) -> dict:
-    """Idempotent. Returns the substrate identity recorded in receipts."""
+def install(model, backend: str = 'inductor') -> dict:
+    """Idempotent. Returns the substrate identity recorded in receipts. backend='eager' (dynamo capture and the
+    same graph split, no codegen, no CUDA graphs) exists only for the equivalence diagnostic."""
+    if backend not in ('inductor', 'eager'):
+        raise ValueError(backend)
     state = getattr(model, '_v27_substrate', None)
     if state is not None:
         return identity(model)
@@ -112,7 +115,8 @@ def install(model) -> dict:
         return register(dynamo.disable(hook), *a, **k)
     base.register_forward_pre_hook = register_eager
     model._v27_eager_model_forward = model.forward
-    model.forward = torch.compile(model.forward, mode='reduce-overhead', dynamic=False)
+    model.forward = (torch.compile(model.forward, mode='reduce-overhead', dynamic=False) if backend == 'inductor'
+                     else torch.compile(model.forward, backend='eager', dynamic=False))
     prepare_sampler, prepare_stop = model._prepare_sampler, model._prepare_diffusion_stopping_criteria
 
     def signature(obj):
@@ -141,7 +145,8 @@ def install(model) -> dict:
             stop.__call__ = model._v27_stop    # assigned exactly as the official _compile_functions does
         return stop
     model._prepare_sampler, model._prepare_diffusion_stopping_criteria = compiled_sampler, compiled_stop
-    model._v27_substrate = dict(substrate='piecewise_v1', global_layers=global_layers, local_layers=local_layers,
+    model._v27_substrate = dict(substrate='piecewise_v1' if backend == 'inductor' else 'piecewise_v1_eager_backend',
+                                global_layers=global_layers, local_layers=local_layers,
                                 local=None, torch=torch.__version__)
     set_local(model, 'graph')
     return identity(model)
