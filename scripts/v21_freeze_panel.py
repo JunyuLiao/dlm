@@ -341,6 +341,12 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
     for entry in original['block_assignments'].values():
         host_uuids.setdefault(entry['host'], set()).add(entry['gpu_uuid'])
     host_ids = sorted(host_uuids)
+    if spec.get('hosts') is not None:
+        # optional single-/sub-host panel (e.g. when the other GPU is in use by someone else); hosts must be
+        # among the frozen v20 hosts and are part of the protocol identity via the schedule
+        if not spec['hosts'] or len(set(spec['hosts'])) != len(spec['hosts']) or set(spec['hosts']) - set(host_ids):
+            raise ValueError('spec hosts must be distinct frozen v20 hosts')
+        host_ids = list(spec['hosts'])
     ids, seeds = spec['ids'], list(spec['seeds'])
     from scripts.v27_datasets import DATASETS, base_task
     if not ids or not set(ids) <= set(DATASETS) or not seeds or \
@@ -419,7 +425,7 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
         stages[dataset] = []
         for q_index, id_ in enumerate(ids[dataset]):
             for s_index, seed in enumerate(seeds):
-                host = host_ids[(q_index + s_index) % 2]
+                host = host_ids[(q_index + s_index) % len(host_ids)]
                 assignment = dict(dataset=dataset, id=id_, seed=seed, host=host,
                                   gpu_uuid=next(iter(host_uuids[host])))
                 assignments[str(block)] = assignment
@@ -443,7 +449,9 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
                     schedule=schedule, planned_executions=len(schedule),
                     generation_manifest_sha256=hashes, stages=stages,
                     selection_rule=spec.get('selection_rule', ''),
-                    host_assignment_rule='host = (question index + seed index) mod 2 within each dataset',
+                    host_assignment_rule=('host = (question index + seed index) mod 2 within each dataset'
+                                          if len(host_ids) == 2 else f'single host {host_ids[0]}' if len(host_ids) == 1
+                                          else 'host = (question index + seed index) mod len(hosts)'),
                     extra_gold_sha256=spec.get('extra_gold_sha256', {}),
                     long_context_execution=spec.get('long_context_execution'),
                     quality_eligible=True, timing_eligible=bool(spec.get('warm', True)))

@@ -221,3 +221,21 @@ def test_unknown_substrate_and_g75_consumer_rejected(tmp_path):
 def test_substrate_local_mode_follows_attention_scope(config, mode):
     from experiments.numerical_qk_reuse.v27_substrate import local_mode_for
     assert local_mode_for(config) == mode
+
+
+def test_single_host_panel(tmp_path):
+    sp, op, bp, pool = _setup(tmp_path, ARMS, warm=False)
+    spec = json.loads(sp.read_text())
+    spec['hosts'] = ['hB']
+    sp.write_text(json.dumps(spec))
+    protocol = freeze_v27(sp, op, bp, pool, tmp_path / 'out')
+    assert {a['host'] for a in protocol['block_assignments'].values()} == {'hB'}
+    assert {e['gpu_uuid'] for e in protocol['schedule']} == {'GPU-B'}
+    validate_protocol(json.loads((tmp_path / 'out' / 'protocol.json').read_bytes()))
+    (tmp_path / 'x').mkdir()
+    sp2, op2, bp2, pool2 = _setup(tmp_path / 'x', ARMS)
+    spec2 = json.loads(sp2.read_text())
+    spec2['hosts'] = ['hC']
+    sp2.write_text(json.dumps(spec2))
+    with pytest.raises(ValueError):
+        freeze_v27(sp2, op2, bp2, pool2, tmp_path / 'x' / 'out')
