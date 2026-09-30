@@ -1,6 +1,13 @@
 {
- "note": "User-authorized GPU hosts added after the frozen v20 protocol (which fixes dllm and mpk). A v27 spec may list them under extra_hosts; each entry fixes the host's GPU UUID, which becomes part of the frozen schedule.",
+ "note": "User-authorized GPU hosts added after the frozen v20 protocol (which fixes dllm and mpk). A v27 spec may list them under extra_hosts; each entry fixes the host's GPU UUID, which becomes part of the frozen schedule. \"mirrors\" names the original v20 host whose model path and v20 base configs this host reuses byte-for-byte (same absolute paths), used only by host binding.",
  "hosts": {
-  "149.165.168.28": {"alias": "dlm2", "gpu_uuid": "GPU-71e99ef8-8452-4da0-7ca7-fd56148a6ba1", "gpu": "NVIDIA H100 80GB HBM3", "added": "2026-09-30", "environment": "same /home/exouser/dyh paths as dllm (conda env, model, binaries, FA4 overlay copied from dllm)"}
+  "149.165.168.28": {
+   "alias": "dlm2",
+   "gpu_uuid": "GPU-71e99ef8-8452-4da0-7ca7-fd56148a6ba1",
+   "gpu": "NVIDIA H100 80GB HBM3",
+   "added": "2026-09-30",
+   "environment": "same /home/exouser/dyh paths as dllm (conda env, model, binaries, FA4 overlay copied from dllm)",
+   "mirrors": "149.165.159.64"
+  }
  }
 }

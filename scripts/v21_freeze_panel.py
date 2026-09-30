@@ -688,11 +688,16 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
     protocol_raw, old_binding_raw = Path(protocol_path).read_bytes(), Path(old_binding_path).read_bytes()
     protocol, binding = json.loads(protocol_raw), json.loads(old_binding_raw)
     validate_protocol(protocol)
+    source = host
+    if host not in binding.get('host_configs', {}):
+        # a registered extra host reuses the v20 model path and base configs of the host it mirrors
+        registry = json.loads(Path(__file__).resolve().with_name('v27_extra_hosts.json').read_text(encoding='utf-8'))
+        source = registry['hosts'].get(host, {}).get('mirrors', host)
     if (protocol.get('v20_binding_sha256') != _sha(old_binding_raw) or
             binding.get('policy_point') != 'P0' or binding.get('scope') != SCOPE or
-            host not in binding.get('host_configs', {})):
+            source not in binding.get('host_configs', {})):
         raise ValueError('host old binding differs from frozen v21 panel')
-    model = binding['host_models'][host]
+    model = binding['host_models'][source]
     manifest_paths = {d: Path(manifests_dir) / f'{d}_generation_manifest.json'
                       for d in protocol['ids']}
     for dataset, path in manifest_paths.items():
@@ -712,7 +717,7 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                           'T_scope' if parent == 'T_scope' else
                           'D_matched' if parent == 'D_matched' else parent)
             from scripts.v27_datasets import base_task
-            inherited = _old_config(binding, host, base_task(dataset),
+            inherited = _old_config(binding, source, base_task(dataset),
                                     'D_native' if contract['kind'] == 'v27_dense' else source_arm)
             plugin = (old.CONTROLS if source_arm in ('D_native', 'D_matched', 'T_scope')
                       else v20.PLUGIN)
