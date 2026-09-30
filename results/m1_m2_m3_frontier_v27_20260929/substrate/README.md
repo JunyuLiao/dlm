@@ -74,14 +74,20 @@ Results (warm):
 |---|---|---:|---:|
 | 17K | D_fa4 dense | 29.3 ms | 14 ms |
 | 17K | B held (first, still-compiling request) | 27.2 ms (0.93× of the D_fa4 plugin) | — |
-| 64K | in-harness FA4 dense (B0) | 37.6 ms | — |
+| 64K | B0 dense bootstrap (call 0 of each canvas) | 37.6 ms | — |
 | 64K | D_fa4 plugin dense (pays HF's 60K-key concat) | 40.5 ms | — |
-| 64K | held FA4 block-sparse | 29.3–29.9 ms (0.78× of in-harness dense) | — |
+| 64K | held FA4 block-sparse (calls 2+) | 29.3–29.9 ms | — |
 | 64K | observation call, B | 77.8 ms | — |
 | 64K | observation call, M3 R6 A64 | 66 ms | — |
 
 At 64K the forward is GPU-bound (host about 15–18 ms).
-- **Per canvas at 64K** (≈ 10 calls), decode forwards come to about 0.93× (B) and 0.87× (M3 R6 A64) of in-harness dense.
+- **Correction (2026-09-30).** An earlier version called B0 an "in-harness dense that avoids HF's concat" and quoted held/B0 = 0.78×.
+  - That was wrong. The integration receives the same concatenated keys as the D_fa4 plugin.
+  - B0 is cheaper because it is call 0 of each canvas: an all-mask canvas hits fewer MoE experts.
+  - Medians over different call indices are confounded by this. They are amortized numbers, not per-forward prices.
+  - The clean per-forward number is the common-state bench in section 3: 0.77× at keep 0.1 and 60K keys.
+  - The per-canvas ratios B 0.93× and M3 0.87× were computed against B0, so they carry the same bias.
+  - The fair dense reference is D_fa4.
 - **Request wall (1,024-token budget)** is dominated by the 60K prefill and the eager per-canvas encoder. Call counts also move ±20% between runs of the same arm, because small numeric changes alter the trajectory. Single requests therefore say nothing about end-to-end effects; that needs the paired panel.
 
 ## What changes
@@ -89,7 +95,8 @@ At 64K the forward is GPU-bound (host about 15–18 ms).
 1. **Paper-grade timing needs a graph-captured substrate.**
    - Our piecewise one is faster than the official compiled path. At 17K its forward is 29.3 ms, plus about 4.5 ms for the rest of the step (measured at 64K), against 44 ms per official step.
    - It also runs 64K, where the official path does not.
-   - Baseline and methods must share it. The contribution is only the increment over its dense FA4 forward (in-harness dense, which avoids the HF concat, is the fair dense reference).
+   - Baseline and methods must share it. The contribution is only the increment over its dense FA4 forward (D_fa4).
+   - FA4 dense runs in its fastest configuration: its own block-sparse interface with every tile kept. That output is bitwise identical to its dense path and 4–6% faster; see `../official_baseline/README.md`.
 2. **Quality must be re-measured on the new substrate.** torch 2.12's `grouped_mm` and inductor change numerics, so no v21–v27 quality result carries over.
 3. **Host-side cost of our method matters again.** The observation call (+28–40 ms at 64K) is now the main overhead to cut. The selection logic runs eagerly at the GLOBAL boundary.
 4. **Environment.** The substrate uses the existing `ljy_dlm` conda env's own torch 2.12.1 (no new env, nothing installed) by leaving the `.local` torch-2.6 overlay off PYTHONPATH. Junyu's torch-2.6 value-direction binaries are not used by the FA4 paths.

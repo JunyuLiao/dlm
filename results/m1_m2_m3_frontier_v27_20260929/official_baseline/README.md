@@ -17,6 +17,26 @@
 - All earlier per-forward ratios quoted against D_c64 must be re-based on FA4 before they are claimed.
 - **Environment effect on Triton.** Our dense64 Triton kernel runs 1.7–1.9× faster in the vLLM environment than in the pinned environment: 2.88 ms vs 4.90 ms at 64K, both with Triton 3.7.1. The pinned environment's toolchain therefore handicaps every self-written Triton kernel. This is being investigated. FA4 numbers come from the pinned environment.
 
+## Update 2026-09-30: provenance, same-process SOTA check, fastest FA4 configuration
+
+**Provenance.**
+- The kernel is FlashAttention-4 (CuTe DSL, BSD-3-Clause), as vendored in vLLM's official `vllm-project/flash-attention` fork.
+- All 53 `vllm_flash_attn/cute` files in our overlay match, byte for byte, the RECORD hashes of the official vLLM nightly wheel (`wheels.vllm.ai/46d2b23ac…`).
+- The SM90 head_dim-512 range (`is_sm90_range = 8 <= head_dim <= 512`) is in the vLLM fork's `main`. The Dao-AILab upstream caps SM90 at 256, and papers must say which one was used.
+
+**Same process** (`dense_sota_same_process.json`; torch 2.13, one H100; CUDA-event median of 20; every configuration checked against FP32):
+
+| keys | FA4 dense (num_splits=1) | FA4 best split-KV | FA4 block-sparse API, all tiles kept | FlashInfer 0.6.18 batch-ragged (FA2 backend) | FlashInfer single_prefill (FA2) | FlashInfer FA3 backend |
+|---:|---:|---:|---:|---:|---:|---|
+| 16,640 | 0.782 | 0.804 (s4) | **0.756** | 0.784 | 4.32 | no hd512 (static_assert hd ∈ {64,128,256}) |
+| 32,768 | 1.462 | 1.493 (s3) | **1.391** | 1.467 | 8.99 | no hd512 |
+| 65,536 | 2.851 | 2.913 (s4) | **2.672** | 2.891 | 19.25 | no hd512 |
+
+- **FA4 and FlashInfer are tied** (within 1.4%). Split-KV does not help FA4 at this shape: the heuristic is 2–12% slower than `num_splits=1`.
+- **FA4's block-sparse API with every tile kept is the fastest dense configuration.** It is 4–6% faster than FA4 dense and bitwise identical to it. `allkept_check.json` shows this at the model's real key counts (17,284 / 32,389 / 60,151 / 60,407, where the last tile is partial): max |dense − all-kept| = 0.0.
+- **The dense baseline (D_fa4) therefore runs through that all-kept path.** Dense and sparse then differ only in the skipped tiles, and no share of the gain comes from the sparse code path itself.
+- An earlier cross-environment run had FlashInfer 5% faster than FA4 (`flashinfer_bench_fan_env.json`). That was an environment artifact; the same-process numbers above supersede it.
+
 ## FA4's official block-sparse interface (same kernel, Q128 × KV64 keep maps)
 
 Random keep maps, with the first tile of each row always kept. Errors against a masked FP32 reference are ≤ 9e-4.

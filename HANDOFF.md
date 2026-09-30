@@ -48,7 +48,7 @@ Results: `results/m1_m2_m3_frontier_v27_20260929/`.
   - In-model FA4 sparse saves about 11 ms of GPU per call at 64K. But every eager forward is host-bound, so none of it reaches wall time.
   - On the pinned torch-2.6 `.local` overlay, transformers' MoE falls back to a per-expert loop with 60 host syncs per forward.
   - Under CUDA graphs the saving appears: common-state keep 0.1 is 0.77× per forward at 60K keys.
-  - Piecewise inductor graphs (GLOBAL attention eager, vLLM split) on the conda env's own torch 2.12, 64K: in-harness FA4 dense 37.6 ms, held FA4 sparse 29.4 ms, observation call 66–78 ms.
+  - Piecewise inductor graphs (GLOBAL attention eager, vLLM split) on the conda env's own torch 2.12, 64K: D_fa4 dense 40.5 ms (call-mix median), held FA4 sparse 29.4 ms (calls 2+; not a common-state ratio), observation call 66–78 ms. The clean per-forward ratio is the common-state bench: 0.77× at keep 0.1.
   - The official HF compiled path is 44/55.7 ms per step at 17K/32K and OOMs at 64K.
   - All v21–v27 end-to-end ratios hold for the eager substrate only.
 
@@ -60,7 +60,7 @@ Results: `results/m1_m2_m3_frontier_v27_20260929/`.
    - `v27_piecewise_bench.piecewise` becomes a plugin-independent install recorded in configs and receipts.
    - Tests: LOCAL binding is semantically the native path; no recompiles across requests; tokens are stable across repeats.
    - Also compile the post-prefill encoder (the official path does); it is currently eager.
-2. **Dense reference.** Use in-harness FA4 dense, which avoids HF's 60K-key concat. Report the D_fa4 plugin and the official compiled path as context.
+2. **Dense reference.** Use D_fa4 in FA4's fastest configuration (block-sparse interface with every tile kept, bitwise identical to dense). Report FlashInfer (tied) and the official compiled path as context. (The earlier claim that B0 avoided HF's concat was wrong: B0 is call 0, with fewer MoE experts hit.)
 3. **Re-measure quality on the new substrate.** The numerics change, so no earlier quality result transfers. Then re-freeze the unshared LB follow-up (`specs/v27_long_lb_unshared.json`) with FA4 execution and `substrate=piecewise`:
    - plain M1/M2c/M3 always;
    - B, M3 R6/R3 A64, M1-DP, pairs/no_last;
