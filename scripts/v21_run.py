@@ -111,7 +111,7 @@ def validate_protocol(protocol: dict) -> None:
                     c.get("threshold_shift", "plus_ln2") not in (
                         "minus_3ln2", "minus_2ln2", "minus_ln2", "plus_ln2", "plus_2ln2", "plus_3ln2", "plus_4ln2"):
                 raise ValueError(f"unknown v27 clock/threshold field: {arm}")
-            if c.get("min_route_keys", 8192) != 8192:
+            if c.get("min_route_keys", 8192) not in (8192, 16384, 32768):
                 raise ValueError(f"unknown v27 length gate: {arm}")
             if (c.get("share_layers", "one") not in ("pairs", "one", "mid3_one", "local_blocks") or
                     c.get("route_layers", "mid3") not in ("mid3", "no_first", "no_last", "late3", "global_plus_local_mid") or
