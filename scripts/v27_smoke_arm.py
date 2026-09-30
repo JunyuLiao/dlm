@@ -28,6 +28,9 @@ def main(argv=None):
     p.add_argument('--index', type=int, default=0)
     p.add_argument('--repeat', type=int, default=1, help='runs per arm; with a compiled substrate the second run '
                                                           'must add no graphs')
+    p.add_argument('--warm-budget', type=int, default=0, help='first run each arm once with this generation budget '
+                                                              '(the runner warm-up), untimed')
+    p.add_argument('--warm-index', type=int, default=None, help='warm on this id index (default: --index)')
     a = p.parse_args(argv)
     from scripts.v21_run import validate_inputs
     protocol, binding, rows, configs = validate_inputs(a.run_dir / 'protocol.json', a.run_dir / 'binding.json',
@@ -46,6 +49,17 @@ def main(argv=None):
         print(json.dumps(dict(substrate_installed=v27_substrate.install(adapter.model))), flush=True)
     row = rows[protocol['ids'][a.dataset][a.index]]
     failures = 0
+    if a.warm_budget:
+        for arm in a.arm:
+            config = configs[a.dataset][arm]
+            if substrate != 'eager':
+                v27_substrate.set_local(adapter.model, v27_substrate.local_mode_for(config))
+            with prefill_dense64(adapter.model, os.environ.get('V27_PREFILL_DENSE64') == '1'):
+                warm_row = row if a.warm_index is None else rows[protocol['ids'][a.dataset][a.warm_index]]
+                _one(adapter, dict(warm_row, generation_budget=a.warm_budget), protocol['seeds'][0], config)
+            print(json.dumps(dict(warm=arm, budget=a.warm_budget,
+                                  graphs=v27_substrate.identity(adapter.model).get('dynamo_unique_graphs')
+                                  if substrate != 'eager' else None)), flush=True)
     for arm in [x for x in a.arm for _ in range(a.repeat)]:
         config = configs[a.dataset][arm]
         graphs = None

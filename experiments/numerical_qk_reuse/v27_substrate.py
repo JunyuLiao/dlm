@@ -10,6 +10,8 @@
                         key, to the same native SDPA function they already reach in every GLOBAL-scope arm, so no
                         plugin state is traced -- or eager boundaries too, for arms whose scope routes LOCAL layers
                         (set per request with set_local);
+                    after every encoder call the LOCAL sliding-window cache is compacted (HF keeps it as a slice of the full
+                    concatenation: prompt-length-dependent strides and the whole prompt's LOCAL K/V retained);
                     the runtime-capture pre-hooks the attention binding registers on the base model run eager; the
                     sampler's accept/renoise are compiled exactly as the official DiffusionGemma compiled path does
                     (generation_diffusion_gemma._compile_functions), cached on the model.
@@ -27,6 +29,19 @@ def local_mode_for(config: dict) -> str:
     scopes = {config.get('v20_scope'), (config.get('parent_config') or {}).get('v20_scope'),
               (config.get('parent_config') or {}).get('v21_scope'), config.get('v21_scope')}
     return 'eager' if 'ALL_NATIVE_LEGAL' in scopes else 'graph'
+
+
+def compact_sliding_cache(cache) -> int:
+    """Replace every sliding-window layer's key/value slice view by a compact copy (value-identical)."""
+    import torch
+    copied = 0
+    for layer in getattr(cache, 'layers', ()):
+        if getattr(layer, 'is_sliding', False) and isinstance(getattr(layer, 'keys', None), torch.Tensor):
+            if not layer.keys.is_contiguous():
+                layer.keys, copied = layer.keys.contiguous(), copied + 1
+            if not layer.values.is_contiguous():
+                layer.values, copied = layer.values.contiguous(), copied + 1
+    return copied
 
 
 def install(model) -> dict:
@@ -67,6 +82,18 @@ def install(model) -> dict:
         else:
             attn.forward = attn._v27_eager_forward
             global_layers.append(int(attn.layer_idx))
+    encoder = model.model.encoder
+    encoder_forward = encoder.forward
+
+    def compact_cache_forward(*a, **k):
+        # HF's DynamicSlidingWindowLayer stores keys/values as a SLICE of the full concatenation, so after the
+        # prefill every LOCAL layer keeps the whole prompt's K/V alive (about 15 GiB at 75K tokens) and exposes a
+        # prompt-length-dependent stride to the compiled decoder (a recompile per new prompt). Compacting them is
+        # value-identical and frees that memory before the first denoising call.
+        out = encoder_forward(*a, **k)
+        compact_sliding_cache(getattr(out, 'past_key_values', None) or k.get('past_key_values'))
+        return out
+    encoder.forward = compact_cache_forward
     base = model.model
     register = base.register_forward_pre_hook
 

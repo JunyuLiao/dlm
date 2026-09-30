@@ -593,25 +593,34 @@ def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: P
                 # untimed warm-up: one short request per arm compiles/captures every graph variant it needs
                 # (compile time must not land in a timed request). Outputs are discarded; only a ledger event.
                 from experiments.numerical_qk_reuse.v27_long import prefill_dense64
-                for arm in protocol["arms"]:
-                    entry = next((e for e in entries if e["arm"] == arm), None)
-                    if entry is None:
-                        continue
-                    config = configs[entry["dataset"]][arm]
-                    row = dict(rows[entry["id"]])
-                    row["generation_budget"] = min(512, int(row.get("generation_budget", 8192)))
-                    v27_substrate.set_local(adapter.model, v27_substrate.local_mode_for(config))
-                    before, warm_error = time.perf_counter(), None
-                    try:
-                        with prefill_dense64(adapter.model, os.environ.get("V27_PREFILL_DENSE64") == "1"):
-                            _one(adapter, row, entry["seed"], config)
-                    except Exception as exc:
-                        warm_error = f"{type(exc).__name__}: {exc}"[:500]
-                    append(ledger, {"event": "substrate_warmup", "arm": arm, "dataset": entry["dataset"],
-                                    "when": time.time(), "wall_s": time.perf_counter() - before,
-                                    "error": warm_error, "host": host, **v27_substrate.identity(adapter.model)})
-                    if warm_error and is_device_error(warm_error):
-                        raise RuntimeError(warm_error)
+                # two passes on two different prompts (when the stage has them): graph variants that depend on the
+                # previous arm's LOCAL mode or on the prompt are then compiled here, not in a timed request
+                warm_ids = list(dict.fromkeys(e["id"] for e in entries))[:2]
+                for warm_id in warm_ids:
+                    for arm in protocol["arms"]:
+                        entry = next((e for e in entries if e["arm"] == arm and e["id"] == warm_id), None)
+                        if entry is None:
+                            continue
+                        config = configs[entry["dataset"]][arm]
+                        row = dict(rows[entry["id"]])
+                        row["generation_budget"] = min(512, int(row.get("generation_budget", 8192)))
+                        v27_substrate.set_local(adapter.model, v27_substrate.local_mode_for(config))
+                        graphs_before = v27_substrate.identity(adapter.model).get("dynamo_unique_graphs")
+                        before, warm_error = time.perf_counter(), None
+                        try:
+                            with prefill_dense64(adapter.model, os.environ.get("V27_PREFILL_DENSE64") == "1"):
+                                _one(adapter, row, entry["seed"], config)
+                        except Exception as exc:
+                            warm_error = f"{type(exc).__name__}: {exc}"[:500]
+                        ident = v27_substrate.identity(adapter.model)
+                        append(ledger, {"event": "substrate_warmup", "arm": arm, "dataset": entry["dataset"],
+                                        "warm_id_index": warm_ids.index(warm_id),
+                                        "when": time.time(), "wall_s": time.perf_counter() - before,
+                                        "new_graphs": (None if graphs_before is None else
+                                                       ident.get("dynamo_unique_graphs") - graphs_before),
+                                        "error": warm_error, "host": host, **ident})
+                        if warm_error and is_device_error(warm_error):
+                            raise RuntimeError(warm_error)
             status = run_complete_blocks(entries, done, deadline_epoch=deadline_epoch, gpu_budget_s=gpu_budget_s,
                                          remaining_requests=remaining_requests, block_guard_s=block_guard_s,
                                          process_started=started, execute_block=execute_block)

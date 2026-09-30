@@ -757,7 +757,8 @@ class Attention:
             lists = next((l for s_ref, e_ref, l in self._fa4_lists if s_ref is skipped and e_ref is eligible), None)
             if lists is None:
                 lists = v27_fa4.block_sparse_tensors(eligible & ~skipped)
-                self._fa4_lists = self._fa4_lists[-15:] + [(skipped, eligible, lists)]
+                # >= 2 x the routed layers (G75 S15/S30 hold 30 maps); a smaller cache thrashes every held call
+                self._fa4_lists = self._fa4_lists[-63:] + [(skipped, eligible, lists)]
                 self.fa4_list_builds += 1
             out = v27_fa4.sparse_lists(q, k, v, lists, scale)
             return SimpleNamespace(output=out.transpose(1, 2), skipped=skipped, eligible=eligible,

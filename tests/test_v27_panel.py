@@ -239,3 +239,18 @@ def test_single_host_panel(tmp_path):
     sp2.write_text(json.dumps(spec2))
     with pytest.raises(ValueError):
         freeze_v27(sp2, op2, bp2, pool2, tmp_path / 'x' / 'out')
+
+
+def test_compact_sliding_cache_releases_the_prompt_buffer_and_keeps_values():
+    import torch
+    from types import SimpleNamespace
+    from experiments.numerical_qk_reuse.v27_substrate import compact_sliding_cache
+    full = torch.randn(1, 8, 5000, 16)
+    sliding = SimpleNamespace(is_sliding=True, keys=full[:, :, -1023:, :], values=full[:, :, -1023:, :].clone()[..., ::1])
+    dense = SimpleNamespace(is_sliding=False, keys=full[:, :, :100, :], values=full[:, :, :100, :])
+    cache = SimpleNamespace(layers=[sliding, dense])
+    before = sliding.keys.clone()
+    assert compact_sliding_cache(cache) == 1          # the slice view is copied; the clone already was compact
+    assert sliding.keys.is_contiguous() and torch.equal(sliding.keys, before)
+    assert sliding.keys.untyped_storage().nbytes() == before.numel() * 4    # no longer holds the 5000-token buffer
+    assert not dense.keys.is_contiguous()            # full-attention layers are left alone

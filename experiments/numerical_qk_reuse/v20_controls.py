@@ -120,6 +120,7 @@ class Consumer:
             self.observation_calls += 1
             self.phase_counts['A'] += 1
         else:
+            bootstrap = False
             if self.held and step >= 1 and old is not None:
                 _, skipped, eligible = old
                 self.held_calls += 1
@@ -130,8 +131,18 @@ class Consumer:
                 skipped = torch.zeros_like(eligible)
                 self.bootstrap_calls += 1
                 self.phase_counts['A'] += 1
+                bootstrap = True
             self.owner._mask_present = False
-            result = self.owner._consume(q, k, v, skipped, eligible, scale, None, False)
+            if self.owner.consumer == 'fa4' and bootstrap:
+                # step-0 bootstrap: FA4 with every tile kept through its cached all-kept lists (bitwise identical
+                # to a freshly built all-kept list; no per-call list build)
+                from types import SimpleNamespace
+                from . import v27_fa4
+                out = v27_fa4.dense(q, k, v, scale)
+                result = SimpleNamespace(output=out.transpose(1, 2), invalid_scores=torch.zeros(
+                    (b, h, nq), dtype=torch.bool, device=q.device))
+            else:
+                result = self.owner._consume(q, k, v, skipped, eligible, scale, None, False)
         returned = result.output.transpose(1, 2).contiguous()
         fused_guard(returned, result.invalid_scores)
         self.calls += 1
