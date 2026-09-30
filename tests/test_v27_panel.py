@@ -131,6 +131,8 @@ def test_long_longbench_bins_use_the_lb_contract(tmp_path):
     from scripts.v21_run import check_task_row
     from scripts.v27_datasets import EXTRA_GOLD, base_task
     assert base_task('longbench_v2_64k') == 'longbench_v2' and 'longbench_v2_32k' in EXTRA_GOLD
+    assert base_task('longbench_v2_128k') == 'longbench_v2' and 'longbench_v2_128k' in EXTRA_GOLD
+    check_task_row('longbench_v2_128k', dict(thinking=True, generation_budget=8192))
     check_task_row('longbench_v2_32k', dict(thinking=True, generation_budget=8192))
     with pytest.raises(ValueError):
         check_task_row('longbench_v2_64k', dict(thinking=False, generation_budget=128))
