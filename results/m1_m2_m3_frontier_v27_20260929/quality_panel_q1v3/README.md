@@ -5,31 +5,32 @@ generation: all 30 AIME26 problems and all 12 LongBench-v2 pool items (10-19K to
 two H100 hosts (every arm of a cell on the same host), substrate `piecewise_v2`. Summary (paired against
 D_fa4_allkept, question-clustered bootstrap): `summary.md`, `summary.csv`; per-cell scores without text: `cells.csv`.
 
-**Missing cells.** Five AIME (problem, seed) cells on mpk (aime26/1 s202, /2 s101, /3 s202, /4 s101, /5 s202) failed
-in every arm with CUDA OOM: another process took 28 GiB of that GPU right after the idle check. The same cells are
-missing in every arm, so comparisons stay paired over 55 AIME cells. They will be rerun.
+**Rerun cells.** Five AIME (problem, seed) cells on mpk (aime26/1 s202, /2 s101, /3 s202, /4 s101, /5 s202) failed
+in every arm of run 001 with CUDA OOM (another process took 28 GiB of that GPU right after the idle check). They were
+rerun for all 11 arms in run 002 (same frozen protocol, mpk only, the first 55 scheduled executions) and merged:
+every arm of a cell still comes from one run on one host. AIME below covers all 60 cells.
 
-## AIME26 (55 cells; dense D_fa4_allkept 30 correct)
+## AIME26 (60 cells; dense D_fa4_allkept 35 correct)
 
 | arm | correct | +/- vs dense | sign test p | request W [95% CI] | steps/canvas |
 |---|---:|---|---:|---|---:|
-| D_native (HF SDPA, exact dense) | 31 | +7/-6 | 1.00 | 1.00 [0.85, 1.13] | 1.00 |
-| Fan M1 (R1 A8) | 24 | +4/-10 | 0.18 | 1.08 [0.91, 1.27] | 1.03 |
-| Fan M2c (R1 A8) | 28 | +5/-7 | 0.77 | 1.01 [0.85, 1.14] | 1.00 |
-| Fan M3 (R3 A8) | 26 | +2/-6 | 0.29 | 1.02 [0.86, 1.14] | 1.02 |
-| B (A64 hold) | 21 | +4/-13 | 0.049 | 1.06 [0.89, 1.23] | 1.05 |
-| M3 R6 A64 rp | 25 | +4/-9 | 0.27 | 1.00 [0.84, 1.15] | 1.01 |
-| M1 R1 A64 DP | 28 | +4/-6 | 0.75 | 0.98 [0.83, 1.09] | 1.01 |
-| M3 R6 A64 DP | 27 | +8/-11 | 0.65 | 0.98 [0.83, 1.11] | 1.05 |
-| M3 R6 A64 DP, shift -2ln2 | 23 | +5/-12 | 0.14 | 0.98 [0.83, 1.11] | 1.02 |
-| M3 R6 A64 DP, gate 8K keys | 30 | +0/-0 | 1.00 | 0.94 [0.81, 1.02] | 1.00 |
+| D_native (HF SDPA, exact dense) | 36 | +7/-6 | 1.00 | 1.01 [0.87, 1.13] | 1.00 |
+| Fan M1 (R1 A8) | 29 | +4/-10 | 0.18 | 1.09 [0.93, 1.27] | 1.03 |
+| Fan M2c (R1 A8) | 33 | +5/-7 | 0.77 | 1.06 [0.88, 1.24] | 1.00 |
+| Fan M3 (R3 A8) | 31 | +2/-6 | 0.29 | 1.06 [0.89, 1.24] | 1.02 |
+| B (A64 hold) | 26 | +4/-13 | 0.049 | 1.07 [0.91, 1.24] | 1.04 |
+| M3 R6 A64 rp | 30 | +4/-9 | 0.27 | 1.01 [0.86, 1.14] | 1.00 |
+| M1 R1 A64 DP | 33 | +4/-6 | 0.75 | 1.01 [0.87, 1.13] | 1.02 |
+| M3 R6 A64 DP | 31 | +8/-12 | 0.50 | 0.99 [0.84, 1.11] | 1.04 |
+| M3 R6 A64 DP, shift -2ln2 | 27 | +5/-13 | 0.10 | 0.98 [0.84, 1.11] | 1.02 |
+| M3 R6 A64 DP, gate 8K keys | 35 | +0/-0 | 1.00 | 0.95 [0.83, 1.02] | 1.00 |
 
-- The exact dense kernel swap already moves 13 of 55 cells (+7/-6): AIME sampling is noisy at this sample size.
+- The exact dense kernel swap already moves 13 of 60 cells (+7/-6): AIME sampling is noisy at this sample size.
 - Every sparse arm without a length gate is net negative. Only B is individually significant (p = 0.049).
-  Keeping more tiles (-2ln2) did not recover AIME accuracy here.
+  Keeping more tiles (-2ln2) did not recover AIME accuracy.
 - AIME prefixes stay below about 9K keys, where sparse attention has no speed benefit; the 8K-key gate runs dense on
-  AIME and reproduces dense tokens. Its request ratio 0.94 [0.81, 1.02] for identical computation shows that AIME
-  request-time differences within about 6% are not resolvable in this panel.
+  AIME and reproduces dense tokens. Its request ratio 0.95 [0.83, 1.02] for identical computation shows that AIME
+  request-time differences within about 5% are not resolvable in this panel.
 
 ## LongBench-v2 pool (24 cells, 10-19K tokens; dense 14 correct)
 
