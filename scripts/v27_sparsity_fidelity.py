@@ -8,8 +8,11 @@ Per call it records the kept tile fraction, the attention mass the kept tiles ca
 (exp(lse_kept - lse_all): 1.0 means nothing skipped), and the relative output error ||o_sparse - o_dense|| /
 ||o_dense|| next to ||o_sdpa - o_fa4|| / ||o_fa4||. The request's own output is the unshadowed sparse output, so
 generation is unchanged. Dense and fused-observation calls are not shadowed.
+Trajectory rows (--out FILE.jsonl, numbers only): per shadowed call its canvas, denoising step within the canvas,
+GLOBAL layer position, and the map's age (steps since that layer's current keep map was first used), so kept mass
+can be read against step and staleness.
 usage: python -m scripts.v27_sparsity_fidelity --run-dir DIR --host IP --gpu-uuid UUID --stage S --dataset D
-           [--index I ...] [--budget N] --arm A [--arm ...]
+           [--index I ...] [--budget N] [--out FILE] --arm A [--arm ...]
 """
 from __future__ import annotations
 
@@ -33,6 +36,7 @@ def main(argv=None):
     p.add_argument('--index', type=int, action='append')
     p.add_argument('--budget', type=int)
     p.add_argument('--arm', action='append', required=True)
+    p.add_argument('--out')
     a = p.parse_args(argv)
     from pathlib import Path
     run = Path(a.run_dir)
@@ -55,14 +59,36 @@ def main(argv=None):
     kernel = v27_substrate.prefill_kernel(substrate)
     records = []
     original = v27_fa4.sparse_lists
+    where = dict(canvas=-1, step=0, layer=0)
+    first_seen = {}                       # layer position -> (lists object, step index when first used)
+    encoder = model.model.encoder
+    enc_forward, dec_forward = encoder.forward, model.forward
+
+    def on_encoder(*x, **kw):
+        where.update(canvas=where['canvas'] + 1, step=0)
+        first_seen.clear()
+        return enc_forward(*x, **kw)
+
+    def on_decoder(*x, **kw):
+        where['layer'] = 0
+        try:
+            return dec_forward(*x, **kw)
+        finally:
+            where['step'] += 1
+    encoder.forward, model.forward = on_encoder, on_decoder
 
     def shadowed(q, k, v, lists, scale):
         out = original(q, k, v, lists, scale)
         heads, qb = lists.full_block_cnt.shape[1:]
         kt = -(-k.shape[2] // 64)
         kept = float(lists.full_block_cnt.sum()) / (heads * qb * kt)
+        layer = where['layer']
+        where['layer'] += 1
         if kept >= 1.0:
             return out
+        seen = first_seen.get(layer)
+        if seen is None or seen[0] is not lists:
+            first_seen[layer] = seen = (lists, where['step'])
         fwd = v27_fa4.load()
         qs, ks, vs = v27_fa4._layout(q, k, v)
         tile = {} if q.shape[-1] > 256 else dict(tile_mn=(128, 64))
@@ -75,7 +101,8 @@ def main(argv=None):
         o_ref = torch.nn.functional.scaled_dot_product_attention(q, k, v, scale=scale, enable_gqa=True)
         dense = o_d.float().transpose(1, 2)
         denom = dense.norm()
-        rec = dict(nk=int(k.shape[2]), kept=round(kept, 5),
+        rec = dict(canvas=where['canvas'], step=where['step'], layer=layer, age=where['step'] - seen[1],
+                   nk=int(k.shape[2]), kept=round(kept, 5),
                    mass_mean=float(mass.mean()), mass_p01=float(torch.quantile(mass, 0.01)),
                    mass_min=float(mass.min()),
                    err=float((o_s.float().transpose(1, 2) - dense).norm() / denom),
@@ -94,6 +121,8 @@ def main(argv=None):
                 if substrate != 'eager':
                     v27_substrate.set_local(model, v27_substrate.local_mode_for(config))
                 records.clear()
+                where.update(canvas=-1, step=0, layer=0)
+                first_seen.clear()
                 with prefill_dense64(model, os.environ.get('V27_PREFILL_DENSE64') == '1', kernel=kernel):
                     receipt = _one(adapter, row, protocol['seeds'][0], config)
                 torch.cuda.synchronize()
@@ -111,9 +140,22 @@ def main(argv=None):
                         err_over_env_median=round(statistics.median(r['err'] / max(r['env'], 1e-12)
                                                                     for r in records), 3),
                         shadow_equals_production=all(r['same_as_production'] for r in records))
+                if records:
+                    by_age, by_step = {}, {}
+                    for r in records:
+                        by_age.setdefault(min(r['age'], 12), []).append(r['mass_mean'])
+                        by_step.setdefault(min(r['step'] // 4 * 4, 32), []).append(r['mass_mean'])
+                    summary.update(
+                        mass_mean_by_age={k: round(statistics.mean(v), 5) for k, v in sorted(by_age.items())},
+                        mass_mean_by_step4={k: round(statistics.mean(v), 5) for k, v in sorted(by_step.items())})
                 print(json.dumps(summary), flush=True)
+                if a.out:
+                    with open(a.out, 'a', encoding='utf-8') as f:
+                        for r in records:
+                            f.write(json.dumps(dict(r, dataset=a.dataset, index=index, arm=arm)) + '\n')
     finally:
         v27_fa4.sparse_lists = original
+        encoder.forward, model.forward = enc_forward, dec_forward
 
 
 if __name__ == '__main__':
