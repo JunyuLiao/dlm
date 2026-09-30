@@ -13,6 +13,10 @@ from contextlib import contextmanager
 
 PLUGIN = 'experiments.numerical_qk_reuse.v27_fast_dense:install'
 CONDITION = 'v27_fast_dense_global_repeat_kv'
+# D_fa4: FlashAttention-4's plain dense path. D_fa4_allkept: the same kernel through its block-sparse interface with
+# every tile kept -- bitwise identical output, 4-6% faster at this shape, and the exact code path the M1/M2/M3
+# FA4 consumer uses, so dense vs sparse differ only in skipped tiles. Both are kept (user request 2026-09-30).
+CONTROLS = ('D_fast', 'D_c64', 'D_fa4', 'D_fa4_allkept')
 
 
 @contextmanager
@@ -20,7 +24,7 @@ def install(adapter, config: dict, condition: str):
     import importlib
 
     import torch
-    if condition != CONDITION or config.get('control') not in ('D_fast', 'D_c64', 'D_fa4'):
+    if condition != CONDITION or config.get('control') not in CONTROLS:
         raise ValueError('v27 fast dense control identity drift')
     model = adapter.model
     modeling = importlib.import_module(type(model).__module__.replace('generation_', 'modeling_'))
@@ -37,11 +41,13 @@ def install(adapter, config: dict, condition: str):
             counts['native_calls'] += 1
             return native(module, query, key, value, attention_mask, dropout=dropout,
                           scaling=scaling, is_causal=is_causal, **kwargs)
-        if config['control'] == 'D_fa4':
+        if config['control'] in ('D_fa4', 'D_fa4_allkept'):
             # the official SOTA dense kernel for these layers: FlashAttention-4 (vLLM fork, SM90 hd512)
             from . import v27_fa4
             counts['fast_dense_global_calls'] += 1
             scale = scaling if scaling is not None else query.shape[-1] ** -.5
+            if config['control'] == 'D_fa4':
+                return v27_fa4.dense_plain(query, key, value, scale), None
             return v27_fa4.dense(query, key, value, scale), None
         if config['control'] == 'D_c64':
             # Same 64-row kernel as the sparse consumer, every tile kept.

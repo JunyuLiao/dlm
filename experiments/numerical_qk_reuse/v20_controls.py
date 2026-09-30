@@ -51,18 +51,25 @@ G75_LOCAL_FRACTIONS = (0.0, 0.15, 0.30)   # v27 port of the vLLM-era F (G75L0) /
 
 
 class Consumer:
-    def __init__(self, adapter, config, held=False, local_fraction=.30, c64=False):
+    def __init__(self, adapter, config, held=False, local_fraction=.30, c64=False, fa4=False):
         from .integration import Attention
         # Reuse the qualified lifecycle hooks/identities, without invoking its
         # historical selector. This also keeps prefix ownership checks identical.
         self.owner = Attention(adapter, config['policy'], support='native_mask',
                                output_mode='historical_route_preqk_current_output',
                                kernel_variant='generic', telemetry='minimal', guard_mode='fused',
-                               consumer='triton' if c64 else config['consumer'],
+                               consumer='triton' if (c64 or fa4) else config['consumer'],
                                support_build=config.get('support_build'))
         if c64:
             # v27 port: every consumer call (bootstrap, observation output, held) runs the 64-row kernel
             self.owner.consumer, self.owner.c64_splits, self.owner.output_layout = 'triton64', 2, 'model_major'
+        if fa4:
+            # v27 FA4 port: every consumer call runs FlashAttention-4 through its block-sparse interface
+            # (bootstrap = all tiles kept), exactly the M1/M2/M3 FA4 consumer path
+            if c64:
+                raise ValueError('choose one G75 consumer')
+            c64 = True   # same call routing as the 64-row port below; only the kernel differs
+            self.owner.consumer, self.owner.c64_splits, self.owner.output_layout = 'fa4', 2, 'model_major'
         if local_fraction not in G75_LOCAL_FRACTIONS:
             raise ValueError('G75 local deletion fraction must be a named vLLM-era point')
         self.local_fraction, self.c64 = local_fraction, c64
@@ -151,7 +158,7 @@ def install(adapter, config, condition):
     from experiments.value_direction_hopper.query_adaptive import State
     from .global_scope import GlobalScopeAdapter
     from .integration import NativeReuseState
-    if condition not in ('v20_dense_consumer', 'v20_fresh_T', 'v20_G75L30_nativeQ128', 'v27_G75_c64'):
+    if condition not in ('v20_dense_consumer', 'v20_fresh_T', 'v20_G75L30_nativeQ128', 'v27_G75_c64', 'v27_G75_fa4'):
         raise ValueError(condition)
     scope = config.get('v20_scope')
     if scope not in SCOPES or config.get('diagnostic') is not False:
@@ -175,6 +182,10 @@ def install(adapter, config, condition):
                 if config.get('consumer') != 'triton64':
                     raise ValueError('v27 G75 port runs on the 64-row consumer')
                 router = Consumer(scoped, config, held=True, local_fraction=config['g75_local_fraction'], c64=True)
+            elif condition == 'v27_G75_fa4':
+                if config.get('consumer') != 'fa4':
+                    raise ValueError('v27 G75 FA4 port runs on the FA4 consumer')
+                router = Consumer(scoped, config, held=True, local_fraction=config['g75_local_fraction'], fa4=True)
             else:
                 router = Consumer(scoped, config, held=condition == 'v20_G75L30_nativeQ128')
             state = NativeReuseState('kernel_dense', router, m_ref=config['m_ref'], diagnostics=False)

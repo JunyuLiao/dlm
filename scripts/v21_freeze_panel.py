@@ -315,7 +315,7 @@ def freeze_seven(v20_protocol_path, v20_binding_path, manifests_dir, out_dir):
 
 V27_EXTRA_KEYS = ('mu_mode', 'score_period', 'decision_interval', 'hold_only', 'threshold_shift',
                   'min_route_keys', 'share_layers', 'route_layers', 'consumer64', 'memory_caps', 'fused_observe',
-                  'fresh_fused', 'route_pipeline', 'risk_state', 'density_gate')
+                  'fresh_fused', 'route_pipeline', 'risk_state', 'density_gate', 'fa4_consumer')
 
 
 def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir):
@@ -379,6 +379,10 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
         elif arm['kind'] == 'dense_c64':
             # strongest dense: native model with GLOBAL attention through the 64-row kernel (all kept)
             contracts[name] = dict(kind='v27_dense', control='D_c64', scope=SCOPE)
+        elif arm['kind'] in ('dense_fa4', 'dense_fa4_allkept'):
+            # official SOTA dense: FlashAttention-4 plain dense path / its block-sparse API with every tile kept
+            contracts[name] = dict(kind='v27_dense', control='D_fa4' if arm['kind'] == 'dense_fa4' else 'D_fa4_allkept',
+                                   scope=SCOPE)
         elif arm['kind'] == 'g75_c64':
             # v27 port of the vLLM-era observe-once-then-reuse mass ranking (F = G75L0, S15, S30) on
             # the 64-row consumer; step 0 dense, step 1 observes and ranks, held for the canvas
@@ -388,6 +392,10 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
                 raise ValueError(f'unknown G75 local fraction: {name}')
             contracts[name] = dict(kind='v27_g75', parent_v20_arm='D_matched', local_fraction=lf,
                                    scope=SCOPE if lf == 0.0 else 'ALL_NATIVE_LEGAL')
+            if arm.get('consumer', 'triton64') == 'fa4':
+                contracts[name]['consumer'] = 'fa4'
+            elif arm.get('consumer', 'triton64') != 'triton64':
+                raise ValueError(f'unknown G75 consumer: {name}')
         elif arm['kind'] == 'dense_matched':
             # Same Triton consumer, FP32 scores, model-major output, every legal tile kept.
             contracts[name] = dict(kind='v21_control', parent_v20_arm='D_matched', scope=SCOPE,
@@ -399,8 +407,11 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
         else:
             raise ValueError(f'unknown v27 arm kind: {arm["kind"]}')
     arms = list(spec['arms'])
-    protocol_id = 'v27_' + spec['name'] + '_' + _sha(_bytes(dict(old_protocol=_sha(original_bytes), ids=ids,
-                                                              seeds=seeds, arms=contracts)))[:16]
+    substrate = spec.get('substrate', 'eager')
+    identity_fields = dict(old_protocol=_sha(original_bytes), ids=ids, seeds=seeds, arms=contracts)
+    if substrate != 'eager':
+        identity_fields['substrate'] = substrate
+    protocol_id = 'v27_' + spec['name'] + '_' + _sha(_bytes(identity_fields))[:16]
     assignments, schedule, block, stages = {}, [], 0, {}
     for dataset in DATASETS:
         if dataset not in ids:
@@ -436,6 +447,9 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
                     extra_gold_sha256=spec.get('extra_gold_sha256', {}),
                     long_context_execution=spec.get('long_context_execution'),
                     quality_eligible=True, timing_eligible=bool(spec.get('warm', True)))
+    if substrate != 'eager':
+        protocol['substrate'] = substrate
+        protocol['timing_eligible'] = True   # compile/capture happens in the runner's untimed per-arm warm-up
     validate_protocol(protocol)
     out_dir.mkdir(parents=True, exist_ok=False)
     for dataset, content in manifests.items():
@@ -688,18 +702,22 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                 result = old.control_config(base, 'native_dense', SCOPE)
                 result = {k: v for k, v in result.items() if k not in ('fingerprint', 'condition', 'plugin')}
                 result.update(control=contract['control'], plugin=fast.PLUGIN, condition=fast.CONDITION)
-                for src in (Path(fast.__file__).resolve(), Path(fast.__file__).resolve().with_name('v27_consumer64.py')):
+                for src in (Path(fast.__file__).resolve(), Path(fast.__file__).resolve().with_name('v27_consumer64.py'),
+                            Path(fast.__file__).resolve().with_name('v27_fa4.py')):
                     result['source_hashes'][str(src)] = _sha(src.read_bytes())
                 # the runner records the config fingerprint in every receipt
                 result['fingerprint'] = old.sha_json(result)
             elif contract['kind'] == 'v27_g75':
                 from experiments.numerical_qk_reuse import v20_controls as controls
                 hashes = dict(base['source_hashes'])
-                for src in (Path(controls.__file__).resolve(), Path(controls.__file__).resolve().with_name('v27_consumer64.py')):
+                for src in (Path(controls.__file__).resolve(), Path(controls.__file__).resolve().with_name('v27_consumer64.py'),
+                            Path(controls.__file__).resolve().with_name('v27_fa4.py')):
                     hashes[str(src)] = _sha(src.read_bytes())
-                result = old.control_config(dict(base, consumer='triton64', support_build=None, source_hashes=hashes,
+                g75_consumer = contract.get('consumer', 'triton64')
+                result = old.control_config(dict(base, consumer=g75_consumer, support_build=None, source_hashes=hashes,
                                                  g75_local_fraction=contract['local_fraction']),
-                                            'v27_G75_c64', contract['scope'])
+                                            'v27_G75_fa4' if g75_consumer == 'fa4' else 'v27_G75_c64',
+                                            contract['scope'])
             elif contract['kind'] == 'v20_legacy':
                 result = old.control_config(dict(base, control='T_scope'), 'v20_fresh_T', SCOPE)
             elif contract['kind'] == 'v21_control':
@@ -728,7 +746,8 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                     fresh_fused=contract.get('fresh_fused', False),
                     route_pipeline=contract.get('route_pipeline', False),
                     risk_state=contract.get('risk_state'),
-                    density_gate=contract.get('density_gate'))
+                    density_gate=contract.get('density_gate'),
+                    fa4_consumer=contract.get('fa4_consumer', False))
             path = config_dir / dataset / f'{arm}.json'
             _new(path, _bytes(result))
             configs[dataset][arm] = dict(path=str(path.resolve()), sha256=_sha(path.read_bytes()))

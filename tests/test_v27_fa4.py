@@ -56,3 +56,33 @@ def test_fa4_consumer_under_inference_mode_caches_by_map_object():
         Attention._consume(fake, q, k, v, other, eligible, 512 ** -.5, None, False)
         assert fake.fa4_list_builds == 2
     torch.testing.assert_close(first.output.transpose(1, 2).float(), _ref(q, k, v, ~skipped), atol=2e-2, rtol=2e-2)
+
+
+@pytest.mark.parametrize('keys', [1100, 4133, 17284])
+def test_fa4_dense_is_the_all_kept_path_and_bitwise_equals_plain_dense(keys):
+    from experiments.numerical_qk_reuse import v27_fa4
+    g = torch.Generator(device='cuda').manual_seed(keys + 1)
+    with torch.inference_mode():
+        q = torch.randn(1, 256, 16, 512, device='cuda', dtype=torch.bfloat16, generator=g).transpose(1, 2)
+        k = torch.randn(1, 2, keys, 512, device='cuda', dtype=torch.bfloat16, generator=g)
+        v = torch.randn(1, 2, keys, 512, device='cuda', dtype=torch.bfloat16, generator=g)
+        fast, plain = v27_fa4.dense(q, k, v, 1.0), v27_fa4.dense_plain(q, k, v, 1.0)
+        kept = torch.ones(1, 16, 2, math.ceil(keys / 64), dtype=torch.bool, device='cuda')
+        built = v27_fa4.sparse(q, k, v, ~kept, torch.ones_like(kept), 1.0)
+    assert torch.equal(fast, plain) and torch.equal(fast, built)
+
+
+@pytest.mark.parametrize('keys', [1279, 1280])
+def test_fa4_block_sparse_at_the_local_layer_geometry(keys):
+    # LOCAL layers (G75 S15/S30 route them): 16 Q / 8 KV heads, head_dim 256, sliding cache + canvas keys
+    from experiments.numerical_qk_reuse import v27_fa4
+    g = torch.Generator(device='cuda').manual_seed(keys)
+    q = torch.randn(1, 256, 16, 256, device='cuda', dtype=torch.bfloat16, generator=g).transpose(1, 2)
+    k = torch.randn(1, 8, keys, 256, device='cuda', dtype=torch.bfloat16, generator=g)
+    v = torch.randn(1, 8, keys, 256, device='cuda', dtype=torch.bfloat16, generator=g)
+    torch.testing.assert_close(v27_fa4.dense(q, k, v, 256 ** -.5).float(), _ref(q, k, v), atol=2e-2, rtol=2e-2)
+    kt = math.ceil(keys / 64)
+    skipped = torch.rand(1, 16, 2, kt, device='cuda', generator=g) > .7
+    skipped[..., 0] = False
+    got = v27_fa4.sparse(q, k, v, skipped, torch.ones_like(skipped), 256 ** -.5).float()
+    torch.testing.assert_close(got, _ref(q, k, v, ~skipped), atol=2e-2, rtol=2e-2)

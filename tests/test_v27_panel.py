@@ -173,3 +173,51 @@ def test_g75_port_arms_freeze_and_validate(tmp_path):
     sp2, op2, bp2, pool2 = _setup(tmp_path / 'bad', dict(ARMS, G=dict(kind='g75_c64', local_fraction=0.5)))
     with pytest.raises(ValueError):
         freeze_v27(sp2, op2, bp2, pool2, tmp_path / 'bad' / 'out')
+
+
+def test_fa4_piecewise_panel_freezes_and_validates(tmp_path):
+    fa4 = dict(consumer64=2, memory_caps='long', fa4_consumer=True, route_pipeline=True)
+    arms = dict(ARMS, D_fa4=dict(kind='dense_fa4'), D_fa4_allkept=dict(kind='dense_fa4_allkept'),
+                G75L0_fa4=dict(kind='g75_c64', local_fraction=0.0, consumer='fa4'),
+                G75L30_fa4=dict(kind='g75_c64', local_fraction=0.3, consumer='fa4'),
+                M1_fa4=dict(kind='method', parent='M1_R1_A8_current_output', extra=fa4))
+    sp, op, bp, pool = _setup(tmp_path, arms)
+    spec = json.loads(sp.read_text())
+    spec['substrate'] = 'piecewise_v1'
+    sp.write_text(json.dumps(spec))
+    protocol = freeze_v27(sp, op, bp, pool, tmp_path / 'out')
+    c = protocol['arm_contracts']
+    assert c['D_fa4']['control'] == 'D_fa4' and c['D_fa4_allkept']['control'] == 'D_fa4_allkept'
+    assert c['G75L0_fa4']['consumer'] == 'fa4' and c['G75L30_fa4']['scope'] == 'ALL_NATIVE_LEGAL'
+    assert c['M1_fa4']['fa4_consumer'] is True
+    assert protocol['substrate'] == 'piecewise_v1' and protocol['timing_eligible'] is True
+    validate_protocol(json.loads((tmp_path / 'out' / 'protocol.json').read_bytes()))
+    # the substrate is part of the protocol identity
+    (tmp_path / 'eager').mkdir()
+    sp2, op2, bp2, pool2 = _setup(tmp_path / 'eager', arms)
+    assert freeze_v27(sp2, op2, bp2, pool2, tmp_path / 'eager' / 'out')['protocol_id'] != protocol['protocol_id']
+
+
+def test_unknown_substrate_and_g75_consumer_rejected(tmp_path):
+    sp, op, bp, pool = _setup(tmp_path, dict(ARMS, G=dict(kind='g75_c64', local_fraction=0.0, consumer='hopper')))
+    with pytest.raises(ValueError):
+        freeze_v27(sp, op, bp, pool, tmp_path / 'out')
+    (tmp_path / 's').mkdir()
+    sp2, op2, bp2, pool2 = _setup(tmp_path / 's', ARMS)
+    spec = json.loads(sp2.read_text())
+    spec['substrate'] = 'full_graph'
+    sp2.write_text(json.dumps(spec))
+    with pytest.raises(ValueError):
+        freeze_v27(sp2, op2, bp2, pool2, tmp_path / 's' / 'out')
+
+
+@pytest.mark.parametrize('config,mode', [
+    (dict(v20_scope='GLOBAL_ONLY_NATIVE_LOCAL'), 'graph'),
+    (dict(v20_scope='ALL_NATIVE_LEGAL'), 'eager'),
+    (dict(parent_config=dict(v20_scope='GLOBAL_ONLY_NATIVE_LOCAL')), 'graph'),
+    (dict(parent_config=dict(v20_scope='ALL_NATIVE_LEGAL')), 'eager'),
+    (dict(condition='native_dense'), 'graph'),
+])
+def test_substrate_local_mode_follows_attention_scope(config, mode):
+    from experiments.numerical_qk_reuse.v27_substrate import local_mode_for
+    assert local_mode_for(config) == mode

@@ -73,6 +73,9 @@ def validate_protocol(protocol: dict) -> None:
         raise ValueError("arm contracts must match explicit arm list")
     if sum(c.get("kind") == "native" for c in contracts.values()) > 1:
         raise ValueError("more than one native arm")
+    from experiments.numerical_qk_reuse.v27_substrate import SUBSTRATES
+    if protocol.get("substrate", "eager") not in SUBSTRATES or ("substrate" in protocol and not v27):
+        raise ValueError("unknown execution substrate")
     for arm, c in contracts.items():
         if c.get("kind") == "native":
             if arm != "D_native":
@@ -85,6 +88,7 @@ def validate_protocol(protocol: dict) -> None:
             pass
         elif c.get("kind") == "v27_g75":
             if (not v27 or c.get("parent_v20_arm") != "D_matched" or c.get("local_fraction") not in (0.0, 0.15, 0.3)
+                    or c.get("consumer", "triton64") not in ("triton64", "fa4")
                     or c.get("scope") != ("GLOBAL_ONLY_NATIVE_LOCAL" if c.get("local_fraction") == 0.0
                                           else "ALL_NATIVE_LEGAL")):
                 raise ValueError(f"v27 G75 port contract drift: {arm}")
@@ -126,7 +130,8 @@ def validate_protocol(protocol: dict) -> None:
                 raise ValueError(f"unknown v23 method field: {arm}")
         else:
             raise ValueError(f"unknown arm contract: {arm}")
-        if c.get("kind") == "v27_dense" and (not v27 or c.get("control") not in ("D_c64", "D_fast")):
+        if c.get("kind") == "v27_dense" and (not v27 or c.get("control") not in ("D_c64", "D_fast", "D_fa4",
+                                                                                 "D_fa4_allkept")):
             raise ValueError(f"v27 dense control outside a v27 panel: {arm}")
     diagnostic = protocol["panel_kind"] == "zero_pruning_diagnostic"
     ids = protocol.get("ids")
@@ -235,8 +240,10 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
             raise ValueError("native config is not native_dense")
         parent = config
     elif contract["kind"] == "v27_g75":
+        g75_consumer = contract.get("consumer", "triton64")
         if (config.get("plugin") != "experiments.numerical_qk_reuse.v20_controls:install" or
-                config.get("condition") != "v27_G75_c64" or config.get("consumer") != "triton64" or
+                config.get("condition") != ("v27_G75_fa4" if g75_consumer == "fa4" else "v27_G75_c64") or
+                config.get("consumer") != g75_consumer or
                 config.get("v20_scope") != contract["scope"] or
                 config.get("g75_local_fraction") != contract["local_fraction"]):
             raise ValueError("v27 G75 port config differs from its contract")
@@ -277,7 +284,8 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
                 bool(config.get("fresh_fused", False)) != bool(contract.get("fresh_fused", False)) or
                 bool(config.get("route_pipeline", False)) != bool(contract.get("route_pipeline", False)) or
                 config.get("risk_state") != contract.get("risk_state") or
-                config.get("density_gate") != contract.get("density_gate")):
+                config.get("density_gate") != contract.get("density_gate") or
+                bool(config.get("fa4_consumer", False)) != bool(contract.get("fa4_consumer", False))):
             raise ValueError("v27 clock/threshold differs from arm contract")
         if (config.get("bootstrap_policy") != contract.get("bootstrap_policy") or
                 config.get("observation_producer", "repeat_interleave") !=
@@ -474,6 +482,12 @@ def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: P
                 "arm_hashes": {f"{d}/{a}": arm_config_hash(c) for d, family in configs.items() for a, c in family.items()},
                 "source_hashes": source_hashes, "binding_sha256": sha(binding_path.read_bytes()),
                 "private_root": str(private.resolve()), "host": host, "gpu_uuid": uuid}
+    substrate = protocol.get("substrate", "eager")
+    if substrate != "eager":
+        # execution substrate is part of the launch identity (resume refuses a drifted substrate module)
+        from experiments.numerical_qk_reuse import v27_substrate
+        identity["substrate"] = substrate
+        identity["substrate_source_sha256"] = sha(Path(v27_substrate.__file__).resolve().read_bytes())
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with lock_path.open("w") as lock:
         fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -495,6 +509,9 @@ def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: P
                                      precision="bfloat16", revision=protocol["model_revision"]).load()
             torch.backends.cuda.matmul.allow_tf32 = False
             torch.backends.cudnn.allow_tf32 = False
+            if substrate != "eager":
+                append(ledger, {"event": "substrate", "when": time.time(), "host": host,
+                                **v27_substrate.install(adapter.model)})
             compiles = []
             JITFunction.cache_hook = lambda **kw: (compiles.append(time.perf_counter()), False)[1]
             first = {e["cell_id"]: e for e in events if e.get("event") == "run" and e.get("role") == "attempt0"}
@@ -512,8 +529,12 @@ def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: P
                 receipt, execution_error = None, None
                 before = time.perf_counter()
                 signal.alarm(timeout)
+                graphs_before = None
                 try:
                     from experiments.numerical_qk_reuse.v27_long import prefill_dense64
+                    if substrate != "eager":
+                        v27_substrate.set_local(adapter.model, v27_substrate.local_mode_for(config))
+                        graphs_before = v27_substrate.identity(adapter.model).get("dynamo_unique_graphs")
                     with prefill_dense64(adapter.model, os.environ.get("V27_PREFILL_DENSE64") == "1"):
                         receipt = _one(adapter, row, seed, config)
                 except Timeout:
@@ -531,6 +552,12 @@ def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: P
                           "dataset": entry["dataset"],
                           "quality_eligible": protocol.get("quality_eligible", True),
                           "timing_eligible": protocol.get("timing_eligible", True)}
+                if substrate != "eager":
+                    record["substrate"] = v27_substrate.identity(adapter.model)
+                    after = record["substrate"].get("dynamo_unique_graphs")
+                    # a timed request must not compile: new graphs here would put compile time into its wall
+                    record["substrate_new_graphs"] = (None if graphs_before is None or after is None
+                                                      else after - graphs_before)
                 if receipt is not None:
                     if receipt.get("seed") != seed:
                         raise ValueError("actual generation seed differs")
@@ -562,6 +589,29 @@ def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: P
                                     configs=configs[dataset], ledger_append=lambda r: append(ledger, r),
                                     private=private, save_receipt=_atomic)
 
+            if substrate != "eager":
+                # untimed warm-up: one short request per arm compiles/captures every graph variant it needs
+                # (compile time must not land in a timed request). Outputs are discarded; only a ledger event.
+                from experiments.numerical_qk_reuse.v27_long import prefill_dense64
+                for arm in protocol["arms"]:
+                    entry = next((e for e in entries if e["arm"] == arm), None)
+                    if entry is None:
+                        continue
+                    config = configs[entry["dataset"]][arm]
+                    row = dict(rows[entry["id"]])
+                    row["generation_budget"] = min(512, int(row.get("generation_budget", 8192)))
+                    v27_substrate.set_local(adapter.model, v27_substrate.local_mode_for(config))
+                    before, warm_error = time.perf_counter(), None
+                    try:
+                        with prefill_dense64(adapter.model, os.environ.get("V27_PREFILL_DENSE64") == "1"):
+                            _one(adapter, row, entry["seed"], config)
+                    except Exception as exc:
+                        warm_error = f"{type(exc).__name__}: {exc}"[:500]
+                    append(ledger, {"event": "substrate_warmup", "arm": arm, "dataset": entry["dataset"],
+                                    "when": time.time(), "wall_s": time.perf_counter() - before,
+                                    "error": warm_error, "host": host, **v27_substrate.identity(adapter.model)})
+                    if warm_error and is_device_error(warm_error):
+                        raise RuntimeError(warm_error)
             status = run_complete_blocks(entries, done, deadline_epoch=deadline_epoch, gpu_budget_s=gpu_budget_s,
                                          remaining_requests=remaining_requests, block_guard_s=block_guard_s,
                                          process_started=started, execute_block=execute_block)
