@@ -204,6 +204,10 @@ class Attention:
         self.risk_state = 'kept'       # v27 M1-DP: 'dense_prefix' (named variant)
         self.density_gate = None       # v27 density gate preset (DENSITY_GATES), named variant
         self._fa4_lists, self.fa4_list_builds = [], 0   # v27 FA4 consumer: block lists per keep map
+        # v27 async observation route: the observation call's selector (whose decision serves only LATER calls)
+        # runs on a side stream, overlapped with the rest of the forward; each layer waits for its own pending
+        # route event at its next call's entry. Decisions are bit-identical to the synchronous route.
+        self.async_route, self._route_stream, self._pending_routes, self.async_routes = False, None, {}, 0
         self.gate_dense = False
         self.gate_stalled, self.gate_previous_accepted = 0, None
         self.gate_entries, self.gate_dense_calls = [], 0
@@ -296,6 +300,9 @@ class Attention:
         b, h, nq, d = q.shape
         hk, source_nk = k.shape[1], k.shape[-2]
         layer = int(module.layer_idx)
+        pending = self._pending_routes.pop(layer, None)
+        if pending is not None:
+            torch.cuda.current_stream().wait_event(pending)
         native_args = (module, q, k, v, mask)
         native_kwargs = dict(kwargs, dropout=dropout, scaling=scaling, is_causal=is_causal,
                              sliding_window=sliding_window)
@@ -702,10 +709,32 @@ class Attention:
         self.summary_prefix_tiles += prefix_tiles
         self.peak_summary_bytes = max(self.peak_summary_bytes, self.summary_bytes)
         threshold = float(self.thresholds[kind]['log_threshold'])
-        route = self._route(tail, projected, ref, valid=valid, sensitivity=self.query_sensitivity,
-                            log_threshold=threshold, summary=summary, store_summary=False,
-                            variant=self.kernel_variant, key_offset=prefix_tiles * 64)
-        torch._assert_async(~route.invalid_tiles.any(), 'Invalid scores in fused observation: request must fail')
+        route_kwargs = dict(valid=valid, sensitivity=self.query_sensitivity, log_threshold=threshold,
+                            summary=summary, store_summary=False, variant=self.kernel_variant,
+                            key_offset=prefix_tiles * 64)
+        if self.async_route:
+            main = torch.cuda.current_stream()
+            if self._route_stream is None:
+                self._route_stream = torch.cuda.Stream(device=q.device)
+            side = self._route_stream
+            side.wait_stream(main)
+            with torch.cuda.stream(side):
+                route = self._route(tail, projected, ref, **route_kwargs)
+                torch._assert_async(~route.invalid_tiles.any(),
+                                    'Invalid scores in fused observation: request must fail')
+            done = torch.cuda.Event()
+            done.record(side)
+            # the side stream reads these main-stream tensors; the main stream later reads the decision
+            for tensor in (tail, projected, ref, valid, summary.z, summary.mu, summary.active, summary.bad):
+                if isinstance(tensor, torch.Tensor):
+                    tensor.record_stream(side)
+            for tensor in (route.skipped, route.eligible):
+                tensor.record_stream(main)
+            self._pending_routes[layer] = done
+            self.async_routes += 1
+        else:
+            route = self._route(tail, projected, ref, **route_kwargs)
+            torch._assert_async(~route.invalid_tiles.any(), 'Invalid scores in fused observation: request must fail')
         torch._assert_async(torch.isfinite(output).all(), 'Invalid fused-observation output')
         self.cache.publish_decision(identity, self.step, Decision(route.skipped, route.eligible))
         self.bootstrap_observation_calls += 1
@@ -896,6 +925,7 @@ class Attention:
                     pipelined_routes=self.pipelined_routes,
                     risk_state=self.risk_state, dp_builds=self.dp_builds, dp_routes=self.dp_routes,
                     density_gate_dense_calls=self.gate_dense_calls, density_gate_entry_steps=list(self.gate_entries),
+                    async_observation_routes=self.async_routes,
                     fa4_list_builds=self.fa4_list_builds,
                     fresh_fused_tiles=(dict(zip(('pv_kept', 'visited'), self.fresh_tile_total.tolist()))
                                        if self.fresh_tile_total is not None else None),

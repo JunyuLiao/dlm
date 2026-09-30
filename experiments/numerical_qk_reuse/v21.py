@@ -71,7 +71,8 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      decision_interval=None, hold_only=False, threshold_shift=None,
                      min_route_keys=None, route_layers=None, share_layers=None,
                      consumer64=None, memory_caps=None, fused_observe=False, fresh_fused=False,
-                     route_pipeline=False, risk_state=None, density_gate=None, fa4_consumer=False) -> dict:
+                     route_pipeline=False, risk_state=None, density_gate=None, fa4_consumer=False,
+                     async_route=False) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -176,6 +177,11 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if fa4_consumer is not True or consumer64 is None or fresh_fused:
             raise ValueError('v27 FA4 consumer replaces the 64-row consumer (consumer64 required)')
         extra['fa4_consumer'] = True
+    if async_route:
+        # v27: the observation call's selector on a side stream (its decision serves later calls; bit-identical)
+        if async_route is not True or not fused_observe:
+            raise ValueError('v27 async observation route needs the fused observation')
+        extra['async_route'] = True
     return _wrap(parent, 'v20_method', output_score_precision, output_layout, extra)
 
 
@@ -308,6 +314,8 @@ def validate_effective(config: dict, condition: str):
         raise ValueError('v27 dense-prefix risk identity drift')
     if 'fa4_consumer' in config and (config['fa4_consumer'] is not True or 'consumer64' not in config):
         raise ValueError('v27 FA4 consumer identity drift')
+    if 'async_route' in config and (config['async_route'] is not True or 'fused_observe' not in config):
+        raise ValueError('v27 async observation route identity drift')
     if 'density_gate' in config:
         from .integration import DENSITY_GATES
         if config['density_gate'] not in DENSITY_GATES or 'bootstrap_policy' not in config:
@@ -376,6 +384,10 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('pipelined selector must be bound before any routed call')
             owner.route_pipeline = True
+        if config.get('async_route'):
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('async observation route must be bound before any routed call')
+            owner.async_route = True
         if 'risk_state' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('risk state must be bound before any routed call')
@@ -435,6 +447,7 @@ def install(adapter, config: dict, condition: str):
                         fused_observe=bool(getattr(owner, 'fused_observe', False)),
                         fresh_fused=bool(getattr(owner, 'fresh_fused', False)),
                         route_pipeline=bool(getattr(owner, 'route_pipeline', False)),
+                        async_route=bool(getattr(owner, 'async_route', False)),
                         risk_state=getattr(owner, 'risk_state', 'kept'),
                         density_gate=config.get('density_gate'),
                         consumer=getattr(owner, 'consumer', None),

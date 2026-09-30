@@ -285,7 +285,8 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
                 bool(config.get("route_pipeline", False)) != bool(contract.get("route_pipeline", False)) or
                 config.get("risk_state") != contract.get("risk_state") or
                 config.get("density_gate") != contract.get("density_gate") or
-                bool(config.get("fa4_consumer", False)) != bool(contract.get("fa4_consumer", False))):
+                bool(config.get("fa4_consumer", False)) != bool(contract.get("fa4_consumer", False)) or
+                bool(config.get("async_route", False)) != bool(contract.get("async_route", False))):
             raise ValueError("v27 clock/threshold differs from arm contract")
         if (config.get("bootstrap_policy") != contract.get("bootstrap_policy") or
                 config.get("observation_producer", "repeat_interleave") !=

@@ -267,3 +267,16 @@ def test_compiled_sampler_state_is_mirrored_to_the_current_sampler():
     accept = mirrored_accept(first, current, compiled_accept)
     assert accept(3) == 3 and current.accepted_token_mask == ('mask', 3)
     assert accept(4) == 4 and current.accepted_token_mask == ('mask', 4)
+
+
+def test_async_observation_route_arm_freezes_and_requires_fused_observation(tmp_path):
+    fa4 = dict(consumer64=2, memory_caps='long', fa4_consumer=True, route_pipeline=True, score_period=64,
+               fused_observe=True, hold_only=True, async_route=True)
+    arms = dict(ARMS, B_async=dict(kind='method', parent='B_A8_matched', extra=fa4))
+    sp, op, bp, pool = _setup(tmp_path, arms)
+    protocol = freeze_v27(sp, op, bp, pool, tmp_path / 'out')
+    assert protocol['arm_contracts']['B_async']['async_route'] is True
+    validate_protocol(json.loads((tmp_path / 'out' / 'protocol.json').read_bytes()))
+    from experiments.numerical_qk_reuse import v21
+    import inspect
+    assert 'async_route' in inspect.signature(v21.effective_config).parameters
