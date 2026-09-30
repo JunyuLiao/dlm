@@ -1,0 +1,86 @@
+{
+ "name": "aime_m2_c1",
+ "ids": {
+  "aime26": [
+   "aime26/1",
+   "aime26/2",
+   "aime26/3",
+   "aime26/4",
+   "aime26/5",
+   "aime26/6",
+   "aime26/7",
+   "aime26/8",
+   "aime26/9",
+   "aime26/10",
+   "aime26/11",
+   "aime26/12",
+   "aime26/13",
+   "aime26/14",
+   "aime26/15",
+   "aime26/16",
+   "aime26/17",
+   "aime26/18",
+   "aime26/19",
+   "aime26/20",
+   "aime26/21",
+   "aime26/22",
+   "aime26/23",
+   "aime26/24",
+   "aime26/25",
+   "aime26/26",
+   "aime26/27",
+   "aime26/28",
+   "aime26/29",
+   "aime26/30"
+  ]
+ },
+ "seeds": [
+  101,
+  202
+ ],
+ "warm": false,
+ "arms": {
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M2c_R6_A64_fused_dp_async_m1ln2_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2"
+   }
+  }
+ },
+ "substrate": "piecewise_v3",
+ "hosts": [
+  "149.165.168.28"
+ ],
+ "selection_rule": "M2 on AIME (2026-09-30): M2c in the best M3 configuration vs M3 R6 DP -ln2 and dense FA4, all 30 AIME26 problems x seeds 101/202; single new host dlm2; substrate piecewise_v3; frozen before generation.",
+ "extra_hosts": [
+  "149.165.168.28"
+ ]
+}
