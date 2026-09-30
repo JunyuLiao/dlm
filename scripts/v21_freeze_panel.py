@@ -351,7 +351,7 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
     ids, seeds = spec['ids'], list(spec['seeds'])
     from scripts.v27_datasets import DATASETS, base_task
     if not ids or not set(ids) <= set(DATASETS) or not seeds or \
-            not set(seeds) <= {101, 202, 303} or len(set(seeds)) != len(seeds):
+            not set(seeds) <= {101, 202, 303, 404} or len(set(seeds)) != len(seeds):
         raise ValueError('v27 spec ids/seeds outside the allowed tasks/seeds')
     manifests, hashes = {}, {}
     for dataset, wanted in ids.items():

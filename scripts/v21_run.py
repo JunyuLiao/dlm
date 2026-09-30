@@ -157,7 +157,7 @@ def validate_protocol(protocol: dict) -> None:
     if v27:
         seeds = protocol.get("seeds")
         if (not isinstance(seeds, list) or not seeds or len(set(seeds)) != len(seeds) or
-                not set(seeds) <= {101, 202, 303}):
+                not set(seeds) <= {101, 202, 303, 404}):   # 404: final AIME panel (4 seeds, all arms)
             raise ValueError("v27 seeds outside the allowed set")
     elif protocol.get("seeds") != ([101] if single_seed else [101, 202]):
         raise ValueError("frozen v20 generation seeds changed")
