@@ -12,7 +12,8 @@ import csv, json, math, random, sys, collections
 
 POOL = {r['id']: r['prompt_token_count'] for r in
         json.load(open('E:/dlm/v27_private/pool/aime26_pool_manifest.json', encoding='utf-8'))}
-TARGET = {'topk30': .3, 'topk40': .4, 'topk50': .5, 's30_': .3, 's40_': .4, 's50_': .5}
+TARGET = {'topk30': .3, 'topk40': .4, 'topk50': .5, 'topk70': .7, 'topk80': .8,
+          's30_': .3, 's40_': .4, 's50_': .5, 's70_': .7, 's80_': .8}
 
 
 def target_of(arm):
