@@ -47,7 +47,7 @@ ROUTE_LAYER_SETS['global_plus_local_mid'] = tuple(sorted((5, 11, 17, 23, 29) +
 _LN2 = 0.6931471805599453
 # Named log-threshold shifts in ln2 units; larger shifts allow more deletion.
 # The realized sparsity is measured, never inferred from the shift.
-THRESHOLD_SHIFTS = {'minus_ln2': -_LN2, 'plus_ln2': _LN2, 'plus_2ln2': 2 * _LN2,
+THRESHOLD_SHIFTS = {'minus_3ln2': -3 * _LN2, 'minus_2ln2': -2 * _LN2, 'minus_ln2': -_LN2, 'plus_ln2': _LN2, 'plus_2ln2': 2 * _LN2,
                     'plus_3ln2': 3 * _LN2, 'plus_4ln2': 4 * _LN2}
 
 

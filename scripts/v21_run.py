@@ -109,7 +109,7 @@ def validate_protocol(protocol: dict) -> None:
                 raise ValueError(f"unknown v25 route storage: {arm}")
             if c.get("decision_interval", 6) not in (6, 12) or c.get("hold_only", True) is not True or \
                     c.get("threshold_shift", "plus_ln2") not in (
-                        "minus_ln2", "plus_ln2", "plus_2ln2", "plus_3ln2", "plus_4ln2"):
+                        "minus_3ln2", "minus_2ln2", "minus_ln2", "plus_ln2", "plus_2ln2", "plus_3ln2", "plus_4ln2"):
                 raise ValueError(f"unknown v27 clock/threshold field: {arm}")
             if c.get("min_route_keys", 8192) != 8192:
                 raise ValueError(f"unknown v27 length gate: {arm}")
