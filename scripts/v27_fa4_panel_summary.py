@@ -62,8 +62,8 @@ def main(argv=None):
         lines += [f'### {dataset}', '']
         for base in [b for b in BASES if any(b in v for k, v in cells.items() if k[0] == dataset)]:
             lines += [f'#### paired vs {base}', '',
-                      '| arm | cells | correct (base) | +/- vs base | W [CI] | decode S excl. prefill [CI] | prefill P [CI] | calls N [CI] | steps/canvas N/C [CI] | tokens T [CI] | S/N (amortized) [CI] | S per output token [CI] |',
-                      '|---|---:|---|---|---|---|---|---|---|---|---|---|']
+                      '| arm | cells | correct (base) | +/- vs base | W [CI] | W excl. timed new-graph pairs [CI] | decode S excl. prefill [CI] | prefill P [CI] | calls N [CI] | steps/canvas N/C [CI] | tokens T [CI] | S/N (amortized) [CI] | S per output token [CI] |',
+                      '|---|---:|---|---|---|---|---|---|---|---|---|---|---|']
             for arm in arms:
                 pairs = [(k, v[arm], v[base]) for k, v in cells.items() if k[0] == dataset and arm in v and base in v]
                 if not pairs:
@@ -80,10 +80,14 @@ def main(argv=None):
                                 ('NC', lambda a, b: (a['N'] / a['C']) / (b['N'] / b['C'])),
                                 ('T', lambda a, b: a['T'] / b['T']),
                                 ('SN', lambda a, b: (a['S'] / a['N']) / (b['S'] / b['N'])),
-                                ('ST', lambda a, b: (a['S'] / a['T']) / (b['S'] / b['T']))):
+                                ('ST', lambda a, b: (a['S'] / a['T']) / (b['S'] / b['T'])),
+                                # sensitivity: W over pairs in which neither run captured new graphs while timed
+                                ('Wc', lambda a, b: None if (a['new_graphs'] or b['new_graphs']) else a['W'] / b['W'])):
                     by_q = defaultdict(list)
                     for k, a, b in pairs:
                         try:
+                            if f(a, b) is None:
+                                continue
                             by_q[k[1]].append(f(a, b))
                         except (TypeError, ZeroDivisionError):
                             pass
@@ -93,7 +97,7 @@ def main(argv=None):
                     row[name + '_ci'] = f'[{lo:.3f},{hi:.3f}]' if lo else ''
                 rows.append(row)
                 lines.append(f"| {arm} | {row['cells']} | {row['correct']} ({row['base_correct']}) | "
-                             f"+{row['arm_only']}/-{row['base_only']} | {row['W']} {row['W_ci']} | {row['S']} {row['S_ci']} | "
+                             f"+{row['arm_only']}/-{row['base_only']} | {row['W']} {row['W_ci']} | {row['Wc']} {row['Wc_ci']} ({row['timed_with_new_graphs']} excl.) | {row['S']} {row['S_ci']} | "
                              f"{row['P']} {row['P_ci']} | {row['N']} {row['N_ci']} | {row['NC']} {row['NC_ci']} | "
                              f"{row['T']} {row['T_ci']} | {row['SN']} {row['SN_ci']} | {row['ST']} {row['ST_ci']} |")
             lines.append('')
