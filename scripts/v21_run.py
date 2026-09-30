@@ -114,11 +114,12 @@ def validate_protocol(protocol: dict) -> None:
             if c.get("min_route_keys", 8192) != 8192:
                 raise ValueError(f"unknown v27 length gate: {arm}")
             if (c.get("share_layers", "one") not in ("pairs", "one", "mid3_one", "local_blocks") or
-                    c.get("route_layers", "mid3") not in ("mid3", "no_first", "no_last", "global_plus_local_mid") or
+                    c.get("route_layers", "mid3") not in ("mid3", "no_first", "no_last", "late3", "global_plus_local_mid") or
                     c.get("consumer64", 2) not in (1, 2, 4) or c.get("memory_caps", "long") != "long" or
                     c.get("fused_observe", True) is not True or c.get("fresh_fused", True) is not True or
                     c.get("route_pipeline", True) is not True or c.get("risk_state", "dense_prefix") != "dense_prefix" or
-                    c.get("density_gate", "ent0.05") not in ("ent0.05", "ent0.02", "cap12", "stall2", "ent0.05_stall2")):
+                    c.get("density_gate", "ent0.05") not in ("ent0.05", "ent0.02", "cap12", "cap24", "stall2",
+                                                              "ent0.05_stall2")):
                 raise ValueError(f"unknown v27 execution field: {arm}")
             if not v27 and any(k in c for k in ("decision_interval", "hold_only", "threshold_shift",
                                                 "min_route_keys", "share_layers", "route_layers",

@@ -78,6 +78,8 @@ class Decision:
 # once it fires, runs the rest of the canvas dense (hysteresis: it never switches back).
 DENSITY_GATES = {
     'ent0.05': dict(entropy=0.05), 'ent0.02': dict(entropy=0.02), 'cap12': dict(cap=12),
+    # v27: dense only for canvases still running after step 24 (the non-converging tail)
+    'cap24': dict(cap=24),
     'stall2': dict(stall=2), 'ent0.05_stall2': dict(entropy=0.05, stall=2),
 }
 

@@ -35,7 +35,9 @@ MIN_ROUTE_KEYS = (8192,)
 # v27 long-context residency: score cache and prefix-summary budgets (bytes).
 MEMORY_CAPS = {'long': (16 * 1024**3, 8 * 1024**3)}
 # v27 GLOBAL layer variants (DiffusionGemma GLOBAL layers 5, 11, 17, 23, 29).
-ROUTE_LAYER_SETS = {'mid3': (11, 17, 23), 'no_first': (11, 17, 23, 29), 'no_last': (5, 11, 17, 23)}
+ROUTE_LAYER_SETS = {'mid3': (11, 17, 23), 'no_first': (11, 17, 23, 29), 'no_last': (5, 11, 17, 23),
+                    # v27: the first two GLOBAL layers stay dense (sparsity_fidelity: they lose most mass)
+                    'late3': (17, 23, 29)}
 SHARE_GROUPS = {'pairs': {11: 5, 23: 17}, 'one': {11: 5, 17: 5, 23: 5, 29: 5},
                 'mid3_one': {17: 11, 23: 11}}
 # LOCAL blocks: the five consecutive sliding layers between GLOBAL layers; each block's
