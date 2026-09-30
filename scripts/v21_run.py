@@ -126,7 +126,7 @@ def validate_protocol(protocol: dict) -> None:
                     c.get("density_gate", "ent0.05") not in ("ent0.05", "ent0.02", "cap12", "cap24", "stall2",
                                                               "ent0.05_stall2") or
                     c.get("risk_budget", "b0") not in ("b0", "b2ln2", "b4ln2", "b6ln2", "b8ln2") or
-                    c.get("risk_topk", "k50") not in ("k70", "k60", "k50") or
+                    c.get("risk_topk", "k50") not in ("k70", "k60", "k50", "k30", "k20") or
                     ("risk_topk" in c and (c.get("risk_state") != "dense_prefix" or "risk_budget" in c)) or
                     ("risk_budget" in c and c.get("risk_state") != "dense_prefix")):
                 raise ValueError(f"unknown v27 execution field: {arm}")

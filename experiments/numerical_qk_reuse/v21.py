@@ -53,7 +53,7 @@ _LN2 = 0.6931471805599453
 RISK_BUDGETS = {'b0': 0.0, 'b2ln2': 2 * 0.6931471805599453, 'b4ln2': 4 * 0.6931471805599453,
                 'b6ln2': 6 * 0.6931471805599453, 'b8ln2': 8 * 0.6931471805599453}
 # v27 target sparsity (M1-DP): kept fraction of the eligible prefix tiles, ranked by risk (sparsity = 1 - keep)
-RISK_TOPKS = {'k70': 0.7, 'k60': 0.6, 'k50': 0.5}
+RISK_TOPKS = {'k70': 0.7, 'k60': 0.6, 'k50': 0.5, 'k30': 0.3, 'k20': 0.2}
 THRESHOLD_SHIFTS = {'minus_3ln2': -3 * _LN2, 'minus_2ln2': -2 * _LN2, 'minus_ln2': -_LN2, 'plus_ln2': _LN2, 'plus_2ln2': 2 * _LN2,
                     'plus_3ln2': 3 * _LN2, 'plus_4ln2': 4 * _LN2}
 

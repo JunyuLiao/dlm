@@ -65,3 +65,14 @@ def test_topk_never_drops_infinite_risk_and_respects_eligibility():
     eligible[0, :, 0, 1] = 0
     drop = topk_skip(lognorm, eligible, t, ref, 100, 0.5)       # 2 to drop; tile 0 infinite, tile 1 ineligible
     assert drop[0, 0, 0].tolist() == [False, False, True, True]
+
+
+def test_topk_high_sparsity_levels_keep_the_named_fraction():
+    from experiments.numerical_qk_reuse.v21 import RISK_TOPKS
+    from experiments.numerical_qk_reuse.v27_dense_prefix import topk_skip
+    assert RISK_TOPKS['k30'] == 0.3 and RISK_TOPKS['k20'] == 0.2       # sparsity 70% / 80% of eligible prefix tiles
+    risks = (0.5, 0.1, 0.4, 0.2, 0.3, 0.05, 0.6, 0.15, 0.25, 0.35)
+    lognorm, eligible, t, ref = _state([math.log(v) for v in risks])
+    for name, kept in (('k30', {0, 2, 6}), ('k20', {0, 6})):
+        drop = topk_skip(lognorm, eligible, t, ref, 100, RISK_TOPKS[name])[0, 0, 0].tolist()
+        assert {j for j, d in enumerate(drop) if not d} == kept
