@@ -310,3 +310,23 @@ def test_async_observation_route_arm_freezes_and_requires_fused_observation(tmp_
     from experiments.numerical_qk_reuse import v21
     import inspect
     assert 'async_route' in inspect.signature(v21.effective_config).parameters
+
+
+def test_registered_extra_host_can_run_a_single_host_panel(tmp_path):
+    sp, op, bp, pool = _setup(tmp_path, ARMS)
+    spec = json.loads(sp.read_text())
+    spec.update(extra_hosts=['149.165.168.28'], hosts=['149.165.168.28'])
+    sp.write_text(json.dumps(spec))
+    protocol = freeze_v27(sp, op, bp, pool, tmp_path / 'out')
+    hosts = {(a['host'], a['gpu_uuid']) for a in protocol['block_assignments'].values()}
+    assert hosts == {('149.165.168.28', 'GPU-71e99ef8-8452-4da0-7ca7-fd56148a6ba1')}
+    validate_protocol(json.loads((tmp_path / 'out' / 'protocol.json').read_bytes()))
+
+
+def test_unregistered_extra_host_is_refused(tmp_path):
+    sp, op, bp, pool = _setup(tmp_path, ARMS)
+    spec = json.loads(sp.read_text())
+    spec.update(extra_hosts=['10.0.0.1'], hosts=['10.0.0.1'])
+    sp.write_text(json.dumps(spec))
+    with pytest.raises(ValueError):
+        freeze_v27(sp, op, bp, pool, tmp_path / 'out')

@@ -1,0 +1,99 @@
+{
+ "name": "long_lb_m2_c1",
+ "ids": {
+  "longbench_v2_32k": [
+   "longbench_v2/66f3b843821e116aacb2e692",
+   "longbench_v2/671b3d1bbb02136c067d5283",
+   "longbench_v2/66eefe85821e116aacb228dc",
+   "longbench_v2/66ece358821e116aacb1dc08",
+   "longbench_v2/66ee8bab821e116aacb21e44",
+   "longbench_v2/66ebdadd5a08c7b9b35e0e5b",
+   "longbench_v2/6719b96abb02136c067d4358",
+   "longbench_v2/66f52567821e116aacb329bc",
+   "longbench_v2/671b1335bb02136c067d4e88",
+   "longbench_v2/66f95c18bb02136c067c52e1",
+   "longbench_v2/66fcfb5fbb02136c067c93ae",
+   "longbench_v2/671b13f5bb02136c067d4ee3"
+  ],
+  "longbench_v2_64k": [
+   "longbench_v2/66ebd2975a08c7b9b35e01e3",
+   "longbench_v2/66f3cfa5821e116aacb2f096",
+   "longbench_v2/66efa466821e116aacb23219",
+   "longbench_v2/66ec1aef821e116aacb1aa1a",
+   "longbench_v2/66f2a557821e116aacb2a510",
+   "longbench_v2/66f950acbb02136c067c5021",
+   "longbench_v2/66ecf139821e116aacb1e0e1",
+   "longbench_v2/66ecfe1e821e116aacb1e41c",
+   "longbench_v2/66f97d7fbb02136c067c56b2",
+   "longbench_v2/66f53892821e116aacb33225",
+   "longbench_v2/66ebc3165a08c7b9b35deb38",
+   "longbench_v2/66f8c783bb02136c067c44b8"
+  ]
+ },
+ "seeds": [
+  101,
+  202,
+  303
+ ],
+ "warm": false,
+ "arms": {
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M2c_R1_A8_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true,
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M2c_R6_A64_fused_dp_async_m1ln2_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2"
+   }
+  }
+ },
+ "extra_gold_sha256": {
+  "longbench_v2_32k": "55098b5d5e95273028228da193ab431d6bb72543004cf3367329d3095146168f",
+  "longbench_v2_64k": "c1833d57fbfe1dd8b3376df6a8213f11803821a621d5308f6e708ac90dfae9c9"
+ },
+ "substrate": "piecewise_v3",
+ "long_context_execution": "all arms: memory-linear GLOBAL causal / LOCAL sliding prefill via the 64-row kernel, elided O(n^2) prefill mask mapping, token-chunked MoE (V27_PREFILL_DENSE64=1); canvas calls follow each arm | decoding substrate piecewise_v1 (torch 2.12.1 grouped_mm MoE; decoder compiled reduce-overhead, split at GLOBAL attention which runs eager; LOCAL attention graphed unless the arm routes LOCAL layers; official-style compiled sampler); untimed per-arm warm-up before timed requests",
+ "selection_rule": "M2 variant panel (2026-09-30, user question whether M2 got the variants): Fan M2c (pooled compact mean V) in the best M3 configuration (decision every 6 steps, fused A64 observation, dense-prefix risk, async selector, threshold -ln2) vs Fan plain M2c R1 A8, M3 R6 DP -ln2 (projected V, same settings) and dense FA4. Same 12+12 LongBench-v2 32K/64K panel items and seeds 101/202/303 as the sweep; single new host dlm2 (registered in scripts/v27_extra_hosts.json); substrate piecewise_v3; frozen before generation.",
+ "hosts": [
+  "149.165.168.28"
+ ],
+ "extra_hosts": [
+  "149.165.168.28"
+ ]
+}

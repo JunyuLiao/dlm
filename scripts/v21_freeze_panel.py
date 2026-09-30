@@ -341,6 +341,13 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
     host_uuids = {}
     for entry in original['block_assignments'].values():
         host_uuids.setdefault(entry['host'], set()).add(entry['gpu_uuid'])
+    if spec.get('extra_hosts'):
+        # user-authorized hosts added after the v20 freeze, each pinned to its GPU UUID by a committed registry
+        registry = json.loads(Path(__file__).resolve().with_name('v27_extra_hosts.json').read_text(encoding='utf-8'))['hosts']
+        for host in spec['extra_hosts']:
+            if host not in registry or host in host_uuids:
+                raise ValueError(f'extra host {host} is not a registered new host')
+            host_uuids[host] = {registry[host]['gpu_uuid']}
     host_ids = sorted(host_uuids)
     if spec.get('hosts') is not None:
         # optional single-/sub-host panel (e.g. when the other GPU is in use by someone else); hosts must be
