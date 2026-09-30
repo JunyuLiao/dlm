@@ -85,6 +85,16 @@ def dense(q, k, v, scale):
     return sparse_lists(q, k, v, lists, scale)
 
 
+def causal(q, k, v, scale, window=0):
+    """FA4 causal attention, bottom-right aligned (a query block shorter than the keys sees the whole prefix):
+    the prompt prefill and the canvas append of the encoder. window>0: sliding window of ``window`` keys
+    (key j visible to query i iff i - window < j <= i), i.e. FA4 window_size_left = window - 1."""
+    fwd = load()
+    qs, ks, vs = _layout(q, k, v)
+    extra = dict(window_size_left=window - 1, window_size_right=0) if window else {}
+    return fwd(qs, ks, vs, softmax_scale=scale, causal=True, **extra)[0]
+
+
 def block_sparse_tensors(kept):
     """[1, H, QB128, KT64] keep map -> FA4 BlockSparseTensorsTorch (all kept blocks are full blocks)."""
     load()

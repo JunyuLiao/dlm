@@ -1,0 +1,60 @@
+{
+ "name": "dev_mpk_fa4pw_v4",
+ "ids": {
+  "longbench_v2_32k": [
+   "longbench_v2/66f3b843821e116aacb2e692",
+   "longbench_v2/671b3d1bbb02136c067d5283"
+  ],
+  "longbench_v2_64k": [
+   "longbench_v2/66f8c783bb02136c067c44b8",
+   "longbench_v2/66efa466821e116aacb23219"
+  ]
+ },
+ "seeds": [
+  101
+ ],
+ "warm": false,
+ "arms": {
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "B_A64_fused_rp_async_fa4": {
+   "kind": "method",
+   "parent": "B_A8_matched",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "hold_only": true,
+    "route_pipeline": true
+   }
+  },
+  "M3_R6_A64_fused_dp_async_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6
+   }
+  }
+ },
+ "extra_gold_sha256": {
+  "longbench_v2_32k": "55098b5d5e95273028228da193ab431d6bb72543004cf3367329d3095146168f",
+  "longbench_v2_64k": "c1833d57fbfe1dd8b3376df6a8213f11803821a621d5308f6e708ac90dfae9c9"
+ },
+ "substrate": "piecewise_v2",
+ "hosts": [
+  "149.165.151.254"
+ ],
+ "long_context_execution": "all arms: memory-linear GLOBAL causal / LOCAL sliding prefill via the 64-row kernel, elided O(n^2) prefill mask mapping, token-chunked MoE (V27_PREFILL_DENSE64=1); canvas calls follow each arm | decoding substrate piecewise_v1 (torch 2.12.1 grouped_mm MoE; decoder compiled reduce-overhead, split at GLOBAL attention which runs eager; LOCAL attention graphed unless the arm routes LOCAL layers; official-style compiled sampler); untimed per-arm warm-up before timed requests",
+ "selection_rule": "DIAGNOSTIC ONLY: piecewise_v2 (FA4 prefill + FA4 GLOBAL canvas append) end-to-end check."
+}

@@ -46,7 +46,7 @@ def main(argv=None):
     substrate = protocol.get('substrate', 'eager')
     if substrate != 'eager':
         from experiments.numerical_qk_reuse import v27_substrate
-        print(json.dumps(dict(substrate_installed=v27_substrate.install(adapter.model))), flush=True)
+        print(json.dumps(dict(substrate_installed=v27_substrate.install(adapter.model, name=substrate))), flush=True)
     row = rows[protocol['ids'][a.dataset][a.index]]
     failures = 0
     if a.warm_budget:
@@ -54,7 +54,8 @@ def main(argv=None):
             config = configs[a.dataset][arm]
             if substrate != 'eager':
                 v27_substrate.set_local(adapter.model, v27_substrate.local_mode_for(config))
-            with prefill_dense64(adapter.model, os.environ.get('V27_PREFILL_DENSE64') == '1'):
+            with prefill_dense64(adapter.model, os.environ.get('V27_PREFILL_DENSE64') == '1',
+                                 kernel='fa4' if substrate == 'piecewise_v2' else 'dense64'):
                 warm_row = row if a.warm_index is None else rows[protocol['ids'][a.dataset][a.warm_index]]
                 _one(adapter, dict(warm_row, generation_budget=a.warm_budget), protocol['seeds'][0], config)
             print(json.dumps(dict(warm=arm, budget=a.warm_budget,
@@ -70,7 +71,8 @@ def main(argv=None):
         torch.cuda.empty_cache()
         torch.cuda.reset_peak_memory_stats()
         try:
-            with prefill_dense64(adapter.model, os.environ.get('V27_PREFILL_DENSE64') == '1'):
+            with prefill_dense64(adapter.model, os.environ.get('V27_PREFILL_DENSE64') == '1',
+                                 kernel='fa4' if substrate == 'piecewise_v2' else 'dense64'):
                 receipt = _one(adapter, row, protocol['seeds'][0], config)
             counters = receipt.get('counters') or {}
             sub = v27_substrate.identity(adapter.model) if substrate != 'eager' else {}

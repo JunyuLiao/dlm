@@ -20,7 +20,13 @@ host sync per call, which cannot be graph-captured.
 """
 from __future__ import annotations
 
-SUBSTRATES = ('eager', 'piecewise_v1')
+SUBSTRATES = ('eager', 'piecewise_v1', 'piecewise_v2')
+# piecewise_v2 = piecewise_v1 + the shared (all-arm) prompt prefill and the GLOBAL canvas append on official FA4
+# causal instead of the 64-row Triton kernel / HF SDPA (substrate/prefill_append_bench.jsonl)
+
+
+def prefill_kernel(substrate: str) -> str:
+    return 'fa4' if substrate == 'piecewise_v2' else 'dense64'
 LOCAL_KEY = 'v27_local_sdpa'
 
 
@@ -55,11 +61,11 @@ def compact_sliding_cache(cache) -> int:
     return copied
 
 
-def install(model, backend: str = 'inductor') -> dict:
+def install(model, backend: str = 'inductor', name: str = 'piecewise_v1') -> dict:
     """Idempotent. Returns the substrate identity recorded in receipts. backend='eager' (dynamo capture and the
     same graph split, no codegen, no CUDA graphs) exists only for the equivalence diagnostic."""
-    if backend not in ('inductor', 'eager'):
-        raise ValueError(backend)
+    if backend not in ('inductor', 'eager') or name not in SUBSTRATES[1:]:
+        raise ValueError((backend, name))
     state = getattr(model, '_v27_substrate', None)
     if state is not None:
         return identity(model)
@@ -145,7 +151,7 @@ def install(model, backend: str = 'inductor') -> dict:
             stop.__call__ = model._v27_stop    # assigned exactly as the official _compile_functions does
         return stop
     model._prepare_sampler, model._prepare_diffusion_stopping_criteria = compiled_sampler, compiled_stop
-    model._v27_substrate = dict(substrate='piecewise_v1' if backend == 'inductor' else 'piecewise_v1_eager_backend',
+    model._v27_substrate = dict(substrate=name if backend == 'inductor' else name + '_eager_backend',
                                 global_layers=global_layers, local_layers=local_layers,
                                 local=None, torch=torch.__version__)
     set_local(model, 'graph')

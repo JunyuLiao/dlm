@@ -86,3 +86,22 @@ def test_fa4_block_sparse_at_the_local_layer_geometry(keys):
     skipped[..., 0] = False
     got = v27_fa4.sparse(q, k, v, skipped, torch.ones_like(skipped), 256 ** -.5).float()
     torch.testing.assert_close(got, _ref(q, k, v, ~skipped), atol=2e-2, rtol=2e-2)
+
+
+@pytest.mark.parametrize('nq,nk,window,d,hk', [(700, 700, 0, 512, 2), (256, 1500, 0, 512, 2),
+                                                (900, 900, 256, 256, 8)])
+def test_fa4_causal_prefill_and_append(nq, nk, window, d, hk):
+    from experiments.numerical_qk_reuse import v27_fa4
+    g = torch.Generator(device='cuda').manual_seed(nq + nk)
+    q = torch.randn(1, nq, 16, d, device='cuda', dtype=torch.bfloat16, generator=g).transpose(1, 2)
+    k = torch.randn(1, hk, nk, d, device='cuda', dtype=torch.bfloat16, generator=g)
+    v = torch.randn(1, hk, nk, d, device='cuda', dtype=torch.bfloat16, generator=g)
+    rows = torch.arange(nq, device='cuda')[:, None] + (nk - nq)          # bottom-right aligned
+    cols = torch.arange(nk, device='cuda')[None, :]
+    allowed = cols <= rows
+    if window:
+        allowed &= cols > rows - window
+    kr, vr = k.repeat_interleave(16 // hk, 1).float(), v.repeat_interleave(16 // hk, 1).float()
+    s = torch.einsum('bhqd,bhkd->bhqk', q.float(), kr) * d ** -.5
+    ref = torch.einsum('bhqk,bhkd->bhqd', s.masked_fill(~allowed, float('-inf')).softmax(-1), vr).transpose(1, 2)
+    torch.testing.assert_close(v27_fa4.causal(q, k, v, d ** -.5, window).float(), ref, atol=2e-2, rtol=2e-2)

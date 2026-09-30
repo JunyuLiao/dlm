@@ -512,7 +512,7 @@ def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: P
             torch.backends.cudnn.allow_tf32 = False
             if substrate != "eager":
                 append(ledger, {"event": "substrate", "when": time.time(), "host": host,
-                                **v27_substrate.install(adapter.model)})
+                                **v27_substrate.install(adapter.model, name=substrate)})
             compiles = []
             JITFunction.cache_hook = lambda **kw: (compiles.append(time.perf_counter()), False)[1]
             first = {e["cell_id"]: e for e in events if e.get("event") == "run" and e.get("role") == "attempt0"}
@@ -536,7 +536,8 @@ def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: P
                     if substrate != "eager":
                         v27_substrate.set_local(adapter.model, v27_substrate.local_mode_for(config))
                         graphs_before = v27_substrate.identity(adapter.model).get("dynamo_unique_graphs")
-                    with prefill_dense64(adapter.model, os.environ.get("V27_PREFILL_DENSE64") == "1"):
+                    with prefill_dense64(adapter.model, os.environ.get("V27_PREFILL_DENSE64") == "1",
+                                        kernel=__import__("experiments.numerical_qk_reuse.v27_substrate", fromlist=["x"]).prefill_kernel(substrate)):
                         receipt = _one(adapter, row, seed, config)
                 except Timeout:
                     execution_error = f"timeout>{timeout}s"
@@ -609,7 +610,8 @@ def run(protocol_path: Path, binding_path: Path, manifests_dir: Path, private: P
                         graphs_before = v27_substrate.identity(adapter.model).get("dynamo_unique_graphs")
                         before, warm_error = time.perf_counter(), None
                         try:
-                            with prefill_dense64(adapter.model, os.environ.get("V27_PREFILL_DENSE64") == "1"):
+                            with prefill_dense64(adapter.model, os.environ.get("V27_PREFILL_DENSE64") == "1",
+                                        kernel=__import__("experiments.numerical_qk_reuse.v27_substrate", fromlist=["x"]).prefill_kernel(substrate)):
                                 _one(adapter, row, entry["seed"], config)
                         except Exception as exc:
                             warm_error = f"{type(exc).__name__}: {exc}"[:500]
