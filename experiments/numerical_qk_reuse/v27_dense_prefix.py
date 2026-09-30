@@ -191,6 +191,31 @@ def _dp_tail(S, Z, REF, T, SKIP, ELIGIBLE, BADTILE, DPPREV, DPPROJ, POOLED, POOL
         previous = tl.where(eligible, combined, previous)
 
 
+def budget_skip(lognorm, eligible, sensitivity, reference, nq, log_budget):
+    """v27 risk-budget selector (named variant on M1-DP): the prefix tiles a row block may drop are bounded by
+    their SUMMED risk instead of each tile's own risk. Per (batch, head, query block) the eligible prefix tiles are
+    taken in ascending order of the M1-DP worst-row risk exp(worst_j) and dropped while the running sum stays below
+    exp(log_budget). Tiles with infinite risk (first support, bad rows) are never dropped; tiles with no active
+    rows (risk 0) always are, as in the per-tile rule. Returns the [B,H,QB,PT] drop map."""
+    b, h, qb, pt, width = lognorm.shape
+    hk = reference.shape[1]
+    dev = lognorm.device
+    rows = (torch.arange(qb * width, device=dev) < nq).view(1, 1, qb, 1, width)
+    log_t = torch.zeros((b, qb * width), device=dev, dtype=torch.float32)
+    log_t[:, :nq] = torch.log(sensitivity.float()[:, :nq])
+    value = lognorm.float() + log_t.view(b, 1, qb, 1, width)
+    value = torch.where(rows, value, torch.full_like(value, float('-inf')))
+    worst = value.amax(-1)
+    log_ref = torch.log(reference.float().clamp_min(1e-12))
+    worst = worst - log_ref[:, torch.arange(h, device=dev) // (h // hk)].view(b, h, 1, 1)
+    candidate = (eligible != 0) & (worst < float('inf')) & ~torch.isnan(worst)
+    key = torch.where(candidate, worst, torch.full_like(worst, float('inf')))
+    ordered, order = key.sort(-1)
+    running = torch.cumsum(torch.exp(ordered.double() - float(log_budget)), -1)
+    drop = torch.zeros_like(candidate).scatter(-1, order, running < 1.0)
+    return drop & candidate
+
+
 def build(summary, nq, kt, hk, pooled=None, identity=None, num_warps=4, num_stages=3):
     """Dense-prefix pass over a filled prefix summary (once per summary)."""
     b, h, qb, pt, _ = summary.z.shape
@@ -214,7 +239,7 @@ def build(summary, nq, kt, hk, pooled=None, identity=None, num_warps=4, num_stag
 
 
 def route(scores, z, reference, state, *, sensitivity=None, log_threshold, pool=False, pooled=None,
-          pool_count=None, key_offset=0, tiles_per_program=16, num_warps=4, num_stages=3):
+          pool_count=None, key_offset=0, tiles_per_program=16, num_warps=4, num_stages=3, risk_budget=None):
     """M1-DP decision call: parallel prefix decisions plus the dense-state tail scan."""
     from .cached_executor import Routing, _extra, _karg, _pool_arguments
     b, h, nq, stored = scores.shape
@@ -238,6 +263,8 @@ def route(scores, z, reference, state, *, sensitivity=None, log_threshold, pool=
         _dp_decide[(qb, b * h, tr.cdiv(pt, tiles_per_program))](
             state.lognorm, state.eligible, state.bad, reference, sensitivity, skip, elig, bad,
             nq, h, hk, qb, kt, pt, log_threshold, tiles_per_program, num_warps=4)
+        if risk_budget is not None:
+            skip[..., :pt] = budget_skip(state.lognorm, state.eligible, sensitivity, reference, nq, risk_budget)
     _dp_tail[(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad, state.previous, state.projected,
                          *pool_args, key_offset, nk - key_offset, nq, _karg('generic', nk), h, hk, 32, 32, qb, kt,
                          log_threshold, pt, pool is True, compact, TAIL=bool(key_offset),

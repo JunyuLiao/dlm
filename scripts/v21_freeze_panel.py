@@ -315,7 +315,8 @@ def freeze_seven(v20_protocol_path, v20_binding_path, manifests_dir, out_dir):
 
 V27_EXTRA_KEYS = ('mu_mode', 'score_period', 'decision_interval', 'hold_only', 'threshold_shift',
                   'min_route_keys', 'share_layers', 'route_layers', 'consumer64', 'memory_caps', 'fused_observe',
-                  'fresh_fused', 'route_pipeline', 'risk_state', 'density_gate', 'fa4_consumer', 'async_route')
+                  'fresh_fused', 'route_pipeline', 'risk_state', 'density_gate', 'fa4_consumer', 'async_route',
+                  'risk_budget')
 
 
 def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir):
@@ -756,7 +757,8 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                     risk_state=contract.get('risk_state'),
                     density_gate=contract.get('density_gate'),
                     fa4_consumer=contract.get('fa4_consumer', False),
-                    async_route=contract.get('async_route', False))
+                    async_route=contract.get('async_route', False),
+                    risk_budget=contract.get('risk_budget'))
             path = config_dir / dataset / f'{arm}.json'
             _new(path, _bytes(result))
             configs[dataset][arm] = dict(path=str(path.resolve()), sha256=_sha(path.read_bytes()))

@@ -49,6 +49,9 @@ ROUTE_LAYER_SETS['global_plus_local_mid'] = tuple(sorted((5, 11, 17, 23, 29) +
 _LN2 = 0.6931471805599453
 # Named log-threshold shifts in ln2 units; larger shifts allow more deletion.
 # The realized sparsity is measured, never inferred from the shift.
+# v27 risk budget (M1-DP): the summed prefix-tile risk a row block may drop, as a log shift over the threshold
+RISK_BUDGETS = {'b0': 0.0, 'b2ln2': 2 * 0.6931471805599453, 'b4ln2': 4 * 0.6931471805599453,
+                'b6ln2': 6 * 0.6931471805599453, 'b8ln2': 8 * 0.6931471805599453}
 THRESHOLD_SHIFTS = {'minus_3ln2': -3 * _LN2, 'minus_2ln2': -2 * _LN2, 'minus_ln2': -_LN2, 'plus_ln2': _LN2, 'plus_2ln2': 2 * _LN2,
                     'plus_3ln2': 3 * _LN2, 'plus_4ln2': 4 * _LN2}
 
@@ -74,7 +77,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      min_route_keys=None, route_layers=None, share_layers=None,
                      consumer64=None, memory_caps=None, fused_observe=False, fresh_fused=False,
                      route_pipeline=False, risk_state=None, density_gate=None, fa4_consumer=False,
-                     async_route=False) -> dict:
+                     async_route=False, risk_budget=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -168,6 +171,10 @@ def effective_config(base: dict, arm: str, scope: str, *,
                 or arm not in ('M1_R1_A8_current_output', 'M3_R3_A8_current_output')):
             raise ValueError('v27 dense-prefix risk needs the bootstrap M1/M3 mainline with prefix summaries')
         extra['risk_state'] = risk_state
+    if risk_budget is not None:
+        if risk_budget not in RISK_BUDGETS or risk_state != 'dense_prefix':
+            raise ValueError('v27 risk budget must be a named budget on M1-DP')
+        extra['risk_budget'] = risk_budget
     if density_gate is not None:
         # v27 density gate: sampler-state return to dense within a canvas (named variant)
         from .integration import DENSITY_GATES
@@ -314,6 +321,9 @@ def validate_effective(config: dict, condition: str):
     if 'risk_state' in config and (config['risk_state'] != 'dense_prefix' or 'bootstrap_policy' not in config
                                    or 'fresh_fused' in config):
         raise ValueError('v27 dense-prefix risk identity drift')
+    if 'risk_budget' in config and (config['risk_budget'] not in RISK_BUDGETS
+                                    or config.get('risk_state') != 'dense_prefix'):
+        raise ValueError('v27 risk budget identity drift')
     if 'fa4_consumer' in config and (config['fa4_consumer'] is not True or 'consumer64' not in config):
         raise ValueError('v27 FA4 consumer identity drift')
     if 'async_route' in config and (config['async_route'] is not True or 'fused_observe' not in config):
@@ -396,6 +406,10 @@ def install(adapter, config: dict, condition: str):
             if owner.selector != 'prefix_block_summary':
                 raise ValueError('dense-prefix risk needs the prefix-summary selector')
             owner.risk_state = config['risk_state']
+        if 'risk_budget' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('risk budget must be bound before any routed call')
+            owner.risk_budget_shift = RISK_BUDGETS[config['risk_budget']]
         if 'density_gate' in config:
             from .integration import DENSITY_GATES
             if owner.cache.entries or owner.calls:
@@ -451,6 +465,7 @@ def install(adapter, config: dict, condition: str):
                         route_pipeline=bool(getattr(owner, 'route_pipeline', False)),
                         async_route=bool(getattr(owner, 'async_route', False)),
                         risk_state=getattr(owner, 'risk_state', 'kept'),
+                        risk_budget=config.get('risk_budget'),
                         density_gate=config.get('density_gate'),
                         consumer=getattr(owner, 'consumer', None),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
