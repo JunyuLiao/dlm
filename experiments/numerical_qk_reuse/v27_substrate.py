@@ -225,11 +225,17 @@ def install(model, backend: str = 'inductor', name: str = 'piecewise_v1') -> dic
     encoder = model.model.encoder
     encoder_forward = encoder.forward
 
+    global_attention = [layer.self_attn for layer in decoder.layers if not layer.self_attn.is_sliding]
+
     def compact_cache_forward(*a, **k):
         # HF's DynamicSlidingWindowLayer stores keys/values as a SLICE of the full concatenation, so after the
         # prefill every LOCAL layer keeps the whole prompt's K/V alive (about 15 GiB at 75K tokens) and exposes a
         # prompt-length-dependent stride to the compiled decoder (a recompile per new prompt). Compacting them is
         # value-identical and frees that memory before the first denoising call.
+        for attn in global_attention:
+            # piecewise_v3: every encoder call replaces the encoder cache tensors, so the joined K/V buffers are
+            # stale from here on; releasing them now keeps them out of the prefill's memory peak (+1.5 GiB at 75K)
+            attn.__dict__.pop('_v27_kv', None)
         out = encoder_forward(*a, **k)
         compact_sliding_cache(getattr(out, 'past_key_values', None) or k.get('past_key_values'))
         return out
