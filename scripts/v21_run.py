@@ -86,6 +86,11 @@ def validate_protocol(protocol: dict) -> None:
                 raise ValueError("legacy task/control identity drift")
         elif c.get("kind") == "v27_dense":
             pass
+        elif c.get("kind") == "v27_sparsed":
+            if (not v27 or c.get("parent_v20_arm") != "D_matched" or c.get("keep") not in (0.1, 0.2, 0.3)
+                    or c.get("skip_steps") not in (1, 10) or c.get("consumer") != "fa4"
+                    or c.get("scope") != "GLOBAL_ONLY_NATIVE_LOCAL"):
+                raise ValueError(f"v27 SparseD port contract drift: {arm}")
         elif c.get("kind") == "v27_g75":
             if (not v27 or c.get("parent_v20_arm") != "D_matched" or c.get("local_fraction") not in (0.0, 0.15, 0.3)
                     or c.get("consumer", "triton64") not in ("triton64", "fa4")
@@ -241,6 +246,14 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
     if contract["kind"] == "native":
         if config.get("condition") != "native_dense" or config.get("plugin"):
             raise ValueError("native config is not native_dense")
+        parent = config
+    elif contract["kind"] == "v27_sparsed":
+        if (config.get("plugin") != "experiments.numerical_qk_reuse.v20_controls:install" or
+                config.get("condition") != "v27_sparsed_fa4" or config.get("consumer") != "fa4" or
+                config.get("v20_scope") != contract["scope"] or
+                config.get("sparsed_keep") != contract["keep"] or
+                config.get("sparsed_skip_steps") != contract["skip_steps"]):
+            raise ValueError("v27 SparseD port config differs from its contract")
         parent = config
     elif contract["kind"] == "v27_g75":
         g75_consumer = contract.get("consumer", "triton64")

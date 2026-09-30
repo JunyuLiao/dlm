@@ -403,6 +403,14 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
                 contracts[name]['consumer'] = 'fa4'
             elif arm.get('consumer', 'triton64') != 'triton64':
                 raise ValueError(f'unknown G75 consumer: {name}')
+        elif arm['kind'] == 'sparsed_fa4':
+            # v27 PORT of SparseD (ICLR 2026) on the FA4 consumer, GLOBAL layers only (v20_controls.sparsed_bitmap)
+            from experiments.numerical_qk_reuse.v20_controls import SPARSED_KEEPS, SPARSED_SKIPS
+            keep, skip = float(arm.get('keep', 0.3)), int(arm.get('skip_steps', 10))
+            if keep not in SPARSED_KEEPS or skip not in SPARSED_SKIPS:
+                raise ValueError(f'unknown SparseD port setting: {name}')
+            contracts[name] = dict(kind='v27_sparsed', parent_v20_arm='D_matched', keep=keep, skip_steps=skip,
+                                   consumer='fa4', scope=SCOPE)
         elif arm['kind'] == 'dense_matched':
             # Same Triton consumer, FP32 scores, model-major output, every legal tile kept.
             contracts[name] = dict(kind='v21_control', parent_v20_arm='D_matched', scope=SCOPE,
@@ -727,6 +735,14 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
                                                  g75_local_fraction=contract['local_fraction']),
                                             'v27_G75_fa4' if g75_consumer == 'fa4' else 'v27_G75_c64',
                                             contract['scope'])
+            elif contract['kind'] == 'v27_sparsed':
+                from experiments.numerical_qk_reuse import v20_controls as controls
+                hashes = dict(base['source_hashes'])
+                for src in (Path(controls.__file__).resolve(), Path(controls.__file__).resolve().with_name('v27_fa4.py')):
+                    hashes[str(src)] = _sha(src.read_bytes())
+                result = old.control_config(dict(base, consumer='fa4', support_build=None, source_hashes=hashes,
+                                                 sparsed_keep=contract['keep'], sparsed_skip_steps=contract['skip_steps']),
+                                            'v27_sparsed_fa4', contract['scope'])
             elif contract['kind'] == 'v20_legacy':
                 result = old.control_config(dict(base, control='T_scope'), 'v20_fresh_T', SCOPE)
             elif contract['kind'] == 'v21_control':

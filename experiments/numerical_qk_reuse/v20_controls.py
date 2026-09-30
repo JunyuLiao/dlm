@@ -49,9 +49,44 @@ def mass_bitmap(scores, prefix, fraction):
 
 G75_LOCAL_FRACTIONS = (0.0, 0.15, 0.30)   # v27 port of the vLLM-era F (G75L0) / S15 / S30 configurations
 
+# v27 PORT of SparseD (Wang et al., ICLR 2026, arXiv 2509.24014; github.com/INV-WZQ/SparseD): full attention for the
+# first skip% of the denoising steps, then ONE sparse pattern from the current attention scores, average-pooled per
+# (query block, key block), keeping the top select% key blocks per query block and head (prefill and generation keys
+# selected separately), reused for the rest of the canvas. Port details (labelled): blocks are the FA4 kernel tiles
+# (Q128 x KV64; SparseD's long-context block_size is 128 on both sides), the current canvas keys are always kept
+# (SparseD applies the same ratio to generation keys; 4 tiles here), the ratio applies to the prefix keys, and the
+# canvas has an adaptive length, so skip is a number of steps: 10 = 20% of the 48-step cap (SparseD's default
+# skip=0.2) or 1 (matched to B/G75). Kernel: FA4 block-sparse (SparseD uses FlexAttention).
+SPARSED_KEEPS = (0.1, 0.2, 0.3)
+SPARSED_SKIPS = (1, 10)
+
+
+def sparsed_bitmap(scores, prefix, keep):
+    """SparseD selection on current scores: per (head, Q128 block), keep the top ``keep`` fraction of the
+    wholly-prefix KV64 tiles by average-pooled attention probability; canvas and boundary tiles are always kept."""
+    import math
+    import torch
+    b, h, nq, nk = scores.shape
+    if not 0 < keep < 1 or not 0 <= prefix <= nk - nq:
+        raise ValueError('invalid SparseD geometry or keep ratio')
+    torch._assert_async(torch.isfinite(scores).all(), 'SparseD scores must be finite')
+    qb, kt = (nq + 127) // 128, (nk + 63) // 64
+    probability = scores.softmax(-1)
+    probability = torch.nn.functional.pad(probability, (0, kt * 64 - nk, 0, qb * 128 - nq))
+    pooled = probability.reshape(b, h, qb, 128, kt, 64).mean((3, 5))       # avgpool over each tile
+    prefix_tiles = prefix // 64
+    prunable = torch.arange(kt, device=scores.device) < prefix_tiles
+    n_keep = min(prefix_tiles, max(1, math.ceil(keep * prefix_tiles))) if prefix_tiles else 0
+    ranked = torch.argsort(pooled.masked_fill(~prunable, float('-inf')), dim=-1, descending=True, stable=True)
+    rank = torch.empty_like(ranked)
+    rank.scatter_(-1, ranked, torch.arange(kt, device=scores.device).expand_as(ranked))
+    skipped = (prunable & (rank >= n_keep)).contiguous()
+    return skipped, torch.ones_like(skipped)
+
+
 
 class Consumer:
-    def __init__(self, adapter, config, held=False, local_fraction=.30, c64=False, fa4=False):
+    def __init__(self, adapter, config, held=False, local_fraction=.30, c64=False, fa4=False, sparsed=None):
         from .integration import Attention
         # Reuse the qualified lifecycle hooks/identities, without invoking its
         # historical selector. This also keeps prefix ownership checks identical.
@@ -73,6 +108,11 @@ class Consumer:
         if local_fraction not in G75_LOCAL_FRACTIONS:
             raise ValueError('G75 local deletion fraction must be a named vLLM-era point')
         self.local_fraction, self.c64 = local_fraction, c64
+        # sparsed = (keep, skip_steps) for the SparseD port; None for G75
+        if sparsed is not None and (sparsed[0] not in SPARSED_KEEPS or sparsed[1] not in SPARSED_SKIPS):
+            raise ValueError('SparseD port needs a named keep ratio and skip')
+        self.sparsed = sparsed
+        self.observe_step = sparsed[1] if sparsed is not None else 1
         self.held, self.maps, self.map_canvas = held, {}, -1
         self.query_sensitivity = self.policy_selector = None
         self.calls = self.bootstrap_calls = self.observation_calls = self.held_calls = 0
@@ -104,8 +144,22 @@ class Consumer:
         scale = float(scaling) if scaling is not None else d ** -.5
         old = self.maps.get(layer)
         step = self.owner.step
-        observe = self.held and step >= 1 and (old is None or old[0] != identity)
-        if observe:
+        observe = self.held and step >= self.observe_step and (old is None or old[0] != identity)
+        if observe and self.sparsed is not None:
+            # SparseD: the pattern comes from the last full-attention step, whose output stays dense; it is
+            # applied from the next step on
+            scores = self.owner.observe_scores(q, k, None, scale, False, None, 0)
+            skipped, eligible = sparsed_bitmap(scores, prefix, self.sparsed[0])
+            del scores
+            self.maps[layer] = (identity, skipped, eligible)
+            from types import SimpleNamespace
+            from . import v27_fa4
+            out = v27_fa4.dense(q, k, v, scale)
+            result = SimpleNamespace(output=out.transpose(1, 2), invalid_scores=torch.zeros(
+                (b, h, nq), dtype=torch.bool, device=q.device))
+            self.observation_calls += 1
+            self.phase_counts['A'] += 1
+        elif observe:
             scores = self.owner.observe_scores(q, k, None, scale, False, None, 0)
             fraction = self.local_fraction if module.is_sliding else .75
             skipped, eligible = mass_bitmap(scores, prefix, fraction)
@@ -121,7 +175,7 @@ class Consumer:
             self.phase_counts['A'] += 1
         else:
             bootstrap = False
-            if self.held and step >= 1 and old is not None:
+            if self.held and step >= self.observe_step and old is not None:
                 _, skipped, eligible = old
                 self.held_calls += 1
                 self.phase_counts['H'] += 1
@@ -153,8 +207,11 @@ class Consumer:
                     bitmap_observation_calls=self.observation_calls, held_decision_calls=self.held_calls,
                     phase_counts=self.phase_counts, support='native_mask',
                     consumer=self.owner.consumer, current_output=True,
-                    selector='mass_max_Q128_per_query_head' if self.held else 'all_legal_kept',
-                    g75_local_fraction=self.local_fraction if self.held else None,
+                    selector=('sparsed_avgpool_topk_port' if self.sparsed is not None else
+                              'mass_max_Q128_per_query_head' if self.held else 'all_legal_kept'),
+                    g75_local_fraction=self.local_fraction if self.held and self.sparsed is None else None,
+                    sparsed_keep=None if self.sparsed is None else self.sparsed[0],
+                    sparsed_skip_steps=None if self.sparsed is None else self.sparsed[1],
                     actual_qk_pv_counts=None, counters_note='counter twin required for pair-weighted physical work')
 
     def close(self):
@@ -169,7 +226,8 @@ def install(adapter, config, condition):
     from experiments.value_direction_hopper.query_adaptive import State
     from .global_scope import GlobalScopeAdapter
     from .integration import NativeReuseState
-    if condition not in ('v20_dense_consumer', 'v20_fresh_T', 'v20_G75L30_nativeQ128', 'v27_G75_c64', 'v27_G75_fa4'):
+    if condition not in ('v20_dense_consumer', 'v20_fresh_T', 'v20_G75L30_nativeQ128', 'v27_G75_c64', 'v27_G75_fa4',
+                         'v27_sparsed_fa4'):
         raise ValueError(condition)
     scope = config.get('v20_scope')
     if scope not in SCOPES or config.get('diagnostic') is not False:
@@ -193,6 +251,11 @@ def install(adapter, config, condition):
                 if config.get('consumer') != 'triton64':
                     raise ValueError('v27 G75 port runs on the 64-row consumer')
                 router = Consumer(scoped, config, held=True, local_fraction=config['g75_local_fraction'], c64=True)
+            elif condition == 'v27_sparsed_fa4':
+                if config.get('consumer') != 'fa4' or scope != SCOPES[1]:
+                    raise ValueError('the SparseD port runs GLOBAL-only on the FA4 consumer')
+                router = Consumer(scoped, config, held=True, local_fraction=0.0, fa4=True,
+                                  sparsed=(config['sparsed_keep'], config['sparsed_skip_steps']))
             elif condition == 'v27_G75_fa4':
                 if config.get('consumer') != 'fa4':
                     raise ValueError('v27 G75 FA4 port runs on the FA4 consumer')
