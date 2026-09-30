@@ -1,0 +1,186 @@
+{
+ "name": "quality_fa4pw_q1v3",
+ "ids": {
+  "aime26": [
+   "aime26/1",
+   "aime26/2",
+   "aime26/3",
+   "aime26/4",
+   "aime26/5",
+   "aime26/6",
+   "aime26/7",
+   "aime26/8",
+   "aime26/9",
+   "aime26/10",
+   "aime26/11",
+   "aime26/12",
+   "aime26/13",
+   "aime26/14",
+   "aime26/15",
+   "aime26/16",
+   "aime26/17",
+   "aime26/18",
+   "aime26/19",
+   "aime26/20",
+   "aime26/21",
+   "aime26/22",
+   "aime26/23",
+   "aime26/24",
+   "aime26/25",
+   "aime26/26",
+   "aime26/27",
+   "aime26/28",
+   "aime26/29",
+   "aime26/30"
+  ],
+  "longbench_v2": [
+   "longbench_v2/66f9625fbb02136c067c5456",
+   "longbench_v2/66f2aac2821e116aacb2a9de",
+   "longbench_v2/66ed2c87821e116aacb1f149",
+   "longbench_v2/66f245cc821e116aacb28698",
+   "longbench_v2/66fab4bfbb02136c067c754c",
+   "longbench_v2/67040276bb02136c067cd8ae",
+   "longbench_v2/6704a442bb02136c067cdd91",
+   "longbench_v2/66f41e45821e116aacb30ec3",
+   "longbench_v2/66f120a9821e116aacb26d02",
+   "longbench_v2/66f2b676821e116aacb2b27a",
+   "longbench_v2/66ebe0fb5a08c7b9b35e14f5",
+   "longbench_v2/66f8c6b4bb02136c067c4480"
+  ]
+ },
+ "seeds": [
+  101,
+  202
+ ],
+ "warm": false,
+ "arms": {
+  "D_native": {
+   "kind": "native"
+  },
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M1_R1_A8_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true
+   }
+  },
+  "M2c_R1_A8_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true,
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R3_A8_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true
+   }
+  },
+  "B_A64_fused_rp_async_fa4": {
+   "kind": "method",
+   "parent": "B_A8_matched",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "hold_only": true,
+    "route_pipeline": true
+   }
+  },
+  "M3_R6_A64_fused_rp_async_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "route_pipeline": true,
+    "decision_interval": 6
+   }
+  },
+  "M1_R1_A64_fused_dp_async_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix"
+   }
+  },
+  "M3_R6_A64_fused_dp_async_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6
+   }
+  },
+  "M3_R6_A64_fused_dp_async_gate8k_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "min_route_keys": 8192
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m2ln2_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_2ln2"
+   }
+  }
+ },
+ "substrate": "piecewise_v2",
+ "hosts": [
+  "149.165.159.64",
+  "149.165.151.254"
+ ],
+ "selection_rule": "Accuracy check on the FA4 + piecewise substrate (user requirement: no accuracy loss, AIME and LongBench, more points): all 30 AIME26 problems and all 12 LongBench-v2 pool items, seeds 101/202, first-only. Dense: D_fa4_allkept (fastest official), D_native (HF official path). Fan plain M1/M2c/M3 (A8, FA4 block-sparse) always present; variants: B, M3 R6, M1-DP, M3-DP (all with the exact async observation route) and the deployable M3-DP with the 8192-key length gate (dense below 8192 keys). No calibration was done on these items for these arms. Frozen before any generation. Substrate piecewise_v2 (supersedes the piecewise_v1 freeze of this panel before any generation): the shared prompt prefill and the GLOBAL canvas append run on official FA4 causal for every arm. q1v3 (2026-09-30, after the small-subset preview quality_preview_q1v2p): same items, seeds and arms plus M3 R6 DP with threshold shift -2ln2 (keeps more tiles; the preview showed B losing 2 AIME and 2 LB cells), split over two H100 hosts with every arm of a cell on the same host; code includes the prefill-mask probe fix (aime26/17 failed in every preview arm)."
+}
