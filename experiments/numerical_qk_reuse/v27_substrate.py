@@ -31,6 +31,17 @@ def local_mode_for(config: dict) -> str:
     return 'eager' if 'ALL_NATIVE_LEGAL' in scopes else 'graph'
 
 
+def mirrored_accept(first, sampler, compiled_accept):
+    """The compiled accept/renoise are bound to the first sampler and keep their state (accepted_token_mask) there,
+    exactly like the official compiled path; mirror it onto this request's sampler after every accept so observers
+    of the current sampler (diagnostics, the v27 density gate) read this step's mask, never None or a stale one."""
+    def accept_canvas(*a, **k):
+        out = compiled_accept(*a, **k)
+        sampler.accepted_token_mask = first.accepted_token_mask
+        return out
+    return accept_canvas
+
+
 def compact_sliding_cache(cache) -> int:
     """Replace every sliding-window layer's key/value slice view by a compact copy (value-identical)."""
     import torch
@@ -104,12 +115,22 @@ def install(model) -> dict:
     model.forward = torch.compile(model.forward, mode='reduce-overhead', dynamic=False)
     prepare_sampler, prepare_stop = model._prepare_sampler, model._prepare_diffusion_stopping_criteria
 
+    def signature(obj):
+        return repr(sorted((key, repr(value)) for key, value in vars(obj).items()
+                           if not callable(value) and not isinstance(value, torch.Tensor)))
+
     def compiled_sampler(*a, **k):
         sampler = prepare_sampler(*a, **k)
         if not hasattr(model, '_v27_accept'):
             model._v27_accept = torch.compile(sampler.accept_canvas, mode='reduce-overhead', fullgraph=True)
             model._v27_renoise = torch.compile(sampler.renoise_canvas, mode='reduce-overhead', fullgraph=True)
-        sampler.accept_canvas, sampler.renoise_canvas = model._v27_accept, model._v27_renoise
+            model._v27_sampler_signature, model._v27_first_sampler = signature(sampler), sampler
+        elif signature(sampler) != model._v27_sampler_signature:
+            # the compiled methods are bound to the FIRST sampler (as in the official _compile_functions); a request
+            # with different sampler settings would silently run with the first one's
+            raise RuntimeError('piecewise_v1 compiled sampler is bound to a sampler with different settings')
+        sampler.accept_canvas = mirrored_accept(model._v27_first_sampler, sampler, model._v27_accept)
+        sampler.renoise_canvas = model._v27_renoise
         return sampler
 
     def compiled_stop(*a, **k):

@@ -254,3 +254,16 @@ def test_compact_sliding_cache_releases_the_prompt_buffer_and_keeps_values():
     assert sliding.keys.is_contiguous() and torch.equal(sliding.keys, before)
     assert sliding.keys.untyped_storage().nbytes() == before.numel() * 4    # no longer holds the 5000-token buffer
     assert not dense.keys.is_contiguous()            # full-attention layers are left alone
+
+
+def test_compiled_sampler_state_is_mirrored_to_the_current_sampler():
+    from types import SimpleNamespace
+    from experiments.numerical_qk_reuse.v27_substrate import mirrored_accept
+    first, current = SimpleNamespace(accepted_token_mask=None), SimpleNamespace(accepted_token_mask=None)
+
+    def compiled_accept(step):               # bound to the first sampler, as the official compiled path is
+        first.accepted_token_mask = ('mask', step)
+        return step
+    accept = mirrored_accept(first, current, compiled_accept)
+    assert accept(3) == 3 and current.accepted_token_mask == ('mask', 3)
+    assert accept(4) == 4 and current.accepted_token_mask == ('mask', 4)
