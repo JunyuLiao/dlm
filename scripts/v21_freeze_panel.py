@@ -356,9 +356,9 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
             raise ValueError('spec hosts must be distinct frozen v20 hosts')
         host_ids = list(spec['hosts'])
     ids, seeds = spec['ids'], list(spec['seeds'])
-    from scripts.v27_datasets import DATASETS, base_task
+    from scripts.v27_datasets import DATASETS, V27_SEEDS, base_task
     if not ids or not set(ids) <= set(DATASETS) or not seeds or \
-            not set(seeds) <= __import__("scripts.v27_datasets", fromlist=["V27_SEEDS"]).V27_SEEDS or len(set(seeds)) != len(seeds):
+            not set(seeds) <= V27_SEEDS or len(set(seeds)) != len(seeds):
         raise ValueError('v27 spec ids/seeds outside the allowed tasks/seeds')
     manifests, hashes = {}, {}
     for dataset, wanted in ids.items():

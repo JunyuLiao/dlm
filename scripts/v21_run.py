@@ -165,9 +165,10 @@ def validate_protocol(protocol: dict) -> None:
     ruler_stage = protocol["panel_kind"] == "bootstrap6_ruler"
     single_seed = ruler_stage or protocol["panel_kind"] == "v26_seven"
     if v27:
+        from scripts.v27_datasets import V27_SEEDS
         seeds = protocol.get("seeds")
         if (not isinstance(seeds, list) or not seeds or len(set(seeds)) != len(seeds) or
-                not set(seeds) <= __import__("scripts.v27_datasets", fromlist=["V27_SEEDS"]).V27_SEEDS):   # 404: final AIME panel; 505-909: E4 large-seed confirmation
+                not set(seeds) <= V27_SEEDS):   # 404: final AIME panel; 505-909: E4 large-seed confirmation
             raise ValueError("v27 seeds outside the allowed set")
     elif protocol.get("seeds") != ([101] if single_seed else [101, 202]):
         raise ValueError("frozen v20 generation seeds changed")
