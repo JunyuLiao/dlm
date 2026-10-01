@@ -1,47 +1,5 @@
 {
   "schema": 26,
-  "current": {
-    "updated_local": "2026-10-01 (UTC-5)",
-    "branch": "research/m3-output-numerics-20260927",
-    "verified_commit": "758723513",
-    "entry_docs": [
-      "AGENTS.md",
-      "HANDOFF.md",
-      "docs/RESEARCH_CONTEXT.md",
-      "docs/DECISIONS.md",
-      "docs/RESULTS_LEDGER.md"
-    ],
-    "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
-    "substrate": "piecewise_v5",
-    "dense_reference": "D_fa4_allkept (FlashAttention-4, vLLM fork, block-sparse interface with every tile kept)",
-    "headline": {
-      "panel": "E4 v27_lb_confirm_e4_d3a7edb87a2b800a (24 items x seeds 404-909 per bin, 144 cells per arm)",
-      "arm": "M3_R6_A64_fused_dp_async_m1ln2_fa4",
-      "64k_request_W": "0.879 [0.820, 0.926]",
-      "64k_decode_S": "0.807",
-      "32k_request_W": "0.940 [0.897, 0.980]",
-      "32k_decode_S": "0.921",
-      "accuracy": "64K 77 vs 75, 32K 86 vs 86 (dense)",
-      "source": "results/m1_m2_m3_frontier_v27_20260929/lb_confirm_panel_e4/summary.md"
-    },
-    "running": [
-      {
-        "panel": "E5 v27_lb_overhead_e5_1c93b97271a3a266",
-        "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_lb_overhead_e5.json",
-        "deploy_tag": "v27_e5_7587235",
-        "run_dir": "v27_lb_e5_001",
-        "hosts": [
-          "dllm",
-          "mpk",
-          "dlm2"
-        ],
-        "executions": 2016,
-        "started_utc": "2026-10-01T16:14Z",
-        "scoring_label": "lb_e5"
-      }
-    ],
-    "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json."
-  },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
   "branch": "research/m3-output-numerics-20260927",

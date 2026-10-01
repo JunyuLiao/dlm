@@ -1,74 +1,100 @@
-# v27c (M1/M2/M3 frontier): strongest dense = FA4; the eager pipeline hides attention savings; move to a graph-captured substrate
+# HANDOFF — current frontier (2026-10-01, local UTC−5)
 
-Authority: user v27 doc + A64 doc + chat. GPUs are the user's own: no time window and no budget stop. Record GPU seconds only.
-Results: `results/m1_m2_m3_frontier_v27_20260929/`.
+Read `AGENTS.md` first. Stable context: `docs/RESEARCH_CONTEXT.md`. History and negatives: `docs/DECISIONS.md`.
+Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-29) is archived at
+`docs/handoff_archive/HANDOFF_v27c_20260929.md`.
 
-## Fan's methods (always present; variants are layered on top, never substituted)
-- **M1**: historical (observed) QK + current rank-32 projected V, current reference and causal T decide which KV64 tiles to keep; redecide every call.
-- **M2**: M1 with the tile mean of V (pooling V) in place of the weighted projected V (`pooled` reference, `pooled_compact` execution).
-- **M3**: M1 every R calls, the bitmap held in between.
-- Output always uses current QK and original V. Junyu's fresh T (current QK + projected V) and B (bootstrap bitmap held) are separate arms.
+- **Branch:** `research/m3-output-numerics-20260927` (pushed to `origin`).
+- **Last verified code commit:** `758723513` (E5 spec). Method code is at `56de98fe2` (`carry_first`).
+- **Docs (AGENTS/CLAUDE/docs, E4 summary):** written 2026-10-01, uncommitted pending user review.
+- **Two local checkouts.**
+  - `E:/dlm/m3_output_numerics_20260927` is the working checkout used for all v27 work.
+  - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
+    using it.
 
-## Done (before this handoff)
-- Tiers 1–3, D_fast, compact M2, R6/R12/A64/B-hold, length gate, layer subsets, cross-layer shared support (see `tier3_report.md`, `direct_cost_report.md`).
-- **c64 consumer** (`v27_consumer64.py`): 64-row, split-KV. The old 16-row consumer reloaded each K/V tile about 128 times. **D_c64** (the same kernel, all tiles kept) is the strongest dense baseline.
-- **Fused observation**: the call-1 dense pass writes the M1 prefix summaries plus a compact FP32 score tail.
-- **Long context vs D_c64**, per call, from `long_context/`:
-  - 32K: held −6.7%.
-  - 64K: held −15% to −17%; M1 shared D −5%.
-  - BO fused: +5.5% at 32K, +9% at 64K.
-- **Disk.** mpk root went from 97% to 76% by moving an inactive dyh directory to the attached volume (verified, symlinked).
+## Current conclusion
 
-## New in this session
-- **Long RULER panel** (`specs/v27_long_ruler.json`): 1,144 executions, 11 arms including D_native, D_c64, T_scope and plain M1/M2c/M3, plus A64 shared/fused variants and B.
-  - Two plumbing bugs cost two launches, both fixed with tests: long-RULER rows failed the ruler4k-only task check, and D_c64 lacked the runner branch and its bound fingerprint.
-  - `scripts/v27_smoke_arm.py` now runs one real request per bound arm before every launch.
-  - Run-dir `v27_long_ruler_006`: all 11 arms passed the smoke.
-- **Fused fresh T** (`consume64_fresh_t`, v21 key `fresh_fused`): Junyu's fresh-T information selected inside the 64-row output kernel. QK is always computed; V load and PV are skipped per tile. It is a named variant, not M1. GPU tests pass against an independent torch reference. Profile queued (arm sets `v27fresh`/`v27freshlong`).
-- **Selector latency is a root cause of weak M1 D-steps.** The generic summary-LOAD route has only 32 programs and a branchy loop that Triton cannot pipeline.
-  - 64K: 5.1 ms per routed layer, vs 5.4 ms for dense attention of that layer.
-  - 17.5K: 1.8 ms vs 1.5 ms.
-  - `v27_route.py` implements the same decision as two branch-free loops (v21 key `route_pipeline`).
-  - Bit-identity tests (`tests/test_v27_route_pipelined.py`) pass on GPU.
-  - Bench (`selector/route_bench.json`): 1.7–1.9× faster; 64K exact mu 5.08 → 2.95 ms, which is still 0.54× a dense layer.
-- **M1-DP** (`v27_dense_prefix.py`, v21 key `risk_state='dense_prefix'`): a named variant. The risk is computed against the dense prefix state and precomputed per summary, so decision calls run in parallel. GPU tests pass against a torch reference. Profiles are queued (`v27dp*`, `v27ns*`). Its threshold must be calibrated separately.
-- **64K memory fix** (`v27_long.py`): generate() kept the O(n²) prefill mask mapping (7.9 GiB) through the first canvas. It is now elided after a semantic check. Tokens are unchanged.
-- **Long RULER panel complete** (572 cells / 1,144 executions; `long_ruler_panel/README.md`):
-  - No end-to-end effect: the initial prefill dominates and a request needs about 5 calls.
-  - Per call vs D_c64: M3 R6/A64 shared+fused is 0.965 at 64K.
-  - Quality at 64K: the plain A8 arms keep it. The shared-support A64 variants lose it (4–5 of 26 cells worse, none better); the unshared B does not.
-  - Redacted records are in `generation_records_v27_long_ruler/`.
-- **LongBench-v2 32K/64K bins** (24 each, natural length, no truncation) built by a subagent. The long-generation panel `specs/v27_long_lb.json` (432 executions) is frozen and running.
-- `scripts/v27_datasets.py`: one map from each dataset to its base task, used by freeze/run/score.
+- **Long context: significant end-to-end gain, no accuracy loss.** E4 has 6 never-used seeds, 144 cells per arm per
+  bin, on piecewise_v5, against FA4 all-kept dense.
+  - **64K:** M3 R6 DP −ln2 request W **0.879 [0.820, 0.926]**; generation-only S 0.807.
+  - **32K:** W **0.940 [0.897, 0.980]**; S 0.921.
+  - Accuracy is equal or higher (64K 77 vs 75, 32K 86 vs 86). B is similar (0.876 / 0.941).
+  - Prefill is not optimized by any arm (P ≈ 1.00).
+- **The earlier "steps inflate / request gain not robust" reading (3-seed held-out, E3) was trajectory noise.** With 6
+  seeds, steps per canvas are 0.97–1.03 and output length 0.95–1.01.
+- **Held-out items only** (never used to choose −ln2): 64K M3 0.85 [0.73, 0.96] significant; 32K M3 0.96 n.s.,
+  obs2 0.95 [0.91, 0.98].
+- **Fan plain M1/M2c/M3 are slower than dense** at every length (1.06–1.34× in E4): the selector and observation cost
+  exceeds the skipped attention.
+- **AIME has no speed room.** Accuracy is neutral for M3 (65/65 of 120). AIME is an accuracy check only.
+- **Novelty is weak.** B ≈ SparseD (no significant speed difference at 64K). There is no evidence that V-aware
+  selection beats score-only selection (it is worse at high AIME sparsity).
+- **The ceiling at batch 1 is low.** GLOBAL attention is about 21% of a 64K request and 16% at 32K; a step is
+  dominated by reading about 46 GB of MoE weights. The current gain is about 60% of that ceiling.
 
-- **LB-long panel** scored (420/432; `long_lb_panel/README.md`). Cross-layer shared support collapses quality. Unshared B/A64 at 64K: per call 0.935 vs D_c64, wall 0.94 [0.87, 1.02].
-- **Official SOTA dense = FlashAttention-4** (vLLM fork, CuTe DSL, SM90 hd512). `official_baseline/README.md`: 64K kernel 2.91 ms, vs 4.9–5.5 ms for D_c64.
-  - `v27_fa4.py` loads it from a dyh overlay. D_fa4 control; `fa4_consumer` makes M1/M2/M3 maps into FA4 block-sparse lists.
-- **Substrate diagnosis** (`substrate/README.md`; read this first).
-  - In-model FA4 sparse saves about 11 ms of GPU per call at 64K. But every eager forward is host-bound, so none of it reaches wall time.
-  - On the pinned torch-2.6 `.local` overlay, transformers' MoE falls back to a per-expert loop with 60 host syncs per forward.
-  - Under CUDA graphs the saving appears: common-state keep 0.1 is 0.77× per forward at 60K keys.
-  - Piecewise inductor graphs (GLOBAL attention eager, vLLM split) on the conda env's own torch 2.12, 64K: D_fa4 dense 40.5 ms (call-mix median), held FA4 sparse 29.4 ms (calls 2+; not a common-state ratio), observation call 66–78 ms. The clean per-forward ratio is the common-state bench: 0.77× at keep 0.1.
-  - The official HF compiled path is 44/55.7 ms per step at 17K/32K and OOMs at 64K.
-  - All v21–v27 end-to-end ratios hold for the eager substrate only.
+## Done (this session, 2026-09-30 to 10-01)
 
-## Running
-- Nothing. Both GPUs are idle.
+- Substrates piecewise_v4 (static LOCAL shape; fixes the AIME recompile fallback) and v5 (compiled encoder-append
+  tail).
+- Panels traj_t1, E1 (cross-canvas carry: rejected), E2 (AIME carry/gates: no room), E3 (32K single-change
+  variants), E4 (large-seed confirmation). See `docs/RESULTS_LEDGER.md` L1, L11–L14.
+- New named variants:
+  - `observe_step` (7786b0ef9);
+  - `protect_output` (7786b0ef9);
+  - `stable1` dense-confirmation gate (adc2056d7);
+  - `carry_first` (56de98fe2).
+- Unit tests pass on dlm2 (75 in the v27 subset).
+- Literature check of step and length inflation (SparseD, PulseCol, Focus-dLLM, Lil, LessIsMore, JoT, Prophet). Group
+  deck and branches were read; the query-sensitivity direction is a collaboration candidate.
+- Progress doc updates 8–12 (`results/m1_m2_m3_frontier_v27_20260929/progress_20260930.md`). Updates 6 and 12 predate
+  E4 and are superseded by it for the request-level verdict.
 
-## Next
-1. **Make the piecewise substrate a fingerprinted runner option.**
-   - `v27_piecewise_bench.piecewise` becomes a plugin-independent install recorded in configs and receipts.
-   - Tests: LOCAL binding is semantically the native path; no recompiles across requests; tokens are stable across repeats.
-   - Also compile the post-prefill encoder (the official path does); it is currently eager.
-2. **Dense reference.** Use D_fa4 in FA4's fastest configuration (block-sparse interface with every tile kept, bitwise identical to dense). Report FlashInfer (tied) and the official compiled path as context. (The earlier claim that B0 avoided HF's concat was wrong: B0 is call 0, with fewer MoE experts hit.)
-3. **Re-measure quality on the new substrate.** The numerics change, so no earlier quality result transfers. Then re-freeze the unshared LB follow-up (`specs/v27_long_lb_unshared.json`) with FA4 execution and `substrate=piecewise`:
-   - plain M1/M2c/M3 always;
-   - B, M3 R6/R3 A64, M1-DP, pairs/no_last;
-   - density gate, G75 F/S15/S30.
-4. **Cut the observation-call overhead** (+28–40 ms at 64K). This is now the main cost of B/M3.
-5. **Ported sparse baselines** (MAGE, SparseD, Quest, BLASST rules) on FA4 block-sparse, labelled as ports. Keep the MAGE/PulseCol/VATP collision in view.
+## Running (started 11:14 local)
 
-Operational notes:
-- On Windows, TaskStop leaves the chain's bash script running as an orphan. After every stop, list `bash` processes with `v27_` in the command line and kill the leftovers.
-- **Diagnostics that must use a frozen config's source hashes** run with cwd in that deploy dir, via the private `v27_deploy_diag.py`.
-- **Caches outside dyh.** Every host run must pin TMPDIR, TORCHINDUCTOR_CACHE_DIR, CUDA_CACHE_PATH and XDG_CACHE_HOME inside dyh (both helpers now do). Earlier runs left files in /tmp/torchinductor_exouser, ~/.nv/ComputeCache, /tmp/pytest-of-exouser and /tmp/exouser; they are awaiting the user's decision.
+- **E5 overhead/tail study** (`specs/v27_lb_overhead_e5.json`, protocol `v27_lb_overhead_e5_1c93b97271a3a266`).
+  - Same 288 cells and host assignment as E4.
+  - Arms: dense, M3, B, M3/B + `carry_first`, M3/B + `stable1`. 2,016 runs.
+  - Deploy tag `v27_e5_7587235`, run dir `v27_lb_e5_001` on dllm, mpk and dlm2 (64K stage, then 32K).
+  - Scoring is queued (label `lb_e5`). Expected about 14:00 local.
+  - Fan plain M1/M2c/M3 for these cells are in E4; check that E5 dense tokens equal E4's.
+
+## Blockers
+
+- None technical. The meeting is 21:00 local; results are wanted by 20:00.
+
+## Immediate next steps
+
+1. When E5 is scored:
+   - verify the receipts: `carried_first_calls > 0` and bootstrap-dense = 1 canvas × 5 layers per request for c0;
+     `gate_entries` for stable1;
+   - check dense tokens are identical to E4;
+   - report W and S per arm.
+2. Larger-gain directions, ranked (see `docs/RESEARCH_CONTEXT.md` §8):
+   - (a) **Batched serving.** Attention share grows with batch. Measure per-step time at batch 1/2/4/8 first; the
+     runner is batch-1 only.
+   - (b) Make the encoder canvas append's GLOBAL attention sparse with the canvas's final map (about 2% at 64K).
+   - (c) Orthogonal step reduction (Prophet/JoT-style early exit). Not our contribution.
+3. Commit the docs after the user reviews them. Copy E5 summaries into `results/…/lb_overhead_panel_e5/`.
+
+## Operational notes (still relevant)
+
+- **Hosts** (H100 80GB, user-authorized, write only under `dyh`):
+  - dllm `149.165.159.64`;
+  - mpk `149.165.151.254` (writes go to `/media/volume/dllm-1/dyh`);
+  - dlm2 `149.165.168.28`.
+
+  Interpreters and env are in `E:/dlm/v20_private/hosts.json` plus `E:/dlm/v27_lbfa4_env.json` (torch 2.12 FA4
+  overlay; caches pinned inside `dyh`).
+- **Panel pipeline.** Coordinator scripts in `E:/dlm`, not in the repo:
+  1. Commit the spec in `results/…/specs/`.
+  2. Freeze: `python -m scripts.v21_freeze_panel freeze --mode v27_panel --spec … --out-dir E:/dlm/v23_private/<name>_frozen`.
+  3. Deploy: `python E:/dlm/v21_deploy_qualify.py --sha <HEAD> --tag v27_<x>_<sha7> --host <alias>`.
+  4. Bind: `python E:/dlm/v23_transport.py --action bind --run-dir … --frozen-dir …`.
+  5. Launch: `TAG=… RUN=… FROZEN=… STAGES=… bash E:/dlm/v27_lbfa4_host.sh <alias> <ip>` (waits for an idle GPU).
+  6. Score: `python E:/dlm/v27_score_lb.py --tag … --run-dir … --label …`.
+  7. Summarize: `python -m scripts.v27_fa4_panel_summary …`.
+
+  Scored outputs land in `E:/dlm/v27_private/lb_scoring/<label>/`.
+- A killed worker leaves no terminal receipt. Relaunch in a **new** run dir and merge at scoring.
+- On Windows, stopping a task can orphan the bash chain. Kill leftover `bash` processes with `v27_` in the command line.
+- Diagnostics that must match a frozen config's source hashes run with cwd = that deploy dir.

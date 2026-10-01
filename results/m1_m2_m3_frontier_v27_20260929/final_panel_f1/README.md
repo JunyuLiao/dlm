@@ -29,6 +29,14 @@ M1/M2c/M3 (A8); B and M3 R6 DP -ln2; each of the latter two also with a 32768-ke
 
 ## AIME26 (120 cells per arm; dense 65 correct)
 
+> **Correction (2026-09-30 15:33, da72ec843 / 823aa214e).** The `request W` column below includes pairs in which a
+> timed request captured new CUDA graphs. The first dense request on each host did, and it biases every W below 1.
+> Use `Wc` (those pairs excluded) from `summary_aime_sensitivity.md`:
+> - M3 R6 DP -ln2: 1.008 [0.957, 1.063];
+> - gated M3: 1.002;
+> - Fan M1: 1.058 [1.016, 1.104];
+> - B: 1.039.
+
 | arm | correct | +/- vs dense | sign test p | request W [95% CI] | steps/canvas | sec/task | steps/task |
 |---|---:|---|---:|---|---:|---:|---:|
 | dense D_fa4_allkept | 65 | | | 1 | 1 | 14.34 | 301.1 |
