@@ -388,7 +388,7 @@ class Attention:
                             str(q.dtype), str(q.device), signature, id(prefix_k))
         if self.protect_output and self.prompt_keys is None:
             if self.canvas != 0 or crop:
-                raise ValueError('output protection must see the request's first canvas on an uncropped layer')
+                raise ValueError('output protection must see the first canvas of the request on an uncropped layer')
             self.prompt_keys = prefix
         if self.min_route_keys and nk < self.min_route_keys:
             # v27 length gate: below the frozen key extent the routed path has no
