@@ -55,7 +55,9 @@ RISK_BUDGETS = {'b0': 0.0, 'b2ln2': 2 * 0.6931471805599453, 'b4ln2': 4 * 0.69314
 # v27 target sparsity (M1-DP): kept fraction of the eligible prefix tiles, ranked by risk (sparsity = 1 - keep)
 RISK_TOPKS = {'k70': 0.7, 'k60': 0.6, 'k50': 0.5, 'k30': 0.3, 'k20': 0.2}
 CARRY_CANVASES = (2, 3, 4, 8)   # v27 cross-canvas carry: observe every K-th canvas, reuse the map in between
-OBSERVE_STEPS = (2, 3)   # v27 observation step: native canvas calls before the (fused) observation; 1 is the default
+OBSERVE_STEPS = (2, 3)
+PROJ_RANKS = (4, 8, 16)    # v27 projected-V rank variants (nested Gaussian prefix of the rank-32 bank); 32 is the default
+RISK_VALUES = ('mass',)    # v27 score-only control for the target-sparsity selector (rank by attention mass, no V)   # v27 observation step: native canvas calls before the (fused) observation; 1 is the default
 THRESHOLD_SHIFTS = {'minus_3ln2': -3 * _LN2, 'minus_2ln2': -2 * _LN2, 'minus_ln2': -_LN2, 'plus_ln2': _LN2, 'plus_2ln2': 2 * _LN2,
                     'plus_3ln2': 3 * _LN2, 'plus_4ln2': 4 * _LN2}
 
@@ -82,7 +84,8 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      consumer64=None, memory_caps=None, fused_observe=False, fresh_fused=False,
                      route_pipeline=False, risk_state=None, density_gate=None, fa4_consumer=False,
                      async_route=False, risk_budget=None, risk_topk=None, carry_canvases=None,
-                     observe_step=None, protect_output=False, carry_first=False) -> dict:
+                     observe_step=None, protect_output=False, carry_first=False, proj_rank=None,
+                     risk_value=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -195,6 +198,16 @@ def effective_config(base: dict, arm: str, scope: str, *,
                 or carry_canvases is not None):
             raise ValueError('v27 observation step needs the fused-observation bootstrap mainline (no carry)')
         extra['observe_step'] = observe_step
+    if proj_rank is not None:
+        # v27 projected-V rank (named variant): rank-r nested Gaussian prefix of the rank-32 bank
+        if proj_rank not in PROJ_RANKS or bootstrap_policy is None or mu_mode != 'exact' or fresh_fused:
+            raise ValueError('v27 projected-V rank needs the bootstrap mainline with exact (projected) mu')
+        extra['proj_rank'] = proj_rank
+    if risk_value is not None:
+        # v27 score-only control: the target-sparsity selector ranks by attention mass only
+        if risk_value not in RISK_VALUES or risk_topk is None:
+            raise ValueError('v27 risk value needs the target-sparsity (risk_topk) selector')
+        extra['risk_value'] = risk_value
     if carry_first:
         # v27 first-call carry (named variant): canvas call 0 reuses the previous canvas's decision, call 1 observes
         if (carry_first is not True or bootstrap_policy is None or fresh_fused or not fused_observe or not fa4_consumer
@@ -366,6 +379,11 @@ def validate_effective(config: dict, condition: str):
         raise ValueError('v27 observation step identity drift')
     if 'protect_output' in config and (config['protect_output'] is not True or 'fused_observe' not in config):
         raise ValueError('v27 output protection identity drift')
+    if 'proj_rank' in config and (config['proj_rank'] not in PROJ_RANKS or 'bootstrap_policy' not in config
+                                  or config.get('mu_mode', 'exact') != 'exact'):
+        raise ValueError('v27 projected-V rank identity drift')
+    if 'risk_value' in config and (config['risk_value'] not in RISK_VALUES or 'risk_topk' not in config):
+        raise ValueError('v27 risk value identity drift')
     if 'carry_first' in config and (config['carry_first'] is not True or 'fused_observe' not in config
                                     or 'fa4_consumer' not in config or 'carry_canvases' in config):
         raise ValueError('v27 first-call carry identity drift')
@@ -471,6 +489,17 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('first-call carry must be bound before any routed call')
             owner.carry_first = True
+        if 'proj_rank' in config:
+            from .integration import RankMaskedProjections
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('projected-V rank must be bound before any routed call')
+            owner.projections = RankMaskedProjections(owner.projections, int(config['proj_rank']))
+            owner.sketches.projections = owner.projections
+            owner.proj_rank = int(config['proj_rank'])
+        if 'risk_value' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('risk value must be bound before any routed call')
+            owner.risk_value = config['risk_value']
         if 'density_gate' in config:
             from .integration import DENSITY_GATES
             if owner.cache.entries or owner.calls:
@@ -536,6 +565,7 @@ def install(adapter, config: dict, condition: str):
                         observe_step=getattr(owner, 'observe_step', 1),
                         protect_output=bool(getattr(owner, 'protect_output', False)),
                         carry_first=bool(getattr(owner, 'carry_first', False)),
+                        proj_rank=getattr(owner, 'proj_rank', 32), risk_value=getattr(owner, 'risk_value', None),
                         density_gate=config.get('density_gate'),
                         consumer=getattr(owner, 'consumer', None),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},

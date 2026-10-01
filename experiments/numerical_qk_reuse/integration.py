@@ -103,6 +103,30 @@ def carried_map(skipped, eligible, prefix, keys):
     return new_skipped, new_eligible
 
 
+class RankMaskedProjections:
+    """v27 projected-V rank variant: the bank's first ``rank`` columns of the rank-32 Gaussian bank, rescaled by
+    sqrt(32/rank), the rest zero. The bank is randn/sqrt(32), so the kept block is exactly randn/sqrt(rank): a rank-r
+    Gaussian JL projection (nested in the rank-32 one) carried in the unchanged 32-wide buffers and kernels -- the
+    zero columns add nothing to any norm."""
+
+    def __init__(self, base, rank):
+        if rank not in (4, 8, 16):
+            raise ValueError(f'unsupported projected-V rank {rank}')
+        self.base, self.rank, self.cache = base, int(rank), {}
+
+    def get(self, layer, heads, width, family, rank, seed, device):
+        matrix = self.base.get(layer, heads, width, family, rank, seed, device)
+        if family != 'gaussian' or rank != 32:
+            return matrix
+        key = (layer, heads, width, seed, str(matrix.device))
+        masked = self.cache.get(key)
+        if masked is None:
+            masked = torch.zeros_like(matrix)
+            masked[..., :self.rank] = matrix[..., :self.rank] * (32.0 / self.rank) ** 0.5
+            self.cache[key] = masked
+        return masked
+
+
 def protect_generated(skipped, prompt_keys):
     """v27 output protection: clear the skip bit of every key tile at or after the tile holding the
     prompt's last key (tile prompt_keys // 64 onward; a tile mixing prompt and generated keys is kept)."""
@@ -237,6 +261,8 @@ class Attention:
         self.risk_state = 'kept'       # v27 M1-DP: 'dense_prefix' (named variant)
         self.risk_budget_shift = None  # v27 risk budget on M1-DP: summed-risk bound (log shift over the threshold)
         self.risk_topk = None          # v27 target sparsity on M1-DP: kept fraction of prefix tiles by risk rank
+        self.risk_value = None         # v27 'mass': the top-k ranks by attention mass only (score-only control)
+        self.proj_rank = 32            # v27 projected-V rank (named variant; <32 = nested Gaussian prefix, see below)
         # v27 cross-canvas carry (named variant): a layer's last decision of an observed canvas is reused, extended
         # with every newer key tile kept, for the next carry_canvases - 1 canvases -- no dense bootstrap, no
         # observation and no decision there; the canvas after that observes again through the normal path
@@ -734,7 +760,8 @@ class Attention:
                   else float(kwargs['log_threshold']) + float(self.risk_budget_shift))
         return dp.route(scores, projected, ref, state, sensitivity=kwargs.get('sensitivity'),
                         log_threshold=kwargs['log_threshold'], key_offset=kwargs.get('key_offset', 0),
-                        risk_budget=budget, risk_topk=self.risk_topk, **pool)
+                        risk_budget=budget, risk_topk=self.risk_topk, risk_value=self.risk_value,
+                        summary=summary, **pool)
 
     def _observe(self, q, k, mask, scale, causal, window, crop):
         if self.observation_producer == 'grouped_q':
@@ -1038,6 +1065,7 @@ class Attention:
                     carry_canvases=self.carry_canvases, carried_calls=self.carried_calls,
                     carry_snapshots=self.carry_snapshots, observe_step=self.observe_step,
                     carry_first=self.carry_first, carried_first_calls=self.carried_first_calls,
+                    risk_value=self.risk_value, proj_rank=self.proj_rank,
                     protect_output=self.protect_output, protected_routes=self.protected_routes,
                     fused_observations=self.fused_observations,
                     fresh_fused_calls=self.fresh_fused_calls,

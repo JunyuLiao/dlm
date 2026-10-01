@@ -249,6 +249,17 @@ def topk_skip(lognorm, eligible, sensitivity, reference, nq, keep):
     return candidate & (rank < n_drop)
 
 
+def log_mass(summary, lognorm):
+    """v27 score-only control (named variant ``risk_value='mass'``): per (tile, row) the log share of the row's
+    prefix attention mass that the tile holds, log(exp(z_j) / sum_j' exp(z_j')), from the same observed prefix
+    summary the M1 risk uses -- no V term. Tiles whose M1-DP risk is +inf (first support, bad rows) stay +inf, so
+    the never-drop conventions are identical; rows without legal keys in a tile are -inf."""
+    z = torch.where(summary.active != 0, summary.z.float(), torch.full_like(summary.z, float('-inf')))
+    lse = torch.logsumexp(z, dim=3, keepdim=True)
+    mass = torch.where(torch.isfinite(lse), z - lse, torch.full_like(z, float('-inf')))
+    return torch.where(torch.isposinf(lognorm), lognorm, mass)
+
+
 def build(summary, nq, kt, hk, pooled=None, identity=None, num_warps=4, num_stages=3):
     """Dense-prefix pass over a filled prefix summary (once per summary)."""
     b, h, qb, pt, _ = summary.z.shape
@@ -273,7 +284,7 @@ def build(summary, nq, kt, hk, pooled=None, identity=None, num_warps=4, num_stag
 
 def route(scores, z, reference, state, *, sensitivity=None, log_threshold, pool=False, pooled=None,
           pool_count=None, key_offset=0, tiles_per_program=16, num_warps=4, num_stages=3, risk_budget=None,
-          risk_topk=None):
+          risk_topk=None, risk_value=None, summary=None):
     """M1-DP decision call: parallel prefix decisions plus the dense-state tail scan."""
     from .cached_executor import Routing, _extra, _karg, _pool_arguments
     b, h, nq, stored = scores.shape
@@ -300,7 +311,17 @@ def route(scores, z, reference, state, *, sensitivity=None, log_threshold, pool=
         if risk_budget is not None:
             skip[..., :pt] = budget_skip(state.lognorm, state.eligible, sensitivity, reference, nq, risk_budget)
         elif risk_topk is not None:
-            skip[..., :pt] = topk_skip(state.lognorm, state.eligible, sensitivity, reference, nq, risk_topk)
+            ranked = state.lognorm
+            if risk_value == 'mass':
+                # score-only control: rank by attention mass share instead of the M1 risk (cached per state)
+                ranked = getattr(state, 'logmass', None)
+                if ranked is None:
+                    if summary is None:
+                        raise ValueError('mass ranking needs the prefix summary')
+                    ranked = state.logmass = log_mass(summary, state.lognorm)
+            elif risk_value is not None:
+                raise ValueError(f'unknown risk value {risk_value!r}')
+            skip[..., :pt] = topk_skip(ranked, state.eligible, sensitivity, reference, nq, risk_topk)
     _dp_tail[(qb, h, b)](scores, z, reference, sensitivity, skip, elig, bad, state.previous, state.projected,
                          *pool_args, key_offset, nk - key_offset, nq, _karg('generic', nk), h, hk, 32, 32, qb, kt,
                          log_threshold, pt, pool is True, compact, TAIL=bool(key_offset),
