@@ -1,0 +1,116 @@
+{
+ "name": "lb96k_confirm_e6",
+ "ids": {
+  "longbench_v2_96k": [
+   "longbench_v2/66f793f4bb02136c067c306e",
+   "longbench_v2/66fa7c81bb02136c067c6e09",
+   "longbench_v2/66ed211f821e116aacb1ee0d",
+   "longbench_v2/66f3d738821e116aacb2f446",
+   "longbench_v2/66fd4f54bb02136c067c9987",
+   "longbench_v2/66f19f04821e116aacb27bab"
+  ]
+ },
+ "seeds": [
+  404,
+  505,
+  606,
+  707,
+  808,
+  909
+ ],
+ "warm": false,
+ "arms": {
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M1_R1_A8_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true
+   }
+  },
+  "M2c_R1_A8_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true,
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R3_A8_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true
+   }
+  },
+  "B_A64_fused_rp_async_fa4": {
+   "kind": "method",
+   "parent": "B_A8_matched",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "hold_only": true,
+    "route_pipeline": true
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2"
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "carry_first": true
+   }
+  }
+ },
+ "extra_gold_sha256": {
+  "longbench_v2_96k": "f662d97ef724fcd889a5a1e44bffa82ba8bf24877b932019aad178191109f1a7"
+ },
+ "substrate": "piecewise_v5",
+ "long_context_execution": "all arms: memory-linear GLOBAL causal / LOCAL sliding prefill via the 64-row kernel, elided O(n^2) prefill mask mapping, token-chunked MoE (V27_PREFILL_DENSE64=1); canvas calls follow each arm | decoding substrate piecewise_v1 (torch 2.12.1 grouped_mm MoE; decoder compiled reduce-overhead, split at GLOBAL attention which runs eager; LOCAL attention graphed unless the arm routes LOCAL layers; official-style compiled sampler); untimed per-arm warm-up before timed requests",
+ "selection_rule": "96K large-seed panel (2026-10-01): the 6 LongBench-v2 96K-bin items whose prompts fit one H100 (<= about 95K tokens; the other 6 OOM in dense prefill for every arm in v27_long_lb96k_c2) x six seeds 404..909 = 36 cells per arm; dense, Fan plain M1/M2c/M3, B, M3 R6 DP -ln2 and its first-call-carry variant; substrate piecewise_v5; hosts dllm and mpk (dlm2 runs the batch-scaling diagnostic); frozen before generation.",
+ "hosts": [
+  "149.165.159.64",
+  "149.165.151.254"
+ ],
+ "extra_hosts": [
+  "149.165.168.28"
+ ]
+}
