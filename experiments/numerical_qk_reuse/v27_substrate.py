@@ -20,7 +20,7 @@ host sync per call, which cannot be graph-captured.
 """
 from __future__ import annotations
 
-SUBSTRATES = ('eager', 'piecewise_v1', 'piecewise_v2', 'piecewise_v3', 'piecewise_v4')
+SUBSTRATES = ('eager', 'piecewise_v1', 'piecewise_v2', 'piecewise_v3', 'piecewise_v4', 'piecewise_v5')
 # piecewise_v2 = piecewise_v1 + the shared (all-arm) prompt prefill and the GLOBAL canvas append on official FA4
 # causal instead of the 64-row Triton kernel / HF SDPA (substrate/prefill_append_bench.jsonl)
 # piecewise_v3 = piecewise_v2 + two value-identical, all-arm host/copy fixes (substrate/time_breakdown.json):
@@ -31,7 +31,7 @@ SUBSTRATES = ('eager', 'piecewise_v1', 'piecewise_v2', 'piecewise_v3', 'piecewis
 #     attention kernels.
 #   * the denoising step's `if finished_denoising.any():` host sync is skipped for batch size 1: with one item, a
 #     finished item ends the canvas loop before the next step, so the guarded torch.where never changes anything.
-V3_SUBSTRATES = ('piecewise_v3', 'piecewise_v4')
+V3_SUBSTRATES = ('piecewise_v3', 'piecewise_v4', 'piecewise_v5')
 # piecewise_v4 = piecewise_v3 + one static LOCAL shape for the compiled decoder (all-arm; 2026-09-30):
 #   while the encoder's sliding-window cache holds fewer than sliding_window - 1 tokens (a short prompt's first
 #   canvases), the decoder sees it LEFT-PADDED to sliding_window - 1 with zero K/V, and the LOCAL attention gets a
@@ -40,11 +40,18 @@ V3_SUBSTRATES = ('piecewise_v3', 'piecewise_v4')
 #   fell back to eager (~110 ms instead of ~23 ms per forward), invisibly to the new-graph counter. Once the window is
 #   full there is no padding and no mask, so long prompts run exactly the v3 graphs. The encoder (prefill and canvas
 #   appends) always sees the real, unpadded cache; LOCAL-routing arms (local mode 'eager') are never padded.
-V4_SUBSTRATES = ('piecewise_v4',)
+V4_SUBSTRATES = ('piecewise_v4', 'piecewise_v5')
+# piecewise_v5 = piecewise_v4 + the encoder's canvas appends partly on CUDA graphs (all-arm; 2026-09-30): after each
+#   canvas the 256 committed tokens run through the encoder (30 layers) to extend the cache. That call was fully eager
+#   (~66 ms, ~20% of an AIME request), while the official compiled path compiles the post-prefill encoder. v5 keeps
+#   each encoder layer's attention (cache update, masks, FA4 / SDPA) eager and runs the rest of the layer -- post-
+#   attention norm, residual, dense MLP, MoE router and experts, norms, layer scalar; fixed 256-token shapes -- as
+#   one compiled reduce-overhead function per layer (torch.compile, CUDA graphs). The prompt prefill is unchanged.
+V5_SUBSTRATES = ('piecewise_v5',)
 
 
 def prefill_kernel(substrate: str) -> str:
-    return 'fa4' if substrate in ('piecewise_v2', 'piecewise_v3', 'piecewise_v4') else 'dense64'
+    return 'fa4' if substrate in ('piecewise_v2', 'piecewise_v3', 'piecewise_v4', 'piecewise_v5') else 'dense64'
 
 
 def joined_kv(attn, encoder_keys, encoder_values, keys, values):
@@ -235,6 +242,49 @@ def local_attention_v4(sdpa):
     return attention
 
 
+def encoder_layer_tail(layer, attn_output, residual):
+    """DiffusionGemmaEncoderTextLayer.forward after self_attn, line for line (transformers 5.x)."""
+    hidden_states = layer.post_attention_layernorm(attn_output)
+    hidden_states = residual + hidden_states
+
+    residual = hidden_states
+    hidden_states = layer.pre_feedforward_layernorm(hidden_states)
+    hidden_states = layer.mlp(hidden_states)
+    hidden_states_1 = layer.post_feedforward_layernorm_1(hidden_states)
+
+    hidden_states_flat = residual.reshape(-1, residual.shape[-1])
+    hidden_states_2_for_routing = hidden_states_flat
+    hidden_states_2_for_experts = layer.pre_feedforward_layernorm_2(hidden_states_flat)
+    _, top_k_weights, top_k_index = layer.router(hidden_states_2_for_routing)
+    hidden_states_2 = layer.experts(hidden_states_2_for_experts, top_k_index, top_k_weights)
+    hidden_states_2 = hidden_states_2.reshape(residual.shape)
+    hidden_states_2 = layer.post_feedforward_layernorm_2(hidden_states_2)
+
+    hidden_states = hidden_states_1 + hidden_states_2
+    hidden_states = layer.post_feedforward_layernorm(hidden_states)
+    hidden_states = residual + hidden_states
+    hidden_states = hidden_states * layer.layer_scalar
+    return hidden_states
+
+
+def graphed_encoder_append(layer, tail, canvas: int):
+    """v5: encoder layer forward whose post-attention part runs ``tail`` (compiled) for canvas-sized appends."""
+    original = layer.forward
+
+    def forward(hidden_states, position_embeddings=None, attention_mask=None, position_ids=None,
+                past_key_values=None, **kwargs):
+        if hidden_states.shape[1] != canvas:
+            return original(hidden_states, position_embeddings=position_embeddings, attention_mask=attention_mask,
+                            position_ids=position_ids, past_key_values=past_key_values, **kwargs)
+        residual = hidden_states
+        attn_input = layer.input_layernorm(hidden_states)
+        attn_output, _ = layer.self_attn(hidden_states=attn_input, position_embeddings=position_embeddings,
+                                         attention_mask=attention_mask, position_ids=position_ids,
+                                         past_key_values=past_key_values, **kwargs)
+        return tail(layer, attn_output, residual).clone()     # never hand a CUDA-graph output buffer onward
+    return forward
+
+
 def install(model, backend: str = 'inductor', name: str = 'piecewise_v1') -> dict:
     """Idempotent. Returns the substrate identity recorded in receipts. backend='eager' (dynamo capture and the
     same graph split, no codegen, no CUDA graphs) exists only for the equivalence diagnostic."""
@@ -288,6 +338,16 @@ def install(model, backend: str = 'inductor', name: str = 'piecewise_v1') -> dic
             global_layers.append(int(attn.layer_idx))
     encoder = model.model.encoder
     encoder_forward = encoder.forward
+    if name in V5_SUBSTRATES:
+        canvas = int(getattr(model.config, 'canvas_length', None) or getattr(model.generation_config, 'canvas_length', None)
+                     or 256)
+        tail = (torch.compile(encoder_layer_tail, mode='reduce-overhead', dynamic=False) if backend == 'inductor'
+                else torch.compile(encoder_layer_tail, backend='eager', dynamic=False))
+        encoder_layers = [m for m in encoder.modules() if type(m).__name__ == 'DiffusionGemmaEncoderTextLayer']
+        if len(encoder_layers) != len(decoder.layers):
+            raise RuntimeError('unexpected encoder layer count')
+        for layer in encoder_layers:
+            layer.forward = graphed_encoder_append(layer, tail, canvas)
 
     global_attention = [layer.self_attn for layer in decoder.layers if not layer.self_attn.is_sliding]
 
