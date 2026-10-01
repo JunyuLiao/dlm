@@ -1,0 +1,161 @@
+{
+ "name": "aime_vterm_e8",
+ "ids": {
+  "aime26": [
+   "aime26/1",
+   "aime26/2",
+   "aime26/3",
+   "aime26/4",
+   "aime26/5",
+   "aime26/6",
+   "aime26/7",
+   "aime26/8",
+   "aime26/9",
+   "aime26/10",
+   "aime26/11",
+   "aime26/12",
+   "aime26/13",
+   "aime26/14",
+   "aime26/15",
+   "aime26/16",
+   "aime26/17",
+   "aime26/18",
+   "aime26/19",
+   "aime26/20",
+   "aime26/21",
+   "aime26/22",
+   "aime26/23",
+   "aime26/24",
+   "aime26/25",
+   "aime26/26",
+   "aime26/27",
+   "aime26/28",
+   "aime26/29",
+   "aime26/30"
+  ]
+ },
+ "seeds": [
+  404,
+  505,
+  606,
+  707,
+  808,
+  909
+ ],
+ "warm": false,
+ "arms": {
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M3_R6_A64_fused_dp_async_topk70_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "risk_topk": "k30"
+   }
+  },
+  "M3_R6_A64_fused_dp_async_topk70_r16_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "risk_topk": "k30",
+    "proj_rank": 16
+   }
+  },
+  "M3_R6_A64_fused_dp_async_topk70_r8_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "risk_topk": "k30",
+    "proj_rank": 8
+   }
+  },
+  "M3_R6_A64_fused_dp_async_topk70_r4_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "risk_topk": "k30",
+    "proj_rank": 4
+   }
+  },
+  "M2c_R6_A64_fused_dp_async_topk70_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "risk_topk": "k30",
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R6_A64_fused_dp_async_topk70_mass_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "risk_topk": "k30",
+    "risk_value": "mass"
+   }
+  },
+  "SparseD_s70_skip1_fa4": {
+   "kind": "sparsed_fa4",
+   "keep": 0.3,
+   "skip_steps": 1
+  }
+ },
+ "substrate": "piecewise_v5",
+ "hosts": [
+  "149.165.159.64",
+  "149.165.151.254",
+  "149.165.168.28"
+ ],
+ "selection_rule": "V-term ablation on the current mainline (2026-10-01): does looking at V help block selection? Same selector as M3 R6 DP (A64 fused observation, async route, dense-prefix risk, decision every 6 calls) at a FIXED 70% target sparsity (risk top-k keeps 30% of prefix tiles; the regime where AIME accuracy starts to drop), changing only the V term of the risk: rank-32 projected V (current), rank 16/8/4 (nested Gaussian prefix of the same bank), the tile-mean V of M2 (pooled compact), and no V at all (rank by attention mass share, score-only control); plus the SparseD port at 70% as an external reference. All 30 AIME26 x seeds 404..909 (180 cells per arm, same cells and hosts as E7, whose Fan plain M1/M2c/M3 arms cover these cells); substrate piecewise_v5; frozen before generation.",
+ "extra_hosts": [
+  "149.165.168.28"
+ ]
+}
