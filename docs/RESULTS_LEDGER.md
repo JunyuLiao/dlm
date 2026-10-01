@@ -80,6 +80,29 @@ Rules for this file:
 - **Source.** `lb96k_confirm_panel_e6/summary.md`, spec `specs/v27_lb96k_confirm_e6.json`, protocol
   `v27_lb96k_confirm_e6_8ab3aa35d1874ca1`.
 
+### L1c2. 96K pooled: E6 + E6b, 11 fitting items × seeds 404–909 = 66 cells per arm (piecewise_v5)
+
+E6b adds the 5 other fitting items of the frozen 96K pool (pool positions 13–24, prompts ≤ 95,074 tokens), same arms,
+seeds and substrate. Pooled ratios are paired per cell with the bootstrap over 11 items.
+
+| arm | W [CI] | S [CI] | per-step S/N [CI] | N [CI] | T | acc (dense 25) |
+|---|---|---|---|---|---:|---:|
+| **M3 + `carry_first`** | **0.822 [0.703, 0.944]** | **0.727 [0.589, 0.887]** | 0.754 [0.738, 0.768] | 0.965 [0.772, 1.190] | 0.960 | 30 |
+| M3 | 0.858 [0.761, 0.956] | 0.783 [0.664, 0.918] | 0.761 [0.740, 0.781] | 1.028 | 1.004 | 31 |
+| B | 0.865 [0.752, 0.969] | 0.789 [0.655, 0.928] | 0.738 [0.725, 0.751] | 1.069 | 1.031 | 31 |
+| Fan plain M1 / M2c / M3 | 1.257 / 1.448 / 1.121 | 1.48 / 1.80 / 1.22 | 1.59 / 1.83 / 1.22 | — | — | 32 / 32 / 33 |
+
+- **96K: M3 + c0 is 18% faster end to end and 27% faster in generation, with no accuracy loss** (30 vs 25). The
+  per-step saving (−25%) is tight; the step count is now neutral (N 0.96, CI spans 1).
+- E6b alone (5 items, 30 cells): per-step S/N 0.745 for M3 + c0, but N 1.19 [0.87, 1.48], so W 0.927 [0.782, 1.052]
+  (n.s.); B's N 1.31 [1.19, 1.44]. E6 alone had N 0.81. **At 96K the step count varies by item set in both
+  directions; only the pooled panel supports a request-level claim.**
+- **Integrity.** E6b 210/210 runs ok, no timed new graphs, one host per cell (dllm, mpk, dlm2), c0 receipts 5
+  bootstrap-dense calls per request. E6b's deploy is one code commit after E6's (c36b1f933 adds opt-in V-term options,
+  off in these arms).
+- **Source.** `lb96k_pooled_e6_e6b/summary.md` and `README.md`; E6b alone `lb96k_extend_panel_e6b/summary.md`, spec
+  `specs/v27_lb96k_extend_e6b.json`, protocol `v27_lb96k_extend_e6b_d1b1c0c74a1dc69d`.
+
 ### L1d. E7 AIME large-seed confirmation: 30 problems × seeds 404–909 = 180 cells per arm (piecewise_v5)
 
 | arm | acc (dense 99) | +/− | W [CI] | Wc [CI] | S | per-step S/N [CI] | N |
