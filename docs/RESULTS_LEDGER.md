@@ -62,6 +62,24 @@ Rules for this file:
 - **Source.** `lb_overhead_panel_e5/summary.md`, spec `specs/v27_lb_overhead_e5.json`, protocol
   `v27_lb_overhead_e5_1c93b97271a3a266`, deploy commit 758723513.
 
+### L1c. E6 96K: the 6 items whose prompts fit one H100 (≤ about 95K tokens) × seeds 404–909 = 36 cells per arm (piecewise_v5)
+
+| arm | W [CI] | S | per-step S/N [CI] | N [CI] | T | acc (dense 12) |
+|---|---|---:|---|---|---:|---:|
+| **M3 + `carry_first`** | **0.744 [0.597, 0.903]** | 0.619 | 0.762 [0.747, 0.776] | 0.812 [0.628, 1.041] | 0.858 | 16 |
+| M3 | 0.819 [0.690, 0.968] | 0.720 | 0.762 [0.731, 0.785] | 0.946 | 0.934 | 14 |
+| B | 0.786 [0.641, 0.946] | 0.668 | 0.743 [0.722, 0.760] | 0.900 | 0.906 | 16 |
+| Fan plain M1 / M2c / M3 | 1.158 / 1.385 / 1.045 | — | 1.62 / 1.83 / 1.25 | — | — | 14 / 17 / 15 |
+
+- The per-step decode cost (−24 to −26%) is robust: tight CIs.
+- Part of the request gain comes from fewer steps or shorter outputs (N 0.81, T 0.86 for M3 + c0). With only 6
+  items these are noisy: N's CI crosses 1, and per-item W ranges 0.28–1.30.
+- With N = 1 the expected request ratio is about 0.85.
+- **Integrity.** 252/252 runs ok, no timed new graphs, one host per cell (dllm, mpk). c0 receipts: 5 bootstrap-dense
+  calls per request.
+- **Source.** `lb96k_confirm_panel_e6/summary.md`, spec `specs/v27_lb96k_confirm_e6.json`, protocol
+  `v27_lb96k_confirm_e6_8ab3aa35d1874ca1`.
+
 ## Panels on piecewise_v3 / v4 / v5 (seeds 101/202/303 unless stated)
 
 | id | comparison | workload | result | caveat | source / protocol |
