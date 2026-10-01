@@ -5,8 +5,8 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 `docs/handoff_archive/HANDOFF_v27c_20260929.md`.
 
 - **Branch:** `research/m3-output-numerics-20260927` (pushed to `origin`).
-- **Last verified code commit:** `758723513` (E5 spec). Method code is at `56de98fe2` (`carry_first`).
-- **Docs (AGENTS/CLAUDE/docs, E4 summary):** written 2026-10-01, uncommitted pending user review.
+- **Method code:** `c36b1f933` (V-term ablation variants), on top of `56de98fe2` (`carry_first`).
+- **Docs:** committed and pushed. Keep them current with every change; this is a user instruction.
 - **Two local checkouts.**
   - `E:/dlm/m3_output_numerics_20260927` is the working checkout used for all v27 work.
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
@@ -14,6 +14,11 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Current conclusion
 
+- **Best configuration now: M3 R6 DP −ln2 + `carry_first`** (E5, same 288 cells as E4).
+  - 64K: request W **0.853 [0.802, 0.895]**, generation S 0.775.
+  - 32K: W **0.907 [0.858, 0.952]**, S 0.878.
+  - Accuracy 76 vs 75 and 92 vs 86. Versus M3 without carry: 0.971 / 0.963.
+  - The `stable1` gate is rejected.
 - **Long context: significant end-to-end gain, no accuracy loss.** E4 has 6 never-used seeds, 144 cells per arm per
   bin, on piecewise_v5, against FA4 all-kept dense.
   - **64K:** M3 R6 DP −ln2 request W **0.879 [0.820, 0.926]**; generation-only S 0.807.
@@ -31,6 +36,8 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   selection beats score-only selection (it is worse at high AIME sparsity).
 - **The ceiling at batch 1 is low.** GLOBAL attention is about 21% of a 64K request and 16% at 32K; a step is
   dominated by reading about 46 GB of MoE weights. The current gain is about 60% of that ceiling.
+- **Batching does not raise the attention share at 64K** (B=1→4: 26/22/25% of a forward; keep-0.12 saving about
+  20%). See `batch_scaling/README.md`.
 
 ## Done (this session, 2026-09-30 to 10-01)
 
@@ -49,15 +56,11 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - Progress doc updates 8–12 (`results/m1_m2_m3_frontier_v27_20260929/progress_20260930.md`). Updates 6 and 12 predate
   E4 and are superseded by it for the request-level verdict.
 
-## Running (started 11:14 local)
+## Running (as of 13:40 local)
 
-- **E5 overhead/tail study** (`specs/v27_lb_overhead_e5.json`, protocol `v27_lb_overhead_e5_1c93b97271a3a266`).
-  - Same 288 cells and host assignment as E4.
-  - Arms: dense, M3, B, M3/B + `carry_first`, M3/B + `stable1`. 2,016 runs.
-  - Deploy tag `v27_e5_7587235`, run dir `v27_lb_e5_001` on dllm, mpk and dlm2 (64K stage, then 32K).
-  - Scoring is queued (label `lb_e5`). Expected about 14:00 local.
-  - Fan plain M1/M2c/M3 for these cells are in E4; check that E5 dense tokens equal E4's.
-- **Queued behind E5** (background jobs that start when each host's E5 ledger closes).
+- **E5** finished and was scored (`docs/RESULTS_LEDGER.md` L1b). **The batch diagnostic** finished
+  (`batch_scaling/`).
+- **Running or queued** (background jobs started when each host's previous job closed).
   - **E6, 96K large-seed panel** (`specs/v27_lb96k_confirm_e6.json`, protocol `v27_lb96k_confirm_e6_8ab3aa35d1874ca1`).
     - 6 fitting items × seeds 404–909 = 36 cells per arm.
     - Arms: dense, Fan plain M1/M2c/M3, B, M3, M3 + `carry_first`. 252 runs.

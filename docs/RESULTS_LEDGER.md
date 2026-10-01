@@ -40,6 +40,28 @@ Rules for this file:
 - **Source.** `lb_confirm_panel_e4/summary.md`, spec `specs/v27_lb_confirm_e4.json`, protocol
   `v27_lb_confirm_e4_d3a7edb87a2b800a`, deploy commit 9e47ddb9d.
 
+### L1b. E5 overhead / tail variants on the E4 cells (same 288 cells, hosts and seeds; piecewise_v5)
+
+| arm | 64K W [CI] | 64K S | 64K acc (dense 75) | 32K W [CI] | 32K S | 32K acc (dense 86) |
+|---|---|---:|---:|---|---:|---:|
+| M3 (reference; tokens identical to E4) | 0.879 [0.818, 0.927] | 0.807 | 77 | 0.942 [0.900, 0.984] | 0.920 | 86 |
+| **M3 + `carry_first`** | **0.853 [0.802, 0.895]** | **0.775** | 76 | **0.907 [0.858, 0.952]** | **0.878** | 92 |
+| B + `carry_first` | 0.858 [0.800, 0.912] | 0.774 | 80 | 0.931 [0.883, 0.980] | 0.907 | 86 |
+| M3 + `stable1` gate | 0.891 [0.832, 0.937] | 0.820 | 75 | 0.953 [0.908, 0.998] | 0.939 | 81 |
+| B + `stable1` gate | 0.889 [0.831, 0.939] | 0.826 | 79 | 0.938 [0.875, 1.005] | 0.920 | 88 |
+
+- **carry_first vs its own reference** (direct pairs, geometric mean, question-clustered bootstrap):
+  - M3: 64K W 0.971 [0.939, 1.001], 32K 0.963 [0.914, 1.011];
+  - accuracy discordance balanced (64K 7/8, 32K 15/9);
+  - B: 64K 0.981, 32K 0.995.
+- **stable1** is slower and costs accuracy at 32K (M3 81 vs 86). Rejected.
+- **Integrity.**
+  - 2,016/2,016 runs ok, no timed new graphs.
+  - Dense, M3 and B tokens are identical to E4 (288/288 each).
+  - Receipts: c0 bootstrap-dense = 5 calls (canvas 0 only) per request; stable1 fired in 225/288 M3 runs.
+- **Source.** `lb_overhead_panel_e5/summary.md`, spec `specs/v27_lb_overhead_e5.json`, protocol
+  `v27_lb_overhead_e5_1c93b97271a3a266`, deploy commit 758723513.
+
 ## Panels on piecewise_v3 / v4 / v5 (seeds 101/202/303 unless stated)
 
 | id | comparison | workload | result | caveat | source / protocol |
@@ -66,6 +88,7 @@ Rules for this file:
 | K2 | FA4 block-sparse scaling | 64K keep 50/25/10%: 0.45/0.27/0.14× dense | `official_baseline/README.md` |
 | K3 | kernel → module → request at 64K (B / M3) | kernel 7.3× (keep about 10%), module 4.4× / 2.7×, request 1.16× / 1.15×; Fan plain module 0.31–0.66× | `kernel_bench/README.md` |
 | K4 | per-forward and per-step time composition at 32K (dense, compiled) | forward about 32 ms: MoE GEMM 12.8 (HBM-bound), GLOBAL attention 7.2, dense GEMMs 3.5, LOCAL 0.8, other about 4; step adds about 4.6 ms sampler | `substrate/time_breakdown.json` (v2-era; KV concat since removed in v3) |
+| K6 | batch scaling of one 64K decoder forward (B = 1/2/4) | prefix-attention share 26/22/25%; keep-0.12 saving 23/19/20%; B=8 OOM | `batch_scaling/README.md` |
 | K5 | substrate correctness | eager-backend split bitwise equals eager; inductor numerics ≈ an exact-kernel swap | `substrate/README.md` §6 |
 
 ## Eager-substrate results (historical; do not compare with the above)
