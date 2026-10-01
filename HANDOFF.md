@@ -65,6 +65,14 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - **Batch-scaling diagnostic** on dlm2 (`scripts/v27_batch_step_bench.py`).
     - E4 run dir and deploy, 64K item 0, seed 404, decoder call 6, batch 1/2/4/8, keep 0.12/0.2.
     - Output: `<dlm2 dyh>/m3_output_numerics_v21_20260927/scratch_tests/batch_1001/bench64.jsonl`.
+  - **E7, AIME large-seed panel** (`specs/v27_aime_confirm_e7.json`, protocol `v27_aime_confirm_e7_0515fa3125588ff0`).
+    - 30 problems × seeds 404–909 = 180 cells per arm.
+    - Arms: dense, Fan plain M1/M2c/M3, M3, and two low-overhead variants:
+      - M3 + `carry_first` + 2K gate;
+      - B at −ln2 + `carry_first` + 2K gate.
+    - 1,260 runs. Deploy `v27_e7_ceefaf2`, run dir `v27_aime_e7_001`.
+    - Starts after E6 on dllm/mpk and after the batch diagnostic on dlm2. Scoring label `aime_e7`.
+    - Question: is any accuracy-safe AIME gain significant?
 
 ## Blockers
 
