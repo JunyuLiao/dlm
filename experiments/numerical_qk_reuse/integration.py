@@ -81,6 +81,10 @@ DENSITY_GATES = {
     # v27: dense only for canvases still running after step 24 (the non-converging tail)
     'cap24': dict(cap=24),
     'stall2': dict(stall=2), 'ent0.05_stall2': dict(entropy=0.05, stall=2),
+    # v27 dense confirmation: once the argmax canvas (what the canvas commits) is unchanged between two
+    # consecutive steps -- the native stability half of the stop rule -- the rest of the canvas runs dense, so
+    # the remaining confidence check sees dense logits (the tail no longer carries sparse-attention noise)
+    'stable1': dict(stable=1),
 }
 
 
@@ -110,16 +114,17 @@ def protect_generated(skipped, prompt_keys):
     return skipped
 
 
-def density_gate_fires(preset, step, entropy, accepted, previous_accepted, stalled_steps):
+def density_gate_fires(preset, step, entropy, accepted, previous_accepted, stalled_steps, changed=None):
     """Pure decision for step ``step`` (0-based in the canvas) from the PREVIOUS step's sampler
-    statistics. Returns (fire, stalled_steps)."""
+    statistics (``changed``: argmax positions that differ from the step before it). Returns (fire, stalled_steps)."""
     if accepted is not None and previous_accepted is not None and accepted <= previous_accepted:
         stalled_steps += 1
     else:
         stalled_steps = 0
     fire = ((preset.get('entropy') and entropy is not None and entropy < preset['entropy'])
             or (preset.get('cap') and step >= preset['cap'])
-            or (preset.get('stall') and stalled_steps >= preset['stall']))
+            or (preset.get('stall') and stalled_steps >= preset['stall'])
+            or (preset.get('stable') and changed is not None and changed == 0))
     return bool(fire), stalled_steps
 
 
@@ -254,6 +259,7 @@ class Attention:
         self.gate_stalled, self.gate_previous_accepted = 0, None
         self.gate_entries, self.gate_dense_calls = [], 0
         self._sampler_entropy = self._sampler_accepted = None
+        self._sampler_changed = self._previous_top = None   # v27 dense-confirmation gate (argmax stability)
         self.dp_states = {}
         self.dp_builds = self.dp_routes = 0
         self.fresh_fused_calls = 0
@@ -309,26 +315,37 @@ class Attention:
         if self.density_gate is not None:
             if canvas != self.canvas or step == 0:
                 self.gate_dense, self.gate_stalled, self.gate_previous_accepted = False, 0, None
-            elif not self.gate_dense and self._sampler_entropy is not None:
+                self._previous_top = self._sampler_changed = None
+            elif not self.gate_dense and self._sampler_accepted is not None:
                 # one host read per step (the native stop check already synchronizes every step)
-                entropy, accepted = (float(x) for x in torch.stack([self._sampler_entropy,
-                                                                    self._sampler_accepted.float()]).tolist())
-                fire, self.gate_stalled = density_gate_fires(self.density_gate, step, entropy, accepted,
-                                                             self.gate_previous_accepted, self.gate_stalled)
+                missing = torch.full((), -1.0, device=self._sampler_accepted.device)
+                entropy, accepted, changed = (float(x) for x in torch.stack([
+                    missing if self._sampler_entropy is None else self._sampler_entropy,
+                    self._sampler_accepted.float(),
+                    missing if self._sampler_changed is None else self._sampler_changed.float()]).tolist())
+                fire, self.gate_stalled = density_gate_fires(
+                    self.density_gate, step, None if entropy < 0 else entropy, accepted,
+                    self.gate_previous_accepted, self.gate_stalled, None if changed < 0 else int(changed))
                 self.gate_previous_accepted = accepted
                 if fire:
                     self.gate_dense = True
                     self.gate_entries.append(step)
-            self._sampler_entropy = self._sampler_accepted = None
+            self._sampler_entropy = self._sampler_accepted = self._sampler_changed = None
         self.canvas, self.step = canvas, step
 
     def observe_sampler(self, logits, accepted):
         """Mean token entropy of the processed logits (the native stop statistic) and the accepted
         token count, kept on device until the next step's gate decision."""
-        x = logits.float()
-        logp = torch.log_softmax(x, -1)
-        self._sampler_entropy = -(logp.exp() * logp).sum(-1).mean()
+        if self.density_gate.get('entropy') or not self.density_gate.get('stable'):
+            x = logits.float()
+            logp = torch.log_softmax(x, -1)
+            self._sampler_entropy = -(logp.exp() * logp).sum(-1).mean()
         self._sampler_accepted = accepted.sum()
+        if self.density_gate.get('stable'):
+            top = logits.argmax(-1)
+            if self._previous_top is not None and self._previous_top.shape == top.shape:
+                self._sampler_changed = (top != self._previous_top).sum()
+            self._previous_top = top
 
     def identify(self, module, args, kwargs):
         cache = kwargs.get('past_key_values', args[3] if len(args) > 3 else None)
