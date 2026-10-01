@@ -31,7 +31,7 @@ SCORE_PERIODS = (8, 16, 64)
 # parent arm stays as namespaced provenance; the effective values are bound on
 # the runtime and reported through one authoritative effective_method record.
 DECISION_INTERVALS = (6, 12)
-MIN_ROUTE_KEYS = (8192, 16384, 32768)   # v27 length gates: dense below this many keys
+MIN_ROUTE_KEYS = (2048, 4096, 8192, 16384, 32768)   # v27 length gates: dense below this many keys
 # v27 long-context residency: score cache and prefix-summary budgets (bytes).
 MEMORY_CAPS = {'long': (16 * 1024**3, 8 * 1024**3)}
 # v27 GLOBAL layer variants (DiffusionGemma GLOBAL layers 5, 11, 17, 23, 29).
