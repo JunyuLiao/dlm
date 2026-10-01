@@ -25,6 +25,7 @@ def test_carried_map_refuses_a_shrinking_extent():
 
 def _mainline():
     return dict(output_score_precision='fp32_scores_bf16_pv', bootstrap_policy='native_bootstrap2_observe1',
+                output_layout='model_major',
                 consumer64=2, memory_caps='long', fa4_consumer=True, score_period=64, fused_observe=True,
                 async_route=True, risk_state='dense_prefix', decision_interval=6, threshold_shift='minus_ln2')
 
