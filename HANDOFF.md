@@ -58,7 +58,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - Progress doc updates 8–12 (`results/m1_m2_m3_frontier_v27_20260929/progress_20260930.md`). Updates 6 and 12 predate
   E4 and are superseded by it for the request-level verdict.
 
-## Running (as of 16:15 local)
+## Running (as of 17:05 local)
 
 - **Finished and scored:** E5 (L1b), E6 (L1c), E7 (L1d), the batch diagnostic (`batch_scaling/`).
 - **Running or queued** (background jobs started when each host's previous job closed).
@@ -66,10 +66,19 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
     - The 5 other fitting items of the 96K pool (pool positions 13–24; prompts ≤ 95,074 tokens) × seeds 404–909 =
       30 cells per arm, same 7 arms as E6. 210 runs on dllm, mpk and dlm2. Pooled with E6: 11 items, 66 cells.
     - Deploy `v27_e6b_b805351`, run dir `v27_lb96k_e6b_001`, scoring label `lb96k_e6b`.
-    - Runs after E8 on each host (dlm2 started first). The binding was merged from the three host fragments
+    - Runs after E8 on each host. The dlm2 share finished (70/70 ok); dllm and mpk follow E8. The binding was merged from the three host fragments
       because the first bind call ran with `HOSTS=dllm` only; the unused one-host binding is kept beside it.
     - Item facts: LongBench-v2 has 32 items in the 84–104K bin, of which 14 fit one H100. The pool kept the first 24
       by sha256 (11 fitting); the other 3 fitting items are outside the frozen pool.
+  - **E9, V-term ablation at 64K under the current best variant** (`specs/v27_lb64_vterm_e9.json`, protocol
+    `v27_lb64_vterm_e9_5b125c63817898f6`).
+    - LongBench-v2 64K, the same 24 items as E4/E5 × seeds 404–707 = 96 cells per arm; 576 runs on three hosts.
+    - All method arms are M3 R6 DP + `carry_first`. At a fixed 88% sparsity (`risk_topk='k12'`, new named keep) only
+      the V term changes: projected V rank 32, rank 8, M2 tile-mean V, attention mass only. The −ln2 threshold arm
+      (E5 best) is the operating-point reference.
+    - Code `efea33024` (k12 + unit test; 101 v27 tests pass on dlm2). Deploy `v27_e9_efea330`, run dir
+      `v27_lb64_e9_001`, scoring label `lb64_e9`. dlm2 started 17:00 local; dllm and mpk run it after their E6b share.
+    - Question: at the long-context operating sparsity, does looking at V select better than attention mass alone?
   - **E8, V-term ablation on AIME** (`specs/v27_aime_vterm_e8.json`, protocol `v27_aime_vterm_e8_bd293196ff730851`).
     - Runs after E7 on each host; same 180 cells and hosts as E7.
     - Fixed 70% target sparsity (risk top-k keeps 30%) on the M3 R6 DP selector. Only the V term changes:
@@ -90,6 +99,9 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
    the realized kept fraction is about 30% in every arm. Then compare accuracy at matched sparsity across projected
    V rank 32/16/8/4, M2 tile-mean V, mass-only and SparseD. Copy the summary into `results/…/aime_vterm_panel_e8/`.
 2. When E6b is scored (label `lb96k_e6b`): report it alone and pooled with E6 (11 items, 66 cells), W and S.
+2b. When E9 is scored (label `lb64_e9`): check `risk_topk`=k12, `proj_rank`, `risk_value`, `mu_mode` and
+    `carry_first` in each arm's `effective_method`; compare accuracy across the four V terms at matched 88% sparsity, and
+    W/S against dense and the −ln2 arm.
 3. Larger-gain directions, ranked (see `docs/RESEARCH_CONTEXT.md` §8):
    - (a) Make the encoder canvas append's GLOBAL attention sparse with the canvas's final map (about 1.4% at 64K).
    - (b) Chunked prefill so that 96K items above 95K tokens and the 128K bin can run on one H100.

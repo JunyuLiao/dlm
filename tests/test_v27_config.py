@@ -53,7 +53,7 @@ def test_old_configs_keep_their_fingerprint_without_new_keys():
     (B, dict(hold_only='yes')),
     (M3, dict(threshold_shift='plus_ln3')),
     (M3, dict(score_period=16, bootstrap_policy=None)),
-    (M3, dict(min_route_keys=4096)),
+    (M3, dict(min_route_keys=3000)),
     (M3, dict(min_route_keys=8192, bootstrap_policy=None)),
     (M3, dict(route_layers='first2')),
     (M3, dict(share_layers='triples')),

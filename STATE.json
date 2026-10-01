@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-01 16:20 (UTC-5)",
+    "updated_local": "2026-10-01 17:05 (UTC-5)",
     "branch": "research/m3-output-numerics-20260927",
     "verified_commit": "b8053511f",
     "entry_docs": [
@@ -50,8 +50,22 @@
           "dlm2"
         ],
         "executions": 210,
-        "status": "dlm2 started; dllm and mpk queued after E8",
+        "status": "dlm2 share finished (70/70 ok); dllm and mpk follow E8",
         "scoring_label": "lb96k_e6b"
+      },
+      {
+        "panel": "E9 v27_lb64_vterm_e9_5b125c63817898f6",
+        "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_lb64_vterm_e9.json",
+        "deploy_tag": "v27_e9_efea330",
+        "run_dir": "v27_lb64_e9_001",
+        "hosts": [
+          "dllm",
+          "mpk",
+          "dlm2"
+        ],
+        "executions": 576,
+        "status": "dlm2 running; dllm and mpk follow E6b",
+        "scoring_label": "lb64_e9"
       }
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",

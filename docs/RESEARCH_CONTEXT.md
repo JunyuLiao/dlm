@@ -87,7 +87,7 @@ The kept tiles are executed by FA4's block-sparse interface (§4).
 | `min_route_keys` (gate2k…gate32k) | below N keys the layer runs exactly dense |
 | `route_layers`, `share_layers` | GLOBAL layer subsets / cross-layer shared support |
 | `density_gate` (ent*, cap*, stall*, `stable1`) | the rest of the canvas runs dense after a sampler-state trigger |
-| `risk_budget`, `risk_topk` (topkXX) | summed-risk budget / fixed target sparsity by risk rank |
+| `risk_budget`, `risk_topk` (topkXX) | summed-risk budget / fixed target sparsity by risk rank; keeps k70/k60/k50/k30/k20/k12 (k12 = keep 12%, 88% sparsity, added 2026-10-01 for E9; arm names say topk88) |
 | `carry_canvases` K | reuse a layer's decision for the next K−1 canvases (newer tiles kept) |
 | `carry_first` (c0) | only canvas call 0 reuses the previous canvas's decision (newer tiles kept); call 1 still observes |
 | `observe_step` (obs2) | dense calls 0..s−1, observation at call s |
