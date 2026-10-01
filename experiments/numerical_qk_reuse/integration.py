@@ -249,6 +249,10 @@ class Attention:
         # generated tokens) are never skipped; only wholly-prompt tiles may be dropped. prompt_keys is the GLOBAL
         # prefix length at the request's first canvas (the router is built per request).
         self.protect_output, self.prompt_keys, self.protected_routes = False, None, 0
+        # v27 first-call carry (named variant, carry_first): canvas call 0 consumes the layer's last decision of the
+        # PREVIOUS canvas (every newer key tile kept) instead of the dense bootstrap; call 1 still runs the dense
+        # observation, so every later call uses a fresh map. Canvas 0 and any invalid carry stay dense.
+        self.carry_first, self.carried_first_calls = False, 0
         self.density_gate = None       # v27 density gate preset (DENSITY_GATES), named variant
         self._fa4_lists, self.fa4_list_builds = [], 0   # v27 FA4 consumer: block lists per keep map
         # v27 async observation route: the observation call's selector (whose decision serves only LATER calls)
@@ -288,7 +292,7 @@ class Attention:
 
     def invalidate(self, *_):
         # Invoked BEFORE prefill or causal commit can mutate the encoder cache.
-        if self.carry_canvases:
+        if self.carry_canvases or self.carry_first:
             # snapshot the finished canvas's decisions (observed layers only) before the cache is cleared
             for layer, entry in list(self.cache.entries.items()):
                 if layer in self._carried_layers or getattr(entry, 'decision', None) is None:
@@ -461,6 +465,17 @@ class Attention:
                 returned = result.output.transpose(1, 2).contiguous()
                 torch._assert_async(torch.isfinite(result.output).all(), 'Invalid carried-map attention output')
                 self.carried_calls += 1
+                self.preqk_calls += 1
+                return returned, None
+        if self.carry_first and self.step == 0 and layer in self._carry:
+            c = self._carry.pop(layer)
+            # valid only as the direct continuation: the previous canvas of this request, prefix grown by one canvas
+            if not crop and self.canvas - c['canvas'] == 1 and (nk - nq) == c['prefix'] + nq:
+                skipped, eligible = carried_map(c['skipped'], c['eligible'], c['prefix'], nk)
+                result = self._consume(q, k, v, skipped, eligible, scale, window, causal)
+                returned = result.output.transpose(1, 2).contiguous()
+                torch._assert_async(torch.isfinite(result.output).all(), 'Invalid first-call carried-map output')
+                self.carried_first_calls += 1
                 self.preqk_calls += 1
                 return returned, None
         if self.bootstrap is not None and self.step <= self.observe_step:
@@ -1022,6 +1037,7 @@ class Attention:
                     layer_native_calls=self.layer_native_calls, shared_calls=self.shared_calls,
                     carry_canvases=self.carry_canvases, carried_calls=self.carried_calls,
                     carry_snapshots=self.carry_snapshots, observe_step=self.observe_step,
+                    carry_first=self.carry_first, carried_first_calls=self.carried_first_calls,
                     protect_output=self.protect_output, protected_routes=self.protected_routes,
                     fused_observations=self.fused_observations,
                     fresh_fused_calls=self.fresh_fused_calls,

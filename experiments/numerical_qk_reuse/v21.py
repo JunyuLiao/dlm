@@ -82,7 +82,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      consumer64=None, memory_caps=None, fused_observe=False, fresh_fused=False,
                      route_pipeline=False, risk_state=None, density_gate=None, fa4_consumer=False,
                      async_route=False, risk_budget=None, risk_topk=None, carry_canvases=None,
-                     observe_step=None, protect_output=False) -> dict:
+                     observe_step=None, protect_output=False, carry_first=False) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -195,6 +195,12 @@ def effective_config(base: dict, arm: str, scope: str, *,
                 or carry_canvases is not None):
             raise ValueError('v27 observation step needs the fused-observation bootstrap mainline (no carry)')
         extra['observe_step'] = observe_step
+    if carry_first:
+        # v27 first-call carry (named variant): canvas call 0 reuses the previous canvas's decision, call 1 observes
+        if (carry_first is not True or bootstrap_policy is None or fresh_fused or not fused_observe or not fa4_consumer
+                or carry_canvases is not None):
+            raise ValueError('v27 first-call carry needs the fused-observation FA4 bootstrap mainline (no carry K)')
+        extra['carry_first'] = True
     if protect_output:
         # v27 output protection (named variant): generated-token key tiles are never skipped
         if protect_output is not True or bootstrap_policy is None or fresh_fused or not fused_observe:
@@ -360,6 +366,9 @@ def validate_effective(config: dict, condition: str):
         raise ValueError('v27 observation step identity drift')
     if 'protect_output' in config and (config['protect_output'] is not True or 'fused_observe' not in config):
         raise ValueError('v27 output protection identity drift')
+    if 'carry_first' in config and (config['carry_first'] is not True or 'fused_observe' not in config
+                                    or 'fa4_consumer' not in config or 'carry_canvases' in config):
+        raise ValueError('v27 first-call carry identity drift')
     if 'fa4_consumer' in config and (config['fa4_consumer'] is not True or 'consumer64' not in config):
         raise ValueError('v27 FA4 consumer identity drift')
     if 'async_route' in config and (config['async_route'] is not True or 'fused_observe' not in config):
@@ -458,6 +467,10 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('output protection must be bound before any routed call')
             owner.protect_output = True
+        if 'carry_first' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('first-call carry must be bound before any routed call')
+            owner.carry_first = True
         if 'density_gate' in config:
             from .integration import DENSITY_GATES
             if owner.cache.entries or owner.calls:
@@ -522,6 +535,7 @@ def install(adapter, config: dict, condition: str):
                         carry_canvases=config.get('carry_canvases'),
                         observe_step=getattr(owner, 'observe_step', 1),
                         protect_output=bool(getattr(owner, 'protect_output', False)),
+                        carry_first=bool(getattr(owner, 'carry_first', False)),
                         density_gate=config.get('density_gate'),
                         consumer=getattr(owner, 'consumer', None),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
