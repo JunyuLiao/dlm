@@ -84,6 +84,21 @@ DENSITY_GATES = {
 }
 
 
+def carried_map(skipped, eligible, prefix, keys):
+    """v27 cross-canvas carry: a decision taken when the prefix had ``prefix`` keys, extended to ``keys`` keys.
+    Tiles lying wholly in that old prefix keep their decision; every newer tile (the old boundary tile, the
+    canvases committed since, the current canvas) is kept."""
+    import torch
+    tiles, old = -(-keys // 64), prefix // 64
+    if old > skipped.shape[-1] or tiles < skipped.shape[-1]:
+        raise ValueError('carried map does not fit the current key extent')
+    new_skipped = torch.zeros((*skipped.shape[:3], tiles), dtype=torch.bool, device=skipped.device)
+    new_eligible = torch.ones_like(new_skipped)
+    new_skipped[..., :old] = skipped[..., :old]
+    new_eligible[..., :old] = eligible[..., :old]
+    return new_skipped, new_eligible
+
+
 def density_gate_fires(preset, step, entropy, accepted, previous_accepted, stalled_steps):
     """Pure decision for step ``step`` (0-based in the canvas) from the PREVIOUS step's sampler
     statistics. Returns (fire, stalled_steps)."""
@@ -206,6 +221,11 @@ class Attention:
         self.risk_state = 'kept'       # v27 M1-DP: 'dense_prefix' (named variant)
         self.risk_budget_shift = None  # v27 risk budget on M1-DP: summed-risk bound (log shift over the threshold)
         self.risk_topk = None          # v27 target sparsity on M1-DP: kept fraction of prefix tiles by risk rank
+        # v27 cross-canvas carry (named variant): a layer's last decision of an observed canvas is reused, extended
+        # with every newer key tile kept, for the next carry_canvases - 1 canvases -- no dense bootstrap, no
+        # observation and no decision there; the canvas after that observes again through the normal path
+        self.carry_canvases = None
+        self._carry, self._carried_layers, self.carried_calls, self.carry_snapshots = {}, set(), 0, 0
         self.density_gate = None       # v27 density gate preset (DENSITY_GATES), named variant
         self._fa4_lists, self.fa4_list_builds = [], 0   # v27 FA4 consumer: block lists per keep map
         # v27 async observation route: the observation call's selector (whose decision serves only LATER calls)
@@ -244,6 +264,18 @@ class Attention:
 
     def invalidate(self, *_):
         # Invoked BEFORE prefill or causal commit can mutate the encoder cache.
+        if self.carry_canvases:
+            # snapshot the finished canvas's decisions (observed layers only) before the cache is cleared
+            for layer, entry in list(self.cache.entries.items()):
+                if layer in self._carried_layers or getattr(entry, 'decision', None) is None:
+                    continue
+                if entry.identity.canvas != self.canvas or entry.identity.encoder_epoch != self.epoch:
+                    continue
+                self._carry[layer] = dict(skipped=entry.decision.skipped, eligible=entry.decision.eligible,
+                                          prefix=entry.identity.keys - entry.identity.queries,
+                                          canvas=self.canvas, ext=None)
+                self.carry_snapshots += 1
+            self._carried_layers = set()
         self.epoch += 1
         self.cache.clear()
         self.sources.clear()
@@ -375,6 +407,23 @@ class Attention:
             return returned, None
         if self.fresh_fused:
             return self._fresh_fused_call(layer, kind, q, k, v, scale, causal, window, prefix - crop, b, hk, nk)
+        if self.carry_canvases and layer in self._carry:
+            c = self._carry[layer]
+            age = self.canvas - c['canvas']
+            # valid only as a continuation of the same request: the prefix grew by exactly one canvas per step
+            if crop or age < 1 or (nk - nq) != c['prefix'] + nq * age:
+                del self._carry[layer]
+            elif age < self.carry_canvases:
+                ext = c['ext']
+                if ext is None or ext[0] != (self.canvas, nk):
+                    ext = c['ext'] = ((self.canvas, nk), *carried_map(c['skipped'], c['eligible'], c['prefix'], nk))
+                self._carried_layers.add(layer)
+                result = self._consume(q, k, v, ext[1], ext[2], scale, window, causal)
+                returned = result.output.transpose(1, 2).contiguous()
+                torch._assert_async(torch.isfinite(result.output).all(), 'Invalid carried-map attention output')
+                self.carried_calls += 1
+                self.preqk_calls += 1
+                return returned, None
         if self.bootstrap is not None and self.step <= 1:
             return self._bootstrap_call(native_args, native_kwargs, identity, layer, kind,
                                         q, k, v, mask, scale, causal, window, crop, prefix,
@@ -927,6 +976,8 @@ class Attention:
                     bootstrap_dense_calls=self.bootstrap_dense_calls,
                     gated_native_calls=self.gated_native_calls, min_route_keys=self.min_route_keys,
                     layer_native_calls=self.layer_native_calls, shared_calls=self.shared_calls,
+                    carry_canvases=self.carry_canvases, carried_calls=self.carried_calls,
+                    carry_snapshots=self.carry_snapshots,
                     fused_observations=self.fused_observations,
                     fresh_fused_calls=self.fresh_fused_calls,
                     pipelined_routes=self.pipelined_routes,

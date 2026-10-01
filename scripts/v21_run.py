@@ -127,6 +127,7 @@ def validate_protocol(protocol: dict) -> None:
                                                               "ent0.05_stall2") or
                     c.get("risk_budget", "b0") not in ("b0", "b2ln2", "b4ln2", "b6ln2", "b8ln2") or
                     c.get("risk_topk", "k50") not in ("k70", "k60", "k50", "k30", "k20") or
+                    c.get("carry_canvases", 2) not in (2, 3, 4, 8) or
                     ("risk_topk" in c and (c.get("risk_state") != "dense_prefix" or "risk_budget" in c)) or
                     ("risk_budget" in c and c.get("risk_state") != "dense_prefix")):
                 raise ValueError(f"unknown v27 execution field: {arm}")
@@ -134,7 +135,7 @@ def validate_protocol(protocol: dict) -> None:
                                                 "min_route_keys", "share_layers", "route_layers",
                                                 "consumer64", "memory_caps", "fused_observe", "fresh_fused",
                                                 "route_pipeline", "risk_state", "density_gate", "risk_budget",
-                                                "risk_topk")):
+                                                "risk_topk", "carry_canvases")):
                 raise ValueError(f"v27 fields outside a v27 panel: {arm}")
             if c.get("bootstrap_policy", "native_bootstrap2_observe1") != "native_bootstrap2_observe1" or \
                     c.get("observation_producer", "grouped_q") not in ("grouped_q", "repeat_interleave"):
@@ -306,6 +307,7 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
                 config.get("density_gate") != contract.get("density_gate") or
                 config.get("risk_budget") != contract.get("risk_budget") or
                 config.get("risk_topk") != contract.get("risk_topk") or
+                config.get("carry_canvases") != contract.get("carry_canvases") or
                 bool(config.get("fa4_consumer", False)) != bool(contract.get("fa4_consumer", False)) or
                 bool(config.get("async_route", False)) != bool(contract.get("async_route", False))):
             raise ValueError("v27 clock/threshold differs from arm contract")

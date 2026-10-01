@@ -54,6 +54,7 @@ RISK_BUDGETS = {'b0': 0.0, 'b2ln2': 2 * 0.6931471805599453, 'b4ln2': 4 * 0.69314
                 'b6ln2': 6 * 0.6931471805599453, 'b8ln2': 8 * 0.6931471805599453}
 # v27 target sparsity (M1-DP): kept fraction of the eligible prefix tiles, ranked by risk (sparsity = 1 - keep)
 RISK_TOPKS = {'k70': 0.7, 'k60': 0.6, 'k50': 0.5, 'k30': 0.3, 'k20': 0.2}
+CARRY_CANVASES = (2, 3, 4, 8)   # v27 cross-canvas carry: observe every K-th canvas, reuse the map in between
 THRESHOLD_SHIFTS = {'minus_3ln2': -3 * _LN2, 'minus_2ln2': -2 * _LN2, 'minus_ln2': -_LN2, 'plus_ln2': _LN2, 'plus_2ln2': 2 * _LN2,
                     'plus_3ln2': 3 * _LN2, 'plus_4ln2': 4 * _LN2}
 
@@ -79,7 +80,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      min_route_keys=None, route_layers=None, share_layers=None,
                      consumer64=None, memory_caps=None, fused_observe=False, fresh_fused=False,
                      route_pipeline=False, risk_state=None, density_gate=None, fa4_consumer=False,
-                     async_route=False, risk_budget=None, risk_topk=None) -> dict:
+                     async_route=False, risk_budget=None, risk_topk=None, carry_canvases=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -181,6 +182,11 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if risk_topk not in RISK_TOPKS or risk_state != 'dense_prefix' or risk_budget is not None:
             raise ValueError('v27 target sparsity must be a named keep on M1-DP (not with a risk budget)')
         extra['risk_topk'] = risk_topk
+    if carry_canvases is not None:
+        if (carry_canvases not in CARRY_CANVASES or bootstrap_policy is None or fresh_fused or not fused_observe
+                or not fa4_consumer):
+            raise ValueError('v27 cross-canvas carry needs the fused-observation FA4 bootstrap mainline')
+        extra['carry_canvases'] = carry_canvases
     if density_gate is not None:
         # v27 density gate: sampler-state return to dense within a canvas (named variant)
         from .integration import DENSITY_GATES
@@ -333,6 +339,9 @@ def validate_effective(config: dict, condition: str):
     if 'risk_topk' in config and (config['risk_topk'] not in RISK_TOPKS or config.get('risk_state') != 'dense_prefix'
                                   or 'risk_budget' in config):
         raise ValueError('v27 target sparsity identity drift')
+    if 'carry_canvases' in config and (config['carry_canvases'] not in CARRY_CANVASES or 'fused_observe' not in config
+                                       or 'fa4_consumer' not in config):
+        raise ValueError('v27 cross-canvas carry identity drift')
     if 'fa4_consumer' in config and (config['fa4_consumer'] is not True or 'consumer64' not in config):
         raise ValueError('v27 FA4 consumer identity drift')
     if 'async_route' in config and (config['async_route'] is not True or 'fused_observe' not in config):
@@ -423,6 +432,10 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('target sparsity must be bound before any routed call')
             owner.risk_topk = RISK_TOPKS[config['risk_topk']]
+        if 'carry_canvases' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('cross-canvas carry must be bound before any routed call')
+            owner.carry_canvases = int(config['carry_canvases'])
         if 'density_gate' in config:
             from .integration import DENSITY_GATES
             if owner.cache.entries or owner.calls:
@@ -479,6 +492,7 @@ def install(adapter, config: dict, condition: str):
                         async_route=bool(getattr(owner, 'async_route', False)),
                         risk_state=getattr(owner, 'risk_state', 'kept'),
                         risk_budget=config.get('risk_budget'), risk_topk=config.get('risk_topk'),
+                        carry_canvases=config.get('carry_canvases'),
                         density_gate=config.get('density_gate'),
                         consumer=getattr(owner, 'consumer', None),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
