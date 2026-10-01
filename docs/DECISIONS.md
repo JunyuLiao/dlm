@@ -63,6 +63,18 @@ FA4 + piecewise substrates. Mechanism findings (what fails and why) usually stil
 | 10-01 | **E4 large-seed confirmation (6 new seeds, 144 cells per arm per bin): request gains are significant and step inflation vanishes.** 64K M3 R6 DP −ln2 W 0.879 [0.820, 0.926]; 32K 0.940 [0.897, 0.980]; accuracy not lower. Supersedes the 09-30 held-out "request gain not robust" conclusion and the E3 "32K break-even" reading. | 7d724de18 (spec), `lb_confirm_panel_e4/summary.md` |
 | 10-01 | Implemented, not yet evaluated: the `stable1` dense-confirmation gate (adc2056d7) and first-call carry `carry_first` (56de98fe2). E5 panel running. | `specs/v27_lb_overhead_e5.json` |
 
+## Group-internal evidence on the V term (not ours; cite, do not absorb)
+
+- JunyuLiao's value-direction routing rank sweeps (branch `ljy/value_aware`, commits 8b29f942d and 47c47d9d7;
+  copies in `results/diffusion_gemma_jl_*` and `results/diffusion_gemma_ruler8k_gaussian_rank_sweep_v15/`).
+  - His selector uses fresh current QK plus projected V on the eager path.
+  - **RULER8K at about 75% sparsity:** projected V rank 32 scores 47.4%, full-dimensional V 49.8%, attention-mass
+    only 21.3%, rank 2 2.5%.
+  - **At 50%:** every variant is about 92%.
+  - **AIME (2048-token cap) and LongBench at 50%:** no rank winner.
+  - Accuracy is not monotone in rank (r16 < r8 on RULER).
+- Whether this transfers to our historical-QK M1/M3 selector is tested by E8 (2026-10-01).
+
 ## Corrections to our own earlier claims (keep; do not repeat)
 
 - "Three independent reproductions" of the 64K gain was overstated. Same-host runs generate identical tokens, so they

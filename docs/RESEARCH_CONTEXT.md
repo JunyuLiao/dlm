@@ -92,6 +92,8 @@ The kept tiles are executed by FA4's block-sparse interface (§4).
 | `carry_first` (c0) | only canvas call 0 reuses the previous canvas's decision (newer tiles kept); call 1 still observes |
 | `observe_step` (obs2) | dense calls 0..s−1, observation at call s |
 | `protect_output` (po) | generated-token key tiles are never skipped |
+| `proj_rank` (r16/r8/r4) | projected V at rank r: the first r columns of the rank-32 Gaussian bank × √(32/r) (nested JL), same kernels |
+| `risk_value='mass'` | score-only control for the top-k selector: rank tiles by attention-mass share, no V term |
 
 **Main configuration** "M3 R6 DP −ln2" = `M3_R6_A64_fused_dp_async_m1ln2_fa4`. It is parent `M3_R3_A8_current_output`
 with `decision_interval=6`, `score_period=64`, `fused_observe`, `async_route`, `risk_state=dense_prefix`,

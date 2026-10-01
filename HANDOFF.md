@@ -73,6 +73,15 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
     - 1,260 runs. Deploy `v27_e7_ceefaf2`, run dir `v27_aime_e7_001`.
     - Starts after E6 on dllm/mpk and after the batch diagnostic on dlm2. Scoring label `aime_e7`.
     - Question: is any accuracy-safe AIME gain significant?
+  - **E8, V-term ablation on AIME** (`specs/v27_aime_vterm_e8.json`, protocol `v27_aime_vterm_e8_bd293196ff730851`).
+    - Runs after E7 on each host; same 180 cells and hosts as E7.
+    - Fixed 70% target sparsity (risk top-k keeps 30%) on the M3 R6 DP selector. Only the V term changes:
+      - projected V at rank 32, 16, 8 and 4 (`proj_rank`);
+      - M2 tile-mean V (`pooled_compact`);
+      - attention mass only (`risk_value='mass'`);
+      - SparseD port at 70% as reference.
+    - 1,440 runs. Deploy `v27_e8_021431b`, run dir `v27_aime_e8_001`, scoring label `aime_e8`.
+    - Question: does looking at V help selection quality at matched sparsity?
 
 ## Blockers
 
