@@ -80,6 +80,27 @@ Rules for this file:
 - **Source.** `lb96k_confirm_panel_e6/summary.md`, spec `specs/v27_lb96k_confirm_e6.json`, protocol
   `v27_lb96k_confirm_e6_8ab3aa35d1874ca1`.
 
+### L1d. E7 AIME large-seed confirmation: 30 problems × seeds 404–909 = 180 cells per arm (piecewise_v5)
+
+| arm | acc (dense 99) | +/− | W [CI] | Wc [CI] | S | per-step S/N [CI] | N |
+|---|---:|---|---|---|---:|---|---:|
+| **M3 + `carry_first` + 2K gate** | **99** | +11/−11 | **1.005 [0.967, 1.042]** | 1.016 [0.985, 1.047] | 1.005 | 1.005 [0.982, 1.017] | 1.000 |
+| M3 | 96 | +16/−19 | 1.033 [0.977, 1.089] | 1.044 [0.995, 1.095] | 1.032 | 1.010 [0.988, 1.023] | 1.022 |
+| B (−ln2) + `carry_first` + 2K gate | 93 | +9/−15 | 1.057 [1.023, 1.096] | 1.065 [1.029, 1.105] | 1.059 | 1.032 [1.015, 1.055] | 1.026 |
+| Fan plain M1 | 97 | +14/−16 | 1.089 [1.050, 1.126] | 1.094 | 1.090 | 1.077 [1.070, 1.084] | 1.012 |
+| Fan plain M2c | 92 | +15/−22 | 1.115 [1.046, 1.183] | 1.115 | 1.113 | 1.097 [1.088, 1.105] | 1.015 |
+| Fan plain M3 | 99 | +19/−19 | 1.069 [1.013, 1.129] | 1.081 | 1.068 | 1.032 [1.007, 1.047] | 1.035 |
+
+- **AIME has no speed gain; the best low-overhead variant is neutral.** M3 + c0 + 2K gate is W 1.005 with accuracy
+  99 vs 99. No arm's accuracy difference is significant (exact McNemar p ≥ 0.31).
+- Fan plain M1/M2c/M3 are 7–12% slower than dense; B with the same gate is 6% slower.
+- **Receipts.** About 31% of GLOBAL calls in the gated arms had fewer than 2K keys and ran native dense
+  (74,845 calls). `carried_first_calls` = 13,115 (M3) and 13,470 (B); bootstrap dense is canvas 0 only (875 calls).
+- **Integrity.** 1,260/1,260 runs ok, one host per cell (dllm, mpk, dlm2 × 420), 3 runs with timed new graphs
+  (excluded in Wc).
+- **Source.** `aime_confirm_panel_e7/summary.md` and `receipts.md`, spec `specs/v27_aime_confirm_e7.json`,
+  protocol `v27_aime_confirm_e7_0515fa3125588ff0`, deploy `v27_e7_ceefaf2`.
+
 ## Panels on piecewise_v3 / v4 / v5 (seeds 101/202/303 unless stated)
 
 | id | comparison | workload | result | caveat | source / protocol |

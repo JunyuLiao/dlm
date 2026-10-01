@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-01 (UTC-5)",
+    "updated_local": "2026-10-01 16:20 (UTC-5)",
     "branch": "research/m3-output-numerics-20260927",
-    "verified_commit": "758723513",
+    "verified_commit": "b8053511f",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -26,21 +26,53 @@
     },
     "running": [
       {
-        "panel": "E5 v27_lb_overhead_e5_1c93b97271a3a266",
-        "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_lb_overhead_e5.json",
-        "deploy_tag": "v27_e5_7587235",
-        "run_dir": "v27_lb_e5_001",
+        "panel": "E8 v27_aime_vterm_e8_bd293196ff730851",
+        "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_aime_vterm_e8.json",
+        "deploy_tag": "v27_e8_021431b",
+        "run_dir": "v27_aime_e8_001",
         "hosts": [
           "dllm",
           "mpk",
           "dlm2"
         ],
-        "executions": 2016,
-        "started_utc": "2026-10-01T16:14Z",
-        "scoring_label": "lb_e5"
+        "executions": 1440,
+        "status": "dlm2 share finished; dllm and mpk running",
+        "scoring_label": "aime_e8"
+      },
+      {
+        "panel": "E6b v27_lb96k_extend_e6b_d1b1c0c74a1dc69d",
+        "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_lb96k_extend_e6b.json",
+        "deploy_tag": "v27_e6b_b805351",
+        "run_dir": "v27_lb96k_e6b_001",
+        "hosts": [
+          "dllm",
+          "mpk",
+          "dlm2"
+        ],
+        "executions": 210,
+        "status": "dlm2 started; dllm and mpk queued after E8",
+        "scoring_label": "lb96k_e6b"
       }
     ],
-    "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json."
+    "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
+    "best_configuration": {
+      "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
+      "panel": "E5 v27_lb_overhead_e5_1c93b97271a3a266 (same 288 cells as E4)",
+      "64k_request_W": "0.853 [0.802, 0.895]",
+      "64k_decode_S": "0.775",
+      "32k_request_W": "0.907 [0.858, 0.952]",
+      "32k_decode_S": "0.878",
+      "accuracy": "64K 76 vs 75, 32K 92 vs 86 (dense)",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/lb_overhead_panel_e5/summary.md"
+    },
+    "aime": {
+      "panel": "E7 v27_aime_confirm_e7_0515fa3125588ff0 (30 x seeds 404-909, 180 cells per arm)",
+      "best_arm": "M3 R6 DP -ln2 + carry_first + 2K gate",
+      "request_W": "1.005 [0.967, 1.042]",
+      "accuracy": "99 vs 99",
+      "verdict": "no speed gain on AIME; accuracy check only",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/aime_confirm_panel_e7/summary.md"
+    }
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",

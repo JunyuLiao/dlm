@@ -31,7 +31,9 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   obs2 0.95 [0.91, 0.98].
 - **Fan plain M1/M2c/M3 are slower than dense** at every length (1.06–1.34× in E4): the selector and observation cost
   exceeds the skipped attention.
-- **AIME has no speed room.** Accuracy is neutral for M3 (65/65 of 120). AIME is an accuracy check only.
+- **AIME has no speed room** (E7, 180 cells per arm, `docs/RESULTS_LEDGER.md` L1d). The best low-overhead variant,
+  M3 + `carry_first` + 2K gate, is W 1.005 [0.967, 1.042] with accuracy 99 vs 99. Fan plain M1/M2c/M3 are 7–12%
+  slower. No accuracy difference is significant. AIME is an accuracy check only.
 - **Novelty is weak.** B ≈ SparseD (no significant speed difference at 64K). There is no evidence that V-aware
   selection beats score-only selection (it is worse at high AIME sparsity).
 - **The ceiling at batch 1 is low.** GLOBAL attention is about 21% of a 64K request and 16% at 32K; a step is
@@ -56,26 +58,18 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - Progress doc updates 8–12 (`results/m1_m2_m3_frontier_v27_20260929/progress_20260930.md`). Updates 6 and 12 predate
   E4 and are superseded by it for the request-level verdict.
 
-## Running (as of 13:40 local)
+## Running (as of 16:15 local)
 
-- **E5** finished and was scored (`docs/RESULTS_LEDGER.md` L1b). **The batch diagnostic** finished
-  (`batch_scaling/`).
+- **Finished and scored:** E5 (L1b), E6 (L1c), E7 (L1d), the batch diagnostic (`batch_scaling/`).
 - **Running or queued** (background jobs started when each host's previous job closed).
-  - **E6, 96K large-seed panel** (`specs/v27_lb96k_confirm_e6.json`, protocol `v27_lb96k_confirm_e6_8ab3aa35d1874ca1`).
-    - 6 fitting items × seeds 404–909 = 36 cells per arm.
-    - Arms: dense, Fan plain M1/M2c/M3, B, M3, M3 + `carry_first`. 252 runs.
-    - Deploy `v27_e6_8f9f188`, run dir `v27_lb96k_e6_001`, hosts dllm and mpk. Scoring label `lb96k_e6`.
-  - **Batch-scaling diagnostic** on dlm2 (`scripts/v27_batch_step_bench.py`).
-    - E4 run dir and deploy, 64K item 0, seed 404, decoder call 6, batch 1/2/4/8, keep 0.12/0.2.
-    - Output: `<dlm2 dyh>/m3_output_numerics_v21_20260927/scratch_tests/batch_1001/bench64.jsonl`.
-  - **E7, AIME large-seed panel** (`specs/v27_aime_confirm_e7.json`, protocol `v27_aime_confirm_e7_0515fa3125588ff0`).
-    - 30 problems × seeds 404–909 = 180 cells per arm.
-    - Arms: dense, Fan plain M1/M2c/M3, M3, and two low-overhead variants:
-      - M3 + `carry_first` + 2K gate;
-      - B at −ln2 + `carry_first` + 2K gate.
-    - 1,260 runs. Deploy `v27_e7_ceefaf2`, run dir `v27_aime_e7_001`.
-    - Starts after E6 on dllm/mpk and after the batch diagnostic on dlm2. Scoring label `aime_e7`.
-    - Question: is any accuracy-safe AIME gain significant?
+  - **E6b, 96K extension** (`specs/v27_lb96k_extend_e6b.json`, protocol `v27_lb96k_extend_e6b_d1b1c0c74a1dc69d`).
+    - The 5 other fitting items of the 96K pool (pool positions 13–24; prompts ≤ 95,074 tokens) × seeds 404–909 =
+      30 cells per arm, same 7 arms as E6. 210 runs on dllm, mpk and dlm2. Pooled with E6: 11 items, 66 cells.
+    - Deploy `v27_e6b_b805351`, run dir `v27_lb96k_e6b_001`, scoring label `lb96k_e6b`.
+    - Runs after E8 on each host (dlm2 started first). The binding was merged from the three host fragments
+      because the first bind call ran with `HOSTS=dllm` only; the unused one-host binding is kept beside it.
+    - Item facts: LongBench-v2 has 32 items in the 84–104K bin, of which 14 fit one H100. The pool kept the first 24
+      by sha256 (11 fitting); the other 3 fitting items are outside the frozen pool.
   - **E8, V-term ablation on AIME** (`specs/v27_aime_vterm_e8.json`, protocol `v27_aime_vterm_e8_bd293196ff730851`).
     - Runs after E7 on each host; same 180 cells and hosts as E7.
     - Fixed 70% target sparsity (risk top-k keeps 30%) on the M3 R6 DP selector. Only the V term changes:
@@ -92,17 +86,15 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Immediate next steps
 
-1. When E5 is scored:
-   - verify the receipts: `carried_first_calls > 0` and bootstrap-dense = 1 canvas × 5 layers per request for c0;
-     `gate_entries` for stable1;
-   - check dense tokens are identical to E4;
-   - report W and S per arm.
-2. Larger-gain directions, ranked (see `docs/RESEARCH_CONTEXT.md` §8):
-   - (a) **Batched serving.** Attention share grows with batch. Measure per-step time at batch 1/2/4/8 first; the
-     runner is batch-1 only.
-   - (b) Make the encoder canvas append's GLOBAL attention sparse with the canvas's final map (about 2% at 64K).
+1. When E8 is scored (label `aime_e8`): check `proj_rank` and `risk_value` in each arm's `effective_method`, and that
+   the realized kept fraction is about 30% in every arm. Then compare accuracy at matched sparsity across projected
+   V rank 32/16/8/4, M2 tile-mean V, mass-only and SparseD. Copy the summary into `results/…/aime_vterm_panel_e8/`.
+2. When E6b is scored (label `lb96k_e6b`): report it alone and pooled with E6 (11 items, 66 cells), W and S.
+3. Larger-gain directions, ranked (see `docs/RESEARCH_CONTEXT.md` §8):
+   - (a) Make the encoder canvas append's GLOBAL attention sparse with the canvas's final map (about 1.4% at 64K).
+   - (b) Chunked prefill so that 96K items above 95K tokens and the 128K bin can run on one H100.
    - (c) Orthogonal step reduction (Prophet/JoT-style early exit). Not our contribution.
-3. Commit the docs after the user reviews them. Copy E5 summaries into `results/…/lb_overhead_panel_e5/`.
+   - Batched serving did not raise the attention share at 64K (B = 1–4); see `batch_scaling/README.md`.
 
 ## Operational notes (still relevant)
 
