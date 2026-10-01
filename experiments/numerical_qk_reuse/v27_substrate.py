@@ -20,7 +20,7 @@ host sync per call, which cannot be graph-captured.
 """
 from __future__ import annotations
 
-SUBSTRATES = ('eager', 'piecewise_v1', 'piecewise_v2', 'piecewise_v3')
+SUBSTRATES = ('eager', 'piecewise_v1', 'piecewise_v2', 'piecewise_v3', 'piecewise_v4')
 # piecewise_v2 = piecewise_v1 + the shared (all-arm) prompt prefill and the GLOBAL canvas append on official FA4
 # causal instead of the 64-row Triton kernel / HF SDPA (substrate/prefill_append_bench.jsonl)
 # piecewise_v3 = piecewise_v2 + two value-identical, all-arm host/copy fixes (substrate/time_breakdown.json):
@@ -31,11 +31,20 @@ SUBSTRATES = ('eager', 'piecewise_v1', 'piecewise_v2', 'piecewise_v3')
 #     attention kernels.
 #   * the denoising step's `if finished_denoising.any():` host sync is skipped for batch size 1: with one item, a
 #     finished item ends the canvas loop before the next step, so the guarded torch.where never changes anything.
-V3_SUBSTRATES = ('piecewise_v3',)
+V3_SUBSTRATES = ('piecewise_v3', 'piecewise_v4')
+# piecewise_v4 = piecewise_v3 + one static LOCAL shape for the compiled decoder (all-arm; 2026-09-30):
+#   while the encoder's sliding-window cache holds fewer than sliding_window - 1 tokens (a short prompt's first
+#   canvases), the decoder sees it LEFT-PADDED to sliding_window - 1 with zero K/V, and the LOCAL attention gets a
+#   persistent key mask (pad slots excluded, updated in place). Without this every prompt-dependent cache length is a
+#   new decoder-layer shape: on AIME the per-shape recompiles exhausted dynamo's recompile limit and the decoder layers
+#   fell back to eager (~110 ms instead of ~23 ms per forward), invisibly to the new-graph counter. Once the window is
+#   full there is no padding and no mask, so long prompts run exactly the v3 graphs. The encoder (prefill and canvas
+#   appends) always sees the real, unpadded cache; LOCAL-routing arms (local mode 'eager') are never padded.
+V4_SUBSTRATES = ('piecewise_v4',)
 
 
 def prefill_kernel(substrate: str) -> str:
-    return 'fa4' if substrate in ('piecewise_v2', 'piecewise_v3') else 'dense64'
+    return 'fa4' if substrate in ('piecewise_v2', 'piecewise_v3', 'piecewise_v4') else 'dense64'
 
 
 def joined_kv(attn, encoder_keys, encoder_values, keys, values):
@@ -179,6 +188,53 @@ def compact_sliding_cache(cache) -> int:
     return copied
 
 
+def pad_sliding_cache(cache, full: int) -> int:
+    """v4: left-pad every sliding layer's cached K/V to ``full`` (= sliding_window - 1) tokens for the decoder, keeping
+    the real tensors aside. Returns the pad length shared by all sliding layers (0: the window is full, untouched)."""
+    import torch
+    pad = None
+    for layer in getattr(cache, 'layers', ()):
+        if not getattr(layer, 'is_sliding', False) or not isinstance(getattr(layer, 'keys', None), torch.Tensor):
+            continue
+        if '_v27_real' in layer.__dict__:
+            raise RuntimeError('sliding cache padded twice')
+        n = layer.keys.shape[-2]
+        if n > full:
+            raise ValueError(f'sliding cache holds {n} > {full} tokens')
+        if pad is None:
+            pad = full - n
+        elif pad != full - n:
+            raise ValueError('sliding layers disagree on their cached length')
+        if pad:
+            layer._v27_real = (layer.keys, layer.values)
+            keys, values = layer.keys, layer.values
+            layer.keys = torch.cat([keys.new_zeros((*keys.shape[:2], pad, keys.shape[3])), keys], dim=-2)
+            layer.values = torch.cat([values.new_zeros((*values.shape[:2], pad, values.shape[3])), values], dim=-2)
+    return pad or 0
+
+
+def unpad_sliding_cache(cache) -> None:
+    """v4: restore the real (unpadded) sliding K/V before anything but the decoder's LOCAL attention reads them."""
+    for layer in getattr(cache, 'layers', ()):
+        real = layer.__dict__.pop('_v27_real', None)
+        if real is not None:
+            layer.keys, layer.values = real
+
+
+def local_attention_v4(sdpa):
+    """LOCAL decoder attention for v4: the native SDPA function, with the persistent pad mask while padding is active
+    (keys = [pad | real window | canvas]; the canvas part is always attended, as in HF's diffusion decoder mask)."""
+    def attention(module, query, key, value, attention_mask, **kwargs):
+        import torch
+        state = getattr(module, '_v27_pad', None)
+        if state is not None and state['active']:
+            encoder_mask = state['mask']
+            canvas = encoder_mask.new_ones((1, 1, 1, key.shape[-2] - encoder_mask.shape[-1]))
+            attention_mask = torch.cat([encoder_mask, canvas], dim=-1)
+        return sdpa(module, query, key, value, attention_mask, **kwargs)
+    return attention
+
+
 def install(model, backend: str = 'inductor', name: str = 'piecewise_v1') -> dict:
     """Idempotent. Returns the substrate identity recorded in receipts. backend='eager' (dynamo capture and the
     same graph split, no codegen, no CUDA graphs) exists only for the equivalence diagnostic."""
@@ -203,7 +259,9 @@ def install(model, backend: str = 'inductor', name: str = 'piecewise_v1') -> dic
     decoder = model.model.decoder
     modeling = importlib.import_module(type(decoder).__module__)
     from transformers.integrations.sdpa_attention import sdpa_attention_forward
-    modeling.ALL_ATTENTION_FUNCTIONS[LOCAL_KEY] = sdpa_attention_forward
+    modeling.ALL_ATTENTION_FUNCTIONS[LOCAL_KEY] = (local_attention_v4(sdpa_attention_forward) if name in V4_SUBSTRATES
+                                                  else sdpa_attention_forward)
+    pad_state = dict(active=False, mask=None, full=None)
     global_layers, local_layers = [], []
     for layer in decoder.layers:
         attn = layer.self_attn
@@ -216,6 +274,12 @@ def install(model, backend: str = 'inductor', name: str = 'piecewise_v1') -> dic
             if graph_config._attn_implementation != LOCAL_KEY:
                 raise RuntimeError('could not bind LOCAL attention implementation')
             attn._v27_graph_config = graph_config
+            if name in V4_SUBSTRATES:
+                attn._v27_pad = pad_state
+                window = int(attn.sliding_window)
+                pad_state['full'] = window - 1 if pad_state['full'] is None else pad_state['full']
+                if pad_state['full'] != window - 1:
+                    raise RuntimeError('LOCAL layers disagree on the sliding window')
             local_layers.append(int(attn.layer_idx))
         else:
             if name in V3_SUBSTRATES:
@@ -236,8 +300,20 @@ def install(model, backend: str = 'inductor', name: str = 'piecewise_v1') -> dic
             # piecewise_v3: every encoder call replaces the encoder cache tensors, so the joined K/V buffers are
             # stale from here on; releasing them now keeps them out of the prefill's memory peak (+1.5 GiB at 75K)
             attn.__dict__.pop('_v27_kv', None)
+        if name in V4_SUBSTRATES:
+            unpad_sliding_cache(k.get('past_key_values'))
         out = encoder_forward(*a, **k)
-        compact_sliding_cache(getattr(out, 'past_key_values', None) or k.get('past_key_values'))
+        cache = getattr(out, 'past_key_values', None) or k.get('past_key_values')
+        compact_sliding_cache(cache)
+        if name in V4_SUBSTRATES:
+            pad = pad_sliding_cache(cache, pad_state['full']) if model._v27_substrate['local'] == 'graph' else 0
+            if pad:
+                if pad_state['mask'] is None:
+                    pad_state['mask'] = torch.ones((1, 1, 1, pad_state['full']), dtype=torch.bool,
+                                                   device=next(model.parameters()).device)
+                pad_state['mask'][..., :pad] = False      # in place: one persistent tensor, one compiled shape
+                pad_state['mask'][..., pad:] = True
+            pad_state['active'] = bool(pad)
         return out
     encoder.forward = compact_cache_forward
     base = model.model
