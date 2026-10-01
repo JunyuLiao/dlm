@@ -47,7 +47,8 @@
 |---|---:|---:|---:|---:|---:|
 | FA4 dense（官方 FlashAttention-4） | 0.443 ms | 0.787 ms | 1.504 ms | 2.862 ms | 5.616 ms |
 | FA4 block-sparse API，全部块保留（**我们的 dense 基线**） | 0.441 ms | 0.766 ms | 1.410 ms | 2.691 ms | 5.273 ms |
-| PyTorch SDPA（HF 模型默认路径） | 2.56 ms | 5.01 ms | 10.07 ms | 19.87 ms | 39.50 ms |
+| PyTorch SDPA，`enable_gqa` 调用（math 后端；不是 HF 的实际路径） | 2.56 ms | 5.01 ms | 10.07 ms | 19.87 ms | 39.50 ms |
+| HF 实际默认路径：K/V 复制 8 份 + SDPA 内存高效后端（`official_baseline/`，另一环境） | — | 1.64 ms | 3.10 ms | 6.16 ms | — |
 
 **端到端请求时间，HF SDPA 相对 FA4 全保留：**
 

@@ -20,7 +20,7 @@ Speedup is relative to FA4 with every tile kept (bitwise equal to FA4 plain dens
 
 - Actual kept fractions include the always-kept canvas tiles (e.g. 7.6% at the 5% setting for 8K).
 - Building the FA4 block lists takes 0.10-0.11 ms per map and is paid once per held map.
-- PyTorch SDPA with enable_gqa (the HF model's default path at head_dim 512) is 5.8-7.5x slower than FA4 dense.
+- PyTorch SDPA called with enable_gqa (math backend) is 5.8-7.5x slower than FA4 dense. Correction (2026-09-30): this is NOT the HF model's default path. For head_dim > 256 HF repeats K/V 8x and SDPA runs the memory-efficient backend, which is about 2.1x slower than FA4 at 64K (6.16 vs 2.91 ms, `../official_baseline/README.md`).
 
 ## 2. Attention-module level inside real requests (`module_profile_32k.jsonl`, `module_profile_64k.jsonl`)
 

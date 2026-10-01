@@ -75,6 +75,7 @@ s = slide('方法与实验设置',
 【块的定义】query 每 128 个一组，key 每 64 个一组（FA4 kernel 的 tile）；"跳过"= 跳过某个 (query 块, key 块) 组合。canvas 自己的 key 块总是保留。
 
 【各方法的具体做法】
+- FA4 与 Triton：FA4（FlashAttention-4，CuTe/CUTLASS 写的官方注意力 kernel）用于 dense 基线、所有稀疏注意力调用（经它的 block-sparse 接口）和 prompt prefill。Triton 是另一种写 GPU kernel 的语言，我们自己的辅助 kernel 用它写：融合观测、DP 风险的构建与决策、选块。只有一处注意力输出不是 FA4 算的：B / M3 R6 DP −ln2 / 风险 top-k 在每个 canvas 的观测步（第 1 步）由我们的 Triton 融合 kernel 输出 dense 结果并顺手写出每块统计量；它的耗时计入方法本身，数值上与 FA4 有浮点级差别。
 - dense：FA4（vLLM 的 flash-attn cute 构建）的 block-sparse 接口保留全部块；与 FA4 dense 逐位一致，且快 1–2%。HF 默认的 SDPA 在 head_dim 512 下端到端慢 1.6–2.2 倍，不用它当基线。FA2/FA3 不支持 head_dim 512；FlashInfer 与 FA4 持平。
 - 风险（M1 的选块依据）：对每个 query 行、每个 key 块，估计"跳过这个块，注意力输出会变多少"：risk = log(‖α_j (μ_j − P)‖ / ref) + log T。α_j 是该块的注意力质量占比，μ_j 是块内按注意力加权的 V 投影（投影到 32 维）均值，P 是保留状态下的输出估计，ref 是参考范数，T 是 query 敏感度。一个块的风险取 128 个 query 行里的最大值。注意力分数（QK）来自观测步，V 用当前步的。
 - 原版 M1（R1 A8）：每一步都按上面的风险从前往后逐块决策，风险低于阈值的块跳过；每 8 步重新观测一次完整 QK。
@@ -128,6 +129,59 @@ table(s, 0.4, 1.3, 12.5, [
     ['阈值、−ln2', '风险低于阈值就跳；−ln2 = 阈值再降 ln2，允许的输出变化减半，更保守、跳得更少'],
     ['风险 top-k XX%', '不用阈值，按风险排序只保留最高的 (1 − XX%)，稀疏度固定；排序很小，每步成本与 SparseD 相同'],
 ], [2.3, 10.2], size=13)
+
+# ---------------------------------------------------------------- 1c baseline choice
+s = slide('基线选择：为什么用 FlashAttention-4（官方、最快、广为人知）',
+          'H100 80GB · DiffusionGemma GLOBAL 层的真实形状：256 个 canvas query，16 个 Q head / 2 个 KV head，head_dim 512，双向，bf16 · 同一进程内实测（CUDA events 中位数）',
+          """
+【调研范围】baseline_survey.md（9/29），逐一核对代码与文档：哪些官方实现能在 H100 上跑 head_dim 512。
+- 不能跑：FlashAttention-2、FlashAttention-3（只到 256）、上游 Dao-AILab 的 FlashAttention-4 在 SM90 上也只到 256；PyTorch SDPA 的 flash 与 cuDNN 后端（只到 256）；cuDNN 的 SM90 D512 引擎还是未合并的 PR；TensorRT-LLM 不支持 DiffusionGemma。
+- 能跑：vLLM 的 flash-attention 分支里的 FA4（SM90 支持 8–512，2026-04-03 合入）；FlashInfer（FA2 模板）；PyTorch SDPA 内存高效后端（HF 默认路径，K/V 先复制 8 份）；FlexAttention（要把块调小）。
+【为什么 FA4 是合格基线】
+1. 官方：DiffusionGemma 技术报告写明其官方 vLLM 服务栈在 canvas 注意力上用 FlashAttention-4；vLLM 主线在 SM90 上遇到 head_size > 256 或扩散模型时自动切到 FA4。我们装的 53 个 vllm_flash_attn/cute 文件与 vLLM 官方 nightly wheel 的哈希逐字节一致。
+2. 最快：同一进程实测（official_baseline/dense_sota_same_process.json，每个配置都对照 FP32 检查过）：64K 时 FA4 全保留 2.67 ms，FA4 dense 2.85 ms，FlashInfer 2.89 ms（与 FA4 持平），FlashInfer single_prefill 19.25 ms；另一环境中 HF 默认路径 6.16 ms，FlexAttention 20.8 ms。
+3. 广为人知：FlashAttention 系列是最常用的注意力 kernel；最接近的已有工作（MAGE、LoSA、SparseD）都用 FlashAttention 家族或 FlashInfer 当 dense 基线。
+【全保留为什么能当 dense】FA4 的 block-sparse 接口在所有块都保留时，输出与 FA4 dense 逐位一致（allkept_check.json，在模型真实的 key 数上核对），而且快 4–6%。dense 基线和所有稀疏方法都走这同一个接口，二者只差跳过了哪些块，所以加速里没有任何一部分来自换 kernel。
+【论文里必须写明】SM90 上 head_dim 512 的 FA4 来自 vLLM 的分支（上游仍限制在 256）；同时并列报告 HF 默认路径、FlashInfer 和 Triton 的数字。
+【更正】此前文档里"HF 默认 SDPA 慢 5.8–7.5 倍"是用 enable_gqa 调 SDPA 测的（math 后端），不是 HF 的实际路径；HF 实际路径约慢 2.1 倍（64K：6.16 对 2.91 ms），端到端慢 1.6–2.2 倍。
+""")
+table(s, 0.4, 1.55, 12.5, [
+    ['实现（官方或广泛使用）', 'H100 上能否跑 head_dim 512', '64K 一次 GLOBAL 调用', '32K', '说明'],
+    ['FA4 block-sparse 接口，全部块保留（我们的 dense 基线）', '能（vLLM 分支）', '2.67 ms', '1.39 ms', '与 FA4 dense 逐位一致，最快'],
+    ['FA4 dense', '能（vLLM 分支）', '2.85 ms', '1.46 ms', 'DiffusionGemma 官方 vLLM 服务栈用的 kernel'],
+    ['FlashInfer（FA2 模板）', '能', '2.89 ms', '1.47 ms', '与 FA4 持平'],
+    ['HF 默认路径（K/V 复制 8 份 + SDPA 内存高效后端）', '能', '6.16 ms*', '3.10 ms*', '约慢 2.1 倍；端到端慢 1.6–2.2 倍'],
+    ['FlexAttention（块调小）', '能', '20.8 ms*', '6.18 ms*', 'SparseD 原代码用它'],
+    ['FA2 / FA3 / 上游 FA4 / cuDNN / SDPA flash', '不能（最多 256）', '—', '—', '—'],
+], [4.4, 2.3, 1.8, 1.3, 2.7], size=12, bold_rows=(1,))
+text(s, 0.4, 5.3, 12.5, 2.0, [
+    'dense 基线和所有稀疏方法走同一个 FA4 接口，只差跳过了哪些块：加速里没有任何一部分来自换 kernel。',
+    '* 另一环境测得（同一进程测的是前三行）。论文需写明 SM90 的 head_dim 512 FA4 来自 vLLM 分支。'], size=13, bullet=True)
+
+# ---------------------------------------------------------------- 1d sparsity and accuracy
+s = slide('各方法的稀疏度，以及对应的精度',
+          '稀疏度 = 跳过的 GLOBAL key 块比例，只统计沿用选块的步（每个 canvas 前 2 步是 dense，不计入）· 开发题上各 2 个请求的中位数 · 答对来自最终面板与 SparseD 面板',
+          """
+【稀疏度从哪来】fidelity_v6/README.md：诊断协议 dev_fidelity_v6（开发题，LongBench 32K/64K 与 AIME 第 1、5 题各 2 个请求，seed 101），对每一次跳块的 GLOBAL 调用记录保留块比例；表中是保留比例中位数换算的稀疏度（1 − 保留比例）。只统计沿用选块的步；每个 canvas 的前 2 步是 dense，所以整条请求的平均稀疏度更低（AIME 上每个 canvas 只有约 10 步，影响更大）。原版 M2c 没有进这次诊断。SparseD 的稀疏度是按构造的目标值。
+【精度从哪来】64K/32K 答对：最终面板 v27_final_lb_f1（36 格/档）与 SparseD 对比面板（SparseD 那一行，同题同 seed 同机器）。AIME 答对：最终面板 v27_final_aime_f1（120 格）。
+【怎么读】
+- 长上下文上，阈值版的方法稀疏度已经有 78–90%（64K 为 85–90%），但答对数没有下降：LongBench-v2 是四选一，36 格的噪声约 ±3–5，跨机器再加约 ±3。正在跑的 64K 留出验证（12 道从未用过的题）会再给一次独立的精度检查。
+- AIME 上阈值版自动变得很保守（稀疏度只有 4–10%），所以精度基本不受影响：选定配置 M3 R6 DP −ln2 是 65 对 65；B 稀疏度最高（10%），也是唯一有下降趋势的（58）。
+- 强行把 AIME 的稀疏度拉高（固定稀疏度面板），实际稀疏度 56% 以上两种选块都掉分，66% 时我们的风险 top-k 显著掉分（见 AIME 那一页）。所以部署配置是：短上下文（< 32K key）直接走 dense，长上下文用阈值版。
+【保真度只作参考】同一诊断里，64K 上 −ln2 保留的块覆盖约 72% 的注意力质量，单次调用的输出相对误差约 28%，但端到端精度没有下降；保真度只用来解释，不作为结论。
+""")
+table(s, 0.4, 1.55, 12.5, [
+    ['方法', '32K 稀疏度', '64K 稀疏度', 'AIME 稀疏度', '64K 答对（dense 18/36）', '32K 答对（dense 28/36）', 'AIME 答对（dense 65/120）'],
+    ['原版 M1', '78%', '85%', '5%', '20', '25', '66'],
+    ['原版 M3', '79%', '85%', '7%', '21', '29', '63'],
+    ['B', '85%', '90%', '10%', '20', '31', '58'],
+    ['M3 R6 DP −ln2（选定）', '79%', '88%', '4%', '23', '31', '65'],
+    ['SparseD 保留 10%（移植）', '90%（目标）', '90%（目标）', '—', '21', '27', '—'],
+], [3.0, 1.4, 1.4, 1.5, 1.8, 1.8, 1.6], size=12, bold_rows=(4,))
+text(s, 0.4, 4.45, 12.5, 2.8, [
+    '长上下文上稀疏度 85–90%，精度没有下降；AIME 上阈值版自动变保守（4–10%），选定配置 65 对 65。',
+    '把 AIME 的稀疏度强行拉到 56% 以上会掉分，所以部署时短上下文（< 32K key）直接走 dense。',
+    '稀疏度只统计沿用选块的步；每个 canvas 前 2 步是 dense，整条请求的平均稀疏度更低。'], size=14, bullet=True)
 
 # ---------------------------------------------------------------- 2 main result
 s = slide('长上下文：64K 端到端快约 13%，精度不降',
@@ -241,7 +295,7 @@ s = slide('AIME 为什么没有提速空间：一步的时间花在哪里',
 【实测对照】AIME 面板里每步的摊销时间是 36–94 ms（按题目不同，所有方法一起变），比 29 ms 还多，多出的部分与注意力无关，所以 GLOBAL 的实际占比更低（≤ 4–5%）。
 【能省多少】保留 50% 时 FA4 在 8K 只快 1.7 倍，即省掉 GLOBAL 时间的约 40%：约 0.6 ms/步，约占一步的 2%。再减去观测和选块的开销，几乎不剩；实测每步成本 0.95–1.01，与此一致。
 【对照 64K】一次 forward 44.2 ms 里 GLOBAL 注意力 15.4 ms（35%），所以那里能省下 15% 的每步时间。
-【上周为什么有 AIME 提升】上周的数字（AIME 生成 1.10–1.22×）在三个条件下测得：①dense 是 HF 原生 eager 路径——注意力用 PyTorch SDPA（head_dim 512 下 8K 时每层 2.56 ms，是 FA4 的 5.8 倍），且没有 CUDA graph；②FIXED16：每个 canvas 固定 16 步，没有"稀疏导致步数增加"的代价；③包含 LOCAL 跳块，在 eager 路径上有收益，在 CUDA graph 底座上 LOCAL 合计只有约 0.8 ms，跳了也省不下。换成 FA4 + CUDA graph + 原生自适应停止后，这个提升消失。结论：AIME 上的加速取决于基线；用最强的官方基线时没有空间。
+【上周为什么有 AIME 提升】上周的数字（AIME 生成 1.10–1.22×）在三个条件下测得：①dense 是 HF 原生 eager 路径——注意力走 HF 默认路径（head_dim > 256 时先把 K/V 复制 8 份，再走 SDPA 内存高效后端，kernel 约比 FA4 慢 2 倍），且没有 CUDA graph（eager 下每步受主机端发射开销限制）；②FIXED16：每个 canvas 固定 16 步，没有"稀疏导致步数增加"的代价；③包含 LOCAL 跳块，在 eager 路径上有收益，在 CUDA graph 底座上 LOCAL 合计只有约 0.8 ms，跳了也省不下。换成 FA4 + CUDA graph + 原生自适应停止后，这个提升消失。结论：AIME 上的加速取决于基线；用最强的官方基线时没有空间。
 【同学的结果】同学 9/30 的 AIME 结果在他们自己的执行栈上（JAX/FA3，生成上限 2048 token），PPT 没写 dense 用的注意力 kernel，不能直接与我们比较，需要向同学确认。
 """)
 table(s, 0.4, 1.55, 7.6, [
@@ -257,7 +311,7 @@ table(s, 0.4, 1.55, 7.6, [
 text(s, 8.3, 1.55, 4.7, 5.6, [
     '可稀疏的只有 GLOBAL 注意力，在 AIME 上只占一步约 5–7%（估算）；实测每步 36–94 ms，实际占比更低。',
     '保留 50% 时只省得下约一步的 2%，还要减去选块开销：所以每步几乎不变。',
-    '上周的 AIME 提升（1.10–1.22×）的基线不同：HF eager + SDPA（注意力慢 5.8 倍、无 CUDA graph）、固定 16 步、含 LOCAL 跳块。'], size=13, bullet=True)
+    '上周的 AIME 提升（1.10–1.22×）的基线不同：HF eager 路径（注意力 kernel 慢约 2 倍、无 CUDA graph）、固定 16 步、含 LOCAL 跳块。'], size=13, bullet=True)
 
 # ---------------------------------------------------------------- 6 M2 + longer context
 s = slide('补充：M2 的变体与更长的上下文',
@@ -289,6 +343,6 @@ text(s, 0.5, 1.4, 12.3, 5.5, [
     '下一步 2：更长上下文要先解决单卡预填充的显存（分块预填充或多卡）。',
     '下一步 3：与同学的 query 自适应保护能否结合（合作内容）。'], size=18, bullet=True)
 
-out = HERE / 'dlm_sparse_attention_20260930_v2.pptx'
+out = HERE / 'dlm_sparse_attention_20260930_v3.pptx'
 prs.save(out)
 print('saved', out, len(prs.slides), 'slides')
