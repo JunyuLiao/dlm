@@ -58,7 +58,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - Progress doc updates 8–12 (`results/m1_m2_m3_frontier_v27_20260929/progress_20260930.md`). Updates 6 and 12 predate
   E4 and are superseded by it for the request-level verdict.
 
-## Running (as of 17:05 local)
+## Running (as of 16:40 local)
 
 - **Finished and scored:** E5 (L1b), E6 (L1c), E7 (L1d), the batch diagnostic (`batch_scaling/`).
 - **Running or queued** (background jobs started when each host's previous job closed).
@@ -77,7 +77,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
       the V term changes: projected V rank 32, rank 8, M2 tile-mean V, attention mass only. The −ln2 threshold arm
       (E5 best) is the operating-point reference.
     - Code `efea33024` (k12 + unit test; 101 v27 tests pass on dlm2). Deploy `v27_e9_efea330`, run dir
-      `v27_lb64_e9_001`, scoring label `lb64_e9`. dlm2 started 17:00 local; dllm and mpk run it after their E6b share.
+      `v27_lb64_e9_001`, scoring label `lb64_e9`. dlm2 started 16:35 local; dllm and mpk run it after their E6b share.
     - Question: at the long-context operating sparsity, does looking at V select better than attention mass alone?
   - **E8, V-term ablation on AIME** (`specs/v27_aime_vterm_e8.json`, protocol `v27_aime_vterm_e8_bd293196ff730851`).
     - Runs after E7 on each host; same 180 cells and hosts as E7.
