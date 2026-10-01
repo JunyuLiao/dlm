@@ -66,6 +66,7 @@ FA4 + piecewise substrates. Mechanism findings (what fails and why) usually stil
 | 10-01 | **E7 AIME (30 × 6 seeds, 180 cells per arm):** no speed gain on AIME. Best low-overhead variant (M3 + `carry_first` + 2K gate) W 1.005 [0.967, 1.042], accuracy 99 vs 99; Fan plain 7–12% slower; no significant accuracy difference. AIME stays an accuracy check. Also froze **E6b**: the 5 other fitting 96K pool items × 6 seeds, to pool with E6. | `aime_confirm_panel_e7/summary.md`, `specs/v27_lb96k_extend_e6b.json` |
 | 10-01 | **E8 V-term ablation (AIME, fixed 70% sparsity, 180 cells per arm):** no evidence that looking at V helps. No V term differs significantly from projected rank 32 (p ≥ 0.30); ranks 32/16/8 score lowest (86–87 vs dense 99; rank 16/8 significantly below dense), mass-only 91, M2 tile-mean 92, rank 4 94, SparseD 94. The "V-aware selection" novelty claim is not supported on AIME; E9 tests it at 64K. | `aime_vterm_panel_e8/summary.md`, `receipts.md` |
 | 10-01 | **E6b + pooled 96K (11 items × 6 seeds, 66 cells):** M3 + c0 W 0.822 [0.703, 0.944], S 0.727, per-step −25%, N 0.96 (n.s.), accuracy 30 vs 25. E6b alone had N 1.19 where E6 had 0.81: the 96K step count swings with the item set, so the 96K request claim rests on the pooled panel. | `lb96k_pooled_e6_e6b/summary.md` |
+| 10-01 | **E9 V-term ablation at 64K (M3 + c0, fixed 88% sparsity, 96 cells per arm):** attention-mass-only ranking is as accurate (54 vs dense 51) and as fast (W 0.845; mass / −ln2 0.999 [0.961, 1.037]) as any V term; no difference is significant. With E8, the "V-aware selection" claim is dropped; the V term can be removed without loss. | `lb64_vterm_panel_e9/summary.md`, `receipts.md` |
 | 10-01 | **Batching does not make attention dominate at 64K.** For B = 1 → 4 the prefix-attention share of a forward stays 22–26% and the keep-0.12 saving about 20%: FA4 is under-occupied at B=1, and MoE becomes compute-bound. The "serving makes sparse attention pay much more" expectation is not supported at this context length. | 02eead519, `batch_scaling/README.md` |
 
 ## Group-internal evidence on the V term (not ours; cite, do not absorb)
@@ -79,7 +80,7 @@ FA4 + piecewise substrates. Mechanism findings (what fails and why) usually stil
   - **AIME (2048-token cap) and LongBench at 50%:** no rank winner.
   - Accuracy is not monotone in rank (r16 < r8 on RULER).
 - Whether this transfers to our historical-QK M1/M3 selector was tested by E8 (2026-10-01): on AIME at 70% sparsity it
-  does not (no V term beats attention mass; see RESULTS_LEDGER L1e). E9 repeats the test at 64K.
+  does not (no V term beats attention mass; see RESULTS_LEDGER L1e). E9 at 64K agrees (L1f).
 
 ## Corrections to our own earlier claims (keep; do not repeat)
 

@@ -153,6 +153,32 @@ the risk changes. SparseD (port) at keep 0.3 is the external reference.
 - **Source.** `aime_vterm_panel_e8/summary.md` and `receipts.md`, spec `specs/v27_aime_vterm_e8.json`, protocol
   `v27_aime_vterm_e8_bd293196ff730851`, deploy `v27_e8_021431b`.
 
+### L1f. E9 V-term ablation at 64K under M3 + `carry_first`, fixed 88% sparsity: 24 items × seeds 404–707 = 96 cells per arm (piecewise_v5)
+
+All method arms are M3 R6 DP + `carry_first`. At `risk_topk='k12'` (keep 12% of eligible prefix tiles) only the V term
+changes; the −ln2 threshold arm (E5 best) is the operating-point reference.
+
+| arm | W [CI] | S [CI] | per-step S/N | N [CI] | acc (dense 51) |
+|---|---|---|---:|---|---:|
+| projected V, rank 32, k12 | 0.880 [0.825, 0.932] | 0.818 [0.745, 0.892] | 0.781 | 1.047 [0.954, 1.141] | 53 |
+| projected V, rank 8, k12 | 0.854 [0.791, 0.924] | 0.777 | 0.785 | 0.990 | 50 |
+| M2 tile-mean V, k12 | 0.888 [0.828, 0.948] | 0.826 | 0.780 | 1.059 | 54 |
+| **no V (attention mass only), k12** | **0.845 [0.789, 0.894]** | 0.772 [0.700, 0.841] | 0.784 | 0.986 | **54** |
+| −ln2 threshold (projected V, rank 32) | 0.846 [0.781, 0.894] | 0.768 [0.686, 0.835] | 0.816 | 0.942 | 49 |
+
+- **At 64K, looking at V does not select better than attention mass alone.** Accuracy is 50–54 vs dense 51 for every
+  V term (all p ≥ 0.42 vs rank 32 and vs dense). Direct speed ratios between V terms are all n.s.: mass / rank 32
+  0.960 [0.905, 1.018]; mass / −ln2 0.999 [0.961, 1.037].
+- The per-step cost hardly depends on the V term (S/N 0.780–0.785 at k12), so the projected-V computation is cheap.
+  The k12 arms are cheaper per step than −ln2 (0.78 vs 0.82); −ln2 therefore keeps more than 12% of the tiles here.
+- Together with E8 (AIME), the V term is not a supported contribution: the selector can rank by attention mass with
+  no loss. This moves our selector closer to score-only selectors such as SparseD.
+- **Receipts.** Every run shows the intended `risk_topk`, `proj_rank`, `risk_value`, `mu_mode` and `carry_first`;
+  carried-first calls 5,115–5,315 per arm; bootstrap dense 480 (canvas 0 only). 576/576 runs ok, one host per cell,
+  no timed new graphs. Dense and the −ln2 arm are token-identical to E5 on these cells (96/96).
+- **Source.** `lb64_vterm_panel_e9/summary.md` and `receipts.md`, spec `specs/v27_lb64_vterm_e9.json`, protocol
+  `v27_lb64_vterm_e9_5b125c63817898f6`, deploy `v27_e9_efea330` (code `efea33024`).
+
 ## Panels on piecewise_v3 / v4 / v5 (seeds 101/202/303 unless stated)
 
 | id | comparison | workload | result | caveat | source / protocol |

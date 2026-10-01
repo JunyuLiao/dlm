@@ -38,7 +38,9 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   slower. No accuracy difference is significant. AIME is an accuracy check only.
 - **Novelty is weak.** B ≈ SparseD (no significant speed difference at 64K). **E8 (AIME, fixed 70% sparsity,
   180 cells per arm) finds no evidence that looking at V helps:** no V term beats attention mass alone (all p ≥ 0.30
-  vs rank 32), and projected V at rank 32/16/8 scores lowest (86–87 vs dense 99). E9 repeats the test at 64K.
+  vs rank 32), and projected V at rank 32/16/8 scores lowest (86–87 vs dense 99). **E9 (64K, M3 + c0, fixed 88%
+  sparsity) agrees:** mass-only ranking is as accurate (54 vs 51) and as fast (W 0.845) as any V term. The V term is
+  not a contribution and can be dropped (L1e, L1f).
 - **The ceiling at batch 1 is low.** GLOBAL attention is about 21% of a 64K request and 16% at 32K; a step is
   dominated by reading about 46 GB of MoE weights. The current gain is about 60% of that ceiling.
 - **Batching does not raise the attention share at 64K** (B=1→4: 26/22/25% of a forward; keep-0.12 saving about
@@ -61,20 +63,11 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - Progress doc updates 8–12 (`results/m1_m2_m3_frontier_v27_20260929/progress_20260930.md`). Updates 6 and 12 predate
   E4 and are superseded by it for the request-level verdict.
 
-## Running (as of 17:25 local)
+## Running (as of 18:15 local)
 
-- **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), the batch
-  diagnostic (`batch_scaling/`).
-- **Running or queued** (background jobs started when each host's previous job closed).
-  - **E9, V-term ablation at 64K under the current best variant** (`specs/v27_lb64_vterm_e9.json`, protocol
-    `v27_lb64_vterm_e9_5b125c63817898f6`).
-    - LongBench-v2 64K, the same 24 items as E4/E5 × seeds 404–707 = 96 cells per arm; 576 runs on three hosts.
-    - All method arms are M3 R6 DP + `carry_first`. At a fixed 88% sparsity (`risk_topk='k12'`, new named keep) only
-      the V term changes: projected V rank 32, rank 8, M2 tile-mean V, attention mass only. The −ln2 threshold arm
-      (E5 best) is the operating-point reference.
-    - Code `efea33024` (k12 + unit test; 101 v27 tests pass on dlm2). Deploy `v27_e9_efea330`, run dir
-      `v27_lb64_e9_001`, scoring label `lb64_e9`. dlm2 share done (192/192 ok, receipts as intended); dllm and mpk running.
-    - Question: at the long-context operating sparsity, does looking at V select better than attention mass alone?
+- **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), E9 (L1f),
+  the batch diagnostic (`batch_scaling/`).
+- **Nothing running.** All GPUs idle after E9.
 
 ## Blockers
 
@@ -85,9 +78,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 1. E8 is done (L1e). Add its outcome to the slides and keep the V-term question open only for E9 (64K).
 2. E6b is done (L1c2). Note for E6b: the first bind call ran with `HOSTS=dllm` only, so the binding was merged from
    the three host fragments; the unused one-host binding is kept beside it.
-2b. When E9 is scored (label `lb64_e9`): check `risk_topk`=k12, `proj_rank`, `risk_value`, `mu_mode` and
-    `carry_first` in each arm's `effective_method`; compare accuracy across the four V terms at matched 88% sparsity, and
-    W/S against dense and the −ln2 arm.
+2b. E9 is done (L1f).
 3. Larger-gain directions, ranked (see `docs/RESEARCH_CONTEXT.md` §8):
    - (a) Make the encoder canvas append's GLOBAL attention sparse with the canvas's final map (about 1.4% at 64K).
    - (b) Chunked prefill so that 96K items above 95K tokens and the 128K bin can run on one H100.
