@@ -76,3 +76,14 @@ def test_topk_high_sparsity_levels_keep_the_named_fraction():
     for name, kept in (('k30', {0, 2, 6}), ('k20', {0, 6})):
         drop = topk_skip(lognorm, eligible, t, ref, 100, RISK_TOPKS[name])[0, 0, 0].tolist()
         assert {j for j, d in enumerate(drop) if not d} == kept
+
+
+def test_topk_k12_keeps_twelve_percent_of_eligible_tiles():
+    from experiments.numerical_qk_reuse.v21 import RISK_TOPKS
+    from experiments.numerical_qk_reuse.v27_dense_prefix import topk_skip
+    assert RISK_TOPKS['k12'] == 0.12                                    # sparsity 88% (the 64K operating point)
+    risks = [0.01 * (1 + (17 * j) % 50) for j in range(50)]            # 50 distinct risks
+    lognorm, eligible, t, ref = _state([math.log(v) for v in risks])
+    drop = topk_skip(lognorm, eligible, t, ref, 100, RISK_TOPKS['k12'])[0, 0, 0].tolist()
+    top6 = set(sorted(range(50), key=lambda j: -risks[j])[:6])            # floor(0.88 * 50) = 44 dropped
+    assert {j for j, d in enumerate(drop) if not d} == top6
