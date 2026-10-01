@@ -1,0 +1,141 @@
+{
+ "name": "aime_confirm_e7",
+ "ids": {
+  "aime26": [
+   "aime26/1",
+   "aime26/2",
+   "aime26/3",
+   "aime26/4",
+   "aime26/5",
+   "aime26/6",
+   "aime26/7",
+   "aime26/8",
+   "aime26/9",
+   "aime26/10",
+   "aime26/11",
+   "aime26/12",
+   "aime26/13",
+   "aime26/14",
+   "aime26/15",
+   "aime26/16",
+   "aime26/17",
+   "aime26/18",
+   "aime26/19",
+   "aime26/20",
+   "aime26/21",
+   "aime26/22",
+   "aime26/23",
+   "aime26/24",
+   "aime26/25",
+   "aime26/26",
+   "aime26/27",
+   "aime26/28",
+   "aime26/29",
+   "aime26/30"
+  ]
+ },
+ "seeds": [
+  404,
+  505,
+  606,
+  707,
+  808,
+  909
+ ],
+ "warm": false,
+ "arms": {
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M1_R1_A8_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true
+   }
+  },
+  "M2c_R1_A8_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true,
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R3_A8_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2"
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_c0_gate2k_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "carry_first": true,
+    "min_route_keys": 2048
+   }
+  },
+  "B_A64_fused_rp_async_m1ln2_c0_gate2k_fa4": {
+   "kind": "method",
+   "parent": "B_A8_matched",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "hold_only": true,
+    "route_pipeline": true,
+    "carry_first": true,
+    "min_route_keys": 2048,
+    "threshold_shift": "minus_ln2"
+   }
+  }
+ },
+ "substrate": "piecewise_v5",
+ "hosts": [
+  "149.165.159.64",
+  "149.165.151.254",
+  "149.165.168.28"
+ ],
+ "selection_rule": "AIME large-seed panel (2026-10-01): can any accuracy-safe configuration give a significant AIME end-to-end gain? All 30 AIME26 problems x seeds 404..909 (180 cells per arm; never used for AIME except 404 in the final panel); dense, Fan plain M1/M2c/M3, M3 R6 DP -ln2, and the two lowest-overhead variants: M3 R6 DP -ln2 and B (held map, threshold -ln2), each with first-call carry and a 2048-key length gate (dense below 2K keys, where FA4 block-sparse saves nothing); three hosts, substrate piecewise_v5; frozen before generation.",
+ "extra_hosts": [
+  "149.165.168.28"
+ ]
+}
