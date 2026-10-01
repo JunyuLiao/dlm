@@ -57,6 +57,14 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - Deploy tag `v27_e5_7587235`, run dir `v27_lb_e5_001` on dllm, mpk and dlm2 (64K stage, then 32K).
   - Scoring is queued (label `lb_e5`). Expected about 14:00 local.
   - Fan plain M1/M2c/M3 for these cells are in E4; check that E5 dense tokens equal E4's.
+- **Queued behind E5** (background jobs that start when each host's E5 ledger closes).
+  - **E6, 96K large-seed panel** (`specs/v27_lb96k_confirm_e6.json`, protocol `v27_lb96k_confirm_e6_8ab3aa35d1874ca1`).
+    - 6 fitting items × seeds 404–909 = 36 cells per arm.
+    - Arms: dense, Fan plain M1/M2c/M3, B, M3, M3 + `carry_first`. 252 runs.
+    - Deploy `v27_e6_8f9f188`, run dir `v27_lb96k_e6_001`, hosts dllm and mpk. Scoring label `lb96k_e6`.
+  - **Batch-scaling diagnostic** on dlm2 (`scripts/v27_batch_step_bench.py`).
+    - E4 run dir and deploy, 64K item 0, seed 404, decoder call 6, batch 1/2/4/8, keep 0.12/0.2.
+    - Output: `<dlm2 dyh>/m3_output_numerics_v21_20260927/scratch_tests/batch_1001/bench64.jsonl`.
 
 ## Blockers
 
