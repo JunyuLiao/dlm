@@ -101,6 +101,35 @@ Rules for this file:
 - **Source.** `aime_confirm_panel_e7/summary.md` and `receipts.md`, spec `specs/v27_aime_confirm_e7.json`,
   protocol `v27_aime_confirm_e7_0515fa3125588ff0`, deploy `v27_e7_ceefaf2`.
 
+### L1e. E8 V-term ablation on AIME at a fixed 70% target sparsity: 30 problems × seeds 404–909 = 180 cells per arm (piecewise_v5)
+
+All method arms use the M3 R6 DP selector with risk top-k keeping 30% of eligible prefix tiles; only the V term of
+the risk changes. SparseD (port) at keep 0.3 is the external reference.
+
+| arm (V term) | acc (dense 99) | vs dense (p) | vs rank 32 (p) | W [CI] | N [CI] | T | per-step S/N |
+|---|---:|---|---|---|---|---:|---:|
+| projected V, rank 32 (current) | 87 | +14/−26 (0.081) | – | 1.138 [1.078, 1.202] | 1.127 [1.065, 1.193] | 1.089 | 1.011 |
+| projected V, rank 16 | 86 | +10/−23 (0.035) | +15/−16 (1.00) | 1.119 [1.059, 1.190] | 1.105 | 1.065 | 1.013 |
+| projected V, rank 8 | 87 | +8/−20 (0.036) | +16/−16 (1.00) | 1.113 [1.029, 1.198] | 1.112 | 1.080 | 1.003 |
+| projected V, rank 4 | 94 | +18/−23 (0.53) | +20/−13 (0.30) | 1.131 [1.058, 1.210] | 1.128 | 1.084 | 1.002 |
+| M2 tile-mean V | 92 | +13/−20 (0.30) | +19/−14 (0.49) | 1.172 [1.071, 1.268] | 1.121 | 1.083 | 1.047 |
+| no V (attention mass only) | 91 | +15/−23 (0.26) | +18/−14 (0.60) | 1.071 [1.013, 1.123] | 1.065 [1.019, 1.113] | 1.020 | 1.005 |
+| SparseD 70% (port) | 94 | +13/−18 (0.47) | +26/−19 (0.37) | 1.020 [0.971, 1.069] | 1.031 | 1.022 | 0.991 |
+
+- **No evidence that looking at V selects better at matched sparsity.** No V term differs significantly from
+  rank 32 (all p ≥ 0.30). The projected-V arms at rank 32/16/8 are the lowest (86–87). Rank 16 and rank 8 lose to dense
+  significantly (p ≈ 0.035); mass-only, M2 tile-mean V, rank 4 and SparseD do not.
+- There is no monotone rank trend (rank 4 scores 94, ranks 8–32 score 86–87).
+- At 70% sparsity every arm of our selector takes more steps and writes longer outputs (N 1.07–1.13, T 1.02–1.09), so
+  W is 7–17% slower than dense. SparseD stays near dense (N 1.03).
+- This replicates L8 (V-aware selection worse at high AIME sparsity) with 3× the cells. It does not reproduce the
+  group-internal RULER8K finding that V helps (that selector uses current QK; ours uses historical QK).
+- **Receipts.** Every run's `effective_method` shows the intended `risk_topk`, `proj_rank`, `risk_value` and `mu_mode`
+  (M2: 54,105 compact pool builds). 1,440/1,440 runs ok, one host per cell, 3 runs with timed new graphs. Dense tokens
+  are identical to E7 (180/180).
+- **Source.** `aime_vterm_panel_e8/summary.md` and `receipts.md`, spec `specs/v27_aime_vterm_e8.json`, protocol
+  `v27_aime_vterm_e8_bd293196ff730851`, deploy `v27_e8_021431b`.
+
 ## Panels on piecewise_v3 / v4 / v5 (seeds 101/202/303 unless stated)
 
 | id | comparison | workload | result | caveat | source / protocol |

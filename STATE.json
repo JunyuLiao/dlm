@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-01 16:40 (UTC-5)",
+    "updated_local": "2026-10-01 16:55 (UTC-5)",
     "branch": "research/m3-output-numerics-20260927",
     "verified_commit": "b8053511f",
     "entry_docs": [
@@ -26,20 +26,6 @@
     },
     "running": [
       {
-        "panel": "E8 v27_aime_vterm_e8_bd293196ff730851",
-        "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_aime_vterm_e8.json",
-        "deploy_tag": "v27_e8_021431b",
-        "run_dir": "v27_aime_e8_001",
-        "hosts": [
-          "dllm",
-          "mpk",
-          "dlm2"
-        ],
-        "executions": 1440,
-        "status": "dlm2 share finished; dllm and mpk running",
-        "scoring_label": "aime_e8"
-      },
-      {
         "panel": "E6b v27_lb96k_extend_e6b_d1b1c0c74a1dc69d",
         "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_lb96k_extend_e6b.json",
         "deploy_tag": "v27_e6b_b805351",
@@ -50,7 +36,7 @@
           "dlm2"
         ],
         "executions": 210,
-        "status": "dlm2 share finished (70/70 ok); dllm and mpk follow E8",
+        "status": "dlm2 share finished (70/70 ok); dllm and mpk running",
         "scoring_label": "lb96k_e6b"
       },
       {
@@ -86,6 +72,11 @@
       "accuracy": "99 vs 99",
       "verdict": "no speed gain on AIME; accuracy check only",
       "source": "results/m1_m2_m3_frontier_v27_20260929/aime_confirm_panel_e7/summary.md"
+    },
+    "v_term": {
+      "panel": "E8 v27_aime_vterm_e8_bd293196ff730851 (AIME 30 x seeds 404-909, 180 cells per arm, fixed 70% sparsity)",
+      "verdict": "no evidence that V helps selection: no V term differs from projected rank 32 (p >= 0.30); ranks 32/16/8 lowest (86-87 vs dense 99), mass-only 91, M2 tile-mean 92, rank 4 94, SparseD 94",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/aime_vterm_panel_e8/summary.md"
     }
   },
   "task": "M3 output numerics and trajectory isolation",

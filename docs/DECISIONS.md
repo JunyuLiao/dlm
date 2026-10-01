@@ -64,6 +64,7 @@ FA4 + piecewise substrates. Mechanism findings (what fails and why) usually stil
 | 10-01 | **E5: first-call carry `carry_first` adopted.** Canvas call 0 reuses the previous canvas's decision; call 1 still observes. M3 + c0 vs dense: 64K W 0.853 [0.802, 0.895], 32K 0.907 [0.858, 0.952]; vs M3 0.971 / 0.963; accuracy not lower. **The `stable1` dense-confirmation gate is rejected** (slower; −5 at 32K). | 56de98fe2, adc2056d7, `lb_overhead_panel_e5/summary.md` |
 | 10-01 | **E6 96K (6 fitting items × 6 seeds):** M3 + c0 W 0.744 [0.597, 0.903], per-step −24%; part of the request gain is (noisy) fewer steps. The per-step gain grows with context: −18% at 64K, −24% at 96K. | `lb96k_confirm_panel_e6/summary.md` |
 | 10-01 | **E7 AIME (30 × 6 seeds, 180 cells per arm):** no speed gain on AIME. Best low-overhead variant (M3 + `carry_first` + 2K gate) W 1.005 [0.967, 1.042], accuracy 99 vs 99; Fan plain 7–12% slower; no significant accuracy difference. AIME stays an accuracy check. Also froze **E6b**: the 5 other fitting 96K pool items × 6 seeds, to pool with E6. | `aime_confirm_panel_e7/summary.md`, `specs/v27_lb96k_extend_e6b.json` |
+| 10-01 | **E8 V-term ablation (AIME, fixed 70% sparsity, 180 cells per arm):** no evidence that looking at V helps. No V term differs significantly from projected rank 32 (p ≥ 0.30); ranks 32/16/8 score lowest (86–87 vs dense 99; rank 16/8 significantly below dense), mass-only 91, M2 tile-mean 92, rank 4 94, SparseD 94. The "V-aware selection" novelty claim is not supported on AIME; E9 tests it at 64K. | `aime_vterm_panel_e8/summary.md`, `receipts.md` |
 | 10-01 | **Batching does not make attention dominate at 64K.** For B = 1 → 4 the prefix-attention share of a forward stays 22–26% and the keep-0.12 saving about 20%: FA4 is under-occupied at B=1, and MoE becomes compute-bound. The "serving makes sparse attention pay much more" expectation is not supported at this context length. | 02eead519, `batch_scaling/README.md` |
 
 ## Group-internal evidence on the V term (not ours; cite, do not absorb)
@@ -76,7 +77,8 @@ FA4 + piecewise substrates. Mechanism findings (what fails and why) usually stil
   - **At 50%:** every variant is about 92%.
   - **AIME (2048-token cap) and LongBench at 50%:** no rank winner.
   - Accuracy is not monotone in rank (r16 < r8 on RULER).
-- Whether this transfers to our historical-QK M1/M3 selector is tested by E8 (2026-10-01).
+- Whether this transfers to our historical-QK M1/M3 selector was tested by E8 (2026-10-01): on AIME at 70% sparsity it
+  does not (no V term beats attention mass; see RESULTS_LEDGER L1e). E9 repeats the test at 64K.
 
 ## Corrections to our own earlier claims (keep; do not repeat)
 

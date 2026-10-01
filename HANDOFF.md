@@ -34,8 +34,9 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - **AIME has no speed room** (E7, 180 cells per arm, `docs/RESULTS_LEDGER.md` L1d). The best low-overhead variant,
   M3 + `carry_first` + 2K gate, is W 1.005 [0.967, 1.042] with accuracy 99 vs 99. Fan plain M1/M2c/M3 are 7–12%
   slower. No accuracy difference is significant. AIME is an accuracy check only.
-- **Novelty is weak.** B ≈ SparseD (no significant speed difference at 64K). There is no evidence that V-aware
-  selection beats score-only selection (it is worse at high AIME sparsity).
+- **Novelty is weak.** B ≈ SparseD (no significant speed difference at 64K). **E8 (AIME, fixed 70% sparsity,
+  180 cells per arm) finds no evidence that looking at V helps:** no V term beats attention mass alone (all p ≥ 0.30
+  vs rank 32), and projected V at rank 32/16/8 scores lowest (86–87 vs dense 99). E9 repeats the test at 64K.
 - **The ceiling at batch 1 is low.** GLOBAL attention is about 21% of a 64K request and 16% at 32K; a step is
   dominated by reading about 46 GB of MoE weights. The current gain is about 60% of that ceiling.
 - **Batching does not raise the attention share at 64K** (B=1→4: 26/22/25% of a forward; keep-0.12 saving about
@@ -60,7 +61,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Running (as of 16:40 local)
 
-- **Finished and scored:** E5 (L1b), E6 (L1c), E7 (L1d), the batch diagnostic (`batch_scaling/`).
+- **Finished and scored:** E5 (L1b), E6 (L1c), E7 (L1d), E8 (L1e), the batch diagnostic (`batch_scaling/`).
 - **Running or queued** (background jobs started when each host's previous job closed).
   - **E6b, 96K extension** (`specs/v27_lb96k_extend_e6b.json`, protocol `v27_lb96k_extend_e6b_d1b1c0c74a1dc69d`).
     - The 5 other fitting items of the 96K pool (pool positions 13–24; prompts ≤ 95,074 tokens) × seeds 404–909 =
@@ -79,15 +80,6 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
     - Code `efea33024` (k12 + unit test; 101 v27 tests pass on dlm2). Deploy `v27_e9_efea330`, run dir
       `v27_lb64_e9_001`, scoring label `lb64_e9`. dlm2 started 16:35 local; dllm and mpk run it after their E6b share.
     - Question: at the long-context operating sparsity, does looking at V select better than attention mass alone?
-  - **E8, V-term ablation on AIME** (`specs/v27_aime_vterm_e8.json`, protocol `v27_aime_vterm_e8_bd293196ff730851`).
-    - Runs after E7 on each host; same 180 cells and hosts as E7.
-    - Fixed 70% target sparsity (risk top-k keeps 30%) on the M3 R6 DP selector. Only the V term changes:
-      - projected V at rank 32, 16, 8 and 4 (`proj_rank`);
-      - M2 tile-mean V (`pooled_compact`);
-      - attention mass only (`risk_value='mass'`);
-      - SparseD port at 70% as reference.
-    - 1,440 runs. Deploy `v27_e8_021431b`, run dir `v27_aime_e8_001`, scoring label `aime_e8`.
-    - Question: does looking at V help selection quality at matched sparsity?
 
 ## Blockers
 
@@ -95,9 +87,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Immediate next steps
 
-1. When E8 is scored (label `aime_e8`): check `proj_rank` and `risk_value` in each arm's `effective_method`, and that
-   the realized kept fraction is about 30% in every arm. Then compare accuracy at matched sparsity across projected
-   V rank 32/16/8/4, M2 tile-mean V, mass-only and SparseD. Copy the summary into `results/…/aime_vterm_panel_e8/`.
+1. E8 is done (L1e). Add its outcome to the slides and keep the V-term question open only for E9 (64K).
 2. When E6b is scored (label `lb96k_e6b`): report it alone and pooled with E6 (11 items, 66 cells), W and S.
 2b. When E9 is scored (label `lb64_e9`): check `risk_topk`=k12, `proj_rank`, `risk_value`, `mu_mode` and
     `carry_first` in each arm's `effective_method`; compare accuracy across the four V terms at matched 88% sparsity, and
