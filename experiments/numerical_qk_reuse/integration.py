@@ -99,6 +99,17 @@ def carried_map(skipped, eligible, prefix, keys):
     return new_skipped, new_eligible
 
 
+def protect_generated(skipped, prompt_keys):
+    """v27 output protection: clear the skip bit of every key tile at or after the tile holding the
+    prompt's last key (tile prompt_keys // 64 onward; a tile mixing prompt and generated keys is kept)."""
+    if prompt_keys is None or prompt_keys < 0:
+        raise ValueError('output protection needs the request prompt extent')
+    first = prompt_keys // 64
+    if first < skipped.shape[-1]:
+        skipped[..., first:] = False
+    return skipped
+
+
 def density_gate_fires(preset, step, entropy, accepted, previous_accepted, stalled_steps):
     """Pure decision for step ``step`` (0-based in the canvas) from the PREVIOUS step's sampler
     statistics. Returns (fire, stalled_steps)."""
@@ -226,6 +237,13 @@ class Attention:
         # observation and no decision there; the canvas after that observes again through the normal path
         self.carry_canvases = None
         self._carry, self._carried_layers, self.carried_calls, self.carry_snapshots = {}, set(), 0, 0
+        # v27 observation step (named variant): canvas calls 0..observe_step-1 are true native and the fused
+        # observation runs at call observe_step (1 = the original native_bootstrap2_observe1 schedule)
+        self.observe_step = 1
+        # v27 output protection (named variant): key tiles from the request's prompt end onward (the model's own
+        # generated tokens) are never skipped; only wholly-prompt tiles may be dropped. prompt_keys is the GLOBAL
+        # prefix length at the request's first canvas (the router is built per request).
+        self.protect_output, self.prompt_keys, self.protected_routes = False, None, 0
         self.density_gate = None       # v27 density gate preset (DENSITY_GATES), named variant
         self._fa4_lists, self.fa4_list_builds = [], 0   # v27 FA4 consumer: block lists per keep map
         # v27 async observation route: the observation call's selector (whose decision serves only LATER calls)
@@ -368,6 +386,10 @@ class Attention:
         identity = Identity(0, self.canvas, self.epoch, layer, b, h, hk, nq, nk, d,
                             absolute, absolute-prefix+crop, source_nk, scale,
                             str(q.dtype), str(q.device), signature, id(prefix_k))
+        if self.protect_output and self.prompt_keys is None:
+            if self.canvas != 0 or crop:
+                raise ValueError('output protection must see the request's first canvas on an uncropped layer')
+            self.prompt_keys = prefix
         if self.min_route_keys and nk < self.min_route_keys:
             # v27 length gate: below the frozen key extent the routed path has no
             # measured saving, so the call is exactly native SDPA (no cache, no bitmap).
@@ -387,7 +409,7 @@ class Attention:
         if leader != layer:
             # v27 cross-layer sharing: a follower consumes its leader's CURRENT-call
             # support on its own current Q/K/V (no score observation, no selector).
-            if self.bootstrap is not None and self.step <= 1:
+            if self.bootstrap is not None and self.step <= self.observe_step:
                 from transformers.integrations.sdpa_attention import sdpa_attention_forward
                 self.shared_native_calls += 1
                 return self._dense_native(native_args, native_kwargs, q, k, v, scale, window, causal)
@@ -424,7 +446,7 @@ class Attention:
                 self.carried_calls += 1
                 self.preqk_calls += 1
                 return returned, None
-        if self.bootstrap is not None and self.step <= 1:
+        if self.bootstrap is not None and self.step <= self.observe_step:
             return self._bootstrap_call(native_args, native_kwargs, identity, layer, kind,
                                         q, k, v, mask, scale, causal, window, crop, prefix,
                                         b, h, nq, nk)
@@ -486,6 +508,8 @@ class Attention:
                          and self.output_score_precision == 'legacy_bf16_scores'))
             if fused and self.mu_mode != 'exact':
                 raise ValueError('pooled mu is qualified only on the route_only pre-QK path')
+            if fused and self.protect_output:
+                raise ValueError('output protection is qualified only on the route_only pre-QK path')
             if fused:
                 result = attention(entry.scores, v, projected.contiguous(), ref.contiguous(),
                                    sensitivity=self.query_sensitivity,
@@ -650,6 +674,9 @@ class Attention:
         if getattr(route, 'pool_mismatch', None) is not None:
             torch._assert_async(~route.pool_mismatch.any(),
                                 'compact pooled mu: row-varying legal key set; request must fail')
+        if self.protect_output:
+            protect_generated(route.skipped, self.prompt_keys)
+            self.protected_routes += 1
         return route
 
     def _route_dense_prefix(self, scores, projected, ref, pool, kwargs):
@@ -695,11 +722,11 @@ class Attention:
         from transformers.integrations.sdpa_attention import sdpa_attention_forward
         if self.bootstrap not in BOOTSTRAP_POLICIES:
             raise ValueError(self.bootstrap)
-        if self.fused_observe and self.step == 1:
+        if self.fused_observe and self.step == self.observe_step:
             return self._fused_bootstrap_observation(identity, layer, kind, q, k, v, mask, scale,
                                                      causal, window, crop, prefix, b, h, nq, nk)
         output = self._dense_native(native_args, native_kwargs, q, k, v, scale, window, causal)
-        if self.step == 0:
+        if self.step < self.observe_step:
             self.bootstrap_dense_calls += 1
             return output
         from .cache import Plan
@@ -977,7 +1004,8 @@ class Attention:
                     gated_native_calls=self.gated_native_calls, min_route_keys=self.min_route_keys,
                     layer_native_calls=self.layer_native_calls, shared_calls=self.shared_calls,
                     carry_canvases=self.carry_canvases, carried_calls=self.carried_calls,
-                    carry_snapshots=self.carry_snapshots,
+                    carry_snapshots=self.carry_snapshots, observe_step=self.observe_step,
+                    protect_output=self.protect_output, protected_routes=self.protected_routes,
                     fused_observations=self.fused_observations,
                     fresh_fused_calls=self.fresh_fused_calls,
                     pipelined_routes=self.pipelined_routes,

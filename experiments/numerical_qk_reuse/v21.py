@@ -55,6 +55,7 @@ RISK_BUDGETS = {'b0': 0.0, 'b2ln2': 2 * 0.6931471805599453, 'b4ln2': 4 * 0.69314
 # v27 target sparsity (M1-DP): kept fraction of the eligible prefix tiles, ranked by risk (sparsity = 1 - keep)
 RISK_TOPKS = {'k70': 0.7, 'k60': 0.6, 'k50': 0.5, 'k30': 0.3, 'k20': 0.2}
 CARRY_CANVASES = (2, 3, 4, 8)   # v27 cross-canvas carry: observe every K-th canvas, reuse the map in between
+OBSERVE_STEPS = (2, 3)   # v27 observation step: native canvas calls before the (fused) observation; 1 is the default
 THRESHOLD_SHIFTS = {'minus_3ln2': -3 * _LN2, 'minus_2ln2': -2 * _LN2, 'minus_ln2': -_LN2, 'plus_ln2': _LN2, 'plus_2ln2': 2 * _LN2,
                     'plus_3ln2': 3 * _LN2, 'plus_4ln2': 4 * _LN2}
 
@@ -80,7 +81,8 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      min_route_keys=None, route_layers=None, share_layers=None,
                      consumer64=None, memory_caps=None, fused_observe=False, fresh_fused=False,
                      route_pipeline=False, risk_state=None, density_gate=None, fa4_consumer=False,
-                     async_route=False, risk_budget=None, risk_topk=None, carry_canvases=None) -> dict:
+                     async_route=False, risk_budget=None, risk_topk=None, carry_canvases=None,
+                     observe_step=None, protect_output=False) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -187,6 +189,17 @@ def effective_config(base: dict, arm: str, scope: str, *,
                 or not fa4_consumer):
             raise ValueError('v27 cross-canvas carry needs the fused-observation FA4 bootstrap mainline')
         extra['carry_canvases'] = carry_canvases
+    if observe_step is not None:
+        # v27 observation step (named variant): dense native calls 0..observe_step-1, observation at observe_step
+        if (observe_step not in OBSERVE_STEPS or bootstrap_policy is None or fresh_fused or not fused_observe
+                or carry_canvases is not None):
+            raise ValueError('v27 observation step needs the fused-observation bootstrap mainline (no carry)')
+        extra['observe_step'] = observe_step
+    if protect_output:
+        # v27 output protection (named variant): generated-token key tiles are never skipped
+        if protect_output is not True or bootstrap_policy is None or fresh_fused or not fused_observe:
+            raise ValueError('v27 output protection needs the fused-observation bootstrap mainline')
+        extra['protect_output'] = True
     if density_gate is not None:
         # v27 density gate: sampler-state return to dense within a canvas (named variant)
         from .integration import DENSITY_GATES
@@ -342,6 +355,11 @@ def validate_effective(config: dict, condition: str):
     if 'carry_canvases' in config and (config['carry_canvases'] not in CARRY_CANVASES or 'fused_observe' not in config
                                        or 'fa4_consumer' not in config):
         raise ValueError('v27 cross-canvas carry identity drift')
+    if 'observe_step' in config and (config['observe_step'] not in OBSERVE_STEPS or 'fused_observe' not in config
+                                     or 'carry_canvases' in config):
+        raise ValueError('v27 observation step identity drift')
+    if 'protect_output' in config and (config['protect_output'] is not True or 'fused_observe' not in config):
+        raise ValueError('v27 output protection identity drift')
     if 'fa4_consumer' in config and (config['fa4_consumer'] is not True or 'consumer64' not in config):
         raise ValueError('v27 FA4 consumer identity drift')
     if 'async_route' in config and (config['async_route'] is not True or 'fused_observe' not in config):
@@ -436,6 +454,10 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('cross-canvas carry must be bound before any routed call')
             owner.carry_canvases = int(config['carry_canvases'])
+        if 'protect_output' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('output protection must be bound before any routed call')
+            owner.protect_output = True
         if 'density_gate' in config:
             from .integration import DENSITY_GATES
             if owner.cache.entries or owner.calls:
@@ -468,6 +490,11 @@ def install(adapter, config: dict, condition: str):
                 raise RuntimeError('bootstrap must be bound before any routed call')
             owner.bootstrap = config['bootstrap_policy']
             owner.cache.origin = 1
+        if 'observe_step' in config:
+            if owner.cache.entries or owner.calls or owner.bootstrap is None:
+                raise RuntimeError('observation step must be bound after the bootstrap and before any routed call')
+            owner.observe_step = int(config['observe_step'])
+            owner.cache.origin = owner.observe_step     # the score clock starts at the observation call
         owner.output_precision_extra_qk_elements_upper_bound = 0
         parent_counters = runtime['counters']
 
@@ -493,6 +520,8 @@ def install(adapter, config: dict, condition: str):
                         risk_state=getattr(owner, 'risk_state', 'kept'),
                         risk_budget=config.get('risk_budget'), risk_topk=config.get('risk_topk'),
                         carry_canvases=config.get('carry_canvases'),
+                        observe_step=getattr(owner, 'observe_step', 1),
+                        protect_output=bool(getattr(owner, 'protect_output', False)),
                         density_gate=config.get('density_gate'),
                         consumer=getattr(owner, 'consumer', None),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
