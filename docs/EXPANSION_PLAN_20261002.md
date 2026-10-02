@@ -158,16 +158,28 @@ LLaDA2.1-mini (upstream SGLang 0.5.21, `JointThreshold`, FlashInfer) does **not 
 - deep_ep imports need `CUDA_HOME`: pointed at the env's pip CUDA 13 package `.../site-packages/nvidia/cu13`;
 - FlashInfer JIT failed (CUDA compiler/headers incompatible): fixed by installing `flashinfer-jit-cache==0.6.18+cu130`
   (prebuilt kernels) into the env; `ninja` was also added to both SGLang envs;
-- **open:** SGLang's own JIT kernels (e.g. `sgl_kernel_jit_fused_rope`) fail to link (`ld returned 1`) with the pip CUDA
-  package. Next: install a full CUDA 13.0 toolkit into a dyh prefix (for example conda `cuda-toolkit=13.0` under
-  `/home/exouser/dyh/dlm_models_20261002/cuda13`) and set `CUDA_HOME` to it, then rerun the smoke test.
+- SGLang's own JIT kernels failed to link (`cannot find -lcudart`): the pip CUDA package has only
+  `lib/libcudart.so.13`. Fixed with a CUDA_HOME shim inside dyh, `/home/exouser/dyh/dlm_models_20261002/cuda13_shim`:
+  `bin`, `include`, `nvvm` and `cccl` link to the pip package, and `lib64` holds `libcudart.so` / `libnvrtc.so` links.
+  The `activation` JIT kernel then built.
+- **open:** a FlashInfer kernel outside the prebuilt cache still JIT-compiles and fails with "CUDA compiler and CUDA
+  toolkit headers are incompatible": FlashInfer's bundled CCCL does not match the pip nvcc.
+  Next options:
+  - install the nvcc/CUDA 13.x version FlashInfer 0.6.18 expects into the env (or a full CUDA 13 toolkit in a dyh
+    prefix);
+  - find which kernel is missing from `flashinfer-jit-cache` and whether `flashinfer-cubin` covers it;
+  - as a first smoke, try `--attention-backend fa3` (also official in SGLang). FlashInfer may still be used for
+    non-attention ops.
 - I-DLM-8B smoke: not run yet (same toolchain needs; config `src/I-DLM/inference/configs/idlm_blockN4_config.yaml`).
 
-**Cache hygiene for every SGLang/vLLM run** (dyh-only rule): set `SGLANG_CACHE_DIR`, `XDG_CACHE_HOME`,
+**Cache hygiene for every SGLang/vLLM run** (dyh-only rule): set `SGLANG_CACHE_DIR`, `SGLANG_JIT_CACHE_DIR` (JIT
+kernel builds; its default `~/.cache/sglang/jit` ignores `SGLANG_CACHE_DIR`), `TVM_FFI_CACHE_DIR`, `XDG_CACHE_HOME`,
 `TRITON_CACHE_DIR`, `TORCHINDUCTOR_CACHE_DIR`, `CUDA_CACHE_PATH`, `FLASHINFER_WORKSPACE_BASE`, `VLLM_CACHE_ROOT`,
 `HF_HOME` and `TMPDIR` to directories under `/home/exouser/dyh/dlm_models_20261002/`.
 - SGLang ignores `XDG_CACHE_HOME` for its own cache and wrote `~/.cache/sglang` on import (14:02 UTC) and during the
   smoke test (15:47 UTC).
 - One Triton cache entry (`~/.triton/cache/KJGB…`, 13:56 UTC) came from the I-DLM env's import check.
-- Both were created by these runs (timestamps match) and were removed at 15:49 UTC. Nothing else under the home
-  directory changed today.
+- Both were created by these runs (timestamps match) and were removed at 15:49 UTC.
+- A later smoke attempt recreated `~/.cache/sglang/jit` (2.2 MB, 15:50 UTC), because `SGLANG_JIT_CACHE_DIR` was not yet
+  set; it was removed at 15:52 UTC.
+- No `~/.cache/tvm-ffi` and no new `~/.triton` entries exist.
