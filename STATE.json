@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 01:45 (UTC-5)",
+    "updated_local": "2026-10-02 02:30 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -39,6 +39,20 @@
         "executions": 7872,
         "status": "running",
         "scoring": "scripts.v27_humaneval score on mpk, then scripts.v27_fa4_panel_summary"
+      },
+      {
+        "panel": "E13 v27_lb_q64_e13_f038777e0ab0d142",
+        "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_lb_q64_e13.json",
+        "deploy_tag": "v27_e13_4552f78",
+        "run_dir": "v27_lb_e13_001",
+        "hosts": [
+          "dllm",
+          "mpk",
+          "dlm2"
+        ],
+        "executions": 1062,
+        "status": "dllm running; dlm2 after E12; mpk after E12 scoring",
+        "scoring_label": "lb_e13"
       }
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
