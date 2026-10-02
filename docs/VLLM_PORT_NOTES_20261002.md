@@ -298,4 +298,24 @@ batch 1, `--block-size 32`, memory 0.85).
     native fallback);
   - `effective_method` is identical to the panels'.
 - At 32K the method is 0.96× of vLLM's default dense per step. That is only a smoke result; 32K is the weakest
-  length. A 64K smoke is running.
+  length.
+
+**4. vLLM smoke, LongBench-v2 64K** (`smoke_4.jsonl`; one item of 71.5K prompt tokens × 2 runs per arm; memory 0.90).
+
+| arm | per step (median, ms) | GLOBAL call (mean, ms) | prefill (s) | steps / wall (s) |
+|---|---:|---:|---:|---|
+| vLLM dense, default cudagraphs | 40.18 / 40.18 | – | 2.40 | 126 / 7.28, 120 / 7.04 |
+| vLLM dense, PIECEWISE | 40.78 / 40.19 | – | 2.40 | 106 / 6.53, 88 / 5.77 |
+| adapter all-kept, split consumer | 40.00 / 40.12 | 1.75 | 2.40 | 76 / 5.30, 89 / 5.81 |
+| **method (main)** | **34.56 / 34.03** | 0.96 | 2.40 | 94 / 5.72, 94 / 5.72 |
+
+- **Per step, the method is 0.85× of vLLM's own default dense serving at 64K, inside vLLM.** All-kept through the
+  adapter equals dense, so the adapter costs nothing measurable.
+- Step counts differ between runs because vLLM cannot fix per-request seeds. Request-level ratios therefore need
+  many items; per-step is the robust smoke metric.
+- With equal step counts (120), an illustrative end-to-end figure is
+  (2.40 + 120 × 34.3 ms) / (2.40 + 120 × 40.2 ms) ≈ 0.90.
+  This is an ESTIMATE, not a measured panel ratio. Prefill is not optimized, and its share is larger in vLLM.
+- **Next:** a vLLM panel on many items at 32K / 64K / 96K, with accuracy scored from the private completions.
+  - Arms: vLLM dense (default) and method; all-kept on a subset.
+  - Memory: 96K needs memory 0.92 and a check that the method's score cache fits.

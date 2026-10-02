@@ -29,9 +29,10 @@
   FA4 分页 KV + block-sparse 读错页的 bug 已在 dyh 的 vLLM 环境里修好（patches/，页大小 64，对 dense 无影响）；
   下一步是把 block-sparse 接进 vLLM 的 FA4 调用，再把方法接进 diffusion_gemma.py。
 - regroup 系列已关闭：64 行 map 只带来每步 0.4–0.7% 的改善，任何重排都不超过约 5%。
-- P16：64K 精度差主要是挑选噪声（最差 3 题在新种子上 −20pp → −8pp，p 0.58；6 题总计 45 vs 44）。输出保护和 −2ln2 不采用。
-- P17：组员的 C gate（合作，已移植）不采用：同阈值下 64K/96K 每步慢 7–10%，精度无提升。
-- 当前 GPU 空闲；R17 RULER（32K/64K/92K，V 秩变体）数据在 dllm 上用 CPU 生成，生成完冻结后上三台机。
+- P16：64K 精度差主要是挑选噪声；P17：组员的 C gate 不采用；R17：RULER 32K/64K/92K 主方法精度全保住，V 项彻底收为负结果。
+- 方法已能在 vLLM 里原样运行（experiments/numerical_qk_reuse/vllm_adapter.py）。冒烟结果：相对 vLLM 默认 dense，每步 32K 为 0.96×，64K 为 0.85×。
+- 重要更正：vLLM 的 dense GLOBAL 调用走 FA4 的 dynamic-causal + split-KV，比我们 HF 面板用的 dense 配置快约 1.65×。所以 HF 底座上的加速比相对最强官方 dense 偏高（精度结论不受影响），论文的速度证据以 vLLM 面板为准。
+- 当前 GPU 空闲。下一步是 vLLM 面板（多题、带精度打分），见 HANDOFF。
 - 扩展：新模型 LLaDA2.1-mini、I-DLM-8B 的官方环境、权重和 LongBench Pro 数据已在 dllm 的 /home/exouser/dyh/dlm_models_20261002 就绪，
   UltraLLaDA 已放弃。计划见 docs/EXPANSION_PLAN_20261002.md。
 

@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 13:30 (UTC-5)",
+    "updated_local": "2026-10-02 16:20 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -17,12 +17,7 @@
     "substrate": "piecewise_v5",
     "dense_reference": "D_fa4_allkept (FlashAttention-4, vLLM fork, block-sparse interface with every tile kept)",
     "headline": "M3 R6 DP -ln2 + carry_first vs D_fa4_allkept (18 seeds, E13+E14+E15): W 0.950/0.867/0.818 at 32K/64K/96K, S 0.937/0.787/0.728, accuracy not lower; vs our HF-based substrate only (vLLM port pending)",
-    "running": [
-      {
-        "job": "R17 RULER 92K data generation (CPU, dllm)",
-        "gpu": false
-      }
-    ],
+    "running": [],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
@@ -165,11 +160,10 @@
       "port_status": "blocked: FA4 block-sparse over paged KV reads wrong pages (vllm_port_probe_1002); options in HANDOFF"
     },
     "next_steps": [
-      "vLLM port: add block-sparse to vLLM FA4 dispatch at --block-size 32 (GLOBAL page 64; paged block-sparse fixed by patches/)",
-      "vLLM port: hook method into diffusion_gemma.py; remeasure vs vLLM dense",
-      "upstream FA4 PR (needs user go-ahead and GitHub account)",
-      "new models: fix FlashInfer JIT (nvcc/CCCL) then official dense smoke + baseline candidate timing",
-      "RULER R17 (32K/64K/92K x 130; V-rank variants at 88%/95%; 96K rows exceed the ~95K one-H100 fit)",
+      "vLLM panel: LB-v2 32K/64K/96K many items x repeats, vLLM dense (default) vs method (PIECEWISE), accuracy from private completions",
+      "upstream FA4 reports x3 (needs user go-ahead and GitHub account)",
+      "new models: LLaDA2.1-mini SGLang smoke on GPU (FlashInfer JIT fixed), I-DLM-8B smoke, baseline timing, thin adapters",
+      "optional: HF-substrate rerun with dynamic-causal dense and alias-split sparse",
       "AIME 32K-budget long-output preview",
       "LongBench Pro official eval code; RULER 8K manifests"
     ],
@@ -186,6 +180,20 @@
       "verdict": "C gate (group member design, collaboration) not adopted: per step 1.07/1.10 vs T at 64K/96K (-ln2), 1.03/1.02 at base threshold; no accuracy gain (preview, 44 cells per arm)",
       "source": "results/m1_m2_m3_frontier_v27_20260929/cgate_preview_p17/receipts.md",
       "gpu_seconds": 3200
+    },
+    "r17": {
+      "verdict": "main keeps RULER accuracy 32K/64K/92K (110/98/91 vs dense 110/97/91); fixed 88%/95% lose only at 32K (cwe); V term closed (mass-only >= rank 32; 95%/32K 107 vs 101, p 0.031)",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/ruler_long_panel_r17/receipts.md",
+      "gpu_seconds": 16852
+    },
+    "vllm_port": {
+      "status": "method runs inside vLLM 0.30.0 via experiments/numerical_qk_reuse/vllm_adapter.py (unchanged core, frozen main config)",
+      "smoke_per_step_vs_vllm_default_dense": {
+        "32k": 0.96,
+        "64k": 0.85
+      },
+      "dense_baseline_correction": "vLLM dense GLOBAL call (FA4 dynamic-causal, effective 2-way split) is ~1.65x faster than the num_splits=1 FA4 config used as D_fa4_allkept in HF panels; HF speed ratios overstate the gain vs the strongest official dense",
+      "source": "docs/VLLM_PORT_NOTES_20261002.md"
     }
   },
   "task": "M3 output numerics and trajectory isolation",

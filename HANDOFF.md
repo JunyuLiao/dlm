@@ -23,27 +23,25 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
     using it.
 
-## Situation at handoff (2026-10-02 13:30 UTC−5)
+## Situation at handoff (2026-10-02 16:20 UTC−5)
 
-**Running (2026-10-02 13:36 UTC−5): R17** (`specs/v27_ruler_long_r17.json`, spec commit 6064109, deploy
-`v27_r17_6064109`, run dir `v27_r17_001`, frozen dir `v27_r17_frozen`).
-- RULER 32K / 64K / 92K × 130 rows × seed 404 × 8 arms = 3,120 runs on dllm, mpk and dlm2. Stage order: 92K, 64K,
-  32K.
-- The coordinator chain `r17_chain.sh` scores it when all three hosts end:
-  `python v27_score_long.py --tag v27_r17_6064109 --run-dir v27_r17_001 --label r17 --dllm-ends 3 --with-mpk --mpk-ends 3 --also dlm2 --also-ends 3 --extra ruler32k_r17=<gold> ruler64k_r17=<gold> ruler92k_r17=<gold>`.
-  The gold files are in `/home/exouser/dyh/ruler_long_v27_r17/` on dllm. Outputs go to
-  `E:/dlm/v27_private/long_scoring/r17/`.
-- Queued on dllm after R17: `scripts/v27_vllm_varlen_sparse_isolate.py` (see the vLLM port notes).
+**Running (2026-10-02 16:20 UTC−5):** nothing; all GPUs idle.
+- **R17 finished** (`ruler_long_panel_r17/receipts.md`, L1p).
+  - Main keeps RULER accuracy at 32K / 64K / 92K (110 / 98 / 91 vs dense 110 / 97 / 91).
+  - Fixed 88% / 95% lose only at 32K (`cwe`).
+  - The V term is closed: mass-only is as good or better (95% / 32K: 107 vs 101, p 0.031).
+- **The method now runs inside vLLM** (`experiments/numerical_qk_reuse/vllm_adapter.py`; notes in
+  `docs/VLLM_PORT_NOTES_20261002.md`). It runs the unchanged core with the frozen main config; receipts match the panels.
+  - Smoke results against vLLM's own default dense serving, per step: **0.96× at 32K, 0.85× at 64K**.
+  - The adapter's all-kept arm equals dense.
+- **Dense-baseline correction (important).** vLLM's dense GLOBAL call uses FA4's dynamic-causal path with an
+  effective 2-way split-KV and is about 1.65× faster than the FA4 configuration our HF panels used as `D_fa4_allkept`.
+  - The HF-substrate speed ratios (E4–E15, the result block below) therefore overstate the gain against the
+    strongest official dense.
+  - Their accuracy results stand. Speed claims for the paper must come from vLLM.
+- P16 / P17 finished earlier: the 64K accuracy gap is selection noise; the C gate is not adopted.
 
-- **P16 finished** (`lb64_item_check_p16/receipts.md`, ledger L1n). The 64K accuracy gap is mostly selection noise:
-  on the 3 worst items it goes from −20 pp in discovery to −8 pp on 12 fresh seeds (p 0.58). Over 6 items main equals
-  dense (45 vs 44). Output protection and −2ln2 are not adopted.
-- **P17 finished** (`cgate_preview_p17/receipts.md`, ledger L1o). The C gate (group member's design; collaboration)
-  is not adopted. At −ln2 it is 7–10% slower per step than T at 64K/96K, it is +2–3% at the base threshold, and it
-  shows no accuracy gain.
-- E15 is scored (`c01_panel_e15/receipts.md`, L1m). c01 is not adopted.
-
-**Main result (18 seeds, E13 + E14 + E15; L1m).** M3 R6 DP −ln2 + `carry_first` vs dense FA4:
+**HF-substrate result (18 seeds, E13 + E14 + E15; L1m; dense = FA4 num_splits=1, see the correction above).** M3 R6 DP −ln2 + `carry_first` vs that dense:
 - end-to-end W **0.950 [0.920, 0.980] (32K), 0.867 [0.841, 0.892] (64K), 0.818 [0.731, 0.898] (96K)**;
 - generation-only S 0.937 / 0.787 / 0.728, per step 0.921 / 0.814 / 0.745;
 - accuracy not lower: 267/274, 228/238, 93/76; at 96K sparse is higher, p 0.012.
@@ -179,7 +177,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Running
 
-- R17 (see the situation section).
+- Nothing.
 
 ## Blockers
 
@@ -187,56 +185,29 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Immediate next steps (in order)
 
-1. ~~Score E15~~ done: c01 not adopted; main pooled over 18 seeds (L1m).
-   - Decide on c01 from the per-step ratio (direct timing exists at kernel level in `observe_split_1002/`), the
-     steps-per-canvas ratio (P15 hinted 1.107 at 64K) and accuracy, including AIME.
-   - Pool M3 + c0 / dense over E13 + E14 + E15.
-2. **vLLM port, step 2** (design notes: `docs/VLLM_PORT_NOTES_20261002.md`). **Paged block-sparse fixed at page 64**
-   (`patches/`, verified exact). GLOBAL page 64 (`--block-size 32`) is 2% FASTER than vLLM's default for dense, so
-   both arms use it. Next: add block-sparse to vLLM's FA4 dispatch. Earlier notes for this step:
-   - The contiguous-view shortcut is ruled out: vLLM's GLOBAL KV pages are 32 tokens and block tables are
-     non-contiguous from the first request (`vllm_port_probe_1002/block_table_probe.json`).
-   - Patch FA4's paged block-sparse path (CuTe kernel in `vllm/vllm_flash_attn/cute`) inside the dyh vLLM env:
-     - add `block_sparse_tensors` to vLLM's dense dispatch;
-     - translate sparse n-blocks through the page table at page 32, or use page 64 for the GLOBAL group;
-     - regression tests: `scripts/v27_vllm_paged_sparse_probe2.py` / `probe3.py`;
-     - report upstream.
-   - Alternative: FlashInfer BSR over paged KV, if its hd 512 SM90 speed is close to FA4's.
-3. **vLLM port, step 3:** hook the method into `vllm/model_executor/models/diffusion_gemma.py`.
-   - Map the canvas/step schedule (call 0 carried map, call 1 observation, held maps, re-decisions).
-   - The observation kernel must read the paged cache.
-   - T needs the per-position argmax flips from vLLM's compiled sampler (`_compiled_sample_step`).
-   - Then rerun dense vs M3 + c0 on vLLM with many items. vLLM rejects per-request seeds for diffusion models, so
-     trajectories cannot be paired by seed; use many items and report distributions plus per-step direct timing.
-4. **New models** (`docs/EXPANSION_PLAN_20261002.md`, sections "Official dense smoke status" and cache hygiene):
-   - First get the LLaDA2.1-mini SGLang smoke running. The CUDA_HOME shim fixed SGLang's JIT linking; one FlashInfer
-     kernel still JIT-compiles against mismatched headers (options in the plan). Always set the dyh cache variables
-     listed there, including `SGLANG_JIT_CACHE_DIR` and `TVM_FFI_CACHE_DIR`; SGLang otherwise writes `~/.cache/sglang`.
-   - official dense smoke runs and baseline-candidate timing: LLaDA2.1-mini on SGLang (FlashInfer/FA3/Triton
-     backends) vs dInfer; I-DLM-8B on its bundled SGLang;
-   - then thin adapters with a model-independent core (user rule: clean code structure).
-5. **RULER R17** (accuracy only): 32K / 64K / 92K × 13 tasks × 10 samples (130 rows per length), seed 404.
-   - Arms: dense, main, and fixed 88% (k12) at V rank 32 / 8 / 4 and mass-only, plus fixed 95% (k5) at rank 32 and
-     mass-only.
-   - Data: pinned RULER generator, seed 1717, on dllm (`/home/exouser/dyh/ruler_long_v27_r17`, CPU only).
-   - **96K was replaced by 92K (94,208 tokens).** The 96K rows are 97.5K–98.2K prompt tokens. Our HF-based substrate
-     OOMs above about 95K for every arm, dense included (c2: 95,074 ran, 98,282 OOMed). 92K keeps every row under
-     95,074, the same range as our LongBench "96K" bin.
-6. **Upstream FA4 report** (`docs/VLLM_PORT_NOTES_20261002.md`): the same bug is in Dao-AILab `main`. A PR with the
-   fix and a regression test is waiting for the user's go-ahead and choice of GitHub account.
-7. ~~Port the group member's C gate~~ done (P17, L1o): not adopted. The design note's gate is cited as
-   collaboration. If the group member wants a full panel, it needs about 18 seeds.
-8. **Short-prompt positioning and an AIME long-output preview.**
-   - Like SparseD and PulseCol, we use short-prompt tasks (HumanEval, AIME at an 8K budget) as accuracy checks only.
-     With an 8K budget GLOBAL attention is at most about 5% of a step: dense AIME output has a median of 6.3K tokens,
-     and the top 10% hit the 8,192 cap.
-   - A gain on short-prompt tasks needs long outputs (as in AR reasoning-sparsity work at about 32K generation).
-   - Proposed preview: AIME 30 × 2 seeds at a 32K thinking budget, dense vs main.
-9. **Datasets:**
-   - LongBench Pro is inventoried (`docs/EXPANSION_PLAN_20261002.md`: 1,500 samples, 250 per length level, EN/ZH,
-     25 tasks). Next: fetch its official evaluation code (GitHub `caskcsg/longcontext`) and the summarization
-     embedding model, then freeze the 32k/64k/128k (DiffusionGemma) and 8k–32k (new models) subsets;
-   - generate RULER 8K manifests with the pinned RULER on dllm (4K exists).
+1. **vLLM panel (the paper's speed evidence).** Use `scripts/v27_vllm_method_bench.py`; the GPU smoke recipe is in the
+   vLLM notes.
+   - LongBench-v2 32K / 64K / 96K, many items × repeats. vLLM cannot fix per-request seeds, so use items × repeats
+     and report per-step and request distributions.
+   - Arms: vLLM dense (default cudagraphs) vs method (PIECEWISE). All-kept on a subset as the adapter-cost control.
+   - Accuracy: score the private completions with the same LongBench scorer as the panels. This needs a small
+     scoring script.
+   - 96K: memory 0.92; check that the method's score cache fits next to vLLM's full-length KV.
+2. **Upstream FA4 reports (waiting for the user's go-ahead and GitHub account).** There are three SM90 issues:
+   - paged block-sparse reads logical pages (fixed locally, `patches/`);
+   - varlen block-sparse offsets use tile_n 128 (one-line fix, cause confirmed);
+   - block-sparse and non-causal split-KV redo the whole range in every split.
+3. **New models.** The FlashInfer JIT is fixed (CUDA 13.0 nvcc shim). Next:
+   - run the LLaDA2.1-mini SGLang smoke on a GPU;
+   - run the I-DLM-8B smoke;
+   - time the baseline candidates;
+   - write thin adapters (the vLLM adapter shows the pattern: stub hooks around the unchanged core).
+4. **Optional HF-substrate rerun.** Make the HF dense control the dynamic-causal split path, and give the HF sparse
+   consumer the alias split, if the HF panels are still to be quoted for speed.
+5. **Short-prompt positioning and an AIME long-output preview** (unchanged; see DECISIONS).
+6. **Datasets:**
+   - LongBench Pro official evaluation code and subsets;
+   - RULER 8K manifests for the new models.
 
 ## Intake audit (2026-10-01, 22:45 UTC−5)
 
