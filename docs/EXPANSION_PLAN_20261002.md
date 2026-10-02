@@ -28,6 +28,26 @@ known SOTA serving path. This file records the survey and the proposal; decision
   - `models/`, `datasets/LongBench-Pro`, each with its HF revision recorded;
   - every pip/HF/XDG/tmp cache stays inside that directory.
 
+## Baseline selection protocol (user rule: official or SOTA, presentable in a paper)
+
+For every model:
+- Benchmark all official dense serving candidates at the model's real geometry: batch 1, bf16, the panel's context
+  lengths, same prompts and stopping.
+- Use the fastest correctness-equivalent one as the dense reference, and state why each excluded candidate is out.
+- Build the sparse method as a modification of that reference's attention kernel (its block-sparse interface), so
+  dense and sparse differ only in skipped blocks.
+
+| model | dense candidates | status |
+|---|---|---|
+| DiffusionGemma | (1) ours: HF model + piecewise_v5 substrate + FA4 all-kept (`D_fa4_allkept`); (2) HF official compiled path; (3) **vLLM 0.30.0 native DiffusionGemma** (official serving, merged 2026-06; FA4 at hd512 on SM90); (4) SGLang (forces Triton attention at hd512) | (2) is measured slower: 44–56 ms/step at 17K–32K, OOM at 60K (`official_baseline/official_compiled_path.jsonl`). **(3) has never been measured end to end, a gap in the current evidence.** If vLLM is faster per step at our lengths, port the method into vLLM's attention call or re-base the speed claims on it. vLLM env C is added to the setup. |
+| LLaDA2.1-mini | (1) upstream SGLang 0.5.21 (JointThreshold) with FlashInfer / FA3 / Triton backends; (2) **dInfer** (inclusionAI's own framework; LLaDA2.1-mini path through its SGLang backend); (3) HF transformers remote code (correctness reference) | vLLM's dllm-plugin is excluded: it needs a vLLM fork branch, and its LLaDA2 model logic is unfinished per its docs |
+| I-DLM-8B | its bundled SGLang (IDLMBlockN / ISD) with FlashInfer / FA3 / Triton backends | transformers loading is unsupported per the model card; this is the only official path |
+
+Sparse baselines: official code where it exists, ported (and labelled as ports) where it does not.
+- Block diffusion with a KV cache (LLaDA2.1-mini, I-DLM/SDAR): MAGE (no code; port), LoSA, Quest (official,
+  FlashInfer), SparseD (official; full-recompute regime, port the rule), PulseCol.
+- Each choice is re-checked against current preprints before the panel is frozen.
+
 ## What the closest papers evaluate (checked against the papers)
 
 | paper | venue / date | models | accuracy benchmarks | lengths for accuracy | speed claim |
