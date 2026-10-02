@@ -25,7 +25,16 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Situation at handoff (2026-10-02 12:25 UTC−5)
 
-**Running:** nothing. All GPUs idle (2026-10-02 12:25 UTC−5).
+**Running (2026-10-02 12:45 UTC−5): P16** (`specs/v27_lb64_item_check_p16.json`, protocol
+`v27_lb64_item_check_p16_4d31029328774e37`, 288 runs on dllm, mpk and dlm2, run dir `v27_p16_001`, deploy
+`v27_p16_959ae20`). It is a held-out check of the 64K accuracy gap: main 228 vs dense 238 of 432 over E13–E15,
+item-clustered p 0.29.
+- 6 items frozen from E13–E15 (`E:/dlm/v27_private/p16_selection.json`): the 3 most-negative and 3 most-positive
+  main-minus-dense items.
+- 12 never-used seeds (2222–3333).
+- Arms: dense, main, main + output protection, main at −2ln2.
+- Score: `python v27_score_lb.py --tag v27_p16_959ae20 --run-dir v27_p16_001 --label p16 --dllm-ends 1 --mpk-ends 1 --also dlm2 --also-ends 1 --bins 64k`.
+- Earlier status line: nothing else running.
 - E15 finished and is scored (`c01_panel_e15/receipts.md`, `docs/RESULTS_LEDGER.md` L1m).
 - c01 is not adopted: negligible per-step gain and an accuracy risk at 64K.
 

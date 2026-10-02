@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 12:25 (UTC-5)",
+    "updated_local": "2026-10-02 12:45 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -17,7 +17,20 @@
     "substrate": "piecewise_v5",
     "dense_reference": "D_fa4_allkept (FlashAttention-4, vLLM fork, block-sparse interface with every tile kept)",
     "headline": "M3 R6 DP -ln2 + carry_first vs D_fa4_allkept (18 seeds, E13+E14+E15): W 0.950/0.867/0.818 at 32K/64K/96K, S 0.937/0.787/0.728, accuracy not lower; vs our HF-based substrate only (vLLM port pending)",
-    "running": [],
+    "running": [
+      {
+        "panel": "P16 v27_lb64_item_check_p16_4d31029328774e37",
+        "hosts": [
+          "dllm",
+          "mpk",
+          "dlm2"
+        ],
+        "deploy_tag": "v27_p16_959ae20",
+        "run_dir": "v27_p16_001",
+        "executions": 288,
+        "scoring_label": "p16"
+      }
+    ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
