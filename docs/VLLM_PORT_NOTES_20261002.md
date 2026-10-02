@@ -70,3 +70,16 @@ relative to its `site-packages/vllm`.
    - vLLM dense vs vLLM + M3 + c0 on the same items. Panels cannot pair by seed, so use many items × repeats.
    - Report the full metric set plus a direct per-forward timing on common states (no seed pairing).
    - Keep vLLM's chunked-prefill and memory settings identical across arms.
+
+## Update: the paged block-sparse bug is fixed (2026-10-02, `patches/`)
+
+- **Cause:** FA4's SM90 block-sparse producer handed logical KV-block indices to the paged TMA load.
+- **Fix:** translate them through the page table, as the dense path does. A 30-line patch in our dyh vLLM env.
+- **Verified:** paged block-sparse now equals contiguous exactly (page size 64).
+- **Remaining for the port:**
+  1. Run vLLM's GLOBAL KV group at page size 64 (TMA path) and check that vLLM dense is not slower than at its default
+     page 32. If it is slower, the dense arm keeps page 32 and we also need a cp.async block-sparse port.
+  2. Add `block_sparse_tensors` to vLLM's FA4 dense dispatch.
+  3. Hook the method into `diffusion_gemma.py`.
+  4. Measure vLLM dense vs vLLM + M3 + c0.
+  5. With the user's go-ahead, report the bug and the patch upstream.

@@ -189,7 +189,9 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
    - Decide on c01 from the per-step ratio (direct timing exists at kernel level in `observe_split_1002/`), the
      steps-per-canvas ratio (P15 hinted 1.107 at 64K) and accuracy, including AIME.
    - Pool M3 + c0 / dense over E13 + E14 + E15.
-2. **vLLM port, step 2** (design notes: `docs/VLLM_PORT_NOTES_20261002.md`): make block-sparse work on vLLM's cache.
+2. **vLLM port, step 2** (design notes: `docs/VLLM_PORT_NOTES_20261002.md`). **Paged block-sparse fixed at page 64**
+   (`patches/`, verified exact). Next: vLLM GLOBAL KV at page 64 vs its default 32 for dense speed; then add
+   block-sparse to vLLM's FA4 dispatch. Earlier notes for this step:
    - The contiguous-view shortcut is ruled out: vLLM's GLOBAL KV pages are 32 tokens and block tables are
      non-contiguous from the first request (`vllm_port_probe_1002/block_table_probe.json`).
    - Patch FA4's paged block-sparse path (CuTe kernel in `vllm/vllm_flash_attn/cute`) inside the dyh vLLM env:

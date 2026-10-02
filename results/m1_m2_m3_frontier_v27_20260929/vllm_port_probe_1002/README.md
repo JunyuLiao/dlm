@@ -46,3 +46,12 @@ Alternatives:
 - change vLLM's KV block size for the GLOBAL group to 64 and fix only the TMA paged block-sparse path;
 - use a different official kernel with paged block-sparse support (FlashInfer BSR; its hd 512 SM90 speed is
   unverified).
+
+## Fix (same day): paged block-sparse corrected at page size 64
+
+- Patch: `patches/vllm_0.30.0_fa4_sm90_paged_block_sparse_tma.patch`. The block-sparse producer now translates sparse
+  KV-block indices through the page table, like the dense path.
+- With fresh compile caches, paged block-sparse equals contiguous block-sparse exactly: max abs vs fp32 3.4e-4,
+  4.6e-4 and 3.3e-4 at keys 65,536 / 65,000 (partial last tile, also passed as a mask block); unused pages hold other
+  data.
+- Page sizes 32 and 128 still fail through the raw entry (cp.async path, a separate gap).
