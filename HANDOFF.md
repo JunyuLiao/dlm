@@ -135,7 +135,10 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - weights, and the LongBench Pro data.
   Next: official dense smoke runs, then model adapters with a clean core/adapter split.
 - **R16 done** (`docs/RESULTS_LEDGER.md` L1l): RULER 32K/64K accuracy preserved; no V-term difference.
-- **vLLM dense check running** on dllm (`scripts/v27_vllm_dense_bench.py`, vLLM 0.30.0, the same E14 dense cells).
+- **vLLM dense check done** (`vllm_dense_check_1002/README.md`).
+  - Official vLLM serving is faster than our dense control: per step 0.76× / 0.90× / 0.98× at 32K / 64K / 96K,
+    prefill about 0.5×.
+  - Paper-grade speed claims need the method ported into vLLM (next main engineering item).
 - **P15 done** (`c01_preview_p15/receipts.md`): no accuracy drop; c01 per step 0.91 (AIME) and 0.949 (64K).
 - **E15 running** (`specs/v27_c01_e15.json`, protocol `v27_c01_e15_e83919d6411343b2`, 1,602 runs):
   - arms: dense, M3 + c0, M3 + c0 + c01;
