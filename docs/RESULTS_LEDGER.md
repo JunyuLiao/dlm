@@ -197,6 +197,25 @@ M2c (tile-mean projected V) on exactly the M3 R6 DP −ln2 + `carry_first` pipel
 - **Source.** `lb_m2opt_panel_e10/summary.md`, `receipts.md`; spec `specs/v27_lb_m2opt_e10.json`, protocol
   `v27_lb_m2opt_e10_c965792c1cb6542d`, deploy `v27_e10_4252356`.
 
+### L1h. E11 V-term preview at 95% sparsity: LongBench-v2 64K, 24 items × seeds 404/505 = 48 cells per arm (piecewise_v5; preview)
+
+M3 R6 DP + `carry_first` at `risk_topk='k5'` (keep 5% of eligible prefix tiles; new named keep, code `9d8ae5e`).
+
+| arm | W [CI] | S | per-step S/N | N [CI] | acc (dense 23) |
+|---|---|---:|---:|---|---:|
+| projected V, rank 32 | 0.887 [0.810, 0.960] | 0.807 | 0.764 | 1.06 [0.91, 1.21] | 24 |
+| M2c tile mean | 0.905 [0.831, 0.985] | 0.839 | 0.761 | 1.10 | 26 |
+| attention mass only | 0.891 [0.818, 0.964] | 0.833 | 0.760 | 1.10 [0.97, 1.24] | 26 |
+
+- **Even at 95% sparsity there is no V advantage and no accuracy loss** (48 cells): mass / rank 32 W 1.004
+  [0.916, 1.099], accuracy +5/−3 (p 0.73); every arm vs dense p ≥ 0.51.
+- Per-step cost improves to 0.76 (0.78 at 88%), but steps rise slightly (n.s.), so request W ≈ 0.89, not better than
+  the 88% operating point (0.85).
+- **Integrity.** 192/192 ok, one host per cell, no timed new graphs; receipts show `k5`, `carry_first`, and the intended
+  `mu_mode` / `risk_value`. k5 unit test passes on dlm2.
+- **Source.** `lb64_vterm_hi_panel_e11/summary.md`, `receipts.md`; spec `specs/v27_lb64_vterm_hi_e11.json`, protocol
+  `v27_lb64_vterm_hi_e11_18d29fa43d5d11a9`, deploy `v27_e11_9d8ae5e`.
+
 ### Time breakdown on piecewise_v5 (2026-10-01): one real dense decoder call per workload
 
 `scripts/v27_time_breakdown.py` on the frozen E7 (AIME, request 0, call 55) and E5 (32K/64K, request 0, call 5)

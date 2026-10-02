@@ -3,7 +3,7 @@ step-count check, AIME cost structure, and the V-term controls. Panel ratios are
 files (not hand-copied); static numbers (kernel timings, time breakdown, step-count check) cite their files in the
 speaker notes.
 
-Writes results/m1_m2_m3_frontier_v27_20260929/ppt_sample/dlm_sparse_attention_20261001_compact_v4.pptx.
+Writes results/m1_m2_m3_frontier_v27_20260929/ppt_sample/dlm_sparse_attention_20261001_compact_v5.pptx.
 """
 import csv
 import json
@@ -237,17 +237,20 @@ def p_select():
     def cell(panel, arm, key):
         r = get(panel, arm) if arm else None
         return '—' if r is None else (r['correct'] if key == 'acc' else f3(r['W']))
-    V = [('投影 V 32 维（M1/M3 的做法）', 'M3_R6_A64_fused_dp_async_topk70_fa4', 'M3_R6_A64_fused_dp_async_topk88_c0_fa4'),
-         ('投影 V 16 维', 'M3_R6_A64_fused_dp_async_topk70_r16_fa4', None),
-         ('投影 V 8 维', 'M3_R6_A64_fused_dp_async_topk70_r8_fa4', 'M3_R6_A64_fused_dp_async_topk88_r8_c0_fa4'),
-         ('投影 V 4 维', 'M3_R6_A64_fused_dp_async_topk70_r4_fa4', None),
-         ('块内简单平均 V（M2 的做法）', 'M2c_R6_A64_fused_dp_async_topk70_fa4', 'M2c_R6_A64_fused_dp_async_topk88_c0_fa4'),
-         ('不看 V（只看注意力）', 'M3_R6_A64_fused_dp_async_topk70_mass_fa4', 'M3_R6_A64_fused_dp_async_topk88_mass_c0_fa4'),
-         ('SparseD 70%（外部论文，移植）', 'SparseD_s70_skip1_fa4', None)]
-    tab = [['选块时 V 怎么用', f'64K 答对（dense {get(e9, D)["correct"]}）', '64K 端到端 W',
-            f'AIME 答对（dense {get(e8, D)["correct"]}）', 'AIME 端到端 W']]
-    for name, a8, a9 in V:
-        tab.append([name, cell(e9, a9, 'acc'), cell(e9, a9, 'w'), cell(e8, a8, 'acc'), cell(e8, a8, 'w')])
+    e11 = 'lb64_vterm_hi_panel_e11'
+    V = [('投影 V 32 维（M1/M3 的做法）', 'M3_R6_A64_fused_dp_async_topk70_fa4', 'M3_R6_A64_fused_dp_async_topk88_c0_fa4', 'M3_R6_A64_fused_dp_async_topk95_c0_fa4'),
+         ('投影 V 16 维', 'M3_R6_A64_fused_dp_async_topk70_r16_fa4', None, None),
+         ('投影 V 8 维', 'M3_R6_A64_fused_dp_async_topk70_r8_fa4', 'M3_R6_A64_fused_dp_async_topk88_r8_c0_fa4', None),
+         ('投影 V 4 维', 'M3_R6_A64_fused_dp_async_topk70_r4_fa4', None, None),
+         ('块内简单平均 V（M2 的做法）', 'M2c_R6_A64_fused_dp_async_topk70_fa4', 'M2c_R6_A64_fused_dp_async_topk88_c0_fa4', 'M2c_R6_A64_fused_dp_async_topk95_c0_fa4'),
+         ('不看 V（只看注意力）', 'M3_R6_A64_fused_dp_async_topk70_mass_fa4', 'M3_R6_A64_fused_dp_async_topk88_mass_c0_fa4', 'M3_R6_A64_fused_dp_async_topk95_mass_c0_fa4'),
+         ('SparseD 70%（外部论文，移植）', 'SparseD_s70_skip1_fa4', None, None)]
+    tab = [['选块时 V 怎么用', f'64K 跳 88%：答对（dense {get(e9, D)["correct"]}）', '端到端 W',
+            f'64K 跳 95%：答对（dense {get(e11, D)["correct"]}，预览）', '端到端 W',
+            f'AIME 跳 70%：答对（dense {get(e8, D)["correct"]}）', '端到端 W']]
+    for name, a8, a9, a11 in V:
+        tab.append([name, cell(e9, a9, 'acc'), cell(e9, a9, 'w'), cell(e11, a11, 'acc'), cell(e11, a11, 'w'),
+                    cell(e8, a8, 'acc'), cell(e8, a8, 'w')])
     d32, d64 = get(e10, D, L32), get(e10, D, L64)
     tab2 = [['当前工作点（阈值 −ln2 + carry0，其余优化全相同）', '32K 端到端 W [95% CI]', 'S / 每步 / N',
              f'答对({d32["correct"]})' if d32 else '答对', '64K 端到端 W [95% CI]', 'S / 每步 / N',
@@ -256,11 +259,12 @@ def p_select():
         r32, r64 = get(e10, arm, L32), get(e10, arm, L64)
         tab2.append([name] + (trip(r32) if r32 else ['运行中', '', '']) + (trip(r64) if r64 else ['运行中', '', '']))
     page('5. 选块要不要看 V、M2 还是 M3：同稀疏度下没有可分辨的差别',
-         '上表：固定稀疏度，只换风险里的 V 项。64K = M3 优化版 + carry0、固定保留 12%（= 主线 64K 工作点），24 题 × 4 seed = 96 格/组；'
+         '上表：固定稀疏度，只换风险里的 V 项。64K = M3 优化版 + carry0，跳 88%（= 主线工作点，96 格/组）与跳 95%（预览，48 格/组）；'
          'AIME = M3 优化版、固定保留 30%（主线阈值在 AIME 只跳约 4%），180 格/组 · 下表：主线阈值下 M2 与 M3 只差 V 的取法（32K/64K 各 24 题 × 4 seed）',
-         [('table', tab, [4.0, 2.2, 1.9, 2.2, 1.9], 11, ()),
+         [('table', tab, [3.4, 1.9, 1.0, 2.2, 1.0, 1.9, 1.0], 10, ()),
           ('table', tab2, [3.6, 1.9, 1.6, 0.8, 1.9, 1.6, 0.8], 10, ()),
           ('bullets', ['64K（工作点 88%）：任何 V 项都不比“不看 V”更准（50–54 vs 51，全部不显著），速度也无显著差别（不看 V / 32 维 0.960 [0.905, 1.018]）。',
+                       '64K 跳到 95%（预览，48 格）：各组精度都不低于 dense，仍无 V 优势（不看 V / 32 维 1.004 [0.916, 1.099]）；每步 0.76，但步数略增，端到端约 0.89，不比 88% 工作点好。',
                        'AIME（强制 70%）：不同 V 项确实选出不同的块（答对 86–94），但最好的是 4 维或不看 V；此稀疏度下步数多 6–13%，都比 dense 慢。',
                        '主线阈值下 M2（简单平均）/ M3（投影 32 维）直接比：32K 0.987 [0.914, 1.063]、64K 0.983 [0.940, 1.024]，每步耗时相同，答对差异不显著——打平。',
                        '结论：“看 V 选块”和“M2 vs M3”都不能作为贡献，选块可以只看注意力。'], 11)],
@@ -361,7 +365,7 @@ def p_aime():
 """)
 
 
-def build(out_name='dlm_sparse_attention_20261001_compact_v4.pptx'):
+def build(out_name='dlm_sparse_attention_20261001_compact_v5.pptx'):
     cover()
     p1_baseline()
     p_methods()

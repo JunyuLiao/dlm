@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-01 20:12 (UTC-5)",
+    "updated_local": "2026-10-01 20:35 (UTC-5)",
     "branch": "research/m3-output-numerics-20260927",
     "verified_commit": "b8053511f",
     "entry_docs": [
@@ -24,22 +24,7 @@
       "accuracy": "64K 77 vs 75, 32K 86 vs 86 (dense)",
       "source": "results/m1_m2_m3_frontier_v27_20260929/lb_confirm_panel_e4/summary.md"
     },
-    "running": [
-      {
-        "panel": "E11 v27_lb64_vterm_hi_e11_18d29fa43d5d11a9",
-        "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_lb64_vterm_hi_e11.json",
-        "deploy_tag": "v27_e11_9d8ae5e",
-        "run_dir": "v27_lb64_e11_001",
-        "hosts": [
-          "dllm",
-          "mpk",
-          "dlm2"
-        ],
-        "executions": 192,
-        "status": "running",
-        "scoring_label": "lb64_e11"
-      }
-    ],
+    "running": [],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
@@ -74,6 +59,11 @@
         "panel": "E9 v27_lb64_vterm_e9_5b125c63817898f6 (64K, 24 items x seeds 404-707, 96 cells per arm, M3 + carry_first, fixed 88% sparsity)",
         "verdict": "attention-mass-only ranking as accurate (54 vs dense 51) and as fast (W 0.845) as any V term; all differences n.s.; V term dropped as a claim",
         "source": "results/m1_m2_m3_frontier_v27_20260929/lb64_vterm_panel_e9/summary.md"
+      },
+      "e11": {
+        "panel": "E11 v27_lb64_vterm_hi_e11_18d29fa43d5d11a9 (64K, 48 cells, 95% sparsity, preview)",
+        "verdict": "no V advantage (mass/r32 1.004 [0.916, 1.099]); no accuracy loss; W ~0.89",
+        "source": "results/m1_m2_m3_frontier_v27_20260929/lb64_vterm_hi_panel_e11/summary.md"
       }
     },
     "m2_vs_m3": {
