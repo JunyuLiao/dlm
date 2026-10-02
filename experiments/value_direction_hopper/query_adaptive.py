@@ -52,15 +52,34 @@ class State:
         # confidence/margin. t_history replaces 'margin is not None' as the history sentinel.
         if fast_t and (method!='T' or diagnostics or collect_margins):raise ValueError('fast_t is exact only for method T without diagnostics')
         self.fast_t=fast_t;self.t_history=False
+        self.cgate=None;self.cg_q=self.cg_r=self.cg_u=None
+
+    def enable_cgate(self,tau=2.5,gamma_q=.65):
+        """C gate (ported from a group member's design note, 2026-10-02; collaboration): the query sensitivity is
+        s = clip(1 + beta*h, 1, 1+beta), h = 1 - g*(1-q)*(1-u), from three causal per-position histories of the
+        PREVIOUS completed calls of the canvas: q = EMA (gamma_q) of 'renoised' (q starts at 1), the stable-run counter
+        r (reset on a top-1 flip, else (r+1)*accepted; starts at 0) through g = 1 - exp(-r/tau), and the confidence
+        uncertainty u = sqrt(max(1 - p_top1, 0)). The first call of a canvas gets s = 1 + beta (fully protected).
+        Replaces T's weights only; the temporal flip EMA is still tracked."""
+        if self.method!='T' or not self.fast_t:raise ValueError('C gate is wired on the fast T path only')
+        if tau<=0 or not 0<=gamma_q<1:raise ValueError('Invalid C-gate parameters')
+        self.cgate=dict(tau=float(tau),gamma_q=float(gamma_q))
 
     def begin(self,cur_step,canvas):
         if cur_step==48 or self.canvas<0:
             if self.canvas>=0:self.finish_canvas()
             self.canvas+=1;self.iteration=0;self.margin=self.confidence=self.temporal=self.previous_top=None;self.t_history=False
+            self.cg_q=self.cg_r=self.cg_u=None
             self.generator=torch.Generator(device=canvas.device).manual_seed(self.seed+7919*self.canvas+104729)
         self.iteration+=1
         chosen=None
-        if self.method in METHODS and (self.margin is not None or self.t_history):
+        if self.cgate is not None:
+            if self.cg_q is None:   # no completed call in this canvas yet: fully protected
+                chosen=torch.full(tuple(canvas.shape[:2]),1+self.beta,device=canvas.device,dtype=torch.float32)
+            else:
+                g=1-torch.exp(-self.cg_r/self.cgate['tau'])
+                chosen=(1+self.beta*(1-g*(1-self.cg_q)*(1-self.cg_u))).clamp(1,1+self.beta).contiguous()
+        elif self.method in METHODS and (self.margin is not None or self.t_history):
             if self.fast_t:chosen=(1+self.beta*self.temporal).clamp(1,1+self.beta).contiguous()   # == weight('T',...)
             else:chosen=weight(self.method,self.margin,self.confidence,self.temporal,beta=self.beta,m_ref=self.m_ref)
             if self.allocation=='uniform':chosen=chosen.mean(-1,keepdim=True).expand_as(chosen).contiguous()
@@ -84,6 +103,16 @@ class State:
         if self.fast_t:
             top=logits.argmax(-1)
             flip=None if self.previous_top is None else top!=self.previous_top
+            if self.cgate is not None:
+                x=logits.float()
+                p_top=(x.amax(-1)-torch.logsumexp(x,dim=-1)).exp()                     # processed top-1 probability
+                acc=accepted.to(torch.float32)
+                q=torch.ones_like(p_top) if self.cg_q is None else self.cg_q
+                r=torch.zeros_like(p_top) if self.cg_r is None else self.cg_r
+                self.cg_q=self.cgate['gamma_q']*q+(1-self.cgate['gamma_q'])*(1-acc)     # renoised = not accepted
+                stay=(r+1)*acc
+                self.cg_r=stay if flip is None else torch.where(flip,torch.zeros_like(stay),stay)
+                self.cg_u=(1-p_top).clamp_min(0).sqrt()
             if self.temporal is None:self.temporal=torch.zeros(top.shape,device=top.device,dtype=torch.float32)
             if flip is not None:self.temporal=self.gamma*self.temporal+(1-self.gamma)*flip.float()
             self.previous_top=top.detach();self.t_history=True

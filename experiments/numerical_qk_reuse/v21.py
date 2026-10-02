@@ -87,7 +87,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      async_route=False, risk_budget=None, risk_topk=None, carry_canvases=None,
                      observe_step=None, protect_output=False, carry_first=False, proj_rank=None,
                      risk_value=None, q_block=None, q_regroup=False, q_carry64=False,
-                     observe_carried=False) -> dict:
+                     observe_carried=False, sensitivity=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -232,6 +232,11 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if observe_carried is not True or not carry_first or not fused_observe or not fa4_consumer:
             raise ValueError('v27 observe_carried needs carry_first with the fused observation on FA4')
         extra['observe_carried'] = True
+    if sensitivity is not None:
+        # v27 C gate (named variant; group member's query sensitivity, ported from the design note): replaces T's weights
+        if sensitivity != 'cgate' or bootstrap_policy is None or fresh_fused:
+            raise ValueError('v27 C gate needs the fast-T bootstrap mainline')
+        extra['sensitivity'] = 'cgate'
     if carry_first:
         # v27 first-call carry (named variant): canvas call 0 reuses the previous canvas's decision, call 1 observes
         if (carry_first is not True or bootstrap_policy is None or fresh_fused or not fused_observe or not fa4_consumer
@@ -417,6 +422,8 @@ def validate_effective(config: dict, condition: str):
     if 'q_carry64' in config and (config['q_carry64'] is not True or config.get('q_block') != 64
                                   or 'q_regroup' in config or config.get('carry_first') is not True):
         raise ValueError('v27 q64 carry identity drift')
+    if 'sensitivity' in config and (config['sensitivity'] != 'cgate' or 'bootstrap_policy' not in config):
+        raise ValueError('v27 C-gate identity drift')
     if 'observe_carried' in config and (config['observe_carried'] is not True or config.get('carry_first') is not True
                                         or 'fused_observe' not in config or 'fa4_consumer' not in config):
         raise ValueError('v27 observe_carried identity drift')
@@ -456,6 +463,10 @@ def install(adapter, config: dict, condition: str):
         from .v20_controls import install as parent_install
     with parent_install(adapter, config['parent_config'], condition) as runtime:
         router = runtime['router']
+        if config.get('sensitivity') == 'cgate':
+            if config['parent_kind'] != 'v20_method':
+                raise ValueError('C gate is qualified on the v20 method parent only')
+            runtime['state'].enable_cgate()
         owner = router if config['parent_kind'] == 'v20_method' else router.owner
         if owner.output_mode != v20.PREQK_MODE:
             raise ValueError('v21 requires parent current-output mode')
@@ -612,6 +623,7 @@ def install(adapter, config: dict, condition: str):
                         q_block=getattr(owner, 'q_block', 128), q_regroup=bool(getattr(owner, 'q_regroup', False)),
                         q_carry64=bool(getattr(owner, 'q_carry64', False)),
                         observe_carried=bool(getattr(owner, 'observe_carried', False)),
+                        sensitivity=config.get('sensitivity', 'temporal_T'),
                         density_gate=config.get('density_gate'),
                         consumer=getattr(owner, 'consumer', None),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
