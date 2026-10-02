@@ -209,3 +209,5 @@ It adds no tensor operation, GPU synchronization or change to native async sched
 N includes all executed denoising work. Retired N and unconsumed speculative N are also
 reported, with exact decomposition checked. Prefill counts must agree between both sources.
 151 CPU tests pass. Closed reserved GPU seconds total 755.639; formal panel still not launched.
+
+- 2026-10-02 17:17 (UTC-5): 96K qualification attempt 003 started on dllm from 088dc8184, after 151 CPU tests. It counts actual async executions using existing CPU snapshots. No formal panel launched; mpk and dlm2 idle.

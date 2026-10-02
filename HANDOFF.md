@@ -23,6 +23,10 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
     using it.
 
+## V18 live status
+
+2026-10-02 17:17 (UTC-5): 96K qualification attempt 003 started on dllm from 088dc8184, after 151 CPU tests. It counts actual async executions using existing CPU snapshots. No formal panel launched; mpk and dlm2 idle.
+
 ## Intake and panel preparation (2026-10-02, US Central UTC-5)
 
 - Reviewed remote branch explicitly with `git fetch origin research/humaneval-v27-20261001`:
@@ -212,7 +216,7 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 
 ## Running
 
-- None. Async-count diagnostic completed; requalification next. No formal panel launched.
+- dllm: v27_vllm_v18_preflight_003 (actual async execution counts; native then main, all-kept, dense)
 
 ## Blockers
 
