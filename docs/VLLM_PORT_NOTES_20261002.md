@@ -172,7 +172,35 @@ It calls `flash_attn_varlen_func` exactly as vLLM's decoder GLOBAL call does (`c
     (or its combination with paging).
   - `scripts/v27_vllm_varlen_sparse_isolate.py` separates fixed vs varlen and contiguous vs paged. It is queued on
     dllm after R17.
-- **Until it is resolved, the port uses the fixed-length entry** (`_flash_attn_fwd` with `page_table`, 4D lists,
+- **Isolation result (15:12 UTC−5, `vllm_port_probe_1002/varlen_isolate.out`; 32K keys, 64-row maps, keep 25%;
+  reference magnitude 0.014):**
+
+  | path | max abs err | mean abs err |
+  |---|---:|---:|
+  | fixed-length, contiguous | 3.2e-4 | 3.2e-5 |
+  | fixed-length, paged | 3.2e-4 | 3.2e-5 |
+  | varlen, contiguous | 0.121 | 0.013 |
+  | varlen, paged | 0.121 | 0.013 |
+  | varlen, paged, ascending lists | 0.121 | 0.013 |
+  | varlen, paged, dense (no lists) | 1.5e-4 | 1.6e-5 |
+
+  - Varlen + block-sparse is wrong regardless of paging or list order. Its mean error equals the output
+    magnitude, yet it skips work (it is fast), so the lists are applied to the wrong rows, heads or blocks.
+  - The cause is either our reading of the varlen list layout (`[H, total_m_blocks]` counts, `[H, total_n_blocks]`
+    indices at offset `m_block × num_n_blocks`) or an FA4 bug.
+  - **Cause found and confirmed (15:28 UTC−5, `varlen_isolate.out` case g):**
+    - `flash_fwd_sm90.py` builds `SeqlenInfoCls = partial(SeqlenInfoQK.create, ...)` without `tile_m` / `tile_n`
+      (comment: "Don't need to pass in tile_mn because we won't access offset_padded").
+    - So `num_n_blocks = ceil(seqlen_k / 128)` (the default tile_n). The varlen block-sparse offset uses it:
+      `block_idx_offset + m_block × num_n_blocks`.
+    - At head_dim 512 the kernel runs tile_n 64. From the second q block on, the kernel therefore reads the previous
+      block's list.
+    - Laying our lists out at a stride of ceil(seqlen_k / 128) gives 3.2e-4 max error, exact.
+    - The fix is one line: pass `tile_m` / `tile_n` to the partial. Configurations with tile_n 128 (head_dim ≤ 128)
+      are unaffected, which is probably why tests miss it.
+  - **Impact:** none on batch-1 work (the fixed-length path is exact); needed only for batch > 1 serving. Report it
+    upstream together with the paged bug (pending the user's go-ahead).
+- **The fixed-length paged path is exact, so the port uses it** (`_flash_attn_fwd` with `page_table`, 4D lists,
   batch 1, verified exact at page 64). Batch 1 is also what the panels run.
 
 ## Thin vLLM adapter for the unchanged method core (2026-10-02 13:50 UTC−5)
@@ -212,3 +240,62 @@ inputs that the HF hooks give it, from inside vLLM:
 - **Next optimisation, once correct:** feed FA4 the paged cache plus page table directly (the patched fixed-length
   path), so the per-call canvas refresh and the per-canvas prefix copy disappear for the consumer. Only the
   observation call would still read a contiguous K.
+
+## The strongest dense GLOBAL call, and a split consumer that matches it (2026-10-02 16:00 UTC−5)
+
+All files are in `results/.../vllm_port_probe_1002/`. Scripts: `v27_fa4_split_sparse_bench.py`,
+`v27_vllm_dyncausal_probe.py`, `v27_fa4_dyncausal_sparse_bench.py`, `v27_fa4_sparse_split_alias_bench.py`.
+
+**1. vLLM's dense GLOBAL call is much faster than the FA4 dense configuration our panels used.**
+- vLLM calls FA4 with `causal=True` plus a per-request `dynamic_causal=False` tensor and `num_splits=0` (heuristic,
+  2 splits here). Captured in-engine at 35K keys: **1.00 ms**; the same call with `num_splits=1` takes 1.81 ms.
+- Standalone (`dyncausal_sparse.jsonl`, dense, contiguous):
+
+  | path | 32K | 64K | 94K |
+  |---|---:|---:|---:|
+  | dynamic-causal, num_splits=0 (vLLM) | 0.92 | 1.71 | 2.42 |
+  | plain non-causal, num_splits=1 (our panels' dense) | 1.49 | 2.96 | 4.17 |
+
+  The outputs are identical (same relative error vs fp32).
+- Cause: on SM90, split-KV only divides the work on the dynamic-causal path. With `causal=False`, and with block
+  sparsity, `num_splits > 1` re-does the whole key range or list in every split (`split_sparse.jsonl`: 4 splits ≈ 2×
+  the time, 8 splits ≈ 4×). This is a candidate third upstream issue; SM100's sparse producer has a split index,
+  SM90's does not.
+- **Consequence for our panels.** `D_fa4_allkept` (and `dense_plain`) ran the slow configuration. Our HF-substrate
+  speed ratios were therefore measured against a dense GLOBAL attention about 1.65× slower than the strongest
+  official FA4 configuration, and they overstate the gain against vLLM-grade dense. The dense comparisons that
+  count from now on are vLLM's own serving, or the dynamic-causal configuration.
+
+**2. Split consumer without kernel changes (`split_alias.jsonl`).**
+- S batch entries alias the same paged K/V through the page table. Each entry gets one contiguous share of every
+  kept-tile list, and the partial outputs are merged exactly by LSE.
+- Relative error is 0.4–0.5% (bf16 partials) vs 0.3% unsplit. The time includes the merge.
+
+  | ms per call | 32K | 64K | 94K |
+  |---|---:|---:|---:|
+  | vLLM dense (dynamic-causal, auto split) | 0.96 | 1.79 | 2.53 |
+  | sparse entry, all tiles kept, S=2 | 0.91 | 1.61 | 2.28 |
+  | keep 25%, S=1 → S=2 | 0.46 → **0.36** | 0.83 → **0.56** | 1.14 → **0.72** |
+  | keep 12%, S=1 → S=2 | 0.29 → **0.27** | 0.48 → **0.37** | 0.65 → **0.46** |
+
+- The vLLM adapter now runs every FA4 call the core makes (consumer and dense calls through
+  `v27_fa4.sparse_lists`) this way, on vLLM's own paged cache with S = 2. The routing is unchanged.
+
+**3. vLLM smoke, LongBench-v2 32K, 2 cells per arm** (`smoke_1/2/3.jsonl`; the two cells are one item × 2 seeds;
+batch 1, `--block-size 32`, memory 0.85).
+
+| arm | per step (median, ms) | GLOBAL call (mean, ms) |
+|---|---:|---:|
+| vLLM dense, default cudagraphs (FULL decode) | 29.94 / 29.97 | – |
+| vLLM dense, PIECEWISE | 30.16 / 30.38 | 0.90 (hooks only, `native`) |
+| adapter all-kept, before the split consumer | 33.3 / 33.5 | 1.56 |
+| adapter all-kept, split consumer | 30.33 / 30.52 | 0.97 |
+| **method (main), split consumer** | **28.80 / 28.74** | 0.72 (includes observation calls) |
+
+- Receipts:
+  - every denoising call was observed exactly once (`order_errors` 0);
+  - the core's counters show the full schedule (carried first calls, fused observations, held decisions; no
+    native fallback);
+  - `effective_method` is identical to the panels'.
+- At 32K the method is 0.96× of vLLM's default dense per step. That is only a smoke result; 32K is the weakest
+  length. A 64K smoke is running.

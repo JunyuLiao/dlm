@@ -1,7 +1,10 @@
 """Isolate the varlen block-sparse error seen in v27_vllm_varlen_sparse_probe.py: compare against an fp32 masked
 reference for (a) fixed-length contiguous, (b) fixed-length paged, (c) varlen contiguous, (d) varlen paged, at 32K keys,
 canvas 256, 64-row maps, keep 25%. Also (e) varlen paged with the n-block lists sorted ascending.
-usage: python v27_vllm_varlen_sparse_isolate.py"""
+usage: python v27_vllm_varlen_sparse_isolate.py [STRIDE_TEST]
+With STRIDE_TEST, adds (g): varlen paged lists laid out at a per-q-block stride of ceil(seqlen_k / 128), the
+num_n_blocks the SM90 kernel computes when SeqlenInfoQK.create gets its default tile_n=128 (hypothesis: the varlen
+offset uses that stride although head_dim 512 runs tile_n 64)."""
 import json
 import math
 
@@ -63,6 +66,18 @@ def varlen_lists(ascending=False):
                block_size=(MR, TN))
 
 
+def varlen_lists_stride(stride):
+    order = order_of(kept, False)[..., :stride]
+    assert int(kept.sum(-1).max()) <= stride
+    return BST(mask_block_cnt=torch.zeros((H, m), device='cuda', dtype=torch.int32),
+               mask_block_idx=torch.zeros((H, m * stride), device='cuda', dtype=torch.int32),
+               full_block_cnt=kept.sum(-1).to(torch.int32).contiguous(),
+               full_block_idx=order.reshape(H, m * stride).contiguous(),
+               cu_total_m_blocks=torch.tensor([0, m], device='cuda', dtype=torch.int32),
+               cu_block_idx_offsets=torch.tensor([0, m * stride], device='cuda', dtype=torch.int32),
+               block_size=(MR, TN))
+
+
 cu_q = torch.tensor([0, CL], device='cuda', dtype=torch.int32)
 used = torch.tensor([keys], device='cuda', dtype=torch.int32)
 res = {}
@@ -86,6 +101,12 @@ cases = {
                                                            max_seqlen_k=keys, seqused_k=used, softmax_scale=scale,
                                                            causal=False, block_table=table, fa_version=4, num_splits=1),
 }
+import sys
+if len(sys.argv) > 1:
+    cases = {'g_varlen_paged_stride128': lambda: flash_attn_varlen_func(
+        q, kc, vc, max_seqlen_q=CL, cu_seqlens_q=cu_q, max_seqlen_k=keys, seqused_k=used, softmax_scale=scale,
+        causal=False, block_table=table, fa_version=4, num_splits=1,
+        block_sparse_tensors=varlen_lists_stride(-(-keys // 128)))}
 for name, fn in cases.items():
     try:
         out = fn()

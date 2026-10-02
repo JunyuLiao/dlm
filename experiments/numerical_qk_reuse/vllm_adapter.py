@@ -19,12 +19,19 @@ against HF-shaped hooks. This adapter feeds it the same inputs from vLLM and tou
   is refreshed from the pages every step. The core sees the prefix as the encoder cache (a stable view per canvas) and
   the whole buffer as the decoder's K/V. These copies are overhead the method arm pays and vLLM's dense arm does not.
 - Output. The core returns model-major [1, Q, H, D]; it is written into vLLM's output buffer.
+- FA4 execution (the consumer and every dense call the core makes through ``v27_fa4.sparse_lists``) runs on vLLM's own
+  paged cache with a 2-way split: two batch entries alias the same pages through the page table, each takes one
+  contiguous share of every kept-tile list, and the two partial outputs are merged exactly by their LSE. Same kernel,
+  same lists; the split only fills the GPU (one 256-query canvas gives FA4 64 CTAs on 132 SMs). It is needed because
+  on SM90 the kernel's own num_splits re-does the whole list per split with block sparsity, while vLLM's dense call
+  gets an effective 2-way split from FA4's dynamic-causal path (bench: v27_fa4_sparse_split_alias_bench.py).
 
 LOCAL layers, prefill, commits, the sampler and everything else stay vLLM's own code. The method arm must run with
 ``cudagraph_mode=PIECEWISE`` so the attention op executes eagerly every step (a FULL decode graph would freeze the
 routing logic at capture time); the dense reference is measured in vLLM's default mode and in PIECEWISE.
 
 Arms:
+  'native'  : patches installed and GLOBAL calls intercepted, but vLLM's own attention runs (cost of the hooks alone).
   'method'  : the core with a frozen v21 effective config (e.g. the main arm M3 R6 DP -ln2 + carry_first).
   'allkept' : the same K/V buffers and FA4 all-kept call (v27_fa4.dense) on every GLOBAL decoder call -- the
               adapter's own cost with no skipping (the analogue of D_fa4_allkept).
@@ -118,8 +125,8 @@ class _PrefixCache:
 
 
 class VllmMethodAdapter:
-    def __init__(self, layer_types, config=None, condition=None, arm='method'):
-        if arm not in ('method', 'allkept'):
+    def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False):
+        if arm not in ('method', 'allkept', 'native'):
             raise ValueError(arm)
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
@@ -128,13 +135,17 @@ class VllmMethodAdapter:
         self.config, self.condition, self.arm = config, condition, arm
         self.runtime = self.stub = self._stack = None
         self.bound = False               # True only while a request is in flight (dummy/warm-up runs pass through)
+        self.profile, self._events = bool(profile), []   # CUDA events around every intercepted GLOBAL call
         self.pending_sample = False      # a denoising forward was prepared and its sample has not been seen yet
         self.step_ctx = None             # dict(phase, step, seq_len, slot) of the forward being prepared
         self.buffers = {}                # layer -> dict(k, v, prefix, nk, pk, pv)
         self.canvas = None
         self.cache = _PrefixCache(len(self.layer_types))
+        self.paged = None                # vLLM paged K/V of the GLOBAL call in flight (for the split FA4 consumer)
+        self.splits = 2
+        self._split_cache = []           # (lists object, split lists) for held maps
         self.calls = dict(global_calls=0, prefix_copies=0, canvas_refreshes=0, invalidates=0, begins=0, observes=0,
-                          passthrough=0, order_errors=0)
+                          passthrough=0, order_errors=0, split_fa4_calls=0, split_list_builds=0)
 
     # ------------------------------------------------------------------ request lifecycle
     def begin_request(self):
@@ -147,7 +158,8 @@ class VllmMethodAdapter:
             self.calls[k] = 0
         self.pending_sample = False
         self.bound = True
-        if self.arm == 'allkept':
+        self._events = []
+        if self.arm in ('allkept', 'native'):
             return
         global _BINDING
         _stub_runner()
@@ -166,6 +178,13 @@ class VllmMethodAdapter:
         self.stub, self.binding = stub, binding
 
     def end_request(self):
+        timing = None
+        if self._events:
+            torch.cuda.synchronize()
+            ms = [a.elapsed_time(b) for a, b in self._events]
+            timing = dict(global_calls_timed=len(ms), global_call_ms_mean=round(sum(ms) / len(ms), 4),
+                          global_ms_total=round(sum(ms), 2))
+            self._events = []
         counters = None
         if self.runtime is not None:
             counters = self.runtime['counters']()
@@ -174,7 +193,7 @@ class VllmMethodAdapter:
         self._stack = self.runtime = self.stub = None
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
-        return dict(adapter=dict(self.calls), method=counters)
+        return dict(adapter=dict(self.calls), method=counters, timing=timing)
 
     # ------------------------------------------------------------------ clock (called from patched vLLM code)
     def on_prepare(self, phase_encoder, step, seq_len, num_tokens):
@@ -247,6 +266,9 @@ class VllmMethodAdapter:
         prefix = ctx['seq_len'] - n
         key_cache, value_cache = kv_cache.transpose(1, 2).split(impl.head_size, dim=-1)
         b = self._buffers(layer_idx, key_cache, value_cache, attn_metadata.block_table[0], prefix, n)
+        page = key_cache.shape[1]
+        self.paged = dict(k=key_cache, v=value_cache, nk=prefix + n,
+                          table=attn_metadata.block_table[0, : (prefix + n + page - 1) // page])
         q = query[:n].transpose(0, 1).unsqueeze(0)                  # [1, H, n, D] view, as HF's decoder passes it
         self.calls['global_calls'] += 1
         if self.arm == 'allkept':
@@ -260,8 +282,48 @@ class VllmMethodAdapter:
             out, _ = self.binding.runtime.attention_override(module, q, b['k'], b['v'], None,
                                                              scaling=float(impl.scale), is_causal=False,
                                                              sliding_window=None)
+        self.paged = None
         output[:n].view(n, -1).copy_(out.reshape(n, -1))
         return output
+
+    # ------------------------------------------------------------------ split FA4 over the paged cache
+    def _split(self, lists):
+        for ref, split in self._split_cache:
+            if ref is lists:
+                return split
+        from experiments.numerical_qk_reuse import v27_fa4
+        S = self.splits
+        order, cnt = lists.full_block_idx, lists.full_block_cnt          # [1, H, QB, KT], [1, H, QB]
+        kt = order.shape[-1]
+        ar = torch.arange(kt, device=order.device)
+        lo = [(cnt * i) // S for i in range(S + 1)]
+        idx = torch.cat([torch.gather(order, -1, (lo[i][..., None] + ar).clamp_max(kt - 1)) for i in range(S)])
+        counts = torch.cat([lo[i + 1] - lo[i] for i in range(S)]).to(torch.int32)
+        zeros = torch.zeros_like(counts)
+        split = v27_fa4._BST(mask_block_cnt=zeros, mask_block_idx=torch.zeros(zeros.shape + (1,), device=zeros.device,
+                                                                               dtype=torch.int32),
+                             full_block_cnt=counts.contiguous(), full_block_idx=idx.to(torch.int32).contiguous(),
+                             block_size=lists.block_size)
+        self._split_cache = self._split_cache[-63:] + [(lists, split)]
+        self.calls['split_list_builds'] += 1
+        return split
+
+    def sparse_lists(self, original, q, k, v, lists, scale):
+        ctx = self.paged
+        if ctx is None or k.shape[-2] != ctx['nk'] or q.shape[0] != 1:
+            return original(q, k, v, lists, scale)
+        from experiments.numerical_qk_reuse import v27_fa4
+        fwd = v27_fa4.load()
+        S = self.splits
+        split = self._split(lists)
+        qs = q.transpose(1, 2).expand(S, -1, -1, -1)                      # [S, Q, H, D], stride-0 batch
+        table = ctx['table'][None].expand(S, -1).contiguous()
+        used = torch.full((S,), ctx['nk'], device=q.device, dtype=torch.int32)
+        o, lse = fwd(qs, ctx['k'], ctx['v'], softmax_scale=scale, causal=False, page_table=table, seqused_k=used,
+                     block_sparse_tensors=split, num_splits=1, return_lse=True)[:2]
+        w = torch.softmax(lse, dim=0).permute(0, 2, 1)[..., None]         # [S, Q, H, 1], exact LSE merge
+        self.calls['split_fa4_calls'] += 1
+        return (o.float() * w).sum(0, keepdim=True).to(o.dtype)           # [1, Q, H, D]
 
 
 # ---------------------------------------------------------------------- vLLM patches
@@ -309,12 +371,35 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
         if a is not None and a.bound and attn_metadata is not None and output_scale is None:
             layer_idx = a.active_for(getattr(layer, 'layer_name', ''))
             if layer_idx is not None:
-                return a.forward(self, layer_idx, query, kv_cache, attn_metadata, output)
+                ev = None
+                if a.profile:
+                    ev = (torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True))
+                    ev[0].record()
+                if a.arm == 'native':
+                    a.calls['global_calls'] += 1
+                    r = forward(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale,
+                                output_block_scale)
+                else:
+                    r = a.forward(self, layer_idx, query, kv_cache, attn_metadata, output)
+                if ev is not None:
+                    ev[1].record()
+                    a._events.append(ev)
+                return r
             if a.step_ctx is not None:
                 a.calls['passthrough'] += 1
         return forward(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale,
                        output_block_scale)
 
+    from experiments.numerical_qk_reuse import v27_fa4
+    sparse_lists = v27_fa4.sparse_lists
+
+    def sparse_lists_patched(q, k, v, lists, scale):
+        a = _ACTIVE
+        if a is not None and a.bound and a.paged is not None:
+            return a.sparse_lists(sparse_lists, q, k, v, lists, scale)
+        return sparse_lists(q, k, v, lists, scale)
+
+    v27_fa4.sparse_lists = sparse_lists_patched
     dg.DiffusionGemmaModelState.prepare_attn = prepare_attn_patched
     dg._compiled_sample_step = sample_step_patched
     fa.FlashAttentionImpl.forward = forward_patched

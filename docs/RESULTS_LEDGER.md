@@ -349,6 +349,25 @@ All 13 RULER tasks at 32K/64K × seeds 404/505/606, dllm.
   gain.
 - Source: `cgate_preview_p17/receipts.md`.
 
+### L1p. R17: RULER 32K / 64K / 92K with V-dimension variants (2026-10-02)
+
+- Design: 13 tasks × 10 samples = 130 rows per length, seed 404, 8 arms, 3,120 runs; accuracy only.
+  - 96K became 92K because 96K RULER rows (97.5K–98.2K tokens) exceed the one-H100 fit of our substrate.
+- **Main vs dense:** 110 / 110, 98 / 97, 91 / 91; no difference anywhere.
+- **Fixed sparsity:** losses only at 32K, mostly on `cwe`:
+  - 95% at rank 32: 101 (p 0.004);
+  - 88% at rank 8 / rank 4: 102 / 103 (p 0.021 / 0.039);
+  - 88% at rank 32: 105 (p 0.13).
+
+  At 64K / 92K every fixed arm equals dense.
+- **V term:**
+  - mass-only ≥ rank 32 everywhere;
+  - at 95% sparsity, 107 vs 101 at 32K (p 0.031, mass-only better);
+  - lower ranks are no better.
+
+  The V term is now negative on AIME, LongBench 64K (88% / 95%), HumanEval and RULER 32K–92K.
+- Source: `ruler_long_panel_r17/receipts.md`.
+
 ### Official-serving check and vLLM port probe (2026-10-02)
 
 - **vLLM 0.30.0 native DiffusionGemma vs our dense control** on the same 18 E14 cells and host, batch 1, bf16:

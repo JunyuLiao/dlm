@@ -27,7 +27,7 @@ def main():
     model_dir, manifest_dir, cells_path, out_path, arm = sys.argv[1:6]
     config_path = sys.argv[6] if len(sys.argv) > 6 and sys.argv[6] not in ('', '-') else None
     datasets = set(sys.argv[7].split(',')) if len(sys.argv) > 7 else None
-    if arm not in ('dense', 'allkept', 'method'):
+    if arm not in ('dense', 'native', 'allkept', 'method'):
         raise ValueError(arm)
     cells = json.loads(Path(cells_path).read_text())
     if datasets:
@@ -69,7 +69,8 @@ def main():
         if arm == 'method':
             config = json.loads(Path(config_path).read_text())
         adapter = vllm_adapter.VllmMethodAdapter(text.layer_types, config=config,
-                                                 condition=None if config is None else config['condition'], arm=arm)
+                                                 condition=None if config is None else config['condition'], arm=arm,
+                                                 profile=os.environ.get('V27_ADAPTER_PROFILE') == '1')
         vllm_adapter.install_vllm_patches(adapter)
     max_len = min(262144, ((longest + 4096) // 1024 + 1) * 1024)
     kw = dict(model=model_dir, dtype='bfloat16', max_model_len=max_len, max_num_seqs=1, max_num_batched_tokens=chunk,
