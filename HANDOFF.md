@@ -189,7 +189,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
    - Decide on c01 from the per-step ratio (direct timing exists at kernel level in `observe_split_1002/`), the
      steps-per-canvas ratio (P15 hinted 1.107 at 64K) and accuracy, including AIME.
    - Pool M3 + c0 / dense over E13 + E14 + E15.
-2. **vLLM port, step 2:** make block-sparse work on vLLM's cache.
+2. **vLLM port, step 2** (design notes: `docs/VLLM_PORT_NOTES_20261002.md`): make block-sparse work on vLLM's cache.
    - First try a contiguous view: for a batch-1 request check `page_table == arange`, or allocate contiguously. If that
      holds, the tested contiguous FA4 path applies as is.
    - Otherwise patch FA4's paged block-sparse path (CuTe kernel in `vllm/vllm_flash_attn/cute`) inside the dyh vLLM

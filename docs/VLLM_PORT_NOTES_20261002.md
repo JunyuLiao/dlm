@@ -1,0 +1,64 @@
+# Porting the method into vLLM's DiffusionGemma (design notes, 2026-10-02)
+
+Why: vLLM 0.30.0's native DiffusionGemma is the fastest official serving system we measured.
+- Its per step is 0.76× / 0.90× / 0.98× ours at 32K / 64K / 96K, and prefill is about 0.5×
+  (`results/.../vllm_dense_check_1002/README.md`).
+- Paper-grade speed claims need dense and sparse inside the same official system, differing only in skipped blocks.
+
+Environment: dllm, `/home/exouser/dyh/dlm_models_20261002/envs/vllm` (vLLM 0.30.0, torch 2.13.0+cu130). Paths below are
+relative to its `site-packages/vllm`.
+
+## What vLLM does today (read from the installed code)
+
+- **Model:** `model_executor/models/diffusion_gemma.py` (1,427 lines).
+  - One Gemma4 backbone run in two modes: the encoder is causal and writes the KV cache; the decoder is bidirectional
+    over the canvas, reads the encoder KV and does not commit it.
+  - The sampler is `_compiled_sample_step` (temperature schedule, Gumbel, entropy confidence, stability threshold,
+    entropy bound), with parameters from the model's generation config.
+  - Per-position argmax and acceptance live in `DiffusionGemmaRequestStates` (`canvas`, `argmax_canvas`, `step_tensor`).
+- **Attention:** `v1/attention/backends/flash_attn.py`.
+  - The FA4 version is selected for diffusion models on SM90 (`fa_utils.py`: "Per-sequence causal (dynamic_causal)
+    requires FA4").
+  - The decoder's GLOBAL call is `_FA4_DENSE_ATTENTION_KERNEL(q, k=key_cache, v=value_cache, cu_seqlens_q,
+    seqused_k, max_seqlen_k, block_table, dynamic_causal, num_splits=attn_metadata.max_num_splits, ...)`. It is a
+    varlen call over the paged cache.
+  - For SM90 hd512 it is a pre-compiled dense family (warm-up over split counts 1/32/64/128/256; page size = KV block
+    size, `MultipleOf(16)`). It has **no block-sparse argument**.
+- **Memory:** one H100 in bf16 serves 96K only with chunked prefill, because vLLM keeps full-length KV for every
+  layer (about 224 KB per token).
+- **Seeds:** vLLM rejects per-request `seed`/`temperature` for diffusion models, so panels cannot pair trajectories by
+  seed.
+
+## What we verified (`results/.../vllm_port_probe_1002/README.md`)
+
+- The raw FA4 interface (`vllm_flash_attn/cute/interface._flash_attn_fwd`) with `page_table`:
+  - dense attention is exact at page size 64;
+  - page size 16 fails through this raw entry point (vLLM itself goes through the compiled dispatch);
+  - **block-sparse lists + page_table read the wrong pages** (error about 22; contiguous is exact).
+
+## Port plan
+
+1. **Block-sparse over the cache.** Pick the cheapest correct option:
+   - a) Contiguous view. With batch 1 and a fresh engine, check whether the request's block table is a contiguous run
+     (`block_table[0, :n] == arange(start, start + n)`). If it is, pass `key_cache.view(-1, hk, d)[start*bs :
+     start*bs + seqused]` as contiguous K/V to the raw FA4 call with our lists. This is our tested path, exact.
+     Otherwise force the KV block size to 64 and allocate contiguously for the panel's single request.
+   - b) Fix FA4's paged block-sparse iteration: translate each sparse n-block through the page table, as the dense
+     path does. Add `scripts/v27_vllm_paged_sparse_probe2.py` as a regression test, and report upstream
+     (vllm-project/flash-attention).
+   - c) FlashInfer BSR over paged KV, only if its hd 512 SM90 speed is close to FA4's (unverified).
+2. **Dense reference inside vLLM.**
+   - Keep vLLM's own `_FA4_DENSE_ATTENTION_KERNEL` call as the dense arm (official, unchanged).
+   - Also time FA4 "all tiles kept" through the sparse entry, as in `D_fa4_allkept`, to show that the sparse entry
+     itself costs nothing.
+3. **Method hooks** (a thin adapter, no edits to the method core):
+   - per canvas: call 0 uses the carried map; call 1 is the observation over the cache's prefix (the observation
+     kernel needs the same contiguous-or-paged K/V access) plus the dense-prefix risk table;
+   - held maps for calls 2–7, re-decision at 8, 14, …;
+   - query sensitivity T from the per-position argmax flips in `DiffusionGemmaRequestStates.argmax_canvas` between
+     steps;
+   - async route on a side stream, as now.
+4. **Measurement.**
+   - vLLM dense vs vLLM + M3 + c0 on the same items. Panels cannot pair by seed, so use many items × repeats.
+   - Report the full metric set plus a direct per-forward timing on common states (no seed pairing).
+   - Keep vLLM's chunked-prefill and memory settings identical across arms.
