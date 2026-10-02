@@ -87,3 +87,14 @@ def test_topk_k12_keeps_twelve_percent_of_eligible_tiles():
     drop = topk_skip(lognorm, eligible, t, ref, 100, RISK_TOPKS['k12'])[0, 0, 0].tolist()
     top6 = set(sorted(range(50), key=lambda j: -risks[j])[:6])            # floor(0.88 * 50) = 44 dropped
     assert {j for j, d in enumerate(drop) if not d} == top6
+
+
+def test_topk_k5_keeps_five_percent_of_eligible_tiles():
+    from experiments.numerical_qk_reuse.v21 import RISK_TOPKS
+    from experiments.numerical_qk_reuse.v27_dense_prefix import topk_skip
+    assert RISK_TOPKS['k5'] == 0.05                                     # sparsity 95%
+    risks = [0.01 * (1 + (17 * j) % 100) for j in range(100)]           # 100 distinct risks
+    lognorm, eligible, t, ref = _state([math.log(v) for v in risks])
+    drop = topk_skip(lognorm, eligible, t, ref, 100, RISK_TOPKS['k5'])[0, 0, 0].tolist()
+    top5 = set(sorted(range(100), key=lambda j: -risks[j])[:5])           # floor(0.95 * 100) = 95 dropped
+    assert {j for j, d in enumerate(drop) if not d} == top5

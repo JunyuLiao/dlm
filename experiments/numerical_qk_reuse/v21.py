@@ -53,7 +53,7 @@ _LN2 = 0.6931471805599453
 RISK_BUDGETS = {'b0': 0.0, 'b2ln2': 2 * 0.6931471805599453, 'b4ln2': 4 * 0.6931471805599453,
                 'b6ln2': 6 * 0.6931471805599453, 'b8ln2': 8 * 0.6931471805599453}
 # v27 target sparsity (M1-DP): kept fraction of the eligible prefix tiles, ranked by risk (sparsity = 1 - keep)
-RISK_TOPKS = {'k70': 0.7, 'k60': 0.6, 'k50': 0.5, 'k30': 0.3, 'k20': 0.2, 'k12': 0.12}
+RISK_TOPKS = {'k70': 0.7, 'k60': 0.6, 'k50': 0.5, 'k30': 0.3, 'k20': 0.2, 'k12': 0.12, 'k5': 0.05}
 CARRY_CANVASES = (2, 3, 4, 8)   # v27 cross-canvas carry: observe every K-th canvas, reuse the map in between
 OBSERVE_STEPS = (2, 3)
 PROJ_RANKS = (4, 8, 16)    # v27 projected-V rank variants (nested Gaussian prefix of the rank-32 bank); 32 is the default
