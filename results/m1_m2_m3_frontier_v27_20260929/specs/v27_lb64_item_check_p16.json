@@ -1,0 +1,96 @@
+{
+ "name": "lb64_item_check_p16",
+ "ids": {
+  "longbench_v2_64k": [
+   "longbench_v2/66ec0c4c821e116aacb1994a",
+   "longbench_v2/66ecfe1e821e116aacb1e41c",
+   "longbench_v2/66f6b623bb02136c067c2646",
+   "longbench_v2/66ece28e821e116aacb1db1f",
+   "longbench_v2/66ecf139821e116aacb1e0e1",
+   "longbench_v2/66f3cfa5821e116aacb2f096"
+  ]
+ },
+ "seeds": [
+  2222,
+  2323,
+  2424,
+  2525,
+  2626,
+  2727,
+  2828,
+  2929,
+  3030,
+  3131,
+  3232,
+  3333
+ ],
+ "warm": false,
+ "extra_gold_sha256": {
+  "longbench_v2_64k": "c1833d57fbfe1dd8b3376df6a8213f11803821a621d5308f6e708ac90dfae9c9"
+ },
+ "arms": {
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "carry_first": true
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_c0_prot_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "carry_first": true,
+    "protect_output": true
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m2ln2_c0_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_2ln2",
+    "carry_first": true
+   }
+  }
+ },
+ "substrate": "piecewise_v5",
+ "long_context_execution": "all arms: memory-linear GLOBAL causal / LOCAL sliding prefill via the 64-row kernel, elided O(n^2) prefill mask mapping, token-chunked MoE (V27_PREFILL_DENSE64=1); canvas calls follow each arm | decoding substrate piecewise_v1 (torch 2.12.1 grouped_mm MoE; decoder compiled reduce-overhead, split at GLOBAL attention which runs eager; LOCAL attention graphed unless the arm routes LOCAL layers; official-style compiled sampler); untimed per-arm warm-up before timed requests",
+ "hosts": [
+  "149.165.159.64",
+  "149.165.151.254",
+  "149.165.168.28"
+ ],
+ "extra_hosts": [
+  "149.165.168.28"
+ ],
+ "selection_rule": "P16 held-out item check (2026-10-02): the 64K main-vs-dense accuracy gap over E13-E15 (228 vs 238 of 432, item-clustered p 0.29) concentrates in a few items. The 3 items with the most negative and the 3 with the most positive main-minus-dense correct count were frozen from E13-E15 only (discover on those panels) and are re-run on 12 never-used seeds (2222..3333) to test whether the per-item drops reproduce. Arms: dense FA4, main M3 + c0 (-ln2), main + output protection (generated-token key tiles never skipped), and main at the more conservative -2ln2 threshold. Three hosts, one host per cell; substrate piecewise_v5; frozen before generation."
+}
