@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 09:25 (UTC-5)",
+    "updated_local": "2026-10-02 09:35 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -28,13 +28,6 @@
     },
     "running": [
       {
-        "panel": "R16 v27_ruler_long_r16_1bf5362572d4e0a8",
-        "hosts": [
-          "dllm"
-        ],
-        "deploy_tag": "v27_p15_5bf19f1"
-      },
-      {
         "panel": "E15 v27_c01_e15_e83919d6411343b2",
         "hosts": [
           "mpk",
@@ -44,6 +37,11 @@
         "run_dir": "v27_lb_e15_001",
         "executions": 1602,
         "scoring_label": "e15"
+      },
+      {
+        "diag": "vLLM 0.30.0 native DiffusionGemma dense check on 18 E14 dense cells",
+        "host": "dllm",
+        "dir": "/home/exouser/dyh/dlm_models_20261002/vllm_check_1002"
       }
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
@@ -176,6 +174,10 @@
     "p15": {
       "verdict": "c01 accuracy-first preview passed; per-step c01/q64c 0.91 AIME, 0.949 64K",
       "source": "results/m1_m2_m3_frontier_v27_20260929/c01_preview_p15/receipts.md"
+    },
+    "r16": {
+      "verdict": "RULER 32K/64K accuracy preserved by all arms; V term = mass-only",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/ruler_long_panel_r16/receipts.md"
     }
   },
   "task": "M3 output numerics and trajectory isolation",

@@ -306,6 +306,15 @@ Thinking ON, budget 8192, pass@1 by the official tests in the unprivileged sandb
 
 Source: `lb_q64c_panel_e14/` (`summary.md`, `steps.md`, `receipts.md`, `direct_*.md`).
 
+### L1l. R16: RULER 32K/64K accuracy check of the current pipeline (2026-10-02)
+
+All 13 RULER tasks at 32K/64K × seeds 404/505/606, dllm.
+- Correct answers per arm: dense 34 / 33; M3 + c0 34 / 33; + q64c 34 / 33.
+- Fixed 88% (k12): rank-32 V 33 / 33, mass-only 33 / 33.
+- No accuracy loss in any arm, and no V-term difference on long-context RULER.
+- Not a speed target (about 5 calls per request).
+- Source: `ruler_long_panel_r16/` (`summary.md`, `vterm.md`, `steps.md`, `receipts.md`).
+
 ### Regroup offline and call-1 split (2026-10-02)
 
 **Offline regrouping** (`regroup_offline_1002/`): real need matrices of 144 decisions (M3 + c0 + q64c, 32K/64K/96K
