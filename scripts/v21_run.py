@@ -163,6 +163,9 @@ def validate_protocol(protocol: dict) -> None:
         raise ValueError("aligned6 pilot seed contract drift")
     if not isinstance(ids, dict) or set(ids) != required_tasks:
         raise ValueError("task ID inventory differs from frozen panel kind")
+    if 'humaneval' in ids:
+        from scripts.v27_humaneval import validate_contract
+        validate_contract(protocol.get('task_contracts', {}).get('humaneval'))
     if any(not isinstance(v, list) or len(v) != len(set(v)) for v in ids.values()):
         raise ValueError("task IDs missing or duplicated")
     ruler_stage = protocol["panel_kind"] == "bootstrap6_ruler"

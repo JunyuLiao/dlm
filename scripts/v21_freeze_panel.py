@@ -432,6 +432,12 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
     arms = list(spec['arms'])
     substrate = spec.get('substrate', 'eager')
     identity_fields = dict(old_protocol=_sha(original_bytes), ids=ids, seeds=seeds, arms=contracts)
+    if 'humaneval' in ids:
+        from scripts.v27_humaneval import validate_contract
+        validate_contract(spec.get('task_contracts', {}).get('humaneval'))
+        identity_fields['task_contracts'] = spec['task_contracts']
+        if not re.fullmatch('[0-9a-f]{64}', spec.get('extra_gold_sha256', {}).get('humaneval', '')):
+            raise ValueError('HumanEval needs pinned scorer-only gold')
     if substrate != 'eager':
         identity_fields['substrate'] = substrate
     protocol_id = 'v27_' + spec['name'] + '_' + _sha(_bytes(identity_fields))[:16]
@@ -475,6 +481,8 @@ def freeze_v27(spec_path, v20_protocol_path, v20_binding_path, pool_dir, out_dir
     if substrate != 'eager':
         protocol['substrate'] = substrate
         protocol['timing_eligible'] = True   # compile/capture happens in the runner's untimed per-arm warm-up
+    if 'humaneval' in ids:
+        protocol['task_contracts'] = spec['task_contracts']
     validate_protocol(protocol)
     out_dir.mkdir(parents=True, exist_ok=False)
     for dataset, content in manifests.items():
@@ -717,8 +725,8 @@ def bind_host(old_binding_path, host, source_commit, protocol_path, manifests_di
             source_arm = ('D_native' if contract['kind'] == 'native' else
                           'T_scope' if parent == 'T_scope' else
                           'D_matched' if parent == 'D_matched' else parent)
-            from scripts.v27_datasets import base_task
-            inherited = _old_config(binding, source, base_task(dataset),
+            from scripts.v27_datasets import runtime_base_task
+            inherited = _old_config(binding, source, runtime_base_task(dataset),
                                     'D_native' if contract['kind'] == 'v27_dense' else source_arm)
             plugin = (old.CONTROLS if source_arm in ('D_native', 'D_matched', 'T_scope')
                       else v20.PLUGIN)

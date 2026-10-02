@@ -9,9 +9,10 @@ BASE_TASK = {
     'ruler32k': 'ruler4k', 'ruler64k': 'ruler4k',
     'longbench_v2_32k': 'longbench_v2', 'longbench_v2_64k': 'longbench_v2', 'longbench_v2_128k': 'longbench_v2',
     'longbench_v2_96k': 'longbench_v2',
+    'humaneval': 'humaneval',
 }
 DATASETS = tuple(BASE_TASK)
-EXTRA_GOLD = tuple(d for d, base in BASE_TASK.items() if d != base)
+EXTRA_GOLD = tuple(d for d, base in BASE_TASK.items() if d != base or d == 'humaneval')
 # v27 generation seeds: 101/202/303 panels, 404 final AIME panel, 505-909 the E4 large-seed confirmation
 V27_SEEDS = frozenset({101, 202, 303, 404, 505, 606, 707, 808, 909})
 
@@ -21,3 +22,9 @@ def base_task(dataset: str) -> str:
         return BASE_TASK[dataset]
     except KeyError:
         raise ValueError(f'unknown dataset {dataset!r}') from None
+
+
+def runtime_base_task(dataset: str) -> str:
+    """Reuse only the pinned thinking-ON/8192 runtime config, never the LB scorer."""
+    base = base_task(dataset)
+    return 'longbench_v2' if base == 'humaneval' else base
