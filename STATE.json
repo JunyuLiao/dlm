@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 10:36 (UTC-5)",
+    "updated_local": "2026-10-02 11:05 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -152,7 +152,7 @@
         "RULER 4K/8K"
       ],
       "setup_dir": "/home/exouser/dyh/dlm_models_20261002 (dllm)",
-      "status": "envs (sglang_up 0.5.21, sglang_idlm, vllm 0.30.0), weights and LongBench Pro ready on dllm; next: vLLM DiffusionGemma dense check, official dense smoke for LLaDA2.1-mini and I-DLM-8B"
+      "status": "envs, weights and LongBench Pro ready on dllm. LLaDA2.1-mini SGLang smoke blocked: SGLang JIT kernels fail to link with the pip CUDA 13 package; install a full CUDA 13 toolkit into dyh. Cache hygiene: set SGLANG_CACHE_DIR etc."
     },
     "e14": {
       "verdict": "main M3+c0 W 0.925/0.860/0.801 (12 seeds); q64 -0.4..-0.7% per step; q64c not adopted",

@@ -204,7 +204,10 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
    - T needs the per-position argmax flips from vLLM's compiled sampler (`_compiled_sample_step`).
    - Then rerun dense vs M3 + c0 on vLLM with many items. vLLM rejects per-request seeds for diffusion models, so
      trajectories cannot be paired by seed; use many items and report distributions plus per-step direct timing.
-4. **New models** (`docs/EXPANSION_PLAN_20261002.md`):
+4. **New models** (`docs/EXPANSION_PLAN_20261002.md`, sections "Official dense smoke status" and cache hygiene):
+   - first, install a full CUDA 13.0 toolkit into a dyh prefix and set `CUDA_HOME`: SGLang's JIT kernels fail to link
+     with the pip CUDA package. Always set the dyh cache variables listed there; SGLang otherwise writes
+     `~/.cache/sglang`.
    - official dense smoke runs and baseline-candidate timing: LLaDA2.1-mini on SGLang (FlashInfer/FA3/Triton
      backends) vs dInfer; I-DLM-8B on its bundled SGLang;
    - then thin adapters with a model-independent core (user rule: clean code structure).
@@ -234,6 +237,9 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Operational notes (still relevant)
 
+- **Cache hygiene (dyh-only):** for SGLang/vLLM runs set `SGLANG_CACHE_DIR`, `XDG_CACHE_HOME`, `TRITON_CACHE_DIR`,
+  `TORCHINDUCTOR_CACHE_DIR`, `CUDA_CACHE_PATH`, `FLASHINFER_WORKSPACE_BASE`, `VLLM_CACHE_ROOT`, `HF_HOME` and `TMPDIR`
+  under dyh. SGLang ignores `XDG_CACHE_HOME` and needs `SGLANG_CACHE_DIR`.
 - **Hosts** (H100 80GB, user-authorized, write only under `dyh`):
   - dllm `149.165.159.64`;
   - mpk `149.165.151.254` (writes go to `/media/volume/dllm-1/dyh`);

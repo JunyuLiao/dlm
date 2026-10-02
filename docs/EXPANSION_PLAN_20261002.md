@@ -149,3 +149,25 @@ Pip freezes and revisions are stored next to each item; every cache stays inside
   - LLaDA2.1-mini and I-DLM-8B: 8k/16k/32k within their windows.
   - Both languages, `question_thinking` when thinking is on.
   - Gold stays private like all other gold.
+
+## Official dense smoke status (2026-10-02 11:00 UTC−5, dllm)
+
+`scripts/v27_sglang_dense_smoke.py` runs the official in-process SGLang engine on one public toy prompt.
+LLaDA2.1-mini (upstream SGLang 0.5.21, `JointThreshold`, FlashInfer) does **not run yet**:
+- deep_gemm (FP8 GEMM only): disabled with `SGLANG_ENABLE_JIT_DEEPGEMM=0`;
+- deep_ep imports need `CUDA_HOME`: pointed at the env's pip CUDA 13 package `.../site-packages/nvidia/cu13`;
+- FlashInfer JIT failed (CUDA compiler/headers incompatible): fixed by installing `flashinfer-jit-cache==0.6.18+cu130`
+  (prebuilt kernels) into the env; `ninja` was also added to both SGLang envs;
+- **open:** SGLang's own JIT kernels (e.g. `sgl_kernel_jit_fused_rope`) fail to link (`ld returned 1`) with the pip CUDA
+  package. Next: install a full CUDA 13.0 toolkit into a dyh prefix (for example conda `cuda-toolkit=13.0` under
+  `/home/exouser/dyh/dlm_models_20261002/cuda13`) and set `CUDA_HOME` to it, then rerun the smoke test.
+- I-DLM-8B smoke: not run yet (same toolchain needs; config `src/I-DLM/inference/configs/idlm_blockN4_config.yaml`).
+
+**Cache hygiene for every SGLang/vLLM run** (dyh-only rule): set `SGLANG_CACHE_DIR`, `XDG_CACHE_HOME`,
+`TRITON_CACHE_DIR`, `TORCHINDUCTOR_CACHE_DIR`, `CUDA_CACHE_PATH`, `FLASHINFER_WORKSPACE_BASE`, `VLLM_CACHE_ROOT`,
+`HF_HOME` and `TMPDIR` to directories under `/home/exouser/dyh/dlm_models_20261002/`.
+- SGLang ignores `XDG_CACHE_HOME` for its own cache and wrote `~/.cache/sglang` on import (14:02 UTC) and during the
+  smoke test (15:47 UTC).
+- One Triton cache entry (`~/.triton/cache/KJGB…`, 13:56 UTC) came from the I-DLM env's import check.
+- Both were created by these runs (timestamps match) and were removed at 16:01 UTC. Nothing else under the home
+  directory changed today.
