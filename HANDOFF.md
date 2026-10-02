@@ -29,8 +29,9 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   remote and local are both `b9e0700d8`. Default fetch only tracks an older branch; use the explicit ref.
 - All three H100s verified idle by SSH during intake (0 MiB, no compute processes).
 - V18 spec and worker/phase tracker/scorer passed 112 CPU tests and were pushed in `c89472cfb`.
-  96K qualification started on dllm at 16:50 UTC-5, campaign `v27_vllm_v18_preflight_001`;
-  four arms run serially, no formal panel yet. mpk and dlm2 are idle.
+  First 96K qualification failed closed after dense warm-up: external/internal request ID mismatch.
+  No qualified record; 241.607 GPU reserved seconds. Fixed with internal ID returned by add_request;
+  125 CPU tests pass. New deploy/run required before another launch; all GPUs idle.
   See `docs/VLLM_PANEL_V18_20261002.md`. Status changes are recorded here and in STATE.current.
 - Fixed stale fastest-dense and blocked-port labels. Historical panel numbers are preserved.
 
@@ -208,7 +209,7 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 
 ## Running
 
-- V18 96K qualification on dllm, started 2026-10-02 16:50 UTC-5. Formal panel not launched.
+- None. V18 attempt 001 closed with the request-ID instrumentation failure; requalification next.
 
 ## Blockers
 

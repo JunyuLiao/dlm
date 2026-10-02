@@ -188,3 +188,5 @@ Sources: audited base `6b13fe178`; `scripts/v27_fa4_panel_summary.py`,
   result. Current map-drift/RULER/HumanEval/LongBench follow-up ordering is unchanged; no GPU workload launched.
 
 - 2026-10-02 16:50 UTC-5: launched V18 96K qualification on dllm (four serial arms, fresh run directories); no full panel yet. GPU seconds pending terminal receipts.
+
+- 2026-10-02 16:58 UTC-5: V18 preflight 001 failed closed on vLLM internal request-ID rewriting (no qualified records; 241.607 GPU reserved seconds). Fixed attribution without changing inference; 125 CPU tests pass. Requalification will use a new deploy/binding/run.

@@ -554,3 +554,10 @@ Step ratio N = method decoder calls / dense decoder calls per cell (M3 R6 DP −
 - Source/background: `docs/GROUP_CONTEXT_20261001.md`. HERALD/PRR/SSV experimental boundaries and BRISK-DLM's
   abstract were checked against public primary sources. No peer figures enter this branch's W/S/N/accuracy tables.
 - No new model output, protocol, run, score or GPU job. GPU seconds = **0**; A/B refs remain pending.
+
+## V18 qualification failure (2026-10-02)
+
+Attempt 001 has zero qualified timed results: phase observer used the external rather than
+internal vLLM request ID. Dense longest-item warm-up ran; 241.607 reserved GPU seconds are
+charged. This is an instrumentation failure, not a model accuracy or performance result.
+Source: `vllm_v18_qualification/attempt001.json`.

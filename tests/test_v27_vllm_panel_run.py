@@ -1,5 +1,22 @@
 import pytest
-from scripts.v27_vllm_panel_run import validate_receipts
+from types import SimpleNamespace
+from scripts.v27_vllm_panel_run import validate_receipts, add_tracked_request
+from scripts.v27_vllm_metrics import PhaseTracker
+
+
+def test_internal_request_id_rewrite_counts_real_prefill():
+    t = PhaseTracker()
+    e = SimpleNamespace(add_request=lambda rid,prompt,params: rid+'-internal')
+    add_tracked_request(e,t,'external',None,None)
+    t.observe_scheduler(SimpleNamespace(num_scheduled_tokens={'external-internal':11},scheduled_spec_decode_tokens={}),
+                        SimpleNamespace(req_id_to_index={'external-internal':0},sampled_token_ids=[[]]),completed_at=2)
+    assert t.finalize(1,3)['prefill_tokens']==11
+
+
+@pytest.mark.parametrize('internal',[None,'',123])
+def test_no_internal_identity_fails_closed(internal):
+    with pytest.raises(ValueError,match='internal request'):
+        add_tracked_request(SimpleNamespace(add_request=lambda *args: internal),PhaseTracker(),'x',None,None)
 
 
 def receipt():

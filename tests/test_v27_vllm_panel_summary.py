@@ -1,5 +1,7 @@
 """Synthetic CPU guard tests; no GPU, model, private dataset or NeMo dependency."""
 import json
+import math
+import csv
 
 import pytest
 
@@ -101,9 +103,17 @@ def test_complete_panel_ratios_controls_and_private_redaction(tmp_path, predict)
     assert primary['W'] == pytest.approx(.8)
     assert primary['S'] == pytest.approx(.8) and primary['SN'] == pytest.approx(.8)
     assert primary['N'] == 1 and primary['W_ci95'] == pytest.approx([.8, .8])
+    assert primary['P'] == 1 and primary['P_ci95'] == [1., 1.]
     assert primary['strict_correct'] == primary['base_strict_correct'] == 6
     assert {row['base'] for row in result['comparisons'] if row['arm'] == 'method'} == {'dense', 'native', 'allkept'}
     assert [row['cells'] for row in result['arms']] == [6, 6, 4, 4]
+    method = next(row for row in result['arms'] if row['arm'] == 'method')
+    assert method['wall_s_mean'] == method['wall_s_median'] == 8
+    assert method['decode_span_s_mean'] == method['decode_span_s_median'] == 4
+    assert method['prefill_s_mean'] == 2
+    assert method['denoise_forward_count_mean'] == method['denoise_forward_count_median'] == 10
+    assert method['denoise_forward_count_sum'] == 60
+    assert method['decode_s_per_denoise_forward_geomean'] == pytest.approx(.4)
     assert predict and all(text == 'Answer: B' for text in predict)
     for path in out.iterdir():
         text = path.read_text(encoding='utf-8')
@@ -434,3 +444,91 @@ def test_same_private_item_cannot_be_counted_as_two_questions(tmp_path):
             row['id'] = 'private-item-0'
     with pytest.raises(ValueError, match='duplicate private item'):
         load(tmp_path, protocol, records, completions)
+
+
+def synthetic_scored_cells(tmp_path):
+    cells, _ = load(tmp_path)
+    for arms in cells.values():
+        for row in arms.values():
+            row.update(strict_correct=True, task_correct=True, parsed=True, final_channel_present=True)
+    return cells
+
+
+def test_absolute_arm_statistics_include_true_forward_counts_and_skew(tmp_path):
+    cells = synthetic_scored_cells(tmp_path)
+    walls = [2, 4, 6, 8, 10, 100]
+    for ordinal, key in enumerate(sorted(cells)):
+        cells[key]['method'].update(wall_s=walls[ordinal], decode_span_s=ordinal + 1,
+                                    prefill_s=(ordinal + 1) / 4, denoise_forward_count=2 * (ordinal + 1),
+                                    commit_forward_count=ordinal)
+    result = summary.summarize(cells, bootstrap_reps=80)
+    method = next(row for row in result['arms'] if row['arm'] == 'method')
+    assert method['wall_s_mean'] == pytest.approx(130 / 6)
+    assert method['wall_s_median'] == 7
+    assert method['decode_span_s_mean'] == method['decode_span_s_median'] == 3.5
+    assert method['prefill_s_mean'] == .875
+    assert method['denoise_forward_count_mean'] == method['denoise_forward_count_median'] == 7
+    assert method['denoise_forward_count_sum'] == 42
+    assert method['decode_s_per_denoise_forward_geomean'] == pytest.approx(.5)
+    assert method['commit_forward_count_mean'] == 2.5
+    assert method['commit_forward_count_observed_cells'] == 6
+    control = next(row for row in result['arms'] if row['arm'] == 'native')
+    assert control['denoise_forward_count_sum'] == 40
+    assert control['commit_forward_count_mean'] is None
+    assert control['commit_forward_count_observed_cells'] == 0
+    out = tmp_path / 'out'
+    summary.write_summary(result, out)
+    with (out / 'arms.csv').open(encoding='utf-8') as stream:
+        csv_method = next(row for row in csv.DictReader(stream) if row['arm'] == 'method')
+    assert csv_method['denoise_forward_count_sum'] == '42'
+    assert float(csv_method['wall_s_mean']) == pytest.approx(130 / 6)
+    assert 'denoise N mean / median / sum' in (out / 'summary.md').read_text(encoding='utf-8')
+
+
+def test_amortized_absolute_cost_is_explicit_geometric_mean(tmp_path):
+    cells = synthetic_scored_cells(tmp_path)
+    for ordinal, key in enumerate(sorted(cells)):
+        cells[key]['method']['decode_span_s'] = ordinal + 1
+    method = next(row for row in summary.summarize(cells, 80)['arms'] if row['arm'] == 'method')
+    expected = math.prod((i + 1) / 10 for i in range(6)) ** (1 / 6)
+    assert method['decode_s_per_denoise_forward_geomean'] == pytest.approx(expected)
+    assert method['decode_s_per_denoise_forward_geomean'] != pytest.approx(.35)
+
+
+def test_prefill_ratio_pairs_actual_prefill_and_retains_item_ci(tmp_path):
+    cells = synthetic_scored_cells(tmp_path)
+    for key, arms in cells.items():
+        arms['method']['prefill_s'] = [1, 2, 4][key[1]]
+    primary = summary.summarize(cells, 400)['comparisons'][0]
+    assert primary['P'] == pytest.approx(1)
+    assert primary['P_ci95'] == pytest.approx([.5, 2.])
+    assert primary['P'] != primary['W']
+
+
+def test_optional_commit_mean_reports_observed_coverage_not_missing_zeroes(tmp_path):
+    cells = synthetic_scored_cells(tmp_path)
+    cells[sorted(cells)[0]]['method']['commit_forward_count'] = 3
+    method = next(row for row in summary.summarize(cells, 80)['arms'] if row['arm'] == 'method')
+    assert method['commit_forward_count_mean'] == 3
+    assert method['commit_forward_count_observed_cells'] == 1
+
+
+@pytest.mark.parametrize('value', [None, -1, False, 1.5])
+def test_invalid_optional_commit_forward_count_is_rejected(tmp_path, value):
+    protocol, records, completions = fixtures()
+    records[0]['commit_forward_count'] = value
+    with pytest.raises(ValueError, match='commit_forward_count'):
+        load(tmp_path, protocol, records, completions)
+
+
+def test_zero_optional_commit_count_is_a_valid_observation(tmp_path):
+    protocol, records, completions = fixtures()
+    for row in records:
+        row['commit_forward_count'] = 0
+    cells, _ = load(tmp_path, protocol, records, completions)
+    for arms in cells.values():
+        for row in arms.values():
+            row.update(strict_correct=True, task_correct=True, parsed=True, final_channel_present=True)
+    method = next(row for row in summary.summarize(cells, 80)['arms'] if row['arm'] == 'method')
+    assert method['commit_forward_count_mean'] == 0
+    assert method['commit_forward_count_observed_cells'] == 6

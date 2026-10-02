@@ -186,6 +186,8 @@ def load_panel(record_paths, completion_paths, protocol):
             raise ValueError('engine seed differs from frozen block')
         for field in ('max_model_len', 'chunk', 'block_size', 'denoise_forward_count'):
             _integer(row.get(field), field, positive=True)
+        if 'commit_forward_count' in row:
+            _integer(row['commit_forward_count'], 'commit_forward_count')
         _integer(row.get('output_tokens'), 'output_tokens')
         _positive(row['gpu_memory_utilization'], 'gpu_memory_utilization')
         if row['gpu_memory_utilization'] > 1:
@@ -321,12 +323,28 @@ def summarize(cells, bootstrap_reps=4000):
         selected = {key: arms for key, arms in cells.items() if key[0] == dataset}
         for arm in ARMS:
             present = [(key, arms[arm]) for key, arms in selected.items() if arm in arms]
+            wall = [row['wall_s'] for _, row in present]
+            decode = [row['decode_span_s'] for _, row in present]
+            prefill = [row['prefill_s'] for _, row in present]
+            forwards = [row['denoise_forward_count'] for _, row in present]
+            commit = [row['commit_forward_count'] for _, row in present if 'commit_forward_count' in row]
             arm_rows.append(dict(dataset=dataset, arm=arm, cells=len(present),
                                  items=len({key[1] for key, _ in present}),
                                  strict_correct=sum(row['strict_correct'] for _, row in present),
                                  task_correct=sum(row['task_correct'] for _, row in present),
                                  capped=sum(row['finish_reason'] == 'length' for _, row in present),
-                                 unparsed=sum(not row['parsed'] for _, row in present)))
+                                 unparsed=sum(not row['parsed'] for _, row in present),
+                                 wall_s_mean=statistics.mean(wall), wall_s_median=statistics.median(wall),
+                                 decode_span_s_mean=statistics.mean(decode),
+                                 decode_span_s_median=statistics.median(decode),
+                                 prefill_s_mean=statistics.mean(prefill),
+                                 denoise_forward_count_mean=statistics.mean(forwards),
+                                 denoise_forward_count_median=statistics.median(forwards),
+                                 denoise_forward_count_sum=sum(forwards),
+                                 decode_s_per_denoise_forward_geomean=_geo(
+                                     [row['decode_span_s'] / row['denoise_forward_count'] for _, row in present]),
+                                 commit_forward_count_mean=statistics.mean(commit) if commit else None,
+                                 commit_forward_count_observed_cells=len(commit)))
         for arm, base in (('method', 'dense'), ('native', 'dense'), ('allkept', 'dense'),
                           ('method', 'native'), ('method', 'allkept')):
             pairs = [(key, arms[arm], arms[base]) for key, arms in selected.items() if arm in arms and base in arms]
@@ -339,6 +357,7 @@ def summarize(cells, bootstrap_reps=4000):
             for name, ratio in (
                     ('W', lambda a, b: a['wall_s'] / b['wall_s']),
                     ('S', lambda a, b: a['decode_span_s'] / b['decode_span_s']),
+                    ('P', lambda a, b: a['prefill_s'] / b['prefill_s']),
                     ('SN', lambda a, b: (a['decode_span_s'] / a['denoise_forward_count']) /
                      (b['decode_span_s'] / b['denoise_forward_count'])),
                     ('N', lambda a, b: a['denoise_forward_count'] / b['denoise_forward_count'])):
@@ -357,7 +376,11 @@ def summarize(cells, bootstrap_reps=4000):
     return dict(schema='v27_vllm_panel_summary_v1', scorer_version=task.SCORER_VERSION,
                 pairing='dataset/index/repeat; repeat is not a sampling seed; seed_applied=false',
                 confidence='95% item-cluster percentile bootstrap retaining all repeats',
-                timing='W=request boundary wall; S=decode span excluding initial prefill; SN=S/N amortized cost',
+                timing='W=request boundary wall; S=decode span excluding initial prefill; P=initial prefill; '
+                       'N=actual denoising forwards excluding encoder commits; SN=S/N amortized cost',
+                absolute_statistics='Per-arm means/medians use all timed requests; '
+                                    'decode_s_per_denoise_forward_geomean is the geometric mean of request S/N; '
+                                    'commit mean uses only its explicitly reported observed cells',
                 inference='McNemar is exploratory only: repeats are not independent seeded samples',
                 arms=arm_rows, comparisons=comparisons)
 
@@ -385,13 +408,25 @@ def write_summary(summary, out_dir):
     for row in summary['arms']:
         lines.append('| ' + ' | '.join(str(row[k]) for k in
                      ('dataset', 'arm', 'cells', 'items', 'strict_correct', 'task_correct', 'capped', 'unparsed')) + ' |')
+    lines += ['', summary['absolute_statistics'], '',
+              '| dataset | arm | W mean / median (s) | S mean / median (s) | prefill mean (s) | denoise N mean / median / sum | S/N geometric mean (s) | commit forwards mean (observed cells) |',
+              '|---|---|---|---|---:|---|---:|---|']
+    for row in summary['arms']:
+        commit = ('unreported' if row['commit_forward_count_mean'] is None else
+                  f"{row['commit_forward_count_mean']:.4f} ({row['commit_forward_count_observed_cells']})")
+        lines.append(f"| {row['dataset']} | {row['arm']} | "
+                     f"{row['wall_s_mean']:.4f} / {row['wall_s_median']:.4f} | "
+                     f"{row['decode_span_s_mean']:.4f} / {row['decode_span_s_median']:.4f} | "
+                     f"{row['prefill_s_mean']:.4f} | "
+                     f"{row['denoise_forward_count_mean']:.4f} / {row['denoise_forward_count_median']:.4f} / "
+                     f"{row['denoise_forward_count_sum']} | {row['decode_s_per_denoise_forward_geomean']:.6f} | {commit} |")
     lines += ['', 'Ratios are candidate/reference; values below one mean faster or fewer forwards.', '',
-              '| dataset | comparison | cells | items | correct (base) | W [95% CI] | S [95% CI] | S/N [95% CI] | N [95% CI] | accuracy difference [95% CI] | exploratory McNemar p |',
-              '|---|---|---:|---:|---|---|---|---|---|---|---:|']
+              '| dataset | comparison | cells | items | correct (base) | W [95% CI] | S [95% CI] | prefill P [95% CI] | S/N [95% CI] | N [95% CI] | accuracy difference [95% CI] | exploratory McNemar p |',
+              '|---|---|---:|---:|---|---|---|---|---|---|---|---:|']
     for row in summary['comparisons']:
         lines.append(f"| {row['dataset']} | {row['arm']}/{row['base']} | {row['cells']} | {row['items']} | "
                      f"{row['strict_correct']} ({row['base_strict_correct']}) | " +
-                     ' | '.join(metric(row, name) for name in ('W', 'S', 'SN', 'N', 'accuracy_difference')) +
+                     ' | '.join(metric(row, name) for name in ('W', 'S', 'P', 'SN', 'N', 'accuracy_difference')) +
                      f" | {row['exploratory_mcnemar_exact_p']:.4g} |")
     (out_dir / 'summary.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
 

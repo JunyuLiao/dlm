@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 16:50 (UTC-5)",
+    "updated_local": "2026-10-02 16:58 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
-    "verified_commit": "c89472cfb",
+    "verified_commit": "562388ef9",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -17,9 +17,7 @@
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
     "headline": "vLLM smoke only: S/N proxy 0.96 at 32K, 0.85 at 64K; request/accuracy panel V18 preparing. Historical HF speed ratios are not headline official-serving evidence.",
-    "running": [
-      "dllm: v27_vllm_v18_preflight_001 (96K qualification, four serial arms)"
-    ],
+    "running": [],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
@@ -198,12 +196,12 @@
       "source": "docs/VLLM_PORT_NOTES_20261002.md"
     },
     "vllm_v18": {
-      "status": "96K qualification running; full panel not launched",
+      "status": "attempt 001 failed closed on internal request-ID rewrite; fixed, ready for fresh qualification",
       "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_vllm_lb_v18.json",
-      "gpu_seconds": null,
-      "cpu_tests": 112,
+      "gpu_seconds": 241.607,
+      "cpu_tests": 125,
       "deploy_commit": "c89472cfb9857deb50d79d23bf840ed48576a3b8",
-      "gpu_accounting": "pending closed worker terminal receipts"
+      "gpu_accounting": "closed failed worker reserved wall seconds"
     }
   },
   "task": "M3 output numerics and trajectory isolation",

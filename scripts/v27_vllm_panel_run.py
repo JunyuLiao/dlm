@@ -33,6 +33,13 @@ def validate_binding(binding, spec):
         raise ValueError('deploy commit drift')
 
 
+def add_tracked_request(engine, tracker, rid, prompt, params):
+    internal_rid = engine.add_request(rid, prompt, params)
+    if not isinstance(internal_rid, str) or not internal_rid:
+        raise ValueError('vLLM did not return its internal request identity')
+    tracker.start_request(internal_rid)
+
+
 def validate_receipts(arm, receipts, n, required):
     if arm == 'dense':
         if receipts is not None:
@@ -94,12 +101,12 @@ def run(a, binding, spec, status):
     for ds, path in binding['manifests'].items():
         for row in read(path):
             rows[(ds, row['id'])] = row
-    if a.arm in spec['controls']:
-        cells = [c for c in cells if c['index'] in spec['control_indices'][c['dataset']]]
     if a.preflight:
         # Longest eligible item is selected without using an answer or completion.
         cells = [max(cells, key=lambda c: len(rows[(c['dataset'], c['id'])]['prompt_tokens']))]
         repeats = [0]
+    elif a.arm in spec['controls']:
+        cells = [c for c in cells if c['index'] in spec['control_indices'][c['dataset']]]
     adapter = None
     config = read(binding['config'])
     import experiments.numerical_qk_reuse.vllm_adapter as va
@@ -151,7 +158,7 @@ def run(a, binding, spec, status):
             begin = time.perf_counter()
             if adapter:
                 adapter.begin_request()
-            engine.add_request(rid, TokensPrompt(prompt_token_ids=list(row['prompt_tokens'])), params)
+            add_tracked_request(engine, tracker, rid, TokensPrompt(prompt_token_ids=list(row['prompt_tokens'])), params)
             final = None
             while engine.has_unfinished_requests():
                 for o in engine.step():
