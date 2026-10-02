@@ -41,6 +41,26 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - Their accuracy results stand. Speed claims for the paper must come from vLLM.
 - P16 / P17 finished earlier: the 64K accuracy gap is selection noise; the C gate is not adopted.
 
+**Do the vLLM results agree with our own (HF-substrate) panels?** The direction agrees; the size of the speed gain
+is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
+
+| | HF substrate, E13–E15 (18 seeds) | vLLM 0.30.0, smoke (1 item × 2 runs per arm) |
+|---|---|---|
+| dense reference | FA4, num_splits=1 (`D_fa4_allkept`) | vLLM's own serving (FA4 dynamic-causal, split-KV; ~1.65× faster GLOBAL call) |
+| per step, 32K | 0.921 | 0.96 |
+| per step, 64K | 0.814 | 0.85 |
+| per step, 96K | 0.745 | not run (memory check pending) |
+| end-to-end W | 0.950 / 0.867 / 0.818 | not measured; 64K estimate ≈ 0.90 if step counts were equal |
+| accuracy | not lower (96K higher, p 0.012) | not measured yet (completions saved privately) |
+
+- The same mechanism shows in both: per-step saving grows with context length.
+- In vLLM each skipped GLOBAL tile saves less, because vLLM's dense call is faster. The rest of vLLM's step is also
+  faster, so GLOBAL attention is a bigger share of a step. The two effects partly offset; the net ratio is a few
+  points weaker than on the HF substrate.
+- Do not quote the HF speed ratios as the paper's speed result; their dense was not the strongest. The HF accuracy
+  results stand.
+- The vLLM panel (next step 1) must confirm the vLLM numbers with many items, accuracy and 96K.
+
 **HF-substrate result (18 seeds, E13 + E14 + E15; L1m; dense = FA4 num_splits=1, see the correction above).** M3 R6 DP −ln2 + `carry_first` vs that dense:
 - end-to-end W **0.950 [0.920, 0.980] (32K), 0.867 [0.841, 0.892] (64K), 0.818 [0.731, 0.898] (96K)**;
 - generation-only S 0.937 / 0.787 / 0.728, per step 0.921 / 0.814 / 0.745;
@@ -181,7 +201,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Blockers
 
-- The vLLM port needs a working block-sparse path over vLLM's paged KV (see the situation section).
+- None. The paged block-sparse path is fixed and the method runs inside vLLM.
 
 ## Immediate next steps (in order)
 
