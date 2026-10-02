@@ -150,7 +150,7 @@ Pip freezes and revisions are stored next to each item; every cache stays inside
   - Both languages, `question_thinking` when thinking is on.
   - Gold stays private like all other gold.
 
-## Official dense smoke status (2026-10-02 11:00 UTC−5, dllm)
+## Official dense smoke status (2026-10-02 10:49 UTC−5, dllm)
 
 `scripts/v27_sglang_dense_smoke.py` runs the official in-process SGLang engine on one public toy prompt.
 LLaDA2.1-mini (upstream SGLang 0.5.21, `JointThreshold`, FlashInfer) does **not run yet**:
@@ -169,5 +169,5 @@ LLaDA2.1-mini (upstream SGLang 0.5.21, `JointThreshold`, FlashInfer) does **not 
 - SGLang ignores `XDG_CACHE_HOME` for its own cache and wrote `~/.cache/sglang` on import (14:02 UTC) and during the
   smoke test (15:47 UTC).
 - One Triton cache entry (`~/.triton/cache/KJGB…`, 13:56 UTC) came from the I-DLM env's import check.
-- Both were created by these runs (timestamps match) and were removed at 16:01 UTC. Nothing else under the home
+- Both were created by these runs (timestamps match) and were removed at 15:49 UTC. Nothing else under the home
   directory changed today.
