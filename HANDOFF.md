@@ -23,32 +23,17 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
     using it.
 
-## Situation at handoff (2026-10-02 11:50 UTC−5)
+## Situation at handoff (2026-10-02 12:25 UTC−5)
 
-**Running (independent of any coordinator session).**
-- E15 (`specs/v27_c01_e15.json`, protocol `v27_c01_e15_e83919d6411343b2`, 1,602 runs).
-  - Arms: dense FA4, M3 + c0 and M3 + c0 + `observe_carried` (c01).
-  - Data: AIME26 30 + LB 32K/64K/96K × seeds 1616–2121.
-  - Hosts: mpk and dlm2; run dir `v27_lb_e15_001`, deploy `v27_e15_f63a1f2`.
-  - At 11:50, 64K, 96K and 32K were done on both hosts and AIME26 was at 193/270 per host (about 8 s per run). Expected
-    end: about 12:05 UTC−5, when both hosts show 4 worker ends. A host-side chain
-    (`<run dir>/host_chain_e15.py`, log `host_chain_e15.log`) launches 32K after the 96K worker ends, then AIME26, with
-    the exact v23_transport launch command. Expect several hours; AIME is the slowest stage.
-  - Check progress: `grep -c '"event": "run"' <run dir>/ledger.jsonl` and `grep -c worker_end` (4 per host when done).
-  - Score when both hosts show 4 worker ends (from `E:/dlm`):
-    `python v27_score_lb.py --tag v27_e15_f63a1f2 --run-dir v27_lb_e15_001 --label e15 --mpk-only --mpk-ends 4 --also dlm2 --also-ends 4 --mixed-gold --bins 32k,64k,96k`
-  - Then, from the repo:
-    - `python -m scripts.v27_fa4_panel_summary L/summary.md L/summary.csv L/scored.csv L/mpk_ledger.jsonl L/dlm2_ledger.jsonl`;
-    - `python -m scripts.v27_direct_compare L/direct_c01_vs_c0.md L/direct_c01_vs_c0.csv M3_R6_A64_fused_dp_async_m1ln2_c0_c01_fa4 M3_R6_A64_fused_dp_async_m1ln2_c0_fa4 --panel E15 L/scored.csv L/mpk_ledger.jsonl L/dlm2_ledger.jsonl`;
-    - `python -m scripts.v27_step_stats L/steps.md L/steps.csv L/mpk_ledger.jsonl L/dlm2_ledger.jsonl`.
-    Here `L=E:/dlm/v27_private/lb_scoring/e15`. Report the full metric set, per host, and pool M3 + c0 / dense with
-    E13 + E14 (18 seeds).
-- dllm is idle.
+**Running:** nothing. All GPUs idle (2026-10-02 12:25 UTC−5).
+- E15 finished and is scored (`c01_panel_e15/receipts.md`, `docs/RESULTS_LEDGER.md` L1m).
+- c01 is not adopted: negligible per-step gain and an accuracy risk at 64K.
 
-**Main result (12 seeds, E13 + E14; `docs/RESULTS_LEDGER.md` L1k).** M3 R6 DP −ln2 + `carry_first` vs dense FA4:
-- end-to-end W **0.925 [0.892, 0.958] (32K), 0.860 [0.826, 0.891] (64K), 0.801 [0.705, 0.902] (96K)**;
-- generation-only S 0.903 / 0.777 / 0.708, per step 0.924 / 0.814 / 0.751;
-- no significant accuracy difference (177/179, 150/155, 62/53).
+**Main result (18 seeds, E13 + E14 + E15; L1m).** M3 R6 DP −ln2 + `carry_first` vs dense FA4:
+- end-to-end W **0.950 [0.920, 0.980] (32K), 0.867 [0.841, 0.892] (64K), 0.818 [0.731, 0.898] (96K)**;
+- generation-only S 0.937 / 0.787 / 0.728, per step 0.921 / 0.814 / 0.751;
+- accuracy not lower: 267/274, 228/238, 93/76; at 96K sparse is higher, p 0.012.
+- AIME (E15): W 0.951, from fewer steps; accuracy 100 vs 94.
 
 **The most important open issue: the dense baseline is not the fastest official serving system.**
 - vLLM 0.30.0's native DiffusionGemma (official, FA4 attention) was run on the same E14 cells and host
@@ -178,7 +163,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Running
 
-- E15 on mpk and dlm2 via host-side chains (see the situation section). Nothing else.
+- Nothing.
 
 ## Blockers
 
@@ -186,7 +171,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Immediate next steps (in order)
 
-1. **Score E15** when it ends (commands above).
+1. ~~Score E15~~ done: c01 not adopted; main pooled over 18 seeds (L1m).
    - Decide on c01 from the per-step ratio (direct timing exists at kernel level in `observe_split_1002/`), the
      steps-per-canvas ratio (P15 hinted 1.107 at 64K) and accuracy, including AIME.
    - Pool M3 + c0 / dense over E13 + E14 + E15.

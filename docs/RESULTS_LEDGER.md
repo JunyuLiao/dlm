@@ -315,6 +315,19 @@ All 13 RULER tasks at 32K/64K × seeds 404/505/606, dllm.
 - Not a speed target (about 5 calls per request).
 - Source: `ruler_long_panel_r16/` (`summary.md`, `vterm.md`, `steps.md`, `receipts.md`).
 
+### L1m. E15: observe_carried (c01) and the 18-seed main result (2026-10-02)
+
+- **Main, M3 + c0 / dense, pooled E13 + E14 + E15 (18 seeds):**
+  - W 0.950 [0.920, 0.980] (32K), 0.867 [0.841, 0.892] (64K), 0.818 [0.731, 0.898] (96K);
+  - generation S 0.937 / 0.787 / 0.728; per step 0.921 / 0.814 / 0.745;
+  - accuracy 267/274, 228/238, 93/76 (p 0.55, 0.24, 0.012 in favour of sparse).
+- **AIME (E15, 180 cells):** W 0.951 [0.894, 1.001], from 7% fewer steps (per step 1.024); accuracy 100 vs 94.
+- **c01 / main:**
+  - per step 0.983 on AIME (significant), 1.004 (32K), 0.995 (64K), 1.002 (96K);
+  - accuracy at 64K 70 vs 78 (p 0.096), and vs dense 70 vs 83 (p about 0.007).
+  - **Not adopted.**
+- Source: `c01_panel_e15/` (`receipts.md`, `summary.md`, `steps.md`, `direct_*.md`).
+
 ### Official-serving check and vLLM port probe (2026-10-02)
 
 - **vLLM 0.30.0 native DiffusionGemma vs our dense control** on the same 18 E14 cells and host, batch 1, bf16:

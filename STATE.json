@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 11:50 (UTC-5)",
+    "updated_local": "2026-10-02 12:25 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -16,22 +16,8 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "piecewise_v5",
     "dense_reference": "D_fa4_allkept (FlashAttention-4, vLLM fork, block-sparse interface with every tile kept)",
-    "headline": "M3 R6 DP -ln2 + carry_first vs D_fa4_allkept (12 seeds): W 0.925/0.860/0.801 at 32K/64K/96K, S 0.903/0.777/0.708, accuracy not significantly different; vs our HF-based substrate only",
-    "running": [
-      {
-        "panel": "E15 v27_c01_e15_e83919d6411343b2",
-        "hosts": [
-          "mpk",
-          "dlm2"
-        ],
-        "deploy_tag": "v27_e15_f63a1f2",
-        "run_dir": "v27_lb_e15_001",
-        "driver": "host-side chain <run dir>/host_chain_e15.py (32K then AIME after 96K)",
-        "done_when": "4 worker_end events per host",
-        "scoring_label": "e15",
-        "progress": "64K/96K/32K done; AIME 193/270 per host at 11:50; expected end ~12:05 UTC-5"
-      }
-    ],
+    "headline": "M3 R6 DP -ln2 + carry_first vs D_fa4_allkept (18 seeds, E13+E14+E15): W 0.950/0.867/0.818 at 32K/64K/96K, S 0.937/0.787/0.728, accuracy not lower; vs our HF-based substrate only (vLLM port pending)",
+    "running": [],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
@@ -174,7 +160,6 @@
       "port_status": "blocked: FA4 block-sparse over paged KV reads wrong pages (vllm_port_probe_1002); options in HANDOFF"
     },
     "next_steps": [
-      "score E15 (commands in HANDOFF)",
       "vLLM port: add block-sparse to vLLM FA4 dispatch at --block-size 32 (GLOBAL page 64; paged block-sparse fixed by patches/)",
       "vLLM port: hook method into diffusion_gemma.py; remeasure vs vLLM dense",
       "upstream FA4 PR (needs user go-ahead and GitHub account)",
@@ -183,7 +168,11 @@
       "C-gate port (group member, cited)",
       "AIME 32K-budget long-output preview",
       "LongBench Pro official eval code; RULER 8K manifests"
-    ]
+    ],
+    "e15": {
+      "verdict": "c01 not adopted (per-step 0.98-1.00, 64K accuracy risk); main pooled over 18 seeds",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/c01_panel_e15/receipts.md"
+    }
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",

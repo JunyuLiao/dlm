@@ -22,13 +22,13 @@
 - 宁要干净的负结果，不要硬凑正结果；不显著就写不显著，不过度声称。
 
 【当前状态（详见 HANDOFF.md「Situation at handoff」）】
-- 主结果（12 个种子）：M3 R6 DP −ln2 + carry_first 相对 dense FA4，端到端 W 在 32K / 64K / 96K 分别为 0.925 / 0.860 / 0.801，
-  纯生成 S 为 0.903 / 0.777 / 0.708，精度无显著差异。RULER 32K/64K 和 HumanEval 精度也保住了。
+- 主结果（18 个种子，E13+E14+E15）：M3 R6 DP −ln2 + carry_first 相对 dense FA4，端到端 W 在 32K / 64K / 96K 分别为 0.950 / 0.867 / 0.818，
+  纯生成 S 为 0.937 / 0.787 / 0.728，精度不降（96K 稀疏反而更高，p 0.012）。c01 和 q64c 都不采用。RULER 32K/64K 和 HumanEval 精度也保住了。
 - 最重要的待办：vLLM 0.30.0 原生 DiffusionGemma（官方 serving，同样用 FA4）的 dense 比我们的 dense 快，每步分别为 0.76× / 0.90× / 0.98×，
   prefill 约快一倍。所以目前的加速比只是相对我们基于 HF 的底座。要写进论文，需要把方法移植进 vLLM 重测。
   卡点：FA4 在分页 KV 上做 block-sparse 时读错页（复现脚本 scripts/v27_vllm_paged_sparse_probe2.py）。
 - regroup 系列已关闭：64 行 map 只带来每步 0.4–0.7% 的改善，任何重排都不超过约 5%。
-- E15（c01 正式面板）在 mpk 和 dlm2 上跑，由主机侧脚本自动接续各阶段。跑完后按 HANDOFF 里的命令打分。
+- 当前没有实验在跑，GPU 全部空闲。
 - 扩展：新模型 LLaDA2.1-mini、I-DLM-8B 的官方环境、权重和 LongBench Pro 数据已在 dllm 的 /home/exouser/dyh/dlm_models_20261002 就绪，
   UltraLLaDA 已放弃。计划见 docs/EXPANSION_PLAN_20261002.md。
 
