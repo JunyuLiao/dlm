@@ -25,7 +25,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Situation at handoff (2026-10-02 12:25 UTC−5)
 
-**Running (2026-10-02 12:45 UTC−5): P16** (`specs/v27_lb64_item_check_p16.json`, protocol
+**Running (2026-10-02 12:20 UTC−5): P16** (`specs/v27_lb64_item_check_p16.json`, protocol
 `v27_lb64_item_check_p16_4d31029328774e37`, 288 runs on dllm, mpk and dlm2, run dir `v27_p16_001`, deploy
 `v27_p16_959ae20`). It is a held-out check of the 64K accuracy gap: main 228 vs dense 238 of 432 over E13–E15,
 item-clustered p 0.29.
@@ -34,7 +34,15 @@ item-clustered p 0.29.
 - 12 never-used seeds (2222–3333).
 - Arms: dense, main, main + output protection, main at −2ln2.
 - Score: `python v27_score_lb.py --tag v27_p16_959ae20 --run-dir v27_p16_001 --label p16 --dllm-ends 1 --mpk-ends 1 --also dlm2 --also-ends 1 --bins 64k`.
-- Earlier status line: nothing else running.
+- **Queued after P16: P17** (`specs/v27_cgate_preview_p17.json`, protocol `v27_cgate_preview_p17_f0b80167ef28fb6e`,
+  176 runs, run dir `v27_p17_001`). It is an accuracy-first preview of the **C gate** (`sensitivity='cgate'`, commit
+  8e1b40f0a, tests `tests/test_v27_cgate.py`).
+  - The C gate is a group member's query sensitivity, ported from their design note (collaboration).
+  - Data: AIME 10, LB 64K 8 and 96K 4 items × seeds 404/505.
+  - Arms: dense, main (T), C gate at −ln2, C gate at the sparser base threshold.
+  - The coordinator chain `p17_chain.sh` deploys, runs all v27 GPU tests on dllm (it stops on any failure), launches
+    on three hosts and scores with label `p17`. If the session ends first, follow the panel pipeline in the
+    operational notes with tag `v27_p17_<sha7 of the P17 spec commit>`.
 - E15 finished and is scored (`c01_panel_e15/receipts.md`, `docs/RESULTS_LEDGER.md` L1m).
 - c01 is not adopted: negligible per-step gain and an accuracy risk at 64K.
 
