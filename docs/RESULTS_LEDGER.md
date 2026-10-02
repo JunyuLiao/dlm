@@ -12,7 +12,11 @@ Rules for this file:
 - Arm shorthand: **M3** = `M3_R6_A64_fused_dp_async_m1ln2_fa4` (M3 R6 DP −ln2). **Fan plain** = `M1_R1_A8_fa4` /
   `M2c_R1_A8_fa4` / `M3_R3_A8_fa4`.
 
-## Current headline (piecewise_v5)
+## Historical HF results (piecewise_v5)
+
+Baseline correction (2026-10-02): these speed ratios use FA4 num_splits=1 and are not
+headline evidence against the fastest official serving. vLLM dynamic-causal split-KV is
+faster. Keep these results unchanged as history; the new vLLM panel is not scored yet.
 
 ### L1. E4 large-seed confirmation: LongBench-v2 32K and 64K, 24 items × 6 new seeds (404–909) = 144 cells per arm per bin
 

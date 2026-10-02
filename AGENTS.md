@@ -56,9 +56,10 @@
   optimized reference for incremental claims. Preserve historical plain-method results and name variants honestly.
   A selector that uses the current QK is fresh-T information, not M1.
 - **Dense baseline** is official FlashAttention-4 (vLLM fork, CuTe DSL, SM90, head_dim 512).
-  - The headline reference is `D_fa4_allkept`: FA4's block-sparse interface with every tile kept. It is bitwise
-    equal to FA4 dense and the fastest dense configuration.
-  - Also keep `D_fa4` (the plain FA4 path) where feasible.
+  - Current headline reference is native vLLM dense (FA4 dynamic-causal, effective split-KV).
+  - `D_fa4_allkept` is the historical HF control with num_splits=1, not the fastest official dense.
+    Preserve its accuracy results and label its speed ratios as HF-substrate-only.
+  - Keep matched PIECEWISE/native-hook and all-kept controls for the vLLM adapter.
   - Never headline against the HF default path (`D_native`), `D_c64` or `D_fast`.
 - **Fair comparison.** All arms share:
   - substrate, deploy commit, host per cell, items, seeds and warm-up;

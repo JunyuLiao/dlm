@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 16:20 (UTC-5)",
+    "updated_local": "2026-10-02 16:45 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
-    "verified_commit": "073d87ece",
+    "verified_commit": "b9e0700d8",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -14,9 +14,9 @@
       "docs/GROUP_CONTEXT_20261001.md"
     ],
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
-    "substrate": "piecewise_v5",
-    "dense_reference": "D_fa4_allkept (FlashAttention-4, vLLM fork, block-sparse interface with every tile kept)",
-    "headline": "M3 R6 DP -ln2 + carry_first vs D_fa4_allkept (18 seeds, E13+E14+E15): W 0.950/0.867/0.818 at 32K/64K/96K, S 0.937/0.787/0.728, accuracy not lower; vs our HF-based substrate only (vLLM port pending)",
+    "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
+    "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
+    "headline": "vLLM smoke only: S/N proxy 0.96 at 32K, 0.85 at 64K; request/accuracy panel V18 preparing. Historical HF speed ratios are not headline official-serving evidence.",
     "running": [],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -80,10 +80,10 @@
       "gpu_seconds": 0
     },
     "v_dimension_hypothesis": {
-      "status": "user clue and authorized group note reviewed; unverified on this branch",
-      "ruler": "V dimensional information may matter; full 512 dimensions not established",
+      "status": "Closed as a negative in tested AIME, LongBench, HumanEval and RULER panels; see R17.",
+      "ruler": "R17 mass-only at least as accurate as rank-32; no supported V benefit.",
       "aime_longbench": "V benefit unsupported in tested settings; do not extrapolate to RULER",
-      "humaneval": "unknown; proposed coding quality check",
+      "humaneval": "E12 completed; no V advantage.",
       "note": "Actual attention uses full V in all arms; only selector inputs are projected"
     },
     "dataset_coverage": {
@@ -139,7 +139,7 @@
         "RULER 4K/8K"
       ],
       "setup_dir": "/home/exouser/dyh/dlm_models_20261002 (dllm)",
-      "status": "envs, weights and LongBench Pro ready on dllm; CUDA_HOME shim fixes SGLang JIT linking; LLaDA2.1-mini smoke still blocked by one FlashInfer JIT kernel (CCCL headers vs pip nvcc). Cache hygiene incl. SGLANG_JIT_CACHE_DIR, TVM_FFI_CACHE_DIR."
+      "status": "Separate envs/weights ready; CUDA 13.0 shim fixed CPU JIT build. LLaDA2.1-mini and I-DLM GPU smoke still pending."
     },
     "e14": {
       "verdict": "main M3+c0 W 0.925/0.860/0.801 (12 seeds); q64 -0.4..-0.7% per step; q64c not adopted",
@@ -157,7 +157,7 @@
       "finding": "vLLM 0.30.0 native DiffusionGemma dense is faster than D_fa4_allkept: per step 0.76/0.90/0.98 at 32K/64K/96K, prefill ~0.5x",
       "consequence": "speed ratios so far are vs our HF-based substrate; port the method into vLLM for paper-grade claims",
       "source": "results/m1_m2_m3_frontier_v27_20260929/vllm_dense_check_1002/README.md",
-      "port_status": "blocked: FA4 block-sparse over paged KV reads wrong pages (vllm_port_probe_1002); options in HANDOFF"
+      "port_status": "Resolved: unchanged main core runs in vLLM with patched paged FA4 and alias split; V18 preparing."
     },
     "next_steps": [
       "vLLM panel: LB-v2 32K/64K/96K many items x repeats, vLLM dense (default) vs method (PIECEWISE), accuracy from private completions",
@@ -194,6 +194,12 @@
       },
       "dense_baseline_correction": "vLLM dense GLOBAL call (FA4 dynamic-causal, effective 2-way split) is ~1.65x faster than the num_splits=1 FA4 config used as D_fa4_allkept in HF panels; HF speed ratios overstate the gain vs the strongest official dense",
       "source": "docs/VLLM_PORT_NOTES_20261002.md"
+    },
+    "vllm_v18": {
+      "status": "spec and measurement qualification, not launched",
+      "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_vllm_lb_v18.json",
+      "gpu_seconds": 0,
+      "cpu_tests": 112
     }
   },
   "task": "M3 output numerics and trajectory isolation",

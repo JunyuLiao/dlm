@@ -23,6 +23,15 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
     using it.
 
+## Intake and panel preparation (2026-10-02, US Central UTC-5)
+
+- Reviewed remote branch explicitly with `git fetch origin research/humaneval-v27-20261001`:
+  remote and local are both `b9e0700d8`. Default fetch only tracks an older branch; use the explicit ref.
+- All three H100s verified idle by SSH during intake (0 MiB, no compute processes).
+- V18 spec and new worker/phase tracker/scorer are being qualified. No V18 generation launched yet.
+  See `docs/VLLM_PANEL_V18_20261002.md`. Status changes are recorded here and in STATE.current.
+- Fixed stale fastest-dense and blocked-port labels. Historical panel numbers are preserved.
+
 ## Situation at handoff (2026-10-02 16:40 UTC−5)
 
 **Running (2026-10-02 16:20 UTC−5):** nothing; all GPUs idle.
@@ -77,7 +86,7 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 - All speed ratios so far hold against our substrate, not against vLLM. Paper-grade claims need the method inside
   vLLM, measured against vLLM dense.
 
-**The port is blocked by one kernel issue.** `vllm_port_probe_1002/README.md`:
+**Historical port blocker (resolved; preserved for context).** `vllm_port_probe_1002/README.md`:
 - vLLM's FA4 runs dense attention over the paged cache correctly (page size 64).
 - But block-sparse lists over a paged cache read the wrong pages: error about 22 vs the masked reference, while
   contiguous K/V is exact to 5e-4.

@@ -126,8 +126,12 @@ with `decision_interval=6`, `score_period=64`, `fused_observe`, `async_route`, `
 
 ## 4. Baselines and execution substrates
 
+**Correction (2026-10-02):** the controls below describe historical HF panels. Native vLLM
+FA4 dynamic-causal split-KV is faster; new speed claims use vLLM dense with matched adapter
+controls. See VLLM_PORT_NOTES_20261002.md. Accuracy must also be scored anew on vLLM.
+
 **Dense controls.**
-- **`D_fa4_allkept`** (headline): FlashAttention-4, the vLLM fork's CuTe DSL kernel with SM90 head_dim ≤ 512, called
+- **`D_fa4_allkept`** (historical HF reference): FlashAttention-4, the vLLM fork's CuTe DSL kernel with SM90 head_dim ≤ 512, called
   through its block-sparse interface with every tile kept.
   - Bitwise equal to FA4 dense.
   - Kernel 4–6% faster than plain FA4 dense; about 1.3% at decode level.

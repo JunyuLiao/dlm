@@ -4,6 +4,20 @@ Read this before proposing a direction. Each item gives the decision, the reason
 on `research/m3-output-numerics-20260927` unless another branch is named. Result paths are relative to
 `results/m1_m2_m3_frontier_v27_20260929/` (v27) unless they start with `results/`.
 
+## V18 intake (2026-10-02 16:45 UTC-5)
+
+- Explicit fetch of the working remote branch confirms `b9e0700d8`; no foreign branch merged.
+- Freeze the E14 eligible 24/24/11 items x four repeat labels on native vLLM, with default
+  dense plus main and matched native-hook/all-kept controls. See `VLLM_PANEL_V18_20261002.md`.
+- Correct smoke measurement before a formal panel: scheduler phases count actual denoising
+  N separately from commit forwards, synchronization only at request boundaries, adapter
+  initialization/cleanup charged to W, all shapes warmed, real graph/compile counters checked.
+- Four repeats do not establish trajectory pairing or accuracy noninferiority. Report item-clustered
+  confidence intervals and retain an inconclusive finding if that is what the data supports.
+- Final CPU qualification: 112 tests passed on the registered dllm interpreter, no GPU job,
+  including closed-worker, frozen-settings, phase-count and receipt checks.
+- No new variant, upstream post, peer-branch integration, shared-slide edit or message.
+
 **Substrate caveat.** Every item before 2026-09-30 01:00 ran on the host-bound **eager** substrate and/or against a
 superseded dense baseline (`D_native`, `D_c64`, `D_fast`). Its end-to-end ratios do not transfer to the current
 FA4 + piecewise substrates. Mechanism findings (what fails and why) usually still apply.
