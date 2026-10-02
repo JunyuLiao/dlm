@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 02:30 (UTC-5)",
+    "updated_local": "2026-10-02 03:35 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -27,19 +27,6 @@
       "source": "results/m1_m2_m3_frontier_v27_20260929/lb_confirm_panel_e4/summary.md"
     },
     "running": [
-      {
-        "panel": "E12 v27_humaneval_e12_d844fb61c76dde6a",
-        "spec": "results/humaneval_ruler_v27_20261002/specs/humaneval_e12.json",
-        "deploy_tag": "v27_e12_5d5c3b9",
-        "run_dir": "he_e12_001",
-        "hosts": [
-          "mpk",
-          "dlm2"
-        ],
-        "executions": 7872,
-        "status": "running",
-        "scoring": "scripts.v27_humaneval score on mpk, then scripts.v27_fa4_panel_summary"
-      },
       {
         "panel": "E13 v27_lb_q64_e13_f038777e0ab0d142",
         "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_lb_q64_e13.json",
@@ -136,8 +123,9 @@
       "input_alone_over_context": 101
     },
     "humaneval": {
-      "tasks": 164,
-      "generations_per_arm_with_6_seeds": 984
+      "panel": "E12 v27_humaneval_e12_d844fb61c76dde6a (164 x 6 seeds, 984 cells per arm)",
+      "verdict": "no accuracy loss (dense 947, main 957); main W 1.023; no V-term difference",
+      "source": "results/humaneval_ruler_v27_20261002/humaneval_e12/summary.md"
     },
     "peer_integration": {
       "status": "A/B branches pending classmates; exact refs unknown; no merge attempted"

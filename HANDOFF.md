@@ -103,18 +103,10 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Running (as of 2026-10-02 01:15 local)
 
-- **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), E9 (L1f), E10 (L1g), E11 (L1h),
+- **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), E9 (L1f), E10 (L1g), E11 (L1h), E12 (L1i),
   the batch diagnostic (`batch_scaling/`).
-- **E12, HumanEval** (`results/humaneval_ruler_v27_20261002/specs/humaneval_e12.json`, protocol
-  `v27_humaneval_e12_d844fb61c76dde6a`): all 164 tasks × seeds 404–909 = 984 cells per arm, 8 arms, 7,872 runs.
-  - Arms: dense; M3 R6 DP −ln2 + c0 (main); the same + 2K gate; V-term ablation at a fixed 70% target sparsity with
-    c0: projected V rank 32 / 8 / 4, M2 tile mean, attention mass only. Plain M1/M2/M3 are not rerun (user, 10-02).
-  - Hosts mpk and dlm2 only (identical software, driver and model files per `environment_audit.json`; dllm's driver
-    differs). Every cell runs all arms on one host with rotated arm order; report per-host ratios too.
-  - Deploy `v27_e12_5d5c3b9`, run dir `he_e12_001`. Scoring runs on mpk (`scripts.v27_humaneval score`, unprivileged
-    bwrap sandbox; dlm2's private receipts must be copied to mpk first), then `scripts.v27_fa4_panel_summary`.
-  - A smoke run (`he_smoke_s0_003`, 4 runs) passed end to end; one M3 run captured 25 CUDA graphs while timed, so
-    report Wc (pairs without timed captures) next to W.
+- **E12 HumanEval: done** (`docs/RESULTS_LEDGER.md` L1i): no accuracy loss in any arm, no speed gain (main W 1.023),
+  no V-term difference. Scored on mpk with the unprivileged sandbox.
 - **E13, q64** (`specs/v27_lb_q64_e13.json`, protocol `v27_lb_q64_e13_f038777e0ab0d142`): new named variant `q_block=64`
   (code `70bdb5071`, tests `c66d7606e`; 119 v27 tests pass on dllm including the FA4 64-row GPU test). The same
   dense-prefix worst-row rule (incl. T) per 64-row half; FA4's SM90 head_dim-512 kernel already uses 64-row query tiles,

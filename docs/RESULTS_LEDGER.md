@@ -235,6 +235,30 @@ configurations. Compiled-forward kernels (CUDA-graph replay) grouped by kernel; 
 
 Data: `time_breakdown_v5/*_dense_first.jsonl`. One request per workload; a diagnostic, not a panel.
 
+### L1i. E12 HumanEval: 164 tasks × seeds 404–909 = 984 cells per arm (piecewise_v5; mpk + dlm2)
+
+Thinking ON, budget 8192, pass@1 by the official tests in the unprivileged sandbox on mpk. Prompts 80–460 tokens.
+
+| arm | pass@1 (dense 947) | vs dense | W [CI] | S | per-step S/N | N (total steps) | steps per block |
+|---|---:|---|---|---:|---:|---:|---:|
+| M3 + c0 (−ln2) | 957 | +31/−21 | 1.023 [1.007, 1.039] | 1.025 | 1.028 | 0.997 | 9.14 (dense 9.22) |
+| M3 + c0 + 2K gate | 948 | +4/−3 | 1.009 [1.004, 1.015] | 1.011 | 1.007 | 1.003 | 9.32 |
+| 70% fixed, projected V rank 32 | 956 | +33/−24 | 1.094 [1.068, 1.124] | 1.101 | 1.024 | 1.075 | 9.79 |
+| 70% fixed, rank 8 | 963 | +31/−15 | 1.095 [1.068, 1.122] | 1.103 | 1.024 | 1.077 | 9.61 |
+| 70% fixed, rank 4 | 957 | +32/−22 | 1.101 [1.075, 1.129] | 1.108 | 1.025 | 1.081 | 9.87 |
+| 70% fixed, M2c tile mean | 948 | +26/−25 | 1.100 [1.074, 1.128] | 1.109 | 1.026 | 1.081 | 9.84 |
+| 70% fixed, mass only | 954 | +31/−24 | 1.100 [1.074, 1.127] | 1.108 | 1.026 | 1.080 | 9.89 |
+
+- **No accuracy loss in any arm**, even at a forced 70% sparsity. Rank 8 is +31/−15 against dense (p 0.026), which is
+  not significant after correcting for seven comparisons. No V term differs from rank 32 (all p ≥ 0.29).
+- **No speed gain**: HumanEval is short-context (dense 48.8 total steps per request, 5.3 blocks, 9.2 steps per block).
+  The main configuration is 2.3% slower; the 2K gate sends 85% of GLOBAL calls to dense and is 0.9% slower; forcing 70%
+  adds 6–8% steps per block and is 9–10% slower.
+- Answers the classmate hypothesis for HumanEval: the selector's V term is not needed here (all V terms tie).
+- **Integrity.** 7,872/7,872 ok, one host per cell, 2 timed new graphs; per-host ratios agree (main 1.024 mpk /
+  1.022 dlm2). Source: `results/humaneval_ruler_v27_20261002/humaneval_e12/` (`summary.md`, `steps.md`, `receipts.md`);
+  protocol `v27_humaneval_e12_d844fb61c76dde6a`, deploy `v27_e12_5d5c3b9`.
+
 ### Map drift between re-decisions (2026-10-02)
 
 E5 configuration, 64K/32K items 0–3: every re-decision (calls 8, 14, …) changes the held map; relative to the first
