@@ -115,3 +115,7 @@
 - Update the `current` block of `STATE.json` with verifiable values only.
 - Commit docs together with the work they describe, then push. Studies live on their own pushed branch (no merge, no
   PR); reports reference branch names.
+
+## Handing over to another agent
+
+A ready-to-paste Chinese handover prompt is in `docs/AGENT_PROMPT.md`. Keep it consistent with this file.
