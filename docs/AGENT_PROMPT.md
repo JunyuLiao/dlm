@@ -11,7 +11,13 @@
 - 远端：coconight01/dlm_test。当前工作分支 research/humaneval-v27-20261001（2026-10-01 23:59 从 v27 存档分支
   research/m3-output-numerics-20260927 的 add23afa9 分出，之后的工作都在这里）；先 git branch --show-current 确认，
   最新状态以 git log 为准
-- 阅读顺序：AGENTS.md → HANDOFF.md → docs/RESEARCH_CONTEXT.md → docs/DECISIONS.md → docs/RESULTS_LEDGER.md → STATE.json 的 current
+- 阅读顺序：AGENTS.md → HANDOFF.md（先看「Situation at handoff」和「Immediate next steps」）→ docs/VLLM_PORT_NOTES_20261002.md
+  （vLLM 移植的全部情况、运行命令、面板计划）→ docs/RESEARCH_CONTEXT.md → docs/DECISIONS.md → docs/RESULTS_LEDGER.md
+  → docs/EXPANSION_PLAN_20261002.md（新模型和数据集）→ STATE.json 的 current
+- 私有协调文件（不在仓库、不能上传）：E:/dlm/v20_private/hosts.json（各机解释器和环境变量）、E:/dlm/v27_lbfa4_env.json、
+  E:/dlm/ 下的协调脚本（v21_deploy_qualify.py、v23_transport.py、v27_lbfa4_host.sh、v27_score_lb.py、v27_score_long.py）、
+  E:/dlm/v27_private/（私有题池、打分结果）。
+- 提交前先 git fetch，看远端有没有别的 AI 推的新提交，审一遍再在其上继续；不 fast-forward、不合并其他研究分支。
 
 【目标与评价标准】
 - 核心是精度、性能、新颖性。基线必须是 SOTA 或官方、能写进论文的：注意力 kernel 是 FA4（vLLM fork），但整套系统层面 vLLM 原生 serving 更快，必须以它为准。新模型同样用官方栈（SGLang / dInfer / I-DLM 自带的 SGLang），并实测选出最快的。
