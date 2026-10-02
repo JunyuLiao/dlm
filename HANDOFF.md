@@ -217,7 +217,13 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
    and fixed-88%/95% V-rank variants (rank 32/8/4, mass-only). Accuracy only.
 6. **Upstream FA4 report** (`docs/VLLM_PORT_NOTES_20261002.md`): the same bug is in Dao-AILab `main`. A PR with the
    fix and a regression test is waiting for the user's go-ahead and choice of GitHub account.
-7. **Datasets:**
+7. **Port the group member's C gate** (query sensitivity from top-1 flip stability, renoise history and confidence;
+   design note shared by the user 2026-10-02, branch not yet available).
+   - Our T is his "Temporal (original)". All inputs are already in `value_direction_hopper/query_adaptive.State`.
+   - Add it as a named, cited variant (collaboration label).
+   - Test whether it reduces step inflation at higher sparsity or allows a sparser threshold (LB 64K/96K, AIME
+     accuracy).
+8. **Datasets:**
    - LongBench Pro is inventoried (`docs/EXPANSION_PLAN_20261002.md`: 1,500 samples, 250 per length level, EN/ZH,
      25 tasks). Next: fetch its official evaluation code (GitHub `caskcsg/longcontext`) and the summarization
      embedding model, then freeze the 32k/64k/128k (DiffusionGemma) and 8k–32k (new models) subsets;
