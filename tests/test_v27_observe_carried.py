@@ -36,10 +36,13 @@ def test_observation_only_kernel_writes_identical_summaries_and_tail(keys, split
     none, tail2 = fused_observe(q, k, v, z, d ** -.5, pt, only, splits=splits, mu=mu, mu_precision='bf16',
                                 output=False)
     assert none is None and out is not None
-    assert torch.equal(tail, tail2)
-    assert torch.equal(full.z, only.z) and torch.equal(full.active, only.active) and torch.equal(full.bad, only.bad)
+    assert torch.equal(tail, tail2) and torch.equal(full.active, only.active) and torch.equal(full.bad, only.bad)
     if mu:
-        assert torch.equal(full.mu, only.mu)
+        # the mu product consumes the same exponentials in both modes: bit-identical (the c01 configuration)
+        assert torch.equal(full.z, only.z) and torch.equal(full.mu, only.mu)
+    else:
+        # without any product on p, Triton may lay out the row sums differently: equal up to summation order
+        torch.testing.assert_close(full.z, only.z, rtol=1e-6, atol=1e-6)
 
 
 def test_observe_carried_config_and_guards():

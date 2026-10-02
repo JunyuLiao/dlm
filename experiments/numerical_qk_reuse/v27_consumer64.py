@@ -123,8 +123,9 @@ def _fused_observe(Q, K, V, Z, PO, PM, PL, ZSUM, MUSUM, ACTSUM, BADSUM, TAIL,
     current scores with the route STORE formulas, sharing one exponential per score with
     the output; (c) keeps those FP32 scores of the remaining (canvas/boundary) tiles in
     a compact tail buffer for later decisions. Named variant: FP32 observation scores.
-    OUT=0 (v27 observe_carried): observation only -- no V load, no PV, no output partials; the
-    summaries and the tail are bit-identical to OUT=1 (same scores, same exponentials)."""
+    OUT=0 (v27 observe_carried): observation only -- no V load, no PV, no output partials. The tail and
+    the flags are bit-identical to OUT=1; with MU the block log-mass and mu are bit-identical too (the mu
+    product consumes the same exponentials); without MU the row sums may differ by summation order."""
     mb, h, sp = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     kh = h // (H // HK)
     qi = mb * BLOCK_M + tl.arange(0, BLOCK_M)
