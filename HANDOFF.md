@@ -134,6 +134,12 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - SGLang envs for LLaDA2.1-mini (upstream 0.5.21) and I-DLM-8B (its bundled fork);
   - weights, and the LongBench Pro data.
   Next: official dense smoke runs, then model adapters with a clean core/adapter split.
+- **P15 done** (`c01_preview_p15/receipts.md`): no accuracy drop; c01 per step 0.91 (AIME) and 0.949 (64K).
+- **E15 running** (`specs/v27_c01_e15.json`, protocol `v27_c01_e15_e83919d6411343b2`, 1,602 runs):
+  - arms: dense, M3 + c0, M3 + c0 + c01;
+  - AIME26 30 + LB 32K/64K/96K × seeds 1616–2121;
+  - mpk + dlm2, deploy `v27_e15_f63a1f2`, run dir `v27_lb_e15_001`;
+  - scoring label `e15` (`e15_score.sh` waits for 4 worker ends per host).
 - **E14 done** (`docs/RESULTS_LEDGER.md` L1k):
   - 12-seed main result: M3 + c0 W 0.925 / 0.860 / 0.801 at 32K / 64K / 96K;
   - q64 −0.4 to −0.7% per step;
