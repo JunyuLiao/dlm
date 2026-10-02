@@ -29,6 +29,7 @@ def main():
         cells = [c for c in cells if c['dataset'] in keep]
     chunk = int(os.environ.get('VLLM_BENCH_BATCHED', '16384'))
     mem = float(os.environ.get('VLLM_BENCH_MEM', '0.92'))
+    block = int(os.environ['VLLM_BENCH_BLOCK']) if os.environ.get('VLLM_BENCH_BLOCK') else None   # vLLM --block-size
     rows = {}
     for dataset in {c['dataset'] for c in cells}:
         for r in json.loads((Path(manifest_dir) / f'{dataset}_generation_manifest.json').read_text()):
@@ -42,11 +43,11 @@ def main():
     max_len = min(262144, ((longest + 4096) // 1024 + 1) * 1024)
     llm = LLM(model=model_dir, dtype='bfloat16', max_model_len=max_len, max_num_seqs=1,
               max_num_batched_tokens=chunk, enable_chunked_prefill=True, gpu_memory_utilization=mem,
-              enable_prefix_caching=False, trust_remote_code=False, seed=0)
+              enable_prefix_caching=False, trust_remote_code=False, seed=0, **({'block_size': block} if block else {}))
     engine = llm.llm_engine
     out = open(out_path, 'a', encoding='utf-8')
     meta = dict(vllm=vllm.__version__, torch=torch.__version__, gpu=torch.cuda.get_device_name(), max_model_len=max_len,
-                chunk=chunk, gpu_memory_utilization=mem)
+                chunk=chunk, gpu_memory_utilization=mem, block_size=block or 'default')
     for warm, cell in [(True, cells[0])] + [(False, c) for c in cells]:
         row = rows[(cell['dataset'], cell['id'])]
         ids = list(row['prompt_tokens'])

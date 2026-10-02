@@ -213,7 +213,11 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
    - official dense smoke runs and baseline-candidate timing: LLaDA2.1-mini on SGLang (FlashInfer/FA3/Triton
      backends) vs dInfer; I-DLM-8B on its bundled SGLang;
    - then thin adapters with a model-independent core (user rule: clean code structure).
-5. **Datasets:**
+5. **RULER R17** (proposal in `docs/EXPANSION_PLAN_20261002.md`): 32K/64K/96K × 13 tasks × 10 samples; dense, main,
+   and fixed-88%/95% V-rank variants (rank 32/8/4, mass-only). Accuracy only.
+6. **Upstream FA4 report** (`docs/VLLM_PORT_NOTES_20261002.md`): the same bug is in Dao-AILab `main`. A PR with the
+   fix and a regression test is waiting for the user's go-ahead and choice of GitHub account.
+7. **Datasets:**
    - LongBench Pro is inventoried (`docs/EXPANSION_PLAN_20261002.md`: 1,500 samples, 250 per length level, EN/ZH,
      25 tasks). Next: fetch its official evaluation code (GitHub `caskcsg/longcontext`) and the summarization
      embedding model, then freeze the 32k/64k/128k (DiffusionGemma) and 8k–32k (new models) subsets;

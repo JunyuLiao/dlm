@@ -183,3 +183,31 @@ kernel builds; its default `~/.cache/sglang/jit` ignores `SGLANG_CACHE_DIR`), `T
 - A later smoke attempt recreated `~/.cache/sglang/jit` (2.2 MB, 15:50 UTC), because `SGLANG_JIT_CACHE_DIR` was not yet
   set; it was removed at 15:52 UTC.
 - No `~/.cache/tvm-ffi` and no new `~/.triton` entries exist.
+
+## RULER: what it is and the R17 proposal (2026-10-02)
+
+**RULER** (NVIDIA, COLM 2024, "What's the Real Context Size of Your Long-Context Language Models?") is a synthetic
+benchmark generated to any target length with the model's own tokenizer. Its 13 tasks:
+- 8 needle-in-a-haystack variants (single 1–3, multi-key 1–3, multi-value, multi-query);
+- variable tracking (multi-hop);
+- common-words and frequent-words extraction (aggregation);
+- 2 QA tasks (SQuAD / HotpotQA with distractor paragraphs).
+
+`scripts/data/prepare.py` fills a haystack (essays or noise) to `max_seq_length` minus the answer budget and inserts
+the needles at random depths. Papers report 4K–128K.
+
+**Our pools** (`/home/exouser/dyh/ruler_long_v27/readme.json`): pinned RULER commit c3f5e3b, seed 42, the
+DiffusionGemma tokenizer, `length_mode total`, 13 tasks × 1 sample at 32K and 64K. Some rows were regenerated after a
+chat-template-overhead fix. The closest dLLM papers use RULER only at 4K/8K (SparseD, PulseCol) or up to 32K.
+
+**R17 proposal** (accuracy only; RULER answers take about 5 decoder calls, so prefill dominates and no speed claim is
+possible):
+- **Data:** RULER at 32K, 64K and 96K (96K = 98,304 total, which fits one H100 like the LB 96K items), 13 tasks ×
+  10 samples = 130 per length. Same pinned generator and tokenizer, a new seed, gold kept private.
+- **Arms:**
+  - dense FA4;
+  - M3 + c0 (main);
+  - fixed 88% (k12) with projected-V rank 32 / 8 / 4 and mass-only (the group member's V-dimension question);
+  - fixed 95% (k5) with rank 32 and mass-only, the sparsity where V effects are most likely to appear.
+- **Size and order:** about 3,100 runs, about 3 h on three hosts. Run after E15.
+- For the new models (windows ≤ 32K): RULER 4K/8K/16K/32K with each model's tokenizer.

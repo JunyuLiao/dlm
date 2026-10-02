@@ -83,3 +83,37 @@ relative to its `site-packages/vllm`.
   3. Hook the method into `diffusion_gemma.py`.
   4. Measure vLLM dense vs vLLM + M3 + c0.
   5. With the user's go-ahead, report the bug and the patch upstream.
+
+## Page size: what the official stack does and the decision rule (2026-10-02)
+
+- **No model-specific page size.** The official recipe (`vllm/vllm-openai:gemma`) sets none. vLLM's default
+  `--block-size 16` applies to the largest-page layers (LOCAL, 8 KV heads × 256). `unify_kv_cache_spec_page_size`
+  then raises the block size of smaller-page layers until every page has the same bytes, so the GLOBAL layers
+  (2 KV heads × 512) get 32-token pages.
+- **`--block-size 32` (a standard vLLM flag) gives GLOBAL 64-token pages.** That is the page size our patched FA4
+  block-sparse path supports (TMA path, page = tile_n).
+- **Literature.** The vLLM paper (PagedAttention, SOSP'23, §7.2, Fig. 18b) varied the block size. On ShareGPT,
+  16–128 give the best performance; only short sequences (Alpaca) degrade with large blocks. 16 is the default for
+  fragmentation reasons, not speed.
+- **Rule.** Measure vLLM dense at its default (GLOBAL 32) and at `--block-size 32` (GLOBAL 64) on the same long
+  prompts.
+  - If equal within noise, run dense and sparse both at GLOBAL 64 (identical configuration), and report the default
+    measurement and the vLLM paper's ablation.
+  - If 64 is slower, the dense arm keeps the default and we add a cp.async (page 32) block-sparse path.
+- The patch does not touch dense attention (the change is inside the block-sparse branch, compile-time gated on
+  paged KV). Dense run-to-run differences of about 2% seen between probe runs are noise; an earlier run had paged and
+  contiguous dense equal at 2.84 ms.
+
+## Upstream report (pending the user's go-ahead)
+
+- **The same bug is in Dao-AILab/flash-attention `main`.** `flash_attn/cute/flash_fwd_sm90.py` has the identical
+  "Block sparsity: use TMA closures directly (not paged)" branch. vLLM's fork syncs from it.
+  - The right target is a PR to Dao-AILab/flash-attention `main`; optionally mirror it to vllm-project/flash-attention
+    `main`. Both accept external PRs (vLLM fork: about 51 open PRs); no CLA found.
+- **Contents:**
+  - the 10-line fix;
+  - a regression test in `tests/cute/` with paged KV and block sparsity: hd ≤ 256 upstream (SM90 caps there), page
+    size = tile_n, unused pages filled with other data, compared with contiguous;
+  - the reproducer and numbers in the description.
+- **Effort:** about half a day (CuTe DSL is pure Python, so there is no C++ build; tests need an H100).
+- **Needs:** the user's explicit approval and the GitHub account to use (public posting).
