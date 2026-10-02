@@ -940,7 +940,8 @@ class Attention:
             # reused under a cached key); a held decision passes the same objects every call
             lists = next((l for s_ref, e_ref, l in self._fa4_lists if s_ref is skipped and e_ref is eligible), None)
             if lists is None:
-                kept64 = next((m for s_ref, e_ref, m in self._q64 if s_ref is skipped and e_ref is eligible), None)
+                kept64 = next((m for s_ref, e_ref, m in getattr(self, '_q64', ()) if s_ref is skipped and e_ref is eligible),
+                              None)
                 if kept64 is not None:
                     lists = v27_fa4.block_sparse_tensors(kept64, q_block=64)
                     self.q64_list_builds += 1

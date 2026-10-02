@@ -23,6 +23,7 @@ def _state(pt, h=16, qb=2, seed=0):
     lognorm[..., 0, :] = float('inf')                      # first support: never dropped
     lognorm[0, 0, 0, 1, :5] = float('-inf')                # some inactive rows
     eligible = (torch.rand(1, h, qb, pt, generator=g) > .1).to(torch.int8)
+    eligible[..., 0] = 1                                   # the first-support tile is always eligible
     z = torch.zeros(1, h, qb, 128)
     return DensePrefixState(lognorm=lognorm, eligible=eligible, bad=torch.zeros_like(eligible), previous=z,
                             projected=torch.zeros(1, h, qb, 128, 32), prefix_tiles=pt, identity=('t', seed))
@@ -63,10 +64,11 @@ def test_refine_without_sensitivity_and_fallbacks():
     from experiments.numerical_qk_reuse.v27_dense_prefix import refine_q64
     state = _state(12, seed=3)
     ref = torch.tensor([[1.0, 1.0]])
-    kept128 = torch.ones(1, 16, 2, 16, dtype=torch.bool)
-    out = refine_q64(state, ~kept128, kept128, ref, None, -3.87, 256)
+    eligible = torch.ones(1, 16, 2, 16, dtype=torch.bool)
+    eligible[..., :12] = state.eligible.bool()                 # the router's prefix eligibility is the state's
+    out = refine_q64(state, torch.zeros_like(eligible), eligible, ref, None, -3.87, 256)
     torch.testing.assert_close(out[..., :12], _brute(state, ref, torch.ones(1, 256), -3.87, 64))
-    assert refine_q64(state, ~kept128, kept128, ref, None, -3.87, 200) is None   # rows do not fill the blocks
+    assert refine_q64(state, torch.zeros_like(eligible), eligible, ref, None, -3.87, 200) is None   # rows do not fill the blocks
 
 
 def test_q64_config_guards():
