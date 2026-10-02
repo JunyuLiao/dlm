@@ -328,6 +328,27 @@ All 13 RULER tasks at 32K/64K × seeds 404/505/606, dllm.
   - **Not adopted.**
 - Source: `c01_panel_e15/` (`receipts.md`, `summary.md`, `steps.md`, `direct_*.md`).
 
+### L1n. P16: held-out check of the 64K accuracy gap (2026-10-02)
+
+- Design: 6 LongBench-v2 64K items frozen from E13–E15 (the 3 most negative and 3 most positive main-minus-dense items)
+  × 12 never-used seeds = 72 cells per arm.
+- **Overall:** main 45 vs dense 44, W 0.857, per step 0.808.
+- **The 3 worst items:** −20 pp in discovery (17 vs 28 of 54) → −8 pp on fresh seeds (14 vs 17 of 36; +5/−8, p 0.58).
+  The gap is mostly selection noise; there is no evidence of a systematic 64K loss.
+- Output protection is 38 / 72 (+8/−14) with N 1.035, so it is not adopted. −2ln2 gives 44 / 72 at per step 0.852,
+  also not adopted.
+- Source: `lb64_item_check_p16/receipts.md`.
+
+### L1o. P17: C-gate preview (group member's query sensitivity; collaboration; 2026-10-02)
+
+- Data: AIME 10, 64K 8, 96K 4 items × 2 seeds (44 cells per arm). **Preview.**
+- **C gate at −ln2 vs main T, per step:** 1.071 [1.063, 1.079] (64K) and 1.103 [1.078, 1.125] (96K).
+- **C gate at the base threshold vs main:** 1.027 at 64K, 1.017 at 96K.
+- **Accuracy** (of 44): dense 27, main 30, C −ln2 27, C base 29; nothing significant.
+- **Verdict:** not adopted. The C gate protects most of the canvas, so it keeps more tiles, and it shows no accuracy
+  gain.
+- Source: `cgate_preview_p17/receipts.md`.
+
 ### Official-serving check and vLLM port probe (2026-10-02)
 
 - **vLLM 0.30.0 native DiffusionGemma vs our dense control** on the same 18 E14 cells and host, batch 1, bf16:

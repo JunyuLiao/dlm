@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 12:30 (UTC-5)",
+    "updated_local": "2026-10-02 13:30 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -19,16 +19,8 @@
     "headline": "M3 R6 DP -ln2 + carry_first vs D_fa4_allkept (18 seeds, E13+E14+E15): W 0.950/0.867/0.818 at 32K/64K/96K, S 0.937/0.787/0.728, accuracy not lower; vs our HF-based substrate only (vLLM port pending)",
     "running": [
       {
-        "panel": "P16 v27_lb64_item_check_p16_4d31029328774e37",
-        "hosts": [
-          "dllm",
-          "mpk",
-          "dlm2"
-        ],
-        "deploy_tag": "v27_p16_959ae20",
-        "run_dir": "v27_p16_001",
-        "executions": 288,
-        "scoring_label": "p16"
+        "job": "R17 RULER 92K data generation (CPU, dllm)",
+        "gpu": false
       }
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
@@ -177,8 +169,7 @@
       "vLLM port: hook method into diffusion_gemma.py; remeasure vs vLLM dense",
       "upstream FA4 PR (needs user go-ahead and GitHub account)",
       "new models: fix FlashInfer JIT (nvcc/CCCL) then official dense smoke + baseline candidate timing",
-      "RULER R17 (32K/64K/96K x 130; V-rank variants at 88%/95%)",
-      "C-gate port (group member, cited)",
+      "RULER R17 (32K/64K/92K x 130; V-rank variants at 88%/95%; 96K rows exceed the ~95K one-H100 fit)",
       "AIME 32K-budget long-output preview",
       "LongBench Pro official eval code; RULER 8K manifests"
     ],
@@ -186,14 +177,16 @@
       "verdict": "c01 not adopted (per-step 0.98-1.00, 64K accuracy risk); main pooled over 18 seeds",
       "source": "results/m1_m2_m3_frontier_v27_20260929/c01_panel_e15/receipts.md"
     },
-    "queued": [
-      {
-        "panel": "P17 v27_cgate_preview_p17_f0b80167ef28fb6e",
-        "after": "P16 + v27 GPU tests",
-        "run_dir": "v27_p17_001",
-        "executions": 176
-      }
-    ]
+    "p16": {
+      "verdict": "64K accuracy gap mostly selection noise (worst-3 items -20pp -> -8pp on 12 fresh seeds, p 0.58; all 6 items main 45 vs dense 44); output protection and -2ln2 not adopted",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/lb64_item_check_p16/receipts.md",
+      "gpu_seconds": 4400
+    },
+    "p17": {
+      "verdict": "C gate (group member design, collaboration) not adopted: per step 1.07/1.10 vs T at 64K/96K (-ln2), 1.03/1.02 at base threshold; no accuracy gain (preview, 44 cells per arm)",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/cgate_preview_p17/receipts.md",
+      "gpu_seconds": 3200
+    }
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",

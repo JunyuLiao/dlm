@@ -26,9 +26,12 @@
   纯生成 S 为 0.937 / 0.787 / 0.728，精度不降（96K 稀疏反而更高，p 0.012）。c01 和 q64c 都不采用。RULER 32K/64K 和 HumanEval 精度也保住了。
 - 最重要的待办：vLLM 0.30.0 原生 DiffusionGemma（官方 serving，同样用 FA4）的 dense 比我们的 dense 快，每步分别为 0.76× / 0.90× / 0.98×，
   prefill 约快一倍。所以目前的加速比只是相对我们基于 HF 的底座。要写进论文，需要把方法移植进 vLLM 重测。
-  卡点：FA4 在分页 KV 上做 block-sparse 时读错页（复现脚本 scripts/v27_vllm_paged_sparse_probe2.py）。
+  FA4 分页 KV + block-sparse 读错页的 bug 已在 dyh 的 vLLM 环境里修好（patches/，页大小 64，对 dense 无影响）；
+  下一步是把 block-sparse 接进 vLLM 的 FA4 调用，再把方法接进 diffusion_gemma.py。
 - regroup 系列已关闭：64 行 map 只带来每步 0.4–0.7% 的改善，任何重排都不超过约 5%。
-- 当前没有实验在跑，GPU 全部空闲。
+- P16：64K 精度差主要是挑选噪声（最差 3 题在新种子上 −20pp → −8pp，p 0.58；6 题总计 45 vs 44）。输出保护和 −2ln2 不采用。
+- P17：组员的 C gate（合作，已移植）不采用：同阈值下 64K/96K 每步慢 7–10%，精度无提升。
+- 当前 GPU 空闲；R17 RULER（32K/64K/92K，V 秩变体）数据在 dllm 上用 CPU 生成，生成完冻结后上三台机。
 - 扩展：新模型 LLaDA2.1-mini、I-DLM-8B 的官方环境、权重和 LongBench Pro 数据已在 dllm 的 /home/exouser/dyh/dlm_models_20261002 就绪，
   UltraLLaDA 已放弃。计划见 docs/EXPANSION_PLAN_20261002.md。
 

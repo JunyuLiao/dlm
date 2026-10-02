@@ -9,6 +9,8 @@ BASE_TASK = {
     'ruler32k': 'ruler4k', 'ruler64k': 'ruler4k',
     # R17 pools (2026-10-02): the same pinned RULER generator, seed 1717, 10 samples per task, 64-token template buffer
     'ruler32k_r17': 'ruler4k', 'ruler64k_r17': 'ruler4k', 'ruler96k_r17': 'ruler4k',
+    # 92K (94,208 tokens): 96K rows (97.5K-98.2K) exceed the ~95K one-H100 fit of our substrate for every arm
+    'ruler92k_r17': 'ruler4k',
     'longbench_v2_32k': 'longbench_v2', 'longbench_v2_64k': 'longbench_v2', 'longbench_v2_128k': 'longbench_v2',
     'longbench_v2_96k': 'longbench_v2',
     'humaneval': 'humaneval',

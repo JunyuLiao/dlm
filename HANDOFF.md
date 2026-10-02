@@ -23,32 +23,21 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
     using it.
 
-## Situation at handoff (2026-10-02 12:25 UTC−5)
+## Situation at handoff (2026-10-02 13:30 UTC−5)
 
-**Running (2026-10-02 12:20 UTC−5): P16** (`specs/v27_lb64_item_check_p16.json`, protocol
-`v27_lb64_item_check_p16_4d31029328774e37`, 288 runs on dllm, mpk and dlm2, run dir `v27_p16_001`, deploy
-`v27_p16_959ae20`). It is a held-out check of the 64K accuracy gap: main 228 vs dense 238 of 432 over E13–E15,
-item-clustered p 0.29.
-- 6 items frozen from E13–E15 (`E:/dlm/v27_private/p16_selection.json`): the 3 most-negative and 3 most-positive
-  main-minus-dense items.
-- 12 never-used seeds (2222–3333).
-- Arms: dense, main, main + output protection, main at −2ln2.
-- Score: `python v27_score_lb.py --tag v27_p16_959ae20 --run-dir v27_p16_001 --label p16 --dllm-ends 1 --mpk-ends 1 --also dlm2 --also-ends 1 --bins 64k`.
-- **Queued after P16: P17** (`specs/v27_cgate_preview_p17.json`, protocol `v27_cgate_preview_p17_f0b80167ef28fb6e`,
-  176 runs, run dir `v27_p17_001`). It is an accuracy-first preview of the **C gate** (`sensitivity='cgate'`, commit
-  8e1b40f0a, tests `tests/test_v27_cgate.py`).
-  - The C gate is a group member's query sensitivity, ported from their design note (collaboration).
-  - Data: AIME 10, LB 64K 8 and 96K 4 items × seeds 404/505.
-  - Arms: dense, main (T), C gate at −ln2, C gate at the sparser base threshold.
-  - The coordinator chain `p17_chain.sh` deploys, runs all v27 GPU tests on dllm (it stops on any failure), launches
-    on three hosts and scores with label `p17`. If the session ends first, follow the panel pipeline in the
-    operational notes with tag `v27_p17_<sha7 of the P17 spec commit>`.
-- E15 finished and is scored (`c01_panel_e15/receipts.md`, `docs/RESULTS_LEDGER.md` L1m).
-- c01 is not adopted: negligible per-step gain and an accuracy risk at 64K.
+**Running (2026-10-02 13:30 UTC−5):** no GPU panel. R17 RULER data generation (CPU) is in progress on dllm; see
+next step 5.
+- **P16 finished** (`lb64_item_check_p16/receipts.md`, ledger L1n). The 64K accuracy gap is mostly selection noise:
+  on the 3 worst items it goes from −20 pp in discovery to −8 pp on 12 fresh seeds (p 0.58). Over 6 items main equals
+  dense (45 vs 44). Output protection and −2ln2 are not adopted.
+- **P17 finished** (`cgate_preview_p17/receipts.md`, ledger L1o). The C gate (group member's design; collaboration)
+  is not adopted. At −ln2 it is 7–10% slower per step than T at 64K/96K, it is +2–3% at the base threshold, and it
+  shows no accuracy gain.
+- E15 is scored (`c01_panel_e15/receipts.md`, L1m). c01 is not adopted.
 
 **Main result (18 seeds, E13 + E14 + E15; L1m).** M3 R6 DP −ln2 + `carry_first` vs dense FA4:
 - end-to-end W **0.950 [0.920, 0.980] (32K), 0.867 [0.841, 0.892] (64K), 0.818 [0.731, 0.898] (96K)**;
-- generation-only S 0.937 / 0.787 / 0.728, per step 0.921 / 0.814 / 0.751;
+- generation-only S 0.937 / 0.787 / 0.728, per step 0.921 / 0.814 / 0.745;
 - accuracy not lower: 267/274, 228/238, 93/76; at 96K sparse is higher, p 0.012.
 - AIME (E15): W 0.951, from fewer steps; accuracy 100 vs 94.
 
@@ -155,7 +144,7 @@ item-clustered p 0.29.
   the markdown source `weekly_slides_20261001_compact.md`. `--md-only` refreshes only the markdown (use it when the
   pptx is open in PowerPoint). The older 9-page deck and its source (`weekly_slides_20261001.md`) are superseded.
 - Read-only review of group work: Junyu's position protections and value-aware family (branch `ljy/value_aware`);
-  his "vector_mean" result files are not committed anywhere we can read.
+  their "vector_mean" result files are not committed anywhere we can read.
 - Literature check of step and length inflation (SparseD, PulseCol, Focus-dLLM, Lil, LessIsMore, JoT, Prophet).
 
 ## Finished on 2026-10-02 (details in `docs/RESULTS_LEDGER.md`, decisions in `docs/DECISIONS.md`)
@@ -174,13 +163,15 @@ item-clustered p 0.29.
   kernel is the remaining lever there.
 - P15 (`c01_preview_p15/`): the c01 accuracy-first preview passed. c01 / q64c per step is 0.91 on AIME and 0.949 at 64K
   (small n); 64K steps per canvas are 1.107. E15 checks both with many seeds.
+- P16 (L1n): the 64K accuracy gap is mostly selection noise; output protection and −2ln2 are not adopted.
+- P17 (L1o): the C gate (collaboration) is not adopted; it costs per-step speed and shows no accuracy gain.
 - R16 RULER 32K/64K (L1l): accuracy preserved by every arm, including a fixed 88% sparsity; the V term equals
   mass-only (33 vs 33).
 - vLLM dense check and paged block-sparse probe: see the situation section.
 
 ## Running
 
-- Nothing.
+- R17 data generation (CPU, dllm). No GPU panel.
 
 ## Blockers
 
@@ -216,16 +207,17 @@ item-clustered p 0.29.
    - official dense smoke runs and baseline-candidate timing: LLaDA2.1-mini on SGLang (FlashInfer/FA3/Triton
      backends) vs dInfer; I-DLM-8B on its bundled SGLang;
    - then thin adapters with a model-independent core (user rule: clean code structure).
-5. **RULER R17** (proposal in `docs/EXPANSION_PLAN_20261002.md`): 32K/64K/96K × 13 tasks × 10 samples; dense, main,
-   and fixed-88%/95% V-rank variants (rank 32/8/4, mass-only). Accuracy only.
+5. **RULER R17** (accuracy only): 32K / 64K / 92K × 13 tasks × 10 samples (130 rows per length), seed 404.
+   - Arms: dense, main, and fixed 88% (k12) at V rank 32 / 8 / 4 and mass-only, plus fixed 95% (k5) at rank 32 and
+     mass-only.
+   - Data: pinned RULER generator, seed 1717, on dllm (`/home/exouser/dyh/ruler_long_v27_r17`, CPU only).
+   - **96K was replaced by 92K (94,208 tokens).** The 96K rows are 97.5K–98.2K prompt tokens. Our HF-based substrate
+     OOMs above about 95K for every arm, dense included (c2: 95,074 ran, 98,282 OOMed). 92K keeps every row under
+     95,074, the same range as our LongBench "96K" bin.
 6. **Upstream FA4 report** (`docs/VLLM_PORT_NOTES_20261002.md`): the same bug is in Dao-AILab `main`. A PR with the
    fix and a regression test is waiting for the user's go-ahead and choice of GitHub account.
-7. **Port the group member's C gate** (query sensitivity from top-1 flip stability, renoise history and confidence;
-   design note shared by the user 2026-10-02, branch not yet available).
-   - Our T is his "Temporal (original)". All inputs are already in `value_direction_hopper/query_adaptive.State`.
-   - Add it as a named, cited variant (collaboration label).
-   - Test whether it reduces step inflation at higher sparsity or allows a sparser threshold (LB 64K/96K, AIME
-     accuracy).
+7. ~~Port the group member's C gate~~ done (P17, L1o): not adopted. The design note's gate is cited as
+   collaboration. If the group member wants a full panel, it needs about 18 seeds.
 8. **Short-prompt positioning and an AIME long-output preview.**
    - Like SparseD and PulseCol, we use short-prompt tasks (HumanEval, AIME at an 8K budget) as accuracy checks only.
      With an 8K budget GLOBAL attention is at most about 5% of a step: dense AIME output has a median of 6.3K tokens,
