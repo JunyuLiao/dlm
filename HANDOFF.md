@@ -25,7 +25,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## V18 live status
 
-2026-10-02 17:45 (UTC-5): V18b main passes the longest 96K input under common KV reservation 0.85, with valid effective-method/actual-forward receipts and no timed compile/capture. Three references are still running/pending; this is not a completed accuracy or speed panel. Read-only expansion check found I-DLM CUDA 12.8 versus upstream SGLang CUDA 13.0, so the latter's shim cannot be treated as I-DLM-qualified.
+2026-10-02 17:54 (UTC-5): All four longest-96K V18b qualification arms pass execution/config/count/graph guards and unchanged NeMo scoring. All four outputs parse and all four are incorrect on this one item; this is scorer qualification only, not accuracy evidence. Qualification 005 reserved 640.802 s; total closed V18 work 2154.955 GPU seconds. Formal V18b panel_001 launched from the identical 8704cd072 deploy/binding: 24/24/11 items at 32K/64K/96K, four repeats, dense/main plus matched controls, 568 timed requests. Expected 2-4 hours; mpk CPU scorer ready, both other GPUs idle.
 
 ## Intake and panel preparation (2026-10-02, US Central UTC-5)
 
@@ -216,7 +216,7 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 
 ## Running
 
-- dllm: v27_vllm_v18_preflight_005 (main passed; all-kept/native/dense references pending)
+- dllm: v27_vllm_v18_panel_001 (formal V18b, 59 items x 4 repeats, 568 timed requests including controls)
 
 ## Blockers
 

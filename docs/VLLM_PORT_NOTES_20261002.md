@@ -318,7 +318,20 @@ batch 1, `--block-size 32`, memory 0.85).
   This is an ESTIMATE, not a measured panel ratio. Prefill is not optimized, and its share is larger in vLLM.
 - **Next:** a vLLM panel on many items at 32K / 64K / 96K, with accuracy scored from the private completions.
   - Arms: vLLM dense (default) and method; all-kept on a subset.
-  - Memory: 96K needs memory 0.92 and a check that the method's score cache fits.
+  - Memory follow-up: original V18 at 0.92 OOMed on main. V18b uses common KV reservation
+    0.85 for every arm; main passes longest-96K qualification with unchanged method caps.
+
+## Current formal-panel entry point (2026-10-02 17:48 UTC-5)
+
+Use `docs/VLLM_PANEL_V18_20261002.md`, the V18b spec and
+`scripts/v27_vllm_panel_run.py`; the historical smoke launch plan below is superseded.
+The formal runner uses request-boundary synchronization, actual async forward counts,
+explicit graph/compile guards, and strict completion scoring. Configuration source paths
+are rebound only after both old/new files match the original hashes; all mathematical
+settings stay unchanged. V18b lowers KV reservation equally across all arms to 0.85,
+instead of changing method score caps. The dated failure receipts are retained.
+Repeat labels pair items for clustered statistics, not identical diffusion trajectories;
+McNemar is exploratory only. See HANDOFF/STATE for the live launch status.
 
 ## How to run the vLLM bench, and the plan for the vLLM panel (handoff, 2026-10-02 16:40 UTC−5)
 

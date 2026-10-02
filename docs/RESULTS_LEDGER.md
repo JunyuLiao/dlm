@@ -585,3 +585,13 @@ Main passed source/config validation but OOM during longest 96K warmup at KV res
 0.92. No timed main record. This is a feasibility negative at that reservation, not an
 accuracy or timing result. Attempt reserved 144.065 GPU seconds; cumulative closed V18
 work is 1514.153 s. V18b is a new protocol with common reservation 0.85 for every arm.
+
+## V18b qualification 005 (2026-10-02 17:54 UTC-5)
+
+Source: `results/m1_m2_m3_frontier_v27_20260929/vllm_v18_qualification/attempt005.json`.
+Common KV reservation 0.85 passes the longest 96K input in all four arms, including main's
+frozen effective method, actual async N and zero timed compile/capture. All four final
+answers parse under the unchanged NeMo scorer; all four are wrong on this single item.
+This validates the execution/scoring chain only, not accuracy or performance.
+Reserved GPU time is 640.802 s; cumulative closed V18 work is 2154.955 s.
+Formal V18b panel_001 is launched from the same deploy/binding; no formal result yet.
