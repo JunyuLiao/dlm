@@ -122,3 +122,30 @@ Prerequisites:
 | `datasets/LongBench-Pro` | 513 MB, HF revision 4996884deae5 |
 
 Pip freezes and revisions are stored next to each item; every cache stays inside that directory.
+
+## LongBench Pro inventory (2026-10-02, from the downloaded `longbench_pro.json`, revision 4996884deae5)
+
+- **Size and balance.** 1,500 samples: 250 at each length level (8k, 16k, 32k, 64k, 128k, 256k; counted with the
+  Qwen tokenizer). 750 English and 750 Chinese.
+- **Tasks.** 11 primary tasks, 25 secondary tasks (60 each).
+- **Fields.**
+  - `context`;
+  - `question_nonthinking` and `question_thinking`;
+  - `answer` (list);
+  - `contextual_requirement` (Full 840 / Partial 660);
+  - `difficulty` (Easy 482 / Moderate 289 / Hard 289 / Extreme 440);
+  - `token_length`, `primary_task`, `secondary_task`, `language`.
+- **Scoring is per task** (paper):
+  - NDCG@k for retrieval/ranking;
+  - pairwise accuracy for sequencing/clustering;
+  - accuracy for QA;
+  - F1 for citation and violations;
+  - SubEM for single-answer generation;
+  - SemSim + ROUGE-L for summarization, which needs an embedding model.
+  Use the official evaluation code (GitHub `caskcsg/longcontext`) rather than a reimplementation. Check it before
+  freezing a panel.
+- **Panel plan.**
+  - DiffusionGemma: the 32k/64k/128k levels, re-measured with its own tokenizer.
+  - LLaDA2.1-mini and I-DLM-8B: 8k/16k/32k within their windows.
+  - Both languages, `question_thinking` when thinking is on.
+  - Gold stays private like all other gold.

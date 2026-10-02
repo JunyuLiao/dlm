@@ -209,8 +209,9 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
      backends) vs dInfer; I-DLM-8B on its bundled SGLang;
    - then thin adapters with a model-independent core (user rule: clean code structure).
 5. **Datasets:**
-   - check LongBench Pro's per-task metrics (NDCG, pairwise accuracy, F1, SubEM, summarization similarity) and pick
-     levels ≤ 32K for the new models;
+   - LongBench Pro is inventoried (`docs/EXPANSION_PLAN_20261002.md`: 1,500 samples, 250 per length level, EN/ZH,
+     25 tasks). Next: fetch its official evaluation code (GitHub `caskcsg/longcontext`) and the summarization
+     embedding model, then freeze the 32k/64k/128k (DiffusionGemma) and 8k–32k (new models) subsets;
    - generate RULER 8K manifests with the pinned RULER on dllm (4K exists).
 
 ## Intake audit (2026-10-01, 22:45 UTC−5)
