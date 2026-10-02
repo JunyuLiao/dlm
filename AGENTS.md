@@ -1,3 +1,11 @@
+# V28 branch overlay
+
+Current working branch is `research/vllm-variants-20261002`, an independent continuation
+from `research/humaneval-v27-20261001` at `9b027df8f`. Read
+`docs/VARIANT_CAMPAIGN_V28_20261002.md` before inherited history below. Do not modify
+the parent worktree or its frozen V18b campaign. The inherited safety/privacy/fairness
+rules remain mandatory. New branch commits are pushed without merging or opening PRs.
+
 # AGENTS.md — entry point for coding agents (Codex, Claude Code, others)
 
 ## What this repository is

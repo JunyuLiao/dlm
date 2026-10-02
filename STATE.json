@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 18:33 (UTC-5)",
-    "branch": "research/humaneval-v27-20261001",
-    "verified_commit": "a7cdb57e5",
+    "updated_local": "2026-10-02 18:54 (UTC-5)",
+    "branch": "research/vllm-variants-20261002",
+    "verified_commit": "9b027df8f",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,9 +16,10 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "V18b formal native-vLLM panel running from frozen 8704cd072. Historical HF speed is substrate-only; repeated-seed accuracy counts do not prove noninferiority. See variant/fairness audit.",
+    "headline": "V28 worthwhile-variant campaign specified; CPU screening and environment inventory in progress, no new performance claim.",
     "running": [
-      "dllm: v27_vllm_v18_panel_001 (formal V18b, 59 items x 4 repeats, 568 timed requests including controls)"
+      "Parent V18b continues on dllm from frozen 8704cd072; managed by original worktree",
+      "V28 CPU screening and adapter memory/lifecycle audit"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -240,6 +241,20 @@
       "gpu_seconds": 0,
       "external_results": "Peer high-sparsity RULER V advantage reported; not a dense-quality-preserving speed claim",
       "original_pdf_uploaded": false
+    },
+    "v28": {
+      "spec": "docs/VARIANT_CAMPAIGN_V28_20261002.md",
+      "status": "preparing",
+      "gpu_seconds": 0,
+      "parent_branch": "research/humaneval-v27-20261001",
+      "candidates": [
+        "native_q64",
+        "kv_view",
+        "lifecycle",
+        "regroup_alias_balance",
+        "regroup_amortized"
+      ],
+      "new_model_status": "official dense qualification pending; sparse adapters not implemented"
     }
   },
   "task": "M3 output numerics and trajectory isolation",

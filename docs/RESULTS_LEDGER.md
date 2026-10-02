@@ -626,3 +626,10 @@ Peer high-sparsity RULER V gains are external reported evidence, not independent
 reproduced branch results or a no-loss speed claim. Table 1/11 dense provenance needs
 clarification. No new method or V18b configuration change. Source and interpretation:
 `docs/PEER_PDF_UPDATE_20261002.md`. The private PDF is not uploaded.
+
+
+## V28 campaign preparation (2026-10-02 18:54 (UTC-5))
+
+User authorized worthwhile variants. Independent branch `research/vllm-variants-20261002`
+starts at `9b027df8f`; parent V18b remains frozen. See `docs/VARIANT_CAMPAIGN_V28_20261002.md`.
+This entry is specification/status only, not a result. New GPU seconds: 0.

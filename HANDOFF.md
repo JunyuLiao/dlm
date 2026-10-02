@@ -1,3 +1,16 @@
+# V28 active handoff (2026-10-02 18:54 (UTC-5))
+
+- Branch: `research/vllm-variants-20261002`, base `9b027df8f`.
+- User authorized trying worthwhile variants. Plan: `docs/VARIANT_CAMPAIGN_V28_20261002.md`.
+- V28 status: CPU implementation/audit and idle-host environment inventory; no new GPU experiment yet.
+- Parent V18b continues on dllm under its unchanged deploy, controlled from the original worktree.
+  Recoverable allocation failures appear in main logs; do not filter or silently correct its times.
+- First candidates: native q64, KV-view/lifecycle standard optimizations, alias2 load-balanced regroup
+  and amortized/fused permutation. New-model official dense qualification proceeds independently.
+- New conclusions and measured results must update this handoff, docs and STATE.current together.
+
+## Inherited parent handoff (historical; current V28 overlay above takes precedence)
+
 # HANDOFF — current frontier (2026-10-02, local UTC−5)
 
 Read `AGENTS.md` first. Stable context: `docs/RESEARCH_CONTEXT.md`. History and negatives: `docs/DECISIONS.md`.
