@@ -27,8 +27,11 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - **32K:** W **0.940 [0.897, 0.980]**; S 0.921.
   - Accuracy is equal or higher (64K 77 vs 75, 32K 86 vs 86). B is similar (0.876 / 0.941).
   - Prefill is not optimized by any arm (P ≈ 1.00).
-- **The earlier "steps inflate / request gain not robust" reading (3-seed held-out, E3) was trajectory noise.** With 6
-  seeds, steps per canvas are 0.97–1.03 and output length 0.95–1.01.
+- **Step count: no significant change, best estimate +1–2% (corrected 2026-10-01 evening).** Per-seed step ratios
+  (M3 / dense, 32K, same 24 items and substrate) range 0.85–1.24. The old 3-seed set (101/202/303) sits high and the
+  6 new seeds sit low; 13 of 84 random 3/6 splits give a gap at least as large, so both are draws from one
+  distribution. Pooled 9 seeds: 32K N 1.024 [0.973, 1.076], 64K 1.015 [0.948, 1.085] (64K pools v4 + v5). E4's
+  request W may therefore be about 2% optimistic; per-step costs (S/N) are stable across all batches.
 - **Held-out items only** (never used to choose −ln2): 64K M3 0.85 [0.73, 0.96] significant; 32K M3 0.96 n.s.,
   obs2 0.95 [0.91, 0.98].
 - **Fan plain M1/M2c/M3 are slower than dense** at every length (1.06–1.34× in E4): the selector and observation cost

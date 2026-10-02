@@ -179,6 +179,22 @@ changes; the −ln2 threshold arm (E5 best) is the operating-point reference.
 - **Source.** `lb64_vterm_panel_e9/summary.md` and `receipts.md`, spec `specs/v27_lb64_vterm_e9.json`, protocol
   `v27_lb64_vterm_e9_5b125c63817898f6`, deploy `v27_e9_efea330` (code `efea33024`).
 
+### Step-count check (2026-10-01): is "no step inflation" itself noise?
+
+Step ratio N = method decoder calls / dense decoder calls per cell (M3 R6 DP −ln2). Single-cell log SD ≈ 0.45 (×1.57).
+
+| seed | 101 | 202 | 303 | 404 | 505 | 606 | 707 | 808 | 909 | pooled 9 seeds [CI] |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 32K N (24 items, v5; 101–303 from E3, 404–909 from E4) | 1.23 | 0.89 | 1.24 | 0.85 | 0.98 | 1.12 | 0.99 | 1.00 | 1.00 | 1.024 [0.973, 1.076] |
+
+- The 3-seed set 101/202/303 sits high (1.10) and the 6 new seeds sit low (0.99). 13 of the 84 possible 3/6 splits
+  give a gap at least as large, so this is ordinary seed-to-seed spread, not a difference between the seed sets.
+- 64K pooled 9 seeds (traj_t1 on v4 with seeds 101–303, E4 on v5): N 1.015 [0.948, 1.085].
+- E4 64K held-out items (12 × 6 seeds): N 0.955 [0.799, 1.099]; per-item N ranges 0.41–1.32. Its 3-seed subsets range
+  0.87–1.05, so the older held-out 1.24 (v3 substrate, seeds 101–303) is at or beyond the edge of this spread.
+- **Reading.** No significant step change; best estimate +1–2%. Request-level W from 6 seeds may be about 2%
+  optimistic. Per-step S/N is stable across all batches.
+
 ## Panels on piecewise_v3 / v4 / v5 (seeds 101/202/303 unless stated)
 
 | id | comparison | workload | result | caveat | source / protocol |

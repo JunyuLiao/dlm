@@ -53,7 +53,7 @@ FA4 + piecewise substrates. Mechanism findings (what fails and why) usually stil
 | 09-30 | **SparseD port head-to-head:** no significant speed difference from SparseD keep 10% at 64K. Treated as a collision (B ≈ SparseD). Its paper default (dense first 20% of steps) is ≈ dense under adaptive stopping. | 7ae185180, `sparsed_panel_c1/summary.md` |
 | 09-30 | AIME high sparsity: our risk top-k drops accuracy at 66% realized (23 vs 34); SparseD holds 29. **Negative for "V-aware selection is better".** | 78d516f1b, `aime_sparsity_panel_hi/` |
 | 09-30 | 128K OOMs in dense prefill on one H100; 96K fits only prompts ≤ about 95K (12 cells, exploratory). | 900f8d6c9, 2d49253fa, `lb96k_panel_c2/summary.md` |
-| 09-30 | 64K held-out (12 untouched items, 3 seeds): the per-step decode gain (−17%) replicates; the request gain did not (1.026). **Superseded by E4** (more seeds): the step inflation was trajectory noise. | 5674e8811, `holdout_panel_h1/summary.md` |
+| 09-30 | 64K held-out (12 untouched items, 3 seeds): the per-step decode gain (−17%) replicates; the request gain did not (1.026). **Superseded by E4** (more seeds); see the step-count correction below (pooled 9 seeds: +1–2%, n.s.). | 5674e8811, `holdout_panel_h1/summary.md` |
 | 09-30 | AIME substrate defect: LOCAL recompile-limit eager fallback on short prompts. **Fixed in piecewise_v4.** Dense AIME 25% faster; v3-era AIME absolute times are inflated, but paired ratios are roughly fair. | 0a75f3177 |
 | 09-30 | piecewise_v5: compiled post-attention tail of encoder canvas appends (all arms). Dense amortized ms per call on AIME −7%. | 97e520d83, `progress_20260930.md` update 9 |
 | 10-01 | 64K traj (24 items, 3 seeds): keeping early GLOBAL layers dense does not stop step or length inflation and gives up per-step savings. Rejected. | d5ef60997, `traj_panel_t1/summary.md` |
@@ -84,6 +84,11 @@ FA4 + piecewise substrates. Mechanism findings (what fails and why) usually stil
 
 ## Corrections to our own earlier claims (keep; do not repeat)
 
+- "The 3-seed step inflation was trajectory noise and E4 shows no inflation" was too strong (corrected 2026-10-01).
+  Per-seed step ratios range 0.85–1.24; the old and new seed sets are both draws from that spread (13 of 84 random
+  3/6 splits give a gap at least as large). Pooled over 9 seeds the step count is +2.4% at 32K and +1.5% at 64K, not
+  significant. Say "no significant step change, best estimate +1–2%", and note that E4's request W may be about 2%
+  optimistic. See RESULTS_LEDGER "Step-count check".
 - "Three independent reproductions" of the 64K gain was overstated. Same-host runs generate identical tokens, so they
   were speed reproductions only (d11e356d7).
 - An attribution of a classmate's AIME speedup to an "HF SDPA baseline" was unsupported. Their slides do not say
