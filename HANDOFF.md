@@ -66,11 +66,15 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - Progress doc updates 8–12 (`results/m1_m2_m3_frontier_v27_20260929/progress_20260930.md`). Updates 6 and 12 predate
   E4 and are superseded by it for the request-level verdict.
 
-## Running (as of 20:05 local)
+## Running (as of 20:12 local)
 
 - **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), E9 (L1f), E10 (L1g),
   the batch diagnostic (`batch_scaling/`).
-- **Nothing running.** E10 finished and was scored (L1g): M2 and M3 tie under the same optimizations.
+- **Running: E11, V-term preview at 95% sparsity** (`specs/v27_lb64_vterm_hi_e11.json`, protocol
+  `v27_lb64_vterm_hi_e11_18d29fa43d5d11a9`). 64K, the E9 items × seeds 404/505 (48 cells per arm, a preview).
+  M3 R6 DP + c0 at `risk_topk=k5` (keep 5%, new named keep, code `9d8ae5e`): projected V rank 32, M2 tile mean,
+  attention mass only; dense control. 192 runs, deploy `v27_e11_9d8ae5e`, run dir `v27_lb64_e11_001`, label `lb64_e11`.
+  Question: does V help when more tiles are skipped? (E10 finished: M2 and M3 tie, L1g.)
 
 ## Blockers
 
