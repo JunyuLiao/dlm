@@ -86,8 +86,10 @@ PPT 的 regroup/JAX 局部计时与我们的 FA4/vLLM 不直接比较。
 其校准题进入 headline 的情况有披露；相应 V 优势仍不足以构成独立质量证据。
 
 [10 月 2 日更新消息](https://gaeaheadquarters.slack.com/archives/C0ARABBHG3W/p1790935917275729)
-指向更新的 value-aware / query-sensitivity 章节，但本次未取得最新正文。
-因此，本分支 HF P17 的 C gate 只能称为当前仓库实现的移植预览，不能认证其与最新原文逐式一致。
+指向更新的 value-aware / query-sensitivity 章节。首次审计未取得正文；用户随后提供的
+10 页附件已补齐 §4，现确认 HF C gate 状态公式 (1)–(7) 匹配，温度概率约定仍需区分。
+R6 held call 不随每步新权重重判，carry_first 首步也继续消费旧图，因此仍非整套方法复现。
+新增 RULER V 方向证据及表间基线差异见 `docs/PEER_PDF_UPDATE_20261002.md`。
 P17 只在历史 DP/R6/carry-first 底座上替换 T，44 cells；并非组员 fresh-QK 整套方法复现。
 同一个阈值不保证同实际密度，同实际密度也不保证同选择成本。现有结果足以维持“不采用此配置”，
 不足以宣称“C gate 普遍无效”。相关方向保留合作归属，不复制组员实现。

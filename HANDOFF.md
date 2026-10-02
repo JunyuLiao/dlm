@@ -36,6 +36,18 @@ cell-level repeated-seed p values are exploratory. HF W excluded method setup/cl
 `new_graphs` tracked Dynamo compilation rather than CUDA capture. Mass-only removes V from prefix
 ranking only. R17 92K main discordance is +0/-0 (91/91 unchanged). CHW/PPT/Slack reviewed read-only.
 
+## New peer PDF evidence (2026-10-02 18:33 (UTC-5))
+
+User-supplied 10-page source fills the missing C-gate formulas. HF state updates match
+Eq. (1)-(7); three existing CPU tests pass. P17 is still not a full replication: R6 holds
+old maps and carry_first does not reapply first-call s=4 protection. The paper reports
+stronger V-direction evidence at severe RULER sparsity, but substantial dense-relative
+quality loss and no end-to-end speed measurement. Keep our V negative scoped to our
+settings. Table 1 versus Table 11 seed-42 dense differs (17/30 versus 14/30), requiring
+protocol provenance before pooling. See `docs/PEER_PDF_UPDATE_20261002.md`.
+The remote V18b campaign is unchanged. Its local waiting finalizer is being re-armed
+against this reviewed documentation commit; no GPU worker was stopped.
+
 ## Completion pipeline (2026-10-02 18:25 (UTC-5))
 
 The private coordinator now has a single-campaign finalizer for `v27_vllm_v18_panel_001`.

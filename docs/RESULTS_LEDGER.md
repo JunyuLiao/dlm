@@ -615,3 +615,14 @@ R17 92K main discordance is corrected here to +0/-0, preserving 91/91 correct.
 Source: `docs/VARIANT_FAIRNESS_AUDIT_20261002.md`; reproducible historical aggregate
 audit: `scripts/v27_historical_accuracy_audit.py`. Audit GPU seconds: 0.
 No new formal V18b result is claimed; the frozen campaign continues.
+
+
+## Peer source update (2026-10-02 18:33 (UTC-5))
+
+The user-supplied 10-page PDF resolves the missing C-gate source. HF state formulas
+match Eq. (1)-(7), but P17 historical-QK/DP/R6/carry-first is not the full current-QK
+retained-state method. Three existing C-gate CPU tests pass; GPU seconds = 0.
+Peer high-sparsity RULER V gains are external reported evidence, not independently
+reproduced branch results or a no-loss speed claim. Table 1/11 dense provenance needs
+clarification. No new method or V18b configuration change. Source and interpretation:
+`docs/PEER_PDF_UPDATE_20261002.md`. The private PDF is not uploaded.

@@ -246,3 +246,14 @@ reported, with exact decomposition checked. Prefill counts must agree between bo
   After all eight workers close, score privately and publish validated aggregates only.
   Pin the local and remote branch head; stop on concurrent changes or invalid runs.
   No autonomous positive interpretation and no additional GPU launch. See HANDOFF.
+
+
+## Peer source update (2026-10-02 18:33 (UTC-5))
+
+The user-supplied 10-page PDF resolves the missing C-gate source. HF state formulas
+match Eq. (1)-(7), but P17 historical-QK/DP/R6/carry-first is not the full current-QK
+retained-state method. Three existing C-gate CPU tests pass; GPU seconds = 0.
+Peer high-sparsity RULER V gains are external reported evidence, not independently
+reproduced branch results or a no-loss speed claim. Table 1/11 dense provenance needs
+clarification. No new method or V18b configuration change. Source and interpretation:
+`docs/PEER_PDF_UPDATE_20261002.md`. The private PDF is not uploaded.
