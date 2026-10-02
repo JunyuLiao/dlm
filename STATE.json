@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 17:41 (UTC-5)",
+    "updated_local": "2026-10-02 17:45 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "8704cd072",
     "entry_docs": [
@@ -18,7 +18,7 @@
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
     "headline": "vLLM smoke only: S/N proxy 0.96 at 32K, 0.85 at 64K; request/accuracy panel V18 preparing. Historical HF speed ratios are not headline official-serving evidence.",
     "running": [
-      "dllm: v27_vllm_v18_preflight_005 (V18b common KV reservation 0.85; main first)"
+      "dllm: v27_vllm_v18_preflight_005 (main passed; all-kept/native/dense references pending)"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -141,7 +141,7 @@
         "RULER 4K/8K"
       ],
       "setup_dir": "/home/exouser/dyh/dlm_models_20261002 (dllm)",
-      "status": "Separate envs/weights ready; CUDA 13.0 shim fixed CPU JIT build. LLaDA2.1-mini and I-DLM GPU smoke still pending."
+      "status": "GPU smokes pending. Upstream SGLang torch2.13/CUDA13.0 shim CPU-qualified; I-DLM torch2.9.1/CUDA12.8 needs separate toolchain qualification. Only dllm environments verified."
     },
     "e14": {
       "verdict": "main M3+c0 W 0.925/0.860/0.801 (12 seeds); q64 -0.4..-0.7% per step; q64c not adopted",
@@ -198,12 +198,12 @@
       "source": "docs/VLLM_PORT_NOTES_20261002.md"
     },
     "vllm_v18": {
-      "status": "V18b qualification 005 launched from 8704cd072 with fresh frozen materials, deploy and binding. All arms use KV reservation 0.85; main runs first, then all-kept/native/dense. Method and native generation parameters remain frozen. No formal panel yet; mpk/dlm2 idle.",
+      "status": "V18b main passes the longest 96K input under common KV reservation 0.85, with valid effective-method/actual-forward receipts and no timed compile/capture. Three references are still running/pending; this is not a completed accuracy or speed panel. Read-only expansion check found I-DLM CUDA 12.8 versus upstream SGLang CUDA 13.0, so the latter's shim cannot be treated as I-DLM-qualified.",
       "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_vllm_lb_v18.json",
       "gpu_seconds": 1514.153,
       "cpu_tests": 164,
       "deploy_commit": "8704cd072582dbb766762f955152bc5533c61986",
-      "gpu_accounting": "1514.153 closed V18 GPU seconds; active qualification 005 pending",
+      "gpu_accounting": "1514.153 prior closed GPU seconds; main in active qualification 005 reserved 158.09 s, campaign total pending",
       "protocol_id": "v27_vllm_lb_v18b_20261002"
     }
   },

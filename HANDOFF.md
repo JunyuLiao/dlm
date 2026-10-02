@@ -25,7 +25,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## V18 live status
 
-2026-10-02 17:41 (UTC-5): V18b qualification 005 launched from 8704cd072 with fresh frozen materials, deploy and binding. All arms use KV reservation 0.85; main runs first, then all-kept/native/dense. Method and native generation parameters remain frozen. No formal panel yet; mpk/dlm2 idle.
+2026-10-02 17:45 (UTC-5): V18b main passes the longest 96K input under common KV reservation 0.85, with valid effective-method/actual-forward receipts and no timed compile/capture. Three references are still running/pending; this is not a completed accuracy or speed panel. Read-only expansion check found I-DLM CUDA 12.8 versus upstream SGLang CUDA 13.0, so the latter's shim cannot be treated as I-DLM-qualified.
 
 ## Intake and panel preparation (2026-10-02, US Central UTC-5)
 
@@ -216,7 +216,7 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 
 ## Running
 
-- dllm: v27_vllm_v18_preflight_005 (V18b common KV reservation 0.85; main first)
+- dllm: v27_vllm_v18_preflight_005 (main passed; all-kept/native/dense references pending)
 
 ## Blockers
 

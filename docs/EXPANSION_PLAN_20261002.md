@@ -152,6 +152,14 @@ Pip freezes and revisions are stored next to each item; every cache stays inside
 
 ## Official dense smoke status (2026-10-02 10:49 UTC−5, dllm)
 
+Read-only environment recheck (2026-10-02 17:44 UTC-5): upstream SGLang has torch
+2.13.0 / CUDA 13.0, SGLang 0.5.21, FlashInfer 0.6.18 and transformers 5.12.1.
+The I-DLM environment instead has torch 2.9.1 / CUDA 12.8, bundled SGLang
+0.0.0.dev0, FlashInfer 0.6.3 and transformers 4.57.1. The CUDA 13.0 shim's
+CPU-build success applies to the upstream environment only; I-DLM needs separate
+toolchain qualification. No nvcc was found under system `/usr/local/cuda*`.
+Both GPU smokes remain pending behind the native-vLLM panel.
+
 `scripts/v27_sglang_dense_smoke.py` runs the official in-process SGLang engine on one public toy prompt.
 LLaDA2.1-mini (upstream SGLang 0.5.21, `JointThreshold`, FlashInfer) does **not run yet**:
 - deep_gemm (FP8 GEMM only): disabled with `SGLANG_ENABLE_JIT_DEEPGEMM=0`;
