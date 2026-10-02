@@ -577,3 +577,11 @@ Longest-input dense/native/all-kept pass actual async execution counting and zer
 compile/capture. Main stops before generation because the unchanged frozen source hashes
 are keyed by the prior deploy paths. No accuracy or performance conclusion. Reserved GPU
 time for this closed attempt is 614.449 s; cumulative V18 closed work is 1370.088 s.
+
+## V18 qualification 004 (2026-10-02 17:40 UTC-5)
+
+Source: `results/m1_m2_m3_frontier_v27_20260929/vllm_v18_qualification/attempt004.json`.
+Main passed source/config validation but OOM during longest 96K warmup at KV reservation
+0.92. No timed main record. This is a feasibility negative at that reservation, not an
+accuracy or timing result. Attempt reserved 144.065 GPU seconds; cumulative closed V18
+work is 1514.153 s. V18b is a new protocol with common reservation 0.85 for every arm.

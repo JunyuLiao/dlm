@@ -25,7 +25,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## V18 live status
 
-2026-10-02 17:36 (UTC-5): Qualification 004 launched from fdca7bf02 with a new frozen binding and strictly byte-validated config path rebinding; main runs first. Three matched references follow if main passes. No formal panel yet. mpk and dlm2 idle. 164 CPU tests and the actual production-config CPU guard pass.
+2026-10-02 17:40 (UTC-5): Qualification 004 reached real main execution but OOM during longest 96K warmup at common KV reservation 0.92 (256 MiB request with only 50.19 MiB free). No timed main record. New committed V18b spec lowers KV reservation equally to 0.85 for all four arms; method and generation parameters unchanged. Requalify every arm under a new binding/run. All GPUs idle. Attempt 004 reserved 144.065 s; closed V18 total 1514.153 GPU seconds.
 
 ## Intake and panel preparation (2026-10-02, US Central UTC-5)
 
@@ -216,7 +216,7 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 
 ## Running
 
-- dllm: v27_vllm_v18_preflight_004 (96K longest input; main, all-kept, native, dense)
+- None.
 
 ## Blockers
 
