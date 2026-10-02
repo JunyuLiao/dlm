@@ -126,3 +126,23 @@ vLLM 0.30.0 dense on the same 6 E14 64K prompts:
 
 **Decision:** run both the dense and the sparse arm at `--block-size 32` (GLOBAL page 64). It is the faster official
 dense configuration, so the baseline gets stronger, and it is the page size the patched FA4 block-sparse path supports.
+
+## Expected effect in vLLM (ESTIMATE, not a result)
+
+Assumption: the method's absolute per-request saving in decode time S (dense S − sparse S on our substrate) transfers
+unchanged to vLLM, at equal step counts. Inputs are the E14 cells' medians:
+
+| bin | ours: P / dense S → W ratio | vLLM: P / dense S → W ratio |
+|---|---|---|
+| 32K | 2.03 s / 7.62 s → 0.92 | 0.89 s / 5.76 s → 0.89 |
+| 64K | 5.05 s / 5.22 s → 0.89 | 2.29 s / 4.61 s → 0.83 |
+| 96K | 7.20 s / 13.68 s → 0.81 | 4.05 s / 13.34 s → 0.77 |
+
+The same saving weighs more because vLLM's prefill and non-attention parts are faster.
+
+Risks that could shrink this:
+- the sparse arm may lose part of vLLM's CUDA-graph coverage if the routing must run eagerly;
+- paged sparse attention is about 3–5% slower than contiguous;
+- host-side routing logic may stall vLLM's async scheduling.
+
+Only the port measures it.
