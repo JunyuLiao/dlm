@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 07:05 (UTC-5)",
+    "updated_local": "2026-10-02 08:00 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -157,7 +157,24 @@
     "q64_bench": {
       "verdict": "q64 -9 to -11% per sparse GLOBAL call on identical states; q64r and FA4 split-KV slower (dropped)",
       "source": "results/m1_m2_m3_frontier_v27_20260929/q64_bench_1002/README.md"
-    }
+    },
+    "queued": [
+      {
+        "panel": "P15 v27_c01_preview_p15_3e50c12a37ee0486",
+        "deploy_tag": "v27_p15_48a8c26",
+        "run_dir": "v27_p15_001",
+        "hosts": [
+          "mpk",
+          "dlm2"
+        ],
+        "executions": 180,
+        "starts": "after E14 and after v27 GPU tests pass on dllm"
+      },
+      {
+        "diag": "obs_split_1002 (call-1 kernel cost) then need_dump_1002 (regroup offline input)",
+        "host": "dllm"
+      }
+    ]
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",

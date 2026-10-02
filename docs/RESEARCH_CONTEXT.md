@@ -118,6 +118,7 @@ The kept tiles are executed by FA4's block-sparse interface (§4).
 | `q_block=64` (q64) | 64-row FA4 keep maps: the dense-prefix worst-row rule (incl. T) applied per 64-row half; FA4's SM90 head_dim-512 forward already runs 64-row query tiles. Threshold selector on the FA4 consumer only; carried maps fall back to 128-row lists |
 | `q_carry64` (q64c) | q64 + `carry_first`: canvas call 0 also reuses the previous canvas's natural 64-row map (old prefix tiles keep their 64-row decision, newer tiles kept). Opt-in so the E13 q64 fingerprint keeps its meaning |
 | `q_regroup` (q64r) | q64 with the rows of each 128-row block sorted by need count into two 64-row groups; Q gathered, output scattered back (idea credited to chw/value_aware). Kernel bench: slower than q64, not run in panels |
+| `observe_carried` (c01) | carry_first + fused observation on FA4: canvas call 1 takes its OUTPUT from the official FA4 block-sparse kernel on the map call 0 used (the carried map); the fused kernel runs observation-only (no V load, no PV), so the risk table and every later decision equal the dense observation's. First canvas: dense fused path. Targets the call-1 cost (fused kernel ~5.1 ms per layer at 75K vs 0.47 ms for a sparse call) |
 
 **Main configuration** "M3 R6 DP −ln2" = `M3_R6_A64_fused_dp_async_m1ln2_fa4`. It is parent `M3_R3_A8_current_output`
 with `decision_interval=6`, `score_period=64`, `fused_observe`, `async_route`, `risk_state=dense_prefix`,

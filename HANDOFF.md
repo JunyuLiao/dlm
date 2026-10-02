@@ -111,6 +111,16 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   accuracy unchanged. Optional named variant `q_block=64`; not a contribution.
 - **q64 kernel bench: done** (`docs/RESULTS_LEDGER.md`, `q64_bench_1002/`): q64 −9 to −11% per sparse GLOBAL
   call on identical states; within-block regrouping (q64r, code kept with tests) and FA4 split-KV are slower.
+- **Queued after E14** (coordinator chain `post_e14_chain.sh`, scratch; starts when all three E14 workers end):
+  1. v27 GPU tests on dllm with deploy `v27_p15_48a8c26` (commit 48a8c26c5); the chain stops if any fail.
+  2. P15 (`specs/v27_c01_preview_p15.json`, protocol `v27_c01_preview_p15_3e50c12a37ee0486`, 180 runs):
+     - accuracy-first preview of `observe_carried` (c01) on top of M3 + c0 + q64c, against the same pipeline
+       without c01 and against dense;
+     - AIME26 10 problems, LB 32K/64K 8 items, 96K 4 items, seeds 404/505;
+     - runs on mpk and dlm2, run dir `v27_p15_001`, scoring label `p15` (`--mpk-only --also dlm2 --mixed-gold`).
+  3. dllm, one after the other:
+     - `scripts/v27_observe_split_bench.py` (call-1 kernel cost: fused vs observation-only + FA4 sparse);
+     - `scripts/v27_need_dump.py` on the E14 deploy (real need matrices for `scripts/v27_regroup_offline.py`).
 - **E14 running** (`specs/v27_lb_q64c_e14.json`, protocol `v27_lb_q64c_e14_46bf7b5a765b7204`):
   - Arms: dense FA4 all-kept, M3 + c0, M3 + c0 + q64, and M3 + c0 + q64c (adds the 64-row carried call-0 map,
     `q_carry64`).
