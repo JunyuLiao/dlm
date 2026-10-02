@@ -259,6 +259,24 @@ Thinking ON, budget 8192, pass@1 by the official tests in the unprivileged sandb
   1.022 dlm2). Source: `results/humaneval_ruler_v27_20261002/humaneval_e12/` (`summary.md`, `steps.md`, `receipts.md`);
   protocol `v27_humaneval_e12_d844fb61c76dde6a`, deploy `v27_e12_5d5c3b9`.
 
+### L1j. E13 q64 (64-row FA4 keep maps), 32K/64K/96K × 6 seeds (piecewise_v5)
+
+| bin | arm | W [CI] | S | per-step S/N | N | acc (dense) |
+|---|---|---|---:|---:|---:|---:|
+| 32K | M3 + c0 | 0.908 [0.857, 0.956] | 0.877 | 0.925 | 0.949 | 92 (86) |
+| 32K | M3 + c0 + q64 | 0.904 [0.845, 0.963] | 0.869 | 0.923 | 0.941 | 87 (86) |
+| 64K | M3 + c0 | 0.854 [0.803, 0.896] | 0.776 | 0.815 | 0.951 | 76 (75) |
+| 64K | M3 + c0 + q64 | 0.864 [0.801, 0.924] | 0.785 | 0.810 | 0.969 | 77 (75) |
+| 96K | M3 + c0 | 0.849 [0.733, 0.969] | 0.771 | 0.746 | 1.034 | 31 (27) |
+| 96K | M3 + c0 + q64 | 0.870 [0.794, 0.938] | 0.779 | 0.740 | 1.052 | 29 (27) |
+
+- **q64 is non-negative but small.** Direct q64 / M3 + c0: per-step 0.998 (32K), **0.993 [0.990, 0.996] (64K, consistent on
+  all three hosts)**, 0.993 (96K); request W 0.995 / 1.011 / 1.025, all n.s. (step-count noise). Accuracy unchanged.
+- The offline estimate (22% less kept prefix work → about 1.5% per step at 64K) overstated the gain: carried call-0 maps
+  stay at 128 rows (23% of list builds) and the refinement itself costs time.
+- Regrouping within 64-row groups would add only ~5% of the remaining kept work (about 0.15% per step); not pursued.
+- Source: `lb_q64_panel_e13/` (`summary.md`, `steps.md`, `receipts.md`); protocol `v27_lb_q64_e13_f038777e0ab0d142`.
+
 ### Map drift between re-decisions (2026-10-02)
 
 E5 configuration, 64K/32K items 0–3: every re-decision (calls 8, 14, …) changes the held map; relative to the first

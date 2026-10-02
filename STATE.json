@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 03:35 (UTC-5)",
+    "updated_local": "2026-10-02 04:55 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -26,22 +26,7 @@
       "accuracy": "64K 77 vs 75, 32K 86 vs 86 (dense)",
       "source": "results/m1_m2_m3_frontier_v27_20260929/lb_confirm_panel_e4/summary.md"
     },
-    "running": [
-      {
-        "panel": "E13 v27_lb_q64_e13_f038777e0ab0d142",
-        "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_lb_q64_e13.json",
-        "deploy_tag": "v27_e13_4552f78",
-        "run_dir": "v27_lb_e13_001",
-        "hosts": [
-          "dllm",
-          "mpk",
-          "dlm2"
-        ],
-        "executions": 1062,
-        "status": "dllm running; dlm2 after E12; mpk after E12 scoring",
-        "scoring_label": "lb_e13"
-      }
-    ],
+    "running": [],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
@@ -139,7 +124,12 @@
       "integration": "exact A/B refs still unknown; no merge",
       "peer_results": "external context only, not v27 benchmark evidence"
     },
-    "checkpoint_branch": "research/m3-output-numerics-20260927 at add23afa9 (v27 checkpoint)"
+    "checkpoint_branch": "research/m3-output-numerics-20260927 at add23afa9 (v27 checkpoint)",
+    "q64": {
+      "panel": "E13 v27_lb_q64_e13_f038777e0ab0d142",
+      "verdict": "per-step -0.7% at 64K (CI [0.990, 0.996]); end to end n.s.; accuracy unchanged",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/lb_q64_panel_e13/summary.md"
+    }
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",

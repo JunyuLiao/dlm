@@ -103,18 +103,13 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Running (as of 2026-10-02 01:15 local)
 
-- **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), E9 (L1f), E10 (L1g), E11 (L1h), E12 (L1i),
+- **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), E9 (L1f), E10 (L1g), E11 (L1h), E12 (L1i), E13 (L1j),
   the batch diagnostic (`batch_scaling/`).
 - **E12 HumanEval: done** (`docs/RESULTS_LEDGER.md` L1i): no accuracy loss in any arm, no speed gain (main W 1.023),
   no V-term difference. Scored on mpk with the unprivileged sandbox.
-- **E13, q64** (`specs/v27_lb_q64_e13.json`, protocol `v27_lb_q64_e13_f038777e0ab0d142`): new named variant `q_block=64`
-  (code `70bdb5071`, tests `c66d7606e`; 119 v27 tests pass on dllm including the FA4 64-row GPU test). The same
-  dense-prefix worst-row rule (incl. T) per 64-row half; FA4's SM90 head_dim-512 kernel already uses 64-row query tiles,
-  so 64-row keep maps need no kernel change. Offline it cuts kept prefix work by about 22% at 64K.
-  - LongBench-v2 32K/64K (E4 items) and 96K (11 fitting items) × seeds 404–909; arms dense, M3 + c0, M3 + c0 + q64;
-    1,062 runs on three hosts, one host per cell. Deploy `v27_e13_4552f78`, run dir `v27_lb_e13_001`, label `lb_e13`.
-  - dllm started at once; dlm2 follows its E12 share; mpk waits until E12 scoring (CPU-heavy test execution on mpk)
-    has finished, so that scoring does not add timing noise to mpk's timed runs.
+- **E13 q64: done** (`docs/RESULTS_LEDGER.md` L1j): per-step −0.7% at 64K (significant, all hosts), end to end n.s.,
+  accuracy unchanged. Optional named variant `q_block=64`; not a contribution.
+- **Nothing running.** All GPUs idle.
 - **Regrouping diagnostic (chw idea): done** (`regroup_diag_1002/README.md`): ~4% fewer kept tiles within 128-row tiles,
   not integrated; finer query tiles would cut kept work by 22–39% but need a new kernel.
 
