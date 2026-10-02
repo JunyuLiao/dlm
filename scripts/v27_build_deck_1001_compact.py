@@ -3,9 +3,10 @@ step-count check, AIME cost structure, and the V-term controls. Panel ratios are
 files (not hand-copied); static numbers (kernel timings, time breakdown, step-count check) cite their files in the
 speaker notes.
 
-Writes results/m1_m2_m3_frontier_v27_20260929/ppt_sample/dlm_sparse_attention_20261001_compact_v2.pptx.
+Writes results/m1_m2_m3_frontier_v27_20260929/ppt_sample/dlm_sparse_attention_20261001_compact_v3.pptx.
 """
 import csv
+import json
 from pathlib import Path
 
 from pptx import Presentation
@@ -87,9 +88,9 @@ def page(title, config, blocks, notes):
     y = 1.4
     for kind, *args in blocks:
         if kind == 'table':
-            rows, widths, size, bold = args
+            rows, widths, size, bold, *height = args
             table(s, 0.35, y, 12.6, rows, widths, size=size, bold_rows=bold)
-            y += 0.3 * len(rows) + 0.3
+            y += (height[0] if height else 0.3 * len(rows)) + 0.3
         elif kind == 'label':
             text(s, 0.35, y, 12.6, 0.35, [args[0]], size=12, bold=True)
             y += 0.35
@@ -106,14 +107,13 @@ M3C = 'M3_R6_A64_fused_dp_async_m1ln2_c0_fa4'
 M2C = 'M2c_R6_A64_fused_dp_async_m1ln2_c0_fa4'
 B = 'B_A64_fused_rp_async_fa4'
 BC = 'B_A64_fused_rp_async_c0_fa4'
-FAN = [('原版 M1（Fan）', 'M1_R1_A8_fa4'), ('原版 M2（Fan）', 'M2c_R1_A8_fa4'), ('原版 M3（Fan）', 'M3_R3_A8_fa4')]
 L32, L64 = 'longbench_v2_32k', 'longbench_v2_64k'
 WIDE = [3.7, 2.1, 0.72, 0.72, 0.6, 0.85, 2.1, 0.72, 0.72, 0.6, 0.85]
 
 
 def cover():
     s = prs.slides.add_slide(BLANK)
-    text(s, 0.8, 2.3, 11.5, 1.0, ['DiffusionGemma-26B-A4B 块稀疏注意力：基线、长上下文结果、AIME 与看 V 对照'], size=30, bold=True)
+    text(s, 0.8, 2.3, 11.5, 1.0, ['DiffusionGemma-26B-A4B 块稀疏注意力：基线、方法、长上下文结果、选块对照与 AIME 耗时'], size=30, bold=True)
     text(s, 0.8, 3.6, 11.5, 1.4, ['2026-10-01 · 所有比值 = 方法 / dense（FA4），< 1 表示更快',
                                   'W = 端到端（含 prefill）· S = 纯生成（不含 prefill）· 每步 = S/N（摊销）· N = forward 数 · 答对 = strict correct 格数',
                                   '95% CI 按题目聚类 bootstrap · 每格 = 一个（题目, seed），同格所有方法同机'], size=15, color=GRAY)
@@ -145,114 +145,70 @@ def p1_baseline():
 
 
 def p_methods():
-    page('2. 方法与变体：M1/M2/M3 是什么，优化版改了哪些地方',
-         '只对 5 个 GLOBAL 层的 canvas 计算做稀疏；LOCAL 层（滑窗 1024）、prompt prefill 和 canvas 追加都保持 dense · 块 = 128 个 query × 64 个 key · 当前 canvas 的块与第一个块始终保留',
-         [('table', [['名称', '做法（选哪些 key 块参与注意力）', '来源'],
-                     ['M1', '每个块的“跳过风险” = 注意力质量（来自历史 QK 观测）×（块内按注意力加权的 V 均值 − 当前输出）的范数 × query 敏感度，V 先随机投影到 32 维；风险低于阈值就跳过；每步重新决策', 'Fan'],
-                     ['M2', '同 M1，但块内 V 取简单平均（不按注意力加权；同样在 32 维投影空间）', 'Fan'],
-                     ['M3', '同 M1，但每 R 步才重新决策（原版 R = 3），中间沿用上次的块图', 'Fan'],
-                     ['B', '每个 canvas 只观测一次，选出块图后整个 canvas 都用它，不再重新决策（≈ SparseD）', '我们（撞车）'],
-                     ['SparseD（移植）', '前几步 dense，之后按池化注意力分数保留 top-k 块并复用到 canvas 结束', '外部论文'],
-                     ['计算输出（所有方法）', '只在保留的块上用当前 QK 和原始 V 精确计算（FA4 块稀疏接口）；跳过的块不算 QK 也不算 PV', '—']],
-           [2.0, 9.0, 1.6], 11, ()),
-          ('label', 'M3 优化版（R6 DP −ln2）在原版 M3 上叠加的改动，以及 carry0'),
-          ('table', [['改动', '作用'],
-                     ['A64 融合观测', '注意力质量的观测融合进每个 canvas 第 1 步的 dense 计算，每个 canvas 只做一次（原版每 8 步一次完整 QK 观测，每层 6–11 ms）'],
-                     ['DP（dense-prefix 风险）', '风险相对 dense prefix 预先算好，所有块并行比较阈值：每次决策 0.27 ms/层（原版 2.3–7.9 ms）'],
-                     ['R6 + 异步', '每 6 步重新决策；选块放在副 stream 上与主计算重叠'],
-                     ['−ln2 阈值', '阈值下调 ln2，更保守、少跳一些块，避免步数增加'],
-                     ['carry0', '每个 canvas 第 0 步直接用上一 canvas 的最终块图（新并入的块全保留），省掉一次 dense 步；第 1 步照常 dense + 观测'],
-                     ['试过未采用', '2K 门控（AIME 用）、obs2、R3、stable1（输出稳定后转 dense）、跨 canvas 复用 K=4（步数增加、掉点）、保留全部生成部分']],
-           [2.4, 10.2], 11, ())],
+    page('2. 方法与变体：每个方法怎么选块，优化版具体改了什么',
+         '只稀疏 5 个 GLOBAL 层在 canvas 上的注意力；25 个 LOCAL 层（滑窗 1024）、prompt prefill、canvas 追加都保持 dense · '
+         '块 = 128 个 query × 64 个 key · 当前 canvas 的块和第一个块永远保留 · 输出只在保留的块上用当前 QK 和原始 V 精确计算（FA4），跳过的块完全不算',
+         [('table', [['方法', '怎么选块', '原版配置'],
+                     ['共同的打分：跳过风险', '对每个 key 块估计“把它跳过，注意力输出会偏多少”≈ 该块分到的注意力 × 该块的 V 与当前输出的差距 × 该 query 对误差的敏感度。'
+                      '风险低于阈值的块就跳过', '—'],
+                     ['M1', '用上面的风险选块。注意力来自“观测”：隔几步完整算一次 QK，中间步沿用；V 取块内按注意力加权的均值（投影到 32 维以省计算）', '每 8 步观测一次（A8），每步都重新选块（R1）'],
+                     ['M2', '同 M1，但 V 取块内 64 个 token 的简单平均（不按注意力加权）', 'A8，R1'],
+                     ['M3', '同 M1，但隔几步才重新选块，中间步直接沿用上次选出的块', 'A8，每 3 步重新选（R3）'],
+                     ['B', '每个 canvas 只选一次块（第 1 步观测后选），整个 canvas 都用这一份，不再重新选', '—'],
+                     ['SparseD（外部论文，移植）', '前几步 dense；之后按块的平均注意力分数保留固定比例的块，用到 canvas 结束', '—']],
+           [2.4, 8.0, 2.2], 11, ()),
+          ('label', 'M3 优化版 = M3 + 下面 5 项改动（第 4 页起简称 M3 优化版）；carry0 可再叠加'),
+          ('table', [['改动', '原版怎么做 → 优化版怎么做'],
+                     ['观测并入第 1 步（A64）', '原版每 8 步额外完整算一次 QK 来得到各块注意力（每层 6–11 ms，比 dense 注意力还贵）→ 每个 canvas 只观测一次，而且在第 1 步本来就要做的 dense 注意力里顺带算出，不额外跑'],
+                     ['风险预先算好（DP）', '原版选块时逐块按顺序累计算风险（每层 2.3–7.9 ms）→ 观测时就把每个块的风险算好存起来，选块只是“风险 < 阈值？”的并行比较（每层 0.27 ms）'],
+                     ['每 6 步重新选块（R6）+ 异步', '原版每 3 步重新选 → 每 6 步一次；选块放在另一条 GPU 流上与主计算同时跑，不占主计算时间'],
+                     ['阈值下调（−ln2）', '阈值是“跳不跳”的分界线；下调后风险要再小一半才跳，跳得更少、更保守，换来步数不增加'],
+                     ['carry0', '每个 canvas 的第 0 步原本 dense → 直接用上一个 canvas 最后的块图（新进来的块全保留），每个 canvas 少一次 dense 步'],
+                     ['试过、未采用', '短上下文门控（key < 2K 直接 dense，AIME 用）；第 2 步才观测；每 3 步选块；输出稳定后整段转 dense；块图跨 4 个 canvas 复用（步数增加、掉点）；保留全部生成部分']],
+           [2.6, 10.0], 10, ())],
          """
-【定义来源】Fan 的 M1/M2/M3 定义（必须出现在每个对比里）；代码 experiments/numerical_qk_reuse/（integration.py、v27_dense_prefix.py、v21.py 中的命名变体）。docs/RESEARCH_CONTEXT.md §3 有每个配置键的完整说明。
-【每个 canvas 的步骤】第 0 步 dense；第 1 步 dense + 观测；第 2 步起按块图稀疏。carry0 把第 0 步也变成稀疏（用上一 canvas 的块图）。
-【M2 与 junyu 的“V 均值”】我们的 M2 是“块内 V 均值 − 当前输出”的范数（居中）乘注意力质量；junyu 代码里的 value/vector_mean 基线是“块内 V 均值向量本身的范数”（不居中）乘注意力质量，两者不同（见口头说明）。
-【保护策略】始终保留：当前 canvas 的全部块、第一个块（attention sink）；carry0 在第 0 步保留刚并入 prefix 的块。junyu 的 prefix_end / diagonal 保护未使用。
+【每个 canvas 的步骤】第 0 步 dense；第 1 步 dense + 观测；第 2 步起按块图稀疏。carry0 把第 0 步也变成稀疏。
+【配置名对照】原版：M1_R1_A8、M2c_R1_A8、M3_R3_A8（均经 FA4 执行）。优化版：M3_R6_A64_fused_dp_async_m1ln2（A64 = 每个 canvas 观测一次；fused = 观测并入第 1 步；dp = dense-prefix 风险；async = 副流选块；m1ln2 = 阈值下调 ln2）。carry0 = carry_first。完整说明见 docs/RESEARCH_CONTEXT.md §3。
+【M2 的块均值】在 32 维投影空间里取块内简单平均（pooled_compact）。junyu 代码里的 value/vector_mean 是“块内 V 均值向量本身的范数”（不减当前输出），与这里的 M2 不同。
+【保护】永远保留当前 canvas 的全部块与第一个块（attention sink）；carry0 在第 0 步保留新进来的块。没有使用 junyu 的 prefix_end / diagonal 保护。
 """)
 
 
-def p2_long():
-    e4, e5, e10 = 'lb_confirm_panel_e4', 'lb_overhead_panel_e5', 'lb_m2opt_panel_e10'
-    tab = [['方法', '32K 端到端 W [95% CI]', 'S', '每步', 'N', '答对(86)', '64K 端到端 W [95% CI]', 'S', '每步', 'N', '答对(75)']]
-    for name, arm, panel in [*[(n, a, e4) for n, a in FAN], ('B（选一次、整段复用）', B, e5),
-                             ('M3 优化版（R6 DP −ln2）', M3, e5), ('M3 优化版 + carry0（当前最好）', M3C, e5), ('B + carry0', BC, e5)]:
-        tab.append([name] + cols(get(panel, arm, L32)) + cols(get(panel, arm, L64)))
-    d32, d64 = get(e10, D, L32), get(e10, D, L64)
-    tab2 = [['同样优化：M2 vs M3（E10，96 格/档）', '32K 端到端 W [95% CI]', 'S', '每步', 'N',
-             f'答对({d32["correct"]})' if d32 else '答对', '64K 端到端 W [95% CI]', 'S', '每步', 'N',
-             f'答对({d64["correct"]})' if d64 else '答对']]
-    for name, arm in [('M3 优化版 + carry0（V = 投影 32 维）', M3C), ('M2 同样优化 + carry0（V = 块均值）', M2C)]:
-        tab2.append([name] + cols(get(e10, arm, L32)) + cols(get(e10, arm, L64)))
-    page('3. 32K / 64K：各变体的端到端、纯生成、每步耗时、forward 数与精度',
-         'LongBench-v2 32K 档（28–40K token）、64K 档（56–76K token）各 24 题 × 6 个新 seed（404–909）= 每档 144 格/方法 · 生成前冻结方案',
-         [('table', tab, WIDE, 10, (6,)),
-          ('table', tab2, WIDE, 10, ()),
-          ('bullets', ['原版 M1/M2/M3 都比 dense 慢：选块和观测每层每次 2.3–7.9 ms，比 dense 注意力本身（1.5–2.9 ms）还贵。',
-                       '优化版：每个 canvas 一次融合观测、dense-prefix 风险、每 6 步决策、副流异步选块、FA4 执行，决策降到 0.27 ms/次；carry0 再去掉每个 canvas 的一次 dense 步。',
-                       '精度都不低于 dense；prefill 所有方法约 1.00（没有动 prefill）。'], 12)],
+def trip(r):
+    """'W [CI]', 'S / 每步 / N', correct for one length."""
+    if r is None:
+        return ['—', '—', '—']
+    return [f'{f3(r["W"])} {ci(r, "W")}', f'{float(r["S"]):.3f} / {float(r["SN"]):.3f} / {float(r["N"]):.2f}', r['correct']]
+
+
+def p_long():
+    e4, e5, p96 = 'lb_confirm_panel_e4', 'lb_overhead_panel_e5', 'lb96k_pooled_e6_e6b'
+    d = [get(e5, D, L32), get(e5, D, L64), get(p96, D)]
+    hdr = ['方法', '32K 端到端 W [95% CI]', 'S / 每步 / N', '答对', '64K 端到端 W [95% CI]', 'S / 每步 / N', '答对',
+           '96K 端到端 W [95% CI]', 'S / 每步 / N', '答对']
+    rows = [hdr, ['dense（FA4，基线）'] + sum([['1', '1 / 1 / 1', x['correct']] for x in d], [])]
+    spec = [('原版 M1', 'M1_R1_A8_fa4', e4, 'M1_R1_A8_fa4'), ('原版 M2', 'M2c_R1_A8_fa4', e4, 'M2c_R1_A8_fa4'),
+            ('原版 M3', 'M3_R3_A8_fa4', e4, 'M3_R3_A8_fa4'), ('B', B, e5, B), ('M3 优化版', M3, e5, M3),
+            ('M3 优化版 + carry0（当前最好）', M3C, e5, M3C), ('B + carry0', BC, e5, None)]
+    for name, arm, panel, arm96 in spec:
+        rows.append([name] + trip(get(panel, arm, L32)) + trip(get(panel, arm, L64)) + trip(get(p96, arm96) if arm96 else None))
+    page('3. 长上下文 32K / 64K / 96K：各方法的端到端、纯生成、每步耗时、forward 数与精度',
+         'LongBench-v2 · 32K、64K 各 24 题 × 6 个 seed = 每档 144 格/方法；96K = 单卡放得下的全部 11 道题 × 6 个 seed = 66 格 · '
+         '比值 = 方法 / dense，< 1 更快 · S = 纯生成，每步 = S/N，N = forward 数',
+         [('table', rows, [2.0, 1.6, 1.6, 0.5, 1.6, 1.6, 0.5, 1.6, 1.6, 0.5], 9, (7,), 0.3 * len(rows) + 0.25),
+          ('bullets', ['M3 优化版 + carry0：端到端 32K 快 9%、64K 快 15%、96K 快 18%；纯生成快 12% / 22% / 27%；上下文越长每步省得越多（每步 0.93 / 0.82 / 0.75）；精度都不低于 dense。prefill 没有优化（所有方法约 1.00）。',
+                       '原版 M1/M2/M3 在三档都比 dense 慢：选块和观测本身（每层每次 2.3–7.9 ms）比 dense 注意力（1.5–2.9 ms）还贵。',
+                       '步数 N 的核查：按 seed 拆开看，单个 seed 的步数比在 0.85–1.24 之间摆动；9 个 seed 合并后 32K +2.4%、64K +1.5%（不显著）。所以“步数没有显著增加，最佳估计 +1–2%”，端到端结论需要大样本；每步耗时的结论各批次一致。'], 11)],
          """
-【协议】E4 v27_lb_confirm_e4_d3a7edb87a2b800a（原版 M1/M2/M3 取自这里）；E5 v27_lb_overhead_e5_1c93b97271a3a266（与 E4 同一批 288 格，dense/M3/B 输出与 E4 逐 token 相同）；E10 v27_lb_m2opt_e10_c965792c1cb6542d（M2 与 M3 只差 V 的摘要方式：块均值 vs 投影 V，其余优化完全一样）。
-【口径】W、S、每步、N 都是 方法/dense 的配对几何平均；每步 = S/N 是摊销值。单次 forward 直接计时（64K 真实状态、CUDA graph 重放）：dense 54.4 ms，保留 12% 时 41.8 ms（−23%）。
-【命名】Fan 的 M2 = M1 换成块均值 V（每步重新选）；M3 = M1 每 R 步才重新选。“M2 同样优化” = 块均值 V + 与 M3 优化版完全相同的流水线（每 6 步决策等），只为隔离 V 摘要的影响。
-【M2 vs M3 其他证据】原版：M2 选块器更贵（64K 每层 9.5 vs 4.5 ms），更慢（1.34 vs 1.09）。固定 88% 稀疏度（E9，64K）：M2/M3 端到端 1.010 [0.945, 1.085]、答对 54 vs 53。AIME 70%（E8）：92 vs 87（p = 0.49）。都不显著。
-【保护策略】始终保留：当前 canvas 的全部块、第一个块（attention sink）；carry0 在第 0 步保留刚并入 prefix 的块。没有用 Junyu 的 prefix_end / diagonal 保护（他自己的结论是不稳定：LongBench diagonal 步数 +58%，AIME beginning 掉点）。我们的 protect_output（保留全部生成部分）在 E3 测过，无显著收益，未采用。
-【数据】lb_confirm_panel_e4/、lb_overhead_panel_e5/、lb_m2opt_panel_e10/ 的 summary.md。
+【协议】32K/64K：原版 M1/M2/M3 来自 E4 v27_lb_confirm_e4_d3a7edb87a2b800a；B、M3 优化版、carry0 两行来自 E5 v27_lb_overhead_e5_1c93b97271a3a266（与 E4 同一批 288 格，dense/M3/B 输出与 E4 逐 token 相同）。96K：E6 + E6b 合并（v27_lb96k_confirm_e6_8ab3aa35d1874ca1、v27_lb96k_extend_e6b_d1b1c0c74a1dc69d），B + carry0 在 96K 没有跑。
+【实际稀疏度】主线（M3 优化版 −ln2）在稀疏调用里实际跳过的块：32K 约 79%、64K 约 88%（fidelity_v6 诊断）。
+【步数核查】32K 同 24 题、同底座：seed 101/202/303（来自 E3）= 1.23/0.89/1.24，404–909（E4）= 0.85/0.98/1.12/0.99/1.00/1.00；84 种 3/6 分组中 13 种的组间差距不小于实际分组。64K 合并（traj_t1 v4 + E4 v5）1.015 [0.948, 1.085]。
+【单次 forward】每步 = S/N 是摊销值；同一请求里单次 forward 的直接计时见第 5 页。
 """)
 
 
-def p3_96k_steps():
-    p96 = 'lb96k_pooled_e6_e6b'
-    tab = [['方法', '96K 端到端 W [95% CI]', '纯生成 S', '每步', 'N', '答对(25)']]
-    for name, arm in [*FAN, ('B', B), ('M3 优化版', M3), ('M3 优化版 + carry0', M3C)]:
-        tab.append([name] + cols(get(p96, arm)))
-    page('4. 96K，以及“步数会不会变多”的核查',
-         '96K：LongBench-v2 84–104K 档题池中单卡放得下的全部 11 道题 × 6 个 seed = 66 格/方法（E6 + E6b）· 步数核查：32K 同 24 题、同底座 v5、9 个 seed',
-         [('table', tab, [3.8, 2.8, 1.3, 1.1, 1.0, 1.2], 11, (6,)),
-          ('label', '步数比 N（M3 优化版 / dense）按 seed 拆开（32K，24 题，同底座）'),
-          ('table', [['seed', '101', '202', '303', '404', '505', '606', '707', '808', '909', '9 个合并 [95% CI]'],
-                     ['N', '1.23', '0.89', '1.24', '0.85', '0.98', '1.12', '0.99', '1.00', '1.00', '1.024 [0.973, 1.076]']],
-           [0.9, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 2.6], 11, ()),
-          ('bullets', ['单个 seed 的步数比在 0.85–1.24 之间摆动；之前 3 个 seed（101/202/303）偏高、6 个新 seed 偏低，都是同一分布的抽样（随机 3/6 分组中 15% 的差距不小于此）。',
-                       '9 个 seed 合并：32K 步数 +2.4%、64K +1.5%，都不显著。应表述为“步数没有显著增加，最佳估计 +1–2%”；E4 的端到端可能因此偏乐观约 2%。每步耗时（S/N）的结论各批次一致、很稳。'], 12)],
-         """
-【96K】E6 v27_lb96k_confirm_e6_8ab3aa35d1874ca1 + E6b v27_lb96k_extend_e6b_d1b1c0c74a1dc69d，462/462 成功。单看 E6（6 题）步数 0.81，单看 E6b（5 题）1.19：96K 只引用合并结果。LongBench-v2 共 32 道题在 84–104K 档，14 道单卡放得下，其中 11 道在冻结题池里（全部用上）；更长的题 dense prefill 就 OOM，128K 需要分块 prefill。
-【步数核查】每格步数比 = 方法 decoder 调用数 / dense 调用数，单格对数标准差 0.45（约 ×1.57）。seed 101/202/303 来自 E3（v5、同 24 题），404–909 来自 E4。84 种 3/6 分组中有 13 种的组间差距不小于实际分组。64K 合并用 traj_t1（v4，3 个 seed）+ E4（v5），N 1.015 [0.948, 1.085]。
-【数据】lb96k_pooled_e6_e6b/summary.md、README.md；步数核查见 docs/RESULTS_LEDGER.md。
-""")
-
-
-def p4_aime():
-    best = get('aime_confirm_panel_e7', 'M3_R6_A64_fused_dp_async_m1ln2_c0_gate2k_fa4')
-    page('5. AIME：精度不降，但没有加速空间（与 LongBench 的每步耗时对比）',
-         'AIME26 30 题 × 6 个 seed = 180 格/方法（E7）· 每步耗时为 dense 摊销值，分项来自模块/kernel 测速 · 同一模型、同一底座',
-         [('table', [['', 'AIME', 'LongBench 32K', 'LongBench 64K'],
-                     ['每次 forward 的 key 数（中位数）', '3.6K（prompt 约 160 token，其余是生成的推理）', '35.6K', '67.3K'],
-                     ['dense 每步耗时（摊销）', '30.7 ms', '37.3 ms', '45.3 ms'],
-                     ['  MoE 专家（每步读约 46 GB 权重，带宽上限）', '12.8 ms', '12.8 ms', '12.8 ms'],
-                     ['  5 层 GLOBAL 注意力（dense）', '约 1.5 ms（≤ 5%，按 kernel 测速估计）', '7.3 ms（约 20%）', '14.8 ms（约 33%）'],
-                     ['  采样（26 万词表）', '约 4.6 ms', '约 4.6 ms', '约 4.6 ms'],
-                     ['  其余（投影、LOCAL、norm、canvas 追加等；余量）', '约 11.8 ms', '约 12.6 ms', '约 13.1 ms'],
-                     ['主线（M3 优化版 −ln2）稀疏调用中实际跳过的块', '约 4%（保留 96%）', '约 79%', '约 88%'],
-                     ['M3 优化版每步耗时', '31.4 ms（略慢）', '34.7 ms', '37.2 ms'],
-                     ['最好变体：端到端 W / 答对 vs dense',
-                      f'{f3(best["W"])} {ci(best, "W")} / {best["correct"]} vs {best["base_correct"]}' if best else '',
-                      '0.907 / 92 vs 86', '0.853 / 76 vs 75']],
-           [4.4, 4.2, 2.0, 2.0], 11, ()),
-          ('bullets', ['AIME 上注意力只占每步约 5%：全部省掉也只快约 5%，而选块的观测、决策、建块表是每步的固定开销，正好抵消。',
-                       '主线阈值在 AIME 上只跳约 4% 的块：key 少（中位数约 57 个块，4 个 canvas 块必须保留），每个块的风险都不低；28% 的调用不到 2K key。强行跳 70%（第 6 页 E8）就掉点、变慢。',
-                       '原版 M1/M2/M3 在 AIME 上慢 7–12%；各方法精度与 dense 差异都不显著。AIME 只作为“精度不掉”的检查。'], 12)],
-         """
-【协议】E7 v27_aime_confirm_e7_0515fa3125588ff0，1,260/1,260 成功，每格同机。最好变体 = M3 优化版 + carry0 + 2K 门控（key < 2K 的调用走原生 dense，约 31% 的 GLOBAL 调用）；纯生成 1.005、每步 1.005。M3 优化版 1.033（答对 96）；原版 M1/M2/M3 端到端 1.089/1.115/1.069。
-【实际稀疏度】fidelity_v6/README.md（诊断，每类 2 个请求，底座 v2）：稀疏调用中保留块比例中位数，M3 R6 DP −ln2：32K 0.21、64K 0.12、AIME 0.96；原版 M1 0.22/0.15/0.95，原版 M3 0.21/0.15/0.93，B 0.15/0.10/0.90。不含每个 canvas 的 dense 步与 canvas 块。
-【耗时来源】LongBench 分项：substrate/time_breakdown.json、kernel_bench/module_profile_*.jsonl。AIME 的 GLOBAL 注意力是按 kernel 测速（8K key 每层 0.44 ms）插值的估计，AIME 没有单独的模块级 profile。每步耗时来自面板 S/N 摊销。
-【AIME 长度】E7 dense：平均输出 5,695 token、22.6 个 canvas、每 canvas 13.1 步；key 数 p10 927、p90 7,342。
-【数据】aime_confirm_panel_e7/summary.md、receipts.md。
-""")
-
-
-def p5_vterm():
-    e8, e9 = 'aime_vterm_panel_e8', 'lb64_vterm_panel_e9'
+def p_select():
+    e8, e9, e10 = 'aime_vterm_panel_e8', 'lb64_vterm_panel_e9', 'lb_m2opt_panel_e10'
 
     def cell(panel, arm, key):
         r = get(panel, arm) if arm else None
@@ -261,37 +217,133 @@ def p5_vterm():
          ('投影 V 16 维', 'M3_R6_A64_fused_dp_async_topk70_r16_fa4', None),
          ('投影 V 8 维', 'M3_R6_A64_fused_dp_async_topk70_r8_fa4', 'M3_R6_A64_fused_dp_async_topk88_r8_c0_fa4'),
          ('投影 V 4 维', 'M3_R6_A64_fused_dp_async_topk70_r4_fa4', None),
-         ('块均值 V（M2 的做法）', 'M2c_R6_A64_fused_dp_async_topk70_fa4', 'M2c_R6_A64_fused_dp_async_topk88_c0_fa4'),
-         ('不看 V（只看注意力质量）', 'M3_R6_A64_fused_dp_async_topk70_mass_fa4', 'M3_R6_A64_fused_dp_async_topk88_mass_c0_fa4'),
-         ('SparseD 70%（移植，外部参照）', 'SparseD_s70_skip1_fa4', None)]
-    tab = [['选块时用的 V', f'AIME 答对（dense {get(e8, D)["correct"]}）', 'AIME 端到端 W',
-            f'64K 答对（dense {get(e9, D)["correct"]}）', '64K 端到端 W']]
+         ('块内简单平均 V（M2 的做法）', 'M2c_R6_A64_fused_dp_async_topk70_fa4', 'M2c_R6_A64_fused_dp_async_topk88_c0_fa4'),
+         ('不看 V（只看注意力）', 'M3_R6_A64_fused_dp_async_topk70_mass_fa4', 'M3_R6_A64_fused_dp_async_topk88_mass_c0_fa4'),
+         ('SparseD 70%（外部论文，移植）', 'SparseD_s70_skip1_fa4', None)]
+    tab = [['选块时 V 怎么用', f'64K 答对（dense {get(e9, D)["correct"]}）', '64K 端到端 W',
+            f'AIME 答对（dense {get(e8, D)["correct"]}）', 'AIME 端到端 W']]
     for name, a8, a9 in V:
-        tab.append([name, cell(e8, a8, 'acc'), cell(e8, a8, 'w'), cell(e9, a9, 'acc'), cell(e9, a9, 'w')])
-    page('6. 选块要不要看 V：同稀疏度下，看 V 没有比只看注意力质量更好',
-         'AIME：固定保留 30% prefix 块（E8，180 格/组；主线阈值在 AIME 只跳约 4%）· 64K：M3 优化版 + carry0 固定保留 12%（E9，96 格/组；= 主线 64K 工作点）· 只换风险里的 V 项',
-         [('table', tab, [4.4, 2.2, 1.8, 2.2, 1.8], 12, ()),
-          ('bullets', ['两处都没有任何 V 项显著好于“只看注意力质量”（AIME 相对 32 维 p ≥ 0.30；64K 全部 p ≥ 0.42）；64K 上只看质量与当前最好的 −ln2 版一样快（比值 0.999）。',
-                       'AIME 并不是“没变化”：不同 V 项选出的块不同，答对数在 86–94 之间变化，但最好的是 4 维或不看 V；70% 稀疏时步数多 6–13%，所以都比 dense 慢。',
-                       'AIME 的 70% prefix 稀疏度约等于 60% 的总块稀疏度（canvas 块必须保留）；64K 的 88% 约等于 88%。',
-                       '结论：“看 V 选块”不能作为贡献；M2（块均值）与 M3（投影 V）在同样优化下也分不出差别（见第 3 页）。'], 12)],
+        tab.append([name, cell(e9, a9, 'acc'), cell(e9, a9, 'w'), cell(e8, a8, 'acc'), cell(e8, a8, 'w')])
+    d32, d64 = get(e10, D, L32), get(e10, D, L64)
+    tab2 = [['当前工作点（阈值 −ln2 + carry0，其余优化全相同）', '32K 端到端 W [95% CI]', 'S / 每步 / N',
+             f'答对({d32["correct"]})' if d32 else '答对', '64K 端到端 W [95% CI]', 'S / 每步 / N',
+             f'答对({d64["correct"]})' if d64 else '答对']]
+    for name, arm in [('M3 优化版（投影 V 32 维）', M3C), ('M2 同样优化（块内简单平均 V）', M2C)]:
+        r32, r64 = get(e10, arm, L32), get(e10, arm, L64)
+        tab2.append([name] + (trip(r32) if r32 else ['运行中', '', '']) + (trip(r64) if r64 else ['运行中', '', '']))
+    page('4. 选块要不要看 V、M2 还是 M3：同稀疏度下没有可分辨的差别',
+         '上表：固定稀疏度，只换风险里的 V 项。64K = M3 优化版 + carry0、固定保留 12%（= 主线 64K 工作点），24 题 × 4 seed = 96 格/组；'
+         'AIME = M3 优化版、固定保留 30%（主线阈值在 AIME 只跳约 4%），180 格/组 · 下表：主线阈值下 M2 与 M3 只差 V 的取法（32K/64K 各 24 题 × 4 seed）',
+         [('table', tab, [4.0, 2.2, 1.9, 2.2, 1.9], 11, ()),
+          ('table', tab2, [3.6, 1.9, 1.6, 0.8, 1.9, 1.6, 0.8], 10, ()),
+          ('bullets', ['64K（工作点 88%）：任何 V 项都不比“不看 V”更准（50–54 vs 51，全部不显著），速度也无显著差别（不看 V / 32 维 0.960 [0.905, 1.018]）。',
+                       'AIME（强制 70%）：不同 V 项确实选出不同的块（答对 86–94），但最好的是 4 维或不看 V；此稀疏度下步数多 6–13%，都比 dense 慢。',
+                       '主线阈值下 M2（简单平均）/ M3（投影 32 维）直接比：32K 0.987 [0.914, 1.063]、64K 0.983 [0.940, 1.024]，每步耗时相同，答对差异不显著——打平。',
+                       '结论：“看 V 选块”和“M2 vs M3”都不能作为贡献，选块可以只看注意力。'], 11)],
          """
-【协议】E8 v27_aime_vterm_e8_bd293196ff730851（1,440/1,440 成功，dense 与 E7 逐 token 相同）；E9 v27_lb64_vterm_e9_5b125c63817898f6（576/576 成功，dense 与 −ln2 + carry0 两臂与 E5 逐 token 相同）。每次运行的 effective_method 都核对过（k30 / k12、proj_rank、risk_value、mu_mode、carry0）。
-【AIME 详细】对 dense 99：32 维 87（p = 0.08）、16 维 86（p = 0.035）、8 维 87（p = 0.036）、4 维 94、块均值 92、只看质量 91、SparseD 94。
-【64K 详细】对 dense 51：32 维 53、8 维 50、块均值 54、只看质量 54、−ln2 版 49；只看质量 / 32 维 端到端 0.960 [0.905, 1.018]。
-【组内对照】JunyuLiao 在 RULER8K（用当前 QK 选块）上发现 V 有用（稀疏 75% 时 32 维 47.4% vs 只看质量 21.3%）；我们用历史 QK，任务也不同。只引用。
-【数据】aime_vterm_panel_e8/、lb64_vterm_panel_e9/ 的 summary.md、receipts.md。
+【协议】E9 v27_lb64_vterm_e9_5b125c63817898f6（576/576 成功；dense 与 −ln2 + carry0 两组与 E5 逐 token 相同）；E8 v27_aime_vterm_e8_bd293196ff730851（1,440/1,440 成功）；E10 v27_lb_m2opt_e10_c965792c1cb6542d（576 次运行，M2 与 M3 只差 mu_mode）。每次运行的配置记录都核对过。
+【AIME 详细】对 dense 99：32 维 87（p = 0.08）、16 维 86（p = 0.035）、8 维 87（p = 0.036）、4 维 94、简单平均 92、不看 V 91、SparseD 94。
+【64K 详细】对 dense 51：32 维 53、8 维 50、简单平均 54、不看 V 54；−ln2 版 49。
+【实际稀疏度】AIME 固定保留 30% 的 prefix 块，算上 canvas 块和 dense 步约跳 57% 的 GLOBAL 块；64K 固定保留 12% ≈ 跳 88%。
+【组内对照】junyu 在 RULER8K（当前 QK 选块，GLOBAL 和 LOCAL 都稀疏）75% 稀疏时 32 维 47.4% vs 只看注意力 21.3%；50% 时都约 92%。只引用。
 """)
 
 
-def build(out_name='dlm_sparse_attention_20261001_compact_v2.pptx'):
+def tb_load(name):
+    p = R / 'time_breakdown_v5' / f'{name}_dense_first.jsonl'
+    if not p.exists():
+        return None
+    out = {}
+    for line in p.open(encoding='utf-8'):
+        if line.strip().startswith('{'):
+            r = json.loads(line)
+            out.setdefault(r['part'], []).append(r)
+    return out
+
+
+def tb_split(tb):
+    """Compiled-forward kernel categories (ms) of one captured dense decoder call, plus step and sampler."""
+    c, dpart = tb['C_compiled_forward_kernels'][0], tb['D_step_replay'][0]
+    cat = dict(global_attn=0.0, local_attn=0.0, moe=0.0, route=0.0, gemm=0.0)
+    for k in c['top']:
+        n = k['kernel']
+        if 'flash_attn' in n or 'FlashAttentionForward' in n:
+            cat['global_attn'] += k['ms']
+        elif 'sdpa' in n and 'cudnn' in n:
+            cat['local_attn'] += k['ms']
+        elif 'cutlass' in n and 'Gemm' in n:
+            cat['moe'] += k['ms']
+        elif 'radixSort' in n or 'gatherTopK' in n or 'bitonicSort' in n:
+            cat['route'] += k['ms']
+        elif 'nvjet' in n:
+            cat['gemm'] += k['ms']
+    fwd, step = dpart['forward_ms'], dpart['step_ms']
+    cat['other'] = fwd - sum(cat.values())
+    cat['sampler'] = dpart['step_minus_forward_ms']
+    return step, fwd, cat, tb['B_forward_composition_eager_ms'][0].get('global_prefix_keys')
+
+
+def p_aime():
+    names = [('aime26', 'AIME'), ('longbench_v2_32k', 'LongBench 32K'), ('longbench_v2_64k', 'LongBench 64K')]
+    data = {k: tb_load(k) for k, _ in names}
+    split = {k: tb_split(v) if v else None for k, v in data.items()}
+
+    def ms(k, key):
+        sp = split[k]
+        if sp is None:
+            return '测量中'
+        step, fwd, cat, _ = sp
+        v = {'step': step, 'fwd': fwd}.get(key, cat.get(key))
+        return f'{v:.1f} ms（{100 * v / step:.0f}%）' if key != 'step' else f'{v:.1f} ms（100%）'
+
+    def keys(k):
+        sp = split[k]
+        return '测量中' if sp is None else f'{sp[3] + 256:,}'
+
+    def fwd_pair(k):
+        a = data[k]
+        if not a:
+            return '测量中'
+        arms = {r['arm']: r['parts']['decoder_forward']['median_ms'] for r in a.get('A_request', [])}
+        dv = arms.get(D)
+        mv = next((v for kk, v in arms.items() if kk != D), None)
+        return f'{dv:.1f} → {mv:.1f} ms（{mv / dv:.2f}）' if dv and mv else '—'
+    best = get('aime_confirm_panel_e7', 'M3_R6_A64_fused_dp_async_m1ln2_c0_gate2k_fa4')
+    rows = [['（dense，同一底座，各取一次真实 forward）'] + [n for _, n in names],
+            ['这次 forward 的 key 数'] + [keys(k) for k, _ in names],
+            ['单步总耗时'] + [ms(k, 'step') for k, _ in names],
+            ['  5 层 GLOBAL 注意力'] + [ms(k, 'global_attn') for k, _ in names],
+            ['  25 层 LOCAL 注意力（滑窗 1024）'] + [ms(k, 'local_attn') for k, _ in names],
+            ['  MoE 专家矩阵乘（每步读约 46 GB 权重）'] + [ms(k, 'moe') for k, _ in names],
+            ['  MoE 路由（排序 / top-k）'] + [ms(k, 'route') for k, _ in names],
+            ['  其他矩阵乘（投影、dense MLP、lm_head 等）'] + [ms(k, 'gemm') for k, _ in names],
+            ['  其余（norm、逐元素、拷贝等）'] + [ms(k, 'other') for k, _ in names],
+            ['  采样 + 停止判断（26 万词表）'] + [ms(k, 'sampler') for k, _ in names],
+            ['主线实际跳过的 GLOBAL 块（稀疏调用中）', '约 4%', '约 79%', '约 88%'],
+            ['单次 forward 中位数：dense → 最好变体（同一请求）'] + [fwd_pair(k) for k, _ in names],
+            ['最好变体：端到端 W / 答对 vs dense',
+             f'{f3(best["W"])} / {best["correct"]} vs {best["base_correct"]}' if best else '', '0.907 / 92 vs 86', '0.853 / 76 vs 75']]
+    page('5. AIME：精度不降，但没有加速空间——每步耗时拆开看（与 LongBench 对比）',
+         'AIME26 30 题 × 6 个 seed = 180 格/方法（E7）· 耗时：同一底座（v5，CUDA graph）下各取一次真实 decoder 调用，按 kernel 归类；百分比 = 占单步总耗时',
+         [('table', rows, [4.4, 2.75, 2.75, 2.75], 10, ()),
+          ('bullets', ['AIME 上 GLOBAL 注意力只占一步的约 2%（key 少），LOCAL 约 3%；全部省掉也快不了多少，而选块是每步的固定开销，正好抵消。',
+                       '主线阈值在 AIME 只跳约 4% 的块（key 少，每个块风险都不低）；强行跳 70% 就掉点、变慢（第 4 页）。',
+                       '长上下文时 GLOBAL 注意力的占比随 key 数增长，这是稀疏能省时间的地方；MoE 和采样各上下文基本不变。'], 11)],
+         """
+【耗时测量】scripts/v27_time_breakdown.py，底座 piecewise_v5：AIME 用 E7 的冻结配置（第 0 题、第 55 次 decoder 调用）；32K/64K 用 E5 的冻结配置（第 0 题、第 5 次调用）。C 部分 = 编译后 forward 的 CUDA graph 重放中各 kernel 的设备时间（前 30 个 kernel 归类，其余计入“其余”）；D 部分 = 整个去噪步重放（forward + 采样 + 停止判断）。数据：time_breakdown_v5/*_dense_first.jsonl。
+【单次 forward】A 部分：同一请求、各自轨迹下 decoder forward 的中位数（AIME 最好变体 = M3 优化版 + carry0 + 2K 门控；32K/64K = M3 优化版 + carry0）。
+【AIME 结果】E7 v27_aime_confirm_e7_0515fa3125588ff0：最好变体 W 1.005 [0.967, 1.042]，答对 99 vs 99；M3 优化版 1.033；原版 M1/M2/M3 1.089/1.115/1.069；各方法精度差异都不显著。
+【实际稀疏度】fidelity_v6（诊断，每类 2 个请求）：主线在稀疏调用中保留块比例 AIME 0.96、32K 0.21、64K 0.12。
+""")
+
+
+def build(out_name='dlm_sparse_attention_20261001_compact_v3.pptx'):
     cover()
     p1_baseline()
     p_methods()
-    p2_long()
-    p3_96k_steps()
-    p4_aime()
-    p5_vterm()
+    p_long()
+    p_select()
+    p_aime()
     HERE.mkdir(parents=True, exist_ok=True)
     prs.save(HERE / out_name)
     return HERE / out_name

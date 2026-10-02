@@ -179,6 +179,43 @@ changes; the −ln2 threshold arm (E5 best) is the operating-point reference.
 - **Source.** `lb64_vterm_panel_e9/summary.md` and `receipts.md`, spec `specs/v27_lb64_vterm_e9.json`, protocol
   `v27_lb64_vterm_e9_5b125c63817898f6`, deploy `v27_e9_efea330` (code `efea33024`).
 
+### L1g. E10 M2 with the same optimizations as M3, at the operating point: LongBench-v2 32K/64K, 24 items × seeds 404–707 = 96 cells per arm per bin (piecewise_v5)
+
+M2c (tile-mean projected V) on exactly the M3 R6 DP −ln2 + `carry_first` pipeline; only `mu_mode` differs.
+
+| bin | arm | W [CI] | S | per-step S/N | N | acc (dense) |
+|---|---|---|---:|---:|---:|---:|
+| 32K | M3 + c0 | 0.909 [0.829, 0.978] | 0.880 | 0.926 | 0.95 | 56 (59) |
+| 32K | M2c + c0 | 0.897 [0.826, 0.968] | 0.874 | 0.905 | 0.96 | 59 (59) |
+| 64K | M3 + c0 | 0.845 [0.782, 0.894] | 0.768 | 0.816 | 0.94 | 49 (51) |
+| 64K | M2c + c0 | 0.830 [0.762, 0.896] | 0.734 | 0.810 | 0.91 | 49 (51) |
+
+- **M2 and M3 tie under the same optimizations.** Direct M2c / M3: 32K 0.987 [0.914, 1.063], 64K 0.983 [0.940, 1.024];
+  accuracy M2c-only / M3-only 11/8 (p 0.65) and 6/6 (p 1.00). Per-step costs are equal.
+- **Integrity.** 576/576 ok, one host per cell, no timed new graphs; dense and M3 + c0 token-identical to E5 (192/192);
+  receipts show `mu_mode` pooled_compact vs exact, `carry_first` true for both (carried-first calls 11,720 / 11,995).
+- **Source.** `lb_m2opt_panel_e10/summary.md`, `receipts.md`; spec `specs/v27_lb_m2opt_e10.json`, protocol
+  `v27_lb_m2opt_e10_c965792c1cb6542d`, deploy `v27_e10_4252356`.
+
+### Time breakdown on piecewise_v5 (2026-10-01): one real dense decoder call per workload
+
+`scripts/v27_time_breakdown.py` on the frozen E7 (AIME, request 0, call 55) and E5 (32K/64K, request 0, call 5)
+configurations. Compiled-forward kernels (CUDA-graph replay) grouped by kernel; step = forward + sampler/stop test.
+
+| part (ms, % of step) | AIME (1,979 keys) | 32K (35,135) | 64K (71,772) |
+|---|---|---|---|
+| step | 27.0 | 37.0 | 44.7 |
+| GLOBAL attention (5 layers, FA4) | 0.5 (2%) | 7.2 (19%) | 14.5 (32%) |
+| LOCAL attention (25 layers, cuDNN SDPA) | 0.8 (3%) | 0.8 (2%) | 0.8 (2%) |
+| MoE expert GEMM | 10.5 (39%) | 12.9 (35%) | 12.2 (27%) |
+| MoE routing sort/top-k | 1.3 (5%) | 1.3 (3%) | 1.3 (3%) |
+| other GEMMs (nvjet) | 3.5 (13%) | 3.5 (9%) | 3.5 (8%) |
+| rest of forward (norm, elementwise, copies) | 6.1 (22%) | 7.0 (19%) | 8.1 (18%) |
+| sampler + stop test | 4.3 (16%) | 4.3 (12%) | 4.3 (10%) |
+| decoder-forward median in one request: dense → best variant | 23.5 → 23.6 (1.00) | 31.1 → 26.4 (0.85) | 38.2 → 27.7 (0.72) |
+
+Data: `time_breakdown_v5/*_dense_first.jsonl`. One request per workload; a diagnostic, not a panel.
+
 ### Step-count check (2026-10-01): is "no step inflation" itself noise?
 
 Step ratio N = method decoder calls / dense decoder calls per cell (M3 R6 DP −ln2). Single-cell log SD ≈ 0.45 (×1.57).
