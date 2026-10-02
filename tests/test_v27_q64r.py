@@ -71,8 +71,9 @@ def test_regroup_is_the_natural_map_when_rows_are_already_sorted():
 
 
 def test_regroup_without_prefix_and_fallback():
+    from types import SimpleNamespace
     from experiments.numerical_qk_reuse.v27_dense_prefix import refine_q64
-    state = _state(0, seed=4)
+    state = SimpleNamespace(lognorm=torch.zeros(1, 16, 2, 0, 128))                 # no prefix tiles yet
     eligible = torch.ones(1, 16, 2, 6, dtype=torch.bool)
     skipped = torch.zeros_like(eligible)
     kept, order = refine_q64(state, skipped, eligible, torch.ones(1, 2), None, -3.87, 256, regroup=True)
