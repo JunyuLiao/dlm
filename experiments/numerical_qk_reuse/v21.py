@@ -57,6 +57,7 @@ RISK_TOPKS = {'k70': 0.7, 'k60': 0.6, 'k50': 0.5, 'k30': 0.3, 'k20': 0.2, 'k12':
 CARRY_CANVASES = (2, 3, 4, 8)   # v27 cross-canvas carry: observe every K-th canvas, reuse the map in between
 OBSERVE_STEPS = (2, 3)
 PROJ_RANKS = (4, 8, 16)    # v27 projected-V rank variants (nested Gaussian prefix of the rank-32 bank); 32 is the default
+Q_BLOCKS = (64,)           # v27 q64: 64-row FA4 keep maps refined from the DP risk table; 128 is the default
 RISK_VALUES = ('mass',)    # v27 score-only control for the target-sparsity selector (rank by attention mass, no V)   # v27 observation step: native canvas calls before the (fused) observation; 1 is the default
 THRESHOLD_SHIFTS = {'minus_3ln2': -3 * _LN2, 'minus_2ln2': -2 * _LN2, 'minus_ln2': -_LN2, 'plus_ln2': _LN2, 'plus_2ln2': 2 * _LN2,
                     'plus_3ln2': 3 * _LN2, 'plus_4ln2': 4 * _LN2}
@@ -85,7 +86,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      route_pipeline=False, risk_state=None, density_gate=None, fa4_consumer=False,
                      async_route=False, risk_budget=None, risk_topk=None, carry_canvases=None,
                      observe_step=None, protect_output=False, carry_first=False, proj_rank=None,
-                     risk_value=None) -> dict:
+                     risk_value=None, q_block=None) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -208,6 +209,12 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if risk_value not in RISK_VALUES or risk_topk is None:
             raise ValueError('v27 risk value needs the target-sparsity (risk_topk) selector')
         extra['risk_value'] = risk_value
+    if q_block is not None:
+        # v27 q64 (named variant): the DP worst-row rule per 64-row half; threshold selector on the FA4 consumer only
+        if (q_block not in Q_BLOCKS or risk_state != 'dense_prefix' or not fa4_consumer or risk_topk is not None
+                or risk_budget is not None or protect_output):
+            raise ValueError('v27 q64 needs the dense-prefix threshold selector on the FA4 consumer')
+        extra['q_block'] = q_block
     if carry_first:
         # v27 first-call carry (named variant): canvas call 0 reuses the previous canvas's decision, call 1 observes
         if (carry_first is not True or bootstrap_policy is None or fresh_fused or not fused_observe or not fa4_consumer
@@ -384,6 +391,10 @@ def validate_effective(config: dict, condition: str):
         raise ValueError('v27 projected-V rank identity drift')
     if 'risk_value' in config and (config['risk_value'] not in RISK_VALUES or 'risk_topk' not in config):
         raise ValueError('v27 risk value identity drift')
+    if 'q_block' in config and (config['q_block'] not in Q_BLOCKS or config.get('risk_state') != 'dense_prefix'
+                                or 'fa4_consumer' not in config or 'risk_topk' in config or 'risk_budget' in config
+                                or 'protect_output' in config):
+        raise ValueError('v27 q64 identity drift')
     if 'carry_first' in config and (config['carry_first'] is not True or 'fused_observe' not in config
                                     or 'fa4_consumer' not in config or 'carry_canvases' in config):
         raise ValueError('v27 first-call carry identity drift')
@@ -489,6 +500,10 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('first-call carry must be bound before any routed call')
             owner.carry_first = True
+        if 'q_block' in config:
+            if owner.cache.entries or owner.calls:
+                raise RuntimeError('q64 must be bound before any routed call')
+            owner.q_block = int(config['q_block'])
         if 'proj_rank' in config:
             from .integration import RankMaskedProjections
             if owner.cache.entries or owner.calls:
@@ -566,6 +581,7 @@ def install(adapter, config: dict, condition: str):
                         protect_output=bool(getattr(owner, 'protect_output', False)),
                         carry_first=bool(getattr(owner, 'carry_first', False)),
                         proj_rank=getattr(owner, 'proj_rank', 32), risk_value=getattr(owner, 'risk_value', None),
+                        q_block=getattr(owner, 'q_block', 128),
                         density_gate=config.get('density_gate'),
                         consumer=getattr(owner, 'consumer', None),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},

@@ -249,6 +249,30 @@ def topk_skip(lognorm, eligible, sensitivity, reference, nq, keep):
     return candidate & (rank < n_drop)
 
 
+def refine_q64(state, skipped, eligible, reference, sensitivity, log_threshold, nq):
+    """v27 named variant q64: the same worst-row rule as ``_dp_decide``, applied to each 64-row half of every
+    128-row query block. FA4's SM90 head_dim-512 kernel already runs 64-row query tiles, so a [B,H,2*QB,KT] keep
+    map with block_size (64, 64) costs nothing extra in the kernel; a tile is skipped for a half when the worst row
+    of that half is below the threshold. Prefix decisions are intersected with the 128-row map (a subset by
+    construction); canvas/boundary tail tiles copy the 128-row decision. Returns None (caller keeps the 128-row map)
+    when the query rows do not fill the 128-row blocks exactly."""
+    b, h, qb, pt, _ = state.lognorm.shape
+    if nq != qb * 128 or (sensitivity is not None and tuple(sensitivity.shape) != (b, nq)):
+        return None
+    kept = (eligible & ~skipped).repeat_interleave(2, dim=2)                      # [B,H,2QB,KT]
+    if pt:
+        hk = reference.shape[1]
+        kh = torch.arange(h, device=reference.device) // (h // hk)
+        log_ref = torch.log(reference.float().clamp_min(1e-12))[:, kh]             # [B,H]
+        risk = state.lognorm - log_ref[:, :, None, None, None]                     # [B,H,QB,PT,128]
+        if sensitivity is not None:
+            risk = risk + torch.log(sensitivity.float()).view(b, 1, qb, 1, 128)
+        worst = risk.view(b, h, qb, pt, 2, 64).amax(-1)                            # [B,H,QB,PT,2]
+        need = (worst >= float(log_threshold)).permute(0, 1, 2, 4, 3).reshape(b, h, qb * 2, pt)
+        kept[..., :pt] &= need
+    return kept
+
+
 def log_mass(summary, lognorm):
     """v27 score-only control (named variant ``risk_value='mass'``): per (tile, row) the log share of the row's
     prefix attention mass that the tile holds, log(exp(z_j) / sum_j' exp(z_j')), from the same observed prefix

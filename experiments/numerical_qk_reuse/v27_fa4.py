@@ -95,8 +95,12 @@ def causal(q, k, v, scale, window=0):
     return fwd(qs, ks, vs, softmax_scale=scale, causal=True, **extra)[0]
 
 
-def block_sparse_tensors(kept):
-    """[1, H, QB128, KT64] keep map -> FA4 BlockSparseTensorsTorch (all kept blocks are full blocks)."""
+def block_sparse_tensors(kept, q_block=128):
+    """[1, H, QB, KT64] keep map -> FA4 BlockSparseTensorsTorch (all kept blocks are full blocks). q_block is 128
+    (the M1/M2/M3 maps) or 64 (v27 q64: FA4's SM90 head_dim-512 forward tile is 64 rows, so 64-row maps run
+    without sub-tiling)."""
+    if q_block not in (64, 128):
+        raise ValueError('FA4 keep maps use 64- or 128-row query blocks')
     load()
     b, h, qb, kt = kept.shape
     order = torch.argsort((~kept).to(torch.int8), dim=-1, stable=True).to(torch.int32)
@@ -104,7 +108,7 @@ def block_sparse_tensors(kept):
     return _BST(mask_block_cnt=zeros,
                 mask_block_idx=torch.zeros((b, h, qb, 1), device=kept.device, dtype=torch.int32),
                 full_block_cnt=kept.sum(-1).to(torch.int32).contiguous(), full_block_idx=order.contiguous(),
-                block_size=(128, 64))
+                block_size=(q_block, 64))
 
 
 def sparse(q, k, v, skipped, eligible, scale):

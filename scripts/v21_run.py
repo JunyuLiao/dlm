@@ -131,6 +131,7 @@ def validate_protocol(protocol: dict) -> None:
                     c.get("observe_step", 2) not in (2, 3) or c.get("protect_output", True) is not True or
                     c.get("carry_first", True) is not True or
                     c.get("proj_rank", 8) not in (4, 8, 16) or c.get("risk_value", "mass") != "mass" or
+                    c.get("q_block", 64) != 64 or
                     ("risk_topk" in c and (c.get("risk_state") != "dense_prefix" or "risk_budget" in c)) or
                     ("risk_budget" in c and c.get("risk_state") != "dense_prefix")):
                 raise ValueError(f"unknown v27 execution field: {arm}")
@@ -139,7 +140,7 @@ def validate_protocol(protocol: dict) -> None:
                                                 "consumer64", "memory_caps", "fused_observe", "fresh_fused",
                                                 "route_pipeline", "risk_state", "density_gate", "risk_budget",
                                                 "risk_topk", "carry_canvases", "observe_step", "protect_output",
-                                                "carry_first", "proj_rank", "risk_value")):
+                                                "carry_first", "proj_rank", "risk_value", "q_block")):
                 raise ValueError(f"v27 fields outside a v27 panel: {arm}")
             if c.get("bootstrap_policy", "native_bootstrap2_observe1") != "native_bootstrap2_observe1" or \
                     c.get("observation_producer", "grouped_q") not in ("grouped_q", "repeat_interleave"):
@@ -321,6 +322,7 @@ def validate_arm_config(config: dict, contract: dict, *, model: str, manifest_sh
                 bool(config.get("carry_first", False)) != bool(contract.get("carry_first", False)) or
                 config.get("proj_rank") != contract.get("proj_rank") or
                 config.get("risk_value") != contract.get("risk_value") or
+                config.get("q_block") != contract.get("q_block") or
                 bool(config.get("fa4_consumer", False)) != bool(contract.get("fa4_consumer", False)) or
                 bool(config.get("async_route", False)) != bool(contract.get("async_route", False))):
             raise ValueError("v27 clock/threshold differs from arm contract")

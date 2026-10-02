@@ -263,6 +263,8 @@ class Attention:
         self.risk_topk = None          # v27 target sparsity on M1-DP: kept fraction of prefix tiles by risk rank
         self.risk_value = None         # v27 'mass': the top-k ranks by attention mass only (score-only control)
         self.proj_rank = 32            # v27 projected-V rank (named variant; <32 = nested Gaussian prefix, see below)
+        self.q_block = 128             # v27 q64: 64-row keep maps for the FA4 consumer (refined from the DP risk table)
+        self._q64, self.q64_refined_routes, self.q64_list_builds = [], 0, 0
         # v27 cross-canvas carry (named variant): a layer's last decision of an observed canvas is reused, extended
         # with every newer key tile kept, for the next carry_canvases - 1 canvases -- no dense bootstrap, no
         # observation and no decision there; the canvas after that observes again through the normal path
@@ -758,10 +760,18 @@ class Attention:
         self.dp_routes += 1
         budget = (None if self.risk_budget_shift is None
                   else float(kwargs['log_threshold']) + float(self.risk_budget_shift))
-        return dp.route(scores, projected, ref, state, sensitivity=kwargs.get('sensitivity'),
-                        log_threshold=kwargs['log_threshold'], key_offset=kwargs.get('key_offset', 0),
-                        risk_budget=budget, risk_topk=self.risk_topk, risk_value=self.risk_value,
-                        summary=summary, **pool)
+        route = dp.route(scores, projected, ref, state, sensitivity=kwargs.get('sensitivity'),
+                         log_threshold=kwargs['log_threshold'], key_offset=kwargs.get('key_offset', 0),
+                         risk_budget=budget, risk_topk=self.risk_topk, risk_value=self.risk_value,
+                         summary=summary, **pool)
+        if self.q_block == 64:
+            kept64 = dp.refine_q64(state, route.skipped, route.eligible, ref, kwargs.get('sensitivity'),
+                                   kwargs['log_threshold'], scores.shape[2])
+            if kept64 is not None:
+                # keyed by the map OBJECTS of this decision, like the FA4 list cache; held calls pass the same objects
+                self._q64 = self._q64[-63:] + [(route.skipped, route.eligible, kept64)]
+                self.q64_refined_routes += 1
+        return route
 
     def _observe(self, q, k, mask, scale, causal, window, crop):
         if self.observation_producer == 'grouped_q':
@@ -872,6 +882,9 @@ class Attention:
                     tensor.record_stream(side)
             for tensor in (route.skipped, route.eligible):
                 tensor.record_stream(main)
+            for s_ref, e_ref, kept64 in self._q64[-1:]:
+                if s_ref is route.skipped:
+                    kept64.record_stream(main)   # q64 map made on the side stream, read by the main stream
             self._pending_routes[layer] = done
             self.async_routes += 1
         else:
@@ -927,7 +940,12 @@ class Attention:
             # reused under a cached key); a held decision passes the same objects every call
             lists = next((l for s_ref, e_ref, l in self._fa4_lists if s_ref is skipped and e_ref is eligible), None)
             if lists is None:
-                lists = v27_fa4.block_sparse_tensors(eligible & ~skipped)
+                kept64 = next((m for s_ref, e_ref, m in self._q64 if s_ref is skipped and e_ref is eligible), None)
+                if kept64 is not None:
+                    lists = v27_fa4.block_sparse_tensors(kept64, q_block=64)
+                    self.q64_list_builds += 1
+                else:
+                    lists = v27_fa4.block_sparse_tensors(eligible & ~skipped)
                 # >= 2 x the routed layers (G75 S15/S30 hold 30 maps); a smaller cache thrashes every held call
                 self._fa4_lists = self._fa4_lists[-63:] + [(skipped, eligible, lists)]
                 self.fa4_list_builds += 1
@@ -1066,6 +1084,7 @@ class Attention:
                     carry_snapshots=self.carry_snapshots, observe_step=self.observe_step,
                     carry_first=self.carry_first, carried_first_calls=self.carried_first_calls,
                     risk_value=self.risk_value, proj_rank=self.proj_rank,
+                    q_block=self.q_block, q64_refined_routes=self.q64_refined_routes, q64_list_builds=self.q64_list_builds,
                     protect_output=self.protect_output, protected_routes=self.protected_routes,
                     fused_observations=self.fused_observations,
                     fresh_fused_calls=self.fresh_fused_calls,
