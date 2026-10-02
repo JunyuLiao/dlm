@@ -23,14 +23,15 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
     using it.
 
-## Situation at handoff (2026-10-02 10:36 UTC−5)
+## Situation at handoff (2026-10-02 11:50 UTC−5)
 
 **Running (independent of any coordinator session).**
 - E15 (`specs/v27_c01_e15.json`, protocol `v27_c01_e15_e83919d6411343b2`, 1,602 runs).
   - Arms: dense FA4, M3 + c0 and M3 + c0 + `observe_carried` (c01).
   - Data: AIME26 30 + LB 32K/64K/96K × seeds 1616–2121.
   - Hosts: mpk and dlm2; run dir `v27_lb_e15_001`, deploy `v27_e15_f63a1f2`.
-  - At 10:30, 64K was done on both hosts and 96K was about two thirds done. A host-side chain
+  - At 11:50, 64K, 96K and 32K were done on both hosts and AIME26 was at 193/270 per host (about 8 s per run). Expected
+    end: about 12:05 UTC−5, when both hosts show 4 worker ends. A host-side chain
     (`<run dir>/host_chain_e15.py`, log `host_chain_e15.log`) launches 32K after the 96K worker ends, then AIME26, with
     the exact v23_transport launch command. Expect several hours; AIME is the slowest stage.
   - Check progress: `grep -c '"event": "run"' <run dir>/ledger.jsonl` and `grep -c worker_end` (4 per host when done).
@@ -223,7 +224,13 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
    - Add it as a named, cited variant (collaboration label).
    - Test whether it reduces step inflation at higher sparsity or allows a sparser threshold (LB 64K/96K, AIME
      accuracy).
-8. **Datasets:**
+8. **Short-prompt positioning and an AIME long-output preview.**
+   - Like SparseD and PulseCol, we use short-prompt tasks (HumanEval, AIME at an 8K budget) as accuracy checks only.
+     With an 8K budget GLOBAL attention is at most about 5% of a step: dense AIME output has a median of 6.3K tokens,
+     and the top 10% hit the 8,192 cap.
+   - A gain on short-prompt tasks needs long outputs (as in AR reasoning-sparsity work at about 32K generation).
+   - Proposed preview: AIME 30 × 2 seeds at a 32K thinking budget, dense vs main.
+9. **Datasets:**
    - LongBench Pro is inventoried (`docs/EXPANSION_PLAN_20261002.md`: 1,500 samples, 250 per length level, EN/ZH,
      25 tasks). Next: fetch its official evaluation code (GitHub `caskcsg/longcontext`) and the summarization
      embedding model, then freeze the 32k/64k/128k (DiffusionGemma) and 8k–32k (new models) subsets;

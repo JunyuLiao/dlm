@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 10:58 (UTC-5)",
+    "updated_local": "2026-10-02 11:50 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -28,7 +28,8 @@
         "run_dir": "v27_lb_e15_001",
         "driver": "host-side chain <run dir>/host_chain_e15.py (32K then AIME after 96K)",
         "done_when": "4 worker_end events per host",
-        "scoring_label": "e15"
+        "scoring_label": "e15",
+        "progress": "64K/96K/32K done; AIME 193/270 per host at 11:50; expected end ~12:05 UTC-5"
       }
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
@@ -173,11 +174,15 @@
       "port_status": "blocked: FA4 block-sparse over paged KV reads wrong pages (vllm_port_probe_1002); options in HANDOFF"
     },
     "next_steps": [
-      "score E15",
-      "vLLM port: block-sparse on paged cache (contiguous view or FA4 fix)",
-      "vLLM port: hook method into diffusion_gemma.py and remeasure vs vLLM dense",
-      "new models: official dense smoke + baseline candidate timing (SGLang/dInfer, I-DLM SGLang)",
-      "LongBench Pro metrics check; RULER 8K manifests"
+      "score E15 (commands in HANDOFF)",
+      "vLLM port: add block-sparse to vLLM FA4 dispatch at --block-size 32 (GLOBAL page 64; paged block-sparse fixed by patches/)",
+      "vLLM port: hook method into diffusion_gemma.py; remeasure vs vLLM dense",
+      "upstream FA4 PR (needs user go-ahead and GitHub account)",
+      "new models: fix FlashInfer JIT (nvcc/CCCL) then official dense smoke + baseline candidate timing",
+      "RULER R17 (32K/64K/96K x 130; V-rank variants at 88%/95%)",
+      "C-gate port (group member, cited)",
+      "AIME 32K-budget long-output preview",
+      "LongBench Pro official eval code; RULER 8K manifests"
     ]
   },
   "task": "M3 output numerics and trajectory isolation",
