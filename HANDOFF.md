@@ -121,6 +121,14 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   3. dllm, one after the other:
      - `scripts/v27_observe_split_bench.py` (call-1 kernel cost: fused vs observation-only + FA4 sparse);
      - `scripts/v27_need_dump.py` on the E14 deploy (real need matrices for `scripts/v27_regroup_offline.py`).
+- **Queued on dllm after the post-E14 diagnostics** (coordinator chain `r16_chain.sh`, gated on the GPU tests):
+  - R16 (`specs/v27_ruler_long_r16.json`, protocol `v27_ruler_long_r16_1bf5362572d4e0a8`, 390 runs): RULER accuracy
+    check of the current pipeline;
+  - all 13 RULER tasks at 32K and 64K × seeds 404/505/606;
+  - arms: dense FA4, M3 + c0, M3 + c0 + q64c, and fixed-88% (k12) rank-32 projected V vs attention mass only (the
+    group member's RULER/V question);
+  - run dir `v27_r16_001`; score with `v27_score_long.py --label r16 --dllm-ends 2`.
+  RULER needs about 5 decoder calls per request, so it is an accuracy check, not a speed target.
 - **E14 running** (`specs/v27_lb_q64c_e14.json`, protocol `v27_lb_q64c_e14_46bf7b5a765b7204`):
   - Arms: dense FA4 all-kept, M3 + c0, M3 + c0 + q64, and M3 + c0 + q64c (adds the 64-row carried call-0 map,
     `q_carry64`).
