@@ -10,8 +10,9 @@ baseline, with **no accuracy loss**? The setting is the model's native adaptive 
 by the model, not fixed.
 - The criteria are accuracy, performance and novelty.
 - Trajectory or step analyses only explain those three; they are not goals.
-- Fan's methods M1/M2/M3 are the required core. Engineering variants may change any detail, but must be named
-  honestly and reported next to the plain methods.
+- M1/M2/M3 are the study's original core. As of the user's 2026-10-01 update, follow-up panels may select only the
+  stronger relevant arms, retaining dense and a matched optimized reference. Historical plain-method comparisons
+  remain available. Engineering variants must be named honestly.
 
 ## 2. Model and decoding (what is fixed)
 
@@ -45,7 +46,7 @@ Sparsity is applied **only to the GLOBAL layers' canvas (decoder) calls**:
 
 The kept tiles are executed by FA4's block-sparse interface (§4).
 
-**Fan's methods (required in every comparison):**
+**Original methods (historical references; not required in every follow-up panel):**
 - **M1.** For each candidate KV64 tile, estimate how much skipping it changes the attention output, from:
   - historical (observed) QK scores: an anchor every A calls; A8 is the plain method;
   - the CURRENT projected V (rank-32 Gaussian bank, seed 1729, per layer and KV head);
@@ -181,6 +182,10 @@ differ between substrates.
   - Same host, same seed, same substrate reproduces tokens exactly. Re-running is speed replication, not an
     independent accuracy replication.
   - Across hosts, tokens differ: about ±3/36 correct for the same arm.
+  - Pool same-host method/dense cell ratios, never raw latencies from different hosts. Report host-specific
+    diagnostics; different item/seed mixtures mean their differences alone cannot identify a hardware effect.
+  - The FA4 timing summary now rejects duplicate first outputs, missing scored executions and joins that differ in
+    host/GPU, substrate, frozen protocol, model revision or source hashes (see `INTAKE_AUDIT_20261001.md`).
 - **Trajectory noise.** Dense-vs-dense across model loads differs by a median 1.17× in denoising calls
   (`research/adaptive-trajectory-characterization-20260921`). Step and request ratios from 3 seeds × 12 items are
   noisy; prefer NC and S/C for mechanism and large seed panels for request claims.
@@ -201,7 +206,27 @@ per-step decode costs:
   - Sampler over the 262K vocabulary: about 4.6 ms.
 - **Request share at 64K:** prefill about 35%, GLOBAL decode attention about 21%. So even a free, step-neutral sparse
   attention caps the request gain at about 16% (32K) and 21% (64K).
-- Batching would amortize the weight reads and raise attention's share. This is not yet measured.
+- Batching was measured at 64K: B=1/2/4 keeps prefix attention at about 26/22/25% of a forward, with keep-0.12
+  savings about 23/19/20%. It did not raise attention's share (`batch_scaling/README.md`).
+
+## 10. Dataset coverage and the V-dimension question (2026-10-01 intake)
+
+- The user relayed a classmate's hypothesis: RULER needs V dimensional information, AIME/LongBench may not, and
+  HumanEval is unknown. This is a hypothesis, not a verified result of this branch. Actual attention output already
+  uses full-dimensional V in every arm; projected V is only a selector input. Existing RULER8K peer evidence
+  supports V direction versus mass-only, but does not establish that all 512 dimensions are necessary.
+- HumanEval has 164 Python tasks with executable tests ([official paper](https://arxiv.org/html/2107.03374v2),
+  [harness](https://github.com/openai/human-eval)). Six seeds mean 984 generations per arm. It is a proposed coding
+  quality check, not yet a registered v27 task or an established sparse-speed workload.
+- Full LongBench-v2 has 503 tasks ([official source](https://github.com/THUDM/LongBench)). The existing private
+  all-item rendering log uses the pinned model tokenizer and unchanged task template, without truncation:
+  min/median/max input = 10,334 / 107,706 / 5,174,028 tokens; 224 inputs are at most 95,074 tokens. This is a length
+  eligibility screen, not evidence that all 224 requests fit the GPU.
+- The pinned model's text config has `max_position_embeddings=262144`. Reserving 8,192 output tokens leaves 400
+  of the 503 rendered inputs in range; 402 inputs alone fit, and 101 inputs alone exceed the configured limit.
+  Chunked prefill may remove the current about-95K memory bottleneck but does not extend the positional context.
+  A complete 503-task run needs an explicit truncation/retrieval protocol for over-limit inputs. Report that
+  separately from an untruncated eligible subset. No such full-panel run has been launched.
 
 ## 9. Related work and novelty status (as of 2026-10-01)
 
@@ -214,5 +239,6 @@ per-step decode costs:
   **Lil** (2601.03043), **LessIsMore** (2508.07101).
 - Step-reduction methods (orthogonal; would not be our contribution): Prophet (2508.19982), JoT (2602.11133),
   SchED (2512.02892), and EB-sampler (2505.24857), which DiffusionGemma already uses.
-- No data so far supports "V-aware selection beats score-only selection". At high AIME sparsity our risk top-k is
+- In this branch's tested AIME/LongBench settings, no data supports "V-aware selection beats score-only selection".
+  This does not settle the RULER hypothesis (§10). At high AIME sparsity our risk top-k is
   worse than SparseD.

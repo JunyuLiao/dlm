@@ -5,7 +5,7 @@
 - The root is a general dLLM inference/evaluation framework (the `dllm` package in `src/dllm`; see `README.md`).
 - This branch, `research/m3-output-numerics-20260927`, holds one research study: **block-sparse attention for the
   GLOBAL layers of DiffusionGemma-26B-A4B under its native adaptive stopping**.
-  - The required core methods are Fan's M1/M2/M3.
+  - The study's original core methods are M1/M2/M3; their historical comparisons remain in the ledger.
   - The goal is a real end-to-end gain against the strongest official dense baseline (FlashAttention-4), with no
     accuracy loss on AIME and LongBench-v2.
 - Stable context is in `docs/`. The current frontier is in `HANDOFF.md`. Do not rely on chat history; the repo and its
@@ -46,8 +46,10 @@
 
 ## Mandatory invariants
 
-- **Fan's plain M1, M2, M3 appear in every comparison.** Tuned variants are layered on them and named honestly. A
-  selector that uses the current QK is fresh-T information, not M1.
+- **Arm selection (user update, 2026-10-01).** Follow-up panels may run only the stronger, relevant configurations;
+  repeating plain M1/M2/M3 in every panel is no longer required. Keep the strong dense baseline and a matched
+  optimized reference for incremental claims. Preserve historical plain-method results and name variants honestly.
+  A selector that uses the current QK is fresh-T information, not M1.
 - **Dense baseline** is official FlashAttention-4 (vLLM fork, CuTe DSL, SM90, head_dim 512).
   - The headline reference is `D_fa4_allkept`: FA4's block-sparse interface with every tile kept. It is bitwise
     equal to FA4 dense and the fastest dense configuration.
@@ -78,6 +80,8 @@
 - **Group members' work** is read-only: cite it, do not absorb it. Overlapping directions are marked as
   collaboration candidates. Example: query-sensitivity protection against step inflation (branch
   `query-sensitivity-aware-v3`, git author JunyuLiao) is theirs.
+  - The user is considering integration with classmates' A/B branches, which are still pending. Do not infer the
+    branch names or merge now. Read-only review and an integration plan may precede a separately identified merge.
 - **Privacy.** Never commit:
   - prompts, gold answers or unredacted generated text;
   - credentials or keys;

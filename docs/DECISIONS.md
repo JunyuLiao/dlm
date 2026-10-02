@@ -106,3 +106,28 @@ FA4 + piecewise substrates. Mechanism findings (what fails and why) usually stil
   These are applied to every arm.
 - Query-sensitivity protection against step inflation belongs to a group member (`query-sensitivity-aware-v3`). It is
   a collaboration candidate only.
+
+## Intake decisions (2026-10-01, 22:45 UTC−5)
+
+- User update: follow-up panels may select only stronger relevant arms. Keep `D_fa4_allkept` and a matched optimized
+  reference; plain M1/M2/M3 stay in the historical ledger but are no longer mandatory in every panel. Pool same-host
+  cell ratios across machines and report host-specific diagnostics.
+- The standalone FA4 summary had a latent last-record-wins join and lacked its own same-host/scorer-provenance
+  checks. The upstream runner and qualified scorer already enforce assignments. Hardened the independent join and
+  tested it; the 8,826 first runs in E4–E11 pass the checks and all reported point metrics/correct counts are unchanged.
+  This is a reporting guard repair, not a speed improvement or a new sparse method.
+- Record the user's classmate clue as a hypothesis: RULER needs V dimensional information; AIME/LongBench may not;
+  HumanEval is unknown. Full V in actual attention has never been removed. Existing peer RULER8K evidence supports
+  V direction over scalar mass, but rank 32 already improves on mass-only, so it does not prove full rank is
+  required. Do not transfer E8/E9/E11 negatives to RULER. See `INTAKE_AUDIT_20261001.md` for a proposed matched test.
+- Prefer the RULER scope/freshness-controlled check over automatically enlarging already tied E10/E11 panels.
+  HumanEval is a proposed coding quality test, not a presumed speed target. No new dataset or GPU run was launched.
+- Full LongBench-v2 coverage has two constraints: current prefill memory and configured positional context. Existing
+  all-item tokenization yields 400/503 inputs within context after reserving 8,192 output tokens. Chunking alone cannot
+  give native, untruncated coverage of all 503. A complete truncated/retrieval evaluation must use a separate protocol.
+- A/B integration remains pending the classmates' exact branch refs and work. No peer branch was absorbed or merged.
+- Fixed a stale research-context sentence that still described batch scaling as unmeasured; the committed 64K
+  diagnostic already found no increase in attention share.
+
+Sources: audited base `6b13fe178`; `scripts/v27_fa4_panel_summary.py`,
+`tests/test_v27_fa4_panel_summary.py`, `results/m1_m2_m3_frontier_v27_20260929/intake_audit_20261001/summary.json`.

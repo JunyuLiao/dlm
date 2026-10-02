@@ -292,3 +292,18 @@ Step ratio N = method decoder calls / dense decoder calls per cell (M3 R6 DP −
   - `long_lb_panel/README.md`.
 - FA4 panels on piecewise_v1 (`fa4_panel_v3/README.md`, protocol `v27_long_lb_fa4pw_v3_b5399ab5c46cd59e`) are
   graph-substrate results, but the substrate predates the v2/v3 fixes.
+
+## Intake verification (2026-10-01, 22:45 UTC−5; CPU only)
+
+- **Scope:** E4/E5/E6/E6b/E7/E8/E9/E10/E11, 1,338 question-seed cells across panels and 8,826 first executions.
+  Same-host/GPU, substrate/protocol/model/source and scorer/run identity checks pass. No duplicate first outputs
+  or unknown graph counters. All existing W/S/P/N/NC/T/SN/ST/Wc point estimates and correct counts reproduce.
+  The historical CI estimator is unchanged; published CSVs and historical ledgers were not rewritten.
+- **Known timing exclusions:** E7 and E8 each have three timed new-graph runs, already documented above; use Wc.
+- **Dataset inventory, not model performance:** all 503 LongBench-v2 inputs were previously rendered with the pinned
+  tokenizer/template. Min/median/max 10,334 / 107,706 / 5,174,028 tokens; 224 inputs ≤95,074. With an 8,192-token
+  output reservation, 400 fit the model's configured 262,144-token positional range. These counts do not establish
+  GPU-fit coverage or successful generation. No new accuracy or speed result is claimed.
+- **Source:** `intake_audit_20261001/summary.json` and `README.md`; explanation `docs/INTAKE_AUDIT_20261001.md`.
+  Source inputs are the existing private scored CSVs/closed ledgers and the prior full-dataset rendering log.
+  GPU seconds for this review = **0**.

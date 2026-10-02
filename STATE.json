@@ -1,15 +1,16 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-01 20:50 (UTC-5)",
+    "updated_local": "2026-10-01 22:52 (UTC-5)",
     "branch": "research/m3-output-numerics-20260927",
-    "verified_commit": "b8053511f",
+    "verified_commit": "6b13fe178",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
       "docs/RESEARCH_CONTEXT.md",
       "docs/DECISIONS.md",
-      "docs/RESULTS_LEDGER.md"
+      "docs/RESULTS_LEDGER.md",
+      "docs/INTAKE_AUDIT_20261001.md"
     ],
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "piecewise_v5",
@@ -76,7 +77,43 @@
       "pptx": "results/m1_m2_m3_frontier_v27_20260929/ppt_sample/dlm_sparse_attention_20261001_compact_v6.pptx",
       "markdown_source": "results/m1_m2_m3_frontier_v27_20260929/weekly_slides_20261001_compact.md"
     },
-    "skip_ratio": "emerges from one fixed log threshold (-3.874); sparse-call skipped tiles about 4% AIME, 79% 32K, 88% 64K (fidelity_v6 diagnostic)"
+    "skip_ratio": "emerges from one fixed log threshold (-3.874); sparse-call skipped tiles about 4% AIME, 79% 32K, 88% 64K (fidelity_v6 diagnostic)",
+    "followup_arm_policy": "Select stronger relevant arms; plain M1/M2/M3 need not repeat in every panel; retain strong dense and matched optimized reference",
+    "intake_audit": {
+      "base_commit": "6b13fe178",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/intake_audit_20261001/summary.json",
+      "runs_checked": 8826,
+      "point_or_accuracy_changes": 0,
+      "unit_tests": 17,
+      "gpu_seconds": 0
+    },
+    "v_dimension_hypothesis": {
+      "status": "classmate clue relayed by user; unverified on this branch",
+      "ruler": "V dimensional information may matter; full 512 dimensions not established",
+      "aime_longbench": "V benefit unsupported in tested settings; do not extrapolate to RULER",
+      "humaneval": "unknown; proposed coding quality check",
+      "note": "Actual attention uses full V in all arms; only selector inputs are projected"
+    },
+    "dataset_coverage": {
+      "items": 503,
+      "min_input_tokens": 10334,
+      "median_input_tokens": 107706,
+      "max_input_tokens": 5174028,
+      "inputs_at_most_95074": 224,
+      "context_limit": 262144,
+      "output_reservation": 8192,
+      "within_context_with_output": 400,
+      "input_alone_within_context": 402,
+      "input_alone_over_context": 101
+    },
+    "humaneval": {
+      "tasks": 164,
+      "generations_per_arm_with_6_seeds": 984
+    },
+    "peer_integration": {
+      "status": "A/B branches pending classmates; exact refs unknown; no merge attempted"
+    },
+    "slack_context": "Public search done; consent for private-channel research search excluding DMs pending"
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",

@@ -21,6 +21,77 @@ from collections import defaultdict
 BASES = ('D_fa4_allkept', 'D_fa4', 'D_native')
 
 
+def read_cells(scored, ledgers):
+    """Read immutable first outputs, requiring the scorer's execution identity.
+
+    The qualified scorer already checks frozen assignments. Recheck at this
+    independent timing join so a wrong ledger list cannot silently mix hosts or
+    replace an earlier output when killed workers are merged.
+    """
+    quality = {}
+    with open(scored, encoding='utf-8') as f:
+        for r in csv.DictReader(f):
+            key = (r['dataset'], r['id'], r['seed'], r['arm'])
+            if key in quality:
+                raise ValueError('duplicate scored first output')
+            quality[key] = r
+    cells = defaultdict(dict)
+    seen = set()
+    successful = set()
+    for path in ledgers:
+        identity = None
+        with open(path, encoding='utf-8') as f:
+            for line in f:
+                e = json.loads(line) if line.strip() else {}
+                if e.get('event') == 'start':
+                    identity = e
+                    continue
+                if e.get('event') != 'run' or e.get('role', 'attempt0') != 'attempt0':
+                    continue
+                key = (e['dataset'], e['id'], str(e['seed']))
+                qkey = key + (e['arm'],)
+                if qkey in seen:
+                    raise ValueError('duplicate ledger first output; merge disjoint executions only')
+                seen.add(qkey)  # failed first outputs must not be replaced by successful retries
+                if not e.get('ok'):
+                    continue
+                if not identity or any(not identity.get(k) for k in
+                                       ('protocol_id', 'model_revision', 'source_hashes')):
+                    raise ValueError('successful first output lacks worker provenance')
+                if any(not e.get(k) or e[k] != identity.get(k) for k in ('host', 'gpu_uuid')):
+                    raise ValueError('run host/GPU differs from worker provenance')
+                q = quality.get(qkey)
+                if (not q or q.get('first_status') != 'success' or
+                        q.get('scored_first') != 'True' or q.get('strict_correct') not in ('True', 'False')):
+                    raise ValueError('successful first output lacks a qualified score')
+                if any(not e.get(k) or str(e[k]) != q.get(k) for k in ('host', 'gpu_uuid', 'cell_id')):
+                    raise ValueError('timing output differs from scored execution identity')
+                span = (e.get('phase_evidence') or {}).get('prefill_end_to_finish_gpu_s')
+                wall = e.get('api_wall_s') or e.get('outer_wall_s')
+                substrate = e.get('substrate') or {}
+                substrate = substrate.get('substrate', 'eager') if isinstance(substrate, dict) else substrate
+                if substrate != identity.get('substrate', 'eager'):
+                    raise ValueError('run substrate differs from worker provenance')
+                cells[key][e['arm']] = dict(
+                    W=wall, S=span, P=(wall - span) if wall and span else None,
+                    N=e.get('decoder_calls'), T=e.get('output_tokens'),
+                    C=e.get('canvases') or len(e.get('per_canvas_calls') or []) or None,
+                    new_graphs=e.get('substrate_new_graphs'), correct=q['strict_correct'] == 'True',
+                    host=e['host'], gpu_uuid=e['gpu_uuid'], substrate=substrate,
+                    provenance={k: identity.get(k) for k in
+                                ('protocol_id', 'model_revision', 'source_hashes', 'substrate_source_sha256')})
+                successful.add(qkey)
+    qualified = {k for k, q in quality.items() if q.get('first_status') == 'success'}
+    if successful != qualified:
+        raise ValueError('timing ledger inventory differs from successful scored first outputs')
+    for values in cells.values():
+        reference = next(iter(values.values()))
+        for value in values.values():
+            if any(value[k] != reference[k] for k in ('host', 'gpu_uuid', 'substrate', 'provenance')):
+                raise ValueError('cell arms differ in host/GPU, substrate, protocol, model or source')
+    return cells
+
+
 def geo(xs):
     return math.exp(statistics.mean(math.log(x) for x in xs)) if xs else None
 
@@ -37,24 +108,7 @@ def cluster_ci(by_q, reps=4000, seed=7):
 def main(argv=None):
     argv = argv or sys.argv[1:]
     md, out_csv, scored, ledgers = argv[0], argv[1], argv[2], argv[3:]
-    quality = {}
-    for r in csv.DictReader(open(scored, encoding='utf-8')):
-        if r.get('first_status') == 'success':
-            quality[(r['dataset'], r['id'], r['seed'], r['arm'])] = r['strict_correct'] == 'True'
-    cells = defaultdict(dict)
-    for path in ledgers:
-        for line in open(path, encoding='utf-8'):
-            e = json.loads(line) if line.strip() else {}
-            if e.get('event') != 'run' or e.get('role', 'attempt0') != 'attempt0' or not e.get('ok'):
-                continue
-            key = (e['dataset'], e['id'], str(e['seed']))
-            span = (e.get('phase_evidence') or {}).get('prefill_end_to_finish_gpu_s')
-            wall = e.get('api_wall_s') or e.get('outer_wall_s')
-            cells[key][e['arm']] = dict(W=wall, S=span, P=(wall - span) if wall and span else None,
-                                        N=e.get('decoder_calls'), T=e.get('output_tokens'),
-                                        C=e.get('canvases') or len(e.get('per_canvas_calls') or []) or None,
-                                        new_graphs=e.get('substrate_new_graphs'),
-                                        correct=quality.get(key + (e['arm'],)))
+    cells = read_cells(scored, ledgers)
     rows, lines = [], []
     for dataset in sorted({k[0] for k in cells}):
         arms = sorted({a for k, v in cells.items() if k[0] == dataset for a in v},
@@ -73,7 +127,9 @@ def main(argv=None):
                            base_correct=sum(bool(b['correct']) for _, _, b in pairs),
                            arm_only=sum(bool(a['correct']) and not b['correct'] for _, a, b in pairs),
                            base_only=sum(not a['correct'] and bool(b['correct']) for _, a, b in pairs),
-                           timed_with_new_graphs=sum(bool(a['new_graphs']) or bool(b['new_graphs']) for _, a, b in pairs))
+                           timed_with_new_graphs=sum(bool(a['new_graphs']) or bool(b['new_graphs']) for _, a, b in pairs),
+                           timed_graph_counter_unknown=sum(a['new_graphs'] is None or b['new_graphs'] is None
+                                                           for _, a, b in pairs))
                 for name, f in (('W', lambda a, b: a['W'] / b['W']), ('S', lambda a, b: a['S'] / b['S']),
                                 ('P', lambda a, b: a['P'] / b['P']),
                                 ('N', lambda a, b: a['N'] / b['N']),
@@ -82,7 +138,8 @@ def main(argv=None):
                                 ('SN', lambda a, b: (a['S'] / a['N']) / (b['S'] / b['N'])),
                                 ('ST', lambda a, b: (a['S'] / a['T']) / (b['S'] / b['T'])),
                                 # sensitivity: W over pairs in which neither run captured new graphs while timed
-                                ('Wc', lambda a, b: None if (a['new_graphs'] or b['new_graphs']) else a['W'] / b['W'])):
+                                ('Wc', lambda a, b: None if (a['new_graphs'] is None or b['new_graphs'] is None or
+                                                           a['new_graphs'] or b['new_graphs']) else a['W'] / b['W'])):
                     by_q = defaultdict(list)
                     for k, a, b in pairs:
                         try:
@@ -97,7 +154,7 @@ def main(argv=None):
                     row[name + '_ci'] = f'[{lo:.3f},{hi:.3f}]' if lo else ''
                 rows.append(row)
                 lines.append(f"| {arm} | {row['cells']} | {row['correct']} ({row['base_correct']}) | "
-                             f"+{row['arm_only']}/-{row['base_only']} | {row['W']} {row['W_ci']} | {row['Wc']} {row['Wc_ci']} ({row['timed_with_new_graphs']} excl.) | {row['S']} {row['S_ci']} | "
+                             f"+{row['arm_only']}/-{row['base_only']} | {row['W']} {row['W_ci']} | {row['Wc']} {row['Wc_ci']} ({row['timed_with_new_graphs']} captures, {row['timed_graph_counter_unknown']} unknown excl.) | {row['S']} {row['S_ci']} | "
                              f"{row['P']} {row['P_ci']} | {row['N']} {row['N_ci']} | {row['NC']} {row['NC_ci']} | "
                              f"{row['T']} {row['T_ci']} | {row['SN']} {row['SN_ci']} | {row['ST']} {row['ST_ci']} |")
             lines.append('')

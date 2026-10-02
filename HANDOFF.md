@@ -8,6 +8,10 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - **Method code:** `9d8ae5e` (named keep k5) on top of `efea33024` (k12), `c36b1f933` (V-term ablation variants)
   and `56de98fe2` (`carry_first`). Docs and decks are newer commits; trust `git log` over this line.
 - **Docs:** committed and pushed. Keep them current with every change; this is a user instruction.
+- **Intake review (2026-10-01, 22:45 UTC−5):** audited base `6b13fe178`, confirmed as the live remote head.
+  See `docs/INTAKE_AUDIT_20261001.md`. Follow-up panels may select the stronger relevant arms instead of repeating
+  plain M1/M2/M3 each time (user update). Same-host paired cells and matched optimized references remain mandatory.
+  Classmates' A/B branches are pending; their exact refs are unknown, so no merge has been attempted.
 - **Two local checkouts.**
   - `E:/dlm/m3_output_numerics_20260927` is the working checkout used for all v27 work.
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
@@ -44,7 +48,10 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   180 cells per arm) finds no evidence that looking at V helps:** no V term beats attention mass alone (all p ≥ 0.30
   vs rank 32), and projected V at rank 32/16/8 scores lowest (86–87 vs dense 99). **E9 (64K, M3 + c0, fixed 88%
   sparsity) and E11 (95%, preview) agree:** mass-only ranking is as accurate (54 vs 51) and as fast (W 0.845) as any V term. The V term is
-  not a contribution and can be dropped (L1e, L1f).
+  not a contribution in these settings and can be dropped (L1e, L1f).
+  This conclusion is limited to the tested AIME/LongBench settings. The user relayed a classmate's hypothesis that
+  RULER needs V dimensional information; HumanEval is unknown. Actual attention already uses full V. The question
+  concerns selector inputs and should be tested on RULER, not generalized from the LongBench negatives.
 - **M2 vs M3 under the same optimizations: tie** (E10, L1g): M2c / M3 32K 0.987 [0.914, 1.063], 64K 0.983
   [0.940, 1.024]; accuracy n.s.
 - **Skip ratio is not set; it emerges from one fixed threshold.** All GLOBAL layers, heads and lengths share the log
@@ -87,7 +94,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   his "vector_mean" result files are not committed anywhere we can read.
 - Literature check of step and length inflation (SparseD, PulseCol, Focus-dLLM, Lil, LessIsMore, JoT, Prophet).
 
-## Running (as of 20:50 local)
+## Running (SSH checked again at 22:52 local)
 
 - **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), E9 (L1f), E10 (L1g), E11 (L1h),
   the batch diagnostic (`batch_scaling/`).
@@ -101,9 +108,14 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 1. Measure how much the held map changes between re-decisions (calls 2 vs 8 vs 14) at 32K/64K. This tests the
    inference that M3 R6 DP is effectively "select once per canvas" (about 40 minutes, one host).
-2. Extend E10 (M2 vs M3) to all 6 seeds, and E11 (95% sparsity) from the 48-cell preview to a full panel.
-3. Test the V term where it could matter: RULER-style retrieval with LOCAL layers also sparse (Junyu's setting;
-   RULER 32K/64K manifests exist in `E:/dlm/v27_private/pool`).
+2. Test the user's dataset-dependent V hypothesis on RULER: mass-only / rank-32 / full-dimensional selector V at
+   matched tile budgets. Start with the current historical-QK GLOBAL-only setting; then separately test the peer's
+   fresh-QK / GLOBAL+LOCAL setting as a collaboration candidate. Existing 32K/64K pools have only 13 items each;
+   expand the official task inventory before a task-level claim. A full-dimensional selector is not implemented yet.
+3. HumanEval quality pilot and full LongBench coverage are proposed follow-ups, not launched work. HumanEval needs
+   a frozen code-extraction and executable scorer contract. LongBench needs a new shared chunked-prefill substrate,
+   followed by a separately named truncation/retrieval protocol to cover all 503 items. New directions use new branches.
+   E10/E11 extensions are optional if needed to resolve a specific question; do not enlarge tied panels by default.
 4. Larger-gain directions:
    - make the encoder canvas append's GLOBAL attention sparse with the canvas's final map (about 1.4% at 64K);
    - chunked prefill so that 96K items above 95K tokens and the 128K bin run on one H100;
@@ -111,6 +123,23 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
    - Batched serving did not raise the attention share at 64K (B = 1–4); see `batch_scaling/README.md`.
 5. Note for E6b: its first bind call ran with `HOSTS=dllm` only, so the binding was merged from the three host
    fragments; the unused one-host binding is kept beside it.
+
+## Intake audit (2026-10-01, 22:45 UTC−5)
+
+- Three GPUs checked idle by SSH; this review launched no GPU worker, GPU seconds = 0.
+- The independent FA4 timing join previously allowed later duplicate records to overwrite first outputs and did
+  not recheck scorer/run identity. Added rejection of duplicates, omitted scored executions, mixed host/GPU,
+  substrate/protocol/model/source, and unqualified scores. Unknown graph counters are excluded from Wc.
+- Audited E4/E5/E6/E6b/E7/E8/E9/E10/E11: 8,826 first runs, same-host cells throughout, no duplicate first outputs,
+  no point-estimate or correct-count changes. E7/E8 each retain the known 3 timed graph captures (use Wc).
+- Final regression: 17 CPU tests pass on the registered dlm2 interpreter; all nine panels pass the final guards.
+- Full LongBench-v2 length inventory: 503 inputs, median 107,706, max 5,174,028 rendered tokens. 224 inputs ≤95,074;
+  400 fit the configured 262,144-token context with 8,192 output tokens reserved. Chunked prefill can address
+  memory, not the 101 inputs whose prompt alone exceeds the context limit. No full-panel run has started.
+- HumanEval: 164 Python tasks, 984 generations/arm with six seeds. Not yet a v27 dataset/scorer; proposed as a
+  coding quality check. Read-only review of the shared `megakernel` deck was limited to retrievable slide text.
+- Optional Slack context: public-channel search found no RULER discussion. Consent for a private-channel-only
+  research search (excluding DMs) is pending; repository work does not depend on it.
 
 ## Operational notes (still relevant)
 
