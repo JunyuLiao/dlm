@@ -31,7 +31,8 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - V18 spec and worker/phase tracker/scorer passed 112 CPU tests and were pushed in `c89472cfb`.
   First 96K qualification failed closed after dense warm-up: external/internal request ID mismatch.
   No qualified record; 241.607 GPU reserved seconds. Fixed with internal ID returned by add_request;
-  125 CPU tests pass. New deploy/run required before another launch; all GPUs idle.
+  125 CPU tests pass. Attempt 002 launched on dllm at 16:58 UTC-5 from `eeba8b6ec`;
+  mpk and dlm2 idle.
   See `docs/VLLM_PANEL_V18_20261002.md`. Status changes are recorded here and in STATE.current.
 - Fixed stale fastest-dense and blocked-port labels. Historical panel numbers are preserved.
 
@@ -209,7 +210,7 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 
 ## Running
 
-- None. V18 attempt 001 closed with the request-ID instrumentation failure; requalification next.
+- V18 96K qualification attempt 002 on dllm, started 2026-10-02 16:58 UTC-5. No formal panel.
 
 ## Blockers
 
