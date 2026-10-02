@@ -129,6 +129,11 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
     group member's RULER/V question);
   - run dir `v27_r16_001`; score with `v27_score_long.py --label r16 --dllm-ends 2`.
   RULER needs about 5 decoder calls per request, so it is an accuracy check, not a speed target.
+- **Expansion to more models and datasets** (`docs/EXPANSION_PLAN_20261002.md`). The coordinator chain
+  `setup_chain.sh` builds `/home/exouser/dyh/dlm_models_20261002` on dllm after the post-E14 diagnostics:
+  - SGLang envs for LLaDA2.1-mini (upstream 0.5.21) and I-DLM-8B (its bundled fork);
+  - weights, and the LongBench Pro data.
+  Next: official dense smoke runs, then model adapters with a clean core/adapter split.
 - **E14 running** (`specs/v27_lb_q64c_e14.json`, protocol `v27_lb_q64c_e14_46bf7b5a765b7204`):
   - Arms: dense FA4 all-kept, M3 + c0, M3 + c0 + q64, and M3 + c0 + q64c (adds the 64-row carried call-0 map,
     `q_carry64`).

@@ -1,8 +1,32 @@
-# Expansion plan: datasets and models (2026-10-02, proposal, nothing run yet)
+# Expansion plan: datasets and models (2026-10-02)
 
 The user asked which datasets comparable papers use (preferring new and long ones) and whether to add models such as
 LLaDA2.1-mini or I-DLM, with the usual baseline rule: each model's dense baseline must be its official or widely
 known SOTA serving path. This file records the survey and the proposal; decisions go to `DECISIONS.md`.
+
+## Decisions (user, 2026-10-02)
+
+- **Models added:** LLaDA2.1-mini and I-DLM-8B, next to DiffusionGemma.
+  - UltraLLaDA is dropped under the user's rule ("old or does not fit one H100"). It is from October 2025 on the
+    February 2025 LLaDA-8B base, and recomputes the whole sequence every step: minutes per request at 64K–128K, and
+    the official generate's full-sequence logits alone are about 33 GB in bf16 at 128K.
+- **Envs and weights:** separate envs under dyh with the official serving stacks; weights downloaded into dyh.
+- **Datasets:** add LongBench Pro and RULER 4K/8K.
+- Both new models top out near 32K (LLaDA2.1-mini 32,768; I-DLM-8B 40,960 positions). Their accuracy panels
+  therefore use RULER 4K–32K, LongBench-v2 ≤ 32K and LongBench Pro levels 8K–32K. This matches the dLLM papers.
+  DiffusionGemma keeps the 64K/96K bins.
+- **Official serving paths (dense baselines):**
+  - LLaDA2.1-mini: upstream SGLang 0.5.21 with `--dllm-algorithm JointThreshold --attention-backend flashinfer`;
+  - I-DLM-8B: the SGLang bundled in the I-DLM repo, `--dllm-algorithm IDLMBlockN` (ISD), FlashInfer backend.
+  - The sparse methods will modify the same FlashInfer attention (its block-sparse interface), so dense and sparse
+    differ only in skipped blocks.
+- **I-DLM caveat.** It is causal (SDAR architecture, 36 layers, 32 Q / 8 KV heads, hd 128). Our canvas observation
+  and held-map structure must be adapted to its strided verify-and-advance decoding; the comparable sparse baselines
+  are decode-sparsity methods (Quest/DSA family).
+- **Setup** (coordinator chain `setup_chain.sh`, after the dllm diagnostics) into `/home/exouser/dyh/dlm_models_20261002`:
+  - `envs/sglang_up` and `envs/sglang_idlm`, with pip freezes;
+  - `models/`, `datasets/LongBench-Pro`, each with its HF revision recorded;
+  - every pip/HF/XDG/tmp cache stays inside that directory.
 
 ## What the closest papers evaluate (checked against the papers)
 
@@ -41,8 +65,8 @@ Reading:
 |---|---|---|---|---|---|
 | DiffusionGemma-26B-A4B (current) | 2026 | 30 layers (5 GLOBAL hd512), MoE 128×top-8, canvas 256 | 96K+ on one H100 | FA4 (vLLM fork) all-kept | main |
 | **LLaDA2.1-mini** (inclusionAI) | 2026-02 | 16B MoE (256 experts, top-8), 20 layers, 16 Q / 4 KV heads, hd 128, block diffusion with KV cache (block 32) | 32K | official SGLang (`--attention-backend flashinfer`, `--dllm-algorithm JointThreshold`) or dInfer | yes: newest mainstream open dLLM family; mini is the only LLaDA2.x that fits one H100 (flash = 100B). Limits: 32K window, 32 query rows per step |
-| **UltraLLaDA** (LLaDA-8B → 128K) | ICLR 2026 | 32 layers, MHA hd 128, bidirectional over the whole sequence | 128K | FlashAttention dense, as SparseD/PulseCol compare; sparse baselines from official code (SparseD, Sparse-dLLM, Focus-dLLM) | yes: the long-context dLLM that Focus-dLLM and the block-approximate paper use |
-| I-DLM-8B (from Qwen3-8B) | 2026-04 | strict causal attention, introspective strided decoding | Qwen3 window | SGLang | no: AR-style causal decoding has no bidirectional canvas, so it is a different sparse-attention problem (decode sparsity, Quest/DSA family) |
+| UltraLLaDA (LLaDA-8B → 128K; dropped, see Decisions) | ICLR 2026 | 32 layers, MHA hd 128, bidirectional over the whole sequence | 128K | FlashAttention dense, as SparseD/PulseCol compare; sparse baselines from official code (SparseD, Sparse-dLLM, Focus-dLLM) | yes: the long-context dLLM that Focus-dLLM and the block-approximate paper use |
+| **I-DLM-8B** (from Qwen3-8B; added by user decision) | 2026-04 | SDAR, 36 layers, 32 Q / 8 KV, hd 128, strict causal attention, introspective strided decoding | 40,960 | I-DLM's bundled SGLang (IDLMBlockN), FlashInfer | added; needs an adapter for causal strided decoding |
 | IDLM (inverse distillation, in chw/value_aware) | 2026-02 | small DiT on OpenWebText / TinyGSM | short | — | no: not a long-context LLM |
 
 Prerequisites:
