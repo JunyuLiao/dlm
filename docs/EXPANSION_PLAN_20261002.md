@@ -39,7 +39,7 @@ For every model:
 
 | model | dense candidates | status |
 |---|---|---|
-| DiffusionGemma | (1) ours: HF model + piecewise_v5 substrate + FA4 all-kept (`D_fa4_allkept`); (2) HF official compiled path; (3) **vLLM 0.30.0 native DiffusionGemma** (official serving, merged 2026-06; FA4 at hd512 on SM90); (4) SGLang (forces Triton attention at hd512) | (2) is measured slower: 44–56 ms/step at 17K–32K, OOM at 60K (`official_baseline/official_compiled_path.jsonl`). **(3) has never been measured end to end, a gap in the current evidence.** If vLLM is faster per step at our lengths, port the method into vLLM's attention call or re-base the speed claims on it. vLLM env C is added to the setup. |
+| DiffusionGemma | (1) HF model + piecewise_v5 substrate + FA4 all-kept (`D_fa4_allkept`); (2) HF official compiled path; (3) **vLLM 0.30.0 native DiffusionGemma** (FA4 at hd512 on SM90); (4) SGLang (forces Triton attention at hd512) | Updated 2026-10-02: vLLM has been measured and the unchanged main method ported. Its dynamic-causal dense GLOBAL uses effective split-KV and is about 1.65× faster than the historical HF GLOBAL control. Native vLLM is the headline reference; HF speed ratios remain substrate-specific. The V18 request-level panel is in qualification; see `VLLM_PORT_NOTES_20261002.md` and `VLLM_PANEL_V18_20261002.md`. |
 | LLaDA2.1-mini | (1) upstream SGLang 0.5.21 (JointThreshold) with FlashInfer / FA3 / Triton backends; (2) **dInfer** (inclusionAI's own framework; LLaDA2.1-mini path through its SGLang backend); (3) HF transformers remote code (correctness reference) | vLLM's dllm-plugin is excluded: it needs a vLLM fork branch, and its LLaDA2 model logic is unfinished per its docs |
 | I-DLM-8B | its bundled SGLang (IDLMBlockN / ISD) with FlashInfer / FA3 / Triton backends | transformers loading is unsupported per the model card; this is the only official path |
 
@@ -83,15 +83,15 @@ Reading:
 
 | model | date | geometry | context | official / SOTA dense baseline | fit |
 |---|---|---|---|---|---|
-| DiffusionGemma-26B-A4B (current) | 2026 | 30 layers (5 GLOBAL hd512), MoE 128×top-8, canvas 256 | 96K+ on one H100 | FA4 (vLLM fork) all-kept | main |
+| DiffusionGemma-26B-A4B (current) | 2026 | 30 layers (5 GLOBAL hd512), MoE 128×top-8, canvas 256 | 96K+ on one H100 | native vLLM dense, FA4 dynamic-causal with effective split-KV | main |
 | **LLaDA2.1-mini** (inclusionAI) | 2026-02 | 16B MoE (256 experts, top-8), 20 layers, 16 Q / 4 KV heads, hd 128, block diffusion with KV cache (block 32) | 32K | official SGLang (`--attention-backend flashinfer`, `--dllm-algorithm JointThreshold`) or dInfer | yes: newest mainstream open dLLM family; mini is the only LLaDA2.x that fits one H100 (flash = 100B). Limits: 32K window, 32 query rows per step |
 | UltraLLaDA (LLaDA-8B → 128K; dropped, see Decisions) | ICLR 2026 | 32 layers, MHA hd 128, bidirectional over the whole sequence | 128K | FlashAttention dense, as SparseD/PulseCol compare; sparse baselines from official code (SparseD, Sparse-dLLM, Focus-dLLM) | yes: the long-context dLLM that Focus-dLLM and the block-approximate paper use |
 | **I-DLM-8B** (from Qwen3-8B; added by user decision) | 2026-04 | SDAR, 36 layers, 32 Q / 8 KV, hd 128, strict causal attention, introspective strided decoding | 40,960 | I-DLM's bundled SGLang (IDLMBlockN), FlashInfer | added; needs an adapter for causal strided decoding |
 | IDLM (inverse distillation, in chw/value_aware) | 2026-02 | small DiT on OpenWebText / TinyGSM | short | — | no: not a long-context LLM |
 
 Prerequisites:
-- No host env has SGLang or FlashInfer. The official LLaDA2.1 baseline needs a separate env under `dyh` (user decision).
-- Weights: about 32 GB (LLaDA2.1-mini) and about 16 GB (UltraLLaDA), to dyh dirs. Space is ample on every host.
+- Separate SGLang/FlashInfer environments and weights now exist on dllm under `dyh`; see the dated setup and toolchain status below. No matching new-model environment is yet verified on mpk or dlm2.
+- Weights: about 32 GB (LLaDA2.1-mini) and about 16 GB (I-DLM-8B), downloaded under dyh. GPU smokes remain pending.
 
 ## Code structure for more models
 
@@ -189,6 +189,8 @@ kernel builds; its default `~/.cache/sglang/jit` ignores `SGLANG_CACHE_DIR`), `T
 - No `~/.cache/tvm-ffi` and no new `~/.triton` entries exist.
 
 ## RULER: what it is and the R17 proposal (2026-10-02)
+
+Historical proposal below: R17 has since completed at 32K/64K/92K. Its verified results are in the results ledger; it is not a pending panel.
 
 **RULER** (NVIDIA, COLM 2024, "What's the Real Context Size of Your Long-Context Language Models?") is a synthetic
 benchmark generated to any target length with the model's own tokenizer. Its 13 tasks:

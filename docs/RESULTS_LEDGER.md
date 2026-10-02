@@ -2,7 +2,7 @@
 
 Rules for this file:
 - An entry needs a scored, frozen panel or a documented benchmark whose summary is in the repo.
-- Dense reference is `D_fa4_allkept` unless stated.
+- Historical HF entries use `D_fa4_allkept` unless stated. Current headline speed evidence must use native vLLM dense (FA4 dynamic-causal with effective split-KV).
 - Ratios are method / dense: paired geometric mean with a question-clustered bootstrap 95% CI. < 1 means faster.
 - W = request wall, including prefill (end to end). S = decode span, excluding prefill (generation time).
   S/N = amortized per step. NC = steps per canvas. T = output tokens.
@@ -569,3 +569,11 @@ V18 clock diagnostic: native executed 350 denoising forwards while the scheduler
 349; exactly 1750 GLOBAL calls and zero order errors. The extra forward is official async
 queue work and must count in N. No speed claim. 158.557 GPU seconds, source
 `vllm_v18_qualification/clock_diagnostic001.json`; total closed V18 work 755.639 s.
+
+## V18 qualification 003 (2026-10-02 17:31 UTC-5)
+
+Source: `results/m1_m2_m3_frontier_v27_20260929/vllm_v18_qualification/attempt003.json`.
+Longest-input dense/native/all-kept pass actual async execution counting and zero timed
+compile/capture. Main stops before generation because the unchanged frozen source hashes
+are keyed by the prior deploy paths. No accuracy or performance conclusion. Reserved GPU
+time for this closed attempt is 614.449 s; cumulative V18 closed work is 1370.088 s.

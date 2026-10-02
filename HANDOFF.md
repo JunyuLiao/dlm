@@ -25,7 +25,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## V18 live status
 
-2026-10-02 17:17 (UTC-5): 96K qualification attempt 003 started on dllm from 088dc8184, after 151 CPU tests. It counts actual async executions using existing CPU snapshots. No formal panel launched; mpk and dlm2 idle.
+2026-10-02 17:31 (UTC-5): Qualification 003: dense, native and all-kept pass actual async N and zero timed compile/capture; main stops before generation because frozen source-hash keys name the old deploy. Core bytes are unchanged. Rebind paths only after old/new byte equality checks, then use a new frozen binding and run. Formal panel not launched. All GPUs idle. Attempt 003 reserved 614.449 GPU seconds; closed V18 total 1370.088 s.
 
 ## Intake and panel preparation (2026-10-02, US Central UTC-5)
 
@@ -216,7 +216,7 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 
 ## Running
 
-- dllm: v27_vllm_v18_preflight_003 (actual async execution counts; native then main, all-kept, dense)
+- None.
 
 ## Blockers
 
