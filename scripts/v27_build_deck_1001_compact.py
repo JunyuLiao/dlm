@@ -3,7 +3,7 @@ step-count check, AIME cost structure, and the V-term controls. Panel ratios are
 files (not hand-copied); static numbers (kernel timings, time breakdown, step-count check) cite their files in the
 speaker notes.
 
-Writes results/m1_m2_m3_frontier_v27_20260929/ppt_sample/dlm_sparse_attention_20261001_compact.pptx.
+Writes results/m1_m2_m3_frontier_v27_20260929/ppt_sample/dlm_sparse_attention_20261001_compact_v2.pptx.
 """
 import csv
 from pathlib import Path
@@ -144,6 +144,34 @@ def p1_baseline():
 """)
 
 
+def p_methods():
+    page('2. 方法与变体：M1/M2/M3 是什么，优化版改了哪些地方',
+         '只对 5 个 GLOBAL 层的 canvas 计算做稀疏；LOCAL 层（滑窗 1024）、prompt prefill 和 canvas 追加都保持 dense · 块 = 128 个 query × 64 个 key · 当前 canvas 的块与第一个块始终保留',
+         [('table', [['名称', '做法（选哪些 key 块参与注意力）', '来源'],
+                     ['M1', '每个块的“跳过风险” = 注意力质量（来自历史 QK 观测）×（块内 V 的 32 维随机投影 − 当前输出）的范数 × query 敏感度；风险低于阈值就跳过；每步重新决策', 'Fan'],
+                     ['M2', '同 M1，但 V 用块内均值（不投影、不按注意力加权）', 'Fan'],
+                     ['M3', '同 M1，但每 R 步才重新决策（原版 R = 3），中间沿用上次的块图', 'Fan'],
+                     ['B', '每个 canvas 只观测一次，选出块图后整个 canvas 都用它，不再重新决策（≈ SparseD）', '我们（撞车）'],
+                     ['SparseD（移植）', '前几步 dense，之后按池化注意力分数保留 top-k 块并复用到 canvas 结束', '外部论文'],
+                     ['计算输出（所有方法）', '只在保留的块上用当前 QK 和原始 V 精确计算（FA4 块稀疏接口）；跳过的块不算 QK 也不算 PV', '—']],
+           [2.0, 9.0, 1.6], 11, ()),
+          ('label', 'M3 优化版（R6 DP −ln2）在原版 M3 上叠加的改动，以及 carry0'),
+          ('table', [['改动', '作用'],
+                     ['A64 融合观测', '注意力质量的观测融合进每个 canvas 第 1 步的 dense 计算，每个 canvas 只做一次（原版每 8 步一次完整 QK 观测，每层 6–11 ms）'],
+                     ['DP（dense-prefix 风险）', '风险相对 dense prefix 预先算好，所有块并行比较阈值：每次决策 0.27 ms/层（原版 2.3–7.9 ms）'],
+                     ['R6 + 异步', '每 6 步重新决策；选块放在副 stream 上与主计算重叠'],
+                     ['−ln2 阈值', '阈值下调 ln2，更保守、少跳一些块，避免步数增加'],
+                     ['carry0', '每个 canvas 第 0 步直接用上一 canvas 的最终块图（新并入的块全保留），省掉一次 dense 步；第 1 步照常 dense + 观测'],
+                     ['试过未采用', '2K 门控（AIME 用）、obs2、R3、stable1（输出稳定后转 dense）、跨 canvas 复用 K=4（步数增加、掉点）、保留全部生成部分']],
+           [2.4, 10.2], 11, ())],
+         """
+【定义来源】Fan 的 M1/M2/M3 定义（必须出现在每个对比里）；代码 experiments/numerical_qk_reuse/（integration.py、v27_dense_prefix.py、v21.py 中的命名变体）。docs/RESEARCH_CONTEXT.md §3 有每个配置键的完整说明。
+【每个 canvas 的步骤】第 0 步 dense；第 1 步 dense + 观测；第 2 步起按块图稀疏。carry0 把第 0 步也变成稀疏（用上一 canvas 的块图）。
+【M2 与 junyu 的“V 均值”】我们的 M2 是“块内 V 均值 − 当前输出”的范数（居中）乘注意力质量；junyu 代码里的 value/vector_mean 基线是“块内 V 均值向量本身的范数”（不居中）乘注意力质量，两者不同（见口头说明）。
+【保护策略】始终保留：当前 canvas 的全部块、第一个块（attention sink）；carry0 在第 0 步保留刚并入 prefix 的块。junyu 的 prefix_end / diagonal 保护未使用。
+""")
+
+
 def p2_long():
     e4, e5, e10 = 'lb_confirm_panel_e4', 'lb_overhead_panel_e5', 'lb_m2opt_panel_e10'
     tab = [['方法', '32K 端到端 W [95% CI]', 'S', '每步', 'N', '答对(86)', '64K 端到端 W [95% CI]', 'S', '每步', 'N', '答对(75)']]
@@ -156,7 +184,7 @@ def p2_long():
              f'答对({d64["correct"]})' if d64 else '答对']]
     for name, arm in [('M3 优化版 + carry0（V = 投影 32 维）', M3C), ('M2 同样优化 + carry0（V = 块均值）', M2C)]:
         tab2.append([name] + cols(get(e10, arm, L32)) + cols(get(e10, arm, L64)))
-    page('2. 32K / 64K：各变体的端到端、纯生成、每步耗时、forward 数与精度',
+    page('3. 32K / 64K：各变体的端到端、纯生成、每步耗时、forward 数与精度',
          'LongBench-v2 32K 档（28–40K token）、64K 档（56–76K token）各 24 题 × 6 个新 seed（404–909）= 每档 144 格/方法 · 生成前冻结方案',
          [('table', tab, WIDE, 10, (6,)),
           ('table', tab2, WIDE, 10, ()),
@@ -178,7 +206,7 @@ def p3_96k_steps():
     tab = [['方法', '96K 端到端 W [95% CI]', '纯生成 S', '每步', 'N', '答对(25)']]
     for name, arm in [*FAN, ('B', B), ('M3 优化版', M3), ('M3 优化版 + carry0', M3C)]:
         tab.append([name] + cols(get(p96, arm)))
-    page('3. 96K，以及“步数会不会变多”的核查',
+    page('4. 96K，以及“步数会不会变多”的核查',
          '96K：LongBench-v2 84–104K 档题池中单卡放得下的全部 11 道题 × 6 个 seed = 66 格/方法（E6 + E6b）· 步数核查：32K 同 24 题、同底座 v5、9 个 seed',
          [('table', tab, [3.8, 2.8, 1.3, 1.1, 1.0, 1.2], 11, (6,)),
           ('label', '步数比 N（M3 优化版 / dense）按 seed 拆开（32K，24 题，同底座）'),
@@ -196,7 +224,7 @@ def p3_96k_steps():
 
 def p4_aime():
     best = get('aime_confirm_panel_e7', 'M3_R6_A64_fused_dp_async_m1ln2_c0_gate2k_fa4')
-    page('4. AIME：精度不降，但没有加速空间（与 LongBench 的每步耗时对比）',
+    page('5. AIME：精度不降，但没有加速空间（与 LongBench 的每步耗时对比）',
          'AIME26 30 题 × 6 个 seed = 180 格/方法（E7）· 每步耗时为 dense 摊销值，分项来自模块/kernel 测速 · 同一模型、同一底座',
          [('table', [['', 'AIME', 'LongBench 32K', 'LongBench 64K'],
                      ['每次 forward 的 key 数（中位数）', '3.6K（prompt 约 160 token，其余是生成的推理）', '35.6K', '67.3K'],
@@ -238,13 +266,13 @@ def p5_vterm():
             f'64K 答对（dense {get(e9, D)["correct"]}）', '64K 端到端 W']]
     for name, a8, a9 in V:
         tab.append([name, cell(e8, a8, 'acc'), cell(e8, a8, 'w'), cell(e9, a9, 'acc'), cell(e9, a9, 'w')])
-    page('5. 选块要不要看 V：同稀疏度下，看 V 没有比只看注意力质量更好',
+    page('6. 选块要不要看 V：同稀疏度下，看 V 没有比只看注意力质量更好',
          'AIME：M3 优化版固定保留 30% prefix 块（E8，180 格/组）· 64K：M3 优化版 + carry0 固定保留 12%（E9，24 题 × 4 seed = 96 格/组）· 只换风险里的 V 项',
          [('table', tab, [4.4, 2.2, 1.8, 2.2, 1.8], 12, ()),
           ('bullets', ['两处都没有任何 V 项显著好于“只看注意力质量”（AIME 相对 32 维 p ≥ 0.30；64K 全部 p ≥ 0.42）；64K 上只看质量与当前最好的 −ln2 版一样快（比值 0.999）。',
                        'AIME 并不是“没变化”：不同 V 项选出的块不同，答对数在 86–94 之间变化，但最好的是 4 维或不看 V；70% 稀疏时步数多 6–13%，所以都比 dense 慢。',
                        'AIME 的 70% prefix 稀疏度约等于 60% 的总块稀疏度（canvas 块必须保留）；64K 的 88% 约等于 88%。',
-                       '结论：“看 V 选块”不能作为贡献；M2（块均值）与 M3（投影 V）在同样优化下也分不出差别（见第 2 页）。'], 12)],
+                       '结论：“看 V 选块”不能作为贡献；M2（块均值）与 M3（投影 V）在同样优化下也分不出差别（见第 3 页）。'], 12)],
          """
 【协议】E8 v27_aime_vterm_e8_bd293196ff730851（1,440/1,440 成功，dense 与 E7 逐 token 相同）；E9 v27_lb64_vterm_e9_5b125c63817898f6（576/576 成功，dense 与 −ln2 + carry0 两臂与 E5 逐 token 相同）。每次运行的 effective_method 都核对过（k30 / k12、proj_rank、risk_value、mu_mode、carry0）。
 【AIME 详细】对 dense 99：32 维 87（p = 0.08）、16 维 86（p = 0.035）、8 维 87（p = 0.036）、4 维 94、块均值 92、只看质量 91、SparseD 94。
@@ -254,9 +282,10 @@ def p5_vterm():
 """)
 
 
-def build(out_name='dlm_sparse_attention_20261001_compact.pptx'):
+def build(out_name='dlm_sparse_attention_20261001_compact_v2.pptx'):
     cover()
     p1_baseline()
+    p_methods()
     p2_long()
     p3_96k_steps()
     p4_aime()
