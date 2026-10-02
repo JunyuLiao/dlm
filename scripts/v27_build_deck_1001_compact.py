@@ -3,7 +3,7 @@ step-count check, AIME cost structure, and the V-term controls. Panel ratios are
 files (not hand-copied); static numbers (kernel timings, time breakdown, step-count check) cite their files in the
 speaker notes.
 
-Writes results/m1_m2_m3_frontier_v27_20260929/ppt_sample/dlm_sparse_attention_20261001_compact_v5.pptx.
+Writes results/m1_m2_m3_frontier_v27_20260929/ppt_sample/dlm_sparse_attention_20261001_compact_v6.pptx.
 """
 import csv
 import json
@@ -182,13 +182,13 @@ def p_flow():
                      ['第 1 步：dense + 观测', '完整算一遍注意力（输出精确），顺带记下每个 query 行 r、每个 key 块 j（64 个 key）的两样东西：'
                       'z = 这一块分到的注意力总量（log Σ exp(q·k)，即“过去的 QK”）；μ = 块内 V 按这一行注意力加权的平均（V 先随机投影到 32 维）。'
                       '随即建“风险表”：按块顺序扫，风险 = log‖α ·（μ − 前面各块给出的输出）‖，α = 这一块在前 j 块中的注意力占比', '全部块', '全部块', '观测不额外跑'],
-                     ['第 2、8、14…步（每 6 步）：选块', '只读风险表：每个头、每 128 个 query 行一组、每个块，取 128 行里最坏的（风险 − log V 参考尺度），小于阈值就跳过；'
-                      '中间各步沿用这份块图', '不算', '不乘', '0.27 ms/层，另一条 GPU 流上并行'],
+                     ['第 2 步选块，用于第 2–7 步；第 8 步重选，用于 8–13；第 14 步…（每 6 步）', '选块只读风险表：每个头、每 128 个 query 行一组、每个块，取 128 行里最坏的（风险 − log V 参考尺度），小于阈值就跳过。重选时不重新观测 QK、不重建 prefix 的风险表（prefix 的 K、V 在 canvas 内不变），只重算：当前 canvas 部分 V 的 32 维投影、V 参考尺度（所有 key 的 V 均方根），再重新比较一次', '不算', '只投影 canvas 部分', '0.27 ms/层，另一条 GPU 流上并行'],
                      ['第 2 步起每一步：真正的注意力', 'FA4 块稀疏接口：保留的块用当前这一步的 Q、K、V 正常算 QK → softmax（只在保留块上归一化）→ 乘完整 512 维原始 V；'
                       '跳过的块 QK 和乘 V 都不算。当前 canvas 的块和第一个块永远保留', '只算保留块', '只乘保留块', '省时间的地方']],
-           [2.5, 7.3, 1.0, 1.0, 1.4], 11, (), 2.75),
+           [2.7, 7.1, 0.9, 1.1, 1.4], 10, (), 2.95),
           ('bullets', ['原版的区别：观测每 8 步额外完整算一次 QK（每层 6–11 ms）；风险是和“已经决定保留的块”的输出比较，所以只能逐块顺序现算（每层 2.3–7.9 ms），M1 每步算、M3 每 3 步算。'
                        '优化版改为和“前面全部块”比较，每块风险互不依赖，观测时一次算好、选块时并行比较（与原版 M1 的选块结果不完全相同，所以算变体）。',
+                       '因此长上下文时每 6 步重选几乎不改变块图（参考尺度只随 256 个 canvas key 微变，canvas 只占几万个 key 的一小部分）：实际上接近每个 canvas 只选一次，这也解释了 M3 优化版与 B 结果几乎一样（按代码推断，未直接测量块图变化）。下一个 canvas 在第 1 步用新的 query 和更长的 prefix 重新观测、重建风险表。',
                        '“看不看 V”只体现在风险里的 μ：投影 32/16/8/4 维、M2 的块内简单平均，或不用 μ（只按注意力占比排序）。输出永远用原始 V。',
                        '公式里还有一项 query 敏感度，在我们所有实验里取 1（未启用）。'], 11)],
          """
@@ -365,7 +365,7 @@ def p_aime():
 """)
 
 
-def build(out_name='dlm_sparse_attention_20261001_compact_v5.pptx'):
+def build(out_name='dlm_sparse_attention_20261001_compact_v6.pptx'):
     cover()
     p1_baseline()
     p_methods()

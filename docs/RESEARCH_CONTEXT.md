@@ -75,6 +75,18 @@ The kept tiles are executed by FA4's block-sparse interface (§4).
   - call 1 is dense plus observation;
   - decisions apply from call 2.
 
+**Schedule of the main configuration within one canvas (from `cache.py:plan` and `v27_dense_prefix.py`).**
+- Call 0: native dense (with `carry_first`: the previous canvas's final map). Call 1: dense plus the fused
+  observation, which also builds the prefix risk table (`_dp_build`, one scan over prefix tiles).
+- Call 2: first decision; the map is held for calls 2–7. Call 8 re-decides (calls 8–13), call 14, … (`decision_interval=6`).
+  With A64 and clock origin 1 there is no second observation within a canvas (canvases have at most 48 calls).
+- A re-decision does not observe QK again and does not rebuild the prefix risk table (prefix K/V are fixed within a
+  canvas). It re-projects only the canvas part of V, recomputes the V reference scale (RMS of V over all valid keys),
+  and re-runs the threshold comparison (`_dp_decide`) plus the canvas/boundary tail scan. At long context the
+  reference scale moves only slightly, so held maps are expected to change little between decisions (inferred from the
+  code; map drift between decisions has not been measured). This is consistent with M3 R6 DP ≈ B in E4.
+- The query sensitivity T is not set in any `numerical_qk_reuse` run, so log T = 0.
+
 **Our named variants (v27; each is an optional `v21` config key):**
 
 | key / suffix | meaning |
