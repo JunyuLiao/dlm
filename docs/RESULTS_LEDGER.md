@@ -277,6 +277,22 @@ Thinking ON, budget 8192, pass@1 by the official tests in the unprivileged sandb
 - Regrouping within 64-row groups would add only ~5% of the remaining kept work (about 0.15% per step); not pursued.
 - Source: `lb_q64_panel_e13/` (`summary.md`, `steps.md`, `receipts.md`); protocol `v27_lb_q64_e13_f038777e0ab0d142`.
 
+### q64 / q64r / split-KV kernel bench on identical real states (2026-10-02)
+
+Kernel level only (no end-to-end claim): 32K/64K/96K items 0–3, seed 404, 240 decisions per bin, each timed under
+every map on the same Q/K/V. Median ratio per sparse GLOBAL call:
+
+| bin | q64 / 128 | q64r / 128 (incl. permutation) | num_splits 2 / 1 | kept prefix 128 → q64 → q64r |
+|---|---:|---:|---:|---|
+| 32K | 0.914 | 1.021 | 1.05 | 21.8% → 17.3% → 16.4% |
+| 64K | 0.887 | 1.006 | 1.04 | 11.9% → 9.0% → 8.6% |
+| 96K | 0.899 | 1.014 | 1.04 | 7.9% → 5.9% → 5.4% |
+
+- q64 is the useful part of the regrouping lead (−9 to −11% per sparse call).
+- Within-block row regrouping (q64r) and FA4 split-KV are slower and are dropped.
+- Next: E14 adds the 64-row carried call-0 map (q64c).
+- Source: `q64_bench_1002/README.md`, `bench.jsonl`.
+
 ### Map drift between re-decisions (2026-10-02)
 
 E5 configuration, 64K/32K items 0–3: every re-decision (calls 8, 14, …) changes the held map; relative to the first
