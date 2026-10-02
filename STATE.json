@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 10:00 (UTC-5)",
+    "updated_local": "2026-10-02 11:50 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -16,16 +16,7 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "piecewise_v5",
     "dense_reference": "D_fa4_allkept (FlashAttention-4, vLLM fork, block-sparse interface with every tile kept)",
-    "headline": {
-      "panel": "E4 v27_lb_confirm_e4_d3a7edb87a2b800a (24 items x seeds 404-909 per bin, 144 cells per arm)",
-      "arm": "M3_R6_A64_fused_dp_async_m1ln2_fa4",
-      "64k_request_W": "0.879 [0.820, 0.926]",
-      "64k_decode_S": "0.807",
-      "32k_request_W": "0.940 [0.897, 0.980]",
-      "32k_decode_S": "0.921",
-      "accuracy": "64K 77 vs 75, 32K 86 vs 86 (dense)",
-      "source": "results/m1_m2_m3_frontier_v27_20260929/lb_confirm_panel_e4/summary.md"
-    },
+    "headline": "M3 R6 DP -ln2 + carry_first vs D_fa4_allkept (12 seeds): W 0.925/0.860/0.801 at 32K/64K/96K, S 0.903/0.777/0.708, accuracy not significantly different; vs our HF-based substrate only",
     "running": [
       {
         "panel": "E15 v27_c01_e15_e83919d6411343b2",
@@ -35,7 +26,8 @@
         ],
         "deploy_tag": "v27_e15_f63a1f2",
         "run_dir": "v27_lb_e15_001",
-        "executions": 1602,
+        "driver": "host-side chain <run dir>/host_chain_e15.py (32K then AIME after 96K)",
+        "done_when": "4 worker_end events per host",
         "scoring_label": "e15"
       }
     ],
@@ -177,8 +169,16 @@
     "baseline_gap": {
       "finding": "vLLM 0.30.0 native DiffusionGemma dense is faster than D_fa4_allkept: per step 0.76/0.90/0.98 at 32K/64K/96K, prefill ~0.5x",
       "consequence": "speed ratios so far are vs our HF-based substrate; port the method into vLLM for paper-grade claims",
-      "source": "results/m1_m2_m3_frontier_v27_20260929/vllm_dense_check_1002/README.md"
-    }
+      "source": "results/m1_m2_m3_frontier_v27_20260929/vllm_dense_check_1002/README.md",
+      "port_status": "blocked: FA4 block-sparse over paged KV reads wrong pages (vllm_port_probe_1002); options in HANDOFF"
+    },
+    "next_steps": [
+      "score E15",
+      "vLLM port: block-sparse on paged cache (contiguous view or FA4 fix)",
+      "vLLM port: hook method into diffusion_gemma.py and remeasure vs vLLM dense",
+      "new models: official dense smoke + baseline candidate timing (SGLang/dInfer, I-DLM SGLang)",
+      "LongBench Pro metrics check; RULER 8K manifests"
+    ]
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",

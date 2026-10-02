@@ -315,6 +315,19 @@ All 13 RULER tasks at 32K/64K × seeds 404/505/606, dllm.
 - Not a speed target (about 5 calls per request).
 - Source: `ruler_long_panel_r16/` (`summary.md`, `vterm.md`, `steps.md`, `receipts.md`).
 
+### Official-serving check and vLLM port probe (2026-10-02)
+
+- **vLLM 0.30.0 native DiffusionGemma vs our dense control** on the same 18 E14 cells and host, batch 1, bf16:
+
+  | | 32K | 64K | 96K |
+  |---|---|---|---|
+  | per step, vLLM / ours | 29.1 / 38.5 ms (0.76×) | 40.5 / 45.0 ms (0.90×) | 48.0 / 49.2 ms (0.98×) |
+  | prefill, vLLM / ours | 0.89 / 2.03 s (0.44×) | 2.48 / 5.05 s (0.49×) | 4.05 / 7.20 s (0.57×) |
+
+  Source: `vllm_dense_check_1002/README.md`.
+- **FA4 block-sparse over vLLM's paged KV is not correct in this build.** The error is about 22 vs the reference;
+  dense paged and contiguous sparse are exact. Source: `vllm_port_probe_1002/README.md`.
+
 ### Regroup offline and call-1 split (2026-10-02)
 
 **Offline regrouping** (`regroup_offline_1002/`): real need matrices of 144 decisions (M3 + c0 + q64c, 32K/64K/96K

@@ -1,0 +1,52 @@
+{
+ "vllm": "0.30.0",
+ "torch": "2.13.0+cu130",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "rows": [
+  {
+   "keys": 33000,
+   "page_size": 16,
+   "keep": 0.18,
+   "kept_fraction": 0.186,
+   "error": "TypeError(\"'NoneType' object is not callable\")"
+  },
+  {
+   "keys": 65000,
+   "page_size": 16,
+   "keep": 0.09,
+   "kept_fraction": 0.0931,
+   "error": "TypeError(\"'NoneType' object is not callable\")"
+  },
+  {
+   "keys": 65000,
+   "page_size": 64,
+   "keep": 0.09,
+   "kept_fraction": 0.0934,
+   "max_abs_paged_vs_contig_sparse": 0.15380859375,
+   "max_abs_paged_vs_contig_dense": 0.0,
+   "max_abs_paged_sparse_vs_fp32": 0.153969407081604,
+   "ms": {
+    "contig_dense": 2.8386,
+    "contig_allkept": 2.5903,
+    "contig_sparse": 0.2951,
+    "paged_dense": 2.8384,
+    "paged_allkept": 2.5567,
+    "paged_sparse": 0.2942
+   }
+  },
+  {
+   "keys": 97000,
+   "page_size": 16,
+   "keep": 0.06,
+   "kept_fraction": 0.0624,
+   "error": "TypeError(\"'NoneType' object is not callable\")"
+  },
+  {
+   "keys": 4133,
+   "page_size": 16,
+   "keep": 0.5,
+   "kept_fraction": 0.5421,
+   "error": "TypeError(\"'NoneType' object is not callable\")"
+  }
+ ]
+}

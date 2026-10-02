@@ -1,4 +1,4 @@
-# HANDOFF — current frontier (2026-10-01, local UTC−5)
+# HANDOFF — current frontier (2026-10-02, local UTC−5)
 
 Read `AGENTS.md` first. Stable context: `docs/RESEARCH_CONTEXT.md`. History and negatives: `docs/DECISIONS.md`.
 Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-29) is archived at
@@ -23,11 +23,65 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
     using it.
 
+## Situation at handoff (2026-10-02 11:50 UTC−5)
+
+**Running (independent of any coordinator session).**
+- E15 (`specs/v27_c01_e15.json`, protocol `v27_c01_e15_e83919d6411343b2`, 1,602 runs).
+  - Arms: dense FA4, M3 + c0 and M3 + c0 + `observe_carried` (c01).
+  - Data: AIME26 30 + LB 32K/64K/96K × seeds 1616–2121.
+  - Hosts: mpk and dlm2; run dir `v27_lb_e15_001`, deploy `v27_e15_f63a1f2`.
+  - At 11:30, 64K was done on both hosts and 96K was about two thirds done. A host-side chain
+    (`<run dir>/host_chain_e15.py`, log `host_chain_e15.log`) launches 32K after the 96K worker ends, then AIME26, with
+    the exact v23_transport launch command. Expect several hours; AIME is the slowest stage.
+  - Check progress: `grep -c '"event": "run"' <run dir>/ledger.jsonl` and `grep -c worker_end` (4 per host when done).
+  - Score when both hosts show 4 worker ends (from `E:/dlm`):
+    `python v27_score_lb.py --tag v27_e15_f63a1f2 --run-dir v27_lb_e15_001 --label e15 --mpk-only --mpk-ends 4 --also dlm2 --also-ends 4 --mixed-gold --bins 32k,64k,96k`
+  - Then, from the repo:
+    - `python -m scripts.v27_fa4_panel_summary L/summary.md L/summary.csv L/scored.csv L/mpk_ledger.jsonl L/dlm2_ledger.jsonl`;
+    - `python -m scripts.v27_direct_compare L/direct_c01_vs_c0.md L/direct_c01_vs_c0.csv M3_R6_A64_fused_dp_async_m1ln2_c0_c01_fa4 M3_R6_A64_fused_dp_async_m1ln2_c0_fa4 --panel E15 L/scored.csv L/mpk_ledger.jsonl L/dlm2_ledger.jsonl`;
+    - `python -m scripts.v27_step_stats L/steps.md L/steps.csv L/mpk_ledger.jsonl L/dlm2_ledger.jsonl`.
+    Here `L=E:/dlm/v27_private/lb_scoring/e15`. Report the full metric set, per host, and pool M3 + c0 / dense with
+    E13 + E14 (18 seeds).
+- dllm is idle.
+
+**Main result (12 seeds, E13 + E14; `docs/RESULTS_LEDGER.md` L1k).** M3 R6 DP −ln2 + `carry_first` vs dense FA4:
+- end-to-end W **0.925 [0.892, 0.958] (32K), 0.860 [0.826, 0.891] (64K), 0.801 [0.705, 0.902] (96K)**;
+- generation-only S 0.903 / 0.777 / 0.708, per step 0.924 / 0.814 / 0.751;
+- no significant accuracy difference (177/179, 150/155, 62/53).
+
+**The most important open issue: the dense baseline is not the fastest official serving system.**
+- vLLM 0.30.0's native DiffusionGemma (official, FA4 attention) was run on the same E14 cells and host
+  (`vllm_dense_check_1002/README.md`). It is faster than our dense control (`D_fa4_allkept` on the HF-based
+  piecewise_v5 substrate):
+  - per step 0.76× at 32K, 0.90× at 64K, 0.98× at 96K;
+  - prefill 0.44–0.57×.
+- The attention kernel is the same, so the gap is MoE kernels, CUDA graphs, sampler and prefill.
+- All speed ratios so far hold against our substrate, not against vLLM. Paper-grade claims need the method inside
+  vLLM, measured against vLLM dense.
+
+**The port is blocked by one kernel issue.** `vllm_port_probe_1002/README.md`:
+- vLLM's FA4 runs dense attention over the paged cache correctly (page size 64).
+- But block-sparse lists over a paged cache read the wrong pages: error about 22 vs the masked reference, while
+  contiguous K/V is exact to 5e-4.
+- Page size 16 does not run at all.
+- Options, in order:
+  1. pass a contiguous view when the request's pages are contiguous;
+  2. fix the paged block-sparse path in FA4 (translate sparse n-blocks through the page table) and report upstream;
+  3. FlashInfer BSR over paged KV (hd 512 speed unverified);
+  4. gather kept tiles.
+
+**Expansion setup is ready** (`docs/EXPANSION_PLAN_20261002.md`). On dllm under `/home/exouser/dyh/dlm_models_20261002`:
+- SGLang 0.5.21 env (LLaDA2.1-mini official path), the I-DLM bundled SGLang env and the vLLM 0.30.0 env;
+- LLaDA2.1-mini and I-DLM-8B weights;
+- LongBench Pro data.
+- Every item has its HF revision and pip freeze recorded.
+- UltraLLaDA is dropped (user rule: old or impractical on one H100).
+
 ## Current conclusion
 
-- **Best configuration now: M3 R6 DP −ln2 + `carry_first`** (E5, same 288 cells as E4).
-  - 64K: request W **0.853 [0.802, 0.895]**, generation S 0.775.
-  - 32K: W **0.907 [0.858, 0.952]**, S 0.878.
+- **Best configuration now: M3 R6 DP −ln2 + `carry_first`.** The pooled 12-seed numbers are in the situation section
+  above. The E5 numbers on its 288 cells: 64K W 0.853 [0.802, 0.895], S 0.775; 32K W 0.907 [0.858, 0.952], S 0.878.
+- **All speed ratios are against our HF-based dense substrate.** vLLM's official serving is faster; see above.
   - Accuracy 76 vs 75 and 92 vs 86. Versus M3 without carry: 0.971 / 0.963.
   - The `stable1` gate is rejected.
   - 96K (E6 + E6b pooled, 11 fitting items × 6 seeds = 66 cells): W **0.822 [0.703, 0.944]**, S 0.727, per-step
@@ -101,83 +155,59 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   his "vector_mean" result files are not committed anywhere we can read.
 - Literature check of step and length inflation (SparseD, PulseCol, Focus-dLLM, Lil, LessIsMore, JoT, Prophet).
 
-## Running (as of 2026-10-02 01:15 local)
+## Finished on 2026-10-02 (details in `docs/RESULTS_LEDGER.md`, decisions in `docs/DECISIONS.md`)
 
-- **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), E9 (L1f), E10 (L1g), E11 (L1h), E12 (L1i), E13 (L1j),
-  the batch diagnostic (`batch_scaling/`).
-- **E12 HumanEval: done** (`docs/RESULTS_LEDGER.md` L1i): no accuracy loss in any arm, no speed gain (main W 1.023),
-  no V-term difference. Scored on mpk with the unprivileged sandbox.
-- **E13 q64: done** (`docs/RESULTS_LEDGER.md` L1j): per-step −0.7% at 64K (significant, all hosts), end to end n.s.,
-  accuracy unchanged. Optional named variant `q_block=64`; not a contribution.
-- **q64 kernel bench: done** (`docs/RESULTS_LEDGER.md`, `q64_bench_1002/`): q64 −9 to −11% per sparse GLOBAL
-  call on identical states; within-block regrouping (q64r, code kept with tests) and FA4 split-KV are slower.
-- **Queued after E14** (coordinator chain `post_e14_chain.sh`, scratch; starts when all three E14 workers end):
-  1. v27 GPU tests on dllm with deploy `v27_p15_48a8c26` (commit 48a8c26c5); the chain stops if any fail.
-  2. P15 (`specs/v27_c01_preview_p15.json`, protocol `v27_c01_preview_p15_3e50c12a37ee0486`, 180 runs):
-     - accuracy-first preview of `observe_carried` (c01) on top of M3 + c0 + q64c, against the same pipeline
-       without c01 and against dense;
-     - AIME26 10 problems, LB 32K/64K 8 items, 96K 4 items, seeds 404/505;
-     - runs on mpk and dlm2, run dir `v27_p15_001`, scoring label `p15` (`--mpk-only --also dlm2 --mixed-gold`).
-  3. dllm, one after the other:
-     - `scripts/v27_observe_split_bench.py` (call-1 kernel cost: fused vs observation-only + FA4 sparse);
-     - `scripts/v27_need_dump.py` on the E14 deploy (real need matrices for `scripts/v27_regroup_offline.py`).
-- **Queued on dllm after the post-E14 diagnostics** (coordinator chain `r16_chain.sh`, gated on the GPU tests):
-  - R16 (`specs/v27_ruler_long_r16.json`, protocol `v27_ruler_long_r16_1bf5362572d4e0a8`, 390 runs): RULER accuracy
-    check of the current pipeline;
-  - all 13 RULER tasks at 32K and 64K × seeds 404/505/606;
-  - arms: dense FA4, M3 + c0, M3 + c0 + q64c, and fixed-88% (k12) rank-32 projected V vs attention mass only (the
-    group member's RULER/V question);
-  - run dir `v27_r16_001`; score with `v27_score_long.py --label r16 --dllm-ends 2`.
-  RULER needs about 5 decoder calls per request, so it is an accuracy check, not a speed target.
-- **Expansion to more models and datasets** (`docs/EXPANSION_PLAN_20261002.md`). The coordinator chain
-  `setup_chain.sh` builds `/home/exouser/dyh/dlm_models_20261002` on dllm after the post-E14 diagnostics:
-  - SGLang envs for LLaDA2.1-mini (upstream 0.5.21) and I-DLM-8B (its bundled fork);
-  - weights, and the LongBench Pro data.
-  Next: official dense smoke runs, then model adapters with a clean core/adapter split.
-- **R16 done** (`docs/RESULTS_LEDGER.md` L1l): RULER 32K/64K accuracy preserved; no V-term difference.
-- **vLLM dense check done** (`vllm_dense_check_1002/README.md`).
-  - Official vLLM serving is faster than our dense control: per step 0.76× / 0.90× / 0.98× at 32K / 64K / 96K,
-    prefill about 0.5×.
-  - Paper-grade speed claims need the method ported into vLLM (next main engineering item).
-- **P15 done** (`c01_preview_p15/receipts.md`): no accuracy drop; c01 per step 0.91 (AIME) and 0.949 (64K).
-- **E15 running** (`specs/v27_c01_e15.json`, protocol `v27_c01_e15_e83919d6411343b2`, 1,602 runs):
-  - arms: dense, M3 + c0, M3 + c0 + c01;
-  - AIME26 30 + LB 32K/64K/96K × seeds 1616–2121;
-  - mpk + dlm2, deploy `v27_e15_f63a1f2`, run dir `v27_lb_e15_001`;
-  - scoring label `e15` (`e15_score.sh` waits for 4 worker ends per host).
-- **E14 done** (`docs/RESULTS_LEDGER.md` L1k):
-  - 12-seed main result: M3 + c0 W 0.925 / 0.860 / 0.801 at 32K / 64K / 96K;
-  - q64 −0.4 to −0.7% per step;
-  - q64c not adopted.
-  - Regroup offline and the call-1 split are recorded under L1k. Running now:
-    - P15 (c01 preview) on mpk and dlm2;
-    - R16 (RULER) on dllm, with the expansion setup alongside.
-- **Regrouping diagnostic (chw idea): done** (`regroup_diag_1002/README.md`): ~4% fewer kept tiles within 128-row tiles,
-  not integrated; finer query tiles would cut kept work by 22–39% but need a new kernel.
+- E12 HumanEval (L1i): no accuracy loss in any arm; no speed gain (short context).
+- E13 q64 (L1j) and E14 (L1k), 12 seeds.
+  - q64 (64-row FA4 maps) gives −0.4 to −0.7% per step, significant at 64K, with no end-to-end effect; it stays an
+    optional named variant.
+  - q64c (64-row carried call-0 map) adds nothing per step over q64 and shows more steps at 96K; not adopted.
+- Regrouping is closed as a clean negative:
+  - kernel bench (`q64_bench_1002/`): q64r and FA4 split-KV are slower;
+  - offline on real need matrices (`regroup_offline_1002/`): no grouping beats natural 64-row tiles by more than
+    about 5%. This covers within-block sort, chw's set key, cross-head (GQA) grouping and greedy clustering.
+- Call-1 split (`observe_split_1002/`): c01 saves 0.45–1.7 ms per GLOBAL layer per canvas, about 0.5–1% per step at
+  kernel level. Our Triton observation-only kernel is slower than FA4 full dense attention, so a faster observation
+  kernel is the remaining lever there.
+- P15 (`c01_preview_p15/`): the c01 accuracy-first preview passed. c01 / q64c per step is 0.91 on AIME and 0.949 at 64K
+  (small n); 64K steps per canvas are 1.107. E15 checks both with many seeds.
+- R16 RULER 32K/64K (L1l): accuracy preserved by every arm, including a fixed 88% sparsity; the V term equals
+  mass-only (33 vs 33).
+- vLLM dense check and paged block-sparse probe: see the situation section.
+
+## Running
+
+- E15 on mpk and dlm2 via host-side chains (see the situation section). Nothing else.
 
 ## Blockers
 
-- None.
+- The vLLM port needs a working block-sparse path over vLLM's paged KV (see the situation section).
 
-## Immediate next steps
+## Immediate next steps (in order)
 
-1. Measure how much the held map changes between re-decisions (calls 2 vs 8 vs 14) at 32K/64K. This tests the
-   inference that M3 R6 DP is effectively "select once per canvas" (about 40 minutes, one host).
-2. Test the user's dataset-dependent V hypothesis on RULER: mass-only / rank-32 / full-dimensional selector V at
-   matched tile budgets. Start with the current historical-QK GLOBAL-only setting; then separately test the peer's
-   fresh-QK / GLOBAL+LOCAL setting as a collaboration candidate. Existing 32K/64K pools have only 13 items each;
-   expand the official task inventory before a task-level claim. A full-dimensional selector is not implemented yet.
-3. HumanEval quality pilot and full LongBench coverage are proposed follow-ups, not launched work. HumanEval needs
-   a frozen code-extraction and executable scorer contract. LongBench needs a new shared chunked-prefill substrate,
-   followed by a separately named truncation/retrieval protocol to cover all 503 items. New directions use new branches.
-   E10/E11 extensions are optional if needed to resolve a specific question; do not enlarge tied panels by default.
-4. Larger-gain directions:
-   - make the encoder canvas append's GLOBAL attention sparse with the canvas's final map (about 1.4% at 64K);
-   - chunked prefill so that 96K items above 95K tokens and the 128K bin run on one H100;
-   - orthogonal step reduction (Prophet/JoT-style early exit) is not our contribution.
-   - Batched serving did not raise the attention share at 64K (B = 1–4); see `batch_scaling/README.md`.
-5. Note for E6b: its first bind call ran with `HOSTS=dllm` only, so the binding was merged from the three host
-   fragments; the unused one-host binding is kept beside it.
+1. **Score E15** when it ends (commands above).
+   - Decide on c01 from the per-step ratio (direct timing exists at kernel level in `observe_split_1002/`), the
+     steps-per-canvas ratio (P15 hinted 1.107 at 64K) and accuracy, including AIME.
+   - Pool M3 + c0 / dense over E13 + E14 + E15.
+2. **vLLM port, step 2:** make block-sparse work on vLLM's cache.
+   - First try a contiguous view: for a batch-1 request check `page_table == arange`, or allocate contiguously. If that
+     holds, the tested contiguous FA4 path applies as is.
+   - Otherwise patch FA4's paged block-sparse path (CuTe kernel in `vllm/vllm_flash_attn/cute`) inside the dyh vLLM
+     env, add a regression test (`scripts/v27_vllm_paged_sparse_probe2.py` is the reproducer) and report upstream.
+3. **vLLM port, step 3:** hook the method into `vllm/model_executor/models/diffusion_gemma.py`.
+   - Map the canvas/step schedule (call 0 carried map, call 1 observation, held maps, re-decisions).
+   - The observation kernel must read the paged cache.
+   - T needs the per-position argmax flips from vLLM's compiled sampler (`_compiled_sample_step`).
+   - Then rerun dense vs M3 + c0 on vLLM with many items. vLLM rejects per-request seeds for diffusion models, so
+     trajectories cannot be paired by seed; use many items and report distributions plus per-step direct timing.
+4. **New models** (`docs/EXPANSION_PLAN_20261002.md`):
+   - official dense smoke runs and baseline-candidate timing: LLaDA2.1-mini on SGLang (FlashInfer/FA3/Triton
+     backends) vs dInfer; I-DLM-8B on its bundled SGLang;
+   - then thin adapters with a model-independent core (user rule: clean code structure).
+5. **Datasets:**
+   - check LongBench Pro's per-task metrics (NDCG, pairwise accuracy, F1, SubEM, summarization similarity) and pick
+     levels ≤ 32K for the new models;
+   - generate RULER 8K manifests with the pinned RULER on dllm (4K exists).
 
 ## Intake audit (2026-10-01, 22:45 UTC−5)
 
