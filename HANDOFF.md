@@ -23,7 +23,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
     using it.
 
-## Situation at handoff (2026-10-02 16:20 UTC−5)
+## Situation at handoff (2026-10-02 16:40 UTC−5)
 
 **Running (2026-10-02 16:20 UTC−5):** nothing; all GPUs idle.
 - **R17 finished** (`ruler_long_panel_r17/receipts.md`, L1p).
@@ -185,8 +185,8 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Immediate next steps (in order)
 
-1. **vLLM panel (the paper's speed evidence).** Use `scripts/v27_vllm_method_bench.py`; the GPU smoke recipe is in the
-   vLLM notes.
+1. **vLLM panel (the paper's speed evidence).** Runner: `scripts/v27_vllm_bench_host.sh` (the exact command is in its
+   header). The panel plan is in the last section of `docs/VLLM_PORT_NOTES_20261002.md`.
    - LongBench-v2 32K / 64K / 96K, many items × repeats. vLLM cannot fix per-request seeds, so use items × repeats
      and report per-step and request distributions.
    - Arms: vLLM dense (default cudagraphs) vs method (PIECEWISE). All-kept on a subset as the adapter-cost control.

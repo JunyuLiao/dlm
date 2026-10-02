@@ -319,3 +319,43 @@ batch 1, `--block-size 32`, memory 0.85).
 - **Next:** a vLLM panel on many items at 32K / 64K / 96K, with accuracy scored from the private completions.
   - Arms: vLLM dense (default) and method; all-kept on a subset.
   - Memory: 96K needs memory 0.92 and a check that the method's score cache fits.
+
+## How to run the vLLM bench, and the plan for the vLLM panel (handoff, 2026-10-02 16:40 UTC−5)
+
+**Runner.** `scripts/v27_vllm_bench_host.sh` (dllm). The header holds the exact command. It:
+- runs `scripts/v27_vllm_method_bench.py` once per arm, each with a fresh engine and after an idle-GPU check;
+- imports the core from the R17 deploy `v27_r17_6064109`, with the frozen main-arm config
+  `v27_r17_001/host.fragment_configs/ruler64k_r17/M3_R6_A64_fused_dp_async_m1ln2_c0_fa4.json`;
+- loads the adapter from `/home/exouser/dyh/dlm_models_20261002/vllm_method/overlay/`. Copy the repo's
+  `vllm_adapter.py` there first; its sha256 is recorded per request.
+- Outputs:
+  - `smoke_<TAG>.jsonl`: public timings and receipts;
+  - `private/bench<TAG>_completions.jsonl`: completion text, private, never commit;
+  - `bench<TAG>_status`.
+- Every cache variable points inside dyh. The vLLM env is `/home/exouser/dyh/dlm_models_20261002/envs/vllm`. It
+  carries the FA4 paged patch (`patches/`) and scipy (`--no-deps`, unused now).
+
+**Settings used so far.** `--block-size 32` (GLOBAL 64-token pages), chunked prefill 16384, batch 1.
+- Memory: 0.85 (32K), 0.90 (64K).
+- Cudagraphs: dense in vLLM's default mode (the reference) and PIECEWISE; adapter arms PIECEWISE.
+
+**Panel plan (next agent).**
+1. Cells: all E14 LongBench-v2 items, 24 / 24 / 11 at 32K / 64K / 96K. Take ids and indices from the E14 frozen
+   manifests, `v27_lb_e14_001/manifests` on dllm.
+   - Use ≥ 4 repeats per item. Seeds cannot be set in vLLM, so repeats are independent draws.
+   - Keep the cells JSON private; it contains ids.
+2. Arms: `dense:` (default cudagraphs) and `method:PIECEWISE` on every cell; `allkept:PIECEWISE` on a subset.
+3. 96K: try MEM=0.92 first on one cell per arm. If the method OOMs, lower the score-cache cap (memory caps) or report
+   96K as not servable on one H100 for the method arm. Do not change the dense arm.
+4. Metrics, from the full metric set:
+   - per-step S/N (direct; the robust one);
+   - request wall W and generation-only S, as distributions per item, since steps cannot be paired;
+   - prefill;
+   - steps per request;
+   - accuracy.
+5. Accuracy: score `private/bench*_completions.jsonl` with the panels' LongBench-v2 scorer (`scripts/v21_score.py`
+   logic; the long LB gold lives on mpk under `/media/volume/dllm-1/dyh/lb_long_v27*`).
+   - Write a small script that takes the completions and gold and outputs correct / incorrect per cell.
+   - Report accuracy vs vLLM dense with McNemar on matched item × repeat order, and item-clustered intervals.
+6. Spread across mpk and dlm2 if their envs are set up. Only dllm has the vLLM env now; a copy must stay inside each
+   host's dyh, and every arm of a cell must run on the same host.

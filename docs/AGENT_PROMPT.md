@@ -21,20 +21,24 @@
 - 每个新变体：写单元测试；用回执（effective_method、计数器）证明预定路径确实执行；所有臂同底座、同部署、同机、同题、同 seed，计时中无新图。
 - 宁要干净的负结果，不要硬凑正结果；不显著就写不显著，不过度声称。
 
-【当前状态（详见 HANDOFF.md「Situation at handoff」）】
-- 主结果（18 个种子，E13+E14+E15）：M3 R6 DP −ln2 + carry_first 相对 dense FA4，端到端 W 在 32K / 64K / 96K 分别为 0.950 / 0.867 / 0.818，
-  纯生成 S 为 0.937 / 0.787 / 0.728，精度不降（96K 稀疏反而更高，p 0.012）。c01 和 q64c 都不采用。RULER 32K/64K 和 HumanEval 精度也保住了。
-- 最重要的待办：vLLM 0.30.0 原生 DiffusionGemma（官方 serving，同样用 FA4）的 dense 比我们的 dense 快，每步分别为 0.76× / 0.90× / 0.98×，
-  prefill 约快一倍。所以目前的加速比只是相对我们基于 HF 的底座。要写进论文，需要把方法移植进 vLLM 重测。
-  FA4 分页 KV + block-sparse 读错页的 bug 已在 dyh 的 vLLM 环境里修好（patches/，页大小 64，对 dense 无影响）；
-  下一步是把 block-sparse 接进 vLLM 的 FA4 调用，再把方法接进 diffusion_gemma.py。
-- regroup 系列已关闭：64 行 map 只带来每步 0.4–0.7% 的改善，任何重排都不超过约 5%。
-- P16：64K 精度差主要是挑选噪声；P17：组员的 C gate 不采用；R17：RULER 32K/64K/92K 主方法精度全保住，V 项彻底收为负结果。
-- 方法已能在 vLLM 里原样运行（experiments/numerical_qk_reuse/vllm_adapter.py）。冒烟结果：相对 vLLM 默认 dense，每步 32K 为 0.96×，64K 为 0.85×。
-- 重要更正：vLLM 的 dense GLOBAL 调用走 FA4 的 dynamic-causal + split-KV，比我们 HF 面板用的 dense 配置快约 1.65×。所以 HF 底座上的加速比相对最强官方 dense 偏高（精度结论不受影响），论文的速度证据以 vLLM 面板为准。
-- 当前 GPU 空闲。下一步是 vLLM 面板（多题、带精度打分），见 HANDOFF。
-- 扩展：新模型 LLaDA2.1-mini、I-DLM-8B 的官方环境、权重和 LongBench Pro 数据已在 dllm 的 /home/exouser/dyh/dlm_models_20261002 就绪，
-  UltraLLaDA 已放弃。计划见 docs/EXPANSION_PLAN_20261002.md。
+【当前状态（详见 HANDOFF.md「Situation at handoff」，2026-10-02 16:40 UTC−5）】
+- 方法已能在 vLLM 0.30.0 官方 serving 里原样运行：experiments/numerical_qk_reuse/vllm_adapter.py，方法核心不改，
+  用冻结的 main 配置。冒烟结果：相对 vLLM 默认 dense，每步 32K 为 0.96×，64K 为 0.85×；adapter 全保留臂和 dense 打平。
+  运行方式、面板计划见 docs/VLLM_PORT_NOTES_20261002.md 最后两节和 scripts/v27_vllm_bench_host.sh。
+- 重要更正：vLLM 的 dense GLOBAL 调用走 FA4 的 dynamic-causal 路径，split-KV 真正生效，比我们 HF 面板用的 dense
+  （D_fa4_allkept，num_splits=1）快约 1.65×。所以 HF 底座上 E4–E15 的加速比相对最强官方 dense 偏高；精度结论不受影响。
+  论文的速度证据以 vLLM 面板为准。adapter 里的稀疏消费者用"页表别名 2 路拆分 + LSE 合并"补齐了同样的并行度。
+- HF 底座上已有结论（精度部分仍成立）：
+  - E13–E15（18 个种子）main 精度不降；
+  - P16：64K 精度差是挑选噪声；P17：组员的 C gate 不采用；
+  - R17：RULER 32K/64K/92K main 精度全保住；V 项在 AIME、LongBench、HumanEval、RULER 上都没用，已收为负结果；
+  - regroup、q64c、c01 都已收。
+- FA4（SM90）有三个可报上游的问题：分页稀疏读错页（本地已修）、变长稀疏偏移按 tile_n 128 算（原因已确认，一行修复）、
+  稀疏和非 causal 路径的 split-KV 每份都重做全部工作。报不报、用哪个 GitHub 账号，等用户决定。
+- 当前没有实验在跑，三台 GPU 空闲。
+- 最优先：vLLM 面板（LongBench-v2 32K/64K/96K 多题 × 多次，vLLM dense 对 main，带精度打分）。
+  其次是新模型：LLaDA2.1-mini 的 SGLang 编译问题已用 CUDA 13.0 nvcc shim 解决，待 GPU 冒烟；
+  I-DLM-8B 冒烟未做。环境、权重和 LongBench Pro 数据在 dllm 的 /home/exouser/dyh/dlm_models_20261002，计划见 docs/EXPANSION_PLAN_20261002.md。
 
 【硬性规则】
 - GPU 机器是用户自己的，不需要审批，预算不是停止条件，但要记录 GPU 秒数：
@@ -54,6 +58,6 @@
   正文不标"Fan/我们"，只给外部论文标来源；方法和变体用白话讲清原版配置和每项改动；耗时拆分要把 GLOBAL、LOCAL 单列并带百分比。
 
 【开始时】
-1. 读完上述文档，用 git log 确认最新提交，ssh 检查三台机器的 GPU 是否空闲（截至 2026-10-02 12:25 没有实验在跑）。
+1. 读完上述文档，用 git log 确认最新提交，ssh 检查三台机器的 GPU 是否空闲（截至 2026-10-02 16:40 UTC−5 没有实验在跑）。
 2. 先用几句话复述你理解的现状、打算先做什么和预计耗时，再动手。
 ```
