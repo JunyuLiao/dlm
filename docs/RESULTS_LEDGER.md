@@ -235,6 +235,31 @@ configurations. Compiled-forward kernels (CUDA-graph replay) grouped by kernel; 
 
 Data: `time_breakdown_v5/*_dense_first.jsonl`. One request per workload; a diagnostic, not a panel.
 
+### Absolute step counts (2026-10-02): total steps per request and steps per block
+
+`scripts/v27_step_stats.py` over successful first outputs. A block is one 256-token canvas; steps are decoder calls;
+the cap is 48 steps per block. Ratios are paired within cells (geometric mean, item-clustered 95% CI). Every panel
+directory now has `steps.md` / `steps.csv` with all arms and per-host means.
+
+| workload | arm | requests | total steps mean / median | blocks per request | steps per block mean / median | blocks at 48 cap | N ratio [CI] | steps/block ratio [CI] |
+|---|---|---|---|---|---|---|---|---|
+| 32K (E5) | dense | 144 | 223.75 / 192.5 | 15.88 | 14.09 / 13.0 | 23/2286 | 1.0 [1.000,1.000] | 1.0 [1.000,1.000] |
+| 32K (E5) | M3 + c0 | 144 | 214.78 / 186.0 | 15.08 | 14.24 / 12.0 | 18/2172 | 0.9485 [0.880,1.011] | 1.0042 [0.977,1.031] |
+| 32K (E5) | M3 | 144 | 219.42 / 201.0 | 15.75 | 13.93 / 12.0 | 9/2268 | 0.9865 [0.927,1.045] | 1.0096 [0.981,1.036] |
+| 64K (E5) | dense | 144 | 218.83 / 162.0 | 12.21 | 17.92 / 17.0 | 9/1758 | 1.0 [1.000,1.000] | 1.0 [1.000,1.000] |
+| 64K (E5) | M3 + c0 | 144 | 205.82 / 156.5 | 11.88 | 17.33 / 16.0 | 3/1710 | 0.9514 [0.875,1.027] | 0.9785 [0.952,1.003] |
+| 64K (E5) | M3 | 144 | 213.24 / 166.0 | 12.1 | 17.63 / 17.0 | 3/1742 | 0.975 [0.883,1.054] | 0.9822 [0.948,1.015] |
+| 96K (E6+E6b) | dense | 66 | 289.24 / 192.5 | 12.38 | 23.37 / 21 | 67/817 | 1.0 [1.000,1.000] | 1.0 [1.000,1.000] |
+| 96K (E6+E6b) | M3 + c0 | 66 | 241.53 / 200.5 | 10.98 | 21.99 / 20 | 23/725 | 0.9648 [0.770,1.200] | 1.0071 [0.936,1.078] |
+| 96K (E6+E6b) | M3 | 66 | 267.56 / 220.5 | 11.68 | 22.9 / 21 | 39/771 | 1.0282 [0.852,1.237] | 1.0267 [0.961,1.105] |
+| AIME (E7) | dense | 180 | 295.91 / 283.0 | 22.57 | 13.11 / 12.0 | 1/4062 | 1.0 [1.000,1.000] | 1.0 [1.000,1.000] |
+| AIME (E7) | M3 + c0 + 2K gate | 180 | 295.44 / 282.5 | 22.47 | 13.15 / 12.0 | 3/4044 | 1.0003 [0.968,1.031] | 1.0057 [0.992,1.021] |
+| AIME (E7) | M3 | 180 | 303.83 / 289.0 | 22.86 | 13.29 / 13.0 | 4/4114 | 1.022 [0.973,1.074] | 1.0075 [0.987,1.029] |
+
+- Steps per block are about 13 (AIME), 14 (32K), 18 (64K) and 23 (96K) for dense; longer contexts take more steps
+  per block. The method changes steps per block by at most about 2–3% in either direction (n.s.).
+- Total steps vary with output length (blocks per request); 96K total-step means are pulled up by a few long requests.
+
 ### Step-count check (2026-10-01): is "no step inflation" itself noise?
 
 Step ratio N = method decoder calls / dense decoder calls per cell (M3 R6 DP −ln2). Single-cell log SD ≈ 0.45 (×1.57).
