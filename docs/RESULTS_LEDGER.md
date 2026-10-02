@@ -235,6 +235,13 @@ configurations. Compiled-forward kernels (CUDA-graph replay) grouped by kernel; 
 
 Data: `time_breakdown_v5/*_dense_first.jsonl`. One request per workload; a diagnostic, not a panel.
 
+### Map drift between re-decisions (2026-10-02)
+
+E5 configuration, 64K/32K items 0–3: every re-decision (calls 8, 14, …) changes the held map; relative to the first
+decision of the canvas, 44–71% of its kept tiles change (kept-set Jaccard 0.59–0.70). The cause is the per-position
+query sensitivity T = clamp(1 + 3·EMA(argmax flips), 1, 4), active in every run; the risk table, reference scale and
+threshold do not change. Details: `map_drift_1002/README.md`.
+
 ### Query-row regrouping diagnostic (2026-10-02; idea from chw/value_aware)
 
 64K/32K, 4 requests each, E5 configuration. Regrouping the 256 canvas rows within 128-row FA4 query tiles keeps

@@ -85,10 +85,16 @@ The kept tiles are executed by FA4's block-sparse interface (§4).
   With A64 and clock origin 1 there is no second observation within a canvas (canvases have at most 48 calls).
 - A re-decision does not observe QK again and does not rebuild the prefix risk table (prefix K/V are fixed within a
   canvas). It re-projects only the canvas part of V, recomputes the V reference scale (RMS of V over all valid keys),
-  and re-runs the threshold comparison (`_dp_decide`) plus the canvas/boundary tail scan. At long context the
-  reference scale moves only slightly, so held maps are expected to change little between decisions (inferred from the
-  code; map drift between decisions has not been measured). This is consistent with M3 R6 DP ≈ B in E4.
-- The query sensitivity T is not set in any `numerical_qk_reuse` run, so log T = 0.
+  and re-runs the threshold comparison (`_dp_decide`) with the CURRENT query sensitivity T, plus the canvas/boundary
+  tail scan.
+- **Query sensitivity T is active** (corrected 2026-10-02; an earlier note said T = 1). Every run wraps the router in
+  `NativeReuseState('T', …)` with the bound parent config `beta=3.0, gamma=0.5, fast_t=True`: each step sets, per canvas
+  position, T = clamp(1 + 3·e, 1, 4), where e is the exponential moving average (γ = 0.5) of "this position's argmax
+  changed since the last step". log T (up to 1.39) is added to every row's risk before the worst-row max, so rows that
+  are still changing keep more tiles. The reference scale does not change between decisions within a canvas.
+- **Measured map drift** (`scripts/v27_map_drift_diag.py`, 64K/32K items 0–3): every re-decision changes the map;
+  relative to the first decision of the canvas, 44–71% of its kept tiles change and the kept-set Jaccard is 0.59–0.70.
+  Re-decisions follow T, so M3 R6 is not "select once per canvas".
 
 **Our named variants (v27; each is an optional `v21` config key):**
 

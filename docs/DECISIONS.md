@@ -90,6 +90,10 @@ FA4 + piecewise substrates. Mechanism findings (what fails and why) usually stil
 
 ## Corrections to our own earlier claims (keep; do not repeat)
 
+- "The query sensitivity T is 1 in every run" and "re-decisions barely change the held map (≈ select once per canvas)"
+  (2026-10-01 docs and deck v6) were wrong (corrected 2026-10-02). `NativeReuseState('T')` sets T = clamp(1 + 3·EMA of
+  argmax flips, 1, 4) per canvas position every step; measured re-decisions change 44–71% of the first decision's kept
+  tiles. Lesson: verify code-path claims with a receipt or a measurement before writing them into slides.
 - "The 3-seed step inflation was trajectory noise and E4 shows no inflation" was too strong (corrected 2026-10-01).
   Per-seed step ratios range 0.85–1.24; the old and new seed sets are both draws from that spread (13 of 84 random
   3/6 splits give a gap at least as large). Pooled over 9 seeds the step count is +2.4% at 32K and +1.5% at 64K, not
