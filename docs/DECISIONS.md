@@ -240,3 +240,9 @@ reported, with exact decomposition checked. Prefill counts must agree between bo
   No evidence currently justifies aborting V18b or reopening closed regroup/V claims.
 - Next method study needs a new branch, independent calibration, matched realized density and
   selector costs, native stopping, strong dense and optimized references. See audit document.
+
+
+- 2026-10-02 18:25 (UTC-5): configured a single-campaign completion stage for formal V18b.
+  After all eight workers close, score privately and publish validated aggregates only.
+  Pin the local and remote branch head; stop on concurrent changes or invalid runs.
+  No autonomous positive interpretation and no additional GPU launch. See HANDOFF.

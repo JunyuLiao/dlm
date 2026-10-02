@@ -36,6 +36,17 @@ cell-level repeated-seed p values are exploratory. HF W excluded method setup/cl
 `new_graphs` tracked Dynamo compilation rather than CUDA capture. Mass-only removes V from prefix
 ranking only. R17 92K main discordance is +0/-0 (91/91 unchanged). CHW/PPT/Slack reviewed read-only.
 
+## Completion pipeline (2026-10-02 18:25 (UTC-5))
+
+The private coordinator now has a single-campaign finalizer for `v27_vllm_v18_panel_001`.
+It waits for all eight workers, then runs strict scoring and publishes only aggregate results.
+It checks that local/remote branch heads have not moved since it was armed; a changed head,
+failed worker, missing pair or nonzero graph counter stops publication for review. It does
+not launch another GPU experiment or infer a positive research conclusion. The configured
+helper is `vllm_v18_finalize.py` in the private coordination directory; consult its private
+status before manually scoring or publishing the same campaign. It will be armed against
+this documentation commit after push. Frozen inference remains `8704cd072`.
+
 ## Intake and panel preparation (2026-10-02, US Central UTC-5)
 
 - Reviewed remote branch explicitly with `git fetch origin research/humaneval-v27-20261001`:
