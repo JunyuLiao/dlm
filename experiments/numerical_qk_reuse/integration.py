@@ -296,6 +296,7 @@ class Attention:
         # PREVIOUS canvas (every newer key tile kept) instead of the dense bootstrap; call 1 still runs the dense
         # observation, so every later call uses a fresh map. Canvas 0 and any invalid carry stay dense.
         self.carry_first, self.carried_first_calls = False, 0
+        self.observe_carried, self.observe_carried_calls, self._first_maps = False, 0, {}
         self.density_gate = None       # v27 density gate preset (DENSITY_GATES), named variant
         self._fa4_lists, self.fa4_list_builds = [], 0   # v27 FA4 consumer: block lists per keep map
         # v27 async observation route: the observation call's selector (whose decision serves only LATER calls)
@@ -352,6 +353,7 @@ class Attention:
                                           canvas=self.canvas, ext=None, kept64=kept64)
                 self.carry_snapshots += 1
             self._carried_layers = set()
+        getattr(self, '_first_maps', {}).clear()
         self.epoch += 1
         self.cache.clear()
         self.sources.clear()
@@ -526,6 +528,9 @@ class Attention:
                                                     None)]
                     self.q64_carried_maps += 1
                 result = self._consume(q, k, v, skipped, eligible, scale, window, causal)
+                if getattr(self, 'observe_carried', False):
+                    # v27 observe_carried: the observation call (call 1) forms its output from this same map
+                    self._first_maps[layer] = (self.canvas, nk, skipped, eligible)
                 returned = result.output.transpose(1, 2).contiguous()
                 torch._assert_async(torch.isfinite(result.output).all(), 'Invalid first-call carried-map output')
                 self.carried_first_calls += 1
@@ -876,9 +881,22 @@ class Attention:
         summary = allocate_summary(b, h, qb, kt, prefix_tiles, rank, q.device, None) if prefix_tiles else None
         if summary is None:
             raise ValueError('fused observation needs at least one wholly-prefix tile')
+        carried = getattr(self, '_first_maps', {}).pop(layer, None)
+        if carried is not None and (carried[0] != self.canvas or carried[1] != nk):
+            carried = None
+        if carried is not None:
+            # v27 observe_carried (named variant): the output of the observation call comes from the official FA4
+            # block-sparse kernel on the map call 0 of this canvas used (the carried map); the fused kernel runs in
+            # observation-only mode, so the summaries, tail and decision are exactly those of the dense path
+            sparse = self._consume(q, k, v, carried[2], carried[3], scale, window, causal)
+            output = sparse.output.transpose(1, 2).contiguous()
+            self.observe_carried_calls += 1
         # Named variant: BF16 inputs for the rank-32 mu estimate (1.9 vs 3.4 ms at 17.5K keys).
-        output, tail = fused_observe(q, k, v, projected.contiguous(), scale, prefix_tiles, summary,
-                                     splits=self.c64_splits, mu=rank > 0, mu_precision='bf16')
+        dense_out, tail = fused_observe(q, k, v, projected.contiguous(), scale, prefix_tiles, summary,
+                                        splits=self.c64_splits, mu=rank > 0, mu_precision='bf16',
+                                        output=carried is None)
+        if carried is None:
+            output = dense_out
         self.cache.publish_scores(identity, self.step, tail)
         lease = self.sketches.entries.get(layer)
         summary.identity = (identity, self.step, None if lease is None else lease['identity'], prefix_tiles)
@@ -1120,6 +1138,7 @@ class Attention:
                     carry_canvases=self.carry_canvases, carried_calls=self.carried_calls,
                     carry_snapshots=self.carry_snapshots, observe_step=self.observe_step,
                     carry_first=self.carry_first, carried_first_calls=self.carried_first_calls,
+                    observe_carried=self.observe_carried, observe_carried_calls=self.observe_carried_calls,
                     risk_value=self.risk_value, proj_rank=self.proj_rank,
                     q_block=self.q_block, q64_refined_routes=self.q64_refined_routes, q64_list_builds=self.q64_list_builds,
                     q_regroup=self.q_regroup, q64_regrouped_calls=self.q64_regrouped_calls, q_carry64=self.q_carry64,

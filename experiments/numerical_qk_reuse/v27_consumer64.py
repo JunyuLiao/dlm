@@ -114,14 +114,17 @@ def _fused_observe(Q, K, V, Z, PO, PM, PL, ZSUM, MUSUM, ACTSUM, BADSUM, TAIL,
                    SQH, SQL, SKH, SKL, SVH, SVL,
                    NQ, NK, H: tl.constexpr, HK: tl.constexpr, D: tl.constexpr, R: tl.constexpr,
                    QB, PT, KT, KOFF, KSTORE, SPLITS: tl.constexpr, SCALE,
-                   MU: tl.constexpr, BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, MU_PREC: tl.constexpr = 0):
+                   MU: tl.constexpr, BLOCK_M: tl.constexpr, BLOCK_N: tl.constexpr, MU_PREC: tl.constexpr = 0,
+                   OUT: tl.constexpr = 1):
     """v27 fused observation: one dense pass that (a) forms the dense attention output
     (online softmax over every legal tile, FP32 scores, like ``consume64``) and (b)
     writes the M1 prefix summaries of every WHOLLY-prefix KV64 tile -- block log-mass
     ``z``, weighted projected-V ``mu`` (optional), active/bad flags -- from the FP32
     current scores with the route STORE formulas, sharing one exponential per score with
     the output; (c) keeps those FP32 scores of the remaining (canvas/boundary) tiles in
-    a compact tail buffer for later decisions. Named variant: FP32 observation scores."""
+    a compact tail buffer for later decisions. Named variant: FP32 observation scores.
+    OUT=0 (v27 observe_carried): observation only -- no V load, no PV, no output partials; the
+    summaries and the tail are bit-identical to OUT=1 (same scores, same exponentials)."""
     mb, h, sp = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     kh = h // (H // HK)
     qi = mb * BLOCK_M + tl.arange(0, BLOCK_M)
@@ -170,25 +173,29 @@ def _fused_observe(Q, K, V, Z, PO, PM, PL, ZSUM, MUSUM, ACTSUM, BADSUM, TAIL,
         else:
             tl.store(TAIL + (h * NQ + qi[:, None]) * KSTORE + (kk[None, :] - KOFF), s,
                      rows[:, None] & kv_ok[None, :])
-        # online softmax from the same exponentials, rescaled by exp(tile_max - m_new)
-        m_new = tl.maximum(m, tile_max)
-        safe = tl.where(m_new > -float('inf'), m_new, 0.)
-        alpha = tl.where(m > -float('inf'), tl.exp(m - safe), 0.)
-        beta = tl.where(active, tl.exp(safe_tile - safe), 0.)
-        l = alpha * l + beta * ell
-        v = tl.load(V + kh * SVH + kk[:, None] * SVL + di[None, :], kv_ok[:, None], other=0.)
-        acc = alpha[:, None] * acc + tl.dot((p * beta[:, None]).to(tl.bfloat16), v)
-        m = m_new
-    base = (h * SPLITS + sp) * NQ + qi
-    tl.store(PM + base, m, rows)
-    tl.store(PL + base, l, rows)
-    tl.store(PO + base[:, None] * D + di[None, :], acc, rows[:, None])
+        if OUT:
+            # online softmax from the same exponentials, rescaled by exp(tile_max - m_new)
+            m_new = tl.maximum(m, tile_max)
+            safe = tl.where(m_new > -float('inf'), m_new, 0.)
+            alpha = tl.where(m > -float('inf'), tl.exp(m - safe), 0.)
+            beta = tl.where(active, tl.exp(safe_tile - safe), 0.)
+            l = alpha * l + beta * ell
+            v = tl.load(V + kh * SVH + kk[:, None] * SVL + di[None, :], kv_ok[:, None], other=0.)
+            acc = alpha[:, None] * acc + tl.dot((p * beta[:, None]).to(tl.bfloat16), v)
+            m = m_new
+    if OUT:
+        base = (h * SPLITS + sp) * NQ + qi
+        tl.store(PM + base, m, rows)
+        tl.store(PL + base, l, rows)
+        tl.store(PO + base[:, None] * D + di[None, :], acc, rows[:, None])
 
 
-def fused_observe(q, k, v, sketch, scale, prefix_tiles, summary, splits=2, mu=True, mu_precision='tf32x3'):
+def fused_observe(q, k, v, sketch, scale, prefix_tiles, summary, splits=2, mu=True, mu_precision='tf32x3',
+                  output=True):
     """Dense output [1,Q,H,D] plus summaries written into ``summary`` (PrefixSummary with
     z/mu/active/bad sized for ``prefix_tiles``) and a compact observation-score tail
-    [1,H,Q,K-64*prefix_tiles] (FP32) for the remaining tiles."""
+    [1,H,Q,K-64*prefix_tiles] (FP32) for the remaining tiles. output=False: observation only, returns
+    (None, tail) with identical summaries and tail."""
     b, h, nq, d = q.shape
     hk, nk = k.shape[1], k.shape[2]
     if b != 1 or sketch.shape != (1, hk, nk, 32):
@@ -197,10 +204,13 @@ def fused_observe(q, k, v, sketch, scale, prefix_tiles, summary, splits=2, mu=Tr
     pt = int(prefix_tiles)
     koff = pt * 64
     tail = torch.empty((1, h, nq, nk - koff), device=q.device, dtype=torch.float32)
-    po = torch.empty((h, splits, nq, d), device=q.device, dtype=torch.float32)
-    pm = torch.empty((h, splits, nq), device=q.device, dtype=torch.float32)
-    pl = torch.empty((h, splits, nq), device=q.device, dtype=torch.float32)
     dummy = torch.empty((1,), device=q.device, dtype=torch.float32)
+    if output:
+        po = torch.empty((h, splits, nq, d), device=q.device, dtype=torch.float32)
+        pm = torch.empty((h, splits, nq), device=q.device, dtype=torch.float32)
+        pl = torch.empty((h, splits, nq), device=q.device, dtype=torch.float32)
+    else:
+        po = pm = pl = dummy
     small = torch.empty((1,), device=q.device, dtype=torch.int8)
     zs = summary.z if pt else dummy
     mus = summary.mu if (pt and mu) else dummy
@@ -211,7 +221,9 @@ def fused_observe(q, k, v, sketch, scale, prefix_tiles, summary, splits=2, mu=Tr
                          q.stride(1), q.stride(2), k.stride(1), k.stride(2), v.stride(1), v.stride(2),
                          nq, nk, h, hk, d, 32, qb, pt, kt, koff, nk - koff, splits, scale,
                          MU=bool(mu), BLOCK_M=64, BLOCK_N=64, num_warps=8, num_stages=1,
-                         MU_PREC={'tf32x3': 0, 'tf32': 1, 'bf16': 2}[mu_precision])
+                         MU_PREC={'tf32x3': 0, 'tf32': 1, 'bf16': 2}[mu_precision], OUT=int(bool(output)))
+    if not output:
+        return None, tail
     if splits == 1:
         out = po[:, 0] / pl[:, 0, :, None]
     else:

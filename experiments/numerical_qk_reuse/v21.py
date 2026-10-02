@@ -86,7 +86,8 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      route_pipeline=False, risk_state=None, density_gate=None, fa4_consumer=False,
                      async_route=False, risk_budget=None, risk_topk=None, carry_canvases=None,
                      observe_step=None, protect_output=False, carry_first=False, proj_rank=None,
-                     risk_value=None, q_block=None, q_regroup=False, q_carry64=False) -> dict:
+                     risk_value=None, q_block=None, q_regroup=False, q_carry64=False,
+                     observe_carried=False) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -225,6 +226,12 @@ def effective_config(base: dict, arm: str, scope: str, *,
         if q_carry64 is not True or q_block != 64 or q_regroup or not carry_first:
             raise ValueError('v27 q64 carry needs q64 (not regrouped) with carry_first')
         extra['q_carry64'] = True
+    if observe_carried:
+        # v27 observe_carried (named variant): the observation call's output uses call 0's carried map on FA4;
+        # the observation itself (summaries, decision) is unchanged
+        if observe_carried is not True or not carry_first or not fused_observe or not fa4_consumer:
+            raise ValueError('v27 observe_carried needs carry_first with the fused observation on FA4')
+        extra['observe_carried'] = True
     if carry_first:
         # v27 first-call carry (named variant): canvas call 0 reuses the previous canvas's decision, call 1 observes
         if (carry_first is not True or bootstrap_policy is None or fresh_fused or not fused_observe or not fa4_consumer
@@ -410,6 +417,9 @@ def validate_effective(config: dict, condition: str):
     if 'q_carry64' in config and (config['q_carry64'] is not True or config.get('q_block') != 64
                                   or 'q_regroup' in config or config.get('carry_first') is not True):
         raise ValueError('v27 q64 carry identity drift')
+    if 'observe_carried' in config and (config['observe_carried'] is not True or config.get('carry_first') is not True
+                                        or 'fused_observe' not in config or 'fa4_consumer' not in config):
+        raise ValueError('v27 observe_carried identity drift')
     if 'carry_first' in config and (config['carry_first'] is not True or 'fused_observe' not in config
                                     or 'fa4_consumer' not in config or 'carry_canvases' in config):
         raise ValueError('v27 first-call carry identity drift')
@@ -515,6 +525,7 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('first-call carry must be bound before any routed call')
             owner.carry_first = True
+            owner.observe_carried = bool(config.get('observe_carried', False))
         if 'q_block' in config:
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('q64 must be bound before any routed call')
@@ -600,6 +611,7 @@ def install(adapter, config: dict, condition: str):
                         proj_rank=getattr(owner, 'proj_rank', 32), risk_value=getattr(owner, 'risk_value', None),
                         q_block=getattr(owner, 'q_block', 128), q_regroup=bool(getattr(owner, 'q_regroup', False)),
                         q_carry64=bool(getattr(owner, 'q_carry64', False)),
+                        observe_carried=bool(getattr(owner, 'observe_carried', False)),
                         density_gate=config.get('density_gate'),
                         consumer=getattr(owner, 'consumer', None),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
