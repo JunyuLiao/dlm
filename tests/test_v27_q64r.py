@@ -142,3 +142,17 @@ def test_fa4_consumer_regrouped_rows_match_reference():
     m = row_map.repeat_interleave(64, 3)[..., :keys]
     ref = torch.einsum('bhqk,bhkd->bhqd', s.masked_fill(~m, float('-inf')).softmax(-1), vr)
     torch.testing.assert_close(got.float(), ref, atol=2e-2, rtol=2e-2)
+
+
+def test_q64_carry_is_opt_in_and_guarded():
+    from experiments.numerical_qk_reuse import v21
+    arm, scope = 'M3_R3_A8_current_output', 'GLOBAL_ONLY_NATIVE_LOCAL'
+    line = _mainline(threshold_shift='minus_ln2')
+    cfg = v21.effective_config(dict(BASE), arm, scope, q_block=64, carry_first=True, q_carry64=True, **line)
+    v21.validate_effective(cfg, cfg['condition'])
+    plain = v21.effective_config(dict(BASE), arm, scope, q_block=64, carry_first=True, **line)
+    assert cfg['q_carry64'] is True and 'q_carry64' not in plain and cfg['fingerprint'] != plain['fingerprint']
+    for bad in (dict(q_block=64, q_carry64=True), dict(q_block=64, carry_first=True, q_regroup=True, q_carry64=True),
+                dict(carry_first=True, q_carry64=True)):
+        with pytest.raises(ValueError):
+            v21.effective_config(dict(BASE), arm, scope, **bad, **line)

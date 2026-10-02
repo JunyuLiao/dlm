@@ -40,6 +40,28 @@ def main():
     kernel = v27_substrate.prefill_kernel(protocol['substrate'])
     fwd = v27_fa4.load()
     bst = v27_fa4.block_sparse_tensors
+    if hasattr(dp, '_regroup_q64'):
+        regroup = dp._regroup_q64
+    else:
+        # an older deploy (e.g. the E13 one, whose frozen configs pin its source bytes): the same within-block
+        # regroup as v27_dense_prefix._regroup_q64 (commit 02fb86c), used only for timing here
+        def regroup(state, skipped, eligible, reference, sensitivity, log_threshold, nq):
+            b, h, qb, pt, _ = state.lognorm.shape
+            kept = (eligible & ~skipped).repeat_interleave(2, dim=2)
+            base = torch.arange(qb, device=skipped.device).view(1, 1, qb, 1) * 128
+            if not pt:
+                return kept, torch.arange(nq, device=skipped.device).expand(b, h, nq).contiguous()
+            hk = reference.shape[1]
+            kh = torch.arange(h, device=reference.device) // (h // hk)
+            risk = state.lognorm - torch.log(reference.float().clamp_min(1e-12))[:, kh][:, :, None, None, None]
+            if sensitivity is not None:
+                risk = risk + torch.log(sensitivity.float()).view(b, 1, qb, 1, 128)
+            need = (risk >= float(log_threshold)).permute(0, 1, 2, 4, 3)                  # [B,H,QB,128,PT]
+            need = need & (eligible & ~skipped)[..., :pt].unsqueeze(3)
+            within = torch.argsort(need.sum(-1), dim=-1, stable=True)
+            grouped = torch.gather(need, 3, within[..., None].expand(-1, -1, -1, -1, pt))
+            kept[..., :pt] = grouped.view(b, h, qb, 2, 64, pt).any(4).reshape(b, h, qb * 2, pt)
+            return kept, (within + base).reshape(b, h, nq)
     pending, records, ctx = {}, [], {}
     original_route, original_consume = dp.route, Attention._consume
 
@@ -78,7 +100,7 @@ def main():
         skipped, eligible = p['skipped'], p['eligible']
         kept128 = eligible & ~skipped
         kept64 = dp.refine_q64(st, skipped, eligible, ref, sens, thr, nq)
-        rr = dp.refine_q64(st, skipped, eligible, ref, sens, thr, nq, regroup=True)
+        rr = regroup(st, skipped, eligible, ref, sens, thr, nq) if kept64 is not None else None
         if kept64 is None or rr is None:
             return None
         kept64r, order = rr
@@ -106,8 +128,7 @@ def main():
         fns['perm_only'] = perm_only
         fns['build128'] = lambda: bst(kept128)
         fns['refine64_build'] = lambda: bst(dp.refine_q64(st, skipped, eligible, ref, sens, thr, nq), q_block=64)
-        fns['refine64r_build'] = lambda: bst(dp.refine_q64(st, skipped, eligible, ref, sens, thr, nq,
-                                                           regroup=True)[0], q_block=64)
+        fns['refine64r_build'] = lambda: bst(regroup(st, skipped, eligible, ref, sens, thr, nq)[0], q_block=64)
         times = timed(fns)
         dense = call(allkept, 1).float()
         o128, o64, o64r = call(lists['128'], 1).float(), call(lists['64'], 1).float(), call(lists['64r'], 1, True).float()

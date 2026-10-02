@@ -13,8 +13,9 @@ BASE_TASK = {
 }
 DATASETS = tuple(BASE_TASK)
 EXTRA_GOLD = tuple(d for d, base in BASE_TASK.items() if d != base or d == 'humaneval')
-# v27 generation seeds: 101/202/303 panels, 404 final AIME panel, 505-909 the E4 large-seed confirmation
-V27_SEEDS = frozenset({101, 202, 303, 404, 505, 606, 707, 808, 909})
+# v27 generation seeds: 101/202/303 panels, 404 final AIME panel, 505-909 the E4 large-seed confirmation,
+# 1010-1515 the E14 fresh-seed confirmation (seeds never used by an earlier panel)
+V27_SEEDS = frozenset({101, 202, 303, 404, 505, 606, 707, 808, 909, 1010, 1111, 1212, 1313, 1414, 1515})
 
 
 def base_task(dataset: str) -> str:

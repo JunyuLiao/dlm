@@ -279,6 +279,7 @@ class Attention:
         self.q_block = 128             # v27 q64: 64-row keep maps for the FA4 consumer (refined from the DP risk table)
         self._q64, self.q64_refined_routes, self.q64_list_builds = [], 0, 0
         self.q_regroup, self.q64_regrouped_calls, self.q64_carried_maps = False, 0, 0
+        self.q_carry64 = False
         # v27 cross-canvas carry (named variant): a layer's last decision of an observed canvas is reused, extended
         # with every newer key tile kept, for the next carry_canvases - 1 canvases -- no dense bootstrap, no
         # observation and no decision there; the canvas after that observes again through the normal path
@@ -341,9 +342,11 @@ class Attention:
                     continue
                 if entry.identity.canvas != self.canvas or entry.identity.encoder_epoch != self.epoch:
                     continue
-                kept64 = next((m for s_ref, e_ref, m, o in getattr(self, '_q64', ())
-                               if s_ref is entry.decision.skipped and e_ref is entry.decision.eligible and o is None),
-                              None)
+                kept64 = None
+                if getattr(self, 'q_carry64', False):
+                    kept64 = next((m for s_ref, e_ref, m, o in getattr(self, '_q64', ())
+                                   if s_ref is entry.decision.skipped and e_ref is entry.decision.eligible
+                                   and o is None), None)
                 self._carry[layer] = dict(skipped=entry.decision.skipped, eligible=entry.decision.eligible,
                                           prefix=entry.identity.keys - entry.identity.queries,
                                           canvas=self.canvas, ext=None, kept64=kept64)
@@ -1119,7 +1122,7 @@ class Attention:
                     carry_first=self.carry_first, carried_first_calls=self.carried_first_calls,
                     risk_value=self.risk_value, proj_rank=self.proj_rank,
                     q_block=self.q_block, q64_refined_routes=self.q64_refined_routes, q64_list_builds=self.q64_list_builds,
-                    q_regroup=self.q_regroup, q64_regrouped_calls=self.q64_regrouped_calls,
+                    q_regroup=self.q_regroup, q64_regrouped_calls=self.q64_regrouped_calls, q_carry64=self.q_carry64,
                     q64_carried_maps=self.q64_carried_maps,
                     protect_output=self.protect_output, protected_routes=self.protected_routes,
                     fused_observations=self.fused_observations,
