@@ -194,3 +194,18 @@ Sources: audited base `6b13fe178`; `scripts/v27_fa4_panel_summary.py`,
 - 2026-10-02 16:58 UTC-5: attempt 002 launched on dllm under new immutable deploy `eeba8b6ec` and new binding/run directories. All arms use the globally longest eligible input. No formal panel yet.
 
 - 2026-10-02 17:07 UTC-5: attempt 002 dense passed (N=146, commit=12, zero timed compile/capture); native failed adapter coverage/clock validation before a timed record. No speed conclusion. Attempt 002 reserved 355.475 GPU seconds; total closed attempts 597.082 s. Independent diagnostic saves scheduler and adapter counters without changing inference. Qualification rows are now explicitly barred from the formal summary; 127 CPU tests pass.
+
+## Async execution-count correction (2026-10-02 17:16 UTC-5)
+
+The independent diagnostic found 349 retired denoising steps versus 350 actual native
+forwards, 1750 GLOBAL calls, 29 encoder calls (6 prefill + 23 commits), and zero order errors.
+The official async batch queue had executed the next canvas's first forward before retiring
+the final commit. This is not an adapter scheduling defect. Earlier V18 dense qualification's
+146 count was a scheduler-retired count, not yet a verified actual execution count.
+
+The tracker now keeps references to vLLM's existing independent CPU sampled-count snapshots,
+tagged using the sampler's CPU draft flag, and reads them after the request-boundary sync.
+It adds no tensor operation, GPU synchronization or change to native async scheduling.
+N includes all executed denoising work. Retired N and unconsumed speculative N are also
+reported, with exact decomposition checked. Prefill counts must agree between both sources.
+151 CPU tests pass. Closed reserved GPU seconds total 755.639; formal panel still not launched.

@@ -1,4 +1,5 @@
 import pytest
+import numpy as np
 from types import SimpleNamespace
 from scripts.v27_vllm_panel_run import validate_receipts, add_tracked_request
 from scripts.v27_vllm_metrics import PhaseTracker
@@ -10,6 +11,7 @@ def test_internal_request_id_rewrite_counts_real_prefill():
     add_tracked_request(e,t,'external',None,None)
     t.observe_scheduler(SimpleNamespace(num_scheduled_tokens={'external-internal':11},scheduled_spec_decode_tokens={}),
                         SimpleNamespace(req_id_to_index={'external-internal':0},sampled_token_ids=[[]]),completed_at=2)
+    t.observe_execution_snapshot(['external-internal'],0,11,np.array([0],dtype=np.int32))
     assert t.finalize(1,3)['prefill_tokens']==11
 
 

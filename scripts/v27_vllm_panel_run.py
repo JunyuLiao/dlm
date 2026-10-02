@@ -119,6 +119,7 @@ def run(a, binding, spec, status):
         va.install_vllm_patches(adapter)
     tracker = PhaseTracker()
     tracker.install_scheduler_hook()
+    tracker.install_execution_hook()
     cg = spec['arm_settings'][a.arm]['cudagraph_mode']
     kw = dict(model=binding['model'], dtype='bfloat16', max_model_len=settings['max_model_len'],
               max_num_seqs=1, max_num_batched_tokens=settings['chunk'], enable_chunked_prefill=True,
@@ -184,6 +185,10 @@ def run(a, binding, spec, status):
             rec = dict(meta,dataset=cell['dataset'],index=cell['index'],repeat=rep,
                        wall_s=end-begin,prefill_s=phase['prefill_s'],decode_span_s=phase['decode_span_s'],
                        denoise_forward_count=n,commit_forward_count=phase['commit_forwards'],
+                       scheduler_denoise_forward_count=phase['scheduler_denoising_forwards'],
+                       scheduler_commit_forward_count=phase['scheduler_commit_forwards'],
+                       speculative_unused_denoising=phase['speculative_unused_denoising'],
+                       execution_count_source='vllm_existing_async_cpu_snapshot',
                        scheduler_steps=phase['scheduler_steps'],prefill_steps=phase['prefill_steps'],
                        phase_boundary=phase['phase_boundary'],output_tokens=len(output.token_ids),
                        finish_reason=output.finish_reason,graph_captures_timed=captures,

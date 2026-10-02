@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 17:07 (UTC-5)",
+    "updated_local": "2026-10-02 17:16 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
-    "verified_commit": "c7a2fa8cd",
+    "verified_commit": "65d3bf2bd",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -17,9 +17,7 @@
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
     "headline": "vLLM smoke only: S/N proxy 0.96 at 32K, 0.85 at 64K; request/accuracy panel V18 preparing. Historical HF speed ratios are not headline official-serving evidence.",
-    "running": [
-      "dllm: v27_vllm_v18_clock_diag_001"
-    ],
+    "running": [],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
@@ -198,12 +196,12 @@
       "source": "docs/VLLM_PORT_NOTES_20261002.md"
     },
     "vllm_v18": {
-      "status": "attempt 002 dense passed, native failed clock/coverage; independent diagnostic running",
+      "status": "async counting boundary identified and fixed with existing CPU snapshots; ready for fresh 96K qualification",
       "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_vllm_lb_v18.json",
-      "gpu_seconds": 597.082,
-      "cpu_tests": 127,
+      "gpu_seconds": 755.639,
+      "cpu_tests": 151,
       "deploy_commit": "eeba8b6eca4c0be607561fa597cbe6ce0775c722",
-      "gpu_accounting": "closed qualification attempts 001+002; active diagnostic pending"
+      "gpu_accounting": "closed qualification 001+002 and clock diagnostic 001"
     }
   },
   "task": "M3 output numerics and trajectory isolation",

@@ -28,7 +28,9 @@ def fixtures():
                    engine_seed=123, seed_applied=False, qualification_only=False,
                    measurement_mode='request_boundary_sync',
                    graph_captures_timed=0, wall_s=wall, decode_span_s=wall / 2, prefill_s=2,
-                   denoise_forward_count=10, output_tokens=16, finish_reason='stop',
+                   denoise_forward_count=10, scheduler_denoise_forward_count=9,
+                   speculative_unused_denoising=1, execution_count_source='vllm_existing_async_cpu_snapshot',
+                   output_tokens=16, finish_reason='stop',
                    receipts=None,
                    adapter_sha256=None if arm == 'dense' else 'adapter',
                    method_fingerprint='method-source' if arm == 'method' else None,
@@ -114,6 +116,8 @@ def test_complete_panel_ratios_controls_and_private_redaction(tmp_path, predict)
     assert method['prefill_s_mean'] == 2
     assert method['denoise_forward_count_mean'] == method['denoise_forward_count_median'] == 10
     assert method['denoise_forward_count_sum'] == 60
+    assert method['scheduler_denoise_forward_count_sum'] == 54
+    assert method['speculative_unused_denoising_mean'] == 1
     assert method['decode_s_per_denoise_forward_geomean'] == pytest.approx(.4)
     assert predict and all(text == 'Answer: B' for text in predict)
     for path in out.iterdir():
@@ -461,6 +465,7 @@ def test_absolute_arm_statistics_include_true_forward_counts_and_skew(tmp_path):
     for ordinal, key in enumerate(sorted(cells)):
         cells[key]['method'].update(wall_s=walls[ordinal], decode_span_s=ordinal + 1,
                                     prefill_s=(ordinal + 1) / 4, denoise_forward_count=2 * (ordinal + 1),
+                                    scheduler_denoise_forward_count=2 * (ordinal + 1) - 1,
                                     commit_forward_count=ordinal)
     result = summary.summarize(cells, bootstrap_reps=80)
     method = next(row for row in result['arms'] if row['arm'] == 'method')
@@ -470,6 +475,8 @@ def test_absolute_arm_statistics_include_true_forward_counts_and_skew(tmp_path):
     assert method['prefill_s_mean'] == .875
     assert method['denoise_forward_count_mean'] == method['denoise_forward_count_median'] == 7
     assert method['denoise_forward_count_sum'] == 42
+    assert method['scheduler_denoise_forward_count_sum'] == 36
+    assert method['speculative_unused_denoising_mean'] == 1
     assert method['decode_s_per_denoise_forward_geomean'] == pytest.approx(.5)
     assert method['commit_forward_count_mean'] == 2.5
     assert method['commit_forward_count_observed_cells'] == 6
@@ -547,3 +554,50 @@ def test_missing_qualification_marker_cannot_enter_formal_summary(tmp_path):
     records[0].pop('qualification_only')
     with pytest.raises(ValueError, match='unqualified record'):
         load(tmp_path, protocol, records, completions)
+
+
+@pytest.mark.parametrize('field', ['execution_count_source', 'scheduler_denoise_forward_count',
+                                  'speculative_unused_denoising'])
+def test_actual_execution_count_evidence_is_required(tmp_path, field):
+    protocol, records, completions = fixtures()
+    records[0].pop(field)
+    with pytest.raises(ValueError, match='execution count source|scheduler_denoise_forward_count|speculative_unused_denoising'):
+        load(tmp_path, protocol, records, completions)
+
+
+def test_scheduler_events_are_not_an_actual_execution_count_source(tmp_path):
+    protocol, records, completions = fixtures()
+    records[0]['execution_count_source'] = 'scheduler_retired_events'
+    with pytest.raises(ValueError, match='execution count source'):
+        load(tmp_path, protocol, records, completions)
+
+
+@pytest.mark.parametrize('field', ['scheduler_denoise_forward_count', 'speculative_unused_denoising'])
+@pytest.mark.parametrize('value', [-1, False, 1.5, None])
+def test_actual_count_components_are_nonnegative_integers(tmp_path, field, value):
+    protocol, records, completions = fixtures()
+    records[0][field] = value
+    with pytest.raises(ValueError, match=field):
+        load(tmp_path, protocol, records, completions)
+
+
+@pytest.mark.parametrize('field,value', [('denoise_forward_count', 9),
+                                        ('scheduler_denoise_forward_count', 10),
+                                        ('speculative_unused_denoising', 0)])
+def test_actual_count_must_equal_scheduler_plus_unused(tmp_path, field, value):
+    protocol, records, completions = fixtures()
+    records[0][field] = value
+    with pytest.raises(ValueError, match='scheduler plus speculative unused'):
+        load(tmp_path, protocol, records, completions)
+
+
+def test_actual_n_and_amortized_cost_include_unused_execution(tmp_path):
+    cells = synthetic_scored_cells(tmp_path)
+    result = summary.summarize(cells, bootstrap_reps=80)
+    method = next(row for row in result['arms'] if row['arm'] == 'method')
+    assert method['denoise_forward_count_sum'] == 60
+    assert method['scheduler_denoise_forward_count_sum'] == 54
+    assert method['speculative_unused_denoising_mean'] == 1
+    assert method['decode_s_per_denoise_forward_geomean'] == pytest.approx(4 / 10)
+    assert method['decode_s_per_denoise_forward_geomean'] != pytest.approx(4 / 9)
+    assert 'including speculative unused execution' in result['timing']

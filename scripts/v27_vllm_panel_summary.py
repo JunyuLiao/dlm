@@ -188,6 +188,13 @@ def load_panel(record_paths, completion_paths, protocol):
             raise ValueError('engine seed differs from frozen block')
         for field in ('max_model_len', 'chunk', 'block_size', 'denoise_forward_count'):
             _integer(row.get(field), field, positive=True)
+        if row.get('execution_count_source') != 'vllm_existing_async_cpu_snapshot':
+            raise ValueError('actual denoising execution count source is missing or unsupported')
+        for field in ('scheduler_denoise_forward_count', 'speculative_unused_denoising'):
+            _integer(row.get(field), field)
+        if row['denoise_forward_count'] != (row['scheduler_denoise_forward_count'] +
+                                           row['speculative_unused_denoising']):
+            raise ValueError('actual denoising execution count differs from scheduler plus speculative unused count')
         if 'commit_forward_count' in row:
             _integer(row['commit_forward_count'], 'commit_forward_count')
         _integer(row.get('output_tokens'), 'output_tokens')
@@ -343,6 +350,10 @@ def summarize(cells, bootstrap_reps=4000):
                                  denoise_forward_count_mean=statistics.mean(forwards),
                                  denoise_forward_count_median=statistics.median(forwards),
                                  denoise_forward_count_sum=sum(forwards),
+                                 speculative_unused_denoising_mean=statistics.mean(
+                                     row['speculative_unused_denoising'] for _, row in present),
+                                 scheduler_denoise_forward_count_sum=sum(
+                                     row['scheduler_denoise_forward_count'] for _, row in present),
                                  decode_s_per_denoise_forward_geomean=_geo(
                                      [row['decode_span_s'] / row['denoise_forward_count'] for _, row in present]),
                                  commit_forward_count_mean=statistics.mean(commit) if commit else None,
@@ -379,7 +390,8 @@ def summarize(cells, bootstrap_reps=4000):
                 pairing='dataset/index/repeat; repeat is not a sampling seed; seed_applied=false',
                 confidence='95% item-cluster percentile bootstrap retaining all repeats',
                 timing='W=request boundary wall; S=decode span excluding initial prefill; P=initial prefill; '
-                       'N=actual denoising forwards excluding encoder commits; SN=S/N amortized cost',
+                       'N=actual denoising forwards including speculative unused execution and excluding encoder commits; '
+                       'SN=S/N amortized cost',
                 absolute_statistics='Per-arm means/medians use all timed requests; '
                                     'decode_s_per_denoise_forward_geomean is the geometric mean of request S/N; '
                                     'commit mean uses only its explicitly reported observed cells',
@@ -411,8 +423,8 @@ def write_summary(summary, out_dir):
         lines.append('| ' + ' | '.join(str(row[k]) for k in
                      ('dataset', 'arm', 'cells', 'items', 'strict_correct', 'task_correct', 'capped', 'unparsed')) + ' |')
     lines += ['', summary['absolute_statistics'], '',
-              '| dataset | arm | W mean / median (s) | S mean / median (s) | prefill mean (s) | denoise N mean / median / sum | S/N geometric mean (s) | commit forwards mean (observed cells) |',
-              '|---|---|---|---|---:|---|---:|---|']
+              '| dataset | arm | W mean / median (s) | S mean / median (s) | prefill mean (s) | denoise N mean / median / sum | unused speculative denoise mean | scheduler denoise sum | S/N geometric mean (s) | commit forwards mean (observed cells) |',
+              '|---|---|---|---|---:|---|---:|---:|---:|---|']
     for row in summary['arms']:
         commit = ('unreported' if row['commit_forward_count_mean'] is None else
                   f"{row['commit_forward_count_mean']:.4f} ({row['commit_forward_count_observed_cells']})")
@@ -421,7 +433,9 @@ def write_summary(summary, out_dir):
                      f"{row['decode_span_s_mean']:.4f} / {row['decode_span_s_median']:.4f} | "
                      f"{row['prefill_s_mean']:.4f} | "
                      f"{row['denoise_forward_count_mean']:.4f} / {row['denoise_forward_count_median']:.4f} / "
-                     f"{row['denoise_forward_count_sum']} | {row['decode_s_per_denoise_forward_geomean']:.6f} | {commit} |")
+                     f"{row['denoise_forward_count_sum']} | {row['speculative_unused_denoising_mean']:.4f} | "
+                     f"{row['scheduler_denoise_forward_count_sum']} | "
+                     f"{row['decode_s_per_denoise_forward_geomean']:.6f} | {commit} |")
     lines += ['', 'Ratios are candidate/reference; values below one mean faster or fewer forwards.', '',
               '| dataset | comparison | cells | items | correct (base) | W [95% CI] | S [95% CI] | prefill P [95% CI] | S/N [95% CI] | N [95% CI] | accuracy difference [95% CI] | exploratory McNemar p |',
               '|---|---|---:|---:|---|---|---|---|---|---|---|---:|']

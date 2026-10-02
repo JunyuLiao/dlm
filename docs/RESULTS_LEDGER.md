@@ -564,3 +564,8 @@ Source: `vllm_v18_qualification/attempt001.json`.
 
 V18 attempt 002: dense qualification passed, native failed independent clock/coverage checks.
 No paired performance result. 355.475 reserved GPU seconds, source `vllm_v18_qualification/attempt002.json`.
+
+V18 clock diagnostic: native executed 350 denoising forwards while the scheduler had retired
+349; exactly 1750 GLOBAL calls and zero order errors. The extra forward is official async
+queue work and must count in N. No speed claim. 158.557 GPU seconds, source
+`vllm_v18_qualification/clock_diagnostic001.json`; total closed V18 work 755.639 s.
