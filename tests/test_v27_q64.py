@@ -22,6 +22,7 @@ def _state(pt, h=16, qb=2, seed=0):
     lognorm = torch.randn(1, h, qb, pt, 128, generator=g) * 2 - 4
     lognorm[..., 0, :] = float('inf')                      # first support: never dropped
     lognorm[0, 0, 0, 1, :5] = float('-inf')                # some inactive rows
+    lognorm[..., 1:pt // 2, 64:] = -20.                    # tiles only the first 64-row half may need
     eligible = (torch.rand(1, h, qb, pt, generator=g) > .1).to(torch.int8)
     eligible[..., 0] = 1                                   # the first-support tile is always eligible
     z = torch.zeros(1, h, qb, 128)
