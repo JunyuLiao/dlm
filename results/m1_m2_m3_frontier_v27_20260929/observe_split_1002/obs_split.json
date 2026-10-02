@@ -1,0 +1,49 @@
+{
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "torch": "2.12.1+cu130",
+ "rounds": 20,
+ "rows": [
+  {
+   "keys": 33000,
+   "prefix_keep": 0.18,
+   "kept_fraction": 0.1906,
+   "ms": {
+    "fused": 2.2154,
+    "obs_only": 1.4697,
+    "fa4_sparse": 0.2924,
+    "fa4_dense": 1.342
+   },
+   "call1_current": 2.2154,
+   "call1_observe_carried": 1.7621,
+   "ratio": 0.7954
+  },
+  {
+   "keys": 65000,
+   "prefix_keep": 0.09,
+   "kept_fraction": 0.0951,
+   "ms": {
+    "fused": 4.2173,
+    "obs_only": 2.8484,
+    "fa4_sparse": 0.2973,
+    "fa4_dense": 2.5893
+   },
+   "call1_current": 4.2173,
+   "call1_observe_carried": 3.1457,
+   "ratio": 0.7459
+  },
+  {
+   "keys": 97000,
+   "prefix_keep": 0.06,
+   "kept_fraction": 0.0646,
+   "ms": {
+    "fused": 6.2812,
+    "obs_only": 4.2586,
+    "fa4_sparse": 0.3318,
+    "fa4_dense": 3.8592
+   },
+   "call1_current": 6.2812,
+   "call1_observe_carried": 4.5904,
+   "ratio": 0.7308
+  }
+ ]
+}

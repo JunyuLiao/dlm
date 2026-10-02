@@ -277,6 +277,68 @@ Thinking ON, budget 8192, pass@1 by the official tests in the unprivileged sandb
 - Regrouping within 64-row groups would add only ~5% of the remaining kept work (about 0.15% per step); not pursued.
 - Source: `lb_q64_panel_e13/` (`summary.md`, `steps.md`, `receipts.md`); protocol `v27_lb_q64_e13_f038777e0ab0d142`.
 
+### L1k. E14: q64 and q64c with six fresh seeds; pooled 12-seed main result (2026-10-02)
+
+| comparison | 32K | 64K | 96K |
+|---|---|---|---|
+| **M3 + c0 / dense, W (12 seeds)** | **0.925 [0.892, 0.958]** | **0.860 [0.826, 0.891]** | **0.801 [0.705, 0.902]** |
+| M3 + c0 / dense, generation-only S | 0.903 | 0.777 | 0.708 |
+| M3 + c0 / dense, per step | 0.924 | 0.814 | 0.751 |
+| M3 + c0 / dense, accuracy | 177 / 179 (p 0.91) | 150 / 155 (p 0.53) | 62 / 53 (p 0.15) |
+| q64 / M3 + c0, per step (12 seeds) | 0.996 [0.993, 1.000] | **0.993 [0.991, 0.996]** | 0.995 [0.988, 1.003] |
+| q64 / M3 + c0, W (12 seeds) | 1.002 | 1.004 | 1.012 |
+| q64c / q64, per step (E14) | 1.002 | 0.998 [0.994, 1.002] | 0.989 [0.972, 1.003] |
+| q64c / M3 + c0, N (E14) | 1.014 | 1.049 [0.989, 1.115] | 1.146 [1.004, 1.323] |
+
+**Main result, robust over 12 seeds.** M3 + c0 is 7.5% / 14% / 20% faster end to end than the FA4 dense control at
+32K / 64K / 96K, with no significant accuracy difference.
+
+**q64.**
+- It cuts per-step cost by 0.4–0.7%; this is significant at 64K and consistent on every host.
+- It is invisible end to end, where step-count noise is about ±5%.
+- Accuracy is unchanged.
+
+**q64c.**
+- The 64-row carried call-0 map adds no measurable per-step gain over q64 at 32K or 64K.
+- It shows more steps at 96K (N 1.146 vs M3 + c0, CI just above 1; 66 vs 37 blocks at the step cap). This may be a
+  real effect of the more aggressive carried call-0 map, or noise.
+- It is not adopted.
+
+Source: `lb_q64c_panel_e14/` (`summary.md`, `steps.md`, `receipts.md`, `direct_*.md`).
+
+### Regroup offline and call-1 split (2026-10-02)
+
+**Offline regrouping** (`regroup_offline_1002/`): real need matrices of 144 decisions (M3 + c0 + q64c, 32K/64K/96K
+items 0–3). Kernel work relative to natural 64-row tiles (q64 = 1):
+
+| grouping | 32K | 64K | 96K |
+|---|---:|---:|---:|
+| q128 (executed M3 map) | | 1.32 | 1.34 |
+| q64r: sort by need count within the 128-row block | | 0.963 | 0.952 |
+| sort by count over the head's 256 rows | 0.987 | 0.983 | 0.950 |
+| chw/value_aware set key (lexicographic) | 1.065 | 1.055 | 1.035 |
+| greedy clustering per head | 0.994 | 1.014 | 1.010 |
+| cross-head (GQA) 8 positions × 8 heads | 1.052 | 1.065 | 1.060 |
+| cross-head sort / set key / greedy | 1.04–1.10 | 1.05–1.09 | 1.04–1.08 |
+| per-row bound | 0.25 | 0.22 | 0.21 |
+
+Natural 64-row tiles are already the best structure tried. Positional neighbours share needs; heads and set-key
+neighbours do not. No grouping removes more than about 5% of q64's tiles, which is less than the permutation costs,
+so the regrouping line is closed. The router check matched in 48/48 decisions per bin.
+
+**Call-1 split** (`observe_split_1002/obs_split.json`), per GLOBAL layer:
+
+| keys | fused observation (current) | observation-only + FA4 sparse (c01) | FA4 dense |
+|---|---:|---:|---:|
+| 33K | 2.22 | 1.76 (0.80×) | 1.34 |
+| 65K | 4.22 | 3.15 (0.75×) | 2.59 |
+| 97K | 6.28 | 4.59 (0.73×) | 3.86 |
+
+- With 14–18 steps per canvas at 32K/64K, c01's expected per-step gain is about 0.5–1%. This corrects the earlier
+  3–4% estimate, which assumed about 9 steps per canvas.
+- Our Triton observation-only kernel (QK plus summaries) is slower than FA4 full dense attention. A faster observation
+  kernel is the remaining lever on this call.
+
 ### q64 / q64r / split-KV kernel bench on identical real states (2026-10-02)
 
 Kernel level only (no end-to-end claim): 32K/64K/96K items 0–3, seed 404, 240 decisions per bin, each timed under

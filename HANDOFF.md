@@ -134,14 +134,13 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - SGLang envs for LLaDA2.1-mini (upstream 0.5.21) and I-DLM-8B (its bundled fork);
   - weights, and the LongBench Pro data.
   Next: official dense smoke runs, then model adapters with a clean core/adapter split.
-- **E14 running** (`specs/v27_lb_q64c_e14.json`, protocol `v27_lb_q64c_e14_46bf7b5a765b7204`):
-  - Arms: dense FA4 all-kept, M3 + c0, M3 + c0 + q64, and M3 + c0 + q64c (adds the 64-row carried call-0 map,
-    `q_carry64`).
-  - LongBench-v2 32K/64K (E4 items) and 96K (11 items) × six fresh seeds 1010–1515; 1,416 runs, one host per cell.
-  - Deploy `v27_e14_0fc74fc`, run dir `v27_lb_e14_001`, frozen dir `v27_lb_e14_frozen`, scoring label `lb_e14`.
-    Started 2026-10-02 06:57 (UTC−5) on dllm, mpk and dlm2.
-  - Score: `python E:/dlm/v27_score_lb.py --tag v27_e14_0fc74fc --run-dir v27_lb_e14_001 --label lb_e14`. Then report
-    q64/q64c vs M3 + c0 (full metric set, per host, steps), and q64 pooled with E13.
+- **E14 done** (`docs/RESULTS_LEDGER.md` L1k):
+  - 12-seed main result: M3 + c0 W 0.925 / 0.860 / 0.801 at 32K / 64K / 96K;
+  - q64 −0.4 to −0.7% per step;
+  - q64c not adopted.
+  - Regroup offline and the call-1 split are recorded under L1k. Running now:
+    - P15 (c01 preview) on mpk and dlm2;
+    - R16 (RULER) on dllm, with the expansion setup alongside.
 - **Regrouping diagnostic (chw idea): done** (`regroup_diag_1002/README.md`): ~4% fewer kept tiles within 128-row tiles,
   not integrated; finer query tiles would cut kept work by 22–39% but need a new kernel.
 

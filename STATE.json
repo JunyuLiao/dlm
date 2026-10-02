@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 08:05 (UTC-5)",
+    "updated_local": "2026-10-02 09:10 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
     "verified_commit": "073d87ece",
     "entry_docs": [
@@ -28,27 +28,23 @@
     },
     "running": [
       {
-        "panel": "E14 v27_lb_q64c_e14_46bf7b5a765b7204",
-        "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_lb_q64c_e14.json",
-        "deploy_tag": "v27_e14_0fc74fc",
-        "run_dir": "v27_lb_e14_001",
-        "frozen_dir": "v27_lb_e14_frozen",
+        "panel": "P15 v27_c01_preview_p15_3e50c12a37ee0486",
         "hosts": [
-          "dllm",
           "mpk",
           "dlm2"
         ],
-        "executions": 1416,
-        "seeds": [
-          1010,
-          1111,
-          1212,
-          1313,
-          1414,
-          1515
+        "deploy_tag": "v27_p15_5bf19f1"
+      },
+      {
+        "panel": "R16 v27_ruler_long_r16_1bf5362572d4e0a8",
+        "hosts": [
+          "dllm"
         ],
-        "started_local": "2026-10-02 06:57 (UTC-5)",
-        "scoring_label": "lb_e14"
+        "deploy_tag": "v27_p15_5bf19f1"
+      },
+      {
+        "setup": "/home/exouser/dyh/dlm_models_20261002 (envs sglang_up, sglang_idlm, vllm; weights; LongBench Pro)",
+        "host": "dllm"
       }
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
@@ -158,33 +154,6 @@
       "verdict": "q64 -9 to -11% per sparse GLOBAL call on identical states; q64r and FA4 split-KV slower (dropped)",
       "source": "results/m1_m2_m3_frontier_v27_20260929/q64_bench_1002/README.md"
     },
-    "queued": [
-      {
-        "panel": "P15 v27_c01_preview_p15_3e50c12a37ee0486",
-        "deploy_tag": "v27_p15_48a8c26",
-        "run_dir": "v27_p15_001",
-        "hosts": [
-          "mpk",
-          "dlm2"
-        ],
-        "executions": 180,
-        "starts": "after E14 and after v27 GPU tests pass on dllm"
-      },
-      {
-        "diag": "obs_split_1002 (call-1 kernel cost) then need_dump_1002 (regroup offline input)",
-        "host": "dllm"
-      },
-      {
-        "panel": "R16 v27_ruler_long_r16_1bf5362572d4e0a8",
-        "deploy_tag": "v27_p15_48a8c26",
-        "run_dir": "v27_r16_001",
-        "hosts": [
-          "dllm"
-        ],
-        "executions": 390,
-        "starts": "after the dllm diagnostics of the post-E14 chain"
-      }
-    ],
     "expansion": {
       "plan": "docs/EXPANSION_PLAN_20261002.md",
       "models": [
@@ -200,6 +169,10 @@
       ],
       "setup_dir": "/home/exouser/dyh/dlm_models_20261002 (dllm)",
       "status": "setup queued after dllm diagnostics"
+    },
+    "e14": {
+      "verdict": "main M3+c0 W 0.925/0.860/0.801 (12 seeds); q64 -0.4..-0.7% per step; q64c not adopted",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/lb_q64c_panel_e14/receipts.md"
     }
   },
   "task": "M3 output numerics and trajectory isolation",
