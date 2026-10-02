@@ -36,6 +36,14 @@ relative to its `site-packages/vllm`.
   - page size 16 fails through this raw entry point (vLLM itself goes through the compiled dispatch);
   - **block-sparse lists + page_table read the wrong pages** (error about 22; contiguous is exact).
 
+- Follow-up facts:
+  - vLLM's GLOBAL layers use KV page size 32 (LOCAL 16).
+  - Real requests' block tables are non-contiguous from the first request on.
+  - The raw FA4 entry runs paged attention only at page 64; 32 and 128 fail there, while vLLM's own pre-compiled dense
+    dispatch handles 32.
+  - So option a) below needs an allocator change, and the realistic route is b): kernel work in the CuTe FA4 sparse
+    iteration at page 32 (two pages per 64-key tile), or page 64 for the GLOBAL group plus the TMA paged fix.
+
 ## Port plan
 
 1. **Block-sparse over the cache.** Pick the cheapest correct option:

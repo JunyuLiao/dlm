@@ -23,3 +23,26 @@ Dense paged attention is fine. So the method cannot simply hand block-sparse lis
 3. FlashInfer's block-sparse (BSR) attention over paged KV, if its hd 512 SM90 speed is competitive (unverified;
    earlier reports put its FA2-template hd 512 far below FA4).
 4. Gather kept tiles into a contiguous buffer per decision (extra copies, likely too slow).
+
+## Follow-up (same day): vLLM's real page sizes and block tables
+
+- **vLLM uses KV page size 32 for the GLOBAL layers and 16 for the LOCAL layers** (hybrid KV groups;
+  `block_table_probe.json`, from wrapping vLLM's own `_FA4_DENSE_ATTENTION_KERNEL` in eager mode, two real requests).
+- **Block tables are not contiguous**, from the first real request on (prefill and canvas calls alike). A contiguous
+  view of the request's cache is therefore not available without changing vLLM's allocator.
+- **The raw FA4 entry only runs paged attention at page size 64** (= tile_n; TMA path), via
+  `scripts/v27_vllm_paged_sparse_probe3.py`.
+  - Page sizes 32 and 128 fail (`'NoneType' object is not callable`).
+  - At page 64 dense is exact; block-sparse is wrong (max abs 21).
+  - vLLM itself serves page 32 through its pre-compiled dense dispatch (`compile_flash_attn_varlen_func_from_specs`).
+
+**Consequence for the port.** The work is at kernel level:
+1. Add `block_sparse_tensors` to vLLM's FA4 dense dispatch.
+2. Make the sparse n-block iteration translate through the page table, at page 32 (two pages per 64-key tile, the
+   cp.async producer path).
+3. Verify against the masked reference with garbage in unused pages (the probe scripts are the regression tests).
+
+Alternatives:
+- change vLLM's KV block size for the GLOBAL group to 64 and fix only the TMA paged block-sparse path;
+- use a different official kernel with paged block-sparse support (FlashInfer BSR; its hd 512 SM90 speed is
+  unverified).

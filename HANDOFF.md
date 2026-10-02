@@ -190,10 +190,14 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
      steps-per-canvas ratio (P15 hinted 1.107 at 64K) and accuracy, including AIME.
    - Pool M3 + c0 / dense over E13 + E14 + E15.
 2. **vLLM port, step 2** (design notes: `docs/VLLM_PORT_NOTES_20261002.md`): make block-sparse work on vLLM's cache.
-   - First try a contiguous view: for a batch-1 request check `page_table == arange`, or allocate contiguously. If that
-     holds, the tested contiguous FA4 path applies as is.
-   - Otherwise patch FA4's paged block-sparse path (CuTe kernel in `vllm/vllm_flash_attn/cute`) inside the dyh vLLM
-     env, add a regression test (`scripts/v27_vllm_paged_sparse_probe2.py` is the reproducer) and report upstream.
+   - The contiguous-view shortcut is ruled out: vLLM's GLOBAL KV pages are 32 tokens and block tables are
+     non-contiguous from the first request (`vllm_port_probe_1002/block_table_probe.json`).
+   - Patch FA4's paged block-sparse path (CuTe kernel in `vllm/vllm_flash_attn/cute`) inside the dyh vLLM env:
+     - add `block_sparse_tensors` to vLLM's dense dispatch;
+     - translate sparse n-blocks through the page table at page 32, or use page 64 for the GLOBAL group;
+     - regression tests: `scripts/v27_vllm_paged_sparse_probe2.py` / `probe3.py`;
+     - report upstream.
+   - Alternative: FlashInfer BSR over paged KV, if its hd 512 SM90 speed is close to FA4's.
 3. **vLLM port, step 3:** hook the method into `vllm/model_executor/models/diffusion_gemma.py`.
    - Map the canvas/step schedule (call 0 carried map, call 1 observation, held maps, re-decisions).
    - The observation kernel must read the paged cache.
