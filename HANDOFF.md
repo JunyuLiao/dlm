@@ -5,7 +5,8 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 `docs/handoff_archive/HANDOFF_v27c_20260929.md`.
 
 - **Branch:** `research/m3-output-numerics-20260927` (pushed to `origin`).
-- **Method code:** `c36b1f933` (V-term ablation variants), on top of `56de98fe2` (`carry_first`).
+- **Method code:** `9d8ae5e` (named keep k5) on top of `efea33024` (k12), `c36b1f933` (V-term ablation variants)
+  and `56de98fe2` (`carry_first`). Docs and decks are newer commits; trust `git log` over this line.
 - **Docs:** committed and pushed. Keep them current with every change; this is a user instruction.
 - **Two local checkouts.**
   - `E:/dlm/m3_output_numerics_20260927` is the working checkout used for all v27 work.
@@ -44,8 +45,23 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   vs rank 32), and projected V at rank 32/16/8 scores lowest (86–87 vs dense 99). **E9 (64K, M3 + c0, fixed 88%
   sparsity) and E11 (95%, preview) agree:** mass-only ranking is as accurate (54 vs 51) and as fast (W 0.845) as any V term. The V term is
   not a contribution and can be dropped (L1e, L1f).
+- **M2 vs M3 under the same optimizations: tie** (E10, L1g): M2c / M3 32K 0.987 [0.914, 1.063], 64K 0.983
+  [0.940, 1.024]; accuracy n.s.
+- **Skip ratio is not set; it emerges from one fixed threshold.** All GLOBAL layers, heads and lengths share the log
+  threshold −3.874 (frozen base −3.180, shifted −ln2). Skipped tiles in sparse calls (diagnostic fidelity_v6, 2
+  requests each): AIME about 4%, 32K about 79%, 64K about 88%. Fixed ratios are used only in E8/E9/E11.
+- **Within a canvas** (code facts, `docs/RESEARCH_CONTEXT.md` §3): call 1 observes and builds the prefix risk table;
+  call 2 decides (map for calls 2–7), call 8 re-decides, and so on. A re-decision reuses the risk table and only
+  re-projects canvas V and the V reference scale, so maps should barely change at long context (inferred, not
+  measured) — consistent with M3 ≈ B. The query-sensitivity term T is 1 in every run.
+- **Per-step time on v5** (one real dense call each, `docs/RESULTS_LEDGER.md` time breakdown): GLOBAL attention 2% /
+  19% / 32% of a step at AIME / 32K / 64K; LOCAL 2–3%; MoE experts 27–39%; sampler 10–16%. Single decoder forward
+  in one request, dense → best variant: AIME 1.00, 32K 0.85, 64K 0.72.
 - **The ceiling at batch 1 is low.** GLOBAL attention is about 21% of a 64K request and 16% at 32K; a step is
-  dominated by reading about 46 GB of MoE weights. The current gain is about 60% of that ceiling.
+  dominated by reading about 46 GB of MoE weights. With `carry_first` the 64K gain (about 15%) is roughly 70% of that
+  ceiling.
+- **Model.** `google/diffusiongemma-26B-A4B-it` belongs to the Gemma 4 family (Gemma4Processor, gemma4_vision in its
+  config); its text model is `diffusion_gemma_text`. Say "DiffusionGemma-26B-A4B", not "DiffusionGemma4".
 - **Batching does not raise the attention share at 64K** (B=1→4: 26/22/25% of a forward; keep-0.12 saving about
   20%). See `batch_scaling/README.md`.
 
@@ -53,20 +69,25 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 - Substrates piecewise_v4 (static LOCAL shape; fixes the AIME recompile fallback) and v5 (compiled encoder-append
   tail).
-- Panels traj_t1, E1 (cross-canvas carry: rejected), E2 (AIME carry/gates: no room), E3 (32K single-change
-  variants), E4 (large-seed confirmation). See `docs/RESULTS_LEDGER.md` L1, L11–L14.
-- New named variants:
-  - `observe_step` (7786b0ef9);
-  - `protect_output` (7786b0ef9);
-  - `stable1` dense-confirmation gate (adc2056d7);
-  - `carry_first` (56de98fe2).
-- Unit tests pass on dlm2 (75 in the v27 subset).
-- Literature check of step and length inflation (SparseD, PulseCol, Focus-dLLM, Lil, LessIsMore, JoT, Prophet). Group
-  deck and branches were read; the query-sensitivity direction is a collaboration candidate.
-- Progress doc updates 8–12 (`results/m1_m2_m3_frontier_v27_20260929/progress_20260930.md`). Updates 6 and 12 predate
-  E4 and are superseded by it for the request-level verdict.
+- Panels, all scored and in `docs/RESULTS_LEDGER.md`:
+  - traj_t1, E1 (cross-canvas carry: rejected), E2 (AIME carry/gates), E3 (32K single-change variants): L11–L14;
+  - E4 large-seed confirmation (L1), E5 `carry_first` (L1b), E6 + E6b 96K pooled (L1c, L1c2), E7 AIME (L1d);
+  - E8 / E9 / E11 V-term ablations (L1e, L1f, L1h), E10 M2 vs M3 under the same optimizations (L1g);
+  - step-count check over 9 seeds (correction: +1–2%, n.s.) and the v5 per-step time breakdown.
+- New named variants: `observe_step`, `protect_output` (7786b0ef9); `stable1` (adc2056d7); `carry_first` (56de98fe2);
+  `proj_rank`, `risk_value='mass'` (c36b1f933); named keeps k12 (efea33024) and k5 (9d8ae5e), each with unit tests
+  (v27 subset passes on dlm2; the stale min_route_keys=4096 test was fixed).
+- Agent docs: `AGENTS.md`, `CLAUDE.md`, `docs/RESEARCH_CONTEXT.md`, `docs/DECISIONS.md`, `docs/RESULTS_LEDGER.md`,
+  this file, and the `current` block of `STATE.json`.
+- Group-meeting deck (2026-10-01): `scripts/v27_build_deck_1001_compact.py` reads the pushed `summary.csv` files and
+  the time-breakdown JSONL and writes both `ppt_sample/dlm_sparse_attention_20261001_compact_v6.pptx` (latest) and
+  the markdown source `weekly_slides_20261001_compact.md`. `--md-only` refreshes only the markdown (use it when the
+  pptx is open in PowerPoint). The older 9-page deck and its source (`weekly_slides_20261001.md`) are superseded.
+- Read-only review of group work: Junyu's position protections and value-aware family (branch `ljy/value_aware`);
+  his "vector_mean" result files are not committed anywhere we can read.
+- Literature check of step and length inflation (SparseD, PulseCol, Focus-dLLM, Lil, LessIsMore, JoT, Prophet).
 
-## Running (as of 20:35 local)
+## Running (as of 20:50 local)
 
 - **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), E9 (L1f), E10 (L1g), E11 (L1h),
   the batch diagnostic (`batch_scaling/`).
@@ -74,19 +95,22 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Blockers
 
-- None technical. The meeting is 21:00 local; results are wanted by 20:00.
+- None.
 
 ## Immediate next steps
 
-1. E8 is done (L1e). Add its outcome to the slides and keep the V-term question open only for E9 (64K).
-2. E6b is done (L1c2). Note for E6b: the first bind call ran with `HOSTS=dllm` only, so the binding was merged from
-   the three host fragments; the unused one-host binding is kept beside it.
-2b. E9 is done (L1f).
-3. Larger-gain directions, ranked (see `docs/RESEARCH_CONTEXT.md` §8):
-   - (a) Make the encoder canvas append's GLOBAL attention sparse with the canvas's final map (about 1.4% at 64K).
-   - (b) Chunked prefill so that 96K items above 95K tokens and the 128K bin can run on one H100.
-   - (c) Orthogonal step reduction (Prophet/JoT-style early exit). Not our contribution.
+1. Measure how much the held map changes between re-decisions (calls 2 vs 8 vs 14) at 32K/64K. This tests the
+   inference that M3 R6 DP is effectively "select once per canvas" (about 40 minutes, one host).
+2. Extend E10 (M2 vs M3) to all 6 seeds, and E11 (95% sparsity) from the 48-cell preview to a full panel.
+3. Test the V term where it could matter: RULER-style retrieval with LOCAL layers also sparse (Junyu's setting;
+   RULER 32K/64K manifests exist in `E:/dlm/v27_private/pool`).
+4. Larger-gain directions:
+   - make the encoder canvas append's GLOBAL attention sparse with the canvas's final map (about 1.4% at 64K);
+   - chunked prefill so that 96K items above 95K tokens and the 128K bin run on one H100;
+   - orthogonal step reduction (Prophet/JoT-style early exit) is not our contribution.
    - Batched serving did not raise the attention share at 64K (B = 1–4); see `batch_scaling/README.md`.
+5. Note for E6b: its first bind call ran with `HOSTS=dllm` only, so the binding was merged from the three host
+   fragments; the unused one-host binding is kept beside it.
 
 ## Operational notes (still relevant)
 
@@ -110,3 +134,8 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - A killed worker leaves no terminal receipt. Relaunch in a **new** run dir and merge at scoring.
 - On Windows, stopping a task can orphan the bash chain. Kill leftover `bash` processes with `v27_` in the command line.
 - Diagnostics that must match a frozen config's source hashes run with cwd = that deploy dir.
+- Time breakdown of one real decoder call: `scripts/v27_time_breakdown.py --run-dir <bound run dir> --host <ip>
+  --gpu-uuid <uuid> --stage <stage> --dataset <dataset> --index 0 --call <k> --arm <dense> --arm <method>`, run in
+  that panel's deploy dir with the host env; outputs in `results/…/time_breakdown_v5/`.
+- Unit tests on a host: in a deploy dir, `PYTHONPATH=<fa4 overlay>:.:src <python> -m pytest -q -p no:cacheprovider
+  tests/test_v27_*.py` (CPU-only tests can run while a GPU job is active).

@@ -16,6 +16,8 @@ by the model, not fixed.
 ## 2. Model and decoding (what is fixed)
 
 - **Model.** `google/diffusiongemma-26B-A4B-it`, revision `f7f5b7f5fa82ffc52addd066915886d497f5517b`, bf16, one H100 80GB, batch 1.
+  - Gemma 4 family: the config's vision tower is `gemma4_vision` and the processor is `Gemma4Processor`; the text
+    model is `diffusion_gemma_text` (`DiffusionGemmaForBlockDiffusion`). Name it DiffusionGemma-26B-A4B.
   - 30 decoder layers, hidden 2816.
   - MoE: 128 experts, top-8, expert intermediate 704, about 46 GB of expert weights. Vocabulary 262,144.
 - **Attention.**

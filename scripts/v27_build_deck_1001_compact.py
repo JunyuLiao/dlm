@@ -81,7 +81,25 @@ def cols(r):
     return [f'{f3(r["W"])} {ci(r, "W")}', f3(r['S']), f3(r['SN']), f'{float(r["N"]):.2f}', r['correct']]
 
 
+MD = []
+
+
+def md_table(rows):
+    out = ['| ' + ' | '.join(c.replace('|', '/') for c in rows[0]) + ' |', '|' + '---|' * len(rows[0])]
+    out += ['| ' + ' | '.join(c.replace('|', '/') for c in r) + ' |' for r in rows[1:]]
+    return '\n'.join(out)
+
+
 def page(title, config, blocks, notes):
+    MD.append(f'## {title}\n\n**【正文顶部】** {config}\n')
+    for kind, *args in blocks:
+        if kind == 'table':
+            MD.append(md_table(args[0]) + '\n')
+        elif kind == 'label':
+            MD.append(f'**{args[0]}**\n')
+        else:
+            MD.append('\n'.join('- ' + x for x in args[0]) + '\n')
+    MD.append('**【Speaker notes】**\n\n' + notes.strip() + '\n\n---\n')
     s = prs.slides.add_slide(BLANK)
     text(s, 0.4, 0.2, 12.5, 0.6, [title], size=22, bold=True)
     text(s, 0.4, 0.8, 12.5, 0.6, [config], size=11, color=GRAY)
@@ -365,7 +383,7 @@ def p_aime():
 """)
 
 
-def build(out_name='dlm_sparse_attention_20261001_compact_v6.pptx'):
+def build(out_name='dlm_sparse_attention_20261001_compact_v6.pptx', md_only=False):
     cover()
     p1_baseline()
     p_methods()
@@ -373,10 +391,17 @@ def build(out_name='dlm_sparse_attention_20261001_compact_v6.pptx'):
     p_long()
     p_select()
     p_aime()
+    head = ('# 组会材料源稿（2026-10-01，压缩版）：DiffusionGemma-26B-A4B 块稀疏注意力\n\n'
+            '由 scripts/v27_build_deck_1001_compact.py 与 pptx 同时生成；表中面板数字直接读取已推送的 summary.csv。'
+            'pptx：ppt_sample/' + out_name + '。\n\n---\n')
+    (R / 'weekly_slides_20261001_compact.md').write_text(head + '\n'.join(MD), encoding='utf-8', newline='\n')
+    if md_only:
+        return R / 'weekly_slides_20261001_compact.md'
     HERE.mkdir(parents=True, exist_ok=True)
     prs.save(HERE / out_name)
     return HERE / out_name
 
 
 if __name__ == '__main__':
-    print(build())
+    import sys
+    print(build(md_only='--md-only' in sys.argv))
