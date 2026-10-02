@@ -249,16 +249,25 @@ def topk_skip(lognorm, eligible, sensitivity, reference, nq, keep):
     return candidate & (rank < n_drop)
 
 
-def refine_q64(state, skipped, eligible, reference, sensitivity, log_threshold, nq):
+def refine_q64(state, skipped, eligible, reference, sensitivity, log_threshold, nq, regroup=False):
     """v27 named variant q64: the same worst-row rule as ``_dp_decide``, applied to each 64-row half of every
     128-row query block. FA4's SM90 head_dim-512 kernel already runs 64-row query tiles, so a [B,H,2*QB,KT] keep
     map with block_size (64, 64) costs nothing extra in the kernel; a tile is skipped for a half when the worst row
     of that half is below the threshold. Prefix decisions are intersected with the 128-row map (a subset by
     construction); canvas/boundary tail tiles copy the 128-row decision. Returns None (caller keeps the 128-row map)
-    when the query rows do not fill the 128-row blocks exactly."""
+    when the query rows do not fill the 128-row blocks exactly.
+
+    regroup=True (v27 q64r, idea credited to chw/value_aware): per head and per 128-row block, the block's rows are
+    sorted by how many prefix tiles they need (stable) and cut into two 64-row groups, so rows with similar needs share
+    a kernel tile. Rows never leave their 128-row block, so every group map stays a subset of the executed 128-row map
+    and eligibility (per query block) is never mixed. A group keeps a prefix tile if any of its rows needs it; tail
+    tiles copy the block decision. Returns (kept [B,H,2*QB,KT], order [B,H,nq] int64) or None; the consumer permutes
+    the query rows by ``order`` and scatters the output back."""
     b, h, qb, pt, _ = state.lognorm.shape
     if nq != qb * 128 or (sensitivity is not None and tuple(sensitivity.shape) != (b, nq)):
         return None
+    if regroup:
+        return _regroup_q64(state, skipped, eligible, reference, sensitivity, log_threshold, nq)
     kept = (eligible & ~skipped).repeat_interleave(2, dim=2)                      # [B,H,2QB,KT]
     if pt:
         hk = reference.shape[1]
@@ -271,6 +280,31 @@ def refine_q64(state, skipped, eligible, reference, sensitivity, log_threshold, 
         need = (worst >= float(log_threshold)).permute(0, 1, 2, 4, 3).reshape(b, h, qb * 2, pt)
         kept[..., :pt] &= need
     return kept
+
+
+def _row_need(state, reference, sensitivity, log_threshold):
+    """Per-row need of every prefix tile under the worst-row rule: [B,H,QB*128,PT] bool."""
+    b, h, qb, pt, _ = state.lognorm.shape
+    hk = reference.shape[1]
+    kh = torch.arange(h, device=reference.device) // (h // hk)
+    risk = state.lognorm - torch.log(reference.float().clamp_min(1e-12))[:, kh][:, :, None, None, None]
+    if sensitivity is not None:
+        risk = risk + torch.log(sensitivity.float()).view(b, 1, qb, 1, 128)
+    return (risk >= float(log_threshold)).permute(0, 1, 2, 4, 3).reshape(b, h, qb * 128, pt)
+
+
+def _regroup_q64(state, skipped, eligible, reference, sensitivity, log_threshold, nq):
+    b, h, qb, pt, _ = state.lognorm.shape
+    kept = (eligible & ~skipped).repeat_interleave(2, dim=2)                      # [B,H,2QB,KT]
+    base = torch.arange(qb, device=skipped.device).view(1, 1, qb, 1) * 128
+    if not pt:
+        return kept, torch.arange(nq, device=skipped.device).expand(b, h, nq).contiguous()
+    need = _row_need(state, reference, sensitivity, log_threshold).view(b, h, qb, 128, pt)
+    need &= (eligible & ~skipped)[..., :pt].unsqueeze(3)                            # within the executed 128 map
+    within = torch.argsort(need.sum(-1), dim=-1, stable=True)                      # [B,H,QB,128]
+    grouped = torch.gather(need, 3, within[..., None].expand(-1, -1, -1, -1, pt))
+    kept[..., :pt] = grouped.view(b, h, qb, 2, 64, pt).any(4).reshape(b, h, qb * 2, pt)
+    return kept, (within + base).reshape(b, h, nq)
 
 
 def log_mass(summary, lognorm):

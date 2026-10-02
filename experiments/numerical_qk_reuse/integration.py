@@ -103,6 +103,19 @@ def carried_map(skipped, eligible, prefix, keys):
     return new_skipped, new_eligible
 
 
+def carried_q64(kept64, prefix, skipped):
+    """v27 q64 + carry_first: the previous canvas's natural-order 64-row map [B,H,2QB,KT_old], extended like
+    ``carried_map`` to the current extent of ``skipped`` [B,H,QB,KT]: tiles wholly in the old prefix keep their
+    64-row decision, every newer tile is kept. A subset of the carried 128-row map by construction."""
+    import torch
+    old = prefix // 64
+    if kept64.shape[2] != 2 * skipped.shape[2] or old > kept64.shape[-1] or skipped.shape[-1] < kept64.shape[-1]:
+        raise ValueError('carried 64-row map does not fit the current key extent')
+    out = torch.ones((*skipped.shape[:2], kept64.shape[2], skipped.shape[-1]), dtype=torch.bool, device=skipped.device)
+    out[..., :old] = kept64[..., :old]
+    return out
+
+
 class RankMaskedProjections:
     """v27 projected-V rank variant: the bank's first ``rank`` columns of the rank-32 Gaussian bank, rescaled by
     sqrt(32/rank), the rest zero. The bank is randn/sqrt(32), so the kept block is exactly randn/sqrt(rank): a rank-r
@@ -265,6 +278,7 @@ class Attention:
         self.proj_rank = 32            # v27 projected-V rank (named variant; <32 = nested Gaussian prefix, see below)
         self.q_block = 128             # v27 q64: 64-row keep maps for the FA4 consumer (refined from the DP risk table)
         self._q64, self.q64_refined_routes, self.q64_list_builds = [], 0, 0
+        self.q_regroup, self.q64_regrouped_calls, self.q64_carried_maps = False, 0, 0
         # v27 cross-canvas carry (named variant): a layer's last decision of an observed canvas is reused, extended
         # with every newer key tile kept, for the next carry_canvases - 1 canvases -- no dense bootstrap, no
         # observation and no decision there; the canvas after that observes again through the normal path
@@ -327,9 +341,12 @@ class Attention:
                     continue
                 if entry.identity.canvas != self.canvas or entry.identity.encoder_epoch != self.epoch:
                     continue
+                kept64 = next((m for s_ref, e_ref, m, o in getattr(self, '_q64', ())
+                               if s_ref is entry.decision.skipped and e_ref is entry.decision.eligible and o is None),
+                              None)
                 self._carry[layer] = dict(skipped=entry.decision.skipped, eligible=entry.decision.eligible,
                                           prefix=entry.identity.keys - entry.identity.queries,
-                                          canvas=self.canvas, ext=None)
+                                          canvas=self.canvas, ext=None, kept64=kept64)
                 self.carry_snapshots += 1
             self._carried_layers = set()
         self.epoch += 1
@@ -500,6 +517,11 @@ class Attention:
             # valid only as the direct continuation: the previous canvas of this request, prefix grown by one canvas
             if not crop and self.canvas - c['canvas'] == 1 and (nk - nq) == c['prefix'] + nq:
                 skipped, eligible = carried_map(c['skipped'], c['eligible'], c['prefix'], nk)
+                if c.get('kept64') is not None:
+                    # q64: the natural-order 64-row map is carried the same way as the 128-row one
+                    self._q64 = self._q64[-63:] + [(skipped, eligible, carried_q64(c['kept64'], c['prefix'], skipped),
+                                                    None)]
+                    self.q64_carried_maps += 1
                 result = self._consume(q, k, v, skipped, eligible, scale, window, causal)
                 returned = result.output.transpose(1, 2).contiguous()
                 torch._assert_async(torch.isfinite(result.output).all(), 'Invalid first-call carried-map output')
@@ -765,11 +787,12 @@ class Attention:
                          risk_budget=budget, risk_topk=self.risk_topk, risk_value=self.risk_value,
                          summary=summary, **pool)
         if self.q_block == 64:
-            kept64 = dp.refine_q64(state, route.skipped, route.eligible, ref, kwargs.get('sensitivity'),
-                                   kwargs['log_threshold'], scores.shape[2])
-            if kept64 is not None:
+            refined = dp.refine_q64(state, route.skipped, route.eligible, ref, kwargs.get('sensitivity'),
+                                    kwargs['log_threshold'], scores.shape[2], regroup=self.q_regroup)
+            if refined is not None:
+                kept64, order = refined if self.q_regroup else (refined, None)
                 # keyed by the map OBJECTS of this decision, like the FA4 list cache; held calls pass the same objects
-                self._q64 = self._q64[-63:] + [(route.skipped, route.eligible, kept64)]
+                self._q64 = self._q64[-63:] + [(route.skipped, route.eligible, kept64, order)]
                 self.q64_refined_routes += 1
         return route
 
@@ -882,9 +905,11 @@ class Attention:
                     tensor.record_stream(side)
             for tensor in (route.skipped, route.eligible):
                 tensor.record_stream(main)
-            for s_ref, e_ref, kept64 in self._q64[-1:]:
+            for s_ref, e_ref, kept64, order in self._q64[-1:]:
                 if s_ref is route.skipped:
                     kept64.record_stream(main)   # q64 map made on the side stream, read by the main stream
+                    if order is not None:
+                        order.record_stream(main)
             self._pending_routes[layer] = done
             self.async_routes += 1
         else:
@@ -938,19 +963,27 @@ class Attention:
             from . import v27_fa4
             # keyed by the map OBJECTS (the entry keeps a reference, so a freed map's storage can never be
             # reused under a cached key); a held decision passes the same objects every call
+            entry64 = next(((m, o) for s_ref, e_ref, m, o in getattr(self, '_q64', ())
+                            if s_ref is skipped and e_ref is eligible), None)
+            order = entry64[1] if entry64 is not None else None
             lists = next((l for s_ref, e_ref, l in self._fa4_lists if s_ref is skipped and e_ref is eligible), None)
             if lists is None:
-                kept64 = next((m for s_ref, e_ref, m in getattr(self, '_q64', ()) if s_ref is skipped and e_ref is eligible),
-                              None)
-                if kept64 is not None:
-                    lists = v27_fa4.block_sparse_tensors(kept64, q_block=64)
+                if entry64 is not None:
+                    lists = v27_fa4.block_sparse_tensors(entry64[0], q_block=64)
                     self.q64_list_builds += 1
                 else:
                     lists = v27_fa4.block_sparse_tensors(eligible & ~skipped)
                 # >= 2 x the routed layers (G75 S15/S30 hold 30 maps); a smaller cache thrashes every held call
                 self._fa4_lists = self._fa4_lists[-63:] + [(skipped, eligible, lists)]
                 self.fa4_list_builds += 1
-            out = v27_fa4.sparse_lists(q, k, v, lists, scale)
+            if order is not None:
+                # q64r: rows regrouped per head; permute Q, run the kernel, scatter the output rows back
+                idx = order[..., None].expand(-1, -1, -1, q.shape[-1])
+                out_perm = v27_fa4.sparse_lists(torch.gather(q, 2, idx), k, v, lists, scale)   # [B,Q,H,D] permuted
+                out = torch.empty_like(out_perm).transpose(1, 2).scatter_(2, idx, out_perm.transpose(1, 2)).transpose(1, 2)
+                self.q64_regrouped_calls += 1
+            else:
+                out = v27_fa4.sparse_lists(q, k, v, lists, scale)
             return SimpleNamespace(output=out.transpose(1, 2), skipped=skipped, eligible=eligible,
                                    invalid_scores=torch.zeros(out.shape[:1] + (out.shape[2], out.shape[1]),
                                                               dtype=torch.bool, device=out.device))
@@ -1086,6 +1119,8 @@ class Attention:
                     carry_first=self.carry_first, carried_first_calls=self.carried_first_calls,
                     risk_value=self.risk_value, proj_rank=self.proj_rank,
                     q_block=self.q_block, q64_refined_routes=self.q64_refined_routes, q64_list_builds=self.q64_list_builds,
+                    q_regroup=self.q_regroup, q64_regrouped_calls=self.q64_regrouped_calls,
+                    q64_carried_maps=self.q64_carried_maps,
                     protect_output=self.protect_output, protected_routes=self.protected_routes,
                     fused_observations=self.fused_observations,
                     fresh_fused_calls=self.fresh_fused_calls,

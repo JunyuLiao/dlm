@@ -86,7 +86,7 @@ def effective_config(base: dict, arm: str, scope: str, *,
                      route_pipeline=False, risk_state=None, density_gate=None, fa4_consumer=False,
                      async_route=False, risk_budget=None, risk_topk=None, carry_canvases=None,
                      observe_step=None, protect_output=False, carry_first=False, proj_rank=None,
-                     risk_value=None, q_block=None) -> dict:
+                     risk_value=None, q_block=None, q_regroup=False) -> dict:
     """Build a wrapper identity while preserving the parent v20 identity."""
     if route_storage != 'logical' and (route_storage not in ROUTE_STORAGES
                                        or output_score_precision != 'fp32_scores_bf16_pv'):
@@ -215,6 +215,11 @@ def effective_config(base: dict, arm: str, scope: str, *,
                 or risk_budget is not None or protect_output):
             raise ValueError('v27 q64 needs the dense-prefix threshold selector on the FA4 consumer')
         extra['q_block'] = q_block
+    if q_regroup:
+        # v27 q64r (named variant): q64 with per-head query-row regrouping (idea credited to chw/value_aware)
+        if q_regroup is not True or q_block != 64:
+            raise ValueError('v27 q64r needs q64')
+        extra['q_regroup'] = True
     if carry_first:
         # v27 first-call carry (named variant): canvas call 0 reuses the previous canvas's decision, call 1 observes
         if (carry_first is not True or bootstrap_policy is None or fresh_fused or not fused_observe or not fa4_consumer
@@ -395,6 +400,8 @@ def validate_effective(config: dict, condition: str):
                                 or 'fa4_consumer' not in config or 'risk_topk' in config or 'risk_budget' in config
                                 or 'protect_output' in config):
         raise ValueError('v27 q64 identity drift')
+    if 'q_regroup' in config and (config['q_regroup'] is not True or config.get('q_block') != 64):
+        raise ValueError('v27 q64r identity drift')
     if 'carry_first' in config and (config['carry_first'] is not True or 'fused_observe' not in config
                                     or 'fa4_consumer' not in config or 'carry_canvases' in config):
         raise ValueError('v27 first-call carry identity drift')
@@ -504,6 +511,7 @@ def install(adapter, config: dict, condition: str):
             if owner.cache.entries or owner.calls:
                 raise RuntimeError('q64 must be bound before any routed call')
             owner.q_block = int(config['q_block'])
+            owner.q_regroup = bool(config.get('q_regroup', False))
         if 'proj_rank' in config:
             from .integration import RankMaskedProjections
             if owner.cache.entries or owner.calls:
@@ -581,7 +589,7 @@ def install(adapter, config: dict, condition: str):
                         protect_output=bool(getattr(owner, 'protect_output', False)),
                         carry_first=bool(getattr(owner, 'carry_first', False)),
                         proj_rank=getattr(owner, 'proj_rank', 32), risk_value=getattr(owner, 'risk_value', None),
-                        q_block=getattr(owner, 'q_block', 128),
+                        q_block=getattr(owner, 'q_block', 128), q_regroup=bool(getattr(owner, 'q_regroup', False)),
                         density_gate=config.get('density_gate'),
                         consumer=getattr(owner, 'consumer', None),
                         log_thresholds={k: float(v['log_threshold']) for k, v in owner.thresholds.items()},
