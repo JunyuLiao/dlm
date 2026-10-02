@@ -219,3 +219,5 @@ reported, with exact decomposition checked. Prefill counts must agree between bo
 - 2026-10-02 17:36 (UTC-5): Qualification 004 launched from fdca7bf02 with a new frozen binding and strictly byte-validated config path rebinding; main runs first. Three matched references follow if main passes. No formal panel yet. mpk and dlm2 idle. 164 CPU tests and the actual production-config CPU guard pass.
 
 - 2026-10-02 17:40 (UTC-5): Qualification 004 reached real main execution but OOM during longest 96K warmup at common KV reservation 0.92 (256 MiB request with only 50.19 MiB free). No timed main record. New committed V18b spec lowers KV reservation equally to 0.85 for all four arms; method and generation parameters unchanged. Requalify every arm under a new binding/run. All GPUs idle. Attempt 004 reserved 144.065 s; closed V18 total 1514.153 GPU seconds.
+
+- 2026-10-02 17:41 (UTC-5): V18b qualification 005 launched from 8704cd072 with fresh frozen materials, deploy and binding. All arms use KV reservation 0.85; main runs first, then all-kept/native/dense. Method and native generation parameters remain frozen. No formal panel yet; mpk/dlm2 idle.
