@@ -66,11 +66,15 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - Progress doc updates 8–12 (`results/m1_m2_m3_frontier_v27_20260929/progress_20260930.md`). Updates 6 and 12 predate
   E4 and are superseded by it for the request-level verdict.
 
-## Running (as of 18:15 local)
+## Running (as of 19:25 local)
 
 - **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), E9 (L1f),
   the batch diagnostic (`batch_scaling/`).
-- **Nothing running.** All GPUs idle after E9.
+- **Running: E10, M2 with the same optimizations as M3** (`specs/v27_lb_m2opt_e10.json`, protocol
+  `v27_lb_m2opt_e10_c965792c1cb6542d`). LongBench-v2 32K and 64K, the E4 items × seeds 404–707 (96 cells per arm
+  per bin); arms dense, M3 R6 DP −ln2 + c0, M2c on the identical pipeline + c0 (only `mu_mode` differs). 576 runs on
+  three hosts, 64K stage first. Deploy `v27_e10_4252356`, run dir `v27_lb_e10_001`, scoring label `lb_e10`.
+  Question: with the same optimizations, is M2 (tile-mean V) better or worse than M3 (projected V)?
 
 ## Blockers
 

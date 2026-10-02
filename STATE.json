@@ -1,7 +1,7 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-01 18:15 (UTC-5)",
+    "updated_local": "2026-10-01 19:25 (UTC-5)",
     "branch": "research/m3-output-numerics-20260927",
     "verified_commit": "b8053511f",
     "entry_docs": [
@@ -24,7 +24,22 @@
       "accuracy": "64K 77 vs 75, 32K 86 vs 86 (dense)",
       "source": "results/m1_m2_m3_frontier_v27_20260929/lb_confirm_panel_e4/summary.md"
     },
-    "running": [],
+    "running": [
+      {
+        "panel": "E10 v27_lb_m2opt_e10_c965792c1cb6542d",
+        "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_lb_m2opt_e10.json",
+        "deploy_tag": "v27_e10_4252356",
+        "run_dir": "v27_lb_e10_001",
+        "hosts": [
+          "dllm",
+          "mpk",
+          "dlm2"
+        ],
+        "executions": 576,
+        "status": "running (64K stage first)",
+        "scoring_label": "lb_e10"
+      }
+    ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
