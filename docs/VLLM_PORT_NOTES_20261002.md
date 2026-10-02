@@ -117,3 +117,12 @@ relative to its `site-packages/vllm`.
   - the reproducer and numbers in the description.
 - **Effort:** about half a day (CuTe DSL is pure Python, so there is no C++ build; tests need an H100).
 - **Needs:** the user's explicit approval and the GitHub account to use (public posting).
+
+## Page-size measurement (2026-10-02, `results/.../vllm_dense_check_1002/vllm_block_size_64k.jsonl`)
+
+vLLM 0.30.0 dense on the same 6 E14 64K prompts:
+- default (GLOBAL page 32): per step 40.53 ms (median), prefill 2.42 s;
+- `--block-size 32` (GLOBAL page 64): per step **39.69 ms** (−2.1%), prefill **2.29 s**.
+
+**Decision:** run both the dense and the sparse arm at `--block-size 32` (GLOBAL page 64). It is the faster official
+dense configuration, so the baseline gets stronger, and it is the page size the patched FA4 block-sparse path supports.
