@@ -44,7 +44,8 @@ AIME/LongBench 的 E8/E9/E11 阴性仅限已测配置，不能外推到 RULER。
 已只读查看共享 [megakernel PPT](https://docs.google.com/presentation/d/1Sr5zEgODnRXSQxlNON5ncgNfwc1rEKly__Clf_nvAnY/edit)
 中可提取的文字：其中有 value-aware 对 BLASST 的观察、query sensitivity/temporal 保护及 HumanEval 后续计划。
 “优于 BLASST”不等于“V 项优于 attention mass”；图像中的表格未作为已核验数字引用。
-Slack 公开搜索没有找到相关 RULER 讨论，私有频道搜索需等待用户同意，不访问私信、不发送消息。
+Slack 公开搜索没有找到相关 RULER 讨论。用户随后授权指定四人研究群的只读搜索，已完成；
+详细脱敏背景和证据边界见 `GROUP_CONTEXT_20261001.md`。未读取一对一私信或发送消息。
 
 拟议下一轮保留 dense、mass-only、rank-32、完整 selector V，冻结匹配的 tile 预算。
 先在同一 historical-QK、GLOBAL-only、当前底座上隔离任务差异；再把 fresh-QK 与 GLOBAL+LOCAL 设置单独测试，

@@ -131,3 +131,17 @@ FA4 + piecewise substrates. Mechanism findings (what fails and why) usually stil
 
 Sources: audited base `6b13fe178`; `scripts/v27_fa4_panel_summary.py`,
 `tests/test_v27_fa4_panel_summary.py`, `results/m1_m2_m3_frontier_v27_20260929/intake_audit_20261001/summary.json`.
+
+## Group-context decisions (2026-10-01, 23:10 UTC−5)
+
+- The user authorized read-only research search of the specified four-person group. Record only sanitized method
+  context (`GROUP_CONTEXT_20261001.md`), not raw messages/contact information. No messages or shared edits.
+- Peer RULER evidence supports V direction; it does not establish full-rank necessity. The peer BLASST control
+  differs from mass-only. Keep their figures and adaptive-step observations out of this branch's benchmark claims.
+- Query-sensitivity/trajectory protection remains a collaboration candidate. Acceptance-threshold changes alter
+  native decoding and require a separately named frozen arm. A/B refs are still pending; no merge.
+- Before any integration, check that each predictor exists at regroup/selection time. Historical same-forward S/TS
+  was explicitly unavailable to pre-forward regroup; previous-step predictors have a different timing contract.
+- HERALD's accuracy uses adaptive acceptance but its performance fixes T=20 and selects peak feasible batch sizes.
+  PRR and SSV concern different AR sparse/speculative substrates. Cite overlap, never import their speedup as a v27
+  result. Current map-drift/RULER/HumanEval/LongBench follow-up ordering is unchanged; no GPU workload launched.

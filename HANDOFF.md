@@ -12,6 +12,9 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   See `docs/INTAKE_AUDIT_20261001.md`. Follow-up panels may select the stronger relevant arms instead of repeating
   plain M1/M2/M3 each time (user update). Same-host paired cells and matched optimized references remain mandatory.
   Classmates' A/B branches are pending; their exact refs are unknown, so no merge has been attempted.
+- **Group-context review (2026-10-01, 23:10 UTC−5):** user-authorized read-only search of the specified four-person
+  research group completed on base `073d87ece`. See `docs/GROUP_CONTEXT_20261001.md`; peer claims remain separate
+  from frozen v27 evidence. No HumanEval result or exact A/B refs was found in that search. GPU seconds = 0.
 - **Two local checkouts.**
   - `E:/dlm/m3_output_numerics_20260927` is the working checkout used for all v27 work.
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
@@ -138,8 +141,9 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   memory, not the 101 inputs whose prompt alone exceeds the context limit. No full-panel run has started.
 - HumanEval: 164 Python tasks, 984 generations/arm with six seeds. Not yet a v27 dataset/scorer; proposed as a
   coding quality check. Read-only review of the shared `megakernel` deck was limited to retrievable slide text.
-- Optional Slack context: public-channel search found no RULER discussion. Consent for a private-channel-only
-  research search (excluding DMs) is pending; repository work does not depend on it.
+- Slack context: the user subsequently authorized the specified four-person group conversation. Read-only research
+  search completed; no one-to-one DM was read. The peer RULER note supports V direction but not a full-rank necessity.
+  Aggressive-sparsity step inflation is a collaboration clue, not a new v27 result. A/B refs remain pending.
 
 ## Operational notes (still relevant)
 

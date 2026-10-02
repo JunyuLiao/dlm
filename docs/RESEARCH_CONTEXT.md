@@ -242,3 +242,16 @@ per-step decode costs:
 - In this branch's tested AIME/LongBench settings, no data supports "V-aware selection beats score-only selection".
   This does not settle the RULER hypothesis (§10). At high AIME sparsity our risk top-k is
   worse than SparseD.
+
+## 11. Authorized group-context review (2026-10-01, 23:10 UTC−5)
+
+The specified four-person group was read with user authorization. Sanitized background and paper links are in
+`GROUP_CONTEXT_20261001.md`. Peer V-rank/step-inflation observations are external context, not new v27 results.
+The reported BLASST control is not the repo's mass-only control. Same-forward spatial S/TS must not be treated as
+available for pre-forward regroup; distinguish it from previous-step signals and from the decode-time metric S.
+A/B refs remain unknown; no integration or GPU generation has occurred.
+
+Related-work boundaries: HERALD uses CPU/GPU KV offloading and block reuse, with adaptive accuracy evaluation but
+fixed-T performance on LLaDA/SDAR; PRR repairs speculative selections on AR DSA; SSV combines sparse speculative
+verification and acceptance-aware orchestration. They constrain novelty but do not measure the current native
+DiffusionGemma/FA4 protocol. BRISK-DLM's prefix-conditioned corrector is not assumed portable to native decoding.

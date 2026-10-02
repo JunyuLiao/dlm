@@ -307,3 +307,12 @@ Step ratio N = method decoder calls / dense decoder calls per cell (M3 R6 DP −
 - **Source:** `intake_audit_20261001/summary.json` and `README.md`; explanation `docs/INTAKE_AUDIT_20261001.md`.
   Source inputs are the existing private scored CSVs/closed ledgers and the prior full-dataset rendering log.
   GPU seconds for this review = **0**.
+
+## Group-context verification (2026-10-01, 23:10 UTC−5; no new benchmark)
+
+- User-authorized read-only search of the specified research group completed. Peer RULER/V-rank and step-inflation
+  messages were read with relevant thread replies; HumanEval search and merge search produced no matches there.
+  This does not establish that no peer HumanEval run or integration exists elsewhere.
+- Source/background: `docs/GROUP_CONTEXT_20261001.md`. HERALD/PRR/SSV experimental boundaries and BRISK-DLM's
+  abstract were checked against public primary sources. No peer figures enter this branch's W/S/N/accuracy tables.
+- No new model output, protocol, run, score or GPU job. GPU seconds = **0**; A/B refs remain pending.
