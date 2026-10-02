@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 17:35 (UTC-5)",
+    "updated_local": "2026-10-02 17:36 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
-    "verified_commit": "bc028d6a7",
+    "verified_commit": "fdca7bf02",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -17,7 +17,9 @@
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
     "headline": "vLLM smoke only: S/N proxy 0.96 at 32K, 0.85 at 64K; request/accuracy panel V18 preparing. Historical HF speed ratios are not headline official-serving evidence.",
-    "running": [],
+    "running": [
+      "dllm: v27_vllm_v18_preflight_004 (96K longest input; main, all-kept, native, dense)"
+    ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
@@ -196,12 +198,12 @@
       "source": "docs/VLLM_PORT_NOTES_20261002.md"
     },
     "vllm_v18": {
-      "status": "Source-path rebind fix passes 164 CPU tests and real frozen production-config validation. Old and new files must match original hashes; only source path keys and derived fingerprints change. All method fields remain frozen. Worker now validates the effective config before GPU initialization. New deploy/binding qualification 004 is next, main first. Closed GPU seconds remain 1370.088.",
+      "status": "Qualification 004 launched from fdca7bf02 with a new frozen binding and strictly byte-validated config path rebinding; main runs first. Three matched references follow if main passes. No formal panel yet. mpk and dlm2 idle. 164 CPU tests and the actual production-config CPU guard pass.",
       "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_vllm_lb_v18.json",
       "gpu_seconds": 1370.088,
       "cpu_tests": 164,
-      "deploy_commit": "088dc8184823c4d6332348621af3095a9efc60f4",
-      "gpu_accounting": "all closed V18 attempts and diagnostic; no active GPU worker"
+      "deploy_commit": "fdca7bf02a603260ae3ff803cf32556f9c96fcef",
+      "gpu_accounting": "1370.088 closed V18 GPU seconds; active attempt 004 pending"
     }
   },
   "task": "M3 output numerics and trajectory isolation",

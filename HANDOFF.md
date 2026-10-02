@@ -25,7 +25,7 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## V18 live status
 
-2026-10-02 17:35 (UTC-5): Source-path rebind fix passes 164 CPU tests and real frozen production-config validation. Old and new files must match original hashes; only source path keys and derived fingerprints change. All method fields remain frozen. Worker now validates the effective config before GPU initialization. New deploy/binding qualification 004 is next, main first. Closed GPU seconds remain 1370.088.
+2026-10-02 17:36 (UTC-5): Qualification 004 launched from fdca7bf02 with a new frozen binding and strictly byte-validated config path rebinding; main runs first. Three matched references follow if main passes. No formal panel yet. mpk and dlm2 idle. 164 CPU tests and the actual production-config CPU guard pass.
 
 ## Intake and panel preparation (2026-10-02, US Central UTC-5)
 
@@ -216,7 +216,7 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 
 ## Running
 
-- None.
+- dllm: v27_vllm_v18_preflight_004 (96K longest input; main, all-kept, native, dense)
 
 ## Blockers
 
