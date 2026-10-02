@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 17:31 (UTC-5)",
+    "updated_local": "2026-10-02 17:35 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
-    "verified_commit": "088dc8184",
+    "verified_commit": "bc028d6a7",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -196,10 +196,10 @@
       "source": "docs/VLLM_PORT_NOTES_20261002.md"
     },
     "vllm_v18": {
-      "status": "Qualification 003: dense, native and all-kept pass actual async N and zero timed compile/capture; main stops before generation because frozen source-hash keys name the old deploy. Core bytes are unchanged. Rebind paths only after old/new byte equality checks, then use a new frozen binding and run. Formal panel not launched. All GPUs idle. Attempt 003 reserved 614.449 GPU seconds; closed V18 total 1370.088 s.",
+      "status": "Source-path rebind fix passes 164 CPU tests and real frozen production-config validation. Old and new files must match original hashes; only source path keys and derived fingerprints change. All method fields remain frozen. Worker now validates the effective config before GPU initialization. New deploy/binding qualification 004 is next, main first. Closed GPU seconds remain 1370.088.",
       "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_vllm_lb_v18.json",
       "gpu_seconds": 1370.088,
-      "cpu_tests": 151,
+      "cpu_tests": 164,
       "deploy_commit": "088dc8184823c4d6332348621af3095a9efc60f4",
       "gpu_accounting": "all closed V18 attempts and diagnostic; no active GPU worker"
     }

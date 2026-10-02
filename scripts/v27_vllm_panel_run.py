@@ -73,6 +73,10 @@ def main():
     binding = read(a.binding)
     spec = read(binding['spec'])
     validate_binding(binding, spec)
+    # Fail source-path/config identity checks before importing GPU runtime/loading weights.
+    from experiments.numerical_qk_reuse import v21
+    config = read(binding['config'])
+    v21.validate_effective(config, config['condition'])
     a.run_dir.mkdir(parents=True, exist_ok=False)
     start_process = time.perf_counter()
     status = dict(protocol_id=spec['protocol_id'], arm=a.arm, block=a.block,

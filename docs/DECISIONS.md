@@ -213,3 +213,5 @@ reported, with exact decomposition checked. Prefill counts must agree between bo
 - 2026-10-02 17:17 (UTC-5): 96K qualification attempt 003 started on dllm from 088dc8184, after 151 CPU tests. It counts actual async executions using existing CPU snapshots. No formal panel launched; mpk and dlm2 idle.
 
 - 2026-10-02 17:31 (UTC-5): Qualification 003: dense, native and all-kept pass actual async N and zero timed compile/capture; main stops before generation because frozen source-hash keys name the old deploy. Core bytes are unchanged. Rebind paths only after old/new byte equality checks, then use a new frozen binding and run. Formal panel not launched. All GPUs idle. Attempt 003 reserved 614.449 GPU seconds; closed V18 total 1370.088 s.
+
+- 2026-10-02 17:35 (UTC-5): Source-path rebind fix passes 164 CPU tests and real frozen production-config validation. Old and new files must match original hashes; only source path keys and derived fingerprints change. All method fields remain frozen. Worker now validates the effective config before GPU initialization. New deploy/binding qualification 004 is next, main first. Closed GPU seconds remain 1370.088.
