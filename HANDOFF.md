@@ -27,6 +27,15 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 2026-10-02 17:54 (UTC-5): All four longest-96K V18b qualification arms pass execution/config/count/graph guards and unchanged NeMo scoring. All four outputs parse and all four are incorrect on this one item; this is scorer qualification only, not accuracy evidence. Qualification 005 reserved 640.802 s; total closed V18 work 2154.955 GPU seconds. Formal V18b panel_001 launched from the identical 8704cd072 deploy/binding: 24/24/11 items at 32K/64K/96K, four repeats, dense/main plus matched controls, 568 timed requests. Expected 2-4 hours; mpk CPU scorer ready, both other GPUs idle.
 
+## Variant/fairness audit (2026-10-02 18:19 (UTC-5))
+
+See `docs/VARIANT_FAIRNESS_AUDIT_20261002.md` for the superseding interpretation of historical claims.
+No new blocker was found for frozen V18b. Added constructor rejection for unsupported C/density gates
+for future deployments only. Historical HF accuracy is descriptive, not proven noninferiority;
+cell-level repeated-seed p values are exploratory. HF W excluded method setup/cleanup, and its
+`new_graphs` tracked Dynamo compilation rather than CUDA capture. Mass-only removes V from prefix
+ranking only. R17 92K main discordance is +0/-0 (91/91 unchanged). CHW/PPT/Slack reviewed read-only.
+
 ## Intake and panel preparation (2026-10-02, US Central UTC-5)
 
 - Reviewed remote branch explicitly with `git fetch origin research/humaneval-v27-20261001`:
@@ -48,7 +57,8 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - **R17 finished** (`ruler_long_panel_r17/receipts.md`, L1p).
   - Main keeps RULER accuracy at 32K / 64K / 92K (110 / 98 / 91 vs dense 110 / 97 / 91).
   - Fixed 88% / 95% lose only at 32K (`cwe`).
-  - The V term is closed: mass-only is as good or better (95% / 32K: 107 vs 101, p 0.031).
+  - Prefix-ranking V ablations are closed as a negative (95% / 32K: mass-only 107 vs rank32 101, p 0.031).
+    This does not remove V from tail selection or observation costs; see the audit above.
 - **The method now runs inside vLLM** (`experiments/numerical_qk_reuse/vllm_adapter.py`; notes in
   `docs/VLLM_PORT_NOTES_20261002.md`). It runs the unchanged core with the frozen main config; receipts match the panels.
   - Smoke results against vLLM's own default dense serving, per step: **0.96× at 32K, 0.85× at 64K**.
@@ -70,7 +80,7 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 | per step, 64K | 0.814 | 0.85 |
 | per step, 96K | 0.745 | not run (memory check pending) |
 | end-to-end W | 0.950 / 0.867 / 0.818 | not measured; 64K estimate ≈ 0.90 if step counts were equal |
-| accuracy | not lower (96K higher, p 0.012) | not measured yet (completions saved privately) |
+| accuracy | 267/274, 228/238, 93/76; noninferiority unproven | not measured yet (completions saved privately) |
 
 - The same mechanism shows in both: per-step saving grows with context length.
 - In vLLM each skipped GLOBAL tile saves less, because vLLM's dense call is faster. The rest of vLLM's step is also
@@ -81,9 +91,11 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 - The vLLM panel (next step 1) must confirm the vLLM numbers with many items, accuracy and 96K.
 
 **HF-substrate result (18 seeds, E13 + E14 + E15; L1m; dense = FA4 num_splits=1, see the correction above).** M3 R6 DP −ln2 + `carry_first` vs that dense:
-- end-to-end W **0.950 [0.920, 0.980] (32K), 0.867 [0.841, 0.892] (64K), 0.818 [0.731, 0.898] (96K)**;
+- HF generation-call W (prefill included, method setup/cleanup excluded) **0.950 [0.920, 0.980] (32K), 0.867 [0.841, 0.892] (64K), 0.818 [0.731, 0.898] (96K)**;
 - generation-only S 0.937 / 0.787 / 0.728, per step 0.921 / 0.814 / 0.745;
-- accuracy not lower: 267/274, 228/238, 93/76; at 96K sparse is higher, p 0.012.
+- accuracy: 267/274, 228/238, 93/76. Old cell-level p=0.012 at 96K is exploratory;
+  11-question exact sign-flip p=0.125. Question-cluster CIs still allow declines at 32K/64K.
+  Neither noninferiority nor a robust 96K advantage is established.
 - AIME (E15): W 0.951, from fewer steps; accuracy 100 vs 94.
 
 **The most important open issue: the dense baseline is not the fastest official serving system.**
@@ -255,7 +267,8 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
   not recheck scorer/run identity. Added rejection of duplicates, omitted scored executions, mixed host/GPU,
   substrate/protocol/model/source, and unqualified scores. Unknown graph counters are excluded from Wc.
 - Audited E4/E5/E6/E6b/E7/E8/E9/E10/E11: 8,826 first runs, same-host cells throughout, no duplicate first outputs,
-  no point-estimate or correct-count changes. E7/E8 each retain the known 3 timed graph captures (use Wc).
+  no point-estimate or correct-count changes. E7/E8 each retain 3 timed Dynamo new-graph events (use historical Wc);
+  these counters do not independently establish CUDA capture counts.
 - Final regression: 17 CPU tests pass on the registered dlm2 interpreter; all nine panels pass the final guards.
 - Full LongBench-v2 length inventory: 503 inputs, median 107,706, max 5,174,028 rendered tokens. 224 inputs ≤95,074;
   400 fit the configured 262,144-token context with 8,192 output tokens reserved. Chunked prefill can address

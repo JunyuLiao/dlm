@@ -175,13 +175,18 @@ differ between substrates.
 
 - **Cells.** One cell is (item, seed); each arm contributes only its first output. All arms of a cell run on one host.
 - **Ratios vs `D_fa4_allkept`.** Paired geometric mean with a question-clustered bootstrap 95% CI:
-  - `W`: request wall;
-  - `Wc`: W excluding pairs that captured new CUDA graphs while timed;
+  - `W`: historical HF generation-call wall including prefill, excluding method installation/cleanup;
+    native V18b includes adapter begin/end but not HTTP/network time;
+  - `Wc`: historical HF W excluding pairs with timed Dynamo `unique_graphs` increments;
+    this is not a direct CUDA graph capture counter. Native V18b checks actual captures separately;
   - `S`: decode span, excluding prefill; `P`: prefill;
   - `N`: decoder calls; `NC` = N/C: steps per canvas; `T`: output tokens;
   - `S/N`: amortized per-step cost (not a direct per-forward price);
   - `S/C`: decode time per canvas (= per-step cost × steps per canvas).
-- **Accuracy.** Strict-correct counts with +/− discordant cells and a paired sign test.
+- **Accuracy.** Strict-correct counts with +/− discordant cells. For repeated seeds on the same
+  questions, cell-level McNemar is exploratory; use question-cluster intervals and disclose
+  independent question count. A nonsignificant difference is not proof of noninferiority.
+  See `docs/VARIANT_FAIRNESS_AUDIT_20261002.md` for the E13–E15 correction.
 - **Realized sparsity.** Skipped GLOBAL key tiles over all GLOBAL tiles, by construction (canvas tiles kept, first
   calls dense). It is not per-tile telemetry.
 

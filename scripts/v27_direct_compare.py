@@ -3,9 +3,10 @@
 Cells come from each panel's qualified scored.csv and worker ledgers through ``v27_fa4_panel_summary.read_cells``
 (same provenance checks: one host per cell, identical substrate/protocol/source within a cell). Panels are pooled
 by stacking their cells (seeds differ between panels, so no cell is counted twice); the bootstrap clusters by
-question (dataset, id) across panels. Ratios are geometric means: W request wall, Wc W excluding pairs that captured
-new graphs while timed, S decode span, P prefill, N decoder calls, NC steps per canvas, T tokens, SN amortized
-per-call cost, ST time per token. Accuracy: paired counts and an exact two-sided McNemar p. Also per host.
+question (dataset, id) across panels. Ratios are geometric means: W HF generation-call wall (setup/cleanup excluded), Wc W excluding pairs with
+timed Dynamo unique_graphs increments (not a CUDA capture counter), S decode span, P prefill, N decoder calls, NC steps per canvas, T tokens, SN amortized
+per-call cost, ST time per token. Accuracy: paired counts and an exploratory cell-level McNemar p (repeated seeds share questions).
+Use v27_historical_accuracy_audit for question-cluster accuracy inference. Also per host.
 usage: python -m scripts.v27_direct_compare OUT.md OUT.csv ARM BASE --panel NAME SCORED.csv LEDGER [LEDGER ...]
        [--panel NAME SCORED.csv LEDGER ...]
 """
@@ -81,7 +82,7 @@ def main(argv=None):
                 pairs[key[0]].append(((key[0], key[1], key[2], name), v[arm], v[base]))
     rows = []
     lines = [f'# {arm} / {base} (direct, paired)', '', 'Panels: ' + ', '.join(n for n, _, _ in panels), '',
-             '| bin | host | cells | acc arm / base (+/-, McNemar p) | W [CI] | Wc | S [CI] | per-step S/N [CI] | N [CI] | '
+             '| bin | host | cells | acc arm / base (+/-, exploratory cell McNemar p) | W [CI] | Wc | S [CI] | per-step S/N [CI] | N [CI] | '
              'steps/canvas N/C | T | P |', '|---|---|---:|---|---|---|---|---|---|---|---|---|']
     for dataset in sorted(pairs):
         groups = [('all', pairs[dataset])] + sorted(

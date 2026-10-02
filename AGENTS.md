@@ -63,10 +63,14 @@
   - Never headline against the HF default path (`D_native`), `D_c64` or `D_fast`.
 - **Fair comparison.** All arms share:
   - substrate, deploy commit, host per cell, items, seeds and warm-up;
-  - sparse arms run through the same FA4 kernel as dense, differing only in skipped tiles.
+  - the same pinned FA4 implementation/version, with exact kernel paths disclosed. Native dense
+    uses dynamic-causal split-KV while sparse uses an alias-split consumer; retain all-kept and
+    native-hook controls so implementation differences are measured rather than hidden.
 
-  Every arm of a cell runs on one host. Timed runs must not capture new CUDA graphs: report `Wc`, or check the
-  counter.
+  Every arm of a cell runs on one host. Timed runs must not capture new CUDA graphs: check an actual
+  CUDA capture counter. Historical HF `Wc` filters Dynamo new compilations only, not CUDA captures.
+  Repeated seeds share questions: accuracy inference must account for question clusters;
+  nonsignificance does not establish noninferiority.
 - **Native decoding is fixed.** The runner asserts the official generation config: canvas 256, max 48 steps,
   confidence 0.005, stability 1, entropy bound 0.1, temperature 0.8→0.4, thinking ON.
 - **Freeze before generation.** Workflow: spec (committed) → frozen protocol → deploy commit → bind → launch → score.

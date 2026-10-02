@@ -130,6 +130,16 @@ class VllmMethodAdapter:
             raise ValueError(arm)
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
+        if arm == 'method':
+            # The vLLM sample hook supplies logits only. These HF variants need
+            # the accepted-token mask, which this adapter does not yet expose.
+            # Reject before request binding, model construction or GPU work.
+            if config.get('sensitivity') == 'cgate':
+                raise ValueError('vLLM adapter does not support C gate (sensitivity=cgate): '
+                                 'the sample hook does not provide the accepted-token mask')
+            if config.get('density_gate') is not None:
+                raise ValueError('vLLM adapter does not support density_gate: '
+                                 'the sample hook does not provide the accepted-token mask')
         self.layer_types = list(layer_types)
         self.global_layers = [i for i, t in enumerate(self.layer_types) if t != 'sliding_attention']
         self.config, self.condition, self.arm = config, condition, arm

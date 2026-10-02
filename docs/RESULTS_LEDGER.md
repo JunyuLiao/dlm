@@ -4,7 +4,8 @@ Rules for this file:
 - An entry needs a scored, frozen panel or a documented benchmark whose summary is in the repo.
 - Historical HF entries use `D_fa4_allkept` unless stated. Current headline speed evidence must use native vLLM dense (FA4 dynamic-causal with effective split-KV).
 - Ratios are method / dense: paired geometric mean with a question-clustered bootstrap 95% CI. < 1 means faster.
-- W = request wall, including prefill (end to end). S = decode span, excluding prefill (generation time).
+- W includes prefill. Historical HF W times the generation call, excluding method setup/cleanup;
+  native V18b W includes adapter begin/end, but excludes HTTP/network time. S excludes prefill.
   S/N = amortized per step. NC = steps per canvas. T = output tokens.
 - Accuracy is strict-correct cells, method vs dense.
 - Paths are relative to `results/m1_m2_m3_frontier_v27_20260929/`.
@@ -17,6 +18,12 @@ Rules for this file:
 Baseline correction (2026-10-02): these speed ratios use FA4 num_splits=1 and are not
 headline evidence against the fastest official serving. vLLM dynamic-causal split-KV is
 faster. Keep these results unchanged as history; the new vLLM panel is not scored yet.
+
+Audit correction (2026-10-02): historical claims of zero capture refer only to Dynamo
+`unique_graphs` unless a direct CUDA counter is documented. Repeated-seed cell McNemar p
+values are exploratory; counts do not prove noninferiority. Mass-only is prefix-ranking-only,
+with V-dependent tail/observation retained. The appended audit entry and
+`docs/VARIANT_FAIRNESS_AUDIT_20261002.md` supersede stronger historical wording.
 
 ### L1. E4 large-seed confirmation: LongBench-v2 32K and 64K, 24 items × 6 new seeds (404–909) = 144 cells per arm per bin
 
@@ -595,3 +602,16 @@ answers parse under the unchanged NeMo scorer; all four are wrong on this single
 This validates the execution/scoring chain only, not accuracy or performance.
 Reserved GPU time is 640.802 s; cumulative closed V18 work is 2154.955 s.
 Formal V18b panel_001 is launched from the same deploy/binding; no formal result yet.
+
+
+## Variant/fairness audit (2026-10-02 18:19 (UTC-5))
+
+Historical counts and times are preserved. E13–E15 pooled main/dense correct counts are
+267/274, 228/238, 93/76; old cell McNemar 96K p≈0.012 is exploratory, while the
+11-question exact sign-flip p=0.125. Question-cluster intervals allow 32K/64K declines;
+noninferiority is unproven. HF W excluded setup/cleanup; HF new_graphs counted Dynamo
+compilations, not CUDA captures. Existing mass-only changes prefix ranking only.
+R17 92K main discordance is corrected here to +0/-0, preserving 91/91 correct.
+Source: `docs/VARIANT_FAIRNESS_AUDIT_20261002.md`; reproducible historical aggregate
+audit: `scripts/v27_historical_accuracy_audit.py`. Audit GPU seconds: 0.
+No new formal V18b result is claimed; the frozen campaign continues.

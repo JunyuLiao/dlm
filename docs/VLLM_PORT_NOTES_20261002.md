@@ -325,7 +325,7 @@ batch 1, `--block-size 32`, memory 0.85).
 
 Use `docs/VLLM_PANEL_V18_20261002.md`, the V18b spec and
 `scripts/v27_vllm_panel_run.py`; the historical smoke launch plan below is superseded.
-The formal runner uses request-boundary synchronization, actual async forward counts,
+The formal measurement tracker uses request-boundary synchronization, actual async forward counts,
 explicit graph/compile guards, and strict completion scoring. Configuration source paths
 are rebound only after both old/new files match the original hashes; all mathematical
 settings stay unchanged. V18b lowers KV reservation equally across all arms to 0.85,
@@ -372,3 +372,12 @@ McNemar is exploratory only. See HANDOFF/STATE for the live launch status.
    - Report accuracy vs vLLM dense with McNemar on matched item × repeat order, and item-clustered intervals.
 6. Spread across mpk and dlm2 if their envs are set up. Only dllm has the vLLM env now; a copy must stay inside each
    host's dyh, and every arm of a cell must run on the same host.
+
+
+## Adapter scope correction (2026-10-02 18:19 (UTC-5))
+
+The sample hook does not expose accepted-token masks. C gate and density_gate are unsupported;
+new constructor guards reject them before binding. Frozen V18b main enables neither and its
+8704cd072 deployment is unchanged. The adapter still performs per-step D2H `.tolist()` calls;
+request-boundary-only synchronization describes the measurement tracker, not all adapter code.
+See `docs/VARIANT_FAIRNESS_AUDIT_20261002.md`.

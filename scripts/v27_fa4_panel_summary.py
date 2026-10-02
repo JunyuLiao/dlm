@@ -1,5 +1,5 @@
 """v27 FA4-panel summary (first-only panels): quality from scored.csv, per-cell numbers from the worker ledger's
-redacted run events (no text): W = request wall (api_wall_s), S = decode span (phase_evidence
+redacted run events (no text): W = HF generation-call wall (api_wall_s; setup/cleanup excluded), S = decode span (phase_evidence
 prefill_end_to_finish_gpu_s: first encoder forward end -> last CUDA event, i.e. EXCLUDES the initial prompt
 prefill, which no method changes), P = W - S (prompt prefill plus host setup; a ratio of 1 confirms the methods
 leave it alone), N = decoder calls, T = output tokens, C = canvases, N/C = decoder calls (denoising steps) per
@@ -137,7 +137,7 @@ def main(argv=None):
                                 ('T', lambda a, b: a['T'] / b['T']),
                                 ('SN', lambda a, b: (a['S'] / a['N']) / (b['S'] / b['N'])),
                                 ('ST', lambda a, b: (a['S'] / a['T']) / (b['S'] / b['T'])),
-                                # sensitivity: W over pairs in which neither run captured new graphs while timed
+                                # sensitivity: W over pairs with zero timed Dynamo unique_graphs increments (not CUDA captures)
                                 ('Wc', lambda a, b: None if (a['new_graphs'] is None or b['new_graphs'] is None or
                                                            a['new_graphs'] or b['new_graphs']) else a['W'] / b['W'])):
                     by_q = defaultdict(list)
@@ -154,7 +154,7 @@ def main(argv=None):
                     row[name + '_ci'] = f'[{lo:.3f},{hi:.3f}]' if lo else ''
                 rows.append(row)
                 lines.append(f"| {arm} | {row['cells']} | {row['correct']} ({row['base_correct']}) | "
-                             f"+{row['arm_only']}/-{row['base_only']} | {row['W']} {row['W_ci']} | {row['Wc']} {row['Wc_ci']} ({row['timed_with_new_graphs']} captures, {row['timed_graph_counter_unknown']} unknown excl.) | {row['S']} {row['S_ci']} | "
+                             f"+{row['arm_only']}/-{row['base_only']} | {row['W']} {row['W_ci']} | {row['Wc']} {row['Wc_ci']} ({row['timed_with_new_graphs']} pairs with Dynamo new graphs, {row['timed_graph_counter_unknown']} unknown excl.) | {row['S']} {row['S_ci']} | "
                              f"{row['P']} {row['P_ci']} | {row['N']} {row['N_ci']} | {row['NC']} {row['NC_ci']} | "
                              f"{row['T']} {row['T_ci']} | {row['SN']} {row['SN_ci']} | {row['ST']} {row['ST_ci']} |")
             lines.append('')

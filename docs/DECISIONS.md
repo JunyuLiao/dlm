@@ -225,3 +225,18 @@ reported, with exact decomposition checked. Prefill counts must agree between bo
 - 2026-10-02 17:45 (UTC-5): V18b main passes the longest 96K input under common KV reservation 0.85, with valid effective-method/actual-forward receipts and no timed compile/capture. Three references are still running/pending; this is not a completed accuracy or speed panel. Read-only expansion check found I-DLM CUDA 12.8 versus upstream SGLang CUDA 13.0, so the latter's shim cannot be treated as I-DLM-qualified.
 
 - 2026-10-02 17:54 (UTC-5): All four longest-96K V18b qualification arms pass execution/config/count/graph guards and unchanged NeMo scoring. All four outputs parse and all four are incorrect on this one item; this is scorer qualification only, not accuracy evidence. Qualification 005 reserved 640.802 s; total closed V18 work 2154.955 GPU seconds. Formal V18b panel_001 launched from the identical 8704cd072 deploy/binding: 24/24/11 items at 32K/64K/96K, four repeats, dense/main plus matched controls, 568 timed requests. Expected 2-4 hours; mpk CPU scorer ready, both other GPUs idle.
+
+
+## Variant/fairness audit (2026-10-02 18:19 (UTC-5))
+
+- Preserve historical raw artifacts and append explicit corrections: repeated-seed cell p values
+  are exploratory, noninferiority unproven, HF W excludes setup/cleanup, HF new_graphs is Dynamo-only,
+  and mass-only is prefix-ranking-only. R17 92K main is +0/-0 at unchanged 91/91.
+- Reject unsupported C/density gate configurations at vLLM adapter construction. Frozen
+  8704cd072 main and ongoing V18b are unchanged. New guard has 6 CPU tests.
+- Read-only CHW/PPT/Slack review distinguishes full-QK/PV-only optimization, JAX baseline,
+  unmatched density/cost and different thinking/budget/protection protocols. No peer code merged.
+- Keep P17 not-adopted as a result for its tested configuration, not a universal C-gate rejection.
+  No evidence currently justifies aborting V18b or reopening closed regroup/V claims.
+- Next method study needs a new branch, independent calibration, matched realized density and
+  selector costs, native stopping, strong dense and optimized references. See audit document.

@@ -1,0 +1,114 @@
+{
+  "schema": "v27_historical_accuracy_audit_v1",
+  "bootstrap": {
+    "seed": 7,
+    "draws": 20000,
+    "method": "item-cluster percentile 95%; all observations retained; cell-weighted difference",
+    "percentile_indices": "floor(0.025*draws), ceil(0.975*draws)-1"
+  },
+  "exact_sign_flip": {
+    "max_items": 16,
+    "assumption": "independent symmetric paired item contrasts under the null"
+  },
+  "interpretation": "Existing qualified strict scores only. Cell McNemar is exploratory. Repeated seeds are not independent question clusters. These tests do not establish accuracy noninferiority.",
+  "datasets": [
+    {
+      "dataset": "aime26",
+      "cells": 180,
+      "items": 30,
+      "observations_per_item_min": 6,
+      "observations_per_item_max": 6,
+      "arm_correct": 100,
+      "base_correct": 94,
+      "arm_only": 21,
+      "base_only": 15,
+      "accuracy_difference": 0.03333333333333333,
+      "accuracy_difference_item_cluster_ci95": [
+        -0.044444444444444446,
+        0.11666666666666667
+      ],
+      "item_positive": 8,
+      "item_negative": 6,
+      "item_zero": 16,
+      "exact_item_sign_flip_p": null,
+      "exact_item_sign_flip_assignments": null,
+      "exact_item_sign_flip_status": "item_limit_exceeded",
+      "exploratory_cell_mcnemar_exact_p": 0.40503224614076316
+    },
+    {
+      "dataset": "longbench_v2_32k",
+      "cells": 432,
+      "items": 24,
+      "observations_per_item_min": 18,
+      "observations_per_item_max": 18,
+      "arm_correct": 267,
+      "base_correct": 274,
+      "arm_only": 47,
+      "base_only": 54,
+      "accuracy_difference": -0.016203703703703703,
+      "accuracy_difference_item_cluster_ci95": [
+        -0.06018518518518518,
+        0.02546296296296296
+      ],
+      "item_positive": 5,
+      "item_negative": 9,
+      "item_zero": 10,
+      "exact_item_sign_flip_p": null,
+      "exact_item_sign_flip_assignments": null,
+      "exact_item_sign_flip_status": "item_limit_exceeded",
+      "exploratory_cell_mcnemar_exact_p": 0.5507089135982718
+    },
+    {
+      "dataset": "longbench_v2_64k",
+      "cells": 432,
+      "items": 24,
+      "observations_per_item_min": 18,
+      "observations_per_item_max": 18,
+      "arm_correct": 228,
+      "base_correct": 238,
+      "arm_only": 24,
+      "base_only": 34,
+      "accuracy_difference": -0.023148148148148147,
+      "accuracy_difference_item_cluster_ci95": [
+        -0.06018518518518518,
+        0.009259259259259259
+      ],
+      "item_positive": 5,
+      "item_negative": 5,
+      "item_zero": 14,
+      "exact_item_sign_flip_p": null,
+      "exact_item_sign_flip_assignments": null,
+      "exact_item_sign_flip_status": "item_limit_exceeded",
+      "exploratory_cell_mcnemar_exact_p": 0.2370471147627195
+    },
+    {
+      "dataset": "longbench_v2_96k",
+      "cells": 198,
+      "items": 11,
+      "observations_per_item_min": 18,
+      "observations_per_item_max": 18,
+      "arm_correct": 93,
+      "base_correct": 76,
+      "arm_only": 29,
+      "base_only": 12,
+      "accuracy_difference": 0.08585858585858586,
+      "accuracy_difference_item_cluster_ci95": [
+        0.005050505050505051,
+        0.18181818181818182
+      ],
+      "item_positive": 4,
+      "item_negative": 2,
+      "item_zero": 5,
+      "exact_item_sign_flip_p": 0.125,
+      "exact_item_sign_flip_assignments": 2048,
+      "exact_item_sign_flip_status": "exact",
+      "exploratory_cell_mcnemar_exact_p": 0.011507789735333063
+    }
+  ],
+  "source_panels": [
+    "E13",
+    "E14",
+    "E15"
+  ],
+  "comparison": "main M3 R6 A64 DP minus-ln2 + carry_first versus historical HF D_fa4_allkept; descriptive accuracy reanalysis only"
+}

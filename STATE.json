@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 17:54 (UTC-5)",
+    "updated_local": "2026-10-02 18:19 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
-    "verified_commit": "8704cd072",
+    "verified_commit": "7d9195047",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,7 +16,7 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "vLLM smoke only: S/N proxy 0.96 at 32K, 0.85 at 64K; request/accuracy panel V18 preparing. Historical HF speed ratios are not headline official-serving evidence.",
+    "headline": "V18b formal native-vLLM panel running from frozen 8704cd072. Historical HF speed is substrate-only; repeated-seed accuracy counts do not prove noninferiority. See variant/fairness audit.",
     "running": [
       "dllm: v27_vllm_v18_panel_001 (formal V18b, 59 items x 4 repeats, 568 timed requests including controls)"
     ],
@@ -59,7 +59,8 @@
         "panel": "E11 v27_lb64_vterm_hi_e11_18d29fa43d5d11a9 (64K, 48 cells, 95% sparsity, preview)",
         "verdict": "no V advantage (mass/r32 1.004 [0.916, 1.099]); no accuracy loss; W ~0.89",
         "source": "results/m1_m2_m3_frontier_v27_20260929/lb64_vterm_hi_panel_e11/summary.md"
-      }
+      },
+      "scope": "Negative evidence for V in prefix ranking only; tail and observation remain V dependent."
     },
     "m2_vs_m3": {
       "panel": "E10 v27_lb_m2opt_e10_c965792c1cb6542d",
@@ -82,7 +83,7 @@
       "gpu_seconds": 0
     },
     "v_dimension_hypothesis": {
-      "status": "Closed as a negative in tested AIME, LongBench, HumanEval and RULER panels; see R17.",
+      "status": "Closed as negative for tested prefix-ranking V choices; not a whole-selector V-free ablation.",
       "ruler": "R17 mass-only at least as accurate as rank-32; no supported V benefit.",
       "aime_longbench": "V benefit unsupported in tested settings; do not extrapolate to RULER",
       "humaneval": "E12 completed; no V advantage.",
@@ -208,6 +209,25 @@
       "qualification": "passed four arms at 96K; parsed 4/4, correct 0/4, single shared item only",
       "formal_campaign": "v27_vllm_v18_panel_001",
       "expected_timed_requests": 568
+    },
+    "variant_fairness_audit": {
+      "source": "docs/VARIANT_FAIRNESS_AUDIT_20261002.md",
+      "base_commit": "7d9195047",
+      "peer_readonly_ref": "chw/value_aware@6f7279c1625f7fa53bacb233b96fb69a385df8c1",
+      "v18b_blocker_found": false,
+      "gpu_seconds": 0,
+      "unsupported_adapter_gates_rejected": [
+        "cgate",
+        "density_gate"
+      ],
+      "historical_accuracy_inference": "question clusters required; cell McNemar exploratory; noninferiority unproven",
+      "mass_only_scope": "prefix ranking only; V-dependent tail and observation retained",
+      "r17_92k_main_discordance": {
+        "arm_only": 0,
+        "dense_only": 0
+      },
+      "cpu_tests": 188,
+      "aggregate": "results/m1_m2_m3_frontier_v27_20260929/variant_fairness_audit_20261002/historical_accuracy.json"
     }
   },
   "task": "M3 output numerics and trajectory isolation",
