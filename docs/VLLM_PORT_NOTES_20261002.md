@@ -174,3 +174,41 @@ It calls `flash_attn_varlen_func` exactly as vLLM's decoder GLOBAL call does (`c
     dllm after R17.
 - **Until it is resolved, the port uses the fixed-length entry** (`_flash_attn_fwd` with `page_table`, 4D lists,
   batch 1, verified exact at page 64). Batch 1 is also what the panels run.
+
+## Thin vLLM adapter for the unchanged method core (2026-10-02 13:50 UTC−5)
+
+Code: `experiments/numerical_qk_reuse/vllm_adapter.py`. Bench: `scripts/v27_vllm_method_bench.py`.
+
+**Principle.** The method core is not reimplemented. The adapter feeds the core
+(`v21.install` → `v20.install` → `global_scope.install` → `integration.Attention` + `NativeReuseState`) the same
+inputs that the HF hooks give it, from inside vLLM:
+
+| core input (HF substrate) | vLLM source |
+|---|---|
+| encoder pre-hook (`invalidate`) before prefill / commit | patched `DiffusionGemmaModelState.prepare_attn` when the request is in the encoder phase |
+| `State.begin(remaining_step, canvas)` before each denoising call | same patch: `48 − step_tensor[slot]` (one host read per step) |
+| `State.observe_logits(processed logits)` after sampling | wrapped `_compiled_sample_step` (its temperature-scaled logits; fast T takes only the argmax) |
+| decoder GLOBAL attention `(q, k = prefix ⊕ canvas, v)` | patched `FlashAttentionImpl.forward` on the 5 GLOBAL layers in denoising calls |
+| encoder cache prefix (identify hook) | per layer and canvas: one contiguous K/V buffer; the prefix copied once from the pages, the canvas region refreshed every call |
+
+- **Frozen configs validate unchanged.** It binds with the frozen R17 main-arm config, verified on CPU in the vLLM env:
+  source-byte hashes and fingerprints pass, and `effective_method` is identical to the panels'.
+  - The core runs from a panel deploy dir; the adapter is loaded from an overlay directory appended to the package
+    path, and its sha256 is recorded per request.
+  - The HF module binding (`runner._install_dense`, whose import pulls in datasets/scipy) is replaced by a stub
+    module that returns the adapter's per-request binding.
+  - The core's hooks are registered on stub modules (`DiffusionGemmaEncoderModel` and 30 attention stubs).
+    `GlobalScopeAdapter` selects GLOBAL layers 5 / 11 / 17 / 23 / 29, as in HF.
+- **Costs the method arm pays and vLLM dense does not:**
+  - one host read per step;
+  - one prefix copy per GLOBAL layer per canvas, plus the canvas-region refresh per call;
+  - eager attention (cudagraph mode PIECEWISE instead of vLLM's default FULL decode graph).
+
+  The dense arm is measured in both cudagraph modes, and an `allkept` arm (same buffers, FA4 with every tile kept)
+  isolates the adapter's own cost.
+- **Env change:** scipy 1.15.3 installed with `--no-deps` into the dyh vLLM env (numpy unchanged). It is no longer
+  needed after the runner stub and can be removed.
+- **Status:** CPU bind check passed. The GPU smoke (one 32K cell, all four arms) waits for R17 to free a GPU.
+- **Next optimisation, once correct:** feed FA4 the paged cache plus page table directly (the patched fixed-length
+  path), so the per-call canvas refresh and the per-canvas prefix copy disappear for the consumer. Only the
+  observation call would still read a contiguous K.
