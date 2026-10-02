@@ -186,3 +186,5 @@ Sources: audited base `6b13fe178`; `scripts/v27_fa4_panel_summary.py`,
 - HERALD's accuracy uses adaptive acceptance but its performance fixes T=20 and selects peak feasible batch sizes.
   PRR and SSV concern different AR sparse/speculative substrates. Cite overlap, never import their speedup as a v27
   result. Current map-drift/RULER/HumanEval/LongBench follow-up ordering is unchanged; no GPU workload launched.
+
+- 2026-10-02 16:50 UTC-5: launched V18 96K qualification on dllm (four serial arms, fresh run directories); no full panel yet. GPU seconds pending terminal receipts.

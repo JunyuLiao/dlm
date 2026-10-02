@@ -28,7 +28,9 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 - Reviewed remote branch explicitly with `git fetch origin research/humaneval-v27-20261001`:
   remote and local are both `b9e0700d8`. Default fetch only tracks an older branch; use the explicit ref.
 - All three H100s verified idle by SSH during intake (0 MiB, no compute processes).
-- V18 spec and new worker/phase tracker/scorer are being qualified. No V18 generation launched yet.
+- V18 spec and worker/phase tracker/scorer passed 112 CPU tests and were pushed in `c89472cfb`.
+  96K qualification started on dllm at 16:50 UTC-5, campaign `v27_vllm_v18_preflight_001`;
+  four arms run serially, no formal panel yet. mpk and dlm2 are idle.
   See `docs/VLLM_PANEL_V18_20261002.md`. Status changes are recorded here and in STATE.current.
 - Fixed stale fastest-dense and blocked-port labels. Historical panel numbers are preserved.
 
@@ -206,7 +208,7 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
 
 ## Running
 
-- Nothing.
+- V18 96K qualification on dllm, started 2026-10-02 16:50 UTC-5. Formal panel not launched.
 
 ## Blockers
 
