@@ -3,7 +3,12 @@
 ## What this repository is
 
 - The root is a general dLLM inference/evaluation framework (the `dllm` package in `src/dllm`; see `README.md`).
-- This branch, `research/m3-output-numerics-20260927`, holds one research study: **block-sparse attention for the
+- **Branches.** The current working branch is `research/humaneval-v27-20261001`. A GPT session created it from the v27
+  checkpoint `research/m3-output-numerics-20260927` (`add23afa9`) on 2026-10-01 23:59; all work since then
+  (HumanEval, step statistics, regrouping, docs) is on it. The old branch stays at `add23afa9` as the v27
+  checkpoint; fast-forwarding it is the user's call.
+- This study (v27 checkpoint branch `research/m3-output-numerics-20260927`, continued on
+  `research/humaneval-v27-20261001`) is about **block-sparse attention for the
   GLOBAL layers of DiffusionGemma-26B-A4B under its native adaptive stopping**.
   - The study's original core methods are M1/M2/M3; their historical comparisons remain in the ledger.
   - The goal is a real end-to-end gain against the strongest official dense baseline (FlashAttention-4), with no

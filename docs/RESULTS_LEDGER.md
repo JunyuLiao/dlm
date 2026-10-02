@@ -235,6 +235,13 @@ configurations. Compiled-forward kernels (CUDA-graph replay) grouped by kernel; 
 
 Data: `time_breakdown_v5/*_dense_first.jsonl`. One request per workload; a diagnostic, not a panel.
 
+### Query-row regrouping diagnostic (2026-10-02; idea from chw/value_aware)
+
+64K/32K, 4 requests each, E5 configuration. Regrouping the 256 canvas rows within 128-row FA4 query tiles keeps
+4.2% / 4.4% fewer prefix tiles (64K 14.0% → 13.4%, 32K 22.8% → 21.8%); at 64- and 32-row tiles regrouping again adds
+only 3–5%. Finer tiles alone cut kept work by 22% (64 rows) and 39% (32 rows); the per-row bound is 2.1% / 4.2% kept.
+Not integrated (end-to-end effect well below 1%). Details: `regroup_diag_1002/README.md`.
+
 ### Absolute step counts (2026-10-02): total steps per request and steps per block
 
 `scripts/v27_step_stats.py` over successful first outputs. A block is one 256-token canvas; steps are decoder calls;

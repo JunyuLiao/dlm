@@ -1,0 +1,190 @@
+{
+  "name": "humaneval_preview_h1",
+  "ids": {
+    "humaneval": [
+      "humaneval/0",
+      "humaneval/7",
+      "humaneval/14",
+      "humaneval/21",
+      "humaneval/28",
+      "humaneval/35",
+      "humaneval/43",
+      "humaneval/50",
+      "humaneval/57",
+      "humaneval/64",
+      "humaneval/71",
+      "humaneval/78",
+      "humaneval/85",
+      "humaneval/92",
+      "humaneval/99",
+      "humaneval/106",
+      "humaneval/113",
+      "humaneval/120",
+      "humaneval/128",
+      "humaneval/135",
+      "humaneval/142",
+      "humaneval/149",
+      "humaneval/156",
+      "humaneval/163"
+    ]
+  },
+  "seeds": [
+    404,
+    505,
+    606,
+    707,
+    808,
+    909
+  ],
+  "warm": false,
+  "arms": {
+    "D_fa4_allkept": {
+      "kind": "dense_fa4_allkept"
+    },
+    "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4": {
+      "kind": "method",
+      "parent": "M3_R3_A8_current_output",
+      "extra": {
+        "consumer64": 2,
+        "memory_caps": "long",
+        "fa4_consumer": true,
+        "score_period": 64,
+        "fused_observe": true,
+        "async_route": true,
+        "risk_state": "dense_prefix",
+        "decision_interval": 6,
+        "threshold_shift": "minus_ln2",
+        "carry_first": true
+      }
+    },
+    "M3_R6_A64_fused_dp_async_topk70_c0_fa4": {
+      "kind": "method",
+      "parent": "M3_R3_A8_current_output",
+      "extra": {
+        "consumer64": 2,
+        "memory_caps": "long",
+        "fa4_consumer": true,
+        "score_period": 64,
+        "fused_observe": true,
+        "async_route": true,
+        "risk_state": "dense_prefix",
+        "decision_interval": 6,
+        "risk_topk": "k30",
+        "carry_first": true
+      }
+    },
+    "M3_R6_A64_fused_dp_async_topk70_r16_c0_fa4": {
+      "kind": "method",
+      "parent": "M3_R3_A8_current_output",
+      "extra": {
+        "consumer64": 2,
+        "memory_caps": "long",
+        "fa4_consumer": true,
+        "score_period": 64,
+        "fused_observe": true,
+        "async_route": true,
+        "risk_state": "dense_prefix",
+        "decision_interval": 6,
+        "risk_topk": "k30",
+        "proj_rank": 16,
+        "carry_first": true
+      }
+    },
+    "M3_R6_A64_fused_dp_async_topk70_r8_c0_fa4": {
+      "kind": "method",
+      "parent": "M3_R3_A8_current_output",
+      "extra": {
+        "consumer64": 2,
+        "memory_caps": "long",
+        "fa4_consumer": true,
+        "score_period": 64,
+        "fused_observe": true,
+        "async_route": true,
+        "risk_state": "dense_prefix",
+        "decision_interval": 6,
+        "risk_topk": "k30",
+        "proj_rank": 8,
+        "carry_first": true
+      }
+    },
+    "M3_R6_A64_fused_dp_async_topk70_r4_c0_fa4": {
+      "kind": "method",
+      "parent": "M3_R3_A8_current_output",
+      "extra": {
+        "consumer64": 2,
+        "memory_caps": "long",
+        "fa4_consumer": true,
+        "score_period": 64,
+        "fused_observe": true,
+        "async_route": true,
+        "risk_state": "dense_prefix",
+        "decision_interval": 6,
+        "risk_topk": "k30",
+        "proj_rank": 4,
+        "carry_first": true
+      }
+    },
+    "M2c_R6_A64_fused_dp_async_topk70_c0_fa4": {
+      "kind": "method",
+      "parent": "M3_R3_A8_current_output",
+      "extra": {
+        "consumer64": 2,
+        "memory_caps": "long",
+        "fa4_consumer": true,
+        "score_period": 64,
+        "fused_observe": true,
+        "async_route": true,
+        "risk_state": "dense_prefix",
+        "decision_interval": 6,
+        "risk_topk": "k30",
+        "mu_mode": "pooled_compact",
+        "carry_first": true
+      }
+    },
+    "M3_R6_A64_fused_dp_async_topk70_mass_c0_fa4": {
+      "kind": "method",
+      "parent": "M3_R3_A8_current_output",
+      "extra": {
+        "consumer64": 2,
+        "memory_caps": "long",
+        "fa4_consumer": true,
+        "score_period": 64,
+        "fused_observe": true,
+        "async_route": true,
+        "risk_state": "dense_prefix",
+        "decision_interval": 6,
+        "risk_topk": "k30",
+        "risk_value": "mass",
+        "carry_first": true
+      }
+    }
+  },
+  "substrate": "piecewise_v5",
+  "hosts": [
+    "149.165.151.254",
+    "149.165.168.28"
+  ],
+  "extra_hosts": [
+    "149.165.168.28"
+  ],
+  "task_contracts": {
+    "humaneval": {
+      "dataset_revision": "6d43fb980f9fee3c892a914eda09951f772ad10d",
+      "dataset_sha256": "b796127e635a67f93fb35c04f4cb03cf06f38c8072ee7cee8833d7bee06979ef",
+      "prompt_style": "chat_complete_function_v1",
+      "extractor": "final_first_python_fence_or_plain_complete_function_v1",
+      "sandbox": "sudo_bwrap_readonly_net_pid_user_isolated_v1",
+      "scorer_sha256": "5ee63af93bc9c6bcdcd936ae52e9ef276d88b2842965afd3969eb55aa7b64193",
+      "thinking": true,
+      "generation_budget": 8192,
+      "test_wall_timeout_s": 5,
+      "test_cpu_limit_s": 3,
+      "test_memory_mb": 512,
+      "quality_metric": "test_pass@1; EOS not required; capped outputs reported"
+    }
+  },
+  "extra_gold_sha256": {
+    "humaneval": "7decdee43ed17c1be57276da2d9abe31fd2b5d7b05867565005729f1daf085ce"
+  },
+  "selection_rule": "Preview: 24 systematically spaced official task indices from all 164; chosen without outputs. Six historical confirmation seeds. Every item-seed cell runs all eight arms on one host, rotated arm order. Rank 32/16/8/4, tile-mean M2 and mass vary only the selector V term at fixed keep=30%, common carry_first. Attention output V remains full-dimensional. Best threshold M3 is an additional optimized reference, not a matched-sparsity attribution. Native thinking and budget unchanged; executable official tests score pass@1 independently of EOS. Only mpk/dlm2 used because their audited software and driver match."
+}

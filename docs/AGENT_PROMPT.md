@@ -8,7 +8,9 @@
 
 【仓库与分支】
 - 本地工作目录：E:/dlm/m3_output_numerics_20260927（git 命令加 -c safe.directory=*）
-- 远端：coconight01/dlm_test，分支 research/m3-output-numerics-20260927（最新状态以 git log 为准）
+- 远端：coconight01/dlm_test。当前工作分支 research/humaneval-v27-20261001（2026-10-01 23:59 从 v27 存档分支
+  research/m3-output-numerics-20260927 的 add23afa9 分出，之后的工作都在这里）；先 git branch --show-current 确认，
+  最新状态以 git log 为准
 - 阅读顺序：AGENTS.md → HANDOFF.md → docs/RESEARCH_CONTEXT.md → docs/DECISIONS.md → docs/RESULTS_LEDGER.md → STATE.json 的 current
 
 【目标与评价标准】

@@ -4,7 +4,10 @@ Read `AGENTS.md` first. Stable context: `docs/RESEARCH_CONTEXT.md`. History and 
 Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-29) is archived at
 `docs/handoff_archive/HANDOFF_v27c_20260929.md`.
 
-- **Branch:** `research/m3-output-numerics-20260927` (pushed to `origin`).
+- **Branch:** The current working branch is `research/humaneval-v27-20261001`. A GPT session created it from the v27
+  checkpoint `research/m3-output-numerics-20260927` (`add23afa9`) on 2026-10-01 23:59; all work since then
+  (HumanEval, step statistics, regrouping, docs) is on it. The old branch stays at `add23afa9` as the v27
+  checkpoint; fast-forwarding it is the user's call.
 - **Method code:** `9d8ae5e` (named keep k5) on top of `efea33024` (k12), `c36b1f933` (V-term ablation variants)
   and `56de98fe2` (`carry_first`). Docs and decks are newer commits; trust `git log` over this line.
 - **Docs:** committed and pushed. Keep them current with every change; this is a user instruction.
@@ -111,10 +114,8 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
     bwrap sandbox; dlm2's private receipts must be copied to mpk first), then `scripts.v27_fa4_panel_summary`.
   - A smoke run (`he_smoke_s0_003`, 4 runs) passed end to end; one M3 run captured 25 CUDA graphs while timed, so
     report Wc (pairs without timed captures) next to W.
-- **Regrouping diagnostic (chw idea) on dllm**: scratch `regroup_diag.py`, E5 frozen config, 64K and 32K items 0–3,
-  seed 404. Counts kept prefix tiles per head if the 256 canvas query rows were regrouped into the two 128-row FA4
-  tiles by their need sets (natural vs need-count sort vs leading-singular-vector sort vs per-row bound); the natural
-  count is checked against the router's own skip map. Output: `<dllm dyh>/m3_output_numerics_v21_20260927/scratch_tests/regroup_1002/`.
+- **Regrouping diagnostic (chw idea): done** (`regroup_diag_1002/README.md`): ~4% fewer kept tiles within 128-row tiles,
+  not integrated; finer query tiles would cut kept work by 22–39% but need a new kernel.
 
 ## Blockers
 
