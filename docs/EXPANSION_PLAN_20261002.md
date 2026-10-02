@@ -162,14 +162,18 @@ LLaDA2.1-mini (upstream SGLang 0.5.21, `JointThreshold`, FlashInfer) does **not 
   `lib/libcudart.so.13`. Fixed with a CUDA_HOME shim inside dyh, `/home/exouser/dyh/dlm_models_20261002/cuda13_shim`:
   `bin`, `include`, `nvvm` and `cccl` link to the pip package, and `lib64` holds `libcudart.so` / `libnvrtc.so` links.
   The `activation` JIT kernel then built.
-- **open:** a FlashInfer kernel outside the prebuilt cache still JIT-compiles and fails with "CUDA compiler and CUDA
-  toolkit headers are incompatible": FlashInfer's bundled CCCL does not match the pip nvcc.
-  Next options:
-  - install the nvcc/CUDA 13.x version FlashInfer 0.6.18 expects into the env (or a full CUDA 13 toolkit in a dyh
-    prefix);
-  - find which kernel is missing from `flashinfer-jit-cache` and whether `flashinfer-cubin` covers it;
-  - as a first smoke, try `--attention-backend fa3` (also official in SGLang). FlashInfer may still be used for
-    non-attention ops.
+- **FlashInfer JIT fixed (2026-10-02 13:30 UTC−5, CPU build verified; GPU smoke pending).**
+  - Cause: the failing kernel is `dsv3_fused_routing` (MoE group routing). The env's pip nvcc is 13.4.92 while
+    its CUDA runtime headers are 13.0 (`CUDART_VERSION 13000`). FlashInfer's bundled CCCL rejects that mismatch.
+  - Fix, without touching the env: nvcc / nvvm / crt 13.0.88 installed with `pip --target` into
+    `/home/exouser/dyh/dlm_models_20261002/nvcc130/target`, plus a second shim
+    `/home/exouser/dyh/dlm_models_20261002/cuda130_shim`:
+    - `bin` and `nvvm` come from nvcc 13.0.88;
+    - `include` merges the 13.0 crt headers with the env's 13.0 runtime headers;
+    - `lib64` is the same as in the first shim.
+  - Use `CUDA_HOME=.../cuda130_shim` and put the env's `bin` (ninja) on PATH.
+  - `gen_dsv3_fused_routing_module().build()` then succeeds on CPU (arch 9.0a), and nothing is written outside dyh.
+  - Next: rerun the LLaDA2.1-mini smoke when a GPU is free.
 - I-DLM-8B smoke: not run yet (same toolchain needs; config `src/I-DLM/inference/configs/idlm_blockN4_config.yaml`).
 
 **Cache hygiene for every SGLang/vLLM run** (dyh-only rule): set `SGLANG_CACHE_DIR`, `SGLANG_JIT_CACHE_DIR` (JIT

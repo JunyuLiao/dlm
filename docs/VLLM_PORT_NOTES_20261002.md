@@ -146,3 +146,31 @@ Risks that could shrink this:
 - host-side routing logic may stall vLLM's async scheduling.
 
 Only the port measures it.
+
+## vLLM calling convention: varlen + paged + block-sparse (2026-10-02 13:35 UTC−5)
+
+Probe: `scripts/v27_vllm_varlen_sparse_probe.py`, raw output `results/.../vllm_port_probe_1002/varlen_probe_p64.jsonl`.
+It calls `flash_attn_varlen_func` exactly as vLLM's decoder GLOBAL call does (`cu_seqlens_q`, `seqused_k`,
+`block_table`, page 64, `fa_version=4`), adds FA4's varlen block-sparse lists, and uses the GLOBAL geometry (canvas 256,
+16 / 2 heads, head_dim 512).
+
+**Per-call time** (ms, median; dense is vLLM's call without lists, best of num_splits 1 / 32 / 64):
+
+| keys | dense | all tiles kept (sparse entry) | keep 25% | keep 12% |
+|---|---:|---:|---:|---:|
+| 32K | 1.56 | 1.43 | 0.49 | 0.32 |
+| 64K | 2.95 | 2.73 | 0.83 | 0.51 |
+| 94K | 4.25 | 3.88 | 1.17 | 0.67 |
+
+**Findings and limits:**
+- The sparse entry with every tile kept is not slower than vLLM's dense call.
+- Varlen block sparsity accepts only 64-row maps (`sparse_block_size[0] = q_stage × tile_m = 64`).
+- **Correctness is not yet established.**
+  - With every tile kept, the output matches the fp32 reference (max abs error 1e-4).
+  - With 25% / 12% kept, the max abs error is 0.07–0.20, too large for bf16.
+  - The fixed-length paged path was exact in `probe3`. The suspect is therefore the varlen block-sparse indexing
+    (or its combination with paging).
+  - `scripts/v27_vllm_varlen_sparse_isolate.py` separates fixed vs varlen and contiguous vs paged. It is queued on
+    dllm after R17.
+- **Until it is resolved, the port uses the fixed-length entry** (`_flash_attn_fwd` with `page_table`, 4D lists,
+  batch 1, verified exact at page 64). Batch 1 is also what the panels run.

@@ -25,8 +25,16 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
 
 ## Situation at handoff (2026-10-02 13:30 UTC−5)
 
-**Running (2026-10-02 13:30 UTC−5):** no GPU panel. R17 RULER data generation (CPU) is in progress on dllm; see
-next step 5.
+**Running (2026-10-02 13:36 UTC−5): R17** (`specs/v27_ruler_long_r17.json`, spec commit 6064109, deploy
+`v27_r17_6064109`, run dir `v27_r17_001`, frozen dir `v27_r17_frozen`).
+- RULER 32K / 64K / 92K × 130 rows × seed 404 × 8 arms = 3,120 runs on dllm, mpk and dlm2. Stage order: 92K, 64K,
+  32K.
+- The coordinator chain `r17_chain.sh` scores it when all three hosts end:
+  `python v27_score_long.py --tag v27_r17_6064109 --run-dir v27_r17_001 --label r17 --dllm-ends 3 --with-mpk --mpk-ends 3 --also dlm2 --also-ends 3 --extra ruler32k_r17=<gold> ruler64k_r17=<gold> ruler92k_r17=<gold>`.
+  The gold files are in `/home/exouser/dyh/ruler_long_v27_r17/` on dllm. Outputs go to
+  `E:/dlm/v27_private/long_scoring/r17/`.
+- Queued on dllm after R17: `scripts/v27_vllm_varlen_sparse_isolate.py` (see the vLLM port notes).
+
 - **P16 finished** (`lb64_item_check_p16/receipts.md`, ledger L1n). The 64K accuracy gap is mostly selection noise:
   on the 3 worst items it goes from −20 pp in discovery to −8 pp on 12 fresh seeds (p 0.58). Over 6 items main equals
   dense (45 vs 44). Output protection and −2ln2 are not adopted.
@@ -171,7 +179,7 @@ next step 5.
 
 ## Running
 
-- R17 data generation (CPU, dllm). No GPU panel.
+- R17 (see the situation section).
 
 ## Blockers
 
