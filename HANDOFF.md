@@ -97,11 +97,24 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   his "vector_mean" result files are not committed anywhere we can read.
 - Literature check of step and length inflation (SparseD, PulseCol, Focus-dLLM, Lil, LessIsMore, JoT, Prophet).
 
-## Running (SSH checked again at 22:52 local)
+## Running (as of 2026-10-02 01:15 local)
 
 - **Finished and scored:** E5 (L1b), E6 (L1c), E6b and the pooled 96K panel (L1c2), E7 (L1d), E8 (L1e), E9 (L1f), E10 (L1g), E11 (L1h),
   the batch diagnostic (`batch_scaling/`).
-- **Nothing running.** E11 finished (L1h): no V advantage even at 95% sparsity (48-cell preview). All GPUs idle.
+- **E12, HumanEval** (`results/humaneval_ruler_v27_20261002/specs/humaneval_e12.json`, protocol
+  `v27_humaneval_e12_d844fb61c76dde6a`): all 164 tasks × seeds 404–909 = 984 cells per arm, 8 arms, 7,872 runs.
+  - Arms: dense; M3 R6 DP −ln2 + c0 (main); the same + 2K gate; V-term ablation at a fixed 70% target sparsity with
+    c0: projected V rank 32 / 8 / 4, M2 tile mean, attention mass only. Plain M1/M2/M3 are not rerun (user, 10-02).
+  - Hosts mpk and dlm2 only (identical software, driver and model files per `environment_audit.json`; dllm's driver
+    differs). Every cell runs all arms on one host with rotated arm order; report per-host ratios too.
+  - Deploy `v27_e12_5d5c3b9`, run dir `he_e12_001`. Scoring runs on mpk (`scripts.v27_humaneval score`, unprivileged
+    bwrap sandbox; dlm2's private receipts must be copied to mpk first), then `scripts.v27_fa4_panel_summary`.
+  - A smoke run (`he_smoke_s0_003`, 4 runs) passed end to end; one M3 run captured 25 CUDA graphs while timed, so
+    report Wc (pairs without timed captures) next to W.
+- **Regrouping diagnostic (chw idea) on dllm**: scratch `regroup_diag.py`, E5 frozen config, 64K and 32K items 0–3,
+  seed 404. Counts kept prefix tiles per head if the 256 canvas query rows were regrouped into the two 128-row FA4
+  tiles by their need sets (natural vs need-count sort vs leading-singular-vector sort vs per-row bound); the natural
+  count is checked against the router's own skip map. Output: `<dllm dyh>/m3_output_numerics_v21_20260927/scratch_tests/regroup_1002/`.
 
 ## Blockers
 
