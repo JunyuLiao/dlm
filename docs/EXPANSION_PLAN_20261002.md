@@ -109,3 +109,16 @@ Prerequisites:
   - the sampler statistics for T;
   - the official dense baseline call.
 - The DiffusionGemma path must stay bit-identical: a regression test against existing receipts (tokens, calls).
+
+## Setup status (2026-10-02 09:05 UTC-5, dllm, `/home/exouser/dyh/dlm_models_20261002`)
+
+| item | result |
+|---|---|
+| `envs/sglang_up` | SGLang 0.5.21, torch 2.13.0+cu130, FlashInfer 0.6.18. The first try failed: `cuda-tile`'s wheel stub could not verify pypi.nvidia.com with the base Python's CA store. Fixed by pointing `SSL_CERT_FILE` at pip's certifi bundle for that process only |
+| `envs/sglang_idlm` | I-DLM's bundled SGLang (`IDLMBlockN` import verified) |
+| `envs/vllm` | vLLM 0.30.0, torch 2.13.0+cu130 |
+| `models/LLaDA2.1-mini` | 31 GB, HF revision 20e64e2ad216 |
+| `models/I-DLM-8B` | 16 GB, HF revision 3cecd8cd39b9 |
+| `datasets/LongBench-Pro` | 513 MB, HF revision 4996884deae5 |
+
+Pip freezes and revisions are stored next to each item; every cache stays inside that directory.
