@@ -25,7 +25,8 @@ def fixtures():
         wall = 8 if arm == 'method' else 10
         row = dict(schema=summary.SCHEMA, protocol_id='p1', deploy_commit='deploy', host='aliasA',
                    gpu_uuid='GPU-A', dataset=dataset, index=index, repeat=repeat, arm=arm,
-                   engine_seed=123, seed_applied=False, measurement_mode='request_boundary_sync',
+                   engine_seed=123, seed_applied=False, qualification_only=False,
+                   measurement_mode='request_boundary_sync',
                    graph_captures_timed=0, wall_s=wall, decode_span_s=wall / 2, prefill_s=2,
                    denoise_forward_count=10, output_tokens=16, finish_reason='stop',
                    receipts=None,
@@ -532,3 +533,17 @@ def test_zero_optional_commit_count_is_a_valid_observation(tmp_path):
     method = next(row for row in summary.summarize(cells, 80)['arms'] if row['arm'] == 'method')
     assert method['commit_forward_count_mean'] == 0
     assert method['commit_forward_count_observed_cells'] == 6
+
+
+def test_same_protocol_preflight_cannot_enter_formal_summary(tmp_path):
+    protocol, records, completions = fixtures()
+    records[0]['qualification_only'] = True
+    with pytest.raises(ValueError, match='qualification-only'):
+        load(tmp_path, protocol, records, completions)
+
+
+def test_missing_qualification_marker_cannot_enter_formal_summary(tmp_path):
+    protocol, records, completions = fixtures()
+    records[0].pop('qualification_only')
+    with pytest.raises(ValueError, match='unqualified record'):
+        load(tmp_path, protocol, records, completions)

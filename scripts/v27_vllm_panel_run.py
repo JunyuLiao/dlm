@@ -47,7 +47,8 @@ def validate_receipts(arm, receipts, n, required):
         return
     a = receipts['adapter']
     if a['order_errors'] or a['begins'] != n or a['observes'] != n or a['global_calls'] != 5*n:
-        raise ValueError('adapter clock/coverage mismatch')
+        counts = {k:a[k] for k in ('begins','observes','global_calls','invalidates','order_errors') if k in a}
+        raise ValueError(f'adapter clock/coverage mismatch: scheduler_N={n}, adapter={counts}')
     if arm == 'method':
         m = receipts['method']
         effective = m['effective_method']
@@ -75,7 +76,7 @@ def main():
     a.run_dir.mkdir(parents=True, exist_ok=False)
     start_process = time.perf_counter()
     status = dict(protocol_id=spec['protocol_id'], arm=a.arm, block=a.block,
-                  run_id=a.run_dir.name, complete=False)
+                  run_id=a.run_dir.parent.name+'_'+a.run_dir.name, complete=False)
     try:
         run(a, binding, spec, status)
         status['complete'] = True
@@ -133,7 +134,7 @@ def run(a, binding, spec, status):
         raise ValueError('GPU identity drift')
     meta = dict(schema='v27_vllm_panel_v1', protocol_id=spec['protocol_id'], deploy_commit=binding['deploy_commit'],
                 host=binding['host'], gpu_uuid=gpu_uuid, arm=a.arm, engine_seed=engine_seed, seed_applied=False,
-                measurement_mode='request_boundary_sync', run_id=a.run_dir.name,
+                measurement_mode='request_boundary_sync', run_id=status['run_id'], qualification_only=a.preflight,
                 adapter_sha256=digest(va.__file__) if adapter else None,
                 method_fingerprint=config['fingerprint'] if a.arm=='method' else None,
                 compilation_config=cg, cudagraph_mode=cg, torch=torch.__version__,vllm=vllm.__version__,**settings)
@@ -189,7 +190,7 @@ def run(a, binding, spec, status):
                        compilation_deltas=compile_delta,receipts=receipts)
             public.write(json.dumps(rec)+'\n');public.flush()
             raw = tokenizer.decode(output.token_ids,skip_special_tokens=False)
-            priv = dict(dataset=cell['dataset'],index=cell['index'],repeat=rep,arm=a.arm,run_id=a.run_dir.name,
+            priv = dict(dataset=cell['dataset'],index=cell['index'],repeat=rep,arm=a.arm,run_id=status['run_id'],
                         id=cell['id'],completion=raw,finish_reason=output.finish_reason,stop_reason=output.stop_reason)
             private.write(json.dumps(priv)+'\n');private.flush()
             status['completed_timed'] += 1

@@ -192,3 +192,5 @@ Sources: audited base `6b13fe178`; `scripts/v27_fa4_panel_summary.py`,
 - 2026-10-02 16:58 UTC-5: V18 preflight 001 failed closed on vLLM internal request-ID rewriting (no qualified records; 241.607 GPU reserved seconds). Fixed attribution without changing inference; 125 CPU tests pass. Requalification will use a new deploy/binding/run.
 
 - 2026-10-02 16:58 UTC-5: attempt 002 launched on dllm under new immutable deploy `eeba8b6ec` and new binding/run directories. All arms use the globally longest eligible input. No formal panel yet.
+
+- 2026-10-02 17:07 UTC-5: attempt 002 dense passed (N=146, commit=12, zero timed compile/capture); native failed adapter coverage/clock validation before a timed record. No speed conclusion. Attempt 002 reserved 355.475 GPU seconds; total closed attempts 597.082 s. Independent diagnostic saves scheduler and adapter counters without changing inference. Qualification rows are now explicitly barred from the formal summary; 127 CPU tests pass.

@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 16:58 (UTC-5)",
+    "updated_local": "2026-10-02 17:07 (UTC-5)",
     "branch": "research/humaneval-v27-20261001",
-    "verified_commit": "eeba8b6ec",
+    "verified_commit": "c7a2fa8cd",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -18,7 +18,7 @@
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
     "headline": "vLLM smoke only: S/N proxy 0.96 at 32K, 0.85 at 64K; request/accuracy panel V18 preparing. Historical HF speed ratios are not headline official-serving evidence.",
     "running": [
-      "dllm: v27_vllm_v18_preflight_002"
+      "dllm: v27_vllm_v18_clock_diag_001"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -198,12 +198,12 @@
       "source": "docs/VLLM_PORT_NOTES_20261002.md"
     },
     "vllm_v18": {
-      "status": "96K requalification attempt 002 running",
+      "status": "attempt 002 dense passed, native failed clock/coverage; independent diagnostic running",
       "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_vllm_lb_v18.json",
-      "gpu_seconds": 241.607,
-      "cpu_tests": 125,
+      "gpu_seconds": 597.082,
+      "cpu_tests": 127,
       "deploy_commit": "eeba8b6eca4c0be607561fa597cbe6ce0775c722",
-      "gpu_accounting": "241.607 s closed attempt 001; attempt 002 pending"
+      "gpu_accounting": "closed qualification attempts 001+002; active diagnostic pending"
     }
   },
   "task": "M3 output numerics and trajectory isolation",

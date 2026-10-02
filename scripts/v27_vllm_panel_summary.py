@@ -160,6 +160,8 @@ def load_panel(record_paths, completion_paths, protocol):
             raise ValueError('public execution outside frozen inventory')
         if row.get('schema') != SCHEMA or row.get('protocol_id') != protocol['protocol_id']:
             raise ValueError('record schema/protocol identity differs')
+        if row.get('qualification_only') is not False:
+            raise ValueError('qualification-only or unqualified record cannot enter a formal panel summary')
         if row.get('seed_applied') is not False or row.get('measurement_mode') != 'request_boundary_sync':
             raise ValueError('seed or measurement contract differs')
         if type(row.get('graph_captures_timed')) is not int or row['graph_captures_timed'] != 0:

@@ -561,3 +561,6 @@ Attempt 001 has zero qualified timed results: phase observer used the external r
 internal vLLM request ID. Dense longest-item warm-up ran; 241.607 reserved GPU seconds are
 charged. This is an instrumentation failure, not a model accuracy or performance result.
 Source: `vllm_v18_qualification/attempt001.json`.
+
+V18 attempt 002: dense qualification passed, native failed independent clock/coverage checks.
+No paired performance result. 355.475 reserved GPU seconds, source `vllm_v18_qualification/attempt002.json`.
