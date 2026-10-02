@@ -23,14 +23,14 @@ Verified numbers: `docs/RESULTS_LEDGER.md`. The previous handoff (v27c, 2026-09-
   - `E:/dlm/dlm_state_adaptive_router_20260828` is the same branch at an older commit (`3d48ebcdd`); pull before
     using it.
 
-## Situation at handoff (2026-10-02 11:50 UTC−5)
+## Situation at handoff (2026-10-02 10:36 UTC−5)
 
 **Running (independent of any coordinator session).**
 - E15 (`specs/v27_c01_e15.json`, protocol `v27_c01_e15_e83919d6411343b2`, 1,602 runs).
   - Arms: dense FA4, M3 + c0 and M3 + c0 + `observe_carried` (c01).
   - Data: AIME26 30 + LB 32K/64K/96K × seeds 1616–2121.
   - Hosts: mpk and dlm2; run dir `v27_lb_e15_001`, deploy `v27_e15_f63a1f2`.
-  - At 11:30, 64K was done on both hosts and 96K was about two thirds done. A host-side chain
+  - At 10:30, 64K was done on both hosts and 96K was about two thirds done. A host-side chain
     (`<run dir>/host_chain_e15.py`, log `host_chain_e15.log`) launches 32K after the 96K worker ends, then AIME26, with
     the exact v23_transport launch command. Expect several hours; AIME is the slowest stage.
   - Check progress: `grep -c '"event": "run"' <run dir>/ledger.jsonl` and `grep -c worker_end` (4 per host when done).
