@@ -1303,3 +1303,22 @@ five layers, excluding DP/output/allocator costs. This is capacity arithmetic,
 not measured traffic or causal latency. Original003 summary_peak_bytes is
 1569751040. QK sharing does not make statistics storage/DP/full output free.
 See results/v29_20261002/dense_native_accounting001/TELEMETRY_LIMITATION.md.
+
+## Dense diagnostic and performance follow-ups rearmed (2026-10-03 01:26 (UTC-5))
+
+The first component coordinator failed during a local Windows atomic status
+replacement (PermissionError), before deployment or GPU launch. Engineering
+stopped at its dependency gate; the first dense coordinator failed check-only.
+All original scripts, plans, statuses and failed evidence are preserved.
+Successor002 coordinators use new local/remote directories and bounded retry
+for transient status-file replacement contention, with retry/exhaustion tests.
+All three successor queues are armed and waiting; no new GPU evidence exists.
+See results/v29_20261002/queue_recovery002/status.json for sanitized receipts.
+
+Order remains original formal generation and strict CPU scores, then two
+component jobs, then12 fresh-engine dense diagnostic workers, then only the
+engineering fusion qualification and its strict scores. Component/engineering
+science stays at1342ec0b1; dense diagnostic source isbdd59ee97. No current formal
+deployment or scientific protocol changed. Public diagnostic CPU tests:21;
+private successor tests: components26, dense23, engineering35.
+Only source/status evidence is committed here, not hypothetical GPU results.

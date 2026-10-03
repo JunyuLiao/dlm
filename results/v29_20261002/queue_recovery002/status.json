@@ -1,0 +1,56 @@
+{
+  "updated_local": "2026-10-03 01:26 (UTC-5)",
+  "previous_attempts": [
+    {
+      "queue": "performance_components001",
+      "phase": "failed_preserved",
+      "error_type": "PermissionError",
+      "operation": "local atomic status replacement",
+      "remote_started": false,
+      "gpu_reserved_seconds": 0
+    },
+    {
+      "queue": "engineering_fusion_queue001",
+      "phase": "failed_preserved_review_required",
+      "error_type": "RuntimeError",
+      "operation": "dependency failure gate",
+      "gpu_started": false,
+      "gpu_reserved_seconds": 0
+    },
+    {
+      "queue": "dense_equivalence001",
+      "phase": "check_only_failed",
+      "operation": "dependency failure gate",
+      "armed": false,
+      "gpu_started": false,
+      "gpu_reserved_seconds": 0
+    }
+  ],
+  "successors": {
+    "performance_components002": {
+      "phase": "waiting_for_formal_generation_and_strict_scores",
+      "source_commit": "1342ec0b193a929295f08964c132aee96c28c5a1",
+      "complete": false,
+      "gpu_started": false,
+      "cpu_tests_passed": 26
+    },
+    "dense_equivalence002": {
+      "phase": "waiting",
+      "source_commit": "bdd59ee972df55e423ad9d3ea33467aa3b99398b",
+      "complete": false,
+      "gpu_started": false,
+      "cpu_tests_passed": 23
+    },
+    "engineering_fusion_queue002": {
+      "phase": "waiting_barriers",
+      "source_commit": "1342ec0b193a929295f08964c132aee96c28c5a1",
+      "complete": false,
+      "gpu_started": false,
+      "cpu_tests_passed": 35
+    }
+  },
+  "public_diagnostic_tests_passed": 21,
+  "scientific_protocol_changed": false,
+  "formal_deployments_changed": false,
+  "failure_recovery": "New directories and coordinators; bounded PermissionError retry; original failed receipts preserved."
+}
