@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 20:37 (UTC-5)",
+    "updated_local": "2026-10-02 20:52 (UTC-5)",
     "branch": "research/vllm-variants-20261002",
-    "verified_commit": "08b9e0691",
+    "verified_commit": "e69b59033",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -299,10 +299,22 @@
       "summary_cpu_tests": 17
     },
     "v28_regroup_triton": {
-      "status": "cpu_prepared_gpu_pending",
+      "status": "pure_gpu_negative_full_held_not_launched",
       "spec": "results/v28_20261002/specs/v28_regroup_triton.json",
-      "claim": "none",
-      "new_cpu_tests": 10
+      "claim": "No request claim; current standard component call slower; full held stage gated out",
+      "new_cpu_tests": 10,
+      "triton_over_torch_component": 1.6264925103225327,
+      "gpu_reserved_seconds": 40.29403461999027,
+      "report": "results/v28_20261002/regroup_triton_permutation/summary.json"
+    },
+    "v28_seed4_completion_pipeline": {
+      "status": "prepared_cpu_qualified_not_armed",
+      "helper": "finish_seed4_preview001.py",
+      "scorer_commit": "f0d3cd0009419ebe3767c975beb90d6536d31cc1",
+      "scorer_cpu_tests": 17,
+      "actual_nemo_toy_join_passed": true,
+      "on_failure": "preserve and stop; no automatic relaunch",
+      "publication": "aggregate only, guarded expected branch HEAD, non-force push; interpretation pending"
     }
   },
   "task": "M3 output numerics and trajectory isolation",

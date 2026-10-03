@@ -471,3 +471,30 @@ more than the consumer saving. Spec: `results/v28_20261002/specs/v28_regroup_tri
 First test exact same-host Torch/Triton permutation; then full gather/FA4/scatter
 on one host. No adding timings from different hosts. CPU and GPU equality are
 prerequisites; no new performance result yet. Existing request preview untouched.
+
+## Triton permutation negative and completion pipeline ready — 2026-10-02 20:52 (UTC-5)
+
+Frozen e69b59033 pure permutation ran on dlm2. All exact GPU checks passed;
+Triton/Torch event-span geomean1.626493 (three bins1.643810/1.620939/1.614872).
+Both allocate per call, warm8 and100rotated repeats. Event spans include any
+host-dispatch gaps; no isolated device-kernel or request-speed interpretation.
+Keep this negative. Full held-attention GPU follow-up was stopped at the stage
+gate before launch; its prepared deployment is retained, no worker ran. Source:
+`results/v28_20261002/regroup_triton_permutation/`. Reserved40.2940346GPU seconds;
+internal post-selection/import body span1.6872869s is a different accounting scope.
+
+The one-shot seed4 completion helper is prepared in private coordination as
+`finish_seed4_preview001.py`; it has not yet been armed. Separate CPU scoring
+source f0d3cd000 is deployed, using the pre-qualified registry CPU interpreter
+and pinned read-only NeMo; real correct/incorrect toy joins plus17scorer tests
+passed. Generation environment remains unchanged. Full24worker/inventory/source/
+receipt/gold checks precede score; only anonymous aggregates are downloaded.
+Publication requires unchanged expected local/remote V28 HEAD, clean staging and
+only known ignored-artifact dirt, then updates HANDOFF/docs/STATE and non-force
+pushes. Any failure retains private evidence and stops; no GPU launch/retry or
+scientific conclusion is automated. Offline failure, closed-accounting and mock
+publication checks pass. Fetch avoids writing the parent worktree's FETCH_HEAD.
+
+Preview frozen question identities were checked privately: six distinct IDs,
+zero cross-bin duplicates. Four engine seeds and two sequential repeats do not
+increase the independent question count beyond six.

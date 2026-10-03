@@ -1,0 +1,103 @@
+{
+  "kind": "same_host_standalone_permutation_microbenchmark",
+  "protocol_id": "v28_regroup_triton_20261002",
+  "source_commit": "e69b5903365bdd655b744c1682d27e4232ff80ac",
+  "source_files": [
+    "scripts/v28_regroup_triton_bench.py",
+    "scripts/v28_regroup_held_bench.py",
+    "scripts/v28_regroup_screen.py",
+    "tests/test_v28_regroup_triton_bench.py"
+  ],
+  "public_spec": "results/v28_20261002/specs/v28_regroup_triton.json",
+  "frozen_private_spec_and_byte_manifest": true,
+  "private_need_snapshots": 144,
+  "selection": "First CPU-accepted historical state per nominal 32K/64K/96K bin using the frozen held gate; no output-based selection.",
+  "completed": true,
+  "exit_code": 0,
+  "cpu_checks_passed": true,
+  "gpu_workers": 1,
+  "environment": {
+    "torch": "2.13.0+cu130",
+    "triton": "3.7.1"
+  },
+  "packages_changed": false,
+  "new_own_caches": true,
+  "records": [
+    {
+      "nominal_length_bin": 32768,
+      "samples": 100,
+      "gpu_ms": {
+        "torch_permutation": 0.05156799964606762,
+        "triton_permutation": 0.08476799726486206
+      },
+      "triton_over_torch": 1.6438100730425782,
+      "exact_permutation_oracle": true
+    },
+    {
+      "nominal_length_bin": 65536,
+      "samples": 100,
+      "gpu_ms": {
+        "torch_permutation": 0.04875200055539608,
+        "triton_permutation": 0.07902399823069572
+      },
+      "triton_over_torch": 1.6209385734007384,
+      "exact_permutation_oracle": true
+    },
+    {
+      "nominal_length_bin": 98304,
+      "samples": 100,
+      "gpu_ms": {
+        "torch_permutation": 0.04798400029540062,
+        "triton_permutation": 0.0774880014359951
+      },
+      "triton_over_torch": 1.614871643859641,
+      "exact_permutation_oracle": true
+    }
+  ],
+  "triton_over_torch_geomean": 1.6264925103225327,
+  "result": "Triton permutation is slower than Torch in all three tested nominal bins.",
+  "gpu_accounting": {
+    "reserved_gpu_seconds": 40.29403461999027,
+    "benchmark_body_wall_seconds": 1.6872869299841113,
+    "benchmark_body_span_definition": "The source starts its internal timer after CPU select_accepted and torch import, before CUDA tensor creation; this span includes construction/JIT, GPU qualification and warmed timing, but excludes CPU selection/import and process teardown. It is distinct from supervisor reservation and CUDA-event medians.",
+    "definition": "Single GPU reserved through CPU selection, first kernel construction/JIT, GPU qualification, warmed timing and complete worker exit; excludes preceding CPU-only deploy checks.",
+    "compute_apps_after_completion": 0,
+    "memory_mib_after_completion": 0,
+    "utilization_percent_after_completion": 0
+  },
+  "private_report_hash_verified": true,
+  "gpu_identity_hash_recorded_privately": true,
+  "allocation_policy": "each call allocates both gather and scatter outputs; same lifecycle for torch and Triton",
+  "timing_parameters": {
+    "repeats": 100,
+    "warm": 8,
+    "rotated_order": true,
+    "mode": "permutation"
+  },
+  "scope": "same fixed held selections; synthetic native-stride BF16 Q and token-major output",
+  "exclusions": [
+    "offline search",
+    "first construction",
+    "consumer",
+    "selector",
+    "model",
+    "request",
+    "accuracy"
+  ],
+  "cuda_graphs": "none requested; eager warmed; rotated same-host comparison",
+  "tensor_contract": {
+    "query_rows": 256,
+    "query_heads": 16,
+    "head_dim": 512,
+    "dtype": "bfloat16",
+    "query_layout": "native token-major stride; head-major view"
+  },
+  "qualification": "Exact gather, scatter, and inverse equality against Torch before any timed use.",
+  "quality_evaluated": false,
+  "model_run": false,
+  "consumer_run": false,
+  "interpretation": "A standalone permutation negative; do not add these times to a different-host consumer result or infer attention/request/quality performance.",
+  "historical_torch_held_negative_unchanged": true,
+  "timing_semantics": "CUDA events surround Python component calls and may include GPU waiting gaps from host dispatch. This is current component-call cost, not isolated device-kernel bandwidth or duration. Oracle/D2H validation does not repeat in timed calls. Additional Triton Python checks/launcher contribution is unmeasured; the entire gap cannot be attributed to it.",
+  "held_gpu_followup": "Paused after the three-bin permutation negative; any prepared deployment retained and unrun."
+}

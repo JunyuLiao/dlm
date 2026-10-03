@@ -1,4 +1,4 @@
-# V28 active handoff (2026-10-02 20:33 (UTC-5))
+# V28 active handoff (2026-10-02 20:52 (UTC-5))
 
 - Branch `research/vllm-variants-20261002`, parent base `9b027df8f`; generation deploy `dcfdb8730` frozen.
 - Qualification004 closed all five request workers successfully: Q128/Q64 legacy canvas, Q128/Q64 release, allkept release. Timed monitored JIT events and allocator retries zero; no performance/accuracy inference from one item.
@@ -7,7 +7,7 @@
 - Parent V18b continues on dllm unchanged; its formal scoring/finalizer belongs to the original worktree. Retain allocator costs; do not alter original campaign.
 - LLaDA official dense environment smoke passed. I-DLM diagnostic003 naturally stops in all3toy calls at868/549/1200 tokens; general task quality remains unqualified. Neither model has our sparse variants implemented. See new-model adaptation audit.
 - New-model attempts total916.2097GPU seconds; dlm2 idle after diagnostic003. mpk qualification004 total867.9727GPU seconds (includes alias sweep and startup/teardown).
-- Next: close six-arm seed4 preview and run strict scoring, then only supported refinements. Question coverage must expand before request-level or noninferiority claims.
+- Next: close six-arm seed4 preview and run strict scoring, then only supported refinements. Completion pipeline CPU-qualified, not yet armed. Question coverage must expand before request-level or noninferiority claims.
 - Update HANDOFF/docs/STATE.current with every result or status change and push. Private prompts, generated text, gold, token arrays and private paths stay outside Git.
 
 ## Inherited parent handoff (historical; current V28 overlay above takes precedence)
@@ -366,3 +366,5 @@ prerequisites; no new performance result yet. Existing request preview untouched
 Triton permutation implementation prepared:10newCPU tests plus8existing held
 tests pass. Pure mode100repeats/warm8, full held32/warm8; eachcall output
 allocation in both backends. GPU equality/combined timing remain pending.
+
+Triton permutation negative1.62649x Torch with exact GPU equality. Reserved40.2940GPU seconds; full held GPU follow-up gated out before launch. See V28 permutation report.
