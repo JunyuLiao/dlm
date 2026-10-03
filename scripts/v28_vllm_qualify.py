@@ -16,6 +16,7 @@ import argparse
 from contextlib import contextmanager
 import json
 import math
+import os
 from pathlib import Path
 import time
 
@@ -26,19 +27,28 @@ ALLOCATOR_FIELDS = frozenset(('num_alloc_retries', 'num_ooms', 'allocated_bytes'
                               'reserved_bytes', 'peak_allocated_bytes', 'peak_reserved_bytes'))
 
 
-def execution_settings(query_block, lifecycle):
+def execution_settings(query_block, lifecycle, canvas_buffers='legacy'):
     if query_block not in (128, 64) or lifecycle != 'request_clear':
         raise ValueError('V28 requires q128/q64 and matched request_clear')
+    if canvas_buffers not in ('legacy', 'release_after_invalidate'):
+        raise ValueError('unknown canvas buffer lifecycle')
     return dict(query_block=query_block, lifecycle=lifecycle, alias_splits=2,
+                canvas_buffers=canvas_buffers, jit_monitor_events=False,
                 q_regroup=False, q_carry64=False,
                 allkept_query_block=128, kv_check='first_warm_request_only')
 
 
-def validate_frozen_inputs(binding, spec, config, query_block, lifecycle):
-    settings = execution_settings(query_block, lifecycle)
+def validate_frozen_inputs(binding, spec, config, query_block, lifecycle, canvas_buffers='legacy'):
+    settings = execution_settings(query_block, lifecycle, canvas_buffers)
+    settings['jit_monitor_events'] = spec.get('jit_event_receipts', False)
+    if type(settings['jit_monitor_events']) is not bool:
+        raise ValueError('jit_event_receipts must be boolean')
     if not str(spec.get('protocol_id', '')).startswith('v28_'):
         raise ValueError('V28 needs a new frozen protocol; do not reuse a V18 binding')
-    if spec.get('adapter_settings') != dict(lifecycle=lifecycle, alias_splits=2):
+    expected_adapter = dict(lifecycle=lifecycle, alias_splits=2)
+    if canvas_buffers != 'legacy':
+        expected_adapter['canvas_buffers'] = canvas_buffers
+    if spec.get('adapter_settings') != expected_adapter:
         raise ValueError('frozen adapter_settings differ')
     if spec.get('arms') != ['dense', 'method'] or spec.get('controls') != ['native', 'allkept']:
         raise ValueError('matched dense/method/native/allkept arms required')
@@ -55,9 +65,11 @@ def validate_frozen_inputs(binding, spec, config, query_block, lifecycle):
     # a qualified binding from silently running a later local instrumentation.
     pinned = {Path(path).resolve() for path in binding.get('files', {})}
     root = Path(__file__).resolve().parents[1]
-    sources = (Path(__file__).resolve(), Path(panel.__file__).resolve(),
+    sources = [Path(__file__).resolve(), Path(panel.__file__).resolve(),
                root / 'scripts/v27_vllm_metrics.py',
-               root / 'experiments/numerical_qk_reuse/vllm_adapter.py')
+               root / 'experiments/numerical_qk_reuse/vllm_adapter.py']
+    if settings['jit_monitor_events']:
+        sources.append(root / 'scripts/v28_jit_receipts.py')
     if any(source.resolve() not in pinned for source in sources):
         raise ValueError('frozen binding must pin V28 wrapper, v27 loop/tracker and adapter')
     return settings
@@ -160,6 +172,8 @@ def adapter_variant(base, settings, warm_count):
     class QualifiedAdapter(base):
         def __init__(self, *args, **kwargs):
             kwargs['lifecycle'] = settings['lifecycle']
+            if settings['canvas_buffers'] != 'legacy':
+                kwargs['canvas_buffers'] = settings['canvas_buffers']
             super().__init__(*args, **kwargs)
             if self.splits != settings['alias_splits']:
                 raise ValueError('alias split drift')
@@ -218,6 +232,11 @@ def validate_variant_receipt(arm, receipts, n, required, settings, original=pane
             raise ValueError('actual KV numerical/layout qualification failed')
         if not adapter.get('split_fa4_calls'):
             raise ValueError('alias2 consumer did not execute')
+        if settings['canvas_buffers'] == 'release_after_invalidate' and (
+                adapter.get('canvas_release_calls', 0) <= 0 or
+                adapter.get('canvas_release_layers', 0) < 5 or
+                adapter.get('canvas_release_bytes', 0) <= 0):
+            raise ValueError('canvas release path did not execute')
     if arm == 'method':
         effective = receipts['method']['effective_method']
         expected = dict(q_block=settings['query_block'], q_regroup=False, q_carry64=False)
@@ -239,6 +258,40 @@ def instrument_runner(adapter_module, settings, warm_count):
         yield
     finally:
         adapter_module.VllmMethodAdapter, panel.validate_receipts = original_adapter, original_validate
+
+
+@contextmanager
+def instrument_jit_snapshots(enabled):
+    """Extend existing request-boundary snapshots; never synchronize a device."""
+    if not enabled:
+        yield
+        return
+    from vllm.utils import jit_monitor
+    from scripts import v27_vllm_metrics as metrics
+    from scripts.v28_jit_receipts import jit_receipts
+    original = metrics.graph_snapshot
+    with jit_receipts(jit_monitor) as receipts:
+        def snapshot():
+            result = original()
+            result.update({'jit_monitor_' + key: value for key, value in receipts.snapshot().items()})
+            return result
+        metrics.graph_snapshot = snapshot
+        try:
+            yield
+        finally:
+            metrics.graph_snapshot = original
+
+
+def validate_jit_deltas(records, required):
+    if not required:
+        return 'not_instrumented'
+    from scripts.v28_jit_receipts import COUNT_FIELDS
+    for row in records:
+        delta = row.get('compilation_deltas', {})
+        if any(type(delta.get('jit_monitor_' + key)) is not int or
+               delta['jit_monitor_' + key] != 0 for key in COUNT_FIELDS):
+            raise ValueError('timed monitor JIT event or missing event receipt; preserve run')
+    return 'zero_observed_monitor_events; not proof of all JIT/autotuning absence'
 
 
 def summarize_closed_run(records, status, settings, qualification):
@@ -299,13 +352,18 @@ def main(argv=None):
     parser.add_argument('--run-dir', type=Path, required=True)
     parser.add_argument('--query-block', type=int, choices=[128, 64], required=True)
     parser.add_argument('--lifecycle', choices=['request_clear'], default='request_clear')
+    parser.add_argument('--canvas-buffers', choices=['legacy', 'release_after_invalidate'], default='legacy')
     parser.add_argument('--mode', choices=['qualification', 'benchmark'], default='qualification')
     args = parser.parse_args(argv)
     args.preflight = args.mode == 'qualification'
     binding = panel.read(args.binding)
     spec, config = panel.read(binding['spec']), panel.read(binding['config'])
     panel.validate_binding(binding, spec)
-    settings = validate_frozen_inputs(binding, spec, config, args.query_block, args.lifecycle)
+    settings = validate_frozen_inputs(binding, spec, config, args.query_block, args.lifecycle, args.canvas_buffers)
+    threads = spec.get('settings', {}).get('cpu_threads')
+    if threads is not None and (type(threads) is not int or threads < 1 or
+                                os.environ.get('OMP_NUM_THREADS') != str(threads)):
+        raise ValueError('OMP_NUM_THREADS differs from frozen common CPU setting')
     from experiments.numerical_qk_reuse import v21
     v21.validate_effective(config, config['condition'])
     if not 0 <= args.block < len(spec['blocks']):
@@ -318,13 +376,14 @@ def main(argv=None):
     started = time.perf_counter()
     try:
         import experiments.numerical_qk_reuse.vllm_adapter as adapter_module
-        with instrument_runner(adapter_module, settings, warm_count):
+        with instrument_jit_snapshots(settings['jit_monitor_events']), instrument_runner(adapter_module, settings, warm_count):
             panel.run(args, binding, spec, status)
         records = [json.loads(line) for line in (args.run_dir / 'records.jsonl').read_text().splitlines()]
         for row in records:
             validate_variant_receipt(args.arm, row['receipts'], row['denoise_forward_count'],
                                      spec['primary_receipt_method'], settings)
         summary = summarize_closed_run(records, status, settings, args.preflight)
+        summary['jit_monitor_receipt'] = validate_jit_deltas(records, settings['jit_monitor_events'])
         (args.run_dir / 'qualification.json').write_text(json.dumps(summary, indent=2) + '\n')
         status['complete'] = True
     finally:

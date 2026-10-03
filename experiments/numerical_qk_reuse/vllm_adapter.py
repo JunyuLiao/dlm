@@ -125,11 +125,14 @@ class _PrefixCache:
 
 
 class VllmMethodAdapter:
-    def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy'):
+    def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
+                 canvas_buffers='legacy'):
         if arm not in ('method', 'allkept', 'native'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
             raise ValueError('lifecycle must be legacy or request_clear')
+        if canvas_buffers not in ('legacy', 'release_after_invalidate'):
+            raise ValueError('canvas_buffers must be legacy or release_after_invalidate')
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
         if arm == 'method':
@@ -146,12 +149,16 @@ class VllmMethodAdapter:
         self.global_layers = [i for i, t in enumerate(self.layer_types) if t != 'sliding_attention']
         self.config, self.condition, self.arm = config, condition, arm
         self.lifecycle = lifecycle      # explicit V28 execution setting, readable by runner receipts
+        self.canvas_buffers = canvas_buffers
         self.runtime = self.stub = self._stack = None
         self.bound = False               # True only while a request is in flight (dummy/warm-up runs pass through)
         self.profile, self._events = bool(profile), []   # CUDA events around every intercepted GLOBAL call
         self.pending_sample = False      # a denoising forward was prepared and its sample has not been seen yet
         self.step_ctx = None             # dict(phase, step, seq_len, slot) of the forward being prepared
         self.buffers = {}                # layer -> dict(k, v, prefix, nk, pk, pv)
+        self._buffer_streams = {}        # opt-in only: layer -> (device, CUDA stream handle)
+        self._canvas_invalidate_epoch = 0
+        self._canvas_release_epoch = None
         self.canvas = None
         self.cache = _PrefixCache(len(self.layer_types))
         self.paged = None                # vLLM paged K/V of the GLOBAL call in flight (for the split FA4 consumer)
@@ -159,12 +166,16 @@ class VllmMethodAdapter:
         self._split_cache = []           # (lists object, split lists) for held maps
         self.calls = dict(global_calls=0, prefix_copies=0, canvas_refreshes=0, invalidates=0, begins=0, observes=0,
                           passthrough=0, order_errors=0, split_fa4_calls=0, split_list_builds=0)
+        if self.canvas_buffers == 'release_after_invalidate':
+            self.calls.update(canvas_release_calls=0, canvas_release_layers=0, canvas_release_bytes=0,
+                              canvas_invalidate_epoch=0, canvas_release_epoch=0)
 
     # ------------------------------------------------------------------ request lifecycle
     def begin_request(self):
         if self._stack is not None or (self.lifecycle == 'request_clear' and self.bound):
             raise RuntimeError('previous request still bound')
         self.buffers.clear()
+        self._clear_canvas_metadata()
         self.cache = _PrefixCache(len(self.layer_types))
         self.step_ctx = None
         for k in self.calls:
@@ -191,6 +202,12 @@ class VllmMethodAdapter:
         self.stub, self.binding = stub, binding
 
     def end_request(self):
+        try:
+            return self._end_request_impl()
+        finally:
+            self._clear_canvas_metadata()
+
+    def _end_request_impl(self):
         if self.lifecycle == 'request_clear':
             return self._end_request_clear()
         timing = None
@@ -246,6 +263,49 @@ class VllmMethodAdapter:
                 self._events.clear()
                 self.bound, self.step_ctx, self.pending_sample = False, None, False
 
+    def _clear_canvas_metadata(self):
+        self._buffer_streams.clear()
+        self._canvas_invalidate_epoch = 0
+        self._canvas_release_epoch = None
+
+    @staticmethod
+    def _stream_identity(device=None):
+        stream = torch.cuda.current_stream(device)
+        return str(stream.device), int(stream.cuda_stream)
+
+    def _release_canvas_buffers(self, epoch):
+        """Drop old contiguous KV only after a successful encoder invalidation.
+
+        Observation/projection reads KV on its creation stream; the async
+        selector reads separately allocated tail/sketch/summary arrays, whose
+        existing record_stream calls protect them. Same-stream allocator reuse
+        orders replacement allocations after outstanding KV readers, without
+        a host or device synchronization. Carry/split maps remain untouched.
+        """
+        if epoch != self._canvas_invalidate_epoch or epoch <= 0 or epoch == self._canvas_release_epoch:
+            raise RuntimeError('canvas release requires a fresh successful encoder invalidation')
+        layers = list(self.buffers)
+        # Validate every layer before modifying either owner. Pointer/stream
+        # object identity alone is insufficient: use the CUDA handle + device.
+        for layer in layers:
+            created = self._buffer_streams.get(layer)
+            if created is None or self._stream_identity(self.buffers[layer]['k'].device) != created:
+                raise RuntimeError('canvas buffer CUDA stream changed; refusing release')
+        if self.cache is None or any(source is not None and layer not in self.buffers
+                                     for layer, source in enumerate(self.cache.layers)):
+            raise RuntimeError('canvas cache owner has no guarded buffer; refusing release')
+        nbytes = sum(b[key].numel() * b[key].element_size()
+                     for b in self.buffers.values() for key in ('k', 'v'))
+        self.buffers.clear()
+        self.cache.layers[:] = [None] * len(self.cache.layers)
+        self._buffer_streams.clear()
+        self._canvas_release_epoch = epoch
+        self.calls['canvas_release_epoch'] = epoch
+        if layers:
+            self.calls['canvas_release_calls'] += 1
+            self.calls['canvas_release_layers'] += len(layers)
+            self.calls['canvas_release_bytes'] += nbytes
+
     # ------------------------------------------------------------------ clock (called from patched vLLM code)
     def on_prepare(self, phase_encoder, step, seq_len, num_tokens):
         """Before a forward: phase_encoder True for prefill/commit, else denoising step `step` of the canvas."""
@@ -256,6 +316,10 @@ class VllmMethodAdapter:
             self.calls['invalidates'] += 1
             if self.stub is not None:
                 self.stub.model.encoder()                         # fires the core's invalidate pre-hooks
+            if self.canvas_buffers == 'release_after_invalidate':
+                self._canvas_invalidate_epoch += 1
+                self.calls['canvas_invalidate_epoch'] = self._canvas_invalidate_epoch
+                self._release_canvas_buffers(self._canvas_invalidate_epoch)
             return
         if self.canvas is None or self.canvas.shape[1] != num_tokens:
             self.canvas = torch.zeros(1, int(num_tokens), dtype=torch.long, device='cuda')
@@ -288,6 +352,11 @@ class VllmMethodAdapter:
         """Contiguous [1, hk, prefix + n, d] K/V; prefix copied once per canvas, canvas region refreshed per call."""
         page = key_cache.shape[1]
         b = self.buffers.get(layer)
+        stream = None
+        if self.canvas_buffers == 'release_after_invalidate':
+            stream = self._stream_identity(key_cache.device)
+            if b is not None and self._buffer_streams.get(layer) != stream:
+                raise RuntimeError('canvas buffer CUDA stream changed; refusing use')
         nk = prefix + n
         if b is None or b['prefix'] != prefix or b['nk'] != nk:
             hk, d = key_cache.shape[2], key_cache.shape[3]
@@ -298,6 +367,8 @@ class VllmMethodAdapter:
             vbuf[0].copy_(value_cache[pages].reshape(-1, hk, d)[:nk].transpose(0, 1))
             b = dict(k=kbuf, v=vbuf, prefix=prefix, nk=nk, pk=kbuf[:, :, :prefix], pv=vbuf[:, :, :prefix])
             self.buffers[layer] = b
+            if stream is not None:
+                self._buffer_streams[layer] = stream
             self.calls['prefix_copies'] += 1
         else:
             first, last = prefix // page, (nk - 1) // page

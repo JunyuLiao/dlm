@@ -1,0 +1,215 @@
+{
+  "schema": "v28_regroup_held_component_v1",
+  "search_options": {
+    "sm_count": 132,
+    "max_total_increase": 0.01,
+    "min_proxy_gain": 0.05,
+    "max_moved_fraction": 0.125,
+    "max_swaps_per_head": 12,
+    "candidates_per_group": 16,
+    "tail_tiles": 0
+  },
+  "records": [
+    {
+      "nominal_length_bin": 32768,
+      "prefix_tokens": 34816,
+      "samples": 32,
+      "errors": {
+        "natural_q64": {
+          "max_abs": 0.001993328332901001,
+          "relative_max": 0.004377714595392748
+        },
+        "held": {
+          "max_abs": 0.001993328332901001,
+          "relative_max": 0.004377714595392748
+        }
+      },
+      "gpu_ms": {
+        "natural_q64": 0.3678400069475174,
+        "held_total": 0.38438399136066437,
+        "held_consumer_only": 0.3479680120944977,
+        "permutation_only": 0.05623999983072281
+      },
+      "synchronized_wall_ms": {
+        "natural_q64": 0.3837441327050328,
+        "held_total": 0.40098605677485466,
+        "held_consumer_only": 0.3640183713287115,
+        "permutation_only": 0.07194455247372389
+      },
+      "held_total_over_natural": 1.044976033331544,
+      "optimistic_break_even": {
+        "consumer_saving_ms": 0.019871994853019714,
+        "gather_scatter_ms": 0.05623999983072281,
+        "optimistic_margin_ms": -0.036368004977703094,
+        "optimistic_break_even": false
+      },
+      "counters": {
+        "global_calls": 0,
+        "prefix_copies": 0,
+        "canvas_refreshes": 0,
+        "invalidates": 0,
+        "begins": 0,
+        "observes": 0,
+        "passthrough": 0,
+        "order_errors": 0,
+        "split_fa4_calls": 123,
+        "split_list_builds": 2
+      },
+      "actual_k_stride": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "actual_q_token_major_stride": [
+        8192,
+        8192,
+        512,
+        1
+      ],
+      "moved_rows": 84,
+      "required_prefix_support_covered": true,
+      "random_physical_page_order": true
+    },
+    {
+      "nominal_length_bin": 65536,
+      "prefix_tokens": 59840,
+      "samples": 32,
+      "errors": {
+        "natural_q64": {
+          "max_abs": 0.0010779201984405518,
+          "relative_max": 0.004044725591273708
+        },
+        "held": {
+          "max_abs": 0.0009023845195770264,
+          "relative_max": 0.00322808311842275
+        }
+      },
+      "gpu_ms": {
+        "natural_q64": 0.5403999984264374,
+        "held_total": 0.5428960025310516,
+        "held_consumer_only": 0.5168319940567017,
+        "permutation_only": 0.06163199990987778
+      },
+      "synchronized_wall_ms": {
+        "natural_q64": 0.5560494028031826,
+        "held_total": 0.5605129990726709,
+        "held_consumer_only": 0.5337261827662587,
+        "permutation_only": 0.07806450594216585
+      },
+      "held_total_over_natural": 1.0046188084971914,
+      "optimistic_break_even": {
+        "consumer_saving_ms": 0.023568004369735718,
+        "gather_scatter_ms": 0.06163199990987778,
+        "optimistic_margin_ms": -0.03806399554014206,
+        "optimistic_break_even": false
+      },
+      "counters": {
+        "global_calls": 0,
+        "prefix_copies": 0,
+        "canvas_refreshes": 0,
+        "invalidates": 0,
+        "begins": 0,
+        "observes": 0,
+        "passthrough": 0,
+        "order_errors": 0,
+        "split_fa4_calls": 123,
+        "split_list_builds": 2
+      },
+      "actual_k_stride": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "actual_q_token_major_stride": [
+        8192,
+        8192,
+        512,
+        1
+      ],
+      "moved_rows": 103,
+      "required_prefix_support_covered": true,
+      "random_physical_page_order": true
+    },
+    {
+      "nominal_length_bin": 98304,
+      "prefix_tokens": 92992,
+      "samples": 32,
+      "errors": {
+        "natural_q64": {
+          "max_abs": 0.0016838014125823975,
+          "relative_max": 0.004086148824079573
+        },
+        "held": {
+          "max_abs": 0.0009618401527404785,
+          "relative_max": 0.0042855213672557966
+        }
+      },
+      "gpu_ms": {
+        "natural_q64": 0.44755201041698456,
+        "held_total": 0.4625120013952255,
+        "held_consumer_only": 0.43054400384426117,
+        "permutation_only": 0.0620959997177124
+      },
+      "synchronized_wall_ms": {
+        "natural_q64": 0.46389398630708456,
+        "held_total": 0.479459878988564,
+        "held_consumer_only": 0.4475080640986562,
+        "permutation_only": 0.07930549327284098
+      },
+      "held_total_over_natural": 1.0334262624902584,
+      "optimistic_break_even": {
+        "consumer_saving_ms": 0.01700800657272339,
+        "gather_scatter_ms": 0.0620959997177124,
+        "optimistic_margin_ms": -0.045087993144989014,
+        "optimistic_break_even": false
+      },
+      "counters": {
+        "global_calls": 0,
+        "prefix_copies": 0,
+        "canvas_refreshes": 0,
+        "invalidates": 0,
+        "begins": 0,
+        "observes": 0,
+        "passthrough": 0,
+        "order_errors": 0,
+        "split_fa4_calls": 123,
+        "split_list_builds": 2
+      },
+      "actual_k_stride": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "actual_q_token_major_stride": [
+        8192,
+        8192,
+        512,
+        1
+      ],
+      "moved_rows": 78,
+      "required_prefix_support_covered": true,
+      "random_physical_page_order": true
+    }
+  ],
+  "reserved_gpu_seconds": 5.349383089924231,
+  "held_total_over_natural_geomean": 1.0275328370725616,
+  "scope": "accepted historical prefix supports; synthetic QKV; full canvas kept; held order only",
+  "interpretation": "amortization upper-limit diagnostic, not online performance or accuracy",
+  "exclusions": [
+    "offline search",
+    "selector",
+    "first-use keep-map/list and alias split construction",
+    "KV copies",
+    "model",
+    "request lifecycle",
+    "accuracy"
+  ],
+  "permutation_cost": "standalone gather/scatter estimate; not necessarily additive with consumer",
+  "fp32_reference": "IEEE FP32; TF32 explicitly disabled",
+  "cuda_graphs": "none requested; eager warmed benchmark",
+  "source_commit": "8927280a1fd45b8de7b24aa31aa32d8132965cff",
+  "worker_reserved_gpu_seconds": 45.849853737978265
+}

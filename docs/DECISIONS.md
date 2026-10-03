@@ -329,3 +329,48 @@ amortization could pay even in this favorable setting. No GPU result yet.
 LLaDA CUDA13 closure mismatch identified (runtime13.4 headers with nvcc13.0);
 isolated CPU small-kernel compile now passes with matching headers. No sparse
 model port or qualified new-model accuracy result yet.
+
+## V28 seed expansion, held-regroup negative and canvas release — 2026-10-02 19:44 (UTC-5)
+
+User explicitly reiterated large seed-dependent denoising-step variance. New
+seed4 protocols freeze four independent engine seeds (28001–28004), two sequential
+repeat labels per engine, six question clusters: 48 requests/arm. Repeats are not
+extra independent seeds; same engine seed is not a matched random trajectory.
+Keep per-seed N distributions, paired geometric W/S/SN/N and correctness, with
+question-cluster intervals. This remains preview; expand question coverage for
+request-level claims. Existing qualification002/V18b protocols are untouched.
+Common OMP_NUM_THREADS=1; new requests record pre-deduplication monitor Triton/CuTe
+JIT event deltas as well as CUDA capture/backend/Inductor counters. Nonzero/missing
+timed monitor receipts fail the new run. Events can include cache loads/failed
+compiles, exclude autotuning/other workers/earlier aliases; zero is not universal
+absence of compilation. Existing log warnings use warning_once, so the original
+panel's zero post-warm warnings are only a lower-bound audit. Its block-0 main
+had 30 recoverable post-warm allocation failures, retained in W.
+
+Held-regroup component003 completed: natural-Q64-relative total times
+1.04498/1.00462/1.03343 at nominal32/64/96K, geomean1.02753, even excluding all
+search/initial-build cost. Three accepted states only; reject this unfused held
+implementation for request expansion, not all grouping/fusion hypotheses.
+Source: `results/v28_20261002/regroup_held/`; 45.8499 reserved GPU seconds.
+
+All five qualification002 request arms passed (q64/main128/allkept/native/dense),
+with existing graph/backend/Inductor checks and intended-path receipts. One item
+per arm is implementation qualification, not performance or quality evidence.
+A q64 alias1/2/4 component sweep is now specified and CPU-tested; independent
+adapter per split avoids the split-cache identity-key pitfall. GPU run pending.
+
+New standard optimization `canvas_buffers=release_after_invalidate` releases all
+old contiguous adapter KV and prefix views only after successful encoder hooks
+and same-CUDA-stream guards. Core observation/projection uses that stream;
+async selector reads independent arrays with existing record_stream protection.
+Carry and split maps are retained; no synchronization or empty_cache added.
+Defaults remain legacy. Must qualify real release counters, numerics and allocator
+behavior; no measured memory/performance claim yet. q128/q64 plus matched allkept
+use the same option in separate frozen specifications. 92 relevant CPU tests pass.
+
+LLaDA official SGLang JointThreshold dense smoke now passed, three toy checks,
+forward count unavailable. This is environment qualification only; none of our
+sparse variants are ported yet. Source: `results/v28_20261002/llada_dense_smoke/`.
+Six attempts reserved345.5495GPU seconds including failures/stops. I-DLM own-stack
+CPU setup/toolchain qualified and first dense smoke is compiling/running; no
+new-model sparse or benchmark result claimed.
