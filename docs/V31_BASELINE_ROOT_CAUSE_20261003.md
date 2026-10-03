@@ -394,3 +394,29 @@ Dense reference: 28/48 correct at 32K, 23/48 at 64K.
 - The bootstrap CIs over 24 items overlap, so this needs the larger confirmation set before it is claimed.
 - A candidate framing for the C-gate contribution: sparsity perturbs adaptive-step denoising trajectories (mean and
   tail forward counts), and query-stability-aware budgeting reduces that perturbation.
+
+## Panel l: adaptive (C gate) vs uniform budget at the realized kept fraction (2026-10-03 18:45 UTC−5)
+
+Realized kept fractions come from the new receipts (overlay8):
+- m2c threshold: 17% (32K) / 9.5% (64K);
+- m2c + C gate: 33% / 18%.
+
+Table: `results/v31_20261003/panels/panel_l_adaptive_vs_uniform.md`.
+
+| comparison | kept | N/C | S/N | W | correct (dense) |
+|---|---|---|---|---|---|
+| 32K C gate (adaptive) | 33% | 1.025 | 1.000 | 1.004 | 29 (28) |
+| 32K uniform k30 | 30% | 1.045 | 0.975 | 1.041 | 32 |
+| 32K uniform k20 | 20% | 1.048 | 0.965 | 0.973 | 34 |
+| 64K C gate (adaptive) | 18% | 1.028 | 0.907 | 0.976 | 23 (23) |
+| 64K uniform k20 | 20% | 1.060 | 0.895 | 0.975 | 26 |
+| 64K uniform k30 | 30% | 1.010 | 0.914 | 0.949 | 29 |
+| MAGE k=2048 / 4096, 64K | ≈3% / 6% | 1.080 / 1.088 | 0.836 / 0.840 | 0.965 / 0.921 | 25 / 26 |
+
+**Reading:**
+- At a matched kept fraction, the C gate's adaptive allocation lowers N/C by only about 2–3 points against a uniform
+  budget, at a slightly higher per-forward cost. End to end and in accuracy it is no better.
+- Mean forward inflation is mostly a function of how much is kept, not of how it is allocated.
+- The C gate's clearer effect is on trajectory perturbation and tails (previous section), which needs the
+  confirmation set.
+- Mean-W frontier at 64K: MAGE k=4096 0.92, main / m2c / k30 about 0.95. No CI excludes 1.
