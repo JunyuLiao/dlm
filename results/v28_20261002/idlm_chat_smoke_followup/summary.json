@@ -1,0 +1,231 @@
+{
+  "kind": "official_chat_protocol_environment_smoke_followup",
+  "previous_diagnostic_unchanged": true,
+  "run_label": "002",
+  "completed": true,
+  "exit_code": 0,
+  "gpu_workers": 1,
+  "performance_claim": false,
+  "environment_execution_qualified": true,
+  "natural_stopping_qualified": false,
+  "final_answer_quality_qualified": false,
+  "model": {
+    "repo": "yifanyu/I-DLM-8B",
+    "revision": "3cecd8cd39b9b32486b20aa80f28e81206387720",
+    "shards": 4,
+    "weights_bytes": 16381516824
+  },
+  "source": {
+    "repository": "https://github.com/Introspective-Diffusion/I-DLM",
+    "commit": "a23c1a12ef997c7f3ad616b25bcfb62db39ded68",
+    "compatibility_patch": {
+      "source_commit": "a23c1a12ef997c7f3ad616b25bcfb62db39ded68",
+      "file": "inference/sglang/sglang/srt/dllm/algorithm/idlm_blockN.py",
+      "compatibility_patch": "from __future__ import annotations",
+      "reason": "Python3.10 eager evaluation rejects Tuple[Tensor,Tensor,...] during module import.",
+      "old_sha256": "8e2e1fbd4225cb06112ba38415e43e06bfe4c26fd8fd7894ab204707ed8eb41a",
+      "new_sha256": "a8ef2db3527aab483d894f0c4b7528eff886c920b6b3aa8e4a52e52af83c16c9",
+      "algorithm_logic_changed": false,
+      "gpu_runs": 0
+    }
+  },
+  "versions": {
+    "sglang": "0.0.0.dev0",
+    "torch": "2.9.1+cu128",
+    "flashinfer_python": "0.6.3",
+    "transformers": "4.57.1",
+    "sgl_kernel": "0.3.21",
+    "cuda_toolchain": {
+      "cuda_nvcc": {
+        "version": "12.8.93",
+        "sha256": "9961b3484b6b71314063709a4f9529654f96782ad39e72bf1e00f070db8210d3",
+        "archive_bytes": 79015464
+      },
+      "cuda_cudart": {
+        "version": "12.8.90",
+        "sha256": "8d566b5fe745c46842dc16945cf36686227536decd2302c372be86da37faca68",
+        "archive_bytes": 1354240
+      },
+      "cuda_cccl": {
+        "version": "12.8.90",
+        "sha256": "0740e9e01e4f15e17c5ab8d68bba4f8ec0eb6b84edccba4ac45112d2d2174e4b",
+        "archive_bytes": 928524
+      },
+      "cuda_nvrtc": {
+        "version": "12.8.93",
+        "sha256": "992f5e4d95cb499f41e442245efa877dbd60c711451afe680a26700d61eb3843",
+        "archive_bytes": 114287212
+      }
+    }
+  },
+  "protocol": {
+    "chat_template": "model supplied chat_template.jinja",
+    "template_sha256": "87a2728cb8dc9fe424d624542f6060ec05a1d285ebbec578bb078900e33396b5",
+    "tokenize": true,
+    "add_generation_prompt": true,
+    "enable_thinking": "official_default_not_overridden",
+    "prompt_token_count": 23,
+    "eos_policy": "Explicit original model generation_config EOS list plus native tokenizer/model EOS, ignore_eos=False",
+    "eos_token_count": 2
+  },
+  "engine": {
+    "dllm_algorithm": "IDLMBlockN",
+    "dtype": "bfloat16",
+    "attention_backend": "flashinfer",
+    "trust_remote_code": true,
+    "mem_fraction_static": 0.8,
+    "max_running_requests": 1,
+    "random_seed": 0
+  },
+  "request_sampling": {
+    "max_new_tokens": 512,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 50,
+    "ignore_eos": false
+  },
+  "algorithm_config": {
+    "repository_relative_file": "inference/configs/idlm_blockN4_config.yaml",
+    "sha256": "53ab0a28977434095953e602835fa168cf5caabe74c9758b4ea4ef518fa1d50e",
+    "yaml": "block_size: 7\ngen_block_size: 4\nconfidence_threshold: 0.0\ntemperature: 1.0\ntop_k: 50\ntop_p: 0.95\nuse_spec_verify: true\n"
+  },
+  "effective_algorithm_sampling": {
+    "temperature": 1.0,
+    "top_k": 50,
+    "top_p": 0.95
+  },
+  "sampling_precedence_verified": true,
+  "sampling_precedence": "IDLMBlockN reads temperature/top_k/top_p from algorithm_config at initialization and uses self fields for sampling. Request fields do not override these sampling values in this pinned implementation; request max_new_tokens/EOS control stopping.",
+  "seed": 0,
+  "toy_runs": [
+    {
+      "latency_s": 135.63996820198372,
+      "prompt_tokens": 23,
+      "completion_tokens": 512,
+      "finish_reason_type": "length",
+      "toy_answer_presence_check_passed": true
+    },
+    {
+      "latency_s": 1.4565222630044445,
+      "prompt_tokens": 23,
+      "completion_tokens": 512,
+      "finish_reason_type": "length",
+      "toy_answer_presence_check_passed": true
+    },
+    {
+      "latency_s": 1.4418973040010314,
+      "prompt_tokens": 23,
+      "completion_tokens": 512,
+      "finish_reason_type": "length",
+      "toy_answer_presence_check_passed": true
+    }
+  ],
+  "toy_answer_presence_checks_passed": 3,
+  "check_limit": "Presence of the expected answer substring only; does not establish final-answer correctness or natural stopping.",
+  "forward_counts_available": false,
+  "forward_counts_reason": "Internal total_forwards is cumulative, is not verified as exposed by Engine.generate per request, and graph capture/general model-call coverage is unverified; the pure-prefill path does increment it. No instrumentation patch was applied.",
+  "gpu_accounting": {
+    "reservation_definition": "One H100 reserved from GPU-idle confirmation through complete worker exit, including CPU import/JIT and teardown.",
+    "followup_reserved_seconds": 190.27768509698217,
+    "idlm_all_attempts_reserved_seconds": 377.48496731798514,
+    "all_new_model_attempts_reserved_seconds": 723.034485472017,
+    "gpu_released_memory_mib": 0,
+    "gpu_released_utilization_percent": 0
+  },
+  "diagnosis": {
+    "001_used_chat_template": false,
+    "001_length_limit": 64,
+    "official_readme_chat_example_length_limit": 512,
+    "001_effective_sampling": {
+      "temperature": 1.0,
+      "top_k": 50,
+      "top_p": 0.95
+    },
+    "002_result": "All three outputs still reached512 despite official chat formatting and native EOS. Correct input and longer budget improve answer presence, but do not resolve or isolate the stopping/quality issue.",
+    "causal_isolation": false
+  },
+  "source_evidence": {
+    "official_chat_example": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/README.md#L47",
+    "algorithm_configuration_sampling": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/dllm/algorithm/idlm_blockN.py#L155",
+    "clean_sampling_uses_algorithm_fields": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/dllm/algorithm/idlm_blockN.py#L738",
+    "chat_template_application": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/entrypoints/openai/serving_chat.py#L462",
+    "length_limit_checked_first": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/managers/schedule_batch.py#L1053",
+    "eos_stop_check": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/managers/schedule_batch.py#L979",
+    "model_chat_template": "https://huggingface.co/yifanyu/I-DLM-8B/blob/3cecd8cd39b9b32486b20aa80f28e81206387720/chat_template.jinja",
+    "official_project_example": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/README.md#L108",
+    "stop_list_normalization": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/sampling/sampling_params.py#L70",
+    "dllm_per_token_finish": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/managers/scheduler_output_processor_mixin.py#L574",
+    "burst_per_token_finish": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/managers/scheduler.py#L1246"
+  },
+  "scope": "Three toy calls only. First-call latency includes JIT. No benchmark, speedup, sparse equivalence, or cross-model latency claim.",
+  "retained_output_diagnostics": {
+    "available": false,
+    "reason": "Workers exited after saving metadata only. Neither generated text nor output token IDs were retained; scalar diagnostics cannot be reconstructed without new inference.",
+    "closed_think_count": null,
+    "repeated_ngram_fraction": null,
+    "actual_output_eos_count": null,
+    "actual_output_eos_before_cap": null,
+    "raw_output_retained": false,
+    "output_token_ids_retained": false,
+    "new_gpu_calls_for_diagnosis": 0
+  },
+  "stop_plumbing_audit": {
+    "submitted_stop_set_matches_model_generation_config": true,
+    "ignore_eos": false,
+    "sampling_params_normalization": "Nonempty stop list is converted to a set without changing membership.",
+    "scheduler_model_eos": "Req receives model_config.hf_eos_token_id, which includes generation_config EOS values.",
+    "dllm_output_finish_iteration": "Reviewed regular, special, and burst paths append and call Req.check_finished once per committed output token; they break and clean up on finish.",
+    "cpu_synthetic_cases": [
+      {
+        "stop_position": 1,
+        "finish_class": "FINISH_MATCHED_TOKEN",
+        "accepted_stop_set_matches_generation_config": true
+      },
+      {
+        "stop_position": 1,
+        "finish_class": "FINISH_MATCHED_TOKEN",
+        "accepted_stop_set_matches_generation_config": true
+      },
+      {
+        "stop_position": 100,
+        "finish_class": "FINISH_MATCHED_TOKEN",
+        "accepted_stop_set_matches_generation_config": true
+      },
+      {
+        "stop_position": 100,
+        "finish_class": "FINISH_MATCHED_TOKEN",
+        "accepted_stop_set_matches_generation_config": true
+      },
+      {
+        "stop_position": 511,
+        "finish_class": "FINISH_MATCHED_TOKEN",
+        "accepted_stop_set_matches_generation_config": true
+      },
+      {
+        "stop_position": 511,
+        "finish_class": "FINISH_MATCHED_TOKEN",
+        "accepted_stop_set_matches_generation_config": true
+      },
+      {
+        "stop_position": 512,
+        "finish_class": "FINISH_LENGTH",
+        "accepted_stop_set_matches_generation_config": true
+      },
+      {
+        "stop_position": 512,
+        "finish_class": "FINISH_LENGTH",
+        "accepted_stop_set_matches_generation_config": true
+      }
+    ],
+    "inference_limit": "Synthetic source-level tests prove stop recognition for supplied EOS values; they do not prove which tokens the real worker produced or its live Req state."
+  },
+  "official_documentation_generation_modes": {
+    "project_readme_max_tokens": 4096,
+    "inference_readme_chat_example_max_tokens": 512,
+    "inference_readme_benchmark_max_tokens": 2048,
+    "readme_examples_explicit_enable_thinking_false": false,
+    "model_template_default": "Thinking allowed when enable_thinking is not explicitly false; false adds an empty thinking block.",
+    "larger_budget_evidence": "The project README uses4096 for a proof prompt, not a demonstrated requirement for this toy prompt."
+  },
+  "unresolved_cause": "Retained evidence cannot distinguish long or repetitive thinking from another generation/sampler integration issue. Reviewed stop membership and per-token finish checking show no evident mismatch/skipped-block bug, and CPU EOS tests pass. Baseline quality/stopping remains unqualified; this is not evidence against a proposed sparse algorithm."
+}

@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 19:44 (UTC-5)",
+    "updated_local": "2026-10-02 20:04 (UTC-5)",
     "branch": "research/vllm-variants-20261002",
-    "verified_commit": "8927280a1",
+    "verified_commit": "dcfdb8730",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,11 +16,11 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "V28: q64 component promising; held regroup slower; all request qualification arms pass; seed4/canvas-release qualification next; LLaDA dense smoke passed.",
+    "headline": "V28 qualification004 passed; six-variant four-seed preview specified, not launched. New-model execution smokes only, no sparse ports.",
     "running": [
-      "Parent V18b seed block1 ongoing on dllm",
-      "V28 mpk qualification002 and held003 closed; new qualification preparation",
-      "I-DLM official dense smoke on dlm2"
+      "Parent V18b on dllm; original finalizer unchanged",
+      "mpk qualification004 closed; expanded alias sweep then seed4 preview next",
+      "dlm2 idle after I-DLM follow-up"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -280,9 +280,20 @@
       "seed4": "4 engine seeds x 2 repeats x 6 questions; preview spec only"
     },
     "v28_new_models": {
-      "llada_dense_smoke": "passed; no sparse adapter or benchmark",
-      "llada_gpu_seconds_all_attempts": 345.54951815403183,
-      "idlm": "official dense smoke running, no sparse adapter"
+      "llada": "official dense execution smoke passed; sparse variants not implemented",
+      "idlm": "chat smoke executes; length stopping512 all3; baseline quality unqualified; sparse variants not implemented",
+      "reserved_gpu_seconds_all_attempts": 723.034485472017
+    },
+    "v28_seed4_family": {
+      "spec": "results/v28_20261002/specs/v28_seed4_family.json",
+      "independent_engine_seeds": 4,
+      "sequential_repeats_per_engine": 2,
+      "questions": 6,
+      "variants": 6,
+      "timed_per_variant": 48,
+      "status": "specified_before_launch",
+      "generation_deploy": "dcfdb8730",
+      "inference_scope": "preview only; repeated questions clustered; no noninferiority claim"
     }
   },
   "task": "M3 output numerics and trajectory isolation",

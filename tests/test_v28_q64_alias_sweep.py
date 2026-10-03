@@ -1,13 +1,15 @@
 """Dependency-light CPU checks for sweep isolation, support and aggregation."""
 from pathlib import Path
 from types import SimpleNamespace
+from contextlib import redirect_stderr
+import io
 import tempfile
 import unittest
 
 import numpy as np
 
-from scripts.v28_q64_alias_sweep import (SPLITS, assert_held_builds, make_adapters,
-    main, rotated_splits, selected_paths, support, timing_ratios, validate_split_batch)
+from scripts.v28_q64_alias_sweep import (SPLITS, assert_held_builds, descriptive_by_bin, make_adapters,
+    main, positive_int, rotated_splits, selected_paths, support, timing_ratios, validate_split_batch)
 from scripts.v28_regroup_screen import load_need
 
 
@@ -75,6 +77,8 @@ class AliasSweepTests(unittest.TestCase):
             selected = selected_paths(root, per_bin=1)
             self.assertEqual(len(selected), 3)
             self.assertEqual([load_need(path).shape[-1] for path in selected], [544, 1117, 1459])
+            self.assertEqual(len(selected_paths(root, per_bin=2)), 6)
+            self.assertEqual(len(selected_paths(root, per_bin=48)), 6)
             for path in selected:
                 need = load_need(path)
                 kept = support(need, 64)
@@ -101,6 +105,30 @@ class AliasSweepTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'new report'):
                 main([str(root), str(report)])
             self.assertEqual(report.read_text(), 'preserve')
+
+    def test_per_bin_argument_is_a_positive_integer(self):
+        self.assertEqual(positive_int('48'), 48)
+        for bad in ('0', '-1', '1.5', 'not-an-int'):
+            with self.subTest(value=bad), redirect_stderr(io.StringIO()), self.assertRaises(SystemExit):
+                main(['unused-private-dir', 'unused-report', '--per-bin', bad])
+
+    def test_descriptive_stats_pool_states_within_bins_and_count_wins(self):
+        records = [dict(nominal_length_bin=32768, ratio_to_alias2={'1': 2., '2': 1., '4': .8}),
+                   dict(nominal_length_bin=32768, ratio_to_alias2={'1': .5, '2': 1., '4': 1.25}),
+                   dict(nominal_length_bin=65536, ratio_to_alias2={'1': 1.1, '2': 1., '4': 1.})]
+        summary = descriptive_by_bin(records)
+        first = summary['32768']
+        self.assertEqual(first['matched_states'], 2)
+        self.assertAlmostEqual(first['geomean_ratio_to_alias2']['1'], 1)
+        self.assertAlmostEqual(first['geomean_ratio_to_alias2']['4'], 1)
+        self.assertEqual(first['faster_than_alias2_states'], {'1': 1, '2': 0, '4': 1})
+        self.assertEqual(first['slower_than_alias2_states'], {'1': 1, '2': 0, '4': 1})
+        self.assertEqual(first['equal_to_alias2_states'], {'1': 0, '2': 2, '4': 0})
+        self.assertEqual(summary['65536']['equal_to_alias2_states']['4'], 1)
+        for invalid in ([], [dict(nominal_length_bin=1, ratio_to_alias2={'1': 1., '2': 1., '4': 1.})],
+                        [dict(nominal_length_bin=32768, ratio_to_alias2={'1': float('nan'), '2': 1., '4': 1.})]):
+            with self.assertRaises(ValueError):
+                descriptive_by_bin(invalid)
 
 
 if __name__ == '__main__':

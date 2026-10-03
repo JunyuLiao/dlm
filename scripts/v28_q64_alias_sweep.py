@@ -1,4 +1,4 @@
-"""Q64 alias S1/2/4 component sweep, with one real-need state per nominal bin.
+"""Q64 alias S1/2/4 component sweep, default one real-need state per nominal bin.
 
 Synthetic QKV use native token-major Q/interleaved paged KV strides and random
 physical pages. All S share one Q64 mask and retain the adapter's generic merge,
@@ -21,6 +21,16 @@ from scripts.v28_regroup_screen import load_need
 
 
 SPLITS = (1, 2, 4)
+
+
+def positive_int(value):
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError) as exc:
+        raise argparse.ArgumentTypeError('must be a positive integer') from exc
+    if parsed < 1:
+        raise argparse.ArgumentTypeError('must be a positive integer')
+    return parsed
 
 
 def make_adapters(factory, paged):
@@ -59,18 +69,43 @@ def timing_ratios(medians):
     return {str(splits): medians[splits]/medians[2] for splits in SPLITS}
 
 
+def descriptive_by_bin(records):
+    """State-level descriptive ratios, not independent-request inference."""
+    if not records:
+        raise ValueError('no records to summarize')
+    bins = {}
+    for record in records:
+        length = record['nominal_length_bin']
+        if length not in (32768, 65536, 98304):
+            raise ValueError('unknown nominal length bin')
+        ratios = record['ratio_to_alias2']
+        if (set(ratios) != {str(s) for s in SPLITS}
+                or not all(math.isfinite(value) and value > 0 for value in ratios.values())):
+            raise ValueError('invalid state ratios')
+        bins.setdefault(length, []).append(ratios)
+    return {str(length): dict(
+                matched_states=len(values),
+                geomean_ratio_to_alias2={str(s): math.exp(statistics.mean(math.log(v[str(s)]) for v in values)) for s in SPLITS},
+                faster_than_alias2_states={str(s): sum(v[str(s)] < 1 for v in values) for s in SPLITS},
+                slower_than_alias2_states={str(s): sum(v[str(s)] > 1 for v in values) for s in SPLITS},
+                equal_to_alias2_states={str(s): sum(v[str(s)] == 1 for v in values) for s in SPLITS})
+            for length, values in sorted(bins.items())}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('private_need_dir')
     parser.add_argument('new_report')
     parser.add_argument('--repeats', type=int, default=30)
+    parser.add_argument('--per-bin', type=positive_int, default=1,
+                        help='maximum real-need states per nominal bin; 48 selects all historical 144')
     args = parser.parse_args(argv)
     dest = Path(args.new_report)
     if dest.exists() or args.repeats < 6:
         raise ValueError('new report and at least six repeats required')
-    paths = selected_paths(args.private_need_dir, per_bin=1)
+    paths = selected_paths(args.private_need_dir, per_bin=args.per_bin)
     states = [(nominal_bin(need), need) for need in map(load_need, paths)]
-    if sorted(length for length, _ in states) != [32768, 65536, 98304]:
+    if {length for length, _ in states} != {32768, 65536, 98304}:
         raise ValueError('all three nominal length bins are required')
 
     import torch
@@ -153,9 +188,11 @@ def main(argv=None):
         del query, cache, kc, vc, k, v, kvk, kvv, mask, lists, adapters, adapter, split, scores, row_mask, ref
     torch.cuda.synchronize()
     report = dict(schema='v28_q64_alias_sweep_component_v1', alias_counts=list(SPLITS), records=records,
+                  per_bin_requested=args.per_bin, descriptive_by_bin=descriptive_by_bin(records),
                   reserved_gpu_seconds=time.monotonic()-started,
                   geomean_ratio_to_alias2={str(s): math.exp(statistics.mean(math.log(r['ratio_to_alias2'][str(s)]) for r in records)) for s in SPLITS},
-                  scope='one historical real-need state per nominal bin; synthetic QKV; full canvas kept; component only',
+                  scope='historical real-need states per nominal bin; synthetic QKV; full canvas kept; component only',
+                  statistics='descriptive state-level geomeans and win counts; repeated states are not independent requests; no request confidence intervals',
                   exclusions=['selector', 'first-use keep-map/list and alias split construction', 'KV copies',
                               'request lifecycle', 'model', 'accuracy'],
                   s1_execution='adapter generic softmax/LSE merge retained; no direct-output optimization',

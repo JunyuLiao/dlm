@@ -1,28 +1,14 @@
-# V28 active handoff (2026-10-02 19:44 (UTC-5))
+# V28 active handoff (2026-10-02 20:04 (UTC-5))
 
-- Branch: `research/vllm-variants-20261002`, base `9b027df8f`.
-- User authorized trying worthwhile variants. Plan: `docs/VARIANT_CAMPAIGN_V28_20261002.md`.
-- V28 status: Q64 component ratio 0.94575; one actual Q64 request qualified. All five matched request qualification arms passed; no seed4 preview launched yet. No request speed/accuracy claim.
-- Parent V18b continues on dllm under its unchanged deploy, controlled from the original worktree.
-  Recoverable allocation failures appear in main logs; do not filter or silently correct its times.
-- KV-view rejected: actual HK=2 paged layout cannot be flattened to the required view without copying.
-- request_clear releases bounded retained request tensors; it is not yet proven to eliminate allocator retries.
-- Regroup default screen accepted 7/144 snapshots but aggregate proxy saving is only 0.28%; deeper screen pending.
-- Idle-host isolated vLLM and LLaDA SGLang package setup completed; no model smoke or sparse model port yet.
-- Parent block-0 dense/main each closed 118 timed rows; native control started. No final panel claim.
-- New conclusions and measured results must update this handoff, docs and STATE.current together.
-
-- 2026-10-02 19:18 (UTC-5): q128/q64 request_clear specs and receipt wrapper CPU-qualified; launch next.
-- Expanded regroup gate: 19/144 accepted, proxy ratio 0.98938; no GPU claim.
-- Component001 retained as diagnostic (30.7184 GPU s); corrected component rerun pending.
-- LLaDA official smoke failed missing CCCL header; isolated compiler repair underway.
-
-- 2026-10-02 19:26 (UTC-5): component result published, strong native request controls still running.
-- Held-regroup gather/consumer/scatter ablation CPU-tested and ready for GPU after current single-worker queue.
-
-- 2026-10-02 19:44 (UTC-5): held-regroup total is 1.02753x natural Q64; do not expand this implementation.
-- LLaDA official dense smoke passed; I-DLM dense smoke running, both sparse ports unimplemented.
-- New seed4 specs and canvas_release/JIT-receipt code CPU-qualified (92 tests); GPU qualification next.
+- Branch `research/vllm-variants-20261002`, parent base `9b027df8f`; generation deploy `dcfdb8730` frozen.
+- Qualification004 closed all five request workers successfully: Q128/Q64 legacy canvas, Q128/Q64 release, allkept release. Timed monitored JIT events and allocator retries zero; no performance/accuracy inference from one item.
+- Four engine seeds x two sequential repeats x six questions are frozen for six variants (48 timed/variant). Family spec committed before launch. Preview not launched yet; expanded 144-state alias sweep first. Repeats are not independent seeds.
+- Component evidence: Q64/Q128 0.94575; held-regroup/natural Q64 total 1.02753 (negative). Alias4/2 three-state mean 0.99264 with mixed bins, insufficient to change default alias2.
+- Parent V18b continues on dllm unchanged; its formal scoring/finalizer belongs to the original worktree. Retain allocator costs; do not alter original campaign.
+- LLaDA official dense environment smoke passed. I-DLM official chat smoke runs but all three outputs reach512; natural stopping/task quality unqualified. Neither model has our sparse variants implemented. See new-model adaptation audit.
+- New-model attempts total723.0345GPU seconds; dlm2 idle. mpk qualification004 total867.9727GPU seconds (includes alias sweep and startup/teardown).
+- Next: full144 alias component, six-arm seed4 request preview and strict scoring, then only supported refinements. Question coverage must expand before request-level or noninferiority claims.
+- Update HANDOFF/docs/STATE.current with every result or status change and push. Private prompts, generated text, gold, token arrays and private paths stay outside Git.
 
 ## Inherited parent handoff (historical; current V28 overlay above takes precedence)
 

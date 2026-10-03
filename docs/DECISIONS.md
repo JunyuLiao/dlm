@@ -374,3 +374,35 @@ sparse variants are ported yet. Source: `results/v28_20261002/llada_dense_smoke/
 Six attempts reserved345.5495GPU seconds including failures/stops. I-DLM own-stack
 CPU setup/toolchain qualified and first dense smoke is compiling/running; no
 new-model sparse or benchmark result claimed.
+
+## V28 qualification and four-seed family — 2026-10-02 20:04 (UTC-5)
+
+Qualification004 closed five request workers on the same dcfdb8730 source and OMP1.
+Q128 legacy/release each N72; Q64 legacy/release each N66; allkept release N81.
+Timed monitored JIT events and allocator retry/OOM deltas were zero. Release
+counters show5 canvas invalidations for each method (9,731,891,200 cumulative
+bytes released, not peak memory saved). Process peaks were nearly unchanged;
+no peak-memory or speed advantage is established. Reserved cost867.9727GPU seconds
+includes the14.3026-second alias sweep. Qualifying one item does not establish accuracy.
+
+The six-arm family spec freezes dense, native-hook, allkept release, main legacy
+canvas, main release and Q64 release. All use request_clear and shared generation
+source. Four engine seeds28001–28004, two sequential repeats each, six questions:
+48timed/variant; 288timed+144warm in24fresh engines. Variant order reverses in
+alternating blocks. Paired W/S/P/SN/N and correctness use question-cluster intervals
+and per-engine-seed step distributions. These are preview data, not a powered
+noninferiority test. Family spec: `results/v28_20261002/specs/v28_seed4_family.json`.
+
+Alias1/2/4 initial sweep uses three historical need states and synthetic QKV.
+Alias1/2 ratio1.29397; alias4/2 ratio0.99264 with 64K slower1.01820 and96K faster0.96739.
+Keep alias2; extend to all144 correlated snapshots with descriptive per-bin
+aggregates, not question-level CI or request speed claims.
+
+I-DLM chat follow-up executed successfully but all3calls hit512tokens despite
+answer-presence checks3/3. Source and CPU EOS checks found no obvious stop-set
+mismatch; actual output was not retained so repetition/think-closure diagnostics
+are unavailable. Baseline stopping/quality remains unqualified. All new-model
+attempts reserved723.0345GPU seconds. No sparse ports implemented; model-specific
+clock, causal mask, rollback and all-kept controls are prerequisites. See
+`docs/NEW_MODEL_PORT_AUDIT_V28_20261002.md` and
+`results/v28_20261002/idlm_chat_smoke_followup/`.
