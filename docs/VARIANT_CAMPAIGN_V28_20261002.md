@@ -77,3 +77,29 @@ Warm kernels before interleaved timing; held lists must not rebuild in timing.
 
 Isolated idle-host public package installations completed. LLaDA weights downloaded;
 GPU smokes and model-specific adapters remain pending. Parent V18b stays frozen.
+
+## V28 regroup screen and native qualification freeze — 2026-10-02 19:27 (UTC-5)
+
+Real historical prefix-need snapshots: 144; natural Q64 work 794361 tiles.
+Default bounded swap search accepted 7/144; gated load proxy ratio 0.9971768.
+Expanded search (12 swaps/head, 16 candidate signatures/group) accepted 19/144;
+ratio 0.9893759, total work +0.0402%. Aggregate max/p95 loads unchanged.
+These are CPU prefix-only proxies, not GPU acceleration; no standalone regroup
+request panel warranted. Source: `results/v28_20261002/regroup_screen/`.
+
+Native q128/q64 request_clear qualification specs are frozen under
+`results/v28_20261002/specs/`. Both use identical main parameters and source,
+common 0.85 reservation, five GLOBAL layers, alias2 and lifecycle cleanup.
+Each future preview uses first two E14 items per length bin x two repeats;
+qualification first uses the longest selected item, one warm plus one timed.
+Native dense/native-hook/all-kept controls retained. Wrapper records actual N,
+untimed actual KV copy checks, effective q64 counters and allocator retry deltas.
+30 CPU wrapper/lifecycle/adapter tests passed; 13 regroup and 3 component tests passed.
+
+Component attempt 001 completed in 30.7184 reserved GPU seconds, but remains
+diagnostic only: exact-length rather than nominal-bin sampling and non-native
+Q strides were found during review. New attempt corrects these and strengthens
+finite checks, disables TF32 for FP32 reference, and explicitly excludes first
+list/split builds. Old run is preserved; no headline speed is taken from it.
+LLaDA first upstream smoke loaded weights but failed RoPE JIT missing CCCL header;
+isolated toolchain repair ongoing. Model sparse ports remain unimplemented.

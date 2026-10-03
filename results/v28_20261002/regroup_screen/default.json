@@ -1,0 +1,59 @@
+{
+  "schema": "v28_alias2_regroup_screen_v1",
+  "options": {
+    "sm_count": 132,
+    "max_total_increase": 0.01,
+    "min_proxy_gain": 0.05,
+    "max_moved_fraction": 0.125,
+    "max_swaps_per_head": 4,
+    "candidates_per_group": 8,
+    "tail_tiles": 0
+  },
+  "measurement": "CPU tile-load proxy only; not GPU time or end-to-end speedup",
+  "limitations": [
+    "prefix-only need snapshots",
+    "uniform tail assumption only",
+    "permutation/selector/list/launch/merge/memory costs excluded",
+    "fixed Q64 groups and alias2 CTA count; Q128/head isolation"
+  ],
+  "snapshots": 144,
+  "accepted": 7,
+  "rejection_reasons": {
+    "insufficient_proxy_gain": 133,
+    "p95_regression": 15
+  },
+  "local_swaps": 2393,
+  "moved_rows": 4748,
+  "variants": {
+    "q64": {
+      "total_tiles": 794361,
+      "cta_count": 18432,
+      "max_cta_tiles": 294,
+      "p95_cta_tiles": 111,
+      "mean_cta_tiles": 43.096842447916664,
+      "balanced_proxy_cost_sum": 13460.0,
+      "balanced_proxy_cost_mean": 93.47222222222223,
+      "proxy_ratio_to_q64": 1.0
+    },
+    "local_swap": {
+      "total_tiles": 794401,
+      "cta_count": 18432,
+      "max_cta_tiles": 292,
+      "p95_cta_tiles": 111,
+      "mean_cta_tiles": 43.09901258680556,
+      "balanced_proxy_cost_sum": 13255.0,
+      "balanced_proxy_cost_mean": 92.04861111111111,
+      "proxy_ratio_to_q64": 0.9847696879643388
+    },
+    "gated": {
+      "total_tiles": 794491,
+      "cta_count": 18432,
+      "max_cta_tiles": 294,
+      "p95_cta_tiles": 111,
+      "mean_cta_tiles": 43.10389539930556,
+      "balanced_proxy_cost_sum": 13422.0,
+      "balanced_proxy_cost_mean": 93.20833333333333,
+      "proxy_ratio_to_q64": 0.9971768202080238
+    }
+  }
+}

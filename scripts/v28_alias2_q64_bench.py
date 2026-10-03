@@ -21,7 +21,10 @@ def selected_paths(directory, per_bin):
     bins = {}
     for path in sorted(Path(directory).glob('*.npz')):
         need = load_need(path)
-        bins.setdefault(need.shape[-1], []).append(path)
+        # Snapshots include generated canvases beyond the nominal input bin.
+        tokens = need.shape[-1] * 64 + need.shape[1]
+        length_bin = min((32768, 65536, 98304), key=lambda n: abs(tokens-n))
+        bins.setdefault(length_bin, []).append(path)
     if not bins:
         raise ValueError('no validated snapshots')
     return [p for _, paths in sorted(bins.items()) for p in paths[:per_bin]]
@@ -50,6 +53,7 @@ def main(argv=None):
     paths = selected_paths(a.private_need_dir, a.per_bin)
     import numpy as np
     import torch
+    torch.backends.cuda.matmul.allow_tf32 = False
     from experiments.numerical_qk_reuse import v27_fa4 as fa
     from experiments.numerical_qk_reuse.vllm_adapter import VllmMethodAdapter
     from scripts.v28_regroup_screen import load_need
@@ -71,7 +75,7 @@ def main(argv=None):
         table = torch.randperm(pages, generator=g, device='cuda').to(torch.int32)
         k = kc[table.long()].reshape(nk, hk, d)
         v = vc[table.long()].reshape(nk, hk, d)
-        query = torch.randn(1, h, qn, d, device='cuda', dtype=torch.bfloat16, generator=g)
+        query = torch.randn(qn, h, d, device='cuda', dtype=torch.bfloat16, generator=g).transpose(0, 1)[None]
         adapter = VllmMethodAdapter(['full_attention'], arm='allkept', lifecycle='request_clear')
         adapter.paged = dict(k=kc, v=vc, table=table, nk=nk)
         lists, masks = {}, {}
@@ -86,6 +90,8 @@ def main(argv=None):
         errors = {}
         for rows in (128, 64):
             got = run(rows)[0]
+            if not torch.isfinite(got).all().item():
+                raise RuntimeError('nonfinite paged sparse output')
             max_abs, max_ref = 0., 0.
             for head in range(h):
                 kh = k[:, head // (h // hk)].float()
@@ -93,8 +99,12 @@ def main(argv=None):
                 scores = query[0, head].float() @ kh.T * scale
                 mask = masks[rows][head].repeat_interleave(rows, 0).repeat_interleave(64, 1)
                 ref = scores.masked_fill(~mask, -torch.inf).softmax(-1) @ vh
+                if not torch.isfinite(ref).all().item():
+                    raise RuntimeError('nonfinite masked reference')
                 max_abs = max(max_abs, (got[:, head].float()-ref).abs().max().item())
                 max_ref = max(max_ref, ref.abs().max().item())
+            if not math.isfinite(max_ref) or max_ref <= 0 or not math.isfinite(max_abs):
+                raise RuntimeError('invalid numerical error denominator/value')
             errors[str(rows)] = dict(max_abs=max_abs, relative_max=max_abs/max_ref)
             if max_abs/max_ref > 0.02:
                 raise RuntimeError('paged alias2 masked reference qualification failed')
@@ -125,6 +135,7 @@ def main(argv=None):
                    gpu_ms={k:statistics.median(v) for k,v in samples.items()},
                    synchronized_wall_ms={k:statistics.median(v) for k,v in walls.items()},
                    counters=dict(adapter.calls), actual_k_stride=list(kc.stride()),
+                   actual_q_token_major_stride=list(query.transpose(1, 2).stride()),
                    effective_method='actual_paged_alias2_q64_vs_q128',
                    required_support_covered=True, random_physical_page_order=True)
         rec['q64_over_q128_gpu'] = rec['gpu_ms']['q64_alias2']/rec['gpu_ms']['q128_alias2']
@@ -136,7 +147,8 @@ def main(argv=None):
                   reserved_gpu_seconds=time.monotonic()-started,
                   q64_over_q128_geomean=math.exp(statistics.mean(math.log(x['q64_over_q128_gpu']) for x in records)),
                   scope='synthetic QKV, real prefix need supports, full canvas kept; component only',
-                  exclusions=['selector', 'KV copies', 'request lifecycle', 'model', 'accuracy'],
+                  exclusions=['selector', 'keep-map/list construction', 'first alias split build',
+                              'KV copies', 'request lifecycle', 'model', 'accuracy'],
                   cuda_graphs='none requested; eager warmed kernel benchmark')
     dest.write_text(json.dumps(report, indent=2)+'\n', encoding='utf8')
 

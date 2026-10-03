@@ -12,6 +12,11 @@
 - Parent block-0 dense/main each closed 118 timed rows; native control started. No final panel claim.
 - New conclusions and measured results must update this handoff, docs and STATE.current together.
 
+- 2026-10-02 19:27 (UTC-5): q128/q64 request_clear specs and receipt wrapper CPU-qualified; launch next.
+- Expanded regroup gate: 19/144 accepted, proxy ratio 0.98938; no GPU claim.
+- Component001 retained as diagnostic (30.7184 GPU s); corrected component rerun pending.
+- LLaDA official smoke failed missing CCCL header; isolated compiler repair underway.
+
 ## Inherited parent handoff (historical; current V28 overlay above takes precedence)
 
 # HANDOFF — current frontier (2026-10-02, local UTC−5)
