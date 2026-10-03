@@ -462,3 +462,12 @@ Source: `results/v28_20261002/idlm_stopping_diagnostic_003/`. Reserved193.175201
 seconds; I-DLM all attempts570.6601686; all new models916.2096868. Failed prelaunch
 transfer check used0GPU seconds. Worker ended, GPU released, private output/statistic
 recomputation and frozen-byte checks passed. Earlier reports remain unchanged.
+
+## Regroup permutation-backend follow-up specified — 2026-10-02 20:37 (UTC-5)
+
+The existing held Torch result remains negative. A separately named Triton
+permutation backend is worth testing because generic gather/scatter consumes
+more than the consumer saving. Spec: `results/v28_20261002/specs/v28_regroup_triton.json`.
+First test exact same-host Torch/Triton permutation; then full gather/FA4/scatter
+on one host. No adding timings from different hosts. CPU and GPU equality are
+prerequisites; no new performance result yet. Existing request preview untouched.
