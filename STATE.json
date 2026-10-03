@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-03 00:12 (UTC-5)",
+    "updated_local": "2026-10-03 00:20 (UTC-5)",
     "branch": "research/vllm-confirmation-20261002",
-    "verified_commit": "f90366965",
+    "verified_commit": "2fa74fed1",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -457,7 +457,9 @@
           "qualification_gpu_reserved_seconds": 780.4074985230109,
           "qualification_results": "results/v29_20261002/aime_qualification002/",
           "formal_workers_expected": 32,
-          "formal_generation_complete": false
+          "formal_generation_complete": false,
+          "path_evidence": "results/v29_20261002/aime_qualification002/path_execution_receipts.jsonl",
+          "receipt_documentation_correction": "Only dense has null receipts; native/allkept/method have real receipts. Earlier README generalized incorrectly; published per-row availability flags and actual strict validation were correct."
         },
         "humaneval": {
           "questions": 164,
@@ -501,7 +503,8 @@
     },
     "known_closed_gpu_seconds_at_snapshot": 6128.522515340534,
     "known_closed_gpu_seconds_scope": "V29 components/diagnostics plus ALL closed qualifications, including interrupted attempts once. Formal active-worker time excluded; this is the launch snapshot.",
-    "v29_qualification_closed_gpu_seconds": 3866.4573246686487
+    "v29_qualification_closed_gpu_seconds": 3866.4573246686487,
+    "evidence_index": "results/v29_20261002/EVIDENCE_INDEX.md"
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",

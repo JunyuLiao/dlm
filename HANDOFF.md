@@ -1,3 +1,23 @@
+## Detailed evidence index and receipt correction (2026-10-03 00:20, UTC-5)
+
+Public evidence navigation: results/v29_20261002/EVIDENCE_INDEX.md, with executed
+source commits, saved artifact links and interpretation limits. Both old diagnostic
+campaigns saved measurement aggregates/records, not individual Chrome timelines.
+Do not reconstruct event timing from their aggregates. The44GPU tests comprise
+40BF16 independent FP32-oracle cases and4original TF32x3 STORE/LOAD comparisons.
+
+AIME now also publishes path_execution_receipts.jsonl with actual adapter,
+effective-method, KV-layout and method counters. The separate correction explains
+the earlier README error: only dense has null receipts; native/allkept/method do
+have them. Previously published per-row availability flags were already correct.
+Old files and original generation are preserved; strict validation had checked
+the real receipts all along. This is an export/documentation correction, not a
+method change or new accuracy/speed evidence.
+
+All three formal panels remain in their first full-question worker,0closed and
+0failed at00:19 snapshot; active GPU time is not yet closed. Completion/scoring
+helper is being CPU-tested before arming; current source/bindings remain frozen.
+
 ## Three formal panels launched (2026-10-03 00:12, UTC-5)
 
 All three complete qualifications passed strict scoring and the actual frozen
