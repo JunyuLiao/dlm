@@ -264,3 +264,12 @@ clarification. No new method or V18b configuration change. Source and interpreta
 User authorized worthwhile variants. Independent branch `research/vllm-variants-20261002`
 starts at `9b027df8f`; parent V18b remains frozen. See `docs/VARIANT_CAMPAIGN_V28_20261002.md`.
 This entry is specification/status only, not a result. New GPU seconds: 0.
+
+## V28 CPU qualification — 2026-10-02 19:08 (UTC-5)
+
+31 CPU tests passed (lifecycle ownership/exception cleanup, unsupported-variant guards,
+HK=2 flat-view counterexample, Q64 coverage and regroup invariants). Source:
+`tests/test_v28_adapter_lifecycle.py`, `tests/test_v27_vllm_adapter.py`,
+`tests/test_v28_alias2_q64_bench.py`, `tests/test_v28_regroup_screen.py`.
+KV-view rejected on layout grounds; request_clear remains an unmeasured standard
+optimization. No new V28 GPU performance or accuracy result. See V28 campaign spec.

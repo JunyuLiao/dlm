@@ -125,9 +125,11 @@ class _PrefixCache:
 
 
 class VllmMethodAdapter:
-    def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False):
+    def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy'):
         if arm not in ('method', 'allkept', 'native'):
             raise ValueError(arm)
+        if lifecycle not in ('legacy', 'request_clear'):
+            raise ValueError('lifecycle must be legacy or request_clear')
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
         if arm == 'method':
@@ -143,6 +145,7 @@ class VllmMethodAdapter:
         self.layer_types = list(layer_types)
         self.global_layers = [i for i, t in enumerate(self.layer_types) if t != 'sliding_attention']
         self.config, self.condition, self.arm = config, condition, arm
+        self.lifecycle = lifecycle      # explicit V28 execution setting, readable by runner receipts
         self.runtime = self.stub = self._stack = None
         self.bound = False               # True only while a request is in flight (dummy/warm-up runs pass through)
         self.profile, self._events = bool(profile), []   # CUDA events around every intercepted GLOBAL call
@@ -159,7 +162,7 @@ class VllmMethodAdapter:
 
     # ------------------------------------------------------------------ request lifecycle
     def begin_request(self):
-        if self._stack is not None:
+        if self._stack is not None or (self.lifecycle == 'request_clear' and self.bound):
             raise RuntimeError('previous request still bound')
         self.buffers.clear()
         self.cache = _PrefixCache(len(self.layer_types))
@@ -188,6 +191,8 @@ class VllmMethodAdapter:
         self.stub, self.binding = stub, binding
 
     def end_request(self):
+        if self.lifecycle == 'request_clear':
+            return self._end_request_clear()
         timing = None
         if self._events:
             torch.cuda.synchronize()
@@ -204,6 +209,42 @@ class VllmMethodAdapter:
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
         return dict(adapter=dict(self.calls), method=counters, timing=timing)
+
+    def _end_request_clear(self):
+        """Close the core before dropping request references, even on a failed close.
+
+        The caller retains the existing request-boundary synchronization before
+        end_request. No allocator flush, new synchronization or canvas-boundary
+        reset is introduced here; carry and async routing stay unchanged.
+        """
+        try:
+            timing = None
+            if self._events:
+                torch.cuda.synchronize()
+                ms = [a.elapsed_time(b) for a, b in self._events]
+                timing = dict(global_calls_timed=len(ms), global_call_ms_mean=round(sum(ms) / len(ms), 4),
+                              global_ms_total=round(sum(ms), 2))
+            counters = self.runtime['counters']() if self.runtime is not None else None
+            return dict(adapter=dict(self.calls), method=counters, timing=timing)
+        finally:
+            try:
+                if self._stack is not None:
+                    self._stack.close()
+            finally:
+                # Prefix views keep the entire contiguous K/V storage alive.
+                if self.cache is not None:
+                    self.cache.layers.clear()
+                # The stub binding's close is a no-op; its override otherwise
+                # retains the closed router and its DP/map caches.
+                binding = getattr(self, 'binding', None)
+                if binding is not None:
+                    binding.runtime.attention_override = None
+                self._stack = self.runtime = self.stub = self.binding = None
+                self.cache = self.paged = self.canvas = None
+                self.buffers.clear()
+                self._split_cache.clear()
+                self._events.clear()
+                self.bound, self.step_ctx, self.pending_sample = False, None, False
 
     # ------------------------------------------------------------------ clock (called from patched vLLM code)
     def on_prepare(self, phase_encoder, step, seq_len, num_tokens):

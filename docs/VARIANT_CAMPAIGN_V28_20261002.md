@@ -59,3 +59,21 @@ private paths or raw generation records. No shared package/cache modification.
 
 Specification and implementation preparation only. No V28 performance or quality result yet.
 Parent V18b is a separate running campaign; consult its original branch for scored results.
+
+## Implementation checkpoint — 2026-10-02 19:08 (UTC-5)
+
+31 CPU tests pass across lifecycle, adapter guards, support refinement and regroup.
+`request_clear` is opt-in, defaults remain legacy, and releases bounded retained
+request objects even on close errors. It adds no empty_cache or synchronization.
+The actual native cache has HK=2 interleaving between pages; a flat zero-copy KV
+view is invalid. Reject KV-view rather than silently copying or misaddressing.
+
+`v28_alias2_q64_bench` qualifies random physical-page order and actual cache
+strides against each support's masked FP32 reference. It uses synthetic QKV
+with real prefix needs and keeps all canvas tiles. This is a component test,
+not an identical-real-QKV benchmark or accuracy panel; selector, KV-copy and
+model costs are excluded. Natural Q64 and Q128 use the same alias2 consumer.
+Warm kernels before interleaved timing; held lists must not rebuild in timing.
+
+Isolated idle-host public package installations completed. LLaDA weights downloaded;
+GPU smokes and model-specific adapters remain pending. Parent V18b stays frozen.

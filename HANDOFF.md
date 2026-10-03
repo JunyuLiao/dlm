@@ -1,12 +1,15 @@
-# V28 active handoff (2026-10-02 18:54 (UTC-5))
+# V28 active handoff (2026-10-02 19:08 (UTC-5))
 
 - Branch: `research/vllm-variants-20261002`, base `9b027df8f`.
 - User authorized trying worthwhile variants. Plan: `docs/VARIANT_CAMPAIGN_V28_20261002.md`.
-- V28 status: CPU implementation/audit and idle-host environment inventory; no new GPU experiment yet.
+- V28 status: 31 CPU tests passed; opt-in request_clear and actual-layout Q64 component benchmark implemented. GPU qualification is next.
 - Parent V18b continues on dllm under its unchanged deploy, controlled from the original worktree.
   Recoverable allocation failures appear in main logs; do not filter or silently correct its times.
-- First candidates: native q64, KV-view/lifecycle standard optimizations, alias2 load-balanced regroup
-  and amortized/fused permutation. New-model official dense qualification proceeds independently.
+- KV-view rejected: actual HK=2 paged layout cannot be flattened to the required view without copying.
+- request_clear releases bounded retained request tensors; it is not yet proven to eliminate allocator retries.
+- Regroup default screen accepted 7/144 snapshots but aggregate proxy saving is only 0.28%; deeper screen pending.
+- Idle-host isolated vLLM and LLaDA SGLang package setup completed; no model smoke or sparse model port yet.
+- Parent block-0 dense/main each closed 118 timed rows; native control started. No final panel claim.
 - New conclusions and measured results must update this handoff, docs and STATE.current together.
 
 ## Inherited parent handoff (historical; current V28 overlay above takes precedence)

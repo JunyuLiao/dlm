@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 18:54 (UTC-5)",
+    "updated_local": "2026-10-02 19:08 (UTC-5)",
     "branch": "research/vllm-variants-20261002",
-    "verified_commit": "9b027df8f",
+    "verified_commit": "7673d3a34",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,10 +16,10 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "V28 worthwhile-variant campaign specified; CPU screening and environment inventory in progress, no new performance claim.",
+    "headline": "V28: 31 CPU tests passed; KV-view rejected; request_clear and q64 component GPU qualification pending.",
     "running": [
-      "Parent V18b continues on dllm from frozen 8704cd072; managed by original worktree",
-      "V28 CPU screening and adapter memory/lifecycle audit"
+      "Parent V18b block-0 dense/main closed, native control running; original frozen campaign",
+      "V28 CPU regroup sensitivity and idle-host isolated environment preparation"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -255,6 +255,13 @@
         "regroup_amortized"
       ],
       "new_model_status": "official dense qualification pending; sparse adapters not implemented"
+    },
+    "v28_qualification": {
+      "cpu_tests": 31,
+      "kv_view": "rejected: incompatible native cache strides",
+      "lifecycle": "request_clear opt-in, CPU qualified only",
+      "gpu_results": false,
+      "new_model_ports": false
     }
   },
   "task": "M3 output numerics and trajectory isolation",
