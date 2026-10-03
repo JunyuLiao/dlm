@@ -1014,3 +1014,32 @@ complete mappings require unchanged original bytes in a new own deployment's
 deployment without moving gold or executing inherited historical binaries.
 Actual v21 validation and all42Linux checks are required before GPU qualification.
 See docs/V29_EXTERNAL_PROVENANCE_REBIND_20261002.md. No new speed/quality result.
+
+## Completed event diagnosis and current qualifications (2026-10-02 23:17, UTC-5)
+
+Diagnostic003 closed all four PIECEWISE arms at source54163f4e7, captures0 and
+adapter ordering errors0; reserved1092.569460863946GPU seconds. Complete scope
+counts match actual N/C/prefill. Matched native/all-kept/main denoise GLOBAL
+span/N is4.494699/4.894036/4.329062ms and LOCAL6.461866/6.618996/6.611120ms.
+These instrumented, different-trajectory observations are not paired speed gains.
+No-hook dense phase attribution remains unknown. Main's40 fused observations
+sum99.534944ms (19.99% of inclusive GLOBAL span), including normal dense output:
+this is not incremental observation overhead. DP build40 and route105 match
+receipts; side-stream overlap and nested consumer/selector ranges prohibit
+adding these scopes as wall time. Full source/caveats:
+results/v29_20261002/cost32k_events003/. No new task-quality result.
+
+HumanEval four-arm qualification remains active on mpk. LongBench qualification
+001 passed host CPU tests and one dense worker, then stopped at the next idle
+check during transient NVML activity; preserve its241.732GPU seconds. New002
+qualification on dllm reruns all12 workers at unchanged54163f4e7/source/binding,
+with bounded stable-idle checks; any foreign compute process stops the launcher.
+No formal panel has launched. Score full qualification before formal work.
+
+Automatic approval review rejected AIME cross-host input transfer, then its
+private config/provenance-only subset; both stopped before SSH/transfer,0GPU.
+Do not retry those transfers. Prepare same-machine AIME using existing mpk
+inputs/config/pins. New immutablev29_aime_confirmation002 spec changes only
+name/protocol_id and all8block hosts from dlm2 to mpk; original001 retained.
+Seeds/questions/method/arm order/budget/scoring are unchanged. CPU bind and GPU
+qualification remain pending. Queue behind current mpk worker, never overlap.

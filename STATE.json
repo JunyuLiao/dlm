@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 23:14 (UTC-5)",
+    "updated_local": "2026-10-02 23:17 (UTC-5)",
     "branch": "research/vllm-confirmation-20261002",
-    "verified_commit": "172e6f308",
+    "verified_commit": "76a43621f",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,10 +16,10 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "44 GPU observation oracles pass; expanded four-arm qualification underway, no formal result.",
+    "headline": "44 GPU observation oracles pass and four-arm event diagnosis complete; expanded qualification running.",
     "running": [
-      "mpk HumanEval four-arm qualification, source54163f4e7",
-      "dllm LongBench qualification queue after diagnostic003; launch confirmation pending"
+      "mpk HumanEval four-arm qualification, frozen54163f4e7",
+      "dllm LongBench twelve-worker qualification002, frozen54163f4e7"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -339,7 +339,7 @@
     },
     "separate_v28_campaign": "Original V28 branch owns seed4 preview and its completion coordinator; consult its live status.",
     "v29": {
-      "status": "specification_and_cpu_qualification",
+      "status": "expanded_GPU_qualification",
       "spec": "docs/CONFIRMATION_CAMPAIGN_V29_20261002.md",
       "copy_tests": 42,
       "gpu_seconds": 55.06876852098503,
@@ -358,18 +358,21 @@
       "combined_cpu_tests": 67,
       "regroup_component_source": "results/v29_20261002/regroup_merge001/summary.json",
       "adapter_merge": "opt-in CPU-qualified; real-model GPU pending",
-      "profile_status": "attempt003_four_workers_closed_aggregation_pending",
+      "profile_status": "attempt003_complete_diagnostic_only",
       "profile_preparation_failure": "attempt001 missingTorch in systemPython;0GPU seconds; preserved",
       "dlm2_environment": "CPU-qualified matching vLLM0.30 stack/FA4 patch; real GPU qualification pending",
       "dense_controls_doc": "docs/V29_DENSE_CONTROLS_20261002.md"
     },
     "v29_cost_diagnostic": {
-      "status": "first_round_closed_attribution_incomplete",
+      "status": "event_diagnostic003_complete",
       "generation_source": "39e08c521",
       "summary": "results/v29_20261002/cost32k_002/aggregate.json",
       "gpu_reserved_seconds": 1081.689751653932,
       "performance_claim_allowed": false,
-      "next": "diagnostic003 closed; anonymous complete event aggregation pending"
+      "next": "Separate formal panels; no causal speed claim from instrumented spans",
+      "event_source_commit": "54163f4e7",
+      "event_summary": "results/v29_20261002/cost32k_events003/aggregate.json",
+      "event_gpu_reserved_seconds": 1092.569460863946
     },
     "v29_observation_audit": {
       "status": "44_GPU_tests_passed_fixed_tolerances",
@@ -387,7 +390,7 @@
       "summary": "results/v29_20261002/fused_observe_bf16_001/summary.json",
       "real_model_quality_qualified": false
     },
-    "v29_closed_gpu_seconds": 1169.495729807939,
+    "v29_closed_gpu_seconds": 2262.065190671885,
     "v29_expanded_confirmation": {
       "status": "qualification_underway_formal_not_launched",
       "engine_seeds": [
@@ -407,19 +410,23 @@
         "longbench": {
           "questions": 59,
           "host": "dllm",
-          "status": "qualification_queued_after_diagnostic003",
+          "status": "qualification002_running",
           "preparation_attempt001": "CPU_missing_archived_spec_GPU0",
           "preparation_attempt002": "source_parent_pins_rebind_and_inventory_verified",
-          "source_commit": "54163f4e7"
+          "source_commit": "54163f4e7",
+          "qualification001": "one_worker_completed_then_transient_NVML_idle_guard_stop_preserved"
         },
         "aime": {
           "questions": 30,
-          "host": "dlm2",
-          "status": "external_provenance_mapping_CPU_qualified_deployment_pending",
+          "host": "mpk",
+          "status": "same_machine_CPU_preparation_pending",
           "CPU_tests_run": 42,
           "CPU_tests_passed": 41,
           "CPU_tests_skipped": 1,
-          "Linux_no_skip_required": true
+          "Linux_no_skip_required": true,
+          "protocol_id": "v29_aime_confirmation002",
+          "prior_protocol": "v29_aime_confirmation001 preserved_unlaunched",
+          "cross_host_private_transfers": "two_auto_review_rejections_no_execution_no_transfer"
         },
         "humaneval": {
           "questions": 164,
@@ -441,7 +448,9 @@
       "requests": 288,
       "gpu_reserved_seconds": 7914.0591097767465,
       "interpretation": "docs/V29_V28_PREVIEW_INTERPRETATION_20261002.md"
-    }
+    },
+    "v29_qualification_failed_attempts_gpu_seconds": 241.732,
+    "v29_qualification_failed_attempts_accounting_note": "LongBench001 closed dense worker, rounded public resource receipt; active attempts excluded."
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",

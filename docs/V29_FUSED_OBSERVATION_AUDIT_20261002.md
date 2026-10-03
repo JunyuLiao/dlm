@@ -1,6 +1,6 @@
 # V29 fused observation correctness audit, 2026-10-02
 
-Status: protocol and CPU syntax prepared; GPU correctness has not run. No speed measurements, gold data, prompts, generated answers, or private paths are involved. Only tests/test_v27_fused_observe.py and this note changed; core is unchanged.
+Current status (2026-10-02 22:51, UTC-5): all44 GPU cases passed at frozen tolerances, source54163f4e7. See the completion receipt below. The protocol/preparation sections retain the pre-execution history. No speed or task-quality conclusion follows; core implementation is unchanged.
 
 ## Actual main path
 
