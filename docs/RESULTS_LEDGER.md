@@ -1270,3 +1270,36 @@ sampling uses global GPU random draws without a supplied request generator; no
 saved RNG boundary state identifies the first divergence. Default initialization
 FULL_AND_PIECEWISE is not evidence of each forward's actual graph mode. A separate
 three-condition graph/RNG diagnostic is being implemented; no new GPU validation.
+
+## Dense reproducibility diagnostic frozen; engineering queue armed (2026-10-03 01:16 (UTC-5))
+
+New public worker/specs: scripts/v29_dense_reference_diag.py and three
+v29_dense_reference_diag_* specs. Same original32K index0, two engine seeds
+28001/28002, two fresh engines per seed/condition,12workers. Conditions are
+default dense, PIECEWISE no-hook dense and PIECEWISE native-hook. Preserve the
+original sampler; read only default-device CUDA-generator state at existing
+request boundaries, retain fingerprints privately, publish only comparisons.
+Record actual graph modes per execution phase, warm and timed N/C/P/output
+length, and original counts/JIT receipts. No new per-step synchronization or
+profiler is added; boundary instrumentation is diagnostic, never formal W.
+Twenty-one public CPU tests pass. Read-only actual cost003 spec comparison
+confirms exact equality with all three public protocols after make_spec; old
+input, method and deployment are unchanged. The private12worker coordinator
+passes20CPU toys and honors the frozen block/repeat/variant launch order.
+It is not armed yet in this source-freeze commit. GPU validation remains pending.
+See docs/V29_DENSE_REFERENCE_DIAG_20261003.md.
+
+Engineering fusion qualification is now armed after30private CPU tests. It
+waits three closed predecessors: original formal generation+strict scoring,
+two component jobs, then the complete12worker dense diagnostic. It will run
+only40warm+40timed qualification requests and strict score all six families;
+no full variant panel or automatic public claims. Its source remains1342ec0b1.
+Component source also remains1342ec0b1. No current formal deployment changes.
+
+New telemetry note distinguishes sparse-path execution from unknown per-tile
+keep fractions, and documents observation storage: exact32K prefix geometry
+needs268MiB summary storage per GLOBAL layer (FP32z/mu32+int8flags),1340MiB for
+five layers, excluding DP/output/allocator costs. This is capacity arithmetic,
+not measured traffic or causal latency. Original003 summary_peak_bytes is
+1569751040. QK sharing does not make statistics storage/DP/full output free.
+See results/v29_20261002/dense_native_accounting001/TELEMETRY_LIMITATION.md.

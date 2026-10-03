@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-03 00:57 (UTC-5)",
+    "updated_local": "2026-10-03 01:16 (UTC-5)",
     "branch": "research/vllm-confirmation-20261002",
-    "verified_commit": "1342ec0b193a929295f08964c132aee96c28c5a1",
+    "verified_commit": "36c6caa56157e265f4f49a8378c6ba9dc68f3541",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -510,9 +510,9 @@
       "phase": "waiting_complete_formal_inventory",
       "cpu_tests_passed": 17,
       "closed_workers": {
-        "longbench": 1,
-        "aime": 5,
-        "humaneval": 5
+        "longbench": 2,
+        "aime": 7,
+        "humaneval": 7
       },
       "failed_workers": {
         "longbench": 0,
@@ -520,14 +520,14 @@
         "humaneval": 0
       },
       "closed_outer_gpu_seconds": {
-        "longbench": 1800.2038734860253,
-        "aime": 2597.158485135995,
-        "humaneval": 2560.5799043234438
+        "longbench": 3133.5223104760516,
+        "aime": 3546.381172598951,
+        "humaneval": 3533.6280580984894
       },
       "accounting": "Formal-only closed outer spans; do not add inner times or mistake incomplete elapsed time for final usage."
     },
     "performance_followups_20261003": {
-      "status": "Two component jobs armed; waiting all formal generation and strict scoring. Real-model fusion queue still being prepared.",
+      "status": "Component and engineering queues armed; engineering additionally waits dense diagnostic; no new GPU runs.",
       "focused_cpu_tests": 47,
       "gpu_runs": 0,
       "components_spec": "results/v29_20261002/specs/v29_homogeneous_cost001.json",
@@ -538,7 +538,11 @@
       "component_source_commit": "1342ec0b193a929295f08964c132aee96c28c5a1",
       "component_queue_cpu_tests": 21,
       "component_queue_armed": true,
-      "component_gpu_started": false
+      "component_gpu_started": false,
+      "engineering_queue_armed": true,
+      "engineering_queue_CPU_tests": 30,
+      "engineering_source_commit": "1342ec0b193a929295f08964c132aee96c28c5a1",
+      "engineering_GPU_started": false
     },
     "junyu_value_aware_review": {
       "commit": "859c0c8fc2a4509a148a3270915f79961e565dee",
@@ -566,7 +570,13 @@
       "source_audit": "docs/V29_DENSE_NATIVE_AUDIT_20261003.md",
       "cpu_wrapper_tests_passed": 6,
       "actual_runtime_modes_previously_saved": false,
-      "new_three_condition_diagnostic_status": "Being implemented; GPU pending"
+      "new_three_condition_diagnostic_status": "Public worker/specs CPU-qualified; private queue tested; GPU not armed in source freeze",
+      "diagnostic_public_CPU_tests": 21,
+      "diagnostic_private_queue_CPU_tests": 20,
+      "diagnostic_workers": 12,
+      "diagnostic_doc": "docs/V29_DENSE_REFERENCE_DIAG_20261003.md",
+      "frozen_launch_order": "block, fresh engine repeat, variant",
+      "actual_cost003_spec_compatibility_verified": true
     }
   },
   "task": "M3 output numerics and trajectory isolation",
