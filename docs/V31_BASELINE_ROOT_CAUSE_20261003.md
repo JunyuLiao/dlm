@@ -98,7 +98,7 @@ equal noise to every arm. All v31 panels use `seed = sha256(base, dataset, index
      sparsity;
   3. sparse execution that matches the strongest production dense path (alias split, pack-GQA).
 
-## Panel a (seed-paired, 48 cells per length, all three hosts) — 2026-10-03 06:10 UTC−5
+## Panel a (seed-paired, 48 cells per length, all three hosts) — 2026-10-03 05:45 UTC−5
 
 Reference: PIECEWISE dense, no hooks. Paired geometric means arm/ref with item-clustered 95% CIs
 (`scripts/v31_paired_summary.py`; private inputs `E:/dlm/v31_private/paired/`).
@@ -130,3 +130,27 @@ Its per-forward cost is 2–3% lower, from the FULL graph.
 - prior art at its own budgets: MAGE k = 1024 / 4096 — panel d;
 - kernel: pack-GQA — `scripts/v31_packgqa_sparse_bench.py`;
 - 96K, where attention is a larger share of the step.
+
+## Panel b (partial, 05:55 UTC−5): the backported fix works
+
+Fixed FULL default (`FIX_51994=1`) vs PIECEWISE dense, seed-paired:
+
+| bin | cells | N/C | S/N | identical outputs |
+|---|---:|---|---|---|
+| 32K | 43 | 0.988 [0.951, 1.030] | 0.976 | 16/43 |
+| 64K | 15 | 1.025 [0.909, 1.154] | 0.983 | 1/15 |
+
+- With the fix, the forward-count inflation disappears.
+- The remaining divergences come from small FULL vs PIECEWISE numeric differences and are statistically
+  equivalent.
+- The FULL graph is 1.7–2.4% cheaper per forward.
+- **The fixed FULL default is therefore the dense baseline: correct and the fastest.**
+- Against it, main currently has per-forward ≈ 1.11 (32K) / 0.98 (64K) and W ≈ 1.0, so there is no end-to-end gain
+  yet. The bottleneck is the per-canvas observation and the re-decisions.
+- Planned kernel work: fold the observation into FA4 itself.
+  - The per-(row, 64-key tile) log-mass comes from the online-softmax pass, with one extra quad reduction and one
+    store per tile, only on the observation call.
+  - The projected-V term becomes optional: negative in our GLOBAL-only regime, positive in Junyu's all-layer 70–75%
+    regime.
+  - In-kernel block statistics have precedent for prefill (Block Sparse Flash Attention, FA-2, block-max gating;
+    CoSA, a separate proxy pass). Decode-time cross-step reuse in diffusion LLMs is open.
