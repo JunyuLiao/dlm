@@ -140,12 +140,9 @@ class VllmMethodAdapter:
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
         if arm == 'method':
-            # The vLLM sample hook supplies logits only. These HF variants need
-            # the accepted-token mask, which this adapter does not yet expose.
-            # Reject before request binding, model construction or GPU work.
-            if config.get('sensitivity') == 'cgate':
-                raise ValueError('vLLM adapter does not support C gate (sensitivity=cgate): '
-                                 'the sample hook does not provide the accepted-token mask')
+            # C gate (v31): the accepted-token mask is recomputed from the sampler's own temperature-scaled logits
+            # with its entropy-bound acceptance rule (see accepted_mask). The density gate still needs the
+            # sampler's stop statistics and stays rejected.
             if config.get('density_gate') is not None:
                 raise ValueError('vLLM adapter does not support density_gate: '
                                  'the sample hook does not provide the accepted-token mask')
@@ -340,8 +337,13 @@ class VllmMethodAdapter:
         if self.runtime is not None:
             self.runtime['state'].begin(MAX_DENOISING_STEPS - int(step), self.canvas)
 
-    def on_sample(self, scaled_logits):
-        """After a denoising sample: the temperature-scaled logits [1, CL, V] (fast T takes their argmax)."""
+    def needs_accepted(self):
+        state = None if self.runtime is None else self.runtime.get('state')
+        return state is not None and getattr(state, 'cgate', None) is not None
+
+    def on_sample(self, scaled_logits, accepted=None):
+        """After a denoising sample: the temperature-scaled logits [1, CL, V] (fast T takes their argmax) and, for the
+        C gate, the sampler's acceptance mask [1, CL]."""
         self.calls['observes'] += 1
         if not self.pending_sample:
             self.calls['order_errors'] += 1
@@ -356,7 +358,13 @@ class VllmMethodAdapter:
                 if scaled_logits.ndim != 3 or scaled_logits.shape[0] != 1 or not 0 < n <= scaled_logits.shape[1]:
                     raise ValueError('V30 sampler/query geometry mismatch')
                 scaled_logits = scaled_logits[:, :n, :]
-            self.runtime['state'].observe_logits(scaled_logits, None, cur_step)
+            if accepted is not None:
+                n = self.step_ctx['n']
+                if scaled_logits.ndim != 3 or scaled_logits.shape[0] != 1 or not 0 < n <= scaled_logits.shape[1]:
+                    raise ValueError('C-gate sampler/query geometry mismatch')
+                scaled_logits, accepted = scaled_logits[:, :n, :], accepted[:, :n]
+                self.calls['cgate_observes'] = self.calls.get('cgate_observes', 0) + 1
+            self.runtime['state'].observe_logits(scaled_logits, accepted, cur_step)
 
     # ------------------------------------------------------------------ GLOBAL decoder attention
     def active_for(self, layer_name):
@@ -501,6 +509,19 @@ class VllmMethodAdapter:
 _ACTIVE = None
 
 
+def accepted_mask(scaled, entropy_bound):
+    """The official sampler's acceptance mask, recomputed from the same temperature-scaled logits it returns:
+    positions sorted by token entropy are accepted while (cumulative entropy - running max) <= entropy_bound
+    (diffusion_gemma._compiled_sample_step, phase 4). Same ops on the same tensor; only an exact tie at the bound can
+    resolve differently under the compiled function's fusion."""
+    x = scaled.float()
+    logp = x.log_softmax(dim=-1)
+    ent = -(logp.exp() * logp).sum(dim=-1)
+    s, idx = torch.sort(ent, dim=-1)
+    keep = (torch.cumsum(s, dim=-1) - torch.cummax(s, dim=-1).values) <= entropy_bound
+    return torch.zeros_like(keep).scatter_(1, idx, keep)
+
+
 def install_vllm_patches(adapter: VllmMethodAdapter):
     """Patch vLLM classes in-process (VLLM_ENABLE_V1_MULTIPROCESSING=0) before the engine is built."""
     global _ACTIVE
@@ -529,11 +550,18 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
         return prepare_attn(self, input_batch, cudagraph_mode, block_tables, slot_mappings, attn_groups,
                             kv_cache_config, for_capture=for_capture, ubatch_idx=ubatch_idx)
 
+    import inspect
+    signature = inspect.signature(getattr(sample_step, '_torchdynamo_orig_callable',
+                                          getattr(sample_step, '__wrapped__', sample_step)))
+
     def sample_step_patched(*args, **kwargs):
         scaled = sample_step(*args, **kwargs)
         a = _ACTIVE
         if a is not None and a.bound and a.step_ctx is not None and not a.step_ctx['encoder']:
-            a.on_sample(scaled)
+            accepted = None
+            if a.needs_accepted():
+                accepted = accepted_mask(scaled, float(signature.bind(*args, **kwargs).arguments['entropy_bound']))
+            a.on_sample(scaled, accepted)
         return scaled
 
     def forward_patched(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale=None,
