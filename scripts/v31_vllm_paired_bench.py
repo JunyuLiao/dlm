@@ -20,7 +20,8 @@ usage: python v31_vllm_paired_bench.py MODEL MANIFEST_DIR CELLS_JSON OUT_JSONL P
        statistics, v31_logit_stats; default legacy torch ops), DP_BUILD=chunked (parallel dense-prefix build,
        v31_dp_chunked), OBSERVE=fa4 (FA4 in-kernel observation for compact-mu configs, v31_fa4_observe),
        MAGE_SELECT=fa4 (MAGE selection statistics from the FA4 observation), KV_COPY=triton / MERGE=triton (V30 one-kernel
-       paged K/V refresh and alias-split LSE merge), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
+       paged K/V refresh and alias-split LSE merge), TRACE=1 (per-canvas step counts and mean-entropy trajectories in the
+       public record), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
        V27_ADAPTER_DIR (overlay holding vllm_adapter.py), SHARD=k/K (take cells k, k+K, ...)
 """
 import hashlib
@@ -92,7 +93,8 @@ def main():
                                                  observe_backend=os.environ.get('OBSERVE', 'triton'),
                                                  mage_select=os.environ.get('MAGE_SELECT', 'torch'),
                                                  kv_copy_backend=os.environ.get('KV_COPY', 'torch'),
-                                                 merge_backend=os.environ.get('MERGE', 'torch'))
+                                                 merge_backend=os.environ.get('MERGE', 'torch'),
+                                                 trace_canvas=os.environ.get('TRACE') == '1')
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -169,7 +171,8 @@ def main():
                    finish_reason=o.finish_reason,
                    output_hash=hashlib.sha256(json.dumps(list(o.token_ids)).encode()).hexdigest()[:16],
                    receipts=None if receipts is None else dict(adapter=receipts.get('adapter'),
-                                                               method=_slim(receipts.get('method'))))
+                                                               method=_slim(receipts.get('method')),
+                                                               trace=receipts.get('trace')))
         out.write(json.dumps(rec, default=str) + '\n')
         out.flush()
         priv.write(json.dumps(dict(arm=arm, cudagraph_mode=cg, dataset=cell['dataset'], index=cell.get('index'),

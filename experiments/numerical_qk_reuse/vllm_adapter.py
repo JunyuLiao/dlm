@@ -131,7 +131,8 @@ class _PrefixCache:
 class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
                  canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024,
-                 logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch'):
+                 logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
+                 trace_canvas=False):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -178,6 +179,9 @@ class VllmMethodAdapter:
         # MAGE port: 'torch' = chunked FP32 QK for the selection (reference); 'fa4' = the same eq. 5 statistics from
         # the FA4 in-kernel tile log-mass (the selection call's output is that FA4 dense output)
         self.mage_select = mage_select
+        # diagnostic receipts (opt-in): denoising steps per canvas and the canvas mean token entropy per step, i.e.
+        # the quantity the official sampler compares with its confidence threshold to stop a canvas
+        self.trace_canvas = bool(trace_canvas)
         self._merge_cache = {}
         self.runtime = self.stub = self._stack = None
         self.bound = False               # True only while a request is in flight (dummy/warm-up runs pass through)
@@ -219,6 +223,7 @@ class VllmMethodAdapter:
         self._events = []
         self.mage_state, self.canvas_id = {}, 0
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
+        self._canvas_steps, self._cur_steps, self._ent_trace, self._conf_threshold = [], 0, [], None
         if self.arm == 'mage':
             self.calls.update(mage_selections=0, mage_reused_calls=0, mage_kept_prefix_tiles=0, mage_prefix_tiles=0)
         if self.arm in ('allkept', 'native', 'mage'):
@@ -263,7 +268,8 @@ class VllmMethodAdapter:
         self._stack = self.runtime = self.stub = None
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
-        return dict(adapter=dict(self.calls, **self._kept_receipt()), method=counters, timing=timing)
+        return dict(adapter=dict(self.calls, **self._kept_receipt()), method=counters, timing=timing,
+                    trace=self._trace_receipt() or None)
 
     def _end_request_clear(self):
         """Close the core before dropping request references, even on a failed close.
@@ -280,7 +286,8 @@ class VllmMethodAdapter:
                 timing = dict(global_calls_timed=len(ms), global_call_ms_mean=round(sum(ms) / len(ms), 4),
                               global_ms_total=round(sum(ms), 2))
             counters = self.runtime['counters']() if self.runtime is not None else None
-            return dict(adapter=dict(self.calls, **self._kept_receipt()), method=counters, timing=timing)
+            return dict(adapter=dict(self.calls, **self._kept_receipt()), method=counters, timing=timing,
+                    trace=self._trace_receipt() or None)
         finally:
             try:
                 if self._stack is not None:
@@ -300,6 +307,17 @@ class VllmMethodAdapter:
                 self._split_cache.clear()
                 self._events.clear()
                 self.bound, self.step_ctx, self.pending_sample = False, None, False
+
+    def _trace_receipt(self):
+        if not getattr(self, 'trace_canvas', False):
+            return {}
+        steps = list(self._canvas_steps) + ([self._cur_steps] if self._cur_steps else [])
+        ent = [round(float(x), 4) for x in torch.stack(self._ent_trace).tolist()] if self._ent_trace else []
+        out, i = [], 0
+        for n in steps:                                   # split the per-step entropies by canvas
+            out.append(ent[i:i + n])
+            i += n
+        return dict(canvas_steps=steps, canvas_entropy=out, confidence_threshold=self._conf_threshold)
 
     def _kept_receipt(self):
         """Realized sparsity of the sparse GLOBAL calls: kept fraction of wholly-prefix 64-key tiles, weighted per call
@@ -360,6 +378,12 @@ class VllmMethodAdapter:
         self.step_ctx = dict(encoder=bool(phase_encoder), step=int(step), seq_len=int(seq_len), n=int(num_tokens))
         if self.pending_sample:
             self.calls['order_errors'] += 1                       # the previous denoising sample was never observed
+        if self.trace_canvas:
+            if phase_encoder and self._cur_steps:
+                self._canvas_steps.append(self._cur_steps)
+                self._cur_steps = 0
+            elif not phase_encoder:
+                self._cur_steps += 1
         if phase_encoder:
             self.calls['invalidates'] += 1
             self.canvas_id += 1
@@ -722,6 +746,12 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                         stats.entropy, float(signature.bind(*args, **kwargs).arguments['entropy_bound']))
             elif a.needs_accepted():
                 accepted = accepted_mask(scaled, float(signature.bind(*args, **kwargs).arguments['entropy_bound']))
+            if a.trace_canvas:
+                from experiments.numerical_qk_reuse.v31_logit_stats import row_stats
+                ts = stats if stats is not None else row_stats(scaled)
+                a._ent_trace.append(ts.entropy.mean())         # all CL rows, as the sampler's mean_entropy
+                if a._conf_threshold is None:
+                    a._conf_threshold = float(signature.bind(*args, **kwargs).arguments['confidence_threshold'])
             a.on_sample(scaled, accepted, stats=stats)
         return scaled
 
