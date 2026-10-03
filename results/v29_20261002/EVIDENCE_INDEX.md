@@ -21,3 +21,9 @@ The qualification directories also preserve arm-level `arms.csv` and scalar `sum
 The 002/003 manifests enumerate plain JSON/JSONL and deterministic gzip copies, original file sizes, redacted fields and SHA256 values of **public compressed artifacts only**. Decompression yields the saved published measurements; these files are not Chrome traces. Neither a timeline nor event ordering can be reconstructed from aggregate durations or call counts. Missing coverage means unknown, not zero.
 
 Outer-supervisor GPU reservation and inner worker terminal spans cover different, nested boundaries. Use each campaign's documented outer reservation for resource accounting; do not add the inner spans or interpret reservation as request speed. Private prompts, gold, token IDs, generated text, private proof files, credentials and private paths are excluded from this index and the linked public exports.
+
+## Dense/native re-tabulation and follow-up protocols
+
+- [Eight original profiled requests and27 event scopes](dense_native_accounting001/README.md): diagnostic durations only; N/output discrepancies remain unexplained.
+- [Same-state cost protocol](specs/v29_homogeneous_cost001.json) and [sparse-cycle protocol](specs/v29_sparse_cycles001.json): source1342ec0b1; queued after current formal scoring, no new GPU result.
+- [Real-model engineering qualification family](specs/v29_engineering_fusion_family001.json): CPU-qualified40-request plan, GPU pending.

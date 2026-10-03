@@ -21,11 +21,18 @@ N 是实际去噪 forward 数，S/N 是摊销时间，含调度和 commit 的影
 [V28 小面板](V29_V28_PREVIEW_INTERPRETATION_20261002.md)。
 
 独立诊断 003 中，native/all-kept/main 的 GLOBAL 事件区间/N 分别是
-4.494699/4.894036/4.329062 ms；LOCAL 是6.461866/6.618996/6.611120 ms。
+4.494699/4.894036/4.329062 ms；LOCAL 是6.460856/6.618996/6.611120 ms。
 main 的 GLOBAL 省下约0.166 ms/N，并不等于整个模型省下相同比例。
 这三次请求 N 不同、轨迹不同，事件本身也有开销，因此不作为因果归因或正式
 速度比较。仅改5个GLOBAL层，25个LOCAL层、MoE、调度与commit仍须执行。
 来源：[完整诊断及原始测量](../results/v29_20261002/cost32k_events003/README.md)。
+新核算表直接从原始记录重算了8条诊断的W、prefill、S、N、commit和输出长度：
+[dense/native核算](../results/v29_20261002/dense_native_accounting001/README.md)。
+旧README的native LOCAL 6.461866是小数抄录误差，原始639.6247041076422ms/99
+应为6.460856ms/N；原始结果不改写。003已经包含PIECEWISE无钩子dense，
+其374步、4761输出token与同模式native的99步、2107token不同。正式面板缺少
+这个中间对照，但并非从未做过。该差异仍未解释，不能仅归于图模式或seed太少；
+应先排查两dense的随机状态、钩子和诊断执行等价性。
 
 ## 已经做了什么，尚缺什么
 

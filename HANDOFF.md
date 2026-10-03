@@ -1,3 +1,46 @@
+## Dense/native accounting correction and component queue (2026-10-03 00:57 (UTC-5))
+Source-audit supplement: docs/V29_DENSE_NATIVE_AUDIT_20261003.md documents the
+actual installed vLLM sampler and runtime dispatcher. Native forwards the original
+attention arguments and sampler result unchanged; six CPU wrapper-contract tests
+pass. This does not rule out GPU execution, graph, hook or RNG bugs.002/003 inputs
+and core source bytes match, while profiler instrumentation differs. Official
+sampling uses global GPU random draws without a supplied request generator; no
+saved RNG boundary state identifies the first divergence. Default initialization
+FULL_AND_PIECEWISE is not evidence of each forward's actual graph mode. A separate
+three-condition graph/RNG diagnostic is being implemented; no new GPU validation.
+
+
+The public raw002/003 records were re-tabulated by
+scripts/v29_compare_dense_diagnostics.py into
+results/v29_20261002/dense_native_accounting001/ (8request rows,27event scopes).
+These are original profiled singleton durations, explicitly excluded from formal
+performance claims.003 includes PIECEWISE dense without adapter hooks: N374,
+output4761,profiled S/N30.029ms. Same-mode native-hook has N99,output2107,
+S/N32.657ms; main has N115,output2006,S/N33.248ms. Thus003 alone has slower
+main amortized S/N, despite its lower GLOBAL span/N. Different trajectory and
+instrumentation prevent causal kernel/request claims. The intermediate no-hook
+control is missing from the formal panel, not from all previous diagnostics.
+
+The native374-to99 change between002/003 remains unexplained. Do not dismiss it
+as seed noise or assume PIECEWISE explains a same-PIECEWISE discrepancy. Warm
+request N/output length and sampling RNG state were not published, so the new
+table marks them unknown. Equivalent dense math with identical random inputs
+and deterministic execution should reproduce; current engine-seed labels alone
+do not establish those conditions. Investigate graph dispatch, hooks, sampling
+state and first numerical divergence in a separately frozen diagnostic.
+
+Correct a small old narrative transcription error without altering original
+artifacts: raw native LOCAL639.6247041076422ms/99=6.460856ms/N, not6.461866.
+All nested/side-stream leaf spans remain non-additive; no fake wall breakdown.
+
+The two frozen component jobs are now armed on source1342ec0b193a929295f08964c132aee96c28c5a1,
+waiting for all current formal generation and strict serial CPU scores before
+any remote deployment/GPU launch.21 private queue tests passed; own-directory,
+registered GPU/idleness, source, full numerical-oracle, every raw timed sample,
+zero JIT/capture and failure/resource preservation gates are enforced. No new
+component GPU result exists yet. The real-model fusion queue is still being
+prepared; no source/binding/run of the current formal campaign is changed.
+
 ## Performance follow-ups and Junyu source audit (2026-10-03 00:44 (UTC-5))
 
 The new same-state cost benchmark, raw component timing helper and sparse-cycle
