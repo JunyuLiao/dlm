@@ -247,3 +247,28 @@ medians in ms per GLOBAL layer call; `results/v31_20261003/kernels/`.
   - main (exact mu): 4.4 + 2.2 ms → 4.4 + 0.55 ms;
   - compact-mu configs: 3.8 + 2.0 ms → 1.6 + 0.3 ms.
 - Panel h runs every efficiency switch together (`_fast` labels) after panel g; see `scripts/v31_h_chain.sh`.
+
+## Prior-art update (2026-10-03 10:25 UTC−5)
+
+- **SparseD** ([arXiv 2509.24014](https://arxiv.org/pdf/2509.24014), ICLR 2026,
+  [code](https://github.com/INV-WZQ/SparseD)):
+  - full attention in the early denoising steps;
+  - head-specific sparse patterns computed once and reused for all later steps;
+  - up to 1.50× over FlashAttention at 64K with 1,024 steps.
+  - It is the closest prior art to "observe once, hold the maps", next to MAGE, LoSA and PulseCol.
+  - It is evaluated with a **fixed** number of denoising steps.
+- **SeerAttention** ([arXiv 2410.13276](https://arxiv.org/pdf/2410.13276)) modifies the FlashAttention-2 kernel to emit
+  block-level (max-pooled) attention statistics alongside the output, as training targets for its gate.
+  - In-kernel block statistics are therefore not new.
+  - The FA4 observation here is an engineering contribution (zero-cost observation inside the production decode
+    kernel, for decode-time reuse) and must cite SeerAttention, BSFA and CoSA.
+- What remains distinct, to re-check before writing:
+  1. **Adaptive-step samplers.** vLLM's DiffusionGemma decodes with entropy-bound acceptance and early convergence. There,
+     sparsity changes the number of denoising forwards: +19–69% per canvas at higher sparsity in panel c. The
+     fixed-step evaluations of SparseD, MAGE and LoSA cannot see this. The evaluation pitfall is also concrete: the
+     PR #51994 bug inflated the default dense baseline's forwards by 19–28%.
+  2. **Step-stable selection.** The query-sensitivity C gate (collaboration with Junyu) removes most of that inflation
+     at equal threshold.
+  3. **A sparse path that matches the strongest production dense path inside vLLM.** This covers FA4 page-alias split
+     sparse execution, the FA4 observation, the chunked dense-prefix scan and fused sampler-hook statistics, with
+     MAGE ported onto the same execution for a fair prior-art comparison.
