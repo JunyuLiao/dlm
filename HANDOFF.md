@@ -1,3 +1,24 @@
+## Latest audit and diagnostic status (2026-10-02 22:35, UTC-5)
+
+First independent32K diagnostic closed four arms successfully, reserved1081.689752
+GPU seconds. Source39e08c521; result `results/v29_20261002/cost32k_002/`.
+GLOBAL/LOCAL name classification and partial GPU associations prevent a valid
+GPU cost breakdown. Preserve the original diagnostic; fix/test the profiler and
+add separately qualified event scopes before repeating. No profile speed claim.
+
+Source audit confirms main fused observation shares one QK pass between complete
+V output and rank32 summaries; observation itself is custom Triton, while the
+sparse output consumer and native dense use FA4 through different dispatches.
+See `docs/V29_BASELINE_CODE_AUDIT_20261002.md`. Main has no2K length gate; short
+prompt panels cannot inherit the HF AIME gated-method conclusion. New BF16-mode
+oracle protocol adds20cases to4existing CUDA tests, source core unchanged;
+GPU correctness execution pending, see `docs/V29_FUSED_OBSERVATION_AUDIT_20261002.md`.
+
+Expanded panel infrastructure remains under CPU review and is not launched.
+Separately, V28 generation closed24workers; its CPU scoring stopped on a
+snapshot-symlink comparison bug, fixed on that branch7c8c608ed with18CPU tests.
+Original generation/bindings are unchanged; repaired CPU rescoring is pending.
+
 ## Running diagnostic (2026-10-02 22:14 (UTC-5))
 
 Four-arm32K independent profile active on dllm, frozen39e08c521.

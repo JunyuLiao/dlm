@@ -1,0 +1,172 @@
+{
+  "schema": "v29_cost32k_first_diagnostic_aggregate",
+  "complete": true,
+  "reserved_gpu_seconds": 1081.689751653932,
+  "arms": [
+    {
+      "arm": "dense",
+      "rc": 0,
+      "reserved_gpu_seconds": 248.16052066604607,
+      "actual_execution": {
+        "denoising_forwards": 137,
+        "commit_forwards": 10,
+        "prefill_steps": 3,
+        "scheduler_denoising_forwards": 136,
+        "scheduler_commit_forwards": 10,
+        "speculative_unused_denoising": 1
+      },
+      "commit_per_denoising_forward": 0.072992700729927,
+      "graph_captures": 0,
+      "adapter_counts": {},
+      "method_counts": {},
+      "eager_scope_calls": {
+        "prepare_metadata": 150,
+        "attention_other": 90,
+        "sample": 147
+      },
+      "gpu_attribution_complete": false
+    },
+    {
+      "arm": "native",
+      "rc": 0,
+      "reserved_gpu_seconds": 296.3592345820507,
+      "actual_execution": {
+        "denoising_forwards": 374,
+        "commit_forwards": 19,
+        "prefill_steps": 3,
+        "scheduler_denoising_forwards": 373,
+        "scheduler_commit_forwards": 19,
+        "speculative_unused_denoising": 1
+      },
+      "commit_per_denoising_forward": 0.05080213903743316,
+      "graph_captures": 0,
+      "adapter_counts": {
+        "begins": 374,
+        "observes": 374,
+        "global_calls": 1870,
+        "invalidates": 22,
+        "order_errors": 0,
+        "prefix_copies": 0,
+        "canvas_refreshes": 0,
+        "split_list_builds": 0,
+        "split_fa4_calls": 0
+      },
+      "method_counts": {},
+      "eager_scope_calls": {
+        "prepare_metadata": 396,
+        "method_begin": 396,
+        "encoder_attention_other": 660,
+        "denoise_attention_other": 11220,
+        "sample": 393,
+        "method_observe": 374
+      },
+      "gpu_attribution_complete": false
+    },
+    {
+      "arm": "allkept",
+      "rc": 0,
+      "reserved_gpu_seconds": 266.20141924591735,
+      "actual_execution": {
+        "denoising_forwards": 150,
+        "commit_forwards": 11,
+        "prefill_steps": 3,
+        "scheduler_denoising_forwards": 149,
+        "scheduler_commit_forwards": 11,
+        "speculative_unused_denoising": 1
+      },
+      "commit_per_denoising_forward": 0.07333333333333333,
+      "graph_captures": 0,
+      "adapter_counts": {
+        "begins": 150,
+        "observes": 150,
+        "global_calls": 750,
+        "invalidates": 14,
+        "order_errors": 0,
+        "prefix_copies": 60,
+        "canvas_refreshes": 690,
+        "split_list_builds": 12,
+        "split_fa4_calls": 750
+      },
+      "method_counts": {},
+      "eager_scope_calls": {
+        "prepare_metadata": 164,
+        "method_begin": 164,
+        "encoder_attention_other": 420,
+        "denoise_attention_other": 3750,
+        "denoise_global_attention": 750,
+        "kv_prefix_build": 60,
+        "consumer": 750,
+        "split_lists": 750,
+        "sample": 161,
+        "method_observe": 150,
+        "kv_canvas_refresh": 690
+      },
+      "gpu_attribution_complete": false
+    },
+    {
+      "arm": "method",
+      "rc": 0,
+      "reserved_gpu_seconds": 270.783853224013,
+      "actual_execution": {
+        "denoising_forwards": 115,
+        "commit_forwards": 9,
+        "prefill_steps": 3,
+        "scheduler_denoising_forwards": 114,
+        "scheduler_commit_forwards": 9,
+        "speculative_unused_denoising": 1
+      },
+      "commit_per_denoising_forward": 0.0782608695652174,
+      "graph_captures": 0,
+      "adapter_counts": {
+        "begins": 115,
+        "observes": 115,
+        "global_calls": 575,
+        "invalidates": 12,
+        "order_errors": 0,
+        "prefix_copies": 50,
+        "canvas_refreshes": 525,
+        "split_list_builds": 151,
+        "split_fa4_calls": 530
+      },
+      "method_counts": {
+        "attention_calls": 480,
+        "score_refresh_calls": 0,
+        "fused_observations": 45,
+        "dp_routes": 105,
+        "dp_builds": 45,
+        "async_observation_routes": 45,
+        "fa4_list_builds": 150,
+        "decision_refresh_calls": 60,
+        "held_decision_calls": 420,
+        "carried_first_calls": 45,
+        "observe_step": 1,
+        "active_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ]
+      },
+      "eager_scope_calls": {
+        "prepare_metadata": 127,
+        "method_begin": 127,
+        "encoder_attention_other": 360,
+        "denoise_attention_other": 2875,
+        "denoise_global_attention": 575,
+        "kv_prefix_build": 50,
+        "consumer": 1055,
+        "split_lists": 530,
+        "sample": 124,
+        "method_observe": 115,
+        "kv_canvas_refresh": 525,
+        "observation": 45,
+        "selector": 210
+      },
+      "gpu_attribution_complete": false
+    }
+  ],
+  "performance_claim_allowed": false,
+  "quality_evaluated": false,
+  "attribution": "incomplete: actual model.layers prefixes were not recognized; custom GPU activity association is partial; no GLOBAL/LOCAL or observation cost shares established"
+}

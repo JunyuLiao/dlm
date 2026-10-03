@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 22:14 (UTC-5)",
+    "updated_local": "2026-10-02 22:35 (UTC-5)",
     "branch": "research/vllm-confirmation-20261002",
-    "verified_commit": "39e08c521",
+    "verified_commit": "26d6b10dd",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,10 +16,8 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "Copy component positive; regroup fused increment approximately tied; standard merge candidate and expanded panel qualification pending.",
-    "running": [
-      "dllm four-arm32K diagnostic profile attempt002, source39e08c521; not formal timing"
-    ],
+    "headline": "FA4/main code audit and first cost diagnostic complete; improved attribution and BF16 observation GPU check pending.",
+    "running": [],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
@@ -361,7 +359,22 @@
       "profile_preparation_failure": "attempt001 missingTorch in systemPython;0GPU seconds; preserved",
       "dlm2_environment": "CPU-qualified matching vLLM0.30 stack/FA4 patch; real GPU qualification pending",
       "dense_controls_doc": "docs/V29_DENSE_CONTROLS_20261002.md"
-    }
+    },
+    "v29_cost_diagnostic": {
+      "status": "first_round_closed_attribution_incomplete",
+      "generation_source": "39e08c521",
+      "summary": "results/v29_20261002/cost32k_002/aggregate.json",
+      "gpu_reserved_seconds": 1081.689751653932,
+      "performance_claim_allowed": false
+    },
+    "v29_observation_audit": {
+      "status": "20_added_BF16_oracle_cases_prepared_GPU_pending",
+      "core_unchanged": true,
+      "QK_recomputed_for_observation": false,
+      "main_min_route_keys": 0,
+      "doc": "docs/V29_FUSED_OBSERVATION_AUDIT_20261002.md"
+    },
+    "v29_closed_gpu_seconds": 1136.758520174917
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
