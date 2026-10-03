@@ -292,3 +292,41 @@ Setup:
 - The cells that are not token-identical diverge through FP32-rounding flips of the acceptance mask or the C-gate
   sensitivity. The selector formulas are the same.
 - Against the fixed dense reference, main + C gate becomes S/N ≈ 1.048 (32K) and ≈ 0.963 (64K).
+
+## Panels h2 / i / j: every efficiency switch, fair MAGE, 96K (2026-10-03 14:30 UTC−5)
+
+Setup:
+- All switches on (`LOGIT_STATS=fused DP_BUILD=chunked OBSERVE=fa4 KV_COPY=triton MERGE=triton MAGE_SELECT=fa4`),
+  overlay7. h2 is the warm repeat of h; h itself had in-request Triton recompiles from a compile-time chunk count.
+- Reference: vLLM FULL + PR #51994 fix.
+- Full table: `results/v31_20261003/panels/frontier_all_arms_vs_fixed_default.md`.
+
+| arm | 32K W | 32K N/C | 32K S/N | 32K correct | 64K W | 64K N/C | 64K S/N | 64K correct |
+|---|---|---|---|---|---|---|---|---|
+| dense (ref) | 1 | 1 | 1 | 28/48 | 1 | 1 | 1 | 23/48 |
+| main | 0.962 | 1.023 | 0.997 | 30 | 0.946 | 1.053 | 0.911 | 24 |
+| main + C gate | 0.983 | 0.987 | 1.033 | 35 | 1.007 | 1.034 | 0.946 | 27 |
+| r12 | 0.982 | 1.052 | 0.984 | 35 | 1.026 | 1.085 | 0.899 | 23 |
+| m2c (M2 compact) | 1.020 | 1.076 | 0.965 | 31 | 0.949 | 1.056 | 0.880 | 25 |
+| m2c + C gate | 1.010 | 1.020 | 0.999 | 28 | 0.974 | 1.025 | 0.907 | 23 |
+| m2c r12 | 1.144 | 1.145 | 0.948 | 30 | 0.975 | 1.062 | 0.870 | 29 |
+| base + C gate | 0.962 | 1.020 | 1.015 | 31 | 0.983 | 1.084 | 0.917 | 27 |
+| MAGE k=4096 (same execution) | 0.978 | 1.085 | 0.920 | 29 | **0.921** | 1.088 | 0.840 | 26 |
+| MAGE k=1024 (same execution) | 1.207 | 1.301 | 0.891 | **22** | 0.969 | 1.168 | 0.825 | 23 |
+
+96K (22 cells; dense 11/22 correct):
+- m2c: W 1.092, N/C 1.194, S/N 0.831, 11/22 correct.
+- MAGE k=1024: W 0.834 [0.61, 1.10], N/C 1.117, S/N 0.797, 12/22 correct.
+- main and r12 (exact mu) ran out of memory at MEM 0.92: the FP32 rank-32 mu summary is about 0.77 GB per GLOBAL
+  layer at 94K keys, on top of the contiguous K/V buffers.
+
+**Reading:**
+- With the efficient execution applied to both, the MAGE port is cheaper per forward than every configuration of the
+  method, because it keeps fewer tiles (k=4096 ≈ 6% of the prefix tiles, vs 7–11% for the method). End to end it
+  is not worse.
+- The method's consistent advantage is forward-count stability. With the C gate, N/C is 0.99–1.03, against 1.09
+  (MAGE k=4096) and 1.17–1.30 (MAGE k=1024). The price is a higher kept fraction.
+- No end-to-end ratio is significant (every W CI crosses 1).
+- **Novelty status: the risk-based selector alone does not beat a fixed-budget mass top-k at this point.**
+  The open question is selection quality at **matched sparsity**: fixed-budget risk top-k (`risk_topk`) vs MAGE at the
+  same budget, and the C gate applied on top of MAGE.
