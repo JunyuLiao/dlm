@@ -1,3 +1,18 @@
+## Peer kernel GPU qualification armed — 2026-10-03 02:43 (UTC-5)
+
+The29-case peer C ABI acceptance queue is armed on sourcee2ec0ae4b, currently
+waiting for all original formal strict scores. Prepared source/kernel bytes
+and pinned SM90 were checked remotely; no GPU was started. It then requires two
+idle checks and an exclusive own worker lock on dlm2. Launch is single-attempt;
+unknown transport outcomes are preserved, never automatically relaunched.
+Every frozen case must pass; skips/duplicates/wrong parameter counts fail.
+Per-test receipts and outer reservation seconds are retained. No automatic
+ATen/model/E2E rollout or public performance claim follows a passing kernel test.
+See results/v30_20261003/peer_gpu_queue001/status.json. Original dllm component,
+dense-equivalence and engineering queues retain their existing order and pins.
+Formal snapshot:LongBench6/32,AIME18/32,HumanEval18/32,zero closed-worker failures;
+these counts are operational progress, not partial scientific results.
+
 ## Peer build and bounded regroup screen — 2026-10-03 02:37 (UTC-5)
 
 Root implemented the isolated build, ABI guard fix and GLOBAL selector wrapper.
