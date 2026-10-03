@@ -330,3 +330,40 @@ Setup:
 - **Novelty status: the risk-based selector alone does not beat a fixed-budget mass top-k at this point.**
   The open question is selection quality at **matched sparsity**: fixed-budget risk top-k (`risk_topk`) vs MAGE at the
   same budget, and the C gate applied on top of MAGE.
+
+## Panel k: selection quality at a fixed budget (2026-10-03 18:05 UTC−5)
+
+Setup:
+- M2 compact mu, every efficiency switch.
+- Fixed keep fraction of the prefix tiles per head and 128-row block: k12 = 12%, k5 = 5%.
+- Ranking by the method's risk (V term) or by attention mass only (`risk_value='mass'`), each with and without the
+  C gate.
+- MAGE k=4096 keeps about 12.6% of the prefix tiles at 32K and 6.3% at 64K.
+- Table: `results/v31_20261003/panels/panel_k_fixed_budget.md`.
+
+| arm | 32K W | 32K N/C | 32K S/N | 32K correct | 64K W | 64K N/C | 64K S/N | 64K correct |
+|---|---|---|---|---|---|---|---|---|
+| risk k12 | 1.131 | 1.166 | 0.948 | 25 | **0.917 [0.843, 0.989]** | 1.041 | 0.881 | 25 |
+| risk k12 + C | 1.079 | 1.117 | 0.953 | 26 | 0.947 | 1.036 | 0.887 | 26 |
+| mass k12 | 0.981 | 1.075 | 0.954 | 32 | 0.946 | 1.053 | 0.881 | 27 |
+| mass k12 + C | 0.941 | 1.026 | 0.966 | 32 | 0.989 | 1.051 | 0.885 | 27 |
+| risk k5 | 1.303 | 1.320 | 0.931 | 25 | 1.036 | 1.112 | 0.863 | 26 |
+| risk k5 + C | 1.293 | 1.278 | 0.938 | 25 | 0.937 | 1.047 | 0.872 | 27 |
+| mass k5 | 0.983 | 1.117 | 0.942 | 31 | 0.955 | 1.070 | 0.865 | 26 |
+| mass k5 + C | 1.024 | 1.122 | 0.948 | 29 | 0.979 | 1.075 | 0.869 | 28 |
+| MAGE k=4096 | 0.978 | 1.085 | 0.920 | 29 | 0.921 | 1.088 | 0.840 | 26 |
+
+Dense reference: 28/48 correct at 32K, 23/48 at 64K.
+
+**Reading:**
+- At a fixed budget, the method's risk ranking (V term) is **not better** than ranking by attention mass. At 32K it is
+  clearly worse: more forward inflation (1.17 vs 1.08 at k12, 1.32 vs 1.12 at k5) and 25 vs 31–32 correct. This
+  agrees with the earlier R17 result that mass alone beats the V term in the GLOBAL-only regime.
+- The C gate at a fixed budget only re-ranks, and its effect is small and inconsistent (mass k12 at 32K:
+  1.075 → 1.026). Its large effect in panel c came from **allocating more tiles** where queries are unstable.
+- Our mass top-k and MAGE k=4096 have similar forward inflation and accuracy. MAGE is cheaper per forward: it uses one
+  shared list per KV head and has no dense-prefix build or routing.
+- **Status of the method contribution:** the selector itself does not improve on a fixed-budget mass top-k such as
+  MAGE. The remaining method question, being tested in panel l, is whether stability-aware **budget allocation** (the
+  C gate on the threshold selector) beats a uniform budget at the same realized mean kept fraction. It uses the new
+  kept-fraction receipts (overlay8).
