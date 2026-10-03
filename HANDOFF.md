@@ -1,3 +1,21 @@
+
+## Additional peer kernel and timing boundaries
+
+The peer kernel advances through KV tiles sequentially with per-tile cluster
+votes (value_direction.cu:306–316,404–416,571–578). Its split variant separates
+router/PV roles across CTAs (:623–666); this is not independent KV-range
+splitting followed by an LSE merge. validate.py:63–83 measures graph replay,
+excluding ordinary Python dispatch and the host-side TMA descriptor construction
+in value_direction.cu:754–758. Cached-sketch component timing is not dynamic
+request latency. All locations refer to the audited b890ff494 peer ref.
+
+A cooperation candidate is register-fed rank32 computation and on-chip running
+state (value_direction.cu:359–401): investigate whether our observation/DP
+boundary can avoid some intermediate-summary materialization. Our all-dense-prefix
+risk dependencies differ from the peer retained-state router. Preserve our
+mathematics and independently qualify any experiment; no equivalence, port,
+new variant or measured gain is claimed. Running queues remain unchanged.
+
 ## Junyu newly published implementation audited (2026-10-03 01:39 (UTC-5))
 
 Read-only peer pin b890ff49488474c5d476df44019597dc045a5969 supersedes the
