@@ -1,5 +1,14 @@
 # V29 active branch overlay
 
+User clarification (2026-10-02 23:20, UTC-5): required private research transfers
+between the user-owned hosts are authorized. Do not publish private data in Git.
+Write only in the user's own dyh directories; collaborators chw/ljy and all other
+peer files remain read-only, never deleted or overwritten.
+User requests prompt commits/pushes and reproducible evidence, not only conclusions.
+Publish reasonably sized sanitized traces, numeric measurements and execution receipts;
+compress larger traces when useful. Keep original private files unchanged and exclude
+prompts, tokens, gold, credentials, generated text and private paths from Git.
+
 Current branch is `research/vllm-confirmation-20261002`, from V28 `e5e1ffcc8`.
 Read `docs/CONFIRMATION_CAMPAIGN_V29_20261002.md` first. V28 and its running
 completion coordinator are separate and must not be modified. Inherited safety,

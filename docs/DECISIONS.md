@@ -699,3 +699,29 @@ inputs/config/pins. New immutablev29_aime_confirmation002 spec changes only
 name/protocol_id and all8block hosts from dlm2 to mpk; original001 retained.
 Seeds/questions/method/arm order/budget/scoring are unchanged. CPU bind and GPU
 qualification remain pending. Queue behind current mpk worker, never overlap.
+
+## User clarified private host transfers (2026-10-02 23:20, UTC-5)
+
+The user explicitly authorizes transfers needed for research between their own
+three machines. Private data/configuration/artifacts still must not enter Git
+or public outputs. Writes stay inside the user's own dyh directories; chw/ljy
+and all other collaborators' files are read-only and must not be deleted or
+overwritten. Prior auto-review rejections remain recorded with zero execution;
+new attempts must use normal approval review with this updated authorization.
+
+Resume original AIME001 on dlm2 at frozen1931db5a6, with exact-source provenance
+mirrors, original byte checks, actual v21 validation and Linux42 tests before
+GPU qualification. AIME002 same-machine fallback is retained but not launched.
+Gold can remain on its existing scoring host; generation/scorer artifact mirrors
+are now explicitly authorized. HumanEval/LongBench qualification continues at
+frozen54163f4e7. Formal launch still requires complete scored qualification proof.
+
+User also requests timely commit/push and reasonably sized traces/measurement
+records, not only conclusions. Full diagnostic trace privacy/size audit is
+in progress; publish sanitized compressed traces and detailed numerical receipts
+where suitable, retaining private originals unchanged.
+
+AIME002 fallback CPU preparation did run on mpk before the latest switch: strict
+rebind, actual v21 validation and all42Linux tests passed without CUDA initialization.
+No binding, generation input/gold transfer or GPU launch was performed there.
+This preserved CPU check does not qualify a full model request.

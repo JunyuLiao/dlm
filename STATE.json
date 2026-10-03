@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 23:17 (UTC-5)",
+    "updated_local": "2026-10-02 23:20 (UTC-5)",
     "branch": "research/vllm-confirmation-20261002",
-    "verified_commit": "76a43621f",
+    "verified_commit": "1931db5a6",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -418,15 +418,18 @@
         },
         "aime": {
           "questions": 30,
-          "host": "mpk",
-          "status": "same_machine_CPU_preparation_pending",
+          "host": "dlm2",
+          "status": "original_protocol_CPU_deployment_resumed_with_explicit_transfer_authorization",
           "CPU_tests_run": 42,
           "CPU_tests_passed": 41,
           "CPU_tests_skipped": 1,
           "Linux_no_skip_required": true,
-          "protocol_id": "v29_aime_confirmation002",
+          "protocol_id": "v29_aime_confirmation001",
           "prior_protocol": "v29_aime_confirmation001 preserved_unlaunched",
-          "cross_host_private_transfers": "two_auto_review_rejections_no_execution_no_transfer"
+          "cross_host_private_transfers": "two_auto_review_rejections_no_execution_no_transfer",
+          "source_commit": "1931db5a6",
+          "fallback_protocol": "v29_aime_confirmation002 preserved_unlaunched",
+          "fallback_CPU": "mpk strict rebind, actualv21 and Linux42 pass; CUDA uninitialized, no binding/generation/GPU"
         },
         "humaneval": {
           "questions": 164,
@@ -450,7 +453,9 @@
       "interpretation": "docs/V29_V28_PREVIEW_INTERPRETATION_20261002.md"
     },
     "v29_qualification_failed_attempts_gpu_seconds": 241.732,
-    "v29_qualification_failed_attempts_accounting_note": "LongBench001 closed dense worker, rounded public resource receipt; active attempts excluded."
+    "v29_qualification_failed_attempts_accounting_note": "LongBench001 closed dense worker, rounded public resource receipt; active attempts excluded.",
+    "private_transfer_authorization": "User explicitly permits needed transfers between own hosts; private data excluded from Git/public outputs; peer chw/ljy files read-only.",
+    "artifact_policy": "Prompt commit/push; include reasonably sized sanitized traces, per-request numbers and receipts, not only conclusions; no private data in Git."
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
