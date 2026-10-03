@@ -89,3 +89,7 @@ The existing V29 matched regroup component is approximately tied; do not label
 the shared merge improvement as a regroup gain. Any request-level improvement
 still needs native dense, matched controls, intended-path receipts, full warm-up,
 zero timed captures/compilations and question-cluster uncertainty.
+
+## Completed GPU verification (2026-10-02 22:51, UTC-5)
+
+All44cases pass at the frozen tolerances. Source54163f4e7, reserved32.737210GPU seconds. See `results/v29_20261002/fused_observe_bf16_001/summary.json` for attempts and scope; this supersedes the pending status above. No task-quality or speed claim.

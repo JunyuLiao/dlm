@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 22:45 (UTC-5)",
+    "updated_local": "2026-10-02 22:51 (UTC-5)",
     "branch": "research/vllm-confirmation-20261002",
-    "verified_commit": "2b47136bc",
+    "verified_commit": "54163f4e7",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -17,7 +17,9 @@
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
     "headline": "Expanded four-arm protocols and corrected event diagnostic CPU-qualified; GPU qualification pending.",
-    "running": [],
+    "running": [
+      "dllm corrected 4-arm PIECEWISE event diagnostic003, source54163f4e7; not formal timing"
+    ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
@@ -366,10 +368,10 @@
       "summary": "results/v29_20261002/cost32k_002/aggregate.json",
       "gpu_reserved_seconds": 1081.689751653932,
       "performance_claim_allowed": false,
-      "next": "new four-arm PIECEWISE event diagnostic prepared,16CPUtests"
+      "next": "event diagnostic003 running;4PIECEWISE arms,16CPUtests"
     },
     "v29_observation_audit": {
-      "status": "44_cases_frozen_GPU002_pending",
+      "status": "44_GPU_tests_passed_fixed_tolerances",
       "core_unchanged": true,
       "QK_recomputed_for_observation": false,
       "main_min_route_keys": 0,
@@ -378,9 +380,13 @@
       "scale_coverage": [
         1.0,
         0.04419417382415922
-      ]
+      ],
+      "source_commit": "54163f4e7",
+      "gpu_reserved_seconds": 32.73720963302185,
+      "summary": "results/v29_20261002/fused_observe_bf16_001/summary.json",
+      "real_model_quality_qualified": false
     },
-    "v29_closed_gpu_seconds": 1136.758520174917,
+    "v29_closed_gpu_seconds": 1169.495729807939,
     "v29_expanded_confirmation": {
       "status": "specs_and_CPU_runner_ready_qualification_pending",
       "engine_seeds": [
@@ -399,7 +405,10 @@
       "suites": {
         "longbench": {
           "questions": 59,
-          "host": "dllm"
+          "host": "dllm",
+          "status": "CPU_source_and_binding_frozen_qualification_pending",
+          "preparation_attempt001": "CPU_missing_archived_spec_GPU0",
+          "preparation_attempt002": "source_parent_pins_rebind_and_inventory_verified"
         },
         "aime": {
           "questions": 30,

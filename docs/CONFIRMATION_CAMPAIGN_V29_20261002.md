@@ -180,3 +180,26 @@ against matchedQ128, but S/N1.00516 and seed/length signs vary; six questions
 only. Canvas release W1.01228[.99035,1.03470], no supported gain. Main/allkept
 W.99576[.91015,1.08942], no demonstrated increment. Keep matched native whose
 preview accuracy is43/48 versus main40/48 and Q6441/48. No noninferiority claim.
+
+## GPU correctness passed; event diagnostic active (2026-10-02 22:51, UTC-5)
+
+Fused observation44GPU tests pass on H100, source54163f4e7:40BF16 FP32-oracle
+cases plus4original STORE/LOAD tests. Includes actual scale1.0, full V output,
+GQA, splits1/2 and boundary tails. Fixed tolerances unchanged; synthetic numeric
+qualification, not task accuracy, bit-exactness or speed. Reserved32.737210GPU
+seconds. First missing-pytest attempt stopped on CPU (0GPU); second used isolated
+runner pytest directory, leaving the qualified vLLM environment unchanged.
+Source `results/v29_20261002/fused_observe_bf16_001/`.
+
+Corrected four-PIECEWISE-arm event diagnostic003 is active on dllm, frozen
+54163f4e7,16CPU checks passed, idle gate passed. It includes native dense with
+no hooks and GLOBAL/LOCAL plus fused observation/DP leaf event spans. Profiler
+overhead remains excluded from formal evidence; no breakdown result yet.
+
+LongBench59x8x4 source/binding frozen on dllm, no GPU qualification launched.
+First CPU preparation missed an archived provenance spec and stopped (0GPU);
+new002directory includes the committed E14 source, all parent input/source
+hashes pass, strict rebind passes and full1888timed/1888warm inventory verifies.
+Generation-host CPU checks and scorer qualification remain pending. AIME and
+HumanEval CPU deployment preparation proceeds on their assigned hosts; no formal
+panel launched. No existing run or frozen binding was edited.
