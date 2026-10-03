@@ -1,0 +1,47 @@
+{
+  "schema": "v30_peer_kernel_qualification_v1",
+  "peer_commit": "b890ff49488474c5d476df44019597dc045a5969",
+  "trt_headers_commit": "7965842954628b0b5456a2f7d59786d3dcd41647",
+  "kernel_sha256": "256f0e52719f6cb8dc8e727e5e7817835d9e977cef80ae012670f915b7c42709",
+  "flags": {"fast_sfu": false, "inline_roles": false, "online_ratio": false},
+  "source_patch": "Accept both ABI3 and ABI4 in debug_scores buffer validation; no CUDA source change",
+  "test_file": "tests/test_value_direction_hopper.py",
+  "test_functions": [
+    "test_reference_and_partial_gqa",
+    "test_first_support_ties_and_empty_rows",
+    "test_dense_graph_and_invalid_contract",
+    "test_packing_tail_bits",
+    "test_async_schedules",
+    "test_tma_batch_head_masks_and_cuda_packing",
+    "test_additive_bias_is_not_discarded",
+    "test_identity_subspace_redundancy_and_cancellation",
+    "test_c_abi_rejects_missing_tma_pointers",
+    "test_fused_projection_refresh_and_prefix_preservation"
+  ],
+  "expected_collected_cases": 29,
+  "cases_per_function": {
+    "test_reference_and_partial_gqa": 16,
+    "test_first_support_ties_and_empty_rows": 2,
+    "test_dense_graph_and_invalid_contract": 1,
+    "test_packing_tail_bits": 1,
+    "test_async_schedules": 2,
+    "test_tma_batch_head_masks_and_cuda_packing": 2,
+    "test_additive_bias_is_not_discarded": 1,
+    "test_identity_subspace_redundancy_and_cancellation": 1,
+    "test_c_abi_rejects_missing_tma_pointers": 1,
+    "test_fused_projection_refresh_and_prefix_preservation": 2
+  },
+  "must_pass_cases": 29,
+  "allowed_skips": 0,
+  "maxfail": 1,
+  "timeout_seconds": 1800,
+  "gpu_launch_barrier": "Original three formal suites closed 32/32 and all strict CPU scores complete; dlm2 idle twice and exclusive own worker lock",
+  "receipt": ["per_test_status", "outer_GPU_reservation_seconds", "source_and_library_identity", "device_name_and_capability"],
+  "scope": "Original peer kernel acceptance subset only; no model, bridge, calibration or E2E experiment",
+  "limitations": [
+    "Native peer BF16-score and same-score oracles are preserved without widening tolerances",
+    "Does not qualify complete model GQA16/2 D512 scaling1.0 outputs, GLOBAL scope, vLLM or serving",
+    "Tests intentionally capture graphs; this is correctness qualification, not timed generation",
+    "Excluded integration/ATen/optional BLASST controls require separate complete dependencies"
+  ]
+}
