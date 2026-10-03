@@ -154,3 +154,75 @@ Fixed FULL default (`FIX_51994=1`) vs PIECEWISE dense, seed-paired:
     regime.
   - In-kernel block statistics have precedent for prefill (Block Sparse Flash Attention, FA-2, block-max gating;
     CoSA, a separate proxy pass). Decode-time cross-step reuse in diffusion LLMs is open.
+
+## Panels b–e complete (2026-10-03 09:50 UTC−5)
+
+Reference: vLLM default FULL + the PR #51994 fix (`dense_default_fix`). Seed-paired, LongBench-v2 32K / 64K, 24 items
+× 2 panel seeds per length; panel e has 32 of 48 cells so far (dllm shard still running). Full tables:
+`results/v31_20261003/panels/panels_bcde_vs_fixed_default.md`. Accuracy: the unchanged v15 scorer
+(`scripts/v31_score_paired.py`, booleans in `results/v31_20261003/panels/scores_correct_bool.json`).
+
+| arm | 32K W | 32K N/C | 32K S/N | 32K correct | 64K W | 64K N/C | 64K S/N | 64K correct |
+|---|---|---|---|---|---|---|---|---|
+| dense default + fix (ref) | 1 | 1 | 1 | 28/48 | 1 | 1 | 1 | 23/48 |
+| dense PIECEWISE | 1.035 | 1.024 | 1.023 | 29 | 1.021 | 1.008 | 1.017 | 25 |
+| main (−ln2) | 0.966 | 1.006 | 1.018 | 35 | 0.981 | 1.072 | **0.927** | 23 |
+| main + C gate | 1.020 | 1.002 | 1.101 | 31 | 1.078 | 1.038 | 1.000 | 27 |
+| base threshold | 1.184 | 1.185 | 1.051 | 29 | 1.161 | 1.268 | 0.942 | 28 |
+| base + C gate | 1.087 | **1.054** | 1.078 | 27 | 1.098 | **1.114** | 0.968 | 27 |
+| +ln2 threshold | 1.507 | 1.587 | 1.005 | 28 | 1.437 | 1.694 | 0.898 | 25 |
+| +ln2 + C gate | 1.306 | **1.358** | 1.043 | 29 | 1.247 | **1.418** | 0.930 | 24 |
+| MAGE k=1024 (port) | 1.347 | 1.350 | 0.984 | **20** | 1.047 | 1.133 | 0.957 | 25 |
+| MAGE k=4096 (port) | 1.045 | 1.070 | 1.041 | 31 | 0.998 | 1.068 | 0.979 | 28 |
+| r12 (32 cells) | 1.133 | 1.078 | 1.001 | 23 (21) | 0.952 | 1.014 | 0.923 | 17 (17) |
+| q64 (32 cells) | 1.088 | 1.052 | 1.011 | 23 (21) | 1.038 | 1.053 | 0.929 | 20 (17) |
+| cc2 (32 cells) | 1.090 | 1.052 | 0.995 | 23 (21) | 1.007 | 1.063 | 0.907 | 19 (17) |
+| r12q64 (32 cells) | 1.089 | 1.068 | 1.003 | 24 (21) | 0.960 | 1.064 | 0.917 | 19 (17) |
+
+Paired geometric means arm / ref; "(ref)" in brackets = the reference's correct count on the same cells. CIs are in
+the full table.
+
+What this shows:
+- **Accuracy:** no arm is below the dense reference beyond noise, except MAGE k=1024 at 32K (20 vs 28).
+- **Forward count:** higher sparsity inflates denoising forwards per canvas strongly (base +19–27%, +ln2 +59–69%).
+  The C gate removes most of that inflation (base 1.185 → 1.054 at 32K, 1.268 → 1.114 at 64K; +ln2 1.587 → 1.358,
+  1.694 → 1.418). This is the clearest method-level effect so far (contribution 2, collaboration with Junyu).
+- **Per forward:** only 64K gains (main 0.927, cc2 0.907, r12q64 0.917). At 32K no arm beats dense per forward.
+- **End to end:** no arm has a significant W gain; main 64K 0.981, r12 64K 0.952 (32 cells).
+- The panel-a "main" timings (S/N 1.112 / 0.985) were slower than the identical panel-c run (1.018 / 0.927) with
+  identical trajectories; the panel-c run (warm caches) is the one to quote.
+
+## Where the per-forward time goes: step profile (2026-10-03 09:30 UTC−5)
+
+`scripts/v31_step_profile.py` brackets every GLOBAL attention call, the FA4 sparse call inside it, the K/V refresh and
+the sampler hook with `torch.cuda.synchronize()` (3 requests per arm; diagnostic only: syncs expose CPU time and remove
+async overlap). Per GLOBAL layer call, ms:
+
+| 64K | total | FA4 sparse | K/V copy | rest (core) | kept tiles |
+|---|---|---|---|---|---|
+| vLLM dense | 1.99 | – | – | – | 100% |
+| main, held call | 1.58 | 0.67 | 0.20 | 0.71 | 11% |
+| main, re-decision call | 2.73 | 0.97 | 0.20 | 1.56 | 13% |
+| main, first call of a canvas (carried map) | 3.13 | 0.94 | **1.20** (prefix copy) | 1.0 | 13% |
+| main, observation call | **8.69** | – | 0.20 | 8.5 | – |
+| main + C gate, held call | 1.85 | 0.91 | 0.21 | 0.73 | 21–28% |
+| MAGE port, reused call | 1.00 | 0.45 | 0.19 | 0.36 | 1.9% |
+| MAGE port, selection call (unoptimized fp32 QK) | 20.0 | – | 1.19 | – | – |
+
+At 32K the main held call (1.41 ms, 22% kept) is more expensive than vLLM dense (1.11 ms). The FA4 sparse call has a
+fixed cost of ≈0.4 ms (0.45 ms at 1.9% kept, 0.67 ms at 11%, 1.0 ms at 28%).
+
+Per step: the sampler hook costs 0.24 ms (fast T) and 1.92 ms with the C gate. The observation step of a canvas
+takes 75 ms vs ≈41 ms for a dense step.
+
+**Efficiency work, in order of measured cost:**
+1. C-gate hook: one-pass Triton row statistics (`v31_logit_stats.py`; argmax / max / logsumexp / entropy) replace
+   the repeated torch passes over the 256 × 262144 FP32 logits: 2.67 → 0.35 ms in isolation; unit-tested against the
+   torch path (`tests/test_v31_logit_stats.py`). Opt-in `LOGIT_STATS=fused`.
+2. Observation call: the M2 compact pooled V term (`mu_mode=pooled_compact`, Fan's M2) drops the per-row projected-V
+   output from the fused kernel and the 0.5 GB `mu` summary from the DP build. Panel f (`m2c`, `m2c_r12`) is running.
+   Next: the FA4 in-kernel observation (per-row tile log-mass), which also removes the per-canvas prefix copy.
+3. Fixed per-call cost (K/V refresh, split lists, core hooks): to be measured on the GPU timeline
+   (`scripts/v31_kernel_profile.py`, CUPTI) before changing code, since syncs inflate CPU-side costs.
+4. MAGE's selection should also use the in-kernel observation, so that the prior-art port is not penalized by an
+   unoptimized selection pass.

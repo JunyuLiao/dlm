@@ -130,7 +130,8 @@ class _PrefixCache:
 
 class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
-                 canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024):
+                 canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024,
+                 logit_stats='legacy'):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -141,6 +142,8 @@ class VllmMethodAdapter:
             raise ValueError('kv_copy_backend must be torch or triton')
         if merge_backend not in ('torch', 'triton'):
             raise ValueError('merge_backend must be torch or triton')
+        if logit_stats not in ('legacy', 'fused'):
+            raise ValueError('logit_stats must be legacy or fused')
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
         if arm == 'method':
@@ -157,6 +160,9 @@ class VllmMethodAdapter:
         self.canvas_buffers = canvas_buffers
         self.kv_copy_backend = kv_copy_backend
         self.merge_backend = merge_backend
+        # v31 execution variant: 'fused' computes the sampler hook's per-position statistics (argmax, top-1
+        # probability, entropy -> acceptance mask) in one pass over the logits (v31_logit_stats); 'legacy' = torch ops
+        self.logit_stats = logit_stats
         self._merge_cache = {}
         self.runtime = self.stub = self._stack = None
         self.bound = False               # True only while a request is in flight (dummy/warm-up runs pass through)
@@ -350,7 +356,15 @@ class VllmMethodAdapter:
         state = None if self.runtime is None else self.runtime.get('state')
         return state is not None and getattr(state, 'cgate', None) is not None
 
-    def on_sample(self, scaled_logits, accepted=None):
+    def fused_stats_eligible(self):
+        """The fused statistics replace State.observe_logits on its fast-T path when the C gate is on (T alone only
+        takes an argmax, which one torch op already does at full bandwidth)."""
+        state = None if self.runtime is None else self.runtime.get('state')
+        return (self.logit_stats == 'fused' and state is not None and getattr(state, 'fast_t', False)
+                and getattr(state, 'cgate', None) is not None
+                and self.config.get('sensitivity') not in ('unit_v30', 'confidence_v30'))
+
+    def on_sample(self, scaled_logits, accepted=None, stats=None):
         """After a denoising sample: the temperature-scaled logits [1, CL, V] (fast T takes their argmax) and, for the
         C gate, the sampler's acceptance mask [1, CL]."""
         self.calls['observes'] += 1
@@ -373,6 +387,15 @@ class VllmMethodAdapter:
                     raise ValueError('C-gate sampler/query geometry mismatch')
                 scaled_logits, accepted = scaled_logits[:, :n, :], accepted[:, :n]
                 self.calls['cgate_observes'] = self.calls.get('cgate_observes', 0) + 1
+            if stats is not None:
+                from experiments.numerical_qk_reuse.v31_logit_stats import RowStats, observe_logits_from_stats
+                n = self.step_ctx['n']
+                if stats.argmax.ndim != 2 or stats.argmax.shape[0] != 1 or not 0 < n <= stats.argmax.shape[1]:
+                    raise ValueError('fused-stats sampler/query geometry mismatch')
+                stats = RowStats(*(t[:, :n] for t in (stats.argmax, stats.max, stats.lse, stats.entropy)))
+                observe_logits_from_stats(self.runtime['state'], stats, accepted, cur_step)
+                self.calls['fused_stat_observes'] = self.calls.get('fused_stat_observes', 0) + 1
+                return
             self.runtime['state'].observe_logits(scaled_logits, accepted, cur_step)
 
     # ------------------------------------------------------------------ GLOBAL decoder attention
@@ -612,10 +635,16 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
         scaled = sample_step(*args, **kwargs)
         a = _ACTIVE
         if a is not None and a.bound and a.step_ctx is not None and not a.step_ctx['encoder']:
-            accepted = None
-            if a.needs_accepted():
+            accepted = stats = None
+            if a.fused_stats_eligible():
+                from experiments.numerical_qk_reuse.v31_logit_stats import accepted_from_entropy, row_stats
+                stats = row_stats(scaled)                                  # all CL rows, as the sampler sorts them
+                if a.needs_accepted():
+                    accepted = accepted_from_entropy(
+                        stats.entropy, float(signature.bind(*args, **kwargs).arguments['entropy_bound']))
+            elif a.needs_accepted():
                 accepted = accepted_mask(scaled, float(signature.bind(*args, **kwargs).arguments['entropy_bound']))
-            a.on_sample(scaled, accepted)
+            a.on_sample(scaled, accepted, stats=stats)
         return scaled
 
     def forward_patched(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale=None,

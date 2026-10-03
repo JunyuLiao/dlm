@@ -2,12 +2,14 @@
 
 Only the declared method fields change: the GLOBAL threshold shift (`threshold_shift`, or none = the calibrated base
 threshold), the query sensitivity (`sensitivity='cgate'`, the group member's C gate), the re-decision interval
-(`decision_interval` 6 or 12), 64-row keep maps (`q_block=64`) and cross-canvas carry (`carry_canvases=K`, which
-replaces `carry_first`; observe every K-th canvas). Every other field, the parent
+(`decision_interval` 6 or 12), 64-row keep maps (`q_block=64`), cross-canvas carry (`carry_canvases=K`, which
+replaces `carry_first`; observe every K-th canvas) and the M2 compact pooled V term (`mu_mode='pooled_compact'`: the
+risk uses the per-tile mean of the projected V instead of the attention-weighted one, so the fused observation writes
+no per-row mu). Every other field, the parent
 v20 config and all source pins stay byte-identical; the fingerprint is recomputed with v21's own function and the
 result must pass v21.validate_effective in this deployment. Run with cwd = the deployment, PYTHONPATH=src:.
 usage: python v31_make_variant_config.py BASE_CONFIG OUT_CONFIG [--shift NAME|none] [--sensitivity cgate]
-       [--interval 6|12] [--q-block 64] [--carry-canvases K]
+       [--interval 6|12] [--q-block 64] [--carry-canvases K] [--mu-mode pooled_compact]
 """
 import argparse
 import json
@@ -25,6 +27,7 @@ def main():
     p.add_argument('--interval', type=int, default=None, choices=(6, 12))
     p.add_argument('--q-block', type=int, default=None, choices=(64,))
     p.add_argument('--carry-canvases', type=int, default=None, choices=(2, 3, 4, 8))
+    p.add_argument('--mu-mode', default=None, choices=('pooled_compact',))
     a = p.parse_args()
     base = json.loads(a.base.read_text())
     v21.validate_effective(base, base['condition'])
@@ -46,9 +49,11 @@ def main():
     if a.carry_canvases is not None:
         cfg.pop('carry_first', None)
         cfg['carry_canvases'] = a.carry_canvases
+    if a.mu_mode is not None:
+        cfg['mu_mode'] = a.mu_mode
     changed = sorted(k for k in set(cfg) | set(base) if k != 'fingerprint' and cfg.get(k) != base.get(k))
     if not set(changed) <= {'threshold_shift', 'sensitivity', 'decision_interval', 'q_block', 'carry_canvases',
-                            'carry_first'}:
+                            'carry_first', 'mu_mode'}:
         raise ValueError(f'undeclared change: {changed}')
     cfg['fingerprint'] = v21._fingerprint(cfg)
     v21.validate_effective(cfg, cfg['condition'])

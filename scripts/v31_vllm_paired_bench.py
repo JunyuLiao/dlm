@@ -16,7 +16,8 @@ ceil(output / 256)), denoising forwards N = sampler calls - C, prefill / decode 
 synchronized), per-step decode times summary, finish reason, adapter + method receipts. Private: raw completion with
 special tokens (for the v15 final-channel LongBench scorer), id, finish reason.
 usage: python v31_vllm_paired_bench.py MODEL MANIFEST_DIR CELLS_JSON OUT_JSONL PRIVATE_JSONL ARM CG [CONFIG_JSON]
-  env: FIX_51994=1 (backport the upstream FULL-graph causal-buffer fix), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
+  env: FIX_51994=1 (backport the upstream FULL-graph causal-buffer fix), LOGIT_STATS=fused (one-pass sampler-hook
+       statistics, v31_logit_stats; default legacy torch ops), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
        V27_ADAPTER_DIR (overlay holding vllm_adapter.py), SHARD=k/K (take cells k, k+K, ...)
 """
 import hashlib
@@ -82,7 +83,8 @@ def main():
             config = json.loads(Path(config_path).read_text())
         adapter = vllm_adapter.VllmMethodAdapter(text.layer_types, config=config,
                                                  condition=None if config is None else config['condition'], arm=arm,
-                                                 mage_k=int(os.environ.get('MAGE_K', '1024')))
+                                                 mage_k=int(os.environ.get('MAGE_K', '1024')),
+                                                 logit_stats=os.environ.get('LOGIT_STATS', 'legacy'))
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -108,7 +110,8 @@ def main():
                 gpu=torch.cuda.get_device_name(), max_model_len=max_len, chunk=chunk, block_size=kw['block_size'],
                 gpu_memory_utilization=kw['gpu_memory_utilization'], seed_base=seed_base, adapter_sha256=adapter_sha,
                 method_fingerprint=None if config is None else config.get('fingerprint'), fix_51994=fix_51994,
-                mage_k=int(os.environ.get('MAGE_K', '1024')) if arm == 'mage' else None)
+                mage_k=int(os.environ.get('MAGE_K', '1024')) if arm == 'mage' else None,
+                logit_stats=os.environ.get('LOGIT_STATS', 'legacy') if arm == 'method' else None)
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]
