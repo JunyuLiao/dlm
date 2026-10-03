@@ -1,3 +1,17 @@
+# V29 active handoff (2026-10-02 21:48, UTC-5)
+
+Branch `research/vllm-confirmation-20261002`, from V28 `e5e1ffcc8`.
+Preparing expanded four-arm LongBench59/AIME30/HumanEval164 panels with8
+engine seeds and1 timed repeat; qualification/scoring must pass before launch.
+No new panel is running yet. Existing V28 preview remains on its original branch.
+32K overhead attribution is pending independent profiling. Opt-in fused paged
+KV copy is implemented with42 CPU tests across copy and adapter lifecycle guards;
+GPU equality/component qualification pending. Regroup output-scatter/LSE fusion
+is being prepared against identically fused natural Q64. No new speed claim.
+Read `docs/CONFIRMATION_CAMPAIGN_V29_20261002.md` for predeclared component protocol.
+
+## Inherited V28 snapshot (historical)
+
 # V28 active handoff (2026-10-02 21:02 (UTC-5))
 
 - Branch `research/vllm-variants-20261002`, parent base `9b027df8f`; generation deploy `dcfdb8730` frozen.

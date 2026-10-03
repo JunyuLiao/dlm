@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 21:02 (UTC-5)",
-    "branch": "research/vllm-variants-20261002",
-    "verified_commit": "78f4ea006",
+    "updated_local": "2026-10-02 21:48 (UTC-5)",
+    "branch": "research/vllm-confirmation-20261002",
+    "verified_commit": "e5e1ffcc8",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,10 +16,8 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "Parent V18b complete: default-dense W gain, matched-native increment unproven; six-arm four-engine-seed preview running; new-model sparse ports unimplemented.",
-    "running": [
-      "mpk seed4_preview001:24engine workers,288timed+144warm, frozen generation dcfdb8730"
-    ],
+    "headline": "V29 expanded controls/seeds/short-task protection preparing; fused-copy CPU-qualified, no new GPU result.",
+    "running": [],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
@@ -163,9 +161,9 @@
       "port_status": "Resolved: unchanged main core runs in vLLM with patched paged FA4 and alias split; V18 preparing."
     },
     "next_steps": [
-      "Close and strictly score frozen seed4 preview; inspect by-seed N and clustered accuracy.",
-      "Freeze larger distinct-question confirmation with expanded matched controls only after preview screening.",
-      "New-model ports require official-stack actual-forward and KV/mask event qualification before sparse algorithms."
+      "GPU-qualify exact fused paged copy and isolated32K profile.",
+      "Freeze and qualify dataset-specific expanded panel/scorer before formal launches.",
+      "Test regroup scatter+merge against identically fused natural reference."
     ],
     "e15": {
       "verdict": "c01 not adopted (per-step 0.98-1.00, 64K accuracy risk); main pooled over 18 seeds",
@@ -335,6 +333,20 @@
       "matched_control_questions_per_bin": 4,
       "noninferiority_established": false,
       "no_merge": true
+    },
+    "separate_v28_campaign": "Original V28 branch owns seed4 preview and its completion coordinator; consult its live status.",
+    "v29": {
+      "status": "specification_and_cpu_qualification",
+      "spec": "docs/CONFIRMATION_CAMPAIGN_V29_20261002.md",
+      "copy_tests": 42,
+      "gpu_seconds": 0,
+      "expanded_questions": {
+        "longbench": 59,
+        "aime": 30,
+        "humaneval": 164
+      },
+      "distinct_engine_seeds": 8,
+      "arms": 4
     }
   },
   "task": "M3 output numerics and trajectory isolation",

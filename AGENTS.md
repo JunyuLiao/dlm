@@ -1,3 +1,10 @@
+# V29 active branch overlay
+
+Current branch is `research/vllm-confirmation-20261002`, from V28 `e5e1ffcc8`.
+Read `docs/CONFIRMATION_CAMPAIGN_V29_20261002.md` first. V28 and its running
+completion coordinator are separate and must not be modified. Inherited safety,
+privacy, test, freeze and fairness rules below remain mandatory.
+
 # V28 branch overlay
 
 Current working branch is `research/vllm-variants-20261002`, an independent continuation

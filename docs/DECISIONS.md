@@ -521,3 +521,12 @@ is pushed; private status is authoritative. It uses separately qualified CPU
 scorer f0d3cd000, checks frozen identities and all workers, then publishes only
 aggregates behind unchanged-local/remote-HEAD guards. No new GPU launch or
 automatic favorable scientific conclusion. Any failure stops for review.
+
+
+## V29 expansion and fused-copy qualification specified (2026-10-02, UTC-5)
+
+See `docs/CONFIRMATION_CAMPAIGN_V29_20261002.md`. New branch from V28 e5e1ffcc8;
+no change to its running preview/finalizer.42 CPU copy/address/adapter tests pass.
+GPU copy/component qualification and expanded dataset panels pending; no new
+performance or accuracy result. Standard copy optimization must apply to matched
+all-kept/main controls. Regroup O-scatter fusion is a separately named candidate.

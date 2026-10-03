@@ -126,13 +126,15 @@ class _PrefixCache:
 
 class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
-                 canvas_buffers='legacy'):
+                 canvas_buffers='legacy', kv_copy_backend='torch'):
         if arm not in ('method', 'allkept', 'native'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
             raise ValueError('lifecycle must be legacy or request_clear')
         if canvas_buffers not in ('legacy', 'release_after_invalidate'):
             raise ValueError('canvas_buffers must be legacy or release_after_invalidate')
+        if kv_copy_backend not in ('torch', 'triton'):
+            raise ValueError('kv_copy_backend must be torch or triton')
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
         if arm == 'method':
@@ -150,6 +152,7 @@ class VllmMethodAdapter:
         self.config, self.condition, self.arm = config, condition, arm
         self.lifecycle = lifecycle      # explicit V28 execution setting, readable by runner receipts
         self.canvas_buffers = canvas_buffers
+        self.kv_copy_backend = kv_copy_backend
         self.runtime = self.stub = self._stack = None
         self.bound = False               # True only while a request is in flight (dummy/warm-up runs pass through)
         self.profile, self._events = bool(profile), []   # CUDA events around every intercepted GLOBAL call
@@ -166,6 +169,8 @@ class VllmMethodAdapter:
         self._split_cache = []           # (lists object, split lists) for held maps
         self.calls = dict(global_calls=0, prefix_copies=0, canvas_refreshes=0, invalidates=0, begins=0, observes=0,
                           passthrough=0, order_errors=0, split_fa4_calls=0, split_list_builds=0)
+        if kv_copy_backend == 'triton':
+            self.calls.update(triton_kv_copy_calls=0, triton_kv_copy_elements=0)
         if self.canvas_buffers == 'release_after_invalidate':
             self.calls.update(canvas_release_calls=0, canvas_release_layers=0, canvas_release_bytes=0,
                               canvas_invalidate_epoch=0, canvas_release_epoch=0)
@@ -362,9 +367,12 @@ class VllmMethodAdapter:
             hk, d = key_cache.shape[2], key_cache.shape[3]
             kbuf = torch.empty((1, hk, nk, d), dtype=key_cache.dtype, device=key_cache.device)
             vbuf = torch.empty_like(kbuf)
-            pages = block_table[: (nk + page - 1) // page].long()
-            kbuf[0].copy_(key_cache[pages].reshape(-1, hk, d)[:nk].transpose(0, 1))
-            vbuf[0].copy_(value_cache[pages].reshape(-1, hk, d)[:nk].transpose(0, 1))
+            if self.kv_copy_backend == 'triton':
+                self._copy_paged(key_cache, value_cache, block_table, kbuf, vbuf, 0, nk)
+            else:
+                pages = block_table[: (nk + page - 1) // page].long()
+                kbuf[0].copy_(key_cache[pages].reshape(-1, hk, d)[:nk].transpose(0, 1))
+                vbuf[0].copy_(value_cache[pages].reshape(-1, hk, d)[:nk].transpose(0, 1))
             b = dict(k=kbuf, v=vbuf, prefix=prefix, nk=nk, pk=kbuf[:, :, :prefix], pv=vbuf[:, :, :prefix])
             self.buffers[layer] = b
             if stream is not None:
@@ -372,13 +380,22 @@ class VllmMethodAdapter:
             self.calls['prefix_copies'] += 1
         else:
             first, last = prefix // page, (nk - 1) // page
-            pages = block_table[first: last + 1].long()
-            off = prefix - first * page
-            hk, d = key_cache.shape[2], key_cache.shape[3]
-            b['k'][0, :, prefix:].copy_(key_cache[pages].reshape(-1, hk, d)[off: off + n].transpose(0, 1))
-            b['v'][0, :, prefix:].copy_(value_cache[pages].reshape(-1, hk, d)[off: off + n].transpose(0, 1))
+            if self.kv_copy_backend == 'triton':
+                self._copy_paged(key_cache, value_cache, block_table, b['k'], b['v'], prefix, n)
+            else:
+                pages = block_table[first: last + 1].long()
+                off = prefix - first * page
+                hk, d = key_cache.shape[2], key_cache.shape[3]
+                b['k'][0, :, prefix:].copy_(key_cache[pages].reshape(-1, hk, d)[off: off + n].transpose(0, 1))
+                b['v'][0, :, prefix:].copy_(value_cache[pages].reshape(-1, hk, d)[off: off + n].transpose(0, 1))
             self.calls['canvas_refreshes'] += 1
         return b
+
+    def _copy_paged(self, key, value, table, out_key, out_value, start, count):
+        from experiments.numerical_qk_reuse.v29_paged_copy import copy_paged_kv
+        copy_paged_kv(key, value, table, out_key, out_value, start, count)
+        self.calls['triton_kv_copy_calls'] += 1
+        self.calls['triton_kv_copy_elements'] += 2 * key.shape[2] * count * key.shape[3]
 
     def forward(self, impl, layer_idx, query, kv_cache, attn_metadata, output):
         ctx = self.step_ctx
