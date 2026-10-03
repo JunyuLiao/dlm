@@ -1,8 +1,9 @@
 # New-model adaptation audit (V28, 2026-10-02)
 
 The two new models have official-stack execution smokes, not ports of the Gemma
-sparse algorithms. LLaDA's toy checks passed; I-DLM's runs reached the length cap,
-so its natural stopping and task quality are not qualified. Do not treat a
+sparse algorithms. LLaDA's toy checks passed; I-DLM's earlier512-token runs hit
+the length cap, but diagnostic003 with4096 budget naturally stopped all3toy calls.
+General task quality remains unqualified for both models. Do not treat a
 substring answer-presence check as benchmark accuracy. See the per-model smoke
 reports under `results/v28_20261002/`.
 

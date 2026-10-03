@@ -1,0 +1,249 @@
+{
+  "kind": "official_dense_stopping_diagnostic",
+  "run_label": "003",
+  "completed": true,
+  "exit_code": 0,
+  "previous_diagnostics_unchanged": true,
+  "engine_count": 1,
+  "engine_seed": 0,
+  "requests": 3,
+  "independent_engine_seeds": 1,
+  "gpu_workers": 1,
+  "performance_claim": false,
+  "quality_benchmark": false,
+  "native_stopping_demonstrated_for_these_toy_requests": true,
+  "general_baseline_quality_qualified": false,
+  "sparse_algorithm_qualified": false,
+  "model": {
+    "repo": "yifanyu/I-DLM-8B",
+    "revision": "3cecd8cd39b9b32486b20aa80f28e81206387720",
+    "shards": 4,
+    "weights_bytes": 16381516824
+  },
+  "source": {
+    "repository": "https://github.com/Introspective-Diffusion/I-DLM",
+    "commit": "a23c1a12ef997c7f3ad616b25bcfb62db39ded68",
+    "compatibility_patch": {
+      "source_commit": "a23c1a12ef997c7f3ad616b25bcfb62db39ded68",
+      "file": "inference/sglang/sglang/srt/dllm/algorithm/idlm_blockN.py",
+      "compatibility_patch": "from __future__ import annotations",
+      "reason": "Python3.10 eager evaluation rejects Tuple[Tensor,Tensor,...] during module import.",
+      "old_sha256": "8e2e1fbd4225cb06112ba38415e43e06bfe4c26fd8fd7894ab204707ed8eb41a",
+      "new_sha256": "a8ef2db3527aab483d894f0c4b7528eff886c920b6b3aa8e4a52e52af83c16c9",
+      "algorithm_logic_changed": false
+    }
+  },
+  "versions": {
+    "sglang": "0.0.0.dev0",
+    "torch": "2.9.1+cu128",
+    "flashinfer_python": "0.6.3",
+    "transformers": "4.57.1",
+    "sgl_kernel": "0.3.21",
+    "cuda_toolchain": {
+      "cuda_nvcc": {
+        "version": "12.8.93",
+        "sha256": "9961b3484b6b71314063709a4f9529654f96782ad39e72bf1e00f070db8210d3",
+        "archive_bytes": 79015464
+      },
+      "cuda_cudart": {
+        "version": "12.8.90",
+        "sha256": "8d566b5fe745c46842dc16945cf36686227536decd2302c372be86da37faca68",
+        "archive_bytes": 1354240
+      },
+      "cuda_cccl": {
+        "version": "12.8.90",
+        "sha256": "0740e9e01e4f15e17c5ab8d68bba4f8ec0eb6b84edccba4ac45112d2d2174e4b",
+        "archive_bytes": 928524
+      },
+      "cuda_nvrtc": {
+        "version": "12.8.93",
+        "sha256": "992f5e4d95cb499f41e442245efa877dbd60c711451afe680a26700d61eb3843",
+        "archive_bytes": 114287212
+      }
+    }
+  },
+  "protocol": {
+    "chat_template": "model supplied chat_template.jinja",
+    "template_sha256": "87a2728cb8dc9fe424d624542f6060ec05a1d285ebbec578bb078900e33396b5",
+    "tokenize": true,
+    "add_generation_prompt": true,
+    "enable_thinking": "official_default_not_overridden",
+    "prompt_token_count": 23,
+    "eos_policy": "Explicit original model generation_config EOS list plus native tokenizer/model EOS, ignore_eos=False",
+    "eos_token_count": 2
+  },
+  "engine": {
+    "dllm_algorithm": "IDLMBlockN",
+    "dtype": "bfloat16",
+    "attention_backend": "flashinfer",
+    "trust_remote_code": true,
+    "mem_fraction_static": 0.8,
+    "max_running_requests": 1,
+    "random_seed": 0
+  },
+  "algorithm_config": {
+    "repository_relative_file": "inference/configs/idlm_blockN4_config.yaml",
+    "sha256": "53ab0a28977434095953e602835fa168cf5caabe74c9758b4ea4ef518fa1d50e",
+    "yaml": "block_size: 7\ngen_block_size: 4\nconfidence_threshold: 0.0\ntemperature: 1.0\ntop_k: 50\ntop_p: 0.95\nuse_spec_verify: true\n"
+  },
+  "effective_algorithm_sampling": {
+    "temperature": 1.0,
+    "top_k": 50,
+    "top_p": 0.95
+  },
+  "sampling_precedence_verified": true,
+  "sampling_precedence": "IDLMBlockN reads temperature/top_k/top_p from algorithm_config at initialization and uses self fields for sampling. Request fields do not override these sampling values in this pinned implementation; request max_new_tokens/EOS control stopping.",
+  "request_sampling": {
+    "max_new_tokens": 4096,
+    "temperature": 1.0,
+    "top_p": 0.95,
+    "top_k": 50,
+    "ignore_eos": false
+  },
+  "diagnostic_early_stop": false,
+  "watchdog_seconds": 1200,
+  "toy_runs": [
+    {
+      "request_index": 1,
+      "latency_s": 136.2356005019974,
+      "completion_tokens": 868,
+      "finish_reason": {
+        "type": "stop",
+        "length": null
+      },
+      "diagnostics": {
+        "actual_output_ids_available": true,
+        "actual_output_token_count": 868,
+        "eos_in_api_output": true,
+        "eos_count": 1,
+        "first_eos_position_1based": 868,
+        "last_eos_position_1based": 868,
+        "finish_matched_native_eos": true,
+        "think_open_count": 1,
+        "think_close_count": 1,
+        "unclosed_think_count": 0,
+        "answer_presence_anywhere": true,
+        "answer_presence_after_last_think_close": true,
+        "repeated_token_4gram_excess_fraction": 0.14450867052023122,
+        "repeated_token_8gram_excess_fraction": 0.0,
+        "tail256_repeated_token_8gram_excess_fraction": 0.0,
+        "decoded_character_count": 2343
+      },
+      "prompt_token_count": 23
+    },
+    {
+      "request_index": 2,
+      "latency_s": 1.5489406409906223,
+      "completion_tokens": 549,
+      "finish_reason": {
+        "type": "stop",
+        "length": null
+      },
+      "diagnostics": {
+        "actual_output_ids_available": true,
+        "actual_output_token_count": 549,
+        "eos_in_api_output": true,
+        "eos_count": 1,
+        "first_eos_position_1based": 549,
+        "last_eos_position_1based": 549,
+        "finish_matched_native_eos": true,
+        "think_open_count": 1,
+        "think_close_count": 1,
+        "unclosed_think_count": 0,
+        "answer_presence_anywhere": true,
+        "answer_presence_after_last_think_close": true,
+        "repeated_token_4gram_excess_fraction": 0.13186813186813187,
+        "repeated_token_8gram_excess_fraction": 0.007380073800738007,
+        "tail256_repeated_token_8gram_excess_fraction": 0.0,
+        "decoded_character_count": 1528
+      },
+      "prompt_token_count": 23
+    },
+    {
+      "request_index": 3,
+      "latency_s": 3.465387792006368,
+      "completion_tokens": 1200,
+      "finish_reason": {
+        "type": "stop",
+        "length": null
+      },
+      "diagnostics": {
+        "actual_output_ids_available": true,
+        "actual_output_token_count": 1200,
+        "eos_in_api_output": true,
+        "eos_count": 1,
+        "first_eos_position_1based": 1200,
+        "last_eos_position_1based": 1200,
+        "finish_matched_native_eos": true,
+        "think_open_count": 1,
+        "think_close_count": 1,
+        "unclosed_think_count": 0,
+        "answer_presence_anywhere": true,
+        "answer_presence_after_last_think_close": true,
+        "repeated_token_4gram_excess_fraction": 0.189640768588137,
+        "repeated_token_8gram_excess_fraction": 0.010058675607711651,
+        "tail256_repeated_token_8gram_excess_fraction": 0.004016064257028112,
+        "decoded_character_count": 3286
+      },
+      "prompt_token_count": 23
+    }
+  ],
+  "forward_counts_available": false,
+  "actualN": null,
+  "forward_counts_reason": "Internal total_forwards is cumulative, is not verified as exposed by Engine.generate per request, and graph capture/general model-call coverage is unverified; the pure-prefill path does increment it. No instrumentation patch was applied.",
+  "private_retention": {
+    "raw_response_text_retained": true,
+    "actual_output_token_ids_retained": true,
+    "response_records": 3,
+    "private_file_mode": "0600",
+    "private_run_directory_mode": "0700"
+  },
+  "offline_verification": {
+    "frozen_bytes_match": true,
+    "recomputed_statistics_match_all_requests": true,
+    "api_token_count_matches_completion_count_all_requests": true,
+    "additional_gpu_workers": 0
+  },
+  "metric_definitions": {
+    "eos_position": "One-based position in actual API output token IDs, including EOS.",
+    "think_counts": "Literal opening/closing thinking tags in actual response text.",
+    "answer_presence": "Expected answer substring only; neither exact final-answer correctness nor benchmark accuracy.",
+    "repeated_token_ngram_excess_fraction": "(overlapping ngram window count - distinct ngram window count) / window count. All output token IDs are included; tail256 uses the last 256 IDs."
+  },
+  "gpu_accounting": {
+    "reservation_definition": "One GPU reserved from idle confirmation through complete worker exit, including import, model load, compilation, generation, offline diagnostics and teardown.",
+    "run003_reserved_seconds": 193.17520130999037,
+    "idlm_all_attempts_reserved_seconds": 570.6601686279755,
+    "all_new_model_attempts_reserved_seconds": 916.2096867820073,
+    "first_request_includes_compilation": true,
+    "model_load_seconds": 47.202883884019684,
+    "gpu_released_memory_mib": 0,
+    "gpu_released_utilization_percent": 0,
+    "prelaunch_transfer_failure_retained": true,
+    "prelaunch_transfer_failure_gpu_workers": 0,
+    "prelaunch_transfer_failure_reserved_seconds": 0
+  },
+  "diagnosis": {
+    "all_requests_naturally_stopped_with_eos": true,
+    "all_completion_lengths_exceed_512": true,
+    "all_thinking_sections_closed": true,
+    "supports_budget_limited_512_diagnostic": true,
+    "interpretation": "These three requests naturally terminate beyond 512 tokens with closed thinking sections and low repeated 8gram fractions. This supports insufficient 512-token budget rather than an obvious sustained repetition or EOS-list failure for this toy.",
+    "causal_isolation": false,
+    "limits": "One engine seed and three sequential requests, not three independent seeds. Longer earlier requests consume more RNG, so later trajectories are not paired with run002. No general task quality, benchmark timing, sparse equivalence or actual-forward-count claim."
+  },
+  "source_evidence": {
+    "official_chat_example": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/README.md#L47",
+    "algorithm_configuration_sampling": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/dllm/algorithm/idlm_blockN.py#L155",
+    "clean_sampling_uses_algorithm_fields": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/dllm/algorithm/idlm_blockN.py#L738",
+    "chat_template_application": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/entrypoints/openai/serving_chat.py#L462",
+    "length_limit_checked_first": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/managers/schedule_batch.py#L1053",
+    "eos_stop_check": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/managers/schedule_batch.py#L979",
+    "model_chat_template": "https://huggingface.co/yifanyu/I-DLM-8B/blob/3cecd8cd39b9b32486b20aa80f28e81206387720/chat_template.jinja",
+    "official_project_example": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/README.md#L108",
+    "stop_list_normalization": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/sampling/sampling_params.py#L70",
+    "dllm_per_token_finish": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/managers/scheduler_output_processor_mixin.py#L574",
+    "burst_per_token_finish": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/managers/scheduler.py#L1246",
+    "api_returns_output_ids": "https://github.com/Introspective-Diffusion/I-DLM/blob/a23c1a12ef997c7f3ad616b25bcfb62db39ded68/inference/sglang/sglang/srt/managers/tokenizer_manager.py#L1537"
+  }
+}

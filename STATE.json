@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 20:23 (UTC-5)",
+    "updated_local": "2026-10-02 20:33 (UTC-5)",
     "branch": "research/vllm-variants-20261002",
-    "verified_commit": "f0d3cd000",
+    "verified_commit": "6d05a6fb7",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -20,7 +20,7 @@
     "running": [
       "Parent V18b on dllm; original finalizer unchanged",
       "mpk seed4_preview001:24engine workers,288timed+144warm, frozen generation dcfdb8730",
-      "dlm2: I-DLM stopping diagnostic003 running,1engine seed0 x3requests,official4096 cap; baseline only"
+      "dlm2 idle; I-DLM diagnostic003 closed"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -281,9 +281,10 @@
     },
     "v28_new_models": {
       "llada": "official dense execution smoke passed; sparse variants not implemented",
-      "idlm": "chat smoke executes; length stopping512 all3; baseline quality unqualified; sparse variants not implemented",
-      "reserved_gpu_seconds_all_attempts": 723.034485472017,
-      "event_prototype_tests": 12
+      "idlm": "official dense toy stopping passed3/3 at868/549/1200 tokens; benchmark quality and sparse ports unimplemented",
+      "reserved_gpu_seconds_all_attempts": 916.2096867820073,
+      "event_prototype_tests": 12,
+      "idlm_diagnostic003": "results/v28_20261002/idlm_stopping_diagnostic_003/summary.json"
     },
     "v28_seed4_family": {
       "spec": "results/v28_20261002/specs/v28_seed4_family.json",

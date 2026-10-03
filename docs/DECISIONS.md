@@ -448,3 +448,17 @@ next commit state and actual/retired execution identity differ. Async copy plus
 a wait at prepare would merely relocate synchronization. No routing optimization
 or shadow trace implemented; frozen preview unchanged. See
 `docs/V28_CPU_METADATA_AUDIT_20261002.md`.
+
+## I-DLM natural stopping diagnostic003 complete — 2026-10-02 20:33 (UTC-5)
+
+All3official dense toy calls naturally stopped at EOS with closed thinking sections,
+at868/549/1200 output tokens. Actual API IDs verify one EOS at the final position;
+8gram excess repetition fractions0/0.00738/0.01006. This supports the earlier512
+budget being too short for this toy; it is not a matched causal experiment because
+later RNG trajectories change with earlier output length. Oneengine seed0, not3seeds.
+Answer-substring presence does not establish exact final-answer or benchmark accuracy.
+No sparse method or verified actual-forward count is implemented for this model.
+Source: `results/v28_20261002/idlm_stopping_diagnostic_003/`. Reserved193.1752013GPU
+seconds; I-DLM all attempts570.6601686; all new models916.2096868. Failed prelaunch
+transfer check used0GPU seconds. Worker ended, GPU released, private output/statistic
+recomputation and frozen-byte checks passed. Earlier reports remain unchanged.

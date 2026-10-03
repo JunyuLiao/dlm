@@ -801,3 +801,17 @@ prefix/layout epochs, edits including A-to-B-to-A, request reset and rollback.
 They install no native hook, measure no forwards, and implement no sparse attention.
 Unchanged token IDs do not prove unchanged hidden states/QKV or safe support reuse.
 New-model adaptation audit states all unimplemented GPU/mask/KV/stream boundaries.
+
+## I-DLM natural stopping diagnostic003 complete — 2026-10-02 20:33 (UTC-5)
+
+All3official dense toy calls naturally stopped at EOS with closed thinking sections,
+at868/549/1200 output tokens. Actual API IDs verify one EOS at the final position;
+8gram excess repetition fractions0/0.00738/0.01006. This supports the earlier512
+budget being too short for this toy; it is not a matched causal experiment because
+later RNG trajectories change with earlier output length. Oneengine seed0, not3seeds.
+Answer-substring presence does not establish exact final-answer or benchmark accuracy.
+No sparse method or verified actual-forward count is implemented for this model.
+Source: `results/v28_20261002/idlm_stopping_diagnostic_003/`. Reserved193.1752013GPU
+seconds; I-DLM all attempts570.6601686; all new models916.2096868. Failed prelaunch
+transfer check used0GPU seconds. Worker ended, GPU released, private output/statistic
+recomputation and frozen-byte checks passed. Earlier reports remain unchanged.

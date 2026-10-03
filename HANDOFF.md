@@ -1,12 +1,12 @@
-# V28 active handoff (2026-10-02 20:14 (UTC-5))
+# V28 active handoff (2026-10-02 20:33 (UTC-5))
 
 - Branch `research/vllm-variants-20261002`, parent base `9b027df8f`; generation deploy `dcfdb8730` frozen.
 - Qualification004 closed all five request workers successfully: Q128/Q64 legacy canvas, Q128/Q64 release, allkept release. Timed monitored JIT events and allocator retries zero; no performance/accuracy inference from one item.
 - Four engine seeds x two sequential repeats x six questions are frozen for six variants (48 timed/variant). Family spec committed before launch. seed4_preview001 now running on mpk:24engines,288timed+144warm. Repeats are not independent seeds.
 - Component evidence: Q64/Q128 0.94575; held-regroup/natural Q64 total 1.02753 (negative). Full144 alias4/2 mean0.98836 with32K slower; retain alias2.
 - Parent V18b continues on dllm unchanged; its formal scoring/finalizer belongs to the original worktree. Retain allocator costs; do not alter original campaign.
-- LLaDA official dense environment smoke passed. I-DLM official chat smoke runs but all three outputs reach512; natural stopping/task quality unqualified. Neither model has our sparse variants implemented. See new-model adaptation audit.
-- New-model attempts total723.0345GPU seconds; dlm2 stopping diagnostic003 running (official4096 cap, private output retention). mpk qualification004 total867.9727GPU seconds (includes alias sweep and startup/teardown).
+- LLaDA official dense environment smoke passed. I-DLM diagnostic003 naturally stops in all3toy calls at868/549/1200 tokens; general task quality remains unqualified. Neither model has our sparse variants implemented. See new-model adaptation audit.
+- New-model attempts total916.2097GPU seconds; dlm2 idle after diagnostic003. mpk qualification004 total867.9727GPU seconds (includes alias sweep and startup/teardown).
 - Next: close six-arm seed4 preview and run strict scoring, then only supported refinements. Question coverage must expand before request-level or noninferiority claims.
 - Update HANDOFF/docs/STATE.current with every result or status change and push. Private prompts, generated text, gold, token arrays and private paths stay outside Git.
 
