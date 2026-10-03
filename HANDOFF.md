@@ -1,34 +1,32 @@
-## V31 update (2026-10-03 10:10 UTC−5; branch `research/vllm-paired-20261003`) — read this first
+## V31 update (2026-10-03 17:05 UTC−5; branch `research/vllm-paired-20261003`) — read this first
 
 - **Dense baseline:** vLLM 0.30.0 default (FULL) + the exact upstream fix of
   [PR #51994](https://github.com/vllm-project/vllm/pull/51994) (`FIX_51994=1`), seed-paired. The unfixed FULL default
-  froze DiffusionGemma's causal / bidirectional mask and took 19–28% more forwards; never quote V18b–V30 "vs default
-  dense" ratios. Details: `docs/V31_BASELINE_ROOT_CAUSE_20261003.md`.
-- **Panels b–e (96 cells, LongBench-v2 32K / 64K) are scored**
-  (`results/v31_20261003/panels/`):
-  - accuracy is kept;
-  - the C gate removes most of the forward inflation of higher sparsity;
-  - a per-forward gain shows only at 64K (main S/N 0.927);
-  - no significant end-to-end gain yet.
-- **Where time goes:**
-  - Step profile: `results/v31_20261003/step_profile/`.
-  - CUPTI profile: GPU busy about 94% in every arm, so Python overhead is mostly hidden.
-  - Per canvas per GLOBAL layer, the observation kernel (4.7 ms) plus `_dp_build` (3.2 ms) cost more than all
-    sparse calls together (sparse call 0.35 ms vs vLLM dense 1.73 ms at 64K).
-  - The C-gate sampler hook costs 1.9 ms per step.
-- **Efficiency work (opt-in execution switches; formulas unchanged):**
-  - `LOGIT_STATS=fused`: one-pass logit statistics for the C-gate hook (`v31_logit_stats.py`). Panel g measures it.
-  - `DP_BUILD=chunked`: a parallel chunked scan for the dense-prefix build (`v31_dp_chunked.py`).
-  - `OBSERVE=fa4`: the FA4 SM90 dense kernel also writes the per-row tile log-mass through an `AttentionMask`
-    subclass and an aux tensor (`v31_fa4_observe.py`). It is used for compact-mu configs.
-  - `MAGE_SELECT=fa4`: the MAGE port selects from the same FA4 observation instead of the unoptimized FP32 QK.
-- **Running:**
-  - panel f: `m2c`, `m2c_r12` (Fan's M2 compact pooled V). The preview is cheaper on held steps but dearer on
-    observation steps; a profile is queued;
-  - panel g: C gate with `LOGIT_STATS=fused`;
-  - on dllm, a test window between f and g runs the kernel unit tests, `scripts/v31_kernel_bench.py` and two m2c
-    step profiles (legacy vs chunked + FA4 observation).
-- **LLaDA2.1-mini port:** a subagent on branch `research/llada21-sparse-port-20261003` (resumed after a rate limit).
+  froze DiffusionGemma's causal / bidirectional mask (19–28% more forwards). Details:
+  `docs/V31_BASELINE_ROOT_CAUSE_20261003.md`.
+- **Efficiency switches** (opt-in, formulas unchanged, all unit-tested on GPU):
+  - `LOGIT_STATS=fused`: C-gate hook, −4–5% per forward;
+  - `DP_BUILD=chunked`: dense-prefix build 4–7× faster;
+  - `OBSERVE=fa4`: FA4 in-kernel tile log-mass, observation at dense cost for compact mu;
+  - `KV_COPY=triton` / `MERGE=triton`;
+  - `MAGE_SELECT=fa4`: fair MAGE selection.
+  - Overlay7 is the deployed set. Kernel bench: `results/v31_20261003/kernels/`.
+- **Scored frontier** (`results/v31_20261003/panels/frontier_all_arms_vs_fixed_default.md`, 48 cells per length):
+  - Accuracy is kept everywhere except MAGE k=1024 at 32K.
+  - Best per forward: MAGE k=4096 0.84, m2c 0.88, main 0.91 at 64K. No W ratio is significant.
+  - The C gate keeps N/C at 0.99–1.03; MAGE is at 1.09–1.30.
+  - 96K: m2c S/N 0.83 but N/C 1.19; exact-mu arms OOM at MEM 0.92.
+- **Honest status:** with the same efficient execution, the fair MAGE port is at least as good as the method per forward
+  and end to end. Panel k (running, ~23:00 UTC) tests selection quality at a fixed budget:
+  - keep 12% / 5%;
+  - risk vs mass ranking;
+  - with and without the C gate.
+- **Prior art to cite:** SparseD (ICLR 2026, fixed steps), MAGE, LoSA, PulseCol, SeerAttention (in-kernel block stats).
+- **LLaDA2.1-mini:**
+  - Subagent branch `research/llada21-sparse-port-20261003`. CPU side is done; 18 tests pass.
+  - The S1 GPU step failed because SGLang's breakable CUDA graph rejects `LogitsProcessorOutput`. The subagent is
+    moving S1 to eager, gated on panel k.
+  - Stray `~/.cache/sglang` on dlm2 (jit log and empty dirs from 10:45 UTC) is reported to the user for removal.
 
 ## Paused by user after short-suite completion — 2026-10-03 04:40 (UTC-5)
 
