@@ -17,31 +17,31 @@ establish end-to-end speedup.
 
 ## Method
 
-For a value vector \(v_k\), Gaussian32 constructs a fixed sketch
+For a value vector $v_k$, Gaussian32 constructs a fixed sketch
 
-\[
+$$
 z_k = v_k R, \qquad R\in\mathbb{R}^{d_v\times32},
-\]
+$$
 
-where the entries of \(R\) are independent \(\mathcal{N}(0,1/32)\) samples.
+where the entries of $R$ are independent $\mathcal{N}(0,1/32)$ samples.
 The projection is generated once per native layer and KV head (seed `1729`)
 and is reused for the request.
 
-For query \(i\) and candidate KV tile \(J\), the router computes the
-within-tile softmax weights \(w^J_{ik}\), the projected weighted value
+For query $i$ and candidate KV tile $J$, the router computes the
+within-tile softmax weights $w^J_{ik}$, the projected weighted value
 direction
 
-\[
+$$
 \mu^J_i = \sum_{k\in J} w^J_{ik}z_k,
-\]
+$$
 
-and the candidate attention mass \(\alpha^J_i\) from the running softmax
-statistics. If \(o_i\) is the projected output accumulated from previously
+and the candidate attention mass $\alpha^J_i$ from the running softmax
+statistics. If $o_i$ is the projected output accumulated from previously
 retained tiles, the estimated candidate contribution is
 
-\[
+$$
 \Delta^J_i = \alpha^J_i(\mu^J_i-o_i).
-\]
+$$
 
 This keeps blocks with large attention mass and a distinct value direction,
 while allowing low-mass, redundant, or internally cancelling blocks to be
@@ -56,26 +56,26 @@ threshold. Original BF16 values are used for the retained attention output.
 Gaussian32 can receive one FP32 sensitivity coefficient per query row. The
 kernel applies it to the value-routing risk before the tile maximum is taken:
 
-\[
+$$
 \rho_i \leftarrow \rho_i + \log s_i.
-\]
+$$
 
 The C_gate state is causal. At the first denoising call, every query receives
-the maximum coefficient \(s_i=1+\beta\). After a call finishes, the state is
+the maximum coefficient $s_i=1+\beta$. After a call finishes, the state is
 updated from the completed sampler mask and completed logits only:
 
-\[
+$$
 u^C_i=\sqrt{\max(1-p_i,0)},\qquad
 q_i\leftarrow\gamma_q q_i+(1-\gamma_q)\,\mathbf{1}[i\text{ was renoised}],
-\]
+$$
 
-\[
+$$
 g_i=1-\exp(-r_i/\tau),\qquad
 h_i=1-g_i(1-q_i)(1-u^C_i),\qquad
 s_i=\operatorname{clip}(1+\beta h_i,1,1+\beta).
-\]
+$$
 
-Here \(p_i\) is the completed-call top-1 probability and \(r_i\) is the
+Here $p_i$ is the completed-call top-1 probability and $r_i$ is the
 completed stable-acceptance run, reset by a top-1 flip. Thus a query remains
 protected until it has both stopped being renoised and accumulated stable
 history. C_gate does not introduce a phase-specific threshold: one calibrated

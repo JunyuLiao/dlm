@@ -19,18 +19,18 @@ calls, and a physical skip count is not a wall-clock speedup claim.
 
 For each native layer and KV head, the projection cache stores
 
-\[
+$$
 z_k=v_kR,\qquad R_{ab}\sim\mathcal{N}(0,1/32),
-\]
+$$
 
 with a fixed projection seed (`1729`). For query row `i` and candidate tile
 `J`, the router computes a within-tile softmax, the projected weighted
-direction \(\mu_i^J\), and candidate mass \(\alpha_i^J\). If \(o_i\) is the
+direction $\mu_i^J$, and candidate mass $\alpha_i^J$. If $o_i$ is the
 projected output from earlier retained tiles, the centered candidate change is
 
-\[
+$$
 \Delta_i^J=\alpha_i^J(\mu_i^J-o_i).
-\]
+$$
 
 The physical decision is the maximum risk over the valid rows in a query tile.
 The Hopper implementation compares a normalized log magnitude of this change
