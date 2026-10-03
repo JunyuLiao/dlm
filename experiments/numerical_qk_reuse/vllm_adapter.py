@@ -132,7 +132,7 @@ class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
                  canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024,
                  logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
-                 trace_canvas=False, dense_when=None):
+                 trace_canvas=False, dense_when=None, regroup_diag=False):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -182,6 +182,10 @@ class VllmMethodAdapter:
         # diagnostic receipts (opt-in): denoising steps per canvas and the canvas mean token entropy per step, i.e.
         # the quantity the official sampler compares with its confidence threshold to stop a canvas
         self.trace_canvas = bool(trace_canvas)
+        # diagnostic (opt-in): at every dense-prefix threshold decision, the kept fraction of prefix tiles the same need
+        # matrix would give at 128-row blocks (executed), natural 64-row halves, regrouped 64-row halves (rows sorted by
+        # need count, chw/value_aware idea; or by a random projection of the need vector) and per row (ideal)
+        self.regroup_diag = bool(regroup_diag)
         # v31 step-level dense fallback (named variant, method arm only): 'conv:THETA' runs every GLOBAL call of the
         # next denoising step with vLLM's own dense FA4 once the canvas mean token entropy of the previous step is below
         # THETA x the sampler's confidence threshold (the canvas is about to converge); 'step:S' does so from the S-th
@@ -236,6 +240,7 @@ class VllmMethodAdapter:
         self._canvas_steps, self._cur_steps, self._ent_trace, self._conf_threshold = [], 0, [], None
         self._dense_next = self._dense_now = False
         self._canvas_step = 0
+        self._regroup_acc, self._regroup_n = None, 0
         if self.arm == 'mage':
             self.calls.update(mage_selections=0, mage_reused_calls=0, mage_kept_prefix_tiles=0, mage_prefix_tiles=0)
         if self.arm in ('allkept', 'native', 'mage'):
@@ -280,7 +285,8 @@ class VllmMethodAdapter:
         self._stack = self.runtime = self.stub = None
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
-        return dict(adapter=dict(self.calls, **self._kept_receipt()), method=counters, timing=timing,
+        return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._regroup_receipt()), method=counters,
+                    timing=timing,
                     trace=self._trace_receipt() or None)
 
     def _end_request_clear(self):
@@ -298,7 +304,8 @@ class VllmMethodAdapter:
                 timing = dict(global_calls_timed=len(ms), global_call_ms_mean=round(sum(ms) / len(ms), 4),
                               global_ms_total=round(sum(ms), 2))
             counters = self.runtime['counters']() if self.runtime is not None else None
-            return dict(adapter=dict(self.calls, **self._kept_receipt()), method=counters, timing=timing,
+            return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._regroup_receipt()), method=counters,
+                    timing=timing,
                     trace=self._trace_receipt() or None)
         finally:
             try:
@@ -319,6 +326,36 @@ class VllmMethodAdapter:
                 self._split_cache.clear()
                 self._events.clear()
                 self.bound, self.step_ctx, self.pending_sample = False, None, False
+
+    @torch.no_grad()
+    def _regroup_account(self, state, reference, sensitivity, log_threshold, nq):
+        b, h, qb, pt, _ = state.lognorm.shape
+        if not pt or nq != qb * 128:
+            return
+        hk = reference.shape[1]
+        kh = torch.arange(h, device=reference.device) // (h // hk)
+        risk = state.lognorm - torch.log(reference.float().clamp_min(1e-12))[:, kh][:, :, None, None, None]
+        if sensitivity is not None:
+            risk = risk + torch.log(sensitivity.float()).view(b, 1, qb, 1, 128)
+        need = ((risk >= float(log_threshold)) & (state.eligible[..., None] != 0)).permute(0, 1, 2, 4, 3)  # [b,h,qb,128,pt]
+        k128 = need.any(3).float().mean()
+        k64 = need.view(b, h, qb, 2, 64, pt).any(4).float().mean()
+        def grouped(key):
+            order = torch.argsort(key, dim=-1, stable=True)
+            g = torch.gather(need, 3, order[..., None].expand(-1, -1, -1, -1, pt))
+            return g.view(b, h, qb, 2, 64, pt).any(4).float().mean()
+        gen = torch.Generator(device=need.device).manual_seed(5)
+        proj = torch.randn(pt, device=need.device, generator=gen)
+        vals = torch.stack([k128, k64, grouped(need.sum(-1)), grouped(need.float() @ proj), need.float().mean()])
+        self._regroup_acc = vals if self._regroup_acc is None else self._regroup_acc + vals
+        self._regroup_n += 1
+
+    def _regroup_receipt(self):
+        if not getattr(self, 'regroup_diag', False) or self._regroup_acc is None:
+            return {}
+        m = (self._regroup_acc / self._regroup_n).tolist()
+        return dict(regroup_decisions=self._regroup_n, kept128=round(m[0], 5), kept64=round(m[1], 5),
+                    kept64_regroup_count=round(m[2], 5), kept64_regroup_proj=round(m[3], 5), kept_per_row=round(m[4], 5))
 
     def _trace_receipt(self):
         if not getattr(self, 'trace_canvas', False):
@@ -816,6 +853,17 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
         return sparse_lists(q, k, v, lists, scale)
 
     v27_fa4.sparse_lists = sparse_lists_patched
+    if adapter.regroup_diag:
+        from experiments.numerical_qk_reuse import v27_dense_prefix as dpmod
+        inner_route = dpmod.route
+
+        def route_diag(scores, z, reference, state, *, sensitivity=None, log_threshold, **kw):
+            r = inner_route(scores, z, reference, state, sensitivity=sensitivity, log_threshold=log_threshold, **kw)
+            a = _ACTIVE
+            if a is not None and kw.get('risk_topk') is None and kw.get('risk_budget') is None:
+                a._regroup_account(state, reference, sensitivity, log_threshold, scores.shape[2])
+            return r
+        dpmod.route = route_diag
     if adapter.dp_build == 'chunked':
         from experiments.numerical_qk_reuse import v27_dense_prefix
         from experiments.numerical_qk_reuse.v31_dp_chunked import build_chunked

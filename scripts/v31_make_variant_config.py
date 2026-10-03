@@ -11,7 +11,7 @@ v20 config and all source pins stay byte-identical; the fingerprint is recompute
 result must pass v21.validate_effective in this deployment. Run with cwd = the deployment, PYTHONPATH=src:.
 usage: python v31_make_variant_config.py BASE_CONFIG OUT_CONFIG [--shift NAME|none] [--sensitivity cgate]
        [--interval 6|12] [--q-block 64] [--carry-canvases K] [--mu-mode pooled_compact] [--risk-topk k5|k12|...]
-       [--risk-value mass]
+       [--risk-value mass] [--q-regroup]
 """
 import argparse
 import json
@@ -28,6 +28,7 @@ def main():
     p.add_argument('--sensitivity', default=None, choices=('cgate',))
     p.add_argument('--interval', type=int, default=None, choices=(6, 12))
     p.add_argument('--q-block', type=int, default=None, choices=(64,))
+    p.add_argument('--q-regroup', action='store_true', help='q64r: regroup query rows by need (chw/value_aware)')
     p.add_argument('--carry-canvases', type=int, default=None, choices=(2, 3, 4, 8))
     p.add_argument('--mu-mode', default=None, choices=('pooled_compact',))
     p.add_argument('--risk-topk', default=None, choices=tuple(v21.RISK_TOPKS))
@@ -50,6 +51,8 @@ def main():
         cfg['decision_interval'] = a.interval
     if a.q_block is not None:
         cfg['q_block'] = a.q_block
+    if a.q_regroup:
+        cfg['q_regroup'] = True
     if a.carry_canvases is not None:
         cfg.pop('carry_first', None)
         cfg['carry_canvases'] = a.carry_canvases
@@ -61,7 +64,7 @@ def main():
         cfg['risk_value'] = a.risk_value
     changed = sorted(k for k in set(cfg) | set(base) if k != 'fingerprint' and cfg.get(k) != base.get(k))
     if not set(changed) <= {'threshold_shift', 'sensitivity', 'decision_interval', 'q_block', 'carry_canvases',
-                            'carry_first', 'mu_mode', 'risk_topk', 'risk_value'}:
+                            'carry_first', 'mu_mode', 'risk_topk', 'risk_value', 'q_regroup'}:
         raise ValueError(f'undeclared change: {changed}')
     cfg['fingerprint'] = v21._fingerprint(cfg)
     v21.validate_effective(cfg, cfg['condition'])
