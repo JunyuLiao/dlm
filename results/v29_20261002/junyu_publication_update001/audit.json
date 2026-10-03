@@ -1,0 +1,551 @@
+{
+  "schema": "v29_peer_publication_audit_v1",
+  "previous_ref": "859c0c8fc2a4509a148a3270915f79961e565dee",
+  "reviewed_ref": "b890ff49488474c5d476df44019597dc045a5969",
+  "branch": "ljy/value_aware",
+  "changed_files": 127,
+  "changed_result_files": [],
+  "previous_missing_targets": [
+    {
+      "path": "experiments/value_direction_hopper/aime_query_sensitivity_gated.py",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_query_sensitivity_uniform.py",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_uniform_baselines.py",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/csrc/torch_bridge.cpp",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/csrc/value_direction.cu",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/csrc/value_direction.h",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/cuda.py",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/experiment.py",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/integration.py",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/projection.py",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive.py",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_sensitivity_uniform.py",
+      "present": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/torch_build.py",
+      "present": true
+    },
+    {
+      "path": "tests/test_query_adaptive.py",
+      "present": true
+    },
+    {
+      "path": "tests/test_value_direction_hopper.py",
+      "present": true
+    },
+    {
+      "path": "tests/test_value_direction_hopper_report.py",
+      "present": true
+    }
+  ],
+  "python_ast_checks": [
+    {
+      "path": "experiments/value_direction_hopper/__init__.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_query_sensitivity_gated.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_query_sensitivity_offline.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_query_sensitivity_uniform.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_query_sensitivity_uniform_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_temporal_calibration_v13.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_temporal_calibration_v14.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_temporal_sweep.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_temporal_two_stage.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_tile_diagnostic.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/aime_uniform_baselines.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/analyze_aime_tile_diagnostic.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/assembly_audit.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/benchmark.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/build_variant.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/capture.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/combine_uniform_temporal_results.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/compare_variant.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/cuda.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/dense_local_probe.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/environment.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/experiment.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/finalize_cached_temporal.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/fused.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/generation_smoke.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/humaneval_query_sensitivity.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/humaneval_query_sensitivity_v2.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/humaneval_query_sensitivity_v2_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/integration.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/intervention.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/intervention_policies.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/intervention_study.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/intervention_study_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/intervention_watch.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/launch.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/length_sweep.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/masks.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/microbench.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/native_benchmark.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/nsys_probe.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/numerics.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/postrun.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/projection.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/projection_check.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/protection_refinement.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/protection_study.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/protection_study_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/provenance.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/qualification.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_allocation.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_allocation_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_allocation_watch.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_confirmation.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_granularity.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_guardrail.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_guardrail_ablation.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_guardrail_matrix.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_guardrail_refine.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_guardrail_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_guardrail_timing.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_guardrail_watch.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_replay.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_replay_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_study.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_supplement_watch.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_tile_controls.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_tile_controls_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_tile_controls_watch.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_timing.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_adaptive_watch.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_sensitivity_uniform.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_sensitivity_uniform_analysis.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_signal_audit.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_signal_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_signal_soft_audit.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/query_signal_trace.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/resources.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/s50_analysis.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/s50_performance.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/sparsity_steps.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/sparsity_steps_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/sparsity_steps_watch.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/systems_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/temporal_sensitivity_sweep.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/temporal_sensitivity_sweep_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/tensorrt.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/torch_build.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/trajectory.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/trajectory_experiment.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/trajectory_finish.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/trajectory_fixed48.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/trajectory_interpret.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/trajectory_launch.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/trajectory_report.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/trajectory_watch.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/trt_smoke.py",
+      "passed": true
+    },
+    {
+      "path": "experiments/value_direction_hopper/validate.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_aime_query_sensitivity_uniform_report.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_protection_refinement.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_query_adaptive.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_query_adaptive_allocation.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_query_adaptive_gpu.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_query_adaptive_guardrail.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_query_adaptive_guardrail_matrix.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_query_adaptive_guardrail_refine.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_query_adaptive_guardrail_report.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_query_adaptive_tile_controls.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_query_sensitivity_gated.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_query_sensitivity_uniform.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_query_signal_audit.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_sparsity_steps.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_temporal_sensitivity_sweep.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_value_direction_hopper.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_value_direction_hopper_report.py",
+      "passed": true
+    },
+    {
+      "path": "tests/test_value_direction_trajectory.py",
+      "passed": true
+    }
+  ],
+  "execution": "Read-only git object inspection and Python AST parsing; no peer imports, tests, build or GPU execution.",
+  "imported_peer_implementation": false,
+  "performance_or_accuracy_validated": false
+}

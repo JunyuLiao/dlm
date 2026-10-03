@@ -1322,3 +1322,25 @@ science stays at1342ec0b1; dense diagnostic source isbdd59ee97. No current forma
 deployment or scientific protocol changed. Public diagnostic CPU tests:21;
 private successor tests: components26, dense23, engineering35.
 Only source/status evidence is committed here, not hypothetical GPU results.
+
+## Junyu newly published implementation audited (2026-10-03 01:39 (UTC-5))
+
+Read-only peer pin b890ff49488474c5d476df44019597dc045a5969 supersedes the
+previous859c0c8fc publication boundary. All15 missing linked implementation/test
+targets and the named report test are now present;118 changed Python files
+parse, with no peer code import/test/build/GPU execution. New diff has127files
+and no results changes. No peer branch merge, source absorption or modification.
+See docs/JUNYU_VALUE_AWARE_CODE_REVIEW_20261003.md and the numeric publication
+receipt results/v29_20261002/junyu_publication_update001/audit.json.
+
+Confirmed static defect: ABI4 kernel is rejected by the ABI3-only debug_scores
+guard used in same-logit qualification/tests. Ordinary no-debug calls are not
+implicated by that check. Historical dense cache reuse has incomplete protocol
+identity validation; this is a code risk, not proof that prior outcomes are wrong.
+Peer kernel physically skips full PV but still computes current QK/rank32 risk;
+its SDPA native adapter is not our vLLM/FA4 baseline. New C_gate agrees with our
+P17 port mathematically at matched parameters, while complete routing systems
+differ. P17 remains configuration-specific; current vLLM adapter still rejects
+C_gate pending accepted-mask lifecycle support. Treat integration as a cited
+cooperation candidate requiring separate qualification/calibration, not a speed
+or accuracy result. Current formal deployments and follow-up queues unchanged.

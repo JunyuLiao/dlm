@@ -1,5 +1,10 @@
 # Junyu value-aware branch review — 2026-10-03
 
+Publication update: the later `b890ff494` commit supplies the previously missing
+implementation and tests. See [the pinned code review](JUNYU_VALUE_AWARE_CODE_REVIEW_20261003.md).
+The analysis below remains a historical review of `859c0c8fc`, not a statement
+that the newer implementation is absent.
+
 Read-only review of `origin/ljy/value_aware` at `859c0c8fc2a4509a148a3270915f79961e565dee`. No checkout/merge, peer code copy, environment execution, GPU launch, or shared-file modification. References below name files **inside that pinned ref**, not similarly named files in our current worktree.
 
 ## Publication boundary
