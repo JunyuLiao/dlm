@@ -132,7 +132,7 @@ class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
                  canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024,
                  logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
-                 trace_canvas=False):
+                 trace_canvas=False, dense_when=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -182,6 +182,16 @@ class VllmMethodAdapter:
         # diagnostic receipts (opt-in): denoising steps per canvas and the canvas mean token entropy per step, i.e.
         # the quantity the official sampler compares with its confidence threshold to stop a canvas
         self.trace_canvas = bool(trace_canvas)
+        # v31 step-level dense fallback (named variant, method arm only): 'conv:THETA' runs every GLOBAL call of the
+        # next denoising step with vLLM's own dense FA4 once the canvas mean token entropy of the previous step is below
+        # THETA x the sampler's confidence threshold (the canvas is about to converge); 'step:S' does so from the S-th
+        # denoising step of a canvas on. The selector is bypassed on those steps; its sampler-side state still updates.
+        self.dense_when = None
+        if dense_when:
+            kind, val = str(dense_when).split(':')
+            if kind not in ('conv', 'step'):
+                raise ValueError('dense_when must be conv:THETA or step:S')
+            self.dense_when = (kind, float(val))
         self._merge_cache = {}
         self.runtime = self.stub = self._stack = None
         self.bound = False               # True only while a request is in flight (dummy/warm-up runs pass through)
@@ -224,6 +234,8 @@ class VllmMethodAdapter:
         self.mage_state, self.canvas_id = {}, 0
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
         self._canvas_steps, self._cur_steps, self._ent_trace, self._conf_threshold = [], 0, [], None
+        self._dense_next = self._dense_now = False
+        self._canvas_step = 0
         if self.arm == 'mage':
             self.calls.update(mage_selections=0, mage_reused_calls=0, mage_kept_prefix_tiles=0, mage_prefix_tiles=0)
         if self.arm in ('allkept', 'native', 'mage'):
@@ -378,6 +390,13 @@ class VllmMethodAdapter:
         self.step_ctx = dict(encoder=bool(phase_encoder), step=int(step), seq_len=int(seq_len), n=int(num_tokens))
         if self.pending_sample:
             self.calls['order_errors'] += 1                       # the previous denoising sample was never observed
+        if phase_encoder:
+            self._dense_next = self._dense_now = False
+            self._canvas_step = 0
+        else:
+            self._canvas_step += 1
+            self._dense_now = bool(self._dense_next) or (self.dense_when is not None and self.dense_when[0] == 'step'
+                                                           and self._canvas_step >= self.dense_when[1])
         if self.trace_canvas:
             if phase_encoder and self._cur_steps:
                 self._canvas_steps.append(self._cur_steps)
@@ -746,12 +765,17 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                         stats.entropy, float(signature.bind(*args, **kwargs).arguments['entropy_bound']))
             elif a.needs_accepted():
                 accepted = accepted_mask(scaled, float(signature.bind(*args, **kwargs).arguments['entropy_bound']))
-            if a.trace_canvas:
+            conv = a.dense_when is not None and a.dense_when[0] == 'conv'
+            if a.trace_canvas or conv:
                 from experiments.numerical_qk_reuse.v31_logit_stats import row_stats
                 ts = stats if stats is not None else row_stats(scaled)
-                a._ent_trace.append(ts.entropy.mean())         # all CL rows, as the sampler's mean_entropy
+                mean_entropy = ts.entropy.mean()                 # all CL rows, as the sampler's mean_entropy
                 if a._conf_threshold is None:
                     a._conf_threshold = float(signature.bind(*args, **kwargs).arguments['confidence_threshold'])
+                if a.trace_canvas:
+                    a._ent_trace.append(mean_entropy)
+                if conv:                                         # one scalar read per step, at the step boundary
+                    a._dense_next = bool(mean_entropy.item() < a.dense_when[1] * a._conf_threshold)
             a.on_sample(scaled, accepted, stats=stats)
         return scaled
 
@@ -765,8 +789,10 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                 if a.profile:
                     ev = (torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True))
                     ev[0].record()
-                if a.arm == 'native':
+                if a.arm == 'native' or (a.arm == 'method' and a._dense_now):
                     a.calls['global_calls'] += 1
+                    if a.arm == 'method':
+                        a.calls['dense_fallback_calls'] = a.calls.get('dense_fallback_calls', 0) + 1
                     r = forward(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale,
                                 output_block_scale)
                 else:

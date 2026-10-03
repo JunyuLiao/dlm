@@ -21,7 +21,8 @@ usage: python v31_vllm_paired_bench.py MODEL MANIFEST_DIR CELLS_JSON OUT_JSONL P
        v31_dp_chunked), OBSERVE=fa4 (FA4 in-kernel observation for compact-mu configs, v31_fa4_observe),
        MAGE_SELECT=fa4 (MAGE selection statistics from the FA4 observation), KV_COPY=triton / MERGE=triton (V30 one-kernel
        paged K/V refresh and alias-split LSE merge), TRACE=1 (per-canvas step counts and mean-entropy trajectories in the
-       public record), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
+       public record), DENSE_WHEN=conv:THETA|step:S (method arm: dense GLOBAL attention near canvas convergence / from
+       step S of a canvas), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
        V27_ADAPTER_DIR (overlay holding vllm_adapter.py), SHARD=k/K (take cells k, k+K, ...)
 """
 import hashlib
@@ -94,7 +95,8 @@ def main():
                                                  mage_select=os.environ.get('MAGE_SELECT', 'torch'),
                                                  kv_copy_backend=os.environ.get('KV_COPY', 'torch'),
                                                  merge_backend=os.environ.get('MERGE', 'torch'),
-                                                 trace_canvas=os.environ.get('TRACE') == '1')
+                                                 trace_canvas=os.environ.get('TRACE') == '1',
+                                                 dense_when=os.environ.get('DENSE_WHEN') or None)
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)

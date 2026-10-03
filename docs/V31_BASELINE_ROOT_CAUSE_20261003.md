@@ -367,3 +367,30 @@ Dense reference: 28/48 correct at 32K, 23/48 at 64K.
   MAGE. The remaining method question, being tested in panel l, is whether stability-aware **budget allocation** (the
   C gate on the threshold selector) beats a uniform budget at the same realized mean kept fraction. It uses the new
   kept-fraction receipts (overlay8).
+
+## Trajectory stability (2026-10-03 18:35 UTC−5)
+
+`scripts/v31_trajectory_stability.py`, results in `results/v31_20261003/panels/trajectory_stability.md`.
+
+- **Numerics alone move a request's forward count a lot.** Dense PIECEWISE vs dense FULL + fix differ only
+  numerically, yet the per-cell log N ratio has s.d. 0.33 (32K) / 0.31 (64K), i.e. about ±35% per request.
+  - Per-request comparisons are meaningless; only paired means over many cells are.
+  - Every arm's perturbation is measured as excess over this null: sqrt(sd² − sd_null²).
+- Excess perturbation and tail (p90 of the N ratio):
+
+| arm | 32K excess | 32K p90 | 64K excess | 64K p90 |
+|---|---|---|---|---|
+| m2c | 0.23 | 1.68 | 0.35 | 2.17 |
+| m2c + C gate | **0.12** | 1.63 | **0.16–0.22** | 1.61 |
+| main | 0.27–0.38 | 1.63–1.80 | 0.26–0.27 | 1.73–1.82 |
+| main + C gate | 0.19 | 1.52 | 0.25 | 1.58 |
+| +ln2 | 0.54 | 3.21 | 0.52 | 3.60 |
+| +ln2 + C gate | 0.42 | 2.24 | 0.35 | 2.36 |
+| MAGE k=1024 | 0.59 | 3.28 | 0.58 | 3.16 |
+| MAGE k=4096 | 0.42 | 2.04 | 0.45 | 1.60 |
+
+- The C gate lowers the excess perturbation and the tail in most comparisons. m2c + C gate is the sparse arm closest
+  to numerical noise.
+- The bootstrap CIs over 24 items overlap, so this needs the larger confirmation set before it is claimed.
+- A candidate framing for the C-gate contribution: sparsity perturbs adaptive-step denoising trajectories (mean and
+  tail forward counts), and query-stability-aware budgeting reduces that perturbation.
