@@ -1,0 +1,122 @@
+{
+  "schema": "v29_engineering_fusion_family_v1",
+  "name": "v29_engineering_fusion_family001",
+  "variants": {
+    "longbench_legacy": {
+      "suite": "longbench",
+      "variant": "legacy",
+      "spec": "results/v29_20261002/specs/v29_engineering_fusion_longbench_legacy001.json",
+      "protocol_id": "v29_engineering_fusion_longbench_legacy001",
+      "host": "dllm",
+      "qualification_workers": 12,
+      "qualification_warm": 12,
+      "qualification_timed": 12,
+      "kv_copy_backend": "torch",
+      "merge_backend": "torch"
+    },
+    "longbench_fused": {
+      "suite": "longbench",
+      "variant": "fused",
+      "spec": "results/v29_20261002/specs/v29_engineering_fusion_longbench_fused001.json",
+      "protocol_id": "v29_engineering_fusion_longbench_fused001",
+      "host": "dllm",
+      "qualification_workers": 12,
+      "qualification_warm": 12,
+      "qualification_timed": 12,
+      "kv_copy_backend": "triton",
+      "merge_backend": "triton"
+    },
+    "aime_legacy": {
+      "suite": "aime",
+      "variant": "legacy",
+      "spec": "results/v29_20261002/specs/v29_engineering_fusion_aime_legacy001.json",
+      "protocol_id": "v29_engineering_fusion_aime_legacy001",
+      "host": "dlm2",
+      "qualification_workers": 4,
+      "qualification_warm": 4,
+      "qualification_timed": 4,
+      "kv_copy_backend": "torch",
+      "merge_backend": "torch"
+    },
+    "aime_fused": {
+      "suite": "aime",
+      "variant": "fused",
+      "spec": "results/v29_20261002/specs/v29_engineering_fusion_aime_fused001.json",
+      "protocol_id": "v29_engineering_fusion_aime_fused001",
+      "host": "dlm2",
+      "qualification_workers": 4,
+      "qualification_warm": 4,
+      "qualification_timed": 4,
+      "kv_copy_backend": "triton",
+      "merge_backend": "triton"
+    },
+    "humaneval_legacy": {
+      "suite": "humaneval",
+      "variant": "legacy",
+      "spec": "results/v29_20261002/specs/v29_engineering_fusion_humaneval_legacy001.json",
+      "protocol_id": "v29_engineering_fusion_humaneval_legacy001",
+      "host": "mpk",
+      "qualification_workers": 4,
+      "qualification_warm": 4,
+      "qualification_timed": 4,
+      "kv_copy_backend": "torch",
+      "merge_backend": "torch"
+    },
+    "humaneval_fused": {
+      "suite": "humaneval",
+      "variant": "fused",
+      "spec": "results/v29_20261002/specs/v29_engineering_fusion_humaneval_fused001.json",
+      "protocol_id": "v29_engineering_fusion_humaneval_fused001",
+      "host": "mpk",
+      "qualification_workers": 4,
+      "qualification_warm": 4,
+      "qualification_timed": 4,
+      "kv_copy_backend": "triton",
+      "merge_backend": "triton"
+    }
+  },
+  "initial_stage": "qualification_only",
+  "deployment_commit": null,
+  "deployment_policy": "Freeze one future committed source for all six protocols; do not guess deployment SHA.",
+  "require_same_deployment_for_all_variants": true,
+  "engine_seeds": [
+    30001,
+    30002,
+    30003,
+    30004,
+    30005,
+    30006,
+    30007,
+    30008
+  ],
+  "qualification_inventory": {
+    "workers": 40,
+    "warm_requests": 40,
+    "timed_requests": 40,
+    "selector": "Longest frozen input per dataset; first declared seed30001; one warm and one timed per arm."
+  },
+  "full_inventory_note": "All original question/8-seed inventories are retained solely for existing frozen runner compatibility. This manifest enables qualification only; root will freeze the corresponding performance panel after evaluating qualification, within existing user authorization.",
+  "comparison_pairs": [
+    [
+      "longbench_fused",
+      "longbench_legacy"
+    ],
+    [
+      "aime_fused",
+      "aime_legacy"
+    ],
+    [
+      "humaneval_fused",
+      "humaneval_legacy"
+    ]
+  ],
+  "fairness": "Per suite same future deployment, host, hardware/software, items, seed, warmup, budget and arm order. Only copy/merge backend differs. Seed labels do not imply identical stochastic trajectories.",
+  "stage_gate": {
+    "required_completion": "All existing three formal suites must be fully strict-scored and completion complete before any new CPU deployment or qualification GPU launch.",
+    "gpu_idle": "One frozen GPU, no compute PID, memory<128MiB, utilization0 with bounded stabilization and recheck.",
+    "mpk_cpu_scorer_idle": true,
+    "no_overlap_with_existing_formal_or_scoring": true
+  },
+  "qualification_interpretation": "40timed+40warm path/numerical/JIT/capture/count/scorer qualification only; no speed or quality conclusion, no noninferiority margin, no post-hoc replacement of wrong/unparsed/capped outputs.",
+  "formal_launch_enabled": false
+}

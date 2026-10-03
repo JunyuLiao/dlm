@@ -1,0 +1,58 @@
+{
+  "schema": "v29_engineering_fusion_cpu_validation_v1",
+  "status": "passed_cpu_planning_checks_gpu_qualification_pending",
+  "tested_base_commit": "f8a3b91e36882da449ad71cbefb8b3ef0e668659",
+  "new_specs_and_tests_were_uncommitted": true,
+  "deployment_commit": null,
+  "same_future_deployment_required": true,
+  "new_test_command": "python -B -m unittest tests.test_v29_engineering_fusion_specs -q",
+  "new_tests_run": 15,
+  "new_tests_passed": 15,
+  "new_tests_failed": 0,
+  "new_tests_wall_seconds": 0.124,
+  "combined_test_command": "python -B -m unittest tests.test_v29_engineering_fusion_specs tests.test_v29_expanded_panel -q",
+  "combined_tests_run": 57,
+  "combined_tests_passed": 56,
+  "combined_tests_skipped": 1,
+  "combined_tests_failed": 0,
+  "combined_tests_wall_seconds": 17.698,
+  "skip_reason": "Existing canonical model alias test could not create a public toy symlink on this Windows host; repeat existing CPU suite on future Linux preparation host. No new fusion-spec test was skipped.",
+  "cpu_checks": [
+    "All six specs pass unchanged v29 validate_spec and execution_settings APIs.",
+    "All original item inventories,8distinct30001..30008 engine seeds,8192token budgets,four full matched arms,host per cell,arm order,Q128/alias2/request_clear/canvaslegacy and frozen main min_route_keys0 are retained.",
+    "Within-suite legacy/fused differ only protocol identity and declared torch/torch vs triton/triton backend choice.",
+    "Full public toy receipts pass actual existing receipt validators for dense/native/allkept/method across both backend choices.",
+    "Missing or nonpositive fused copy/merge execution counters are rejected for both allkept and method; torch receipts reject accidental Triton paths.",
+    "Existing constructor context explicitly forwards both frozen backends and restores adapter/validator after context exit.",
+    "Timed Triton JIT event, changed main gate, reduced task budget and unsolicited noninferiority margin are rejected.",
+    "Public specs/family contain anonymous inventory and host aliases, no private inputs or paths."
+  ],
+  "qualification_inventory": {
+    "protocols": 6,
+    "workers": 40,
+    "warm_requests": 40,
+    "timed_requests": 40,
+    "longbench_requests_per_backend": 12,
+    "aime_requests_per_backend": 4,
+    "humaneval_requests_per_backend": 4
+  },
+  "formal_launch_enabled": false,
+  "formal_scope_note": "Current manifest executes qualification only. Root selects/freezes a later performance panel based on qualification within existing user authorization; no renewed permission requirement.",
+  "pending_gpu_checks": [
+    "Actual real-model warm KV layout/copy probe and applicable numerical oracle.",
+    "Fused copy and LSE merge positive executed counters on both matched adapter arms.",
+    "Known actual denoise counts including unused speculative forwards; complete inventories/joins.",
+    "Zero timed CUDA captures/backend/inductor/Triton/CuTe/unknown JIT events.",
+    "Strict pinned official scorers with real public correct/wrong toys; wrong/unparsed/capped responses retained without reselection."
+  ],
+  "queue_gate": "No new CPU deployment/heavy preparation or GPU qualification before current three-suite completion is complete and fully strict-scored; then no scorer process and single frozen GPU idle checks.",
+  "execution": {
+    "remote_deployments": 0,
+    "gpu_runs": 0,
+    "gpu_reserved_seconds": 0,
+    "private_gold_or_completion_transfers": 0,
+    "new_runner_implementations": 0,
+    "commits": 0
+  },
+  "interpretation": "CPU API/receipt compatibility only. No real-model numerical correctness, speed benefit, accuracy equivalence, or noninferiority is established."
+}

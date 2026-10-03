@@ -845,3 +845,41 @@ method change or new accuracy/speed evidence.
 All three formal panels remain in their first full-question worker,0closed and
 0failed at00:19 snapshot; active GPU time is not yet closed. Completion/scoring
 helper is being CPU-tested before arming; current source/bindings remain frozen.
+
+## Performance follow-ups and Junyu source audit (2026-10-03 00:44 (UTC-5))
+
+The new same-state cost benchmark, raw component timing helper and sparse-cycle
+Q movement prototype are CPU-qualified, not GPU-qualified.47 focused public CPU
+tests pass (15 cycle,12 homogeneous,5 timing,15 engineering specs). Frozen public
+protocols and six legacy/fused real-model qualification specs are committed with
+the source. No new model/request gain is claimed. Component samples retain every
+arm/repetition/order and host/event duration; no Chrome timeline is fabricated.
+The official JIT monitor must activate before FA4/consumer imports, numerical
+oracles precede warm timing, and all monitored timed JIT/capture deltas must be0.
+See docs/V29_PERFORMANCE_NEXT_20261003.md and the new public specs.
+
+Junyu ljy/value_aware was reviewed read-only at859c0c8fc2a4509a148a3270915f79961e565dee.
+Its latest three commits only change READMEs; the newer Hopper/C_gate sources and
+tests linked there are absent from that ref. Historical current-QK retained-state
+routing is distinct from our dense-prefix surrogate and temporal reuse. Its old
+quality/budget/backend results do not establish performance against vLLM/FA4.
+The documented C_gate is a cooperation candidate, not a verified port or new
+contribution of this branch. See docs/JUNYU_VALUE_AWARE_REVIEW_20261003.md.
+
+The user's dense/native equivalence challenge requires a separate audit. Native
+hooks currently call original FlashAttentionImpl.forward, but graph mode/hook and
+RNG-trajectory equivalence are not proved by that fact. V18b warmed59 questions
+for dense/main and only12 for the control subset, without per-request reseeding;
+matched labels were not matched random states. Preserve its measurements but do
+not causally attribute default/native W or N differences to PIECEWISE, sparse
+quality, or seed noise alone. V29 already uses identical full warm inventories
+for all arms; more seeds still do not establish graph/hook equivalence.
+
+Current formal panels remain immutable and running. Closed workers at this
+snapshot: LB1/32,AIME3/32,HE4/32; no reported failures.
+Their outer closed-worker GPU seconds are recorded in STATE.current; active
+unclosed time is excluded and inner worker times are not added. One-shot strict
+completion/scoring is armed (17 CPU tests passed), waits all32/32/32 workers,
+then scores HE/LB/AIME serially and exports detailed sanitized evidence for
+review. New component and engineering queues are still being qualified; not yet
+armed in this commit and no new GPU work overlaps the formal campaign.

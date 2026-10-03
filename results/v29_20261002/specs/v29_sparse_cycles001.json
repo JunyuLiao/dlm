@@ -1,0 +1,36 @@
+{
+  "schema": "v29_sparse_cycles_protocol_v1",
+  "module": "scripts.v29_sparse_q_cycles_bench",
+  "nominal_bins": [
+    32768,
+    65536,
+    98304
+  ],
+  "repeats": 32,
+  "warm": 8,
+  "seed": 2903,
+  "softmax_scale": 1.0,
+  "input": "Historical held support and synthetic QKV; private need arrays never exported",
+  "reference": "natural_fused",
+  "arms": [
+    "natural_standard",
+    "natural_fused",
+    "held_fused_gather",
+    "held_sparse_cycles"
+  ],
+  "unchanged_order_and_support": true,
+  "query_restore_included": true,
+  "numerical_oracles": [
+    "exact cycle forward/inverse",
+    "FP32 masked attention",
+    "FP32 LSE merge"
+  ],
+  "warm_and_oracles_before_timing": true,
+  "zero_monitored_timed_JIT_and_capture_required": true,
+  "raw_sample_durations_and_order_saved": true,
+  "chrome_timeline_saved": false,
+  "online_order_cost_free": false,
+  "valid_order_lifetime_measured": false,
+  "request_speed_claim_allowed": false,
+  "accuracy_evaluated": false
+}

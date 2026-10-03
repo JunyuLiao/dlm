@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-03 00:20 (UTC-5)",
+    "updated_local": "2026-10-03 00:44 (UTC-5)",
     "branch": "research/vllm-confirmation-20261002",
-    "verified_commit": "2fa74fed1",
+    "verified_commit": "f8a3b91e36882da449ad71cbefb8b3ef0e668659",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,7 +16,7 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "All three strict qualifications passed; expanded eight-seed formal panels running.",
+    "headline": "Eight-seed formal panels running; dense/native equivalence audit and new performance diagnostics CPU-qualified, GPU pending.",
     "running": [
       "dllm LongBench formal panel001,32 workers",
       "dlm2 AIME formal panel001,32 workers",
@@ -504,7 +504,45 @@
     "known_closed_gpu_seconds_at_snapshot": 6128.522515340534,
     "known_closed_gpu_seconds_scope": "V29 components/diagnostics plus ALL closed qualifications, including interrupted attempts once. Formal active-worker time excluded; this is the launch snapshot.",
     "v29_qualification_closed_gpu_seconds": 3866.4573246686487,
-    "evidence_index": "results/v29_20261002/EVIDENCE_INDEX.md"
+    "evidence_index": "results/v29_20261002/EVIDENCE_INDEX.md",
+    "formal_completion_20261003": {
+      "armed": true,
+      "phase": "waiting_complete_formal_inventory",
+      "cpu_tests_passed": 17,
+      "closed_workers": {
+        "longbench": 1,
+        "aime": 3,
+        "humaneval": 4
+      },
+      "failed_workers": {
+        "longbench": 0,
+        "aime": 0,
+        "humaneval": 0
+      },
+      "closed_outer_gpu_seconds": {
+        "longbench": 1800.2038734860253,
+        "aime": 1604.3105108979798,
+        "humaneval": 2088.773676856421
+      },
+      "accounting": "Formal-only closed outer spans; do not add inner times or mistake incomplete elapsed time for final usage."
+    },
+    "performance_followups_20261003": {
+      "status": "CPU-qualified; GPU queues being validated, not armed",
+      "focused_cpu_tests": 47,
+      "gpu_runs": 0,
+      "components_spec": "results/v29_20261002/specs/v29_homogeneous_cost001.json",
+      "regroup_spec": "results/v29_20261002/specs/v29_sparse_cycles001.json",
+      "fusion_family": "results/v29_20261002/specs/v29_engineering_fusion_family001.json",
+      "current_formal_main_changed": false,
+      "new_accuracy_or_speed_claim": false
+    },
+    "junyu_value_aware_review": {
+      "commit": "859c0c8fc2a4509a148a3270915f79961e565dee",
+      "source": "docs/JUNYU_VALUE_AWARE_REVIEW_20261003.md",
+      "new_hopper_implementation_published": false,
+      "peer_source_copied": false,
+      "cooperation_candidate": true
+    }
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
