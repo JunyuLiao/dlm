@@ -347,7 +347,16 @@ class VllmMethodAdapter:
             self.calls['order_errors'] += 1
         self.pending_sample = False
         if self.runtime is not None:
-            self.runtime['state'].observe_logits(scaled_logits, None, None)
+            cur_step = None
+            if self.config.get('sensitivity') in ('unit_v30','confidence_v30'):
+                cur_step = MAX_DENOISING_STEPS - self.step_ctx['step']
+                # The official sampler pads a terminal partial canvas to CL.
+                # Only real query rows enter the selector; do not include padding.
+                n = self.step_ctx['n']
+                if scaled_logits.ndim != 3 or scaled_logits.shape[0] != 1 or not 0 < n <= scaled_logits.shape[1]:
+                    raise ValueError('V30 sampler/query geometry mismatch')
+                scaled_logits = scaled_logits[:, :n, :]
+            self.runtime['state'].observe_logits(scaled_logits, None, cur_step)
 
     # ------------------------------------------------------------------ GLOBAL decoder attention
     def active_for(self, layer_name):

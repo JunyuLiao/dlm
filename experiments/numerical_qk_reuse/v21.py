@@ -18,7 +18,7 @@ PLUGIN = 'experiments.numerical_qk_reuse.v21:install'
 CONTROL_PLUGIN = 'experiments.numerical_qk_reuse.v20_controls:install'
 CONTROL_CONDITION = 'v20_dense_consumer'
 SOURCES = ('v21.py', 'generic_kernels.py', 'cached_executor.py', 'integration.py',
-           'v20_controls.py')
+           'v20_controls.py', 'v30_sensitivity.py')
 REQUEST_ENVELOPE = ('phase', 'diagnostic', 'timing_events', 'thinking', 'max_new_tokens')
 # v23 optional method fields. Absent keys mean the original behaviour, so
 # every previously bound v21 config keeps its fingerprint.
@@ -234,9 +234,11 @@ def effective_config(base: dict, arm: str, scope: str, *,
         extra['observe_carried'] = True
     if sensitivity is not None:
         # v27 C gate (named variant; group member's query sensitivity, ported from the design note): replaces T's weights
-        if sensitivity != 'cgate' or bootstrap_policy is None or fresh_fused:
-            raise ValueError('v27 C gate needs the fast-T bootstrap mainline')
-        extra['sensitivity'] = 'cgate'
+        if sensitivity not in ('cgate','unit_v30','confidence_v30') or bootstrap_policy is None or fresh_fused:
+            raise ValueError('Explicit sensitivity (C gate / V30) needs the fast-T bootstrap mainline')
+        if sensitivity != 'cgate' and (risk_state != 'dense_prefix' or not carry_first or density_gate is not None):
+            raise ValueError('V30 sensitivity ablations require M3 DP carry_first without density gate')
+        extra['sensitivity'] = sensitivity
     if carry_first:
         # v27 first-call carry (named variant): canvas call 0 reuses the previous canvas's decision, call 1 observes
         if (carry_first is not True or bootstrap_policy is None or fresh_fused or not fused_observe or not fa4_consumer
@@ -422,8 +424,11 @@ def validate_effective(config: dict, condition: str):
     if 'q_carry64' in config and (config['q_carry64'] is not True or config.get('q_block') != 64
                                   or 'q_regroup' in config or config.get('carry_first') is not True):
         raise ValueError('v27 q64 carry identity drift')
-    if 'sensitivity' in config and (config['sensitivity'] != 'cgate' or 'bootstrap_policy' not in config):
-        raise ValueError('v27 C-gate identity drift')
+    if 'sensitivity' in config and (config['sensitivity'] not in ('cgate','unit_v30','confidence_v30') or 'bootstrap_policy' not in config):
+        raise ValueError('Explicit query-sensitivity identity drift')
+    if config.get('sensitivity') in ('unit_v30','confidence_v30') and (config.get('risk_state') != 'dense_prefix'
+            or config.get('carry_first') is not True or config.get('fresh_fused') or 'density_gate' in config):
+        raise ValueError('V30 sensitivity requires the DP carry_first mainline')
     if 'observe_carried' in config and (config['observe_carried'] is not True or config.get('carry_first') is not True
                                         or 'fused_observe' not in config or 'fa4_consumer' not in config):
         raise ValueError('v27 observe_carried identity drift')
@@ -463,6 +468,7 @@ def install(adapter, config: dict, condition: str):
         from .v20_controls import install as parent_install
     with parent_install(adapter, config['parent_config'], condition) as runtime:
         router = runtime['router']
+        sensitivity_override = None
         if config.get('sensitivity') == 'cgate':
             if config['parent_kind'] != 'v20_method':
                 raise ValueError('C gate is qualified on the v20 method parent only')
@@ -661,4 +667,18 @@ def install(adapter, config: dict, condition: str):
                         output_precision_extra_qk_counter_scope=
                             'conservative full QK dispatch geometry; retained physical work counted separately')
 
-        yield {**runtime, 'counters': counters}
+        # Install only after setup has succeeded, so every installed override
+        # is covered by the cleanup below, including a failed request.
+        if config.get('sensitivity') in ('unit_v30','confidence_v30'):
+            if config['parent_kind'] != 'v20_method':
+                raise ValueError('V30 sensitivity requires the method parent')
+            from .v30_sensitivity import SensitivityOverride
+            sensitivity_override = SensitivityOverride(runtime['state'],config['sensitivity'])
+            original_counters = counters
+            def counters():
+                return dict(original_counters(),v30_sensitivity=sensitivity_override.receipt())
+        try:
+            yield {**runtime, 'counters': counters}
+        finally:
+            if sensitivity_override is not None:
+                sensitivity_override.close()

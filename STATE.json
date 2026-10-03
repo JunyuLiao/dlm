@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-03 02:43 (UTC-5)",
+    "updated_local": "2026-10-03 03:16 (UTC-5)",
     "branch": "research/cooperative-sparsity-20261003",
-    "verified_commit": "e2ec0ae4b36f19e3b8a80fe642dec7da6ea6cb40",
+    "verified_commit": "ed711c8b4afd5bf93a457f03bfc5714a5b36dcb9",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -607,6 +607,52 @@
       "global_scope": "implemented;4 CPU tests; GPU/model parity pending",
       "regroup_key6": "144 CPU snapshots; proxy0.996582; no GPU/E2E gain claim",
       "kernel_gpu_queue_receipt": "results/v30_20261003/peer_gpu_queue001/status.json"
+    },
+    "v30_dense_divergence": {
+      "status": "code_and_public_specs_cpu_tested_not_deployed_or_armed",
+      "variants": [
+        "default_dense",
+        "piecewise_dense_nohook",
+        "piecewise_native_hook",
+        "piecewise_sync_only"
+      ],
+      "seeds": [
+        28001,
+        28002
+      ],
+      "fresh_engine_repeats": 2,
+      "protocols": [
+        "sync_control",
+        "first_sample_trace"
+      ],
+      "root_cause_confirmed": false,
+      "gpu_reserved_seconds": 0
+    },
+    "v30_sensitivity": {
+      "status": "implemented_cpu_tested_gpu_pending",
+      "modes": [
+        "temporal_T",
+        "unit_v30",
+        "confidence_v30"
+      ],
+      "cpu_tests_passed": 25,
+      "seeds": [
+        30001,
+        30002,
+        30003,
+        30004,
+        30005,
+        30006,
+        30007,
+        30008
+      ],
+      "question_counts": {
+        "longbench": 59,
+        "aime": 30,
+        "humaneval": 164
+      },
+      "gpu_reserved_seconds": 0,
+      "peer_attribution": "Junyu confidence prior only; not C_gate or fresh value-aware"
     }
   },
   "task": "M3 output numerics and trajectory isolation",
