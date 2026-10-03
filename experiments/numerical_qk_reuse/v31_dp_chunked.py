@@ -12,6 +12,8 @@ Here:
   3. ``_chunk_pass(MODE=1)``: every chunk reruns the original per-tile body from its start state and writes lognorm /
      eligible / bad exactly as ``_dp_build`` does.
 Decisions can differ from the sequential build only where a risk ties the threshold to FP32 rounding.
+The chunk count is a runtime argument (not specialized): the prefix grows every canvas, and a compile-time chunk count
+would recompile inside timed requests.
 """
 from __future__ import annotations
 
@@ -24,10 +26,10 @@ from .cached_executor import _logadd
 from .v27_dense_prefix import DensePrefixState
 
 
-@tr.jit(do_not_specialize=['KT', 'PREFIX_TILES'])
+@tr.jit(do_not_specialize=['KT', 'PREFIX_TILES', 'NCH'])
 def _chunk_pass(ZSUM, MUSUM, ACTSUM, BADSUM, POOLED, LOGN, DPELIG, DPBAD, CLSE, CPROJ,
                 Q: tl.constexpr, H: tl.constexpr, HK: tl.constexpr, R: tl.constexpr, RP: tl.constexpr,
-                QB: tl.constexpr, KT, PREFIX_TILES, NCH: tl.constexpr, CHUNK: tl.constexpr,
+                QB: tl.constexpr, KT, PREFIX_TILES, NCH, CHUNK: tl.constexpr,
                 COMPACT: tl.constexpr, MODE: tl.constexpr):
     qb, h, c = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     batch = 0
@@ -75,9 +77,9 @@ def _chunk_pass(ZSUM, MUSUM, ACTSUM, BADSUM, POOLED, LOGN, DPELIG, DPBAD, CLSE, 
         tl.store(CPROJ+cstate[:, None]*RP+ri[None, :], projected, rows[:, None] & (ri[None, :] < R))
 
 
-@tr.jit
+@tr.jit(do_not_specialize=['NCH'])
 def _chunk_scan(CLSE, CPROJ, DPPREV, DPPROJ, Q: tl.constexpr, H: tl.constexpr, R: tl.constexpr, RP: tl.constexpr,
-                QB: tl.constexpr, NCH: tl.constexpr):
+                QB: tl.constexpr, NCH):
     """Exclusive scan over the chunk summaries, in place: chunk c's slot becomes the state before chunk c."""
     qb, h = tl.program_id(0), tl.program_id(1)
     r128 = tl.arange(0, 128)
