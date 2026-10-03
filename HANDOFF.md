@@ -1,20 +1,36 @@
+## V31 update (2026-10-03 10:10 UTC−5; branch `research/vllm-paired-20261003`) — read this first
+
+- **Dense baseline:** vLLM 0.30.0 default (FULL) + the exact upstream fix of
+  [PR #51994](https://github.com/vllm-project/vllm/pull/51994) (`FIX_51994=1`), seed-paired. The unfixed FULL default
+  froze DiffusionGemma's causal / bidirectional mask and took 19–28% more forwards; never quote V18b–V30 "vs default
+  dense" ratios. Details: `docs/V31_BASELINE_ROOT_CAUSE_20261003.md`.
+- **Panels b–e (96 cells, LongBench-v2 32K / 64K) are scored**
+  (`results/v31_20261003/panels/`):
+  - accuracy is kept;
+  - the C gate removes most of the forward inflation of higher sparsity;
+  - a per-forward gain shows only at 64K (main S/N 0.927);
+  - no significant end-to-end gain yet.
+- **Where time goes:**
+  - Step profile: `results/v31_20261003/step_profile/`.
+  - CUPTI profile: GPU busy about 94% in every arm, so Python overhead is mostly hidden.
+  - Per canvas per GLOBAL layer, the observation kernel (4.7 ms) plus `_dp_build` (3.2 ms) cost more than all
+    sparse calls together (sparse call 0.35 ms vs vLLM dense 1.73 ms at 64K).
+  - The C-gate sampler hook costs 1.9 ms per step.
+- **Efficiency work (opt-in execution switches; formulas unchanged):**
+  - `LOGIT_STATS=fused`: one-pass logit statistics for the C-gate hook (`v31_logit_stats.py`). Panel g measures it.
+  - `DP_BUILD=chunked`: a parallel chunked scan for the dense-prefix build (`v31_dp_chunked.py`).
+  - `OBSERVE=fa4`: the FA4 SM90 dense kernel also writes the per-row tile log-mass through an `AttentionMask`
+    subclass and an aux tensor (`v31_fa4_observe.py`). It is used for compact-mu configs.
+  - `MAGE_SELECT=fa4`: the MAGE port selects from the same FA4 observation instead of the unoptimized FP32 QK.
+- **Running:**
+  - panel f: `m2c`, `m2c_r12` (Fan's M2 compact pooled V). The preview is cheaper on held steps but dearer on
+    observation steps; a profile is queued;
+  - panel g: C gate with `LOGIT_STATS=fused`;
+  - on dllm, a test window between f and g runs the kernel unit tests, `scripts/v31_kernel_bench.py` and two m2c
+    step profiles (legacy vs chunked + FA4 observation).
+- **LLaDA2.1-mini port:** a subagent on branch `research/llada21-sparse-port-20261003` (resumed after a rate limit).
+
 ## Paused by user after short-suite completion — 2026-10-03 04:40 (UTC-5)
-
-## V31 update (2026-10-03 05:50 UTC−5; branch `research/vllm-paired-20261003`) — read this first
-
-- **Root cause of the "fast dense" / trajectory confusion: upstream vLLM bug
-  [PR #51994](https://github.com/vllm-project/vllm/pull/51994).** It is merged 2026-09-30 and not in 0.30.0.
-  FULL-graph decode froze DiffusionGemma's causal / bidirectional mask.
-  - vLLM's default dense in V18b–V30 therefore ran a wrong mask and took ~25–50% more forwards.
-  - Do not quote "method vs default dense" from those panels.
-  - Details: `docs/V31_BASELINE_ROOT_CAUSE_20261003.md`.
-- **vLLM is seed-controllable:** reseeding the default torch generators per request gives token-identical batch-1
-  runs (`results/v31_20261003/graphmode001`).
-- **Dense baseline:** vLLM 0.30.0 default (FULL) plus the exact upstream fix (`FIX_51994=1`), seed-paired. PIECEWISE
-  dense and the unfixed default are secondary references.
-- **Running:** seed-paired LongBench 32K / 64K panels a / b / c on all three hosts (see the V31 doc); then the
-  pack-GQA sparse bench on dllm.
-- **The C gate now works in vLLM** (acceptance mask recomputed from the sampler logits).
 
 AIME32/32 and HumanEval32/32 completed generation, unscored. LongBench11/32
 complete; b2_native interrupted in warm-up (0 timed rows), 20 workers unstarted.

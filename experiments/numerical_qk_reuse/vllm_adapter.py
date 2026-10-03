@@ -131,7 +131,7 @@ class _PrefixCache:
 class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
                  canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024,
-                 logit_stats='legacy'):
+                 logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch'):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -144,6 +144,12 @@ class VllmMethodAdapter:
             raise ValueError('merge_backend must be torch or triton')
         if logit_stats not in ('legacy', 'fused'):
             raise ValueError('logit_stats must be legacy or fused')
+        if dp_build not in ('legacy', 'chunked'):
+            raise ValueError('dp_build must be legacy or chunked')
+        if observe_backend not in ('triton', 'fa4'):
+            raise ValueError('observe_backend must be triton or fa4')
+        if mage_select not in ('torch', 'fa4'):
+            raise ValueError('mage_select must be torch or fa4')
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
         if arm == 'method':
@@ -163,6 +169,15 @@ class VllmMethodAdapter:
         # v31 execution variant: 'fused' computes the sampler hook's per-position statistics (argmax, top-1
         # probability, entropy -> acceptance mask) in one pass over the logits (v31_logit_stats); 'legacy' = torch ops
         self.logit_stats = logit_stats
+        # v31 execution variants of the observation path (same selector formulas):
+        #   dp_build='chunked'    dense-prefix state by a parallel chunked scan (v31_dp_chunked) instead of the
+        #                         sequential per-(block, head) loop
+        #   observe_backend='fa4' observation calls without a per-row projected V (compact pooled mu) run the
+        #                         official FA4 dense kernel with the in-kernel prefix log-mass (v31_fa4_observe)
+        self.dp_build, self.observe_backend = dp_build, observe_backend
+        # MAGE port: 'torch' = chunked FP32 QK for the selection (reference); 'fa4' = the same eq. 5 statistics from
+        # the FA4 in-kernel tile log-mass (the selection call's output is that FA4 dense output)
+        self.mage_select = mage_select
         self._merge_cache = {}
         self.runtime = self.stub = self._stack = None
         self.bound = False               # True only while a request is in flight (dummy/warm-up runs pass through)
@@ -489,8 +504,11 @@ class VllmMethodAdapter:
         nk = prefix + n
         st = self.mage_state.get(layer_idx)
         if st is None or st['canvas'] != self.canvas_id or st['nk'] != nk:
-            out = v27_fa4.dense(q, b['k'], b['v'], scale)                 # exact first-step attention output
-            kept = self._mage_select(q, b['k'], scale, prefix, n)
+            if self.mage_select == 'fa4':
+                out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
+            else:
+                out = v27_fa4.dense(q, b['k'], b['v'], scale)             # exact first-step attention output
+                kept = self._mage_select(q, b['k'], scale, prefix, n)
             self.mage_state[layer_idx] = dict(canvas=self.canvas_id, nk=nk, lists=v27_fa4.block_sparse_tensors(kept))
             self.calls['mage_selections'] += 1
             return out
@@ -525,6 +543,44 @@ class VllmMethodAdapter:
         self.calls['mage_prefix_tiles'] += int(first_canvas_tile) * HK
         qb = -(-n // 128)
         return kept_kv.repeat_interleave(G, 0)[None, :, None, :].expand(1, H, qb, kt).contiguous()
+
+    @torch.no_grad()
+    def _mage_select_fa4(self, q, k, v, scale, prefix, n):
+        """MAGE eq. 5 from the FA4 observation: per-row prefix-tile log-mass from the dense FA4 pass, the
+        remaining (canvas / boundary) tiles from an FP32 tail product, row-normalized, averaged over the canvas queries
+        and the query heads of each KV head; top (mage_k / 64) prefix tiles per KV head. Returns (output, kept)."""
+        from experiments.numerical_qk_reuse.v31_fa4_observe import observe_dense
+        _, H, _, D = q.shape
+        HK, nk = k.shape[1], k.shape[2]
+        G, kt = H // HK, -(-nk // 64)
+        first_canvas_tile = prefix // 64
+        qb = -(-n // 128)
+        z = torch.empty((H, qb, first_canvas_tile, 128), device=q.device, dtype=torch.float32)
+        out = observe_dense(q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2), scale, z)
+        head_lse = z.permute(0, 1, 3, 2).reshape(H, qb * 128, first_canvas_tile)[:, :n]          # [H, n, PT]
+        koff = first_canvas_tile * 64
+        tf32 = torch.backends.cuda.matmul.allow_tf32
+        torch.backends.cuda.matmul.allow_tf32 = False
+        try:
+            s = torch.matmul(q[0].float().reshape(HK, G, n, D), k[0, :, koff:].float().transpose(-1, -2).unsqueeze(1))
+        finally:
+            torch.backends.cuda.matmul.allow_tf32 = tf32
+        s = s.reshape(H, n, nk - koff) * scale
+        pad = -(nk - koff) % 64
+        if pad:
+            s = torch.nn.functional.pad(s, (0, pad), value=float('-inf'))
+        tail_lse = s.reshape(H, n, -1, 64).logsumexp(-1)                                         # [H, n, KT-PT]
+        tile_lse = torch.cat([head_lse, tail_lse], -1)                                            # [H, n, KT]
+        mass = (tile_lse - tile_lse.logsumexp(-1, keepdim=True)).exp()
+        score = mass.reshape(HK, G, n, kt).mean(dim=(1, 2))                                        # [HK, KT]
+        k_tiles = max(1, min(self.mage_k // 64, first_canvas_tile))
+        kept_kv = torch.zeros((HK, kt), device=q.device, dtype=torch.bool)
+        if first_canvas_tile:
+            kept_kv.scatter_(1, score[:, :first_canvas_tile].topk(k_tiles, dim=-1).indices, True)
+        kept_kv[:, first_canvas_tile:] = True
+        self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * HK
+        self.calls['mage_prefix_tiles'] += int(first_canvas_tile) * HK
+        return out, kept_kv.repeat_interleave(G, 0)[None, :, None, :].expand(1, H, qb, kt).contiguous()
 
     # ------------------------------------------------------------------ split FA4 over the paged cache
     def _split(self, lists):
@@ -682,6 +738,28 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
         return sparse_lists(q, k, v, lists, scale)
 
     v27_fa4.sparse_lists = sparse_lists_patched
+    if adapter.dp_build == 'chunked':
+        from experiments.numerical_qk_reuse import v27_dense_prefix
+        from experiments.numerical_qk_reuse.v31_dp_chunked import build_chunked
+        v27_dense_prefix.build = build_chunked
+    if adapter.observe_backend == 'fa4':
+        from experiments.numerical_qk_reuse import v27_consumer64
+        from experiments.numerical_qk_reuse.v31_fa4_observe import fused_observe_fa4
+        triton_observe = v27_consumer64.fused_observe
+
+        def fused_observe_routed(q, k, v, sketch, scale, prefix_tiles, summary, splits=2, mu=True,
+                                 mu_precision='tf32x3', output=True):
+            a = _ACTIVE
+            if mu:                                         # exact mu needs the per-row projected V: Triton kernel
+                if a is not None:
+                    a.calls['triton_observations'] = a.calls.get('triton_observations', 0) + 1
+                return triton_observe(q, k, v, sketch, scale, prefix_tiles, summary, splits=splits, mu=mu,
+                                      mu_precision=mu_precision, output=output)
+            if a is not None:
+                a.calls['fa4_observations'] = a.calls.get('fa4_observations', 0) + 1
+            return fused_observe_fa4(q, k, v, sketch, scale, prefix_tiles, summary, splits=splits, mu=mu,
+                                     mu_precision=mu_precision, output=output)
+        v27_consumer64.fused_observe = fused_observe_routed
     dg.DiffusionGemmaModelState.prepare_attn = prepare_attn_patched
     dg._compiled_sample_step = sample_step_patched
     fa.FlashAttentionImpl.forward = forward_patched
