@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 22:35 (UTC-5)",
+    "updated_local": "2026-10-02 22:45 (UTC-5)",
     "branch": "research/vllm-confirmation-20261002",
-    "verified_commit": "26d6b10dd",
+    "verified_commit": "2b47136bc",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,7 +16,7 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "FA4/main code audit and first cost diagnostic complete; improved attribution and BF16 observation GPU check pending.",
+    "headline": "Expanded four-arm protocols and corrected event diagnostic CPU-qualified; GPU qualification pending.",
     "running": [],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -365,16 +365,63 @@
       "generation_source": "39e08c521",
       "summary": "results/v29_20261002/cost32k_002/aggregate.json",
       "gpu_reserved_seconds": 1081.689751653932,
-      "performance_claim_allowed": false
+      "performance_claim_allowed": false,
+      "next": "new four-arm PIECEWISE event diagnostic prepared,16CPUtests"
     },
     "v29_observation_audit": {
-      "status": "20_added_BF16_oracle_cases_prepared_GPU_pending",
+      "status": "44_cases_frozen_GPU002_pending",
       "core_unchanged": true,
       "QK_recomputed_for_observation": false,
       "main_min_route_keys": 0,
-      "doc": "docs/V29_FUSED_OBSERVATION_AUDIT_20261002.md"
+      "doc": "docs/V29_FUSED_OBSERVATION_AUDIT_20261002.md",
+      "attempt001_reserved_gpu_seconds": 0,
+      "scale_coverage": [
+        1.0,
+        0.04419417382415922
+      ]
     },
-    "v29_closed_gpu_seconds": 1136.758520174917
+    "v29_closed_gpu_seconds": 1136.758520174917,
+    "v29_expanded_confirmation": {
+      "status": "specs_and_CPU_runner_ready_qualification_pending",
+      "engine_seeds": [
+        29001,
+        29002,
+        29003,
+        29004,
+        29005,
+        29006,
+        29007,
+        29008
+      ],
+      "timed_requests": 8096,
+      "warm_requests": 8096,
+      "CPU_tests": 33,
+      "suites": {
+        "longbench": {
+          "questions": 59,
+          "host": "dllm"
+        },
+        "aime": {
+          "questions": 30,
+          "host": "dlm2"
+        },
+        "humaneval": {
+          "questions": 164,
+          "host": "mpk"
+        }
+      },
+      "specs_dir": "results/v29_20261002/specs",
+      "quality_noninferiority_claim": false
+    },
+    "v28_preview_reference": {
+      "branch": "research/vllm-variants-20261002",
+      "publication": "91db65396",
+      "status": "complete_scored_preview_only",
+      "questions": 6,
+      "requests": 288,
+      "gpu_reserved_seconds": 7914.0591097767465,
+      "interpretation": "docs/V29_V28_PREVIEW_INTERPRETATION_20261002.md"
+    }
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",

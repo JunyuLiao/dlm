@@ -56,10 +56,11 @@ def test_fused_observe_matches_store_path(keys, splits, mu):
 # Frozen V29 correctness protocol. Main explicitly selects bf16, unlike the
 # original four cases above. Retain the original tolerances; never tune them
 # after observing GPU failures. pt=0 tests the primitive, not core eligibility.
+@pytest.mark.parametrize('scale', [512 ** -.5, 1.0], ids=['inverse-sqrt-d', 'official-global-scale'])
 @pytest.mark.parametrize('prefix', [0, 31, 65, 844, 1793])
 @pytest.mark.parametrize('splits', [1, 2])
 @pytest.mark.parametrize('output', [True, False], ids=['dense-output', 'observe-only'])
-def test_main_bf16_fused_observe_fp32_oracle(prefix, splits, output):
+def test_main_bf16_fused_observe_fp32_oracle(prefix, splits, output, scale):
     from experiments.numerical_qk_reuse.cached_executor import allocate_summary
     from experiments.numerical_qk_reuse.v27_consumer64 import fused_observe
 
@@ -71,7 +72,6 @@ def test_main_bf16_fused_observe_fp32_oracle(prefix, splits, output):
     k = torch.randn(1, hk, keys, d, device='cuda', dtype=torch.bfloat16, generator=g)
     v = torch.randn(1, hk, keys, d, device='cuda', dtype=torch.bfloat16, generator=g)
     sketch = torch.randn(1, hk, keys, rank, device='cuda', dtype=torch.float32, generator=g)
-    scale = d ** -.5
     summary = allocate_summary(1, h, nq // 128, math.ceil(keys / 64), pt, rank, 'cuda', ('v29',))
 
     # Independent eager math, no SDPA backend or route STORE/fused helper.

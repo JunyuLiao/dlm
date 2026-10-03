@@ -150,3 +150,33 @@ Expanded panel infrastructure remains under CPU review and is not launched.
 Separately, V28 generation closed24workers; its CPU scoring stopped on a
 snapshot-symlink comparison bug, fixed on that branch7c8c608ed with18CPU tests.
 Original generation/bindings are unchanged; repaired CPU rescoring is pending.
+
+## New diagnostic and expanded-panel freeze (2026-10-02 22:45, UTC-5)
+
+Expanded runner/scorer CPU validation passes33tests, including canonical model
+snapshot paths, complete scorer-only artifact mirrors, original byte pins,
+implicit Q128 defaults, native task contracts and same-host qualification proof.
+Committed specs select engine seeds29001-29008, all59LongBench/all30AIME/all164
+HumanEval questions and all4arms (8096timed plus8096warm total); suites assigned
+dllm/dlm2/mpk respectively. No formal or qualification GPU worker is launched
+yet; full qualification and real scorer toys remain required. Main stays Q128,
+legacy canvas, torch copy/merge, no2K gate. New code never silently changes it.
+
+Corrected independent profiler has16CPU checks: actual model.layers naming,
+copy API wait caveat, optional same-stream event spans and fused-observe/DP-build/
+DP-route leaf scopes. New four-engine PIECEWISE diagnostic (dense-nohook/native/
+allkept/main) is prepared, not yet launched. Default FULL result remains unknown
+for layer breakdown. Timings are diagnostic only, never formal panel evidence.
+
+BF16 observation correctness protocol now covers actual scale1.0 and the prior
+scale512**-.5:40BF16 cases plus4original=44. First CPU preflight found no pytest
+and stopped before GPU work (0s). A separate own runner dependency directory
+now supplies pytest; qualified vLLM environment unchanged. New attempt002 GPU
+correctness awaits this source freeze. No tolerance was changed.
+
+V28 complete preview was repaired/scored/pushed on its own branch91db65396.
+See `docs/V29_V28_PREVIEW_INTERPRETATION_20261002.md`: Q64 request ratio.94245
+against matchedQ128, but S/N1.00516 and seed/length signs vary; six questions
+only. Canvas release W1.01228[.99035,1.03470], no supported gain. Main/allkept
+W.99576[.91015,1.08942], no demonstrated increment. Keep matched native whose
+preview accuracy is43/48 versus main40/48 and Q6441/48. No noninferiority claim.

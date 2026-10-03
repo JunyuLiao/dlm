@@ -22,8 +22,11 @@ LABELS = frozenset(('global_attention', 'local_attention', 'attention_other',
                    'encoder_global_attention', 'encoder_local_attention', 'encoder_attention_other',
                    'prepare_metadata', 'kv_prefix_build', 'kv_canvas_refresh',
                    'selector', 'observation', 'consumer', 'split_lists',
-                   'sample', 'method_begin', 'method_observe'))
+                   'sample', 'method_begin', 'method_observe',
+                   'fused_observe', 'dp_build', 'dp_route'))
 PREFIX = 'v29.cost.'
+CUDA_EVENT_LABELS = LABELS - frozenset(('prepare_metadata', 'sample', 'method_begin', 'method_observe',
+                                               'attention_other', 'encoder_attention_other', 'denoise_attention_other'))
 GLOBAL_LAYERS = frozenset((5, 11, 17, 23, 29))
 COUNT_FIELDS = ('denoising_forwards', 'commit_forwards', 'prefill_steps',
                 'scheduler_denoising_forwards', 'scheduler_commit_forwards',
@@ -31,8 +34,11 @@ COUNT_FIELDS = ('denoising_forwards', 'commit_forwards', 'prefill_steps',
 
 
 def attention_label(layer_name):
-    match = re.search(r'(?:^|\.)decoder\.layers\.(\d+)(?:\.|$)', str(layer_name))
-    if match is None:
+    # Installed vLLM Gemma4 shares this backbone across causal commits and
+    # bidirectional denoising. Phase comes from the existing adapter context.
+    # Match the actual Attention prefix, not arbitrary encoder/layer strings.
+    match = re.fullmatch(r'model\.layers\.(\d+)\.self_attn\.attn', str(layer_name))
+    if match is None or not 0 <= int(match[1]) < 30:
         return 'attention_other'
     return 'global_attention' if int(match[1]) in GLOBAL_LAYERS else 'local_attention'
 
@@ -94,7 +100,7 @@ def host_category(name):
     if name in ('aten::item', 'aten::_local_scalar_dense'):
         return 'host_scalar_extract'
     if 'cudamemcpy' in lower or 'cumemcpy' in lower:
-        return 'host_copy_enqueue'
+        return 'host_copy_api'
     if 'cudalaunch' in lower or 'cugraphlaunch' in lower or 'cudagraphlaunch' in lower:
         return 'host_cuda_launch'
     if any(word in lower for word in ('cudamalloc', 'cudafree')):
@@ -148,11 +154,33 @@ def summarize_events(events, scope_calls):
                 missing_eager_attention_scopes=[name for name in ('global_attention', 'local_attention')
                                                 if not any(value for key,value in scope_calls.items() if key.endswith(name))],
                 interpretation='nested CPU ranges overlap; CUDA streams overlap; totals are not additive request time; '
-                               'FULL graph replay may lack eager layer ranges; host sync is observed wait, not causal attribution')
+                               'FULL graph replay may lack eager layer ranges; host sync is observed wait, not causal attribution; '
+                               'host_copy_api CPU duration may include implicit blocking, not pure enqueue or GPU copy time')
+
+
+def summarize_cuda_events(pairs, *, boundary_completed):
+    """Read events only after the existing device-wide request boundary sync.
+
+    No event synchronize/query or new stream dependency is introduced. Inclusive
+    spans contain host dispatch gaps and nested work; cross-stream spans overlap.
+    """
+    if not boundary_completed:
+        return dict(available=False, reason='request boundary not completed', spans={})
+    rows = {}
+    for label, start, end in pairs:
+        if label not in CUDA_EVENT_LABELS:
+            raise ValueError('unknown CUDA event scope')
+        value = _nonnegative(start.elapsed_time(end))
+        row = rows.setdefault(label, dict(calls=0, sum_ms=0.))
+        row['calls'] += 1
+        row['sum_ms'] += value
+    return dict(available=True, spans=rows, missing_scopes=sorted(CUDA_EVENT_LABELS-set(rows)),
+                interpretation='inclusive entry-stream event spans include host dispatch gaps; nested ranges and '
+                               'streams overlap, not additive wall time or isolated kernel time; diagnostic overhead unknown')
 
 
 class ProfileSession:
-    def __init__(self, torch, ordinal):
+    def __init__(self, torch, ordinal, cuda_events=False):
         if type(ordinal) is not int or ordinal < 1:
             raise ValueError('profile ordinal must follow at least one unprofiled request')
         self.torch, self.ordinal = torch, ordinal
@@ -161,6 +189,9 @@ class ProfileSession:
         self.calls = defaultdict(int)
         self.summary = None
         self.phase = None
+        self.cuda_events = bool(cuda_events)
+        self.event_pairs = []
+        self.event_summary = None
 
     def request_start(self):
         selected = self.seen == self.ordinal
@@ -172,12 +203,14 @@ class ProfileSession:
             self.profiler.__enter__()
             self.active = self.started = True
 
-    def stop(self, failed=False):
+    def stop(self, failed=False, boundary_completed=False):
         if self.active:
             self.active = False
             self.profiler.__exit__(None, None, None)
             self.finished = not failed
             self.summary = summarize_events(self.profiler.events(), dict(self.calls))
+            if self.cuda_events:
+                self.event_summary = summarize_cuda_events(self.event_pairs, boundary_completed=boundary_completed and not failed)
 
     @contextmanager
     def scope(self, label):
@@ -188,7 +221,20 @@ class ProfileSession:
             return
         self.calls[label] += 1
         with self.torch.profiler.record_function(PREFIX+label):
-            yield
+            if not self.cuda_events or label not in CUDA_EVENT_LABELS:
+                yield
+                return
+            stream = self.torch.cuda.current_stream()
+            start = self.torch.cuda.Event(enable_timing=True)
+            end = self.torch.cuda.Event(enable_timing=True)
+            start.record(stream)
+            try:
+                yield
+            finally:
+                # Keep the entry stream even when a callee temporarily changes
+                # streams. Inner dp/observe ranges capture their actual stream.
+                end.record(stream)
+                self.event_pairs.append((label, start, end))
 
 
 def wrapped(session, fn, label):
@@ -220,6 +266,12 @@ def instrument(session, panel, metrics, va, dg, fa, integration, arm):
                                 ('_observe', 'observation'), ('_fused_bootstrap_observation', 'observation'),
                                 ('_consume', 'consumer')):
                 tag(integration.Attention, name, label)
+            # These functions execute on the caller's current stream, including
+            # the existing route side stream; no dependency/sync is changed.
+            from experiments.numerical_qk_reuse import v27_dense_prefix as dp, v27_consumer64 as consumer
+            tag(dp, 'build', 'dp_build')
+            tag(dp, 'route', 'dp_route')
+            tag(consumer, 'fused_observe', 'fused_observe')
         # The adapter's metadata read is in its installed wrapper, not inside
         # the original vLLM prepare_attn. Wrap after adapter patch installation.
         original_install = va.install_vllm_patches
@@ -240,7 +292,7 @@ def instrument(session, panel, metrics, va, dg, fa, integration, arm):
             result = original_final(*args, **kwargs)
             if getattr(session, 'active', False):
                 session.phase = profile_counts(result)
-            session.stop()
+            session.stop(boundary_completed=True)
             return result
         stack.enter_context(patch.object(panel, 'add_tracked_request', add))
         stack.enter_context(patch.object(metrics.PhaseTracker, 'finalize', finalize))
@@ -262,10 +314,20 @@ def validate_32k(binding, read):
     return len(cells)
 
 
+def validate_event_settings(spec, enabled):
+    frozen = spec.get('cuda_events', False)
+    if type(frozen) is not bool or frozen != enabled:
+        raise ValueError('CUDA event switch differs from frozen diagnostic spec')
+    if enabled and (spec.get('diagnostic_only') is not True or
+                    spec.get('cuda_event_leaf_scopes') != ['fused_observe','dp_build','dp_route']):
+        raise ValueError('CUDA event leaf scopes must be frozen for an independent diagnostic')
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--summary', type=Path, required=True)
     parser.add_argument('--profile-ordinal', type=int, default=1)
+    parser.add_argument('--cuda-events', action='store_true', help='independent diagnostic only: entry-stream CUDA spans')
     parser.add_argument('--binding', required=True)
     parser.add_argument('--arm', choices=('dense', 'native', 'allkept', 'method'), required=True)
     parser.add_argument('--block', type=int, required=True)
@@ -279,6 +341,7 @@ def main(argv=None):
     binding = panel.read(args.binding)
     spec = panel.read(binding['spec'])
     panel.validate_binding(binding, spec)
+    validate_event_settings(spec, args.cuda_events)
     if Path(__file__).resolve() not in {Path(path).resolve() for path in binding['files']}:
         raise ValueError('frozen diagnostic binding must pin this profiler source')
     validate_32k(binding, panel.read)
@@ -297,17 +360,20 @@ def main(argv=None):
         import experiments.numerical_qk_reuse.integration as integration
     import vllm.model_executor.models.diffusion_gemma as dg
     from vllm.v1.attention.backends import flash_attn as fa
-    session = ProfileSession(torch, args.profile_ordinal)
+    session = ProfileSession(torch, args.profile_ordinal, cuda_events=args.cuda_events)
     worker_args = ['--binding', args.binding, '--arm', args.arm, '--block', str(args.block),
                    '--run-dir', str(args.run_dir), '--query-block', str(args.query_block),
                    '--canvas-buffers', args.canvas_buffers, '--mode', 'benchmark']
     with instrument(session, panel, metrics, va, dg, fa, integration, args.arm):
         worker.main(worker_args)
-    if not session.finished or session.summary is None or session.phase is None:
+    if (not session.finished or session.summary is None or session.phase is None
+            or args.cuda_events and not session.event_summary.get('available',False)):
         raise ValueError('selected diagnostic request was not profiled')
-    report = dict(schema='v29_32k_cost_profile_v1', arm=args.arm, profile_ordinal=args.profile_ordinal,
+    report = dict(schema='v29_32k_cost_profile_v2', arm=args.arm, profile_ordinal=args.profile_ordinal,
                   deploy_commit=binding['deploy_commit'], torch=torch.__version__,
-                  profiler=session.summary, performance_claim_allowed=False, quality_evaluated=False,
+                  engine_execution_settings=spec['arm_settings'][args.arm],
+                  profiler=session.summary, cuda_event_spans=session.event_summary, cuda_events_enabled=args.cuda_events,
+                  performance_claim_allowed=False, quality_evaluated=False,
                   profiled_native_counts=session.phase,
                   measurement='independent profiled request; initialization and preceding requests unprofiled',
                   native_clock='unchanged runner plus actual async execution receipts',

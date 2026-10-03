@@ -51,6 +51,13 @@ also exist. Observation occurs once per canvas, not on every denoising call.
 
 The current source preserves full-V output, the model's scale, GQA head mapping,
 finite-output checks and asynchronous event dependencies for route consumption.
+Installed official Gemma GLOBAL scale is 1.0 (with its QK normalization); the
+adapter passes `impl.scale`, rather than imposing head_dim**-0.5. The installed
+FA4 returns natural-log LSE, consistent with the adapter's softmax-weighted
+FP32 merge. Alias list boundaries floor(count*i/splits) partition the retained
+list without overlap. Current configuration has zero attention softcap and no
+extra ALiBi/sink mask. These facts do not qualify reuse for arbitrary future
+configurations: the adapter does not yet reject every unsupported extra feature.
 The native hook forwards to the original native attention function. Main and
 all-kept obtain K/V from the native paged cache; prefix and canvas copy paths are
 separate. Only the configured GLOBAL decoder layers are intercepted; prefill,
@@ -61,9 +68,9 @@ The local constructor/adapter, paged-copy, mapped-merge and profiler suites pass
 GPU paged/alias-output checks and the V29 copy/merge component oracles are
 recorded separately; the latter do not qualify a new full-model deployment.
 No blanket proof of numerical correctness or task noninferiority follows from
-these checks. An explicit GPU check of the actual BF16 observation-summary mode
-is being prepared because the original fused-observation unit test uses its
-default TF32x3 summary mode.
+these checks. Explicit GPU checks of the actual BF16 observation-summary mode,
+including scale1.0, are prepared because the original fused-observation unit
+test uses its default TF32x3 summary mode.
 
 An independent profiling-tool defect was identified: its decoder-layer name
 regex fails to classify the installed native layer names. This causes missing
