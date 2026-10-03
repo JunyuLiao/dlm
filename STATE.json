@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 20:52 (UTC-5)",
+    "updated_local": "2026-10-02 21:02 (UTC-5)",
     "branch": "research/vllm-variants-20261002",
-    "verified_commit": "e69b59033",
+    "verified_commit": "78f4ea006",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,11 +16,9 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "Six-variant four-engine-seed preview running on mpk; full144 alias sweep closed, keep alias2; new-model sparse ports still unimplemented.",
+    "headline": "Parent V18b complete: default-dense W gain, matched-native increment unproven; six-arm four-engine-seed preview running; new-model sparse ports unimplemented.",
     "running": [
-      "Parent V18b on dllm; original finalizer unchanged",
-      "mpk seed4_preview001:24engine workers,288timed+144warm, frozen generation dcfdb8730",
-      "dlm2 idle; I-DLM diagnostic003 closed"
+      "mpk seed4_preview001:24engine workers,288timed+144warm, frozen generation dcfdb8730"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -165,12 +163,9 @@
       "port_status": "Resolved: unchanged main core runs in vLLM with patched paged FA4 and alias split; V18 preparing."
     },
     "next_steps": [
-      "vLLM panel: LB-v2 32K/64K/96K many items x repeats, vLLM dense (default) vs method (PIECEWISE), accuracy from private completions",
-      "upstream FA4 reports x3 (needs user go-ahead and GitHub account)",
-      "new models: LLaDA2.1-mini SGLang smoke on GPU (FlashInfer JIT fixed), I-DLM-8B smoke, baseline timing, thin adapters",
-      "optional: HF-substrate rerun with dynamic-causal dense and alias-split sparse",
-      "AIME 32K-budget long-output preview",
-      "LongBench Pro official eval code; RULER 8K manifests"
+      "Close and strictly score frozen seed4 preview; inspect by-seed N and clustered accuracy.",
+      "Freeze larger distinct-question confirmation with expanded matched controls only after preview screening.",
+      "New-model ports require official-stack actual-forward and KV/mask event qualification before sparse algorithms."
     ],
     "e15": {
       "verdict": "c01 not adopted (per-step 0.98-1.00, 64K accuracy risk); main pooled over 18 seeds",
@@ -201,17 +196,19 @@
       "source": "docs/VLLM_PORT_NOTES_20261002.md"
     },
     "vllm_v18": {
-      "status": "All four longest-96K V18b qualification arms pass execution/config/count/graph guards and unchanged NeMo scoring. All four outputs parse and all four are incorrect on this one item; this is scorer qualification only, not accuracy evidence. Qualification 005 reserved 640.802 s; total closed V18 work 2154.955 GPU seconds. Formal V18b panel_001 launched from the identical 8704cd072 deploy/binding: 24/24/11 items at 32K/64K/96K, four repeats, dense/main plus matched controls, 568 timed requests. Expected 2-4 hours; mpk CPU scorer ready, both other GPUs idle.",
+      "status": "complete_on_parent_branch_readonly",
       "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_vllm_lb_v18.json",
-      "gpu_seconds": 2154.955,
+      "gpu_seconds": 12809.068,
       "cpu_tests": 164,
       "deploy_commit": "8704cd072582dbb766762f955152bc5533c61986",
-      "gpu_accounting": "closed qualification and diagnostic work only; active formal panel pending",
+      "gpu_accounting": "10654.113 formal panel plus2154.955 qualification; closed",
       "protocol_id": "v27_vllm_lb_v18b_20261002",
       "qualification": "passed four arms at 96K; parsed 4/4, correct 0/4, single shared item only",
       "formal_campaign": "v27_vllm_v18_panel_001",
       "expected_timed_requests": 568,
-      "completion_pipeline": "Single-campaign guarded scoring/publication configured; arm after this documentation commit is pushed. Private finalizer status is authoritative; no new GPU launch."
+      "completion_pipeline": "Original parent finalizer completed scoring, commit and push.",
+      "message": "Parent V18b complete and pushed; see V28 interpretation and parent source commit.",
+      "source_commit": "e1d2f89c29b6a713ffd3419cf7149d1a34abbd50"
     },
     "variant_fairness_audit": {
       "source": "docs/VARIANT_FAIRNESS_AUDIT_20261002.md",
@@ -245,8 +242,8 @@
     },
     "v28": {
       "spec": "docs/VARIANT_CAMPAIGN_V28_20261002.md",
-      "status": "preparing",
-      "gpu_seconds": 0,
+      "status": "seed4_preview_running_components_closed",
+      "gpu_seconds": null,
       "parent_branch": "research/humaneval-v27-20261001",
       "candidates": [
         "native_q64",
@@ -255,12 +252,13 @@
         "regroup_alias_balance",
         "regroup_amortized"
       ],
-      "new_model_status": "official dense qualification pending; sparse adapters not implemented"
+      "new_model_status": "Both official dense toy executions qualified; sparse GPU adapters and benchmark quality unimplemented",
+      "gpu_seconds_note": "This object is not the campaign GPU total; use per-run receipts and dedicated current entries."
     },
     "v28_qualification": {
       "cpu_tests": 92,
       "kv_view": "rejected: incompatible native cache strides",
-      "lifecycle": "request_clear opt-in, CPU qualified only",
+      "lifecycle": "request_clear GPU-qualified; common base in frozen preview",
       "gpu_results": "component only, not request inference",
       "new_model_ports": false,
       "component001": "diagnostic only; corrected nominal bins, native Q strides and finite checks",
@@ -276,8 +274,8 @@
       "held_regroup": "component negative, no request expansion",
       "qualification002": "all five request arms passed; single item only",
       "held_regroup_ratio": 1.0275328370725616,
-      "canvas_release": "CPU-qualified standard optimization; GPU pending",
-      "seed4": "4 engine seeds x 2 repeats x 6 questions; preview spec only"
+      "canvas_release": "five-arm qualification004 passed; matched legacy/release comparisons in frozen preview",
+      "seed4": "running:4 engine seeds x2 sequential repeats x6 distinct questions; preview only"
     },
     "v28_new_models": {
       "llada": "official dense execution smoke passed; sparse variants not implemented",
@@ -308,13 +306,35 @@
       "report": "results/v28_20261002/regroup_triton_permutation/summary.json"
     },
     "v28_seed4_completion_pipeline": {
-      "status": "prepared_cpu_qualified_not_armed",
+      "status": "arm_after_this_commit_push_verify_private_status",
       "helper": "finish_seed4_preview001.py",
       "scorer_commit": "f0d3cd0009419ebe3767c975beb90d6536d31cc1",
       "scorer_cpu_tests": 17,
       "actual_nemo_toy_join_passed": true,
       "on_failure": "preserve and stop; no automatic relaunch",
       "publication": "aggregate only, guarded expected branch HEAD, non-force push; interpretation pending"
+    },
+    "v28_parent_v18b_review": {
+      "source_commit": "e1d2f89c29b6a713ffd3419cf7149d1a34abbd50",
+      "report": "docs/V18B_INTERPRETATION_V28_20261002.md",
+      "timed_requests": 568,
+      "questions": 59,
+      "independent_engine_seeds": 2,
+      "gpu_reserved_seconds": 10654.113,
+      "total_v18_gpu_reserved_seconds": 12809.068,
+      "main_dense_W": [
+        0.7814,
+        0.7439,
+        0.807
+      ],
+      "main_native_W": [
+        1.1377,
+        1.0065,
+        1.0446
+      ],
+      "matched_control_questions_per_bin": 4,
+      "noninferiority_established": false,
+      "no_merge": true
     }
   },
   "task": "M3 output numerics and trajectory isolation",

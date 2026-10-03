@@ -311,3 +311,26 @@ publication checks pass. Fetch avoids writing the parent worktree's FETCH_HEAD.
 Preview frozen question identities were checked privately: six distinct IDs,
 zero cross-bin duplicates. Four engine seeds and two sequential repeats do not
 increase the independent question count beyond six.
+
+## Completed parent V18b and seed interpretation — 2026-10-02 21:02 (UTC-5)
+
+Read-only source: parent branch commit `e1d2f89c29b6a713ffd3419cf7149d1a34abbd50`,
+568 timed requests,59 questions,2 independent engine seeds, four repeat labels.
+Formal reserved10654.113GPU seconds; with qualification12809.068. No merge.
+Main/default-dense W ratios .7814/.7439/.8070 at32K/64K/96K, but main/native
+W on the small matched subset is1.1377/1.0065/1.0446.32K S/N is slower versus
+dense; changed N contributes substantially. Native's own lower W accompanies
+lower N, not lower S/N; do not label it a proven engineering-only gain.
+64K main/all-kept W .9255 [.8969,.9668] is a lead, with7/16 versus8/16 correct.
+Equal64K/96K main/dense accuracy counts do not establish noninferiority.
+See `docs/V18B_INTERPRETATION_V28_20261002.md` for sources, CIs and limitations.
+
+Frozen V28 preview unchanged:4 engine seeds x2 repeats x6 distinct questions;
+report N by seed and cluster by question. It is still a preview. Confirmation
+needs more independent questions and seed blocks with expanded matched controls,
+frozen accuracy margin and analysis. Do not silently add per-request RNG resets.
+One-shot existing-campaign completion helper will be armed after this commit
+is pushed; private status is authoritative. It uses separately qualified CPU
+scorer f0d3cd000, checks frozen identities and all workers, then publishes only
+aggregates behind unchanged-local/remote-HEAD guards. No new GPU launch or
+automatic favorable scientific conclusion. Any failure stops for review.

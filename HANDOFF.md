@@ -1,13 +1,13 @@
-# V28 active handoff (2026-10-02 20:52 (UTC-5))
+# V28 active handoff (2026-10-02 21:02 (UTC-5))
 
 - Branch `research/vllm-variants-20261002`, parent base `9b027df8f`; generation deploy `dcfdb8730` frozen.
 - Qualification004 closed all five request workers successfully: Q128/Q64 legacy canvas, Q128/Q64 release, allkept release. Timed monitored JIT events and allocator retries zero; no performance/accuracy inference from one item.
 - Four engine seeds x two sequential repeats x six questions are frozen for six variants (48 timed/variant). Family spec committed before launch. seed4_preview001 now running on mpk:24engines,288timed+144warm. Repeats are not independent seeds.
 - Component evidence: Q64/Q128 0.94575; held-regroup/natural Q64 total 1.02753 (negative). Full144 alias4/2 mean0.98836 with32K slower; retain alias2.
-- Parent V18b continues on dllm unchanged; its formal scoring/finalizer belongs to the original worktree. Retain allocator costs; do not alter original campaign.
+- Parent V18b completed and pushed at `e1d2f89c29b6a713ffd3419cf7149d1a34abbd50`:568 timed requests,59 questions,2 engine seeds. Main/default-dense W ratios .7814/.7439/.8070, but matched native W 1.1377/1.0065/1.0446; no general incremental or noninferiority claim. See `docs/V18B_INTERPRETATION_V28_20261002.md`. Parent result files stay on their own branch.
 - LLaDA official dense environment smoke passed. I-DLM diagnostic003 naturally stops in all3toy calls at868/549/1200 tokens; general task quality remains unqualified. Neither model has our sparse variants implemented. See new-model adaptation audit.
 - New-model attempts total916.2097GPU seconds; dlm2 idle after diagnostic003. mpk qualification004 total867.9727GPU seconds (includes alias sweep and startup/teardown).
-- Next: close six-arm seed4 preview and run strict scoring, then only supported refinements. Completion pipeline CPU-qualified, not yet armed. Question coverage must expand before request-level or noninferiority claims.
+- Next: close six-arm seed4 preview and run strict scoring, then only supported refinements. Completion pipeline CPU-qualified; arm against this documentation commit after push, then verify private waiting status. It only finishes the existing campaign and publishes validated aggregates; no new GPU job. Question coverage must expand before request-level or noninferiority claims.
 - Update HANDOFF/docs/STATE.current with every result or status change and push. Private prompts, generated text, gold, token arrays and private paths stay outside Git.
 
 ## Inherited parent handoff (historical; current V28 overlay above takes precedence)
