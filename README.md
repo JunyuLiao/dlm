@@ -243,6 +243,14 @@ the root's JSON files. Threshold fitting uses tile counts and trajectory
 metadata only. Calibration IDs overlap the historical AIME manifest, so those
 runs should be reported as development evidence rather than held-out results.
 
+The numeric configuration and threshold-file contract is documented in the
+[Hopper frozen-configuration section](experiments/value_direction_hopper/README.md#frozen-hyperparameters-and-threshold-artifacts).
+Load the full-precision pair from the selected `thresholds/*.json` record and
+keep its `configuration.json` fingerprint, source hashes, model revision, and
+kernel provenance together with the run. Thresholds are protocol-specific;
+they should be recalibrated when the model, manifest, kernel, tile geometry,
+projection, sensitivity hyperparameters, or runtime changes.
+
 ## Verification
 
 Run the CPU formula suite in every environment. The H100 suite additionally

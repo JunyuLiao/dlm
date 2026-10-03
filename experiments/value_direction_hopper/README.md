@@ -101,6 +101,96 @@ The causal variants use the same bounded coefficient `s = clip(1 + beta*h,
 diagnostic variants. All of them are updated only after a completed native
 sampler call and can be evaluated under the same uniform-threshold adapter.
 
+### Frozen hyperparameters and threshold artifacts
+
+The calibration driver freezes every value that can change routing or the
+denoising trajectory in `configuration.json`. The current AIME26 uniform
+protocol uses these defaults:
+
+| Parameter | Value | Scope |
+|---|---:|---|
+| `beta` | `3.0` | Sensitivity range is `1` to `1 + beta = 4`; call 1 always uses 4 |
+| `gamma` | `0.5` | Completed-call top-1 flip EMA and the default trajectory EMA |
+| `trajectory_gamma` | `0.5` | `M_prior`, `C_prior`, `T_prior`, and `T_hybrid` |
+| `smooth_trajectory_gamma` | `0.8` | `T_smooth` |
+| `gate_trajectory_gamma` | `0.65` | `M_gate`, `M_gate_norm`, `C_gate`, `T_gate`, and `C_gate_soft` |
+| `gate_tau` | `2.5` | Stable-run gate time constant for gate variants |
+| `m_ref` | loaded from the frozen parent configuration | Margin reference for `M_*`; it is not the Gaussian32 value-RMS reference |
+| Gaussian rank | `32` | Value sketch dimension |
+| Projection seed | `1729` | One projection per native layer and KV head |
+| Physical tile | `128 × 64` | Query rows × key/value rows |
+| Canvas / step cap | `256` / `48` | Native DiffusionGemma request schedule |
+
+The integration defaults that affect execution are
+`precision=tf32x3_register`, `projection=fused`, `allocation=normal`,
+`bootstrap=false`, and `tma=true` for unmasked value-router calls. The
+masked path disables TMA; BLASST TMA is off unless `blasst_tma=true` is
+explicitly selected. Calibration and audit runs keep `collect=true` and
+diagnostics enabled, while clean timing runs must disable routing/profile
+instrumentation separately.
+
+`T_run` uses `exp(-stable_run / 2)` for its causal trajectory completion;
+`gamma=0.5` still controls its completed-call flip EMA.
+
+The native temperature processor remains
+`0.4 + 0.4 * (remaining_schedule_step / 48)`. Calibration uses the fixed
+seed-42 six-question manifest `aime26/{2,8,14,20,23,30}`. The standard final
+development runs use seeds `42,43,44`; set `AIME_SEEDS` or
+`AIME_FINAL_SEEDS` explicitly when reproducing a different seed set.
+
+The archived AIME/HumanEval configurations currently use
+`m_ref = 14.258454322814941`; a new parent configuration must be treated as a
+new protocol if this value changes. Optional diagnostic variants additionally
+record `anchor_lambda=0.90`, `soft_prior_alpha=0.25`, `tail_tau=0.75`,
+`tail_lambda=0.5`, `tail_trajectory_gamma=0.65`, and
+`soft_gate_lambda=0.2`. `M_gate_norm` has one extra fitted value,
+`margin_scale`; it is the frozen robust scale
+`max(IQR(log1p(raw_margin))/1.349, 0.05)` from dense calibration trajectories.
+The other gate variants do not consume `margin_scale`.
+
+Gaussian32's value-RMS reference is recomputed from the valid K/V values for
+each native layer and call by `integration.Sketches`; it is not a second
+user-supplied threshold or a fixed constant.
+
+The threshold files are protocol outputs, not universal constants. For a value
+router, `thresholds/<method>_s<target>.json` contains an attained record such
+as:
+
+```json
+{
+  "status": "attained",
+  "target": 50,
+  "policy": {
+    "call1": {"local": {"log_threshold": 0.0}, "global": {"log_threshold": 0.0}},
+    "call2": {"local": {"log_threshold": 0.0}, "global": {"log_threshold": 0.0}},
+    "late":  {"local": {"log_threshold": 0.0}, "global": {"log_threshold": 0.0}}
+  },
+  "max_error": 0.0
+}
+```
+
+The zeros above are schema placeholders, not recommended thresholds. Use the
+full-precision values from the selected record. A uniform run must satisfy
+`policy.call1 == policy.call2 == policy.late`; the runtime passes the
+`policy.late` local/global mapping to `UniformThresholdState`, which returns
+that same pair on every call. The calibration acceptance test is pooled whole,
+local, and global physical sparsity within ±2 percentage points of the target;
+the selected feasible point then minimizes mean canvas steps. A threshold
+record is valid only with its matching configuration fingerprint, source
+hashes, model revision, kernel provenance, manifest, and `status="attained"`.
+
+BLASST uses a different field: `log_scale`, not `log_threshold`. The
+integration converts it to the per-call kernel threshold by subtracting
+`log(valid_kv_length)` and applies `cap_one` when present. Do not copy a value
+router threshold into a BLASST policy or vice versa.
+
+For a direct integration, the executable reference is
+[`aime_temporal_sweep._run_one`](aime_temporal_sweep.py). It loads the frozen
+record, calls `install(...)` with the local/global policy, constructs
+`UniformThresholdState` with the values in `configuration.json`, and wraps the
+native sampler with `observe(...)`. This preserves causal updates: completed
+sampler masks and logits affect only the next routing call.
+
 ## Implementation files
 
 The integration order is:
@@ -222,6 +312,11 @@ PYTHONPATH=src:. python -m experiments.value_direction_hopper.aime_uniform_basel
 PYTHONPATH=src:. python -m experiments.value_direction_hopper.aime_uniform_baselines \
   report --root results/aime_uniform_baselines
 ```
+
+Before `run`, verify `calibration_complete.json` has `"passed": true` and
+that every requested threshold has `status="attained"`. `search_incomplete`
+records retain the nearest measured point for diagnosis, but they are not
+calibrated evaluation policies.
 
 The causal driver supports the same uniform threshold contract:
 
