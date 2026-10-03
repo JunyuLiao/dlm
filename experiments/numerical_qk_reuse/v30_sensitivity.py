@@ -45,6 +45,8 @@ class SensitivityOverride:
             chosen = torch.full(canvas.shape[:2],1+self.state.beta,device=canvas.device,dtype=torch.float32)
             self.calls['protected_first_steps'] += 1
         else:
+            if tuple(self.previous_confidence.shape) != tuple(canvas.shape[:2]):
+                raise ValueError('Query geometry changed inside one canvas')
             chosen = (1+self.state.beta*(1-self.previous_confidence).clamp_min(0).sqrt()).clamp(1,1+self.state.beta).contiguous()
             self.calls['confidence_steps'] += 1
         self.state.used_weights = chosen

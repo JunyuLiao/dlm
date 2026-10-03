@@ -58,6 +58,15 @@ def test_modes_and_unsupported_state_combinations_fail():
     with pytest.raises(RuntimeError):SensitivityOverride(s,'confidence_v30')
 
 
+def test_confidence_rejects_mid_canvas_geometry_change_before_routing():
+    s,r=state();SensitivityOverride(s,'confidence_v30')
+    s.begin(48,torch.zeros((1,2),dtype=torch.long));s.observe_logits(logits([.5,.9]),None,48)
+    with pytest.raises(ValueError,match='geometry changed'):
+        s.begin(47,torch.zeros((1,3),dtype=torch.long))
+    s.begin(48,torch.zeros((1,3),dtype=torch.long))
+    torch.testing.assert_close(r.query_sensitivity,torch.full((1,3),4.))
+
+
 @pytest.mark.parametrize('mode',(None,'unit_v30','confidence_v30'))
 def test_vllm_dispatch_preserves_main_and_trims_only_new_variant_padding(mode):
     from experiments.numerical_qk_reuse.vllm_adapter import VllmMethodAdapter

@@ -1,3 +1,22 @@
+## V30 configuration qualification and final shape guard — 2026-10-03 03:33 (UTC-5)
+
+All three hosts successfully CPU-froze three sensitivity bindings each and dllm
+also froze eight diagnostic bindings at26f3f03b6; CUDA stayed uninitialized.
+No GPU execution. These unused campaign002 bindings are retained and superseded
+by the next source freeze adding a pre-routing confidence geometry check.
+A within-canvas Q-size change now fails before sparse selection; a new canvas
+may change Q normally. Updated CPU regression26/26passed, no skips,78stages
+CUDA-uninitialized,0GPU seconds. Per-case receipts and source pins:
+results/v30_20261003/sensitivity_cpu002. New immutable deployment follows.
+
+The prepared private continuation has32dense diagnostic workers and60pipeline
+qualification workers (three modes x four arms x five datasets), then nine
+complete strict CPU scores. Full eight-seed specs are committed; qualification
+is one longest input/dataset, one warm+one timed and is NOT a quality/speed claim.
+It waits for original formal strict scores, earlier component/dense/engineering
+queues, and the29-case peer kernel qualification. It has six local guard/payload
+tests but is NOT armed at this commit. No frozen prior queue is modified.
+
 ## V30 source-freeze guard correction — 2026-10-03 03:21 (UTC-5)
 
 First CPU-only preparation on dlm2 stopped before GPU: the original parent
