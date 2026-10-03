@@ -1,3 +1,30 @@
+## Detailed evidence published and qualification progress (2026-10-02 23:34, UTC-5)
+
+Publish the actual per-arm profiler outputs, sanitized request measurements and
+terminal receipts from both closed diagnostics, not just their conclusions:
+results/v29_20261002/cost32k_002/raw/ and cost32k_events003/raw/.
+There are24measurement files,80,316uncompressed bytes and28,647bytes of gzip
+copies, plus manifests/README. Root independently verified all24 gzip roundtrips,
+public artifact digests and private-field/path scans. Full numeric measurements,
+counts, method/allocator/layout receipts remain; private identities and data are
+removed. No timeline was originally exported, so none is reconstructed. Resource
+accounting uses each supervisor's complete reserved span, not inner terminal
+clock values. These profiled requests remain excluded from formal speed/quality.
+
+AIME CPU setup passed actual v21 validation and all42Linux tests on both original
+mpk and destination dlm2; public preparation receipts and test inventory retained.
+Destination frozen1931db5a6 now has a verified AIME001 input binding. An initial
+minimal-input transfer stopped at strict byte verification due to Windows CRLF
+versus Linux LF serialization (0GPU). New002 transfers original bytes, validates
+both the byte pin and parsed30rows, and passes freeze/read_frozen; original001
+is preserved. No gold contents were transferred. AIME GPU qualification pending.
+
+HumanEval qualification generation closed4/4 with no failure; strict CPU scoring
+and formal proof remain pending. LongBench qualification002 has closed5/12 with
+no failures and is running64K native; frozen54163f4e7 unchanged. Its closed-worker
+reserved time currently944.897625s; active-worker time remains unclosed. No formal
+panel has launched. Preserve the separate previous241.732s idle-guard attempt.
+
 
 User also requests timely commit/push and reasonably sized traces/measurement
 records, not only conclusions. Full diagnostic trace privacy/size audit is

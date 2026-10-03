@@ -1,0 +1,151 @@
+{
+  "schema": "v29_32k_cost_profile_v1",
+  "arm": "allkept",
+  "profile_ordinal": 1,
+  "deploy_commit": "39e08c521d15b458a1e4c19e98de42a312ff0c25",
+  "torch": "2.13.0+cu130",
+  "profiler": {
+    "range_cpu_inclusive": {
+      "prepare_metadata": {
+        "calls": 164,
+        "cpu_inclusive_ms": 2059.534519999995
+      },
+      "method_begin": {
+        "calls": 164,
+        "cpu_inclusive_ms": 5.106352000001878
+      },
+      "encoder_attention_other": {
+        "calls": 420,
+        "cpu_inclusive_ms": 109.49026199999768
+      },
+      "denoise_attention_other": {
+        "calls": 3750,
+        "cpu_inclusive_ms": 1019.6548190000101
+      },
+      "denoise_global_attention": {
+        "calls": 750,
+        "cpu_inclusive_ms": 598.0365060000059
+      },
+      "kv_prefix_build": {
+        "calls": 60,
+        "cpu_inclusive_ms": 13.156862000001247
+      },
+      "consumer": {
+        "calls": 750,
+        "cpu_inclusive_ms": 335.9088609999882
+      },
+      "split_lists": {
+        "calls": 750,
+        "cpu_inclusive_ms": 14.197470000003912
+      },
+      "sample": {
+        "calls": 161,
+        "cpu_inclusive_ms": 214.96571699999848
+      },
+      "method_observe": {
+        "calls": 150,
+        "cpu_inclusive_ms": 3.1077369999968196
+      },
+      "kv_canvas_refresh": {
+        "calls": 690,
+        "cpu_inclusive_ms": 134.10196899999215
+      }
+    },
+    "directly_associated_gpu_ms": {
+      "unattributed": 2686.539713999877,
+      "prepare_metadata": 3.0548489999954884,
+      "method_begin": 0.001087999999988824,
+      "kv_prefix_build": 34.401363999999035,
+      "split_lists": 0.4501770000087557,
+      "consumer": 37.11363099999645,
+      "denoise_global_attention": 1.8854060000041548,
+      "sample": 288.9635940000217,
+      "kv_canvas_refresh": 11.209251999993654
+    },
+    "raw_cuda_activity_sum_ms": 7737.390685999929,
+    "directly_associated_kernel_records": 40763,
+    "d2h_activity": {
+      "calls": 492,
+      "sum_ms": 0.8591119999982402
+    },
+    "host_ops": {
+      "host_cuda_launch": {
+        "calls": 36312,
+        "cpu_self_ms": 354.62982300007525,
+        "cpu_inclusive_ms": 356.41794300007587,
+        "by_scope_self_ms": {
+          "unattributed": 217.9413520000419,
+          "prepare_metadata": 10.868014000006589,
+          "encoder_attention_other": 5.667651000008331,
+          "method_begin": 0.010690999999991619,
+          "denoise_attention_other": 54.200698000027586,
+          "kv_prefix_build": 1.723141999997082,
+          "split_lists": 1.2221909999956837,
+          "consumer": 36.17907199999126,
+          "sample": 6.357651000003217,
+          "kv_canvas_refresh": 20.426567000005203,
+          "denoise_global_attention": 0.03279399999976158
+        }
+      },
+      "host_scalar_extract": {
+        "calls": 2264,
+        "cpu_self_ms": 1.8477720000089635,
+        "cpu_inclusive_ms": 2.298141000012656,
+        "by_scope_self_ms": {
+          "unattributed": 0.473881999999519,
+          "sample": 1.373890000009445
+        }
+      },
+      "host_copy_enqueue": {
+        "calls": 3044,
+        "cpu_self_ms": 1996.0107269999958,
+        "cpu_inclusive_ms": 1996.0107269999958,
+        "by_scope_self_ms": {
+          "unattributed": 16.1009950000134,
+          "prepare_metadata": 1962.342609999993,
+          "denoise_global_attention": 13.43987100000667,
+          "sample": 4.127250999986075
+        }
+      },
+      "host_sync": {
+        "calls": 331,
+        "cpu_self_ms": 9.19550300001019,
+        "cpu_inclusive_ms": 9.19550300001019,
+        "by_scope_self_ms": {
+          "prepare_metadata": 0.7891620000038307,
+          "unattributed": 8.406341000006359
+        }
+      }
+    },
+    "eager_scope_calls": {
+      "prepare_metadata": 164,
+      "method_begin": 164,
+      "encoder_attention_other": 420,
+      "denoise_attention_other": 3750,
+      "denoise_global_attention": 750,
+      "kv_prefix_build": 60,
+      "consumer": 750,
+      "split_lists": 750,
+      "sample": 161,
+      "method_observe": 150,
+      "kv_canvas_refresh": 690
+    },
+    "missing_eager_attention_scopes": [
+      "local_attention"
+    ],
+    "interpretation": "nested CPU ranges overlap; CUDA streams overlap; totals are not additive request time; FULL graph replay may lack eager layer ranges; host sync is observed wait, not causal attribution"
+  },
+  "performance_claim_allowed": false,
+  "quality_evaluated": false,
+  "profiled_native_counts": {
+    "denoising_forwards": 150,
+    "commit_forwards": 11,
+    "prefill_steps": 3,
+    "scheduler_denoising_forwards": 149,
+    "scheduler_commit_forwards": 11,
+    "speculative_unused_denoising": 1
+  },
+  "measurement": "independent profiled request; initialization and preceding requests unprofiled",
+  "native_clock": "unchanged runner plus actual async execution receipts",
+  "caveat": "profiled worker records must never be ingested as formal timing; ranges/trace overhead unknown"
+}

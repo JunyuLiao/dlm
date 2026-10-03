@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 23:20 (UTC-5)",
+    "updated_local": "2026-10-02 23:34 (UTC-5)",
     "branch": "research/vllm-confirmation-20261002",
-    "verified_commit": "1931db5a6",
+    "verified_commit": "fc40f98e7",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -18,8 +18,7 @@
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
     "headline": "44 GPU observation oracles pass and four-arm event diagnosis complete; expanded qualification running.",
     "running": [
-      "mpk HumanEval four-arm qualification, frozen54163f4e7",
-      "dllm LongBench twelve-worker qualification002, frozen54163f4e7"
+      "dllm LongBench qualification002:5/12 closed,64K native active, frozen54163f4e7"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -372,7 +371,13 @@
       "next": "Separate formal panels; no causal speed claim from instrumented spans",
       "event_source_commit": "54163f4e7",
       "event_summary": "results/v29_20261002/cost32k_events003/aggregate.json",
-      "event_gpu_reserved_seconds": 1092.569460863946
+      "event_gpu_reserved_seconds": 1092.569460863946,
+      "raw_evidence": [
+        "results/v29_20261002/cost32k_002/raw/manifest.json",
+        "results/v29_20261002/cost32k_events003/raw/manifest.json"
+      ],
+      "timeline_originally_saved": false,
+      "public_measurement_artifact_count": 24
     },
     "v29_observation_audit": {
       "status": "44_GPU_tests_passed_fixed_tolerances",
@@ -410,34 +415,43 @@
         "longbench": {
           "questions": 59,
           "host": "dllm",
-          "status": "qualification002_running",
+          "status": "qualification002_running_5of12_closed",
           "preparation_attempt001": "CPU_missing_archived_spec_GPU0",
           "preparation_attempt002": "source_parent_pins_rebind_and_inventory_verified",
           "source_commit": "54163f4e7",
-          "qualification001": "one_worker_completed_then_transient_NVML_idle_guard_stop_preserved"
+          "qualification001": "one_worker_completed_then_transient_NVML_idle_guard_stop_preserved",
+          "closed_worker_gpu_reserved_seconds": 944.8976253968431,
+          "closed_worker_gpu_seconds_excludes_active": true
         },
         "aime": {
           "questions": 30,
           "host": "dlm2",
-          "status": "original_protocol_CPU_deployment_resumed_with_explicit_transfer_authorization",
+          "status": "dlm2_AIME001_binding_verified_GPU_qualification_pending",
           "CPU_tests_run": 42,
-          "CPU_tests_passed": 41,
-          "CPU_tests_skipped": 1,
+          "CPU_tests_passed": 42,
+          "CPU_tests_skipped": 0,
           "Linux_no_skip_required": true,
           "protocol_id": "v29_aime_confirmation001",
           "prior_protocol": "v29_aime_confirmation001 preserved_unlaunched",
           "cross_host_private_transfers": "two_auto_review_rejections_no_execution_no_transfer",
           "source_commit": "1931db5a6",
           "fallback_protocol": "v29_aime_confirmation002 preserved_unlaunched",
-          "fallback_CPU": "mpk strict rebind, actualv21 and Linux42 pass; CUDA uninitialized, no binding/generation/GPU"
+          "fallback_CPU": "mpk strict rebind, actualv21 and Linux42 pass; CUDA uninitialized, no binding/generation/GPU",
+          "input_freeze001": "CRLF_LF_byte_pin_failure_GPU0_preserved",
+          "input_freeze002": "original_bytes_and_semantic_rows_verified_freeze_and_read_frozen_passed_GPU0",
+          "CPU_receipts": [
+            "results/v29_20261002/aime_dlm2_cpu_preparation001/summary.json",
+            "results/v29_20261002/aime_original_host_cpu_preparation002/summary.json"
+          ]
         },
         "humaneval": {
           "questions": 164,
           "host": "mpk",
-          "status": "four_arm_GPU_qualification_running",
+          "status": "qualification_generation4of4_closed_CPU_score_pending",
           "source_commit": "54163f4e7",
           "CPU_tests": 33,
-          "real_scorer_toys": true
+          "real_scorer_toys": true,
+          "qualification_failed_workers": 0
         }
       },
       "specs_dir": "results/v29_20261002/specs",
