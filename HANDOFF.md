@@ -1,5 +1,21 @@
 ## Paused by user after short-suite completion — 2026-10-03 04:40 (UTC-5)
 
+## V31 update (2026-10-03 05:50 UTC−5; branch `research/vllm-paired-20261003`) — read this first
+
+- **Root cause of the "fast dense" / trajectory confusion: upstream vLLM bug
+  [PR #51994](https://github.com/vllm-project/vllm/pull/51994).** It is merged 2026-09-30 and not in 0.30.0.
+  FULL-graph decode froze DiffusionGemma's causal / bidirectional mask.
+  - vLLM's default dense in V18b–V30 therefore ran a wrong mask and took ~25–50% more forwards.
+  - Do not quote "method vs default dense" from those panels.
+  - Details: `docs/V31_BASELINE_ROOT_CAUSE_20261003.md`.
+- **vLLM is seed-controllable:** reseeding the default torch generators per request gives token-identical batch-1
+  runs (`results/v31_20261003/graphmode001`).
+- **Dense baseline:** vLLM 0.30.0 default (FULL) plus the exact upstream fix (`FIX_51994=1`), seed-paired. PIECEWISE
+  dense and the unfixed default are secondary references.
+- **Running:** seed-paired LongBench 32K / 64K panels a / b / c on all three hosts (see the V31 doc); then the
+  pack-GQA sparse bench on dllm.
+- **The C gate now works in vLLM** (acceptance mask recomputed from the sampler logits).
+
 AIME32/32 and HumanEval32/32 completed generation, unscored. LongBench11/32
 complete; b2_native interrupted in warm-up (0 timed rows), 20 workers unstarted.
 All 75 closed workers succeeded. Three GPUs confirmed idle; all six local

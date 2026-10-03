@@ -16,7 +16,7 @@ ceil(output / 256)), denoising forwards N = sampler calls - C, prefill / decode 
 synchronized), per-step decode times summary, finish reason, adapter + method receipts. Private: raw completion with
 special tokens (for the v15 final-channel LongBench scorer), id, finish reason.
 usage: python v31_vllm_paired_bench.py MODEL MANIFEST_DIR CELLS_JSON OUT_JSONL PRIVATE_JSONL ARM CG [CONFIG_JSON]
-  env: REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
+  env: FIX_51994=1 (backport the upstream FULL-graph causal-buffer fix), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
        V27_ADAPTER_DIR (overlay holding vllm_adapter.py), SHARD=k/K (take cells k, k+K, ...)
 """
 import hashlib
@@ -65,6 +65,9 @@ def main():
     from transformers import AutoConfig
     from vllm import LLM, SamplingParams
     from vllm.inputs import TokensPrompt
+    fix_51994 = os.environ.get('FIX_51994') == '1'
+    if fix_51994:
+        apply_fix_51994()
 
     adapter, config, adapter_sha = None, None, None
     if arm != 'dense':
@@ -103,7 +106,7 @@ def main():
     meta = dict(schema='v31_vllm_paired_v1', arm=arm, cudagraph_mode=cg, vllm=vllm.__version__, torch=torch.__version__,
                 gpu=torch.cuda.get_device_name(), max_model_len=max_len, chunk=chunk, block_size=kw['block_size'],
                 gpu_memory_utilization=kw['gpu_memory_utilization'], seed_base=seed_base, adapter_sha256=adapter_sha,
-                method_fingerprint=None if config is None else config.get('fingerprint'))
+                method_fingerprint=None if config is None else config.get('fingerprint'), fix_51994=fix_51994)
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]
@@ -167,6 +170,26 @@ def _slim(m):
             'bootstrap_dense_calls', 'preqk_consumer_calls', 'attention_calls', 'layer_native_calls', 'fresh_fused_calls',
             'fa4_list_builds', 'async_observation_routes', 'protected_routes', 'v30_sensitivity', 'cgate')
     return {k: m.get(k) for k in keep if k in m}
+
+
+def apply_fix_51994():
+    """Backport of vLLM PR #51994 (merged 2026-09-30, not in 0.30.0): DiffusionGemma's per-request causal buffer was
+    bool, so FlashAttentionMetadataBuilder.build() cast it out of place to int32 on every call; FULL CUDA graphs bound
+    the capture-time copy and replayed a frozen causal/bidirectional flag. Allocating the buffer as int32 makes
+    prepare_attn's slice assignment an in-place update that captured graphs see (the upstream fix also turns the
+    builder's silent cast into an error; behaviour with an int32 buffer is identical)."""
+    import torch
+    import vllm.model_executor.models.diffusion_gemma as dg
+    cls = dg.DiffusionGemmaModelState
+    if getattr(cls, '_v31_fix_51994', False):
+        return
+    init = cls.__init__
+
+    def patched(self, *args, **kwargs):
+        init(self, *args, **kwargs)
+        self._causal_buf = torch.zeros(self._causal_buf.shape[0], dtype=torch.int32, device=self._causal_buf.device)
+    cls.__init__ = patched
+    cls._v31_fix_51994 = True
 
 
 if __name__ == '__main__':

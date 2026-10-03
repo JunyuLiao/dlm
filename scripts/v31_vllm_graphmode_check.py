@@ -40,6 +40,9 @@ def main():
     import vllm.model_executor.models.diffusion_gemma as dg
     from vllm import LLM, SamplingParams
     from vllm.inputs import TokensPrompt
+    fix_51994 = os.environ.get('FIX_51994') == '1'
+    if fix_51994:
+        apply_fix_51994()
 
     trace = dict(calls=[], dump=None)
     original = dg._compiled_sample_step
@@ -82,7 +85,7 @@ def main():
         only = os.environ.get('DUMP_ONLY')
         tag = f"{cell.get('index')}_{cell['seed']}"
         trace['dump'] = None if warm or rep or (only and tag != only) else (
-            str(Path(dump_dir) / f"{cg}_{cell['dataset']}_{tag}"), calls)
+            str(Path(dump_dir) / f"{cg}{'_fix' if fix_51994 else ''}_{cell['dataset']}_{tag}"), calls)
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
         torch.cuda.synchronize()
@@ -99,7 +102,7 @@ def main():
         if warm:
             continue
         toks = list(final.outputs[0].token_ids)
-        rec = dict(cudagraph_mode=cg, dataset=cell['dataset'], index=cell.get('index'), panel_seed=cell['seed'],
+        rec = dict(cudagraph_mode=cg, fix_51994=fix_51994, dataset=cell['dataset'], index=cell.get('index'), panel_seed=cell['seed'],
                    repeat=rep, rng_seed=seed, sampler_calls=len(trace['calls']), output_tokens=len(toks),
                    output_hash=hashlib.sha256(json.dumps(toks).encode()).hexdigest()[:16], wall_s=round(wall, 3),
                    first_calls=trace['calls'][:12], finish_reason=final.outputs[0].finish_reason,
@@ -107,6 +110,26 @@ def main():
         out.write(json.dumps(rec) + '\n')
         out.flush()
         print(json.dumps({k: v for k, v in rec.items() if k != 'first_calls'}), flush=True)
+
+
+def apply_fix_51994():
+    """Backport of vLLM PR #51994 (merged 2026-09-30, not in 0.30.0): DiffusionGemma's per-request causal buffer was
+    bool, so FlashAttentionMetadataBuilder.build() cast it out of place to int32 on every call; FULL CUDA graphs bound
+    the capture-time copy and replayed a frozen causal/bidirectional flag. Allocating the buffer as int32 makes
+    prepare_attn's slice assignment an in-place update that captured graphs see (the upstream fix also turns the
+    builder's silent cast into an error; behaviour with an int32 buffer is identical)."""
+    import torch
+    import vllm.model_executor.models.diffusion_gemma as dg
+    cls = dg.DiffusionGemmaModelState
+    if getattr(cls, '_v31_fix_51994', False):
+        return
+    init = cls.__init__
+
+    def patched(self, *args, **kwargs):
+        init(self, *args, **kwargs)
+        self._causal_buf = torch.zeros(self._causal_buf.shape[0], dtype=torch.int32, device=self._causal_buf.device)
+    cls.__init__ = patched
+    cls._v31_fix_51994 = True
 
 
 if __name__ == '__main__':
