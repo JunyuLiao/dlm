@@ -72,7 +72,7 @@ $$
 $$
 g_i=1-\exp(-r_i/\tau),\qquad
 h_i=1-g_i(1-q_i)(1-u^C_i),\qquad
-s_i=\operatorname{clip}(1+\beta h_i,1,1+\beta).
+s_i=\mathrm{clip}(1+\beta h_i,1,1+\beta).
 $$
 
 Here $p_i$ is the completed-call top-1 probability and $r_i$ is the
