@@ -126,7 +126,7 @@ class _PrefixCache:
 
 class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
-                 canvas_buffers='legacy', kv_copy_backend='torch'):
+                 canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch'):
         if arm not in ('method', 'allkept', 'native'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -135,6 +135,8 @@ class VllmMethodAdapter:
             raise ValueError('canvas_buffers must be legacy or release_after_invalidate')
         if kv_copy_backend not in ('torch', 'triton'):
             raise ValueError('kv_copy_backend must be torch or triton')
+        if merge_backend not in ('torch', 'triton'):
+            raise ValueError('merge_backend must be torch or triton')
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
         if arm == 'method':
@@ -153,6 +155,8 @@ class VllmMethodAdapter:
         self.lifecycle = lifecycle      # explicit V28 execution setting, readable by runner receipts
         self.canvas_buffers = canvas_buffers
         self.kv_copy_backend = kv_copy_backend
+        self.merge_backend = merge_backend
+        self._merge_cache = {}
         self.runtime = self.stub = self._stack = None
         self.bound = False               # True only while a request is in flight (dummy/warm-up runs pass through)
         self.profile, self._events = bool(profile), []   # CUDA events around every intercepted GLOBAL call
@@ -171,6 +175,8 @@ class VllmMethodAdapter:
                           passthrough=0, order_errors=0, split_fa4_calls=0, split_list_builds=0)
         if kv_copy_backend == 'triton':
             self.calls.update(triton_kv_copy_calls=0, triton_kv_copy_elements=0)
+        if merge_backend == 'triton':
+            self.calls.update(triton_lse_merge_calls=0, triton_lse_identity_builds=0)
         if self.canvas_buffers == 'release_after_invalidate':
             self.calls.update(canvas_release_calls=0, canvas_release_layers=0, canvas_release_bytes=0,
                               canvas_invalidate_epoch=0, canvas_release_epoch=0)
@@ -269,6 +275,7 @@ class VllmMethodAdapter:
                 self.bound, self.step_ctx, self.pending_sample = False, None, False
 
     def _clear_canvas_metadata(self):
+        self._merge_cache.clear()
         self._buffer_streams.clear()
         self._canvas_invalidate_epoch = 0
         self._canvas_release_epoch = None
@@ -460,9 +467,25 @@ class VllmMethodAdapter:
         used = torch.full((S,), ctx['nk'], device=q.device, dtype=torch.int32)
         o, lse = fwd(qs, ctx['k'], ctx['v'], softmax_scale=scale, causal=False, page_table=table, seqused_k=used,
                      block_sparse_tensors=split, num_splits=1, return_lse=True)[:2]
-        w = torch.softmax(lse, dim=0).permute(0, 2, 1)[..., None]         # [S, Q, H, 1], exact LSE merge
         self.calls['split_fa4_calls'] += 1
+        if self.merge_backend == 'triton':
+            return self._merge_alias2(o, lse)
+        w = torch.softmax(lse, dim=0).permute(0, 2, 1)[..., None]         # [S, Q, H, 1], exact LSE merge
         return (o.float() * w).sum(0, keepdim=True).to(o.dtype)           # [1, Q, H, D]
+
+    def _merge_alias2(self, partials, lse):
+        from experiments.numerical_qk_reuse.v29_lse_merge import Alias2MappedMerge
+        if self.splits != 2:
+            raise ValueError('fused identity merge requires exactly two alias splits')
+        key = (partials.shape[2], partials.shape[1], str(partials.device))
+        merger = self._merge_cache.get(key)
+        if merger is None:
+            merger = Alias2MappedMerge.identity(key[0], key[1], partials.device)
+            self._merge_cache[key] = merger
+            self.calls['triton_lse_identity_builds'] += 1
+        result = merger(partials, lse)
+        self.calls['triton_lse_merge_calls'] += 1
+        return result
 
 
 # ---------------------------------------------------------------------- vLLM patches

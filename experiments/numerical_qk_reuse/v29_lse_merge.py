@@ -4,6 +4,7 @@ No adapter integration or FA4 loader change. Lazy torch/Triton imports permit
 CPU contract tests. Both natural and grouped arms must use this same merge.
 """
 import numpy as np
+from functools import lru_cache
 
 
 def validate_order(order, heads, rows):
@@ -37,6 +38,7 @@ def merge_reference(partials, lse, order):
     return result[None]
 
 
+@lru_cache(maxsize=1)
 def _kernel():
     global tl
     import triton
@@ -78,6 +80,20 @@ class Alias2MappedMerge:
         validate_order(order.cpu().numpy(), self.heads, self.rows)
         self.order = order
         self.kernel = _kernel()
+
+    @classmethod
+    def identity(cls, heads, rows, device):
+        """Construct known immutable identity on CPU; no device-to-host read."""
+        import torch
+        if any(type(x) is not int or x <= 0 for x in (heads, rows)):
+            raise ValueError('positive integer identity dimensions required')
+        order = np.broadcast_to(np.arange(rows, dtype=np.int64), (heads, rows)).copy()
+        validate_order(order, heads, rows)
+        obj = cls.__new__(cls)
+        obj.heads, obj.rows = heads, rows
+        obj.order = torch.from_numpy(order).to(device=device, dtype=torch.long)
+        obj.kernel = _kernel()
+        return obj
 
     def __call__(self, partials, lse):
         import torch

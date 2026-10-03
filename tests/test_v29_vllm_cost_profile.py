@@ -5,7 +5,7 @@ import unittest
 
 from scripts.v29_vllm_cost_profile import (PREFIX, ProfileSession, attention_label,
     buffer_label, host_category, instrument, nearest_label, summarize_events,
-    validate_32k, wrapped, profile_counts)
+    validate_32k, wrapped, profile_counts, phase_attention_label)
 
 
 def event(name, parent=None, kernels=(), device='CPU', cpu=0., self_cpu=0., gpu=0.):
@@ -28,6 +28,14 @@ class CostProfileTests(unittest.TestCase):
         self.assertEqual(buffer_label(adapter, 5, 32768, 256), 'kv_canvas_refresh')
         self.assertEqual(buffer_label(adapter, 5, 33024, 256), 'kv_prefix_build')
         self.assertEqual(buffer_label(adapter, 5, 32768, 128), 'kv_prefix_build')
+
+    def test_phase_tags_reuse_existing_exact_context_without_gpu_read(self):
+        va=NS(_ACTIVE=NS(bound=True, step_ctx={'encoder':False}))
+        self.assertEqual(phase_attention_label(va,'model.decoder.layers.5.attn'), 'denoise_global_attention')
+        va._ACTIVE.step_ctx={'encoder':True}
+        self.assertEqual(phase_attention_label(va,'model.encoder.layers.5.attn'), 'encoder_attention_other')
+        va._ACTIVE=None
+        self.assertEqual(phase_attention_label(va,'model.decoder.layers.5.attn'), 'global_attention')
 
     def test_nearest_scope_kernel_ownership_avoids_inclusive_double_count(self):
         outer = event(PREFIX+'global_attention', cpu=900)

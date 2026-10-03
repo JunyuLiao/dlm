@@ -1,0 +1,216 @@
+{
+  "schema": "v29_lse_merge_component_v1",
+  "records": [
+    {
+      "nominal_length_bin": 32768,
+      "samples": 32,
+      "gpu_ms": {
+        "natural_standard": 0.36323200166225433,
+        "natural_fused": 0.32814399898052216,
+        "held_standard_scatter": 0.376896008849144,
+        "held_fused": 0.33000001311302185
+      },
+      "errors": {
+        "natural_merge": {
+          "max_abs": 0.0009765625,
+          "relative_max": 0.0019083969465648854
+        },
+        "held_merge": {
+          "max_abs": 0.0009765625,
+          "relative_max": 0.0019083969465648854
+        },
+        "natural_standard": {
+          "max_abs": 0.0019836723804473877,
+          "relative_max": 0.0038843811706517936
+        },
+        "natural_fused": {
+          "max_abs": 0.0019836723804473877,
+          "relative_max": 0.0038843811706517936
+        },
+        "held_standard_scatter": {
+          "max_abs": 0.0019836723804473877,
+          "relative_max": 0.0038843811706517936
+        },
+        "held_fused": {
+          "max_abs": 0.0019836723804473877,
+          "relative_max": 0.0038843811706517936
+        }
+      },
+      "held_fused_over_natural_fused": 1.005656096525507,
+      "fusion_only_natural_over_standard": 0.903400574505662,
+      "cpu_order_screen_compute_seconds": 1.0942298059817404,
+      "first_split_build_wall_seconds": 0.04883900098502636,
+      "first_map_list_split_build_wall_seconds": 0.07892997295130044,
+      "first_use_and_oracles_wall_seconds": 6.041328513994813,
+      "construction_note": "CPU screen on already loaded need; excludes signal generation, transfer and input I/O. Split build is for both arms, includes synchronization. Neither is hidden as online free work.",
+      "cpu_reproduced_same_frozen_order": true,
+      "required_support_covered": true,
+      "alias_splits": 2,
+      "no_timed_oracle_or_d2h": true,
+      "no_timed_list_build": true,
+      "query_stride": [
+        8192,
+        512,
+        8192,
+        1
+      ],
+      "k_stride": [
+        131072,
+        1024,
+        65536,
+        1
+      ]
+    },
+    {
+      "nominal_length_bin": 65536,
+      "samples": 32,
+      "gpu_ms": {
+        "natural_standard": 0.5449280142784119,
+        "natural_fused": 0.5045920014381409,
+        "held_standard_scatter": 0.5511040091514587,
+        "held_fused": 0.49377600848674774
+      },
+      "errors": {
+        "natural_merge": {
+          "max_abs": 0.0001220703125,
+          "relative_max": 0.0006345177664974619
+        },
+        "held_merge": {
+          "max_abs": 0.000244140625,
+          "relative_max": 0.0012077294685990338
+        },
+        "natural_standard": {
+          "max_abs": 0.0008102655410766602,
+          "relative_max": 0.004212646616774353
+        },
+        "natural_fused": {
+          "max_abs": 0.0008102655410766602,
+          "relative_max": 0.004212646616774353
+        },
+        "held_standard_scatter": {
+          "max_abs": 0.0009796172380447388,
+          "relative_max": 0.004852347038065102
+        },
+        "held_fused": {
+          "max_abs": 0.0009796172380447388,
+          "relative_max": 0.004852347038065102
+        }
+      },
+      "held_fused_over_natural_fused": 0.978564874352811,
+      "fusion_only_natural_over_standard": 0.925979190308864,
+      "cpu_order_screen_compute_seconds": 1.4297251868993044,
+      "first_split_build_wall_seconds": 0.0006104429485276341,
+      "first_map_list_split_build_wall_seconds": 0.005973145016469061,
+      "first_use_and_oracles_wall_seconds": 0.1051696459762752,
+      "construction_note": "CPU screen on already loaded need; excludes signal generation, transfer and input I/O. Split build is for both arms, includes synchronization. Neither is hidden as online free work.",
+      "cpu_reproduced_same_frozen_order": true,
+      "required_support_covered": true,
+      "alias_splits": 2,
+      "no_timed_oracle_or_d2h": true,
+      "no_timed_list_build": true,
+      "query_stride": [
+        8192,
+        512,
+        8192,
+        1
+      ],
+      "k_stride": [
+        131072,
+        1024,
+        65536,
+        1
+      ]
+    },
+    {
+      "nominal_length_bin": 98304,
+      "samples": 32,
+      "gpu_ms": {
+        "natural_standard": 0.4455520063638687,
+        "natural_fused": 0.4025920033454895,
+        "held_standard_scatter": 0.46212799847126007,
+        "held_fused": 0.4068640023469925
+      },
+      "errors": {
+        "natural_merge": {
+          "max_abs": 0.000244140625,
+          "relative_max": 0.0011312217194570137
+        },
+        "held_merge": {
+          "max_abs": 0.000244140625,
+          "relative_max": 0.001072961373390558
+        },
+        "natural_standard": {
+          "max_abs": 0.0009583830833435059,
+          "relative_max": 0.004449494405824109
+        },
+        "natural_fused": {
+          "max_abs": 0.0009583830833435059,
+          "relative_max": 0.004449494405824109
+        },
+        "held_standard_scatter": {
+          "max_abs": 0.0009646415710449219,
+          "relative_max": 0.004244092208043124
+        },
+        "held_fused": {
+          "max_abs": 0.0009646415710449219,
+          "relative_max": 0.004244092208043124
+        }
+      },
+      "held_fused_over_natural_fused": 1.0106112366018283,
+      "fusion_only_natural_over_standard": 0.9035802725500576,
+      "cpu_order_screen_compute_seconds": 1.2163199529750273,
+      "first_split_build_wall_seconds": 0.0005874949274584651,
+      "first_map_list_split_build_wall_seconds": 0.007354498957283795,
+      "first_use_and_oracles_wall_seconds": 0.14954923698678613,
+      "construction_note": "CPU screen on already loaded need; excludes signal generation, transfer and input I/O. Split build is for both arms, includes synchronization. Neither is hidden as online free work.",
+      "cpu_reproduced_same_frozen_order": true,
+      "required_support_covered": true,
+      "alias_splits": 2,
+      "no_timed_oracle_or_d2h": true,
+      "no_timed_list_build": true,
+      "query_stride": [
+        8192,
+        512,
+        8192,
+        1
+      ],
+      "k_stride": [
+        131072,
+        1024,
+        65536,
+        1
+      ]
+    }
+  ],
+  "offline_selection_wall_seconds": 36.47520629200153,
+  "software": {
+    "torch": "2.13.0+cu130",
+    "torch_cuda": "13.0",
+    "triton": "3.7.1"
+  },
+  "device": {
+    "name": "NVIDIA H100 80GB HBM3",
+    "compute_capability": [
+      9,
+      0
+    ]
+  },
+  "numerical_scope": "FP32 stable softmax weights followed by weighted multiply/add; Triton FP fusion disabled. Tolerance-qualified merge, not bit-exact equality, sampler trajectory equality or model accuracy.",
+  "merge_fp_fusion": false,
+  "held_fused_over_natural_fused_geomean": 0.9981774291976859,
+  "interpretation": "incremental regroup compares held_fused only to natural_fused; no request or quality claim",
+  "quality_evaluated": false,
+  "request_run": false,
+  "effective_support": "unchanged historical held gate; full canvas kept; random physical pages",
+  "online_build_cost_measured": false,
+  "online_cost_limit": "CPU reconstruction and split-build costs recorded; no online signal/validity lifetime measured. No free online construction or reuse assumption.",
+  "allocation_policy": "same Q gather as historical; same table/used allocations; all routes allocate output; fused routes remove separate merged output and held O scatter",
+  "timing_parameters": {
+    "repeats": 32,
+    "warm": 8,
+    "rotated_order": true
+  },
+  "timing_semantics": "CUDA events around complete Python component calls including Q gather, FA4 and merge/writeback; possible host dispatch waits. CPU selection and first construction separate; JIT/oracles before timing.",
+  "native_adapter_changed": false,
+  "fa4_q_loader_changed": false
+}

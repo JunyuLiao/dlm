@@ -18,6 +18,8 @@ from unittest.mock import patch
 
 
 LABELS = frozenset(('global_attention', 'local_attention', 'attention_other',
+                   'denoise_global_attention', 'denoise_local_attention', 'denoise_attention_other',
+                   'encoder_global_attention', 'encoder_local_attention', 'encoder_attention_other',
                    'prepare_metadata', 'kv_prefix_build', 'kv_canvas_refresh',
                    'selector', 'observation', 'consumer', 'split_lists',
                    'sample', 'method_begin', 'method_observe'))
@@ -33,6 +35,15 @@ def attention_label(layer_name):
     if match is None:
         return 'attention_other'
     return 'global_attention' if int(match[1]) in GLOBAL_LAYERS else 'local_attention'
+
+
+def phase_attention_label(adapter_module, layer_name):
+    label = attention_label(layer_name)
+    adapter = getattr(adapter_module, '_ACTIVE', None)
+    ctx = getattr(adapter, 'step_ctx', None)
+    if adapter is None or not getattr(adapter, 'bound', False) or ctx is None:
+        return label  # Native FULL/default has no exact host-side phase receipt.
+    return ('encoder_' if ctx['encoder'] else 'denoise_')+label
 
 
 def buffer_label(adapter, layer, prefix, count):
@@ -135,7 +146,7 @@ def summarize_events(events, scope_calls):
                 d2h_activity=dict(calls=d2h_count, sum_ms=d2h_us/1000), host_ops=host,
                 eager_scope_calls=dict(scope_calls),
                 missing_eager_attention_scopes=[name for name in ('global_attention', 'local_attention')
-                                                if not scope_calls.get(name)],
+                                                if not any(value for key,value in scope_calls.items() if key.endswith(name))],
                 interpretation='nested CPU ranges overlap; CUDA streams overlap; totals are not additive request time; '
                                'FULL graph replay may lack eager layer ranges; host sync is observed wait, not causal attribution')
 
@@ -196,8 +207,8 @@ def instrument(session, panel, metrics, va, dg, fa, integration, arm):
         def tag(owner, name, label):
             stack.enter_context(patch.object(owner, name, wrapped(session, getattr(owner, name), label)))
 
-        tag(fa.FlashAttentionImpl, 'forward', lambda args, _: attention_label(getattr(args[1], 'layer_name', '')))
-        tag(va.VllmMethodAdapter, 'forward', 'global_attention')
+        tag(fa.FlashAttentionImpl, 'forward', lambda args, _: phase_attention_label(va, getattr(args[1], 'layer_name', '')))
+        tag(va.VllmMethodAdapter, 'forward', 'denoise_global_attention')
         tag(va.VllmMethodAdapter, '_buffers', lambda args, _: buffer_label(args[0], args[1], args[5], args[6]))
         tag(va.VllmMethodAdapter, 'sparse_lists', 'consumer')
         tag(va.VllmMethodAdapter, '_split', 'split_lists')

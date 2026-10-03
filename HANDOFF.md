@@ -1,3 +1,10 @@
+## Latest V29 stage (2026-10-02 22:05 (UTC-5))
+
+Fused regroup writeback is approximately tied (.99818 vs equally fused natural);
+standard merge fusion reduces component span7.4-9.7%, real-model qualification
+pending. Copy component exact; both standard optimizations opt-in with torch
+default. Expanded dataset preparation continues. No V29 formal panel launched.
+
 # V29 active handoff (2026-10-02 21:48, UTC-5)
 
 Branch `research/vllm-confirmation-20261002`, from V28 `e5e1ffcc8`.

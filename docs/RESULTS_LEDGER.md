@@ -887,3 +887,22 @@ Reserved3.867908GPU seconds on dlm2; run closed. Sources:
 
 
 Independent32K profiler (10 CPU tests) and mapped alias2 merge prototype (11 CPU tests) ready for separate GPU qualification. Fixed component protocol: historical3 accepted states, seed2903, warm8,32 rotated samples, natural_fused matched reference, frozen order/search unchanged; GPU Torch LSE and IEEE FP32 masked oracles before timing; online construction remains unmeasured. Merge is tolerance-qualified, not bit-exact. Source docs: docs/V29_32K_COST_AUDIT_20261002.md and docs/V29_REGROUP_REVIEW_20261002.md. No GPU result for these diagnostics yet.
+
+## Regroup fused writeback component001 closed (2026-10-02 22:05 (UTC-5))
+
+Sourcee07aec657; three fixed accepted states passed GPU numeric oracles.
+Held_fused/natural_fused1.00566/.97856/1.01061, geometric.998177: approximate
+tie and no general regroup speed evidence. No request expansion for this held
+search. Standard natural merge fusion alone gives.90340/.92598/.90358 ratios;
+keep as shared implementation candidate, not regroup novelty. Not bit-exact.
+Reserved51.200860GPU seconds, including36.475206CPU selection; source
+`results/v29_20261002/regroup_merge001/`. No W/quality evidence.
+
+Adapter `merge_backend=triton` opt-in now CPU-qualified alongside copy backend;
+default remains torch. Identity constructed from known CPU indices, no D2H
+validation; count builds/calls, reuse only immutable index geometry, clear at
+request boundaries. Apply to main/all-kept equally; all request initialization
+cost stays in W. Real-model/GPU adapter qualification remains pending.
+Independent32K profiler updated with denoise/encoder scope where exact existing
+CPU phase is available; default FULL missing scopes stay unknown.11 CPU tests.
+Combined copy/merge/profile/adapter suites67 tests pass.
