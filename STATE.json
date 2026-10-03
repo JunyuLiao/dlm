@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 19:27 (UTC-5)",
+    "updated_local": "2026-10-02 19:26 (UTC-5)",
     "branch": "research/vllm-variants-20261002",
-    "verified_commit": "5bec4cb88",
+    "verified_commit": "e7b5ff061",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,11 +16,11 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "V28 regroup CPU screen weak; native q64 and lifecycle qualification frozen, GPU rerun next.",
+    "headline": "V28 q64 component time ratio 0.94575; actual q64 request qualified; matched controls and new-model toolchains in progress.",
     "running": [
-      "Parent V18b remains unchanged on dllm",
-      "V28 native request qualification preparation on mpk",
-      "LLaDA upstream smoke/compiler qualification on dlm2"
+      "Parent V18b unchanged on dllm",
+      "V28 qualification002 matched arms serially on mpk, deploy e7b5ff061",
+      "LLaDA upstream smoke after isolated toolchain CPU qualification on dlm2"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -258,15 +258,22 @@
       "new_model_status": "official dense qualification pending; sparse adapters not implemented"
     },
     "v28_qualification": {
-      "cpu_tests": 46,
+      "cpu_tests": 54,
       "kv_view": "rejected: incompatible native cache strides",
       "lifecycle": "request_clear opt-in, CPU qualified only",
-      "gpu_results": false,
+      "gpu_results": "component only, not request inference",
       "new_model_ports": false,
       "component001": "diagnostic only; corrected nominal bins, native Q strides and finite checks",
       "component001_gpu_seconds": 30.7184,
       "regroup_expanded_proxy_ratio": 0.9893759,
-      "regroup_source": "results/v28_20261002/regroup_screen"
+      "regroup_source": "results/v28_20261002/regroup_screen",
+      "q64_component_ratio": 0.9457519586071002,
+      "component002_gpu_seconds": 18.651182946981862,
+      "q64_actual_N": 66,
+      "q64_refined_routes": 60,
+      "q64_timed_allocator_retries": 0,
+      "source": "results/v28_20261002/q64_component",
+      "held_regroup": "CPU tested, GPU pending"
     }
   },
   "task": "M3 output numerics and trajectory isolation",

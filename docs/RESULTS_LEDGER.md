@@ -643,7 +643,7 @@ HK=2 flat-view counterexample, Q64 coverage and regroup invariants). Source:
 KV-view rejected on layout grounds; request_clear remains an unmeasured standard
 optimization. No new V28 GPU performance or accuracy result. See V28 campaign spec.
 
-## V28 regroup screen and native qualification freeze — 2026-10-02 19:27 (UTC-5)
+## V28 regroup screen and native qualification freeze — 2026-10-02 19:18 (UTC-5)
 
 Real historical prefix-need snapshots: 144; natural Q64 work 794361 tiles.
 Default bounded swap search accepted 7/144; gated load proxy ratio 0.9971768.
@@ -668,3 +668,33 @@ finite checks, disables TF32 for FP32 reference, and explicitly excludes first
 list/split builds. Old run is preserved; no headline speed is taken from it.
 LLaDA first upstream smoke loaded weights but failed RoPE JIT missing CCCL header;
 isolated toolchain repair ongoing. Model sparse ports remain unimplemented.
+
+## V28 native Q64 component result and request qualification — 2026-10-02 19:26 (UTC-5)
+
+Corrected component002 passed finite IEEE-FP32 masked references on six historical
+need snapshots with synthetic QKV, actual native tensor strides and random pages.
+Q64/Q128 alias2 GPU-time geometric mean = 0.94575 (about 5.4% component reduction).
+Selector, KV copies, first lists/splits and other model costs excluded; no request
+or accuracy claim. Source: `results/v28_20261002/q64_component/`. Worker time
+18.6512 GPU s; prior diagnostic001 30.7184 s. Dense component key corrected to
+fixed-length diagnostic: it is not the official varlen serving baseline.
+
+Native request qualification002 runs on mpk, frozen deploy e7b5ff061, one worker
+at a time. Q64 method passed: actual N=66 (65 retired+1 unused), 330 GLOBAL calls,
+60 q64-refined routes/list builds, five GLOBAL warm copy checks passed; no timed
+CUDA captures/backend/inductor compiles or allocator retries/OOMs. Warm long
+requests did show recoverable allocation retries, so request_clear does not
+eliminate canvas allocation peaks. These one-request checks are not performance
+or accuracy evidence. Main128, allkept, native-hook and dense follow serially.
+Environment used OMP_NUM_THREADS=4; future performance preview should freeze 1
+for all arms, following official serving warning. Do not compare qualifications
+as a strongest-baseline speed panel. Further Triton/CuTe compilation coverage is
+being audited independently from existing CUDA-graph/backend/inductor counters.
+
+Held-regroup optimistic ablation now implemented with 8 CPU tests: natural Q64
+versus token-major per-head gather, alias2 and scatter; at most one CPU-accepted
+state per nominal bin. Search/first builds are excluded deliberately to ask whether
+amortization could pay even in this favorable setting. No GPU result yet.
+LLaDA CUDA13 closure mismatch identified (runtime13.4 headers with nvcc13.0);
+isolated CPU small-kernel compile now passes with matching headers. No sparse
+model port or qualified new-model accuracy result yet.

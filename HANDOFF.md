@@ -1,8 +1,8 @@
-# V28 active handoff (2026-10-02 19:08 (UTC-5))
+# V28 active handoff (2026-10-02 19:26 (UTC-5))
 
 - Branch: `research/vllm-variants-20261002`, base `9b027df8f`.
 - User authorized trying worthwhile variants. Plan: `docs/VARIANT_CAMPAIGN_V28_20261002.md`.
-- V28 status: 31 CPU tests passed; opt-in request_clear and actual-layout Q64 component benchmark implemented. GPU qualification is next.
+- V28 status: Q64 component ratio 0.94575; one actual Q64 request qualified. Other matched qualification arms running on mpk. No request speed/accuracy claim.
 - Parent V18b continues on dllm under its unchanged deploy, controlled from the original worktree.
   Recoverable allocation failures appear in main logs; do not filter or silently correct its times.
 - KV-view rejected: actual HK=2 paged layout cannot be flattened to the required view without copying.
@@ -12,10 +12,13 @@
 - Parent block-0 dense/main each closed 118 timed rows; native control started. No final panel claim.
 - New conclusions and measured results must update this handoff, docs and STATE.current together.
 
-- 2026-10-02 19:27 (UTC-5): q128/q64 request_clear specs and receipt wrapper CPU-qualified; launch next.
+- 2026-10-02 19:18 (UTC-5): q128/q64 request_clear specs and receipt wrapper CPU-qualified; launch next.
 - Expanded regroup gate: 19/144 accepted, proxy ratio 0.98938; no GPU claim.
 - Component001 retained as diagnostic (30.7184 GPU s); corrected component rerun pending.
 - LLaDA official smoke failed missing CCCL header; isolated compiler repair underway.
+
+- 2026-10-02 19:26 (UTC-5): component result published, strong native request controls still running.
+- Held-regroup gather/consumer/scatter ablation CPU-tested and ready for GPU after current single-worker queue.
 
 ## Inherited parent handoff (historical; current V28 overlay above takes precedence)
 

@@ -113,7 +113,9 @@ def main(argv=None):
         def dense():
             return fwd(query.transpose(1, 2), kc, vc, softmax_scale=scale, causal=True,
                        dynamic_causal=dynamic, page_table=table[None], seqused_k=used, num_splits=0)[0]
-        funcs = {'native_dense_component':dense, 'q128_alias2':lambda:run(128), 'q64_alias2':lambda:run(64)}
+        # This fixed-length diagnostic is NOT vLLM's varlen serving baseline.
+        # Headline dense comparisons belong to the matched full request panel.
+        funcs = {'fixed_length_dense_diagnostic':dense, 'q128_alias2':lambda:run(128), 'q64_alias2':lambda:run(64)}
         for fn in funcs.values():
             for _ in range(8): fn()
         torch.cuda.synchronize()
@@ -147,6 +149,7 @@ def main(argv=None):
                   reserved_gpu_seconds=time.monotonic()-started,
                   q64_over_q128_geomean=math.exp(statistics.mean(math.log(x['q64_over_q128_gpu']) for x in records)),
                   scope='synthetic QKV, real prefix need supports, full canvas kept; component only',
+                  dense_scope='fixed-length diagnostic; not native varlen serving baseline',
                   exclusions=['selector', 'keep-map/list construction', 'first alias split build',
                               'KV copies', 'request lifecycle', 'model', 'accuracy'],
                   cuda_graphs='none requested; eager warmed kernel benchmark')
