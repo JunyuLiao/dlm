@@ -1,3 +1,32 @@
+## V30 follow-up queue armed — 2026-10-03 03:38 (UTC-5)
+
+The new continuation is actually armed on94134a91b, phase waiting_prior_queues,
+0newGPU seconds. All three own-host campaign003 CPU preparations passed, with
+nine full-inventory sensitivity bindings and eight dense diagnostic bindings;
+CUDA uninitialized. Source CPU tests33passed; private queue/payload guards6;
+remote sensitivity/config/adapter regressions26. Earlier source freezes and
+running worker deployments are unchanged. Receipt:
+results/v30_20261003/campaign_queue001/status.json.
+
+After original formal strict scores, original component/dense/engineering work,
+and peer29-case qualification finish, run32fresh-engine dense diagnostics,
+then60sensitivity pipeline qualification workers and nine complete strict CPU
+scores. No automatic formal launch or quality/speed claim. Full eight-seed
+specs exist for59LongBench,30AIME,164HumanEval questions per mode. Raw first
+logits/canvas/RNG traces and hashes stay private; sanitized phase/count/graph
+traces and boolean comparisons are retained. The first sampled state only
+locates an initial difference; it cannot rule out a later divergence.
+
+Original formal snapshot: longbench 8/32, aime 25/32, humaneval 25/32;
+zero closed-worker failures. GPU resource seconds per suite remain in the
+receipt; active worker spans are not yet included. Diagnosis is pending.
+
+Operational continuation: private campaign_queue001.py/PID file, inputs in
+prepare_*_003, scorer campaign_score001.py. Do not edit these now-pinned helper
+files; a correction requires a new queue/run. Inspect status, preserve failures,
+then review first-divergence comparisons and all nine strict qualifications
+before choosing the matched engineering baseline for full confirmation.
+
 ## V30 configuration qualification and final shape guard — 2026-10-03 03:33 (UTC-5)
 
 All three hosts successfully CPU-froze three sensitivity bindings each and dllm

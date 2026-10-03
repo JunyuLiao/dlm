@@ -1,0 +1,76 @@
+{
+  "schema": "v30_campaign_queue_receipt_v1",
+  "updated_local": "2026-10-03 03:38 (UTC-5)",
+  "source_commit": "94134a91b4322adeb2d0d41d7dca438689129e95",
+  "armed": true,
+  "phase": "waiting_prior_queues",
+  "gpu_started": false,
+  "gpu_reserved_seconds": 0,
+  "cpu_preparations": [
+    {
+      "complete": true,
+      "host": "dllm",
+      "suite": "longbench",
+      "bindings": 3,
+      "diagnostic_bindings": 8,
+      "cuda_initialized": false,
+      "source_commit": "94134a91b4322adeb2d0d41d7dca438689129e95",
+      "gpu_reserved_seconds": 0
+    },
+    {
+      "complete": true,
+      "host": "dlm2",
+      "suite": "aime",
+      "bindings": 3,
+      "diagnostic_bindings": 0,
+      "cuda_initialized": false,
+      "source_commit": "94134a91b4322adeb2d0d41d7dca438689129e95",
+      "gpu_reserved_seconds": 0
+    },
+    {
+      "complete": true,
+      "host": "mpk",
+      "suite": "humaneval",
+      "bindings": 3,
+      "diagnostic_bindings": 0,
+      "cuda_initialized": false,
+      "source_commit": "94134a91b4322adeb2d0d41d7dca438689129e95",
+      "gpu_reserved_seconds": 0
+    }
+  ],
+  "local_source_tests_passed": 33,
+  "private_queue_tests_passed": 6,
+  "remote_sensitivity_regression_passed": 26,
+  "dense_diagnostic_workers": 32,
+  "qualification_workers": 60,
+  "strict_qualification_families": 9,
+  "formal_launch_enabled": false,
+  "qualification_is_accuracy_evidence": false,
+  "barriers": [
+    "all_original_formal_strict_scores",
+    "original_components_dense_engineering_queue_closed",
+    "peer_kernel29_qualified"
+  ],
+  "original_formal_snapshot": {
+    "longbench": {
+      "closed": 8,
+      "failed": 0,
+      "gpu_reserved_seconds": 11185.405584780267,
+      "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81"
+    },
+    "aime": {
+      "closed": 25,
+      "failed": 0,
+      "gpu_reserved_seconds": 12381.790160944947,
+      "source_commit": "1931db5a6540409946641ebb0b04c06507d48402"
+    },
+    "humaneval": {
+      "closed": 25,
+      "failed": 0,
+      "gpu_reserved_seconds": 12135.263343404513,
+      "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81"
+    }
+  },
+  "root_cause_confirmed": false,
+  "novel_variant_e2e_measured": false
+}

@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-03 03:33 (UTC-5)",
+    "updated_local": "2026-10-03 03:38 (UTC-5)",
     "branch": "research/cooperative-sparsity-20261003",
-    "verified_commit": "ed711c8b4afd5bf93a457f03bfc5714a5b36dcb9",
+    "verified_commit": "94134a91b4322adeb2d0d41d7dca438689129e95",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -609,7 +609,7 @@
       "kernel_gpu_queue_receipt": "results/v30_20261003/peer_gpu_queue001/status.json"
     },
     "v30_dense_divergence": {
-      "status": "code_and_public_specs_cpu_tested_not_deployed_or_armed",
+      "status": "deployed_frozen_queue_armed_waiting_prior_queues",
       "variants": [
         "default_dense",
         "piecewise_dense_nohook",
@@ -626,10 +626,11 @@
         "first_sample_trace"
       ],
       "root_cause_confirmed": false,
-      "gpu_reserved_seconds": 0
+      "gpu_reserved_seconds": 0,
+      "source_commit": "94134a91b4322adeb2d0d41d7dca438689129e95"
     },
     "v30_sensitivity": {
-      "status": "implemented_cpu_tested_gpu_pending",
+      "status": "deployed_frozen_qualification_queue_armed",
       "modes": [
         "temporal_T",
         "unit_v30",
@@ -653,7 +654,18 @@
       },
       "gpu_reserved_seconds": 0,
       "peer_attribution": "Junyu confidence prior only; not C_gate or fresh value-aware",
-      "preparation": "campaign002 passed on three hosts, superseded before GPU by geometry guard; queue prepared not armed"
+      "preparation": "campaign003 three-host strict CPU freeze passed",
+      "queue_source_commit": "94134a91b4322adeb2d0d41d7dca438689129e95",
+      "qualification_workers": 60,
+      "formal_launched": false
+    },
+    "v30_followup_queue": {
+      "phase": "waiting_prior_queues",
+      "armed": true,
+      "source_commit": "94134a91b4322adeb2d0d41d7dca438689129e95",
+      "receipt": "results/v30_20261003/campaign_queue001/status.json",
+      "root_review_after_nine_strict_qualifications": true,
+      "gpu_reserved_seconds": 0
     }
   },
   "task": "M3 output numerics and trajectory isolation",
