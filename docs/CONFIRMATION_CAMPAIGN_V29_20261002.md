@@ -112,3 +112,20 @@ cost stays in W. Real-model/GPU adapter qualification remains pending.
 Independent32K profiler updated with denoise/encoder scope where exact existing
 CPU phase is available; default FULL missing scopes stay unknown.11 CPU tests.
 Combined copy/merge/profile/adapter suites67 tests pass.
+
+
+## 32K diagnostic launched and third vLLM host ready (2026-10-02 22:14 (UTC-5))
+
+Four-arm independent32K profile running on dllm, frozen39e08c521, same one
+question/engine28001, source/input/CPU-test guards passed. First preparation
+attempt used wrong system Python lacking Torch; failed before GPU work (0s),
+preserved. Attempt002 uses qualified own vLLM interpreter. Each arm new engine
+and run/cache, GPU-idle gate,11 profiler CPU tests pass. No speed inference from
+profiled records. Fifth PIECEWISE-dense-without-hooks diagnostic is specified in
+`docs/V29_DENSE_CONTROLS_20261002.md`, not yet launched and not part of formal
+panel. Main/Q64 already run in vLLM; component candidates have narrower scope.
+
+dlm2 own vLLM0.30/Torch2.13cu130/Triton3.7.1/FlashInfer0.6.18.post1 installed,
+202 runtime distributions match mpk, pip check/CPU imports pass, FA4 paged-patch
+bytes match qualified mpk. Model606shards validated read-only. Setup GPU work0;
+GPU numerical qualification remains required. No shared environment modified.

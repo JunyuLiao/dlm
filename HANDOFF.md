@@ -1,3 +1,9 @@
+## Running diagnostic (2026-10-02 22:14 (UTC-5))
+
+Four-arm32K independent profile active on dllm, frozen39e08c521.
+Expanded formal dataset panels still preparing, none launched. dlm2 own vLLM
+environment CPU-qualified and patched; GPU qualification pending.
+
 ## Latest V29 stage (2026-10-02 22:05 (UTC-5))
 
 Fused regroup writeback is approximately tied (.99818 vs equally fused natural);
