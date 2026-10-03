@@ -788,3 +788,41 @@ ordinal agree; output is a separate wholly new private directory with no overwri
 Trace export is off by default and occurs after the original request boundary.
 No existing GPU deployment is changed, no GPU trace run has occurred, and no trace
 is automatically published. See docs/V29_TRACE_EXPORT_20261002.md.
+
+## Three formal panels launched (2026-10-03 00:12, UTC-5)
+
+All three complete qualifications passed strict scoring and the actual frozen
+formal-launch guard. LongBench12/12 and AIME4/4 detailed measurements, per-request
+receipts and worker accounting are published under longbench_qualification001/
+and aime_qualification002/. HumanEval4/4 detailed evidence was already published.
+Wrong, unparsed and capped outputs remain failures; qualification is only pipeline
+validation. In particular all four AIME qualification outputs capped/unparsed.
+No accuracy or speed conclusion follows from these singleton qualifications.
+
+The three formal panels now run: LongBench59 questions on dllm, AIME30 on dlm2,
+HumanEval164 on mpk; each has8 engine seeds29001-29008 and4 arms,32 workers per
+suite,8096 timed plus8096 warm requests total. LB/HE source54163f4e7, AIME1931db5a6.
+Main stays frozen Q128/alias2 with legacy torch copy/merge and no2K route gate.
+All qualification proofs/source pins, GPU identity/idleness and CPU scorer idle
+checks passed. Private coordinator17CPU tests pass. mpk launched last; a shared
+CPU-scoring barrier remains active until all three strict32/32 inventories close.
+No existing source, binding or run directory was changed. Any failed worker stops
+its supervisor and requires a new run directory; retain failed-attempt evidence.
+
+Closed qualification reserved GPU seconds: HE672.373426352, LB2413.676399794
+(including original interrupted001 outer244.358443453), AIME780.407498523
+(including reused dense001239.994346702 exactly once). Together3866.457324669s.
+With prior V29 components/diagnostics2262.065190672s, pre-formal closed total is
+6128.522515341s. Formal workers are active; their unclosed time is excluded.
+Use outer supervisor spans; inner worker times are not additional consumption.
+
+Current new-model status clarified: LLaDA2.1-mini and I-DLM-8B official dense toy
+GPU executions have completed. Sparse main/variant adapters on these models are
+NOT implemented; CPU event-prototype tests do not qualify GPU integration.
+See docs/NEW_MODEL_PORT_AUDIT_V28_20261002.md. Older pending-smoke notes are history.
+
+Next: preserve all formal records, complete strict full-family scoring after the
+three-suite barrier, export anonymous per-request numbers/receipts plus paired
+geometric means and question-cluster95% intervals. Completion/scoring automation
+is being prepared; no automatic interpretation or noninferiority claim.
+

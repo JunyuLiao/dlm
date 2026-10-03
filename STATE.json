@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 23:51 (UTC-5)",
+    "updated_local": "2026-10-03 00:12 (UTC-5)",
     "branch": "research/vllm-confirmation-20261002",
-    "verified_commit": "2db02f17a",
+    "verified_commit": "f90366965",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,10 +16,11 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "44 GPU observation oracles pass and four-arm event diagnosis complete; expanded qualification running.",
+    "headline": "All three strict qualifications passed; expanded eight-seed formal panels running.",
     "running": [
-      "dllm LongBench qualification002 final96K method;11/12 closed at snapshot",
-      "dlm2 AIME qualification002 remaining3arms; original dense preserved"
+      "dllm LongBench formal panel001,32 workers",
+      "dlm2 AIME formal panel001,32 workers",
+      "mpk HumanEval formal panel001,32 workers"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -143,7 +144,7 @@
         "RULER 4K/8K"
       ],
       "setup_dir": "/home/exouser/dyh/dlm_models_20261002 (dllm)",
-      "status": "GPU smokes pending. Upstream SGLang torch2.13/CUDA13.0 shim CPU-qualified; I-DLM torch2.9.1/CUDA12.8 needs separate toolchain qualification. Only dllm environments verified."
+      "status": "Both official dense toy GPU executions completed; main and other sparse variants NOT implemented. See current.v28_new_models and NEW_MODEL_PORT_AUDIT_V28_20261002.md; no benchmark quality/speed qualification."
     },
     "e14": {
       "verdict": "main M3+c0 W 0.925/0.860/0.801 (12 seeds); q64 -0.4..-0.7% per step; q64c not adopted",
@@ -164,9 +165,9 @@
       "port_status": "Resolved: unchanged main core runs in vLLM with patched paged FA4 and alias split; V18 preparing."
     },
     "next_steps": [
-      "GPU-qualify exact fused paged copy and isolated32K profile.",
-      "Freeze and qualify dataset-specific expanded panel/scorer before formal launches.",
-      "Test regroup scatter+merge against identically fused natural reference."
+      "Close all three strict formal generation families; no scoring during timed GPU work.",
+      "Score serially on mpk after global barrier; publish sanitized detailed evidence and question-cluster intervals.",
+      "Real-model qualification of engineering opt-ins and new-model sparse adapters remains pending."
     ],
     "e15": {
       "verdict": "c01 not adopted (per-step 0.98-1.00, 64K accuracy risk); main pooled over 18 seeds",
@@ -339,7 +340,7 @@
     },
     "separate_v28_campaign": "Original V28 branch owns seed4 preview and its completion coordinator; consult its live status.",
     "v29": {
-      "status": "expanded_GPU_qualification",
+      "status": "expanded_formal_running",
       "spec": "docs/CONFIRMATION_CAMPAIGN_V29_20261002.md",
       "copy_tests": 42,
       "gpu_seconds": 55.06876852098503,
@@ -360,7 +361,7 @@
       "adapter_merge": "opt-in CPU-qualified; real-model GPU pending",
       "profile_status": "attempt003_complete_diagnostic_only",
       "profile_preparation_failure": "attempt001 missingTorch in systemPython;0GPU seconds; preserved",
-      "dlm2_environment": "CPU-qualified matching vLLM0.30 stack/FA4 patch; real GPU qualification pending",
+      "dlm2_environment": "AIME full four-arm GPU/scorer qualification passed at1931db5a6; formal running.",
       "dense_controls_doc": "docs/V29_DENSE_CONTROLS_20261002.md"
     },
     "v29_cost_diagnostic": {
@@ -398,7 +399,7 @@
     },
     "v29_closed_gpu_seconds": 2262.065190671885,
     "v29_expanded_confirmation": {
-      "status": "qualification_underway_formal_not_launched",
+      "status": "all_qualifications_passed_three_formal_panels_running",
       "engine_seeds": [
         29001,
         29002,
@@ -416,27 +417,31 @@
         "longbench": {
           "questions": 59,
           "host": "dllm",
-          "status": "qualification002_running_11of12_closed",
+          "status": "strict_qualification_and_actual_guard_passed_formal_panel001_running",
           "preparation_attempt001": "CPU_missing_archived_spec_GPU0",
           "preparation_attempt002": "source_parent_pins_rebind_and_inventory_verified",
           "source_commit": "54163f4e7",
           "qualification001": "one_worker_completed_then_transient_NVML_idle_guard_stop_preserved",
-          "closed_worker_gpu_reserved_seconds": 1992.5355911328224,
+          "closed_worker_gpu_reserved_seconds": 2169.317956340732,
           "closed_worker_gpu_seconds_excludes_active": true,
           "prior_attempt_outer_gpu_reserved_seconds": 244.35844345297664,
-          "question_identity_audit": "results/v29_20261002/expanded_question_identity_audit001/summary.json"
+          "question_identity_audit": "results/v29_20261002/expanded_question_identity_audit001/summary.json",
+          "qualification_gpu_reserved_seconds": 2413.6763997937087,
+          "qualification_results": "results/v29_20261002/longbench_qualification001/",
+          "formal_workers_expected": 32,
+          "formal_generation_complete": false
         },
         "aime": {
           "questions": 30,
           "host": "dlm2",
-          "status": "qualification002_remaining3_running_prior_dense_valid_preserved",
+          "status": "strict_qualification_and_actual_guard_passed_formal_panel001_running",
           "CPU_tests_run": 42,
           "CPU_tests_passed": 42,
           "CPU_tests_skipped": 0,
           "Linux_no_skip_required": true,
           "protocol_id": "v29_aime_confirmation001",
-          "prior_protocol": "v29_aime_confirmation001 preserved_unlaunched",
-          "cross_host_private_transfers": "two_auto_review_rejections_no_execution_no_transfer",
+          "prior_protocol": "Original AIME001 active on dlm2; AIME002 fallback retained unlaunched.",
+          "cross_host_private_transfers": "Authorized by user; exact pinned necessary inputs/source/artifacts copied in own directories, prior rejected attempts preserved with zero execution.",
           "source_commit": "1931db5a6",
           "fallback_protocol": "v29_aime_confirmation002 preserved_unlaunched",
           "fallback_CPU": "mpk strict rebind, actualv21 and Linux42 pass; CUDA uninitialized, no binding/generation/GPU",
@@ -448,22 +453,31 @@
           ],
           "qualification001_outer_gpu_reserved_seconds": 239.9943467020057,
           "qualification001_interruption": "transient_post_exit_NVML_private_launcher_guard_no_model_failure",
-          "qualification002_launcher_CPU_toys": 4
+          "qualification002_launcher_CPU_toys": 4,
+          "qualification_gpu_reserved_seconds": 780.4074985230109,
+          "qualification_results": "results/v29_20261002/aime_qualification002/",
+          "formal_workers_expected": 32,
+          "formal_generation_complete": false
         },
         "humaneval": {
           "questions": 164,
           "host": "mpk",
-          "status": "strict_qualification_proof_and_formal_guard_passed_formal_held_for_global_CPU_scoring_barrier",
+          "status": "strict_qualification_and_actual_guard_passed_formal_panel001_running",
           "source_commit": "54163f4e7",
           "CPU_tests": 33,
           "real_scorer_toys": true,
           "qualification_failed_workers": 0,
           "qualification_gpu_reserved_seconds": 672.3734263519291,
-          "qualification_results": "results/v29_20261002/humaneval_qualification001/"
+          "qualification_results": "results/v29_20261002/humaneval_qualification001/",
+          "formal_workers_expected": 32,
+          "formal_generation_complete": false
         }
       },
       "specs_dir": "results/v29_20261002/specs",
-      "quality_noninferiority_claim": false
+      "quality_noninferiority_claim": false,
+      "coordinator_CPU_tests": 17,
+      "CPU_scoring_barrier": "active_until_all_three_strict_32of32_complete",
+      "formal_completed_workers_at_launch": 0
     },
     "v28_preview_reference": {
       "branch": "research/vllm-variants-20261002",
@@ -485,8 +499,9 @@
       "private_default": true,
       "automatic_publication": false
     },
-    "known_closed_gpu_seconds_at_snapshot": 5411.326998311619,
-    "known_closed_gpu_seconds_scope": "V29 components/diagnostics plus the explicitly listed closed qualification workers; active worker time excluded; snapshot only."
+    "known_closed_gpu_seconds_at_snapshot": 6128.522515340534,
+    "known_closed_gpu_seconds_scope": "V29 components/diagnostics plus ALL closed qualifications, including interrupted attempts once. Formal active-worker time excluded; this is the launch snapshot.",
+    "v29_qualification_closed_gpu_seconds": 3866.4573246686487
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",

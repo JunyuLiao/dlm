@@ -1,0 +1,152 @@
+{
+  "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+  "qualification_only": true,
+  "workers": [
+    {
+      "dataset": "longbench_v2_32k",
+      "arm": "dense",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 246.3099637880223,
+      "worker_terminal_gpu_reserved_seconds": 243.618
+    },
+    {
+      "dataset": "longbench_v2_32k",
+      "arm": "native",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 185.69311410700902,
+      "worker_terminal_gpu_reserved_seconds": 183.097
+    },
+    {
+      "dataset": "longbench_v2_32k",
+      "arm": "allkept",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 148.76631134492345,
+      "worker_terminal_gpu_reserved_seconds": 146.164
+    },
+    {
+      "dataset": "longbench_v2_32k",
+      "arm": "method",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 155.34805374697316,
+      "worker_terminal_gpu_reserved_seconds": 152.683
+    },
+    {
+      "dataset": "longbench_v2_64k",
+      "arm": "dense",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 208.78018240991514,
+      "worker_terminal_gpu_reserved_seconds": 206.116
+    },
+    {
+      "dataset": "longbench_v2_64k",
+      "arm": "native",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 181.705300242058,
+      "worker_terminal_gpu_reserved_seconds": 179.146
+    },
+    {
+      "dataset": "longbench_v2_64k",
+      "arm": "allkept",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 176.5191073269816,
+      "worker_terminal_gpu_reserved_seconds": 173.977
+    },
+    {
+      "dataset": "longbench_v2_64k",
+      "arm": "method",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 182.96421511599328,
+      "worker_terminal_gpu_reserved_seconds": 180.315
+    },
+    {
+      "dataset": "longbench_v2_96k",
+      "arm": "dense",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 168.02530656801537,
+      "worker_terminal_gpu_reserved_seconds": 165.42
+    },
+    {
+      "dataset": "longbench_v2_96k",
+      "arm": "native",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 167.81249305594247,
+      "worker_terminal_gpu_reserved_seconds": 165.205
+    },
+    {
+      "dataset": "longbench_v2_96k",
+      "arm": "allkept",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 170.61154342698865,
+      "worker_terminal_gpu_reserved_seconds": 168.039
+    },
+    {
+      "dataset": "longbench_v2_96k",
+      "arm": "method",
+      "block": 0,
+      "exit_code": 0,
+      "complete": true,
+      "expected_timed": 1,
+      "completed_timed": 1,
+      "gpu_reserved_seconds": 176.7823652079096,
+      "worker_terminal_gpu_reserved_seconds": 174.085
+    }
+  ],
+  "gpu_reserved_seconds": 2169.317956340732,
+  "prior_attempt_accounting": [
+    {
+      "attempt": "qualification001",
+      "complete": false,
+      "workers_closed": 1,
+      "gpu_reserved_seconds": 244.35844345297664,
+      "inner_terminal_gpu_reserved_seconds": 241.732,
+      "failure_reason": "NVML cleanup residual after completed worker; no row selection"
+    }
+  ],
+  "total_campaign_gpu_reserved_seconds": 2413.6763997937087,
+  "accounting_boundary": "Outer supervisor reserved time; inner terminal time is separately reported and never added.",
+  "interpretation": "Pipeline qualification only; no accuracy/speed inference. Wrong/unparsed/capped outputs remain scored failures."
+}
