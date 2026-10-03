@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-03 01:42 (UTC-5)",
-    "branch": "research/vllm-confirmation-20261002",
-    "verified_commit": "5179394a2",
+    "updated_local": "2026-10-03 02:17 (UTC-5)",
+    "branch": "research/cooperative-sparsity-20261003",
+    "verified_commit": "035b70c3f49653674cff338d74d25a34cc742ac2",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,7 +16,7 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "Eight-seed formal panels running; dense/native equivalence audit and new performance diagnostics CPU-qualified, GPU pending.",
+    "headline": "Formal eight-seed panels running; length accounting corrected; peer CPU formulas 31 passed; peer GPU/E2E pending.",
     "running": [
       "dllm LongBench formal panel001,32 workers",
       "dlm2 AIME formal panel001,32 workers",
@@ -593,6 +593,15 @@
       "frozen_launch_order": "block, fresh engine repeat, variant",
       "actual_cost003_spec_compatibility_verified": true,
       "diagnostic_source_commit": "bdd59ee972df55e423ad9d3ea33467aa3b99398b"
+    },
+    "v30": {
+      "entry_doc": "docs/V30_COOPERATIVE_CAMPAIGN_20261003.md",
+      "peer_cpu_receipt": "results/v30_20261003/junyu_cpu001/receipt.json",
+      "length_accounting": "results/v30_20261003/closed_length_accounting001/aggregate.json",
+      "queue_recovery": "results/v30_20261003/queue_recovery003/status.json",
+      "peer_gpu_executed": false,
+      "formal_protocols_changed": false,
+      "root_owns_critical_review": true
     }
   },
   "task": "M3 output numerics and trajectory isolation",

@@ -1361,3 +1361,41 @@ boundary can avoid some intermediate-summary materialization. Our all-dense-pref
 risk dependencies differ from the peer retained-state router. Preserve our
 mathematics and independently qualify any experiment; no equivalence, port,
 new variant or measured gain is claimed. Running queues remain unchanged.
+
+## V30 cooperative campaign active — 2026-10-03 02:17 (UTC-5)
+
+Branch `research/cooperative-sparsity-20261003` starts from verified V29
+`035b70c3f`. User authorizes attributed peer-document snapshots and isolated
+execution; root owns algorithm/fairness review. Peer branches stay read-only.
+See docs/V30_COOPERATIVE_CAMPAIGN_20261003.md.
+
+Correction: profiled singleton32K cannot establish that main is slower at64K/96K.
+Closed V28 preview main/native S/N ratios are0.902307 and0.864398; N ratios
+1.197263 and0.955624; W ratios1.084097 and0.849983. Each bin has only two
+questions, so these are preview point estimates. V18 controls have different
+warm/request inventories; its four repeats are two seeds times two repeats.
+Full accounting, numeric tables and five CPU tests are committed under
+results/v30_20261003/closed_length_accounting001. Physical density was not
+recorded in these requests; high HF sparsity is not evidence for their density.
+
+Junyu b890ff494 docs copied with attribution and redaction. Original peer CPU
+formula tests actually executed:31passed, no CUDA initialization, GPU seconds0;
+per-test receipt in results/v30_20261003/junyu_cpu001. Kernel/E2E remains pending.
+ABI4 debug guard defect needs an isolated patch before affected qualification.
+Peer reproduction design is explicitly a draft, not launched or frozen.
+
+Formal workers continue on their original sources and eight seeds. The previous
+completion monitor failed on a read-only SSH timeout, not a GPU worker failure.
+New completion002 retries only read-only transient transport errors. Components003,
+dense003 and engineering003 are armed after strict formal scoring in that order;
+new directories preserve failed originals. No scientific settings or deployments
+were changed. Snapshot and source pins:results/v30_20261003/queue_recovery003/status.json.
+Successor CPU checks passed28/26/23/35. Counts at snapshot are operational status,
+not partial performance results. Three GPUs remain reserved for formal workers.
+
+Next: isolate peer ABI/toolchain fixes and GLOBAL-only routing tests; compile
+without touching shared environments; execute numerical qualification only on
+an idle GPU. Await frozen dense12-engine diagnostic before attributing the large
+dense trajectory discrepancy. New regroup candidates must include construction,
+movement and restoration costs against the same optimized natural-order consumer.
+

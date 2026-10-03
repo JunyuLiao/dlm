@@ -1,0 +1,1194 @@
+{
+  "schema": "v30_closed_length_accounting_v1",
+  "ratio_definition": "candidate/reference; paired geometric means unless explicitly summary-derived",
+  "causal_claims": false,
+  "V18b": {
+    "source_commit": "8704cd072582dbb766762f955152bc5533c61986",
+    "protocol_id": "v27_vllm_lb_v18b_20261002",
+    "coverage": {
+      "dense": 236,
+      "method": 236,
+      "native": 48,
+      "allkept": 48
+    },
+    "comparisons": [
+      {
+        "candidate": "method",
+        "reference": "dense",
+        "dataset": "longbench_v2_32k",
+        "cells": 96,
+        "questions": 24,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 0.781431636058276,
+          "S": 0.7599897087195218,
+          "N": 0.7377021017087655,
+          "SN": 1.030212204844111
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 206.96875,
+            "C_mean": 15.260416666666666,
+            "output_tokens_mean": 3790.6458333333335,
+            "C_over_N_geomean": 0.07428456821118104,
+            "W_geomean": 6.1278696309832865,
+            "S_geomean": 5.166899212645164,
+            "N_geomean": 171.8810979298984,
+            "SN_geomean": 0.030060892529046323
+          },
+          "reference": {
+            "N_mean": 304.40625,
+            "C_mean": 17.21875,
+            "output_tokens_mean": 4317.15625,
+            "C_over_N_geomean": 0.06039372427563519,
+            "W_geomean": 7.841849943385571,
+            "S_geomean": 6.798643657097251,
+            "N_geomean": 232.99526669608798,
+            "SN_geomean": 0.029179320908545296
+          }
+        }
+      },
+      {
+        "candidate": "method",
+        "reference": "dense",
+        "dataset": "longbench_v2_64k",
+        "cells": 96,
+        "questions": 24,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 0.7439348654923682,
+          "S": 0.6840034858203874,
+          "N": 0.7315002692895972,
+          "SN": 0.9350693561393535
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 199.88541666666666,
+            "C_mean": 11.71875,
+            "output_tokens_mean": 2884.6354166666665,
+            "C_over_N_geomean": 0.0629297954239047,
+            "W_geomean": 8.503922161270951,
+            "S_geomean": 6.098205236606737,
+            "N_geomean": 165.03201047268325,
+            "SN_geomean": 0.03695165088966866
+          },
+          "reference": {
+            "N_mean": 288.65625,
+            "C_mean": 12.989583333333334,
+            "output_tokens_mean": 3215.90625,
+            "C_over_N_geomean": 0.049514887300138095,
+            "W_geomean": 11.431003647937231,
+            "S_geomean": 8.915459296662219,
+            "N_geomean": 225.60758676542332,
+            "SN_geomean": 0.03951755091433213
+          }
+        }
+      },
+      {
+        "candidate": "method",
+        "reference": "dense",
+        "dataset": "longbench_v2_96k",
+        "cells": 44,
+        "questions": 11,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 0.8069797614425022,
+          "S": 0.7604774154222615,
+          "N": 0.8621619494429574,
+          "SN": 0.8820586618483984
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 267.8636363636364,
+            "C_mean": 12.25,
+            "output_tokens_mean": 3014.7954545454545,
+            "C_over_N_geomean": 0.05101708226451606,
+            "W_geomean": 12.926071865733824,
+            "S_geomean": 9.027897326817271,
+            "N_geomean": 218.34832318930557,
+            "SN_geomean": 0.0413463093966157
+          },
+          "reference": {
+            "N_mean": 349.72727272727275,
+            "C_mean": 13.409090909090908,
+            "output_tokens_mean": 3321.2727272727275,
+            "C_over_N_geomean": 0.045364757449591606,
+            "W_geomean": 16.017838963678663,
+            "S_geomean": 11.871354945898629,
+            "N_geomean": 253.25673828493632,
+            "SN_geomean": 0.04687478416681771
+          }
+        }
+      },
+      {
+        "candidate": "method",
+        "reference": "native",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 1.1377485723213405,
+          "S": 1.1615986207004183,
+          "N": 1.1778412364482567,
+          "SN": 0.9862098428504529
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 197.0625,
+            "C_mean": 16,
+            "output_tokens_mean": 3984.6875,
+            "C_over_N_geomean": 0.07565689821692843,
+            "W_geomean": 6.467757940227045,
+            "S_geomean": 5.643533850591863,
+            "N_geomean": 187.8800758746773,
+            "SN_geomean": 0.030037958119392617
+          },
+          "reference": {
+            "N_mean": 173.625,
+            "C_mean": 14.3125,
+            "output_tokens_mean": 3573.375,
+            "C_over_N_geomean": 0.07945069721508811,
+            "W_geomean": 5.684698796879986,
+            "S_geomean": 4.8584198965292655,
+            "N_geomean": 159.51222461969803,
+            "SN_geomean": 0.03045797842837746
+          }
+        }
+      },
+      {
+        "candidate": "method",
+        "reference": "native",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 1.0064956110736183,
+          "S": 1.003403922124315,
+          "N": 1.0982142533453647,
+          "SN": 0.9136686389452332
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 247.0625,
+            "C_mean": 15,
+            "output_tokens_mean": 3745,
+            "C_over_N_geomean": 0.061589125071458854,
+            "W_geomean": 9.963498735124725,
+            "S_geomean": 7.330375437752977,
+            "N_geomean": 197.37465835825714,
+            "SN_geomean": 0.037139395192505045
+          },
+          "reference": {
+            "N_mean": 235.6875,
+            "C_mean": 14.1875,
+            "output_tokens_mean": 3513.25,
+            "C_over_N_geomean": 0.06219072265912045,
+            "W_geomean": 9.899197398880622,
+            "S_geomean": 7.305508057247551,
+            "N_geomean": 179.7232714445448,
+            "SN_geomean": 0.0406486483276693
+          }
+        }
+      },
+      {
+        "candidate": "method",
+        "reference": "native",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 1.0445602363713165,
+          "S": 1.0893059294289116,
+          "N": 1.2809886968691773,
+          "SN": 0.8503634201388729
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 289.125,
+            "C_mean": 11.625,
+            "output_tokens_mean": 2856.3125,
+            "C_over_N_geomean": 0.048576751263957,
+            "W_geomean": 12.893594830151141,
+            "S_geomean": 8.736173013368127,
+            "N_geomean": 213.60932126632622,
+            "SN_geomean": 0.04089790165325203
+          },
+          "reference": {
+            "N_mean": 267.4375,
+            "C_mean": 10.8125,
+            "output_tokens_mean": 2630.0625,
+            "C_over_N_geomean": 0.056152464463748344,
+            "W_geomean": 12.343562756076208,
+            "S_geomean": 8.01994442272817,
+            "N_geomean": 166.7534786125762,
+            "SN_geomean": 0.048094615413458164
+          }
+        }
+      },
+      {
+        "candidate": "method",
+        "reference": "allkept",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 0.9715919162597944,
+          "S": 0.968580679319856,
+          "N": 0.9814518551798579,
+          "SN": 0.9868855759026068
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 197.0625,
+            "C_mean": 16,
+            "output_tokens_mean": 3984.6875,
+            "C_over_N_geomean": 0.07565689821692843,
+            "W_geomean": 6.467757940227045,
+            "S_geomean": 5.643533850591863,
+            "N_geomean": 187.8800758746773,
+            "SN_geomean": 0.030037958119392617
+          },
+          "reference": {
+            "N_mean": 203.9375,
+            "C_mean": 15.5625,
+            "output_tokens_mean": 3874.25,
+            "C_over_N_geomean": 0.07373160262619267,
+            "W_geomean": 6.65686676884375,
+            "S_geomean": 5.826601718459624,
+            "N_geomean": 191.43076135940157,
+            "SN_geomean": 0.030437123464814916
+          }
+        }
+      },
+      {
+        "candidate": "method",
+        "reference": "allkept",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 0.925531167730207,
+          "S": 0.8969282101914458,
+          "N": 0.9832538489884847,
+          "SN": 0.9122041181065847
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 247.0625,
+            "C_mean": 15,
+            "output_tokens_mean": 3745,
+            "C_over_N_geomean": 0.061589125071458854,
+            "W_geomean": 9.963498735124725,
+            "S_geomean": 7.330375437752977,
+            "N_geomean": 197.37465835825714,
+            "SN_geomean": 0.037139395192505045
+          },
+          "reference": {
+            "N_mean": 248,
+            "C_mean": 15.3125,
+            "output_tokens_mean": 3796.0625,
+            "C_over_N_geomean": 0.06219996292954905,
+            "W_geomean": 10.76516824339847,
+            "S_geomean": 8.172756029368657,
+            "N_geomean": 200.73621736777824,
+            "SN_geomean": 0.04071390871331887
+          }
+        }
+      },
+      {
+        "candidate": "method",
+        "reference": "allkept",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 1.0315278341944885,
+          "S": 1.0660625479484795,
+          "N": 1.2535347123693523,
+          "SN": 0.8504451750948926
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 289.125,
+            "C_mean": 11.625,
+            "output_tokens_mean": 2856.3125,
+            "C_over_N_geomean": 0.048576751263957,
+            "W_geomean": 12.893594830151141,
+            "S_geomean": 8.736173013368127,
+            "N_geomean": 213.60932126632622,
+            "SN_geomean": 0.04089790165325203
+          },
+          "reference": {
+            "N_mean": 264.3125,
+            "C_mean": 10.625,
+            "output_tokens_mean": 2599.4375,
+            "C_over_N_geomean": 0.05342963474592163,
+            "W_geomean": 12.499512279491366,
+            "S_geomean": 8.194803419536624,
+            "N_geomean": 170.40558921784887,
+            "SN_geomean": 0.04808999198412603
+          }
+        }
+      },
+      {
+        "candidate": "native",
+        "reference": "dense",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 0.5812766758747441,
+          "S": 0.549097668203162,
+          "N": 0.5227691029869956,
+          "SN": 1.0503636597222947
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 173.625,
+            "C_mean": 14.3125,
+            "output_tokens_mean": 3573.375,
+            "C_over_N_geomean": 0.07945069721508811,
+            "W_geomean": 5.684698796879986,
+            "S_geomean": 4.8584198965292655,
+            "N_geomean": 159.51222461969803,
+            "SN_geomean": 0.03045797842837746
+          },
+          "reference": {
+            "N_mean": 385.4375,
+            "C_mean": 20.0625,
+            "output_tokens_mean": 5068.9375,
+            "C_over_N_geomean": 0.057509401852387884,
+            "W_geomean": 9.779678134040505,
+            "S_geomean": 8.848006789807904,
+            "N_geomean": 305.1294036091228,
+            "SN_geomean": 0.02899755541469346
+          }
+        }
+      },
+      {
+        "candidate": "native",
+        "reference": "dense",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 0.8659715733744544,
+          "S": 0.813393592640852,
+          "N": 0.7967210453242841,
+          "SN": 1.0209264552686463
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 235.6875,
+            "C_mean": 14.1875,
+            "output_tokens_mean": 3513.25,
+            "C_over_N_geomean": 0.06219072265912045,
+            "W_geomean": 9.899197398880622,
+            "S_geomean": 7.305508057247551,
+            "N_geomean": 179.7232714445448,
+            "SN_geomean": 0.0406486483276693
+          },
+          "reference": {
+            "N_mean": 258.8125,
+            "C_mean": 14.8125,
+            "output_tokens_mean": 3698.9375,
+            "C_over_N_geomean": 0.052782527895833174,
+            "W_geomean": 11.431319113982177,
+            "S_geomean": 8.981516603208904,
+            "N_geomean": 225.57866708716494,
+            "SN_geomean": 0.0398154520513165
+          }
+        }
+      },
+      {
+        "candidate": "native",
+        "reference": "dense",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 0.8763585063899906,
+          "S": 0.8109020692047137,
+          "N": 0.7965719419268047,
+          "SN": 1.0179897464668997
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 267.4375,
+            "C_mean": 10.8125,
+            "output_tokens_mean": 2630.0625,
+            "C_over_N_geomean": 0.056152464463748344,
+            "W_geomean": 12.343562756076208,
+            "S_geomean": 8.01994442272817,
+            "N_geomean": 166.7534786125762,
+            "SN_geomean": 0.048094615413458164
+          },
+          "reference": {
+            "N_mean": 290.625,
+            "C_mean": 10.6875,
+            "output_tokens_mean": 2619.1875,
+            "C_over_N_geomean": 0.04456479327966588,
+            "W_geomean": 14.085060698416006,
+            "S_geomean": 9.890151631495616,
+            "N_geomean": 209.33888056516412,
+            "SN_geomean": 0.04724469532269693
+          }
+        }
+      },
+      {
+        "candidate": "allkept",
+        "reference": "native",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 1.1710148605406032,
+          "S": 1.1992791571230812,
+          "N": 1.2001008813951541,
+          "SN": 0.99931528733558
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 203.9375,
+            "C_mean": 15.5625,
+            "output_tokens_mean": 3874.25,
+            "C_over_N_geomean": 0.07373160262619267,
+            "W_geomean": 6.65686676884375,
+            "S_geomean": 5.826601718459624,
+            "N_geomean": 191.43076135940157,
+            "SN_geomean": 0.030437123464814916
+          },
+          "reference": {
+            "N_mean": 173.625,
+            "C_mean": 14.3125,
+            "output_tokens_mean": 3573.375,
+            "C_over_N_geomean": 0.07945069721508811,
+            "W_geomean": 5.684698796879986,
+            "S_geomean": 4.8584198965292655,
+            "N_geomean": 159.51222461969803,
+            "SN_geomean": 0.03045797842837746
+          }
+        }
+      },
+      {
+        "candidate": "allkept",
+        "reference": "native",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 1.0874788944622689,
+          "S": 1.1187115208586675,
+          "N": 1.1169183364755142,
+          "SN": 1.0016054749255991
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 248,
+            "C_mean": 15.3125,
+            "output_tokens_mean": 3796.0625,
+            "C_over_N_geomean": 0.06219996292954905,
+            "W_geomean": 10.76516824339847,
+            "S_geomean": 8.172756029368657,
+            "N_geomean": 200.73621736777824,
+            "SN_geomean": 0.04071390871331887
+          },
+          "reference": {
+            "N_mean": 235.6875,
+            "C_mean": 14.1875,
+            "output_tokens_mean": 3513.25,
+            "C_over_N_geomean": 0.06219072265912045,
+            "W_geomean": 9.899197398880622,
+            "S_geomean": 7.305508057247551,
+            "N_geomean": 179.7232714445448,
+            "SN_geomean": 0.0406486483276693
+          }
+        }
+      },
+      {
+        "candidate": "allkept",
+        "reference": "native",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 4,
+        "source": "raw_same_cell_pairs",
+        "ratios": {
+          "W": 1.0126340770891604,
+          "S": 1.021803018523783,
+          "N": 1.0219012558877874,
+          "SN": 0.999903868046508
+        },
+        "absolute": {
+          "candidate": {
+            "N_mean": 264.3125,
+            "C_mean": 10.625,
+            "output_tokens_mean": 2599.4375,
+            "C_over_N_geomean": 0.05342963474592163,
+            "W_geomean": 12.499512279491366,
+            "S_geomean": 8.194803419536624,
+            "N_geomean": 170.40558921784887,
+            "SN_geomean": 0.04808999198412603
+          },
+          "reference": {
+            "N_mean": 267.4375,
+            "C_mean": 10.8125,
+            "output_tokens_mean": 2630.0625,
+            "C_over_N_geomean": 0.056152464463748344,
+            "W_geomean": 12.343562756076208,
+            "S_geomean": 8.01994442272817,
+            "N_geomean": 166.7534786125762,
+            "SN_geomean": 0.048094615413458164
+          }
+        }
+      }
+    ],
+    "sparsity_coverage": {
+      "requests": 236,
+      "telemetry_modes": [
+        "minimal"
+      ],
+      "per_tile_statistics_receipts": [
+        "N/A (minimal telemetry; use a token-matched full audit run)"
+      ],
+      "actual_sparsity_available": false
+    }
+  },
+  "V28": {
+    "source_commit": "dcfdb8730efff131f92d0a8bbbab514ef1eedf18",
+    "scorer_commit": "7c8c608ed3adb7fd0c7edba7f8d77dcbcbe7bf10",
+    "raw_rows_locally_available": false,
+    "coverage": {
+      "workers": 24,
+      "timed_requests": 288,
+      "requests_per_variant": 48,
+      "questions_per_bin": 2
+    },
+    "comparisons": [
+      {
+        "candidate": "q64_release",
+        "reference": "main_release",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 1.0295268791832015,
+          "S": 1.0386602180480922,
+          "N": 1.0317672820061057,
+          "SN": 1.006680708103657
+        }
+      },
+      {
+        "candidate": "q64_release",
+        "reference": "main_release",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.8358823478248433,
+          "S": 0.7941606417795131,
+          "N": 0.7920595404271912,
+          "SN": 1.0026527063245632
+        }
+      },
+      {
+        "candidate": "q64_release",
+        "reference": "main_release",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.9727283647472348,
+          "S": 0.9595957800061619,
+          "N": 0.9537415772068794,
+          "SN": 1.0061381436430894
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "main_legacy",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 1.0194388411787672,
+          "S": 1.0212068052796368,
+          "N": 1.0218553650355982,
+          "SN": 0.9993653115909034
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "main_legacy",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.9953978029060896,
+          "S": 0.9954555698357863,
+          "N": 0.9962609614749188,
+          "SN": 0.9991915856685378
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "main_legacy",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 1.0222202545855825,
+          "S": 1.0290214500521742,
+          "N": 1.036752130213499,
+          "SN": 0.9925433669861542
+        }
+      },
+      {
+        "candidate": "main_legacy",
+        "reference": "dense",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.5956712737443406,
+          "S": 0.5614464761336617,
+          "N": 0.5403511721920706,
+          "SN": 1.0390399892277695
+        }
+      },
+      {
+        "candidate": "main_legacy",
+        "reference": "dense",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 1.0235724538498294,
+          "S": 0.9979733158901304,
+          "N": 1.0903261848612302,
+          "SN": 0.9152979445478014
+        }
+      },
+      {
+        "candidate": "main_legacy",
+        "reference": "dense",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.8718719334498832,
+          "S": 0.8215520964663174,
+          "N": 0.9460240514583661,
+          "SN": 0.8684262257390116
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "dense",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.6072504330294107,
+          "S": 0.5733529622279665,
+          "N": 0.5521607443077418,
+          "SN": 1.0383805225900187
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "dense",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 1.018861771677315,
+          "S": 0.993438095850319,
+          "N": 1.0862494132511293,
+          "SN": 0.9145580045718712
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "dense",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.8912451497771635,
+          "S": 0.8453947295991735,
+          "N": 0.9807924505826658,
+          "SN": 0.8619506900740767
+        }
+      },
+      {
+        "candidate": "q64_release",
+        "reference": "dense",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.625180643199417,
+          "S": 0.5955189127662193,
+          "N": 0.569701390384867,
+          "SN": 1.0453176397619655
+        }
+      },
+      {
+        "candidate": "q64_release",
+        "reference": "dense",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.8516485698186136,
+          "S": 0.7889494357687067,
+          "N": 0.8603742110489957,
+          "SN": 0.9169840583747789
+        }
+      },
+      {
+        "candidate": "q64_release",
+        "reference": "dense",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.8669394371316447,
+          "S": 0.8112372149628172,
+          "N": 0.935422538731312,
+          "SN": 0.8672414672230114
+        }
+      },
+      {
+        "candidate": "allkept_release",
+        "reference": "dense",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.5905410279683894,
+          "S": 0.5559999823443145,
+          "N": 0.5205426225643197,
+          "SN": 1.06811615080687
+        }
+      },
+      {
+        "candidate": "allkept_release",
+        "reference": "dense",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.9010514976904157,
+          "S": 0.8495373626412284,
+          "N": 0.8377647402613817,
+          "SN": 1.0140524204637373
+        }
+      },
+      {
+        "candidate": "allkept_release",
+        "reference": "dense",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 1.049591523697174,
+          "S": 1.0266525651553706,
+          "N": 1.0226081775116627,
+          "SN": 1.003954972914014
+        }
+      },
+      {
+        "candidate": "native",
+        "reference": "dense",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.5086336382438875,
+          "S": 0.4688280008856475,
+          "N": 0.4434934914946438,
+          "SN": 1.0571248730294156
+        }
+      },
+      {
+        "candidate": "native",
+        "reference": "dense",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.9441707290659298,
+          "S": 0.9237937659868793,
+          "N": 0.910682416855517,
+          "SN": 1.014397279324481
+        }
+      },
+      {
+        "candidate": "native",
+        "reference": "dense",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 1.0257524026126799,
+          "S": 0.9945669372791234,
+          "N": 0.9899539315032181,
+          "SN": 1.0046598186330757
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "allkept_release",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 1.0282950790371093,
+          "S": 1.0312103964652752,
+          "N": 1.0607406970588948,
+          "SN": 0.9721606791598568
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "allkept_release",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 1.1307475480467784,
+          "S": 1.1693871741693624,
+          "N": 1.2966043580590665,
+          "SN": 0.9018843465248412
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "allkept_release",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 2,
+        "source": "published_paired_summary_only",
+        "ratios": {
+          "W": 0.8491352394289188,
+          "S": 0.82344773518511,
+          "N": 0.9591087497160956,
+          "SN": 0.8585551277984459
+        }
+      },
+      {
+        "candidate": "main_legacy",
+        "reference": "native",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 2,
+        "source": "same_complete_inventory_summary_geomean_ratio_no_new_ci",
+        "ratios": {
+          "W": 1.171120486252069,
+          "S": 1.1975532073021484,
+          "N": 1.2183970735872611,
+          "SN": 0.9828923864502216
+        }
+      },
+      {
+        "candidate": "main_legacy",
+        "reference": "native",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 2,
+        "source": "same_complete_inventory_summary_geomean_ratio_no_new_ci",
+        "ratios": {
+          "W": 1.0840967870953295,
+          "S": 1.0802988206182642,
+          "N": 1.19726280499189,
+          "SN": 0.9023071760970488
+        }
+      },
+      {
+        "candidate": "main_legacy",
+        "reference": "native",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 2,
+        "source": "same_complete_inventory_summary_geomean_ratio_no_new_ci",
+        "ratios": {
+          "W": 0.849982833312552,
+          "S": 0.8260400237251705,
+          "N": 0.9556243188224466,
+          "SN": 0.8643982864971934
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "native",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 2,
+        "source": "same_complete_inventory_summary_geomean_ratio_no_new_ci",
+        "ratios": {
+          "W": 1.1938857113855237,
+          "S": 1.2229494849814098,
+          "N": 1.2450255863888153,
+          "SN": 0.9822685560451523
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "native",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 2,
+        "source": "same_complete_inventory_summary_geomean_ratio_no_new_ci",
+        "ratios": {
+          "W": 1.0791075600122415,
+          "S": 1.0753894780714819,
+          "N": 1.192786193239379,
+          "SN": 0.9015777380445108
+        }
+      },
+      {
+        "candidate": "main_release",
+        "reference": "native",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 2,
+        "source": "same_complete_inventory_summary_geomean_ratio_no_new_ci",
+        "ratios": {
+          "W": 0.8688696682621315,
+          "S": 0.8500129030148074,
+          "N": 0.9907455482229954,
+          "SN": 0.8579527856969866
+        }
+      },
+      {
+        "candidate": "q64_release",
+        "reference": "native",
+        "dataset": "longbench_v2_32k",
+        "cells": 16,
+        "questions": 2,
+        "source": "same_complete_inventory_summary_geomean_ratio_no_new_ci",
+        "ratios": {
+          "W": 1.2291374305441545,
+          "S": 1.2702289787325929,
+          "N": 1.2845766652964452,
+          "SN": 0.9888308055474905
+        }
+      },
+      {
+        "candidate": "q64_release",
+        "reference": "native",
+        "dataset": "longbench_v2_64k",
+        "cells": 16,
+        "questions": 2,
+        "source": "same_complete_inventory_summary_geomean_ratio_no_new_ci",
+        "ratios": {
+          "W": 0.9020069608185707,
+          "S": 0.8540319980681836,
+          "N": 0.9447576840450818,
+          "SN": 0.9039693590123068
+        }
+      },
+      {
+        "candidate": "q64_release",
+        "reference": "native",
+        "dataset": "longbench_v2_96k",
+        "cells": 16,
+        "questions": 2,
+        "source": "same_complete_inventory_summary_geomean_ratio_no_new_ci",
+        "ratios": {
+          "W": 0.8451741715870956,
+          "S": 0.8156687946837959,
+          "N": 0.9449152217728939,
+          "SN": 0.8632190231345833
+        }
+      }
+    ],
+    "actual_sparsity_available": false,
+    "sparsity_note": "No actual tile density retained in the supplied summary artifacts; unknown, not zero."
+  },
+  "HF_E14": {
+    "protocol_id": "v27_lb_q64c_e14_46bf7b5a765b7204",
+    "deploy_label": "v27_e14_0fc74fc",
+    "source_commit": "0fc74fcbfe7b9e58b6cf6061f7581f49585f6403",
+    "baseline": "HF D_fa4_allkept num_splits=1; not current vLLM dynamic-causal baseline",
+    "comparisons": [
+      {
+        "candidate": "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+        "reference": "D_fa4_allkept",
+        "dataset": "longbench_v2_32k",
+        "cells": 144,
+        "source": "published_paired_summary_rounded_4dp",
+        "ratios": {
+          "W": 0.9419,
+          "S": 0.9302,
+          "N": 1.0075,
+          "SN": 0.9233
+        }
+      },
+      {
+        "candidate": "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+        "reference": "D_fa4_allkept",
+        "dataset": "longbench_v2_64k",
+        "cells": 144,
+        "source": "published_paired_summary_rounded_4dp",
+        "ratios": {
+          "W": 0.8654,
+          "S": 0.7782,
+          "N": 0.9564,
+          "SN": 0.8137
+        }
+      },
+      {
+        "candidate": "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+        "reference": "D_fa4_allkept",
+        "dataset": "longbench_v2_96k",
+        "cells": 66,
+        "source": "published_paired_summary_rounded_4dp",
+        "ratios": {
+          "W": 0.7553,
+          "S": 0.6497,
+          "N": 0.8604,
+          "SN": 0.7552
+        }
+      }
+    ],
+    "actual_sparsity_available": false,
+    "sparsity_note": "Input paired summary has no tile-density measurements."
+  },
+  "V29_diagnostics": {
+    "scope": "32K singleton profiled diagnostics only; no 64K/96K data; not formal speed evidence",
+    "requests": [
+      {
+        "campaign": "cost32k_002",
+        "arm": "dense",
+        "source_commit": "39e08c521d15b458a1e4c19e98de42a312ff0c25",
+        "requested_graph": "default",
+        "N": 137,
+        "C": 10,
+        "output_tokens": 2497,
+        "W": 5.0523453711066395,
+        "S": 4.152350080083124,
+        "SN_ms": 30.309124672139593
+      },
+      {
+        "campaign": "cost32k_002",
+        "arm": "native",
+        "source_commit": "39e08c521d15b458a1e4c19e98de42a312ff0c25",
+        "requested_graph": "PIECEWISE",
+        "N": 374,
+        "C": 19,
+        "output_tokens": 4761,
+        "W": 12.81784324394539,
+        "S": 11.911538952961564,
+        "SN_ms": 31.84903463358707
+      },
+      {
+        "campaign": "cost32k_002",
+        "arm": "allkept",
+        "source_commit": "39e08c521d15b458a1e4c19e98de42a312ff0c25",
+        "requested_graph": "PIECEWISE",
+        "N": 150,
+        "C": 11,
+        "output_tokens": 2734,
+        "W": 5.784694508067332,
+        "S": 4.875221665017307,
+        "SN_ms": 32.501477766782045
+      },
+      {
+        "campaign": "cost32k_002",
+        "arm": "method",
+        "source_commit": "39e08c521d15b458a1e4c19e98de42a312ff0c25",
+        "requested_graph": "PIECEWISE",
+        "N": 115,
+        "C": 9,
+        "output_tokens": 2205,
+        "W": 4.670019419048913,
+        "S": 3.7572237940039486,
+        "SN_ms": 32.67151125220825
+      },
+      {
+        "campaign": "cost32k_events003",
+        "arm": "dense",
+        "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+        "requested_graph": "PIECEWISE",
+        "N": 374,
+        "C": 19,
+        "output_tokens": 4761,
+        "W": 12.114007308031432,
+        "S": 11.230953159974888,
+        "SN_ms": 30.029286523997026
+      },
+      {
+        "campaign": "cost32k_events003",
+        "arm": "native",
+        "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+        "requested_graph": "PIECEWISE",
+        "N": 99,
+        "C": 9,
+        "output_tokens": 2107,
+        "W": 4.1473185940412804,
+        "S": 3.2330097699305043,
+        "SN_ms": 32.65666434273236
+      },
+      {
+        "campaign": "cost32k_events003",
+        "arm": "allkept",
+        "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+        "requested_graph": "PIECEWISE",
+        "N": 150,
+        "C": 11,
+        "output_tokens": 2734,
+        "W": 5.823049440048635,
+        "S": 4.912813376984559,
+        "SN_ms": 32.75208917989706
+      },
+      {
+        "campaign": "cost32k_events003",
+        "arm": "method",
+        "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+        "requested_graph": "PIECEWISE",
+        "N": 115,
+        "C": 8,
+        "output_tokens": 2006,
+        "W": 4.736678818007931,
+        "S": 3.823476165998727,
+        "SN_ms": 33.247618834771544
+      }
+    ]
+  }
+}

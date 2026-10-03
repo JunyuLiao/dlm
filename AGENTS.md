@@ -1,4 +1,16 @@
-# V29 active branch overlay
+# V30 active branch overlay
+
+Current branch: `research/cooperative-sparsity-20261003`, from V29 `035b70c3f`.
+Read `docs/V30_COOPERATIVE_CAMPAIGN_20261003.md`. User explicitly authorizes
+attributed peer-document snapshots and isolated execution of peer algorithms
+for cooperation/variant evaluation. Peer branches and chw/ljy files remain
+read-only; do not merge or silently attribute their work to this study.
+Preserve all frozen V29 experiments and source pins. Multiple questions and
+eight seeds are required for confirmation; small diagnostics are not claims.
+The root agent personally reviews critical algorithm, fairness and execution
+decisions. Delegate only checked mechanical tasks/preparation to sol.
+
+# V29 inherited branch overlay
 
 User clarification (2026-10-02 23:20, UTC-5): required private research transfers
 between the user-owned hosts are authorized. Do not publish private data in Git.

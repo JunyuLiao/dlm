@@ -1,0 +1,71 @@
+{
+  "snapshot_local": "2026-10-03T02:16:07-05:00",
+  "previous_monitor_failure": "Read-only SSH connection timeout; GPU workers continued. Failed queues preserved.",
+  "formal_monitor": {
+    "successor": "completion002",
+    "phase": "waiting_complete_formal_inventory",
+    "formal_gpu_launches": 0,
+    "generation": {
+      "suites": {
+        "longbench": {
+          "started": true,
+          "complete": false,
+          "generation_complete": false,
+          "closed": 5,
+          "failed": 0,
+          "gpu_reserved_seconds": 7167.413360535167,
+          "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+          "phase": null
+        },
+        "aime": {
+          "started": true,
+          "complete": false,
+          "generation_complete": false,
+          "closed": 15,
+          "failed": 0,
+          "gpu_reserved_seconds": 7502.006127035973,
+          "source_commit": "1931db5a6540409946641ebb0b04c06507d48402",
+          "phase": null
+        },
+        "humaneval": {
+          "started": true,
+          "complete": false,
+          "generation_complete": false,
+          "closed": 15,
+          "failed": 0,
+          "gpu_reserved_seconds": 7354.722434923751,
+          "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+          "phase": null
+        }
+      },
+      "serial_cpu_scoring_may_begin": false
+    }
+  },
+  "followups": {
+    "components003": {
+      "phase": "waiting_for_formal_generation_and_strict_scores",
+      "complete": false,
+      "gpu_started": false,
+      "source_commit": "1342ec0b193a929295f08964c132aee96c28c5a1"
+    },
+    "dense003": {
+      "phase": "waiting",
+      "complete": false,
+      "gpu_started": false,
+      "source_commit": "bdd59ee972df55e423ad9d3ea33467aa3b99398b"
+    },
+    "engineering003": {
+      "phase": "waiting_barriers",
+      "complete": false,
+      "gpu_started": false,
+      "source_commit": "1342ec0b193a929295f08964c132aee96c28c5a1"
+    }
+  },
+  "tests_passed": {
+    "formal_completion002": 28,
+    "components003": 26,
+    "dense003": 23,
+    "engineering003": 35
+  },
+  "note": "Closed worker reservation spans only; active workers excluded. No new diagnostic GPU launch."
+}
