@@ -420,3 +420,42 @@ Table: `results/v31_20261003/panels/panel_l_adaptive_vs_uniform.md`.
 - The C gate's clearer effect is on trajectory perturbation and tails (previous section), which needs the
   confirmation set.
 - Mean-W frontier at 64K: MAGE k=4096 0.92, main / m2c / k30 about 0.95. No CI excludes 1.
+
+## Panel m: where the extra denoising steps come from (2026-10-03 19:00 UTC−5, partial)
+
+Setup:
+- `TRACE=1` receipts record the denoising steps of every canvas and the canvas mean token entropy after every step,
+  i.e. the quantity the sampler compares with its confidence threshold (0.005).
+- Each arm is compared with the dense trace (PIECEWISE through the adapter) on the same cells.
+- Files: `scripts/v31_entropy_phases.py`, `scripts/v31_canvas_steps.py`,
+  `results/v31_20261003/panels/panel_m_*.txt`.
+
+| 64K, 32 cells | early (≥1) | mid | tail [0.005, 0.1) | conv | steps/canvas | canvases ≥ 40 steps |
+|---|---|---|---|---|---|---|
+| dense | 7.96 | 3.10 | 2.16 | 1.52 | 14.73 | 1 |
+| m2c | 8.08 | 3.14 | **2.91** | 1.80 | 15.94 | **12** |
+| m2c + C gate | 8.39 | 3.18 | 2.37 | 1.52 | 15.46 | 2 |
+
+At 32K:
+- dense 13.10 steps/canvas, 1 capped canvas;
+- m2c 13.81, 6 capped;
+- m2c + C gate 13.07, 0 capped.
+
+**Mechanism:**
+- Sparsity-induced forward inflation is concentrated at the end of a canvas: the tail and converging phases.
+- Most of it comes from a few canvases that linger just above the convergence threshold until near the step cap.
+  At 64K there are 12 capped canvases for m2c against 1 for dense. At about 30 extra steps each, they account for
+  most of the +1.2 steps per canvas.
+- The C gate's benefit is mainly that it prevents such stuck canvases.
+
+Canvas step distribution:
+- median 12–15, p90 23–26 steps; dense itself has 19–25% of canvases at ≥ 20 steps;
+- steps after step 19 are 7.8% of all dense steps vs 11.5–14% for m2c;
+- canvases ≥ 30 steps: dense 2.1%, m2c 3.9–6.5%.
+
+**Variant under test (panel n):** a step-triggered dense rescue, `DENSE_WHEN=step:S`. GLOBAL attention runs dense
+from the S-th denoising step of a canvas on, so only long canvases pay. Arms:
+- m2c with S = 20 and S = 28;
+- mass k5 with S = 20, to see whether the rescue unlocks higher sparsity;
+- MAGE k=1024 with S = 20, to see whether the rescue generalizes to another selector;
+- an entropy trigger (`conv:4`) as control.

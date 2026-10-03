@@ -186,7 +186,7 @@ class VllmMethodAdapter:
         # matrix would give at 128-row blocks (executed), natural 64-row halves, regrouped 64-row halves (rows sorted by
         # need count, chw/value_aware idea; or by a random projection of the need vector) and per row (ideal)
         self.regroup_diag = bool(regroup_diag)
-        # v31 step-level dense fallback (named variant, method arm only): 'conv:THETA' runs every GLOBAL call of the
+        # v31 step-level dense fallback (named variant; method and MAGE arms): 'conv:THETA' runs every GLOBAL call of the
         # next denoising step with vLLM's own dense FA4 once the canvas mean token entropy of the previous step is below
         # THETA x the sampler's confidence threshold (the canvas is about to converge); 'step:S' does so from the S-th
         # denoising step of a canvas on. The selector is bypassed on those steps; its sampler-side state still updates.
@@ -826,9 +826,9 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                 if a.profile:
                     ev = (torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True))
                     ev[0].record()
-                if a.arm == 'native' or (a.arm == 'method' and a._dense_now):
+                if a.arm == 'native' or (a.arm in ('method', 'mage') and a._dense_now):
                     a.calls['global_calls'] += 1
-                    if a.arm == 'method':
+                    if a.arm != 'native':
                         a.calls['dense_fallback_calls'] = a.calls.get('dense_fallback_calls', 0) + 1
                     r = forward(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale,
                                 output_block_scale)
