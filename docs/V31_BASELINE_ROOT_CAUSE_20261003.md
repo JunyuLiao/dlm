@@ -272,3 +272,23 @@ medians in ms per GLOBAL layer call; `results/v31_20261003/kernels/`.
   3. **A sparse path that matches the strongest production dense path inside vLLM.** This covers FA4 page-alias split
      sparse execution, the FA4 observation, the chunked dense-prefix scan and fused sampler-hook statistics, with
      MAGE ported onto the same execution for a fair prior-art comparison.
+
+## Panel g: fused C-gate hook (2026-10-03 10:30 UTC−5)
+
+Setup:
+- Same configs, cells and seeds as panel c.
+- `LOGIT_STATS=fused`, labels `*_fs`.
+- Reference = the legacy-hook run of the same config, so these are paired ratios of fused vs legacy.
+
+| config | bin | W | N/C | S/N | identical outputs |
+|---|---|---|---|---|---|
+| main + C gate | 32K | 0.967 [0.919, 1.019] | 0.994 [0.971, 1.019] | **0.952 [0.950, 0.955]** | 20/48 |
+| main + C gate | 64K | 0.968 [0.907, 1.032] | 0.993 [0.971, 1.018] | **0.963 [0.959, 0.967]** | 15/48 |
+| base + C gate | 32K | 0.952 [0.914, 0.979] | 0.996 [0.971, 1.014] | **0.950 [0.948, 0.952]** | 29/48 |
+| base + C gate | 64K | 0.941 [0.877, 0.999] | 0.977 [0.941, 1.011] | **0.964 [0.959, 0.972]** | 18/48 |
+
+- The one-pass statistics remove 4–5% of the per-forward cost of every C-gate arm.
+- The forward count is unchanged.
+- The cells that are not token-identical diverge through FP32-rounding flips of the acceptance mask or the C-gate
+  sensitivity. The selector formulas are the same.
+- Against the fixed dense reference, main + C gate becomes S/N ≈ 1.048 (32K) and ≈ 0.963 (64K).
