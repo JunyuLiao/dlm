@@ -6,8 +6,10 @@ engine seeds and1 timed repeat; qualification/scoring must pass before launch.
 No new panel is running yet. Existing V28 preview remains on its original branch.
 32K overhead attribution is pending independent profiling. Opt-in fused paged
 KV copy is implemented with42 CPU tests across copy and adapter lifecycle guards;
-GPU equality/component qualification pending. Regroup output-scatter/LSE fusion
-is being prepared against identically fused natural Q64. No new speed claim.
+GPU component001 passed10 exact cases; long tail event-span ratio about.556;
+real-model and W/accuracy qualification pending. Reserved3.867908GPU seconds. Regroup output-scatter/LSE fusion
+CPU prototype and11 tests pass, against identically fused natural Q64.
+Independent32K profiler and10 CPU tests also ready; no GPU diagnostic yet. No new speed claim.
 Read `docs/CONFIRMATION_CAMPAIGN_V29_20261002.md` for predeclared component protocol.
 
 ## Inherited V28 snapshot (historical)

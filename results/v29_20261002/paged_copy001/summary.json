@@ -1,0 +1,170 @@
+{
+  "schema": "v29_paged_copy_component_v1",
+  "records": [
+    {
+      "prefix_tokens": 0,
+      "canvas_tokens": 1,
+      "mode": "full",
+      "exact_gpu_oracle": true,
+      "native_cache_strides": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "repeats": 100,
+      "torch_median_ms": 0.07636800035834312,
+      "triton_median_ms": 0.05246400088071823,
+      "triton_over_torch": 0.6869893232052735
+    },
+    {
+      "prefix_tokens": 0,
+      "canvas_tokens": 1,
+      "mode": "tail",
+      "exact_gpu_oracle": true,
+      "native_cache_strides": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "repeats": 100,
+      "torch_median_ms": 0.0764320008456707,
+      "triton_median_ms": 0.05225600115954876,
+      "triton_over_torch": 0.6836927017658817
+    },
+    {
+      "prefix_tokens": 65,
+      "canvas_tokens": 256,
+      "mode": "full",
+      "exact_gpu_oracle": true,
+      "native_cache_strides": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "repeats": 100,
+      "torch_median_ms": 0.09148800000548363,
+      "triton_median_ms": 0.05222399905323982,
+      "triton_over_torch": 0.5708289507925587
+    },
+    {
+      "prefix_tokens": 65,
+      "canvas_tokens": 256,
+      "mode": "tail",
+      "exact_gpu_oracle": true,
+      "native_cache_strides": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "repeats": 100,
+      "torch_median_ms": 0.11600000038743019,
+      "triton_median_ms": 0.06438399851322174,
+      "triton_over_torch": 0.5550344680877985
+    },
+    {
+      "prefix_tokens": 32768,
+      "canvas_tokens": 256,
+      "mode": "full",
+      "exact_gpu_oracle": true,
+      "native_cache_strides": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "repeats": 100,
+      "torch_median_ms": 0.7265599966049194,
+      "triton_median_ms": 0.1324160024523735,
+      "triton_over_torch": 0.1822506098204264
+    },
+    {
+      "prefix_tokens": 32768,
+      "canvas_tokens": 256,
+      "mode": "tail",
+      "exact_gpu_oracle": true,
+      "native_cache_strides": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "repeats": 100,
+      "torch_median_ms": 0.09412800148129463,
+      "triton_median_ms": 0.052480001002550125,
+      "triton_over_torch": 0.5575386726231417
+    },
+    {
+      "prefix_tokens": 65536,
+      "canvas_tokens": 256,
+      "mode": "full",
+      "exact_gpu_oracle": true,
+      "native_cache_strides": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "repeats": 100,
+      "torch_median_ms": 1.39028799533844,
+      "triton_median_ms": 0.2232159972190857,
+      "triton_over_torch": 0.16055378307769094
+    },
+    {
+      "prefix_tokens": 65536,
+      "canvas_tokens": 256,
+      "mode": "tail",
+      "exact_gpu_oracle": true,
+      "native_cache_strides": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "repeats": 100,
+      "torch_median_ms": 0.09350399672985077,
+      "triton_median_ms": 0.052112000063061714,
+      "triton_over_torch": 0.5573237710214923
+    },
+    {
+      "prefix_tokens": 98304,
+      "canvas_tokens": 256,
+      "mode": "full",
+      "exact_gpu_oracle": true,
+      "native_cache_strides": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "repeats": 100,
+      "torch_median_ms": 2.052127957344055,
+      "triton_median_ms": 0.31198400259017944,
+      "triton_over_torch": 0.15202950745525703
+    },
+    {
+      "prefix_tokens": 98304,
+      "canvas_tokens": 256,
+      "mode": "tail",
+      "exact_gpu_oracle": true,
+      "native_cache_strides": [
+        131072,
+        1024,
+        65536,
+        1
+      ],
+      "repeats": 100,
+      "torch_median_ms": 0.09323200210928917,
+      "triton_median_ms": 0.0517599992454052,
+      "triton_over_torch": 0.5551741684655733
+    }
+  ],
+  "torch": "2.13.0+cu130",
+  "cuda": "13.0",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "body_wall_seconds": 2.2271786100172903,
+  "scope": "Synthetic native-stride exact copy only; preallocated destination in both arms. Includes original intermediate allocation and host dispatch gaps. No request or accuracy claim."
+}

@@ -874,3 +874,16 @@ no change to its running preview/finalizer.42 CPU copy/address/adapter tests pas
 GPU copy/component qualification and expanded dataset panels pending; no new
 performance or accuracy result. Standard copy optimization must apply to matched
 all-kept/main controls. Regroup O-scatter fusion is a separately named candidate.
+
+## Fused paged-copy component001 passed (2026-10-02 21:53, UTC-5)
+
+Source3a3a3c52d;10 synthetic native-stride GPU cases bit-exact,100 alternating
+samples after8 warm. Long tail copy ratios .55754/.55732/.55517 at32/64/96K;
+full-copy ratios .18225/.16055/.15203. Event spans include host dispatch and
+original intermediate allocation. Real-model qualification and W/accuracy pending;
+standard optimization must also apply to all-kept. No request-speed claim.
+Reserved3.867908GPU seconds on dlm2; run closed. Sources:
+`results/v29_20261002/paged_copy001/{summary.json,receipts.json,README.md}`.
+
+
+Independent32K profiler (10 CPU tests) and mapped alias2 merge prototype (11 CPU tests) ready for separate GPU qualification. Fixed component protocol: historical3 accepted states, seed2903, warm8,32 rotated samples, natural_fused matched reference, frozen order/search unchanged; GPU Torch LSE and IEEE FP32 masked oracles before timing; online construction remains unmeasured. Merge is tolerance-qualified, not bit-exact. Source docs: docs/V29_32K_COST_AUDIT_20261002.md and docs/V29_REGROUP_REVIEW_20261002.md. No GPU result for these diagnostics yet.
