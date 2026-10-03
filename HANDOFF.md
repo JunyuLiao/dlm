@@ -1,3 +1,20 @@
+## Independent Junyu vLLM adapter checkpoint — 2026-10-03 04:13 (UTC-5)
+
+User-facing concise status: [V30_WORKING_STATUS_20261003.md](docs/V30_WORKING_STATUS_20261003.md).
+Added separate no-M3 GLOBAL adapter source: bare peer dense, projected all-kept,
+fresh value-only, previous-confidence and previous-temporal variants. Official
+FA4 remains the external dense reference; the peer consumer is explicitly named.
+Ten CPU tests passed, no skips/CUDA initialization, 0 GPU seconds. Per-case
+evidence/source hashes: results/v30_20261003/standalone_cpu002. Real peer CUDA,
+paged-KV numerical qualification, finite policy binding and E2E runner remain
+pending; this adapter is NOT armed. Do not mistake earlier M3 sensitivity or
+original peer kernel queues for its execution. Current peer SHA remains b890ff494;
+uniform attained policy JSON absent, README zero is a placeholder. Public old
+RULER8K policies may only be separately labeled transfer candidates.
+
+Read-only 04:09 formal snapshot: LB10/32, AIME28/32, HumanEval29/32; 67 closed,
+0 failed, 41710.304596 closed GPU seconds. Earlier frozen queues unchanged.
+
 ## V30 follow-up queue armed — 2026-10-03 03:38 (UTC-5)
 
 The new continuation is actually armed on94134a91b, phase waiting_prior_queues,

@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-03 03:38 (UTC-5)",
+    "updated_local": "2026-10-03 04:13 (UTC-5)",
     "branch": "research/cooperative-sparsity-20261003",
-    "verified_commit": "94134a91b4322adeb2d0d41d7dca438689129e95",
+    "verified_commit": "94caf2e8032c50022d695804eaebb44560d7927d",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -666,6 +666,47 @@
       "receipt": "results/v30_20261003/campaign_queue001/status.json",
       "root_review_after_nine_strict_qualifications": true,
       "gpu_reserved_seconds": 0
+    },
+    "working_status_doc": "docs/V30_WORKING_STATUS_20261003.md",
+    "standalone_peer_v30": {
+      "source": "experiments/numerical_qk_reuse/v30_peer_standalone.py",
+      "peer_commit": "b890ff49488474c5d476df44019597dc045a5969",
+      "variants": [
+        "kernel_dense",
+        "value_allkept",
+        "value_unit",
+        "value_confidence",
+        "value_temporal"
+      ],
+      "m3_installed": false,
+      "cpu_tests_passed": 10,
+      "gpu_seconds": 0,
+      "gpu_qualified": false,
+      "e2e_runner_implemented": false,
+      "armed": false,
+      "finite_policy_bound": false,
+      "receipt": "results/v30_20261003/standalone_cpu002/receipt.json"
+    },
+    "latest_formal_snapshot": {
+      "closed_workers": 67,
+      "planned_workers": 96,
+      "failed_closed_workers": 0,
+      "scoring_started": false,
+      "closed_gpu_seconds": 41710.30459611936,
+      "suites": {
+        "longbench": {
+          "closed": 10,
+          "gpu_seconds": 13757.54145053518
+        },
+        "aime": {
+          "closed": 28,
+          "gpu_seconds": 13893.31456376196
+        },
+        "humaneval": {
+          "closed": 29,
+          "gpu_seconds": 14059.448581822217
+        }
+      }
     }
   },
   "task": "M3 output numerics and trajectory isolation",
