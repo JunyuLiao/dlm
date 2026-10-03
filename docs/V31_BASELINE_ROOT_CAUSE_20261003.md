@@ -97,3 +97,36 @@ equal noise to every arm. All v31 panels use `seed = sha256(base, dataset, index
   2. step-stable sparsity: query protection (C gate, collaboration with Junyu) on top of cached reuse, at higher
      sparsity;
   3. sparse execution that matches the strongest production dense path (alias split, pack-GQA).
+
+## Panel a (seed-paired, 48 cells per length, all three hosts) — 2026-10-03 06:10 UTC−5
+
+Reference: PIECEWISE dense, no hooks. Paired geometric means arm/ref with item-clustered 95% CIs
+(`scripts/v31_paired_summary.py`; private inputs `E:/dlm/v31_private/paired/`).
+
+| arm | bin | W | N/C (forwards per canvas) | S/N (mean per-forward) | median step | identical outputs |
+|---|---|---|---|---|---|---|
+| vLLM default dense (FULL, **unfixed**) | 32K | 1.185 [1.04, 1.37] | **1.192 [1.12, 1.26]** | 0.971 | – | 0/48 |
+| vLLM default dense (FULL, **unfixed**) | 64K | 1.222 [1.11, 1.37] | **1.275 [1.18, 1.37]** | 0.979 | – | 0/48 |
+| main (PIECEWISE) | 32K | 1.006 [0.86, 1.17] | 0.982 [0.93, 1.03] | 1.086 [1.02, 1.18] | 0.955 | 0/48 |
+| main (PIECEWISE) | 64K | 1.001 [0.91, 1.10] | 1.065 [1.01, 1.13] | 0.966 [0.92, 1.04] | 0.860 | 0/48 |
+
+**The bug at scale.** Seed-paired, the unfixed FULL default needs 19–28% more forwards per canvas than correct dense.
+Its per-forward cost is 2–3% lower, from the FULL graph.
+
+**The method against correct dense: no end-to-end gain yet.**
+- A typical sparse forward (per-request median step) is 4.5% (32K) and 14% (64K) cheaper, consistent across hosts.
+- The mean per-forward cost keeps little of that, because the per-canvas observation and the re-decisions are
+  expensive. The fused observation kernel takes 4.2 ms per GLOBAL layer at 65K, versus about 1.7 ms for vLLM's dense
+  call (`observe_split_1002`).
+- At 64K the method also takes 6.5% more forwards per canvas.
+- The earlier HF-substrate gains came largely from a slower dense reference. The vLLM smoke "0.85× at 64K" was a
+  median step against the buggy FULL default.
+
+**Next levers, queued or planned:**
+- overhead: observe every 2nd canvas (`cc2`), re-decide every 12 calls (`r12`), 64-row maps (`q64`) — panel e;
+  a cheaper observation without the projected-V mu (V term is a measured negative), timed in
+  `scripts/v31_observe_cost_bench.py`;
+- step inflation: the C gate at the main / base / +ln2 thresholds — panel c;
+- prior art at its own budgets: MAGE k = 1024 / 4096 — panel d;
+- kernel: pack-GQA — `scripts/v31_packgqa_sparse_bench.py`;
+- 96K, where attention is a larger share of the step.
