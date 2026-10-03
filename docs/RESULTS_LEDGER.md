@@ -1480,3 +1480,13 @@ lifecycle and merge tests also passed. Last direct GPU check found one active
 original worker on each of dllm/dlm2/mpk; no new GPU launch. Verified parent:
 ed711c8b4afd5bf93a457f03bfc5714a5b36dcb9. Do not mislabel the new source/config freeze as a byte-identical rebind.
 
+## V30 source-freeze guard correction — 2026-10-03 03:21 (UTC-5)
+
+First CPU-only preparation on dlm2 stopped before GPU: the original parent
+provenance also pins v21.py, so a byte-identical parent rebind correctly rejected
+the reviewed wrapper change. Preserve failed campaign001. New config migration
+now verifies every old pin, explicitly allows only reviewed v21.py/adapter.py
+changes at any nesting, keeps all other dependencies byte-identical, and asserts
+all mathematical fields unchanged except the named sensitivity. Two CPU tests
+cover nested fingerprints, old-byte drift, unreviewed kernels and basename
+spoofing. New immutable preparation is pending; no GPU was started.

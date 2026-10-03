@@ -1,3 +1,14 @@
+## V30 source-freeze guard correction — 2026-10-03 03:21 (UTC-5)
+
+First CPU-only preparation on dlm2 stopped before GPU: the original parent
+provenance also pins v21.py, so a byte-identical parent rebind correctly rejected
+the reviewed wrapper change. Preserve failed campaign001. New config migration
+now verifies every old pin, explicitly allows only reviewed v21.py/adapter.py
+changes at any nesting, keeps all other dependencies byte-identical, and asserts
+all mathematical fields unchanged except the named sensitivity. Two CPU tests
+cover nested fingerprints, old-byte drift, unreviewed kernels and basename
+spoofing. New immutable preparation is pending; no GPU was started.
+
 ## Dense divergence and M3 query-weight ports — 2026-10-03 03:16 (UTC-5)
 
 Root reviewed installed vLLM sampling and adapter code. Native-hook prepare
