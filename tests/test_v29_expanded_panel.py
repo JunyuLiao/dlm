@@ -448,5 +448,107 @@ class AdditionalTests(unittest.TestCase):
             self.assertTrue(cells[('humaneval',0,0)]['dense']['strict_correct'])
 
 
+
+class ExternalRebindTests(unittest.TestCase):
+    def setup_case(self, root):
+        old = root/'unavailable_origin'
+        mirror, new = root/'mirror', root/'destination'
+        for base in (mirror, new):
+            base.mkdir()
+            (base/'toy.py').write_text('public internal source')
+        external = root/'unavailable_external'/'public.so'
+        external2 = root/'unavailable_external'/'public_identity.json'
+        folder = new/'.external_sources'; folder.mkdir()
+        target, target2 = folder/'public.so', folder/'public_identity.json'
+        target.write_bytes(b'public synthetic artifact')
+        target2.write_text('public synthetic identity')
+        parent = dict(library=str(external), public_setting=19,
+                      source_hashes={str(external):run.panel.digest(target),
+                                     str(external2):run.panel.digest(target2)})
+        parent['fingerprint'] = fingerprint(parent)
+        config = dict(parent_config=parent, public_setting=17,
+                      source_hashes={str(old/'toy.py'):run.panel.digest(mirror/'toy.py'),
+                                     str(external):run.panel.digest(target)})
+        config['fingerprint'] = fingerprint(config)
+        return old, mirror, new, config, {str(external):str(target), str(external2):str(target2)}
+
+    def test_explicit_complete_map_preserves_math_hashes_and_input(self):
+        with tempfile.TemporaryDirectory() as folder:
+            old,mirror,new,config,mapping=self.setup_case(Path(folder));saved=deepcopy(config)
+            result=run.rebind_config_from_mirror(config,old,mirror,new,mapping)
+            self.assertEqual(config,saved)
+            self.assertEqual(run._method_fields(result),run._method_fields(saved))
+            run._validate_fingerprints(result)
+            self.assertEqual(result['parent_config']['library'],saved['parent_config']['library'])
+            for original,target in mapping.items():
+                self.assertEqual(result['parent_config']['source_hashes'][target],saved['parent_config']['source_hashes'][original])
+            self.assertNotEqual(result['fingerprint'],saved['fingerprint'])
+
+    def test_map_rejects_missing_and_extra_original_paths(self):
+        with tempfile.TemporaryDirectory() as folder:
+            old,mirror,new,config,mapping=self.setup_case(Path(folder))
+            missing=dict(mapping);missing.pop(next(iter(missing)))
+            extra=dict(mapping);extra[str(Path(folder)/'unknown.so')]=next(iter(mapping.values()))
+            for bad in (missing,extra):
+                with self.assertRaises(ValueError):run.rebind_config_from_mirror(config,old,mirror,new,bad)
+
+    def test_map_rejects_changed_bytes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            old,mirror,new,config,mapping=self.setup_case(Path(folder))
+            Path(next(iter(mapping.values()))).write_bytes(b'different public artifact')
+            with self.assertRaises(ValueError):run.rebind_config_from_mirror(config,old,mirror,new,mapping)
+
+    def test_map_rejects_destination_outside_external_directory(self):
+        with tempfile.TemporaryDirectory() as folder:
+            old,mirror,new,config,mapping=self.setup_case(Path(folder))
+            original=next(iter(mapping));outside=new/'public.so'
+            outside.write_bytes(Path(mapping[original]).read_bytes());mapping[original]=str(outside)
+            with self.assertRaises(ValueError):run.rebind_config_from_mirror(config,old,mirror,new,mapping)
+
+    def test_map_rejects_alias_collision(self):
+        with tempfile.TemporaryDirectory() as folder:
+            old,mirror,new,config,mapping=self.setup_case(Path(folder))
+            first,second=list(mapping)
+            mapping[second]=mapping[first]
+            with self.assertRaises(ValueError):run.rebind_config_from_mirror(config,old,mirror,new,mapping)
+
+    def test_map_rejects_symlink_escape(self):
+        with tempfile.TemporaryDirectory() as folder:
+            old,mirror,new,config,mapping=self.setup_case(Path(folder))
+            original=next(iter(mapping));target=Path(mapping[original]);outside=Path(folder)/'outside.so'
+            outside.write_bytes(target.read_bytes());target.unlink()
+            try:target.symlink_to(outside)
+            except OSError as exc:self.skipTest('host cannot create public toy symlink: '+type(exc).__name__)
+            with self.assertRaises(ValueError):run.rebind_config_from_mirror(config,old,mirror,new,mapping)
+
+    def test_internal_mirror_and_destination_still_require_original_bytes(self):
+        with tempfile.TemporaryDirectory() as folder:
+            old,mirror,new,config,mapping=self.setup_case(Path(folder))
+            for root in (mirror,new):
+                (root/'toy.py').write_text('changed public internal source')
+                with self.assertRaises(ValueError):run.rebind_config_from_mirror(config,old,mirror,new,mapping)
+                (root/'toy.py').write_text('public internal source')
+
+    def test_default_external_behavior_is_unchanged(self):
+        with tempfile.TemporaryDirectory() as folder:
+            old,mirror,new,config,mapping=self.setup_case(Path(folder))
+            with self.assertRaises(OSError):run.rebind_config_from_mirror(config,old,mirror,new)
+            for original,target in mapping.items():
+                Path(original).parent.mkdir(exist_ok=True)
+                shutil.copyfile(target,original)
+            result=run.rebind_config_from_mirror(config,old,mirror,new)
+            self.assertEqual(result['parent_config']['source_hashes'],config['parent_config']['source_hashes'])
+
+    def test_cli_external_map_is_explicit(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root=Path(folder);old,mirror,new,config,mapping=self.setup_case(root)
+            dump(root/'config.json',config);dump(root/'mapping.json',mapping)
+            run.main(['rebind-mirror','--config',str(root/'config.json'),'--old-root',str(old),
+                      '--mirror-root',str(mirror),'--new-root',str(new),'--out',str(root/'out.json'),
+                      '--external-map',str(root/'mapping.json')])
+            result=run.panel.read(root/'out.json')
+            self.assertEqual(run._method_fields(result),run._method_fields(config))
+
+
 if __name__=='__main__':
     unittest.main()

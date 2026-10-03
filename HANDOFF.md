@@ -1,3 +1,20 @@
+## Expanded qualification and provenance freeze (2026-10-02 23:14, UTC-5)
+
+HumanEval four-arm qualification is running on mpk from frozen54163f4e7,
+following33CPU checks, real correct/wrong scorer and bwrap toys, private-cache
+and single-idle-GPU checks. LongBench qualification is queued on dllm behind
+independent diagnostic003; no formal panel has launched. The four diagnostic
+workers closed successfully; complete anonymous event aggregation is pending.
+Existing generation sources and bindings remain unchanged.
+
+Explicit external provenance rebinding is CPU-qualified:42tests run,41passed
+and1Windows symlink-permission skip. Default behavior is unchanged. Optional
+complete mappings require unchanged original bytes in a new own deployment's
+.external_sources; method/runtime fields stay fixed. This prepares AIME CPU
+deployment without moving gold or executing inherited historical binaries.
+Actual v21 validation and all42Linux checks are required before GPU qualification.
+See docs/V29_EXTERNAL_PROVENANCE_REBIND_20261002.md. No new speed/quality result.
+
 ## GPU correctness passed; event diagnostic active (2026-10-02 22:51, UTC-5)
 
 Fused observation44GPU tests pass on H100, source54163f4e7:40BF16 FP32-oracle

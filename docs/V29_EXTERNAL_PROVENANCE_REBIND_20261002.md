@@ -1,0 +1,21 @@
+# V29 explicit external provenance rebinding
+
+Status: CPU implementation/tests prepared; no AIME GPU launch, no external artifact transfer yet. Original config and generation binding remain unchanged. This operation changes only source_hashes path keys and nested fingerprints in a newly created destination config; all byte hashes and non-binding fields stay fixed.
+
+## Strict optional map
+
+`rebind_config_from_mirror(..., external_map=None)` retains existing behavior: external original paths are checked in place and kept verbatim. The `rebind-mirror` CLI now accepts an explicit `--external-map` JSON dictionary. When supplied, its keys must exactly cover all original external source paths across nested source_hashes, with no missing/unknown keys or conflicting repeated byte pins. Destinations must be canonical absolute regular files below the new deployment's real `.external_sources` directory. Symlink aliases/escape, duplicated resolved destinations, hardlink aliases, unavailable files and changed bytes reject the operation. Internal original-source mirrors and new deployment sources still both require the original hash. Nested fingerprints are recalculated bottom-up; `_method_fields` equality is checked afterward. Runtime library paths, sampling/method fields, original hashes and source config are never rewritten.
+
+This is explicit file provenance transport, not permission to silently change a library or install/execute a binary. The committed source and every immutable byte receipt must be pinned before actual deployment. Private map keys/hashes/paths remain outside Git. Gold, model weights and generation data are excluded from this artifact mirror.
+
+## Current main runtime audit
+
+The frozen config selects parent_kind=v20_method, parent consumer=triton, GLOBAL_ONLY_NATIVE_LOCAL, then the named R6/A64/DP/carry_first/async/FA4 options. It contains six external provenance pins: four historical shared-library files, one HF generation-source file and one build-identity record. Root owns the config's exact private provenance inventory. No ABI compatibility claim is made for mirrored libraries.
+
+Static execution evidence: `vllm_adapter.VllmMethodAdapter.begin_request` installs v21, which validates and installs the v20 parent. `v20.install` selects `global_scope.install` for GLOBAL-only. Its ordinary M3 branch creates numerical `integration.Attention` with parent consumer=triton; it does not instantiate the historical value-direction Kernel. `global_scope` reads library/torch_library for global_T or CVM branches, which this config does not select. Numerical `Attention` loads `support_build` only for consumer=hopper, which this parent does not select. Imported value-direction `Sketches` uses eager Torch projection or its separate Triton refresh, not those pinned historical shared libraries. Importing the historical cuda module defines Kernel/build functions; it does not load the libraries at module scope.
+
+The adapter's stub HF runner replaces only the install binding; actual generation remains vLLM's official DiffusionGemma implementation. The old pinned HF generation file is inherited provenance rather than the new model's generation execution. Runtime library fields deliberately stay unchanged as part of `_method_fields`; this mapping is valid only while those inherited files remain non-loaded provenance. If a future configuration chooses global_T/CVM/hopper or otherwise actually loads them, it needs independent binary-path/ABI qualification and cannot rely on this mirror claim. GPU request qualification must still verify the effective FA4/method paths.
+
+## CPU checks and limits
+
+Nine new public synthetic tests cover complete-map success, original/config/math preservation, missing/extra entries, changed bytes, destination escape, alias collision, symlink escape, internal double-hash validation, unchanged default behavior and explicit CLI wiring. Of42 expanded-panel tests,41 passed on the local CPU and one symlink-creation test was skipped because this Windows process cannot create symlinks. The committed Linux deployment must rerun it without that platform limitation. No GPU or real-model quality conclusion follows from these checks.

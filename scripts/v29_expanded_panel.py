@@ -377,11 +377,13 @@ def read_frozen(path, artifacts=None):
     return binding, spec, config
 
 
-def rebind_config_from_mirror(config, old_root, mirror_root, new_root):
+def rebind_config_from_mirror(config, old_root, mirror_root, new_root, external_map=None):
     """Validate old pinned source mirrors and destination bytes; change paths only.
 
     Run on the destination host. No directory at the old absolute path is needed.
-    External source paths are retained and checked locally, never silently remapped.
+    External paths are retained by default. An explicit complete external_map
+    may map provenance files into new_root/.external_sources, with unchanged
+    byte pins. No runtime library/config field is rewritten by this operation.
     """
     _validate_fingerprints(config)
     if not isinstance(config, dict) or 'fingerprint' not in config:
@@ -390,6 +392,59 @@ def rebind_config_from_mirror(config, old_root, mirror_root, new_root):
     mirror_root, new_root = Path(mirror_root).resolve(strict=True), Path(new_root).resolve(strict=True)
     if not old_root.is_absolute() or not mirror_root.is_dir() or not new_root.is_dir():
         raise ValueError('absolute old root and existing mirror/destination roots required')
+    external_pins = {}
+    def collect_external(value):
+        if isinstance(value, list):
+            for child in value:
+                collect_external(child)
+        elif isinstance(value, dict):
+            for key, child in value.items():
+                if key != 'source_hashes':
+                    collect_external(child)
+                    continue
+                if not isinstance(child, dict):
+                    raise ValueError('source hash dictionary required')
+                for original, digest in child.items():
+                    if not isinstance(original, str) or not Path(original).is_absolute():
+                        raise ValueError('absolute source path required')
+                    try:
+                        Path(original).relative_to(old_root)
+                    except ValueError:
+                        if original in external_pins and external_pins[original] != digest:
+                            raise ValueError('conflicting external source byte pins')
+                        external_pins[original] = digest
+    collect_external(config)
+    mapped_external = {}
+    if external_map is not None:
+        if not isinstance(external_map, dict) or set(external_map) != set(external_pins):
+            raise ValueError('external map must exactly cover original external sources')
+        external_root = new_root / '.external_sources'
+        if external_pins and (not external_root.is_dir() or external_root.resolve() != external_root):
+            raise ValueError('external artifact root must be a real directory within deployment')
+        resolved_targets = set()
+        file_identities = set()
+        for original, target in external_map.items():
+            if str(Path(original)) != original or '..' in Path(original).parts or not isinstance(target, str):
+                raise ValueError('external map requires canonical original and destination paths')
+            destination = Path(target)
+            if not destination.is_absolute() or str(destination) != target:
+                raise ValueError('external destination must be canonical and absolute')
+            try:
+                destination.relative_to(external_root)
+                resolved = destination.resolve(strict=True)
+            except (ValueError, OSError) as exc:
+                raise ValueError('external destination outside deployment or unavailable') from exc
+            if not resolved.is_relative_to(external_root) or resolved != destination or not destination.is_file():
+                raise ValueError('external destination must be a real file without symlink alias/escape')
+            stat = destination.stat()
+            identity = (stat.st_dev, stat.st_ino)
+            if resolved in resolved_targets or identity in file_identities:
+                raise ValueError('external destination alias collision')
+            resolved_targets.add(resolved)
+            file_identities.add(identity)
+            if panel.digest(destination) != external_pins[original]:
+                raise ValueError('external mirrored source byte drift')
+            mapped_external[original] = destination
     def rewrite(value):
         if isinstance(value, list):
             return [rewrite(child) for child in value]
@@ -412,8 +467,8 @@ def rebind_config_from_mirror(config, old_root, mirror_root, new_root):
                 try:
                     relative = source.relative_to(old_root)
                 except ValueError:
-                    destination = source
-                    candidates = [source]
+                    destination = mapped_external.get(original, source)
+                    candidates = [destination]
                 else:
                     if '..' in relative.parts:
                         raise ValueError('source escapes original root')
@@ -589,6 +644,7 @@ def main(argv=None):
     rebind = sub.add_parser('rebind-mirror')
     for name in ('config', 'old-root', 'mirror-root', 'new-root', 'out'):
         rebind.add_argument('--' + name, type=Path, required=True)
+    rebind.add_argument('--external-map', type=Path)
     run = sub.add_parser('run')
     run.add_argument('--binding', type=Path, required=True)
     run.add_argument('--arm', choices=ARMS, required=True)
@@ -607,7 +663,8 @@ def main(argv=None):
         print(json.dumps(freeze_private(args.spec, args.catalog, args.config, args.model, args.deploy,
                                        args.host, args.gpu_uuid, args.out_dir)))
     elif args.action == 'rebind-mirror':
-        write_new(args.out, rebind_config_from_mirror(panel.read(args.config), args.old_root, args.mirror_root, args.new_root))
+        write_new(args.out, rebind_config_from_mirror(panel.read(args.config), args.old_root, args.mirror_root, args.new_root,
+                                                         None if args.external_map is None else panel.read(args.external_map)))
     else:
         run_worker(args)
 
