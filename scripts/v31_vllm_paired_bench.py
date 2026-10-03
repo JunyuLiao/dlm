@@ -8,7 +8,7 @@ seed = f(dataset, index, panel seed, repeat), identical for every arm. Verified:
 token-identical outputs (results/v31_20261003/graphmode001). The method's own randomness uses private generators
 (projection bank on CPU, State generator), so it never shifts the sampler's noise.
 
-Arms (one engine per process): dense | native | allkept | method; cudagraph mode per process (CG='default' keeps
+Arms (one engine per process): dense | native | allkept | method | mage (MAGE port, budget MAGE_K tokens); cudagraph mode per process (CG='default' keeps
 vLLM's default FULL+PIECEWISE, 'PIECEWISE' the matched mode). Adapter arms require PIECEWISE.
 
 Per request (public record, no text): prompt tokens, output tokens, sampler calls, canvases C (= commits =
@@ -40,7 +40,7 @@ def request_seed(base, cell, repeat):
 def main():
     model_dir, manifest_dir, cells_path, out_path, private_path, arm, cg = sys.argv[1:8]
     config_path = sys.argv[8] if len(sys.argv) > 8 else None
-    if arm not in ('dense', 'native', 'allkept', 'method'):
+    if arm not in ('dense', 'native', 'allkept', 'method', 'mage'):
         raise ValueError(arm)
     if arm != 'dense' and cg != 'PIECEWISE':
         raise ValueError('adapter arms need CG=PIECEWISE')
@@ -81,7 +81,8 @@ def main():
         if arm == 'method':
             config = json.loads(Path(config_path).read_text())
         adapter = vllm_adapter.VllmMethodAdapter(text.layer_types, config=config,
-                                                 condition=None if config is None else config['condition'], arm=arm)
+                                                 condition=None if config is None else config['condition'], arm=arm,
+                                                 mage_k=int(os.environ.get('MAGE_K', '1024')))
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -106,7 +107,8 @@ def main():
     meta = dict(schema='v31_vllm_paired_v1', arm=arm, cudagraph_mode=cg, vllm=vllm.__version__, torch=torch.__version__,
                 gpu=torch.cuda.get_device_name(), max_model_len=max_len, chunk=chunk, block_size=kw['block_size'],
                 gpu_memory_utilization=kw['gpu_memory_utilization'], seed_base=seed_base, adapter_sha256=adapter_sha,
-                method_fingerprint=None if config is None else config.get('fingerprint'), fix_51994=fix_51994)
+                method_fingerprint=None if config is None else config.get('fingerprint'), fix_51994=fix_51994,
+                mage_k=int(os.environ.get('MAGE_K', '1024')) if arm == 'mage' else None)
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]

@@ -75,3 +75,25 @@ equal noise to every arm. All v31 panels use `seed = sha256(base, dataset, index
   `scripts/v31_make_variant_config.py`: only `threshold_shift` / `sensitivity` change, validated by v21.
 - Then on dllm: `scripts/v31_packgqa_sparse_bench.py`. This is the regroup lever: sharing K/V tiles across the 8
   query heads of a KV head (pack-GQA), which our per-head lists currently disable.
+
+## Prior art and the MAGE baseline (added 2026-10-03 06:40 UTC−5)
+
+- Novelty check against current preprints. The closest prior art:
+  - **MAGE** ([arXiv 2602.14209](https://arxiv.org/html/2602.14209), Feb 2026): exact attention at the first step of a
+    block, per-KV-head top-k (fixed budget, 512/1024 tokens) reused for the whole block. FlashInfer dense baseline;
+    6.82× at 128K. This overlaps our "observe once per canvas, hold the maps" core.
+  - **LoSA** ([arXiv 2604.12056](https://arxiv.org/html/2604.12056v1), Apr 2026): stable vs active query tokens by
+    query change between steps; stable tokens reuse cached prefix attention. This overlaps the query-protection idea.
+  - Also FlashBlock (2602.05305) and PulseCol (2605.20813).
+  - None of them analyses how sparsity changes the denoising trajectory or the number of forwards.
+- **MAGE port as a baseline arm** (`vllm_adapter.py` arm `mage`; tests `tests/test_v31_mage_port.py`):
+  - the same paged split FA4 execution as our method; only the selection rule differs;
+  - first call of each canvas: exact dense output plus MAGE eq. 5 at 64-key tile granularity;
+  - later calls reuse the selection; the canvas tiles are always kept;
+  - all 5 GLOBAL layers are sparsified (MAGE keeps layers 1–2 dense; no GLOBAL layer is among them).
+- Panel d (all three hosts, after panel c): MAGE at k = 1024 and 4096 tokens, the same 96 cells and seeds.
+- Proposed contribution framing, conditional on panels c / d:
+  1. a forward-count-aware evaluation (latency = forwards × per-forward cost, with seed-paired trajectories);
+  2. step-stable sparsity: query protection (C gate, collaboration with Junyu) on top of cached reuse, at higher
+     sparsity;
+  3. sparse execution that matches the strongest production dense path (alias split, pack-GQA).

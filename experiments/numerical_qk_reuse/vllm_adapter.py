@@ -33,6 +33,10 @@ routing logic at capture time); the dense reference is measured in vLLM's defaul
 Arms:
   'native'  : patches installed and GLOBAL calls intercepted, but vLLM's own attention runs (cost of the hooks alone).
   'method'  : the core with a frozen v21 effective config (e.g. the main arm M3 R6 DP -ln2 + carry_first).
+  'mage'    : port of MAGE (arXiv 2602.14209, prior art) on the same execution path: at the first denoising call of
+              each canvas, exact dense output plus a per-KV-head top-k of 64-key tiles by softmax mass averaged over
+              the canvas queries and the GQA group (MAGE eq. 5); every later call of the canvas reuses it. Fixed
+              budget mage_k tokens; canvas tiles always kept (port decision: the current block is always attended).
   'allkept' : the same K/V buffers and FA4 all-kept call (v27_fa4.dense) on every GLOBAL decoder call -- the
               adapter's own cost with no skipping (the analogue of D_fa4_allkept).
 """
@@ -126,8 +130,8 @@ class _PrefixCache:
 
 class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
-                 canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch'):
-        if arm not in ('method', 'allkept', 'native'):
+                 canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024):
+        if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
             raise ValueError('lifecycle must be legacy or request_clear')
@@ -167,6 +171,7 @@ class VllmMethodAdapter:
         self.cache = _PrefixCache(len(self.layer_types))
         self.paged = None                # vLLM paged K/V of the GLOBAL call in flight (for the split FA4 consumer)
         self.splits = 2
+        self.mage_k, self.mage_state, self.canvas_id = int(mage_k), {}, 0
         self._split_cache = []           # (lists object, split lists) for held maps
         self.calls = dict(global_calls=0, prefix_copies=0, canvas_refreshes=0, invalidates=0, begins=0, observes=0,
                           passthrough=0, order_errors=0, split_fa4_calls=0, split_list_builds=0)
@@ -191,7 +196,10 @@ class VllmMethodAdapter:
         self.pending_sample = False
         self.bound = True
         self._events = []
-        if self.arm in ('allkept', 'native'):
+        self.mage_state, self.canvas_id = {}, 0
+        if self.arm == 'mage':
+            self.calls.update(mage_selections=0, mage_reused_calls=0, mage_kept_prefix_tiles=0, mage_prefix_tiles=0)
+        if self.arm in ('allkept', 'native', 'mage'):
             return
         global _BINDING
         _stub_runner()
@@ -323,6 +331,7 @@ class VllmMethodAdapter:
             self.calls['order_errors'] += 1                       # the previous denoising sample was never observed
         if phase_encoder:
             self.calls['invalidates'] += 1
+            self.canvas_id += 1
             if self.stub is not None:
                 self.stub.model.encoder()                         # fires the core's invalidate pre-hooks
             if self.canvas_buffers == 'release_after_invalidate':
@@ -437,6 +446,8 @@ class VllmMethodAdapter:
         if self.arm == 'allkept':
             from experiments.numerical_qk_reuse import v27_fa4
             out = v27_fa4.dense(q, b['k'], b['v'], float(impl.scale))
+        elif self.arm == 'mage':
+            out = self._mage(layer_idx, q, b, float(impl.scale), prefix, n)
         else:
             self.cache.layers[layer_idx] = _CacheLayer(b['pk'], b['pv'])
             self.cache.length = prefix
@@ -448,6 +459,49 @@ class VllmMethodAdapter:
         self.paged = None
         output[:n].view(n, -1).copy_(out.reshape(n, -1))
         return output
+
+    # ------------------------------------------------------------------ MAGE port (prior-art baseline)
+    def _mage(self, layer_idx, q, b, scale, prefix, n):
+        from experiments.numerical_qk_reuse import v27_fa4
+        nk = prefix + n
+        st = self.mage_state.get(layer_idx)
+        if st is None or st['canvas'] != self.canvas_id or st['nk'] != nk:
+            out = v27_fa4.dense(q, b['k'], b['v'], scale)                 # exact first-step attention output
+            kept = self._mage_select(q, b['k'], scale, prefix, n)
+            self.mage_state[layer_idx] = dict(canvas=self.canvas_id, nk=nk, lists=v27_fa4.block_sparse_tensors(kept))
+            self.calls['mage_selections'] += 1
+            return out
+        self.calls['mage_reused_calls'] += 1
+        return v27_fa4.sparse_lists(q, b['k'], b['v'], st['lists'], scale)
+
+    @torch.no_grad()
+    def _mage_select(self, q, k, scale, prefix, n, chunk=8192):
+        """MAGE eq. 5 at 64-key tile granularity: softmax mass per tile from exact first-step attention, averaged
+        over the canvas queries and the query heads of each KV head; top (mage_k / 64) prefix tiles per KV head."""
+        _, H, _, D = q.shape
+        HK, nk = k.shape[1], k.shape[2]
+        G, kt = H // HK, -(-nk // 64)
+        qg = q[0].reshape(HK, G, n, D).float()
+        tile_lse = torch.empty((HK, G, n, kt), device=q.device, dtype=torch.float32)
+        for c0 in range(0, nk, chunk):
+            c1 = min(nk, c0 + chunk)
+            s = torch.matmul(qg, k[0, :, c0:c1].float().transpose(-1, -2).unsqueeze(1)) * scale   # [HK,G,n,len]
+            pad = -(c1 - c0) % 64
+            if pad:
+                s = torch.nn.functional.pad(s, (0, pad), value=float('-inf'))
+            tile_lse[..., c0 // 64: c0 // 64 + s.shape[-1] // 64] = s.reshape(HK, G, n, -1, 64).logsumexp(-1)
+        mass = (tile_lse - tile_lse.logsumexp(-1, keepdim=True)).exp()
+        score = mass.mean(dim=(1, 2))                                          # [HK, kt]
+        first_canvas_tile = prefix // 64
+        k_tiles = max(1, min(self.mage_k // 64, first_canvas_tile))
+        kept_kv = torch.zeros((HK, kt), device=q.device, dtype=torch.bool)
+        if first_canvas_tile:
+            kept_kv.scatter_(1, score[:, :first_canvas_tile].topk(k_tiles, dim=-1).indices, True)
+        kept_kv[:, first_canvas_tile:] = True                                  # the canvas (current block) itself
+        self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * HK
+        self.calls['mage_prefix_tiles'] += int(first_canvas_tile) * HK
+        qb = -(-n // 128)
+        return kept_kv.repeat_interleave(G, 0)[None, :, None, :].expand(1, H, qb, kt).contiguous()
 
     # ------------------------------------------------------------------ split FA4 over the paged cache
     def _split(self, lists):

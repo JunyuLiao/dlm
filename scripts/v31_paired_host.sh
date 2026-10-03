@@ -26,10 +26,11 @@ for spec in $ARMS; do
   [ "$rest" != "$cg" ] && name=${rest#*:}
   cfg=$CFG; [ "$name" != main ] && cfg=$W/configs/$name.json
   label=${arm}_${cg}; [ "$arm" = method ] && label=${arm}_${name}_${cg}
+  mk=1024; [ "$arm" = mage ] && [ "$name" != main ] && mk=$name && label=${arm}${mk}_${cg}
   [ "$FIX_51994" = 1 ] && label=${label}_fix
   until [ "$(nvidia-smi --query-compute-apps=pid --format=csv,noheader | wc -l)" = "0" ]; do sleep 20; done
   echo "$label start $(date -u)" >> $W/status_$TAG
-  timeout 21600 $PY $BENCH $MODEL $MAN $W/cells.json $W/public/${TAG}_${label}.jsonl \
+  MAGE_K=$mk timeout 21600 $PY $BENCH $MODEL $MAN $W/cells.json $W/public/${TAG}_${label}.jsonl \
     $W/private/${TAG}_${label}.private.jsonl $arm $cg $([ $arm = method ] && echo $cfg) \
     > $W/${TAG}_${label}.out 2> $W/${TAG}_${label}.err
   echo "$label rc=$? $(date -u)" >> $W/status_$TAG
