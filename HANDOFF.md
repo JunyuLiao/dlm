@@ -1,3 +1,22 @@
+## Paused by user after short-suite completion — 2026-10-03 04:40 (UTC-5)
+
+AIME32/32 and HumanEval32/32 completed generation, unscored. LongBench11/32
+complete; b2_native interrupted in warm-up (0 timed rows), 20 workers unstarted.
+All 75 closed workers succeeded. Three GPUs confirmed idle; all six local
+follow-up/scoring coordinators stopped. NO automatic resume. Older queue
+armed/active fields are preserved historical snapshots, not current liveness.
+
+Published 6,857 sanitized request rows, per-worker accounting, effective_method
+and numeric counters; 0 timed CUDA captures. Private originals and completion
+files backed up locally and retained remotely. Evidence/resume instructions:
+results/v30_20261003/pause_after_short001. Closed GPU seconds46574.813729;
+interrupted-worker age643.62s recorded separately as approximate reservation.
+Three exporter privacy/format tests passed. No new score or speed conclusion.
+
+On explicit resume, verify pins and reuse completed workers; rerun interrupted
+and unstarted workers in new directories, form a new complete family, then
+strictly score. Do not simply restart original supervisors/frozen queues.
+
 ## Independent Junyu vLLM adapter checkpoint — 2026-10-03 04:13 (UTC-5)
 
 User-facing concise status: [V30_WORKING_STATUS_20261003.md](docs/V30_WORKING_STATUS_20261003.md).

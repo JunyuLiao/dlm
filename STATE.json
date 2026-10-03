@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-03 04:13 (UTC-5)",
+    "updated_local": "2026-10-03 04:40 (UTC-5)",
     "branch": "research/cooperative-sparsity-20261003",
-    "verified_commit": "94caf2e8032c50022d695804eaebb44560d7927d",
+    "verified_commit": "70d382993a3639ab4f4d7dfad2567ee212759a64",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,12 +16,8 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "Formal eight-seed panels running; length accounting corrected; peer CPU formulas 31 passed; peer GPU/E2E pending.",
-    "running": [
-      "dllm LongBench formal panel001,32 workers",
-      "dlm2 AIME formal panel001,32 workers",
-      "mpk HumanEval formal panel001,32 workers"
-    ],
+    "headline": "Paused by user: AIME/HumanEval generation complete and unscored; LongBench 11/32 preserved; all GPUs idle.",
+    "running": [],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
       "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
@@ -165,9 +161,9 @@
       "port_status": "Resolved: unchanged main core runs in vLLM with patched paged FA4 and alias split; V18 preparing."
     },
     "next_steps": [
-      "Close all three strict formal generation families; no scoring during timed GPU work.",
-      "Score serially on mpk after global barrier; publish sanitized detailed evidence and question-cluster intervals.",
-      "Real-model qualification of engineering opt-ins and new-model sparse adapters remains pending."
+      "Wait for explicit user resume.",
+      "Use pause receipt and private resume manifest; new directories/family required.",
+      "Strict scoring remains pending."
     ],
     "e15": {
       "verdict": "c01 not adopted (per-step 0.98-1.00, 64K accuracy risk); main pooled over 18 seeds",
@@ -524,7 +520,9 @@
         "aime": 4544.384748636978,
         "humaneval": 4490.277373086428
       },
-      "accounting": "Formal-only closed outer spans; do not add inner times or mistake incomplete elapsed time for final usage."
+      "accounting": "Formal-only closed outer spans; do not add inner times or mistake incomplete elapsed time for final usage.",
+      "live_status_override": "paused_by_user; prior fields historical",
+      "pause_receipt": "results/v30_20261003/pause_after_short001/status.json"
     },
     "performance_followups_20261003": {
       "status": "Successor002 component and engineering queues armed and waiting; first attempts failed before GPU and are preserved.",
@@ -543,7 +541,9 @@
       "engineering_queue_CPU_tests": 35,
       "engineering_source_commit": "1342ec0b193a929295f08964c132aee96c28c5a1",
       "engineering_GPU_started": false,
-      "recovery_receipt": "results/v29_20261002/queue_recovery002/status.json"
+      "recovery_receipt": "results/v29_20261002/queue_recovery002/status.json",
+      "live_status_override": "paused_by_user; prior fields historical",
+      "pause_receipt": "results/v30_20261003/pause_after_short001/status.json"
     },
     "junyu_value_aware_review": {
       "commit": "b890ff49488474c5d476df44019597dc045a5969",
@@ -606,7 +606,9 @@
       "kernel_gpu_qualification": "Armed29case C ABI suite; waiting formal strict scores then idle dlm2;0new GPU seconds",
       "global_scope": "implemented;4 CPU tests; GPU/model parity pending",
       "regroup_key6": "144 CPU snapshots; proxy0.996582; no GPU/E2E gain claim",
-      "kernel_gpu_queue_receipt": "results/v30_20261003/peer_gpu_queue001/status.json"
+      "kernel_gpu_queue_receipt": "results/v30_20261003/peer_gpu_queue001/status.json",
+      "live_status_override": "paused_by_user; prior fields historical",
+      "pause_receipt": "results/v30_20261003/pause_after_short001/status.json"
     },
     "v30_dense_divergence": {
       "status": "deployed_frozen_queue_armed_waiting_prior_queues",
@@ -660,12 +662,13 @@
       "formal_launched": false
     },
     "v30_followup_queue": {
-      "phase": "waiting_prior_queues",
-      "armed": true,
+      "phase": "stopped_by_user",
+      "armed": false,
       "source_commit": "94134a91b4322adeb2d0d41d7dca438689129e95",
       "receipt": "results/v30_20261003/campaign_queue001/status.json",
       "root_review_after_nine_strict_qualifications": true,
-      "gpu_reserved_seconds": 0
+      "gpu_reserved_seconds": 0,
+      "current_status_receipt": "results/v30_20261003/pause_after_short001/status.json"
     },
     "working_status_doc": "docs/V30_WORKING_STATUS_20261003.md",
     "standalone_peer_v30": {
@@ -688,26 +691,43 @@
       "receipt": "results/v30_20261003/standalone_cpu002/receipt.json"
     },
     "latest_formal_snapshot": {
-      "closed_workers": 67,
-      "planned_workers": 96,
-      "failed_closed_workers": 0,
-      "scoring_started": false,
-      "closed_gpu_seconds": 41710.30459611936,
-      "suites": {
-        "longbench": {
-          "closed": 10,
-          "gpu_seconds": 13757.54145053518
-        },
-        "aime": {
-          "closed": 28,
-          "gpu_seconds": 13893.31456376196
-        },
-        "humaneval": {
-          "closed": 29,
-          "gpu_seconds": 14059.448581822217
-        }
+      "longbench": {
+        "complete_workers": 11,
+        "planned_workers": 32,
+        "timed_records": 649,
+        "questions": 59,
+        "generation_complete": false,
+        "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+        "scored": false,
+        "closed_gpu_seconds": 15243.666969622136,
+        "timed_capture_nonzero_records": 0
+      },
+      "aime": {
+        "complete_workers": 32,
+        "planned_workers": 32,
+        "timed_records": 960,
+        "questions": 30,
+        "generation_complete": true,
+        "source_commit": "1931db5a6540409946641ebb0b04c06507d48402",
+        "scored": false,
+        "closed_gpu_seconds": 15855.445644421969,
+        "timed_capture_nonzero_records": 0
+      },
+      "humaneval": {
+        "complete_workers": 32,
+        "planned_workers": 32,
+        "timed_records": 5248,
+        "questions": 164,
+        "generation_complete": true,
+        "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+        "scored": false,
+        "closed_gpu_seconds": 15475.701114565367,
+        "timed_capture_nonzero_records": 0
       }
-    }
+    },
+    "status": "paused_by_user",
+    "pause_receipt": "results/v30_20261003/pause_after_short001/status.json",
+    "auto_resume": false
   },
   "task": "M3 output numerics and trajectory isolation",
   "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
