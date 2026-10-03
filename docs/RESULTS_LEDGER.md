@@ -1096,3 +1096,39 @@ and formal proof remain pending. LongBench qualification002 has closed5/12 with
 no failures and is running64K native; frozen54163f4e7 unchanged. Its closed-worker
 reserved time currently944.897625s; active-worker time remains unclosed. No formal
 panel has launched. Preserve the separate previous241.732s idle-guard attempt.
+
+## HumanEval qualified; trace exporter frozen (2026-10-02 23:51, UTC-5)
+
+HumanEval's full four-arm qualification passes strict54163f4e7 scoring, original
+bwrap sandbox, public correct/wrong toys and the actual formal-launch guard.
+All four single-question outputs pass official tests; this is pipeline evidence
+only, not accuracy noninferiority or speed. Publish detailed numeric requests,
+receipts, workers and aggregate tables under humaneval_qualification001/.
+Reserved outer GPU time672.373426352s; inner worker663.996s is not additive.
+Dlm2 CPU scoring stopped on unavailable OS sandbox; mpk CPU scoring uses the
+unchanged isolation after an authorized pinned-gold copy. An independent exporter
+integer-key bug was repaired without changing the strict proof or GPU generation.
+Formal launch is held until all three suite qualifications/scoring are ready, to
+avoid heavy mpk CPU scoring contention during HumanEval formal timing.
+
+LongBench qualification002 has11/12 workers closed without failure, final96K
+method running,1992.535591133 closed-worker GPU seconds. Resource correction:
+qualification001 outer reserved time is244.358443453s; earlier241.732s is its
+inner worker terminal span. Preserve earlier records and use the complete outer
+value in current accounting, never add both. A read-only original-source-ID audit
+confirms59 distinct questions (24/24/11), with zero overlap between length groups.
+Eight seeds remain repeats within question clusters; these are previously used
+questions, not a newly held-out question pool. Audit receipt is published.
+
+AIME qualification001 completed dense,239.994346702 outer GPU seconds, then its
+launcher stopped at transient post-exit NVML activity. Dense artifact stays valid;
+new002 runs only the remaining3arms at the same1931db5a6/input002 binding and merges
+the preserved dense by exact byte pins. Four launcher CPU toys cover bounded
+stable-idle wait, occupied GPU rejection, timeout and worker failure. Formal pending.
+
+The independent trace wrapper and9 new CPU tests plus16 unchanged-profiler tests
+pass. Both wrapper and original profiler must be source-pinned; spec/CLI flags and
+ordinal agree; output is a separate wholly new private directory with no overwrite.
+Trace export is off by default and occurs after the original request boundary.
+No existing GPU deployment is changed, no GPU trace run has occurred, and no trace
+is automatically published. See docs/V29_TRACE_EXPORT_20261002.md.
