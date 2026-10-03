@@ -218,6 +218,7 @@ class VllmMethodAdapter:
         self.bound = True
         self._events = []
         self.mage_state, self.canvas_id = {}, 0
+        self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
         if self.arm == 'mage':
             self.calls.update(mage_selections=0, mage_reused_calls=0, mage_kept_prefix_tiles=0, mage_prefix_tiles=0)
         if self.arm in ('allkept', 'native', 'mage'):
@@ -262,7 +263,7 @@ class VllmMethodAdapter:
         self._stack = self.runtime = self.stub = None
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
-        return dict(adapter=dict(self.calls), method=counters, timing=timing)
+        return dict(adapter=dict(self.calls, **self._kept_receipt()), method=counters, timing=timing)
 
     def _end_request_clear(self):
         """Close the core before dropping request references, even on a failed close.
@@ -279,7 +280,7 @@ class VllmMethodAdapter:
                 timing = dict(global_calls_timed=len(ms), global_call_ms_mean=round(sum(ms) / len(ms), 4),
                               global_ms_total=round(sum(ms), 2))
             counters = self.runtime['counters']() if self.runtime is not None else None
-            return dict(adapter=dict(self.calls), method=counters, timing=timing)
+            return dict(adapter=dict(self.calls, **self._kept_receipt()), method=counters, timing=timing)
         finally:
             try:
                 if self._stack is not None:
@@ -299,6 +300,15 @@ class VllmMethodAdapter:
                 self._split_cache.clear()
                 self._events.clear()
                 self.bound, self.step_ctx, self.pending_sample = False, None, False
+
+    def _kept_receipt(self):
+        """Realized sparsity of the sparse GLOBAL calls: kept fraction of wholly-prefix 64-key tiles, weighted per call
+        (dense calls -- bootstrap, observation, MAGE selection -- are counted separately by their own counters)."""
+        kept, total = getattr(self, '_kept_prefix', None), getattr(self, '_prefix_total', 0)
+        if kept is None or not total:
+            return {}
+        return dict(kept_prefix_tiles=int(kept.item()), sparse_prefix_tiles=int(total),
+                    kept_prefix_fraction=round(float(kept.item()) / total, 5))
 
     def _clear_canvas_metadata(self):
         self._merge_cache.clear()
@@ -477,7 +487,7 @@ class VllmMethodAdapter:
         key_cache, value_cache = kv_cache.transpose(1, 2).split(impl.head_size, dim=-1)
         b = self._buffers(layer_idx, key_cache, value_cache, attn_metadata.block_table[0], prefix, n)
         page = key_cache.shape[1]
-        self.paged = dict(k=key_cache, v=value_cache, nk=prefix + n,
+        self.paged = dict(k=key_cache, v=value_cache, nk=prefix + n, prefix=prefix,
                           table=attn_metadata.block_table[0, : (prefix + n + page - 1) // page])
         q = query[:n].transpose(0, 1).unsqueeze(0)                  # [1, H, n, D] view, as HF's decoder passes it
         self.calls['global_calls'] += 1
@@ -586,7 +596,7 @@ class VllmMethodAdapter:
     def _split(self, lists):
         for ref, split in self._split_cache:
             if ref is lists:
-                return split
+                return split[0] if isinstance(split, tuple) else split
         from experiments.numerical_qk_reuse import v27_fa4
         S = self.splits
         order, cnt = lists.full_block_idx, lists.full_block_cnt          # [1, H, QB, KT], [1, H, QB]
@@ -600,9 +610,20 @@ class VllmMethodAdapter:
                                                                                dtype=torch.int32),
                              full_block_cnt=counts.contiguous(), full_block_idx=idx.to(torch.int32).contiguous(),
                              block_size=lists.block_size)
-        self._split_cache = self._split_cache[-63:] + [(lists, split)]
+        # kept wholly-prefix tiles of this map (list entries are tile indices; the first cnt entries are kept)
+        pt = (self.paged['prefix'] // 64) if self.paged is not None else 0
+        kept_prefix = ((order < pt) & (ar < cnt[..., None])).sum()
+        self._split_cache = self._split_cache[-63:] + [(lists, (split, kept_prefix, order.shape[1] * order.shape[2] * pt))]
         self.calls['split_list_builds'] += 1
         return split
+
+    def _kept_account(self, lists):
+        for ref, entry in self._split_cache:
+            if ref is lists and isinstance(entry, tuple):
+                _, kept, total = entry
+                self._kept_prefix = kept.double() if self._kept_prefix is None else self._kept_prefix + kept
+                self._prefix_total += total
+                return
 
     def sparse_lists(self, original, q, k, v, lists, scale):
         ctx = self.paged
@@ -612,6 +633,7 @@ class VllmMethodAdapter:
         fwd = v27_fa4.load()
         S = self.splits
         split = self._split(lists)
+        self._kept_account(lists)
         qs = q.transpose(1, 2).expand(S, -1, -1, -1)                      # [S, Q, H, D], stride-0 batch
         table = ctx['table'][None].expand(S, -1).contiguous()
         used = torch.full((S,), ctx['nk'], device=q.device, dtype=torch.int32)
