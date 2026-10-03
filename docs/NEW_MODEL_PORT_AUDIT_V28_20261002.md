@@ -36,3 +36,7 @@ prefix, with changed/new/boundary tiles kept. Risk summaries, support selection,
 and V-ranking ablations are reusable ideas; R6/A64/carry/q64/regroup/C-gate presets
 are not already implemented for either model. Tune any new thresholds on a
 separately frozen development set before evaluating benchmark quality.
+
+CPU prerequisites now have a supplied-snapshot prototype in `new_model_events.py`
+and12unit tests. It tracks token/position provenance only; no native hooks,
+sparse consumers, forward instrumentation or all-kept GPU equivalence are implemented.

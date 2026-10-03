@@ -225,3 +225,11 @@ possible):
   - fixed 95% (k5) with rank 32 and mass-only, the sparsity where V effects are most likely to appear.
 - **Size and order:** about 3,100 runs, about 3 h on three hosts. Run after E15.
 - For the new models (windows ≤ 32K): RULER 4K/8K/16K/32K with each model's tokenizer.
+
+## V28 update — 2026-10-02 20:14 (UTC-5)
+
+Later isolated setup supersedes the pending-smoke status above: official LLaDA
+dense execution smoke passed; I-DLM chat execution runs but all3calls hit512tokens
+and baseline stopping/quality is unqualified. Sparse variants are not ported to
+either model. See `NEW_MODEL_PORT_AUDIT_V28_20261002.md` and the V28 per-model
+reports. CPU event/identity prerequisites now have12tests; no GPU sparse claim.

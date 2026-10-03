@@ -1,9 +1,9 @@
 {
   "schema": 26,
   "current": {
-    "updated_local": "2026-10-02 20:04 (UTC-5)",
+    "updated_local": "2026-10-02 20:14 (UTC-5)",
     "branch": "research/vllm-variants-20261002",
-    "verified_commit": "dcfdb8730",
+    "verified_commit": "8c9cd31ae",
     "entry_docs": [
       "AGENTS.md",
       "HANDOFF.md",
@@ -16,11 +16,11 @@
     "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
     "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
     "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
-    "headline": "V28 qualification004 passed; six-variant four-seed preview specified, not launched. New-model execution smokes only, no sparse ports.",
+    "headline": "Six-variant four-engine-seed preview running on mpk; full144 alias sweep closed, keep alias2; new-model sparse ports still unimplemented.",
     "running": [
       "Parent V18b on dllm; original finalizer unchanged",
-      "mpk qualification004 closed; expanded alias sweep then seed4 preview next",
-      "dlm2 idle after I-DLM follow-up"
+      "mpk seed4_preview001:24engine workers,288timed+144warm, frozen generation dcfdb8730",
+      "dlm2: preparing official I-DLM4096-cap stopping diagnostic003; baseline only"
     ],
     "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
     "best_configuration": {
@@ -282,7 +282,8 @@
     "v28_new_models": {
       "llada": "official dense execution smoke passed; sparse variants not implemented",
       "idlm": "chat smoke executes; length stopping512 all3; baseline quality unqualified; sparse variants not implemented",
-      "reserved_gpu_seconds_all_attempts": 723.034485472017
+      "reserved_gpu_seconds_all_attempts": 723.034485472017,
+      "event_prototype_tests": 12
     },
     "v28_seed4_family": {
       "spec": "results/v28_20261002/specs/v28_seed4_family.json",
@@ -291,9 +292,10 @@
       "questions": 6,
       "variants": 6,
       "timed_per_variant": 48,
-      "status": "specified_before_launch",
+      "status": "running_seed4_preview001",
       "generation_deploy": "dcfdb8730",
-      "inference_scope": "preview only; repeated questions clustered; no noninferiority claim"
+      "inference_scope": "preview only; repeated questions clustered; no noninferiority claim",
+      "summary_cpu_tests": 17
     }
   },
   "task": "M3 output numerics and trajectory isolation",

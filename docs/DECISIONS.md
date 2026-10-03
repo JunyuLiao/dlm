@@ -406,3 +406,29 @@ attempts reserved723.0345GPU seconds. No sparse ports implemented; model-specifi
 clock, causal mask, rollback and all-kept controls are prerequisites. See
 `docs/NEW_MODEL_PORT_AUDIT_V28_20261002.md` and
 `results/v28_20261002/idlm_chat_smoke_followup/`.
+
+## V28 preview launched and strict summary ready — 2026-10-02 20:14 (UTC-5)
+
+seed4_preview001 launched on mpk from unchanged dcfdb8730 generation deployment,
+using the six-variant family spec committed at8c9cd31ae. Four independent engines
+per variant, shared seeds28001–28004, six questions, two sequential repeats per
+engine:288timed+144warm total. One GPU worker at a time; immutable new run directories.
+The full144 alias component run ended and released the GPU before preview launch.
+Alias4/2 mean0.98836, with32K slower1.01731,64K0.98315,96K0.96533; keep alias2.
+Reserved component cost27.0913GPU seconds. No request/accuracy claim from this sweep.
+
+The new CPU summary validates all24workers and288records, exact bound source/input
+bytes, protocol/config/host/software/seed identities, intended execution counters,
+actual N, zero observed timed monitor JIT events and CUDA captures, and private
+completion joins before unchanged NeMo scoring. Outputs contain aggregates only,
+including W/S/P/SN/N, correctness, by-seed N distributions and length-stratified
+question-cluster95%intervals. The main_legacy/dense extra comparison is labelled
+descriptive; other seven comparisons are frozen family pairs.17CPU tests passed.
+Qualification004 release/legacy private output equality holds for each Q128/Q64
+pair (one item each); this is a limited numerical control, not model quality evidence.
+
+CPU-only new-model event prototypes and12tests cover absolute-position identity,
+prefix/layout epochs, edits including A-to-B-to-A, request reset and rollback.
+They install no native hook, measure no forwards, and implement no sparse attention.
+Unchanged token IDs do not prove unchanged hidden states/QKV or safe support reuse.
+New-model adaptation audit states all unimplemented GPU/mask/KV/stream boundaries.
