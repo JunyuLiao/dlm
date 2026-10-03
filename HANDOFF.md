@@ -6,7 +6,7 @@
 - Component evidence: Q64/Q128 0.94575; held-regroup/natural Q64 total 1.02753 (negative). Full144 alias4/2 mean0.98836 with32K slower; retain alias2.
 - Parent V18b continues on dllm unchanged; its formal scoring/finalizer belongs to the original worktree. Retain allocator costs; do not alter original campaign.
 - LLaDA official dense environment smoke passed. I-DLM official chat smoke runs but all three outputs reach512; natural stopping/task quality unqualified. Neither model has our sparse variants implemented. See new-model adaptation audit.
-- New-model attempts total723.0345GPU seconds; dlm2 stopping diagnostic003 preparation (official4096 cap, private output retention). mpk qualification004 total867.9727GPU seconds (includes alias sweep and startup/teardown).
+- New-model attempts total723.0345GPU seconds; dlm2 stopping diagnostic003 running (official4096 cap, private output retention). mpk qualification004 total867.9727GPU seconds (includes alias sweep and startup/teardown).
 - Next: close six-arm seed4 preview and run strict scoring, then only supported refinements. Question coverage must expand before request-level or noninferiority claims.
 - Update HANDOFF/docs/STATE.current with every result or status change and push. Private prompts, generated text, gold, token arrays and private paths stay outside Git.
 
@@ -346,3 +346,10 @@ is smaller; accuracy, end-to-end time and 96K are not yet measured in vLLM.
   that panel's deploy dir with the host env; outputs in `results/…/time_breakdown_v5/`.
 - Unit tests on a host: in a deploy dir, `PYTHONPATH=<fa4 overlay>:.:src <python> -m pytest -q -p no:cacheprovider
   tests/test_v27_*.py` (CPU-only tests can run while a GPU job is active).
+
+D2H metadata audit: existing CPU scheduler/sample-count fields cannot replace
+the full exact phase/step/sequence-length tuple. CPU length is an upper bound;
+next commit state and actual/retired execution identity differ. Async copy plus
+a wait at prepare would merely relocate synchronization. No routing optimization
+or shadow trace implemented; frozen preview unchanged. See
+`docs/V28_CPU_METADATA_AUDIT_20261002.md`.

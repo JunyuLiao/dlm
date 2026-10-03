@@ -432,3 +432,19 @@ prefix/layout epochs, edits including A-to-B-to-A, request reset and rollback.
 They install no native hook, measure no forwards, and implement no sparse attention.
 Unchanged token IDs do not prove unchanged hidden states/QKV or safe support reuse.
 New-model adaptation audit states all unimplemented GPU/mask/KV/stream boundaries.
+
+## I-DLM diagnostic003 launched — 2026-10-02 20:23 (UTC-5)
+
+Frozen private spec verified byte-for-byte before launch on idle dlm2. One
+engine seed0, three sequential toy requests, official chat/thinking/sampler
+unchanged, max4096. Raw Engine text/output IDs remain in private own directories;
+only scalar stop/closure/repetition diagnostics will be published. An initial
+prelaunch newline-transfer mismatch was caught before GPU launch (0GPU seconds);
+the failed prelaunch directory is preserved. This is baseline diagnosis only.
+
+D2H metadata audit: existing CPU scheduler/sample-count fields cannot replace
+the full exact phase/step/sequence-length tuple. CPU length is an upper bound;
+next commit state and actual/retired execution identity differ. Async copy plus
+a wait at prepare would merely relocate synchronization. No routing optimization
+or shadow trace implemented; frozen preview unchanged. See
+`docs/V28_CPU_METADATA_AUDIT_20261002.md`.
