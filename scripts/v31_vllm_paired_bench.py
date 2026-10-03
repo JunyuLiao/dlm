@@ -19,7 +19,8 @@ usage: python v31_vllm_paired_bench.py MODEL MANIFEST_DIR CELLS_JSON OUT_JSONL P
   env: FIX_51994=1 (backport the upstream FULL-graph causal-buffer fix), LOGIT_STATS=fused (one-pass sampler-hook
        statistics, v31_logit_stats; default legacy torch ops), DP_BUILD=chunked (parallel dense-prefix build,
        v31_dp_chunked), OBSERVE=fa4 (FA4 in-kernel observation for compact-mu configs, v31_fa4_observe),
-       MAGE_SELECT=fa4 (MAGE selection statistics from the FA4 observation), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
+       MAGE_SELECT=fa4 (MAGE selection statistics from the FA4 observation), KV_COPY=triton / MERGE=triton (V30 one-kernel
+       paged K/V refresh and alias-split LSE merge), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
        V27_ADAPTER_DIR (overlay holding vllm_adapter.py), SHARD=k/K (take cells k, k+K, ...)
 """
 import hashlib
@@ -89,7 +90,9 @@ def main():
                                                  logit_stats=os.environ.get('LOGIT_STATS', 'legacy'),
                                                  dp_build=os.environ.get('DP_BUILD', 'legacy'),
                                                  observe_backend=os.environ.get('OBSERVE', 'triton'),
-                                                 mage_select=os.environ.get('MAGE_SELECT', 'torch'))
+                                                 mage_select=os.environ.get('MAGE_SELECT', 'torch'),
+                                                 kv_copy_backend=os.environ.get('KV_COPY', 'torch'),
+                                                 merge_backend=os.environ.get('MERGE', 'torch'))
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -117,6 +120,8 @@ def main():
                 method_fingerprint=None if config is None else config.get('fingerprint'), fix_51994=fix_51994,
                 mage_k=int(os.environ.get('MAGE_K', '1024')) if arm == 'mage' else None,
                 mage_select=os.environ.get('MAGE_SELECT', 'torch') if arm == 'mage' else None,
+                kv_copy_backend=os.environ.get('KV_COPY', 'torch') if arm != 'dense' else None,
+                merge_backend=os.environ.get('MERGE', 'torch') if arm != 'dense' else None,
                 logit_stats=os.environ.get('LOGIT_STATS', 'legacy') if arm == 'method' else None,
                 dp_build=os.environ.get('DP_BUILD', 'legacy') if arm == 'method' else None,
                 observe_backend=os.environ.get('OBSERVE', 'triton') if arm == 'method' else None)

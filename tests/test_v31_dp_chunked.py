@@ -11,14 +11,14 @@ def _summary(pt, h=16, hk=2, nq=256, seed=0, rank=32):
     qb = -(-nq // 128)
     s = allocate_summary(1, h, qb, pt + 4, pt, rank, 'cuda', ('t', seed))
     s.z.copy_(torch.randn(s.z.shape, device='cuda', generator=g) * 4)
-    s.z[..., 3, :] -= 200.                                           # an almost massless tile
+    s.z[..., 3 % pt, :] -= 200.                                      # an almost massless tile
     if rank:
         s.mu.copy_(torch.randn(s.mu.shape, device='cuda', generator=g))
     s.active.fill_(1)
-    s.active[0, 1, 0, 7, :50] = 0                                    # partially inactive tile
-    s.active[0, 2, 1, 9] = 0                                         # fully inactive (ineligible) tile
+    s.active[0, 1, 0, 7 % pt, :50] = 0                               # partially inactive tile
+    s.active[0, 2, 1, 9 % pt] = 0                                    # fully inactive (ineligible) tile
     s.bad.zero_()
-    s.bad[0, 3, 0, 11, 5] = 1                                        # a bad row
+    s.bad[0, 3, 0, 11 % pt, 5] = 1                                   # a bad row
     return s
 
 

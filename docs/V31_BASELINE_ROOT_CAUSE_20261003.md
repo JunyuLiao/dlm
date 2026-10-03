@@ -226,3 +226,24 @@ takes 75 ms vs ≈41 ms for a dense step.
    (`scripts/v31_kernel_profile.py`, CUPTI) before changing code, since syncs inflate CPU-side costs.
 4. MAGE's selection should also use the in-kernel observation, so that the prior-art port is not penalized by an
    unoptimized selection pass.
+
+## Observation-path kernels (2026-10-03 10:15 UTC−5, dllm H100)
+
+`scripts/v31_kernel_bench.py`, GLOBAL geometry (16 q / 2 kv heads, head_dim 512, 256 canvas queries), CUDA-event
+medians in ms per GLOBAL layer call; `results/v31_20261003/kernels/`.
+
+| keys | vLLM FA4 dense | FA4 + in-kernel observation | Triton observation (mu / no mu) | DP build exact: v27 → chunked | DP build compact: v27 → chunked |
+|---|---|---|---|---|---|
+| 32K | 0.93 | 0.93 | 2.26 / 1.96 | 1.12 → 0.29 | 0.95 → 0.19 |
+| 64K | 1.76 | 1.63 | 4.43 / 3.83 | 2.20 → 0.55 | 2.03 → 0.29 |
+| 94K | 2.46 | 2.25 | 6.33 / 5.27 | 3.13 → 0.79 | 3.02 → 0.43 |
+
+- **The FA4 observation is free:** the dense output is bit-identical to plain FA4, and the per-row tile log-mass matches
+  the FP32 reference and the Triton observation to FP32 rounding (`tests/test_v31_fa4_observe.py`). Its time equals
+  the dense call (pack-GQA off in both observation forms).
+- **The chunked dense-prefix build is 4–7× faster** and matches the sequential build to FP32 rounding, with identical
+  eligibility and bad flags (`tests/test_v31_dp_chunked.py`).
+- Observation call at 64K, per layer:
+  - main (exact mu): 4.4 + 2.2 ms → 4.4 + 0.55 ms;
+  - compact-mu configs: 3.8 + 2.0 ms → 1.6 + 0.3 ms.
+- Panel h runs every efficiency switch together (`_fast` labels) after panel g; see `scripts/v31_h_chain.sh`.
