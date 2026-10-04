@@ -128,12 +128,15 @@ class _PrefixCache:
         return self.length
 
 
+MAGE_GRANULARITIES = ('kvhead', 'qhead', 'qblock', 'qblock_max')
+
+
 class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
                  canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024,
                  logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
                  trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None,
-                 mage_coverage=None, mage_select_step=0):
+                 mage_coverage=None, mage_select_step=0, mage_granularity='kvhead', mage_keep_frac=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -154,6 +157,13 @@ class VllmMethodAdapter:
             raise ValueError('mage_select must be torch or fa4')
         if (mage_critical is not None or mage_coverage is not None) and mage_select != 'fa4':
             raise ValueError('mage_critical / mage_coverage are implemented on the FA4 selection only (mage_select=fa4)')
+        if mage_granularity not in MAGE_GRANULARITIES:
+            raise ValueError(f'mage_granularity must be one of {MAGE_GRANULARITIES}')
+        if mage_granularity != 'kvhead' and (mage_select != 'fa4' or mage_critical is not None
+                                             or mage_coverage is not None):
+            raise ValueError('mage_granularity other than kvhead needs mage_select=fa4, without critical / coverage')
+        if mage_keep_frac is not None and not 0.0 < float(mage_keep_frac) <= 1.0:
+            raise ValueError('mage_keep_frac must be in (0, 1]')
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
         if arm == 'method':
@@ -197,6 +207,17 @@ class VllmMethodAdapter:
         if int(mage_select_step) < 0:
             raise ValueError('mage_select_step must be >= 0')
         self.mage_select_step = int(mage_select_step)
+        # v31 selection-granularity ladder (named variants on the MAGE port, ablation from MAGE toward the method's
+        # mass ranking): the unit that owns a top-k set and how its rows are aggregated --
+        #   kvhead      MAGE: mean row-normalized mass over the canvas queries and the query heads of a KV head;
+        #   qhead       mean over the canvas queries of each query head;
+        #   qblock      mean over the rows of each (query head, 128-row block);
+        #   qblock_max  max over the rows of each (query head, 128-row block) of the row's share of its PREFIX mass
+        #               (the method's risk_value='mass' statistic, from the exact FA4 observation).
+        # mage_keep_frac: keep PT - floor((1 - f) PT) prefix tiles per unit (topk_skip's rule, so f = 0.12 matches the
+        # method's k12 at every length) instead of mage_k / 64.
+        self.mage_granularity = mage_granularity
+        self.mage_keep_frac = None if mage_keep_frac is None else float(mage_keep_frac)
         # diagnostic receipts (opt-in): denoising steps per canvas and the canvas mean token entropy per step, i.e.
         # the quantity the official sampler compares with its confidence threshold to stop a canvas
         self.trace_canvas = bool(trace_canvas)
@@ -712,8 +733,14 @@ class VllmMethodAdapter:
         tail_lse = s.reshape(H, n, -1, 64).logsumexp(-1)                                         # [H, n, KT-PT]
         tile_lse = torch.cat([head_lse, tail_lse], -1)                                            # [H, n, KT]
         mass = (tile_lse - tile_lse.logsumexp(-1, keepdim=True)).exp()
+        if self.mage_keep_frac is not None:
+            import math
+            k_tiles = max(1, first_canvas_tile - int(math.floor((1.0 - self.mage_keep_frac) * first_canvas_tile + 1e-9)))
+        else:
+            k_tiles = max(1, min(self.mage_k // 64, first_canvas_tile))
+        if self.mage_granularity != 'kvhead':
+            return out, self._mage_units(mass, head_lse, H, n, qb, kt, first_canvas_tile, k_tiles)
         score = mass.reshape(HK, G, n, kt).mean(dim=(1, 2))                                        # [HK, KT]
-        k_tiles = max(1, min(self.mage_k // 64, first_canvas_tile))
         kept_kv = torch.zeros((HK, kt), device=q.device, dtype=torch.bool)
         if first_canvas_tile and self.mage_coverage is not None:
             pre = score[:, :first_canvas_tile]                                                  # [HK, PT]
@@ -740,6 +767,29 @@ class VllmMethodAdapter:
             kept[0, :, :, :first_canvas_tile] |= critical
             self.calls['mage_critical_added_tiles'] = self.calls.get('mage_critical_added_tiles', 0) + int(added.sum())
         return out, kept
+
+    def _mage_units(self, mass, head_lse, H, n, qb, kt, pt, k_tiles):
+        """Selection-granularity ladder: top k_tiles prefix tiles per query head (qhead) or per (query head, 128-row
+        block) (qblock, qblock_max); canvas / boundary tiles always kept. Returns kept [1, H, QB, KT]."""
+        kept = torch.zeros((1, H, qb, kt), device=mass.device, dtype=torch.bool)
+        kept[..., pt:] = True
+        if not pt:
+            return kept
+        pad = qb * 128 - n
+        if self.mage_granularity == 'qhead':
+            score = mass[..., :pt].mean(1)[:, None].expand(H, qb, pt)                              # [H, QB, PT]
+        elif self.mage_granularity == 'qblock':
+            m = torch.nn.functional.pad(mass[..., :pt], (0, 0, 0, pad)).view(H, qb, 128, pt)
+            rows = torch.nn.functional.pad(torch.ones(n, device=mass.device), (0, pad)).view(qb, 128).sum(-1)
+            score = m.sum(2) / rows.clamp_min(1)[None, :, None]
+        else:                                                                                   # qblock_max
+            share = head_lse - head_lse.logsumexp(-1, keepdim=True)                               # log share of prefix mass
+            share = torch.nn.functional.pad(share, (0, 0, 0, pad), value=float('-inf')).view(H, qb, 128, pt)
+            score = share.amax(2)
+        kept[0, :, :, :pt].scatter_(-1, score.topk(k_tiles, dim=-1).indices, True)
+        self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * H * qb
+        self.calls['mage_prefix_tiles'] += int(pt) * H * qb
+        return kept
 
     # ------------------------------------------------------------------ split FA4 over the paged cache
     def _split(self, lists):
