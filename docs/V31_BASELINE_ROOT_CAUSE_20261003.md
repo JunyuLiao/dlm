@@ -793,3 +793,24 @@ Both are now reported. Tables:
   - regroup: closed on cost;
   - LLaDA2.1: Amdahl;
   - prefill / per-step / N-C breakdowns: timing only.
+
+## Final evaluation suite (decided with the user, 2026-10-04 06:55 UTC)
+
+Criteria: recent; long where possible; covering the benchmarks of 2025–26 DLM efficiency work; convincing in the
+paper. LongBench v1 is NOT included: it is older, mostly under 32K tokens, and its open-ended generation role is
+covered by MRCR / GraphWalks. Add a small v1 subset only if a line-by-line comparison with MAGE's v1 numbers is
+required.
+
+| group | dataset | lengths | protocol / metric | role |
+|---|---|---|---|---|
+| long-context (main) | LongBench-v2 (ACL'25) | official: all 503 items, official middle truncation to the 128K-class budget; analysis: natural-length bins 32K / 64K / 96K / 128K | accuracy (official extraction), easy/hard and length breakdowns | realistic deep-reasoning QA; comparable with the leaderboard and prior work |
+| | RULER (13 tasks) | 32K / 64K / 128K, fresh pool v33 (seed 6464, 15 per task) for the final numbers | OFFICIAL score (per-task mean, partial credit) primary; strict all-correct secondary (McNemar) | the DLM sparse-attention standard (SparseD, PulseCol, BA-Att), at longer lengths |
+| | OpenAI MRCR 2-needle (2025) | 32K / 64K / 128K natural | official SequenceMatcher ratio (prefix check) | precise retrieval among distractors in long multi-turn input; open-ended generation |
+| | OpenAI GraphWalks (2025) | 32K / 64K / 128K natural | official set F1 of the final answer | aggregation of scattered facts (the cwe-type weakness) |
+| long-generation guards | AIME26 (2026) | short prompt, 8K thinking budget | exact numeric | newest math reasoning, low contamination |
+| | HumanEval | short prompt, 8K budget | pass@1 (official tests, sandbox) | the standard code guard of DLM papers |
+
+- Speed is reported on LongBench-v2 (official protocol and natural bins) and RULER, per length: end-to-end time,
+  prefill, per-step cost, steps per canvas, canvases.
+- All final numbers use fresh seeds or pools and a pre-registration.
+- Scoring definitions are under audit against the official implementations (report pending).
