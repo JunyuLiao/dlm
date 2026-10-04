@@ -129,7 +129,8 @@ class _PrefixCache:
 
 
 MAGE_GRANULARITIES = ('kvhead', 'qhead', 'qblock', 'qblock_max', 'kvhead_max', 'kvblock_max')
-ROW_WEIGHTS = (None, 'cgate', 'conf', 'margin', 'temporal', 'mt', 'ct')
+ROW_WEIGHTS = (None, 'cgate', 'conf', 'margin', 'temporal', 'mt', 'ct', 'jcgate')
+TRIGGER_SIGNALS = ('accept', 'settle')
 
 
 class VllmMethodAdapter:
@@ -140,7 +141,8 @@ class VllmMethodAdapter:
                  mage_coverage=None, mage_select_step=0, mage_granularity='kvhead', mage_keep_frac=None,
                  residual=None, drop_guard=None, drift_diag=False, dense_below=None, mage_carry_first=False,
                  risk_group=None, mage_reselect=None, mage_row_weight=None, mage_beta=3.0, mage_reselect_k=None,
-                 mage_reselect_trigger=None):
+                 mage_reselect_trigger=None, mage_trigger_signal='accept', mage_reselect_kmin=None,
+                 mage_cg_tau=2.5, mage_cg_gamma_q=0.65):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -177,11 +179,23 @@ class VllmMethodAdapter:
                 raise ValueError('mage_reselect: canvas call indices after mage_select_step, FA4 selection, no '
                                  'critical / coverage')
         if mage_reselect_trigger is not None:
-            if not 0.0 < float(mage_reselect_trigger) <= 1.0 or mage_reselect is not None or mage_select != 'fa4':
-                raise ValueError('mage_reselect_trigger: an accepted fraction in (0, 1], FA4 selection, instead of '
+            th = mage_reselect_trigger if isinstance(mage_reselect_trigger, (list, tuple)) else [mage_reselect_trigger]
+            th = tuple(sorted({float(x) for x in th}))
+            if not th or not all(0.0 < f <= 1.0 for f in th) or mage_reselect is not None or mage_select != 'fa4':
+                raise ValueError('mage_reselect_trigger: progress thresholds in (0, 1], FA4 selection, instead of '
                                  'mage_reselect')
-            if int(mage_select_step) < 1:
-                raise ValueError('mage_reselect_trigger re-selects after the step-1 selection: needs mage_select_step >= 1')
+            mage_reselect_trigger = th
+        if mage_trigger_signal not in TRIGGER_SIGNALS or (mage_trigger_signal != 'accept' and mage_reselect_trigger is None):
+            raise ValueError(f'mage_trigger_signal must be one of {TRIGGER_SIGNALS}, with mage_reselect_trigger')
+        if mage_reselect_kmin is not None and (mage_reselect_trigger is None or int(mage_reselect_kmin) < 64):
+            raise ValueError('mage_reselect_kmin: a token floor (>= 64) for progress-following re-selection budgets, '
+                             'with mage_reselect_trigger')
+        if mage_row_weight == 'jcgate' and mage_reselect_trigger is None:
+            raise ValueError("mage_row_weight 'jcgate' needs the progress clock (mage_reselect_trigger)")
+        if mage_cg_tau <= 0 or not 0.0 <= mage_cg_gamma_q < 1.0:
+            raise ValueError('invalid C-gate parameters')
+        if mage_reselect_trigger is not None and int(mage_select_step) < 1:
+            raise ValueError('mage_reselect_trigger re-selects after the step-1 selection: needs mage_select_step >= 1')
         if mage_row_weight not in ROW_WEIGHTS:
             raise ValueError(f'mage_row_weight must be one of {ROW_WEIGHTS}')
         if mage_reselect_k is not None and ((mage_reselect is None and mage_reselect_trigger is None)
@@ -294,8 +308,26 @@ class VllmMethodAdapter:
         # gives the accepted fraction of the canvas rows; the first time it reaches f, every layer re-selects at the
         # next call (once per canvas; row weights as above, from that same step). One small host read per step until
         # the canvas has triggered (the adapter's prepare hook already reads the step metadata once per step).
-        self.mage_reselect_trigger = None if mage_reselect_trigger is None else float(mage_reselect_trigger)
+        self.mage_reselect_trigger = mage_reselect_trigger          # tuple of thresholds (round 4) or None
         self._trig_canvas, self._trig_at = None, None
+        # round 4: the progress clock carries Junyu Liao's full C gate (query_adaptive.State.enable_cgate; COLLABORATION
+        # CANDIDATE). Per canvas row, from the previous completed steps: q = EMA (gamma_q 0.65) of 'renoised' (= not
+        # accepted, q starts at 1), the stable run r (reset on an argmax flip, else (r + 1) * accepted) through
+        # g = 1 - exp(-r / tau) (tau 2.5), and u = sqrt(1 - p_top). Settledness = g (1 - q) (1 - u) in [0, 1].
+        #  - mage_trigger_signal 'settle': the progress signal is the canvas mean settledness instead of the accepted
+        #    fraction; mage_reselect_trigger may list several thresholds (one re-selection per crossing);
+        #  - mage_row_weight 'jcgate': the re-selection weighs its rows by Junyu's sensitivity
+        #    s = clip(1 + beta (1 - settledness), 1, 1 + beta) (unsettled rows steer the choice);
+        #  - mage_reselect_kmin: the budget follows progress -- a re-selection at progress phi keeps
+        #    max(kmin, K (1 - phi)) tokens per unit (rounded down to 64), K = mage_reselect_k or mage_k. Every unit keeps
+        #    the same count at every step, so CTAs stay balanced: Junyu's allocation over queries becomes an allocation
+        #    over denoising time.
+        # The histories are device tensors updated once per step (no host read); the progress signal is one scalar read
+        # per step until the canvas has crossed its last threshold.
+        self.mage_trigger_signal = mage_trigger_signal
+        self.mage_reselect_kmin = None if mage_reselect_kmin is None else int(mage_reselect_kmin)
+        self.mage_cg_tau, self.mage_cg_gamma_q = float(mage_cg_tau), float(mage_cg_gamma_q)
+        self._trig_count, self._trig_k, self._jc = 0, None, None
         # v31 pooled residual (named variant, opt-in, any sparse arm): dropped wholly-prefix tiles are added back as
         # their centroid key / mean value (v31_residual); centroids cached per (layer, canvas)
         self.residual = residual
@@ -379,6 +411,7 @@ class VllmMethodAdapter:
         self._mage_count, self._mage_row_w, self._mage_units_w = {}, None, None
         self._mage_prev_argmax, self._k_override = None, None
         self._trig_canvas, self._trig_at = None, None
+        self._trig_count, self._trig_k, self._jc = 0, None, None
         self._tile_means, self._residual_tiles, self._guard_cache = {}, 0, []
         self._drift_prev, self._drift_acc = {}, None
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
@@ -816,7 +849,7 @@ class VllmMethodAdapter:
                    else self._trig_at == (self.canvas_id, cnt[2]))
             if st is not None and st['canvas'] == self.canvas_id and st['nk'] == nk and due:
                 self._mage_units_w = self._mage_row_w if self.mage_row_weight is not None else None
-                self._k_override = self.mage_reselect_k
+                self._k_override = self._trig_k if self._trig_k is not None else self.mage_reselect_k
                 try:
                     out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
                 finally:
@@ -956,6 +989,49 @@ class VllmMethodAdapter:
             kept[0, :, :, :first_canvas_tile] |= critical
             self.calls['mage_critical_added_tiles'] = self.calls.get('mage_critical_added_tiles', 0) + int(added.sum())
         return out, kept
+
+    def _progress_observe(self, argmax, p_top, acc, scaled, n_rows, entropy_bound):
+        """The progress clock, after every denoising step while the canvas has thresholds left: argmax / p_top / acc are
+        the step's per-row statistics [n_rows] (acc = the official acceptance mask). Updates the C-gate histories,
+        reads the progress signal and, when it crosses the next threshold(s), schedules a re-selection at the next
+        call with its row weights and budget."""
+        if self._trig_canvas != self.canvas_id:                                 # a new canvas: reset the clock
+            self._trig_canvas, self._trig_count, self._jc, self._trig_k = self.canvas_id, 0, None, None
+        if self._trig_count >= len(self.mage_reselect_trigger):
+            return
+        settled = None
+        if self.mage_trigger_signal == 'settle' or self.mage_row_weight == 'jcgate':
+            accf = acc.float()
+            jc = self._jc
+            q = torch.ones_like(p_top) if jc is None else jc['q']
+            r = torch.zeros_like(p_top) if jc is None else jc['r']
+            q = self.mage_cg_gamma_q * q + (1 - self.mage_cg_gamma_q) * (1 - accf)          # renoised = not accepted
+            stay = (r + 1) * accf
+            r = stay if jc is None else torch.where(argmax != jc['prev'], torch.zeros_like(stay), stay)
+            u = (1 - p_top.float()).clamp_min(0).sqrt()
+            self._jc = dict(q=q, r=r, prev=argmax)
+            settled = (1 - torch.exp(-r / self.mage_cg_tau)) * (1 - q) * (1 - u)
+        signal = settled if self.mage_trigger_signal == 'settle' else acc.float()
+        self.calls['trigger_checks'] = self.calls.get('trigger_checks', 0) + 1
+        phi = float(signal.mean().item())                                      # the one host read of the step
+        crossed = sum(1 for f in self.mage_reselect_trigger if phi >= f)
+        if crossed <= self._trig_count:
+            return
+        self._trig_count = crossed
+        self._trig_at = (self.canvas_id, self._canvas_step)
+        self.calls['triggers'] = self.calls.get('triggers', 0) + 1
+        self.calls['trigger_step_sum'] = self.calls.get('trigger_step_sum', 0) + self._canvas_step
+        if self.mage_reselect_kmin is not None:
+            base = self.mage_reselect_k if self.mage_reselect_k is not None else self.mage_k
+            self._trig_k = max(self.mage_reselect_kmin, int(base * (1.0 - phi)) // 64 * 64)
+            self.calls['trigger_k_sum'] = self.calls.get('trigger_k_sum', 0) + self._trig_k
+        mode = self.mage_row_weight
+        if mode == 'cgate':
+            self._mage_row_w = (~acc).float()
+        elif mode == 'jcgate':
+            self._mage_row_w = (1 + self.mage_beta * (1 - settled)).clamp(1, 1 + self.mage_beta)
+        elif mode is not None:
+            self._mage_row_w = self._row_weight_from_logits(scaled, n_rows, entropy_bound)
 
     def _row_weight_from_logits(self, scaled, n, entropy_bound):
         """Row weights [n] for the next re-selection from the sampler's temperature-scaled logits [1, CL, V]
@@ -1229,20 +1305,14 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
             if (a.arm == 'mage' and a.mage_row_weight in ('temporal', 'mt', 'ct') and a.mage_reselect is not None
                     and a._canvas_step + 1 in a.mage_reselect):             # two steps ahead: keep the argmax
                 a._mage_prev_argmax = scaled[0, :a.step_ctx['n']].argmax(-1)
-            if a.arm == 'mage' and a.mage_reselect_trigger is not None and a._trig_canvas != a.canvas_id:
+            if (a.arm == 'mage' and a.mage_reselect_trigger is not None
+                    and (a._trig_canvas != a.canvas_id or a._trig_count < len(a.mage_reselect_trigger))):
                 from experiments.numerical_qk_reuse.v31_logit_stats import accepted_from_entropy, row_stats
                 n_rows = a.step_ctx['n']
                 eb = float(signature.bind(*args, **kwargs).arguments['entropy_bound'])
-                ent = (stats if stats is not None else row_stats(scaled)).entropy      # reuse the fused statistics
-                acc = (accepted if accepted is not None else accepted_from_entropy(ent, eb))[0, :n_rows]
-                a.calls['trigger_checks'] = a.calls.get('trigger_checks', 0) + 1
-                if float(acc.float().mean().item()) >= a.mage_reselect_trigger:
-                    a._trig_canvas, a._trig_at = a.canvas_id, (a.canvas_id, a._canvas_step)
-                    a.calls['triggers'] = a.calls.get('triggers', 0) + 1
-                    a.calls['trigger_step_sum'] = a.calls.get('trigger_step_sum', 0) + a._canvas_step
-                    if a.mage_row_weight is not None:
-                        a._mage_row_w = ((~acc).float() if a.mage_row_weight == 'cgate'
-                                         else a._row_weight_from_logits(scaled, n_rows, eb))
+                rs = stats if stats is not None else row_stats(scaled)                 # reuse the fused statistics
+                acc = (accepted if accepted is not None else accepted_from_entropy(rs.entropy, eb))[0, :n_rows]
+                a._progress_observe(rs.argmax[0, :n_rows], (rs.max - rs.lse).exp()[0, :n_rows], acc, scaled, n_rows, eb)
             if (a.arm == 'mage' and a.mage_row_weight is not None and a.mage_reselect is not None
                     and a._canvas_step in a.mage_reselect):                 # the next step re-selects: weigh its rows
                 a._mage_row_w = a._row_weight_from_logits(
