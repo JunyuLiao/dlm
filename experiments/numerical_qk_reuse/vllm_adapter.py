@@ -133,7 +133,7 @@ class VllmMethodAdapter:
                  canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024,
                  logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
                  trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None,
-                 mage_coverage=None):
+                 mage_coverage=None, mage_select_step=0):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -191,6 +191,12 @@ class VllmMethodAdapter:
         # covers mage_coverage of the head's mean attention mass: concentrated heads stay at the floor, diffuse heads
         # (aggregation over the whole context) keep more
         self.mage_coverage = None if mage_coverage is None else float(mage_coverage)
+        # v31 selection-timing control (named variant on the MAGE port): run the first mage_select_step GLOBAL calls
+        # of each canvas dense and select from the queries of the next call (MAGE selects at step 0, all-mask
+        # canvas; the method observes at step 1 after two exact steps). Separates when to select from how.
+        if int(mage_select_step) < 0:
+            raise ValueError('mage_select_step must be >= 0')
+        self.mage_select_step = int(mage_select_step)
         # diagnostic receipts (opt-in): denoising steps per canvas and the canvas mean token entropy per step, i.e.
         # the quantity the official sampler compares with its confidence threshold to stop a canvas
         self.trace_canvas = bool(trace_canvas)
@@ -223,6 +229,7 @@ class VllmMethodAdapter:
         self.paged = None                # vLLM paged K/V of the GLOBAL call in flight (for the split FA4 consumer)
         self.splits = 2
         self.mage_k, self.mage_state, self.canvas_id = int(mage_k), {}, 0
+        self._mage_warm = {}
         self._split_cache = []           # (lists object, split lists) for held maps
         self.calls = dict(global_calls=0, prefix_copies=0, canvas_refreshes=0, invalidates=0, begins=0, observes=0,
                           passthrough=0, order_errors=0, split_fa4_calls=0, split_list_builds=0)
@@ -248,6 +255,7 @@ class VllmMethodAdapter:
         self.bound = True
         self._events = []
         self.mage_state, self.canvas_id = {}, 0
+        self._mage_warm = {}
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
         self._sparse_kept, self._sparse_total, self._global_tiles = None, 0, 0
         self._canvas_steps, self._cur_steps, self._ent_trace, self._conf_threshold = [], 0, [], None
@@ -628,6 +636,14 @@ class VllmMethodAdapter:
         nk = prefix + n
         st = self.mage_state.get(layer_idx)
         if st is None or st['canvas'] != self.canvas_id or st['nk'] != nk:
+            if self.mage_select_step:
+                w = self._mage_warm.get(layer_idx)
+                if w is None or w[:2] != [self.canvas_id, nk]:
+                    w = self._mage_warm[layer_idx] = [self.canvas_id, nk, 0]
+                if w[2] < self.mage_select_step:                   # exact steps before the selection
+                    w[2] += 1
+                    self.calls['mage_warm_dense_calls'] = self.calls.get('mage_warm_dense_calls', 0) + 1
+                    return v27_fa4.dense(q, b['k'], b['v'], scale)
             if self.mage_select == 'fa4':
                 out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
             else:
