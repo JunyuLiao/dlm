@@ -1826,3 +1826,14 @@ each over the whole suite:
 - T3: 8192 until the trigger, then a 2048-token C-gate re-selection (front-loaded);
 - T4: T1 with margin weights;
 - lean 8192 (budget reference).
+
+**Short-prompt screening part S1s** (`sc1s_chain.sh`, `sc_suite_short.json`, after sc1; user 2026-10-04 21:15 UTC).
+- The user's plan for the paper: 2–3 long-context and 1–2 short benchmarks, recent and convincing.
+- Same seven arms, seeds 1 and 2, thinking on, 8192-token budget, pool `manifests_ae`, pinned max_model_len 13312:
+  - AIME26: all 30 problems. Too few to split, so a confirmation uses fresh seeds.
+  - HumanEval: a seeded 40 of the 164 problems. The other 124 are held out (`cells_he_holdout.json`).
+- Prompts are short. The sparse path acts on the model's own reasoning once the context passes the token budget, so
+  this part checks that the method does not hurt short-prompt tasks. Accuracy only; there is no speed headroom at
+  ≤ 8.4K tokens.
+- Benchmark choice for the paper is fixed **before** the confirmation run, with the selection rule written down. Every
+  screened benchmark is reported, the ones outside the main text in an appendix.
