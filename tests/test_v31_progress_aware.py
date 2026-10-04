@@ -131,6 +131,43 @@ def test_reselection_budget_override():
             pass
 
 
+def test_progress_trigger_reselects_once_at_the_flagged_call():
+    log, sel = [], []
+    v27_fa4.block_sparse_tensors = lambda kept, q_block=128: ('lists', kept.clone())
+    v27_fa4.dense = lambda q, k, v, s: (log.append('dense'), 'dense')[1]
+    v27_fa4.sparse_lists = lambda q, k, v, lists, s: (log.append(('sparse', lists[1])), 'sparse')[1]
+
+    def fake_select(self, q, k, v, scale, prefix, n):
+        kept = torch.zeros((1, H, 2, (prefix + n) // 64), dtype=torch.bool)
+        kept[..., prefix // 64:] = True
+        sel.append(self._mage_units_w)
+        return 'select', kept
+    orig = VllmMethodAdapter._mage_select_fa4
+    VllmMethodAdapter._mage_select_fa4 = fake_select
+    try:
+        a = _adapter(mage_select_step=1, mage_carry_first=True, mage_reselect_trigger=0.5, mage_row_weight='cgate')
+        q, b, prefix, n = torch.zeros(1, H, 256, 4), dict(k=None, v=None), 64 * 40, 256
+        a.canvas_id = 1
+        out = [a._mage(5, q, b, 1.0, prefix, n) for _ in range(3)]          # no trigger yet: dense, select, held
+        assert out == ['dense', 'select', 'sparse']
+        a._trig_canvas, a._trig_at = 1, (1, 3)                              # the hook flagged call 3 of canvas 1
+        a._mage_row_w = torch.ones(n)
+        assert [a._mage(5, q, b, 1.0, prefix, n) for _ in range(3)] == ['select', 'sparse', 'sparse']
+        assert a.calls['mage_reselections'] == 1 and sel[-1] is not None
+        a.canvas_id = 2                                                     # a new canvas: not flagged
+        assert [a._mage(5, q, b, 1.0, prefix + n, n) for _ in range(5)] == ['sparse', 'select', 'sparse', 'sparse', 'sparse']
+        assert a.calls['mage_reselections'] == 1
+    finally:
+        VllmMethodAdapter._mage_select_fa4 = orig
+    for bad in (dict(mage_select_step=1, mage_reselect_trigger=0.0), dict(mage_select_step=1, mage_reselect=[3], mage_reselect_trigger=0.5),
+                dict(mage_select_step=0, mage_reselect_trigger=0.5)):
+        try:
+            _adapter(**bad)
+            raise AssertionError(f'accepted {bad}')
+        except ValueError:
+            pass
+
+
 if __name__ == '__main__':
     import sys
     for name, fn in list(globals().items()):

@@ -139,7 +139,8 @@ class VllmMethodAdapter:
                  trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None,
                  mage_coverage=None, mage_select_step=0, mage_granularity='kvhead', mage_keep_frac=None,
                  residual=None, drop_guard=None, drift_diag=False, dense_below=None, mage_carry_first=False,
-                 risk_group=None, mage_reselect=None, mage_row_weight=None, mage_beta=3.0, mage_reselect_k=None):
+                 risk_group=None, mage_reselect=None, mage_row_weight=None, mage_beta=3.0, mage_reselect_k=None,
+                 mage_reselect_trigger=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -175,12 +176,20 @@ class VllmMethodAdapter:
                     or mage_critical is not None or mage_coverage is not None):
                 raise ValueError('mage_reselect: canvas call indices after mage_select_step, FA4 selection, no '
                                  'critical / coverage')
+        if mage_reselect_trigger is not None:
+            if not 0.0 < float(mage_reselect_trigger) <= 1.0 or mage_reselect is not None or mage_select != 'fa4':
+                raise ValueError('mage_reselect_trigger: an accepted fraction in (0, 1], FA4 selection, instead of '
+                                 'mage_reselect')
+            if int(mage_select_step) < 1:
+                raise ValueError('mage_reselect_trigger re-selects after the step-1 selection: needs mage_select_step >= 1')
         if mage_row_weight not in ROW_WEIGHTS:
             raise ValueError(f'mage_row_weight must be one of {ROW_WEIGHTS}')
-        if mage_reselect_k is not None and (mage_reselect is None or int(mage_reselect_k) < 64
+        if mage_reselect_k is not None and ((mage_reselect is None and mage_reselect_trigger is None)
+                                            or int(mage_reselect_k) < 64
                                             or mage_keep_frac is not None):
             raise ValueError('mage_reselect_k: a token budget (>= 64) for re-selections, with mage_reselect and mage_k')
-        if mage_row_weight is not None and (mage_reselect is None or mage_granularity != 'qblock_max'):
+        if mage_row_weight is not None and ((mage_reselect is None and mage_reselect_trigger is None)
+                                            or mage_granularity != 'qblock_max'):
             raise ValueError('mage_row_weight weights the rows of a re-selection: needs mage_reselect and qblock_max')
         if risk_group not in (None, 'kv'):
             raise ValueError("risk_group must be None or 'kv'")
@@ -280,6 +289,13 @@ class VllmMethodAdapter:
         # schedule over denoising progress; per-unit counts stay equal, so CTAs stay balanced).
         self.mage_reselect_k = None if mage_reselect_k is None else int(mage_reselect_k)
         self._mage_prev_argmax, self._k_override = None, None
+        # round 3: mage_reselect_trigger f -- the re-selection is triggered by denoising PROGRESS instead of a fixed step:
+        # after each denoising step the sampler's acceptance mask (official entropy-bound rule, fused row statistics)
+        # gives the accepted fraction of the canvas rows; the first time it reaches f, every layer re-selects at the
+        # next call (once per canvas; row weights as above, from that same step). One small host read per step until
+        # the canvas has triggered (the adapter's prepare hook already reads the step metadata once per step).
+        self.mage_reselect_trigger = None if mage_reselect_trigger is None else float(mage_reselect_trigger)
+        self._trig_canvas, self._trig_at = None, None
         # v31 pooled residual (named variant, opt-in, any sparse arm): dropped wholly-prefix tiles are added back as
         # their centroid key / mean value (v31_residual); centroids cached per (layer, canvas)
         self.residual = residual
@@ -362,6 +378,7 @@ class VllmMethodAdapter:
         self._mage_warm = {}
         self._mage_count, self._mage_row_w, self._mage_units_w = {}, None, None
         self._mage_prev_argmax, self._k_override = None, None
+        self._trig_canvas, self._trig_at = None, None
         self._tile_means, self._residual_tiles, self._guard_cache = {}, 0, []
         self._drift_prev, self._drift_acc = {}, None
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
@@ -790,13 +807,14 @@ class VllmMethodAdapter:
         from experiments.numerical_qk_reuse import v27_fa4
         nk = prefix + n
         st = self.mage_state.get(layer_idx)
-        if self.mage_reselect is not None:
+        if self.mage_reselect is not None or self.mage_reselect_trigger is not None:
             cnt = self._mage_count.get(layer_idx)
             if cnt is None or cnt[:2] != [self.canvas_id, nk]:
                 cnt = self._mage_count[layer_idx] = [self.canvas_id, nk, -1]
             cnt[2] += 1                                                  # 0-based call index of this canvas
-            if (st is not None and st['canvas'] == self.canvas_id and st['nk'] == nk
-                    and cnt[2] in self.mage_reselect):
+            due = (cnt[2] in self.mage_reselect if self.mage_reselect is not None
+                   else self._trig_at == (self.canvas_id, cnt[2]))
+            if st is not None and st['canvas'] == self.canvas_id and st['nk'] == nk and due:
                 self._mage_units_w = self._mage_row_w if self.mage_row_weight is not None else None
                 self._k_override = self.mage_reselect_k
                 try:
@@ -1211,6 +1229,18 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
             if (a.arm == 'mage' and a.mage_row_weight in ('temporal', 'mt', 'ct') and a.mage_reselect is not None
                     and a._canvas_step + 1 in a.mage_reselect):             # two steps ahead: keep the argmax
                 a._mage_prev_argmax = scaled[0, :a.step_ctx['n']].argmax(-1)
+            if a.arm == 'mage' and a.mage_reselect_trigger is not None and a._trig_canvas != a.canvas_id:
+                from experiments.numerical_qk_reuse.v31_logit_stats import accepted_from_entropy, row_stats
+                n_rows = a.step_ctx['n']
+                eb = float(signature.bind(*args, **kwargs).arguments['entropy_bound'])
+                acc = accepted_from_entropy(row_stats(scaled).entropy, eb)[0, :n_rows]
+                a.calls['trigger_checks'] = a.calls.get('trigger_checks', 0) + 1
+                if float(acc.float().mean().item()) >= a.mage_reselect_trigger:
+                    a._trig_canvas, a._trig_at = a.canvas_id, (a.canvas_id, a._canvas_step)
+                    a.calls['triggers'] = a.calls.get('triggers', 0) + 1
+                    if a.mage_row_weight is not None:
+                        a._mage_row_w = ((~acc).float() if a.mage_row_weight == 'cgate'
+                                         else a._row_weight_from_logits(scaled, n_rows, eb))
             if (a.arm == 'mage' and a.mage_row_weight is not None and a.mage_reselect is not None
                     and a._canvas_step in a.mage_reselect):                 # the next step re-selects: weigh its rows
                 a._mage_row_w = a._row_weight_from_logits(
