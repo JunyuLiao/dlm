@@ -1,21 +1,23 @@
 """Score v31 private GraphWalks completions with the official OpenAI GraphWalks extraction and set F1 (primary: F1).
 
-Rule: scripts/v31_official.py. Per completion: answer text = final_response(raw, row thinking) (ON for every GraphWalks
-pool: the text after the last '<channel|>', cut at the first end token, stripped; an unfinished thought gives ''), then
-the README's `get_list` (openai/graphwalks @ be6cc6ec: the last line must contain 'Final Answer:', the greedy '[...]'
-span on it is split on commas, items stripped, empty items dropped; otherwise unparsed) and its set precision / recall /
-F1 against the gold answer nodes (unparsed -> 0; empty gold and empty prediction -> 1).
+Rule: scripts/v31_official.py (planned cells, binding). Per completion: answer text = the raw response the README grades
+(`answer_unstripped`: the text after the last '<channel|>' -- thinking is ON for every GraphWalks pool, an unfinished
+thought gives '' --, cut at the first end token, NOT stripped), then the README's `get_list` (openai/graphwalks @
+be6cc6ec: the last line must contain 'Final Answer:', the greedy '[...]' span on it is split on commas, items stripped,
+empty items dropped; otherwise unparsed) and its set precision / recall / F1 against the gold answer nodes (unparsed -> 0;
+empty gold and empty prediction -> 1).
 Outputs (OUT_PREFIX):
   .official.json               {arm: {cell: f1}}  PRIMARY (no finish requirement)
   .f1_eq_1_and_finished.json   {arm: {cell: bool}}  SECONDARY: F1 == 1 AND a stop / eos finish
+  .binding.json                per-cell run settings for the comparison tools (v31_paired_official.py graphwalks)
   .summary.json                per arm: the official GraphWalks numbers = mean F1 per bin (dataset) per problem type
                                (bfs / parents), plus per bin; cells, finished / capped / other, unparsed,
-                               no_final_response
-A duplicate cell key raises; every cell's id must be the manifest row at its index. No text, ids or answers written.
-Run with cwd / PYTHONPATH holding experiments/ (CPU only, no torch).
-usage: python v31_score_graphwalks.py OUT_PREFIX MANIFEST_DIR GOLD_DIR PRIVATE.jsonl [...]
-  MANIFEST_DIR / GOLD_DIR hold {dataset}_generation_manifest.json (or _rowinfo.json: id, problem_type, thinking) and
-  {dataset}_gold.json ({id: [node, ...]}); arm labels from file names <tag>_<label>.private.jsonl
+                               no_final_response, coverage, binding
+A record from another pool / manifest / budget, a duplicate cell, a record outside the plan or (without --allow-missing)
+a missing planned cell raises. No text, ids or answers written. Run with cwd / PYTHONPATH holding experiments/.
+usage: python v31_score_graphwalks.py OUT_PREFIX MANIFEST_DIR GOLD_DIR --cells CELLS.json [--repeats N] [--allow-missing]
+           [--legacy-unbound] PRIVATE.jsonl [...]
+  GOLD_DIR holds {dataset}_gold.json ({id: [node, ...]})
 """
 import collections
 import json
@@ -70,22 +72,24 @@ def f1_score(response: str, answer_nodes) -> float:
     return float(f1)
 
 
-def score(records, rows_of, gold_of, final_response):
-    official, strict, diag, types = {}, {}, {}, {}
+def score(records, pools, gold_of, legacy=False):
+    official, strict, binding, diag, types = {}, {}, {}, {}, {}
     for label, key, r in records:
-        row = op.check_cell(rows_of(r['dataset']), r['dataset'], r)
-        text = final_response(r['completion'], bool(row['thinking']))
+        row, b, verified = op.bind(r, pools, legacy)
+        text = op.answer_unstripped(r['completion'], bool(row['thinking']))
         f1 = f1_score(text, gold_of(r['dataset'])[r['id']])
         fc = op.finish_class(r['finish_reason'])
         op.put(official, label, key, f1)
         op.put(strict, label, key, f1 == 1.0 and fc == 'finished')
+        op.put(binding, label, key, b)
         types[key] = row['problem_type']
         d = diag.setdefault(label, collections.Counter())
         d['cells'] += 1
         d[fc] += 1
         d['unparsed'] += get_list(text)[1]
         d['no_final_response'] += text == ''
-    return official, {SECONDARY: strict}, diag, types
+        d['verified' if verified else 'legacy_unbound'] += 1
+    return official, {SECONDARY: strict}, binding, diag, types
 
 
 def summarize(official, diag, types):
@@ -96,29 +100,26 @@ def summarize(official, diag, types):
             per[k.split('|')[0]][types[k]].append(v)
             per[k.split('|')[0]]['all'].append(v)
         out[label] = dict(bins={b: {t: dict(mean_f1=statistics.mean(v), cells=len(v)) for t, v in sorted(by_type.items())}
-                                for b, by_type in sorted(per.items())}, **dict(diag[label]))
+                                for b, by_type in sorted(per.items(), key=lambda x: op.natural_key(x[0]))},
+                          **dict(diag[label]))
     return out
 
 
 def main():
-    prefix, man_dir, gold_dir, files = sys.argv[1], Path(sys.argv[2]), Path(sys.argv[3]), sys.argv[4:]
-    final_response, source = op.load_final_response()
-    rows, golds = {}, {}
-
-    def rows_of(ds):
-        if ds not in rows:
-            rows[ds] = op.load_rows(man_dir, ds, ('id', 'problem_type', 'thinking'))
-        return rows[ds]
+    a = op.scorer_cli(__doc__, ('out_prefix', 'manifest_dir', 'gold_dir'))
+    golds = {}
 
     def gold_of(ds):
         if ds not in golds:
-            golds[ds] = json.loads((gold_dir / f'{ds}_gold.json').read_text(encoding='utf-8'))
+            golds[ds] = json.loads((Path(a.gold_dir) / f'{ds}_gold.json').read_text(encoding='utf-8'))
         return golds[ds]
 
-    official, secondary, diag, types = score(op.read_private(files), rows_of, gold_of, final_response)
-    summary = dict(metric='openai/graphwalks set F1 of the final-answer list; mean per bin per problem type',
-                   answer_text=source, arms=summarize(official, diag, types))
-    op.write_outputs(prefix, official, secondary, summary)
+    records, coverage = op.planned_records(a)
+    official, secondary, binding, diag, types = score(records, op.Pools(a.manifest_dir, ('problem_type', 'thinking')),
+                                                      gold_of, a.legacy_unbound)
+    summary = dict(metric='openai/graphwalks set F1 of the final-answer list on the unstripped response; mean per bin per '
+                          'problem type', coverage=coverage, arms=summarize(official, diag, types))
+    op.write_outputs(a.out_prefix, official, secondary, summary, binding)
     for label, s in sorted(summary['arms'].items()):
         print(label, {b: {t: round(v['mean_f1'], 4) for t, v in by.items()} for b, by in s['bins'].items()},
               f"cells={s['cells']} capped={s.get('capped', 0)} unparsed={s['unparsed']}")

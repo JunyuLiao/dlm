@@ -124,3 +124,11 @@ def test_sandbox_toy_programs_full_prompt_semantics():
     assert reason == 'parsed' and he.run_test(he.program_for(STUB_TASK, code))[0]
     bad = he.extract_code('<channel|>```python\ndef add(xs):\n    return 0\n```', 'add')[0]
     assert not he.run_test(he.program_for(STUB_TASK, bad))[0]
+
+
+def test_extractor_accepts_py_prefixed_fence_tags():
+    for tag in ('pythonpython', 'Python3', 'py', ''):
+        raw = '<channel|>```' + tag + '\ndef f(x): return x\n```'
+        assert he.extract_code(raw, 'f') == ('def f(x): return x', 'parsed'), tag
+    assert he.extract_code('<channel|>```java\ndef f(x): return x\n```', 'f') == (None, 'no_python_fence')
+    assert he.EXTRACTOR.endswith('_v3')

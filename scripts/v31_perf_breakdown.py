@@ -7,6 +7,8 @@ geometric means of the paired ratios arm / reference, and the split of log(W rat
   decode    log((P + S) / (P + S_ref))                         -- the decode change given the arm's prefill
 and of log(S ratio) into canvases C, steps per canvas N/C and per-step cost S/N (these three add up exactly).
 Reference medians (seconds, forwards) give the scale. Public records only; no text.
+Comparability: every paired cell must have identical rng_seed, budget, prompt_tokens, max_model_len, chunk, block_size
+(and prompt / manifest sha256 when recorded) in both arms; otherwise the tool refuses (COMPARE).
 usage: python v31_perf_breakdown.py REF_LABEL RECORDS.jsonl [...] [--datasets a,b]
   labels from file names <tag>_<label>.jsonl
 """
@@ -16,6 +18,17 @@ import math
 import statistics
 import sys
 from pathlib import Path
+
+COMPARE = ('rng_seed', 'budget', 'prompt_tokens', 'max_model_len', 'chunk', 'block_size', 'prompt_sha256', 'manifest_sha256')
+
+
+def check_pairs(label, ref, pairs):
+    """Refuse a pair whose run settings differ (a missing field must be missing in both arms)."""
+    for a, r in pairs:
+        bad = [f for f in COMPARE if a.get(f) != r.get(f)]
+        if bad:
+            raise ValueError(f"{label} vs {ref}, cell {a['dataset']}|{a['index']}|{a['panel_seed']}|{a['repeat']}: "
+                             f'different {bad}; refusing to compare')
 
 
 def main():
@@ -53,6 +66,7 @@ def main():
             pairs = [(recs[label][k], b[k]) for k in b if k in recs[label]]
             if not pairs:
                 continue
+            check_pairs(label, ref, pairs)
             g = collections.defaultdict(list)
             for a, r in pairs:
                 P, S, Pr, Sr = a['prefill_s'], a['decode_s'], r['prefill_s'], r['decode_s']

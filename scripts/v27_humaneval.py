@@ -19,7 +19,7 @@ import subprocess
 
 DATA_REVISION = '6d43fb980f9fee3c892a914eda09951f772ad10d'
 PROMPT_STYLE = 'chat_complete_function_v1'
-EXTRACTOR = 'final_first_entry_point_python_fence_or_plain_complete_function_v2'
+EXTRACTOR = 'final_first_entry_point_py_fence_or_plain_complete_function_v3'
 PROGRAM = 'official_check_program_full_prompt_v2'
 SANDBOX = 'unprivileged_bwrap_readonly_net_pid_user_isolated_mpk_v1'
 PREFIX = ('Complete the Python function below. Return the complete Python solution '
@@ -78,14 +78,15 @@ def final_text(raw):
 
 
 def extract_code(raw, entry_point):
-    """The first python fence (language '', 'python' or 'py') that parses and defines `entry_point` at top level;
-    without any fence, the whole final text as a plain complete function. Never chosen by test outcome."""
+    """The first fence tagged '' or 'py*' (python, py, python3, a doubled 'pythonpython', ...; case-insensitive) that
+    parses and defines `entry_point` at top level; without any fence, the whole final text as a plain complete function.
+    Never chosen by test outcome."""
     text = final_text(raw)
     if not text:
         return None, 'no_final_response'
     fences = re.findall(r'```([^\n`]*)\n(.*?)```', text, re.S)
     if fences:
-        bodies = [body.strip() for lang, body in fences if lang.strip().lower() in ('', 'python', 'py')]
+        bodies = [body.strip() for lang, body in fences if lang.strip().lower() == '' or lang.strip().lower().startswith('py')]
         if not bodies:
             return None, 'no_python_fence'
     else:
