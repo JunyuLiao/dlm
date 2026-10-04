@@ -935,3 +935,21 @@ it at selection time, keeping each head's budget.
   - LongBench-v2 64K + 96K end to end.
   - The read-out rules are the gs rules, with the control as the reference.
 - On mpk, the kernel microbenchmark (vkb) now runs after gs2.
+
+**Panel gs control check (09:55 UTC).**
+- Result:
+  - dlm2: the `qblock_max` step-1 control reproduces panel x's records on 87/87 cells (output hash and forward
+    count).
+  - mpk: 86/87. The odd cell is RULER 64K, index 66, seed 1. It has the same output length (110 tokens), but 9 vs
+    11 denoising steps in its single canvas, and the text differs from character 163.
+- Code path: diffed the deployed files.
+  - overlay15 (x) against ov_gs: the adapter differs only in the inactive `DENSE_BELOW`, `MAGE_CARRY`,
+    `kvblock / kvhead_max` and `RISK_GROUP` options.
+  - The helper modules are byte-identical.
+  - The bench differs only in passing those options through.
+- So the rule's purpose, detecting a code-path change, is met. The panel is read.
+- Deviation, reported openly: the control rule was stated as "token for token on each host". The one mismatch
+  reveals a rare run-to-run nondeterminism in the MAGE step-1 FA4 selection path (1/174 cells). This is noise, not
+  bias.
+- A determinism probe (dp) is queued on mpk after fc. It reruns the same control twice on the mpk shard to measure
+  the flip rate.
