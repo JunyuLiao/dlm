@@ -1357,3 +1357,38 @@ RULER v31 pool, 174 panel-x cells (both hosts), official score. Dense FULL is 83
     construction, to be measured);
   - fc's step-inflation numbers;
   - then the confirmation design.
+
+## Integration branch `research/v31-integration-20261004` — 2026-10-04 12:00 UTC
+
+**Contents.** Merged (no rebase, no force push), starting from the forced-canvas line, which carries the
+group-select work:
+- `research/v31-forced-canvas-20261004`: bench forced-canvas mode.
+- `research/v31-group-shared-select-20261004`:
+  - adapter options `MAGE_GRAN=qblock_max|kvblock_max|kvhead_max`, `MAGE_CARRY`, `RISK_GROUP`;
+  - the gs / gb results and the lean candidate;
+  - `scripts/v31_lb_paired_ci.py`.
+- `research/v31-official-protocol-20261004`:
+  - official pools builder and checker;
+  - scorers with planned-cell and binding checks;
+  - paired tools;
+  - bench binding (`manifest_sha256`, `prompt_sha256`, budget, pinned `MAX_MODEL_LEN`, chunk, block size in every
+    public and private record).
+
+The bench merged without a conflict. The only conflicts were appended doc sections, and both sides were kept.
+
+**Not merged:**
+- `research/v31-kernel-audit-20261004`: its output-preserving flags save at most 0.5% per step, and union / align /
+  S=4 are not adopted (see that branch).
+- The lean / meta-clock and sampled-residual branches: no speed gain, or no accuracy panel yet.
+
+**CPU tests on mpk** (repository layout, integration HEAD 7ee169820):
+- official scorers + HumanEval: 32/32;
+- forced-canvas mode: 4/4.
+
+GPU tests run in the first chain that uses this code.
+
+**Counting note.** Across 47/47 forced reference records, the bench's `denoise_forwards` (sampler calls − canvases)
+is exactly one above the true number of denoising steps, which is the sum of the exact per-canvas counts. Each
+request has one sampler call in the commit phase more than it has canvases.
+- Every N and N/C so far carries this +1 per request, for every arm alike. Ratios move by under 1/N, below 1%.
+- The definition stays as is so records stay comparable. Forced-mode records carry the exact per-canvas counts.
