@@ -143,7 +143,7 @@ class VllmMethodAdapter:
                  risk_group=None, mage_reselect=None, mage_row_weight=None, mage_beta=3.0, mage_reselect_k=None,
                  mage_reselect_trigger=None, mage_trigger_signal='accept', mage_reselect_kmin=None,
                  mage_cg_tau=2.5, mage_cg_gamma_q=0.65, mage_clock_trace=False, mage_sink=0, mage_recent=0,
-                 mage_trigger_relative=False, mage_pool=None):
+                 mage_trigger_relative=False, mage_pool=None, mage_kcover=None, mage_kq=0.75, mage_kmax=16384):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -205,6 +205,11 @@ class VllmMethodAdapter:
                                       or (mage_reselect is None and mage_reselect_trigger is None)):
             raise ValueError('mage_pool: a pool factor >= 2 for re-selections (mage_reselect / trigger) of the FA4 '
                              'qblock_max selection with a token budget')
+        if mage_kcover is not None and (not 0.0 < float(mage_kcover) < 1.0 or not 0.0 <= float(mage_kq) <= 1.0
+                                        or int(mage_kmax) < int(mage_k) or mage_select != 'fa4'
+                                        or mage_granularity != 'qblock_max' or mage_keep_frac is not None):
+            raise ValueError('mage_kcover: a mass coverage in (0, 1) with a quantile in [0, 1] and mage_kmax >= mage_k, '
+                             'on the FA4 qblock_max selection with a token budget')
         if mage_trigger_relative and mage_reselect_trigger is None:
             raise ValueError('mage_trigger_relative rescales the progress signal: needs mage_reselect_trigger')
         if mage_clock_trace and mage_reselect_trigger is None:
@@ -353,6 +358,9 @@ class VllmMethodAdapter:
         # round 5: two-level selection -- the step-1 dense observation also marks a pool of mage_pool x k tiles per
         # unit; re-selections observe inside the block-sparse kernel over that pool (_mage_select_pool).
         self.mage_pool, self._last_pool = (None if mage_pool is None else int(mage_pool)), None
+        # round 6: coverage-calibrated balanced budget -- see _coverage_tiles
+        self.mage_kcover = None if mage_kcover is None else float(mage_kcover)
+        self.mage_kq, self.mage_kmax = float(mage_kq), int(mage_kmax)
         # round 4c: in-budget protection -- the first mage_sink prefix tiles (attention sink) and the last mage_recent
         # prefix tokens (the most recently committed canvases) win every unit's top-k before the scored tiles, so each
         # unit still keeps exactly k tiles. Re-selections use the same protection.
@@ -996,6 +1004,8 @@ class VllmMethodAdapter:
         else:
             budget = self._k_override if self._k_override is not None else self.mage_k
             k_tiles = max(1, min(budget // 64, first_canvas_tile))
+            if self.mage_kcover is not None and self._k_override is None and first_canvas_tile:
+                k_tiles = self._coverage_tiles(head_lse, n, qb, first_canvas_tile, k_tiles)
         if self.mage_granularity != 'kvhead':
             kept = self._mage_units(mass, head_lse, H, n, qb, kt, first_canvas_tile, k_tiles, G)
             if self.mage_pool is not None:                                       # round 5: the candidate pool
@@ -1162,6 +1172,26 @@ class VllmMethodAdapter:
             self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * H * qb
             self.calls['mage_prefix_tiles'] += int(pt) * H * qb
         return kept
+
+    def _coverage_tiles(self, head_lse, n, qb, pt, k_min):
+        """One per-unit tile count for the canvas: every (query head, 128-row block) unit's prefix-tile distribution is
+        the row mean of the per-row prefix softmax; need_u = the top tiles covering mass mage_kcover; the result is the
+        mage_kq quantile of need_u clipped to [k_min, mage_kmax / 64] (and to the prefix). One host read."""
+        import math
+        H = head_lse.shape[0]
+        p = torch.softmax(head_lse.float(), -1)                                                  # [H, n, PT]
+        pad = qb * 128 - n
+        rows = torch.nn.functional.pad(torch.ones(n, device=p.device), (0, pad)).view(qb, 128).sum(-1)
+        unit = torch.nn.functional.pad(p, (0, 0, 0, pad)).view(H, qb, 128, pt).sum(2) / rows[None, :, None]
+        srt = unit.sort(-1, descending=True).values.cumsum(-1)                                   # [H, QB, PT]
+        need = (srt < self.mage_kcover).sum(-1) + 1                                              # [H, QB]
+        flat = need.flatten()
+        rank = max(1, min(flat.numel(), math.ceil(self.mage_kq * flat.numel())))        # nearest-rank quantile:
+        k = int(flat.kthvalue(rank).values.item())                                     # >= kq of the units covered
+        k = max(k_min, min(k, self.mage_kmax // 64, pt))
+        self.calls['kcover_tiles_sum'] = self.calls.get('kcover_tiles_sum', 0) + k
+        self.calls['kcover_selections'] = self.calls.get('kcover_selections', 0) + 1
+        return k
 
     @staticmethod
     def _split_tensors(kept, S):

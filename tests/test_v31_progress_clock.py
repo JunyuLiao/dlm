@@ -212,6 +212,26 @@ def test_pool_routes_reselections_and_is_stored_with_the_selection():
             pass
 
 
+def test_coverage_budget_is_one_balanced_k_per_canvas():
+    H, n, pt, qb = 16, 256, 400, 2
+    a = _adapter(mage_kcover=0.9, mage_kq=0.75, mage_kmax=16384)
+    peaked = torch.full((H, n, pt), -30.0)
+    peaked[..., 5] = 0.0                                           # all mass on one tile: k stays at the floor
+    assert a._coverage_tiles(peaked, n, qb, pt, 64) == 64
+    flat = torch.zeros(H, n, pt)                                   # uniform: 90% needs 360 tiles, capped at 256
+    assert a._coverage_tiles(flat, n, qb, pt, 64) == 256
+    mixed = flat.clone()
+    mixed[:12] = peaked[:12]                                       # 12 of 16 heads peaked -> the 0.75 quantile is peaked
+    k = a._coverage_tiles(mixed, n, qb, pt, 64)
+    assert k == 64 and a.calls['kcover_selections'] == 3
+    for bad in (dict(mage_kcover=1.0), dict(mage_kcover=0.9, mage_kmax=2048)):
+        try:
+            _adapter(**bad)
+            raise AssertionError(f'accepted {bad}')
+        except ValueError:
+            pass
+
+
 if __name__ == '__main__':
     import sys
     for name, fn in list(globals().items()):
