@@ -1233,11 +1233,13 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                 from experiments.numerical_qk_reuse.v31_logit_stats import accepted_from_entropy, row_stats
                 n_rows = a.step_ctx['n']
                 eb = float(signature.bind(*args, **kwargs).arguments['entropy_bound'])
-                acc = accepted_from_entropy(row_stats(scaled).entropy, eb)[0, :n_rows]
+                ent = (stats if stats is not None else row_stats(scaled)).entropy      # reuse the fused statistics
+                acc = (accepted if accepted is not None else accepted_from_entropy(ent, eb))[0, :n_rows]
                 a.calls['trigger_checks'] = a.calls.get('trigger_checks', 0) + 1
                 if float(acc.float().mean().item()) >= a.mage_reselect_trigger:
                     a._trig_canvas, a._trig_at = a.canvas_id, (a.canvas_id, a._canvas_step)
                     a.calls['triggers'] = a.calls.get('triggers', 0) + 1
+                    a.calls['trigger_step_sum'] = a.calls.get('trigger_step_sum', 0) + a._canvas_step
                     if a.mage_row_weight is not None:
                         a._mage_row_w = ((~acc).float() if a.mage_row_weight == 'cgate'
                                          else a._row_weight_from_logits(scaled, n_rows, eb))
