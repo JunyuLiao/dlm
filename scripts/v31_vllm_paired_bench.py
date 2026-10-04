@@ -98,7 +98,8 @@ def main():
                                                  trace_canvas=os.environ.get('TRACE') == '1',
                                                  dense_when=os.environ.get('DENSE_WHEN') or None,
                                                  regroup_diag=os.environ.get('REGROUP_DIAG') == '1',
-                                                 mage_critical=float(os.environ['MAGE_CRIT']) if os.environ.get('MAGE_CRIT') else None)
+                                                 mage_critical=float(os.environ['MAGE_CRIT']) if os.environ.get('MAGE_CRIT') else None,
+                                                 mage_coverage=float(os.environ['MAGE_COV']) if os.environ.get('MAGE_COV') else None)
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)

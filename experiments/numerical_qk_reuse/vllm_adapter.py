@@ -132,7 +132,8 @@ class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
                  canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024,
                  logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
-                 trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None):
+                 trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None,
+                 mage_coverage=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -183,6 +184,11 @@ class VllmMethodAdapter:
         # (mean mass over the canvas queries and the query heads of a KV head, top k) UNION the per-query-head
         # critical prefix tiles whose mass share reaches mage_critical for ANY row of a 128-row block
         self.mage_critical = None if mage_critical is None else float(mage_critical)
+        # v31 coverage-adaptive budget (named variant on the MAGE port, FA4 selection only): per KV head keep the
+        # fewest prefix tiles (at least mage_k / 64) whose mean mass, together with the always-kept canvas tiles,
+        # covers mage_coverage of the head's mean attention mass: concentrated heads stay at the floor, diffuse heads
+        # (aggregation over the whole context) keep more
+        self.mage_coverage = None if mage_coverage is None else float(mage_coverage)
         # diagnostic receipts (opt-in): denoising steps per canvas and the canvas mean token entropy per step, i.e.
         # the quantity the official sampler compares with its confidence threshold to stop a canvas
         self.trace_canvas = bool(trace_canvas)
@@ -674,10 +680,19 @@ class VllmMethodAdapter:
         score = mass.reshape(HK, G, n, kt).mean(dim=(1, 2))                                        # [HK, KT]
         k_tiles = max(1, min(self.mage_k // 64, first_canvas_tile))
         kept_kv = torch.zeros((HK, kt), device=q.device, dtype=torch.bool)
-        if first_canvas_tile:
+        if first_canvas_tile and self.mage_coverage is not None:
+            pre = score[:, :first_canvas_tile]                                                  # [HK, PT]
+            covered = score[:, first_canvas_tile:].sum(-1, keepdim=True)                       # canvas mass
+            srt, order = pre.sort(-1, descending=True)
+            need = ((covered + srt.cumsum(-1)) < self.mage_coverage).sum(-1) + 1                 # tiles to reach p
+            need = need.clamp(min=k_tiles, max=first_canvas_tile)
+            sel = torch.arange(first_canvas_tile, device=q.device)[None] < need[:, None]
+            kept_kv[:, :first_canvas_tile].scatter_(1, order, sel)
+            self.calls['mage_kept_prefix_tiles'] += int(need.sum())
+        elif first_canvas_tile:
             kept_kv.scatter_(1, score[:, :first_canvas_tile].topk(k_tiles, dim=-1).indices, True)
+            self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * HK
         kept_kv[:, first_canvas_tile:] = True
-        self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * HK
         self.calls['mage_prefix_tiles'] += int(first_canvas_tile) * HK
         kept = kept_kv.repeat_interleave(G, 0)[None, :, None, :].expand(1, H, qb, kt).contiguous()
         if self.mage_critical is not None and first_canvas_tile:
