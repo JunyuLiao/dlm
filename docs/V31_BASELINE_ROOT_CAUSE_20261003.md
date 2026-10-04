@@ -1473,3 +1473,32 @@ PIECEWISE, which records its tokens with per-canvas reseeding.
 - Consequence: free-running comparisons of PIECEWISE sparse arms against the FULL reference carry an extra,
   attention-independent source of trajectory divergence. This is another reason to measure step inflation in
   forced mode, and to keep per-step cost (S/N) as the free-running speed measure.
+
+**Correction and the first sparse arms (12:40 UTC).** The zero noise floor above holds on mpk only.
+
+| arm, forced, LongBench-v2 64K + 96K | host | canvases | step ratio [95% CI] | per-canvas geo mean | token agreement |
+|---|---|---|---|---|---|
+| dense FULL (calibration) | mpk | 583 | 1.000 | 1.000 | 1.000 |
+| dense FULL (calibration) | dlm2 | 518 | 1.013 [0.989, 1.036] | 1.010 | 0.243 |
+| MAGE 4096 | mpk | 583 | 1.026 [1.005, 1.049] | 1.028 | 0.250 |
+| MAGE 4096 | dlm2 | 518 | 1.016 [0.993, 1.040] | 1.014 | 0.233 |
+| m2c | mpk | 583 | **1.101** [1.056, 1.153] | 1.068 | 0.218 |
+| m2c | dlm2 | 518 | **1.076** [1.030, 1.121] | 1.055 | 0.198 |
+
+- **On dlm2, dense FULL differs from dense PIECEWISE even on forced canvases** (agreement 0.24, 8/518 canvases
+  equal). Its step ratio, however, is not distinguishable from 1.
+  - The two hosts run identical vLLM / torch / FlashInfer / CUTLASS-DSL / Triton versions, the same driver and
+    VBIOS, and an identical `diffusion_gemma.py`.
+  - They differ in their cells (shards) and in their copies of the environment, the weights and the compile
+    caches. The cause is open.
+  - So the panel-z statement and the "boundary-only" reading above hold on mpk, not in general.
+- **Token agreement is cascade-sensitive.** One differing token changes the rest of the canvas's denoising context.
+  It is a valid fidelity ranking only on mpk, where the floor is 1.0. On dlm2 the floor is about 0.24.
+- **Step inflation on identical canvases is robust on both hosts.**
+  - m2c inflates the denoising steps by 7.6–10.1%, MAGE 4096 by 1.6–2.6%.
+  - This reverses the free-running estimates (m2c 1.048, MAGE 1.075), which were confounded by trajectory
+    divergence.
+  - It matches panel m's mechanism: m2c has canvases that linger near the convergence threshold. Junyu's
+    step-20 dense rescue (COLLABORATION CANDIDATE) targets exactly this, and its fc arm follows.
+  - For the lean candidate (MAGE-port machinery, balanced, held selection), the step inflation is measured by the
+    `qbm_step1_carry0/1` arms.
