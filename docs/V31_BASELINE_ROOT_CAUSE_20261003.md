@@ -1896,3 +1896,27 @@ all-kept:
    - Question: does a re-observation also cut step inflation? Fewer denoising steps would be a speed lever beyond the
      attention share of the step.
 3. The S1s short part with eight arms (T0 included).
+
+## Kernel launch geometry and SM use (nsys, mpk) — 2026-10-04 21:45 UTC
+
+- Hardware counters are admin-only on both hosts (`RmProfilingAdminOnly: 1`), so ncu cannot run. nsys can still
+  trace every kernel's grid, block, registers and shared memory.
+- Source: `nsys profile --trace=cuda` of `v31_sparse_kernel_audit.py` (synthetic tensors, 64K / 128K keys).
+  Summary: `results/v31_20261003/panels/fa4_grid_summary.json`.
+- Every FA4 SM90 forward kernel, dense and block-sparse, has the same footprint:
+  - 384 threads × 168 registers = 64,512 registers, against a 65,536-register file per SM;
+  - 211 KB of dynamic shared memory, against 228 KB per SM;
+  - so exactly **one CTA per SM**.
+- Launch grids:
+  - vLLM's dense call: (64, 2, 1) = 128 CTAs;
+  - our block-sparse call (per query head lists, alias splits S = 2): (4, 16, 2) = 128 CTAs;
+  - both run one wave on the 132 SMs with **97% SM coverage**. S = 4 gives 256 CTAs in 2 full waves.
+- Inside a wave, the kernel's time is that of its longest CTA:
+  - equal per-unit budgets give equal CTA lengths. At 128K, keeping 6.25% / 12.5% of the tiles takes 0.20–0.22 /
+    0.38–0.41 ms against 2.82–2.95 ms all-kept, which is 85–90% of linear scaling;
+  - a skewed map at the same mean kept fraction takes 3.5–6× longer at 64K (0.41–0.72 vs 0.11–0.13 ms);
+  - this is the measured basis of the balanced-budget rule.
+- Fairness:
+  - dense and sparse arms run the same kernel family with the same occupancy and the same CTA count;
+  - the sparse path's all-kept call is 0.85–0.89× the dense call (S = 2 splits);
+  - end to end, all-kept is within about 1–2% of dense (ak), because the split merge and list build cost it back.

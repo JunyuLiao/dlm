@@ -1,0 +1,168 @@
+{
+ "source": "nsys 2025.5.2 cuda_gpu_trace of v31_sparse_kernel_audit.py (synthetic tensors, 64K/128K keys), mpk H100 132 SMs",
+ "note": "ctas_per_sm = 1: 384 threads x 168 regs = 64512 registers (the SM register file is 65536) and 206 KB dynamic shared memory (228 KB per SM)",
+ "kernels": [
+  {
+   "grid": [
+    4,
+    16,
+    2
+   ],
+   "ctas": 128,
+   "threads": 384,
+   "regs_per_thread": 168,
+   "dyn_smem_kb": 210.9,
+   "ctas_per_sm": 1,
+   "waves_on_132": 1,
+   "sm_coverage": 0.97,
+   "launches": 1244,
+   "ms_p50": 0.3954,
+   "ms_min": 0.0593,
+   "ms_max": 2.999
+  },
+  {
+   "grid": [
+    4,
+    16,
+    4
+   ],
+   "ctas": 256,
+   "threads": 384,
+   "regs_per_thread": 168,
+   "dyn_smem_kb": 210.9,
+   "ctas_per_sm": 1,
+   "waves_on_132": 2,
+   "sm_coverage": 0.97,
+   "launches": 420,
+   "ms_p50": 0.3795,
+   "ms_min": 0.1056,
+   "ms_max": 2.9358
+  },
+  {
+   "grid": [
+    64,
+    2,
+    1
+   ],
+   "ctas": 128,
+   "threads": 384,
+   "regs_per_thread": 168,
+   "dyn_smem_kb": 210.9,
+   "ctas_per_sm": 1,
+   "waves_on_132": 1,
+   "sm_coverage": 0.97,
+   "launches": 224,
+   "ms_p50": 0.9928,
+   "ms_min": 0.1146,
+   "ms_max": 3.4805
+  },
+  {
+   "grid": [
+    32,
+    1,
+    2
+   ],
+   "ctas": 64,
+   "threads": 384,
+   "regs_per_thread": 168,
+   "dyn_smem_kb": 210.9,
+   "ctas_per_sm": 1,
+   "waves_on_132": 1,
+   "sm_coverage": 0.485,
+   "launches": 112,
+   "ms_p50": 2.3254,
+   "ms_min": 1.0854,
+   "ms_max": 4.02
+  },
+  {
+   "grid": [
+    4,
+    8,
+    2
+   ],
+   "ctas": 64,
+   "threads": 384,
+   "regs_per_thread": 168,
+   "dyn_smem_kb": 210.9,
+   "ctas_per_sm": 1,
+   "waves_on_132": 1,
+   "sm_coverage": 0.485,
+   "launches": 112,
+   "ms_p50": 2.304,
+   "ms_min": 1.0726,
+   "ms_max": 3.8208
+  },
+  {
+   "grid": [
+    32,
+    1,
+    4
+   ],
+   "ctas": 128,
+   "threads": 384,
+   "regs_per_thread": 168,
+   "dyn_smem_kb": 210.9,
+   "ctas_per_sm": 1,
+   "waves_on_132": 1,
+   "sm_coverage": 0.97,
+   "launches": 112,
+   "ms_p50": 1.2724,
+   "ms_min": 0.5991,
+   "ms_max": 2.0723
+  },
+  {
+   "grid": [
+    4,
+    8,
+    4
+   ],
+   "ctas": 128,
+   "threads": 384,
+   "regs_per_thread": 168,
+   "dyn_smem_kb": 210.9,
+   "ctas_per_sm": 1,
+   "waves_on_132": 1,
+   "sm_coverage": 0.97,
+   "launches": 112,
+   "ms_p50": 1.1926,
+   "ms_min": 0.5579,
+   "ms_max": 2.1554
+  },
+  {
+   "grid": [
+    64,
+    1,
+    1
+   ],
+   "ctas": 64,
+   "threads": 384,
+   "regs_per_thread": 168,
+   "dyn_smem_kb": 210.9,
+   "ctas_per_sm": 1,
+   "waves_on_132": 1,
+   "sm_coverage": 0.485,
+   "launches": 84,
+   "ms_p50": 0.608,
+   "ms_min": 0.2028,
+   "ms_max": 6.4065
+  },
+  {
+   "grid": [
+    64,
+    16,
+    1
+   ],
+   "ctas": 1024,
+   "threads": 384,
+   "regs_per_thread": 168,
+   "dyn_smem_kb": 210.9,
+   "ctas_per_sm": 1,
+   "waves_on_132": 8,
+   "sm_coverage": 0.97,
+   "launches": 84,
+   "ms_p50": 2.1945,
+   "ms_min": 1.4778,
+   "ms_max": 2.9573
+  }
+ ]
+}
