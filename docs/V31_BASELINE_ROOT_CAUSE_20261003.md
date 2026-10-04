@@ -1702,3 +1702,23 @@ Chain: `results/v31_20261003/panels/bs_chain.sh`. On mpk, vkb (the kernel microb
 
 The result is reported as registered: no difference between arms on this column. Table:
 `results/v31_20261003/panels/stageA_longbench_0shot.md`.
+
+## STAGE A RESULT — MRCR 2-needle (official SequenceMatcher ratio, 24 per bin), 18:20 UTC
+
+| arm | 32K bin | 64K bin | 128K bin | mean of bins |
+|---|---|---|---|---|
+| dense FULL | 0.454 | 0.239 | 0.179 | 0.290 |
+| lean 4096 | 0.329 (−0.124 [−0.272, +0.018]) | 0.170 (−0.069 [−0.153, −0.002]) | 0.176 (−0.003) | 0.225 |
+| MAGE 4096 | 0.303 (−0.151 [−0.260, −0.055]) | 0.146 (−0.093 [−0.221, +0.011]) | 0.165 (−0.014) | 0.205 |
+| lean 2048 | 0.285 (−0.169) | 0.190 (−0.049) | 0.166 (−0.013) | 0.214 |
+
+- Both sparse selectors lose clearly on MRCR, most at 32K, where 4096 tokens are 12.5% of the prefix. MRCR asks for
+  a verbatim reproduction of one earlier long response among similar ones, which needs attention over the whole
+  target span, not a few high-mass tiles.
+- The lean candidate is above MAGE in the 32K and 64K bins, but not significantly per bin at n = 24. It recovers
+  about a quarter of MAGE's loss on the bin mean.
+- At 128K even dense is near the floor (0.18), so that bin hardly discriminates.
+- A limitation for the paper, and a target for variants: long verbatim retrieval needs span coverage (for example
+  contiguous neighbours of selected tiles) or a larger budget. Panel bs maps budget only on RULER.
+
+Table: `results/v31_20261003/panels/stageA_mrcr.md`.
