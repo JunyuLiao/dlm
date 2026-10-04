@@ -101,6 +101,36 @@ def test_invalid_configurations_are_refused():
         pass
 
 
+def test_query_sensitivity_family_weights():
+    a = _adapter(mage_select_step=1, mage_reselect=[4], mage_row_weight='margin')
+    scaled = torch.full((1, 3, 5), -10.0)
+    scaled[0, 0, 0], scaled[0, 0, 1] = 6.0, 1.0          # clear winner: margin 5 -> 1 + 3 / 6 = 1.5
+    scaled[0, 1, 0], scaled[0, 1, 1] = 2.0, 2.0          # tie at the top: margin 0 -> 1 + 3 = 4
+    w = a._row_weight_from_logits(scaled, 2, entropy_bound=1.0)
+    assert abs(float(w[0]) - 1.5) < 1e-4 and abs(float(w[1]) - 4.0) < 1e-4
+    t = _adapter(mage_select_step=1, mage_reselect=[4], mage_row_weight='temporal')
+    t._mage_prev_argmax = torch.tensor([0, 3, 0])        # row 0 kept its argmax, row 1 flipped
+    w = t._row_weight_from_logits(scaled, 2, entropy_bound=1.0)
+    assert float(w[0]) == 1.0 and float(w[1]) == 4.0
+    mt = _adapter(mage_select_step=1, mage_reselect=[4], mage_row_weight='mt')
+    mt._mage_prev_argmax = torch.tensor([0, 3, 0])
+    w = mt._row_weight_from_logits(scaled, 2, entropy_bound=1.0)
+    assert abs(float(w[0]) - math.sqrt(1.5 * 1.0)) < 1e-4 and abs(float(w[1]) - 4.0) < 1e-4
+    nohist = _adapter(mage_select_step=1, mage_reselect=[4], mage_row_weight='temporal')
+    assert bool((nohist._row_weight_from_logits(scaled, 2, entropy_bound=1.0) == 4.0).all())   # no history: all count
+
+
+def test_reselection_budget_override():
+    a = _adapter(mage_select_step=1, mage_reselect=[3], mage_reselect_k=64 * 3)
+    assert a.mage_reselect_k == 192
+    for bad in (dict(mage_select_step=1, mage_reselect_k=256), dict(mage_select_step=1, mage_reselect=[3], mage_reselect_k=32)):
+        try:
+            _adapter(**bad)
+            raise AssertionError(f'accepted {bad}')
+        except ValueError:
+            pass
+
+
 if __name__ == '__main__':
     import sys
     for name, fn in list(globals().items()):
