@@ -15,6 +15,12 @@ cd $W
 until grep -q '^done ' $W/status_sc1chain 2>/dev/null; do sleep 30; done
 until [ "$(nvidia-smi --query-compute-apps=pid --format=csv,noheader | wc -l)" = "0" ]; do sleep 10; done
 O=$W/ov_pa4; S=$W/sc1
+if [ "${POOLCHECK:-0}" = 1 ]; then          # round 5 GPU check (pool observation vs dense observation), ~3 min
+  C=$W/cache
+  ( cd $ROOT/deploy/v27_r17_6064109 && PYTHONPATH=src:. PYTHONNOUSERSITE=1 V27_ADAPTER_DIR=$O TRITON_CACHE_DIR=$C/triton     TVM_FFI_CACHE_DIR=$C/tvm CUDA_CACHE_PATH=$C/cuda CUTE_DSL_CACHE_DIR=$C/cute FLASH_ATTENTION_CUTE_DSL_CACHE_DIR=$C/facute     TMPDIR=$C/tmp XDG_CACHE_HOME=$C/xdg timeout 1200 $PY $O/v31_pool_observe_check.py $W/pool_check.jsonl ) > $W/pool_check.log 2>&1
+  echo "poolcheck rc=$? $(date -u)" >> $W/status_sc1xchain
+  until [ "$(nvidia-smi --query-compute-apps=pid --format=csv,noheader | wc -l)" = "0" ]; do sleep 10; done
+fi
 FAST="LOGIT_STATS=fused DP_BUILD=chunked OBSERVE=fa4 KV_COPY=triton MERGE=triton MAGE_SELECT=fa4"
 LEAN="MAGE_GRAN=qblock_max MAGE_STEP=1 MAGE_CARRY=1"
 run() {  # PART NAME BUDGET(dense|tokens) EXTRA...
