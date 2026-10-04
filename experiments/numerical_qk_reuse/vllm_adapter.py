@@ -143,7 +143,8 @@ class VllmMethodAdapter:
                  risk_group=None, mage_reselect=None, mage_row_weight=None, mage_beta=3.0, mage_reselect_k=None,
                  mage_reselect_trigger=None, mage_trigger_signal='accept', mage_reselect_kmin=None,
                  mage_cg_tau=2.5, mage_cg_gamma_q=0.65, mage_clock_trace=False, mage_sink=0, mage_recent=0,
-                 mage_trigger_relative=False, mage_pool=None, mage_kcover=None, mage_kq=0.75, mage_kmax=16384):
+                 mage_trigger_relative=False, mage_pool=None, mage_kcover=None, mage_kq=0.75, mage_kmax=16384,
+                 cg_stop=None, stall_rescue=None, stall_eps=0.01):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -210,6 +211,10 @@ class VllmMethodAdapter:
                                         or mage_granularity != 'qblock_max' or mage_keep_frac is not None):
             raise ValueError('mage_kcover: a mass coverage in (0, 1) with a quantile in [0, 1] and mage_kmax >= mage_k, '
                              'on the FA4 qblock_max selection with a token budget')
+        if cg_stop is not None and int(cg_stop) < 1:
+            raise ValueError('cg_stop: a stable-run length >= 1 (steps)')
+        if stall_rescue is not None and (int(stall_rescue) < 1 or arm not in ('method', 'mage') or float(stall_eps) < 0):
+            raise ValueError('stall_rescue: a step count >= 1 on a sparse arm (method / mage)')
         if mage_trigger_relative and mage_reselect_trigger is None:
             raise ValueError('mage_trigger_relative rescales the progress signal: needs mage_reselect_trigger')
         if mage_clock_trace and mage_reselect_trigger is None:
@@ -358,6 +363,12 @@ class VllmMethodAdapter:
         # round 5: two-level selection -- the step-1 dense observation also marks a pool of mage_pool x k tiles per
         # unit; re-selections observe inside the block-sparse kernel over that pool (_mage_select_pool).
         self.mage_pool, self._last_pool = (None if mage_pool is None else int(mage_pool)), None
+        # round 7: C gate as step control (_cg_track / _cg_stop / _stall_check)
+        self.cg_stop = None if cg_stop is None else int(cg_stop)
+        self.stall_rescue = None if stall_rescue is None else int(stall_rescue)
+        self.stall_eps = float(stall_eps)
+        self._cg = self._cg_canvas = None
+        self._stall_best, self._stall_since = -1.0, 0
         # round 6: coverage-calibrated balanced budget -- see _coverage_tiles
         self.mage_kcover = None if mage_kcover is None else float(mage_kcover)
         self.mage_kq, self.mage_kmax = float(mage_kq), int(mage_kmax)
@@ -450,6 +461,8 @@ class VllmMethodAdapter:
         self._trig_canvas, self._trig_at = None, None
         self._trig_count, self._trig_k, self._jc = 0, None, None
         self._clock, self._trig_phi0 = [], None
+        self._cg = self._cg_canvas = None
+        self._stall_best, self._stall_since = -1.0, 0
         self._tile_means, self._residual_tiles, self._guard_cache = {}, 0, []
         self._drift_prev, self._drift_acc = {}, None
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
@@ -1099,6 +1112,53 @@ class VllmMethodAdapter:
         elif mode is not None:
             self._mage_row_w = self._row_weight_from_logits(scaled, n_rows, entropy_bound)
 
+    def _cg_track(self, argmax, p_top, acc):
+        """Junyu's C-gate histories for the canvas in flight, updated once per denoising step (device ops only):
+        returns (settledness g (1 - q) (1 - u), stable run r), both [n_rows]."""
+        if self._cg_canvas != self.canvas_id:
+            self._cg_canvas, self._cg, self._stall_best, self._stall_since = self.canvas_id, None, -1.0, 0
+        accf = acc.float()
+        cg = self._cg
+        q = torch.ones_like(p_top, dtype=torch.float32) if cg is None else cg['q']
+        r = torch.zeros_like(p_top, dtype=torch.float32) if cg is None else cg['r']
+        q = self.mage_cg_gamma_q * q + (1 - self.mage_cg_gamma_q) * (1 - accf)
+        stay = (r + 1) * accf
+        r = stay if cg is None else torch.where(argmax != cg['prev'], torch.zeros_like(stay), stay)
+        u = (1 - p_top.float()).clamp_min(0).sqrt()
+        self._cg = dict(q=q, r=r, prev=argmax)
+        return (1 - torch.exp(-r / self.mage_cg_tau)) * (1 - q) * (1 - u), r
+
+    def _cg_stop(self, args, r):
+        """cg_stop: after the official sample step (args = its bound arguments), converge the canvas when every row's
+        stable run reached cg_stop and the official rule has not converged it. One host read of two flags."""
+        slot = args['decode_slots'][:1]
+        phase = args['is_encoder_phase']
+        ready, done = torch.stack([(r >= self.cg_stop).all(), phase[slot][0]]).tolist()
+        self.calls['cg_stop_checks'] = self.calls.get('cg_stop_checks', 0) + 1
+        if not ready or done:
+            return False
+        CL = int(args['CL'])
+        phase[slot] = True                                                   # commit next, as a converged canvas
+        args['canvas'][slot] = args['argmax_canvas'][slot]
+        args['draft_tokens'][slot, :CL] = args['canvas'][slot]
+        args['sc_embeds'][slot] = 0
+        self.calls['cg_stops'] = self.calls.get('cg_stops', 0) + 1
+        self.calls['cg_stop_step_sum'] = self.calls.get('cg_stop_step_sum', 0) + getattr(self, '_canvas_step', 0)
+        return True
+
+    def _stall_check(self, settled):
+        """stall_rescue: dense GLOBAL attention for the rest of the canvas once its mean settledness has not risen by
+        more than stall_eps for stall_rescue steps. One host read per step until the rescue starts."""
+        m = float(settled.mean().item())
+        if m > self._stall_best + self.stall_eps:
+            self._stall_best, self._stall_since = m, 0
+            return
+        self._stall_since += 1
+        if self._stall_since >= self.stall_rescue:
+            self._dense_next = True                                          # held until the canvas commits
+            self.calls['stall_rescues'] = self.calls.get('stall_rescues', 0) + 1
+            self.calls['stall_rescue_step_sum'] = self.calls.get('stall_rescue_step_sum', 0) + getattr(self, '_canvas_step', 0)
+
     def _clock_receipt(self):
         return dict(clock_trace=self._clock) if self.mage_clock_trace else {}
 
@@ -1475,6 +1535,17 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                 rs = stats if stats is not None else row_stats(scaled)                 # reuse the fused statistics
                 acc = (accepted if accepted is not None else accepted_from_entropy(rs.entropy, eb))[0, :n_rows]
                 a._progress_observe(rs.argmax[0, :n_rows], (rs.max - rs.lse).exp()[0, :n_rows], acc, scaled, n_rows, eb)
+            if a.cg_stop is not None or (a.stall_rescue is not None and not a._dense_next):
+                from experiments.numerical_qk_reuse.v31_logit_stats import accepted_from_entropy, row_stats
+                n_rows = a.step_ctx['n']
+                bound = signature.bind(*args, **kwargs).arguments
+                rs = stats if stats is not None else row_stats(scaled)
+                acc = (accepted if accepted is not None
+                       else accepted_from_entropy(rs.entropy, float(bound['entropy_bound'])))[0, :n_rows]
+                settled, run = a._cg_track(rs.argmax[0, :n_rows], (rs.max - rs.lse).exp()[0, :n_rows], acc)
+                stopped = a._cg_stop(bound, run) if a.cg_stop is not None else False
+                if a.stall_rescue is not None and not a._dense_next and not stopped:
+                    a._stall_check(settled)
             if (a.arm == 'mage' and a.mage_row_weight is not None and a.mage_reselect is not None
                     and a._canvas_step in a.mage_reselect):                 # the next step re-selects: weigh its rows
                 a._mage_row_w = a._row_weight_from_logits(

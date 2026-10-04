@@ -232,6 +232,51 @@ def test_coverage_budget_is_one_balanced_k_per_canvas():
             pass
 
 
+def test_cg_stop_converges_a_canvas_once_every_row_is_stably_accepted():
+    a = VllmMethodAdapter(TYPES, arm='native', cg_stop=2)
+    a.canvas_id, a._canvas_step = 1, 0
+    n, CL = 4, 4
+    args = dict(decode_slots=torch.tensor([3]), is_encoder_phase=torch.zeros(5, dtype=torch.bool),
+                canvas=torch.zeros(5, CL, dtype=torch.long), argmax_canvas=torch.full((5, CL), 7, dtype=torch.long),
+                draft_tokens=torch.zeros(5, CL + 2, dtype=torch.long), sc_embeds=torch.ones(5, CL, 3), CL=CL)
+    p_top = torch.full((n,), 0.99)
+    seq = [(torch.tensor([1, 2, 3, 4]), torch.tensor([True, True, False, True])),
+           (torch.tensor([1, 2, 3, 4]), torch.tensor([True, True, True, True])),
+           (torch.tensor([1, 2, 3, 5]), torch.tensor([True, True, True, True])),     # row 3 flips: its run resets
+           (torch.tensor([1, 2, 3, 5]), torch.tensor([True, True, True, True])),
+           (torch.tensor([1, 2, 3, 5]), torch.tensor([True, True, True, True]))]
+    stops = []
+    for step, (arg, acc) in enumerate(seq, 1):
+        a._canvas_step = step
+        _, run = a._cg_track(arg, p_top, acc)
+        stops.append(a._cg_stop(args, run))
+    assert stops == [False, False, False, False, True]             # row 3's run restarts at its flip (step 3)
+    assert bool(args['is_encoder_phase'][3]) and not bool(args['is_encoder_phase'][2])
+    assert bool((args['canvas'][3] == 7).all()) and bool((args['draft_tokens'][3, :CL] == 7).all())
+    assert float(args['sc_embeds'][3].abs().sum()) == 0.0 and float(args['sc_embeds'][2].sum()) == 12.0
+    assert a.calls['cg_stops'] == 1 and a.calls['cg_stop_step_sum'] == 5
+    args['is_encoder_phase'][3] = True                             # already converged by the official rule: no-op
+    assert a._cg_stop(args, run) is False and a.calls['cg_stops'] == 1
+
+
+def test_stall_rescue_turns_dense_after_s_flat_steps():
+    a = _adapter(stall_rescue=2, stall_eps=0.01)
+    for m in (0.1, 0.3, 0.305, 0.31):                                # rises, then two flat steps
+        a._stall_check(torch.full((4,), m))
+    assert a._dense_next is True and a.calls['stall_rescues'] == 1
+    for bad in (dict(stall_rescue=0),):
+        try:
+            _adapter(**bad)
+            raise AssertionError(f'accepted {bad}')
+        except ValueError:
+            pass
+    try:
+        VllmMethodAdapter(TYPES, arm='native', stall_rescue=3)
+        raise AssertionError('stall rescue accepted on the native arm')
+    except ValueError:
+        pass
+
+
 if __name__ == '__main__':
     import sys
     for name, fn in list(globals().items()):
