@@ -1069,3 +1069,40 @@ fidelity of the lean candidate follow in the next panel, at the chosen budget.
   RULER they bought no accuracy (+0.78 vs +0.83).
 - The lean candidate is the efficient form of the method's selection. Its per-step cost scales with the kept
   tiles like MAGE's.
+
+## Panel gb: at MAGE's own budget the lean candidate is 3.4–4.0 points better — 2026-10-04 11:35 UTC
+
+RULER v31 pool, 174 panel-x cells (both hosts), official score. Dense FULL is 83.8. Table:
+`results/v31_20261003/panels/ruler_gb_official.md`.
+- Every arm keeps the same number of prefix tiles per unit: the token budget / 64. That gives equal, balanced
+  held-call cost.
+- Realized decode kept fraction and GLOBAL work come from the receipts.
+
+| arm | sparse kept | work | official | cwe | diff vs dense [95% CI] |
+|---|---|---|---|---|---|
+| **4096, max share per (head, block), step 1 (lean candidate)** | 0.084 | 0.398 | **84.0** | 80.0 | **+0.14** [−1.44, +2.01] |
+| 4096, max share, step 0 | 0.084 | 0.395 | 82.5 | 79.3 | −1.35 [−3.65, +0.92] |
+| 4096, MAGE's mean mass per KV head, step 1 | 0.085 | 0.405 | 83.1 | 78.6 | −0.69 [−2.67, +1.38] |
+| 4096, MAGE as published (mean, step 0) | 0.084 | 0.401 | 80.6 | 62.9 | −3.25 [−6.12, −0.69] |
+| **2048, max share, step 1** | 0.044 | 0.373 | **82.7** | 72.1 | **−1.21** [−3.25, +0.83] |
+| 2048, MAGE as published | 0.042 | 0.372 | 78.7 | 45.7 | −5.20 [−8.33, −2.21] |
+| MAGE 6144 | 0.125 | 0.430 | 81.6 | 75.0 | −2.27 |
+| MAGE 8192 | 0.167 | 0.457 | 83.1 | 83.6 | −0.72 |
+
+**Reading.**
+- At identical budget, kept fraction and work, the lean candidate beats MAGE by **+3.39** official points at 4096
+  and **+3.99** at 2048. At 4096 it is within noise of dense.
+- MAGE needs 8192 tokens (twice the tiles) to come within 0.9 points of the lean candidate at 4096. MAGE 8192 is
+  about level with the lean candidate at 2048 (a quarter of MAGE's tiles).
+- Both components count. On the 2 × 2 at 4096:
+  - observing at step 1 instead of step 0: +2.56 with MAGE's statistic, +1.49 with ours;
+  - the per-(head, block) worst-row max share instead of the KV-head mean: +1.90 at step 0, +0.87 at step 1.
+- On multi-canvas outputs, step-1 selection costs no extra dense call: call 0 runs on the carried selection
+  (verified in panel gsl). On RULER's one-canvas answers the work is still matched (0.398 vs 0.401).
+- Exploratory, on the reused v31 pool. The final claim needs the pre-registered confirmation: fresh RULER v33
+  official pool, official LongBench-v2, the other suite datasets, and fresh seeds.
+- Next:
+  - per-step cost and end-to-end speed of the lean candidate at 4096 against MAGE 4096 on LongBench-v2 (equal by
+    construction, to be measured);
+  - fc's step-inflation numbers;
+  - then the confirmation design.
