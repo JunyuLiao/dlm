@@ -991,3 +991,34 @@ unit. Dense is 83.8. Table: `results/v31_20261003/panels/ruler_gs_official.md`.
   - fc drops its kv arm and adds the MAGE-port `qblock_max` step-1 unit without and with the carry.
 - Control check: x was reproduced on 173/174 cells (see above). The one cell that differs does not change any
   score.
+
+## The lean candidate and the budget-matched comparison with MAGE (panel gb, queued 10:30 UTC)
+
+**Where m2c's GLOBAL time goes per canvas** (64K, about 15 steps; per-call costs from the profile, 5 layers):
+
+| component | m2c | MAGE k=4096 |
+|---|---|---|
+| held calls | about 20 ms (0.334 ms each) | about 11 ms |
+| observation / selection | 12.6 ms | 11.4 ms |
+| re-decisions every 6 steps | about 10.4 ms | – |
+| carried first call | 3.4 ms | – |
+| total | about 46 ms (2.96 ms per step) | about 22.5 ms |
+
+Re-decisions buy no accuracy at 12%: on RULER, the MAGE-port per-head max-share unit selected once at step 1 and held
+scores +0.83, against +0.78 for k12 mass with re-decisions.
+
+**Lean candidate.**
+- One exact observation per canvas, at step 1.
+- Per (query head, 128-row block): the top-k prefix tiles by worst-row prefix-mass share, with equal k for every
+  unit, so CTA loads are balanced.
+- The selection is held for the canvas. Call 0 of the next canvas reuses it (carry).
+
+At MAGE's token budget, its held call costs the same as MAGE's, so the per-step cost should match. Any accuracy
+difference is then the method, not compute.
+
+**Panel gb.** RULER v31 x cells, both hosts. A 2 × 2 at 4096 tokens:
+- statistic: MAGE's mean mass per KV head, or the per-(head, block) worst-row max share;
+- selection time: step 0 or step 1.
+
+MAGE 4096 at step 0 is the existing arm. Panel gb also adds the max-share unit at step 1 with 2048 tokens. Speed and
+fidelity of the lean candidate follow in the next panel, at the chosen budget.
