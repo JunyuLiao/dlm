@@ -173,7 +173,7 @@ RULER_FILES = ('scripts/eval/synthetic/constants.py', 'scripts/synthetic.yaml', 
                'scripts/pred/call_api.py', 'scripts/eval/evaluate.py')
 # What a model's non-thinking turn emits before its visible answer, after the chat template's generation prompt.
 # DiffusionGemma (Gemma 4 turn format): an empty thought block; 3972 / 3975 non-thinking RULER completions of the v31
-# panels begin with exactly this text (the other 3 open it and never close it), none with any other text.
+# panels begin with exactly this text (the other 3 open it and stop without closing it), none with any other text.
 RESPONSE_OPENER = {'diffusion_gemma': '<|channel>thought\n<channel|>'}
 
 

@@ -272,7 +272,7 @@ def build_ruler(a, logf):
                        generation_prompt_ids=tok.encode('<|turn>model\n', add_special_tokens=False),
                        answer_prefix='verbatim RULER answer_prefix (leading space kept, as RULER sends it)',
                        opener_evidence='3972 / 3975 non-thinking RULER completions of the v31 panels open with exactly the '
-                                       'opener; the other 3 open it and never close it (length cap)'),
+                                       'opener; the other 3 open it and stop without closing it'),
         row_format=dict(keys=sorted(meta[RULER_LENGTHS[0][1]]['rows'][0]),
                         prompt='RULER sample input (the user-turn text, answer prefix removed)',
                         prompt_tokens='encode_prompt(prompt, thinking off) + tokenizer.encode(response_prefill, add_special_tokens=False)',
