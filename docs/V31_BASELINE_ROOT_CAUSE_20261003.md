@@ -572,3 +572,43 @@ Pool:
   - The method's worst-row selection keeps the QA evidence that MAGE's mean-over-queries fixed top-k drops.
   - Aggregation tasks are a shared weakness of sparse GLOBAL attention here.
   - This is the first accuracy result that separates the method from MAGE; the dlm2 shard completes it.
+
+## Confirmation set and RULER, complete (all three shards) — 2026-10-04 03:35 UTC
+
+LongBench-v2 confirmation (`results/v31_20261003/panels/confirmation_q_full.md`; 72 / 72 / 22 cells, new seeds):
+
+| arm | 32K W | 32K correct | 64K W | 64K correct | 96K W | 96K correct |
+|---|---|---|---|---|---|---|
+| dense (ref) | 1 | 45/72 | 1 | 40/72 | 1 | 11/22 |
+| MAGE k=4096 | **0.960** | 49 | 0.887 [0.82, 0.96] | 42 | **0.750** [0.62, 0.89] | 13 |
+| MAGE k=4096 + rescue | 0.962 | 50 | 0.898 | 40 | 0.863 | 11 |
+| m2c | 1.035 | 43 | 0.904 [0.84, 0.97] | 38 | 0.839 [0.73, 0.96] | 8 |
+| m2c + rescue | 1.022 | 45 | **0.870** [0.80, 0.94] | 38 | 0.907 | 9 |
+| mass k5 + rescue | 1.098 | 44 | 0.959 | 42 | 0.744 | 12 |
+
+RULER, complete (260 cells; `results/v31_20261003/panels/ruler31_scores_correct_bool.json`):
+
+| arm | 32K | 64K | lost / gained vs dense | McNemar p | cwe | qa (1+2) | multivalue |
+|---|---|---|---|---|---|---|---|
+| dense | 109/130 | 106/130 | – | – | 16/20 | 25/40 | 14/20 |
+| m2c (± rescue) | 106 | 100 | 13 / 4 | 0.049 | 4/20 | 26/40 | 16/20 |
+| MAGE k=4096 (± rescue) | 103 | 99 | 17 / 4 | 0.007 | 3/20 | 23/40 | 16/20 |
+
+**Correction of the interim RULER reading:**
+- With the third shard, m2c vs MAGE is no longer significant: 6 vs 2 cells correct by one only, p = 0.29.
+- Both sparse arms lose significantly against dense, and almost all of it is **common-words extraction (cwe)**, an
+  aggregation over the whole context. Without cwe the arms are equal: dense 199/240, m2c 202, MAGE 199.
+
+**Overall status:**
+1. Sparse GLOBAL attention gives significant end-to-end gains against the official fixed FULL-graph dense at 64K and
+   96K.
+2. MAGE (fixed shared budget) and the method are comparable in speed and accuracy. MAGE is faster at 32K / 96K, the
+   method with rescue at 64K.
+3. The accuracy weakness common to both is aggregation, where attention is diffuse.
+
+**Next (in progress):**
+- Panel s: a two-level selection that adds critical tiles to MAGE's budget. τ = 0.05 adds about 2% of tiles and
+  recovers nothing (RULER 130/174 vs MAGE 129/174), so the QA losses are not single missed tiles.
+- Panel t: RULER at matched kept fractions.
+- Next variant: a coverage-adaptive budget (keep the fewest tiles covering p of each row's or head's mass), which
+  targets the diffuse-attention failure mode.
