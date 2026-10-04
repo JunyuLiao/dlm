@@ -1521,3 +1521,30 @@ PIECEWISE, which records its tokens with per-canvas reseeding.
 - The step-20 dense rescue (Junyu Liao's idea, COLLABORATION CANDIDATE) also repairs the threshold selector (8
   stuck), at the price of dense steps.
 - The lean candidate is a fixed-budget selector. Its forced inflation, with and without the carry, is measured next.
+
+**Panel fc complete (13:15 UTC): the lean candidate inflates least.**
+
+| arm (forced, 1101 canvases) | step ratio mpk / dlm2 [95% CI] | stuck (≥ 40 steps) | token agreement, mpk (floor 1.0) | kept | work |
+|---|---|---|---|---|---|
+| lean candidate 12%, no carry | 1.009 [0.988, 1.030] / 1.021 [0.999, 1.042] | 6 | **0.272** | 0.121 | 0.239 |
+| lean candidate 12% + carry | 1.021 [0.997, 1.047] / 1.010 [0.983, 1.038] | 9 | 0.219 | 0.121 | **0.182** |
+| m2c k12 mass | 1.031 / 1.013 | 12 | 0.220 | 0.121 | 0.183 |
+| MAGE 4096 | 1.026 / 1.016 | 12 | 0.250 | 0.058 | 0.123 |
+| m2c + step-20 rescue | 1.040 / 1.031 | 8 | 0.217 | 0.084 | 0.243 |
+| m2c | 1.101 / 1.076 | 51 | 0.218 | 0.083 | 0.145 |
+| dense FULL (calibration) | 1.000 / 1.013 | 12 | 1.000 | – | – |
+| dense reference | 1 | 9 | – | – | – |
+
+- **Step inflation.** The lean candidate's is 1–2%, the lowest of the sparse arms and within noise of 1 on each host
+  separately. It has no more stuck canvases than dense. Fixed per-unit budgets do not starve units.
+- **The carry** removes the step-0 dense call of every canvas after the first: work 0.239 → 0.182 at the same kept
+  fraction, with no change in step inflation.
+  - It lowers token agreement on mpk from 0.272 to 0.219. Running step 0 on the previous canvas's selection changes
+    where the canvas's denoising starts, which cascades.
+  - Whether that costs accuracy can only show on multi-canvas outputs. In stage A those are MRCR, GraphWalks and
+    HumanEval. RULER and LongBench-v2 0shot answers are one canvas, so the carry is inactive there.
+- **Paper reading.** Free-running N/C mixes trajectory divergence, and on dlm2 even an execution-mode effect, into
+  "step inflation". Measured on identical canvases, step inflation is a property of the selector:
+  - threshold selection: +8–10%, with stuck canvases;
+  - fixed per-unit budgets: +1–3%.
+  No prior work quantifies this.
