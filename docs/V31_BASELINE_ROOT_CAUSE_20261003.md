@@ -1722,3 +1722,48 @@ The result is reported as registered: no difference between arms on this column.
   contiguous neighbours of selected tiles) or a larger budget. Panel bs maps budget only on RULER.
 
 Table: `results/v31_20261003/panels/stageA_mrcr.md`.
+
+## Progress-aware re-selection (branch `research/v31-progress-aware-20261004`) — 2026-10-04 19:35 UTC
+
+**Why.** After stage A, the user asked for a stronger algorithm: performance, accuracy and novelty, all three.
+- The lean candidate selects once, at step 1, while most canvas positions are still noise. Its remaining losses are
+  where a query's needs only become clear later: MRCR's verbatim copy, cwe's aggregation, and 128K.
+- In a diffusion LM the sampler tells us, step by step, which positions are settled (accepted) and how confident
+  each position is. Junyu Liao's C gate and confidence prior use exactly this signal, but per step as a query weight
+  inside the method core. That cost +3% per step and gave no speed gain.
+- Here the signal decides **when and for whom to re-select**: once per canvas, at a fixed balanced budget.
+
+**Options** (MAGE port; `vllm_adapter.py`; bench env in brackets):
+- `mage_reselect` (`MAGE_RESELECT=4[,8]`): at those 0-based canvas calls the layer observes exactly again and
+  re-selects, replacing the held lists. The carry then uses the latest selection.
+- `mage_row_weight` (`MAGE_ROWW`) weights the rows of the re-selection from the sampler of the step before:
+  - `cgate`: rows the sampler accepted weigh 0 (C gate);
+  - `conf`: 1 + β √(1 − p_top), clamped to [1, 1 + β], with `MAGE_BETA` 3 as in `query_adaptive.weight` (confidence
+    prior / T).
+  - In the worst-row max-share statistic the weight enters as + log w per row. A block whose rows all weigh 0 falls
+    back to unweighted.
+  - Weights are computed only on the step before a re-selection, so other steps pay nothing.
+- The per-unit budget is unchanged (balanced CTAs). A re-selection costs one exact observation per layer and canvas.
+- **Attribution.** The C gate and the confidence prior are Junyu Liao's ideas, so these arms are COLLABORATION
+  CANDIDATES. The re-selection schedule, the worst-row statistic, the balanced budget and the carry are ours.
+- Tests: `tests/test_v31_progress_aware.py` (CPU, FA4 stubbed), 4/4 on mpk. They cover:
+  - accepted rows stop deciding a block;
+  - the all-accepted fallback;
+  - the confidence weight formula;
+  - re-selection replacing the held lists and feeding the carry;
+  - refusals.
+
+**Panel pa (screening, both hosts).**
+- Data:
+  - RULER v34ofc subset: 13 tasks × 6 items × 32K / 128K, 156 cells, a fresh pool;
+  - MRCR 2-needle: 72 cells.
+- Arms:
+  - P0 dense;
+  - P1 lean 4096;
+  - P2 + re-selection at step 4;
+  - P3 + C-gate rows;
+  - P4 + confidence prior;
+  - P5 re-selection at step 8 with C-gate rows.
+- The stage-A tail (HumanEval) and the budget sweep were stopped to free the GPUs (user, 19:20 UTC: algorithm before
+  datasets). The last GraphWalks arm on mpk runs first. dlm2's partial HumanEval dense run is kept in
+  `aborted_fahe/`, unscored.

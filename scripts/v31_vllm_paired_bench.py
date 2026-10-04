@@ -214,7 +214,11 @@ def main():
                                                  drift_diag=os.environ.get('DRIFT_DIAG') == '1',
                                                  dense_below=int(os.environ['DENSE_BELOW']) if os.environ.get('DENSE_BELOW') else None,
                                                  mage_carry_first=os.environ.get('MAGE_CARRY') == '1',
-                                                 risk_group=os.environ.get('RISK_GROUP') or None)
+                                                 risk_group=os.environ.get('RISK_GROUP') or None,
+                                                 mage_reselect=([int(x) for x in os.environ['MAGE_RESELECT'].split(',')]
+                                                                if os.environ.get('MAGE_RESELECT') else None),
+                                                 mage_row_weight=os.environ.get('MAGE_ROWW') or None,
+                                                 mage_beta=float(os.environ.get('MAGE_BETA', '3')))
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -258,7 +262,7 @@ def main():
                          else None)
                    for key in ('mage_critical', 'mage_coverage', 'mage_select_step', 'mage_granularity',
                                'mage_keep_frac', 'mage_carry_first', 'residual', 'drop_guard', 'drift_diag',
-                               'dense_below', 'risk_group')})
+                               'dense_below', 'risk_group', 'mage_reselect', 'mage_row_weight', 'mage_beta')})
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]

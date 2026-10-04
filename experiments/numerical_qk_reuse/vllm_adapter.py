@@ -138,7 +138,7 @@ class VllmMethodAdapter:
                  trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None,
                  mage_coverage=None, mage_select_step=0, mage_granularity='kvhead', mage_keep_frac=None,
                  residual=None, drop_guard=None, drift_diag=False, dense_below=None, mage_carry_first=False,
-                 risk_group=None):
+                 risk_group=None, mage_reselect=None, mage_row_weight=None, mage_beta=3.0):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -168,6 +168,16 @@ class VllmMethodAdapter:
             raise ValueError('mage_keep_frac must be in (0, 1] and needs mage_select=fa4')
         if mage_carry_first and int(mage_select_step) < 1:
             raise ValueError('mage_carry_first replaces the first exact call of a canvas: needs mage_select_step >= 1')
+        if mage_reselect is not None:
+            mage_reselect = tuple(sorted({int(x) for x in mage_reselect}))
+            if (not mage_reselect or mage_reselect[0] <= int(mage_select_step) or mage_select != 'fa4'
+                    or mage_critical is not None or mage_coverage is not None):
+                raise ValueError('mage_reselect: canvas call indices after mage_select_step, FA4 selection, no '
+                                 'critical / coverage')
+        if mage_row_weight not in (None, 'cgate', 'conf'):
+            raise ValueError("mage_row_weight must be None, 'cgate' or 'conf'")
+        if mage_row_weight is not None and (mage_reselect is None or mage_granularity != 'qblock_max'):
+            raise ValueError('mage_row_weight weights the rows of a re-selection: needs mage_reselect and qblock_max')
         if risk_group not in (None, 'kv'):
             raise ValueError("risk_group must be None or 'kv'")
         if risk_group is not None and (arm != 'method' or config is None or config.get('risk_topk') is None
@@ -248,6 +258,17 @@ class VllmMethodAdapter:
         # core's per-(query head, block) top-k (v27_dense_prefix.topk_skip) becomes one decision per (KV head, block)
         # on the max of the heads' worst-row values (v31_group_select): same tiles per head, identical lists in a group
         self.risk_group = risk_group
+        # v31 progress-aware re-selection (named variant on the MAGE port): at the canvas calls listed in mage_reselect
+        # (0-based denoising step of the canvas) the layer observes again (exact output) and re-selects, replacing the
+        # held lists (the carry then uses the latest selection). mage_row_weight weights the rows of that re-selection
+        # from the sampler of the step before it -- 'cgate': rows the sampler ACCEPTED get weight 0 (Junyu Liao's C gate
+        # idea: spend the budget on positions still being decided); 'conf': 1 + beta * sqrt(1 - p_top) clamped to
+        # [1, 1 + beta] (his confidence prior / query sensitivity T, beta 3 as in query_adaptive.weight). In the
+        # worst-row max-share statistic a weight enters as + log(w) per row; a block whose rows all weigh 0 falls back
+        # to the unweighted statistic. Weights are computed only on the step before a re-selection.
+        self.mage_reselect = mage_reselect
+        self.mage_row_weight, self.mage_beta = mage_row_weight, float(mage_beta)
+        self._mage_count, self._mage_row_w, self._mage_units_w = {}, None, None
         # v31 pooled residual (named variant, opt-in, any sparse arm): dropped wholly-prefix tiles are added back as
         # their centroid key / mean value (v31_residual); centroids cached per (layer, canvas)
         self.residual = residual
@@ -328,6 +349,7 @@ class VllmMethodAdapter:
         self._events = []
         self.mage_state, self.canvas_id = {}, 0
         self._mage_warm = {}
+        self._mage_count, self._mage_row_w, self._mage_units_w = {}, None, None
         self._tile_means, self._residual_tiles, self._guard_cache = {}, 0, []
         self._drift_prev, self._drift_acc = {}, None
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
@@ -756,6 +778,23 @@ class VllmMethodAdapter:
         from experiments.numerical_qk_reuse import v27_fa4
         nk = prefix + n
         st = self.mage_state.get(layer_idx)
+        if self.mage_reselect is not None:
+            cnt = self._mage_count.get(layer_idx)
+            if cnt is None or cnt[:2] != [self.canvas_id, nk]:
+                cnt = self._mage_count[layer_idx] = [self.canvas_id, nk, -1]
+            cnt[2] += 1                                                  # 0-based call index of this canvas
+            if (st is not None and st['canvas'] == self.canvas_id and st['nk'] == nk
+                    and cnt[2] in self.mage_reselect):
+                self._mage_units_w = self._mage_row_w if self.mage_row_weight is not None else None
+                try:
+                    out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
+                finally:
+                    self._mage_units_w = None
+                st['lists'] = v27_fa4.block_sparse_tensors(kept)
+                if self.mage_carry_first:
+                    st['kept'] = kept
+                self.calls['mage_reselections'] = self.calls.get('mage_reselections', 0) + 1
+                return out
         if st is None or st['canvas'] != self.canvas_id or st['nk'] != nk:
             if self.mage_select_step:
                 w = self._mage_warm.get(layer_idx)
@@ -886,6 +925,14 @@ class VllmMethodAdapter:
             self.calls['mage_critical_added_tiles'] = self.calls.get('mage_critical_added_tiles', 0) + int(added.sum())
         return out, kept
 
+    def _row_weight_from_logits(self, scaled, n, entropy_bound):
+        """Row weights [n] for the next re-selection from the sampler's temperature-scaled logits [1, CL, V]."""
+        if self.mage_row_weight == 'cgate':
+            return (~accepted_mask(scaled, entropy_bound)[0, :n]).float()
+        x = scaled[0, :n].float()
+        p_top = (x.amax(-1) - torch.logsumexp(x, dim=-1)).exp().clamp(0, 1)
+        return (1 + self.mage_beta * (1 - p_top).clamp_min(0).sqrt()).clamp(1, 1 + self.mage_beta)
+
     def _mage_units(self, mass, head_lse, H, n, qb, kt, pt, k_tiles, G=1):
         """Selection-granularity ladder: top k_tiles prefix tiles per query head (qhead), per (query head, 128-row
         block) (qblock, qblock_max), or per KV head of G query heads, per block (kvblock_max) or for the whole canvas
@@ -917,6 +964,13 @@ class VllmMethodAdapter:
             share = head_lse - head_lse.logsumexp(-1, keepdim=True)                               # log share of prefix mass
             share = torch.nn.functional.pad(share, (0, 0, 0, pad), value=float('-inf')).view(H, qb, 128, pt)
             score = share.amax(2)
+            w = self._mage_units_w
+            if w is not None:                                                                   # progress-aware rows
+                logw = torch.nn.functional.pad(torch.log(w.float()[:n]), (0, pad), value=float('-inf')).view(qb, 128)
+                weighted = (share + logw[None, :, :, None]).amax(2)                             # [H, QB, PT]
+                live = torch.isfinite(logw).any(-1)                                             # [QB]: a row to weigh
+                score = torch.where(live[None, :, None], weighted, score)
+                self.calls['mage_weighted_units'] = self.calls.get('mage_weighted_units', 0) + 1
         kept[0, :, :, :pt].scatter_(-1, score.topk(k_tiles, dim=-1).indices, True)
         self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * H * qb
         self.calls['mage_prefix_tiles'] += int(pt) * H * qb
@@ -1126,6 +1180,10 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                     a._ent_trace.append(mean_entropy)
                 if conv:                                         # one scalar read per step, at the step boundary
                     a._dense_next = bool(mean_entropy.item() < a.dense_when[1] * a._conf_threshold)
+            if (a.arm == 'mage' and a.mage_row_weight is not None and a.mage_reselect is not None
+                    and a._canvas_step in a.mage_reselect):                 # the next step re-selects: weigh its rows
+                a._mage_row_w = a._row_weight_from_logits(
+                    scaled, a.step_ctx['n'], float(signature.bind(*args, **kwargs).arguments['entropy_bound']))
             a.on_sample(scaled, accepted, stats=stats)
         return scaled
 
