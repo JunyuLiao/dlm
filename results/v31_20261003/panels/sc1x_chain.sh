@@ -47,6 +47,8 @@ run() {  # PART NAME BUDGET(dense|tokens) EXTRA...
   sed -i "s/^done /done_$K$L /" $W/status_$T
   echo "$T $K$L complete $(date -u)" >> $W/status_sc1xchain
 }
+if [ "${PFU:-0}" = 1 ]; then bash $W/pf_unknown.sh; fi   # mpk: nsys profile of the context-dependent non-GLOBAL cost
+until [ "$(nvidia-smi --query-compute-apps=pid --format=csv,noheader | wc -l)" = "0" ]; do sleep 10; done
 T0="MAGE_RESELECT_TRIGGER=0.5"
 for part in ruler lbt mrcr gw; do run $part _t50 4096 $T0 MAGE_CLOCK_TRACE=1; done
 run fc '' dense
