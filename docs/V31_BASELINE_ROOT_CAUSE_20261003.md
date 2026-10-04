@@ -1562,3 +1562,29 @@ PIECEWISE, which records its tokens with per-canvas reseeding.
 Other stage-A pre-checks (panel rc, dense):
 - the official RULER rendering scores 98.1 (32K) / 88.5 (128K);
 - the opener ablation shows 99.48 vs 98.93, so the placement is robust.
+
+**Determinism probe (panel dp, mpk, 14:00 UTC).** The MAGE-port `qblock_max` step-1 control was run 4 times on the
+same 87 RULER cells: panel x, panel gs and two dp reruns.
+- 86 cells give the same output in all 4 runs.
+- Cell (RULER 64K, 66, seed 1) differs only in the gs run: 9 vs 11 steps. x and both dp reruns agree.
+- Run-to-run flip rate: 1 / 348 cell-runs, about 0.3%. That is noise, not bias. The code path was identical, as the
+  file diff had already shown.
+
+**Panel gl, dlm2 half: lean 4096 vs MAGE 4096 speed** (same cells and host, against a fresh dense FULL run).
+
+| 64K, 36 cells | S/N | N/C (free running) | per-canvas decode | W |
+|---|---|---|---|---|
+| lean 4096 | 0.848 [0.843, 0.853] | 1.031 [0.995, 1.069] | 0.875 [0.845, 0.905] | 0.872 [0.806, 0.944] |
+| MAGE 4096 | 0.842 [0.837, 0.847] | 1.098 [1.032, 1.169] | 0.925 [0.876, 0.979] | 0.937 [0.828, 1.060] |
+
+| 96K, 11 cells | S/N | per-canvas decode |
+|---|---|---|
+| lean 4096 | 0.820 [0.808, 0.835] | 0.743 [0.624, 0.864] |
+| MAGE 4096 | 0.818 [0.805, 0.835] | 0.714 [0.599, 0.842] |
+
+- Per-step cost is equal by construction, and measured within 0.7%. The profile on the same host gives +0.04 ms of
+  GLOBAL time per step for the carried first call.
+- The free-running N/C advantage of the lean candidate is confounded (see fc). On identical canvases the two
+  selectors inflate alike.
+- So at equal budget the speed is the same as MAGE's, and the accuracy is +3.4 points (gb).
+- The mpk half and the 128K part follow.
