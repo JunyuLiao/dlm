@@ -104,7 +104,7 @@ def main():
             c = compute(r)
             if key in common and c is not None:
                 work[label][key] = c
-    lengths = sorted({k.split('|')[0] for k in common})
+    lengths = sorted({k.split('|')[0] for k in common}, key=op.natural_key)
     task_of = {ds: [r['task'] for r in op.load_rows(man_dir, ds, ('id', 'task'))] for ds in lengths}
     task = lambda k: task_of[k.split('|')[0]][int(k.split('|')[1])]
     length = lambda k: k.split('|')[0]

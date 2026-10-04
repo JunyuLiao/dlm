@@ -89,6 +89,11 @@ def put(table, label, key, value):
     cells[key] = value
 
 
+def natural_key(text):
+    """Sort key that orders embedded numbers numerically ('ruler32k' < 'ruler64k' < 'ruler128k')."""
+    return [int(t) if t.isdigit() else t for t in re.split(r'(\d+)', str(text))]
+
+
 def finish_class(reason) -> str:
     return 'finished' if reason in FINISHED else 'capped' if reason in CAPPED else 'other'
 
@@ -229,7 +234,7 @@ def ruler_official_aggregate(scores, task_of, length_of):
     for k, v in scores.items():
         per[length_of(k)][task_of(k)].append(v)
     out = {}
-    for ln in sorted(per):
+    for ln in sorted(per, key=natural_key):
         tasks = {t: statistics.mean(v) for t, v in sorted(per[ln].items())}
         rest = [v for t, v in tasks.items() if t != 'cwe']
         out[ln] = dict(tasks=tasks, avg=statistics.mean(tasks.values()), cwe=tasks.get('cwe'),
