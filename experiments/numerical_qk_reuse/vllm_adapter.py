@@ -132,7 +132,7 @@ class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
                  canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024,
                  logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
-                 trace_canvas=False, dense_when=None, regroup_diag=False):
+                 trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -179,6 +179,10 @@ class VllmMethodAdapter:
         # MAGE port: 'torch' = chunked FP32 QK for the selection (reference); 'fa4' = the same eq. 5 statistics from
         # the FA4 in-kernel tile log-mass (the selection call's output is that FA4 dense output)
         self.mage_select = mage_select
+        # v31 two-level selection (named variant on the MAGE port, FA4 selection only): MAGE's shared fixed budget
+        # (mean mass over the canvas queries and the query heads of a KV head, top k) UNION the per-query-head
+        # critical prefix tiles whose mass share reaches mage_critical for ANY row of a 128-row block
+        self.mage_critical = None if mage_critical is None else float(mage_critical)
         # diagnostic receipts (opt-in): denoising steps per canvas and the canvas mean token entropy per step, i.e.
         # the quantity the official sampler compares with its confidence threshold to stop a canvas
         self.trace_canvas = bool(trace_canvas)
@@ -675,7 +679,17 @@ class VllmMethodAdapter:
         kept_kv[:, first_canvas_tile:] = True
         self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * HK
         self.calls['mage_prefix_tiles'] += int(first_canvas_tile) * HK
-        return out, kept_kv.repeat_interleave(G, 0)[None, :, None, :].expand(1, H, qb, kt).contiguous()
+        kept = kept_kv.repeat_interleave(G, 0)[None, :, None, :].expand(1, H, qb, kt).contiguous()
+        if self.mage_critical is not None and first_canvas_tile:
+            m = mass[..., :first_canvas_tile]                                                   # [H, n, PT]
+            pad = qb * 128 - n
+            if pad:
+                m = torch.nn.functional.pad(m, (0, 0, 0, pad))
+            critical = m.view(H, qb, 128, first_canvas_tile).amax(2) >= self.mage_critical       # [H, QB, PT]
+            added = critical & ~kept[0, :, :, :first_canvas_tile]
+            kept[0, :, :, :first_canvas_tile] |= critical
+            self.calls['mage_critical_added_tiles'] = self.calls.get('mage_critical_added_tiles', 0) + int(added.sum())
+        return out, kept
 
     # ------------------------------------------------------------------ split FA4 over the paged cache
     def _split(self, lists):
