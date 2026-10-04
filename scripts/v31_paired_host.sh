@@ -7,7 +7,7 @@
 #   nohup bash v31_paired_host.sh > host_a.log 2>&1 &
 # ARMS entries: arm:cudagraph_mode[:variant]; a variant names configs/<variant>.json (v31_make_variant_config.py),
 # default = the frozen R17 main config. FIX_51994=1 backports the upstream FULL-graph causal-buffer fix.
-# LABEL_SUFFIX names an execution variant (e.g. _dpc for DP_BUILD=chunked); LOGIT_STATS / DP_BUILD / OBSERVE /
+# CELLS overrides the cell file (default $W/cells.json; e.g. the confirmation set). LABEL_SUFFIX names an execution variant (e.g. _dpc for DP_BUILD=chunked); LOGIT_STATS / DP_BUILD / OBSERVE /
 # MAGE_SELECT pass through the environment to the bench.
 # W must contain v31_vllm_paired_bench.py, overlay/vllm_adapter.py and cells.json (private: has item ids).
 set -u
@@ -33,7 +33,7 @@ for spec in $ARMS; do
   label=${label}${LABEL_SUFFIX:-}
   until [ "$(nvidia-smi --query-compute-apps=pid --format=csv,noheader | wc -l)" = "0" ]; do sleep 20; done
   echo "$label start $(date -u)" >> $W/status_$TAG
-  MAGE_K=$mk timeout 21600 $PY $BENCH $MODEL $MAN $W/cells.json $W/public/${TAG}_${label}.jsonl \
+  MAGE_K=$mk timeout 21600 $PY $BENCH $MODEL $MAN ${CELLS:-$W/cells.json} $W/public/${TAG}_${label}.jsonl \
     $W/private/${TAG}_${label}.private.jsonl $arm $cg $([ $arm = method ] && echo $cfg) \
     > $W/${TAG}_${label}.out 2> $W/${TAG}_${label}.err
   echo "$label rc=$? $(date -u)" >> $W/status_$TAG
