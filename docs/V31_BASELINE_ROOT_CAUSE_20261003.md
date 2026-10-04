@@ -911,3 +911,27 @@ it at selection time, keeping each head's budget.
   - End to end, W, S/N, N/C and C are reported against the same-host dense run.
 - **Next step.** Any winner here is exploratory. It enters the integration branch and the pre-registered
   confirmation (fresh RULER v33 pool and official LongBench-v2), not the paper directly.
+
+**The same decision inside the method (`RISK_GROUP=kv`, added 09:05 UTC; module `v31_group_select.py`).**
+- What it does:
+  - On a fixed-fraction method config (m2c k12 mass), the core's per-(query head, block) top-k
+    (`v27_dense_prefix.topk_skip`) is replaced at install time by `grouped_topk_skip`. The frozen core files are
+    untouched.
+  - One decision per (KV head, block): rank by the max over the group's heads of the worst-row value. A tile can
+    be dropped only if every head of the group may drop it (eligible and finite).
+  - The same (1 − keep) fraction is dropped, so each head keeps as many tiles as before. The canvas (tail) tiles
+    keep the core's per-head decision.
+  - The adapter refuses configs where the option would be silently ignored: no `risk_topk`, a `risk_budget`, or
+    64-row blocks.
+- Tests: `tests/test_v31_risk_group.py` (CPU), 6/6 on mpk.
+  - Identical heads reproduce the per-head rule exactly.
+  - One shared set per group, with the per-head drop count unchanged.
+  - A needle in one head is kept for its group.
+  - A tile that any head must keep is never dropped.
+  - Padded rows never decide.
+- **Panel gs2** (after gs, both hosts):
+  - RULER v31 x cells: m2c k12 mass as a control on this overlay, and with `RISK_GROUP=kv`;
+  - per-call profile on 3 LongBench-v2 64K cells;
+  - LongBench-v2 64K + 96K end to end.
+  - The read-out rules are the gs rules, with the control as the reference.
+- On mpk, the kernel microbenchmark (vkb) now runs after gs2.

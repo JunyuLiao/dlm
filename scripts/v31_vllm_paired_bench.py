@@ -22,7 +22,7 @@ usage: python v31_vllm_paired_bench.py MODEL MANIFEST_DIR CELLS_JSON OUT_JSONL P
        MAGE_SELECT=fa4 (MAGE selection statistics from the FA4 observation), KV_COPY=triton / MERGE=triton (V30 one-kernel
        paged K/V refresh and alias-split LSE merge), TRACE=1 (per-canvas step counts and mean-entropy trajectories in the
        public record), DENSE_WHEN=conv:THETA|step:S (method arm: dense GLOBAL attention near canvas convergence / from
-       step S of a canvas), MAGE_CRIT=TAU (MAGE + per-query-head critical tiles with mass share >= TAU), MAGE_STEP=S (MAGE selects at step S of a canvas after S exact steps; default 0), MAGE_GRAN=kvhead|qhead|qblock|qblock_max|kvblock_max|kvhead_max (selection unit / row aggregation), MAGE_CARRY=1 (with MAGE_STEP >= 1: canvas call 0 runs on the previous canvas's selection, the method's carry_first), MAGE_FRAC=F (keep fraction of prefix tiles per unit instead of MAGE_K), RESIDUAL=centroid (dropped prefix tiles added back as centroid key / mean value, any sparse arm), DROP_GUARD=THETA (a (head, block) whose dropped tiles hold > THETA of its estimated mass keeps its whole prefix, any sparse arm), DRIFT_DIAG=1 (receipt: step-to-step drift of GLOBAL queries / outputs within a canvas), DENSE_BELOW=K (any sparse arm: GLOBAL calls with fewer than K keys run vLLM's own dense attention), REGROUP_DIAG=1 (kept fraction at 128 / 64 / regrouped-64 rows / per row), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
+       step S of a canvas), MAGE_CRIT=TAU (MAGE + per-query-head critical tiles with mass share >= TAU), MAGE_STEP=S (MAGE selects at step S of a canvas after S exact steps; default 0), MAGE_GRAN=kvhead|qhead|qblock|qblock_max|kvblock_max|kvhead_max (selection unit / row aggregation), MAGE_CARRY=1 (with MAGE_STEP >= 1: canvas call 0 runs on the previous canvas's selection, the method's carry_first), RISK_GROUP=kv (method arm, fixed-fraction top-k configs: one top-k decision per (KV head, block), shared by the group's heads), MAGE_FRAC=F (keep fraction of prefix tiles per unit instead of MAGE_K), RESIDUAL=centroid (dropped prefix tiles added back as centroid key / mean value, any sparse arm), DROP_GUARD=THETA (a (head, block) whose dropped tiles hold > THETA of its estimated mass keeps its whole prefix, any sparse arm), DRIFT_DIAG=1 (receipt: step-to-step drift of GLOBAL queries / outputs within a canvas), DENSE_BELOW=K (any sparse arm: GLOBAL calls with fewer than K keys run vLLM's own dense attention), REGROUP_DIAG=1 (kept fraction at 128 / 64 / regrouped-64 rows / per row), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
        V27_ADAPTER_DIR (overlay holding vllm_adapter.py), SHARD=k/K (take cells k, k+K, ...)
 """
 import hashlib
@@ -109,7 +109,8 @@ def main():
                                                  drop_guard=float(os.environ['DROP_GUARD']) if os.environ.get('DROP_GUARD') else None,
                                                  drift_diag=os.environ.get('DRIFT_DIAG') == '1',
                                                  dense_below=int(os.environ['DENSE_BELOW']) if os.environ.get('DENSE_BELOW') else None,
-                                                 mage_carry_first=os.environ.get('MAGE_CARRY') == '1')
+                                                 mage_carry_first=os.environ.get('MAGE_CARRY') == '1',
+                                                 risk_group=os.environ.get('RISK_GROUP') or None)
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -148,7 +149,7 @@ def main():
                          else None)
                    for key in ('mage_critical', 'mage_coverage', 'mage_select_step', 'mage_granularity',
                                'mage_keep_frac', 'mage_carry_first', 'residual', 'drop_guard', 'drift_diag',
-                               'dense_below')})
+                               'dense_below', 'risk_group')})
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]

@@ -137,7 +137,8 @@ class VllmMethodAdapter:
                  logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
                  trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None,
                  mage_coverage=None, mage_select_step=0, mage_granularity='kvhead', mage_keep_frac=None,
-                 residual=None, drop_guard=None, drift_diag=False, dense_below=None, mage_carry_first=False):
+                 residual=None, drop_guard=None, drift_diag=False, dense_below=None, mage_carry_first=False,
+                 risk_group=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -167,6 +168,12 @@ class VllmMethodAdapter:
             raise ValueError('mage_keep_frac must be in (0, 1] and needs mage_select=fa4')
         if mage_carry_first and int(mage_select_step) < 1:
             raise ValueError('mage_carry_first replaces the first exact call of a canvas: needs mage_select_step >= 1')
+        if risk_group not in (None, 'kv'):
+            raise ValueError("risk_group must be None or 'kv'")
+        if risk_group is not None and (arm != 'method' or config is None or config.get('risk_topk') is None
+                                       or config.get('risk_budget') is not None or config.get('q_block') == 64):
+            raise ValueError('risk_group needs the method arm with a fixed-fraction top-k config (risk_topk, '
+                             'no risk_budget) on 128-row blocks')
         from experiments.numerical_qk_reuse.v31_residual import RESIDUAL_MODES
         if residual is not None and residual not in RESIDUAL_MODES:
             raise ValueError(f'residual must be one of {RESIDUAL_MODES}')
@@ -237,6 +244,10 @@ class VllmMethodAdapter:
         # current canvas) is kept. Valid only as the direct continuation (prefix grown by exactly that canvas, same
         # block layout); the request's first canvas and any invalid carry run the exact call as before.
         self.mage_carry_first = bool(mage_carry_first)
+        # v31 group-shared method selection (named variant, method arm, fixed-fraction top-k configs only): the
+        # core's per-(query head, block) top-k (v27_dense_prefix.topk_skip) becomes one decision per (KV head, block)
+        # on the max of the heads' worst-row values (v31_group_select): same tiles per head, identical lists in a group
+        self.risk_group = risk_group
         # v31 pooled residual (named variant, opt-in, any sparse arm): dropped wholly-prefix tiles are added back as
         # their centroid key / mean value (v31_residual); centroids cached per (layer, canvas)
         self.residual = residual
@@ -1175,6 +1186,16 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
         from experiments.numerical_qk_reuse import v27_dense_prefix
         from experiments.numerical_qk_reuse.v31_dp_chunked import build_chunked
         v27_dense_prefix.build = build_chunked
+    if adapter.risk_group == 'kv':
+        from experiments.numerical_qk_reuse import v27_dense_prefix as dp_topk
+        from experiments.numerical_qk_reuse.v31_group_select import grouped_topk_skip
+
+        def topk_skip_grouped(lognorm, eligible, sensitivity, reference, nq, keep):
+            a = _ACTIVE
+            if a is not None:
+                a.calls['grouped_topk_calls'] = a.calls.get('grouped_topk_calls', 0) + 1
+            return grouped_topk_skip(lognorm, eligible, sensitivity, reference, nq, keep)
+        dp_topk.topk_skip = topk_skip_grouped
     if adapter.observe_backend == 'fa4':
         from experiments.numerical_qk_reuse import v27_consumer64
         from experiments.numerical_qk_reuse.v31_fa4_observe import fused_observe_fa4
