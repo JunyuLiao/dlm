@@ -1767,3 +1767,62 @@ Table: `results/v31_20261003/panels/stageA_mrcr.md`.
 - The stage-A tail (HumanEval) and the budget sweep were stopped to free the GPUs (user, 19:20 UTC: algorithm before
   datasets). The last GraphWalks arm on mpk runs first. dlm2's partial HumanEval dense run is kept in
   `aborted_fahe/`, unscored.
+
+**Round 2 (`ov_pa2`).**
+- `MAGE_ROWW` adds Junyu Liao's whole query-sensitivity family as row weights, each clamped to [1, 1 + β]:
+  - `margin`: M = 1 + β / (top-2 margin + 1);
+  - `temporal`: T = 1 + β · [the argmax changed over the last step];
+  - `mt` / `ct`: √(M·T) / √(C·T).
+- `MAGE_RESELECT_K`: the re-selection's own token budget, a budget schedule over denoising progress. Per-unit counts
+  stay equal, so CTAs stay balanced.
+- Tests: 6/6.
+
+**What the pa RULER half showed (dlm2).**
+- RULER canvases converge in a median of 4 steps.
+- A re-selection at a fixed step 4 ran in only 22 of 78 canvases. The differences are within noise: rs4 +0.51 points,
+  C gate identical to rs4.
+- Conclusion: a fixed step suits neither short nor long canvases. Re-selection should follow denoising **progress**.
+
+**Round 3 (`ov_pa3`): the progress trigger, `MAGE_RESELECT_TRIGGER=f`.**
+- After each denoising step, the hook takes the sampler's own acceptance mask (the official entropy-bound rule, on the
+  fused row statistics). The first time the accepted fraction of the canvas rows reaches f, every GLOBAL layer
+  re-selects at the next call.
+- It fires once per canvas. Row weights come from that same step.
+- It costs one scalar read per step until the canvas triggers.
+- With `MAGE_RESELECT_K` the budget can decay after the trigger, or start larger and shrink (front-loaded).
+- Receipts record `trigger_checks`, `triggers` and `trigger_step_sum`.
+- Tests: 7/7 (`test_progress_trigger_reselects_once_at_the_flagged_call`). Full overlay CPU suite: 25 PASS, CUDA-only
+  tests skipped.
+- This is the adaptive-generation-length angle. The amount of attention a canvas gets is tied to how far its
+  denoising has progressed, and the positions still undecided steer where it goes (C gate).
+
+**Screening protocol from 20:40 UTC (user, 2026-10-04).**
+- Every candidate is screened on small subsets of **several** datasets under **several seeds**. Only candidates that
+  look good are expanded. No single dataset decides.
+- Suite S1 (`scripts/v31_screen_suite.py`, `results/v31_20261003/panels/sc_suite.json`; sampler seeds 1 and 2; every
+  arm of a cell on one host):
+  - RULER v34ofc, the exploration pool: p0000 and p0001 of all 13 tasks at 32K / 64K / 128K (78 items);
+  - LongBench-v2 `0shot_think` (thinking on, 16384 tokens, pinned max_model_len 141312): 32 items from the
+    exploration split;
+  - MRCR 2-needle: 8 per bin (24);
+  - GraphWalks b32k: 4 per bin (12).
+- LongBench-v2 `0shot_think` split (`scripts/v31_lbt_split.py`, `lbt_split.json`, seed 20261004):
+  - exploration: 160 rows with ≥ 32768 prompt tokens, stratified by length class (28 short / 88 medium / 44 long);
+  - hold-out: the other 343 rows, never screened, reserved for the pre-registered confirmation.
+- MRCR and GraphWalks have no separate exploration pool. A later confirmation uses only the bin complements of the
+  screened items.
+- Why `0shot_think`:
+  - Stage A's `0shot` was capped at 128 tokens and uninformative.
+  - With thinking on, the dense run on the earlier LongBench-v2 cells produced a median of 2682 tokens, 11 canvases
+    and 194 forwards per request. That is where progress-aware re-selection can act. RULER and MRCR are mostly one
+    canvas of 4–14 steps.
+
+**Panel sc1** (`results/v31_20261003/panels/sc1_chain.sh`). It replaces the queued pa2 panel and runs after ak. Arms,
+each over the whole suite:
+- dense FULL;
+- lean 4096;
+- T1: lean 4096 + trigger 0.5 + C gate;
+- T2: T1 with a 2048-token re-selection (decaying budget);
+- T3: 8192 until the trigger, then a 2048-token C-gate re-selection (front-loaded);
+- T4: T1 with margin weights;
+- lean 8192 (budget reference).
