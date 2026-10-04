@@ -137,7 +137,7 @@ class VllmMethodAdapter:
                  logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
                  trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None,
                  mage_coverage=None, mage_select_step=0, mage_granularity='kvhead', mage_keep_frac=None,
-                 residual=None, drop_guard=None, drift_diag=False):
+                 residual=None, drop_guard=None, drift_diag=False, dense_below=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -237,6 +237,13 @@ class VllmMethodAdapter:
         # diagnostic receipts (opt-in): step-to-step drift of the GLOBAL queries and outputs within a canvas -- the
         # prefix K/V are fixed inside a canvas, so a row whose query did not move could reuse its prefix partial
         self.drift_diag = bool(drift_diag)
+        # v31 length gate (opt-in, any sparse arm): a GLOBAL call whose key length (prefix + canvas) is below
+        # dense_below keys runs vLLM's own dense attention -- the same code path as the dense PIECEWISE baseline --
+        # because below the measured crossover the sparse path has no saving (fixed per-call costs); the arm's
+        # selector state simply starts at the first call above the gate
+        if dense_below is not None and int(dense_below) <= 0:
+            raise ValueError('dense_below must be a positive key count')
+        self.dense_below = None if dense_below is None else int(dense_below)
         self._drift_prev, self._drift_acc = {}, None
         # diagnostic receipts (opt-in): denoising steps per canvas and the canvas mean token entropy per step, i.e.
         # the quantity the official sampler compares with its confidence threshold to stop a canvas
@@ -1077,12 +1084,15 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                 if a.profile:
                     ev = (torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True))
                     ev[0].record()
-                if a.arm == 'native' or (a.arm in ('method', 'mage') and a._dense_now):
+                gated = (a.arm in ('method', 'mage') and a.dense_below is not None and a.step_ctx is not None
+                         and a.step_ctx['seq_len'] < a.dense_below)
+                if a.arm == 'native' or (a.arm in ('method', 'mage') and (a._dense_now or gated)):
                     a.calls['global_calls'] += 1
                     n = a.step_ctx['n']
                     a._global_tiles += self.num_heads * -(-n // 128) * ((a.step_ctx['seq_len'] - n) // 64)
                     if a.arm != 'native':
-                        a.calls['dense_fallback_calls'] = a.calls.get('dense_fallback_calls', 0) + 1
+                        counter = 'dense_gate_calls' if gated and not a._dense_now else 'dense_fallback_calls'
+                        a.calls[counter] = a.calls.get(counter, 0) + 1
                     r = forward(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale,
                                 output_block_scale)
                 else:
