@@ -1948,3 +1948,53 @@ all-kept:
   tokens). The trajectories differ, so these ratios are noise, not step inflation. The forced-canvas arms of sc1x
   measure inflation on identical canvases.
 - Decode time per forward is consistent across hosts: 0.78–0.79 of dense.
+
+## Rounds 5–7 and the queue after S1 — 2026-10-04 23:20 UTC
+
+**S1 references** (both hosts, seeds 1–2, official scorers):
+
+| task | dense | lean 4096 | lean − dense [95% CI] |
+|---|---|---|---|
+| RULER v34 official | 88.9 | 88.8 | −0.16 [−1.3, +0.8] |
+| RULER without cwe | 89.2 | 90.0 | |
+| RULER cwe | 85.8 | 74.2 | |
+| LongBench-v2 `0shot_think` | 43.8% | 45.3% | +1.6 [−14, +17] |
+| MRCR | | | −0.111 [−0.21, −0.02] |
+| GraphWalks | | | −0.101 [−0.30, +0.03] |
+
+- The losses are the diffuse-attention tasks.
+- dlm2 half of MRCR (12 items × 2):
+  - lean 8192: +0.006 vs dense;
+  - T1 (trigger 0.5 + C gate): +0.040;
+  - lean 4096: −0.064.
+
+**New opt-in variants** (overlay `ov_pa4`; CPU tests 37 PASS):
+- **Round 5, two-level selection (`MAGE_POOL=P`).**
+  - The step-1 dense observation marks a candidate pool of P × k tiles.
+  - Re-selections observe inside the FA4 block-sparse kernel over the pool. The pool tiles are MASK blocks, so the
+    observing mask writes z.
+  - The call uses S alias splits with equal tiles per CTA, so its cost follows the pool, not the context.
+  - GPU check `scripts/v31_pool_observe_check.py` (z vs the dense observation, output vs FP32, timing) runs first in
+    dlm2's sc1x.
+- **Round 6, coverage-calibrated balanced budget (`MAGE_KCOVER=p`).**
+  - One per-unit k per canvas: the nearest-rank `MAGE_KQ` quantile of the units' p-coverage tile counts, in
+    [mage_k, `MAGE_KMAX`].
+  - Concentrated canvases keep 4096 tokens; diffuse ones get more. CTAs stay balanced at every step.
+- **Round 7, Junyu Liao's C gate as step control (COLLABORATION CANDIDATE).** Usable on the `native` arm (vLLM
+  attention through the same hooks), so dense and sparse get the same rule:
+  - `CG_STOP=R`: a canvas also converges once every row has been accepted with an unchanged argmax for R steps.
+    Applied after the official sample step: commit next, canvas ← argmax canvas.
+  - `STALL_RESCUE=s`: dense GLOBAL attention for the rest of the canvas once C-gate settledness stalls for s steps.
+  - Sampler-side rules change the decoding itself, so they are only compared rule-on vs rule-off on the same arm.
+
+**Queue.**
+- **sc1x:** pool check (dlm2), T0 with the clock trace, then forced canvases. The forced arms are dense, lean, rs4,
+  T0–T3, and step control on identical canvases: native ± CG_STOP=3, lean + CG_STOP=3, lean + STALL_RESCUE=3, lean
+  + step-20 rescue.
+- **sc2** (`jobs_chain.sh`, `jobs_sc2.txt`), in order:
+  1. a lean-on-`ov_pa4` equivalence check;
+  2. native, native + CG_STOP=3, lean + CG_STOP=3 (step control, fair);
+  3. lean + KCOVER 0.9;
+  4. relative multi-trigger + pool 4;
+  5. relative trigger + jcgate;
+  6. sink 1 + recent 1024.

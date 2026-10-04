@@ -27,6 +27,8 @@ run() {  # PART NAME BUDGET EXTRA...
   B="W=$W PY=$PY MODEL=$MODEL ROOT=$ROOT SHARD=$SHARD FIX_51994=1 MEM=0.90 OVERLAY=$O BENCH=$BENCHF TAG=$T DATASETS=$D $X"
   if [ $K = dense ]; then
     env $B "$@" LABEL_SUFFIX=$L ARMS='dense:default' bash $W/v31_paired_host8.sh > $W/host_${T}_dense$L.log 2>&1
+  elif [ $K = native ]; then                  # vLLM's dense attention through the adapter hooks (step-control rules)
+    env $B "$@" LABEL_SUFFIX=$L ARMS='native:PIECEWISE' bash $W/v31_paired_host8.sh > $W/host_${T}_native$L.log 2>&1
   else
     env $B $FAST $LEAN "$@" LABEL_SUFFIX=_lean$L ARMS="mage:PIECEWISE:$K" bash $W/v31_paired_host8.sh > $W/host_${T}_$K$L.log 2>&1
   fi

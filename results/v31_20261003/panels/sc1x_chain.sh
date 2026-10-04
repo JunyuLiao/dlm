@@ -39,6 +39,8 @@ run() {  # PART NAME BUDGET(dense|tokens) EXTRA...
   B="W=$W PY=$PY MODEL=$MODEL ROOT=$ROOT SHARD=$SHARD FIX_51994=1 MEM=0.90 OVERLAY=$O BENCH=$W/bench_ov_pa4.py TAG=$T DATASETS=$D $X"
   if [ $K = dense ]; then
     env $B ARMS='dense:default' bash $W/v31_paired_host8.sh > $W/host_${T}_$K.log 2>&1
+  elif [ $K = native ]; then                  # vLLM's dense attention through the adapter hooks (step-control rules)
+    env $B "$@" LABEL_SUFFIX=$L ARMS='native:PIECEWISE' bash $W/v31_paired_host8.sh > $W/host_${T}_native$L.log 2>&1
   else
     env $B $FAST $LEAN "$@" LABEL_SUFFIX=_lean$L ARMS="mage:PIECEWISE:$K" bash $W/v31_paired_host8.sh > $W/host_${T}_$K$L.log 2>&1
   fi
@@ -54,4 +56,10 @@ run fc _t50 4096 $T0
 run fc _t50_cgate 4096 $T0 MAGE_ROWW=cgate
 run fc _t50_cgate_k2048 4096 $T0 MAGE_ROWW=cgate MAGE_RESELECT_K=2048
 run fc _t50_cgate_k2048 8192 $T0 MAGE_ROWW=cgate MAGE_RESELECT_K=2048
+# step control on identical canvases (Junyu's C gate; collaboration candidate), dense and sparse alike
+run fc '' native
+run fc _cgstop3 native CG_STOP=3
+run fc _cgstop3 4096 CG_STOP=3
+run fc _stall3 4096 STALL_RESCUE=3
+run fc _rescue20 4096 DENSE_WHEN=step:20
 echo "done $(date -u)" >> $W/status_sc1xchain
