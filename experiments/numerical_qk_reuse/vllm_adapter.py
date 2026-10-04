@@ -142,7 +142,8 @@ class VllmMethodAdapter:
                  residual=None, drop_guard=None, drift_diag=False, dense_below=None, mage_carry_first=False,
                  risk_group=None, mage_reselect=None, mage_row_weight=None, mage_beta=3.0, mage_reselect_k=None,
                  mage_reselect_trigger=None, mage_trigger_signal='accept', mage_reselect_kmin=None,
-                 mage_cg_tau=2.5, mage_cg_gamma_q=0.65, mage_clock_trace=False, mage_sink=0, mage_recent=0):
+                 mage_cg_tau=2.5, mage_cg_gamma_q=0.65, mage_clock_trace=False, mage_sink=0, mage_recent=0,
+                 mage_trigger_relative=False):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -199,6 +200,8 @@ class VllmMethodAdapter:
                              or protect >= int(mage_k) // 64)):
             raise ValueError('mage_sink (tiles) / mage_recent (tokens, a multiple of 64): FA4 query-head selection with '
                              'a token budget mage_k larger than the protected tiles')
+        if mage_trigger_relative and mage_reselect_trigger is None:
+            raise ValueError('mage_trigger_relative rescales the progress signal: needs mage_reselect_trigger')
         if mage_clock_trace and mage_reselect_trigger is None:
             raise ValueError('mage_clock_trace traces the progress clock: needs mage_reselect_trigger')
         if mage_cg_tau <= 0 or not 0.0 <= mage_cg_gamma_q < 1.0:
@@ -338,6 +341,10 @@ class VllmMethodAdapter:
         self.mage_cg_tau, self.mage_cg_gamma_q = float(mage_cg_tau), float(mage_cg_gamma_q)
         self._trig_count, self._trig_k, self._jc = 0, None, None
         self.mage_clock_trace, self._clock = bool(mage_clock_trace), []
+        # round 4d: relative progress -- phi_rel = (phi - phi_1) / (1 - phi_1) with phi_1 the signal after the canvas's
+        # first step (that step never triggers): rows the sampler accepts at once (trailing end-of-text positions in
+        # short answers) no longer count as progress.
+        self.mage_trigger_relative, self._trig_phi0 = bool(mage_trigger_relative), None
         # round 4c: in-budget protection -- the first mage_sink prefix tiles (attention sink) and the last mage_recent
         # prefix tokens (the most recently committed canvases) win every unit's top-k before the scored tiles, so each
         # unit still keeps exactly k tiles. Re-selections use the same protection.
@@ -426,7 +433,7 @@ class VllmMethodAdapter:
         self._mage_prev_argmax, self._k_override = None, None
         self._trig_canvas, self._trig_at = None, None
         self._trig_count, self._trig_k, self._jc = 0, None, None
-        self._clock = []
+        self._clock, self._trig_phi0 = [], None
         self._tile_means, self._residual_tiles, self._guard_cache = {}, 0, []
         self._drift_prev, self._drift_acc = {}, None
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
@@ -1012,6 +1019,7 @@ class VllmMethodAdapter:
         call with its row weights and budget."""
         if self._trig_canvas != self.canvas_id:                                 # a new canvas: reset the clock
             self._trig_canvas, self._trig_count, self._jc, self._trig_k = self.canvas_id, 0, None, None
+            self._trig_phi0 = None
             if self.mage_clock_trace:
                 self._clock.append([])
         done = self._trig_count >= len(self.mage_reselect_trigger)
@@ -1038,6 +1046,11 @@ class VllmMethodAdapter:
             phi = ps if self.mage_trigger_signal == 'settle' else pa
         else:
             phi = float(signal.mean().item())                                  # the one host read of the step
+        if self.mage_trigger_relative:
+            if self._trig_phi0 is None:                                        # the canvas's first step: reference
+                self._trig_phi0 = phi
+                return
+            phi = (phi - self._trig_phi0) / (1.0 - self._trig_phi0) if self._trig_phi0 < 1.0 else 0.0
         self.calls['trigger_checks'] = self.calls.get('trigger_checks', 0) + 1
         crossed = sum(1 for f in self.mage_reselect_trigger if phi >= f)
         if crossed <= self._trig_count:

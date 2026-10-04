@@ -139,6 +139,26 @@ def test_sink_and_recent_tiles_are_kept_within_the_budget():
             pass
 
 
+def test_relative_progress_ignores_rows_accepted_at_the_first_step():
+    n = 10
+    logits = torch.zeros(1, n, 5)
+    arg, p_top = _stats(logits, n)
+    fired = {}
+    for rel in (False, True):
+        a = _adapter(mage_reselect_trigger=0.5, mage_trigger_relative=rel)
+        a.canvas_id = 1
+        for step, k in enumerate([6, 7, 8, 10], 1):                # absolute 0.6 at step 1; relative 0.25, 0.5, 1.0
+            a._canvas_step = step
+            a._progress_observe(arg, p_top, torch.arange(n) < k, logits, n, 1.0)
+        fired[rel] = a._trig_at
+    assert fired == {False: (1, 1), True: (1, 3)}
+    try:
+        _adapter(mage_trigger_relative=True)
+        raise AssertionError('relative progress accepted without a trigger')
+    except ValueError:
+        pass
+
+
 if __name__ == '__main__':
     import sys
     for name, fn in list(globals().items()):
