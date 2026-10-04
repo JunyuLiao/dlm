@@ -552,8 +552,12 @@ Pool:
 - `ruler_long_v31` on dllm: the pinned RULER checkout and DiffusionGemma tokenizer, a new generator seed 4242;
 - 13 tasks × 10 samples per length;
 - private gold.
-- Scorer: `scripts/v31_score_ruler.py`, the official RULER metrics; correct = 100. RULER answers are a single short
-  canvas, so this panel is accuracy only.
+- Scorer: `scripts/v31_score_ruler.py`. The counts below are **strict all-correct (secondary)**: RULER's per-sample
+  metric equals 100 and the output finished with stop / eos. This is not RULER's official score, which is the
+  per-task mean of the partial-credit metric (see "Re-scoring RULER with the official metric" below). RULER answers
+  are a single short canvas, so this panel is accuracy only.
+
+Strict all-correct (secondary):
 
 | arm | 32K | 64K | total | lost / gained vs dense | McNemar p |
 |---|---|---|---|---|---|
@@ -567,7 +571,12 @@ Pool:
   - both sparse methods fail **common-words extraction** (cwe: dense 10/14, m2c 2/14, MAGE 1/14), an aggregation
     over the whole context;
   - MAGE additionally loses multi-hop QA with distractors (qa_1 + qa_2: dense 15, m2c 15, MAGE 12) and multi-value.
-  - vt is 0 for every arm, a model limit.
+  - vt is 0 for every arm. **Correction (2026-10-04): this is a prompt artifact, not a model limit.** Our RULER
+    prompts put the task's answer prefix at the end of the user message (`src/dllm/evaluation/ruler/official.py`).
+    Official RULER puts it after the model-turn marker, so generation starts inside the answer. With our prompts the
+    model first restates the prefix, and vt's official 30-token budget runs out before any variable is named: in the
+    v31 panels, 311 of 315 vt completions hit the 30-token cap and 311 restate the prefix's template phrase. Fixed for
+    the final suite (see "Official protocols (final suite)").
 - Reading:
   - The method's worst-row selection keeps the QA evidence that MAGE's mean-over-queries fixed top-k drops.
   - Aggregation tasks are a shared weakness of sparse GLOBAL attention here.
@@ -586,7 +595,9 @@ LongBench-v2 confirmation (`results/v31_20261003/panels/confirmation_q_full.md`;
 | m2c + rescue | 1.022 | 45 | **0.870** [0.80, 0.94] | 38 | 0.907 | 9 |
 | mass k5 + rescue | 1.098 | 44 | 0.959 | 42 | 0.744 | 12 |
 
-RULER, complete (260 cells; `results/v31_20261003/panels/ruler31_scores_correct_bool.json`):
+RULER, complete (260 cells), **strict all-correct (secondary)** counts
+(`results/v31_20261003/panels/ruler31_scores_correct_bool.json`; RULER's official score is re-computed in the 06:40
+section below):
 
 | arm | 32K | 64K | lost / gained vs dense | McNemar p | cwe | qa (1+2) | multivalue |
 |---|---|---|---|---|---|---|---|
@@ -596,8 +607,9 @@ RULER, complete (260 cells; `results/v31_20261003/panels/ruler31_scores_correct_
 
 **Correction of the interim RULER reading:**
 - With the third shard, m2c vs MAGE is no longer significant: 6 vs 2 cells correct by one only, p = 0.29.
-- Both sparse arms lose significantly against dense, and almost all of it is **common-words extraction (cwe)**, an
-  aggregation over the whole context. Without cwe the arms are equal: dense 199/240, m2c 202, MAGE 199.
+- Under strict all-correct (secondary), both sparse arms lose significantly against dense, and almost all of it is
+  **common-words extraction (cwe)**, an aggregation over the whole context. Without cwe the arms are equal: dense
+  199/240, m2c 202, MAGE 199.
 
 **Overall status:**
 1. Sparse GLOBAL attention gives significant end-to-end gains against the official fixed FULL-graph dense at 64K and
@@ -636,9 +648,10 @@ RULER, complete (260 cells; `results/v31_20261003/panels/ruler31_scores_correct_
 
 **RULER, 174 common cells (shards 0 and 1 of the v31 pool), compute-matched**
 (`results/v31_20261003/panels/ruler_rstuv_compare.md`). "work" is the GLOBAL prefix attention work over dense.
-"sparse kept" covers the sparse calls only.
+"sparse kept" covers the sparse calls only. "strict correct" and the cwe counts are strict all-correct (secondary),
+not RULER's official score.
 
-| arm | correct | vs dense FULL lost/gained (p) | cwe | sparse kept | work |
+| arm | strict correct | vs dense FULL lost/gained (p) | cwe | sparse kept | work |
 |---|---|---|---|---|---|
 | dense FULL (ref) | 140 | – | 10/14 | – | 1 |
 | MAGE k=4096 | 129 | 13/2 (0.007) | 1/14 | 0.084 | 0.401 |
@@ -684,7 +697,8 @@ fixed vLLM (`FIX_51994=1`).
 | 6 | m2c (risk threshold, default) | the method's default selector |
 | 7 | MAGE k=6144, `MAGE_STEP=1` | selection-timing control (select from step-1 queries after one exact step) |
 
-**Primary test.** Arm 4 vs arm 3: exact two-sided McNemar on the 390 cells, α = 0.05.
+**Primary test.** Arm 4 vs arm 3: exact two-sided McNemar on the 390 cells, α = 0.05, on strict all-correct
+(secondary since 2026-10-04: score = 100 and a stop / eos finish; RULER's official score is the partial-credit mean).
 - Reported with both arms' `global_prefix_work_fraction` (exact receipts).
 - If the two work fractions differ by more than 0.03, the comparison is reported as not compute-matched.
 
@@ -700,10 +714,12 @@ new pool.
 
 ## Panel w result: the pre-registered primary test is NOT confirmed — 2026-10-04 05:30 UTC
 
-Held-out RULER v32 (seed 5353), 390 cells, 7 arms, all complete; scored on mpk with the official metrics.
-Full tables: `results/v31_20261003/panels/panel_w_heldout_confirmation.md`. "Work" is exact, from the new receipts.
+Held-out RULER v32 (seed 5353), 390 cells, 7 arms, all complete; scored on mpk as **strict all-correct (secondary)**:
+RULER's per-sample metric = 100 and a stop / eos finish, the metric registered at the time. RULER's official score
+for the same cells is in the 06:40 section below. Full tables: `results/v31_20261003/panels/panel_w_heldout_confirmation.md`.
+"Work" is exact, from the new receipts.
 
-| arm | correct | vs dense FULL lost/gained (p) | cwe | without cwe | sparse kept | work |
+| arm | strict correct | vs dense FULL lost/gained (p) | cwe | without cwe | sparse kept | work |
 |---|---|---|---|---|---|---|
 | dense FULL (ref) | 323 | – | 19/30 | 304/360 | – | 1 |
 | dense PIECEWISE | 323 | 0/0 (1.0) | 19/30 | 304/360 | – | 1 |
@@ -722,7 +738,8 @@ Full tables: `results/v31_20261003/panels/panel_w_heldout_confirmation.md`. "Wor
 **Secondary (descriptive).**
 - **Dense FULL and dense PIECEWISE agree on all 390 cells.** Short RULER answers carry no trajectory noise at the
   correctness level, so every discordance between a sparse arm and dense comes from the attention approximation.
-- **Every sparse arm loses significantly against dense, and the whole deficit is cwe.** Without cwe all arms are
+- **Under strict all-correct (secondary), every sparse arm loses significantly against dense, and the whole deficit is
+  cwe.** (Under RULER's official partial-credit score the differences are within about 2 points; see 06:40.) Without cwe all arms are
   within 6 cells of dense (298–304 / 360). cwe: dense 19/30, sparse 1–9/30. This replicates the v31 finding: the
   aggregation failure is shared by MAGE and the method.
 - **Selection timing does not help MAGE.** Step-1 selection gives 304 vs 308 (p = 0.42), at 0.60 work, because RULER
@@ -805,9 +822,9 @@ required.
 |---|---|---|---|---|
 | long-context (main) | LongBench-v2 (ACL'25) | official: all 503 items, official middle truncation to the 128K-class budget; analysis: natural-length bins 32K / 64K / 96K / 128K | accuracy (official extraction), easy/hard and length breakdowns | realistic deep-reasoning QA; comparable with the leaderboard and prior work |
 | | RULER (13 tasks) | 32K / 64K / 128K, fresh pool v33 (seed 6464, 15 per task) for the final numbers | OFFICIAL score (per-task mean, partial credit) primary; strict all-correct secondary (McNemar) | the DLM sparse-attention standard (SparseD, PulseCol, BA-Att), at longer lengths |
-| | OpenAI MRCR 2-needle (2025) | 32K / 64K / 128K natural | official SequenceMatcher ratio (prefix check) | precise retrieval among distractors in long multi-turn input; open-ended generation |
-| | OpenAI GraphWalks (2025) | 32K / 64K / 128K natural | official set F1 of the final answer | aggregation of scattered facts (the cwe-type weakness) |
-| long-generation guards | AIME26 (2026) | short prompt, 8K thinking budget | exact numeric | newest math reasoning, low contamination |
+| | OpenAI MRCR 2-needle (2025) | the README's bins of o200k tokens (prompt + answer): (16K, 32K], (32K, 64K], (64K, 128K] | official SequenceMatcher ratio (prefix check) on the raw response | precise retrieval among distractors in long multi-turn input; open-ended generation |
+| | OpenAI GraphWalks (2025) | natural bins 22k / 45k / 90k of our tokens (20–26K, 40–56K, 76–116K) | official set F1 of the final answer on the raw response | aggregation of scattered facts (the cwe-type weakness) |
+| long-generation guards | AIME26 (2026) | short prompt, 32,768-token budget (thinking on) | exact numeric, avg@4 | newest math reasoning, low contamination |
 | | HumanEval | short prompt, 8K budget | pass@1 (official tests, sandbox) | the standard code guard of DLM papers |
 
 - Speed is reported on LongBench-v2 (official protocol and natural bins) and RULER, per length: end-to-end time,
@@ -1022,3 +1039,150 @@ The `RISK_GROUP=kv` arm was dropped: panel gs rejected group-shared selection.
 - The failed partial outputs are kept in `failed_fc1/` on dlm2. No GPU result was produced.
 - Order on dlm2: vks started early when the failed chain wrote its final status line, so fc now runs after vks.
   mpk: gb → fc.
+
+- Scoring definitions were audited against the official implementations on 2026-10-04; the final suite follows
+  "Official protocols (final suite)" below.
+
+## Official protocols (final suite) — 2026-10-04
+
+Branch `research/v31-official-protocol-20261004`. An audit compared every scorer and prompt with the dataset's official
+implementation. The deviations it found hit every arm identically, so earlier paired comparisons stay valid, but the
+final suite fixes them. A second, independent audit (same day) added the binding and planned-cell rules below.
+
+One rule module (`scripts/v31_official.py`) is shared by the pool builder (`scripts/v31_build_official_pools.py`), the
+fresh-process checks (`scripts/v31_check_official_pools.py`), every scorer and the comparison tools
+(`scripts/v31_ruler_official_table.py`, `scripts/v31_paired_official.py`, `scripts/v31_perf_breakdown.py`).
+
+**Every scorer:**
+- writes the dataset's **official per-sample metric** as its primary output (`<prefix>.official.json`), unrounded;
+  aggregates average unrounded values and round once;
+- writes booleans only as secondary files named for what they require (for example `strict_all_correct_finished`);
+- never requires a stop / eos finish in a primary metric, and counts capped outputs separately;
+- takes the planned cells (`--cells`): a record outside the plan raises; a missing planned cell raises unless
+  `--allow-missing`, which scores one explicit intersection of all arms and prints per arm planned / present / dropped;
+- binds every completion to its pool: the bench now writes `manifest_sha256`, `prompt_sha256` (sha256 of the prompt
+  token ids), `budget`, `max_model_len`, `chunk`, `block_size` (and `rng_seed`, `prompt_tokens`) into the public and
+  private records; the scorer refuses a record whose manifest, prompt ids or budget differ from the pool it is given
+  (records of the older bench only with `--legacy-unbound`);
+- raises on a duplicate cell key, and writes `<prefix>.binding.json` (per-cell run settings) for the comparison tools.
+
+**Comparison tools** (RULER table, paired tool, perf breakdown) refuse any cell whose `rng_seed`, `budget`,
+`prompt_tokens`, `max_model_len`, `chunk`, `block_size` or hashes differ across arms. The RULER table also asserts all
+13 tasks per length on the common cells. `scripts/v31_paired_official.py` gives paired item-bootstrap CIs:
+- LongBench-v2 per item, plus result.py's columns;
+- AIME26 over problems with the 4 seeds nested;
+- HumanEval over tasks;
+- MRCR and GraphWalks per bin (and per problem type);
+- McNemar for boolean metrics, sign tests for continuous ones.
+
+**Pools.** Private, on mpk in the dyh tree under `pools_v31_official/`. Every pool has its own dataset names, so a
+completion produced from another pool, prompt or budget cannot be scored against it. `<dataset>_rowinfo.json`
+(`v31_rowinfo_v2`) carries the manifest sha256, per-row prompt sha256 and budget, and the pool's **pinned
+max_model_len**. Pass it to every arm as `MAX_MODEL_LEN`; the bench refuses a value below what the cells need.
+
+| dataset (pool dir) | over-length rule | N | generation settings | headline metric (official) | our declared deviations |
+|---|---|---|---|---|---|
+| LongBench-v2, w/o CoT (`longbench_v2_0shot`, `longbench_v2_ofc/`) | official middle truncation: the filled template is tokenized with our tokenizer; above 120,000 tokens the first and last 60,000 are kept and decoded (237 of 503 items) | 503 items, seed 1 | `prompts/0shot.txt` (THUDM/LongBench @ 2e00731f), chat template, thinking off, 128 new tokens; max_model_len 124,928 | accuracy with pred.py `extract_answer` (unparsed = wrong); result.py Overall / Easy / Hard / Short / Medium / Long, one decimal | native seeded diffusion sampler instead of temperature 0.1; reserved special-token spellings escaped (116 occurrences); the model's empty thought block counts toward the 128 tokens |
+| LongBench-v2, w/ CoT (`longbench_v2_0shot_think`) | same (237 of 503) | 503, seed 1 | `prompts/0shot.txt`, thinking on, 16,384 new tokens; max_model_len 141,312 | the same, on the final response after the thinking channel | sampler; escaping; our 16,384 is a total cap on thinking + answer, not a thinking budget |
+| RULER, 13 tasks (`ruler32k_v33ofc` / `ruler64k_v33ofc` / `ruler128k_v33ofc`, `ruler_v33ofc/`) | none: RULER generates each sample to fit `max_seq_length` (prompt + output); with the chat template and the opener the 128K pool reaches 131,085 total tokens (prompt + budget), above RULER's 131,072, because RULER's base-template generator counts neither | 195 per length (15 per task), seed 1 | answer prefix after the model-turn marker (below), thinking off, RULER `tokens_to_generate` per task (niah 128, vt 30, cwe 120, fwe 50, qa 32); max_model_len 136,192 | RULER score: per-sample `string_match_all` / `string_match_part` (0–100, unrounded), mean per task, unweighted mean over the 13 tasks per length | sampler instead of greedy; chat template with the model's empty thought block before the answer prefix |
+| OpenAI MRCR 2-needle (`mrcr2_32k_ofc` / `_64k_ofc` / `_128k_ofc`, `mrcr_ofc/`) | the README's bins of o200k tokens of prompt + answer: (16384, 32768], (32768, 65536], (65536, 131072]; untruncated | 24 per bin | message list through the chat template, thinking off, 2048 (answers at most 838 of our tokens) new tokens; max_model_len 143,360 | mean `SequenceMatcher` ratio per bin with the random-prefix check, on the raw response (difflib default autojunk kept, as in the published numbers) | sampler; bin membership from the dataset's bin blocks (below) |
+| OpenAI GraphWalks (`graphwalks_22k_b16k` / `_45k_b16k` / `_90k_b16k`, `graphwalks_b16k/`) | natural bins of our rendered tokens: 22k = 22,265–22,529, 45k = 44,511–44,841, 90k = 89,071–89,676; untruncated | 24 per bin (12 bfs + 12 parents) | thinking on, 16,384 new tokens (no official budget, so the reasoning-model rule; 4 of 24 90k gold answer lines alone need more than 2048 tokens); max_model_len 110,592 | mean set F1 of the final `Final Answer: [...]` line on the raw response, per bin and problem type | sampler |
+| AIME26 (`aime26_b32k`, `aime26_b32k/`) | short prompts | 30 problems × seeds 1–4 | thinking on, 32,768 new tokens; max_model_len 37,888 | exact match, avg@4 | sampler; project answer extraction (last `\boxed{}`, else an answer marker, else the last number) |
+| HumanEval (existing v27 pool) | short prompts | 164 tasks | chat complete-function prompt, thinking on, 8192 new tokens | pass@1: official `check_program` (full prompt + completion + test + `check(entry_point)`), sandboxed, no finish requirement; time-outs re-run serially | sampler; chat prompt with fence extraction (the first fence tagged '' or `py*` that defines the entry point) |
+
+The first official builds (`ruler_v33/`, `aime26/`, `graphwalks/`, `longbench_v2/`) are superseded:
+- they reused names of earlier pools with other prompts or budgets;
+- `ruler_v33/` stays in place for the queued `rc` panel; its token ids equal the `ruler_v33ofc` rows;
+- `longbench_v2/` has the same manifests byte for byte as `longbench_v2_ofc/`, but without rowinfo v2.
+
+**RULER answer-prefix placement.**
+- Official RULER sends `input + answer_prefix`, with the model template inside `input`
+  (`scripts/pred/call_api.py`, `scripts/data/prepare.py` @ c3f5e3b). The prefix therefore follows the model-turn
+  marker, and the generation starts inside the answer.
+- Our earlier pools put the prefix at the end of the user message. The model then restates the prefix, and the
+  30-token vt budget runs out (the vt = 0 artifact above).
+- DiffusionGemma's chat template ends a non-thinking generation prompt with `<|turn>model\n`. The model itself then
+  emits an empty thought block, `<|channel>thought\n<channel|>`, before its visible answer: 3972 of 3975 non-thinking
+  RULER completions of the v31 panels begin with exactly this block; the other 3 open it and stop without closing it.
+- The final pool therefore uses user turn = the sample input without the prefix (thinking off), followed by the
+  prefill `<|channel>thought\n<channel|>` + the official answer prefix, verbatim (its leading space kept, as RULER
+  sends it).
+- The scorer cuts the continuation only at the end token (no thought-channel split), which is exactly RULER's `pred`.
+- Ablation (dense only, to queue): `ruler32k_v33noop` (`ruler_v33noop/`) renders the vt and the 8 niah_* rows of
+  `ruler32k_v33ofc` WITHOUT the empty thought block: `encode_prompt(input)` ending in `<|turn>model\n`, then the answer
+  prefix tokens, exactly as RULER sends `input + answer_prefix`. Its partner cells in the official pool are
+  `ruler_v33ofc/cells_ruler32k_v33ofc_vt_niah.json`; both use max_model_len 136,192.
+
+**LongBench-v2 CoT column (decision 2026-10-04).**
+- The headline columns are `longbench_v2_0shot` (w/o CoT, thinking off) and `longbench_v2_0shot_think` (w/ CoT).
+- This follows the leaderboard's rule for hybrid reasoning models (longbench2.github.io): for Qwen3, "w/o CoT" is
+  non-thinking mode and "w/ CoT" is thinking mode with a 16K thinking budget. The leaderboard's CoT prompt is for
+  non-reasoning models.
+- The paper's Table 2 lists o1-preview under both settings (Overall 57.7 w/o CoT, 56.2 w/ CoT); only Fig. 3 uses
+  its zero-shot score. So the paper does not by itself fix a template for reasoning models.
+- pred.py's `--cot` mode is a two-stage pipeline for non-reasoning models: `0shot_cot` (1024 tokens), then
+  `0shot_cot_ans` (context omitted), which asks for the answer format. Stage 2 cannot be a fixed generation manifest.
+- `longbench_v2_cot_think` (`0shot_cot`, single stage, thinking on) stays out of headline tables. It is not an
+  official pipeline: its template never asks for "The correct answer is (X)", so pred.py's extraction undercounts it.
+- Our 16,384 is a total cap on thinking + answer, not a thinking budget.
+
+**MRCR bins (re-binned 2026-10-04).**
+- The README bins rows by o200k_base tokens of prompt + answer, with 100 rows per bin.
+- The 800 dataset rows form 8 blocks of 100 in dataset order. Each block maps one-to-one onto a README bin (the bins
+  are the generator's).
+- The official o200k_base BPE file is not on the host, and downloading it needs the user's approval. So a row's bin
+  is its block, cross-checked with o200k counts from a vendored o200k_base vocabulary (199,991 of 199,998 ranks; tiktoken
+  0.14 from a dyh-local copy). The approximate counts put 791 of 800 rows in their block's bin; the other 9 lie just across an adjacent bin edge (consistent with a slightly different count convention). 1 chosen row each in the 32K and 64K bins is such an edge row; its bin is taken from its block.
+- 24 rows per bin by sha256(id).
+- The previous `pools_v31/mrcr` (our own rendered-token bins) is superseded.
+
+**Answer text.**
+- MRCR and GraphWalks grade the raw response, as their READMEs do: the text after the thought channel, cut at the end
+  token, not stripped.
+- The other scorers use `final_response` (stripped).
+
+**Queued pilots (commands, not run).** Both use the env of `v31_paired_host8.sh` with this branch's bench
+(`BENCH=$P/code/repo_bb2190426/scripts/v31_vllm_paired_bench.py`), where:
+- `P=` the dyh `pools_v31_official` dir;
+- `W=` the paired run dir;
+- `PY=` the vLLM env python.
+
+GraphWalks 16,384 dense cap-rate pilot:
+
+    env W=$W PY=$PY MODEL=$MODEL ROOT=$ROOT BENCH=$BENCH SHARD= DATASETS=graphwalks_90k_b16k MEM=0.90 TAG=gwpilot FIX_51994=1 \
+      MAN_DIR=$P/graphwalks_b16k CELLS=$P/graphwalks_b16k/cells_graphwalks_90k_b16k_pilot.json MAX_MODEL_LEN=110592 \
+      ARMS='dense:default' bash $W/v31_paired_host8.sh > $W/host_gwpilot.log 2>&1
+    python $P/code/repo_bb2190426/scripts/v31_cap_rate.py $W/public/gwpilot_dense_default_fix.jsonl
+
+RULER opener ablation, run twice: once with `TAG=noop`, `MAN_DIR=$P/ruler_v33noop` and
+`CELLS=$P/ruler_v33noop/cells_ruler_v33noop.json` (`DATASETS=ruler32k_v33noop`), and once with `TAG=noopref`,
+`MAN_DIR=$P/ruler_v33ofc` and `CELLS=$P/ruler_v33ofc/cells_ruler32k_v33ofc_vt_niah.json` (`DATASETS=ruler32k_v33ofc`).
+Both runs use `MAX_MODEL_LEN=136192`, `FIX_51994=1`, `MEM=0.90` and `ARMS='dense:default'`. Score each with
+`v31_score_ruler.py` and compare vt / niah per task.
+
+**Checks after the audit fixes (2026-10-04, mpk CPU).** Counts, token statistics, pins and sha256 of every pool file:
+`results/v31_official_20261004/pools_summary.json`.
+- A fresh process re-renders every row from its stored text and reproduces `prompt_tokens` exactly. The checks:
+  - RULER ofc 585 / 585, each decoded tail = generation prompt + empty thought block + prefix;
+  - no-opener ablation 135 / 135, tail = generation prompt + prefix;
+  - LongBench-v2 1509 / 1509, with the truncation re-derived from the source items for all 1509 rows (237 of 503
+    truncated per variant);
+  - AIME26 30 / 30, GraphWalks 72 / 72, MRCR 72 / 72 (messages path).
+- Rowinfo v2 checks: manifest sha256, per-row prompt sha256, budgets and pins hold on every row.
+- Renaming kept the content. The renamed RULER pool has the first official build's token ids (195 / 195 per length).
+  GraphWalks matches `pools_v31`. The LongBench rebuild from the sha256-verified copies is byte-identical to the
+  first build.
+- Scorer CLIs on the real pools with synthetic, bound completions (`scripts/v31_scorer_e2e_check.py`):
+  - a perfect answer scores the maximum everywhere (MRCR exactly 1.0 now that the raw response is graded);
+  - a capped copy keeps the primary metric and fails only the secondary boolean;
+  - an empty answer scores 0;
+  - every pool refuses a changed prompt hash, budget or manifest hash, a missing planned cell and an unplanned cell;
+  - the paired tool and the RULER table run on these outputs;
+  - no summary holds a host path.
+- HumanEval positive control (`scripts/v31_humaneval_positive_control.py`): the 164 canonical solutions pass 164 / 164
+  through extract → full-prompt check_program → sandbox (no time-outs).
+- The `py*` fence rule recovers completions tagged `pythonpython`, which the old whitelist rejected. On the mpk shard
+  of the preview panel, 1 of 48 HumanEval completions (m2c k12 mass) changes from no_python_fence to parsed. The audit
+  counts 2 of 96 over both shards; the dlm2 shard was not re-checked here.
+- Toy tests: `tests/test_v31_official_scorers.py` (20) + `tests/test_v27_humaneval.py` (12) + `tests/test_ruler_pipeline.py`
+  (5): 37 passed under pytest on mpk, with the pinned RULER metrics and the bwrap sandbox.

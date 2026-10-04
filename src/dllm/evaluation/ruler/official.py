@@ -251,6 +251,13 @@ def prepare_manifest(
                 )
         valid = []
         for row_index, raw in enumerate(read_jsonl(shard)):
+            # `prompt` is RULER's raw request string (scripts/pred/call_api.py sends input + answer_prefix, the model
+            # template being part of `input`). Wrapping it whole into one chat user turn, as encode_prompt below and the
+            # pre-v31-official pools did, puts the answer prefix at the END OF THE USER MESSAGE; official RULER places
+            # it after the model-turn marker, so generation starts inside the answer. `input` and `answer_prefix` are
+            # recorded separately so the official placement can be rendered (scripts/v31_official.py:ruler_prompt_ids;
+            # pools_v31_official/ruler_v33). actual_prompt_length keeps its historical definition (used by the runner
+            # and the prompt-mode length filter).
             prompt = str(raw["input"]) + str(raw.get("answer_prefix", ""))
             actual = len(adapter.encode_prompt(prompt, generation_extra))
             measured_length = (
@@ -278,6 +285,8 @@ def prepare_manifest(
                     "inference_seed": seed * 1_000_000 + context_length * 100 + task_index * 10_000 + row_index,
                     "prompt": prompt,
                     "prompt_sha256": sha256_bytes(prompt.encode()),
+                    "input": str(raw["input"]),
+                    "answer_prefix": str(raw.get("answer_prefix", "")),
                     "outputs": [str(value) for value in raw["outputs"]],
                     "tokens_to_generate": tokens_to_generate,
                     "official_index": raw.get("index"),

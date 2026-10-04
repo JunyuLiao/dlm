@@ -15,6 +15,10 @@ Per request (public record, no text): prompt tokens, output tokens, sampler call
 ceil(output / 256)), denoising forwards N = sampler calls - C, prefill / decode / wall time (each engine step is
 synchronized), per-step decode times summary, finish reason, adapter + method receipts. Private: raw completion with
 special tokens (for the v15 final-channel LongBench scorer), id, finish reason.
+Binding (public AND private record): manifest_sha256 (sha256 of the dataset's manifest file), prompt_sha256 (sha256 of
+json.dumps(prompt token ids)), budget, max_model_len, chunk, block_size (+ rng_seed, prompt_tokens in the private
+record), so a scorer can refuse a completion produced from another pool / budget / setting. MAX_MODEL_LEN pins vLLM's
+max_model_len (refused below the cells' longest prompt + budget); unset, it is derived from the cells as before.
 usage: python v31_vllm_paired_bench.py MODEL MANIFEST_DIR CELLS_JSON OUT_JSONL PRIVATE_JSONL ARM CG [CONFIG_JSON]
   env: FIX_51994=1 (backport the upstream FULL-graph causal-buffer fix), LOGIT_STATS=fused (one-pass sampler-hook
        statistics, v31_logit_stats; default legacy torch ops), DP_BUILD=chunked (parallel dense-prefix build,
@@ -159,9 +163,11 @@ def main():
         cells = cells[:int(os.environ['LIMIT'])]
     repeats = int(os.environ.get('REPEATS', '1'))
     seed_base = int(os.environ.get('SEED_BASE', '31'))
-    rows = {}
+    rows, man_sha = {}, {}
     for ds in {c['dataset'] for c in cells}:
-        for r in json.loads((Path(manifest_dir) / f'{ds}_generation_manifest.json').read_text()):
+        raw = (Path(manifest_dir) / f'{ds}_generation_manifest.json').read_bytes()
+        man_sha[ds] = hashlib.sha256(raw).hexdigest()
+        for r in json.loads(raw):
             rows[(ds, r['id'])] = r
     import torch
     import vllm
@@ -222,7 +228,9 @@ def main():
 
     longest = max(len(rows[(c['dataset'], c['id'])]['prompt_tokens']) + int(rows[(c['dataset'], c['id'])]['generation_budget'])
                   for c in cells)
-    max_len = min(262144, ((longest + 4096) // 1024 + 1) * 1024)
+    max_len = int(os.environ.get('MAX_MODEL_LEN') or min(262144, ((longest + 4096) // 1024 + 1) * 1024))
+    if max_len < longest:
+        raise ValueError(f'MAX_MODEL_LEN {max_len} is below what the cells need ({longest} = prompt + budget)')
     chunk = int(os.environ.get('CHUNK', '16384'))
     kw = dict(model=model_dir, dtype='bfloat16', max_model_len=max_len, max_num_seqs=1, max_num_batched_tokens=chunk,
               enable_chunked_prefill=True, gpu_memory_utilization=float(os.environ.get('MEM', '0.85')),
@@ -234,6 +242,7 @@ def main():
     tok = llm.get_tokenizer()
     meta = dict(schema='v31_vllm_paired_v1', arm=arm, cudagraph_mode=cg, vllm=vllm.__version__, torch=torch.__version__,
                 gpu=torch.cuda.get_device_name(), max_model_len=max_len, chunk=chunk, block_size=kw['block_size'],
+                max_model_len_source='env' if os.environ.get('MAX_MODEL_LEN') else 'derived', max_model_len_need=longest,
                 gpu_memory_utilization=kw['gpu_memory_utilization'], seed_base=seed_base, adapter_sha256=adapter_sha,
                 method_fingerprint=None if config is None else config.get('fingerprint'), fix_51994=fix_51994,
                 mage_k=int(os.environ.get('MAGE_K', '1024')) if arm == 'mage' else None,
@@ -289,8 +298,10 @@ def main():
         canvases = math.ceil(n_out / CANVAS)
         k = -(-len(ids) // chunk)                          # prefill engine steps (one chunk each)
         decode = steps[k:]
+        bind = dict(manifest_sha256=man_sha[cell['dataset']], prompt_sha256=hashlib.sha256(json.dumps(ids).encode()).hexdigest(),
+                    budget=int(row['generation_budget']), max_model_len=max_len, chunk=chunk, block_size=kw['block_size'])
         rec = dict(meta, dataset=cell['dataset'], index=cell.get('index'), panel_seed=cell['seed'], repeat=rep,
-                   rng_seed=seed, prompt_tokens=len(ids), budget=int(row['generation_budget']), output_tokens=n_out,
+                   rng_seed=seed, prompt_tokens=len(ids), **bind, output_tokens=n_out,
                    sampler_calls=counter['calls'], canvases=canvases, denoise_forwards=counter['calls'] - canvases,
                    engine_steps=len(steps), prefill_steps=k, prefill_s=round(sum(steps[:k]), 5),
                    decode_s=round(sum(decode), 5), wall_s=round(wall, 5),
@@ -305,6 +316,7 @@ def main():
         out.flush()
         priv.write(json.dumps(dict(arm=arm, cudagraph_mode=cg, dataset=cell['dataset'], index=cell.get('index'),
                                    panel_seed=cell['seed'], repeat=rep, id=cell['id'], finish_reason=o.finish_reason,
+                                   rng_seed=seed, prompt_tokens=len(ids), **bind,
                                    completion=tok.decode(o.token_ids, skip_special_tokens=False))) + '\n')
         priv.flush()
         if rec_out is not None:

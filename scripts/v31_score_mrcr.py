@@ -1,36 +1,35 @@
-"""Score v31 private MRCR 2-needle completions with the official OpenAI MRCR grading (ratios + booleans).
+"""Score v31 private MRCR 2-needle completions with the official OpenAI MRCR grading (primary: ratio per sample).
 
-Per completion: the final response (`final_response` of experiments/diffusion_gemma_aime26_modes/protocol.py with the
-manifest row's thinking flag, OFF for every MRCR pool: the text after the last '<channel|>' if one is present, cut at
-the first '<turn|>' / '<|endoftext|>' / '<eos>', stripped), then the README's `grade` (openai/mrcr @ f4c69fae): 0 unless
-the response starts with random_string_to_prepend, otherwise difflib.SequenceMatcher(None, response, answer).ratio()
-after removing that prefix from both. correct = ratio >= 0.99 and a stop / eos finish, as in v31_score_ruler.py.
-Writes {arm_label: {"dataset|index|panel_seed|repeat": ratio}} and the same keys with the boolean -- no text, ids or
-answers. CPU only, no torch: final_response is compiled from the protocol module's own source (importing that module
-would pull in torch and the BLASST runner).
-Run with cwd = a checkout or deployment that holds experiments/ (PYTHONPATH=.).
-usage: python v31_score_mrcr.py OUT_RATIO_JSON OUT_BOOL_JSON MANIFEST_DIR GOLD_DIR PRIVATE.jsonl [...]
-  MANIFEST_DIR / GOLD_DIR hold {dataset}_generation_manifest.json and {dataset}_gold.json
-  ({id: {"answer", "random_string_to_prepend"}}); labels from file names <tag>_<label>.private.jsonl
+Rule: scripts/v31_official.py (planned cells, binding). Per completion: answer text = the raw response the README grades
+(`answer_unstripped`: the text after the last '<channel|>' if present -- the API's message content excludes the thought
+channel --, cut at the first end token, NOT stripped), then the README's `grade` (openai/mrcr @ f4c69fae): 0 unless the
+response starts with random_string_to_prepend, otherwise difflib.SequenceMatcher(None, response, answer).ratio() after
+removing that prefix from both (difflib defaults, autojunk on, as the published numbers).
+Outputs (OUT_PREFIX):
+  .official.json                     {arm: {cell: ratio}}  PRIMARY (no finish requirement)
+  .ratio_ge_099_and_finished.json    {arm: {cell: bool}}  SECONDARY: ratio >= 0.99 AND a stop / eos finish
+  .binding.json                      per-cell run settings for the comparison tools (v31_paired_official.py mrcr)
+  .summary.json                      per arm: the official MRCR number = mean ratio per bin (dataset), plus the mean
+                                     over bins; cells, finished / capped / other, missing_prefix (ratio 0 because the
+                                     response does not open with the random string), coverage, binding
+A record from another pool / manifest / budget, a duplicate cell, a record outside the plan or (without --allow-missing)
+a missing planned cell raises. No text, ids or answers written. Run with cwd / PYTHONPATH holding experiments/.
+usage: python v31_score_mrcr.py OUT_PREFIX MANIFEST_DIR GOLD_DIR --cells CELLS.json [--repeats N] [--allow-missing]
+           [--legacy-unbound] PRIVATE.jsonl [...]
+  GOLD_DIR holds {dataset}_gold.json ({id: {"answer", "random_string_to_prepend"}})
 """
-import ast
-import importlib.util
+import collections
 import json
+import statistics
 import sys
 from difflib import SequenceMatcher
 from pathlib import Path
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import v31_official as op  # noqa: E402
+
 THRESHOLD = 0.99
-
-
-def load_final_response():
-    """experiments.diffusion_gemma_aime26_modes.protocol.final_response, compiled from that file alone."""
-    origin = importlib.util.find_spec('experiments.diffusion_gemma_aime26_modes.protocol').origin
-    tree = ast.parse(Path(origin).read_text(encoding='utf-8'))
-    node = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == 'final_response')
-    namespace = {}
-    exec(compile(ast.Module(body=[node], type_ignores=[]), origin, 'exec'), namespace)
-    return namespace['final_response']
+SECONDARY = 'ratio_ge_099_and_finished'
 
 
 def grade(response, answer, random_string_to_prepend) -> float:
@@ -42,29 +41,53 @@ def grade(response, answer, random_string_to_prepend) -> float:
     return float(SequenceMatcher(None, response, answer).ratio())
 
 
+def score(records, pools, gold_of, legacy=False):
+    official, strict, binding, diag = {}, {}, {}, {}
+    for label, key, r in records:
+        row, b, verified = op.bind(r, pools, legacy)
+        gold = gold_of(r['dataset'])[r['id']]
+        text = op.answer_unstripped(r['completion'], bool(row['thinking']))
+        ratio = grade(text, gold['answer'], gold['random_string_to_prepend'])
+        fc = op.finish_class(r['finish_reason'])
+        op.put(official, label, key, ratio)
+        op.put(strict, label, key, ratio >= THRESHOLD and fc == 'finished')
+        op.put(binding, label, key, b)
+        d = diag.setdefault(label, collections.Counter())
+        d['cells'] += 1
+        d[fc] += 1
+        d['missing_prefix'] += not text.startswith(gold['random_string_to_prepend'])
+        d['verified' if verified else 'legacy_unbound'] += 1
+    return official, {SECONDARY: strict}, binding, diag
+
+
+def summarize(official, diag):
+    out = {}
+    for label, cells in official.items():
+        per_bin = collections.defaultdict(list)
+        for k, v in cells.items():
+            per_bin[k.split('|')[0]].append(v)
+        bins = {b: dict(mean_ratio=statistics.mean(v), cells=len(v)) for b, v in sorted(per_bin.items(), key=lambda x: op.natural_key(x[0]))}
+        out[label] = dict(bins=bins, mean_over_bins=statistics.mean(b['mean_ratio'] for b in bins.values()), **dict(diag[label]))
+    return out
+
+
 def main():
-    out_ratio, out_bool, man_dir, gold_dir, files = sys.argv[1], sys.argv[2], Path(sys.argv[3]), Path(sys.argv[4]), sys.argv[5:]
-    final_response = load_final_response()
-    rows, golds, ratios, correct = {}, {}, {}, {}
-    for f in files:
-        label = Path(f).name.split('.private')[0].split('_', 1)[1]
-        for line in open(f, encoding='utf-8'):
-            r = json.loads(line)
-            ds = r['dataset']
-            if ds not in rows:
-                rows[ds] = {x['id']: x for x in json.loads((man_dir / f'{ds}_generation_manifest.json').read_text(encoding='utf-8'))}
-                golds[ds] = json.loads((gold_dir / f'{ds}_gold.json').read_text(encoding='utf-8'))
-            gold = golds[ds][r['id']]
-            text = final_response(r['completion'], bool(rows[ds][r['id']]['thinking']))
-            ratio = grade(text, gold['answer'], gold['random_string_to_prepend'])
-            key = f"{ds}|{r['index']}|{r['panel_seed']}|{r['repeat']}"
-            ratios.setdefault(label, {})[key] = ratio
-            correct.setdefault(label, {})[key] = ratio >= THRESHOLD and r['finish_reason'] in ('stop', 'eos')
-    Path(out_ratio).write_text(json.dumps(ratios, indent=1, sort_keys=True))
-    Path(out_bool).write_text(json.dumps(correct, indent=1, sort_keys=True))
-    for k in sorted(ratios):
-        v = ratios[k]
-        print(k, sum(correct[k].values()), len(v), f'mean_ratio={sum(v.values()) / len(v):.4f}')
+    a = op.scorer_cli(__doc__, ('out_prefix', 'manifest_dir', 'gold_dir'))
+    golds = {}
+
+    def gold_of(ds):
+        if ds not in golds:
+            golds[ds] = json.loads((Path(a.gold_dir) / f'{ds}_gold.json').read_text(encoding='utf-8'))
+        return golds[ds]
+
+    records, coverage = op.planned_records(a)
+    official, secondary, binding, diag = score(records, op.Pools(a.manifest_dir, ('thinking',)), gold_of, a.legacy_unbound)
+    summary = dict(metric='openai/mrcr grade on the unstripped response: SequenceMatcher ratio with the random-prefix '
+                          'check; mean per bin', coverage=coverage, arms=summarize(official, diag))
+    op.write_outputs(a.out_prefix, official, secondary, summary, binding)
+    for label, s in sorted(summary['arms'].items()):
+        print(label, {b: round(v['mean_ratio'], 4) for b, v in s['bins'].items()}, f"cells={s['cells']} "
+              f"capped={s.get('capped', 0)} missing_prefix={s['missing_prefix']}")
 
 
 if __name__ == '__main__':
