@@ -17,6 +17,7 @@ def test_regroup_kept_fractions_on_a_constructed_need_matrix():
     lognorm = torch.where(need.permute(0, 1, 2, 4, 3), torch.tensor(0.0), torch.tensor(-10.0))
     state = SimpleNamespace(lognorm=lognorm, eligible=torch.ones(b, h, qb, pt, dtype=torch.int8))
     a._regroup_account(state, torch.ones(b, 1), None, -1.0, 128)
+    torch.cuda.synchronize = lambda *x: None                   # CPU-only test
     r = a._regroup_receipt()
     assert r['kept128'] == 0.5                           # tiles 0 and 1 of 4
     assert r['kept64'] == 0.5                            # both halves still need both tiles (interleaved rows)

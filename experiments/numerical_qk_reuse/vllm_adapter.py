@@ -347,13 +347,18 @@ class VllmMethodAdapter:
         gen = torch.Generator(device=need.device).manual_seed(5)
         proj = torch.randn(pt, device=need.device, generator=gen)
         vals = torch.stack([k128, k64, grouped(need.sum(-1)), grouped(need.float() @ proj), need.float().mean()])
-        self._regroup_acc = vals if self._regroup_acc is None else self._regroup_acc + vals
+        # decisions run on the main stream and (after an observation) asynchronously on the core's route stream: keep
+        # one tensor per decision and reduce only at the end of the request, after the per-step device sync
+        if self._regroup_acc is None:
+            self._regroup_acc = []
+        self._regroup_acc.append(vals)
         self._regroup_n += 1
 
     def _regroup_receipt(self):
         if not getattr(self, 'regroup_diag', False) or self._regroup_acc is None:
             return {}
-        m = (self._regroup_acc / self._regroup_n).tolist()
+        torch.cuda.synchronize()
+        m = torch.stack(self._regroup_acc).mean(0).tolist()
         return dict(regroup_decisions=self._regroup_n, kept128=round(m[0], 5), kept64=round(m[1], 5),
                     kept64_regroup_count=round(m[2], 5), kept64_regroup_proj=round(m[3], 5), kept_per_row=round(m[4], 5))
 
