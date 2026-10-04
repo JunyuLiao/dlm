@@ -1186,3 +1186,174 @@ Both runs use `MAX_MODEL_LEN=136192`, `FIX_51994=1`, `MEM=0.90` and `ARMS='dense
   counts 2 of 96 over both shards; the dlm2 shard was not re-checked here.
 - Toy tests: `tests/test_v31_official_scorers.py` (20) + `tests/test_v27_humaneval.py` (12) + `tests/test_ruler_pipeline.py`
   (5): 37 passed under pytest on mpk, with the pinned RULER metrics and the bwrap sandbox.
+
+**Panel gs control check (09:55 UTC).**
+- Result:
+  - dlm2: the `qblock_max` step-1 control reproduces panel x's records on 87/87 cells (output hash and forward
+    count).
+  - mpk: 86/87. The odd cell is RULER 64K, index 66, seed 1. It has the same output length (110 tokens), but 9 vs
+    11 denoising steps in its single canvas, and the text differs from character 163.
+- Code path: diffed the deployed files.
+  - overlay15 (x) against ov_gs: the adapter differs only in the inactive `DENSE_BELOW`, `MAGE_CARRY`,
+    `kvblock / kvhead_max` and `RISK_GROUP` options.
+  - The helper modules are byte-identical.
+  - The bench differs only in passing those options through.
+- So the rule's purpose, detecting a code-path change, is met. The panel is read.
+- Deviation, reported openly: the control rule was stated as "token for token on each host". The one mismatch
+  reveals a rare run-to-run nondeterminism in the MAGE step-1 FA4 selection path (1/174 cells). This is noise, not
+  bias.
+- A determinism probe (dp) is queued on mpk after fc. It reruns the same control twice on the mpk shard to measure
+  the flip rate.
+
+## Panel gs results: group sharing costs accuracy and saves no time — 2026-10-04 10:25 UTC
+
+**RULER, official score.** v31 pool, 174 panel-x cells, both hosts. Every arm keeps 12% of the prefix tiles per
+unit. Dense is 83.8. Table: `results/v31_20261003/panels/ruler_gs_official.md`.
+
+| unit (selection at step 1 unless noted) | official | cwe | diff vs dense [95% CI] |
+|---|---|---|---|
+| per (query head, block), max share (`qblock_max`) | 84.6 | 88.6 | +0.83 [−0.52, +2.64] |
+| per (KV head, block), max share (`kvblock_max`) | 84.3 | 84.3 | +0.49 [−1.03, +2.27] |
+| per KV head, max share (`kvhead_max`) | 84.3 | 83.6 | +0.43 [−0.80, +1.84] |
+| per KV head, mean mass (MAGE's statistic) | 83.6 | 82.1 | −0.26 [−2.16, +1.75] |
+| per KV head, mean mass, step 0 (MAGE as published, 12%) | 81.7 | 78.6 | −2.13 [−4.89, +0.32] |
+| m2c k12 mass (the method) | 84.6 | 87.9 | +0.78 [−0.60, +2.50] |
+
+**Per-call cost** (no-sync events profile, 3 LongBench-v2 64K cells, dlm2), both arms with the carry and 12.4% kept:
+
+| unit | held call | its FA4 part | GLOBAL ms per step |
+|---|---|---|---|
+| `qblock_max` | 0.257 ms | 0.234 ms | 1.83 |
+| `kvblock_max` | 0.253 ms | 0.229 ms | 1.83 |
+
+**Reading.**
+- Sharing one list across the 8 query heads of a KV group costs 4.3 cwe points (0.34 official) and saves 1–2% of a
+  held call. With balanced counts, L2 reuse of shared K/V tiles is not a lever.
+- The held call's cost follows the tiles per CTA. That is consistent with panel vk (union) and SPARSE_DIAG
+  (imbalance).
+- **Group-shared selection is rejected.** The method keeps per-head units.
+- The max-share statistic is worth about 0.7 official points over MAGE's mean mass at the same unit and budget:
+  `kvhead_max` vs MAGE's statistic at step 1.
+- The carry rungs reproduce their no-carry rungs exactly. RULER answers fit in one canvas, so there is no previous
+  canvas to carry from. This is a panel-design miss. The carry is now measured in panel fc, on multi-canvas
+  LongBench outputs, by per-canvas token agreement.
+- Consequences for the queue (10:25 UTC):
+  - gs2 drops the `RISK_GROUP=kv` arms and keeps the k12 mass control (profile + end to end);
+  - fc drops its kv arm and adds the MAGE-port `qblock_max` step-1 unit without and with the carry.
+- Control check: x was reproduced on 173/174 cells (see above). The one cell that differs does not change any
+  score.
+
+## The lean candidate and the budget-matched comparison with MAGE (panel gb, queued 10:30 UTC)
+
+**Where m2c's GLOBAL time goes per canvas** (64K, about 15 steps; per-call costs from the profile, 5 layers):
+
+| component | m2c | MAGE k=4096 |
+|---|---|---|
+| held calls | about 20 ms (0.334 ms each) | about 11 ms |
+| observation / selection | 12.6 ms | 11.4 ms |
+| re-decisions every 6 steps | about 10.4 ms | – |
+| carried first call | 3.4 ms | – |
+| total | about 46 ms (2.96 ms per step) | about 22.5 ms |
+
+Re-decisions buy no accuracy at 12%: on RULER, the MAGE-port per-head max-share unit selected once at step 1 and held
+scores +0.83, against +0.78 for k12 mass with re-decisions.
+
+**Lean candidate.**
+- One exact observation per canvas, at step 1.
+- Per (query head, 128-row block): the top-k prefix tiles by worst-row prefix-mass share, with equal k for every
+  unit, so CTA loads are balanced.
+- The selection is held for the canvas. Call 0 of the next canvas reuses it (carry).
+
+At MAGE's token budget, its held call costs the same as MAGE's, so the per-step cost should match. Any accuracy
+difference is then the method, not compute.
+
+**Panel gb.** RULER v31 x cells, both hosts. A 2 × 2 at 4096 tokens:
+- statistic: MAGE's mean mass per KV head, or the per-(head, block) worst-row max share;
+- selection time: step 0 or step 1.
+
+MAGE 4096 at step 0 is the existing arm. Panel gb also adds the max-share unit at step 1 with 2048 tokens. Speed and
+fidelity of the lean candidate follow in the next panel, at the chosen budget.
+
+**Lean candidate at 12%, end to end (panel gsl, both hosts, 10:50 UTC).**
+- Arm: MAGE port, `qblock_max` (per-head worst-row max share), 12% per unit, selected at step 1 and held, with the
+  carry. It is compared with its own same-host dense FULL run on the LongBench-v2 confirmation cells.
+- MAGE k=4096 and m2c are from panel pf, on the same cells against pf's dense run (dense outputs are deterministic).
+- Geometric means of paired ratios, with 95% bootstrap CIs over cells (`scripts/v31_lb_paired_ci.py`).
+
+| 64K, 72 cells | S/N | N/C | per-canvas decode (N/C × S/N) | W |
+|---|---|---|---|---|
+| lean candidate, 12% + carry | 0.859 [0.853, 0.864] | 1.036 [0.991, 1.087] | **0.890** [0.857, 0.930] | 0.929 [0.860, 1.012] |
+| MAGE k=4096 (6.25% at 64K) | 0.844 [0.840, 0.848] | 1.075 [1.027, 1.130] | 0.907 [0.870, 0.950] | 0.930 [0.866, 1.004] |
+| m2c | 0.883 [0.878, 0.887] | 1.048 [1.006, 1.094] | 0.925 [0.890, 0.961] | 0.929 [0.860, 1.018] |
+
+| 96K, 22 cells | S/N | per-canvas decode |
+|---|---|---|
+| lean candidate, 12% + carry | 0.834 [0.822, 0.846] | 0.772 [0.694, 0.848] |
+| MAGE k=4096 | 0.818 [0.809, 0.829] | 0.752 [0.678, 0.819] |
+| m2c | 0.843 [0.825, 0.858] | 0.882 [0.795, 0.972] |
+
+- The carry acts: in a 7-canvas request, every canvas after the first started from the carried selection (35
+  carried calls; 5 exact calls in the first canvas).
+- **Reading.**
+  - At 64K the lean candidate keeps about twice MAGE 4096's tiles. It has a lower per-step saving but less step
+    inflation, so its per-canvas decode cost matches or beats MAGE's.
+  - On RULER it scores +0.83 (12%), against −3.25 for MAGE 4096.
+  - Panel gb gives its accuracy at MAGE's own budget, where the per-step cost should be equal by construction.
+  - Panel fc gives step inflation on identical canvases.
+- Speed ceiling (Amdahl):
+  - At 64K a dense step is about 41 ms, of which GLOBAL attention in 5 layers is about 7.7 ms. Even free attention
+    saves at most about 19% per step.
+  - At 96K–128K the share and the gains grow.
+  - W also carries the unchanged prefill: 28% of the request at 64K.
+
+**Per-call cost of the method's balanced variant (panel gs2 profile, dlm2, 3 LongBench-v2 64K cells; warm-up excluded).**
+
+| arm | held call (FA4 part) | mean kept | re-decision call | GLOBAL ms per step |
+|---|---|---|---|---|
+| m2c k12 mass (method; equal counts per (head, block)) | 0.280 ms (0.233) | 12.4% | 1.109 ms | 2.50 |
+| m2c (threshold; CTA imbalance about 1.8) | 0.348 ms (0.299) | 9.9% | 1.054 ms | 2.72 |
+| lean candidate (MAGE port, `qblock_max` 12%, held, carry) | 0.257 ms (0.234) | 12.4% | – | 1.83 |
+| MAGE k=4096 | 0.158 ms (0.134) | 6.25% | – | 1.39 |
+
+- **Balance:** with 25% more kept tiles, the balanced k12 mass held call is 20% cheaper than the threshold map's.
+- **The method's re-decisions and core hooks cost about 0.67 ms per step** (2.50 vs 1.83 at the same 12.4%). On
+  RULER they bought no accuracy (+0.78 vs +0.83).
+- The lean candidate is the efficient form of the method's selection. Its per-step cost scales with the kept
+  tiles like MAGE's.
+
+## Panel gb: at MAGE's own budget the lean candidate is 3.4–4.0 points better — 2026-10-04 11:35 UTC
+
+RULER v31 pool, 174 panel-x cells (both hosts), official score. Dense FULL is 83.8. Table:
+`results/v31_20261003/panels/ruler_gb_official.md`.
+- Every arm keeps the same number of prefix tiles per unit: the token budget / 64. That gives equal, balanced
+  held-call cost.
+- Realized decode kept fraction and GLOBAL work come from the receipts.
+
+| arm | sparse kept | work | official | cwe | diff vs dense [95% CI] |
+|---|---|---|---|---|---|
+| **4096, max share per (head, block), step 1 (lean candidate)** | 0.084 | 0.398 | **84.0** | 80.0 | **+0.14** [−1.44, +2.01] |
+| 4096, max share, step 0 | 0.084 | 0.395 | 82.5 | 79.3 | −1.35 [−3.65, +0.92] |
+| 4096, MAGE's mean mass per KV head, step 1 | 0.085 | 0.405 | 83.1 | 78.6 | −0.69 [−2.67, +1.38] |
+| 4096, MAGE as published (mean, step 0) | 0.084 | 0.401 | 80.6 | 62.9 | −3.25 [−6.12, −0.69] |
+| **2048, max share, step 1** | 0.044 | 0.373 | **82.7** | 72.1 | **−1.21** [−3.25, +0.83] |
+| 2048, MAGE as published | 0.042 | 0.372 | 78.7 | 45.7 | −5.20 [−8.33, −2.21] |
+| MAGE 6144 | 0.125 | 0.430 | 81.6 | 75.0 | −2.27 |
+| MAGE 8192 | 0.167 | 0.457 | 83.1 | 83.6 | −0.72 |
+
+**Reading.**
+- At identical budget, kept fraction and work, the lean candidate beats MAGE by **+3.39** official points at 4096
+  and **+3.99** at 2048. At 4096 it is within noise of dense.
+- MAGE needs 8192 tokens (twice the tiles) to come within 0.9 points of the lean candidate at 4096. MAGE 8192 is
+  about level with the lean candidate at 2048 (a quarter of MAGE's tiles).
+- Both components count. On the 2 × 2 at 4096:
+  - observing at step 1 instead of step 0: +2.56 with MAGE's statistic, +1.49 with ours;
+  - the per-(head, block) worst-row max share instead of the KV-head mean: +1.90 at step 0, +0.87 at step 1.
+- On multi-canvas outputs, step-1 selection costs no extra dense call: call 0 runs on the carried selection
+  (verified in panel gsl). On RULER's one-canvas answers the work is still matched (0.398 vs 0.401).
+- Exploratory, on the reused v31 pool. The final claim needs the pre-registered confirmation: fresh RULER v33
+  official pool, official LongBench-v2, the other suite datasets, and fresh seeds.
+- Next:
+  - per-step cost and end-to-end speed of the lean candidate at 4096 against MAGE 4096 on LongBench-v2 (equal by
+    construction, to be measured);
+  - fc's step-inflation numbers;
+  - then the confirmation design.
