@@ -1054,3 +1054,18 @@ fidelity of the lean candidate follow in the next panel, at the chosen budget.
     saves at most about 19% per step.
   - At 96K–128K the share and the gains grow.
   - W also carries the unchanged prefill: 28% of the request at 64K.
+
+**Per-call cost of the method's balanced variant (panel gs2 profile, dlm2, 3 LongBench-v2 64K cells; warm-up excluded).**
+
+| arm | held call (FA4 part) | mean kept | re-decision call | GLOBAL ms per step |
+|---|---|---|---|---|
+| m2c k12 mass (method; equal counts per (head, block)) | 0.280 ms (0.233) | 12.4% | 1.109 ms | 2.50 |
+| m2c (threshold; CTA imbalance about 1.8) | 0.348 ms (0.299) | 9.9% | 1.054 ms | 2.72 |
+| lean candidate (MAGE port, `qblock_max` 12%, held, carry) | 0.257 ms (0.234) | 12.4% | – | 1.83 |
+| MAGE k=4096 | 0.158 ms (0.134) | 6.25% | – | 1.39 |
+
+- **Balance:** with 25% more kept tiles, the balanced k12 mass held call is 20% cheaper than the threshold map's.
+- **The method's re-decisions and core hooks cost about 0.67 ms per step** (2.50 vs 1.83 at the same 12.4%). On
+  RULER they bought no accuracy (+0.78 vs +0.83).
+- The lean candidate is the efficient form of the method's selection. Its per-step cost scales with the kept
+  tiles like MAGE's.
