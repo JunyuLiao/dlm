@@ -1588,3 +1588,16 @@ same 87 RULER cells: panel x, panel gs and two dp reruns.
   selectors inflate alike.
 - So at equal budget the speed is the same as MAGE's, and the accuracy is +3.4 points (gb).
 - The mpk half and the 128K part follow.
+
+**Panel gl, both hosts (64K: 72 cells, 96K: 22 cells), 14:35 UTC.**
+
+| length | arm | S/N | per-canvas decode | W |
+|---|---|---|---|---|
+| 64K | lean 4096 | 0.847 [0.840, 0.852] | 0.887 [0.857, 0.922] | 0.913 [0.859, 0.976] |
+| 64K | MAGE 4096 | 0.843 [0.839, 0.847] | 0.909 [0.874, 0.953] | 0.943 [0.872, 1.021] |
+| 96K | lean 4096 | 0.816 [0.797, 0.830] | 0.774 [0.688, 0.854] | 0.743 [0.619, 0.901] |
+| 96K | MAGE 4096 | 0.816 [0.807, 0.827] | 0.753 [0.677, 0.825] | 0.709 [0.577, 0.848] |
+
+- Per-step cost is identical: within 0.4% at 64K, equal at 96K.
+- The per-canvas and W differences sit within free-running noise. They go opposite ways at 64K and 96K.
+- 128K (LongBench-v2 128K pool, 72 cells) follows.
