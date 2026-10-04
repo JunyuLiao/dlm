@@ -478,3 +478,40 @@ from the S-th denoising step of a canvas on, so only long canvases pay. Arms:
   - trajectory stability (excess s.d. over the dense numerical null is not available here: no PIECEWISE dense arm,
     so only N/C tails are reported).
 - Script: `scripts/v31_q_confirmation_chain.sh`. Development evidence behind the choice: panels m and n.
+
+## Panels n and p (development, 32 cells per length on dllm + mpk) — 2026-10-03 19:45 UTC−5
+
+**Step-triggered dense rescue (panel n).** GLOBAL attention runs dense from step S of a canvas on.
+
+| arm (dllm+mpk, 32 cells) | 32K N/C | 32K S/N | 32K W | 64K N/C | 64K S/N | 64K W |
+|---|---|---|---|---|---|---|
+| m2c | 1.058 | 0.965 | 0.990 | 1.073 | 0.881 | 0.972 |
+| m2c + rescue S=20 | **1.020** | 0.977 | 0.945 | **1.035** | 0.896 | 0.958 |
+| MAGE k=4096 | 1.055 | 0.920 | 0.961 | 1.109 | 0.838 | 0.924 |
+
+On the mpk shard (16 cells per length):
+- The rescue removes the capped canvases (2/2 → 0/0) and brings steps per canvas back to dense level, with 6.7% of
+  GLOBAL calls dense.
+- S=28 is too late (64K N/C 1.065).
+- An entropy trigger (dense once the canvas mean entropy is below 4× the threshold) costs more (11% dense calls,
+  64K S/N 0.929) and helps less (64K N/C 1.045). The step trigger is the right form.
+- On MAGE k=1024 the rescue helps partially: 32K N/C 1.238 → 1.153, W 1.199 → 1.017. MAGE's inflation is mostly a
+  uniform slowdown of early and mid denoising (panel m), not stuck canvases.
+
+**Regrouping (panel p, chw/value_aware q64r).** The regroup diagnostic records the kept prefix-tile fraction of the
+same need matrix at different row granularities:
+
+| granularity | 32K | 64K |
+|---|---|---|
+| 128-row worst row (executed) | 16.1% | 8.4% |
+| natural 64-row halves | 12.6% | 6.6% |
+| 64-row regrouped by need count | 11.9% | 6.2% |
+| 64-row regrouped by random projection | 13.3% | 6.9% |
+| per row (ideal) | 2.9% | 1.4% |
+
+- Executed q64r keeps 25–28% fewer tiles than m2c (13.0% / 6.9% vs 17.2% / 9.5%), but per-forward cost does not drop:
+  S/N 0.975 / 0.893 vs 0.969 / 0.884.
+- The sparse calls are already cheap, and the row permutation, output scatter and 64-row list refinement eat the
+  saving. Forward inflation rises slightly (32K N/C 1.085 vs 1.026).
+- **Regrouping does not pay at FA4's 64-row granularity.** The real headroom is per row (4× fewer tiles than 64-row),
+  which the head_dim-512 FA4 kernel cannot exploit.
