@@ -57,3 +57,25 @@ def merge(o_parts, lse_parts, dtype):
     """Exact log-sum-exp merge: o_parts [P, n, H, D], lse_parts [P, H, n] -> [1, n, H, D] in dtype."""
     w = torch.softmax(lse_parts.float(), dim=0).permute(0, 2, 1)[..., None]
     return (o_parts.float() * w).sum(0, keepdim=True).to(dtype)
+
+
+def dropped_share(q, k, kb, kept, pt, scale, q_block=128):
+    """Estimated share of each (query head, query block)'s attention mass held by its DROPPED wholly-prefix tiles,
+    mean over the block's valid rows -> [H, QB] fp32. Prefix tiles are scored by their centroid (scale q.kbar + log
+    64; Jensen under-estimates the peaked kept tiles, so the dropped share is over-estimated: a conservative guard),
+    the canvas / boundary keys exactly."""
+    _, h, n, d = q.shape
+    hk = kb.shape[0]
+    g = h // hk
+    qf = q[0].float().reshape(hk, g * n, d)
+    z = (torch.bmm(qf, kb.transpose(1, 2)) * scale + math.log(64.0)).view(h, n, pt)
+    tail = torch.bmm(qf, k[0, :, pt * 64:].float().transpose(1, 2)).view(h, n, -1) * scale
+    rows = torch.arange(n, device=q.device) // q_block
+    drop = z.masked_fill(kept[:, rows, :pt], float('-inf')).logsumexp(-1)
+    total = torch.logaddexp(z.logsumexp(-1), tail.logsumexp(-1))
+    share = torch.exp(drop - total)                                            # [H, n]
+    qb = kept.shape[1]
+    pad = qb * q_block - n
+    share = torch.nn.functional.pad(share, (0, pad)).view(h, qb, q_block).sum(-1)
+    count = torch.nn.functional.pad(torch.ones(n, device=q.device), (0, pad)).view(qb, q_block).sum(-1)
+    return share / count.clamp_min(1)

@@ -137,7 +137,7 @@ class VllmMethodAdapter:
                  logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
                  trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None,
                  mage_coverage=None, mage_select_step=0, mage_granularity='kvhead', mage_keep_frac=None,
-                 residual=None):
+                 residual=None, drop_guard=None, drift_diag=False):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -168,6 +168,8 @@ class VllmMethodAdapter:
         from experiments.numerical_qk_reuse.v31_residual import RESIDUAL_MODES
         if residual is not None and residual not in RESIDUAL_MODES:
             raise ValueError(f'residual must be one of {RESIDUAL_MODES}')
+        if drop_guard is not None and not 0.0 < float(drop_guard) < 1.0:
+            raise ValueError('drop_guard must be in (0, 1)')
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
         if arm == 'method':
@@ -226,6 +228,15 @@ class VllmMethodAdapter:
         # their centroid key / mean value (v31_residual); centroids cached per (layer, canvas)
         self.residual = residual
         self._tile_means, self._cur_layer, self._residual_tiles = {}, None, 0
+        # v31 dropped-mass guard (named variant, opt-in, any sparse arm): at the first call of each held keep map, a
+        # (query head, 128-row block) whose dropped prefix tiles are estimated to hold more than drop_guard of its
+        # attention mass keeps its whole prefix (v31_residual.dropped_share); the guarded map is held with the original
+        self.drop_guard = None if drop_guard is None else float(drop_guard)
+        self._guard_cache = []
+        # diagnostic receipts (opt-in): step-to-step drift of the GLOBAL queries and outputs within a canvas -- the
+        # prefix K/V are fixed inside a canvas, so a row whose query did not move could reuse its prefix partial
+        self.drift_diag = bool(drift_diag)
+        self._drift_prev, self._drift_acc = {}, None
         # diagnostic receipts (opt-in): denoising steps per canvas and the canvas mean token entropy per step, i.e.
         # the quantity the official sampler compares with its confidence threshold to stop a canvas
         self.trace_canvas = bool(trace_canvas)
@@ -285,7 +296,8 @@ class VllmMethodAdapter:
         self._events = []
         self.mage_state, self.canvas_id = {}, 0
         self._mage_warm = {}
-        self._tile_means, self._residual_tiles = {}, 0
+        self._tile_means, self._residual_tiles, self._guard_cache = {}, 0, []
+        self._drift_prev, self._drift_acc = {}, None
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
         self._sparse_kept, self._sparse_total, self._global_tiles = None, 0, 0
         self._canvas_steps, self._cur_steps, self._ent_trace, self._conf_threshold = [], 0, [], None
@@ -336,7 +348,8 @@ class VllmMethodAdapter:
         self._stack = self.runtime = self.stub = None
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
-        return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._regroup_receipt()), method=counters,
+        return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._regroup_receipt(),
+                                 **self._drift_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
 
@@ -355,7 +368,8 @@ class VllmMethodAdapter:
                 timing = dict(global_calls_timed=len(ms), global_call_ms_mean=round(sum(ms) / len(ms), 4),
                               global_ms_total=round(sum(ms), 2))
             counters = self.runtime['counters']() if self.runtime is not None else None
-            return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._regroup_receipt()), method=counters,
+            return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._regroup_receipt(),
+                                     **self._drift_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
         finally:
@@ -661,8 +675,47 @@ class VllmMethodAdapter:
                                                              scaling=float(impl.scale), is_causal=False,
                                                              sliding_window=None)
         self.paged = None
+        if self.drift_diag:
+            self._drift_account(layer_idx, q, out, n)
         output[:n].view(n, -1).copy_(out.reshape(n, -1))
         return output
+
+    DRIFT_THRESHOLDS = (0.001, 0.003, 0.01, 0.03, 0.1, 0.3)
+
+    @torch.no_grad()
+    def _drift_account(self, layer_idx, q, out, n):
+        """Relative change of each (head, row) query and output vs the previous GLOBAL call of this layer in the
+        same canvas; counts at DRIFT_THRESHOLDS for rows, for 128-row blocks (max over the block) and for outputs."""
+        h = q.shape[1]
+        cur_q = q[0].float()                                                    # [H, n, D]
+        cur_o = out.reshape(n, h, -1).transpose(0, 1).float()                  # [H, n, D]
+        prev = self._drift_prev.get(layer_idx)
+        self._drift_prev[layer_idx] = (self.canvas_id, n, cur_q.to(torch.bfloat16), cur_o.to(torch.bfloat16))
+        if prev is None or prev[0] != self.canvas_id or prev[1] != n:
+            return
+        pq, po = prev[2].float(), prev[3].float()
+        dq = (cur_q - pq).norm(dim=-1) / pq.norm(dim=-1).clamp_min(1e-12)     # [H, n]
+        do = (cur_o - po).norm(dim=-1) / po.norm(dim=-1).clamp_min(1e-12)
+        qb = -(-n // 128)
+        blocks = torch.nn.functional.pad(dq, (0, qb * 128 - n)).view(h, qb, 128).amax(-1)
+        thr = torch.tensor(self.DRIFT_THRESHOLDS, device=q.device)
+        acc = torch.stack([(dq[..., None] <= thr).sum((0, 1)), (blocks[..., None] <= thr).sum((0, 1)),
+                           (do[..., None] <= thr).sum((0, 1))]).double()
+        totals = torch.tensor([dq.numel(), blocks.numel(), do.numel()], device=q.device, dtype=torch.float64)
+        if self._drift_acc is None:
+            self._drift_acc = [acc, totals]
+        else:
+            self._drift_acc[0] += acc
+            self._drift_acc[1] += totals
+
+    def _drift_receipt(self):
+        acc = getattr(self, '_drift_acc', None)
+        if acc is None:
+            return {}
+        frac = (acc[0] / acc[1][:, None]).tolist()
+        return dict(drift_thresholds=list(self.DRIFT_THRESHOLDS), drift_q_rows=[round(x, 5) for x in frac[0]],
+                    drift_q_blocks=[round(x, 5) for x in frac[1]], drift_out_rows=[round(x, 5) for x in frac[2]],
+                    drift_pairs=int(acc[1][0].item()))
 
     # ------------------------------------------------------------------ MAGE port (prior-art baseline)
     def _mage(self, layer_idx, q, b, scale, prefix, n):
@@ -849,6 +902,8 @@ class VllmMethodAdapter:
         from experiments.numerical_qk_reuse import v27_fa4
         fwd = v27_fa4.load()
         S = self.splits
+        if self.drop_guard is not None and not any(lists is x for x in v27_fa4._ALLKEPT.values()):
+            lists = self._guarded(q, k, v, lists, scale)
         split = self._split(lists)
         self._kept_account(lists)
         qs = q.transpose(1, 2).expand(S, -1, -1, -1)                      # [S, Q, H, D], stride-0 batch
@@ -864,12 +919,8 @@ class VllmMethodAdapter:
         w = torch.softmax(lse, dim=0).permute(0, 2, 1)[..., None]         # [S, Q, H, 1], exact LSE merge
         return (o.float() * w).sum(0, keepdim=True).to(o.dtype)           # [1, Q, H, D]
 
-    def _with_residual(self, q, k, v, lists, scale, o, lse):
-        """Exact sparse partials [S, Q, H, D] / [S, H, Q] plus the dropped tiles' centroid partial, LSE-merged."""
+    def _centroids(self, k, v, pt):
         from experiments.numerical_qk_reuse import v31_residual as rs
-        pt = self.paged['prefix'] // 64
-        if not pt:
-            return rs.merge(o, lse, o.dtype)
         key = (self._cur_layer, self.canvas_id, pt)
         means = self._tile_means.get(key)
         if means is None:
@@ -877,6 +928,37 @@ class VllmMethodAdapter:
                 self._tile_means.clear()
             means = self._tile_means[key] = rs.tile_means(k, v, pt)
             self.calls['residual_centroid_builds'] = self.calls.get('residual_centroid_builds', 0) + 1
+        return means
+
+    def _guarded(self, q, k, v, lists, scale):
+        """The keep map with the dropped-mass guard applied, built once per held map object."""
+        for ref, guarded in self._guard_cache:
+            if ref is lists:
+                return guarded
+        from experiments.numerical_qk_reuse import v27_fa4, v31_residual as rs
+        pt = self.paged['prefix'] // 64
+        guarded = lists
+        if pt:
+            kept = rs.kept_from_lists(lists)
+            share = rs.dropped_share(q, k, self._centroids(k, v, pt)[0], kept, pt, scale, q_block=lists.block_size[0])
+            flag = share > self.drop_guard                                    # [H, QB]
+            n_flag = int(flag.sum())
+            self.calls['guard_units'] = self.calls.get('guard_units', 0) + flag.numel()
+            self.calls['guard_flagged_units'] = self.calls.get('guard_flagged_units', 0) + n_flag
+            if n_flag:
+                kept = kept.clone()
+                kept[..., :pt] |= flag[..., None]
+                guarded = v27_fa4.block_sparse_tensors(kept[None], q_block=lists.block_size[0])
+        self._guard_cache = self._guard_cache[-63:] + [(lists, guarded)]
+        return guarded
+
+    def _with_residual(self, q, k, v, lists, scale, o, lse):
+        """Exact sparse partials [S, Q, H, D] / [S, H, Q] plus the dropped tiles' centroid partial, LSE-merged."""
+        from experiments.numerical_qk_reuse import v31_residual as rs
+        pt = self.paged['prefix'] // 64
+        if not pt:
+            return rs.merge(o, lse, o.dtype)
+        means = self._centroids(k, v, pt)
         kept = rs.kept_from_lists(lists)
         o_d, lse_d = rs.residual_partial(q, means[0], means[1], kept, pt, scale, q_block=lists.block_size[0])
         self.calls['residual_calls'] = self.calls.get('residual_calls', 0) + 1
