@@ -1002,3 +1002,11 @@ interval only slowly, so the comparison is moved onto identical canvases instead
 - The lean branch's 13 fake-torch unit tests load the adapter by repository path, so they error in the flat overlay
   layout. They pass in the repository layout (36 tests, the 13 CUDA ones skipped without CUDA). The CUDA classes
   pass on dlm2 (22 ok).
+
+**fc revised before it started (10:25 UTC).** Arms added:
+- m2c with the step-20 dense rescue (`DENSE_WHEN=step:20`). The dense-rescue idea comes from Junyu Liao's work, so
+  it is a COLLABORATION CANDIDATE.
+- The MAGE-port per-head unit (`qblock_max`, 12%, step 1), without and with `MAGE_CARRY`. Panel gs could not test
+  the carry, because RULER answers are one canvas long.
+
+The `RISK_GROUP=kv` arm was dropped: panel gs rejected group-shared selection.
