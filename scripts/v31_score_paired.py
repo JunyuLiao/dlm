@@ -1,7 +1,12 @@
-"""Score v31 private completions with the panels' unchanged LongBench-v2 scorer (v15 NeMo MCQ on the final channel,
-strict EOS), on mpk where the long-LB gold and the pinned NeMo-Skills checkout live. Writes only booleans:
-{arm_label: {"dataset|index|panel_seed|repeat": correct}} -- no text, no ids, no predictions.
-Run in a panel deployment (cwd, PYTHONPATH=src:.) with the project's scorer environment.
+"""Score v31 private completions of the NATURAL-length LongBench-v2 bins (longbench_v2_32k / _64k / _96k: NeMo-Skills
+prompt, untruncated) with the panels' unchanged v15 scorer (scripts/v15_longbench_task.py: NeMo eval_mcq default
+config on the final channel), on mpk where the long-LB gold and the pinned NeMo-Skills checkout live.
+Writes v15's `task_correct` per cell: the extracted choice equals the gold; a stop / eos finish is NOT required (a valid
+final-channel choice counts at a length cap). v15's `strict_correct` (which requires eos) is not written.
+This is the project's NeMo extraction on the NeMo prompt, not LongBench's official protocol: the official-protocol
+pools (pools_v31_official/longbench_v2) are scored by scripts/v31_score_longbench_official.py.
+Output: {arm_label: {"dataset|index|panel_seed|repeat": task_correct}} -- no text, no ids, no predictions; a duplicate
+cell key raises. Run in a panel deployment (cwd, PYTHONPATH=src:.) with the project's scorer environment.
 usage: python v31_score_paired.py OUT_JSON GOLD_DIR32_64 GOLD_DIR96 PRIVATE.jsonl [PRIVATE.jsonl ...]
   arm labels come from the file names: <tag>_<label>.private.jsonl
 """

@@ -19,7 +19,8 @@ import subprocess
 
 DATA_REVISION = '6d43fb980f9fee3c892a914eda09951f772ad10d'
 PROMPT_STYLE = 'chat_complete_function_v1'
-EXTRACTOR = 'final_first_python_fence_or_plain_complete_function_v1'
+EXTRACTOR = 'final_first_entry_point_python_fence_or_plain_complete_function_v2'
+PROGRAM = 'official_check_program_full_prompt_v2'
 SANDBOX = 'unprivileged_bwrap_readonly_net_pid_user_isolated_mpk_v1'
 PREFIX = ('Complete the Python function below. Return the complete Python solution '
           'in a single fenced python code block, without a test harness.\n\n')
@@ -31,7 +32,7 @@ def sha(data):
 
 def contract(raw_sha, scorer_sha):
     return dict(dataset_revision=DATA_REVISION, dataset_sha256=raw_sha,
-                prompt_style=PROMPT_STYLE, extractor=EXTRACTOR, sandbox=SANDBOX,
+                prompt_style=PROMPT_STYLE, extractor=EXTRACTOR, program=PROGRAM, sandbox=SANDBOX,
                 scorer_sha256=scorer_sha, thinking=True, generation_budget=8192,
                 test_wall_timeout_s=5, test_cpu_limit_s=3, test_memory_mb=512,
                 quality_metric='test_pass@1; EOS not required; capped outputs reported')
@@ -77,30 +78,36 @@ def final_text(raw):
 
 
 def extract_code(raw, entry_point):
+    """The first python fence (language '', 'python' or 'py') that parses and defines `entry_point` at top level;
+    without any fence, the whole final text as a plain complete function. Never chosen by test outcome."""
     text = final_text(raw)
     if not text:
         return None, 'no_final_response'
     fences = re.findall(r'```([^\n`]*)\n(.*?)```', text, re.S)
     if fences:
-        selected = next((body for lang, body in fences if lang.strip().lower() in ('', 'python', 'py')), None)
-        if selected is None:
+        bodies = [body.strip() for lang, body in fences if lang.strip().lower() in ('', 'python', 'py')]
+        if not bodies:
             return None, 'no_python_fence'
-        text = selected.strip()
-    try:
-        module = ast.parse(text)
-    except (SyntaxError, ValueError):
-        return None, 'syntax_error'
-    if not any(isinstance(n, ast.FunctionDef) and n.name == entry_point for n in module.body):
-        return None, 'missing_entry_point'
-    return text, 'parsed'
+    else:
+        bodies = [text]
+    parsed_any = False
+    for body in bodies:
+        try:
+            module = ast.parse(body)
+        except (SyntaxError, ValueError):
+            continue
+        parsed_any = True
+        if any(isinstance(n, ast.FunctionDef) and n.name == entry_point for n in module.body):
+            return body, 'parsed'
+    return None, 'missing_entry_point' if parsed_any else 'syntax_error'
 
 
 def program_for(problem, code):
-    # Preserve original imports preceding the task's signature. Tests/check are
-    # added only in the separate scoring process, never the generation manifest.
-    stem = problem['prompt']
-    header = stem[:re.search(r'^def\s+', stem, re.M).start()]
-    return header + '\n' + code + '\n' + problem['test'] + '\ncheck(' + problem['entry_point'] + ')\n'
+    """The official HumanEval check_program (openai/human-eval execution.py: prompt + completion + test +
+    check(entry_point)) with the task's FULL prompt. The completion is a complete function (chat format): the prompt's
+    docstring-only stub is valid Python and the model's definition replaces it, while imports and helper functions the
+    prompt defines stay available. Tests / check are added only here, never in the generation manifest."""
+    return problem['prompt'] + '\n' + code + '\n' + problem['test'] + '\n' + f"check({problem['entry_point']})" + '\n'
 
 
 BOOTSTRAP = """
