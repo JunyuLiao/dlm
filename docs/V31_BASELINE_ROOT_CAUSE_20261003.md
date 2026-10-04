@@ -1392,3 +1392,59 @@ is exactly one above the true number of denoising steps, which is the sum of the
 request has one sampler call in the commit phase more than it has canvases.
 - Every N and N/C so far carries this +1 per request, for every arm alike. Ratios move by under 1/N, below 1%.
 - The definition stays as is so records stay comparable. Forced-mode records carry the exact per-canvas counts.
+
+## PRE-REGISTRATION — confirmation stage A (registered 2026-10-04 12:10 UTC, before any stage-A result)
+
+**Code.**
+- Branch `research/v31-integration-20261004` @ 42ae056dd.
+- Overlay `ov_int`: adapter 3bf07e69d9cf; bench `bench_ov_int.py` 1fe793e4fce4.
+- Records are bound to manifest / prompt / budget and carry a pinned `max_model_len`.
+- Chain: `results/v31_20261003/panels/fa_chain.sh`. It starts with the overlay's GPU test suite and aborts unless
+  every test passes.
+
+**Arms.** Every arm runs on every cell of a host's shard; mpk takes 0/2 and dlm2 1/2.
+
+| arm | definition |
+|---|---|
+| A0 | dense: vLLM FULL graphs + PR #51994 backport (the official serving path) |
+| A1 | MAGE as published (prior art): exact step-0 observation, mean row-normalized mass per KV head, 4096 tokens = 64 prefix tiles per KV head, held for the canvas |
+| A2 | **ours, lean 4096:** exact observation at step 1, per-(query head, 128-row block) worst-row prefix-mass share, 64 tiles per unit, held for the canvas, the next canvas's first call on the carried selection |
+| A3 | ours, lean 2048 (32 tiles per unit) |
+
+- All sparse arms use PIECEWISE graphs, the same execution flags and FA4 kernel path, and alias splits S=2.
+- A1 and A2 keep the same number of tiles per unit, so their per-step cost is equal by construction.
+
+**Datasets.** Official pools (`research/v31-official-protocol-20261004`), seed 1:
+- RULER v33ofc at 32K / 64K / 128K: 585 cells;
+- LongBench-v2 `0shot` (thinking off, 128 tokens): 503 items;
+- MRCR 2-needle (official bins): 72;
+- GraphWalks at 16K budget: 72;
+- HumanEval (thinking on, 8192 tokens): 164.
+
+**Freshness.**
+- RULER v33 and the MRCR / GraphWalks pools were never used in development.
+- LongBench-v2: the development confirmation cells (24 / 24 / 11 items at 32K / 64K / 96K) come from the same 503
+  items. Only their speed and a few accuracy previews were looked at.
+- HumanEval had an 8-task preview (panel ae).
+
+**Primary hypotheses** (official score; paired; stratified bootstrap 95% CI with
+`scripts/v31_ruler_official_table.py`; overall = mean over the three lengths):
+- **H1 (method beats prior art at equal budget):** RULER official(A2) − official(A1) > 0. The lower CI bound must be
+  above 0.
+- **H2 (near-lossless):** RULER official(A2) − official(A0) > −1.0 point. The lower CI bound must be above −1.0.
+
+**Secondary analyses** (reported in full, no selection):
+- H1 / H2 per length, and the same contrasts for A3.
+- LongBench-v2 accuracy: overall / easy / hard / short / medium / long, paired per item.
+- MRCR and GraphWalks per bin.
+- HumanEval pass@1.
+- Speed per dataset and length from the same runs: S/N, N/C (with the +1 counting note), per-canvas decode,
+  prefill, W, as paired geometric means with CIs (`scripts/v31_lb_paired_ci.py`).
+
+**Rules.**
+- No cell is excluded. A missing cell means a re-run; the scorers refuse missing cells.
+- Every arm of a cell runs on the same host.
+- A failure of H1 or H2 is reported as such.
+
+**Stage B** (LongBench-v2 `0shot_think` at 16K, AIME26 32K × 4 seeds) is designed separately with the user. It costs
+more than 10 GPU-hours per arm.
