@@ -119,6 +119,26 @@ def test_clock_trace_records_both_signals_per_canvas():
     assert _adapter(mage_reselect_trigger=0.5)._clock_receipt() == {}
 
 
+def test_sink_and_recent_tiles_are_kept_within_the_budget():
+    torch.manual_seed(0)
+    H, n, pt, kt, qb, G = 16, 256, 40, 44, 2, 8
+    head_lse = torch.randn(H, n, pt)
+    head_lse[:, :, 10] += 9.0                                      # one clearly dominant scored tile everywhere
+    mass = torch.softmax(torch.cat([head_lse, torch.randn(H, n, kt - pt)], -1), -1)
+    a = _adapter(mage_sink=1, mage_recent=128)
+    kept = a._mage_units(mass, head_lse, H, n, qb, kt, pt, 4, G)
+    pre = kept[0, :, :, :pt]
+    assert bool((pre.sum(-1) == 4).all())                          # exactly k tiles per unit
+    assert bool(pre[..., 0].all() and pre[..., pt - 1].all() and pre[..., pt - 2].all() and pre[..., 10].all())
+    assert bool(kept[0, :, :, pt:].all())
+    for bad in (dict(mage_recent=100), dict(mage_sink=64), dict(mage_sink=-1)):
+        try:
+            _adapter(**bad)
+            raise AssertionError(f'accepted {bad}')
+        except ValueError:
+            pass
+
+
 if __name__ == '__main__':
     import sys
     for name, fn in list(globals().items()):

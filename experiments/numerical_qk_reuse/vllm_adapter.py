@@ -142,7 +142,7 @@ class VllmMethodAdapter:
                  residual=None, drop_guard=None, drift_diag=False, dense_below=None, mage_carry_first=False,
                  risk_group=None, mage_reselect=None, mage_row_weight=None, mage_beta=3.0, mage_reselect_k=None,
                  mage_reselect_trigger=None, mage_trigger_signal='accept', mage_reselect_kmin=None,
-                 mage_cg_tau=2.5, mage_cg_gamma_q=0.65, mage_clock_trace=False):
+                 mage_cg_tau=2.5, mage_cg_gamma_q=0.65, mage_clock_trace=False, mage_sink=0, mage_recent=0):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -192,6 +192,13 @@ class VllmMethodAdapter:
                              'with mage_reselect_trigger')
         if mage_row_weight == 'jcgate' and mage_reselect_trigger is None:
             raise ValueError("mage_row_weight 'jcgate' needs the progress clock (mage_reselect_trigger)")
+        protect = int(mage_sink) + int(mage_recent) // 64
+        if int(mage_sink) < 0 or int(mage_recent) < 0 or int(mage_recent) % 64 or (
+                protect and (mage_select != 'fa4' or mage_keep_frac is not None
+                             or mage_granularity in ('kvhead', 'kvblock_max', 'kvhead_max')
+                             or protect >= int(mage_k) // 64)):
+            raise ValueError('mage_sink (tiles) / mage_recent (tokens, a multiple of 64): FA4 query-head selection with '
+                             'a token budget mage_k larger than the protected tiles')
         if mage_clock_trace and mage_reselect_trigger is None:
             raise ValueError('mage_clock_trace traces the progress clock: needs mage_reselect_trigger')
         if mage_cg_tau <= 0 or not 0.0 <= mage_cg_gamma_q < 1.0:
@@ -331,6 +338,10 @@ class VllmMethodAdapter:
         self.mage_cg_tau, self.mage_cg_gamma_q = float(mage_cg_tau), float(mage_cg_gamma_q)
         self._trig_count, self._trig_k, self._jc = 0, None, None
         self.mage_clock_trace, self._clock = bool(mage_clock_trace), []
+        # round 4c: in-budget protection -- the first mage_sink prefix tiles (attention sink) and the last mage_recent
+        # prefix tokens (the most recently committed canvases) win every unit's top-k before the scored tiles, so each
+        # unit still keeps exactly k tiles. Re-selections use the same protection.
+        self.mage_sink, self.mage_recent_tiles = int(mage_sink), int(mage_recent) // 64
         # v31 pooled residual (named variant, opt-in, any sparse arm): dropped wholly-prefix tiles are added back as
         # their centroid key / mean value (v31_residual); centroids cached per (layer, canvas)
         self.residual = residual
@@ -1110,6 +1121,11 @@ class VllmMethodAdapter:
                 live = torch.isfinite(logw).any(-1)                                             # [QB]: a row to weigh
                 score = torch.where(live[None, :, None], weighted, score)
                 self.calls['mage_weighted_units'] = self.calls.get('mage_weighted_units', 0) + 1
+        if self.mage_sink or self.mage_recent_tiles:                                           # in-budget protection
+            score = score.clone()
+            score[..., :min(self.mage_sink, pt)] = float('inf')
+            if self.mage_recent_tiles:
+                score[..., max(0, pt - self.mage_recent_tiles):] = float('inf')
         kept[0, :, :, :pt].scatter_(-1, score.topk(k_tiles, dim=-1).indices, True)
         self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * H * qb
         self.calls['mage_prefix_tiles'] += int(pt) * H * qb
