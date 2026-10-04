@@ -736,3 +736,60 @@ Full tables: `results/v31_20261003/panels/panel_w_heldout_confirmation.md`. "Wor
 - This is what the exploratory panels y (pooled residual for dropped tiles) and z (dropped-mass guard) target. Any
   winner from x / y / z needs its own pre-registered confirmation on a fresh pool (v33) and LongBench seeds.
 - No novelty claim rests on selector quality for RULER.
+
+## Re-scoring RULER with the official metric: earlier conclusions revisited — 2026-10-04 06:40 UTC
+
+**The scoring rule mattered.** RULER's official score is the per-sample metric (0–100) averaged per task, then over
+the 13 tasks. The multi-answer tasks give partial credit: cwe scores 70 for 7 of 10 words. Our McNemar analyses used
+a STRICT boolean (score = 100 and a stop/eos finish), which turns every partially correct cwe answer into a failure.
+Both are now reported. Tables:
+- `results/v31_20261003/panels/ruler_v31_official_vs_strict.md`: all v31-pool arms, 174 common cells, exploratory;
+- panel w (held-out v32) below.
+
+**Held-out v32 (panel w, 390 cells), official score.** All differences are per cell vs dense FULL.
+
+| arm | official | cwe | diff vs dense [95% CI] |
+|---|---|---|---|
+| dense FULL / PIECEWISE | 85.8 | 84.7 | – |
+| m2c k12 mass | 85.5 | 88.3 | −0.29 [−1.65, +1.04] |
+| MAGE k=6144 | 84.7 | 77.7 | −1.12 [−2.42, +0.10] |
+| MAGE k=4096 | 84.1 | 67.3 | – |
+| m2c (risk) | 84.0 | 71.7 | – |
+
+- k12 mass − MAGE 6144 at matched work: +0.82 [−0.37, +2.01]; better/worse cells 23/10, sign test p = 0.035.
+- On cwe the same difference is +10.7 [+5.3, +16.3] (p = 0.004).
+- This is POST HOC: the registered metric was strict correctness. The next confirmation registers the official
+  score as primary.
+
+**v31 pool (exploratory), official score; dense 83.8.**
+
+| arm | work | official diff |
+|---|---|---|
+| m2c (risk) | 0.372 | −0.66 |
+| MAGE 2048 | 0.372 | −5.20 |
+| MAGE 4096 | 0.401 | −3.25 |
+| MAGE 4096 + critical tiles (tau 0.02) | 0.410 | −1.55 |
+| MAGE 6144 | 0.430 | −2.27 |
+| m2c k12 mass | 0.428 | +0.78 |
+| m2c k20 mass | 0.485 | +0.98 |
+| coverage 0.90 | 0.73 | +0.29 |
+| coverage 0.95 | 0.84 | +0.72 |
+
+- The pooled (centroid) residual lowers every arm by 0.4–1.6 points.
+
+**Earlier conclusions, revisited.**
+- "m2c vs MAGE not significant (strict p = 0.29)": the strict rule understated the method. Under the official score
+  the method is 2.6–4.5 points above MAGE at matched work on v31 (exploratory), and +0.8 on held-out v32 (post hoc,
+  CI includes 0). To be confirmed with the official score registered.
+- "Critical tiles recover nothing (panel s)": wrong under the official score. tau = 0.02 recovers 1.7 of MAGE's 3.25
+  points (cwe 63 → 75) at +0.009 work. Revived; an arm-agnostic version is being built.
+- "Pooled residual (panel y)": negative under both rules. Rejected as implemented (uncalibrated centroid). Calibrated
+  and sampled versions are being built.
+- "Selection timing (MAGE step 1)": +1.9 on v31 but at 0.58 work, and no gain on v32. Stays rejected.
+- Selector granularity (panel x ladder), at step 1: per-block max beats KV-head mean by about 1 point. This is mild
+  support for the method's granularity.
+- Unchanged:
+  - LongBench-v2 conclusions: single-choice, no partial credit;
+  - regroup: closed on cost;
+  - LLaDA2.1: Amdahl;
+  - prefill / per-step / N-C breakdowns: timing only.
