@@ -22,7 +22,7 @@ usage: python v31_vllm_paired_bench.py MODEL MANIFEST_DIR CELLS_JSON OUT_JSONL P
        MAGE_SELECT=fa4 (MAGE selection statistics from the FA4 observation), KV_COPY=triton / MERGE=triton (V30 one-kernel
        paged K/V refresh and alias-split LSE merge), TRACE=1 (per-canvas step counts and mean-entropy trajectories in the
        public record), DENSE_WHEN=conv:THETA|step:S (method arm: dense GLOBAL attention near canvas convergence / from
-       step S of a canvas), MAGE_CRIT=TAU (MAGE + per-query-head critical tiles with mass share >= TAU), MAGE_STEP=S (MAGE selects at step S of a canvas after S exact steps; default 0), MAGE_GRAN=kvhead|qhead|qblock|qblock_max (selection unit / row aggregation), MAGE_FRAC=F (keep fraction of prefix tiles per unit instead of MAGE_K), REGROUP_DIAG=1 (kept fraction at 128 / 64 / regrouped-64 rows / per row), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
+       step S of a canvas), MAGE_CRIT=TAU (MAGE + per-query-head critical tiles with mass share >= TAU), MAGE_STEP=S (MAGE selects at step S of a canvas after S exact steps; default 0), MAGE_GRAN=kvhead|qhead|qblock|qblock_max (selection unit / row aggregation), MAGE_FRAC=F (keep fraction of prefix tiles per unit instead of MAGE_K), RESIDUAL=centroid (dropped prefix tiles added back as centroid key / mean value, any sparse arm), REGROUP_DIAG=1 (kept fraction at 128 / 64 / regrouped-64 rows / per row), REPEATS (default 1), MEM (0.85), BLOCK (32), CHUNK (16384), LIMIT, DATASETS (comma list), SEED_BASE (31),
        V27_ADAPTER_DIR (overlay holding vllm_adapter.py), SHARD=k/K (take cells k, k+K, ...)
 """
 import hashlib
@@ -102,7 +102,8 @@ def main():
                                                  mage_coverage=float(os.environ['MAGE_COV']) if os.environ.get('MAGE_COV') else None,
                                                  mage_select_step=int(os.environ.get('MAGE_STEP', '0')),
                                                  mage_granularity=os.environ.get('MAGE_GRAN', 'kvhead'),
-                                                 mage_keep_frac=float(os.environ['MAGE_FRAC']) if os.environ.get('MAGE_FRAC') else None)
+                                                 mage_keep_frac=float(os.environ['MAGE_FRAC']) if os.environ.get('MAGE_FRAC') else None,
+                                                 residual=os.environ.get('RESIDUAL') or None)
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -140,7 +141,8 @@ def main():
                 mage_coverage=float(os.environ['MAGE_COV']) if arm == 'mage' and os.environ.get('MAGE_COV') else None,
                 mage_select_step=int(os.environ.get('MAGE_STEP', '0')) if arm == 'mage' else None,
                 mage_granularity=os.environ.get('MAGE_GRAN', 'kvhead') if arm == 'mage' else None,
-                mage_keep_frac=float(os.environ['MAGE_FRAC']) if arm == 'mage' and os.environ.get('MAGE_FRAC') else None)
+                mage_keep_frac=float(os.environ['MAGE_FRAC']) if arm == 'mage' and os.environ.get('MAGE_FRAC') else None,
+                residual=os.environ.get('RESIDUAL') or None if arm != 'dense' else None)
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]

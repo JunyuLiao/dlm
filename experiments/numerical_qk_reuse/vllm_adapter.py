@@ -136,7 +136,8 @@ class VllmMethodAdapter:
                  canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024,
                  logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
                  trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None,
-                 mage_coverage=None, mage_select_step=0, mage_granularity='kvhead', mage_keep_frac=None):
+                 mage_coverage=None, mage_select_step=0, mage_granularity='kvhead', mage_keep_frac=None,
+                 residual=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -164,6 +165,9 @@ class VllmMethodAdapter:
             raise ValueError('mage_granularity other than kvhead needs mage_select=fa4, without critical / coverage')
         if mage_keep_frac is not None and not 0.0 < float(mage_keep_frac) <= 1.0:
             raise ValueError('mage_keep_frac must be in (0, 1]')
+        from experiments.numerical_qk_reuse.v31_residual import RESIDUAL_MODES
+        if residual is not None and residual not in RESIDUAL_MODES:
+            raise ValueError(f'residual must be one of {RESIDUAL_MODES}')
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
         if arm == 'method':
@@ -218,6 +222,10 @@ class VllmMethodAdapter:
         # method's k12 at every length) instead of mage_k / 64.
         self.mage_granularity = mage_granularity
         self.mage_keep_frac = None if mage_keep_frac is None else float(mage_keep_frac)
+        # v31 pooled residual (named variant, opt-in, any sparse arm): dropped wholly-prefix tiles are added back as
+        # their centroid key / mean value (v31_residual); centroids cached per (layer, canvas)
+        self.residual = residual
+        self._tile_means, self._cur_layer, self._residual_tiles = {}, None, 0
         # diagnostic receipts (opt-in): denoising steps per canvas and the canvas mean token entropy per step, i.e.
         # the quantity the official sampler compares with its confidence threshold to stop a canvas
         self.trace_canvas = bool(trace_canvas)
@@ -277,6 +285,7 @@ class VllmMethodAdapter:
         self._events = []
         self.mage_state, self.canvas_id = {}, 0
         self._mage_warm = {}
+        self._tile_means, self._residual_tiles = {}, 0
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
         self._sparse_kept, self._sparse_total, self._global_tiles = None, 0, 0
         self._canvas_steps, self._cur_steps, self._ent_trace, self._conf_threshold = [], 0, [], None
@@ -434,9 +443,12 @@ class VllmMethodAdapter:
         if stotal:
             out.update(sparse_only_kept_tiles=int(round(sk)), sparse_only_prefix_tiles=int(stotal),
                        sparse_kept_prefix_fraction=round(sk / stotal, 5))
+        rtiles = getattr(self, '_residual_tiles', 0)
+        if rtiles:
+            out.update(residual_prefix_tiles=round(rtiles, 1))
         if gtiles:
             out.update(global_prefix_tiles=int(gtiles),
-                       global_prefix_work_fraction=round((gtiles - stotal + sk) / gtiles, 5))
+                       global_prefix_work_fraction=round((gtiles - stotal + sk + rtiles) / gtiles, 5))
         return out
 
     def _clear_canvas_metadata(self):
@@ -633,6 +645,7 @@ class VllmMethodAdapter:
                           table=attn_metadata.block_table[0, : (prefix + n + page - 1) // page])
         q = query[:n].transpose(0, 1).unsqueeze(0)                  # [1, H, n, D] view, as HF's decoder passes it
         self.calls['global_calls'] += 1
+        self._cur_layer = layer_idx
         self._global_tiles += q.shape[1] * -(-n // 128) * (prefix // 64)
         if self.arm == 'allkept':
             from experiments.numerical_qk_reuse import v27_fa4
@@ -844,10 +857,32 @@ class VllmMethodAdapter:
         o, lse = fwd(qs, ctx['k'], ctx['v'], softmax_scale=scale, causal=False, page_table=table, seqused_k=used,
                      block_sparse_tensors=split, num_splits=1, return_lse=True)[:2]
         self.calls['split_fa4_calls'] += 1
+        if self.residual is not None and not any(lists is x for x in v27_fa4._ALLKEPT.values()):
+            return self._with_residual(q, k, v, lists, scale, o, lse)
         if self.merge_backend == 'triton':
             return self._merge_alias2(o, lse)
         w = torch.softmax(lse, dim=0).permute(0, 2, 1)[..., None]         # [S, Q, H, 1], exact LSE merge
         return (o.float() * w).sum(0, keepdim=True).to(o.dtype)           # [1, Q, H, D]
+
+    def _with_residual(self, q, k, v, lists, scale, o, lse):
+        """Exact sparse partials [S, Q, H, D] / [S, H, Q] plus the dropped tiles' centroid partial, LSE-merged."""
+        from experiments.numerical_qk_reuse import v31_residual as rs
+        pt = self.paged['prefix'] // 64
+        if not pt:
+            return rs.merge(o, lse, o.dtype)
+        key = (self._cur_layer, self.canvas_id, pt)
+        means = self._tile_means.get(key)
+        if means is None:
+            if len(self._tile_means) >= 64:
+                self._tile_means.clear()
+            means = self._tile_means[key] = rs.tile_means(k, v, pt)
+            self.calls['residual_centroid_builds'] = self.calls.get('residual_centroid_builds', 0) + 1
+        kept = rs.kept_from_lists(lists)
+        o_d, lse_d = rs.residual_partial(q, means[0], means[1], kept, pt, scale, q_block=lists.block_size[0])
+        self.calls['residual_calls'] = self.calls.get('residual_calls', 0) + 1
+        h, qb = kept.shape[0], kept.shape[1]
+        self._residual_tiles += h * qb * pt / 64.0                         # one centroid key per prefix tile
+        return rs.merge(torch.cat([o.float(), o_d]), torch.cat([lse.float(), lse_d]), o.dtype)
 
     def _merge_alias2(self, partials, lse):
         from experiments.numerical_qk_reuse.v29_lse_merge import Alias2MappedMerge
