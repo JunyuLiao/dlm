@@ -523,3 +523,25 @@ same need matrix at different row granularities:
   - The C gate's cost comes from the 128-row worst-row aggregation (per row: 8.0% vs 31.6% at 128 rows). SM90 wgmma
     has M = 64 minimum, so FA4 at head_dim 512 cannot use a finer row granularity. Regrouping is closed for this
     kernel; a row-granular decode kernel is future work.
+
+## Confirmation set, interim: 2 of 3 shards (dllm + mpk), 2026-10-04 02:15 UTC
+
+`results/v31_20261003/panels/confirmation_q_partial_dllm_mpk.md`. New seeds 3–5; 48 cells at 32K / 64K, 15 at 96K.
+The dlm2 shard is pending.
+
+| arm | 32K W | 32K correct | 64K W | 64K correct | 96K W | 96K correct |
+|---|---|---|---|---|---|---|
+| dense (ref) | 1 | 29/48 | 1 | 28/48 | 1 | 8/15 |
+| MAGE k=4096 | **0.928** [0.84, 1.03] | 33 | **0.882** [0.82, 0.95] | 27 | **0.697** [0.58, 0.83] | 10 |
+| MAGE k=4096 + rescue | 0.925 | 32 | 0.905 | 27 | 0.838 | 9 |
+| m2c | 1.006 | 30 | 0.914 [0.84, 0.99] | 25 | 0.751 [0.63, 0.90] | 6 |
+| m2c + rescue | 0.983 | 31 | 0.885 [0.80, 0.97] | 24 | 0.866 | 7 |
+| mass k5 + rescue | 1.072 | 31 | 0.945 | 28 | 0.705 | 9 |
+
+**Interim reading:**
+- With the same efficient execution, sparse GLOBAL attention gives a significant end-to-end gain against the official
+  fixed FULL-graph dense at 64K (≈12%) and 96K (≈25–30%). This holds for MAGE and for m2c.
+- MAGE k=4096 is the best or tied arm at every length, with accuracy at or above dense.
+- The step-20 rescue lowers m2c's forward inflation on new seeds (64K N/C 1.040 → 0.987), but its W benefit is not
+  consistent (better at 32K and 64K, worse at 96K), and it does not help MAGE.
+- m2c accuracy at 64K / 96K is 3–4 / 1–2 items below dense: within noise, but in the wrong direction.
