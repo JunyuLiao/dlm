@@ -1654,3 +1654,26 @@ arm, and comparable settings were checked on every cell. Official score, stratif
 
 Tables: `results/v31_20261003/panels/stageA_ruler_official_vs_dense.md`. The vs-MAGE contrast was computed with the
 same tool and MAGE as the reference. Stage A continues: LongBench-v2 0shot, MRCR, GraphWalks, HumanEval.
+
+## Next: exploratory budget sweep on a fresh pool (panel bs, queued after stage A) — 2026-10-04 17:10 UTC
+
+**Why.** At 4096 tokens the lean candidate beats MAGE (H1) but not dense (H2). Its loss sits in the aggregation task
+(cwe) and at 128K, where 4096 tokens are 3% of the prefix. On the development pool, 12% matched dense, at only 1.4%
+more per-step cost at 64K. The paper needs the accuracy–cost frontier: the budget at which the lean candidate stops
+losing to dense, and its speed there, next to MAGE's frontier.
+
+**Pool.** `ruler_v34ofc` (official-protocol branch @ 0db443372):
+- seed 7575, the same generator and rendering as v33ofc, 585 cells;
+- no overlap with v33 in sample ids, needles, vt variables or fwe answers.
+
+**Disclosure that also affects stage A.** RULER's qa generator takes questions in index order whatever the seed. So
+every pool of this pipeline (v31–v34) shares the same 15 SQuAD / HotpotQA questions per length, with different
+distractor documents. qa_1 / qa_2 in the confirmation pool v33 are therefore not fresh relative to the development
+pools v31 / v32. The method was not tuned on qa, but the confirmation report states this limitation.
+
+**Arms.**
+- RULER v34: dense FULL, and {lean, MAGE} × {4096, 8192, 16384} tokens.
+- LongBench-v2 128K per-step cost: {lean, MAGE} × {8192, 16384}. The dense reference is gl128's run on the same
+  cells.
+
+Chain: `results/v31_20261003/panels/bs_chain.sh`. On mpk, vkb (the kernel microbenchmark) now runs after bs.
