@@ -697,3 +697,42 @@ fixed vLLM (`FIX_51994=1`).
 
 **Rule.** No arm, budget or option is added to panel w's analysis after this registration. A new variant needs a
 new pool.
+
+## Panel w result: the pre-registered primary test is NOT confirmed — 2026-10-04 05:30 UTC
+
+Held-out RULER v32 (seed 5353), 390 cells, 7 arms, all complete; scored on mpk with the official metrics.
+Full tables: `results/v31_20261003/panels/panel_w_heldout_confirmation.md`. "Work" is exact, from the new receipts.
+
+| arm | correct | vs dense FULL lost/gained (p) | cwe | without cwe | sparse kept | work |
+|---|---|---|---|---|---|---|
+| dense FULL (ref) | 323 | – | 19/30 | 304/360 | – | 1 |
+| dense PIECEWISE | 323 | 0/0 (1.0) | 19/30 | 304/360 | – | 1 |
+| m2c k12 mass | 310 | 18/5 (0.011) | 9/30 | 301/360 | 0.122 | 0.438 |
+| MAGE k=6144 | 308 | 18/3 (0.001) | 5/30 | 303/360 | 0.126 | 0.433 |
+| MAGE k=4096 | 307 | 20/4 (0.002) | 3/30 | 304/360 | 0.084 | 0.407 |
+| MAGE k=6144, select at step 1 | 304 | 22/3 (<0.001) | 4/30 | 300/360 | 0.126 | 0.598 |
+| m2c (risk threshold) | 299 | 26/2 (<0.001) | 1/30 | 298/360 | 0.053 | 0.389 |
+
+**Primary test (as registered).**
+- m2c k12 mass vs MAGE k=6144 at matched work (0.438 vs 0.433; within the 0.03 rule): 310 vs 308.
+- Discordant 12 / 10, exact McNemar p = 0.83. **Not confirmed.**
+- The exploratory 8 / 0 (p = 0.008) on the reused v31 cells did not replicate. It is best read as selection on reused
+  cells (winner's curse).
+
+**Secondary (descriptive).**
+- **Dense FULL and dense PIECEWISE agree on all 390 cells.** Short RULER answers carry no trajectory noise at the
+  correctness level, so every discordance between a sparse arm and dense comes from the attention approximation.
+- **Every sparse arm loses significantly against dense, and the whole deficit is cwe.** Without cwe all arms are
+  within 6 cells of dense (298–304 / 360). cwe: dense 19/30, sparse 1–9/30. This replicates the v31 finding: the
+  aggregation failure is shared by MAGE and the method.
+- **Selection timing does not help MAGE.** Step-1 selection gives 304 vs 308 (p = 0.42), at 0.60 work, because RULER
+  canvases are only a few steps long and the extra exact step dominates.
+- **The method's default (risk threshold) is not better than MAGE k=4096.** It scores 299 vs 307 (13 / 5,
+  p = 0.096), at slightly less work (0.389 vs 0.407).
+
+**Consequences.**
+- On RULER at matched compute, the method's selector and MAGE are statistically indistinguishable. The accuracy
+  lever is the diffuse-attention (aggregation) regime, not which concentrated tiles are kept.
+- This is what the exploratory panels y (pooled residual for dropped tiles) and z (dropped-mass guard) target. Any
+  winner from x / y / z needs its own pre-registered confirmation on a fresh pool (v33) and LongBench seeds.
+- No novelty claim rests on selector quality for RULER.

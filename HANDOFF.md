@@ -15,8 +15,17 @@
     scores 130 (8 / 0 discordant, p = 0.008).
   - MAGE needs 0.58–0.84 of dense work for 136–141.
   - This is exploratory (adaptive reuse of cells). It is being confirmed on a held-out pool.
-- **Running:** panel w, the pre-registered held-out confirmation (RULER v32, seed 5353, 390 cells on mpk + dlm2,
-  7 arms). New control `MAGE_STEP=1` (087b5df87) separates selection timing from the selection rule.
+- **Panel w (pre-registered, held-out RULER v32, 390 cells): primary NOT confirmed.**
+  - m2c k12 mass 310 vs MAGE k=6144 308 at matched work 0.44 (p = 0.83). The exploratory 8 / 0 was a winner's curse.
+  - Dense FULL = dense PIECEWISE on every cell, so RULER correctness has no trajectory noise.
+  - All sparse arms lose to dense only through cwe (aggregation); without cwe they are within 6 / 360 of dense.
+- **Exploratory queue (mpk + dlm2, code 44dd964df after a second audit):**
+  - x: selection-granularity ladder (`MAGE_GRAN`, `MAGE_FRAC`) plus accuracy–compute curve points;
+  - y: pooled residual (`RESIDUAL=centroid`) on both arms;
+  - z: dropped-mass guard (`DROP_GUARD`) on both arms, plus the B (adapter overhead) and E (query drift)
+    diagnostics on LongBench 64K;
+  - l128: LongBench-v2 128K scaling (new pool `lb_long_v31_128k`, 24 natural-length items, seeds 1–3).
+- Winners need a fresh pre-registered confirmation (RULER v33 plus LongBench seeds).
 
 ## V31 update (2026-10-03 17:05 UTC−5; branch `research/vllm-paired-20261003`) — read this first
 
