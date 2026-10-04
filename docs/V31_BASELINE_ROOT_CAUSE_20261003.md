@@ -545,3 +545,30 @@ The dlm2 shard is pending.
 - The step-20 rescue lowers m2c's forward inflation on new seeds (64K N/C 1.040 → 0.987), but its W benefit is not
   consistent (better at 32K and 64K, worse at 96K), and it does not help MAGE.
 - m2c accuracy at 64K / 96K is 3–4 / 1–2 items below dense: within noise, but in the wrong direction.
+
+## RULER 32K / 64K accuracy on a new pool, interim (2 of 3 shards, 174 cells) — 2026-10-04 02:45 UTC
+
+Pool:
+- `ruler_long_v31` on dllm: the pinned RULER checkout and DiffusionGemma tokenizer, a new generator seed 4242;
+- 13 tasks × 10 samples per length;
+- private gold.
+- Scorer: `scripts/v31_score_ruler.py`, the official RULER metrics; correct = 100. RULER answers are a single short
+  canvas, so this panel is accuracy only.
+
+| arm | 32K | 64K | total | lost / gained vs dense | McNemar p |
+|---|---|---|---|---|---|
+| dense (ref) | 72/87 | 68/87 | 140/174 | – | – |
+| m2c (± rescue) | 69 | 66 | 135 | 8 / 3 | 0.23 |
+| MAGE k=4096 (± rescue) | 65 | 64 | 129 | 13 / 2 | **0.007** |
+
+- Head to head, m2c alone is correct on 6 cells and MAGE alone on 0 (p = 0.031).
+- By task:
+  - all eight needle tasks stay at or near 100% for every arm;
+  - both sparse methods fail **common-words extraction** (cwe: dense 10/14, m2c 2/14, MAGE 1/14), an aggregation
+    over the whole context;
+  - MAGE additionally loses multi-hop QA with distractors (qa_1 + qa_2: dense 15, m2c 15, MAGE 12) and multi-value.
+  - vt is 0 for every arm, a model limit.
+- Reading:
+  - The method's worst-row selection keeps the QA evidence that MAGE's mean-over-queries fixed top-k drops.
+  - Aggregation tasks are a shared weakness of sparse GLOBAL attention here.
+  - This is the first accuracy result that separates the method from MAGE; the dlm2 shard completes it.
