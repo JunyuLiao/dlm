@@ -515,3 +515,11 @@ same need matrix at different row granularities:
   saving. Forward inflation rises slightly (32K N/C 1.085 vs 1.026).
 - **Regrouping does not pay at FA4's 64-row granularity.** The real headroom is per row (4× fewer tiles than 64-row),
   which the head_dim-512 FA4 kernel cannot exploit.
+- C gate + regroup (mpk shard):
+  - realized kept falls from 32.9% / 17.7% to 27.1% / 13.9%;
+  - S/N is again slightly higher (1.015 / 0.924 vs 0.995 / 0.908);
+  - regrouping by need count (25.7% at 32K) is barely better than the natural 64-row halves (26.1%): unstable rows do
+    not concentrate.
+  - The C gate's cost comes from the 128-row worst-row aggregation (per row: 8.0% vs 31.6% at 128 rows). SM90 wgmma
+    has M = 64 minimum, so FA4 at head_dim 512 cannot use a finer row granularity. Regrouping is closed for this
+    kernel; a row-granular decode kernel is future work.
