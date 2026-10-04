@@ -13,11 +13,23 @@ top-k selection loses. Concentrated tiles are kept exactly by the selector. Cost
 product and one [n, PT] x [PT, D] product per KV head (PT = prefix tiles, 1/64 of the prefix keys); centroids are
 computed once per canvas and layer. Arm-agnostic: applies to the MAGE port and the method alike.
 """
+import contextlib
 import math
 
 import torch
 
 RESIDUAL_MODES = ('centroid',)
+
+
+@contextlib.contextmanager
+def _fp32_matmul():
+    """The products below are FP32 statistics, like the MAGE selection: no TF32 whatever the host process set."""
+    old = torch.backends.cuda.matmul.allow_tf32
+    torch.backends.cuda.matmul.allow_tf32 = False
+    try:
+        yield
+    finally:
+        torch.backends.cuda.matmul.allow_tf32 = old
 
 
 def tile_means(k, v, pt):
@@ -43,13 +55,15 @@ def residual_partial(q, kb, vb, kept, pt, scale, q_block=128):
     _, h, n, d = q.shape
     hk = kb.shape[0]
     g = h // hk
-    z = torch.bmm(q[0].float().reshape(hk, g * n, d), kb.transpose(1, 2)) * scale + math.log(64.0)
+    with _fp32_matmul():
+        z = torch.bmm(q[0].float().reshape(hk, g * n, d), kb.transpose(1, 2)) * scale + math.log(64.0)
     z = z.view(h, n, pt)
     rows = torch.arange(n, device=q.device) // q_block
     z = z.masked_fill(kept[:, rows, :pt], float('-inf'))                     # keep only the dropped tiles
     lse = torch.logsumexp(z, -1)                                               # [H, n]
     p = torch.exp(z - lse[..., None]).nan_to_num(0.0)                          # all-kept rows: nan -> 0
-    o = torch.bmm(p.view(hk, g * n, pt), vb).view(h, n, d)
+    with _fp32_matmul():
+        o = torch.bmm(p.view(hk, g * n, pt), vb).view(h, n, d)
     return o.transpose(0, 1)[None], lse[None]
 
 
@@ -62,14 +76,16 @@ def merge(o_parts, lse_parts, dtype):
 def dropped_share(q, k, kb, kept, pt, scale, q_block=128):
     """Estimated share of each (query head, query block)'s attention mass held by its DROPPED wholly-prefix tiles,
     mean over the block's valid rows -> [H, QB] fp32. Prefix tiles are scored by their centroid (scale q.kbar + log
-    64; Jensen under-estimates the peaked kept tiles, so the dropped share is over-estimated: a conservative guard),
-    the canvas / boundary keys exactly."""
+    64), the canvas / boundary keys exactly. By Jensen the centroid under-estimates every non-uniform tile, kept or
+    dropped: the estimate is accurate for diffuse dropped tiles (the case the guard targets) and NOT conservative
+    for a dropped needle tile. Canvas / boundary tiles a selector dropped count as kept mass here."""
     _, h, n, d = q.shape
     hk = kb.shape[0]
     g = h // hk
     qf = q[0].float().reshape(hk, g * n, d)
-    z = (torch.bmm(qf, kb.transpose(1, 2)) * scale + math.log(64.0)).view(h, n, pt)
-    tail = torch.bmm(qf, k[0, :, pt * 64:].float().transpose(1, 2)).view(h, n, -1) * scale
+    with _fp32_matmul():
+        z = (torch.bmm(qf, kb.transpose(1, 2)) * scale + math.log(64.0)).view(h, n, pt)
+        tail = torch.bmm(qf, k[0, :, pt * 64:].float().transpose(1, 2)).view(h, n, -1) * scale
     rows = torch.arange(n, device=q.device) // q_block
     drop = z.masked_fill(kept[:, rows, :pt], float('-inf')).logsumexp(-1)
     total = torch.logaddexp(z.logsumexp(-1), tail.logsumexp(-1))

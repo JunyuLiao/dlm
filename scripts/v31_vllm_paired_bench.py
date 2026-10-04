@@ -75,13 +75,15 @@ def main():
     if fix_51994:
         apply_fix_51994()
 
-    adapter, config, adapter_sha = None, None, None
+    adapter, config, adapter_sha, residual_sha = None, None, None, None
     if arm != 'dense':
         import experiments.numerical_qk_reuse as pkg
         if os.environ.get('V27_ADAPTER_DIR'):
             pkg.__path__.append(os.environ['V27_ADAPTER_DIR'])
         from experiments.numerical_qk_reuse import vllm_adapter
         adapter_sha = hashlib.sha256(Path(vllm_adapter.__file__).read_bytes()).hexdigest()
+        from experiments.numerical_qk_reuse import v31_residual
+        residual_sha = hashlib.sha256(Path(v31_residual.__file__).read_bytes()).hexdigest()
         text = AutoConfig.from_pretrained(model_dir)
         text = getattr(text, 'text_config', text)
         if arm == 'method':
@@ -138,15 +140,12 @@ def main():
                 logit_stats=os.environ.get('LOGIT_STATS', 'legacy') if arm == 'method' else None,
                 dp_build=os.environ.get('DP_BUILD', 'legacy') if arm == 'method' else None,
                 observe_backend=os.environ.get('OBSERVE', 'triton') if arm == 'method' else None,
-                dense_when=os.environ.get('DENSE_WHEN') or None,
-                mage_critical=float(os.environ['MAGE_CRIT']) if arm == 'mage' and os.environ.get('MAGE_CRIT') else None,
-                mage_coverage=float(os.environ['MAGE_COV']) if arm == 'mage' and os.environ.get('MAGE_COV') else None,
-                mage_select_step=int(os.environ.get('MAGE_STEP', '0')) if arm == 'mage' else None,
-                mage_granularity=os.environ.get('MAGE_GRAN', 'kvhead') if arm == 'mage' else None,
-                mage_keep_frac=float(os.environ['MAGE_FRAC']) if arm == 'mage' and os.environ.get('MAGE_FRAC') else None,
-                residual=os.environ.get('RESIDUAL') or None if arm != 'dense' else None,
-                drop_guard=float(os.environ['DROP_GUARD']) if arm != 'dense' and os.environ.get('DROP_GUARD') else None,
-                drift_diag=os.environ.get('DRIFT_DIAG') == '1' if arm != 'dense' else None)
+                dense_when=os.environ.get('DENSE_WHEN') or None, residual_sha256=residual_sha,
+                # the adapter's EFFECTIVE settings (not the environment), so a silently ignored option shows here
+                **{key: (getattr(adapter, key) if adapter is not None and (arm == 'mage' or not key.startswith('mage_'))
+                         else None)
+                   for key in ('mage_critical', 'mage_coverage', 'mage_select_step', 'mage_granularity',
+                               'mage_keep_frac', 'residual', 'drop_guard', 'drift_diag')})
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]

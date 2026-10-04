@@ -163,8 +163,8 @@ class VllmMethodAdapter:
         if mage_granularity != 'kvhead' and (mage_select != 'fa4' or mage_critical is not None
                                              or mage_coverage is not None):
             raise ValueError('mage_granularity other than kvhead needs mage_select=fa4, without critical / coverage')
-        if mage_keep_frac is not None and not 0.0 < float(mage_keep_frac) <= 1.0:
-            raise ValueError('mage_keep_frac must be in (0, 1]')
+        if mage_keep_frac is not None and (not 0.0 < float(mage_keep_frac) <= 1.0 or mage_select != 'fa4'):
+            raise ValueError('mage_keep_frac must be in (0, 1] and needs mage_select=fa4')
         from experiments.numerical_qk_reuse.v31_residual import RESIDUAL_MODES
         if residual is not None and residual not in RESIDUAL_MODES:
             raise ValueError(f'residual must be one of {RESIDUAL_MODES}')
@@ -230,7 +230,8 @@ class VllmMethodAdapter:
         self._tile_means, self._cur_layer, self._residual_tiles = {}, None, 0
         # v31 dropped-mass guard (named variant, opt-in, any sparse arm): at the first call of each held keep map, a
         # (query head, 128-row block) whose dropped prefix tiles are estimated to hold more than drop_guard of its
-        # attention mass keeps its whole prefix (v31_residual.dropped_share); the guarded map is held with the original
+        # attention mass keeps its whole prefix (v31_residual.dropped_share); the guarded map is held with the original.
+        # It runs once per new map: once per canvas for MAGE, once per re-decision for the method.
         self.drop_guard = None if drop_guard is None else float(drop_guard)
         self._guard_cache = []
         # diagnostic receipts (opt-in): step-to-step drift of the GLOBAL queries and outputs within a canvas -- the
@@ -698,10 +699,12 @@ class VllmMethodAdapter:
         do = (cur_o - po).norm(dim=-1) / po.norm(dim=-1).clamp_min(1e-12)
         qb = -(-n // 128)
         blocks = torch.nn.functional.pad(dq, (0, qb * 128 - n)).view(h, qb, 128).amax(-1)
-        thr = torch.tensor(self.DRIFT_THRESHOLDS, device=q.device)
+        thr = getattr(self, '_drift_thr', None)
+        if thr is None or thr.device != q.device:
+            thr = self._drift_thr = torch.tensor(self.DRIFT_THRESHOLDS, device=q.device)
         acc = torch.stack([(dq[..., None] <= thr).sum((0, 1)), (blocks[..., None] <= thr).sum((0, 1)),
                            (do[..., None] <= thr).sum((0, 1))]).double()
-        totals = torch.tensor([dq.numel(), blocks.numel(), do.numel()], device=q.device, dtype=torch.float64)
+        totals = acc.new_tensor([dq.numel(), blocks.numel(), do.numel()])  # diagnostic runs are not timing runs
         if self._drift_acc is None:
             self._drift_acc = [acc, totals]
         else:
@@ -877,8 +880,10 @@ class VllmMethodAdapter:
                              block_size=lists.block_size)
         # kept wholly-prefix tiles of this map (list entries are tile indices; the first cnt entries are kept)
         pt = (self.paged['prefix'] // 64) if self.paged is not None else 0
-        kept_prefix = ((order < pt) & (ar < cnt[..., None])).sum()
-        self._split_cache = self._split_cache[-63:] + [(lists, (split, kept_prefix, order.shape[1] * order.shape[2] * pt))]
+        rows = lists.block_size[0] / 128.0                                 # 64-row (q64) maps count half blocks
+        kept_prefix = ((order < pt) & (ar < cnt[..., None])).sum() * rows
+        self._split_cache = self._split_cache[-63:] + [(lists, (split, kept_prefix,
+                                                                order.shape[1] * order.shape[2] * pt * rows))]
         self.calls['split_list_builds'] += 1
         return split
 
@@ -924,8 +929,8 @@ class VllmMethodAdapter:
         key = (self._cur_layer, self.canvas_id, pt)
         means = self._tile_means.get(key)
         if means is None:
-            if len(self._tile_means) >= 64:
-                self._tile_means.clear()
+            for old in [x for x in self._tile_means if x[1] != self.canvas_id]:   # earlier canvases: never reused
+                del self._tile_means[old]
             means = self._tile_means[key] = rs.tile_means(k, v, pt)
             self.calls['residual_centroid_builds'] = self.calls.get('residual_centroid_builds', 0) + 1
         return means
@@ -943,6 +948,7 @@ class VllmMethodAdapter:
             share = rs.dropped_share(q, k, self._centroids(k, v, pt)[0], kept, pt, scale, q_block=lists.block_size[0])
             flag = share > self.drop_guard                                    # [H, QB]
             n_flag = int(flag.sum())
+            self._residual_tiles += flag.numel() * pt / 64.0 * lists.block_size[0] / 128.0   # centroid scoring cost
             self.calls['guard_units'] = self.calls.get('guard_units', 0) + flag.numel()
             self.calls['guard_flagged_units'] = self.calls.get('guard_flagged_units', 0) + n_flag
             if n_flag:
@@ -957,13 +963,17 @@ class VllmMethodAdapter:
         from experiments.numerical_qk_reuse import v31_residual as rs
         pt = self.paged['prefix'] // 64
         if not pt:
-            return rs.merge(o, lse, o.dtype)
+            return self._merge_alias2(o, lse) if self.merge_backend == 'triton' else rs.merge(o, lse, o.dtype)
         means = self._centroids(k, v, pt)
         kept = rs.kept_from_lists(lists)
         o_d, lse_d = rs.residual_partial(q, means[0], means[1], kept, pt, scale, q_block=lists.block_size[0])
         self.calls['residual_calls'] = self.calls.get('residual_calls', 0) + 1
         h, qb = kept.shape[0], kept.shape[1]
-        self._residual_tiles += h * qb * pt / 64.0                         # one centroid key per prefix tile
+        self._residual_tiles += h * qb * pt / 64.0 * lists.block_size[0] / 128.0   # one centroid key per tile
+        if self.merge_backend == 'triton':                                 # the plain path's merge, then 2-way
+            sparse = self._merge_alias2(o, lse)                            # [1, Q, H, D]
+            lse_s = torch.logsumexp(lse.float(), dim=0, keepdim=True)      # [1, H, Q]
+            return rs.merge(torch.cat([sparse.float(), o_d]), torch.cat([lse_s, lse_d]), o.dtype)
         return rs.merge(torch.cat([o.float(), o_d]), torch.cat([lse.float(), lse_d]), o.dtype)
 
     def _merge_alias2(self, partials, lse):

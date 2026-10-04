@@ -28,7 +28,7 @@ def test_units_follow_their_own_queries():
     q = torch.randn(1, H, n, D, device='cuda', generator=g) * 0.05
     k = torch.randn(1, HK, prefix + n, D, device='cuda', generator=g) * 0.05
     v = torch.randn(1, HK, prefix + n, D, device='cuda', generator=g)
-    a_, b_, c_, w_ = _directions(g, D, 4)
+    a_, b_, c_, w_, x_ = _directions(g, D, 5)
     q[0, 0] += a_ * 3                                    # head 0 (KV group 0) likes tile 5
     k[0, 0, 5 * 64:6 * 64] += a_ * 3
     q[0, 1, :128] += b_ * 3                              # head 1, block 0 likes tile 11; block 1 likes tile 23
@@ -37,6 +37,8 @@ def test_units_follow_their_own_queries():
     k[0, 0, 23 * 64:24 * 64] += c_ * 3
     q[0, 2, 7] += w_ * 8                                 # one row of head 2 looks for a needle in tile 40
     k[0, 0, 40 * 64:40 * 64 + 2] += w_ * 10
+    q[0, 2, :128] += x_ * 2                              # ... while every row of that block puts ~11% on tile 30
+    k[0, 0, 30 * 64:31 * 64] += x_ * 2
     q, k, v = q.to(torch.bfloat16), k.to(torch.bfloat16), v.to(torch.bfloat16)
     kv, _ = _select('kvhead', q, k, v, prefix, n, mage_k=64 * 2)
     qh, _ = _select('qhead', q, k, v, prefix, n, mage_k=64 * 2)
@@ -47,8 +49,8 @@ def test_units_follow_their_own_queries():
     assert bool(qh[0, 0, 0, 5]) and bool(qh[0, 1, 0, 11] | qh[0, 1, 0, 23])
     # qblock: head 1 keeps tile 11 for block 0 and tile 23 for block 1
     assert bool(qbk[0, 1, 0, 11]) and bool(qbk[0, 1, 1, 23]) and not bool(qbk[0, 1, 0, 23])
-    # qblock_max: the single needle row of head 2 decides block 0; the block mean does not
-    assert bool(qbm[0, 2, 0, 40]) and not bool(qbk[0, 2, 0, 40])
+    # qblock_max: the single needle row of head 2 decides block 0; the block mean follows the diffuse tile 30
+    assert bool(qbm[0, 2, 0, 40]) and not bool(qbk[0, 2, 0, 40]) and bool(qbk[0, 2, 0, 30])
     for kept in (kv, qh, qbk, qbm):
         assert bool(kept[0, :, :, pt:].all())            # canvas always kept
     assert a.calls['mage_kept_prefix_tiles'] == H * 2 * 1 and a.calls['mage_prefix_tiles'] == H * 2 * pt

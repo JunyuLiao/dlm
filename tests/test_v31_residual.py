@@ -69,16 +69,17 @@ def test_adapter_sparse_lists_with_residual_matches_dense():
     lists = v27_fa4.block_sparse_tensors(kept[None])
     scale = D ** -0.5
     out = {}
-    for mode in (None, 'centroid'):
-        a = VllmMethodAdapter(['sliding_attention'] * 5 + ['full_attention'], arm='mage', residual=mode)
+    for mode, merge in ((None, 'torch'), ('centroid', 'triton'), ('centroid', 'torch')):
+        a = VllmMethodAdapter(['sliding_attention'] * 5 + ['full_attention'], arm='mage', residual=mode,
+                              merge_backend=merge)
         a._kept_prefix, a._prefix_total = None, 0
         a.paged = dict(k=kc, v=vc, table=table, nk=nk, prefix=prefix)
         a._cur_layer = 5
-        out[mode] = a.sparse_lists(None, q, k, v, lists, scale)[0].float()             # [n, H, D]
+        out[(mode, merge)] = a.sparse_lists(None, q, k, v, lists, scale)[0].float()      # [n, H, D]
     dense, _ = _attend(q, k, v, scale)
-    err_plain = (out[None] - dense).abs().max().item()
-    err_res = (out['centroid'] - dense).abs().max().item()
-    assert err_res < 3e-2 < err_plain, (err_res, err_plain)
+    err_plain = (out[(None, 'torch')] - dense).abs().max().item()
+    err_res = max((out[('centroid', m)] - dense).abs().max().item() for m in ('triton', 'torch'))
+    assert err_res < 5e-3 < 5e-2 < err_plain, (err_res, err_plain)
     assert a.calls['residual_calls'] == 1 and a.calls['residual_centroid_builds'] == 1
     assert a._residual_tiles == H * kept.shape[1] * pt / 64.0
     allk = v27_fa4._allkept(H, kept.shape[1], kept.shape[2], q.device)                # dense-routed: no residual
