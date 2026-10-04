@@ -1920,3 +1920,23 @@ all-kept:
   - dense and sparse arms run the same kernel family with the same occupancy and the same CTA count;
   - the sparse path's all-kept call is 0.85–0.89× the dense call (S = 2 splits);
   - end to end, all-kept is within about 1–2% of dense (ak), because the split merge and list build cost it back.
+
+**Re-plan at 22:30 UTC: `sc1b_chain.sh` with per-host job lists (`jobs_sc1b_*.txt`) replaces the rest of sc1.**
+- The absolute trigger fires at step ~1 on short answers. Trailing end-of-text rows are accepted at once: on dlm2's
+  RULER, 152 triggers in 78 canvases at a mean step of 1.1, with +5.7% decode.
+- On LongBench-v2 `0shot_think` (dlm2 half, 16 items × 2 seeds), T1 triggers at a mean step of 8.4. Its accuracy
+  equals lean's.
+- So T4 (trigger + margin weights) is dropped, and lean 8192 moves ahead of T2 / T3.
+- Round 4d adds relative progress for the next panel.
+
+**First LongBench-v2 `0shot_think` numbers** (dlm2 half, official scorer, n.s.):
+
+| arm | accuracy | decode time per forward vs dense | forwards per canvas vs dense | wall vs dense |
+|---|---|---|---|---|
+| dense | 53.1% | 1 | 1 | 1 |
+| lean 4096 | 40.6% | 0.780 | +14% | 0.923 |
+| T1 | 40.6% | 0.804 | +16% | 1.013 |
+
+- **Step inflation is the main performance loss on long thinking outputs.**
+- Panel m / n traced such inflation to canvases that stick near the convergence threshold. A dense rescue from step
+  20 removed it for m2c.
