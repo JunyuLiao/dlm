@@ -73,7 +73,11 @@ class CanvasForcing:
                 self.ref[(r['dataset'], r['index'], r['panel_seed'], r['repeat'])] = r['token_ids']
         self.record_path = record_path
         self.mode = 'force' if ref_path else ('record' if record_path else 'reseed')
+        # no active request until begin(): vLLM's engine start-up warms the sampler up with dummy decode steps (possibly
+        # several slots) -- those calls pass straight through
         self.seed = self.cur_ref = None
+        self.active = False
+        self.canvas, self.steps, self.steps_list, self.agree = 0, 0, [], []
 
     @classmethod
     def from_env(cls):
@@ -87,11 +91,14 @@ class CanvasForcing:
             raise KeyError(f'no reference trajectory for {key}')
         self.seed, self.cur_ref = seed, self.ref.get(key)
         self.canvas, self.steps, self.steps_list, self.agree = 0, 0, [], []
+        self.active = True
 
     def wrap(self, inner):
         import torch
 
         def step(*args, **kwargs):
+            if not self.active:
+                return inner(*args, **kwargs)
             slots, canvas, argmax, enc, draft = args[1], args[5], args[6], args[8], args[17]
             if slots.numel() != 1:
                 raise RuntimeError('forced-canvas mode needs exactly one decoding request')
@@ -127,6 +134,7 @@ class CanvasForcing:
         draft[s, :n] = t.to(draft.dtype)
 
     def receipt(self, token_ids):
+        self.active = False
         r = dict(forced_mode=self.mode, forced_canvas_steps=list(self.steps_list), forced_agree=list(self.agree))
         if self.cur_ref is not None:
             r['forced_output_matches_ref'] = list(token_ids) == list(self.cur_ref)
@@ -273,6 +281,8 @@ def main():
         wall = time.perf_counter() - start
         receipts = adapter.end_request() if adapter is not None else None
         if warm:
+            if forcing is not None:
+                forcing.active = False
             continue
         o = final.outputs[0]
         n_out = len(o.token_ids)

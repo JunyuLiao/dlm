@@ -123,6 +123,21 @@ def test_missing_reference_is_refused():
         path.unlink()
 
 
+def test_engine_warmup_calls_pass_through_before_begin():
+    mod = _bench()
+    f = mod.CanvasForcing(None, 'unused')
+    calls = []
+    step = f.wrap(lambda *a, **k: calls.append(1) or 'x')
+    two_slots = [None, torch.tensor([0, 1])] + [None] * 16       # a dummy warm-up batch with two decode slots
+    assert step(*two_slots, CL=8) == 'x' and calls == [1]
+    assert f.steps_list == [] and not f.active
+    f.begin(5, ('d', 0, 3, 0))
+    assert f.active
+    f.receipt([])
+    assert not f.active
+    assert step(*two_slots, CL=8) == 'x' and calls == [1, 1]   # between requests: pass through again
+
+
 if __name__ == '__main__':
     for name, fn in list(globals().items()):
         if name.startswith('test_'):

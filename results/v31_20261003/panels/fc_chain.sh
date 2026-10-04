@@ -12,7 +12,7 @@
 # env: W PY MODEL ROOT LBSHARD
 set -u
 cd $W
-until grep -q '^done ' $W/status_gs2 2>/dev/null; do sleep 30; done
+until grep -q '^done ' $W/status_gb 2>/dev/null; do sleep 30; done
 until [ "$(nvidia-smi --query-compute-apps=pid --format=csv,noheader | wc -l)" = "0" ]; do sleep 10; done
 REF=$W/private/fc_dense_PIECEWISE_ref.tokens.jsonl
 FAST="LOGIT_STATS=fused DP_BUILD=chunked OBSERVE=fa4 KV_COPY=triton MERGE=triton MAGE_SELECT=fa4"
@@ -22,6 +22,7 @@ if [ ! -s $REF ]; then
   env $LB FORCE_RECORD=$REF LABEL_SUFFIX=_ref ARMS='dense:PIECEWISE' bash $W/v31_paired_host8.sh > $W/host_fc_ref.log 2>&1
   sed -i "s/^done /done_ref /" $W/status_fc
 fi
+if [ ! -s $REF ]; then echo "ABORT: empty reference record $REF $(date -u)" >> $W/status_fc; echo "done $(date -u)" >> $W/status_fc; exit 1; fi
 env $LB FORCE_REF=$REF LABEL_SUFFIX=_self ARMS='dense:PIECEWISE' bash $W/v31_paired_host8.sh > $W/host_fc_self.log 2>&1
 sed -i "s/^done /done_self /" $W/status_fc
 env $LB FORCE_REF=$REF LABEL_SUFFIX=_forced ARMS='dense:default' bash $W/v31_paired_host8.sh > $W/host_fc_full.log 2>&1

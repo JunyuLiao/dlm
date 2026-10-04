@@ -1010,3 +1010,15 @@ interval only slowly, so the comparison is moved onto identical canvases instead
   the carry, because RULER answers are one canvas long.
 
 The `RISK_GROUP=kv` arm was dropped: panel gs rejected group-shared selection.
+
+**First fc attempt failed on dlm2 (11:17 UTC); fixed and relaunched.**
+- vLLM's engine start-up warms the sampler up with dummy decode steps before any request. The forcing wrapper ran
+  on them before `begin()` and failed (`AttributeError: steps`). The reference run died in engine init, and the
+  later steps failed in cascade.
+- Fix: the wrapper passes calls through while no request is active (engine warm-up, possibly several slots, and
+  between requests). The state is initialised at construction.
+  - New CPU test `test_engine_warmup_calls_pass_through_before_begin`; 4/4 on mpk.
+  - The chain now aborts if the reference record is empty.
+- The failed partial outputs are kept in `failed_fc1/` on dlm2. No GPU result was produced.
+- Order on dlm2: vks started early when the failed chain wrote its final status line, so fc now runs after vks.
+  mpk: gb → fc.
