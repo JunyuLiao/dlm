@@ -7,7 +7,7 @@
 #   nohup bash v31_paired_host.sh > host_a.log 2>&1 &
 # ARMS entries: arm:cudagraph_mode[:variant]; a variant names configs/<variant>.json (v31_make_variant_config.py),
 # default = the frozen R17 main config. FIX_51994=1 backports the upstream FULL-graph causal-buffer fix.
-# CELLS overrides the cell file (default $W/cells.json; e.g. the confirmation set). LABEL_SUFFIX names an execution variant (e.g. _dpc for DP_BUILD=chunked); LOGIT_STATS / DP_BUILD / OBSERVE /
+# MAN_DIR overrides the generation-manifest directory (e.g. the v31 RULER pool). CELLS overrides the cell file (default $W/cells.json; e.g. the confirmation set). LABEL_SUFFIX names an execution variant (e.g. _dpc for DP_BUILD=chunked); LOGIT_STATS / DP_BUILD / OBSERVE /
 # MAGE_SELECT pass through the environment to the bench.
 # W must contain v31_vllm_paired_bench.py, overlay/vllm_adapter.py and cells.json (private: has item ids).
 set -u
@@ -15,7 +15,7 @@ C=$W/cache
 BENCH=${BENCH:-$W/v31_vllm_paired_bench.py}; OVERLAY=${OVERLAY:-$W/overlay}
 D=$ROOT/deploy/v27_r17_6064109
 CFG=$ROOT/v23/v27_r17_001/host.fragment_configs/ruler64k_r17/M3_R6_A64_fused_dp_async_m1ln2_c0_fa4.json
-MAN=$ROOT/v23/v27_lb_e14_001/manifests
+MAN=${MAN_DIR:-$ROOT/v23/v27_lb_e14_001/manifests}
 mkdir -p $C/tmp $W/private $W/public
 export VLLM_CACHE_ROOT=$C/vllm XDG_CACHE_HOME=$C/xdg TMPDIR=$C/tmp TORCHINDUCTOR_CACHE_DIR=$C/inductor TRITON_CACHE_DIR=$C/triton \
   HF_HUB_OFFLINE=1 VLLM_ENABLE_V1_MULTIPROCESSING=0 TVM_FFI_CACHE_DIR=$C/tvm CUDA_CACHE_PATH=$C/cuda CUTE_DSL_CACHE_DIR=$C/cute \
