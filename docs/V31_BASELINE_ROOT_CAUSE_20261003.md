@@ -971,6 +971,8 @@ Both runs use `MAX_MODEL_LEN=136192`, `FIX_51994=1`, `MEM=0.90` and `ARMS='dense
   - no summary holds a host path.
 - HumanEval positive control (`scripts/v31_humaneval_positive_control.py`): the 164 canonical solutions pass 164 / 164
   through extract → full-prompt check_program → sandbox (no time-outs).
-- The `py*` fence rule recovers the 2 of 96 preview completions tagged `pythonpython` that the old whitelist rejected.
+- The `py*` fence rule recovers completions tagged `pythonpython`, which the old whitelist rejected. On the mpk shard
+  of the preview panel, 1 of 48 HumanEval completions (m2c k12 mass) changes from no_python_fence to parsed. The audit
+  counts 2 of 96 over both shards; the dlm2 shard was not re-checked here.
 - Toy tests: `tests/test_v31_official_scorers.py` (20) + `tests/test_v27_humaneval.py` (12) + `tests/test_ruler_pipeline.py`
   (5): 37 passed under pytest on mpk, with the pinned RULER metrics and the bwrap sandbox.
