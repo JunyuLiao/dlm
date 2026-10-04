@@ -524,11 +524,17 @@ def build_aime(a, logf):
 
 def build_graphwalks(a, logf):
     src = Path(a.src or GW_SRC)
+    # --gw-budget: the generation budget; the dataset / pool suffix follows it (16384 -> _b16k, 32768 -> _b32k), so pools
+    # with different budgets never share dataset names (records are bound to their pool)
+    budget = int(a.gw_budget)
+    suffix = f'b{budget // 1024}k'
+    datasets = tuple((old, f'{old}_{suffix}') for old, _ in GW_DATASETS)
+    pilot, pool = f'graphwalks_90k_{suffix}', f'graphwalks_{suffix}'
     outputs, bins, all_rows, staged = {}, {}, [], []
-    for old_ds, ds in GW_DATASETS:
+    for old_ds, ds in datasets:
         rows = json.loads((src / f'{old_ds}_generation_manifest.json').read_text())
         gold_bytes = (src / f'{old_ds}_gold.json').read_bytes()
-        new = rename_rows(rows, ds, GW_BUDGET)
+        new = rename_rows(rows, ds, budget)
         all_rows += new
         staged.append((old_ds, ds, rows, new, gold_bytes))
     pin, need = pin_max_model_len(all_rows)
@@ -540,17 +546,17 @@ def build_graphwalks(a, logf):
                         prompt_token_count=stats([r['prompt_token_count'] for r in new]),
                         source_manifest_sha256=op.sha_file(src / f'{old_ds}_generation_manifest.json'),
                         source_gold_sha256=op.sha(gold_bytes))
-    write_cells(a.out, 'graphwalks_b16k', cells, outputs)
-    write_cells(a.out, f'{GW_PILOT}_pilot', [c for c in cells if c['dataset'] == GW_PILOT], outputs)
-    readme = dict(schema='pools_v31_official_readme_v2', pool='graphwalks_b16k', built_utc=now(),
-                  rule=f'pools_v31 GraphWalks rows under their own dataset names with generation_budget 8192 -> {GW_BUDGET} (no '
+    write_cells(a.out, pool, cells, outputs)
+    write_cells(a.out, f'{pilot}_pilot', [c for c in cells if c['dataset'] == pilot], outputs)
+    readme = dict(schema='pools_v31_official_readme_v2', pool=pool, built_utc=now(),
+                  rule=f'pools_v31 GraphWalks rows under their own dataset names with generation_budget 8192 -> {budget} (no '
                        'official budget: the reasoning-model rule; 4 of 24 graphwalks_90k gold answer lines alone need > 2048 '
                        'tokens); ids, prompts, prompt_tokens, thinking and gold unchanged (asserted); cells seed 1; '
-                       f'cells_{GW_PILOT}_pilot.json = the 90k bin for the dense cap-rate pilot',
+                       f'cells_{pilot}_pilot.json = the 90k bin for the dense cap-rate pilot',
                   bins=bins, cells=len(cells), max_model_len=dict(pinned=pin, need=need), output_files_sha256=outputs,
                   code=dict(builder_sha256=op.sha_file(Path(__file__).resolve())))
     write_readme(a.out, readme)
-    log(logf, f'graphwalks: {len(all_rows)} rows, pin {pin}; outputs {outputs}')
+    log(logf, f'{pool}: {len(all_rows)} rows, pin {pin}; outputs {outputs}')
 
 # ---------------------------------------------------------------- MRCR 2-needle on the README's bins
 
@@ -671,6 +677,7 @@ def main():
     p.add_argument('--out', type=Path, required=True)
     p.add_argument('--src', default=None)
     p.add_argument('--jobs', type=int, default=4)
+    p.add_argument('--gw-budget', type=int, default=GW_BUDGET, help='GraphWalks generation budget (pool suffix follows)')
     a = p.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     if any(a.out.glob('*_generation_manifest.json')):

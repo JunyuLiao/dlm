@@ -1548,3 +1548,17 @@ PIECEWISE, which records its tokens with per-canvas reseeding.
   - threshold selection: +8–10%, with stuck canvases;
   - fixed per-unit budgets: +1–3%.
   No prior work quantifies this.
+
+**AMENDMENT to the stage-A pre-registration (2026-10-04 13:55 UTC; no stage-A run had started on either host).**
+- What changed: GraphWalks moves from the 16384-token pool `graphwalks_b16k` to a 32768-token pool
+  `graphwalks_b32k`. Same 72 cells and ids, gold unchanged, pinned `max_model_len` 126976.
+- Why: the dense cap-rate pilot that the audit asked for (panel rc, GraphWalks 90k bin, 24 cells) capped 14/24
+  (58%) at 16K; the median output was the full 16384 tokens. At 16K the bin would measure truncation, not ability.
+- How: the pool builder gained `--gw-budget`, and the pool's dataset suffix follows the budget, so records stay
+  bound to their pool.
+- Nothing else changed: arms, the other datasets, hypotheses and analysis.
+- The stage-A chain was replaced on both hosts before it started (`status_fachain` absent).
+
+Other stage-A pre-checks (panel rc, dense):
+- the official RULER rendering scores 98.1 (32K) / 88.5 (128K);
+- the opener ablation shows 99.48 vs 98.93, so the placement is robust.

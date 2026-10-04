@@ -8,7 +8,7 @@
 #                      held, first call of each canvas on the carried selection)
 #   A3 lean 2048      (ours, 32 tiles per unit)
 # Datasets (official pools, seed 1): RULER v33ofc 32K/64K/128K, LongBench-v2 0shot (thinking off, 128 tokens),
-# MRCR 2-needle ofc, GraphWalks b16k, HumanEval (thinking on, 8192). Sparse arms: PIECEWISE, the same execution flags,
+# MRCR 2-needle ofc, GraphWalks b32k (amended 13:50 UTC: 58% of the 90k bin capped at 16K in the dense pilot), HumanEval (thinking on, 8192). Sparse arms: PIECEWISE, the same execution flags,
 # alias splits S=2. Every arm waits for an empty GPU. env: W PY MODEL ROOT SHARD (k/2) P (pool dir) WAIT_STATUS
 set -u
 cd $W
@@ -41,6 +41,6 @@ run() {  # TAG DATASETS CELLS MAN_DIR MAX_MODEL_LEN
 run faruler ruler32k_v33ofc,ruler64k_v33ofc,ruler128k_v33ofc $P/ruler_v33ofc/cells_ruler_v33ofc.json $P/ruler_v33ofc 136192
 run falb longbench_v2_0shot $P/longbench_v2_ofc/cells_longbench_v2_0shot.json $P/longbench_v2_ofc 124928
 run famrcr mrcr2_32k_ofc,mrcr2_64k_ofc,mrcr2_128k_ofc $P/mrcr_ofc/cells_mrcr_ofc.json $P/mrcr_ofc 143360
-run fagw graphwalks_22k_b16k,graphwalks_45k_b16k,graphwalks_90k_b16k $P/graphwalks_b16k/cells_graphwalks_b16k.json $P/graphwalks_b16k 110592
+run fagw graphwalks_22k_b32k,graphwalks_45k_b32k,graphwalks_90k_b32k $P/graphwalks_b32k/cells_graphwalks_b32k.json $P/graphwalks_b32k 126976
 run fahe humaneval $W/cells_he164.json $W/manifests_ae 13312
 echo "done $(date -u)" >> $W/status_fachain
