@@ -223,7 +223,8 @@ def main():
                                                  mage_reselect_trigger=([float(x) for x in os.environ['MAGE_RESELECT_TRIGGER'].split(',')]
                                                                         if os.environ.get('MAGE_RESELECT_TRIGGER') else None),
                                                  mage_trigger_signal=os.environ.get('MAGE_TRIGGER_SIGNAL', 'accept'),
-                                                 mage_reselect_kmin=int(os.environ['MAGE_RESELECT_KMIN']) if os.environ.get('MAGE_RESELECT_KMIN') else None)
+                                                 mage_reselect_kmin=int(os.environ['MAGE_RESELECT_KMIN']) if os.environ.get('MAGE_RESELECT_KMIN') else None,
+                                                 mage_clock_trace=os.environ.get('MAGE_CLOCK_TRACE') == '1')
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -269,7 +270,7 @@ def main():
                                'mage_keep_frac', 'mage_carry_first', 'residual', 'drop_guard', 'drift_diag',
                                'dense_below', 'risk_group', 'mage_reselect', 'mage_row_weight', 'mage_beta',
                                'mage_reselect_k', 'mage_reselect_trigger', 'mage_trigger_signal',
-                               'mage_reselect_kmin')})
+                               'mage_reselect_kmin', 'mage_clock_trace')})
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]

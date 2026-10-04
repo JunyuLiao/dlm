@@ -142,7 +142,7 @@ class VllmMethodAdapter:
                  residual=None, drop_guard=None, drift_diag=False, dense_below=None, mage_carry_first=False,
                  risk_group=None, mage_reselect=None, mage_row_weight=None, mage_beta=3.0, mage_reselect_k=None,
                  mage_reselect_trigger=None, mage_trigger_signal='accept', mage_reselect_kmin=None,
-                 mage_cg_tau=2.5, mage_cg_gamma_q=0.65):
+                 mage_cg_tau=2.5, mage_cg_gamma_q=0.65, mage_clock_trace=False):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -192,6 +192,8 @@ class VllmMethodAdapter:
                              'with mage_reselect_trigger')
         if mage_row_weight == 'jcgate' and mage_reselect_trigger is None:
             raise ValueError("mage_row_weight 'jcgate' needs the progress clock (mage_reselect_trigger)")
+        if mage_clock_trace and mage_reselect_trigger is None:
+            raise ValueError('mage_clock_trace traces the progress clock: needs mage_reselect_trigger')
         if mage_cg_tau <= 0 or not 0.0 <= mage_cg_gamma_q < 1.0:
             raise ValueError('invalid C-gate parameters')
         if mage_reselect_trigger is not None and int(mage_select_step) < 1:
@@ -328,6 +330,7 @@ class VllmMethodAdapter:
         self.mage_reselect_kmin = None if mage_reselect_kmin is None else int(mage_reselect_kmin)
         self.mage_cg_tau, self.mage_cg_gamma_q = float(mage_cg_tau), float(mage_cg_gamma_q)
         self._trig_count, self._trig_k, self._jc = 0, None, None
+        self.mage_clock_trace, self._clock = bool(mage_clock_trace), []
         # v31 pooled residual (named variant, opt-in, any sparse arm): dropped wholly-prefix tiles are added back as
         # their centroid key / mean value (v31_residual); centroids cached per (layer, canvas)
         self.residual = residual
@@ -412,6 +415,7 @@ class VllmMethodAdapter:
         self._mage_prev_argmax, self._k_override = None, None
         self._trig_canvas, self._trig_at = None, None
         self._trig_count, self._trig_k, self._jc = 0, None, None
+        self._clock = []
         self._tile_means, self._residual_tiles, self._guard_cache = {}, 0, []
         self._drift_prev, self._drift_acc = {}, None
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
@@ -465,7 +469,7 @@ class VllmMethodAdapter:
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
         return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._regroup_receipt(),
-                                 **self._drift_receipt()), method=counters,
+                                 **self._drift_receipt(), **self._clock_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
 
@@ -485,7 +489,7 @@ class VllmMethodAdapter:
                               global_ms_total=round(sum(ms), 2))
             counters = self.runtime['counters']() if self.runtime is not None else None
             return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._regroup_receipt(),
-                                     **self._drift_receipt()), method=counters,
+                                     **self._drift_receipt(), **self._clock_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
         finally:
@@ -997,10 +1001,13 @@ class VllmMethodAdapter:
         call with its row weights and budget."""
         if self._trig_canvas != self.canvas_id:                                 # a new canvas: reset the clock
             self._trig_canvas, self._trig_count, self._jc, self._trig_k = self.canvas_id, 0, None, None
-        if self._trig_count >= len(self.mage_reselect_trigger):
+            if self.mage_clock_trace:
+                self._clock.append([])
+        done = self._trig_count >= len(self.mage_reselect_trigger)
+        if done and not self.mage_clock_trace:
             return
         settled = None
-        if self.mage_trigger_signal == 'settle' or self.mage_row_weight == 'jcgate':
+        if self.mage_trigger_signal == 'settle' or self.mage_row_weight == 'jcgate' or self.mage_clock_trace:
             accf = acc.float()
             jc = self._jc
             q = torch.ones_like(p_top) if jc is None else jc['q']
@@ -1012,8 +1019,15 @@ class VllmMethodAdapter:
             self._jc = dict(q=q, r=r, prev=argmax)
             settled = (1 - torch.exp(-r / self.mage_cg_tau)) * (1 - q) * (1 - u)
         signal = settled if self.mage_trigger_signal == 'settle' else acc.float()
+        if self.mage_clock_trace:
+            pa, ps = torch.stack([acc.float().mean(), settled.mean()]).tolist()
+            self._clock[-1].append([round(pa, 3), round(ps, 3)])
+            if done:
+                return
+            phi = ps if self.mage_trigger_signal == 'settle' else pa
+        else:
+            phi = float(signal.mean().item())                                  # the one host read of the step
         self.calls['trigger_checks'] = self.calls.get('trigger_checks', 0) + 1
-        phi = float(signal.mean().item())                                      # the one host read of the step
         crossed = sum(1 for f in self.mage_reselect_trigger if phi >= f)
         if crossed <= self._trig_count:
             return
@@ -1032,6 +1046,9 @@ class VllmMethodAdapter:
             self._mage_row_w = (1 + self.mage_beta * (1 - settled)).clamp(1, 1 + self.mage_beta)
         elif mode is not None:
             self._mage_row_w = self._row_weight_from_logits(scaled, n_rows, entropy_bound)
+
+    def _clock_receipt(self):
+        return dict(clock_trace=self._clock) if self.mage_clock_trace else {}
 
     def _row_weight_from_logits(self, scaled, n, entropy_bound):
         """Row weights [n] for the next re-selection from the sampler's temperature-scaled logits [1, CL, V]

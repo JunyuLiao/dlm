@@ -102,6 +102,23 @@ def test_invalid_round4_configurations():
             pass
 
 
+def test_clock_trace_records_both_signals_per_canvas():
+    n = 8
+    a = _adapter(mage_reselect_trigger=0.5, mage_clock_trace=True)
+    logits = torch.zeros(1, n, 5)
+    arg, p_top = _stats(logits, n)
+    for canvas, ks in ((1, [2, 4, 6]), (2, [8])):
+        a.canvas_id = canvas
+        for step, k in enumerate(ks, 1):
+            a._canvas_step = step
+            a._progress_observe(arg, p_top, torch.arange(n) < k, logits, n, 1.0)
+    tr = a._clock_receipt()['clock_trace']
+    assert [[x[0] for x in c] for c in tr] == [[0.25, 0.5, 0.75], [1.0]]
+    assert all(0.0 <= x[1] <= 1.0 for c in tr for x in c)
+    assert a.calls['triggers'] == 2 and a.calls['trigger_checks'] == 3            # tracing kept the clock reading
+    assert _adapter(mage_reselect_trigger=0.5)._clock_receipt() == {}
+
+
 if __name__ == '__main__':
     import sys
     for name, fn in list(globals().items()):
