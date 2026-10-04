@@ -1,18 +1,7 @@
-# sc2 (both hosts; S1 suite, seeds 1-2; overlay ov_pa4). Order: equivalence check, step control (fair: dense and lean
-# with the same rule), then the accuracy variants for the diffuse-attention losses (MRCR / GraphWalks / cwe).
+# sc2 (both hosts; S1 suite, seeds 1-2; overlay ov_pa4). Order (re-planned 23:40 UTC, user: the sampler-side stop
+# rule changes decoding, so it is the lowest priority and never part of the main comparison): equivalence check,
+# the accuracy variants for the diffuse-attention losses, then the stop-rule arms (dense and lean alike) last.
 ruler _pa4check 4096
-ruler - native
-lbt - native
-mrcr - native
-gw - native
-ruler _cgstop3 native CG_STOP=3
-lbt _cgstop3 native CG_STOP=3
-mrcr _cgstop3 native CG_STOP=3
-gw _cgstop3 native CG_STOP=3
-ruler _cgstop3 4096 CG_STOP=3
-lbt _cgstop3 4096 CG_STOP=3
-mrcr _cgstop3 4096 CG_STOP=3
-gw _cgstop3 4096 CG_STOP=3
 ruler _kcov90 4096 MAGE_KCOVER=0.9
 lbt _kcov90 4096 MAGE_KCOVER=0.9
 mrcr _kcov90 4096 MAGE_KCOVER=0.9
@@ -29,3 +18,15 @@ ruler _sink1_rec1024 4096 MAGE_SINK=1 MAGE_RECENT=1024
 lbt _sink1_rec1024 4096 MAGE_SINK=1 MAGE_RECENT=1024
 mrcr _sink1_rec1024 4096 MAGE_SINK=1 MAGE_RECENT=1024
 gw _sink1_rec1024 4096 MAGE_SINK=1 MAGE_RECENT=1024
+ruler - native
+lbt - native
+mrcr - native
+gw - native
+ruler _cgstop3 native CG_STOP=3
+lbt _cgstop3 native CG_STOP=3
+mrcr _cgstop3 native CG_STOP=3
+gw _cgstop3 native CG_STOP=3
+ruler _cgstop3 4096 CG_STOP=3
+lbt _cgstop3 4096 CG_STOP=3
+mrcr _cgstop3 4096 CG_STOP=3
+gw _cgstop3 4096 CG_STOP=3

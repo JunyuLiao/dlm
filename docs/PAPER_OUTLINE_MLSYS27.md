@@ -21,7 +21,7 @@ observation. Status: ✓ = evidence in hand; ◐ = partial; ○ = pending.
 | D1 | Balanced selection: per (query head, 128-row block) worst-row prefix-mass top-k with equal k. The FA4 pass observes in-kernel (observing mask writes the tile log-mass during the dense pass). The selection is held for the canvas and carried into the next canvas's first call. | O1, O3 | ✓ (+1.40 vs MAGE on RULER, pre-registered; same per-step cost as MAGE) |
 | D2 | Progress clock: the sampler's own acceptance or C-gate settledness decides when to re-observe. Two-level re-observation runs inside the block-sparse kernel over a candidate pool, at balanced CTAs and pool-sized cost. | O2 | ◐ (MRCR / GraphWalks gains; LongBench-think −6 n.s.; pool GPU check pending) |
 | D3 | Budget adapts in time, not in space: one k per step for all units, set by progress or coverage. | O3 | ○ (sc2) |
-| D4 | Step control from the C gate: stall rescue (attention side) and a stop rule (sampler side, evaluated on dense too and reported as a separate component). | O4 | ○ (sc1x / sc2) |
+| D4 | Step control from the C gate on the attention side only: stall rescue (dense GLOBAL attention once a canvas stalls). The decoding (official sampler and stop rule) is never changed in the main comparison. | O4 | ○ (sc1x forced canvases) |
 
 C gate and query sensitivity are Junyu Liao's ideas, a COLLABORATION CANDIDATE. Our parts are D1, the clock as a
 trigger, the pool re-observation, and the balance principle.
@@ -33,8 +33,8 @@ trigger, the pool re-observation, and the balance principle.
   - Short: AIME26, HumanEval.
   - The benchmark choice is fixed before the confirmation. All screened benchmarks are reported, the rest in an
     appendix.
-- **Baselines.** Official dense FULL, all-kept (same kernel path), MAGE (same per-step cost), dense + the same step
-  rule (for D4).
+- **Baselines.** Official dense FULL, all-kept (same kernel path), MAGE (same per-step cost). All use the official
+  sampler.
 - **Performance.**
   - Per step, end to end, and the step count.
   - Context scaling, if feasible to 256K.
@@ -43,6 +43,12 @@ trigger, the pool re-observation, and the balance principle.
 - **Ablations:** D1 granularity / carry, D2 trigger / pool, D3 budget, D4 rescue / stop.
 - **Confirmation.** Pre-registered on hold-out items (RULER v33, LongBench `0shot_think` hold-out 343, MRCR /
   GraphWalks bin complements, HumanEval hold-out 124), at least 2 seeds.
+
+**Sampler-side stop rule (`CG_STOP`): appendix at most** (user, 2026-10-04 23:40 UTC).
+- It changes decoding, so the baseline comparison would no longer be like for like.
+- It is measured cheaply on forced canvases, and last in sc2 for dense and lean alike.
+- It is reported only if it saves many steps with no accuracy loss, and then as a separate, method-independent
+  component.
 
 ## Risks
 
