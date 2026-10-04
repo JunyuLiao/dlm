@@ -131,7 +131,10 @@ def main():
                 merge_backend=os.environ.get('MERGE', 'torch') if arm != 'dense' else None,
                 logit_stats=os.environ.get('LOGIT_STATS', 'legacy') if arm == 'method' else None,
                 dp_build=os.environ.get('DP_BUILD', 'legacy') if arm == 'method' else None,
-                observe_backend=os.environ.get('OBSERVE', 'triton') if arm == 'method' else None)
+                observe_backend=os.environ.get('OBSERVE', 'triton') if arm == 'method' else None,
+                dense_when=os.environ.get('DENSE_WHEN') or None,
+                mage_critical=float(os.environ['MAGE_CRIT']) if arm == 'mage' and os.environ.get('MAGE_CRIT') else None,
+                mage_coverage=float(os.environ['MAGE_COV']) if arm == 'mage' and os.environ.get('MAGE_COV') else None)
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]

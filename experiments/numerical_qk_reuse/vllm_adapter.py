@@ -152,6 +152,8 @@ class VllmMethodAdapter:
             raise ValueError('observe_backend must be triton or fa4')
         if mage_select not in ('torch', 'fa4'):
             raise ValueError('mage_select must be torch or fa4')
+        if (mage_critical is not None or mage_coverage is not None) and mage_select != 'fa4':
+            raise ValueError('mage_critical / mage_coverage are implemented on the FA4 selection only (mage_select=fa4)')
         if arm == 'method' and (config is None or condition is None):
             raise ValueError('the method arm needs a frozen v21 effective config and its condition')
         if arm == 'method':
@@ -247,6 +249,7 @@ class VllmMethodAdapter:
         self._events = []
         self.mage_state, self.canvas_id = {}, 0
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
+        self._sparse_kept, self._sparse_total, self._global_tiles = None, 0, 0
         self._canvas_steps, self._cur_steps, self._ent_trace, self._conf_threshold = [], 0, [], None
         self._dense_next = self._dense_now = False
         self._canvas_step = 0
@@ -384,13 +387,28 @@ class VllmMethodAdapter:
         return dict(canvas_steps=steps, canvas_entropy=out, confidence_threshold=self._conf_threshold)
 
     def _kept_receipt(self):
-        """Realized sparsity of the sparse GLOBAL calls: kept fraction of wholly-prefix 64-key tiles, weighted per call
-        (dense calls -- bootstrap, observation, MAGE selection -- are counted separately by their own counters)."""
+        """Realized sparsity, in wholly-prefix 64-key tiles x query heads x 128-row query blocks:
+        - kept_prefix_fraction (legacy, records before 2026-10-04): every call through the split FA4 lists, which
+          INCLUDES the method's bootstrap dense calls (v27_fa4.dense routes an all-kept list there);
+        - sparse_kept_prefix_fraction: the genuinely sparse calls only (all-kept lists excluded);
+        - global_prefix_work_fraction: all GLOBAL calls of the request (dense bootstrap / observation / MAGE selection /
+          dense fallback count every prefix tile, sparse calls their kept tiles) over the dense equivalent -- the
+          compute-matched comparison between arms with different numbers of dense steps."""
         kept, total = getattr(self, '_kept_prefix', None), getattr(self, '_prefix_total', 0)
         if kept is None or not total:
             return {}
-        return dict(kept_prefix_tiles=int(kept.item()), sparse_prefix_tiles=int(total),
-                    kept_prefix_fraction=round(float(kept.item()) / total, 5))
+        out = dict(kept_prefix_tiles=int(kept.item()), sparse_prefix_tiles=int(total),
+                   kept_prefix_fraction=round(float(kept.item()) / total, 5))
+        skept, stotal, gtiles = (getattr(self, '_sparse_kept', None), getattr(self, '_sparse_total', 0),
+                                 getattr(self, '_global_tiles', 0))
+        sk = float(skept.item()) if skept is not None else 0.0
+        if stotal:
+            out.update(sparse_only_kept_tiles=int(round(sk)), sparse_only_prefix_tiles=int(stotal),
+                       sparse_kept_prefix_fraction=round(sk / stotal, 5))
+        if gtiles:
+            out.update(global_prefix_tiles=int(gtiles),
+                       global_prefix_work_fraction=round((gtiles - stotal + sk) / gtiles, 5))
+        return out
 
     def _clear_canvas_metadata(self):
         self._merge_cache.clear()
@@ -586,6 +604,7 @@ class VllmMethodAdapter:
                           table=attn_metadata.block_table[0, : (prefix + n + page - 1) // page])
         q = query[:n].transpose(0, 1).unsqueeze(0)                  # [1, H, n, D] view, as HF's decoder passes it
         self.calls['global_calls'] += 1
+        self._global_tiles += q.shape[1] * -(-n // 128) * (prefix // 64)
         if self.arm == 'allkept':
             from experiments.numerical_qk_reuse import v27_fa4
             out = v27_fa4.dense(q, b['k'], b['v'], float(impl.scale))
@@ -732,11 +751,16 @@ class VllmMethodAdapter:
         return split
 
     def _kept_account(self, lists):
+        from experiments.numerical_qk_reuse import v27_fa4
         for ref, entry in self._split_cache:
             if ref is lists and isinstance(entry, tuple):
                 _, kept, total = entry
                 self._kept_prefix = kept.double() if self._kept_prefix is None else self._kept_prefix + kept
                 self._prefix_total += total
+                if not any(lists is x for x in v27_fa4._ALLKEPT.values()):   # a dense call routed as all-kept
+                    prev = getattr(self, '_sparse_kept', None)
+                    self._sparse_kept = kept.double() if prev is None else prev + kept
+                    self._sparse_total = getattr(self, '_sparse_total', 0) + total
                 return
 
     def sparse_lists(self, original, q, k, v, lists, scale):
@@ -862,6 +886,8 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                     ev[0].record()
                 if a.arm == 'native' or (a.arm in ('method', 'mage') and a._dense_now):
                     a.calls['global_calls'] += 1
+                    n = a.step_ctx['n']
+                    a._global_tiles += self.num_heads * -(-n // 128) * ((a.step_ctx['seq_len'] - n) // 64)
                     if a.arm != 'native':
                         a.calls['dense_fallback_calls'] = a.calls.get('dense_fallback_calls', 0) + 1
                     r = forward(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale,
