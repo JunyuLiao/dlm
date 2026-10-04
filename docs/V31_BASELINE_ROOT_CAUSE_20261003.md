@@ -1502,3 +1502,22 @@ PIECEWISE, which records its tokens with per-canvas reseeding.
     step-20 dense rescue (COLLABORATION CANDIDATE) targets exactly this, and its fc arm follows.
   - For the lean candidate (MAGE-port machinery, balanced, held selection), the step inflation is measured by the
     `qbm_step1_carry0/1` arms.
+
+**Where step inflation comes from (fc, both hosts, 1101 forced canvases; 13:00 UTC).**
+
+| arm | step ratio mpk / dlm2 [95% CI] | canvases with ≥ 40 steps |
+|---|---|---|
+| dense PIECEWISE reference | 1 | 9 |
+| MAGE 4096 | 1.026 [1.005, 1.049] / 1.016 [0.993, 1.040] | 12 |
+| m2c (threshold selection) | **1.101** [1.056, 1.153] / **1.076** [1.030, 1.121] | **51** |
+| m2c + step-20 dense rescue | 1.040 [1.015, 1.066] / 1.031 [1.005, 1.059] | 8 |
+| m2c k12 mass (fixed budget per unit) | 1.031 [1.002, 1.061] / 1.013 [0.992, 1.032] | 12 |
+
+- **The threshold selector causes the inflation.** A per-(head, block) count that follows a risk threshold sometimes
+  starves a unit. Some canvases then linger near the convergence threshold and run to the step cap (51 vs 9 for
+  dense).
+- With the same statistic on a fixed per-unit budget (k12 mass), the inflation falls to MAGE's level and the stuck
+  canvases disappear.
+- The step-20 dense rescue (Junyu Liao's idea, COLLABORATION CANDIDATE) also repairs the threshold selector (8
+  stuck), at the price of dense steps.
+- The lean candidate is a fixed-budget selector. Its forced inflation, with and without the carry, is measured next.
