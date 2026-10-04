@@ -949,3 +949,28 @@ RULER opener ablation, run twice: once with `TAG=noop`, `MAN_DIR=$P/ruler_v33noo
 `MAN_DIR=$P/ruler_v33ofc` and `CELLS=$P/ruler_v33ofc/cells_ruler32k_v33ofc_vt_niah.json` (`DATASETS=ruler32k_v33ofc`).
 Both runs use `MAX_MODEL_LEN=136192`, `FIX_51994=1`, `MEM=0.90` and `ARMS='dense:default'`. Score each with
 `v31_score_ruler.py` and compare vt / niah per task.
+
+**Checks after the audit fixes (2026-10-04, mpk CPU).** Counts, token statistics, pins and sha256 of every pool file:
+`results/v31_official_20261004/pools_summary.json`.
+- A fresh process re-renders every row from its stored text and reproduces `prompt_tokens` exactly. The checks:
+  - RULER ofc 585 / 585, each decoded tail = generation prompt + empty thought block + prefix;
+  - no-opener ablation 135 / 135, tail = generation prompt + prefix;
+  - LongBench-v2 1509 / 1509, with the truncation re-derived from the source items for all 1509 rows (237 of 503
+    truncated per variant);
+  - AIME26 30 / 30, GraphWalks 72 / 72, MRCR 72 / 72 (messages path).
+- Rowinfo v2 checks: manifest sha256, per-row prompt sha256, budgets and pins hold on every row.
+- Renaming kept the content. The renamed RULER pool has the first official build's token ids (195 / 195 per length).
+  GraphWalks matches `pools_v31`. The LongBench rebuild from the sha256-verified copies is byte-identical to the
+  first build.
+- Scorer CLIs on the real pools with synthetic, bound completions (`scripts/v31_scorer_e2e_check.py`):
+  - a perfect answer scores the maximum everywhere (MRCR exactly 1.0 now that the raw response is graded);
+  - a capped copy keeps the primary metric and fails only the secondary boolean;
+  - an empty answer scores 0;
+  - every pool refuses a changed prompt hash, budget or manifest hash, a missing planned cell and an unplanned cell;
+  - the paired tool and the RULER table run on these outputs;
+  - no summary holds a host path.
+- HumanEval positive control (`scripts/v31_humaneval_positive_control.py`): the 164 canonical solutions pass 164 / 164
+  through extract → full-prompt check_program → sandbox (no time-outs).
+- The `py*` fence rule recovers the 2 of 96 preview completions tagged `pythonpython` that the old whitelist rejected.
+- Toy tests: `tests/test_v31_official_scorers.py` (20) + `tests/test_v27_humaneval.py` (12) + `tests/test_ruler_pipeline.py`
+  (5): 37 passed under pytest on mpk, with the pinned RULER metrics and the bwrap sandbox.
