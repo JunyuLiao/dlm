@@ -12,7 +12,10 @@ short. Writes one JSON line per request with per-kind aggregates and the step li
 PROFILE_MODE=events (v31): no synchronization inside a request. Every bracketed region records a pair of CUDA events on
 the current stream (GPU time of that region, async overlap and side-stream waits included); each engine step records
 its CPU wall time (the step ends with the token read-back, so this is the real step latency). Events are resolved once
-per request. Use these numbers for real per-step costs; the default sync mode stays the attribution tool.
+per request. The per-call GPU times are valid; the per-step CPU wall clock is NOT a latency under vLLM's async
+scheduling (the CPU runs ahead; its sum under-counts the request's decode time by ~1/3 in practice) -- use the bench
+record's decode_s for latency. The first record of every process is the warm-up request (JIT compiles, first-call
+allocations; e.g. 200+ ms dense calls): it is flagged warmup=true and must be excluded from aggregates.
 """
 import collections
 import json
@@ -183,7 +186,8 @@ def summarize(prof, out):
                    kept_mean=(round(sum(c['kept'] for c in v if c['kept'] is not None)
                                     / max(1, sum(c['kept'] is not None for c in v)), 4)))
            for k, v in sorted(by_kind.items())}
-    rec = dict(mode='events' if prof.get('events') else 'sync', steps=len(steps),
+    prof['written'] = prof.get('written', 0) + 1
+    rec = dict(mode='events' if prof.get('events') else 'sync', warmup=prof['written'] == 1, steps=len(steps),
                step_ms_total=round(sum(s['ms'] for s in steps), 2),
                global_ms_total=round(sum(s['global_ms'] for s in steps), 2),
                hook_ms_total=round(sum(s['hook_ms'] for s in steps), 2), calls_by_kind=agg,

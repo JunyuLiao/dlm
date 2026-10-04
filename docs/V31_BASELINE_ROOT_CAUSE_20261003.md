@@ -814,3 +814,44 @@ required.
   prefill, per-step cost, steps per canvas, canvases.
 - All final numbers use fresh seeds or pools and a pre-registration.
 - Scoring definitions are under audit against the official implementations (report pending).
+
+## Where the method's extra per-step cost comes from (no-sync GPU-event profile) — 2026-10-04 08:10 UTC
+
+Panel pf, profile part: CUDA events around every GLOBAL call, no synchronization. LongBench-v2 64K, 3 cells per host
+on mpk and dlm2. The warm-up request is excluded (it carries JIT compiles). GPU time per GLOBAL call:
+
+| call kind | m2c | m2c + C gate | MAGE k=4096 |
+|---|---|---|---|
+| held / reused sparse call | 0.334 ms (FA4 0.286) | 0.523 ms (FA4 0.476) | **0.159 ms (FA4 0.135)** |
+| observation / MAGE selection (once per canvas) | 2.51 ms | 2.49 ms | 2.28 ms |
+| re-decision (dp_route) | 1.035 ms (FA4 0.405) | 1.139 ms | – |
+| first call of a canvas (carried map) | 0.682 ms | 0.816 ms | – |
+| GLOBAL total per step (5 layers, mean) | **2.96 ms** | 3.65 ms | **1.56 ms** |
+
+**Reading.**
+- The method spends about 1.4 ms more per step on GLOBAL attention than the MAGE port. That matches the end-to-end
+  per-step gap (1.2–1.5 ms).
+- Two sources:
+  1. The FA4 part of a held call is 2.1× MAGE's, about +0.9 ms per step, although the kept fraction is only about
+     1.5× MAGE's.
+  2. Re-decisions add about +0.6 ms per step.
+- Hypothesis for (1): the method's keep lists differ per query head, so the 8 query heads of a KV head do not share
+  K/V tile reads. MAGE's lists are identical across those heads and reuse them through L2. The kernel audit tests
+  two fixes:
+  - GQA-packed execution over the union of the heads' lists. This is a selection superset, so it needs an accuracy
+    check.
+  - A shared traversal order. This leaves the tile set unchanged.
+
+**Other diagnostics from panel z.**
+- The adapter's all-kept path costs 0.984× vLLM's own dense attention per step. The generic adapter path is not the
+  overhead.
+- Query drift between consecutive steps: only 11–12% of rows change by ≤10%, and about 0.2% of 128-row blocks do.
+  Reusing attention OUTPUTS across steps is not viable. Reusing the SELECTION across steps is, because the tile-level
+  pattern is stable (this is what the method does).
+- Dense determinism:
+  - dense PIECEWISE re-run in a separate engine with the same seed reproduces all 12/12 outputs;
+  - dense FULL vs dense PIECEWISE with the same seed agree on 6/12 at 64K. This is a deterministic numerical
+    difference between execution modes; it appears only at long contexts (24/24 identical at short contexts).
+- Drop guard (DROP_GUARD) is rejected under the official score:
+  - MAGE: −3.33 (guard 0.5) and −4.20 (0.3) vs −3.25 plain, at 0.50 and 0.68 work vs 0.40;
+  - m2c k12 mass: +0.37 and +0.66 vs +0.78, at higher work.
