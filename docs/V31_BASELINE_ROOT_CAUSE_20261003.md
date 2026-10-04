@@ -1448,3 +1448,28 @@ request has one sampler call in the commit phase more than it has canvases.
 
 **Stage B** (LongBench-v2 `0shot_think` at 16K, AIME26 32K × 4 seeds) is designed separately with the user. It costs
 more than 10 GPU-hours per arm.
+
+## Panel fc, first results: the forced comparison has a zero noise floor — 2026-10-04 12:10 UTC
+
+LongBench-v2 64K + 96K confirmation cells: 47 cells (583 canvases) on mpk and 47 on dlm2. Reference: dense
+PIECEWISE, which records its tokens with per-canvas reseeding.
+
+| arm, forced with the reference's tokens | canvases | output = reference | step ratio | token agreement | canvases fully equal |
+|---|---|---|---|---|---|
+| dense PIECEWISE (self-check), mpk | 583 | 47/47 | 1.000 | 1.0000 | 583/583 |
+| dense PIECEWISE (self-check), dlm2 | – | 47/47 | 1.000 | 1.0000 | all |
+| **dense FULL graphs (calibration), mpk** | 583 | 47/47 | **1.000** | **1.0000** | **583/583** |
+
+**Reading.**
+- The forced comparison is exact. Even switching vLLM's execution mode (FULL vs PIECEWISE graphs) changes no step
+  count and no token, so any difference a sparse arm shows here is its attention's effect.
+- **Correction of an earlier explanation.** Free-running dense FULL and dense PIECEWISE agreed on only 6/12
+  LongBench 64K outputs (panel z), and that was attributed to numerical differences between execution modes. On
+  identical prefixes with per-canvas seeds the two modes are identical. The divergence therefore enters at canvas
+  boundaries, through the noise stream, most likely a different random-number offset between the modes across a
+  commit step, not through attention numerics.
+- Consistent with that: free-running FULL and PIECEWISE agree on every RULER cell (one canvas per answer, no
+  boundary) but not on multi-canvas LongBench outputs.
+- Consequence: free-running comparisons of PIECEWISE sparse arms against the FULL reference carry an extra,
+  attention-independent source of trajectory divergence. This is another reason to measure step inflation in
+  forced mode, and to keep per-step cost (S/N) as the free-running speed measure.
