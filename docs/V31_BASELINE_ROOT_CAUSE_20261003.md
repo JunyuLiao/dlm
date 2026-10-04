@@ -855,3 +855,59 @@ on mpk and dlm2. The warm-up request is excluded (it carries JIT compiles). GPU 
 - Drop guard (DROP_GUARD) is rejected under the official score:
   - MAGE: −3.33 (guard 0.5) and −4.20 (0.3) vs −3.25 plain, at 0.50 and 0.68 work vs 0.40;
   - m2c k12 mass: +0.37 and +0.66 vs +0.78, at higher work.
+
+## Group-shared selection and the MAGE first-call carry (branch `research/v31-group-shared-select-20261004`) — 2026-10-04 09:00 UTC
+
+**Why.** The no-sync profile (section above) puts most of the method's extra per-step cost in the held calls: their
+FA4 part costs 2.1× MAGE's for about 1.5× the kept tiles. The leading explanation is that the method keeps a
+different tile list per query head. The 8 query heads of a KV head then do not share K/V tile reads, whereas MAGE's
+lists are identical inside a group and reuse them through L2. The kernel audit (branch
+`research/v31-kernel-audit-20261004`) attacks this at execution time (`SPARSE_GQA=align|union`). This branch attacks
+it at selection time, keeping each head's budget.
+
+**What (two opt-in options on the MAGE port; the ladder's other rungs are unchanged).**
+- `MAGE_GRAN=kvblock_max`
+  - Per (KV head, 128-row block), rank prefix tiles by the max, over the block's rows AND the group's 8 query heads,
+    of the row's share of its prefix mass. This is the method's `risk_value='mass'` statistic from the exact FA4
+    observation.
+  - Keep the top k tiles. The set is shared by the group's heads.
+  - The per-head budget is unchanged, so the work is the same as `qblock_max`. Only the list structure changes.
+- `MAGE_GRAN=kvhead_max`
+  - The same max share over all canvas rows: one set per KV head for both blocks.
+  - This is exactly MAGE's list structure and cost, with the max-share statistic instead of MAGE's mean mass.
+- `MAGE_CARRY=1` (needs `MAGE_STEP >= 1`): the method's `carry_first` on the MAGE port.
+  - Canvas call 0 runs on the layer's selection from the previous canvas instead of exact attention. Tiles wholly
+    in that canvas's prefix keep their decision; every newer tile is kept.
+  - It applies only as the direct continuation: the previous canvas, the prefix grown by exactly that canvas, and the
+    same row-block layout. Otherwise call 0 stays exact.
+  - It removes the extra dense call that made the step-1 ladder rungs cost 0.58 of dense work.
+- Tests:
+  - `tests/test_v31_group_select.py` (GPU): shared sets, budget, needle rows, the carried map against the expected
+    map, each invalid-carry case, and option validation.
+  - A CPU logic check with stubbed FA4 entry points passed on mpk before the GPU queue.
+
+**Panel gs (overlay `ov_gs`, adapter e8391eb210c7; EXPLORATORY; queued after panel vk on mpk and dlm2).**
+1. The overlay's GPU test suite. The panel aborts unless every test passes.
+2. RULER v31 pool, panel x cells (mpk shard 1/3, dlm2 0/3), keep 12% per unit, selection at step 1:
+   - a control rerun of `qblock_max`;
+   - `kvblock_max` and `kvhead_max`;
+   - with carry: `qblock_max`, `kvblock_max` and MAGE's own `kvhead`.
+3. Per-call GPU cost (`PROFILE_MODE=events`, 3 LongBench-v2 64K cells per host): `qblock_max` vs `kvblock_max`,
+   both with carry.
+4. End to end on the LongBench-v2 64K + 96K confirmation cells (pf's cells and shards):
+   - a fresh dense FULL reference on the same host;
+   - `qblock_max` and `kvblock_max`, both with carry.
+
+**Read-out rules, stated before the data.**
+- **Control.** The control must reproduce panel x's `qblock_max` step-1 records token for token on each host.
+  Otherwise the overlay changed the code path and nothing else in the panel is read.
+- **Accuracy.** Official RULER score, paired per cell against the `qblock_max` control:
+  - group sharing "keeps the method's gain" if the mean difference is within ±1 point;
+  - it "loses it" if it falls toward MAGE's `kvhead` rung (about −1).
+  - The carry is read the same way against the same unit without carry.
+- **Speed.**
+  - The hypothesis holds if a `kvblock_max` held call costs clearly less on the GPU than a `qblock_max` held call
+    at the same kept fraction. The kernel audit's `corr0` vs `indep` patterns give the kernel-only expectation.
+  - End to end, W, S/N, N/C and C are reported against the same-host dense run.
+- **Next step.** Any winner here is exploratory. It enters the integration branch and the pre-registered
+  confirmation (fresh RULER v33 pool and official LongBench-v2), not the paper directly.

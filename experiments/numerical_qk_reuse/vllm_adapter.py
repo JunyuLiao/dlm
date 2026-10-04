@@ -128,7 +128,7 @@ class _PrefixCache:
         return self.length
 
 
-MAGE_GRANULARITIES = ('kvhead', 'qhead', 'qblock', 'qblock_max')
+MAGE_GRANULARITIES = ('kvhead', 'qhead', 'qblock', 'qblock_max', 'kvhead_max', 'kvblock_max')
 
 
 class VllmMethodAdapter:
@@ -137,7 +137,7 @@ class VllmMethodAdapter:
                  logit_stats='legacy', dp_build='legacy', observe_backend='triton', mage_select='torch',
                  trace_canvas=False, dense_when=None, regroup_diag=False, mage_critical=None,
                  mage_coverage=None, mage_select_step=0, mage_granularity='kvhead', mage_keep_frac=None,
-                 residual=None, drop_guard=None, drift_diag=False, dense_below=None):
+                 residual=None, drop_guard=None, drift_diag=False, dense_below=None, mage_carry_first=False):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -165,6 +165,8 @@ class VllmMethodAdapter:
             raise ValueError('mage_granularity other than kvhead needs mage_select=fa4, without critical / coverage')
         if mage_keep_frac is not None and (not 0.0 < float(mage_keep_frac) <= 1.0 or mage_select != 'fa4'):
             raise ValueError('mage_keep_frac must be in (0, 1] and needs mage_select=fa4')
+        if mage_carry_first and int(mage_select_step) < 1:
+            raise ValueError('mage_carry_first replaces the first exact call of a canvas: needs mage_select_step >= 1')
         from experiments.numerical_qk_reuse.v31_residual import RESIDUAL_MODES
         if residual is not None and residual not in RESIDUAL_MODES:
             raise ValueError(f'residual must be one of {RESIDUAL_MODES}')
@@ -219,11 +221,22 @@ class VllmMethodAdapter:
         #   qhead       mean over the canvas queries of each query head;
         #   qblock      mean over the rows of each (query head, 128-row block);
         #   qblock_max  max over the rows of each (query head, 128-row block) of the row's share of its PREFIX mass
-        #               (the method's risk_value='mass' statistic, from the exact FA4 observation).
+        #               (the method's risk_value='mass' statistic, from the exact FA4 observation);
+        #   kvblock_max the same max share, taken over the rows of a 128-row block AND the query heads of its KV head:
+        #               one set per (KV head, block), shared by those query heads (same per-head budget, so the same
+        #               work; the shared lists let the heads of a GQA group reuse each K/V tile read, like MAGE's);
+        #   kvhead_max  the same max share over all canvas rows and the group's heads: one set per KV head (MAGE's
+        #               exact list structure and cost, with the max-share statistic instead of the mean mass).
         # mage_keep_frac: keep PT - floor((1 - f) PT) prefix tiles per unit (topk_skip's rule, so f = 0.12 matches the
         # method's k12 at every length) instead of mage_k / 64.
         self.mage_granularity = mage_granularity
         self.mage_keep_frac = None if mage_keep_frac is None else float(mage_keep_frac)
+        # v31 first-call carry on the MAGE port (named variant, the method's carry_first): with mage_select_step >= 1,
+        # canvas call 0 runs on the layer's selection of the PREVIOUS canvas instead of exact attention -- tiles wholly
+        # in that canvas's prefix keep their decision, every newer tile (the previous canvas, now prefix, and the
+        # current canvas) is kept. Valid only as the direct continuation (prefix grown by exactly that canvas, same
+        # block layout); the request's first canvas and any invalid carry run the exact call as before.
+        self.mage_carry_first = bool(mage_carry_first)
         # v31 pooled residual (named variant, opt-in, any sparse arm): dropped wholly-prefix tiles are added back as
         # their centroid key / mean value (v31_residual); centroids cached per (layer, canvas)
         self.residual = residual
@@ -739,6 +752,10 @@ class VllmMethodAdapter:
                     w = self._mage_warm[layer_idx] = [self.canvas_id, nk, 0]
                 if w[2] < self.mage_select_step:                   # exact steps before the selection
                     w[2] += 1
+                    carried = self._mage_carried(st, prefix, n) if self.mage_carry_first and w[2] == 1 else None
+                    if carried is not None:
+                        self.calls['mage_carried_calls'] = self.calls.get('mage_carried_calls', 0) + 1
+                        return v27_fa4.sparse_lists(q, b['k'], b['v'], carried, scale)
                     self.calls['mage_warm_dense_calls'] = self.calls.get('mage_warm_dense_calls', 0) + 1
                     return v27_fa4.dense(q, b['k'], b['v'], scale)
             if self.mage_select == 'fa4':
@@ -746,11 +763,25 @@ class VllmMethodAdapter:
             else:
                 out = v27_fa4.dense(q, b['k'], b['v'], scale)             # exact first-step attention output
                 kept = self._mage_select(q, b['k'], scale, prefix, n)
-            self.mage_state[layer_idx] = dict(canvas=self.canvas_id, nk=nk, lists=v27_fa4.block_sparse_tensors(kept))
+            self.mage_state[layer_idx] = dict(canvas=self.canvas_id, nk=nk, prefix=prefix, lists=v27_fa4.block_sparse_tensors(kept),
+                                              kept=kept if self.mage_carry_first else None)
             self.calls['mage_selections'] += 1
             return out
         self.calls['mage_reused_calls'] += 1
         return v27_fa4.sparse_lists(q, b['k'], b['v'], st['lists'], scale)
+
+    def _mage_carried(self, st, prefix, n):
+        """Lists for canvas call 0 from the previous canvas's selection (mage_carry_first), or None when the carry is
+        not the direct continuation: previous canvas, prefix grown by exactly that canvas, same row-block layout."""
+        from experiments.numerical_qk_reuse import v27_fa4
+        if st is None or st.get('kept') is None or st['canvas'] != self.canvas_id - 1 or st['nk'] != prefix:
+            return None
+        old, qb, kt = st['prefix'] // 64, -(-n // 128), -(-(prefix + n) // 64)
+        if st['kept'].shape[2] != qb or old > st['kept'].shape[-1] or kt < st['kept'].shape[-1]:
+            return None
+        kept = torch.ones((*st['kept'].shape[:3], kt), dtype=torch.bool, device=st['kept'].device)
+        kept[..., :old] = st['kept'][..., :old]
+        return v27_fa4.block_sparse_tensors(kept)
 
     @torch.no_grad()
     def _mage_select(self, q, k, scale, prefix, n, chunk=8192):
@@ -815,7 +846,7 @@ class VllmMethodAdapter:
         else:
             k_tiles = max(1, min(self.mage_k // 64, first_canvas_tile))
         if self.mage_granularity != 'kvhead':
-            return out, self._mage_units(mass, head_lse, H, n, qb, kt, first_canvas_tile, k_tiles)
+            return out, self._mage_units(mass, head_lse, H, n, qb, kt, first_canvas_tile, k_tiles, G)
         score = mass.reshape(HK, G, n, kt).mean(dim=(1, 2))                                        # [HK, KT]
         kept_kv = torch.zeros((HK, kt), device=q.device, dtype=torch.bool)
         if first_canvas_tile and self.mage_coverage is not None:
@@ -844,14 +875,27 @@ class VllmMethodAdapter:
             self.calls['mage_critical_added_tiles'] = self.calls.get('mage_critical_added_tiles', 0) + int(added.sum())
         return out, kept
 
-    def _mage_units(self, mass, head_lse, H, n, qb, kt, pt, k_tiles):
-        """Selection-granularity ladder: top k_tiles prefix tiles per query head (qhead) or per (query head, 128-row
-        block) (qblock, qblock_max); canvas / boundary tiles always kept. Returns kept [1, H, QB, KT]."""
+    def _mage_units(self, mass, head_lse, H, n, qb, kt, pt, k_tiles, G=1):
+        """Selection-granularity ladder: top k_tiles prefix tiles per query head (qhead), per (query head, 128-row
+        block) (qblock, qblock_max), or per KV head of G query heads, per block (kvblock_max) or for the whole canvas
+        (kvhead_max), shared by those heads; canvas / boundary tiles always kept. Returns kept [1, H, QB, KT]."""
         kept = torch.zeros((1, H, qb, kt), device=mass.device, dtype=torch.bool)
         kept[..., pt:] = True
         if not pt:
             return kept
         pad = qb * 128 - n
+        if self.mage_granularity in ('kvblock_max', 'kvhead_max'):
+            share = head_lse - head_lse.logsumexp(-1, keepdim=True)                               # log share of prefix mass
+            share = torch.nn.functional.pad(share, (0, 0, 0, pad), value=float('-inf')).view(H // G, G, qb, 128, pt)
+            score = share.amax(dim=(1, 3))                                                        # [HK, QB, PT]
+            if self.mage_granularity == 'kvhead_max':
+                score = score.amax(1, keepdim=True)                                               # [HK, 1, PT]
+            unit = torch.zeros(score.shape, device=mass.device, dtype=torch.bool)
+            unit.scatter_(-1, score.topk(k_tiles, dim=-1).indices, True)
+            kept[0, :, :, :pt] = unit.expand(-1, qb, -1).repeat_interleave(G, 0)                  # same set per group
+            self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * H * qb
+            self.calls['mage_prefix_tiles'] += int(pt) * H * qb
+            return kept
         if self.mage_granularity == 'qhead':
             score = mass[..., :pt].mean(1)[:, None].expand(H, qb, pt)                              # [H, QB, PT]
         elif self.mage_granularity == 'qblock':
