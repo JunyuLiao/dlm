@@ -1940,3 +1940,11 @@ all-kept:
 - **Step inflation is the main performance loss on long thinking outputs.**
 - Panel m / n traced such inflation to canvases that stick near the convergence threshold. A dense rescue from step
   20 removed it for m2c.
+
+**Correction (22:45 UTC): with both hosts, LongBench-v2 `0shot_think` shows no lean loss.**
+- 32 items × 2 seeds, official scorer: dense 43.8%, lean 4096 45.3%, a difference of +1.6 [−14.1, +17.2] with
+  8 / 7 discordant cells. The dlm2-half deficit (−12.5) was chance.
+- Unforced forwards per canvas, lean relative to dense: +14% on dlm2, −11% on mpk (where lean also wrote 40% fewer
+  tokens). The trajectories differ, so these ratios are noise, not step inflation. The forced-canvas arms of sc1x
+  measure inflation on identical canvases.
+- Decode time per forward is consistent across hosts: 0.78–0.79 of dense.
