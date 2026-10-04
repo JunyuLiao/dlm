@@ -1837,3 +1837,53 @@ each over the whole suite:
   ≤ 8.4K tokens.
 - Benchmark choice for the paper is fixed **before** the confirmation run, with the selection rule written down. Every
   screened benchmark is reported, the ones outside the main text in an appendix.
+
+## Panel pa results: a second observation per canvas repairs MRCR — 2026-10-04 21:20 UTC
+
+- Official scorers, both hosts, seed 1, item-bootstrap 95% CIs.
+- Tables: `results/v31_20261003/panels/pa_ruler_official.md` and `pa_mrcr_official.md`.
+
+**MRCR 2-needle (72 cells, SequenceMatcher ratio).**
+
+| arm | mean | vs dense | vs lean | output tokens (mpk half) |
+|---|---|---|---|---|
+| dense FULL | 0.290 | — | — | 7251 |
+| lean 4096 | 0.225 | −0.065 [−0.130, −0.007] | — | 4340 |
+| + re-select at step 4 | 0.277 | −0.014 [−0.069, +0.035] | **+0.051 [+0.016, +0.094]**, 25/12 cells | 4935 |
+| + step 4, C-gate rows | 0.263 | −0.027 | +0.038 [+0.003, +0.080] | 4963 |
+| + step 4, confidence rows | 0.265 | −0.026 | +0.040 [+0.002, +0.083] | 5226 |
+| + step 8, C-gate rows | 0.261 | −0.029 | +0.036 [+0.004, +0.075] | 4217 |
+
+- The lean candidate loses MRCR significantly. Its answers are shorter than dense's, which the ratio penalises.
+- One re-selection per canvas recovers about 80% of the gap, significantly better than lean.
+- Row weights (C gate, confidence) do **not** beat the unweighted re-selection on this panel. The gain comes from
+  re-observing once the canvas has content, not from whose rows steer the choice.
+- Cost per forward: the lean decode time per forward is 0.936 of dense (mpk), the re-selection arms 0.946–0.968.
+
+**RULER v34ofc subset (156 cells, 32K / 128K).**
+
+| arm | official | cwe | vs dense | vs lean |
+|---|---|---|---|---|
+| dense | 86.9 | 79.2 | — | — |
+| lean 4096 | 87.1 | 70.8 | +0.22 [−1.89, +2.28] | — |
+| + re-select at step 4 | 87.5 | 74.2 | +0.61 [−1.57, +2.72] | +0.38 [+0.06, +0.83], 4/0 |
+
+- On this fresh pool the lean candidate already matches dense. The re-selection mostly repairs cwe.
+- Step 8 rarely triggers on RULER: a median of 4 steps per canvas.
+
+**All-kept baseline (ak, dlm2).** FA4 block-sparse path with every tile kept; decode time per forward relative to
+all-kept:
+
+| context | dense | lean 4096 |
+|---|---|---|
+| 64K / 96K (47 requests) | 1.012 | 0.837 |
+| 128K (36 requests) | 0.991 | 0.744 |
+
+- Sparsity's own per-forward gain is therefore 16% at 64–96K and 26% at 128K.
+- The kernel path itself is within about 1% of dense.
+- In these unforced runs lean takes about 10% more steps per canvas than dense at 128K. Step inflation is to be
+  measured on forced canvases.
+
+**Consequence for the algorithm.**
+- The progress trigger (round 3, panel sc1) keeps the part that works, a second observation per canvas, and places it
+  by progress instead of a fixed step. Weighting stays an arm to test, not the claim.
