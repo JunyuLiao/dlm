@@ -8,6 +8,11 @@ is removed and the absolute step times are inflated; the record is for attributi
   per denoising step: wall ms, sum of GLOBAL ms, sampler-hook ms (accepted mask, T / C-gate state update)
 Usage: same arguments and env as v31_vllm_paired_bench.py, plus PROFILE_OUT=<jsonl>. Use LIMIT / DATASETS to keep it
 short. Writes one JSON line per request with per-kind aggregates and the step list (times and kinds only, no text).
+
+PROFILE_MODE=events (v31): no synchronization inside a request. Every bracketed region records a pair of CUDA events on
+the current stream (GPU time of that region, async overlap and side-stream waits included); each engine step records
+its CPU wall time (the step ends with the token read-back, so this is the real step latency). Events are resolved once
+per request. Use these numbers for real per-step costs; the default sync mode stays the attribution tool.
 """
 import collections
 import json
@@ -30,13 +35,28 @@ def install_profiler():
         pkg.__path__.append(os.environ['V27_ADAPTER_DIR'])
     from experiments.numerical_qk_reuse import vllm_adapter as va
     prof = dict(calls=[], steps=[], hook=[], pending=[])
+    events = os.environ.get('PROFILE_MODE', 'sync') == 'events'
 
     def sync_time(fn, *a, **k):
+        if events:                                     # an unresolved [start, end] event pair, resolved per request
+            e0, e1 = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+            e0.record()
+            r = fn(*a, **k)
+            e1.record()
+            return r, [e0, e1]
         torch.cuda.synchronize()
         t = time.perf_counter()
         r = fn(*a, **k)
         torch.cuda.synchronize()
         return r, 1000 * (time.perf_counter() - t)
+
+    def wall_time(fn, *a, **k):                        # step latency: CPU wall clock, no added synchronization
+        if not events:
+            return sync_time(fn, *a, **k)
+        t = time.perf_counter()
+        r = fn(*a, **k)
+        return r, 1000 * (time.perf_counter() - t)
+    prof['events'] = events
 
     def counters(a):
         c = dict(a.calls)
@@ -49,7 +69,7 @@ def install_profiler():
     def sparse_lists(self, original, q, k, v, lists, scale):
         r, ms = sync_time(inner_sparse, self, original, q, k, v, lists, scale)
         cnt = lists.full_block_cnt
-        kept = float(cnt.sum()) / (cnt.numel() * lists.full_block_idx.shape[-1])
+        kept = (cnt.sum() / (cnt.numel() * lists.full_block_idx.shape[-1])) if events else             float(cnt.sum()) / (cnt.numel() * lists.full_block_idx.shape[-1])
         prof['pending'].append(('sparse', ms, kept))
         return r
     va.VllmMethodAdapter.sparse_lists = sparse_lists
@@ -110,10 +130,9 @@ def install_profiler():
             kind = '+'.join(k for k in KINDS if after.get(k, 0) != before.get(k, 0)) or (
                 'dense' if a.arm == 'native' else 'other')
             sparse = [p for p in prof['pending'] if p[0] == 'sparse']
-            prof['calls'].append(dict(layer=layer_idx, kind=kind, ms=round(ms, 4),
-                                      sparse_ms=round(sum(p[1] for p in sparse), 4),
-                                      kv_ms=round(sum(p[1] for p in prof['pending'] if p[0] == 'kv'), 4),
-                                      kept=None if not sparse else round(sparse[-1][2], 4)))
+            prof['calls'].append(dict(layer=layer_idx, kind=kind, ms=ms, sparse_ms=[p[1] for p in sparse],
+                                      kv_ms=[p[1] for p in prof['pending'] if p[0] == 'kv'],
+                                      kept=None if not sparse else sparse[-1][2]))
             return r
         fa.FlashAttentionImpl.forward = forward
     va.install_vllm_patches = install
@@ -123,20 +142,38 @@ def install_profiler():
 
     def step(self):
         n0, h0 = len(prof['calls']), len(prof['hook'])
-        r, ms = sync_time(inner_step, self)
-        calls = prof['calls'][n0:]
-        prof['steps'].append(dict(ms=round(ms, 3), global_ms=round(sum(c['ms'] for c in calls), 3),
-                                  hook_ms=round(sum(prof['hook'][h0:]), 3),
-                                  kinds=sorted({c['kind'] for c in calls})))
+        r, ms = wall_time(inner_step, self)
+        prof['steps'].append(dict(ms=ms, calls=(n0, len(prof['calls'])), hook=(h0, len(prof['hook']))))
         return r
     LLMEngine.step = step
     return prof
+
+
+def _ms(x):
+    """A float (sync mode) or an unresolved [start, end] CUDA event pair (events mode) -> milliseconds."""
+    return x[0].elapsed_time(x[1]) if isinstance(x, list) else x
 
 
 def summarize(prof, out):
     steps, calls = prof['steps'], prof['calls']
     if not steps:
         return
+    import torch
+    if prof.get('events'):
+        torch.cuda.synchronize()                       # once per request: resolve every recorded event pair
+    for c in calls:
+        c['ms'] = round(_ms(c['ms']), 4)
+        c['sparse_ms'] = round(sum(_ms(x) for x in c['sparse_ms']), 4)
+        c['kv_ms'] = round(sum(_ms(x) for x in c['kv_ms']), 4)
+        if c['kept'] is not None:
+            c['kept'] = round(float(c['kept']), 4)
+    hook = [round(_ms(x), 4) for x in prof['hook']]
+    for s in steps:
+        s['ms'] = round(_ms(s['ms']), 3)
+        mine = calls[s['calls'][0]:s['calls'][1]]
+        s['global_ms'] = round(sum(c['ms'] for c in mine), 3)
+        s['hook_ms'] = round(sum(hook[s['hook'][0]:s['hook'][1]]), 3)
+        s['kinds'] = sorted({c['kind'] for c in mine})
     by_kind = collections.defaultdict(list)
     for c in calls:
         by_kind[c['kind']].append(c)
@@ -146,7 +183,8 @@ def summarize(prof, out):
                    kept_mean=(round(sum(c['kept'] for c in v if c['kept'] is not None)
                                     / max(1, sum(c['kept'] is not None for c in v)), 4)))
            for k, v in sorted(by_kind.items())}
-    rec = dict(steps=len(steps), step_ms_total=round(sum(s['ms'] for s in steps), 2),
+    rec = dict(mode='events' if prof.get('events') else 'sync', steps=len(steps),
+               step_ms_total=round(sum(s['ms'] for s in steps), 2),
                global_ms_total=round(sum(s['global_ms'] for s in steps), 2),
                hook_ms_total=round(sum(s['hook_ms'] for s in steps), 2), calls_by_kind=agg,
                step_list=[[s['ms'], s['global_ms'], s['hook_ms'], s['kinds']] for s in steps])
