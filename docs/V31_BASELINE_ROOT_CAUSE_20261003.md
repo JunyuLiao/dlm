@@ -953,3 +953,41 @@ it at selection time, keeping each head's budget.
   bias.
 - A determinism probe (dp) is queued on mpk after fc. It reruns the same control twice on the mpk shard to measure
   the flip rate.
+
+## Panel gs results: group sharing costs accuracy and saves no time — 2026-10-04 10:25 UTC
+
+**RULER, official score.** v31 pool, 174 panel-x cells, both hosts. Every arm keeps 12% of the prefix tiles per
+unit. Dense is 83.8. Table: `results/v31_20261003/panels/ruler_gs_official.md`.
+
+| unit (selection at step 1 unless noted) | official | cwe | diff vs dense [95% CI] |
+|---|---|---|---|
+| per (query head, block), max share (`qblock_max`) | 84.6 | 88.6 | +0.83 [−0.52, +2.64] |
+| per (KV head, block), max share (`kvblock_max`) | 84.3 | 84.3 | +0.49 [−1.03, +2.27] |
+| per KV head, max share (`kvhead_max`) | 84.3 | 83.6 | +0.43 [−0.80, +1.84] |
+| per KV head, mean mass (MAGE's statistic) | 83.6 | 82.1 | −0.26 [−2.16, +1.75] |
+| per KV head, mean mass, step 0 (MAGE as published, 12%) | 81.7 | 78.6 | −2.13 [−4.89, +0.32] |
+| m2c k12 mass (the method) | 84.6 | 87.9 | +0.78 [−0.60, +2.50] |
+
+**Per-call cost** (no-sync events profile, 3 LongBench-v2 64K cells, dlm2), both arms with the carry and 12.4% kept:
+
+| unit | held call | its FA4 part | GLOBAL ms per step |
+|---|---|---|---|
+| `qblock_max` | 0.257 ms | 0.234 ms | 1.83 |
+| `kvblock_max` | 0.253 ms | 0.229 ms | 1.83 |
+
+**Reading.**
+- Sharing one list across the 8 query heads of a KV group costs 4.3 cwe points (0.34 official) and saves 1–2% of a
+  held call. With balanced counts, L2 reuse of shared K/V tiles is not a lever.
+- The held call's cost follows the tiles per CTA. That is consistent with panel vk (union) and SPARSE_DIAG
+  (imbalance).
+- **Group-shared selection is rejected.** The method keeps per-head units.
+- The max-share statistic is worth about 0.7 official points over MAGE's mean mass at the same unit and budget:
+  `kvhead_max` vs MAGE's statistic at step 1.
+- The carry rungs reproduce their no-carry rungs exactly. RULER answers fit in one canvas, so there is no previous
+  canvas to carry from. This is a panel-design miss. The carry is now measured in panel fc, on multi-canvas
+  LongBench outputs, by per-canvas token agreement.
+- Consequences for the queue (10:25 UTC):
+  - gs2 drops the `RISK_GROUP=kv` arms and keeps the k12 mass control (profile + end to end);
+  - fc drops its kv arm and adds the MAGE-port `qblock_max` step-1 unit without and with the carry.
+- Control check: x was reproduced on 173/174 cells (see above). The one cell that differs does not change any
+  score.
