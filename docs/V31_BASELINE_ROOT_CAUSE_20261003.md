@@ -1022,3 +1022,35 @@ difference is then the method, not compute.
 
 MAGE 4096 at step 0 is the existing arm. Panel gb also adds the max-share unit at step 1 with 2048 tokens. Speed and
 fidelity of the lean candidate follow in the next panel, at the chosen budget.
+
+**Lean candidate at 12%, end to end (panel gsl, both hosts, 10:50 UTC).**
+- Arm: MAGE port, `qblock_max` (per-head worst-row max share), 12% per unit, selected at step 1 and held, with the
+  carry. It is compared with its own same-host dense FULL run on the LongBench-v2 confirmation cells.
+- MAGE k=4096 and m2c are from panel pf, on the same cells against pf's dense run (dense outputs are deterministic).
+- Geometric means of paired ratios, with 95% bootstrap CIs over cells (`scripts/v31_lb_paired_ci.py`).
+
+| 64K, 72 cells | S/N | N/C | per-canvas decode (N/C × S/N) | W |
+|---|---|---|---|---|
+| lean candidate, 12% + carry | 0.859 [0.853, 0.864] | 1.036 [0.991, 1.087] | **0.890** [0.857, 0.930] | 0.929 [0.860, 1.012] |
+| MAGE k=4096 (6.25% at 64K) | 0.844 [0.840, 0.848] | 1.075 [1.027, 1.130] | 0.907 [0.870, 0.950] | 0.930 [0.866, 1.004] |
+| m2c | 0.883 [0.878, 0.887] | 1.048 [1.006, 1.094] | 0.925 [0.890, 0.961] | 0.929 [0.860, 1.018] |
+
+| 96K, 22 cells | S/N | per-canvas decode |
+|---|---|---|
+| lean candidate, 12% + carry | 0.834 [0.822, 0.846] | 0.772 [0.694, 0.848] |
+| MAGE k=4096 | 0.818 [0.809, 0.829] | 0.752 [0.678, 0.819] |
+| m2c | 0.843 [0.825, 0.858] | 0.882 [0.795, 0.972] |
+
+- The carry acts: in a 7-canvas request, every canvas after the first started from the carried selection (35
+  carried calls; 5 exact calls in the first canvas).
+- **Reading.**
+  - At 64K the lean candidate keeps about twice MAGE 4096's tiles. It has a lower per-step saving but less step
+    inflation, so its per-canvas decode cost matches or beats MAGE's.
+  - On RULER it scores +0.83 (12%), against −3.25 for MAGE 4096.
+  - Panel gb gives its accuracy at MAGE's own budget, where the per-step cost should be equal by construction.
+  - Panel fc gives step inflation on identical canvases.
+- Speed ceiling (Amdahl):
+  - At 64K a dense step is about 41 ms, of which GLOBAL attention in 5 layers is about 7.7 ms. Even free attention
+    saves at most about 19% per step.
+  - At 96K–128K the share and the gains grow.
+  - W also carries the unchanged prefill: 28% of the request at 64K.
