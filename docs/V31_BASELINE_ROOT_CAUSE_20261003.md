@@ -1625,3 +1625,32 @@ length):
 - Free-running per-canvas and W figures move both ways within trajectory noise. Step inflation is measured on
   identical canvases (fc): 1–3% for both selectors.
 - End to end at 128K the requests are 14–17% faster than dense FULL. Prefill is unchanged.
+
+## STAGE A RESULT — RULER (pre-registered primary), 2026-10-04 16:35 UTC
+
+RULER v33ofc: 585 cells (13 tasks × 15 per length × 32K / 64K / 128K). All planned cells were present for every
+arm, and comparable settings were checked on every cell. Official score, stratified bootstrap.
+
+| arm | 32K | 64K | 128K | official | cwe | w/o cwe | diff vs dense [95% CI] |
+|---|---|---|---|---|---|---|---|
+| A0 dense FULL | 94.0 | 88.7 | 84.4 | 89.0 | 84.0 | 89.5 | – |
+| A1 MAGE 4096 | 92.5 | 86.4 | 80.9 | 86.6 | 56.0 | 89.1 | −2.46 [−3.56, −1.38] |
+| **A2 lean 4096** | 93.7 | 87.8 | 82.5 | **88.0** | 77.6 | 88.9 | −1.06 [−2.12, −0.01] |
+| A3 lean 2048 | 93.6 | 87.4 | 80.5 | 87.2 | 68.0 | 88.8 | −1.87 [−3.02, −0.73] |
+
+**Primary hypotheses.**
+- **H1 (A2 > A1): CONFIRMED.** +1.40 [+0.57, +2.21]; 43 better / 20 worse cells, sign test p = 0.005.
+- **H2 (A2 > A0 − 1.0): NOT CONFIRMED.** −1.06 [−2.12, −0.01]. Neither the point estimate nor the lower bound
+  reaches the −1.0 margin.
+
+**Secondary (reported, no selection).**
+- A3 vs A1: +0.59 [−0.41, +1.55] with half the tiles (38 better / 22 worse, p = 0.052).
+- Where the lean candidate loses to dense: the aggregation task cwe (77.6 vs 84.0) and the 128K length (82.5 vs
+  84.4). Without cwe it is 0.6 points below dense. MAGE loses far more on cwe (56.0).
+- Shrinkage: the exploratory gap over MAGE on the reused v31 pool was +3.39 at 4096. On the fresh official pool it
+  is +1.40. The direction holds and the size shrinks, as expected for a development winner.
+- The confirmed claim: at MAGE's budget and per-step cost, the lean candidate is significantly more accurate than
+  MAGE on RULER. It is not near-lossless against dense at 4096 tokens on RULER v33.
+
+Tables: `results/v31_20261003/panels/stageA_ruler_official_vs_dense.md`. The vs-MAGE contrast was computed with the
+same tool and MAGE as the reference. Stage A continues: LongBench-v2 0shot, MRCR, GraphWalks, HumanEval.
