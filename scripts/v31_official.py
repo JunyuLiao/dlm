@@ -279,16 +279,6 @@ def planned_records(args):
     return kept, coverage
 
 
-def binding_summary(binding, verified):
-    """Per arm: verified / unverified (legacy) records and the max_model_len / chunk / block_size values seen."""
-    out = {}
-    for label, cells in binding.items():
-        out[label] = dict(verified=verified[label][True], legacy_unbound=verified[label][False],
-                          **{f + '_values': sorted({b.get(f) for b in cells.values()}, key=str)
-                             for f in ('max_model_len', 'chunk', 'block_size', 'budget')})
-    return out
-
-
 def check_comparable(binding, labels, keys, legacy=False):
     """Per cell, every arm must have run with identical COMPARE_FIELDS; a missing field raises unless legacy (then only
     the fields present in every arm are compared). Returns the number of cells compared."""
