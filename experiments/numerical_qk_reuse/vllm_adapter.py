@@ -143,7 +143,7 @@ class VllmMethodAdapter:
                  risk_group=None, mage_reselect=None, mage_row_weight=None, mage_beta=3.0, mage_reselect_k=None,
                  mage_reselect_trigger=None, mage_trigger_signal='accept', mage_reselect_kmin=None,
                  mage_cg_tau=2.5, mage_cg_gamma_q=0.65, mage_clock_trace=False, mage_sink=0, mage_recent=0,
-                 mage_trigger_relative=False):
+                 mage_trigger_relative=False, mage_pool=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -200,6 +200,11 @@ class VllmMethodAdapter:
                              or protect >= int(mage_k) // 64)):
             raise ValueError('mage_sink (tiles) / mage_recent (tokens, a multiple of 64): FA4 query-head selection with '
                              'a token budget mage_k larger than the protected tiles')
+        if mage_pool is not None and (int(mage_pool) < 2 or mage_select != 'fa4' or mage_granularity != 'qblock_max'
+                                      or mage_keep_frac is not None
+                                      or (mage_reselect is None and mage_reselect_trigger is None)):
+            raise ValueError('mage_pool: a pool factor >= 2 for re-selections (mage_reselect / trigger) of the FA4 '
+                             'qblock_max selection with a token budget')
         if mage_trigger_relative and mage_reselect_trigger is None:
             raise ValueError('mage_trigger_relative rescales the progress signal: needs mage_reselect_trigger')
         if mage_clock_trace and mage_reselect_trigger is None:
@@ -345,6 +350,9 @@ class VllmMethodAdapter:
         # first step (that step never triggers): rows the sampler accepts at once (trailing end-of-text positions in
         # short answers) no longer count as progress.
         self.mage_trigger_relative, self._trig_phi0 = bool(mage_trigger_relative), None
+        # round 5: two-level selection -- the step-1 dense observation also marks a pool of mage_pool x k tiles per
+        # unit; re-selections observe inside the block-sparse kernel over that pool (_mage_select_pool).
+        self.mage_pool, self._last_pool = (None if mage_pool is None else int(mage_pool)), None
         # round 4c: in-budget protection -- the first mage_sink prefix tiles (attention sink) and the last mage_recent
         # prefix tokens (the most recently committed canvases) win every unit's top-k before the scored tiles, so each
         # unit still keeps exactly k tiles. Re-selections use the same protection.
@@ -873,7 +881,11 @@ class VllmMethodAdapter:
                 self._mage_units_w = self._mage_row_w if self.mage_row_weight is not None else None
                 self._k_override = self._trig_k if self._trig_k is not None else self.mage_reselect_k
                 try:
-                    out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
+                    pool = st.get('pool') if self.mage_pool is not None else None
+                    if pool is not None and pool.shape[-1] == -(-nk // 64):
+                        out, kept = self._mage_select_pool(q, b['k'], b['v'], scale, prefix, n, pool)
+                    else:
+                        out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
                 finally:
                     self._mage_units_w, self._k_override = None, None
                 st['lists'] = v27_fa4.block_sparse_tensors(kept)
@@ -895,12 +907,14 @@ class VllmMethodAdapter:
                     self.calls['mage_warm_dense_calls'] = self.calls.get('mage_warm_dense_calls', 0) + 1
                     return v27_fa4.dense(q, b['k'], b['v'], scale)
             if self.mage_select == 'fa4':
+                self._last_pool = None
                 out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
             else:
                 out = v27_fa4.dense(q, b['k'], b['v'], scale)             # exact first-step attention output
                 kept = self._mage_select(q, b['k'], scale, prefix, n)
             self.mage_state[layer_idx] = dict(canvas=self.canvas_id, nk=nk, prefix=prefix, lists=v27_fa4.block_sparse_tensors(kept),
-                                              kept=kept if self.mage_carry_first else None)
+                                              kept=kept if self.mage_carry_first else None, pool=self._last_pool)
+            self._last_pool = None
             self.calls['mage_selections'] += 1
             return out
         self.calls['mage_reused_calls'] += 1
@@ -983,7 +997,11 @@ class VllmMethodAdapter:
             budget = self._k_override if self._k_override is not None else self.mage_k
             k_tiles = max(1, min(budget // 64, first_canvas_tile))
         if self.mage_granularity != 'kvhead':
-            return out, self._mage_units(mass, head_lse, H, n, qb, kt, first_canvas_tile, k_tiles, G)
+            kept = self._mage_units(mass, head_lse, H, n, qb, kt, first_canvas_tile, k_tiles, G)
+            if self.mage_pool is not None:                                       # round 5: the candidate pool
+                self._last_pool = self._mage_units(mass, head_lse, H, n, qb, kt, first_canvas_tile,
+                                                   min(first_canvas_tile, self.mage_pool * k_tiles), G, account=False)
+            return out, kept
         score = mass.reshape(HK, G, n, kt).mean(dim=(1, 2))                                        # [HK, KT]
         kept_kv = torch.zeros((HK, kt), device=q.device, dtype=torch.bool)
         if first_canvas_tile and self.mage_coverage is not None:
@@ -1096,7 +1114,7 @@ class VllmMethodAdapter:
              'mt': lambda: (parts['M'] * parts['T']).sqrt(), 'ct': lambda: (parts['C'] * parts['T']).sqrt()}[mode]()
         return w.clamp(1, 1 + beta)
 
-    def _mage_units(self, mass, head_lse, H, n, qb, kt, pt, k_tiles, G=1):
+    def _mage_units(self, mass, head_lse, H, n, qb, kt, pt, k_tiles, G=1, account=True):
         """Selection-granularity ladder: top k_tiles prefix tiles per query head (qhead), per (query head, 128-row
         block) (qblock, qblock_max), or per KV head of G query heads, per block (kvblock_max) or for the whole canvas
         (kvhead_max), shared by those heads; canvas / boundary tiles always kept. Returns kept [1, H, QB, KT]."""
@@ -1140,9 +1158,77 @@ class VllmMethodAdapter:
             if self.mage_recent_tiles:
                 score[..., max(0, pt - self.mage_recent_tiles):] = float('inf')
         kept[0, :, :, :pt].scatter_(-1, score.topk(k_tiles, dim=-1).indices, True)
-        self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * H * qb
-        self.calls['mage_prefix_tiles'] += int(pt) * H * qb
+        if account:
+            self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * H * qb
+            self.calls['mage_prefix_tiles'] += int(pt) * H * qb
         return kept
+
+    @staticmethod
+    def _split_tensors(kept, S):
+        """[1, H, QB, KT] keep map -> (counts [S, H, QB] int32, idx [S, H, QB, KT] int32): each unit's kept tiles
+        (ascending) dealt into S contiguous parts whose sizes differ by at most one (balanced CTAs)."""
+        order = torch.argsort((~kept).to(torch.int8), dim=-1, stable=True)
+        cnt = kept.sum(-1)
+        kt = order.shape[-1]
+        ar = torch.arange(kt, device=order.device)
+        lo = [(cnt * i) // S for i in range(S + 1)]
+        idx = torch.cat([torch.gather(order, -1, (lo[i][..., None] + ar).clamp_max(kt - 1)) for i in range(S)])
+        counts = torch.cat([lo[i + 1] - lo[i] for i in range(S)])
+        return counts.to(torch.int32).contiguous(), idx.to(torch.int32).contiguous()
+
+    def _pool_observe(self, q, scale, pool, n, prefix):
+        """One block-sparse FA4 call over the pool tiles of every unit (as MASK blocks, so the observing mask writes the
+        prefix-tile log-mass z [H, QB, PT, 128], -inf outside the pool), on the paged cache of the call in flight, S
+        alias splits with equal tiles per CTA. Returns (output [1, Q, H, D], z)."""
+        from experiments.numerical_qk_reuse import v27_fa4
+        from experiments.numerical_qk_reuse import v31_fa4_observe as ob
+        ctx = self.paged
+        fwd = v27_fa4.load()
+        H = q.shape[1]
+        pt, qb = prefix // 64, -(-n // 128)
+        S = self.splits
+        counts, idx = self._split_tensors(pool, S)
+        zeros = torch.zeros_like(counts)
+        lists = v27_fa4._BST(mask_block_cnt=counts, mask_block_idx=idx, full_block_cnt=zeros,
+                             full_block_idx=torch.zeros(zeros.shape + (1,), device=zeros.device, dtype=torch.int32),
+                             block_size=(128, 64))
+        z = torch.full((H, qb, pt, 128), float('-inf'), device=q.device, dtype=torch.float32)
+        qs = q.transpose(1, 2).expand(S, -1, -1, -1)                      # [S, Q, H, D], stride-0 batch
+        table = ctx['table'][None].expand(S, -1).contiguous()
+        used = torch.full((S,), ctx['nk'], device=q.device, dtype=torch.int32)
+        old = ob._sm90.AttentionMask
+        ob._sm90.AttentionMask = ob.ObservingMask
+        try:
+            o, lse = fwd(qs, ctx['k'], ctx['v'], softmax_scale=scale, causal=False, page_table=table, seqused_k=used,
+                         block_sparse_tensors=lists, num_splits=1, return_lse=True,
+                         aux_tensors=[z, ob._scale_tensor(scale, q.device)])[:2]
+        finally:
+            ob._sm90.AttentionMask = old
+        if self.merge_backend == 'triton':
+            return self._merge_alias2(o, lse), z
+        w = torch.softmax(lse, dim=0).permute(0, 2, 1)[..., None]
+        return (o.float() * w).sum(0, keepdim=True).to(o.dtype), z
+
+    @torch.no_grad()
+    def _mage_select_pool(self, q, k, v, scale, prefix, n, pool):
+        """Round 5 re-selection over the candidate pool [1, H, QB, KT] observed inside the block-sparse kernel
+        (pool tiles as mask blocks -> the observing mask writes z; S alias splits, equal tiles per CTA). Falls back to
+        the dense observation when the paged context of the call is not available. Returns (output, kept)."""
+        ctx = self.paged
+        if ctx is None or k.shape[-2] != ctx['nk'] or q.shape[0] != 1:
+            self.calls['mage_pool_fallbacks'] = self.calls.get('mage_pool_fallbacks', 0) + 1
+            return self._mage_select_fa4(q, k, v, scale, prefix, n)
+        H = q.shape[1]
+        G = H // k.shape[1]
+        pt, qb, kt = prefix // 64, -(-n // 128), pool.shape[-1]
+        out, z = self._pool_observe(q, scale, pool, n, prefix)
+        head_lse = z.permute(0, 1, 3, 2).reshape(H, qb * 128, pt)[:, :n]                         # [H, n, PT]
+        budget = self._k_override if self._k_override is not None else self.mage_k
+        k_tiles = max(1, min(budget // 64, pt))
+        kept = self._mage_units(None, head_lse, H, n, qb, kt, pt, k_tiles, G)
+        self.calls['mage_pool_reselections'] = self.calls.get('mage_pool_reselections', 0) + 1
+        self.calls['mage_pool_tiles'] = self.calls.get('mage_pool_tiles', 0) + int(pool[0, :, :, :pt].sum())
+        return out, kept
 
     # ------------------------------------------------------------------ split FA4 over the paged cache
     def _split(self, lists):

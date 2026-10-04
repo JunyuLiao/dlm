@@ -227,7 +227,8 @@ def main():
                                                  mage_clock_trace=os.environ.get('MAGE_CLOCK_TRACE') == '1',
                                                  mage_sink=int(os.environ.get('MAGE_SINK', '0')),
                                                  mage_recent=int(os.environ.get('MAGE_RECENT', '0')),
-                                                 mage_trigger_relative=os.environ.get('MAGE_TRIGGER_RELATIVE') == '1')
+                                                 mage_trigger_relative=os.environ.get('MAGE_TRIGGER_RELATIVE') == '1',
+                                                 mage_pool=int(os.environ['MAGE_POOL']) if os.environ.get('MAGE_POOL') else None)
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -274,7 +275,7 @@ def main():
                                'dense_below', 'risk_group', 'mage_reselect', 'mage_row_weight', 'mage_beta',
                                'mage_reselect_k', 'mage_reselect_trigger', 'mage_trigger_signal',
                                'mage_reselect_kmin', 'mage_clock_trace', 'mage_sink', 'mage_recent_tiles',
-                               'mage_trigger_relative')})
+                               'mage_trigger_relative', 'mage_pool')})
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]

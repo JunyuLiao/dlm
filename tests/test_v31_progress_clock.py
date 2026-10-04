@@ -159,6 +159,59 @@ def test_relative_progress_ignores_rows_accepted_at_the_first_step():
         pass
 
 
+def test_split_tensors_deal_each_unit_into_balanced_parts():
+    torch.manual_seed(1)
+    kept = torch.rand(1, 3, 2, 40) < 0.3
+    kept[..., 36:] = True
+    counts, idx = VllmMethodAdapter._split_tensors(kept, 2)
+    assert counts.shape == (2, 3, 2) and idx.shape == (2, 3, 2, 40)
+    for h in range(3):
+        for b in range(2):
+            want = torch.nonzero(kept[0, h, b]).flatten().tolist()
+            got = idx[0, h, b, :counts[0, h, b]].tolist() + idx[1, h, b, :counts[1, h, b]].tolist()
+            assert got == want                                         # disjoint, complete, ascending
+            assert abs(int(counts[0, h, b]) - int(counts[1, h, b])) <= 1
+
+
+def test_pool_routes_reselections_and_is_stored_with_the_selection():
+    from experiments.numerical_qk_reuse import v27_fa4
+    v27_fa4.block_sparse_tensors = lambda kept, q_block=128: ('lists', kept.clone())
+    v27_fa4.dense = lambda q, k, v, s: 'dense'
+    v27_fa4.sparse_lists = lambda q, k, v, lists, s: 'sparse'
+    calls = []
+
+    def fake_select(self, q, k, v, scale, prefix, n):
+        kept = torch.zeros((1, 16, 2, (prefix + n) // 64), dtype=torch.bool)
+        kept[..., prefix // 64:] = True
+        if self.mage_pool is not None:
+            self._last_pool = kept.clone()
+        calls.append('dense_observe')
+        return 'select', kept
+
+    def fake_pool(self, q, k, v, scale, prefix, n, pool):
+        calls.append(('pool', int(pool.sum())))
+        return 'pool_select', pool.clone()
+    o1, o2 = VllmMethodAdapter._mage_select_fa4, VllmMethodAdapter._mage_select_pool
+    VllmMethodAdapter._mage_select_fa4, VllmMethodAdapter._mage_select_pool = fake_select, fake_pool
+    try:
+        a = _adapter(mage_carry_first=True, mage_reselect_trigger=0.5, mage_pool=4)
+        q, b, prefix, n = torch.zeros(1, 16, 256, 4), dict(k=None, v=None), 64 * 40, 256
+        a.canvas_id = 1
+        assert [a._mage(5, q, b, 1.0, prefix, n) for _ in range(2)] == ['dense', 'select']
+        assert a.mage_state[5]['pool'] is not None
+        a._trig_canvas, a._trig_at = 1, (1, 2)
+        assert a._mage(5, q, b, 1.0, prefix, n) == 'pool_select'
+        assert calls == ['dense_observe', ('pool', 16 * 2 * 4)]
+    finally:
+        VllmMethodAdapter._mage_select_fa4, VllmMethodAdapter._mage_select_pool = o1, o2
+    for bad in (dict(mage_pool=4), dict(mage_reselect_trigger=0.5, mage_pool=1)):
+        try:
+            _adapter(**bad)
+            raise AssertionError(f'accepted {bad}')
+        except ValueError:
+            pass
+
+
 if __name__ == '__main__':
     import sys
     for name, fn in list(globals().items()):
