@@ -1601,3 +1601,27 @@ same 87 RULER cells: panel x, panel gs and two dp reruns.
 - Per-step cost is identical: within 0.4% at 64K, equal at 96K.
 - The per-canvas and W differences sit within free-running noise. They go opposite ways at 64K and 96K.
 - 128K (LongBench-v2 128K pool, 72 cells) follows.
+
+**Panel gl at 128K, both hosts (LongBench-v2 128K pool, 72 cells), 15:15 UTC.**
+
+| arm | S/N | N/C (free running) | per-canvas decode | W |
+|---|---|---|---|---|
+| lean 4096 | 0.774 [0.766, 0.783] | 1.036 [0.969, 1.104] | 0.802 [0.754, 0.846] | 0.861 [0.790, 0.940] |
+| MAGE 4096 | 0.776 [0.771, 0.781] | 0.976 [0.932, 1.019] | 0.757 [0.728, 0.788] | 0.828 [0.749, 0.917] |
+
+- dlm2 medians:
+  - dense: 58.4 ms per step, 5.7 s prefill, 22.8 s per request;
+  - MAGE: 45.4 ms per step;
+  - lean: 45.5 ms per step.
+
+**Speed summary of the lean candidate at MAGE's budget** (per-step cost vs dense FULL; equal to MAGE's at every
+length):
+
+| length | 64K | 96K | 128K |
+|---|---|---|---|
+| S/N lean / MAGE | 0.847 / 0.843 | 0.816 / 0.816 | 0.774 / 0.776 |
+
+- The per-step saving grows with context, about 15% → 18% → 23%, because GLOBAL attention's share of the step grows.
+- Free-running per-canvas and W figures move both ways within trajectory noise. Step inflation is measured on
+  identical canvases (fc): 1–3% for both selectors.
+- End to end at 128K the requests are 14–17% faster than dense FULL. Prefill is unchanged.
