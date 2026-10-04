@@ -43,6 +43,96 @@ def request_seed(base, cell, repeat):
     return int.from_bytes(hashlib.sha256(key).digest()[:4], 'little') & 0x7FFFFFFF
 
 
+def canvas_seed(seed, canvas):
+    key = f'{seed}|canvas|{canvas}'.encode()
+    return int.from_bytes(hashlib.sha256(key).digest()[:4], 'little') & 0x7FFFFFFF
+
+
+class CanvasForcing:
+    """v31 forced-canvas mode (opt-in; timing fields of these records are NOT valid -- the mode synchronizes).
+
+    Free-running arms diverge after the first differing token, so their steps per canvas (N/C) compare different texts
+    and stay noisy (72 LongBench-v2 64K cells: N/C CI about +-5%; at 96K below 1). This mode compares arms on the SAME
+    canvases:
+      * per-canvas reseeding: before every commit step (which draws the next canvas's initial noise) the CUDA generator
+        is reseeded from (request seed, canvas index), so canvas i's noise does not depend on how many steps earlier
+        canvases took;
+      * FORCE_RECORD=path: write this run's committed token ids per cell (private) -- the reference trajectory;
+      * FORCE_REF=path: when a canvas converges, record the arm's own denoising-step count and the fraction of its
+        converged argmax tokens equal to the reference's, then overwrite the converged canvas (argmax canvas, canvas,
+        draft tokens) with the reference's tokens before the commit step, so the commit encodes and emits the
+        reference text and every canvas starts from the reference prefix.
+    Self-check: the reference configuration forced with its own record must reproduce every step count and agree 1.0.
+    One decoding request at a time (max_num_seqs=1)."""
+
+    def __init__(self, ref_path, record_path):
+        self.ref = {}
+        if ref_path:
+            for line in open(ref_path, encoding='utf-8'):
+                r = json.loads(line)
+                self.ref[(r['dataset'], r['index'], r['panel_seed'], r['repeat'])] = r['token_ids']
+        self.record_path = record_path
+        self.mode = 'force' if ref_path else ('record' if record_path else 'reseed')
+        self.seed = self.cur_ref = None
+
+    @classmethod
+    def from_env(cls):
+        ref, rec = os.environ.get('FORCE_REF') or None, os.environ.get('FORCE_RECORD') or None
+        if ref is None and rec is None and os.environ.get('CANVAS_RESEED') != '1':
+            return None
+        return cls(ref, rec)
+
+    def begin(self, seed, key):
+        if self.mode == 'force' and key not in self.ref:
+            raise KeyError(f'no reference trajectory for {key}')
+        self.seed, self.cur_ref = seed, self.ref.get(key)
+        self.canvas, self.steps, self.steps_list, self.agree = 0, 0, [], []
+
+    def wrap(self, inner):
+        import torch
+
+        def step(*args, **kwargs):
+            slots, canvas, argmax, enc, draft = args[1], args[5], args[6], args[8], args[17]
+            if slots.numel() != 1:
+                raise RuntimeError('forced-canvas mode needs exactly one decoding request')
+            s = slots[0]
+            committing = bool(enc[s].item())
+            if committing:
+                self.canvas += 1
+                torch.cuda.manual_seed(canvas_seed(self.seed, self.canvas))
+            out = inner(*args, **kwargs)
+            if not committing:
+                self.steps += 1
+                if bool(enc[s].item()):                                  # converged: the next call commits it
+                    self._converged(s, canvas, argmax, draft, int(kwargs['CL']))
+            return out
+        return step
+
+    def _converged(self, s, canvas, argmax, draft, CL):
+        import torch
+        i = len(self.steps_list)
+        self.steps_list.append(self.steps)
+        self.steps = 0
+        if self.cur_ref is None:
+            return
+        seg = self.cur_ref[i * CL:(i + 1) * CL]
+        if not seg:
+            self.agree.append(None)                                      # past the reference's end (never if forced)
+            return
+        n = len(seg)
+        t = torch.tensor(seg, device=argmax.device, dtype=torch.long)
+        self.agree.append(round(float((argmax[s, :n].long() == t).float().mean().item()), 5))
+        argmax[s, :n] = t.to(argmax.dtype)
+        canvas[s, :n] = t.to(canvas.dtype)
+        draft[s, :n] = t.to(draft.dtype)
+
+    def receipt(self, token_ids):
+        r = dict(forced_mode=self.mode, forced_canvas_steps=list(self.steps_list), forced_agree=list(self.agree))
+        if self.cur_ref is not None:
+            r['forced_output_matches_ref'] = list(token_ids) == list(self.cur_ref)
+        return r
+
+
 def main():
     model_dir, manifest_dir, cells_path, out_path, private_path, arm, cg = sys.argv[1:8]
     config_path = sys.argv[8] if len(sys.argv) > 8 else None
@@ -118,7 +208,9 @@ def main():
     def counting(*args, **kwargs):
         counter['calls'] += 1
         return inner(*args, **kwargs)
-    dg._compiled_sample_step = counting
+    forcing = CanvasForcing.from_env()
+    dg._compiled_sample_step = forcing.wrap(counting) if forcing is not None else counting
+    rec_out = open(forcing.record_path, 'a', encoding='utf-8') if forcing is not None and forcing.record_path else None
 
     longest = max(len(rows[(c['dataset'], c['id'])]['prompt_tokens']) + int(rows[(c['dataset'], c['id'])]['generation_budget'])
                   for c in cells)
@@ -161,6 +253,8 @@ def main():
         if adapter is not None:
             adapter.begin_request()
         counter['calls'] = 0
+        if forcing is not None:
+            forcing.begin(seed, (cell['dataset'], cell.get('index'), cell['seed'], max(rep, 0)))
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
         torch.cuda.synchronize()
@@ -193,6 +287,7 @@ def main():
                    step_median_ms=round(1000 * statistics.median(decode), 3) if decode else None,
                    finish_reason=o.finish_reason,
                    output_hash=hashlib.sha256(json.dumps(list(o.token_ids)).encode()).hexdigest()[:16],
+                   **(forcing.receipt(o.token_ids) if forcing is not None else {}),
                    receipts=None if receipts is None else dict(adapter=receipts.get('adapter'),
                                                                method=_slim(receipts.get('method')),
                                                                trace=receipts.get('trace')))
@@ -202,6 +297,10 @@ def main():
                                    panel_seed=cell['seed'], repeat=rep, id=cell['id'], finish_reason=o.finish_reason,
                                    completion=tok.decode(o.token_ids, skip_special_tokens=False))) + '\n')
         priv.flush()
+        if rec_out is not None:
+            rec_out.write(json.dumps(dict(dataset=cell['dataset'], index=cell.get('index'), panel_seed=cell['seed'],
+                                          repeat=rep, token_ids=list(o.token_ids))) + '\n')
+            rec_out.flush()
         print(json.dumps({k2: rec[k2] for k2 in ('arm', 'cudagraph_mode', 'dataset', 'index', 'panel_seed', 'repeat',
                                                  'output_tokens', 'canvases', 'denoise_forwards', 'wall_s',
                                                  'step_median_ms')}), flush=True)

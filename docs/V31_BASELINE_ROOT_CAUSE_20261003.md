@@ -935,3 +935,70 @@ it at selection time, keeping each head's budget.
   - LongBench-v2 64K + 96K end to end.
   - The read-out rules are the gs rules, with the control as the reference.
 - On mpk, the kernel microbenchmark (vkb) now runs after gs2.
+
+## Step inflation measured on the same canvases (branch `research/v31-forced-canvas-20261004`) — 2026-10-04 09:20 UTC
+
+**Why.** In panel pf (72 LongBench-v2 64K cells, both hosts) the per-step cost S/N is measured to ±0.5%:
+- MAGE k=4096: 0.844 [0.840, 0.848];
+- m2c: 0.883 [0.878, 0.887].
+
+Steps per canvas N/C is the dominant noise:
+- MAGE: 1.075 [1.03, 1.13];
+- m2c: 1.048 [1.00, 1.09].
+
+At 96K (22 cells) the N/C intervals even reach below 1 (MAGE 0.92 [0.82, 1.01]). That is illogical for a sparsity
+effect: free-running arms diverge after the first differing token and then denoise different texts.
+
+The output length also differs wildly per cell. For example, dense ran to the 8192-token cap in 32 canvases where
+the sparse arms stopped after 15. So W and the canvas count C mostly measure length noise. More seeds narrow the
+interval only slowly, so the comparison is moved onto identical canvases instead.
+
+**Forced-canvas mode (bench option, opt-in; `CanvasForcing` in `scripts/v31_vllm_paired_bench.py`).**
+- Per-canvas reseeding: the CUDA generator is reseeded from (request seed, canvas index) before every commit step,
+  which draws the next canvas's initial noise. Canvas i's noise therefore does not depend on how many steps earlier
+  canvases took.
+- `FORCE_RECORD`: the reference run writes its committed token ids per cell (private).
+- `FORCE_REF`: when a canvas of the arm converges, the mode records:
+  - the arm's denoising-step count;
+  - the share of its converged argmax tokens equal to the reference's.
+
+  It then overwrites the converged canvas (argmax canvas, canvas, draft tokens) with the reference tokens before
+  the commit step. Every canvas therefore starts from the reference prefix with the same noise seed.
+- Step counts and agreement are paired per canvas. Only the arm's attention differs.
+- Records carry `forced_mode`, `forced_canvas_steps`, `forced_agree` and `forced_output_matches_ref`. Their timing
+  fields are not valid, because the mode synchronizes.
+- Tests: `tests/test_v31_forced_canvas.py` (CPU, fake sampler state machine), 3/3 on mpk. They cover:
+  - step counts per canvas;
+  - one reseed per commit;
+  - the reference overwrite of the argmax canvas, canvas and draft tokens (the tail beyond a short last canvas is
+    kept);
+  - the agreement values;
+  - refusal of a missing reference.
+- Report: `scripts/v31_forced_canvas_report.py`. It gives the step ratio (sum) and the per-canvas geometric mean,
+  each with a cell-clustered 95% CI, plus more / equal / fewer canvases and token agreement.
+
+**Panel fc (after gs2 on both hosts; LongBench-v2 64K + 96K confirmation cells, pf's shards).**
+1. Reference: dense PIECEWISE.
+2. Self-check: the same configuration forced with its own record.
+3. Calibration: dense FULL forced with the PIECEWISE record.
+4. Arms: MAGE k=4096, m2c and m2c k12 mass, all forced with the same record.
+
+**Read-out rules, stated before the data.**
+- The self-check must reproduce every canvas's step count and agree 1.0. Otherwise the mode is not deterministic
+  and its differences are not read.
+- The FULL calibration gives the execution-mode noise floor: numerics alone, no sparsity.
+- A sparse arm's step inflation is its step ratio. It counts as a real effect only when the CI excludes the
+  calibration's ratio.
+- Token agreement ranks attention fidelity on identical inputs. This is the paper's step-inflation measurement;
+  no prior work quantifies it.
+- The measurement says nothing about wall time. Time per step stays the S/N of the free-running panels.
+
+**Also settled today (vt).**
+- Dense FULL, the same configuration in two separate engines: 6/6 identical outputs at 64K (dlm2). The earlier
+  FULL-vs-PIECEWISE disagreement (6/12) is a deterministic numerical difference between execution modes, not
+  run-to-run noise.
+- `LEAN_HELD` + `NO_META_SYNC=check`: identical outputs for m2c and MAGE (3/3 each, dlm2). The CPU metadata clock
+  had no mismatch in 162 checks. The check mode adds GPU reads, so its S/N (about 1.00) is not a speed result.
+- The lean branch's 13 fake-torch unit tests load the adapter by repository path, so they error in the flat overlay
+  layout. They pass in the repository layout (36 tests, the 13 CUDA ones skipped without CUDA). The CUDA classes
+  pass on dlm2 (22 ok).
