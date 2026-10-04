@@ -1,3 +1,23 @@
+## V31 status (2026-10-03 23:20 UTC−5) — read this first
+
+- **Machines:** dllm (149.165.159.64) is retired and can be shut down by the user; it is idle.
+  - Its unique data is backed up to dlm2:`/home/exouser/dyh/backup_dllm_20261004/` (four `.tar.zst` archives,
+    every entry and byte count verified; the README has the sha256 values and the list of skipped rebuildable items:
+    models, envs, caches, HF text).
+  - Private RULER gold, the pool and the v31 records are also at local `E:/dlm/v31_private/backup_dllm/`.
+  - RULER scoring now runs on mpk (`/media/volume/dllm-1/dyh/ruler_scoring`, ljy_dlm env, read only). It reproduces
+    dllm's panel t scores exactly.
+- **Accounting fix (78644966f):** the method's legacy `kept_prefix_fraction` counted its bootstrap dense call as
+  kept. Use `sparse_kept_prefix_fraction` and `global_prefix_work_fraction` (exact from 2026-10-04 on; older
+  records are reconstructed by `scripts/v31_ruler_compare.py`).
+- **RULER at matched compute** (v31 pool, 174 cells; doc section "Correction: realized-sparsity accounting"):
+  - m2c k12 mass reaches 138/174 at 0.43 of dense GLOBAL work. Dense scores 140; MAGE k=6144 at the same work
+    scores 130 (8 / 0 discordant, p = 0.008).
+  - MAGE needs 0.58–0.84 of dense work for 136–141.
+  - This is exploratory (adaptive reuse of cells). It is being confirmed on a held-out pool.
+- **Running:** panel w, the pre-registered held-out confirmation (RULER v32, seed 5353, 390 cells on mpk + dlm2,
+  7 arms). New control `MAGE_STEP=1` (087b5df87) separates selection timing from the selection rule.
+
 ## V31 update (2026-10-03 17:05 UTC−5; branch `research/vllm-paired-20261003`) — read this first
 
 - **Dense baseline:** vLLM 0.30.0 default (FULL) + the exact upstream fix of

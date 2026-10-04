@@ -612,3 +612,88 @@ RULER, complete (260 cells; `results/v31_20261003/panels/ruler31_scores_correct_
 - Panel t: RULER at matched kept fractions.
 - Next variant: a coverage-adaptive budget (keep the fewest tiles covering p of each row's or head's mass), which
   targets the diffuse-attention failure mode.
+
+## Correction: realized-sparsity accounting, and RULER at matched compute (panels t, u, v) — 2026-10-04 04:20 UTC
+
+**Accounting bug (found by a code audit, confirmed on the receipts).**
+- The method's bootstrap dense GLOBAL call reaches FA4 as an all-kept block list (`v27_fa4.dense`). The legacy
+  `kept_prefix_fraction` counted it as 100% kept, against its own docstring.
+- RULER answers are one canvas of about 5 to 8 steps, so this dominated the RULER receipts. For example, k12 was
+  reported at 0.35 kept, but its genuinely sparse calls keep 0.12, which is what `risk_topk=k12` specifies.
+- On multi-canvas LongBench requests the effect is smaller, but the earlier m2c kept fractions there are also
+  upper bounds.
+- The MAGE kept fractions were correct: its selection call bypasses the lists.
+- Fixed in commit 78644966f. The receipts now add:
+  - `sparse_kept_prefix_fraction`: all-kept lists excluded;
+  - `global_prefix_work_fraction`: every GLOBAL call, with each dense step at full cost. This is the
+    compute-matched axis for arms that take different numbers of dense steps.
+- The method takes two exact steps per canvas (bootstrap and observation). MAGE takes one (selection at step 0).
+- `scripts/v31_ruler_compare.py` reconstructs both quantities for older records from the call counters. This is
+  exact for single-canvas RULER answers.
+- Other fixes in the same commit:
+  - MAGE coverage / critical now refuse `MAGE_SELECT=torch`; they were silently ignored before.
+  - The bench records `dense_when`, `mage_critical` and `mage_coverage`.
+
+**RULER, 174 common cells (shards 0 and 1 of the v31 pool), compute-matched**
+(`results/v31_20261003/panels/ruler_rstuv_compare.md`). "work" is the GLOBAL prefix attention work over dense.
+"sparse kept" covers the sparse calls only.
+
+| arm | correct | vs dense FULL lost/gained (p) | cwe | sparse kept | work |
+|---|---|---|---|---|---|
+| dense FULL (ref) | 140 | – | 10/14 | – | 1 |
+| MAGE k=4096 | 129 | 13/2 (0.007) | 1/14 | 0.084 | 0.401 |
+| MAGE k=6144 (panel t) | 130 | 12/2 (0.013) | 2/14 | 0.125 | 0.430 |
+| MAGE at 0.347 kept per length (panel v: 11136 / 22528 tokens) | 136 | 6/2 (0.29) | 7/14 | 0.347 | 0.575 |
+| MAGE coverage p=0.90 (panel u) | 137 | 4/1 (0.38) | 8/14 | 0.587 | 0.732 |
+| MAGE coverage p=0.95 (panel u) | 141 | 3/4 (1.0) | 11/14 | 0.750 | 0.840 |
+| m2c (risk threshold) | 135 | 8/3 (0.23) | 2/14 | 0.052 | 0.372 |
+| m2c k12 (risk) (panel t) | 132 | 10/2 (0.039) | 2/14 | 0.121 | 0.421 |
+| m2c k12 mass (panel t) | 138 | 5/3 (0.73) | 5/14 | 0.122 | 0.428 |
+
+**Reading (exploratory, on reused cells)**
+- At matched total GLOBAL work (≈0.43), m2c k12 mass beats MAGE k=6144 head to head: 8 cells correct by it alone,
+  0 by MAGE (p = 0.008).
+- MAGE reaches the same accuracy only at 0.58–0.84 of dense work.
+- cwe (aggregation) needs most of the context: only the coverage budget, at near-dense work, restores it.
+- Caveats:
+  - These 174 cells were reused across adaptively chosen variants (k5–k30, risk vs mass, MAGE options), so the
+    p-value is not a confirmatory test.
+  - No dense PIECEWISE RULER arm exists yet, so the trajectory-noise level of discordant pairs is unknown.
+  - The method selects at step 1 after two exact steps, MAGE at step 0. Matched work does not separate selection
+    timing from the selection rule.
+- Hence the pre-registered confirmation below.
+
+## Pre-registered held-out confirmation: panel w (registered 2026-10-04 04:20 UTC, before any w result)
+
+**Pool.** `ruler_long_v32` on mpk: same pinned RULER checkout, task set and generator as v31, new seed 5353.
+- 13 tasks × 15 samples per length (32K, 64K): 390 cells, panel seed 1, one repeat.
+- Datasets `ruler32k_v32` / `ruler64k_v32`; private gold.
+- Sharded 2 ways (mpk 0/2, dlm2 1/2). dllm is retired.
+
+**Arms.** Each runs one fresh engine per arm with the same per-request seeds. All sparse arms use the efficient
+execution (`LOGIT_STATS=fused DP_BUILD=chunked OBSERVE=fa4 KV_COPY=triton MERGE=triton MAGE_SELECT=fa4`) and the
+fixed vLLM (`FIX_51994=1`).
+
+| # | arm | role |
+|---|---|---|
+| 1 | dense FULL (default graph) | reference |
+| 2 | dense PIECEWISE | noise floor (trajectory noise of discordant pairs) |
+| 3 | MAGE k=6144 | primary comparator (matched work ≈0.43 on v31) |
+| 4 | m2c k12 mass | primary candidate |
+| 5 | MAGE k=4096 | standard MAGE budget |
+| 6 | m2c (risk threshold, default) | the method's default selector |
+| 7 | MAGE k=6144, `MAGE_STEP=1` | selection-timing control (select from step-1 queries after one exact step) |
+
+**Primary test.** Arm 4 vs arm 3: exact two-sided McNemar on the 390 cells, α = 0.05.
+- Reported with both arms' `global_prefix_work_fraction` (exact receipts).
+- If the two work fractions differ by more than 0.03, the comparison is reported as not compute-matched.
+
+**Secondary (descriptive, no multiplicity claim)**
+- Each arm vs dense FULL.
+- Dense PIECEWISE vs dense FULL discordance.
+- Arm 7 vs arm 3.
+- Arm 6 vs arm 5.
+- cwe / qa / multivalue by arm.
+
+**Rule.** No arm, budget or option is added to panel w's analysis after this registration. A new variant needs a
+new pool.
