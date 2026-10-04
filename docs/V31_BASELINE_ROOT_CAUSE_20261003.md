@@ -1677,3 +1677,28 @@ pools v31 / v32. The method was not tuned on qa, but the confirmation report sta
   cells.
 
 Chain: `results/v31_20261003/panels/bs_chain.sh`. On mpk, vkb (the kernel microbenchmark) now runs after bs.
+
+## STAGE A RESULT — LongBench-v2 `0shot` (thinking off, 128 tokens): uninformative for this model — 18:05 UTC
+
+503 items, all present for every arm, comparable settings checked.
+
+| arm | accuracy | diff vs dense [95% CI] | McNemar |
+|---|---|---|---|
+| dense FULL | 12.1 | – | – |
+| MAGE 4096 | 13.1 | +0.99 [−0.80, +2.78] | 13 / 8, p = 0.38 |
+| lean 4096 | 12.9 | +0.80 [−0.99, +2.58] | 12 / 8, p = 0.50 |
+| lean 2048 | 11.9 | −0.20 [−1.99, +1.59] | 10 / 11, p = 1.00 |
+
+**Why every arm sits below chance (25%).**
+- Thinking-off itself works: 252/252 mpk dense completions start with the exact empty thought block, closed at
+  character 18.
+- In non-thinking mode this model then explains before answering. On the mpk half, 190 / 252 dense completions
+  (75%) hit the official 128-token cap, and only 74 / 252 contain "The correct answer is".
+- The official zero-shot column thus measures whether the model states the answer within 128 tokens, not long-context
+  ability. It does not discriminate between arms.
+- The leaderboard's rule for hybrid reasoning models takes the "w/ CoT" column from thinking mode with a 16K
+  budget. That is stage B's `0shot_think` (thinking on, 16,384 tokens). It is the informative LongBench-v2 measure
+  for this model and is recommended as stage B's first job.
+
+The result is reported as registered: no difference between arms on this column. Table:
+`results/v31_20261003/panels/stageA_longbench_0shot.md`.
