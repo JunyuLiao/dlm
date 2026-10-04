@@ -8,7 +8,7 @@ aggregates:
   empty            an empty final response                                             -> metric 0, counted as null / unparsed
 and the refusals: a record whose prompt_sha256 / budget / manifest_sha256 differs from the pool, a missing planned cell
 (without --allow-missing) and a record outside the plan must each make the scorer fail. Then the paired tool / RULER
-table run on the same outputs. Pools: pools_v31_official/{ruler_v33ofc, ruler_v33noop, longbench_v2, aime26_b32k,
+table run on the same outputs. Pools: pools_v31_official/{ruler_v33ofc, ruler_v33noop, longbench_v2_ofc, aime26_b32k,
 graphwalks_b16k, mrcr_ofc}. Prints aggregates only.
 usage: python v31_scorer_e2e_check.py PRIVATE_DIR   (cwd = a deployment holding experiments/, PYTHONPATH=src:.)
 """
@@ -119,7 +119,7 @@ def main():
     results['ruler_table_rows'] = [x for x in table.splitlines() if x.startswith('| ') and 'official' not in x]
     # LongBench-v2
     for ds in LB:
-        pd = W / 'longbench_v2'
+        pd = W / 'longbench_v2_ofc'
         g = json.loads((pd / f'{ds}_gold.json').read_text())
         s, ref = suite(ds, out, pd, pd / f'cells_{ds}.json', lambda c: f"The correct answer is ({g[c['id']]})",
                        rowinfo(pd, ds)['rows'][0]['thinking'], 'v31_score_longbench_official.py', (pd, pd))
