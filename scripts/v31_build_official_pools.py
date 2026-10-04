@@ -608,7 +608,8 @@ def build_mrcr(a, logf):
         members = [r for r in rows if r['block'] == b]
         bins = collections.Counter(readme_bin(r['o200k_total']) for r in members)
         main_bin = statistics.median_low(sorted(r['o200k_total'] for r in members))
-        blocks[b] = dict(readme_bin=readme_bin(main_bin), rows=len(members), count_bins=dict(bins),
+        blocks[b] = dict(readme_bin=readme_bin(main_bin), rows=len(members),
+                         count_bins={('outside' if k is None else str(k)): v for k, v in bins.items()},
                          o200k_total=stats([r['o200k_total'] for r in members]),
                          rows_outside_block_bin=sum(readme_bin(r['o200k_total']) != readme_bin(main_bin) for r in members))
     if sorted(b['readme_bin'] for b in blocks.values()) != list(range(8)):
