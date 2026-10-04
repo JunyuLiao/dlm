@@ -1,7 +1,7 @@
 """Fresh-process checks of the pools_v31_official pools (CPU tokenizer only, no weights, no GPU, no git).
 
-For every manifest row: encode_prompt(prompt, {'thinking': thinking}) + tokens(response_prefill, if any) reproduces
-prompt_tokens; prompt_hash = sha256(prompt); prompt_token_count = len(prompt_tokens); benchmark = the dataset name.
+For every manifest row: encode_prompt(prompt, {'thinking': thinking}) + tokens(response_prefill, if any) -- for MRCR rows
+(a JSON message list) render_messages(messages, thinking) -- reproduces prompt_tokens; prompt_hash = sha256(prompt); prompt_token_count = len(prompt_tokens); benchmark = the dataset name.
 Rowinfo (v31_rowinfo_v2): its manifest_sha256 is the manifest file's, every row's prompt_sha256 is the sha256 of its
 token ids, budgets / counts agree, and the pinned max_model_len holds every row (prompt + budget). Cells (index -> id,
 prompt_tokens) and gold keys agree with the manifest. Per pool in addition:
@@ -37,11 +37,16 @@ def _init():
 
 
 def _render(job):
-    """(key, prompt, thinking, prefill, expected ids, opener expected) -> (key, reproduced, tail ok or None)."""
-    key, prompt, thinking, prefill, expected, opener = job
+    """(key, prompt, thinking, prefill, expected ids, opener expected, messages) -> (key, reproduced, tail ok or None).
+    MRCR rows (messages) hold the JSON message list and are rendered through v31_build_pools.render_messages."""
+    key, prompt, thinking, prefill, expected, opener, messages = job
     adapter = _W['adapter']
     tok = adapter.tokenizer
-    ids = list(adapter.encode_prompt(prompt, {'thinking': thinking}))
+    if messages:
+        import v31_build_pools as vb
+        ids = list(vb.render_messages(adapter, json.loads(prompt), thinking))
+    else:
+        ids = list(adapter.encode_prompt(prompt, {'thinking': thinking}))
     tail_ok = None
     if prefill is not None:
         n_user = len(ids)
@@ -93,7 +98,8 @@ def check_pool(pool_dir: Path, jobs, report):
             c['rowinfo_ok'] += (ri['id'] == r['id'] and ri['index'] == i and ri['prompt_token_count'] == r['prompt_token_count']
                                 and ri['generation_budget'] == r['generation_budget']
                                 and ri['prompt_sha256'] == op.token_ids_sha256(r['prompt_tokens']))
-            plan.append(((ds, i), r['prompt'], bool(r['thinking']), r.get('response_prefill'), r['prompt_tokens'], opener))
+            plan.append(((ds, i), r['prompt'], bool(r['thinking']), r.get('response_prefill'), r['prompt_tokens'], opener,
+                         'total_messages' in r))
         for x in cells.get(ds, []):
             c['cells'] += 1
             c['cells_ok'] += rows[x['index']]['id'] == x['id'] and rows[x['index']]['prompt_token_count'] == x['prompt_tokens']
