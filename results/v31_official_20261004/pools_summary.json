@@ -1,0 +1,1249 @@
+{
+ "aime26": {
+  "cells": 120,
+  "output_files_sha256": {
+   "aime26_generation_manifest.json": "66921cad5cb76cb4a90ed5db433fdd3d41b4a6478a313490ebe558aa6c062ab4",
+   "aime26_rowinfo.json": "4fe842835a15fbb1b29c172654613d15e85b07a7d8bee13319317ae3ead30c4c",
+   "cells_aime26.json": "d4f10ca75d1431a67df756429f560a0431bd84f713cc55dd074833cac56edeea"
+  },
+  "prompt_token_count": {
+   "max": 381,
+   "mean": 165.6,
+   "median": 164.0,
+   "min": 79,
+   "n": 30
+  },
+  "rows": 30,
+  "rule": "v27 final AIME26 manifest, generation_budget 8192 -> 32768; ids, prompts, prompt_tokens, thinking unchanged (asserted per row); cells seeds 1-4 (avg@4), seed-major. Gold: the pinned math-ai/aime26 file read by scripts/v31_score_aime.py (not copied here).",
+  "seeds": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "source_sha256": "21f8373418c2d47ce9f83b84554ece9496ed146b8bfc4db0c07c8a0c0a5e8467"
+ },
+ "e2e_synthetic_scorer_check": {
+  "description": "scorer CLIs on the real pool files with synthetic completions: perfect (gold in the official answer format, stop), cappedperfect (same text, finish length), empty (empty final response)",
+  "results": {
+   "aime26": {
+    "cappedperfect": {
+     "avg_at_k": 100,
+     "capped": 120,
+     "cells": 120,
+     "unparsed": 0
+    },
+    "empty": {
+     "avg_at_k": 0,
+     "capped": 0,
+     "cells": 120,
+     "unparsed": 120
+    },
+    "perfect": {
+     "avg_at_k": 100,
+     "capped": 0,
+     "cells": 120,
+     "unparsed": 0
+    }
+   },
+   "graphwalks": {
+    "cappedperfect": {
+     "graphwalks_22k": {
+      "all": 1.0,
+      "bfs": 1.0,
+      "parents": 1.0
+     },
+     "graphwalks_45k": {
+      "all": 1.0,
+      "bfs": 1.0,
+      "parents": 1.0
+     },
+     "graphwalks_90k": {
+      "all": 1.0,
+      "bfs": 1.0,
+      "parents": 1.0
+     }
+    },
+    "empty": {
+     "graphwalks_22k": {
+      "all": 0.0,
+      "bfs": 0.0,
+      "parents": 0.0
+     },
+     "graphwalks_45k": {
+      "all": 0.0,
+      "bfs": 0.0,
+      "parents": 0.0
+     },
+     "graphwalks_90k": {
+      "all": 0.0,
+      "bfs": 0.0,
+      "parents": 0.0
+     }
+    },
+    "perfect": {
+     "graphwalks_22k": {
+      "all": 1.0,
+      "bfs": 1.0,
+      "parents": 1.0
+     },
+     "graphwalks_45k": {
+      "all": 1.0,
+      "bfs": 1.0,
+      "parents": 1.0
+     },
+     "graphwalks_90k": {
+      "all": 1.0,
+      "bfs": 1.0,
+      "parents": 1.0
+     }
+    }
+   },
+   "longbench_v2_0shot": {
+    "cappedperfect": {
+     "Easy": 100.0,
+     "Hard": 100.0,
+     "Long": 100.0,
+     "Medium": 100.0,
+     "Overall": 100.0,
+     "Short": 100.0,
+     "capped": 503,
+     "items": 503,
+     "unparsed": 0
+    },
+    "empty": {
+     "Easy": 0.0,
+     "Hard": 0.0,
+     "Long": 0.0,
+     "Medium": 0.0,
+     "Overall": 0.0,
+     "Short": 0.0,
+     "capped": 0,
+     "items": 503,
+     "unparsed": 503
+    },
+    "perfect": {
+     "Easy": 100.0,
+     "Hard": 100.0,
+     "Long": 100.0,
+     "Medium": 100.0,
+     "Overall": 100.0,
+     "Short": 100.0,
+     "capped": 0,
+     "items": 503,
+     "unparsed": 0
+    }
+   },
+   "longbench_v2_0shot_think": {
+    "cappedperfect": {
+     "Easy": 100.0,
+     "Hard": 100.0,
+     "Long": 100.0,
+     "Medium": 100.0,
+     "Overall": 100.0,
+     "Short": 100.0,
+     "capped": 503,
+     "items": 503,
+     "unparsed": 0
+    },
+    "empty": {
+     "Easy": 0.0,
+     "Hard": 0.0,
+     "Long": 0.0,
+     "Medium": 0.0,
+     "Overall": 0.0,
+     "Short": 0.0,
+     "capped": 0,
+     "items": 503,
+     "unparsed": 503
+    },
+    "perfect": {
+     "Easy": 100.0,
+     "Hard": 100.0,
+     "Long": 100.0,
+     "Medium": 100.0,
+     "Overall": 100.0,
+     "Short": 100.0,
+     "capped": 0,
+     "items": 503,
+     "unparsed": 0
+    }
+   },
+   "longbench_v2_cot_think": {
+    "cappedperfect": {
+     "Easy": 100.0,
+     "Hard": 100.0,
+     "Long": 100.0,
+     "Medium": 100.0,
+     "Overall": 100.0,
+     "Short": 100.0,
+     "capped": 503,
+     "items": 503,
+     "unparsed": 0
+    },
+    "empty": {
+     "Easy": 0.0,
+     "Hard": 0.0,
+     "Long": 0.0,
+     "Medium": 0.0,
+     "Overall": 0.0,
+     "Short": 0.0,
+     "capped": 0,
+     "items": 503,
+     "unparsed": 503
+    },
+    "perfect": {
+     "Easy": 100.0,
+     "Hard": 100.0,
+     "Long": 100.0,
+     "Medium": 100.0,
+     "Overall": 100.0,
+     "Short": 100.0,
+     "capped": 0,
+     "items": 503,
+     "unparsed": 0
+    }
+   },
+   "mrcr": {
+    "cappedperfect": {
+     "mrcr2_128k": 0.999959,
+     "mrcr2_32k": 0.999746,
+     "mrcr2_64k": 0.999937
+    },
+    "empty": {
+     "mrcr2_128k": 0.0,
+     "mrcr2_32k": 0.0,
+     "mrcr2_64k": 0.0
+    },
+    "perfect": {
+     "mrcr2_128k": 0.999959,
+     "mrcr2_32k": 0.999746,
+     "mrcr2_64k": 0.999937
+    }
+   },
+   "ruler": {
+    "cappedperfect": {
+     "capped": 585,
+     "cells": 585,
+     "nulls": 0,
+     "overall": 100.0
+    },
+    "empty": {
+     "capped": 0,
+     "cells": 585,
+     "nulls": 585,
+     "overall": 0.0
+    },
+    "perfect": {
+     "capped": 0,
+     "cells": 585,
+     "nulls": 0,
+     "overall": 100.0
+    }
+   }
+  }
+ },
+ "fresh_process_checks": {
+  "aime26": {
+   "aime26_budgets": 32768,
+   "cells": 120,
+   "cells_ok": 120,
+   "cells_without_manifest": 0,
+   "count_ok": 30,
+   "hash_ok": 30,
+   "ids_unique": 1,
+   "manifests": 1,
+   "rerender_identical": 30,
+   "rowinfo_ok": 30,
+   "rows": 30,
+   "seconds": 6,
+   "source_rows": 30,
+   "source_rows_equal_except_budget": 30
+  },
+  "graphwalks": {
+   "cells": 72,
+   "cells_ok": 72,
+   "cells_without_manifest": 0,
+   "count_ok": 72,
+   "gold_files": 3,
+   "gold_keys_match": 3,
+   "graphwalks_22k_budgets": 16384,
+   "graphwalks_45k_budgets": 16384,
+   "graphwalks_90k_budgets": 16384,
+   "hash_ok": 72,
+   "ids_unique": 3,
+   "manifests": 3,
+   "rerender_identical": 72,
+   "rowinfo_ok": 72,
+   "rows": 72,
+   "seconds": 21,
+   "source_rows": 72,
+   "source_rows_equal_except_budget": 72
+  },
+  "longbench_v2": {
+   "cells": 1509,
+   "cells_ok": 1509,
+   "cells_without_manifest": 0,
+   "count_ok": 1509,
+   "gold_files": 3,
+   "gold_keys_match": 3,
+   "hash_ok": 1509,
+   "ids_unique": 3,
+   "lb_rows": 1509,
+   "lb_truncation_rederived_identical": 1509,
+   "longbench_v2_0shot_rows": 503,
+   "longbench_v2_0shot_think_rows": 503,
+   "longbench_v2_0shot_think_truncated": 237,
+   "longbench_v2_0shot_truncated": 237,
+   "longbench_v2_cot_think_rows": 503,
+   "longbench_v2_cot_think_truncated": 237,
+   "manifests": 3,
+   "rerender_identical": 1509,
+   "rowinfo_ok": 1509,
+   "rows": 1509,
+   "seconds": 1371
+  },
+  "ruler_v33": {
+   "cells": 585,
+   "cells_ok": 585,
+   "cells_without_manifest": 0,
+   "count_ok": 585,
+   "gold_files": 3,
+   "gold_keys_match": 3,
+   "hash_ok": 585,
+   "ids_unique": 3,
+   "manifests": 3,
+   "rerender_identical": 585,
+   "rowinfo_ok": 585,
+   "rows": 585,
+   "ruler_gold_bytes_equal_v33": 3,
+   "ruler_ids_equal_v33": 3,
+   "ruler_prefill_is_opener_plus_prefix": 585,
+   "ruler_raw_prompt_equal_v33": 585,
+   "ruler_tail_checked": 585,
+   "ruler_tail_ok": 585,
+   "ruler_user_turn_without_prefix": 585,
+   "seconds": 266
+  }
+ },
+ "graphwalks": {
+  "bins": {
+   "graphwalks_22k": {
+    "identical_to_source_except_budget": true,
+    "problem_type": {
+     "bfs": 12,
+     "parents": 12
+    },
+    "prompt_token_count": {
+     "max": 22529,
+     "mean": 22400.3,
+     "median": 22404.5,
+     "min": 22265,
+     "n": 24
+    },
+    "rows": 24,
+    "source_gold_sha256": "964fd6e93da1d891610c067220037022c7ecaa37979e8f74732c8aa28fd4a26f",
+    "source_manifest_sha256": "22a73616d1b9023f6cbde5bbde5fdec9b487a90966222386d8f923168a305035"
+   },
+   "graphwalks_45k": {
+    "identical_to_source_except_budget": true,
+    "problem_type": {
+     "bfs": 12,
+     "parents": 12
+    },
+    "prompt_token_count": {
+     "max": 44841,
+     "mean": 44695.7,
+     "median": 44702.5,
+     "min": 44511,
+     "n": 24
+    },
+    "rows": 24,
+    "source_gold_sha256": "128de27e9f6f1a97d6bfea7a79afd6fd8119b506bf611d75136b720299e62bf8",
+    "source_manifest_sha256": "5e64b8ed57355f72fb6068e9447edeb7bd209739b9fe329d96faee15bea02604"
+   },
+   "graphwalks_90k": {
+    "identical_to_source_except_budget": true,
+    "problem_type": {
+     "bfs": 12,
+     "parents": 12
+    },
+    "prompt_token_count": {
+     "max": 89676,
+     "mean": 89496.1,
+     "median": 89538.5,
+     "min": 89071,
+     "n": 24
+    },
+    "rows": 24,
+    "source_gold_sha256": "a4a2ed23bc3b80f338ac1c23df2e469aa1f224b10ee8fdb26c719ab7244c0599",
+    "source_manifest_sha256": "1f0861c2df7091cb96532905f51c7c914e3b472681f444552d7f2c5db3f501a1"
+   }
+  },
+  "cells": 72,
+  "output_files_sha256": {
+   "cells_graphwalks.json": "c97feb4df41b54a7ea29a93e61889901425f6cb0df06aa06de69c35c444c4a3b",
+   "graphwalks_22k_generation_manifest.json": "46876354cbfa753552e15bafc498046038310719304f93964981bb8aeb8cff0b",
+   "graphwalks_22k_gold.json": "964fd6e93da1d891610c067220037022c7ecaa37979e8f74732c8aa28fd4a26f",
+   "graphwalks_22k_rowinfo.json": "fba865e42a5201be5ac02af9dbe82a5684b79965592ac6e69898cc39ed22d00b",
+   "graphwalks_45k_generation_manifest.json": "2aeffff70b903c9f57af7714271df233f4ac69994bca5343a8bc109aa998b8aa",
+   "graphwalks_45k_gold.json": "128de27e9f6f1a97d6bfea7a79afd6fd8119b506bf611d75136b720299e62bf8",
+   "graphwalks_45k_rowinfo.json": "cf51daf48dd19d13fd108fbda0d5c7a370dc5817710cf4338f7f7d2c6571ade6",
+   "graphwalks_90k_generation_manifest.json": "69b42ed88673ff3b117114309f408c3f68e922854e89b67ac9ac4dae83c432be",
+   "graphwalks_90k_gold.json": "a4a2ed23bc3b80f338ac1c23df2e469aa1f224b10ee8fdb26c719ab7244c0599",
+   "graphwalks_90k_rowinfo.json": "4c3f589b748f5c533d6df2d3ee31e329776a9aa87576a0638ce18a6cf65a6b97"
+  },
+  "rule": "pools_v31 GraphWalks pool with generation_budget 8192 -> 16384 (no official budget: the reasoning-model rule; 4 of 24 graphwalks_90k gold answer lines alone need > 2048 tokens); ids, prompts, prompt_tokens, thinking, gold and cells byte-identical / unchanged (asserted)"
+ },
+ "longbench_v2": {
+  "code": {
+   "adapter_sha256": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+   "deploy_sha": "acd3cf8da03a6bb81b300cc6ed5f2917df6632d9",
+   "files_sha256": {
+    "v15_longbench_task.py": "9a84561c9a70c46a390300eff864822abb2ec22c4013a35118799b1946b42c1b",
+    "v31_build_official_pools.py": "5c79464aa52f3f07581e5551edff186a21f348e4622cfe3a34daedeea650b3c0",
+    "v31_official.py": "dd63e29414ddbef0a24b686eda943ae2534fb8fc98789002ebe05c0ab27cdf51"
+   }
+  },
+  "dataset": {
+   "items": 503,
+   "revision": "2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9",
+   "sha256": "15d61c22d92c96900b3c4948b6aeea218d3214b676a65df48e7b8555604c7fe2"
+  },
+  "escaping": {
+   "occurrences": {
+    "<bos>": 11,
+    "<eos>": 15,
+    "<mask>": 12,
+    "<pad>": 24,
+    "<unk>": 36,
+    "<|audio|>": 1,
+    "<|image|>": 17
+   },
+   "rule": "scripts/v15_longbench_task.py escape: literal reserved special-token spellings in the item fields become &lt;...&gt; before the template is filled (declared deviation)"
+  },
+  "official": {
+   "commit": "2e00731f8d0bff23dc4325161044d0ed8af94c1e",
+   "files_sha256": {
+    "config/model2maxlen.json": "c37ec6e5d77e68e4cf6280183c6e68e885852ced6904e049ed75d3e73fc61ebe",
+    "pred.py": "ab63f77866a1c0dc770582bc3fe6b014c3b4be4667399b0ee267075780c6a138",
+    "prompts/0shot.txt": "68a162252bc9ff71d5d7abca3d69bb31aac3c35f832d657a2866f2018b8a6950",
+    "prompts/0shot_cot.txt": "6cc33d92fd8f611662b756c1f10f302c541ca005b58c46d5f3188ac3a939bfe8",
+    "prompts/0shot_cot_ans.txt": "85ec59df4ac0e27aabbc619a7ca5cf3ae1787dd5a76cf51a18944eb52c91955f",
+    "result.py": "b6675c1c0b72090c01e12c94d3b176c4991fe38ceed9a301d24d22b1997465bd"
+   },
+   "max_len_open_models": [
+    120000
+   ]
+  },
+  "output_files_sha256": {
+   "cells_longbench_v2_0shot.json": "786dc7a6a153cd3506f9a2adf46ea8ccdbca1f606cdb47c0fbc8623c30e054e9",
+   "cells_longbench_v2_0shot_think.json": "d48c39d68533467fd4942931745377a42a9d57e3e5714aa8913f5d897e7d4957",
+   "cells_longbench_v2_cot_think.json": "639899384937f6d6429a3bab91d4abdbc457882730ccfae2018ced507676486a",
+   "longbench_v2_0shot_generation_manifest.json": "bfc9dfae07a06801e8462c2671e471c9cbe14627df527eff4a4c77ea16ee3495",
+   "longbench_v2_0shot_gold.json": "9bb1e8e29cebc3ae4f28595f5aab5b3fe1d9d520f73632f4e2e5a672b0846e7b",
+   "longbench_v2_0shot_rowinfo.json": "7f2c21813f86a04277f0a483d641f47a4af299856623622b2f3f5faa6f6823d0",
+   "longbench_v2_0shot_think_generation_manifest.json": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "longbench_v2_0shot_think_gold.json": "9bb1e8e29cebc3ae4f28595f5aab5b3fe1d9d520f73632f4e2e5a672b0846e7b",
+   "longbench_v2_0shot_think_rowinfo.json": "01430c77a92cc706d864aa6e53e3fe0c852b1dd4f8f5db3873631e3560247eb4",
+   "longbench_v2_cot_think_generation_manifest.json": "6b65dbdb4b662eb8082d67111bd0ddfc583e4c867084f8ba87b5c733ebbe0b19",
+   "longbench_v2_cot_think_gold.json": "9bb1e8e29cebc3ae4f28595f5aab5b3fe1d9d520f73632f4e2e5a672b0846e7b",
+   "longbench_v2_cot_think_rowinfo.json": "7ef18f1970e8821324fab57d11839cc9250e90c9b4460bd7da6d4370f36c951d"
+  },
+  "rule": "All 503 LongBench-v2 items (pinned dataset revision), THUDM/LongBench pred.py: template filled with the\n              stripped fields (after the project's reserved-token escaping), tokenized with OUR tokenizer\n              (tokenizer.encode, as pred.py); above 120,000 ids the first and last 60,000 are kept and decoded with\n              skip_special_tokens=True; then adapter.encode_prompt. Variants (one dataset each):",
+  "truncation": {
+   "keep": "first 60000 + last 60000 ids of tokenizer.encode(filled template) (adds no special tokens for this tokenizer), decode(skip_special_tokens=True)",
+   "max_len": 120000,
+   "tokenizer": "ours (Gemma4Processor.tokenizer)"
+  },
+  "variants": {
+   "longbench_v2_0shot": {
+    "column": "w/o CoT: pred.py without --cot (temperature 0.1, 128 new tokens)",
+    "difficulty": {
+     "easy": 192,
+     "hard": 311
+    },
+    "generation_budget": 128,
+    "length_class": {
+     "long": 108,
+     "medium": 215,
+     "short": 180
+    },
+    "original_token_count": {
+     "max": 5173963,
+     "mean": 282001.7,
+     "median": 107641,
+     "min": 10269,
+     "n": 503
+    },
+    "original_token_count_truncated": {
+     "max": 5173963,
+     "mean": 540763.3,
+     "median": 225519,
+     "min": 120178,
+     "n": 237
+    },
+    "prompt_token_count": {
+     "max": 120010,
+     "mean": 83758.4,
+     "median": 107650,
+     "min": 10278,
+     "n": 503
+    },
+    "prompt_token_count_truncated": {
+     "max": 120010,
+     "mean": 120009.0,
+     "median": 120009,
+     "min": 120008,
+     "n": 237
+    },
+    "rows": 503,
+    "template": "prompts/0shot.txt",
+    "thinking": false,
+    "total_tokens_max": 120138,
+    "truncated": 237,
+    "truncated_by_length_class": {
+     "long": 108,
+     "medium": 127,
+     "short": 2
+    },
+    "untruncated": 266
+   },
+   "longbench_v2_0shot_think": {
+    "column": "w/ CoT for a reasoning model: zero-shot prompt with native thinking (the paper evaluates the reasoning model o1-preview under zero-shot prompting; leaderboard Qwen3: thinking mode, 16K budget)",
+    "difficulty": {
+     "easy": 192,
+     "hard": 311
+    },
+    "generation_budget": 16384,
+    "length_class": {
+     "long": 108,
+     "medium": 215,
+     "short": 180
+    },
+    "original_token_count": {
+     "max": 5173963,
+     "mean": 282001.7,
+     "median": 107641,
+     "min": 10269,
+     "n": 503
+    },
+    "original_token_count_truncated": {
+     "max": 5173963,
+     "mean": 540763.3,
+     "median": 225519,
+     "min": 120178,
+     "n": 237
+    },
+    "prompt_token_count": {
+     "max": 120017,
+     "mean": 83765.4,
+     "median": 107657,
+     "min": 10285,
+     "n": 503
+    },
+    "prompt_token_count_truncated": {
+     "max": 120017,
+     "mean": 120016.0,
+     "median": 120016,
+     "min": 120015,
+     "n": 237
+    },
+    "rows": 503,
+    "template": "prompts/0shot.txt",
+    "thinking": true,
+    "total_tokens_max": 136401,
+    "truncated": 237,
+    "truncated_by_length_class": {
+     "long": 108,
+     "medium": 127,
+     "short": 2
+    },
+    "untruncated": 266
+   },
+   "longbench_v2_cot_think": {
+    "column": "prompts/0shot_cot.txt with native thinking, single stage (pred.py --cot always adds the 0shot_cot_ans stage that asks for the answer format; this variant has no such stage)",
+    "difficulty": {
+     "easy": 192,
+     "hard": 311
+    },
+    "generation_budget": 16384,
+    "length_class": {
+     "long": 108,
+     "medium": 215,
+     "short": 180
+    },
+    "original_token_count": {
+     "max": 5173955,
+     "mean": 281993.7,
+     "median": 107633,
+     "min": 10261,
+     "n": 503
+    },
+    "original_token_count_truncated": {
+     "max": 5173955,
+     "mean": 540755.3,
+     "median": 225511,
+     "min": 120170,
+     "n": 237
+    },
+    "prompt_token_count": {
+     "max": 120016,
+     "mean": 83761.2,
+     "median": 107649,
+     "min": 10277,
+     "n": 503
+    },
+    "prompt_token_count_truncated": {
+     "max": 120016,
+     "mean": 120015.9,
+     "median": 120016,
+     "min": 120015,
+     "n": 237
+    },
+    "rows": 503,
+    "template": "prompts/0shot_cot.txt",
+    "thinking": true,
+    "total_tokens_max": 136400,
+    "truncated": 237,
+    "truncated_by_length_class": {
+     "long": 108,
+     "medium": 127,
+     "short": 2
+    },
+    "untruncated": 266
+   }
+  }
+ },
+ "mrcr_reference_pools_v31": {
+  "answer_tokens": {
+   "max": 675,
+   "mean": 363.5,
+   "median": 411.0,
+   "min": 57,
+   "n": 70,
+   "p90": 550,
+   "p95": 591
+  },
+  "bins": {
+   "128k": {
+    "chosen": 22,
+    "label": "116-136K",
+    "prompt_token_count": {
+     "max": 135090,
+     "median": 124217.0,
+     "min": 116229,
+     "n": 22
+    }
+   },
+   "32k": {
+    "chosen": 24,
+    "label": "28-40K",
+    "prompt_token_count": {
+     "max": 37961,
+     "median": 31124.5,
+     "min": 28099,
+     "n": 24
+    }
+   },
+   "64k": {
+    "chosen": 24,
+    "label": "56-76K",
+    "prompt_token_count": {
+     "max": 75763,
+     "median": 63140.0,
+     "min": 56016,
+     "n": 24
+    }
+   }
+  },
+  "generation_budget": 2048,
+  "note": "used as is (thinking off, generation_budget 2048, untruncated natural bins)",
+  "output_files_sha256": {
+   "cells_mrcr.json": "466b107633e8844afc40601e6da8170ceb2d0f7bc1a60aa8ce3f006ba55c44e4",
+   "mrcr2_128k_generation_manifest.json": "82bfc434f3aed093ae34cc1c09ba79081cec2c49d547ffae31cc69e80c028be0",
+   "mrcr2_128k_gold.json": "eed714d21c168763a69abd12338d7e55528e116dfd3672dd0fb149f3b51e691b",
+   "mrcr2_32k_generation_manifest.json": "22c87b0b70eb661bd07d846d44ac5cce9346b9e0b5e280a8bff0a43b8fad6de1",
+   "mrcr2_32k_gold.json": "1318f10c393ab6e27bb1ae405ae7ef96beccf0f4e9ef808822005c54856e9f5e",
+   "mrcr2_64k_generation_manifest.json": "8db47811897f1e7f48a4c44aea3de0b840d92669dc18ebc0bc8d7d1264dc990a",
+   "mrcr2_64k_gold.json": "fa9b5c40267fbc8cdc74c92a52f98604e8ec396f6fa12a696c59b0f9f20fff7c"
+  }
+ },
+ "ruler_v33": {
+  "checks_at_build": {
+   "generation_prompt_ends_user_part": 585,
+   "no_think_token": 585,
+   "one_bos_first": 585,
+   "one_thought_block": 585,
+   "opener_follows": 585,
+   "prefix_round_trip": 585,
+   "prefix_tokens_equal_separate_encoding": 585,
+   "rows": 585,
+   "tail_decodes_to_model_turn_opener_prefix": 585,
+   "turn_tokens": 585,
+   "whole_string_tokenization_identical": 585
+  },
+  "code": {
+   "adapter_sha256": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+   "deploy_sha": "acd3cf8da03a6bb81b300cc6ed5f2917df6632d9",
+   "files_sha256": {
+    "v31_build_official_pools.py": "4a218d35a4b1f0d427996705237cd440ba5fa51f37380a0af83dcb1247123d26",
+    "v31_official.py": "5489c6c8bac81e8a8ccbe60ac9e2645fd2cffdfae98e226aabd8c57ac79cade7"
+   }
+  },
+  "datasets": {
+   "ruler128k_v33": {
+    "context_length": 131072,
+    "delta_vs_v33_prompt_token_count": {
+     "max": 5,
+     "mean": 4.1,
+     "median": 4,
+     "min": 4,
+     "n": 195
+    },
+    "generation_budget_by_task": {
+     "cwe": [
+      120
+     ],
+     "fwe": [
+      50
+     ],
+     "niah_multikey_1": [
+      128
+     ],
+     "niah_multikey_2": [
+      128
+     ],
+     "niah_multikey_3": [
+      128
+     ],
+     "niah_multiquery": [
+      128
+     ],
+     "niah_multivalue": [
+      128
+     ],
+     "niah_single_1": [
+      128
+     ],
+     "niah_single_2": [
+      128
+     ],
+     "niah_single_3": [
+      128
+     ],
+     "qa_1": [
+      32
+     ],
+     "qa_2": [
+      32
+     ],
+     "vt": [
+      30
+     ]
+    },
+    "prefill_token_count_by_task": {
+     "cwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "fwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "niah_multikey_1": {
+      "max": 19,
+      "mean": 18.5,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_2": {
+      "max": 20,
+      "mean": 19.0,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_3": {
+      "max": 51,
+      "mean": 47.7,
+      "median": 48,
+      "min": 43,
+      "n": 15
+     },
+     "niah_multiquery": {
+      "max": 38,
+      "mean": 34.3,
+      "median": 34,
+      "min": 32,
+      "n": 15
+     },
+     "niah_multivalue": {
+      "max": 20,
+      "mean": 18.6,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_1": {
+      "max": 21,
+      "mean": 18.9,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_2": {
+      "max": 23,
+      "mean": 19.1,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_3": {
+      "max": 19,
+      "mean": 18.3,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "qa_1": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "qa_2": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "vt": {
+      "max": 39,
+      "mean": 39.0,
+      "median": 39,
+      "min": 39,
+      "n": 15
+     }
+    },
+    "prompt_token_count": {
+     "max": 131053,
+     "mean": 130102.8,
+     "median": 130811,
+     "min": 123036,
+     "n": 195
+    },
+    "rows": 195,
+    "tasks": {
+     "cwe": 15,
+     "fwe": 15,
+     "niah_multikey_1": 15,
+     "niah_multikey_2": 15,
+     "niah_multikey_3": 15,
+     "niah_multiquery": 15,
+     "niah_multivalue": 15,
+     "niah_single_1": 15,
+     "niah_single_2": 15,
+     "niah_single_3": 15,
+     "qa_1": 15,
+     "qa_2": 15,
+     "vt": 15
+    },
+    "total_tokens_max": 131085
+   },
+   "ruler32k_v33": {
+    "context_length": 32768,
+    "delta_vs_v33_prompt_token_count": {
+     "max": 5,
+     "mean": 4.1,
+     "median": 4,
+     "min": 4,
+     "n": 195
+    },
+    "generation_budget_by_task": {
+     "cwe": [
+      120
+     ],
+     "fwe": [
+      50
+     ],
+     "niah_multikey_1": [
+      128
+     ],
+     "niah_multikey_2": [
+      128
+     ],
+     "niah_multikey_3": [
+      128
+     ],
+     "niah_multiquery": [
+      128
+     ],
+     "niah_multivalue": [
+      128
+     ],
+     "niah_single_1": [
+      128
+     ],
+     "niah_single_2": [
+      128
+     ],
+     "niah_single_3": [
+      128
+     ],
+     "qa_1": [
+      32
+     ],
+     "qa_2": [
+      32
+     ],
+     "vt": [
+      30
+     ]
+    },
+    "prefill_token_count_by_task": {
+     "cwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "fwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "niah_multikey_1": {
+      "max": 20,
+      "mean": 18.7,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_2": {
+      "max": 21,
+      "mean": 19.3,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_3": {
+      "max": 51,
+      "mean": 48.7,
+      "median": 49,
+      "min": 44,
+      "n": 15
+     },
+     "niah_multiquery": {
+      "max": 38,
+      "mean": 33.8,
+      "median": 33,
+      "min": 31,
+      "n": 15
+     },
+     "niah_multivalue": {
+      "max": 19,
+      "mean": 18.3,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_1": {
+      "max": 20,
+      "mean": 18.9,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_2": {
+      "max": 20,
+      "mean": 18.5,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_3": {
+      "max": 20,
+      "mean": 18.7,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "qa_1": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "qa_2": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "vt": {
+      "max": 39,
+      "mean": 39.0,
+      "median": 39,
+      "min": 39,
+      "n": 15
+     }
+    },
+    "prompt_token_count": {
+     "max": 32750,
+     "mean": 32217.6,
+     "median": 32549,
+     "min": 27616,
+     "n": 195
+    },
+    "rows": 195,
+    "tasks": {
+     "cwe": 15,
+     "fwe": 15,
+     "niah_multikey_1": 15,
+     "niah_multikey_2": 15,
+     "niah_multikey_3": 15,
+     "niah_multiquery": 15,
+     "niah_multivalue": 15,
+     "niah_single_1": 15,
+     "niah_single_2": 15,
+     "niah_single_3": 15,
+     "qa_1": 15,
+     "qa_2": 15,
+     "vt": 15
+    },
+    "total_tokens_max": 32781
+   },
+   "ruler64k_v33": {
+    "context_length": 65536,
+    "delta_vs_v33_prompt_token_count": {
+     "max": 5,
+     "mean": 4.1,
+     "median": 4,
+     "min": 4,
+     "n": 195
+    },
+    "generation_budget_by_task": {
+     "cwe": [
+      120
+     ],
+     "fwe": [
+      50
+     ],
+     "niah_multikey_1": [
+      128
+     ],
+     "niah_multikey_2": [
+      128
+     ],
+     "niah_multikey_3": [
+      128
+     ],
+     "niah_multiquery": [
+      128
+     ],
+     "niah_multivalue": [
+      128
+     ],
+     "niah_single_1": [
+      128
+     ],
+     "niah_single_2": [
+      128
+     ],
+     "niah_single_3": [
+      128
+     ],
+     "qa_1": [
+      32
+     ],
+     "qa_2": [
+      32
+     ],
+     "vt": [
+      30
+     ]
+    },
+    "prefill_token_count_by_task": {
+     "cwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "fwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "niah_multikey_1": {
+      "max": 21,
+      "mean": 18.8,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_2": {
+      "max": 22,
+      "mean": 19.0,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_3": {
+      "max": 51,
+      "mean": 48.9,
+      "median": 49,
+      "min": 46,
+      "n": 15
+     },
+     "niah_multiquery": {
+      "max": 37,
+      "mean": 34.5,
+      "median": 34,
+      "min": 33,
+      "n": 15
+     },
+     "niah_multivalue": {
+      "max": 20,
+      "mean": 18.7,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_1": {
+      "max": 20,
+      "mean": 18.6,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_2": {
+      "max": 19,
+      "mean": 18.5,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_3": {
+      "max": 21,
+      "mean": 18.6,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "qa_1": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "qa_2": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "vt": {
+      "max": 39,
+      "mean": 39.0,
+      "median": 39,
+      "min": 39,
+      "n": 15
+     }
+    },
+    "prompt_token_count": {
+     "max": 65509,
+     "mean": 64832.1,
+     "median": 65251,
+     "min": 61515,
+     "n": 195
+    },
+    "rows": 195,
+    "tasks": {
+     "cwe": 15,
+     "fwe": 15,
+     "niah_multikey_1": 15,
+     "niah_multikey_2": 15,
+     "niah_multikey_3": 15,
+     "niah_multiquery": 15,
+     "niah_multivalue": 15,
+     "niah_single_1": 15,
+     "niah_single_2": 15,
+     "niah_single_3": 15,
+     "qa_1": 15,
+     "qa_2": 15,
+     "vt": 15
+    },
+    "total_tokens_max": 65549
+   }
+  },
+  "output_files_sha256": {
+   "cells_ruler_v33.json": "37b959057a4e299c2a604062194e2b6c5859fe70a5f1776e4160ad9a1cc3958b",
+   "ruler128k_v33_generation_manifest.json": "04b529cb2d7d74dec77d25c69ea3a9fb20a1108035de47b375fa79f7585dcfb0",
+   "ruler128k_v33_gold.json": "14bfd0e0d0cfeef2c5fc3ab6fefc670790aa692f7ed3313fc446477ad1878a2e",
+   "ruler128k_v33_rowinfo.json": "3ac55dc354d5c178d7f92b3d85bfc3de389c3a424b4ab2019995ff7846d61e74",
+   "ruler32k_v33_generation_manifest.json": "d80ceb048cd04b312934436f13b5fe04ca8767cfea7d8ce747e6f3c015aa913a",
+   "ruler32k_v33_gold.json": "a6db9b2d2a529c412c734ebc14bae96203c8543bb754660843e2d0b3f1a49bb0",
+   "ruler32k_v33_rowinfo.json": "ffed4bb844ea9946d69e341d690a7470e6ee272c3cb4313c2c55ae1a7a2c0d80",
+   "ruler64k_v33_generation_manifest.json": "24415db28b8214830859c7cc7af994c6da23cedda36a3772c307b455b8ef8d6d",
+   "ruler64k_v33_gold.json": "76f006e4b91a09bffb2226288baa5d1accc26e51b063d1a7a4bfd5be1a1de348",
+   "ruler64k_v33_rowinfo.json": "0272fe226f7c9b1b26155055f7577788406f1ad09d56cab3391daf8212e05fac"
+  },
+  "placement": {
+   "answer_prefix": "verbatim RULER answer_prefix (leading space kept, as RULER sends it)",
+   "generation_prompt_ids": [
+    105,
+    4368,
+    107
+   ],
+   "opener": "<|channel>thought\n<channel|>",
+   "opener_evidence": "3972 / 3975 non-thinking RULER completions of the v31 panels open with exactly the opener; the other 3 open it and stop without closing it",
+   "opener_ids": [
+    100,
+    45518,
+    107,
+    101
+   ]
+  },
+  "rule": "Build the v31 final-suite pools under each dataset's OFFICIAL protocol (CPU tokenizer only, no weights, no GPU).\n\nRule: scripts/v31_official.py. Every pool writes <dataset>_generation_manifest.json (rows: id, benchmark, prompt,\nprompt_hash = sha256(prompt), prompt_tokens, prompt_token_count, generation_budget, thinking, source_id + non-gold task\nfields; json.dumps(rows, indent=2, sort_keys=True, ensure_ascii=False) + '\\n'), a small <dataset>_rowinfo.json (the\nsame rows without prompt text / tokens, for the scorers), scorer-only <dataset>_gold.json, cells_<pool>.json\n({dataset, id, index = manifest position, seed, prompt_tokens}) and readme.json (counts, token stats, sha256 only).\n  ruler       Re-render of the v33 pool (same samples, ids, order, gold) with the official answer-prefix placement:\n              user turn = the RULER sample `input` without its answer prefix (chat template, thinking off), then the\n              response prefill = DiffusionGemma's empty thought block + the official answer prefix, verbatim, so\n              generation starts inside the answer (RULER call_api.py sends input + answer_prefix with the model\n              template inside input). Budget = RULER tokens_to_generate per task. Row field `prompt` is the user-turn\n              text, `response_prefill` the appended text (prompt_tokens = encode_prompt(prompt) + tokens(prefill)).",
+  "ruler": {
+   "commit": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a",
+   "generator_seed": 6464,
+   "length_mode": "total"
+  },
+  "tokenizer": {
+   "files_sha256": {
+    "chat_template.jinja": "9aeb7eac68ad87bba7567e9d4597ff203e5609f1b427d9e823437d0142cc61bf",
+    "processor_config.json": "32bdf45d2ad4cc29a0822ddd157a182de76644f0419a6228d151495256e9813c",
+    "tokenizer.json": "cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f",
+    "tokenizer_config.json": "a284d1243b62be31faa9c13e1c28cece940c4abaa7bd9ad87b94f61b40687200"
+   },
+   "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+   "processor_class": "Gemma4Processor",
+   "tokenizer_class": "GemmaTokenizer",
+   "tokenizers": "0.22.2",
+   "transformers": "5.11.0"
+  }
+ }
+}
+

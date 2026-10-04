@@ -882,3 +882,16 @@ Pools are private, on mpk under `/media/volume/dllm-1/dyh/pools_v31_official/` (
 - `longbench_v2_cot_think` (`0shot_cot`, single stage, thinking on, 16,384) is also built, as first specified. It is
   not an official pipeline: its template never asks for "The correct answer is (X)", so pred.py's extraction would
   undercount it.
+
+**Checks (2026-10-04, mpk CPU).** Counts, token statistics and sha256 of every pool file:
+`results/v31_official_20261004/pools_summary.json`.
+- A fresh process re-renders every row from its stored text (`scripts/v31_check_official_pools.py`) and reproduces
+  `prompt_tokens` exactly: RULER 585 / 585, LongBench-v2 1509 / 1509 (3 variants), AIME26 30 / 30, GraphWalks 72 / 72.
+- LongBench-v2 truncation re-derived from the source items for all 1509 rows (same text, flag and original count;
+  237 of 503 items truncated per variant). A second RULER build reproduced every data file byte for byte.
+- Scorer CLIs on the real pool files with synthetic completions (`scripts/v31_scorer_e2e_check.py`): a perfect
+  answer scores 100 / 1.0 everywhere (MRCR 0.9997–1.0, the stripped-reply ceiling); a capped copy keeps the primary
+  metric and fails only the secondary boolean; an empty answer scores 0 and is counted as null / unparsed.
+- Toy CPU tests: `tests/test_v31_official_scorers.py` (13) and `tests/test_v27_humaneval.py` (11, including a
+  sandboxed task whose prompt defines a helper; the former header-only assembly fails it). The assembled official
+  program compiles for all 164 real HumanEval tasks; 4 of their prompts define a helper before the entry point.
