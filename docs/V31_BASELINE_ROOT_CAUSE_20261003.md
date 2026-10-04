@@ -459,3 +459,22 @@ from the S-th denoising step of a canvas on, so only long canvases pay. Arms:
 - mass k5 with S = 20, to see whether the rescue unlocks higher sparsity;
 - MAGE k=1024 with S = 20, to see whether the rescue generalizes to another selector;
 - an entropy trigger (`conv:4`) as control.
+
+## Confirmation set — pre-registered 2026-10-04 00:25 UTC (19:25 UTC−5), before any confirmation result
+
+- **Cells:** the same 24 (32K) / 24 (64K) / 11 (96K) items with NEW panel seeds 3, 4, 5 (3, 4 at 96K): 166 cells
+  (`cells_confirm.json` on every host, private), sharded over the three hosts.
+- **Limitation:** new trajectories but not new items. The LongBench-v2 pools hold exactly 24 items per length bin.
+- **Arms** (every efficiency switch on, no traces, MEM 0.92, vLLM FULL + PR #51994 fix as the reference):
+  1. dense default (reference);
+  2. m2c + step-20 dense rescue (`DENSE_WHEN=step:20`): the primary candidate;
+  3. m2c (ablation of the rescue);
+  4. mass k5 + rescue (a budget matched to MAGE k=4096 at 64K);
+  5. MAGE k=4096 (prior art at its best development point);
+  6. MAGE k=4096 + rescue (does the rescue generalize?).
+- **Primary metrics:**
+  - W, S/N and N/C as paired geometric means with item-clustered CIs;
+  - accuracy (v15 scorer);
+  - trajectory stability (excess s.d. over the dense numerical null is not available here: no PIECEWISE dense arm,
+    so only N/C tails are reported).
+- Script: `scripts/v31_q_confirmation_chain.sh`. Development evidence behind the choice: panels m and n.
