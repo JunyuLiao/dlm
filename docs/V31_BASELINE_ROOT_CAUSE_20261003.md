@@ -1887,3 +1887,12 @@ all-kept:
 **Consequence for the algorithm.**
 - The progress trigger (round 3, panel sc1) keeps the part that works, a second observation per canvas, and places it
   by progress instead of a fixed step. Weighting stays an arm to test, not the claim.
+
+**Queue change (21:30 UTC): `sc1x_chain.sh` replaces sc1s.** It runs after sc1.
+1. **T0**: the trigger at 0.5 with **no row weights**, on the four long parts. Panel pa found the unweighted
+   re-selection the best MRCR arm.
+2. **Forced canvases** (fc protocol; LongBench-v2 64K / 96K, 47 cells, each host's own dense PIECEWISE reference).
+   - Arms: dense, lean, step-4 re-selection, T0, T1, T2, T3.
+   - Question: does a re-observation also cut step inflation? Fewer denoising steps would be a speed lever beyond the
+     attention share of the step.
+3. The S1s short part with eight arms (T0 included).
