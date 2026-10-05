@@ -2140,3 +2140,14 @@ The FX block's per-forward times will show the actual end-to-end effect.
   - only the per-forward time changes.
 - Reporting: speed against both the official dense as-is and dense+fix. The headline uses dense+fix, the stronger
   baseline. The fix is a baseline improvement (upstreamable), not our contribution.
+
+**FX control and a gate race (2026-10-05 04:05 UTC).**
+- On dlm2, lean 8192 + fix matched the sc1 lean 8192 run on only 29 of 32 cells, while dense + fix matched dense on
+  64 of 64.
+- The two lean runs used different adapter versions: 789917ef104b in sc1 and 7338e2769d45 in FX. So a control was
+  queued: lean 8192 without the fix, on the FX adapter and the same cells (`jobs_fx2.txt`).
+- The first control gate (`fxgate2.sh`) paused the sc2 chain as soon as its next job's python existed. That was before
+  the python appeared on the GPU, so the control's GPU-empty check passed too. The two engines started 2 s apart.
+- vLLM's startup memory check refused the control (rc=1, no records). The sc2 job ran alone; only startup overlapped,
+  and its KV cache (279,106 tokens) equals the earlier GW runs.
+- `fxgate3.sh` replaces it. It pauses the chain only once the job's python is listed by nvidia-smi.
