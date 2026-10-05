@@ -2385,3 +2385,17 @@ Dropped: GraphWalks is budget-sensitive (8192 sticky −0.005), and on LongBench
   cost was the LOCAL bug, now fixed.
 - The gain grows with context, so 192K / 256K is the most direct performance lever: about 3 engineering days in that
   study's plan.
+
+**Pool sticky, all four parts — rejected.**
+
+| | accuracy vs dense | W vs dense + fix | N vs dense |
+|---|---|---|---|
+| MRCR | −0.027 (t50_sticky: −0.010) | 0.952 | — |
+| GraphWalks | **−0.158 [−0.291, −0.039]** (t50_sticky: −0.005) | 1.004 | **1.20** (t50_sticky: 0.94) |
+
+- The candidate pool is frozen at step 1 (the 4k best tiles of the first observation). A re-selection can only choose
+  inside it.
+- On multi-hop GraphWalks, the relevant prefix moves outside the step-1 pool as denoising proceeds, and only a full
+  re-observation catches it.
+- This is evidence for the design choice: re-observe the whole prefix, not a step-1 shortlist.
+- Final candidate stays t50_sticky 8192: one full re-observation at 50% accepted, with hysteresis.
