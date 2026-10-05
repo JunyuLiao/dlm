@@ -127,8 +127,15 @@
 - **意外发现：LOCAL（滑窗）attention 在长上下文下异常贵（nsys，dense 官方路径）。**
   - 每次调用：32K 223 µs，64K 43 µs，128K 826 µs。
   - 128K 时 25 个 LOCAL 调用约 20.7 ms/forward，比 5 个 GLOBAL（16.6 ms）还多。
-  - 窗口只有 1024，应与长度无关（64K 正常）。疑似 vLLM 的 FA4 local + dynamic_causal + paged 路径在某些长度没有剪掉窗外 KV 块。
-  - 微基准正在 dlm2 排队。可修的话，dense 和我们都受益；我们相对修好后的 dense，每步提速估计约 1.8 倍（128K）。
+  - 窗口只有 1024，应与长度无关（64K 正常）。
+- **根因已确认并修复（10-05 03:30 UTC）：**
+  - vLLM 0.30 的 FA4 SM90 kernel 中，dynamic_causal 分支对双向序列（canvas）把 KV 块范围重置为全上下文，丢掉了 LOCAL kernel 已算好的窗口范围。
+  - 窗外块全被 mask，所以输出正确，只是白扫一遍。
+  - 修复只改两行（producer 和 consumer 各一行，只对 LOCAL kernel 生效），用 `FA4_LOCAL_FIX=1` 开启。
+  - GPU 校验（mpk）：16K–131K 共 12 个长度，与原调用逐位一致；每次调用固定 0.105 ms，原来是 0.48–3.19 ms。
+  - GLOBAL 层和因果（prefill）序列不受影响。
+  - 语义说明：vLLM 的 LOCAL 窗口是按 query 对称滑动的 (1023, 1023)，与 HF 的 flash-attention 路径一致；HF 默认 sdpa 路径让所有 canvas 行看同样的前缀 1023 个 token，两者对最后几行最多差 255 个最老的 token。这是原有差异，所有 arm 相同，论文中说明即可。
+- **FX 端到端（进行中）：** LongBench think S1 上跑 dense / lean 8192 / 粘性候选三个臂，都加修复。sc2 暂停约 1 小时后自动恢复。预期 token 与未修复时完全相同，只有每步耗时变化。报告时同时给出"官方原样"和"修复后 dense"两个基线，主结论用更强的修复后基线。
 
 ## 4. 正在跑 / 下一步
 

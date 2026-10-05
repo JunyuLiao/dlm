@@ -12,7 +12,10 @@ timing (CUDA events, median of warm reps), max |A - B|, and A against an FP32 re
 (bottom-right aligned: query i sits at key position nk - nq + i). Prints one JSON row per key length.
 FA4's compile cache keys this call without the presence of dynamic_causal, so the variants run in separate processes:
 --mode a (vLLM call, with the FP32 window check), b (static non-causal, with the check), c (no window, timing only).
-usage: python v31_local_window_bench.py OUT.jsonl --mode a|b|c [--keys 16384,24576,...]
+--fix installs FA4_LOCAL_FIX (v31_vllm_paired_bench.apply_fa4_local_fix: the bidirectional LOCAL call keeps the window's
+block range) before the first compile. --save OUT.pt keeps the outputs; --compare REF.pt reports, per key length, the
+max |output - REF| and whether they are bitwise equal (the inputs are the same seeded draws in every process).
+usage: python v31_local_window_bench.py OUT.jsonl --mode a|b|c [--fix] [--save X.pt] [--compare X.pt] [--keys ...]
 """
 import argparse
 import json
@@ -57,8 +60,20 @@ def main():
     ap.add_argument('out')
     ap.add_argument('--keys', default='16384,24576,32907,40960,49152,57344,65673,73728,81920,98304,114688,131201')
     ap.add_argument('--mode', choices=('a', 'b', 'c'), required=True)
+    ap.add_argument('--fix', action='store_true')
+    ap.add_argument('--save')
+    ap.add_argument('--compare')
     a = ap.parse_args()
+    fix_path = None
+    if a.fix:
+        import sys
+        from pathlib import Path
+        sys.path.insert(0, str(Path(__file__).resolve().parent))
+        from v31_vllm_paired_bench import apply_fa4_local_fix
+        fix_path = apply_fa4_local_fix()
     from vllm.vllm_flash_attn import flash_attn_varlen_func
+    ref = torch.load(a.compare) if a.compare else None
+    saved = {}
     torch.manual_seed(0)
     scale = D ** -0.5
     rows = []
@@ -84,7 +99,7 @@ def main():
 
         def call_c():
             return flash_attn_varlen_func(causal=False, window_size=None, **kw)
-        row = dict(keys=nk, pages=pages, mode=a.mode)
+        row = dict(keys=nk, pages=pages, mode=a.mode, fa4_local_fix=fix_path)
         call = {'a': call_a, 'b': call_b, 'c': call_c}[a.mode]
         try:
             o = call()
@@ -93,6 +108,12 @@ def main():
                 k_lin = kc[table[0].long()].reshape(-1, HK, D)[:nk]
                 v_lin = vc[table[0].long()].reshape(-1, HK, D)[:nk]
                 row['vs_window_ref_max_abs'] = float((o.float() - reference(q, k_lin, v_lin, nk, scale)).abs().max())
+            if a.save:
+                saved[nk] = o.detach().cpu().clone()
+            if ref is not None and nk in ref:
+                r = ref[nk].to(o.device)
+                row['vs_compare_max_abs'] = float((o.float() - r.float()).abs().max())
+                row['vs_compare_bitwise'] = bool(torch.equal(o, r))
             row['ms'] = timed(call)
         except Exception as e:                                    # keep sweeping; report the failure
             row['error'] = f'{type(e).__name__}: {e}'[-600:]
@@ -100,6 +121,8 @@ def main():
         rows.append(row)
         del kc, vc
         torch.cuda.empty_cache()
+    if a.save:
+        torch.save(saved, a.save)
     with open(a.out, 'w') as f:
         for r in rows:
             f.write(json.dumps(r) + '\n')

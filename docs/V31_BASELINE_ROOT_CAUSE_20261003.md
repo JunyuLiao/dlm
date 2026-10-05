@@ -2076,3 +2076,67 @@ call). Median per-call FA4 time:
   about 20 ms per step at 128K. Estimated per-step gain of our method over the fixed dense: about 1.8× at 128K.
 - Reporting rule: compare against the official vLLM dense as it is AND against the fixed dense. The fix is a separate
   contribution, upstreamable, and benefits the baseline equally.
+
+## Root cause and fix of the LOCAL cost: FA4's dynamic-causal branch discards the window range — 2026-10-05 03:30 UTC
+
+**Micro-benchmark** (`scripts/v31_local_window_bench.py`, mpk, the exact vLLM decode-canvas call: hd 256, 16 / 8
+heads, 256 canvas rows, 128-token pages, window (1023, 1023), causal False, `dynamic_causal=tensor([False])`):
+
+| keys | A: vLLM call | B: same call without dynamic_causal | C: no window |
+|---|---|---|---|
+| 16K | 0.48 ms | 0.10 ms | 0.42 ms |
+| 64K | 1.65 ms | 0.10 ms | — |
+| 131K | 3.19 ms | 0.10 ms | 2.76 ms |
+
+A and B agree with an FP32 windowed reference to the same ~1e-3 (bf16). So the window is applied correctly, but path A
+iterates over the whole context. A is even slower than C, because every block runs through the masked loop.
+
+**Root cause** (`vllm/vllm_flash_attn/cute/flash_fwd_sm90.py`, vLLM 0.30, md5 b6c559a7… on both hosts):
+- A LOCAL call with window (1023, 1023) and causal False compiles an `is_local` kernel.
+  `BlockInfo.get_n_block_min_max` already returns exactly the KV blocks the window can reach.
+- For a bidirectional sequence (psc == 0), the per-sequence mask applies that same compiled window.
+- But the dynamic-causal branch resets `[n_block_min, n_block_max)` to the FULL key range for every bidirectional
+  sequence. This happens in both the producer's K/V load loop (~line 1064) and the consumer's main loop (~line 1526).
+- That reset is needed for kernels compiled causal (the GLOBAL calls), whose range stops at the diagonal. For a local
+  kernel it only adds fully masked blocks: their -inf scores leave the row max, the row sum and O unchanged.
+
+**Fix** (`FA4_LOCAL_FIX=1`, `apply_fa4_local_fix` in `scripts/v31_vllm_paired_bench.py`):
+- The reset is kept for non-local kernels only. The same one-line condition (`and not self.is_local`) is added on both
+  sides; the producer and consumer block counts must agree or the pipeline deadlocks.
+- The patched copy of the installed file is written to disk (CuTe DSL re-reads kernel source from the file) and
+  imported as `vllm.vllm_flash_attn.cute.flash_fwd_sm90` before any kernel compiles; interface's class binding is
+  updated.
+- GLOBAL kernels and causal (prefill / commit) sequences are untouched. CuTe DSL's file cache keys on the MLIR
+  bytecode, so patched and unpatched kernels cannot be mixed through the shared cache.
+- CPU test: `tests/test_v31_fa4_local_fix.py`, 2/2 locally and on mpk's vLLM env.
+
+**GPU check** (mpk, `results/v31_20261003/panels/fa4_local_fix_check_mpk.jsonl`, `fixgate.sh`):
+- At every one of the 12 lengths from 16K to 131K, the patched vLLM call is **bitwise equal** to the unpatched call
+  (max |diff| 0.0).
+- Patched call: 0.104–0.106 ms at every length, vs 0.48–3.19 ms before (30× at 131K). It equals path B, which is
+  also bitwise equal to A.
+
+**Semantics.** The fix does not change which keys are attended; it only skips blocks that were already fully masked.
+Separately, vLLM's window semantics differ slightly from the HF reference's default path. This is pre-existing and
+applies to every arm alike:
+- HF (`modeling_diffusion_gemma.py`, sdpa / eager): the sliding cache keeps the last 1023 prefix tokens, and every
+  canvas row attends to all of them plus the whole canvas (bidirectional mask, no window inside the canvas).
+- vLLM: symmetric window (1023, 1023) per query position (`_maybe_symmetrize_window`). Canvas row i loses the oldest
+  i of those 1023 prefix tokens (at most 255, for the last row).
+- HF's own flash-attention path passes the same (1023, 1023) window and matches vLLM, so the two HF paths disagree
+  with each other.
+- We keep vLLM's behaviour, since it is the official serving path, and state it in the paper.
+
+**The 64K nsys point (43 µs per call) stays unexplained.** The micro-benchmark grows linearly through 64K (1.65 ms).
+The FX block's per-forward times will show the actual end-to-end effect.
+
+**FX block** (`fxgate.sh`, `jobs_fx.txt`, both hosts, 2026-10-05 03:35 UTC):
+- Runs the sc2 chain's S1 LongBench-v2 think cells (seeds 1–2, same shards) for three arms with the fix: dense,
+  lean 8192, and the final candidate t50_sticky 8192.
+- The sc2 chain is paused by SIGSTOP while this runs (no job killed) and resumes afterwards.
+- Expectations:
+  - dense+fix should reproduce dense's tokens exactly, since the LOCAL outputs are bitwise equal;
+  - steps should be unchanged;
+  - only the per-forward time changes.
+- Reporting: speed against both the official dense as-is and dense+fix. The headline uses dense+fix, the stronger
+  baseline. The fix is a baseline improvement (upstreamable), not our contribution.

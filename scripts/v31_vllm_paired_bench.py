@@ -20,7 +20,8 @@ json.dumps(prompt token ids)), budget, max_model_len, chunk, block_size (+ rng_s
 record), so a scorer can refuse a completion produced from another pool / budget / setting. MAX_MODEL_LEN pins vLLM's
 max_model_len (refused below the cells' longest prompt + budget); unset, it is derived from the cells as before.
 usage: python v31_vllm_paired_bench.py MODEL MANIFEST_DIR CELLS_JSON OUT_JSONL PRIVATE_JSONL ARM CG [CONFIG_JSON]
-  env: FIX_51994=1 (backport the upstream FULL-graph causal-buffer fix), LOGIT_STATS=fused (one-pass sampler-hook
+  env: FIX_51994=1 (backport the upstream FULL-graph causal-buffer fix), FA4_LOCAL_FIX=1 (LOCAL sliding-window calls
+       of bidirectional canvases skip the KV blocks outside the window; see apply_fa4_local_fix), LOGIT_STATS=fused (one-pass sampler-hook
        statistics, v31_logit_stats; default legacy torch ops), DP_BUILD=chunked (parallel dense-prefix build,
        v31_dp_chunked), OBSERVE=fa4 (FA4 in-kernel observation for compact-mu configs, v31_fa4_observe),
        MAGE_SELECT=fa4 (MAGE selection statistics from the FA4 observation), KV_COPY=triton / MERGE=triton (V30 one-kernel
@@ -178,6 +179,7 @@ def main():
     fix_51994 = os.environ.get('FIX_51994') == '1'
     if fix_51994:
         apply_fix_51994()
+    fa4_local_fix = apply_fa4_local_fix() if os.environ.get('FA4_LOCAL_FIX') == '1' else None
 
     adapter, config, adapter_sha, residual_sha = None, None, None, None
     if arm != 'dense':
@@ -266,6 +268,7 @@ def main():
                 max_model_len_source='env' if os.environ.get('MAX_MODEL_LEN') else 'derived', max_model_len_need=longest,
                 gpu_memory_utilization=kw['gpu_memory_utilization'], seed_base=seed_base, adapter_sha256=adapter_sha,
                 method_fingerprint=None if config is None else config.get('fingerprint'), fix_51994=fix_51994,
+                fa4_local_fix=fa4_local_fix,
                 mage_k=int(os.environ.get('MAGE_K', '1024')) if arm == 'mage' else None,
                 mage_select=os.environ.get('MAGE_SELECT', 'torch') if arm == 'mage' else None,
                 kv_copy_backend=os.environ.get('KV_COPY', 'torch') if arm != 'dense' else None,
@@ -380,6 +383,76 @@ def apply_fix_51994():
         self._causal_buf = torch.zeros(self._causal_buf.shape[0], dtype=torch.int32, device=self._causal_buf.device)
     cls.__init__ = patched
     cls._v31_fix_51994 = True
+
+
+FA4_LOCAL_FIX_EDITS = (
+    # producer (K/V load loop)
+    ("""                    if const_expr(self._mDynamicCausal is not None):
+                        psc_producer = self._mDynamicCausal[batch_idx]
+""", """                    if const_expr(self._mDynamicCausal is not None and not self.is_local):
+                        psc_producer = self._mDynamicCausal[batch_idx]
+"""),
+    # consumer (main loop)
+    ("""            if const_expr(self._mDynamicCausal is not None):
+                # Per-sequence causal: psc == 0 means this sequence is processed
+""", """            if const_expr(self._mDynamicCausal is not None and not self.is_local):
+                # Per-sequence causal: psc == 0 means this sequence is processed
+"""),
+)
+
+
+def apply_fa4_local_fix(build_dir=None):
+    """FA4_LOCAL_FIX=1: skip the KV blocks outside the sliding window in FA4 SM90 LOCAL calls of bidirectional sequences.
+
+    vLLM 0.30 calls FA4 for DiffusionGemma's LOCAL layers with window (1023, 1023), causal False and a per-sequence
+    dynamic_causal tensor; a decode canvas is bidirectional (psc == 0). Such a kernel is compiled is_local, and
+    BlockInfo.get_n_block_min_max already returns exactly the KV blocks the window mask can reach (the mask of a
+    bidirectional sequence applies that same compiled window). But the dynamic-causal branch of the producer (K/V
+    load loop) and the consumer (main loop) -- written for kernels compiled causal, whose range stops at the diagonal
+    -- resets every bidirectional sequence to the FULL key range. The extra blocks are fully masked (-inf scores leave
+    the row max, the row sum and O unchanged), so outputs are right, but every LOCAL canvas call scans the whole
+    context (3.2 ms at 131K keys vs 0.10 ms over the window; 25 LOCAL layers per forward). The fix keeps that reset
+    for non-local kernels only, identically on both sides (their block counts must agree or the pipeline deadlocks).
+    The blocks inside the window run in the same order as before, so outputs are expected to be bitwise unchanged;
+    GLOBAL (non-local) kernels and causal sequences are untouched.
+    CuTe DSL re-reads kernel source from the defining file, so the patched copy of the installed flash_fwd_sm90.py is
+    written to disk (BUILD/<sha of the original>/) and imported as vllm.vllm_flash_attn.cute.flash_fwd_sm90 before any
+    kernel compiles. Returns the patched file's path."""
+    import importlib
+    import importlib.util
+    name = 'vllm.vllm_flash_attn.cute.flash_fwd_sm90'
+    cur = sys.modules.get(name)
+    if cur is not None and getattr(cur, '_v31_fa4_local_fix', False):
+        return cur.__file__
+    src = Path(importlib.util.find_spec(name).origin).read_text(encoding='utf-8')
+    patched = src
+    for old, new in FA4_LOCAL_FIX_EDITS:
+        assert patched.count(old) == 1, ('FA4_LOCAL_FIX: unexpected flash_fwd_sm90.py', old[:70], patched.count(old))
+        patched = patched.replace(old, new)
+    build = Path(build_dir or os.environ.get('FA4_LOCAL_FIX_DIR') or Path(__file__).resolve().parent / '_fa4_local_fix')
+    path = build / hashlib.sha256(src.encode('utf-8')).hexdigest()[:16] / 'flash_fwd_sm90.py'
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if not path.exists() or path.read_text(encoding='utf-8') != patched:
+        tmp = path.with_name(f'flash_fwd_sm90.tmp{os.getpid()}')
+        tmp.write_text(patched, encoding='utf-8')
+        os.replace(tmp, path)
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod
+    try:
+        spec.loader.exec_module(mod)
+    except BaseException:
+        if cur is None:
+            del sys.modules[name]
+        else:
+            sys.modules[name] = cur
+        raise
+    mod._v31_fa4_local_fix = True
+    setattr(importlib.import_module('vllm.vllm_flash_attn.cute'), 'flash_fwd_sm90', mod)
+    iface = sys.modules.get('vllm.vllm_flash_attn.cute.interface')
+    if iface is not None:                       # interface imported the class by name at its own import time
+        iface.FlashAttentionForwardSm90 = mod.FlashAttentionForwardSm90
+    return str(path)
 
 
 if __name__ == '__main__':
