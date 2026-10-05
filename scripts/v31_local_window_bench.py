@@ -68,8 +68,11 @@ def main():
         cu_q = torch.tensor([0, NQ], device='cuda', dtype=torch.int32)
         used = torch.tensor([nk], device='cuda', dtype=torch.int32)
         dyn = torch.tensor([False], device='cuda')
-        kw = dict(q=q, k=kc, v=vc, cu_seqlens_q=cu_q, max_seqlen_q=NQ, seqused_k=used, max_seqlen_k=pages * PAGE,
-                  softmax_scale=scale, block_table=table, fa_version=4, num_splits=1)
+        dyn_i = torch.tensor([0], device='cuda', dtype=torch.int32)     # vLLM with the PR #51994 fix keeps it int32
+        out_buf = torch.empty_like(q)
+        kw = dict(q=q, k=kc, v=vc, out=out_buf, cu_seqlens_q=cu_q, max_seqlen_q=NQ, seqused_k=used,
+                  max_seqlen_k=pages * PAGE, softmax_scale=scale, block_table=table, fa_version=4, num_splits=1,
+                  alibi_slopes=None, softcap=0.0, scheduler_metadata=None, s_aux=None)
 
         def call_a():
             return flash_attn_varlen_func(causal=False, window_size=[W, W], dynamic_causal=dyn, **kw)
@@ -92,7 +95,19 @@ def main():
                        b_vs_window_ref_max_abs=float((ob.float() - ref).abs().max()),
                        ms_a_vllm_dynamic=timed(call_a), ms_b_static=timed(call_b), ms_c_full=timed(call_c))
         except Exception as e:                                    # keep sweeping; report the failure
-            row['error'] = f'{type(e).__name__}: {e}'[:400]
+            import traceback
+            row['error'] = f'{type(e).__name__}: {e}'[-1500:]
+            if nk == int(a.keys.split(',')[0]):
+                traceback.print_exc()
+            try:                                                  # the int32 dynamic-causal buffer vLLM really passes
+                def call_ai():
+                    return flash_attn_varlen_func(causal=False, window_size=[W, W], dynamic_causal=dyn_i, **kw)
+                call_ai()
+                row['ms_a_vllm_dynamic_int32'] = timed(call_ai)
+                row['ms_b_static'] = timed(call_b)
+                row['ms_c_full'] = timed(call_c)
+            except Exception as e2:
+                row['error_int32'] = f'{type(e2).__name__}: {e2}'[-800:]
         print(json.dumps(row), flush=True)
         rows.append(row)
         del kc, vc
