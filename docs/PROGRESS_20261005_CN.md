@@ -1,4 +1,4 @@
-# DiffusionGemma 长上下文稀疏 attention：进度总结（2026-10-05 02:50 UTC / 10-04 21:50 UTC−5）
+# DiffusionGemma 长上下文稀疏 attention：进度总结（更新于 2026-10-05 04:30 UTC / 10-04 23:30 UTC−5）
 
 - 分支：`research/v31-progress-aware-20261004`（github.com/coconight01/dlm_test）
 - 详细研究日志：`docs/V31_BASELINE_ROOT_CAUSE_20261003.md`（末尾各节）
@@ -37,6 +37,23 @@
   - 重选时在 FA4 block-sparse kernel 里只观测候选池（候选 tile 作为 mask block，观测钩子写出 z），用 S=2 split 均衡 CTA。
 
 ## 3. 主要结果
+
+### 3.0 最新：最终候选"粘性进度重选"（10-05 04:30 UTC，seed 1–2，两台机器）
+
+方法：lean 8192；canvas 中途已接受比例达到 0.5 时重选一次；粘性（已选 tile 加 1.386 的 log 份额）。
+
+| 相对 dense | RULER v34 | MRCR | GraphWalks | LongBench think |
+|---|---|---|---|---|
+| 准确率差 | +0.61 [−0.58, +2.28] | −0.010 [−0.110, +0.066] | −0.005 [−0.124, +0.129] | +0.047 [−0.094, +0.188] |
+| 总步数 N | 0.993 | 0.964 | 0.938 | 0.928 |
+| 每 canvas 步数 N/C | 0.993 | 1.029 | 0.875 | 0.997 |
+| 端到端 W（官方 dense） | 1.012 | 0.974 | 0.901 | 0.856 [0.737, 0.995] |
+
+- 四个数据集准确率都与 dense 持平；GraphWalks 是第一次不掉点（其他 lean 变体约 −0.10）。总步数都不多于 dense。
+- **加 LOCAL 修复后（LongBench think，都加修复）：** 相对修复后 dense，W 0.806 [0.60, 1.03]，每步耗时 0.748；lean 8192 为 W 0.799 [0.66, 0.96]、每步 0.698。
+- **弱点：** RULER 每个 canvas 约 5 步就收敛，观测开销摊不开，每步比 dense 慢约 13%（端到端约 1.01，因为 prefill 为主）。计划用候选池重观测降低这部分开销。
+- seed 3–4、AIME26 / HumanEval 在 sc2 队列中。
+
 
 ### 3.1 和 MAGE 比（stage A 预注册确认，RULER v33，585 个 cell）
 
