@@ -27,6 +27,15 @@ mrcr34 _t50 8192 MAGE_RESELECT_TRIGGER=0.5
 lbt34 _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
 gw34 _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
 mrcr34 _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
+# short-prompt part (user: do not forget AIME26): references and the final candidates, seeds 1-2
+aime - dense
+aime - 4096
+aime - 8192
+aime _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+aime _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
+he - dense
+he - 4096
+he _t50 8192 MAGE_RESELECT_TRIGGER=0.5
 # Junyu Liao's C-gate settledness as the progress clock (calibrated on the T0 clock trace: median 0.17 at step 8)
 ruler _settle15_sticky 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386
 lbt _settle15_sticky 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386

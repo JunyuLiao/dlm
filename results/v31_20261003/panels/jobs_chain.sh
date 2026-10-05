@@ -23,6 +23,8 @@ run() {  # PART NAME BUDGET EXTRA...
     lbt)   D=longbench_v2_0shot_think; X="CELLS=$S/cells_sc_lbt$seeds.json MAN_DIR=$P/longbench_v2_ofc MAX_MODEL_LEN=141312" ;;
     mrcr)  D=mrcr2_32k_ofc,mrcr2_64k_ofc,mrcr2_128k_ofc; X="CELLS=$S/cells_sc_mrcr$seeds.json MAN_DIR=$P/mrcr_ofc MAX_MODEL_LEN=143360" ;;
     gw)    D=graphwalks_22k_b32k,graphwalks_45k_b32k,graphwalks_90k_b32k; X="CELLS=$S/cells_sc_gw$seeds.json MAN_DIR=$P/graphwalks_b32k MAX_MODEL_LEN=126976" ;;
+    aime)  D=aime26; X="CELLS=$S/cells_sc_aime.json MAN_DIR=$W/manifests_ae MAX_MODEL_LEN=13312" ;;
+    he)    D=humaneval; X="CELLS=$S/cells_sc_he.json MAN_DIR=$W/manifests_ae MAX_MODEL_LEN=13312" ;;
   esac
   local T=sc1$part
   B="W=$W PY=$PY MODEL=$MODEL ROOT=$ROOT SHARD=$SHARD FIX_51994=1 MEM=0.90 OVERLAY=$O BENCH=$BENCHF TAG=$T DATASETS=$D $X"
