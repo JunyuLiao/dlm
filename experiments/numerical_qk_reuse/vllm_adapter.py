@@ -1196,7 +1196,8 @@ class VllmMethodAdapter:
         """Selection-granularity ladder: top k_tiles prefix tiles per query head (qhead), per (query head, 128-row
         block) (qblock, qblock_max), or per KV head of G query heads, per block (kvblock_max) or for the whole canvas
         (kvhead_max), shared by those heads; canvas / boundary tiles always kept. Returns kept [1, H, QB, KT]."""
-        kept = torch.zeros((1, H, qb, kt), device=mass.device, dtype=torch.bool)
+        dev = head_lse.device if head_lse is not None else mass.device         # the pool path passes mass=None
+        kept = torch.zeros((1, H, qb, kt), device=dev, dtype=torch.bool)
         kept[..., pt:] = True
         if not pt:
             return kept
@@ -1207,7 +1208,7 @@ class VllmMethodAdapter:
             score = share.amax(dim=(1, 3))                                                        # [HK, QB, PT]
             if self.mage_granularity == 'kvhead_max':
                 score = score.amax(1, keepdim=True)                                               # [HK, 1, PT]
-            unit = torch.zeros(score.shape, device=mass.device, dtype=torch.bool)
+            unit = torch.zeros(score.shape, device=dev, dtype=torch.bool)
             unit.scatter_(-1, score.topk(k_tiles, dim=-1).indices, True)
             kept[0, :, :, :pt] = unit.expand(-1, qb, -1).repeat_interleave(G, 0)                  # same set per group
             self.calls['mage_kept_prefix_tiles'] += int(k_tiles) * H * qb

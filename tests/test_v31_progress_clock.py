@@ -173,6 +173,35 @@ def test_split_tensors_deal_each_unit_into_balanced_parts():
             assert abs(int(counts[0, h, b]) - int(counts[1, h, b])) <= 1
 
 
+def test_pool_selection_runs_the_real_unit_choice():
+    """_mage_select_pool end to end except the kernel: sc4's first pool job crashed in _mage_units (mass=None on the
+    pool path; device taken from mass). Kept prefix tiles = top k_tiles of the pool-observed shares per (head, block),
+    inside the pool, canvas tiles kept; with stickiness a held pool tile beats a slightly larger unheld one."""
+    H, n, qb, pt, k_tiles = 16, 256, 2, 40, 2
+    kt = pt + n // 64
+    a = _adapter(mage_carry_first=True, mage_reselect_trigger=0.5, mage_pool=4, mage_sticky=1.386)
+    a.mage_k = 64 * k_tiles
+    pool = torch.zeros((1, H, qb, kt), dtype=torch.bool)
+    pool[..., pt:] = True
+    pool[..., 3:3 + 4 * k_tiles] = True                                     # 8 pool tiles: 3..10
+    z = torch.full((1, H, pt, qb * 128), float('-inf'))
+    for t in range(3, 11):
+        z[:, :, t] = 0.5 * t                                                # larger tile index = larger share
+    a.paged = dict(nk=64 * kt)
+    a._pool_observe = lambda q, scale, pool_, n_, prefix: ('out', z)
+    k = torch.zeros(1, 2, 64 * kt, 4)
+    q = torch.zeros(1, H, n, 4)
+    out, kept = a._mage_select_pool(q, k, k, 1.0, 64 * pt, n, pool)
+    assert out == 'out' and kept.shape == (1, H, qb, kt) and kept[..., pt:].all()
+    assert kept[..., :pt].sum(-1).eq(k_tiles).all() and not (kept[..., :pt] & ~pool[..., :pt]).any()
+    assert kept[0, 0, 0, :pt].nonzero().flatten().tolist() == [9, 10]       # top shares inside the pool
+    held = torch.zeros((1, H, qb, kt), dtype=torch.bool)
+    held[..., [8, 9]] = True
+    a._mage_held = held                                                     # held 8 (4.0 + 1.386) beats unheld 10 (5.0)
+    _, kept = a._mage_select_pool(q, k, k, 1.0, 64 * pt, n, pool)
+    assert kept[0, 0, 0, :pt].nonzero().flatten().tolist() == [8, 9]
+
+
 def test_pool_routes_reselections_and_is_stored_with_the_selection():
     from experiments.numerical_qk_reuse import v27_fa4
     v27_fa4.block_sparse_tensors = lambda kept, q_block=128: ('lists', kept.clone())
