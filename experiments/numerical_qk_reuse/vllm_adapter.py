@@ -1528,7 +1528,8 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                     and a._canvas_step + 1 in a.mage_reselect):             # two steps ahead: keep the argmax
                 a._mage_prev_argmax = scaled[0, :a.step_ctx['n']].argmax(-1)
             if (a.arm == 'mage' and a.mage_reselect_trigger is not None
-                    and (a._trig_canvas != a.canvas_id or a._trig_count < len(a.mage_reselect_trigger))):
+                    and (a._trig_canvas != a.canvas_id or a._trig_count < len(a.mage_reselect_trigger)
+                         or a.mage_clock_trace)):                       # a traced clock keeps reading every step
                 from experiments.numerical_qk_reuse.v31_logit_stats import accepted_from_entropy, row_stats
                 n_rows = a.step_ctx['n']
                 eb = float(signature.bind(*args, **kwargs).arguments['entropy_bound'])
