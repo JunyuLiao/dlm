@@ -16,12 +16,13 @@ LEAN="MAGE_GRAN=qblock_max MAGE_STEP=1 MAGE_CARRY=1"
 run() {  # PART NAME BUDGET EXTRA...
   local part=$1 L=$2 K=$3; shift 3
   [ "$L" = - ] && L=""
-  local X=""
-  case $part in
-    ruler) D=ruler32k_v34ofc,ruler64k_v34ofc,ruler128k_v34ofc; X="CELLS=$S/cells_sc_ruler.json MAN_DIR=$P/ruler_v34ofc MAX_MODEL_LEN=136192" ;;
-    lbt)   D=longbench_v2_0shot_think; X="CELLS=$S/cells_sc_lbt.json MAN_DIR=$P/longbench_v2_ofc MAX_MODEL_LEN=141312" ;;
-    mrcr)  D=mrcr2_32k_ofc,mrcr2_64k_ofc,mrcr2_128k_ofc; X="CELLS=$S/cells_sc_mrcr.json MAN_DIR=$P/mrcr_ofc MAX_MODEL_LEN=143360" ;;
-    gw)    D=graphwalks_22k_b32k,graphwalks_45k_b32k,graphwalks_90k_b32k; X="CELLS=$S/cells_sc_gw.json MAN_DIR=$P/graphwalks_b32k MAX_MODEL_LEN=126976" ;;
+  local X="" seeds=""
+  case $part in *34) seeds=_s34 ;; esac        # PART<x>34: the same items under sampler seeds 3-4 (cells_sc_<x>_s34.json)
+  case ${part%34} in
+    ruler) D=ruler32k_v34ofc,ruler64k_v34ofc,ruler128k_v34ofc; X="CELLS=$S/cells_sc_ruler$seeds.json MAN_DIR=$P/ruler_v34ofc MAX_MODEL_LEN=136192" ;;
+    lbt)   D=longbench_v2_0shot_think; X="CELLS=$S/cells_sc_lbt$seeds.json MAN_DIR=$P/longbench_v2_ofc MAX_MODEL_LEN=141312" ;;
+    mrcr)  D=mrcr2_32k_ofc,mrcr2_64k_ofc,mrcr2_128k_ofc; X="CELLS=$S/cells_sc_mrcr$seeds.json MAN_DIR=$P/mrcr_ofc MAX_MODEL_LEN=143360" ;;
+    gw)    D=graphwalks_22k_b32k,graphwalks_45k_b32k,graphwalks_90k_b32k; X="CELLS=$S/cells_sc_gw$seeds.json MAN_DIR=$P/graphwalks_b32k MAX_MODEL_LEN=126976" ;;
   esac
   local T=sc1$part
   B="W=$W PY=$PY MODEL=$MODEL ROOT=$ROOT SHARD=$SHARD FIX_51994=1 MEM=0.90 OVERLAY=$O BENCH=$BENCHF TAG=$T DATASETS=$D $X"
