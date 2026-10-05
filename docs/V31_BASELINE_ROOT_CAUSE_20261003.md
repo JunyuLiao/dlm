@@ -2251,3 +2251,17 @@ cells on both hosts. It adds new items only:
 
 S2 records which items stay free for the pre-registered confirmation: RULER v34 351, MRCR 24, GraphWalks 36, plus
 RULER v33 and the 343 LongBench hold-out items. It runs once the algorithm settles.
+
+**Determinism, complete matrix (05:05 UTC).** Identical output hashes out of 32 cells:
+
+| pair | mpk | dlm2 |
+|---|---|---|
+| no fix vs no fix (ctl ~ ctl2) | 30 | — (ctl excluded) |
+| fix vs fix (fx ~ fxrep) | 28 | 31 |
+| no fix vs fix (ctl/ctl2 ~ fx/fxrep) | 29–30 | 30–31 |
+| old sc1 lean vs any | 29–30 | 29–30 |
+
+- Repeats of the same configuration disagree on 1–4 of 32 long-output cells, the same rate as with vs without the fix.
+- So the LOCAL fix introduces no divergence, and the lean arm's run-to-run nondeterminism is pre-existing.
+- dlm2's first ctl run disagrees with every other run (0/32), including its own repeat. It is a one-off and stays
+  excluded.
