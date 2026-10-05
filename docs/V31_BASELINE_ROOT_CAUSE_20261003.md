@@ -2329,3 +2329,24 @@ What changed (`jobs_sc4_{mpk,dlm2}.txt`, swapped in with `switch_chain.sh`):
 - On RULER the 4096 variant's sparse saving and its observation cost cancel.
 - **Measurement noise.** An identical-configuration repeat (lean 8192 fx vs fxrep) moves LongBench W from 0.799 to
   0.753 and N from 1.02 to 0.89. Differences between variants below about ±0.05 in W are not meaningful at S1 size.
+
+**Pool variant crash and fix (06:03–06:10 UTC).**
+- **Symptom:** the first `_rel_pool4_sticky_fx` jobs crashed at their first re-selection (dlm2 RULER and LongBench,
+  mpk RULER; rc=1, 0 records).
+- **Cause:** `_mage_units` took its device from `mass`, which the pool path passes as None.
+- **Why it slipped through:** the CPU test faked `_mage_select_pool`, and the GPU pool check covered only
+  `_pool_observe`.
+- **Fix:** adapter 013ea66a4e52 takes the device from `head_lse`, which is identical for every other path. A new CPU
+  test runs the real `_mage_select_pool` with a stub observation and checks:
+  - kept tiles lie inside the pool;
+  - exactly k tiles per unit;
+  - a held tile wins under hysteresis.
+
+  21 of 21 adapter CPU tests pass on mpk's env.
+- **Deployment:** deployed into both ov_pa4fx overlays at 06:05:30. The mpk traceback shows new source lines only
+  because Python reads source text at print time; the process had loaded the old file.
+- **GPU check:** dlm2 MRCR, started after the deploy, ran 24/24 cells with 435 pool re-selections, 0 fallbacks and
+  sticky applied 435 times.
+- **Requeue:** the crashed jobs are requeued (`jobs_sc4b_{mpk,dlm2}.txt`).
+- **Records:** earlier sc4 records carry adapter 7338e2769d45; later ones carry 013ea66a4e52. The behaviour outside
+  the pool path is identical.
