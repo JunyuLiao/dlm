@@ -42,3 +42,9 @@ the private completion text.
 The GPU worker writes public JSONL receipts and private completions under its
 own authorized `dyh` run directory. Only sanitized summaries and receipts may
 be copied back into this repository.
+
+The completed 90-cell result is summarized in
+[`summary.md`](summary.md). The sparse run used the repository's pinned FA4
+SM90 page-table compatibility patch in the private vLLM runtime; the unpatched
+consumer was rejected after a one-cell numerical smoke because it produced
+malformed paged outputs.

@@ -1,69 +1,145 @@
-# 接手提示词（给继续这项研究的 AI）
+# Algorithm and execution handoff
 
-复制下面整段作为新会话的第一条消息。状态细节都在仓库文档里，这里只放入口、目标和规则；仓库更新后这段一般不用改。
+This document is the agent handoff for the value-aware and query-sensitivity
+protection work. It intentionally omits collaborator-specific hosts, paths,
+preferences, and private coordination procedures. Repository source and frozen
+experiment records are authoritative.
 
-```text
-你接手一个进行中的研究：在 DiffusionGemma-26B-A4B（Gemma 4 系列的块扩散 MoE 模型）上，对 5 个 GLOBAL 注意力层做块稀疏，
-争取在不掉精度的前提下拿到端到端加速。请以仓库为准，不要依赖聊天记录。
+## Scope
 
-【仓库与分支】
-- 本地工作目录：E:/dlm/m3_output_numerics_20260927（git 命令加 -c safe.directory=*）
-- 远端：coconight01/dlm_test。当前工作分支 research/humaneval-v27-20261001（2026-10-01 23:59 从 v27 存档分支
-  research/m3-output-numerics-20260927 的 add23afa9 分出，之后的工作都在这里）；先 git branch --show-current 确认，
-  最新状态以 git log 为准
-- 阅读顺序：AGENTS.md → HANDOFF.md（先看「Situation at handoff」和「Immediate next steps」）→ docs/VLLM_PORT_NOTES_20261002.md
-  （vLLM 移植的全部情况、运行命令、面板计划）→ docs/RESEARCH_CONTEXT.md → docs/DECISIONS.md → docs/RESULTS_LEDGER.md
-  → docs/EXPANSION_PLAN_20261002.md（新模型和数据集）→ STATE.json 的 current
-- 私有协调文件（不在仓库、不能上传）：E:/dlm/v20_private/hosts.json（各机解释器和环境变量）、E:/dlm/v27_lbfa4_env.json、
-  E:/dlm/ 下的协调脚本（v21_deploy_qualify.py、v23_transport.py、v27_lbfa4_host.sh、v27_score_lb.py、v27_score_long.py）、
-  E:/dlm/v27_private/（私有题池、打分结果）。
-- 提交前先 git fetch，看远端有没有别的 AI 推的新提交，审一遍再在其上继续；不 fast-forward、不合并其他研究分支。
+- Model: DiffusionGemma-26B-A4B with the native adaptive denoising sampler.
+- Serving path: vLLM 0.30.0 with the pinned SM90 FlashAttention-4 path.
+- Attention geometry: 128 query rows × 64 key tokens per physical tile,
+  native GQA and structural masks.
+- The current V31 adapter sparsifies the five GLOBAL layers only. LOCAL layers,
+  prefill, canvas commits, and the sampler remain native dense execution.
+- A reported sparsity number must say whether it is GLOBAL prefix sparsity,
+  LOCAL sparsity, or count-weighted overall decoder-attention sparsity.
 
-【目标与评价标准】
-- 核心是精度、性能、新颖性。基线必须是 SOTA 或官方、能写进论文的：注意力 kernel 是 FA4（vLLM fork），但整套系统层面 vLLM 原生 serving 更快，必须以它为准。新模型同样用官方栈（SGLang / dInfer / I-DLM 自带的 SGLang），并实测选出最快的。
-- 速度同时报告端到端 W（含 prefill）和纯生成 S，以及每步 S/N、forward 数 N、答对数；配对几何平均 + 按题目聚类的 95% CI。
-- 后续面板可以只跑较好的相关配置，无需每次重复原版 M1/M2/M3；历史对比保留。必须保留强 dense 和匹配的优化参考，所有变体如实命名，增量按"相对标准优化之上"计算。
-- 请求级结论需要大样本（单个 seed 的步数比在 0.85–1.24 之间摆动）；小样本只能称为预览。
-- 每个新变体：写单元测试；用回执（effective_method、计数器）证明预定路径确实执行；所有臂同底座、同部署、同机、同题、同 seed，计时中无新图。
-- 宁要干净的负结果，不要硬凑正结果；不显著就写不显著，不过度声称。
+## Value-aware routing contract
 
-【当前状态（详见 HANDOFF.md「Situation at handoff」，2026-10-02 16:40 UTC−5）】
-- 方法已能在 vLLM 0.30.0 官方 serving 里原样运行：experiments/numerical_qk_reuse/vllm_adapter.py，方法核心不改，
-  用冻结的 main 配置。冒烟结果：相对 vLLM 默认 dense，每步 32K 为 0.96×，64K 为 0.85×；adapter 全保留臂和 dense 打平。
-  运行方式、面板计划见 docs/VLLM_PORT_NOTES_20261002.md 最后两节和 scripts/v27_vllm_bench_host.sh。
-- 重要更正：vLLM 的 dense GLOBAL 调用走 FA4 的 dynamic-causal 路径，split-KV 真正生效，比我们 HF 面板用的 dense
-  （D_fa4_allkept，num_splits=1）快约 1.65×。所以 HF 底座上 E4–E15 的加速比相对最强官方 dense 偏高；精度结论不受影响。
-  论文的速度证据以 vLLM 面板为准。adapter 里的稀疏消费者用"页表别名 2 路拆分 + LSE 合并"补齐了同样的并行度。
-- HF 底座上已有结论（精度部分仍成立）：
-  - E13–E15（18 个种子）main 精度不降；
-  - P16：64K 精度差是挑选噪声；P17：组员的 C gate 不采用；
-  - R17：RULER 32K/64K/92K main 精度全保住；V 项在 AIME、LongBench、HumanEval、RULER 上都没用，已收为负结果；
-  - regroup、q64c、c01 都已收。
-- FA4（SM90）有三个可报上游的问题：分页稀疏读错页（本地已修）、变长稀疏偏移按 tile_n 128 算（原因已确认，一行修复）、
-  稀疏和非 causal 路径的 split-KV 每份都重做全部工作。报不报、用哪个 GitHub 账号，等用户决定。
-- 当前没有实验在跑，三台 GPU 空闲。
-- 最优先：vLLM 面板（LongBench-v2 32K/64K/96K 多题 × 多次，vLLM dense 对 main，带精度打分）。
-  其次是新模型：LLaDA2.1-mini 的 SGLang 编译问题已用 CUDA 13.0 nvcc shim 解决，待 GPU 冒烟；
-  I-DLM-8B 冒烟未做。环境、权重和 LongBench Pro 数据在 dllm 的 /home/exouser/dyh/dlm_models_20261002，计划见 docs/EXPANSION_PLAN_20261002.md。
+The Gaussian32 value-aware method is a separate routing candidate and must keep
+its own implementation identity when compared with temporal reuse or MAGE:
 
-【硬性规则】
-- GPU 机器是用户自己的，不需要审批，预算不是停止条件，但要记录 GPU 秒数：
-  dllm 149.165.159.64；mpk 149.165.151.254（写 /media/volume/dllm-1/dyh）；dlm2 149.165.168.28。
-  只在各自 dyh 目录下创建或修改文件；他人目录只读；不改共享环境、包、模型和 JIT 缓存；
-  解释器和环境变量用 E:/dlm/v20_private/hosts.json 与 E:/dlm/v27_lbfa4_env.json；每张卡只跑一个 worker，启动前确认 GPU 空闲。
-- 面板流程：spec → freeze → deploy → bind → launch → score → summarize，命令见 HANDOFF.md「Operational notes」
-  （协调脚本在 E:/dlm/，不在仓库）。被杀掉的 worker 用新的 run dir 重跑，打分时合并。
-- 不上传任何凭据、prompt、prompt token 或哈希、标准答案、私有绝对路径；生成记录只发脱敏版。
-  不改仓库可见性，不发 Slack 或邮件，不改共享幻灯片，不转发 ssh 密钥。
-- 不提交 third_party/dinfer/assets/Wechat.JPG 和 ~$ 开头的锁文件；不 force push；不重置历史账本。
-- 组内其他人的分支、结果、机器只读，只引用不吸收，重叠部分标为合作候选。
-- 文档实时更新：新结果、新变体、新决策、运行状态变化，都在同一次提交里更新 HANDOFF.md、docs/ 和 STATE.json current，并立即 push。
-  新的研究方向开新分支（推送，不合并，不开 PR）。
-- 回复用中文；时间写用户本地时间（US Central，UTC−5）。
-- 做组会 PPT：用 scripts/v27_build_deck_1001_compact.py 的方式（数字直接读 summary.csv，同时输出 markdown 源稿）；
-  正文不标"Fan/我们"，只给外部论文标来源；方法和变体用白话讲清原版配置和每项改动；耗时拆分要把 GLOBAL、LOCAL 单列并带百分比。
+1. Build one fixed Gaussian/sign/identity projection basis per native KV head,
+   using the pinned projection seed and FP32 construction. Record the basis
+   identity; do not regenerate it per step.
+2. Form the current QK scores and valid mask, then compute the candidate
+   block's projected value contribution. Routing information is available only
+   after the current QK/softmax work.
+3. Compare the candidate contribution with the retained running output. A
+   skipped block leaves that retained state unchanged; the first valid support
+   and threshold ties are retained.
+4. The physical vote is conservative over valid query rows. Only a complete
+   unchanged prefix block may reuse a cached sketch. Equality of the relevant
+   K/V state and validity mask is required before reuse.
+5. The native output remains the original BF16 V attention output. A projected
+   diagnostic or a dense-shaped masked PV computation is not evidence that the
+   corresponding full-dimensional arithmetic was physically removed.
 
-【开始时】
-1. 读完上述文档，用 git log 确认最新提交，ssh 检查三台机器的 GPU 是否空闲（截至 2026-10-02 16:40 UTC−5 没有实验在跑）。
-2. 先用几句话复述你理解的现状、打算先做什么和预计耗时，再动手。
-```
+The Gaussian32 operator therefore must be reported separately from the V31
+cached-QK/MAGE selector. Do not claim a value-aware accuracy or kernel speed
+gain without matched dense controls, physical tile counts, and a clean timing
+pass on the same runtime.
+
+## Query-sensitivity protection (C gate)
+
+The gate is causal: a completed sampler result can affect the next routing
+decision, never the call that produced that result. For each canvas row keep:
+
+- `q = gamma_q*q + (1-gamma_q)*(1-accepted)`, initialized to `1`,
+  with `gamma_q = 0.65`;
+- `r = (r+1)*accepted`, reset when the top-1 token flips;
+- `u = sqrt(max(1-p_top1, 0))`;
+- `settledness = (1-exp(-r/tau))*(1-q)*(1-u)`, with `tau = 2.5`;
+- `s = clip(1 + beta*(1-settledness), 1, 1+beta)`, with `beta = 3`.
+
+The accepted mask must be recomputed from the sampler's own temperature-scaled
+logits and entropy-bound rule. Reset all gate state at a canvas boundary. The
+first call of a canvas uses maximal protection. A trigger or row weight must
+be named explicitly; the settledness trigger at `0.15` and the accepted-fraction
+clock are different ablations. The tested row-weight variants are not a free
+accuracy improvement: fixed budgets can remove tiles needed by rows that are
+already settled.
+
+## Current V31 execution variant
+
+The current integrated baseline uses the same paged FA4 consumer and the
+progress-aware re-observation path:
+
+- `qblock_max` selection, 64-key tile granularity;
+- GLOBAL budget `4096` tokens for the AIME26 half-context run;
+- first exact call used for selection, with first-call carry enabled;
+- settledness trigger `0.15`, sticky log-share bonus `1.386`;
+- FA4 selection, fused logit statistics, chunked DP build, Triton K/V copy and
+  LSE merge, and the pinned FA4/local fixes;
+- LOCAL budget requests are metadata until a LOCAL routing path exists. In the
+  present adapter LOCAL remains dense, so its achieved sparsity is zero and the
+  512-token request must not be presented as an effective local skip budget.
+
+Keep the MAGE/V31 arm distinct from Gaussian32. If the value-aware operator is
+added to this path, freeze the operator, projection seed, state scope, and
+budget as a new named arm and retain the existing arm as its control.
+
+## Local H100 execution
+
+The current server has one NVIDIA H100 80 GB GPU. Run one worker at a time with
+CUDA device 0. Use the repository root `/home/exouser/ljy/dlm` for source and
+the user's writable private directory `/home/exouser/dyh` for manifests,
+caches, raw generations, and run logs. Do not alter shared environments or
+other collaborators' files. When the execution sandbox hides CUDA devices,
+launch the approved GPU command with the server's elevated execution mode;
+verify `torch.cuda.is_available()` and the H100 identity before starting.
+
+Use the local DiffusionGemma snapshot and the pinned tokenizer/model revision.
+Build the AIME26 manifest from dataset revision
+`79037aebdb6580008fb960d17cb21fd3099083e3`; keep prompts, gold answers,
+token IDs, raw completions, and credentials private. The final public record
+contains only hashes, sanitized receipts, and aggregate measurements.
+
+For the requested confirmation run:
+
+1. Freeze the source commit, model revision, prompt manifest, sampler settings,
+   and cell list before generation.
+2. Use all 30 AIME26 problems with seeds `42, 43, 44`. Keep the native canvas
+   length 256, maximum 48 denoising calls per canvas, confidence threshold
+   `0.005`, stability threshold `1`, entropy bound `0.1`, and the native
+   `0.8 -> 0.4` temperature schedule. Thinking and output budget must match the
+   pinned V31 protocol.
+3. Run a one-cell dense and sparse smoke first. Check finite output, scorer
+   identity, GLOBAL-only routing, the C-gate counters, selected/held tile
+   counts, and no unexpected CUDA graph capture.
+4. Run matched dense and sparse cells on the same H100, then perform a clean
+   timing pass with routing diagnostics disabled. A timing pass that includes
+   selection traces is diagnostic, not the headline latency result.
+5. Require completion markers for every arm and seed before aggregation. A
+   partial shard is progress, not a result.
+
+Report per arm and pooled across seeds:
+
+- accuracy on all 30 problems and the per-seed counts;
+- total denoising calls and calls per canvas;
+- GLOBAL, LOCAL, and count-weighted overall physical sparsity;
+- final end-to-end time (prefill + decode) and matched dense speedup;
+- decode-only time and matched dense speedup;
+- observation, re-selection, C-gate, fallback, and dense-call counters.
+
+Speedup is always measured as the dense time divided by the sparse time on the
+same cell set. Never infer it from the fraction of skipped tiles. Preserve
+native stopping, acceptance, and re-noising behavior; do not add hidden
+forwards or silently change the scorer.
+
+## Required checks before publishing a result
+
+- Unit tests for the value-aware projection/routing and C-gate state update.
+- A receipt proving the intended arm and kernel executed, including projection
+  identity, trigger parameters, GLOBAL/LOCAL layer coverage, and physical tile
+  counters.
+- Matched prompt, seed, model, budget, and sampler settings across arms.
+- Source and environment fingerprints, GPU model, and run completion markers.
+- Separate timing and audit passes, with no newly captured CUDA graphs in the
+  timed pass.
+
+Do not merge peer branches, copy peer environment claims, or attribute a peer
+kernel to this study. Cite peer algorithms as peer work and label any port or
+integration as a new, separately audited arm.

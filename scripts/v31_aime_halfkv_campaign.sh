@@ -9,22 +9,22 @@ set -euo pipefail
 : "${ROOT:?set ROOT to the private V31 deployment root}"
 : "${OVERLAY:?set OVERLAY to the pinned V31 adapter overlay}"
 
-BENCH=${BENCH:-$W/v31_vllm_paired_bench.py}
+BENCH=${BENCH:-$W/scripts/v31_vllm_paired_bench.py}
 MAN_DIR=${MAN_DIR:-$W/manifests_ae}
-CELLS=${CELLS:-$W/cells_aime_halfkv_20261005.json}
+CELLS=${CELLS:-$W/cells/cells_aime_halfkv_20261005.json}
 OUT_ROOT=${OUT_ROOT:-$W/aime_halfkv_20261005}
 SEEDS=${SEEDS:-42,43,44}
 SEED_BASE=${SEED_BASE:-31}
-MAX_MODEL_LEN=${MAX_MODEL_LEN:-13312}
-MEM=${MEM:-0.90}
+MAX_MODEL_LEN=${MAX_MODEL_LEN:-9216}
+MEM=${MEM:-0.80}
 BLOCK=${BLOCK:-32}
-CHUNK=${CHUNK:-16384}
+CHUNK=${CHUNK:-4096}
 
 mkdir -p "$OUT_ROOT/public" "$OUT_ROOT/private" "$OUT_ROOT/cache"
 
 if [[ ! -f "$CELLS" ]]; then
   : "${HE_CELLS:?set HE_CELLS when generating the AIME cell file}"
-  python "$W/v31_screen_suite.py" --short "$MAN_DIR" "$HE_CELLS" "$OUT_ROOT/suite" \
+  "$PY" "$W/scripts/v31_screen_suite.py" --short "$MAN_DIR" "$HE_CELLS" "$OUT_ROOT/suite" \
     --seeds "$SEEDS" --sample-seed 20261005
   cp "$OUT_ROOT/suite/cells_sc_aime.json" "$CELLS"
 fi
@@ -33,7 +33,7 @@ export VLLM_CACHE_ROOT="$OUT_ROOT/cache/vllm" XDG_CACHE_HOME="$OUT_ROOT/cache/xd
   TMPDIR="$OUT_ROOT/cache/tmp" TORCHINDUCTOR_CACHE_DIR="$OUT_ROOT/cache/inductor" \
   TRITON_CACHE_DIR="$OUT_ROOT/cache/triton" CUDA_CACHE_PATH="$OUT_ROOT/cache/cuda" \
   HF_HUB_OFFLINE=1 VLLM_ENABLE_V1_MULTIPROCESSING=0 PYTHONNOUSERSITE=1 \
-  PYTHONPATH="src:." V27_ADAPTER_DIR="$OVERLAY" SEED_BASE MEM BLOCK CHUNK \
+  PYTHONPATH="$W/src:$W" V27_ADAPTER_DIR="$OVERLAY" SEED_BASE MEM BLOCK CHUNK \
   FIX_51994=1 FA4_LOCAL_FIX=1 DATASETS=aime26 CELLS MAN_DIR MAX_MODEL_LEN
 mkdir -p "$TMPDIR"
 
