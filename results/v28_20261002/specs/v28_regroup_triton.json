@@ -1,0 +1,35 @@
+{
+  "schema": "v28_regroup_permutation_backend_v1",
+  "protocol_id": "v28_regroup_triton_20261002",
+  "hypothesis": "Replace generic Torch token-major per-head gather/scatter with one Triton gather and one Triton scatter, retaining exactly the held ordering and Q64 support.",
+  "modes": {
+    "permutation": "Same-host Torch/Triton input, ordering and buffers; no attention or model claim.",
+    "held": "Same-host natural Q64, held Torch regroup, held Triton regroup; include gather+identical FA4 alias2+scatter, exclude offline search and first list builds explicitly."
+  },
+  "selection": "Reuse at most first CPU-accepted historical need state per nominal32K/64K/96K bin from the existing held-regroup gate; no output-based selection.",
+  "correctness": "CPU permutation/address tests; GPU exact gather/scatter equality with Torch before timings; complete consumer masked IEEE FP32 finite oracle in held mode. No mixed-host addition of component times.",
+  "timing": "Warm both backends; interleave/rotate repeated CUDA-event timings; count actual held list builds; identical native Q layout, support, QKV and split2. Record reserved GPU seconds and expose all failures.",
+  "baseline": "Previously published Torch held-regroup negative remains unchanged. Kernel-only wins do not imply request speed or model accuracy.",
+  "launch": "Commit spec and code, freeze/deploy/bind private inputs, check GPU idle, one worker perGPU, own dyh caches only. Preview seed4 source and schedule unchanged.",
+  "mode_settings": {
+    "permutation": {
+      "repeats": 100,
+      "warm": 8,
+      "synthetic_qkv_seed": 2863
+    },
+    "held": {
+      "repeats": 32,
+      "warm": 8,
+      "synthetic_qkv_seed": 2803
+    }
+  },
+  "tensor_contract": {
+    "query_rows": 256,
+    "query_heads": 16,
+    "head_dim": 512,
+    "dtype": "bfloat16",
+    "layout": "native token-major Q; per-head row permutation",
+    "alias_splits": 2
+  },
+  "allocation_policy": "Both Torch and Triton allocate gather/scatter outputs on every call; same lifecycle."
+}

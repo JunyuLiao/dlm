@@ -1,0 +1,36 @@
+{
+ "schema": "v27_fused_bench_v1",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "rows": [
+  {
+   "keys": 17536,
+   "dense64": 1.4869279861450195,
+   "fused_mu": 3.3975518941879272,
+   "fused_nomu": 1.7139520049095154,
+   "route_load_tail": 1.7818400263786316,
+   "fused_mu_tf32": 2.523935914039612,
+   "fused_mu_bf16": 1.9260639548301697,
+   "route_load_s2_w4": 1.8319519758224487,
+   "route_load_s2_w8": 1.5142880082130432,
+   "route_load_s3_w4": 1.83051198720932,
+   "route_load_s3_w8": 1.4991520047187805,
+   "unfused_dense_producer_store": 6.214048147201538,
+   "fused_mu_plus_route": 5.179391920566559
+  },
+  {
+   "keys": 65536,
+   "dense64": 5.417680025100708,
+   "fused_mu": 11.173312187194824,
+   "fused_nomu": 5.785664081573486,
+   "route_load_tail": 5.082367897033691,
+   "fused_mu_tf32": 8.209504127502441,
+   "fused_mu_bf16": 6.808784008026123,
+   "route_load_s2_w4": 6.184816122055054,
+   "route_load_s2_w8": 5.125184059143066,
+   "route_load_s3_w4": 6.288575887680054,
+   "route_load_s3_w8": 5.190544128417969,
+   "unfused_dense_producer_store": 22.687792778015137,
+   "fused_mu_plus_route": 16.255680084228516
+  }
+ ]
+}

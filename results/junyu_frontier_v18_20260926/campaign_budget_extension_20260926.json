@@ -1,0 +1,42 @@
+{
+  "schema": "v18_frozen_campaign_budget_v1",
+  "frozen_utc": "2026-09-26T23:22:38.894969+00:00",
+  "deadline_epoch": 1790573520.0,
+  "wall_start_utc": "2026-09-26T18:02:00Z",
+  "initial_soft_deadline_epoch": 1790456600.6273003,
+  "gpu_cap_s_by_host": {
+    "mpk": 86400,
+    "dllm": 86400
+  },
+  "baseline_gpu_s_by_host": {
+    "mpk": 1900,
+    "dllm": 100
+  },
+  "baseline_gpu_note": "Conservative charged ceilings: mpk measured1479s plus at most300s pending cost diagnostic and60s early probe reserve; dllm28s bridge plus60s probe reserve. Never sum this baseline again with completed stage ledgers.",
+  "baseline_requests": 475,
+  "baseline_requests_by_host": {
+    "mpk": 469,
+    "dllm": 6
+  },
+  "request_cap": 7000,
+  "request_cap_by_host": {
+    "mpk": 3500,
+    "dllm": 3500
+  },
+  "block_guard_s": 1800,
+  "aime_reserved_executions": 1080,
+  "scoring_minutes_reserved": 30,
+  "priority": [
+    "ruler_initial",
+    "aime_all",
+    "ruler_remainder"
+  ],
+  "hard_timeout_required": true,
+  "data_selection": "Frozen completeblock order; no runtime/quality-dependent question choice",
+  "deadline_is_gpu_cutoff": true,
+  "resource_authorization": "RESOURCE_AUTHORIZATION.md",
+  "supersedes_budget_sha256": "5c444604bc82772ffce713d9e0a145c1f07c9ababdf3cfcd3b12d7c9f36659dd",
+  "amendment": "Bounded extension after explicit user instruction; existing frozen panels only. Original schedule, request quotas, native semantics, max5 calibration pairs and accounting unchanged.",
+  "wall_hours_cap": 36,
+  "gpu_process_hours_combined_cap": 48
+}

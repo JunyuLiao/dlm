@@ -1,0 +1,258 @@
+{
+  "arm_hashes": {
+    "B8_P": "fb5fe0dc890f4191b7f2a308ff4e4210f69957293d3079d6553db154e469b64b",
+    "CVM_T": "a6f320e89b16e650a65db6695515a7063ff7009081f69a8c25744670709bb0ec",
+    "T_P": "539c9c1542bfba49f5fd17153b03d3cb4adc254488254258c2cc4ca2a7cd0007"
+  },
+  "arms": {
+    "B8_P": {
+      "condition": "global_B8P",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "name": "B8_P",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "support_build": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build/support_e3c283b8cbb9b79c/build_identity.json",
+      "v5_build": "/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926/build/v5_be53e4c706032aef/build_identity.json"
+    },
+    "CVM_T": {
+      "condition": "global_CVM",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "name": "CVM_T",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "support_build": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build/support_e3c283b8cbb9b79c/build_identity.json",
+      "v5_build": "/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926/build/v5_be53e4c706032aef/build_identity.json"
+    },
+    "T_P": {
+      "condition": "global_TP",
+      "fast_t": true,
+      "name": "T_P",
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "v5_build": "/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926/build/v5_be53e4c706032aef/build_identity.json"
+    }
+  },
+  "authorization": "User v14 spec 2026-09-26 (pasted): \"Initial six development questions: /2,/8,/14,/20,/23,/30; generation seeds17/29; five conditions; attempt0 plus one warm repetition =120 complete executions ... If both direct forward timing and adaptive/quality pilot are encouraging, freeze one extension to /1,/6,/16,/25 ... Pick and commit these IDs before the initial answer scores are read.\"",
+  "ceilings": {
+    "elapsed_h": 8,
+    "executions_total": 224,
+    "gpu_h": 6,
+    "this_protocol": 3
+  },
+  "development_ids": [
+    "aime26/2",
+    "aime26/8",
+    "aime26/14",
+    "aime26/20",
+    "aime26/23",
+    "aime26/30"
+  ],
+  "effective_arm_fields": {
+    "B8_P": {
+      "collect": null,
+      "condition": "global_B8P",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": {
+        "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+        "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+        "key": "e3c283b8cbb9b79c",
+        "sources": {
+          "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+          "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+          "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+        }
+      },
+      "v5_binary": {
+        "bridge_sha256": "7b7cf2b7c44623f19622b18b55d08086d04cd1eab340f51aab4e0942ca6ec1f1",
+        "kernel_sha256": "770724c9598fc567d38430cfd5e5cfa47cfb733ecc7ab952e570652288baa8ba",
+        "key": "be53e4c706032aef",
+        "sources": {
+          "torch_bridge_v5.cpp": "fb3741de02bbb47f1253ef90cb817a428912a74b8ed31a86ad2094266de4113e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10",
+          "value_direction_v5.cu": "645c957de3df9acd4bbd1172348812837aa2751d6795e115e5d08d497a1ff24e",
+          "value_direction_v5.h": "edd714c1e0c1515f1472f24c667ae1d85c7d1bffda3f7099bfc2ad48e9167182"
+        }
+      }
+    },
+    "CVM_T": {
+      "collect": null,
+      "condition": "global_CVM",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": {
+        "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+        "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+        "key": "e3c283b8cbb9b79c",
+        "sources": {
+          "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+          "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+          "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+        }
+      },
+      "v5_binary": {
+        "bridge_sha256": "7b7cf2b7c44623f19622b18b55d08086d04cd1eab340f51aab4e0942ca6ec1f1",
+        "kernel_sha256": "770724c9598fc567d38430cfd5e5cfa47cfb733ecc7ab952e570652288baa8ba",
+        "key": "be53e4c706032aef",
+        "sources": {
+          "torch_bridge_v5.cpp": "fb3741de02bbb47f1253ef90cb817a428912a74b8ed31a86ad2094266de4113e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10",
+          "value_direction_v5.cu": "645c957de3df9acd4bbd1172348812837aa2751d6795e115e5d08d497a1ff24e",
+          "value_direction_v5.h": "edd714c1e0c1515f1472f24c667ae1d85c7d1bffda3f7099bfc2ad48e9167182"
+        }
+      }
+    },
+    "T_P": {
+      "collect": null,
+      "condition": "global_TP",
+      "fast_t": true,
+      "guard_mode": null,
+      "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+      "period": null,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": null,
+      "v5_binary": {
+        "bridge_sha256": "7b7cf2b7c44623f19622b18b55d08086d04cd1eab340f51aab4e0942ca6ec1f1",
+        "kernel_sha256": "770724c9598fc567d38430cfd5e5cfa47cfb733ecc7ab952e570652288baa8ba",
+        "key": "be53e4c706032aef",
+        "sources": {
+          "torch_bridge_v5.cpp": "fb3741de02bbb47f1253ef90cb817a428912a74b8ed31a86ad2094266de4113e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10",
+          "value_direction_v5.cu": "645c957de3df9acd4bbd1172348812837aa2751d6795e115e5d08d497a1ff24e",
+          "value_direction_v5.h": "edd714c1e0c1515f1472f24c667ae1d85c7d1bffda3f7099bfc2ad48e9167182"
+        }
+      }
+    }
+  },
+  "exposure_note": "all ten IDs were examined in v13 (and six in v10-v12); development data, not a held-out test",
+  "extension_ids": [
+    "aime26/1",
+    "aime26/6",
+    "aime26/16",
+    "aime26/25"
+  ],
+  "extension_rule": "committed before any v14 answer score is read; run (80 executions) ONLY if both the direct complete-forward gate (5.1) and the adaptive/quality pilot are encouraging; additional development checks, not pristine validation (v13 used all 30)",
+  "failure_policy": "every scheduled execution runs once; failures recorded and count as incorrect/missing; no silent retries",
+  "frozen_utc": "2026-09-26T06:05:41Z",
+  "generation": {
+    "dtype": "bfloat16",
+    "eos": true,
+    "max_new_tokens": 8192,
+    "native_adaptive": true,
+    "temperature_sentinel": 0.0,
+    "thinking": true
+  },
+  "ids": [
+    "aime26/2"
+  ],
+  "manifest": "/media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/private/manifest_all30.json",
+  "manifest_sha256": "a253c357e1a2a2634d895e91620d7e91b1b10640755088a8d4ca7d2b0250b57c",
+  "method_notes": {
+    "B8_P": "fresh v5 anchor (A8 / new canvas / new epoch) + held anchor bitmap, same mandatory set, v11 current-output consumer",
+    "CVM_T": "B8_P + per-step add-only restoration: restore tile iff max_valid_rows(log rho_a + log s_t) >= log tau",
+    "T_G_original": "v13 fresh original GLOBAL T (Junyu v4 binary) with the exact T-only controller fast path",
+    "T_P": "fresh T every call through the private v5 binary with the mandatory set (current canvas + edge tiles)",
+    "fallback": "all *_P arms and CVM_T use native SDPA when no complete immutable-prefix tile exists"
+  },
+  "metrics": {
+    "aggregation": "per question mean over seeds of log(candidate/reference); geometric mean over questions; summed-time ratio = calls ratio x time/call ratio; question-cluster bootstrap (descriptive)",
+    "parity_checks": "D_native and T_G_original attempt-0 token hashes vs the v13 same (id, seed) cells",
+    "primary": "CVM_T vs B8_P (live protection attribution) and CVM_T vs T_P (vs fresh T, same mandatory set)",
+    "quality": "attempt-0 final-channel correctness (frozen v13 scorer); cap/unparsed/failure = incorrect",
+    "secondary": [
+      "CVM_T vs D_native",
+      "CVM_T vs T_G_original",
+      "B8_P vs T_P",
+      "T_P vs T_G_original",
+      "T_G_original vs D_native"
+    ],
+    "time": "accepted single warm API wall (same cell, no new compilation, tokens/calls/termination identical to attempt 0)"
+  },
+  "mode": "smoke",
+  "model_path": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "planned_executions": 3,
+  "policy_file": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/results/query_adaptive_v3/configs/frozen_policies.json",
+  "prompt_hashes": {
+    "aime26/2": "5565b6edb22e83ff52f3714363dde0f997c9d7a5da4c2c51b0d3d50bd520b71b"
+  },
+  "protocol_id": "v14_cvm_t_smoke",
+  "schedule": [
+    {
+      "arm": "B8_P",
+      "block": 0,
+      "cell_id": "d2788d748cfea807fca0797b",
+      "id": "aime26/2",
+      "index": 0,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 42
+    },
+    {
+      "arm": "CVM_T",
+      "block": 0,
+      "cell_id": "7a07e2674b76ad147d3162e9",
+      "id": "aime26/2",
+      "index": 1,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 42
+    },
+    {
+      "arm": "T_P",
+      "block": 0,
+      "cell_id": "e76b0976fe233589e84a1e83",
+      "id": "aime26/2",
+      "index": 2,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 42
+    }
+  ],
+  "schedule_rule": "v13 plan_schedule: (question, seed) blocks shuffled by random.Random(schedule_seed); within a block all arms attempt 0 in cyclic rotation by block position, then one warm repeat per arm reversed",
+  "schedule_seed": 20260927,
+  "schema": "v14_frozen_protocol_v1",
+  "seed_semantics": "generation seed -> GenerationRequest.seed -> adapter.generate seed_everything (native sampler RNG)",
+  "seeds": [
+    42
+  ],
+  "warm_repeats": 1
+}

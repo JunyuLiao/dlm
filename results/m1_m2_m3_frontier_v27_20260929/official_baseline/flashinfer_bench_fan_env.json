@@ -1,0 +1,64 @@
+{
+ "schema": "v27_flashinfer_bench_v1",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "torch": "2.13.0+cu130",
+ "rows": [
+  {
+   "keys": 16640,
+   "flashinfer": "0.6.18.post1",
+   "dense_fa2": {
+    "ms": 4.277,
+    "max_abs_err_vs_fp32": 0.00028
+   },
+   "dense_fa3": {
+    "error": "RuntimeError: Ninja build failed. Ninja output:\nninja: Entering directory `/home/exouser/dyh/m3_output_numerics_v21_20260927/scratch_tests/v27_flashinfer_4/fi_ws/.cache/flashinfer/0.6.18.post1/90a/cached_ops/single_prefill_with_kv_cache_dtype_q_bf16_dtype_kv_bf16_dtype_o_bf16_head_dim_qk_512_head_dim_vo_512_posen"
+   },
+   "dense_auto": {
+    "ms": 4.3427,
+    "max_abs_err_vs_fp32": 0.00028
+   },
+   "batch_ragged_fa2": {
+    "ms": 0.7674,
+    "max_abs_err_vs_fp32": 0.00028
+   }
+  },
+  {
+   "keys": 32768,
+   "flashinfer": "0.6.18.post1",
+   "dense_fa2": {
+    "ms": 8.9027,
+    "max_abs_err_vs_fp32": 0.00024
+   },
+   "dense_fa3": {
+    "error": "RuntimeError: Ninja build failed. Ninja output:\nninja: Entering directory `/home/exouser/dyh/m3_output_numerics_v21_20260927/scratch_tests/v27_flashinfer_4/fi_ws/.cache/flashinfer/0.6.18.post1/90a/cached_ops/single_prefill_with_kv_cache_dtype_q_bf16_dtype_kv_bf16_dtype_o_bf16_head_dim_qk_512_head_dim_vo_512_posen"
+   },
+   "dense_auto": {
+    "ms": 8.9865,
+    "max_abs_err_vs_fp32": 0.00024
+   },
+   "batch_ragged_fa2": {
+    "ms": 1.4105,
+    "max_abs_err_vs_fp32": 0.00023
+   }
+  },
+  {
+   "keys": 65536,
+   "flashinfer": "0.6.18.post1",
+   "dense_fa2": {
+    "ms": 19.2699,
+    "max_abs_err_vs_fp32": 0.00014
+   },
+   "dense_fa3": {
+    "error": "RuntimeError: Ninja build failed. Ninja output:\nninja: Entering directory `/home/exouser/dyh/m3_output_numerics_v21_20260927/scratch_tests/v27_flashinfer_4/fi_ws/.cache/flashinfer/0.6.18.post1/90a/cached_ops/single_prefill_with_kv_cache_dtype_q_bf16_dtype_kv_bf16_dtype_o_bf16_head_dim_qk_512_head_dim_vo_512_posen"
+   },
+   "dense_auto": {
+    "ms": 18.8519,
+    "max_abs_err_vs_fp32": 0.00014
+   },
+   "batch_ragged_fa2": {
+    "ms": 2.7646,
+    "max_abs_err_vs_fp32": 0.00014
+   }
+  }
+ ]
+}

@@ -1,0 +1,1807 @@
+{
+ "aime26_b32k": {
+  "built_utc": "2026-10-04T10:08:16Z",
+  "cells": 120,
+  "code": {
+   "builder_sha256": "0af74b325da7305dbaed6a5fddab72ac00cd62e46c4ffaf0589c25ae6a193ce3"
+  },
+  "max_model_len": {
+   "need": 33149,
+   "pinned": 37888
+  },
+  "output_files_sha256": {
+   "aime26_b32k_generation_manifest.json": "6faaa369e0c305f8388da51a4c0c9dbdca068638f88a7cd407a028bd4c11ec33",
+   "aime26_b32k_rowinfo.json": "4ff7f3fbf6a9693b540bc3ca0bded42f5c6b609a437ff97ca97b7a3b0c54de8a",
+   "cells_aime26_b32k.json": "16be22703f0e87fb023d91c5aa1c309a6c32776ef2b1ad587e95354fe0ed7c1a"
+  },
+  "pool": "aime26_b32k",
+  "prompt_token_count": {
+   "max": 381,
+   "mean": 165.6,
+   "median": 164.0,
+   "min": 79,
+   "n": 30
+  },
+  "rows": 30,
+  "rule": "v27 final AIME26 manifest, generation_budget 8192 -> 32768 under its own dataset name; ids, prompts, prompt_tokens, thinking unchanged (asserted per row); cells seeds 1-4 (avg@4), seed-major. No gold file: answers come from the pinned math-ai/aime26 file via each row's source_id.",
+  "schema": "pools_v31_official_readme_v2",
+  "seeds": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "source_sha256": "21f8373418c2d47ce9f83b84554ece9496ed146b8bfc4db0c07c8a0c0a5e8467"
+ },
+ "e2e_synthetic_scorer_check": {
+  "detail": {
+   "aime26_b32k": {
+    "arms": {
+     "cappedperfect": {
+      "avg_at_k": 100,
+      "cells": 120,
+      "k": [
+       4
+      ]
+     },
+     "empty": {
+      "avg_at_k": 0,
+      "cells": 120,
+      "k": [
+       4
+      ]
+     },
+     "perfect": {
+      "avg_at_k": 100,
+      "cells": 120,
+      "k": [
+       4
+      ]
+     }
+    },
+    "paired": [
+     "| empty | aime26_b32k | 0.0 | 100.0 | -100.00 [-100.00, -100.00] | 0/120 (p=0.000) | 120 | 30 |"
+    ],
+    "refusals": {
+     "budget": "ValueError: cell aime26_b32k|0|1|0: budget 32769 differs from the pool row (32768)",
+     "manifest_sha256": "ValueError: cell aime26_b32k|0|1|0: generated from another manifest than the pool given",
+     "missing_cell": "ValueError: arm partial: 1 of 120 planned cells missing (--allow-missing scores the cells common to all arms)",
+     "prompt_sha256": "ValueError: cell aime26_b32k|0|1|0: prompt token ids differ from the pool row",
+     "unplanned_cell": "ValueError: arm stray: 1 cells are not planned cells (e.g. aime26_b32k|100000|1|0)"
+    }
+   },
+   "graphwalks_b16k": {
+    "arms": {
+     "cappedperfect": {
+      "graphwalks_22k_b16k": 1.0,
+      "graphwalks_45k_b16k": 1.0,
+      "graphwalks_90k_b16k": 1.0
+     },
+     "empty": {
+      "graphwalks_22k_b16k": 0.0,
+      "graphwalks_45k_b16k": 0.0,
+      "graphwalks_90k_b16k": 0.0
+     },
+     "perfect": {
+      "graphwalks_22k_b16k": 1.0,
+      "graphwalks_45k_b16k": 1.0,
+      "graphwalks_90k_b16k": 1.0
+     }
+    },
+    "refusals": {
+     "budget": "ValueError: cell graphwalks_22k_b16k|0|1|0: budget 16385 differs from the pool row (16384)",
+     "manifest_sha256": "ValueError: cell graphwalks_22k_b16k|0|1|0: generated from another manifest than the pool given",
+     "missing_cell": "ValueError: arm partial: 1 of 72 planned cells missing (--allow-missing scores the cells common to all arms)",
+     "prompt_sha256": "ValueError: cell graphwalks_22k_b16k|0|1|0: prompt token ids differ from the pool row",
+     "unplanned_cell": "ValueError: arm stray: 1 cells are not planned cells (e.g. graphwalks_22k_b16k|100000|1|0)"
+    }
+   },
+   "longbench_v2_0shot": {
+    "arms": {
+     "cappedperfect": {
+      "Easy": 100.0,
+      "Hard": 100.0,
+      "Long": 100.0,
+      "Medium": 100.0,
+      "Overall": 100.0,
+      "Short": 100.0,
+      "items": 503,
+      "unparsed": 0
+     },
+     "empty": {
+      "Easy": 0.0,
+      "Hard": 0.0,
+      "Long": 0.0,
+      "Medium": 0.0,
+      "Overall": 0.0,
+      "Short": 0.0,
+      "items": 503,
+      "unparsed": 503
+     },
+     "perfect": {
+      "Easy": 100.0,
+      "Hard": 100.0,
+      "Long": 100.0,
+      "Medium": 100.0,
+      "Overall": 100.0,
+      "Short": 100.0,
+      "items": 503,
+      "unparsed": 0
+     }
+    },
+    "paired": [
+     "| empty | longbench_v2_0shot | 0.0 | 100.0 | -100.00 [-100.00, -100.00] | 0/503 (p=0.000) | 503 | 503 |",
+     "| empty | longbench_v2_0shot | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) |"
+    ],
+    "refusals": {
+     "budget": "ValueError: cell longbench_v2_0shot|0|1|0: budget 129 differs from the pool row (128)",
+     "manifest_sha256": "ValueError: cell longbench_v2_0shot|0|1|0: generated from another manifest than the pool given",
+     "missing_cell": "ValueError: arm partial: 1 of 503 planned cells missing (--allow-missing scores the cells common to all arms)",
+     "prompt_sha256": "ValueError: cell longbench_v2_0shot|0|1|0: prompt token ids differ from the pool row",
+     "unplanned_cell": "ValueError: arm stray: 1 cells are not planned cells (e.g. longbench_v2_0shot|100000|1|0)"
+    }
+   },
+   "longbench_v2_0shot_think": {
+    "arms": {
+     "cappedperfect": {
+      "Easy": 100.0,
+      "Hard": 100.0,
+      "Long": 100.0,
+      "Medium": 100.0,
+      "Overall": 100.0,
+      "Short": 100.0,
+      "items": 503,
+      "unparsed": 0
+     },
+     "empty": {
+      "Easy": 0.0,
+      "Hard": 0.0,
+      "Long": 0.0,
+      "Medium": 0.0,
+      "Overall": 0.0,
+      "Short": 0.0,
+      "items": 503,
+      "unparsed": 503
+     },
+     "perfect": {
+      "Easy": 100.0,
+      "Hard": 100.0,
+      "Long": 100.0,
+      "Medium": 100.0,
+      "Overall": 100.0,
+      "Short": 100.0,
+      "items": 503,
+      "unparsed": 0
+     }
+    },
+    "paired": [
+     "| empty | longbench_v2_0shot_think | 0.0 | 100.0 | -100.00 [-100.00, -100.00] | 0/503 (p=0.000) | 503 | 503 |",
+     "| empty | longbench_v2_0shot_think | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) |"
+    ],
+    "refusals": {
+     "budget": "ValueError: cell longbench_v2_0shot_think|0|1|0: budget 16385 differs from the pool row (16384)",
+     "manifest_sha256": "ValueError: cell longbench_v2_0shot_think|0|1|0: generated from another manifest than the pool given",
+     "missing_cell": "ValueError: arm partial: 1 of 503 planned cells missing (--allow-missing scores the cells common to all arms)",
+     "prompt_sha256": "ValueError: cell longbench_v2_0shot_think|0|1|0: prompt token ids differ from the pool row",
+     "unplanned_cell": "ValueError: arm stray: 1 cells are not planned cells (e.g. longbench_v2_0shot_think|100000|1|0)"
+    }
+   },
+   "longbench_v2_cot_think": {
+    "arms": {
+     "cappedperfect": {
+      "Easy": 100.0,
+      "Hard": 100.0,
+      "Long": 100.0,
+      "Medium": 100.0,
+      "Overall": 100.0,
+      "Short": 100.0,
+      "items": 503,
+      "unparsed": 0
+     },
+     "empty": {
+      "Easy": 0.0,
+      "Hard": 0.0,
+      "Long": 0.0,
+      "Medium": 0.0,
+      "Overall": 0.0,
+      "Short": 0.0,
+      "items": 503,
+      "unparsed": 503
+     },
+     "perfect": {
+      "Easy": 100.0,
+      "Hard": 100.0,
+      "Long": 100.0,
+      "Medium": 100.0,
+      "Overall": 100.0,
+      "Short": 100.0,
+      "items": 503,
+      "unparsed": 0
+     }
+    },
+    "paired": [
+     "| empty | longbench_v2_cot_think | 0.0 | 100.0 | -100.00 [-100.00, -100.00] | 0/503 (p=0.000) | 503 | 503 |",
+     "| empty | longbench_v2_cot_think | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) | 0.0 (-100.0) |"
+    ],
+    "refusals": {
+     "budget": "ValueError: cell longbench_v2_cot_think|0|1|0: budget 16385 differs from the pool row (16384)",
+     "manifest_sha256": "ValueError: cell longbench_v2_cot_think|0|1|0: generated from another manifest than the pool given",
+     "missing_cell": "ValueError: arm partial: 1 of 503 planned cells missing (--allow-missing scores the cells common to all arms)",
+     "prompt_sha256": "ValueError: cell longbench_v2_cot_think|0|1|0: prompt token ids differ from the pool row",
+     "unplanned_cell": "ValueError: arm stray: 1 cells are not planned cells (e.g. longbench_v2_cot_think|100000|1|0)"
+    }
+   },
+   "mrcr_ofc": {
+    "arms": {
+     "cappedperfect": {
+      "mrcr2_128k_ofc": 1.0,
+      "mrcr2_32k_ofc": 1.0,
+      "mrcr2_64k_ofc": 1.0
+     },
+     "empty": {
+      "mrcr2_128k_ofc": 0.0,
+      "mrcr2_32k_ofc": 0.0,
+      "mrcr2_64k_ofc": 0.0
+     },
+     "perfect": {
+      "mrcr2_128k_ofc": 1.0,
+      "mrcr2_32k_ofc": 1.0,
+      "mrcr2_64k_ofc": 1.0
+     }
+    },
+    "refusals": {
+     "budget": "ValueError: cell mrcr2_32k_ofc|0|1|0: budget 2049 differs from the pool row (2048)",
+     "manifest_sha256": "ValueError: cell mrcr2_32k_ofc|0|1|0: generated from another manifest than the pool given",
+     "missing_cell": "ValueError: arm partial: 1 of 72 planned cells missing (--allow-missing scores the cells common to all arms)",
+     "prompt_sha256": "ValueError: cell mrcr2_32k_ofc|0|1|0: prompt token ids differ from the pool row",
+     "unplanned_cell": "ValueError: arm stray: 1 cells are not planned cells (e.g. mrcr2_32k_ofc|100000|1|0)"
+    }
+   },
+   "ruler_table_rows": [
+    "| perfect | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | - | - | - |",
+    "| cappedperfect | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | 100.0 | +0.00 [+0.00, +0.00] | 0/0 (1.000) | - |",
+    "| empty | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | 0.0 | -100.00 [-100.00, -100.00] | 0/585 (0.000) | - |"
+   ],
+   "ruler_v33noop": {
+    "arms": {
+     "cappedperfect": {
+      "capped": 135,
+      "cells": 135,
+      "nulls": 0,
+      "overall": 100.0,
+      "verified": 135
+     },
+     "empty": {
+      "capped": 0,
+      "cells": 135,
+      "nulls": 135,
+      "overall": 0.0,
+      "verified": 135
+     },
+     "perfect": {
+      "capped": 0,
+      "cells": 135,
+      "nulls": 0,
+      "overall": 100.0,
+      "verified": 135
+     }
+    },
+    "refusals": {
+     "budget": "ValueError: cell ruler32k_v33noop|0|1|0: budget 129 differs from the pool row (128)",
+     "manifest_sha256": "ValueError: cell ruler32k_v33noop|0|1|0: generated from another manifest than the pool given",
+     "missing_cell": "ValueError: arm partial: 1 of 135 planned cells missing (--allow-missing scores the cells common to all arms)",
+     "prompt_sha256": "ValueError: cell ruler32k_v33noop|0|1|0: prompt token ids differ from the pool row",
+     "unplanned_cell": "ValueError: arm stray: 1 cells are not planned cells (e.g. ruler32k_v33noop|100000|1|0)"
+    }
+   },
+   "ruler_v33ofc": {
+    "arms": {
+     "cappedperfect": {
+      "capped": 585,
+      "cells": 585,
+      "nulls": 0,
+      "overall": 100.0,
+      "verified": 585
+     },
+     "empty": {
+      "capped": 0,
+      "cells": 585,
+      "nulls": 585,
+      "overall": 0.0,
+      "verified": 585
+     },
+     "perfect": {
+      "capped": 0,
+      "cells": 585,
+      "nulls": 0,
+      "overall": 100.0,
+      "verified": 585
+     }
+    },
+    "refusals": {
+     "budget": "ValueError: cell ruler32k_v33ofc|0|1|0: budget 121 differs from the pool row (120)",
+     "manifest_sha256": "ValueError: cell ruler32k_v33ofc|0|1|0: generated from another manifest than the pool given",
+     "missing_cell": "ValueError: arm partial: 1 of 585 planned cells missing (--allow-missing scores the cells common to all arms)",
+     "prompt_sha256": "ValueError: cell ruler32k_v33ofc|0|1|0: prompt token ids differ from the pool row",
+     "unplanned_cell": "ValueError: arm stray: 1 cells are not planned cells (e.g. ruler32k_v33ofc|100000|1|0)"
+    }
+   }
+  },
+  "result": "ALL_EXPECTED"
+ },
+ "fresh_process_checks": {
+  "aime26_b32k": {
+   "aime26_b32k_budget": 32768,
+   "benchmark_is_dataset": 30,
+   "cells": 120,
+   "cells_ok": 120,
+   "cells_without_manifest": 0,
+   "count_ok": 30,
+   "hash_ok": 30,
+   "ids_unique": 1,
+   "manifest_sha_ok": 1,
+   "manifests": 1,
+   "pin_holds_rows": 1,
+   "rerender_identical": 30,
+   "rowinfo_ok": 30,
+   "rowinfo_v2": 1,
+   "rows": 30,
+   "seconds": 6,
+   "source_rows": 30,
+   "source_rows_equal_except_name_budget": 30
+  },
+  "graphwalks_b16k": {
+   "benchmark_is_dataset": 72,
+   "cells": 96,
+   "cells_ok": 96,
+   "cells_without_manifest": 0,
+   "count_ok": 72,
+   "gold_files": 3,
+   "gold_keys_match": 3,
+   "graphwalks_22k_b16k_budget": 16384,
+   "graphwalks_45k_b16k_budget": 16384,
+   "graphwalks_90k_b16k_budget": 16384,
+   "hash_ok": 72,
+   "ids_unique": 3,
+   "manifest_sha_ok": 3,
+   "manifests": 3,
+   "pin_holds_rows": 3,
+   "rerender_identical": 72,
+   "rowinfo_ok": 72,
+   "rowinfo_v2": 3,
+   "rows": 72,
+   "seconds": 20,
+   "source_rows": 72,
+   "source_rows_equal_except_name_budget": 72
+  },
+  "longbench_v2_ofc": {
+   "benchmark_is_dataset": 1509,
+   "cells": 1509,
+   "cells_ok": 1509,
+   "cells_without_manifest": 0,
+   "count_ok": 1509,
+   "gold_files": 3,
+   "gold_keys_match": 3,
+   "hash_ok": 1509,
+   "ids_unique": 3,
+   "lb_rows": 1509,
+   "lb_truncation_rederived_identical": 1509,
+   "longbench_v2_0shot_rows": 503,
+   "longbench_v2_0shot_think_rows": 503,
+   "longbench_v2_0shot_think_truncated": 237,
+   "longbench_v2_0shot_truncated": 237,
+   "longbench_v2_cot_think_rows": 503,
+   "longbench_v2_cot_think_truncated": 237,
+   "manifest_sha_ok": 3,
+   "manifests": 3,
+   "pin_holds_rows": 3,
+   "rerender_identical": 1509,
+   "rowinfo_ok": 1509,
+   "rowinfo_v2": 3,
+   "rows": 1509,
+   "seconds": 1379
+  },
+  "mrcr_ofc": {
+   "benchmark_is_dataset": 72,
+   "cells": 72,
+   "cells_ok": 72,
+   "cells_without_manifest": 0,
+   "count_ok": 72,
+   "gold_files": 3,
+   "gold_keys_match": 3,
+   "hash_ok": 72,
+   "ids_unique": 3,
+   "manifest_sha_ok": 3,
+   "manifests": 3,
+   "mrcr_row_in_bin_block": 72,
+   "mrcr_rows": 72,
+   "pin_holds_rows": 3,
+   "rerender_identical": 72,
+   "rowinfo_ok": 72,
+   "rowinfo_v2": 3,
+   "rows": 72,
+   "seconds": 51
+  },
+  "ruler_v33noop": {
+   "benchmark_is_dataset": 135,
+   "cells": 135,
+   "cells_ok": 135,
+   "cells_without_manifest": 0,
+   "count_ok": 135,
+   "gold_files": 1,
+   "gold_keys_match": 1,
+   "hash_ok": 135,
+   "ids_unique": 1,
+   "manifest_sha_ok": 1,
+   "manifests": 1,
+   "noop_same_id_input_prefix_as_ofc": 135,
+   "noop_tasks_ok": 135,
+   "pin_holds_rows": 1,
+   "prefill_tail_checked": 135,
+   "prefill_tail_ok": 135,
+   "rerender_identical": 135,
+   "rowinfo_ok": 135,
+   "rowinfo_v2": 1,
+   "rows": 135,
+   "seconds": 24
+  },
+  "ruler_v33ofc": {
+   "benchmark_is_dataset": 585,
+   "cells": 720,
+   "cells_ok": 720,
+   "cells_without_manifest": 0,
+   "count_ok": 585,
+   "gold_files": 3,
+   "gold_keys_match": 3,
+   "hash_ok": 585,
+   "ids_unique": 3,
+   "manifest_sha_ok": 3,
+   "manifests": 3,
+   "pin_holds_rows": 3,
+   "prefill_tail_checked": 585,
+   "prefill_tail_ok": 585,
+   "rerender_identical": 585,
+   "rowinfo_ok": 585,
+   "rowinfo_v2": 3,
+   "rows": 585,
+   "ruler_gold_bytes_equal_v33": 3,
+   "ruler_ids_equal_v33": 3,
+   "ruler_raw_prompt_equal_v33": 585,
+   "ruler_user_turn_without_prefix": 585,
+   "seconds": 269
+  }
+ },
+ "fresh_process_checks_note": "mrcr_ofc re-checked with the messages-path renderer (commit 3f38a48e9)",
+ "graphwalks_b16k": {
+  "bins": {
+   "graphwalks_22k_b16k": {
+    "problem_type": {
+     "bfs": 12,
+     "parents": 12
+    },
+    "prompt_token_count": {
+     "max": 22529,
+     "mean": 22400.3,
+     "median": 22404.5,
+     "min": 22265,
+     "n": 24
+    },
+    "rows": 24,
+    "source_dataset": "graphwalks_22k",
+    "source_gold_sha256": "964fd6e93da1d891610c067220037022c7ecaa37979e8f74732c8aa28fd4a26f",
+    "source_manifest_sha256": "22a73616d1b9023f6cbde5bbde5fdec9b487a90966222386d8f923168a305035"
+   },
+   "graphwalks_45k_b16k": {
+    "problem_type": {
+     "bfs": 12,
+     "parents": 12
+    },
+    "prompt_token_count": {
+     "max": 44841,
+     "mean": 44695.7,
+     "median": 44702.5,
+     "min": 44511,
+     "n": 24
+    },
+    "rows": 24,
+    "source_dataset": "graphwalks_45k",
+    "source_gold_sha256": "128de27e9f6f1a97d6bfea7a79afd6fd8119b506bf611d75136b720299e62bf8",
+    "source_manifest_sha256": "5e64b8ed57355f72fb6068e9447edeb7bd209739b9fe329d96faee15bea02604"
+   },
+   "graphwalks_90k_b16k": {
+    "problem_type": {
+     "bfs": 12,
+     "parents": 12
+    },
+    "prompt_token_count": {
+     "max": 89676,
+     "mean": 89496.1,
+     "median": 89538.5,
+     "min": 89071,
+     "n": 24
+    },
+    "rows": 24,
+    "source_dataset": "graphwalks_90k",
+    "source_gold_sha256": "a4a2ed23bc3b80f338ac1c23df2e469aa1f224b10ee8fdb26c719ab7244c0599",
+    "source_manifest_sha256": "1f0861c2df7091cb96532905f51c7c914e3b472681f444552d7f2c5db3f501a1"
+   }
+  },
+  "built_utc": "2026-10-04T10:08:18Z",
+  "cells": 72,
+  "code": {
+   "builder_sha256": "0af74b325da7305dbaed6a5fddab72ac00cd62e46c4ffaf0589c25ae6a193ce3"
+  },
+  "max_model_len": {
+   "need": 106060,
+   "pinned": 110592
+  },
+  "output_files_sha256": {
+   "cells_graphwalks_90k_b16k_pilot.json": "08e6c9519edc94683553fd6f687a03f9543379cb9fd72f376befc6b6c5e8b8d8",
+   "cells_graphwalks_b16k.json": "62aadde53da99841deebe522d7c5f822a698134016f3662feb4bc70a1ea4bde9",
+   "graphwalks_22k_b16k_generation_manifest.json": "838370313ab9ce51d6fa3551cdb7e4be307bd981b3f5fbfee4b93d979e017b98",
+   "graphwalks_22k_b16k_gold.json": "964fd6e93da1d891610c067220037022c7ecaa37979e8f74732c8aa28fd4a26f",
+   "graphwalks_22k_b16k_rowinfo.json": "6788e32cba7c02fcfb3ada5ec6fd2e3c0bf9bff9714695608c97cdda8f0af69a",
+   "graphwalks_45k_b16k_generation_manifest.json": "e912a6381a27ca3a8de8f49ffdf85d37c7c64d1eb0ced4ee49766fb9a5188503",
+   "graphwalks_45k_b16k_gold.json": "128de27e9f6f1a97d6bfea7a79afd6fd8119b506bf611d75136b720299e62bf8",
+   "graphwalks_45k_b16k_rowinfo.json": "97fbb736e7b7efdfd296ed83e0e25dea25577db2d13abf7634538484eeb9b7a4",
+   "graphwalks_90k_b16k_generation_manifest.json": "dea0ac4b0768824af495508414f557343d7f5f43c53ffad7987966f6ea4a37ec",
+   "graphwalks_90k_b16k_gold.json": "a4a2ed23bc3b80f338ac1c23df2e469aa1f224b10ee8fdb26c719ab7244c0599",
+   "graphwalks_90k_b16k_rowinfo.json": "1cdd11663e5639887a27bb642d2d72539b07bc1227046d8a380f7abb7ccb87b1"
+  },
+  "pool": "graphwalks_b16k",
+  "rule": "pools_v31 GraphWalks rows under their own dataset names with generation_budget 8192 -> 16384 (no official budget: the reasoning-model rule; 4 of 24 graphwalks_90k gold answer lines alone need > 2048 tokens); ids, prompts, prompt_tokens, thinking and gold unchanged (asserted); cells seed 1; cells_graphwalks_90k_b16k_pilot.json = the 90k bin for the dense cap-rate pilot",
+  "schema": "pools_v31_official_readme_v2"
+ },
+ "humaneval_positive_control": {
+  "dataset_sha256": "b796127e635a67f93fb35c04f4cb03cf06f38c8072ee7cee8833d7bee06979ef",
+  "extraction": {
+   "parsed": 164
+  },
+  "extractor": "final_first_entry_point_py_fence_or_plain_complete_function_v3",
+  "failed": [],
+  "passed": 164,
+  "program": "official_check_program_full_prompt_v2",
+  "sandbox": "unprivileged_bwrap_readonly_net_pid_user_isolated_mpk_v1",
+  "tasks": 164,
+  "timeouts_after_rerun": 0,
+  "timeouts_first_pass": 0
+ },
+ "longbench_v2_ofc": {
+  "code": {
+   "adapter_sha256": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+   "deploy_sha": "acd3cf8da03a6bb81b300cc6ed5f2917df6632d9",
+   "files_sha256": {
+    "v15_longbench_task.py": "9a84561c9a70c46a390300eff864822abb2ec22c4013a35118799b1946b42c1b",
+    "v31_build_official_pools.py": "0af74b325da7305dbaed6a5fddab72ac00cd62e46c4ffaf0589c25ae6a193ce3",
+    "v31_official.py": "953f8acd9b1e1360293d06c2b270c99bf928154448b847b98b9a5a0af2c70a13"
+   }
+  },
+  "dataset": {
+   "items": 503,
+   "revision": "2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9",
+   "sha256": "15d61c22d92c96900b3c4948b6aeea218d3214b676a65df48e7b8555604c7fe2"
+  },
+  "escaping": {
+   "occurrences": {
+    "<bos>": 11,
+    "<eos>": 15,
+    "<mask>": 12,
+    "<pad>": 24,
+    "<unk>": 36,
+    "<|audio|>": 1,
+    "<|image|>": 17
+   },
+   "rule": "scripts/v15_longbench_task.py escape: literal reserved special-token spellings in the item fields become &lt;...&gt; before the template is filled (declared deviation)"
+  },
+  "official": {
+   "commit": "2e00731f8d0bff23dc4325161044d0ed8af94c1e",
+   "files_sha256": {
+    "config/model2maxlen.json": "c37ec6e5d77e68e4cf6280183c6e68e885852ced6904e049ed75d3e73fc61ebe",
+    "pred.py": "ab63f77866a1c0dc770582bc3fe6b014c3b4be4667399b0ee267075780c6a138",
+    "prompts/0shot.txt": "68a162252bc9ff71d5d7abca3d69bb31aac3c35f832d657a2866f2018b8a6950",
+    "prompts/0shot_cot.txt": "6cc33d92fd8f611662b756c1f10f302c541ca005b58c46d5f3188ac3a939bfe8",
+    "prompts/0shot_cot_ans.txt": "85ec59df4ac0e27aabbc619a7ca5cf3ae1787dd5a76cf51a18944eb52c91955f",
+    "result.py": "b6675c1c0b72090c01e12c94d3b176c4991fe38ceed9a301d24d22b1997465bd"
+   },
+   "max_len_open_models": [
+    120000
+   ],
+   "source": "copies of the THUDM/LongBench @ 2e00731f files, verified by sha256 against the pinned values"
+  },
+  "output_files_sha256": {
+   "cells_longbench_v2_0shot.json": "786dc7a6a153cd3506f9a2adf46ea8ccdbca1f606cdb47c0fbc8623c30e054e9",
+   "cells_longbench_v2_0shot_think.json": "d48c39d68533467fd4942931745377a42a9d57e3e5714aa8913f5d897e7d4957",
+   "cells_longbench_v2_cot_think.json": "639899384937f6d6429a3bab91d4abdbc457882730ccfae2018ced507676486a",
+   "longbench_v2_0shot_generation_manifest.json": "bfc9dfae07a06801e8462c2671e471c9cbe14627df527eff4a4c77ea16ee3495",
+   "longbench_v2_0shot_gold.json": "9bb1e8e29cebc3ae4f28595f5aab5b3fe1d9d520f73632f4e2e5a672b0846e7b",
+   "longbench_v2_0shot_rowinfo.json": "a63237872e5d362bf08645301783d4e995706e1a80a45941253b57ecb6600b29",
+   "longbench_v2_0shot_think_generation_manifest.json": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "longbench_v2_0shot_think_gold.json": "9bb1e8e29cebc3ae4f28595f5aab5b3fe1d9d520f73632f4e2e5a672b0846e7b",
+   "longbench_v2_0shot_think_rowinfo.json": "2104bcdaa103c0dd9dd91b019777183e1aee9e91838378f24960b55902e6266d",
+   "longbench_v2_cot_think_generation_manifest.json": "6b65dbdb4b662eb8082d67111bd0ddfc583e4c867084f8ba87b5c733ebbe0b19",
+   "longbench_v2_cot_think_gold.json": "9bb1e8e29cebc3ae4f28595f5aab5b3fe1d9d520f73632f4e2e5a672b0846e7b",
+   "longbench_v2_cot_think_rowinfo.json": "d5da45e020e95c686f76dfe4d44ae4e8e2efaed3df46e3267ea35187ba9eea7b"
+  },
+  "rule": "All 503 LongBench-v2 items (pinned dataset revision), THUDM/LongBench @ 2e00731f pred.py (the six files\n              copied into the dyh tree and verified by sha256, never read through git): template filled with the\n              stripped fields (after the project's reserved-token escaping), tokenized with OUR tokenizer\n              (tokenizer.encode, as pred.py); above 120,000 ids the first and last 60,000 are kept and decoded with\n              skip_special_tokens=True; then adapter.encode_prompt. One dataset per variant:\n                longbench_v2_0shot        prompts/0shot.txt,     thinking off, 128 new tokens   headline w/o CoT\n                longbench_v2_0shot_think  prompts/0shot.txt,     thinking on, 16384 (total cap)  headline w/ CoT\n                longbench_v2_cot_think    prompts/0shot_cot.txt, thinking on, 16384             not a headline column",
+  "truncation": {
+   "keep": "first 60000 + last 60000 ids of tokenizer.encode(filled template) (adds no special tokens for this tokenizer), decode(skip_special_tokens=True)",
+   "max_len": 120000,
+   "tokenizer": "ours (Gemma4Processor.tokenizer)"
+  },
+  "variants": {
+   "longbench_v2_0shot": {
+    "column": "headline w/o CoT: pred.py without --cot (zero-shot prompt, 128 new tokens), thinking off",
+    "difficulty": {
+     "easy": 192,
+     "hard": 311
+    },
+    "generation_budget": 128,
+    "length_class": {
+     "long": 108,
+     "medium": 215,
+     "short": 180
+    },
+    "max_model_len": {
+     "need": 120138,
+     "pinned": 124928
+    },
+    "original_token_count": {
+     "max": 5173963,
+     "mean": 282001.7,
+     "median": 107641,
+     "min": 10269,
+     "n": 503
+    },
+    "original_token_count_truncated": {
+     "max": 5173963,
+     "mean": 540763.3,
+     "median": 225519,
+     "min": 120178,
+     "n": 237
+    },
+    "prompt_token_count": {
+     "max": 120010,
+     "mean": 83758.4,
+     "median": 107650,
+     "min": 10278,
+     "n": 503
+    },
+    "prompt_token_count_truncated": {
+     "max": 120010,
+     "mean": 120009.0,
+     "median": 120009,
+     "min": 120008,
+     "n": 237
+    },
+    "rows": 503,
+    "template": "prompts/0shot.txt",
+    "thinking": false,
+    "total_tokens_max": 120138,
+    "truncated": 237,
+    "truncated_by_length_class": {
+     "long": 108,
+     "medium": 127,
+     "short": 2
+    },
+    "untruncated": 266
+   },
+   "longbench_v2_0shot_think": {
+    "column": "headline w/ CoT: the leaderboard rule for hybrid reasoning models (Qwen3: w/o CoT = non-thinking mode, w/ CoT = thinking mode with a 16K thinking budget); zero-shot prompt, thinking on; our 16,384 is a total cap on thinking + answer, not a thinking budget",
+    "difficulty": {
+     "easy": 192,
+     "hard": 311
+    },
+    "generation_budget": 16384,
+    "length_class": {
+     "long": 108,
+     "medium": 215,
+     "short": 180
+    },
+    "max_model_len": {
+     "need": 136401,
+     "pinned": 141312
+    },
+    "original_token_count": {
+     "max": 5173963,
+     "mean": 282001.7,
+     "median": 107641,
+     "min": 10269,
+     "n": 503
+    },
+    "original_token_count_truncated": {
+     "max": 5173963,
+     "mean": 540763.3,
+     "median": 225519,
+     "min": 120178,
+     "n": 237
+    },
+    "prompt_token_count": {
+     "max": 120017,
+     "mean": 83765.4,
+     "median": 107657,
+     "min": 10285,
+     "n": 503
+    },
+    "prompt_token_count_truncated": {
+     "max": 120017,
+     "mean": 120016.0,
+     "median": 120016,
+     "min": 120015,
+     "n": 237
+    },
+    "rows": 503,
+    "template": "prompts/0shot.txt",
+    "thinking": true,
+    "total_tokens_max": 136401,
+    "truncated": 237,
+    "truncated_by_length_class": {
+     "long": 108,
+     "medium": 127,
+     "short": 2
+    },
+    "untruncated": 266
+   },
+   "longbench_v2_cot_think": {
+    "column": "NOT a headline column: prompts/0shot_cot.txt single stage with thinking (pred.py --cot always adds the 0shot_cot_ans stage that asks for the answer format; extract_answer undercounts this variant)",
+    "difficulty": {
+     "easy": 192,
+     "hard": 311
+    },
+    "generation_budget": 16384,
+    "length_class": {
+     "long": 108,
+     "medium": 215,
+     "short": 180
+    },
+    "max_model_len": {
+     "need": 136400,
+     "pinned": 141312
+    },
+    "original_token_count": {
+     "max": 5173955,
+     "mean": 281993.7,
+     "median": 107633,
+     "min": 10261,
+     "n": 503
+    },
+    "original_token_count_truncated": {
+     "max": 5173955,
+     "mean": 540755.3,
+     "median": 225511,
+     "min": 120170,
+     "n": 237
+    },
+    "prompt_token_count": {
+     "max": 120016,
+     "mean": 83761.2,
+     "median": 107649,
+     "min": 10277,
+     "n": 503
+    },
+    "prompt_token_count_truncated": {
+     "max": 120016,
+     "mean": 120015.9,
+     "median": 120016,
+     "min": 120015,
+     "n": 237
+    },
+    "rows": 503,
+    "template": "prompts/0shot_cot.txt",
+    "thinking": true,
+    "total_tokens_max": 136400,
+    "truncated": 237,
+    "truncated_by_length_class": {
+     "long": 108,
+     "medium": 127,
+     "short": 2
+    },
+    "untruncated": 266
+   }
+  }
+ },
+ "mrcr_ofc": {
+  "bins": {
+   "mrcr2_128k_ofc": {
+    "answer_tokens": {
+     "max": 600,
+     "mean": 451.6,
+     "median": 467.0,
+     "min": 177,
+     "n": 24
+    },
+    "candidates": 100,
+    "chosen": 24,
+    "chosen_outside_bin": 0,
+    "dataset_block": 6,
+    "label": "(65536, 131072]",
+    "o200k_total": {
+     "max": 127452,
+     "mean": 97623.4,
+     "median": 95871.0,
+     "min": 65798,
+     "n": 24
+    },
+    "prompt_token_count": {
+     "max": 136554,
+     "mean": 104470.1,
+     "median": 102550.5,
+     "min": 70337,
+     "n": 24
+    }
+   },
+   "mrcr2_32k_ofc": {
+    "answer_tokens": {
+     "max": 796,
+     "mean": 455.1,
+     "median": 480.5,
+     "min": 61,
+     "n": 24
+    },
+    "candidates": 100,
+    "chosen": 24,
+    "chosen_outside_bin": 1,
+    "dataset_block": 1,
+    "label": "(16384, 32768]",
+    "o200k_total": {
+     "max": 31899,
+     "mean": 23886.6,
+     "median": 25245.5,
+     "min": 16317,
+     "n": 24
+    },
+    "prompt_token_count": {
+     "max": 34195,
+     "mean": 25125.3,
+     "median": 26356.0,
+     "min": 17008,
+     "n": 24
+    }
+   },
+   "mrcr2_64k_ofc": {
+    "answer_tokens": {
+     "max": 838,
+     "mean": 399.2,
+     "median": 428.0,
+     "min": 63,
+     "n": 24
+    },
+    "candidates": 100,
+    "chosen": 24,
+    "chosen_outside_bin": 1,
+    "dataset_block": 3,
+    "label": "(32768, 65536]",
+    "o200k_total": {
+     "max": 59951,
+     "mean": 47368.8,
+     "median": 48078.0,
+     "min": 32666,
+     "n": 24
+    },
+    "prompt_token_count": {
+     "max": 63849,
+     "mean": 50497.0,
+     "median": 51281.0,
+     "min": 34031,
+     "n": 24
+    }
+   }
+  },
+  "blocks": {
+   "0": {
+    "count_bins": {
+     "5": 100
+    },
+    "o200k_total": {
+     "max": 255021,
+     "mean": 192620.6,
+     "median": 184840.5,
+     "min": 131172,
+     "n": 100
+    },
+    "readme_bin": 5,
+    "rows": 100,
+    "rows_outside_block_bin": 0
+   },
+   "1": {
+    "count_bins": {
+     "1": 1,
+     "2": 99
+    },
+    "o200k_total": {
+     "max": 31899,
+     "mean": 24877.4,
+     "median": 25534.5,
+     "min": 16317,
+     "n": 100
+    },
+    "readme_bin": 2,
+    "rows": 100,
+    "rows_outside_block_bin": 1
+   },
+   "2": {
+    "count_bins": {
+     "6": 100
+    },
+    "o200k_total": {
+     "max": 511016,
+     "mean": 373830.2,
+     "median": 362355.5,
+     "min": 264725,
+     "n": 100
+    },
+    "readme_bin": 6,
+    "rows": 100,
+    "rows_outside_block_bin": 0
+   },
+   "3": {
+    "count_bins": {
+     "2": 3,
+     "3": 97
+    },
+    "o200k_total": {
+     "max": 63952,
+     "mean": 48217.4,
+     "median": 47847.0,
+     "min": 32552,
+     "n": 100
+    },
+    "readme_bin": 3,
+    "rows": 100,
+    "rows_outside_block_bin": 3
+   },
+   "4": {
+    "count_bins": {
+     "0": 96,
+     "outside": 4
+    },
+    "o200k_total": {
+     "max": 7904,
+     "mean": 5804.8,
+     "median": 5643.0,
+     "min": 3673,
+     "n": 100
+    },
+    "readme_bin": 0,
+    "rows": 100,
+    "rows_outside_block_bin": 4
+   },
+   "5": {
+    "count_bins": {
+     "7": 100
+    },
+    "o200k_total": {
+     "max": 1041556,
+     "mean": 782017.4,
+     "median": 784636.5,
+     "min": 525987,
+     "n": 100
+    },
+    "readme_bin": 7,
+    "rows": 100,
+    "rows_outside_block_bin": 0
+   },
+   "6": {
+    "count_bins": {
+     "4": 100
+    },
+    "o200k_total": {
+     "max": 128366,
+     "mean": 94838.3,
+     "median": 95157.5,
+     "min": 65774,
+     "n": 100
+    },
+    "readme_bin": 4,
+    "rows": 100,
+    "rows_outside_block_bin": 0
+   },
+   "7": {
+    "count_bins": {
+     "0": 1,
+     "1": 99
+    },
+    "o200k_total": {
+     "max": 16001,
+     "mean": 12406.4,
+     "median": 12687.0,
+     "min": 8181,
+     "n": 100
+    },
+    "readme_bin": 1,
+    "rows": 100,
+    "rows_outside_block_bin": 1
+   }
+  },
+  "budget": {
+   "fraction_answers_over_1500": 0.0,
+   "value": 2048
+  },
+  "code": {
+   "adapter_sha256": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+   "deploy_sha": "acd3cf8da03a6bb81b300cc6ed5f2917df6632d9",
+   "files_sha256": {
+    "v31_build_official_pools.py": "b14b6b086772a2a050440d4236bff4c88fa23928e4166985045bb5c4794fbd31",
+    "v31_build_pools.py": "66286f0b0b1bbe2a5acac62412da7f7a4fd37123eda9731fdef7ce97ccac48b2",
+    "v31_official.py": "953f8acd9b1e1360293d06c2b270c99bf928154448b847b98b9a5a0af2c70a13"
+   }
+  },
+  "max_model_len": {
+   "need": 138602,
+   "pinned": 143360
+  },
+  "o200k": {
+   "note": "the official o200k_base BPE file is not on the host; counts are approximate",
+   "official_ranks": 199998,
+   "tiktoken": "0.14.0",
+   "vendored_file_sha256": "d4f3aed4bede01e9379bb52edb9b4b54d13315eb8ff60fad510ece42c4c0038d",
+   "vendored_ranks": 199991
+  },
+  "output_files_sha256": {
+   "cells_mrcr_ofc.json": "481675745529fef20beaa7684f078d6d6f26b0f02876e9d2dc4ccc58f40f39be",
+   "mrcr2_128k_ofc_generation_manifest.json": "86291e2821dd22615e2af1468b71ff0eeb151c466c616756570a018a7428c5b7",
+   "mrcr2_128k_ofc_gold.json": "ccc90988e67798d0d80be9132d876601e35387ca11ae28e2700ca10ff36bbbe5",
+   "mrcr2_128k_ofc_rowinfo.json": "a7618f5935cfb6af769b885d98b27b76c8f1a69f4005c10e40846336fc7bc653",
+   "mrcr2_32k_ofc_generation_manifest.json": "2e96b0465726620d72d3f0b9457fcd027b43fb90c4000f8bf36949875dfc2b57",
+   "mrcr2_32k_ofc_gold.json": "0656e7661751592beebc4f50b847e5fe7124c718cc966af9029adcc924f4d8f6",
+   "mrcr2_32k_ofc_rowinfo.json": "67287e86b80c8a7001023bbd5eb64d75b658b748520fe858e00a43be02330c6e",
+   "mrcr2_64k_ofc_generation_manifest.json": "e07a0291e94456fb8a36b0f0ff68022f129fa1562334af75da519980e1bb5393",
+   "mrcr2_64k_ofc_gold.json": "e47d1e4ab06d769906739d7fa221a695a28a4b5d6bd0779c564cce7280cad381",
+   "mrcr2_64k_ofc_rowinfo.json": "4da2180c2720150636bf01fe39906678fc99c472cd04fcfb53fc840959dfbe0b"
+  },
+  "rule": "mrcr2_32k_ofc / mrcr2_64k_ofc / mrcr2_128k_ofc: the README's bins (o200k_base tokens of prompt + answer):\n              (16384, 32768], (32768, 65536], (65536, 131072]. The dataset holds 8 blocks of 100 rows in dataset order,\n              one per README bin; a row's bin is its block, cross-checked with o200k counts from the vendored\n              o200k_base vocabulary (the official BPE file is not on the host). 24 rows per bin by sha256(id); message\n              list through the chat template (thinking off); budget 2048 (4096 if > 5% of the answers exceed 1500 of our\n              tokens). Run with tiktoken importable (PYTHONPATH holding the dyh-local copy).",
+  "source": {
+   "files": {
+    "2needle/2needle_0.parquet": "1c297b254bf64a31856b74918cd7db889a214503e0b67daa834e84f20df6aa93",
+    "2needle/2needle_1.parquet": "a5a1dc9ccc945623253d04d33c03d89aee2d676c88955ce368da2ab16a0ce94d",
+    "README.md": "88c53574f0bb4baf877df69ac2523e8991460a516866bda21698a02d8f7d6986"
+   },
+   "repo": "openai/mrcr",
+   "revision": "f4c69fae7cf81f7ca26b9fee34b392a50f6b8a1d"
+  }
+ },
+ "ruler_v33noop": {
+  "checks_at_build": {
+   "generation_prompt_ends_user_part": 135,
+   "no_think_token": 135,
+   "one_bos_first": 135,
+   "opener_follows": 135,
+   "prefix_round_trip": 135,
+   "prefix_tokens_equal_separate_encoding": 135,
+   "rows": 135,
+   "tail_decodes_to_model_turn_opener_prefix": 135,
+   "thought_blocks": 135,
+   "turn_tokens": 135,
+   "whole_string_tokenization_identical": 135
+  },
+  "code": {
+   "adapter_sha256": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+   "deploy_sha": "acd3cf8da03a6bb81b300cc6ed5f2917df6632d9",
+   "files_sha256": {
+    "v31_build_official_pools.py": "0af74b325da7305dbaed6a5fddab72ac00cd62e46c4ffaf0589c25ae6a193ce3",
+    "v31_official.py": "953f8acd9b1e1360293d06c2b270c99bf928154448b847b98b9a5a0af2c70a13"
+   }
+  },
+  "datasets": {
+   "ruler32k_v33noop": {
+    "delta_vs_v33_prompt_token_count": {
+     "max": 1,
+     "mean": 0.1,
+     "median": 0,
+     "min": 0,
+     "n": 135
+    },
+    "generation_budget_by_task": {
+     "niah_multikey_1": [
+      128
+     ],
+     "niah_multikey_2": [
+      128
+     ],
+     "niah_multikey_3": [
+      128
+     ],
+     "niah_multiquery": [
+      128
+     ],
+     "niah_multivalue": [
+      128
+     ],
+     "niah_single_1": [
+      128
+     ],
+     "niah_single_2": [
+      128
+     ],
+     "niah_single_3": [
+      128
+     ],
+     "vt": [
+      30
+     ]
+    },
+    "prefill_token_count_by_task": {
+     "niah_multikey_1": {
+      "max": 16,
+      "mean": 14.7,
+      "median": 15,
+      "min": 14,
+      "n": 15
+     },
+     "niah_multikey_2": {
+      "max": 17,
+      "mean": 15.3,
+      "median": 15,
+      "min": 14,
+      "n": 15
+     },
+     "niah_multikey_3": {
+      "max": 47,
+      "mean": 44.7,
+      "median": 45,
+      "min": 40,
+      "n": 15
+     },
+     "niah_multiquery": {
+      "max": 34,
+      "mean": 29.8,
+      "median": 29,
+      "min": 27,
+      "n": 15
+     },
+     "niah_multivalue": {
+      "max": 15,
+      "mean": 14.3,
+      "median": 14,
+      "min": 14,
+      "n": 15
+     },
+     "niah_single_1": {
+      "max": 16,
+      "mean": 14.9,
+      "median": 15,
+      "min": 14,
+      "n": 15
+     },
+     "niah_single_2": {
+      "max": 16,
+      "mean": 14.5,
+      "median": 14,
+      "min": 14,
+      "n": 15
+     },
+     "niah_single_3": {
+      "max": 16,
+      "mean": 14.7,
+      "median": 15,
+      "min": 14,
+      "n": 15
+     },
+     "vt": {
+      "max": 35,
+      "mean": 35.0,
+      "median": 35,
+      "min": 35,
+      "n": 15
+     }
+    },
+    "prompt_token_count": {
+     "max": 32746,
+     "mean": 32449.5,
+     "median": 32638,
+     "min": 31997,
+     "n": 135
+    },
+    "rows": 135,
+    "tasks": {
+     "niah_multikey_1": 15,
+     "niah_multikey_2": 15,
+     "niah_multikey_3": 15,
+     "niah_multiquery": 15,
+     "niah_multivalue": 15,
+     "niah_single_1": 15,
+     "niah_single_2": 15,
+     "niah_single_3": 15,
+     "vt": 15
+    },
+    "total_tokens_max": 32777
+   }
+  },
+  "max_model_len": {
+   "need": 32777,
+   "pinned": 136192,
+   "rule": "the ruler_v33ofc pool pin, so the ablation runs with the main pool setting"
+  },
+  "output_files_sha256": {
+   "cells_ruler_v33noop.json": "54daf030808b992602428b5c96231a4bff487533fffc6e4bc6267964f25b6f3a",
+   "ruler32k_v33noop_generation_manifest.json": "7782d7c517d0676ed3bf8075e7066902f9994b6f930f31faab100c94fbba9a9c",
+   "ruler32k_v33noop_gold.json": "a28980e766943acabaf5f5a7c7e5e3fec504d1f562b0f31a1008b9214586cdab",
+   "ruler32k_v33noop_rowinfo.json": "02332e445d32971149401853683a0f3e63403274388040b76486853767a52b49"
+  },
+  "placement": {
+   "answer_prefix": "verbatim RULER answer_prefix (leading space kept, as RULER sends it)",
+   "generation_prompt_ids": [
+    105,
+    4368,
+    107
+   ],
+   "opener": "",
+   "opener_evidence": "3972 / 3975 non-thinking RULER completions of the v31 panels open with the empty thought block; the other 3 open it and stop without closing it",
+   "opener_ids": [],
+   "response_prefill": "tokenizer.encode(opener + answer_prefix, add_special_tokens=False)",
+   "user_turn": "adapter.encode_prompt(sample input, {\"thinking\": False}) -> <bos><|turn>user\\n{input}<turn|>\\n<|turn>model\\n"
+  },
+  "rule": "ruler32k_v33ofc / ruler64k_v33ofc / ruler128k_v33ofc: the v33 samples (same ids, order and gold) with\n              the official answer-prefix placement: user turn = the RULER sample `input` without its answer prefix\n              (chat template, thinking off), then the response prefill = DiffusionGemma's empty thought block + the\n              official answer prefix, verbatim (RULER call_api.py sends input + answer_prefix with the model template\n              inside input). Budget = RULER tokens_to_generate per task. Also writes cells_ruler32k_v33ofc_vt_niah.json\n              (the vt + niah_* ids at 32K, the partner cells of the ruler_noop ablation).\n  ruler_noop  ruler32k_v33noop (dense-only ablation): the vt + niah_* rows of ruler32k_v33ofc rendered WITHOUT the empty\n              thought block: encode_prompt(input) ending in '<|turn>model\\n', then the answer prefix tokens, exactly\n              as RULER sends input + answer_prefix. Pinned max_model_len = the ruler pool's.",
+  "ruler": {
+   "commit": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a",
+   "generator_seed": 6464
+  }
+ },
+ "ruler_v33ofc": {
+  "checks_at_build": {
+   "generation_prompt_ends_user_part": 585,
+   "no_think_token": 585,
+   "one_bos_first": 585,
+   "opener_follows": 585,
+   "prefix_round_trip": 585,
+   "prefix_tokens_equal_separate_encoding": 585,
+   "rows": 585,
+   "tail_decodes_to_model_turn_opener_prefix": 585,
+   "thought_blocks": 585,
+   "turn_tokens": 585,
+   "whole_string_tokenization_identical": 585
+  },
+  "code": {
+   "adapter_sha256": "1ee5ca2fe74fa1df451258cd7819ea4c0a4350183edd78f1a76df1c7c0b4b494",
+   "deploy_sha": "acd3cf8da03a6bb81b300cc6ed5f2917df6632d9",
+   "files_sha256": {
+    "v31_build_official_pools.py": "0af74b325da7305dbaed6a5fddab72ac00cd62e46c4ffaf0589c25ae6a193ce3",
+    "v31_official.py": "953f8acd9b1e1360293d06c2b270c99bf928154448b847b98b9a5a0af2c70a13"
+   }
+  },
+  "datasets": {
+   "ruler128k_v33ofc": {
+    "delta_vs_v33_prompt_token_count": {
+     "max": 5,
+     "mean": 4.1,
+     "median": 4,
+     "min": 4,
+     "n": 195
+    },
+    "generation_budget_by_task": {
+     "cwe": [
+      120
+     ],
+     "fwe": [
+      50
+     ],
+     "niah_multikey_1": [
+      128
+     ],
+     "niah_multikey_2": [
+      128
+     ],
+     "niah_multikey_3": [
+      128
+     ],
+     "niah_multiquery": [
+      128
+     ],
+     "niah_multivalue": [
+      128
+     ],
+     "niah_single_1": [
+      128
+     ],
+     "niah_single_2": [
+      128
+     ],
+     "niah_single_3": [
+      128
+     ],
+     "qa_1": [
+      32
+     ],
+     "qa_2": [
+      32
+     ],
+     "vt": [
+      30
+     ]
+    },
+    "prefill_token_count_by_task": {
+     "cwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "fwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "niah_multikey_1": {
+      "max": 19,
+      "mean": 18.5,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_2": {
+      "max": 20,
+      "mean": 19.0,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_3": {
+      "max": 51,
+      "mean": 47.7,
+      "median": 48,
+      "min": 43,
+      "n": 15
+     },
+     "niah_multiquery": {
+      "max": 38,
+      "mean": 34.3,
+      "median": 34,
+      "min": 32,
+      "n": 15
+     },
+     "niah_multivalue": {
+      "max": 20,
+      "mean": 18.6,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_1": {
+      "max": 21,
+      "mean": 18.9,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_2": {
+      "max": 23,
+      "mean": 19.1,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_3": {
+      "max": 19,
+      "mean": 18.3,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "qa_1": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "qa_2": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "vt": {
+      "max": 39,
+      "mean": 39.0,
+      "median": 39,
+      "min": 39,
+      "n": 15
+     }
+    },
+    "prompt_token_count": {
+     "max": 131053,
+     "mean": 130102.8,
+     "median": 130811,
+     "min": 123036,
+     "n": 195
+    },
+    "rows": 195,
+    "tasks": {
+     "cwe": 15,
+     "fwe": 15,
+     "niah_multikey_1": 15,
+     "niah_multikey_2": 15,
+     "niah_multikey_3": 15,
+     "niah_multiquery": 15,
+     "niah_multivalue": 15,
+     "niah_single_1": 15,
+     "niah_single_2": 15,
+     "niah_single_3": 15,
+     "qa_1": 15,
+     "qa_2": 15,
+     "vt": 15
+    },
+    "total_tokens_max": 131085
+   },
+   "ruler32k_v33ofc": {
+    "delta_vs_v33_prompt_token_count": {
+     "max": 5,
+     "mean": 4.1,
+     "median": 4,
+     "min": 4,
+     "n": 195
+    },
+    "generation_budget_by_task": {
+     "cwe": [
+      120
+     ],
+     "fwe": [
+      50
+     ],
+     "niah_multikey_1": [
+      128
+     ],
+     "niah_multikey_2": [
+      128
+     ],
+     "niah_multikey_3": [
+      128
+     ],
+     "niah_multiquery": [
+      128
+     ],
+     "niah_multivalue": [
+      128
+     ],
+     "niah_single_1": [
+      128
+     ],
+     "niah_single_2": [
+      128
+     ],
+     "niah_single_3": [
+      128
+     ],
+     "qa_1": [
+      32
+     ],
+     "qa_2": [
+      32
+     ],
+     "vt": [
+      30
+     ]
+    },
+    "prefill_token_count_by_task": {
+     "cwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "fwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "niah_multikey_1": {
+      "max": 20,
+      "mean": 18.7,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_2": {
+      "max": 21,
+      "mean": 19.3,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_3": {
+      "max": 51,
+      "mean": 48.7,
+      "median": 49,
+      "min": 44,
+      "n": 15
+     },
+     "niah_multiquery": {
+      "max": 38,
+      "mean": 33.8,
+      "median": 33,
+      "min": 31,
+      "n": 15
+     },
+     "niah_multivalue": {
+      "max": 19,
+      "mean": 18.3,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_1": {
+      "max": 20,
+      "mean": 18.9,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_2": {
+      "max": 20,
+      "mean": 18.5,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_3": {
+      "max": 20,
+      "mean": 18.7,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "qa_1": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "qa_2": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "vt": {
+      "max": 39,
+      "mean": 39.0,
+      "median": 39,
+      "min": 39,
+      "n": 15
+     }
+    },
+    "prompt_token_count": {
+     "max": 32750,
+     "mean": 32217.6,
+     "median": 32549,
+     "min": 27616,
+     "n": 195
+    },
+    "rows": 195,
+    "tasks": {
+     "cwe": 15,
+     "fwe": 15,
+     "niah_multikey_1": 15,
+     "niah_multikey_2": 15,
+     "niah_multikey_3": 15,
+     "niah_multiquery": 15,
+     "niah_multivalue": 15,
+     "niah_single_1": 15,
+     "niah_single_2": 15,
+     "niah_single_3": 15,
+     "qa_1": 15,
+     "qa_2": 15,
+     "vt": 15
+    },
+    "total_tokens_max": 32781
+   },
+   "ruler64k_v33ofc": {
+    "delta_vs_v33_prompt_token_count": {
+     "max": 5,
+     "mean": 4.1,
+     "median": 4,
+     "min": 4,
+     "n": 195
+    },
+    "generation_budget_by_task": {
+     "cwe": [
+      120
+     ],
+     "fwe": [
+      50
+     ],
+     "niah_multikey_1": [
+      128
+     ],
+     "niah_multikey_2": [
+      128
+     ],
+     "niah_multikey_3": [
+      128
+     ],
+     "niah_multiquery": [
+      128
+     ],
+     "niah_multivalue": [
+      128
+     ],
+     "niah_single_1": [
+      128
+     ],
+     "niah_single_2": [
+      128
+     ],
+     "niah_single_3": [
+      128
+     ],
+     "qa_1": [
+      32
+     ],
+     "qa_2": [
+      32
+     ],
+     "vt": [
+      30
+     ]
+    },
+    "prefill_token_count_by_task": {
+     "cwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "fwe": {
+      "max": 21,
+      "mean": 21.0,
+      "median": 21,
+      "min": 21,
+      "n": 15
+     },
+     "niah_multikey_1": {
+      "max": 21,
+      "mean": 18.8,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_2": {
+      "max": 22,
+      "mean": 19.0,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_multikey_3": {
+      "max": 51,
+      "mean": 48.9,
+      "median": 49,
+      "min": 46,
+      "n": 15
+     },
+     "niah_multiquery": {
+      "max": 37,
+      "mean": 34.5,
+      "median": 34,
+      "min": 33,
+      "n": 15
+     },
+     "niah_multivalue": {
+      "max": 20,
+      "mean": 18.7,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_1": {
+      "max": 20,
+      "mean": 18.6,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_2": {
+      "max": 19,
+      "mean": 18.5,
+      "median": 19,
+      "min": 18,
+      "n": 15
+     },
+     "niah_single_3": {
+      "max": 21,
+      "mean": 18.6,
+      "median": 18,
+      "min": 18,
+      "n": 15
+     },
+     "qa_1": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "qa_2": {
+      "max": 6,
+      "mean": 6.0,
+      "median": 6,
+      "min": 6,
+      "n": 15
+     },
+     "vt": {
+      "max": 39,
+      "mean": 39.0,
+      "median": 39,
+      "min": 39,
+      "n": 15
+     }
+    },
+    "prompt_token_count": {
+     "max": 65509,
+     "mean": 64832.1,
+     "median": 65251,
+     "min": 61515,
+     "n": 195
+    },
+    "rows": 195,
+    "tasks": {
+     "cwe": 15,
+     "fwe": 15,
+     "niah_multikey_1": 15,
+     "niah_multikey_2": 15,
+     "niah_multikey_3": 15,
+     "niah_multiquery": 15,
+     "niah_multivalue": 15,
+     "niah_single_1": 15,
+     "niah_single_2": 15,
+     "niah_single_3": 15,
+     "qa_1": 15,
+     "qa_2": 15,
+     "vt": 15
+    },
+    "total_tokens_max": 65549
+   }
+  },
+  "max_model_len": {
+   "need": 131085,
+   "pinned": 136192,
+   "rule": "pin_max_model_len over all three lengths"
+  },
+  "output_files_sha256": {
+   "cells_ruler32k_v33ofc_vt_niah.json": "7202e9010d7341d54508e62a0c2e63ecae5c92ad6b83e319c89790430b4824e8",
+   "cells_ruler_v33ofc.json": "5abaa75cdf7b4f01433e5b3e1286685aa6132b4e24a181814b536d4fe789d3b9",
+   "ruler128k_v33ofc_generation_manifest.json": "834a1374d79ebb2e1634ae6f7fb5e4bcaf9d28eb311febfd02aa61a72b735ad5",
+   "ruler128k_v33ofc_gold.json": "14bfd0e0d0cfeef2c5fc3ab6fefc670790aa692f7ed3313fc446477ad1878a2e",
+   "ruler128k_v33ofc_rowinfo.json": "f7aa859199d9abb81fc477f22d147a1176a9a44bdd2fdc380bc51299633dcd98",
+   "ruler32k_v33ofc_generation_manifest.json": "4142be0da51946baf1a3b2b0f953ce8aea559419d8f92df43e3f4f856759900f",
+   "ruler32k_v33ofc_gold.json": "a6db9b2d2a529c412c734ebc14bae96203c8543bb754660843e2d0b3f1a49bb0",
+   "ruler32k_v33ofc_rowinfo.json": "36ff43018e0fc1aeb67f6c985b3ff5eb17ea79cd1cb5ac8f351bd1503c2d41eb",
+   "ruler64k_v33ofc_generation_manifest.json": "e4d15823f033c15622eac8a0cb82a0728997d78999d10e657ca539a55be1be8a",
+   "ruler64k_v33ofc_gold.json": "76f006e4b91a09bffb2226288baa5d1accc26e51b063d1a7a4bfd5be1a1de348",
+   "ruler64k_v33ofc_rowinfo.json": "51fc096b695c59851dc84ce1982d45b3c66c1f52cbf503fbaa71a1cf70b5cca9"
+  },
+  "placement": {
+   "answer_prefix": "verbatim RULER answer_prefix (leading space kept, as RULER sends it)",
+   "generation_prompt_ids": [
+    105,
+    4368,
+    107
+   ],
+   "opener": "<|channel>thought\n<channel|>",
+   "opener_evidence": "3972 / 3975 non-thinking RULER completions of the v31 panels open with the empty thought block; the other 3 open it and stop without closing it",
+   "opener_ids": [
+    100,
+    45518,
+    107,
+    101
+   ],
+   "response_prefill": "tokenizer.encode(opener + answer_prefix, add_special_tokens=False)",
+   "user_turn": "adapter.encode_prompt(sample input, {\"thinking\": False}) -> <bos><|turn>user\\n{input}<turn|>\\n<|turn>model\\n"
+  },
+  "rule": "ruler32k_v33ofc / ruler64k_v33ofc / ruler128k_v33ofc: the v33 samples (same ids, order and gold) with\n              the official answer-prefix placement: user turn = the RULER sample `input` without its answer prefix\n              (chat template, thinking off), then the response prefill = DiffusionGemma's empty thought block + the\n              official answer prefix, verbatim (RULER call_api.py sends input + answer_prefix with the model template\n              inside input). Budget = RULER tokens_to_generate per task. Also writes cells_ruler32k_v33ofc_vt_niah.json\n              (the vt + niah_* ids at 32K, the partner cells of the ruler_noop ablation).\n  ruler_noop  ruler32k_v33noop (dense-only ablation): the vt + niah_* rows of ruler32k_v33ofc rendered WITHOUT the empty\n              thought block: encode_prompt(input) ending in '<|turn>model\\n', then the answer prefix tokens, exactly\n              as RULER sends input + answer_prefix. Pinned max_model_len = the ruler pool's.",
+  "ruler": {
+   "commit": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a",
+   "generator_seed": 6464
+  }
+ }
+}
+

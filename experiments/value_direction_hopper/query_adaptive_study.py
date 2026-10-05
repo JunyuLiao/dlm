@@ -34,8 +34,8 @@ from .query_adaptive import METHODS,State,observe
 from .sparsity_steps import routing_counts
 
 ROOT=Path(__file__).resolve().parents[2]/'results'/'query_adaptive_v3'
-SOURCE=Path(__file__).resolve().parents[2]/'results'/'value_direction_sparsity_steps_v2'
-TRAJECTORY=Path(__file__).resolve().parents[2]/'results'/'value_direction_trajectory_v2'
+SOURCE=Path('results/value_direction_sparsity_steps_v2')
+TRAJECTORY=Path('results/value_direction_trajectory_v2')
 TARGETS=(50,70)
 ADAPTIVE=tuple(dict(name=m,method=m) for m in METHODS)
 

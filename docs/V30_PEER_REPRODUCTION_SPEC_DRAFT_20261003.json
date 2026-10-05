@@ -1,0 +1,149 @@
+{
+  "schema": "v30_peer_reproduction_draft_v1",
+  "status": "root_review_required",
+  "execution_enabled": false,
+  "formal_launch_enabled": false,
+  "performance_claim_allowed": false,
+  "attribution": "Junyu Gaussian32 retained-state router; cooperation candidate",
+  "peer_source_commit": "b890ff49488474c5d476df44019597dc045a5969",
+  "haowei_review_commit": "6f7279c1625f7fa53bacb233b96fb69a385df8c1",
+  "protocol_id": "v30_hf_global_gaussian32_extended_draft001",
+  "fidelity": "Peer value-risk/kernel unchanged; GLOBAL-only scope and thinking/full8192 protocol are explicitly new",
+  "arms": [
+    "hf_sdpa_native",
+    "hf_peer_gaussian32_allretained",
+    "hf_peer_gaussian32_global"
+  ],
+  "seeds": [
+    31001,
+    31002,
+    31003,
+    31004,
+    31005,
+    31006,
+    31007,
+    31008
+  ],
+  "qualification": {
+    "per_arm_longest_prompt": true,
+    "full_budget": true,
+    "performance_evidence": false
+  },
+  "pilot": {
+    "datasets": {
+      "aime26": {
+        "items": 3
+      },
+      "longbench_v2_32k": {
+        "items": 3
+      }
+    },
+    "selection": "Predeclare manifest before any candidate generation; no answer-based selection",
+    "timed_cells": 48,
+    "timed_requests": 144
+  },
+  "full_panel": {
+    "datasets": {
+      "aime26": {
+        "items": 30
+      },
+      "longbench_v2": {
+        "items": 59
+      }
+    },
+    "timed_cells": 712,
+    "timed_requests": 2136,
+    "launch_enabled": false
+  },
+  "settings": {
+    "generation_budget": 8192,
+    "thinking": true,
+    "canvas_length": 256,
+    "max_denoising_steps": 48,
+    "native_temperature_schedule": [
+      0.8,
+      0.4
+    ],
+    "confidence_threshold": 0.005,
+    "stability_threshold": 1,
+    "entropy_bound": 0.1,
+    "cpu_threads": 1
+  },
+  "method": {
+    "rank": 32,
+    "projection_seed": 1729,
+    "query_sensitivity": null,
+    "temporal": false,
+    "risk_state": "current_qk_sequential_retained",
+    "output": "retained original BF16 V",
+    "precision": "tf32x3_register",
+    "projection": "fused",
+    "tma_for_supported_unmasked_calls": true,
+    "global_layers": [
+      5,
+      11,
+      17,
+      23,
+      29
+    ],
+    "local": "original_dense"
+  },
+  "thresholds": {
+    "status": "not_bound",
+    "source": "Existing immutable peer policy only after byte/source/scope qualification; otherwise new independent calibration",
+    "identical_across_seeds": true,
+    "final_score_retuning": false,
+    "allretained_log_threshold": "negative_infinity"
+  },
+  "fairness": {
+    "same_host_per_cell": true,
+    "same_prompt_tokens": true,
+    "same_sampling": true,
+    "same_source_and_build": true,
+    "fresh_per_condition_engine": true,
+    "default_rng_equivalence_claim": false,
+    "local_mask_oracle_required": true,
+    "original_peer_scope": "LOCAL and GLOBAL; separate protocol if reproduced",
+    "reference": "HF/SDPA diagnostic only; official vLLM FA4 strong-reference port not yet implemented"
+  },
+  "gates": [
+    "source_dependency_closure",
+    "own_toolchain_headers_and_bridge_pin",
+    "cpu_import_tests_cuda_hidden",
+    "sm90_kernel_full_output_oracle",
+    "scope_and_local_mask_oracle",
+    "allretained_zero_skip",
+    "native_sampling_and_stopping",
+    "full_budget_multicanvas_accounting",
+    "timed_jit_capture_zero",
+    "full_private_scorer_proof",
+    "root_freeze_and_resource_barriers"
+  ],
+  "reporting": {
+    "public": "Numeric per-request/worker evidence and question-cluster CIs only",
+    "private_only": [
+      "prompts",
+      "tokens",
+      "gold",
+      "completion_text",
+      "private_paths",
+      "rng_states"
+    ],
+    "spans": [
+      "W_including_binding_setup_cleanup",
+      "decode_S",
+      "actual_N_C_P",
+      "outer_reserved_GPU_seconds"
+    ],
+    "counters": [
+      "global_routes",
+      "local_routes_zero",
+      "eligible_and_skipped_tiles",
+      "projected_tokens",
+      "reused_tokens",
+      "output_length",
+      "caps",
+      "jit_and_graph_capture_deltas"
+    ]
+  }
+}

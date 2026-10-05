@@ -1,0 +1,121 @@
+{
+  "schema": "v28_q64_alias_full_descriptive_v1",
+  "source_commit": "8c9cd31ae06b8b54ef6dcf91f792c864139afa5c",
+  "parent_deploy_commit": "dcfdb8730efff131f92d0a8bbbab514ef1eedf18",
+  "sweep_script_sha256": "453363678505c3dc5efcadfe34edfb0562f4adf17f804e793039239f38ccc4d3",
+  "matched_states": 144,
+  "per_bin_requested": 48,
+  "repeats": 30,
+  "alias_counts": [
+    1,
+    2,
+    4
+  ],
+  "supervisor_gpu_reserved_seconds": 27.091281150933355,
+  "component_reserved_seconds": 21.688516506226733,
+  "geomean_ratio_to_alias2": {
+    "1": 1.371553239685805,
+    "2": 1.0,
+    "4": 0.9883609199405684
+  },
+  "descriptive_by_bin": {
+    "32768": {
+      "matched_states": 48,
+      "geomean_ratio_to_alias2": {
+        "1": 1.3460073387535878,
+        "2": 1.0,
+        "4": 1.017309743186841
+      },
+      "faster_than_alias2_states": {
+        "1": 0,
+        "2": 0,
+        "4": 19
+      },
+      "slower_than_alias2_states": {
+        "1": 48,
+        "2": 0,
+        "4": 29
+      },
+      "equal_to_alias2_states": {
+        "1": 0,
+        "2": 48,
+        "4": 0
+      }
+    },
+    "65536": {
+      "matched_states": 48,
+      "geomean_ratio_to_alias2": {
+        "1": 1.3882841246323037,
+        "2": 1.0,
+        "4": 0.983149939678515
+      },
+      "faster_than_alias2_states": {
+        "1": 0,
+        "2": 0,
+        "4": 28
+      },
+      "slower_than_alias2_states": {
+        "1": 48,
+        "2": 0,
+        "4": 20
+      },
+      "equal_to_alias2_states": {
+        "1": 0,
+        "2": 48,
+        "4": 0
+      }
+    },
+    "98304": {
+      "matched_states": 48,
+      "geomean_ratio_to_alias2": {
+        "1": 1.380741014823619,
+        "2": 1.0,
+        "4": 0.9653254007732921
+      },
+      "faster_than_alias2_states": {
+        "1": 0,
+        "2": 0,
+        "4": 33
+      },
+      "slower_than_alias2_states": {
+        "1": 48,
+        "2": 0,
+        "4": 15
+      },
+      "equal_to_alias2_states": {
+        "1": 0,
+        "2": 48,
+        "4": 0
+      }
+    }
+  },
+  "max_relative_error": {
+    "1": 0.004204334673207415,
+    "2": 0.0060506987417323745,
+    "4": 0.005396510304922795
+  },
+  "held_list_builds": {
+    "1": [
+      1
+    ],
+    "2": [
+      1
+    ],
+    "4": [
+      1
+    ]
+  },
+  "source_scope": "historical real-need states per nominal bin; synthetic QKV; full canvas kept; component only",
+  "statistics": "descriptive state-level geomeans and win counts; repeated states are not independent requests; no request confidence intervals",
+  "exclusions": [
+    "selector",
+    "first-use keep-map/list and alias split construction",
+    "KV copies",
+    "request lifecycle",
+    "model",
+    "accuracy"
+  ],
+  "s1_execution": "adapter generic softmax/LSE merge retained; no direct-output optimization",
+  "fp32_reference": "one shared IEEE FP32 masked reference; TF32 explicitly disabled",
+  "cuda_graphs": "none requested; eager warmed benchmark"
+}

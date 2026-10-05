@@ -1,0 +1,97 @@
+{
+  "covered_by_tests": {
+    "declared_rule": "rho=.1,tau=.2: s=1 drop, s=2.5 restore, s=1.75 stays restored (monotone within epoch); equality retained",
+    "exact_T_fast_path": "full weight sequences (dtype, contiguity, temporal, previous_top) bit-identical to the frozen observer across one canvas, partial canvas + reset, repeated short canvases (two-step bootstrap), argmax ties, forced flips; refuses non-T / diagnostics / collect_margins",
+    "export_semantics": "exported unweighted log-risk + log s reconstructs the kernel keep decision on every prefix tile except |risk-tau|<1e-4",
+    "exporter_on_off_parity": "v5 without protect/export bit-identical to Junyu v4 (output, skipped, eligible, log-normalizer) at 4 prefix/threshold cases; export on/off identical",
+    "gpu_planner_vs_reference": "bit-equal masks incl. +inf rows, all -inf rows, partial Q tiles (Q=200), protect=KT",
+    "mandatory_scope": "planner never touches tiles j >= protect (current canvas / edge tiles)",
+    "protect_coherent_across_roles": "with protect, kernel output is bit-identical to the v11 support consumer run on the kernel's own protected map (router and PV roles agree); no protected tile skipped",
+    "row_vs_tile": "one hot row restores its Q128xKV64 tile; the row-mean ablation does not (no averaging)",
+    "seed_safe_driver": "v13 tests (cell ids, resume refusal, warm acceptance) pass on the v14 tree"
+  },
+  "junyu_v4_binary": {
+    "library": "value_direction_db080045f7a5fbce.so",
+    "torch_bridge": "torch_4c65c048754f9fb7"
+  },
+  "metadata_budget": {
+    "measured_live_bytes_late_state_5_layers": 8470720,
+    "note": "AIME /14 canvas 24 (prefix 6275): 8.47 MB live for 5 GLOBAL layers; no full-score or rank-32 summary caches kept",
+    "per_layer_formula": "log_rho FP32 [B,H,ceil(K/64),Q] + skipped/eligible bool [B,H,ceil(Q/128),ceil(K/64)] x2"
+  },
+  "not_covered_or_limits": [
+    "no compute-sanitizer run yet: kernel synchronization was not changed (export store by the owning router lane, decide() gains a tile predicate); a bounded memcheck/racecheck is scheduled after the pilot if GPU budget allows",
+    "no explicit kernel-launch inventory test for ordinary steps (by construction ordinary CVM calls launch planner + v11 consumer + fused guard; verified post-pilot if budget allows)",
+    "encoder commit / request / canvas invalidation are code-path properties (pre-hook epoch++, canvas change clears state, ident tuple) exercised in real runs, not isolated unit tests",
+    "numerical-interchangeability envelope of the v11 consumer vs old Triton arithmetic unchanged (60/660 max-abs failures remain a boundary)",
+    "add-only support is not guaranteed to reduce attention error or improve accuracy; s in [1,4] bounds the controller, not attention error"
+  ],
+  "python_sources": {
+    "experiments/numerical_qk_reuse/global_scope.py": "2846a5a3ec534dfe94e2ba411e39f15574212d45ce4b9696ad80bf8e05afa14e",
+    "experiments/value_direction_hopper/csrc/torch_bridge_v5.cpp": "fb3741de02bbb47f1253ef90cb817a428912a74b8ed31a86ad2094266de4113e",
+    "experiments/value_direction_hopper/csrc/value_direction_v5.cu": "645c957de3df9acd4bbd1172348812837aa2751d6795e115e5d08d497a1ff24e",
+    "experiments/value_direction_hopper/csrc/value_direction_v5.h": "edd714c1e0c1515f1472f24c667ae1d85c7d1bffda3f7099bfc2ad48e9167182",
+    "experiments/value_direction_hopper/cvm.py": "8f47d841710747b8313a0fbff664f906c8c32a1d0987235acb6b774d13fca767",
+    "experiments/value_direction_hopper/query_adaptive.py": "df432cd3540efe8091b51ff82861ab42345689bbfe5de7b2b6f4eb50f8583e97",
+    "experiments/value_direction_hopper/support.py": "34f1b0ab9359ff3a96960596b15b8ae84bc0fa3705edeac82d24dc78e819f6cc",
+    "tests/test_v14_cvm.py": "6bbca27696b36fdcc33ec786f6a3315a1f3a71b74f64e0a48a0cfdfb963638a0"
+  },
+  "refs": {
+    "base_checkpoint": "73b6a668bf82aa9c5412f1856f1bbc2e302e351b",
+    "deploy_used_for_tests": "82b77afb907c",
+    "junyu": "query-sensitivity-aware-v3",
+    "junyu_branch_written": false,
+    "junyu_sha_verified": "053441c6c6741ada6728dfc97d8faa6ea2be72aa"
+  },
+  "runtime_evidence": {
+    "B8_P_equals_CVM_T_until_T_history": "adaptive diagnostic: identical divergence counts at steps 0-1 in all 5 states (anchor with s=1; no restoration possible before iteration 3)",
+    "complete_forward_outputs_identical_across_reps": "all arms, all 5 profiled states (complete_forward_profile.json)",
+    "structural_fallback": "protect<=0 -> native SDPA, counted (fallback_native)"
+  },
+  "schema": "v14_qualification_v1",
+  "support_consumer_binary": {
+    "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+    "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+    "key": "e3c283b8cbb9b79c"
+  },
+  "test_receipts": {
+    "regression_v12_v13": [
+      ".sss...........                                                          [100%]",
+      "12 passed, 3 skipped in 4.30s"
+    ],
+    "v14": [
+      "..............                                                           [100%]",
+      "14 passed in 2.19s"
+    ]
+  },
+  "v5_binary": {
+    "abi_version": 5,
+    "aten_namespace": "value_direction_hopper_v5",
+    "bridge_sha256": "7b7cf2b7c44623f19622b18b55d08086d04cd1eab340f51aab4e0942ca6ec1f1",
+    "derived_from_junyu": {
+      "torch_bridge_cpp": "849d20a8abaf0fd44076aab40cc4100436eb3fe4dd683ecd0144bfa189d55cda",
+      "value_direction_cu": "ae5b1e82a1d5b0024fde18cf5cfe1a3f3dd835e2ad1d3f53053d3b681783fcfb"
+    },
+    "flags": [
+      "-std=c++17",
+      "-O3",
+      "-arch=sm_90a",
+      "--shared",
+      "-Xcompiler=-fPIC",
+      "-lineinfo",
+      "--ptxas-options=-v"
+    ],
+    "kernel_sha256": "770724c9598fc567d38430cfd5e5cfa47cfb733ecc7ab952e570652288baa8ba",
+    "key": "be53e4c706032aef",
+    "namespace": "fmha::value_direction_v5",
+    "overwrites_junyu_binary": false,
+    "private": true,
+    "sources": {
+      "torch_bridge_v5.cpp": "fb3741de02bbb47f1253ef90cb817a428912a74b8ed31a86ad2094266de4113e",
+      "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+      "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10",
+      "value_direction_v5.cu": "645c957de3df9acd4bbd1172348812837aa2751d6795e115e5d08d497a1ff24e",
+      "value_direction_v5.h": "edd714c1e0c1515f1472f24c667ae1d85c7d1bffda3f7099bfc2ad48e9167182"
+    }
+  }
+}

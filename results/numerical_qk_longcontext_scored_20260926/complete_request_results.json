@@ -1,0 +1,1599 @@
+{
+  "meta": {
+    "arms": [
+      "B8_P",
+      "CVM_T",
+      "D_native",
+      "T_G_original",
+      "T_P"
+    ],
+    "complete": true,
+    "executed": 240,
+    "planned_executions": 240,
+    "protocol_id": "v15_lbv2_scored_28f30b0d703d",
+    "quality_denominator_per_arm": 24,
+    "questions": 12,
+    "seeds": [
+      17,
+      29
+    ]
+  },
+  "pairs": {
+    "B8_P/D_native": {
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.8256275515531898,
+          1.0974959740065682
+        ],
+        "note": "question clusters (seeds and arms travel together); descriptive, not a test",
+        "quality_diff_95": [
+          -0.08333333333333333,
+          0.2916666666666667
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.7753330981927453,
+          1.0376980316194133
+        ],
+        "timed_questions": 12
+      },
+      "candidate": "B8_P",
+      "candidate_calls": 5405,
+      "candidate_correct": 14,
+      "candidate_time_s": 951.9310875318479,
+      "decomposition_check": true,
+      "geometric_time_ratio": 0.9584148467605872,
+      "leave_one_question_out": {
+        "longbench_v2/66ebe0fb5a08c7b9b35e14f5": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9362578883923943,
+          "reference_correct": 11,
+          "summed_time_ratio": 0.8737809937778368
+        },
+        "longbench_v2/66ed2c87821e116aacb1f149": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9675870723052324,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8938461661425359
+        },
+        "longbench_v2/66f120a9821e116aacb26d02": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9851351067833665,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.9229203162835303
+        },
+        "longbench_v2/66f245cc821e116aacb28698": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 1.0040478917614741,
+          "reference_correct": 11,
+          "summed_time_ratio": 0.9365596395807836
+        },
+        "longbench_v2/66f2aac2821e116aacb2a9de": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9537480842146289,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8877260888711749
+        },
+        "longbench_v2/66f2b676821e116aacb2b27a": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9386012242286587,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.8753787286515197
+        },
+        "longbench_v2/66f41e45821e116aacb30ec3": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9292142052938659,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8673995969055748
+        },
+        "longbench_v2/66f8c6b4bb02136c067c4480": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9392244046801835,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.8808581153421031
+        },
+        "longbench_v2/66f9625fbb02136c067c5456": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.978230030462515,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9102989147596436
+        },
+        "longbench_v2/66fab4bfbb02136c067c754c": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9471846108130473,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.8762556986474214
+        },
+        "longbench_v2/67040276bb02136c067cd8ae": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9718320392979991,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9105192576973942
+        },
+        "longbench_v2/6704a442bb02136c067cdd91": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9528834409651026,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.8814500347690065
+        }
+      },
+      "missing_timings": [],
+      "note": "pooled time/call is amortized request wall per decoder call, not pure GPU latency",
+      "outcomes": 24,
+      "paired_outcomes": {
+        "both": 11,
+        "candidate_only": 3,
+        "neither": 9,
+        "reference_only": 1
+      },
+      "per_bin": {
+        "10-15K": {
+          "candidate_correct": 8,
+          "geometric_time_ratio": 0.9430367921220331,
+          "pooled_call_ratio": 0.9129504102747057,
+          "pooled_time_per_call_ratio": 0.9351986149757453,
+          "reference_correct": 5,
+          "summed_time_ratio": 0.8537899592304431
+        },
+        "15-20K": {
+          "candidate_correct": 6,
+          "geometric_time_ratio": 0.9740436705806217,
+          "pooled_call_ratio": 1.0215362526920315,
+          "pooled_time_per_call_ratio": 0.9098783959485359,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.9294737670027039
+        }
+      },
+      "per_seed": {
+        "17": {
+          "candidate_correct": 8,
+          "geometric_time_ratio": 0.8454031968816201,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.8133045957983442
+        },
+        "29": {
+          "candidate_correct": 6,
+          "geometric_time_ratio": 1.0865336467609117,
+          "reference_correct": 5,
+          "summed_time_ratio": 0.9794520454582221
+        }
+      },
+      "pooled_call_ratio": 0.9670781893004116,
+      "pooled_time_per_call_ratio": 0.9229313446697515,
+      "questions": 12,
+      "questions_with_complete_timing": 12,
+      "reference": "D_native",
+      "reference_calls": 5589,
+      "reference_correct": 12,
+      "reference_time_s": 1066.5335595097858,
+      "strict": {
+        "candidate_correct": 14,
+        "paired_outcomes": {
+          "both": 11,
+          "candidate_only": 3,
+          "neither": 9,
+          "reference_only": 1
+        },
+        "reference_correct": 12
+      },
+      "summed_time_ratio": 0.8925467736518173,
+      "timing_complete": true
+    },
+    "B8_P/T_P": {
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.8670910628488944,
+          1.1352729716375212
+        ],
+        "note": "question clusters (seeds and arms travel together); descriptive, not a test",
+        "quality_diff_95": [
+          -0.16666666666666666,
+          0.16666666666666666
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.829518904898164,
+          1.1228492720092988
+        ],
+        "timed_questions": 12
+      },
+      "candidate": "B8_P",
+      "candidate_calls": 5405,
+      "candidate_correct": 14,
+      "candidate_time_s": 951.9310875318479,
+      "decomposition_check": true,
+      "geometric_time_ratio": 0.9881081788191604,
+      "leave_one_question_out": {
+        "longbench_v2/66ebe0fb5a08c7b9b35e14f5": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9436556587115993,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9016100416690246
+        },
+        "longbench_v2/66ed2c87821e116aacb1f149": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9786082438842945,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9523353053655478
+        },
+        "longbench_v2/66f120a9821e116aacb26d02": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 1.0185541324244693,
+          "reference_correct": 13,
+          "summed_time_ratio": 1.0008075342607607
+        },
+        "longbench_v2/66f245cc821e116aacb28698": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.982454811102505,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.950383498630215
+        },
+        "longbench_v2/66f2aac2821e116aacb2a9de": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 1.0107622399385006,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9680961207949351
+        },
+        "longbench_v2/66f2b676821e116aacb2b27a": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 1.0016373835721846,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9647154639682026
+        },
+        "longbench_v2/66f41e45821e116aacb30ec3": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9770155636033959,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9451103889883727
+        },
+        "longbench_v2/66f8c6b4bb02136c067c4480": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9689709332248042,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9459072220105007
+        },
+        "longbench_v2/66f9625fbb02136c067c5456": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9867693387391476,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9515686574865391
+        },
+        "longbench_v2/66fab4bfbb02136c067c754c": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9782128368850328,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9435632572445986
+        },
+        "longbench_v2/67040276bb02136c067cd8ae": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 1.013501548849217,
+          "reference_correct": 13,
+          "summed_time_ratio": 0.9926224027184016
+        },
+        "longbench_v2/6704a442bb02136c067cdd91": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9997458843066709,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9679830933652702
+        }
+      },
+      "missing_timings": [],
+      "note": "pooled time/call is amortized request wall per decoder call, not pure GPU latency",
+      "outcomes": 24,
+      "paired_outcomes": {
+        "both": 12,
+        "candidate_only": 2,
+        "neither": 8,
+        "reference_only": 2
+      },
+      "per_bin": {
+        "10-15K": {
+          "candidate_correct": 8,
+          "geometric_time_ratio": 0.9862394166910396,
+          "pooled_call_ratio": 1.0058962264150944,
+          "pooled_time_per_call_ratio": 0.9349623339660145,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.9404750835766631
+        },
+        "15-20K": {
+          "candidate_correct": 6,
+          "geometric_time_ratio": 0.9899804819453718,
+          "pooled_call_ratio": 1.0572065378900446,
+          "pooled_time_per_call_ratio": 0.9185689860975491,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.9711171376053583
+        }
+      },
+      "per_seed": {
+        "17": {
+          "candidate_correct": 8,
+          "geometric_time_ratio": 0.8875439333578858,
+          "reference_correct": 6,
+          "summed_time_ratio": 0.8575615643771213
+        },
+        "29": {
+          "candidate_correct": 6,
+          "geometric_time_ratio": 1.100066978493581,
+          "reference_correct": 8,
+          "summed_time_ratio": 1.068962424768389
+        }
+      },
+      "pooled_call_ratio": 1.0322765469824293,
+      "pooled_time_per_call_ratio": 0.9266615283134388,
+      "questions": 12,
+      "questions_with_complete_timing": 12,
+      "reference": "T_P",
+      "reference_calls": 5236,
+      "reference_correct": 14,
+      "reference_time_s": 995.1494710606057,
+      "strict": {
+        "candidate_correct": 14,
+        "paired_outcomes": {
+          "both": 12,
+          "candidate_only": 2,
+          "neither": 8,
+          "reference_only": 2
+        },
+        "reference_correct": 14
+      },
+      "summed_time_ratio": 0.9565709626688574,
+      "timing_complete": true
+    },
+    "CVM_T/B8_P": {
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.8170294260290418,
+          1.12362106432761
+        ],
+        "note": "question clusters (seeds and arms travel together); descriptive, not a test",
+        "quality_diff_95": [
+          -0.16666666666666666,
+          0.16666666666666666
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.8146177393870124,
+          1.1802090264379455
+        ],
+        "timed_questions": 12
+      },
+      "candidate": "CVM_T",
+      "candidate_calls": 5197,
+      "candidate_correct": 14,
+      "candidate_time_s": 934.0390886827372,
+      "decomposition_check": true,
+      "geometric_time_ratio": 0.9525276118931381,
+      "leave_one_question_out": {
+        "longbench_v2/66ebe0fb5a08c7b9b35e14f5": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9889133284593511,
+          "reference_correct": 13,
+          "summed_time_ratio": 1.0393207479996942
+        },
+        "longbench_v2/66ed2c87821e116aacb1f149": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9445974868727273,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9783054953339798
+        },
+        "longbench_v2/66f120a9821e116aacb26d02": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9309546368398974,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9504551489257663
+        },
+        "longbench_v2/66f245cc821e116aacb28698": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9013991807710514,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9151118340430946
+        },
+        "longbench_v2/66f2aac2821e116aacb2a9de": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.94579534208985,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9762562222387844
+        },
+        "longbench_v2/66f2b676821e116aacb2b27a": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9638427495746149,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9925968217399576
+        },
+        "longbench_v2/66f41e45821e116aacb30ec3": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9943082690988799,
+          "reference_correct": 14,
+          "summed_time_ratio": 1.0149957742296085
+        },
+        "longbench_v2/66f8c6b4bb02136c067c4480": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9615283204537266,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9875602383679621
+        },
+        "longbench_v2/66f9625fbb02136c067c5456": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9594376855313784,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.991333670885178
+        },
+        "longbench_v2/66fab4bfbb02136c067c754c": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9442356774507151,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9757980484384341
+        },
+        "longbench_v2/67040276bb02136c067cd8ae": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9610510990201553,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.994095155971319
+        },
+        "longbench_v2/6704a442bb02136c067cdd91": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9378859848630021,
+          "reference_correct": 13,
+          "summed_time_ratio": 0.9616053145788447
+        }
+      },
+      "missing_timings": [],
+      "note": "pooled time/call is amortized request wall per decoder call, not pure GPU latency",
+      "outcomes": 24,
+      "paired_outcomes": {
+        "both": 12,
+        "candidate_only": 2,
+        "neither": 8,
+        "reference_only": 2
+      },
+      "per_bin": {
+        "10-15K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.9096752631405111,
+          "pooled_call_ratio": 0.9472450175849941,
+          "pooled_time_per_call_ratio": 1.0186809577627403,
+          "reference_correct": 8,
+          "summed_time_ratio": 0.9649404617494656
+        },
+        "15-20K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.9973986192462827,
+          "pooled_call_ratio": 0.9743499648629655,
+          "pooled_time_per_call_ratio": 1.0216441179726177,
+          "reference_correct": 6,
+          "summed_time_ratio": 0.9954389104490755
+        }
+      },
+      "per_seed": {
+        "17": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 1.0505145168538246,
+          "reference_correct": 8,
+          "summed_time_ratio": 1.0965074490144957
+        },
+        "29": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.863680450733927,
+          "reference_correct": 6,
+          "summed_time_ratio": 0.8762019124744213
+        }
+      },
+      "pooled_call_ratio": 0.9615171137835338,
+      "pooled_time_per_call_ratio": 1.020475360185521,
+      "questions": 12,
+      "questions_with_complete_timing": 12,
+      "reference": "B8_P",
+      "reference_calls": 5405,
+      "reference_correct": 14,
+      "reference_time_s": 951.9310875318479,
+      "strict": {
+        "candidate_correct": 14,
+        "paired_outcomes": {
+          "both": 12,
+          "candidate_only": 2,
+          "neither": 8,
+          "reference_only": 2
+        },
+        "reference_correct": 14
+      },
+      "summed_time_ratio": 0.9812045230127941,
+      "timing_complete": true
+    },
+    "CVM_T/D_native": {
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.8258304125488287,
+          1.0020673934634865
+        ],
+        "note": "question clusters (seeds and arms travel together); descriptive, not a test",
+        "quality_diff_95": [
+          -0.08333333333333333,
+          0.2916666666666667
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.7672729196763683,
+          0.9978552443752271
+        ],
+        "timed_questions": 12
+      },
+      "candidate": "CVM_T",
+      "candidate_calls": 5197,
+      "candidate_correct": 14,
+      "candidate_time_s": 934.0390886827372,
+      "decomposition_check": true,
+      "geometric_time_ratio": 0.9129166051877899,
+      "leave_one_question_out": {
+        "longbench_v2/66ebe0fb5a08c7b9b35e14f5": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9258779047064463,
+          "reference_correct": 11,
+          "summed_time_ratio": 0.9081387160410975
+        },
+        "longbench_v2/66ed2c87821e116aacb1f149": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9139803168300624,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8744546163204524
+        },
+        "longbench_v2/66f120a9821e116aacb26d02": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9171160955737425,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.8771943666598783
+        },
+        "longbench_v2/66f245cc821e116aacb28698": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9050479470886941,
+          "reference_correct": 11,
+          "summed_time_ratio": 0.8570568094675105
+        },
+        "longbench_v2/66f2aac2821e116aacb2a9de": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.902050495577314,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8666481179041845
+        },
+        "longbench_v2/66f2b676821e116aacb2b27a": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.90466398471465,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.8688981438782631
+        },
+        "longbench_v2/66f41e45821e116aacb30ec3": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9239253680878351,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8804069254276242
+        },
+        "longbench_v2/66f8c6b4bb02136c067c4480": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.903090864361288,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.8699004503556012
+        },
+        "longbench_v2/66f9625fbb02136c067c5456": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9385507563442452,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9024099647714713
+        },
+        "longbench_v2/66fab4bfbb02136c067c754c": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.8943655026619497,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.8550486006732103
+        },
+        "longbench_v2/67040276bb02136c067cd8ae": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9339802494303407,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9051427834955806
+        },
+        "longbench_v2/6704a442bb02136c067cdd91": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.8936960244892015,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.847607037969584
+        }
+      },
+      "missing_timings": [],
+      "note": "pooled time/call is amortized request wall per decoder call, not pure GPU latency",
+      "outcomes": 24,
+      "paired_outcomes": {
+        "both": 10,
+        "candidate_only": 4,
+        "neither": 8,
+        "reference_only": 2
+      },
+      "per_bin": {
+        "10-15K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.8578572420247939,
+          "pooled_call_ratio": 0.8647877274348912,
+          "pooled_time_per_call_ratio": 0.9526690208018804,
+          "reference_correct": 5,
+          "summed_time_ratio": 0.8238564774968812
+        },
+        "15-20K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.9715098121226932,
+          "pooled_call_ratio": 0.9953338119167265,
+          "pooled_time_per_call_ratio": 0.9295719112911821,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.9252343539161695
+        }
+      },
+      "per_seed": {
+        "17": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.8881083309187738,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.891794547610608
+        },
+        "29": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.9384178697720416,
+          "reference_correct": 5,
+          "summed_time_ratio": 0.858197755407478
+        }
+      },
+      "pooled_call_ratio": 0.9298622293791375,
+      "pooled_time_per_call_ratio": 0.9418286963783719,
+      "questions": 12,
+      "questions_with_complete_timing": 12,
+      "reference": "D_native",
+      "reference_calls": 5589,
+      "reference_correct": 12,
+      "reference_time_s": 1066.5335595097858,
+      "strict": {
+        "candidate_correct": 14,
+        "paired_outcomes": {
+          "both": 10,
+          "candidate_only": 4,
+          "neither": 8,
+          "reference_only": 2
+        },
+        "reference_correct": 12
+      },
+      "summed_time_ratio": 0.8757709313076398,
+      "timing_complete": true
+    },
+    "CVM_T/T_G_original": {
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.7508428418178176,
+          1.0940992200672002
+        ],
+        "note": "question clusters (seeds and arms travel together); descriptive, not a test",
+        "quality_diff_95": [
+          -0.16666666666666666,
+          0.20833333333333334
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.7163029763643611,
+          1.081016161926898
+        ],
+        "timed_questions": 12
+      },
+      "candidate": "CVM_T",
+      "candidate_calls": 5197,
+      "candidate_correct": 14,
+      "candidate_time_s": 934.0390886827372,
+      "decomposition_check": true,
+      "geometric_time_ratio": 0.9066557966084882,
+      "leave_one_question_out": {
+        "longbench_v2/66ebe0fb5a08c7b9b35e14f5": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9355078292941464,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9192991469264082
+        },
+        "longbench_v2/66ed2c87821e116aacb1f149": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.8980356205947905,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.8689008305288695
+        },
+        "longbench_v2/66f120a9821e116aacb26d02": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9124847016631701,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8786454793245664
+        },
+        "longbench_v2/66f245cc821e116aacb28698": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.866745467801206,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8213866963843663
+        },
+        "longbench_v2/66f2aac2821e116aacb2a9de": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.8689044928501531,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.8489786633796069
+        },
+        "longbench_v2/66f2b676821e116aacb2b27a": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9211164834815773,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8817261064470031
+        },
+        "longbench_v2/66f41e45821e116aacb30ec3": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.949953305025031,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9024477578159509
+        },
+        "longbench_v2/66f8c6b4bb02136c067c4480": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.8995164267818992,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8692034934282483
+        },
+        "longbench_v2/66f9625fbb02136c067c5456": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9151825239791804,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.880007984403352
+        },
+        "longbench_v2/66fab4bfbb02136c067c754c": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.8730402137472051,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8423270567175911
+        },
+        "longbench_v2/67040276bb02136c067cd8ae": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.947236844952391,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9254085742612435
+        },
+        "longbench_v2/6704a442bb02136c067cdd91": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.8971243522951171,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8553150420695437
+        }
+      },
+      "missing_timings": [],
+      "note": "pooled time/call is amortized request wall per decoder call, not pure GPU latency",
+      "outcomes": 24,
+      "paired_outcomes": {
+        "both": 12,
+        "candidate_only": 2,
+        "neither": 8,
+        "reference_only": 2
+      },
+      "per_bin": {
+        "10-15K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.808206538066538,
+          "pooled_call_ratio": 0.8434237995824635,
+          "pooled_time_per_call_ratio": 0.9603411574825641,
+          "reference_correct": 6,
+          "summed_time_ratio": 0.8099745879393652
+        },
+        "15-20K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 1.0170973566859423,
+          "pooled_call_ratio": 0.9917739628040058,
+          "pooled_time_per_call_ratio": 0.944168545378252,
+          "reference_correct": 8,
+          "summed_time_ratio": 0.9364017798046826
+        }
+      },
+      "per_seed": {
+        "17": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.8422851169474934,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.8070951736760904
+        },
+        "29": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.9759459320649683,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.9646615172603494
+        }
+      },
+      "pooled_call_ratio": 0.9165784832451499,
+      "pooled_time_per_call_ratio": 0.9533285923865532,
+      "questions": 12,
+      "questions_with_complete_timing": 12,
+      "reference": "T_G_original",
+      "reference_calls": 5670,
+      "reference_correct": 14,
+      "reference_time_s": 1068.9386366172694,
+      "strict": {
+        "candidate_correct": 14,
+        "paired_outcomes": {
+          "both": 12,
+          "candidate_only": 2,
+          "neither": 8,
+          "reference_only": 2
+        },
+        "reference_correct": 14
+      },
+      "summed_time_ratio": 0.8738004752439007,
+      "timing_complete": true
+    },
+    "CVM_T/T_P": {
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.8089017589919447,
+          1.1165252007360698
+        ],
+        "note": "question clusters (seeds and arms travel together); descriptive, not a test",
+        "quality_diff_95": [
+          -0.125,
+          0.125
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.7969108020090594,
+          1.13367837278569
+        ],
+        "timed_questions": 12
+      },
+      "candidate": "CVM_T",
+      "candidate_calls": 5197,
+      "candidate_correct": 14,
+      "candidate_time_s": 934.0390886827372,
+      "decomposition_check": true,
+      "geometric_time_ratio": 0.9412003238626926,
+      "leave_one_question_out": {
+        "longbench_v2/66ebe0fb5a08c7b9b35e14f5": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9331936583759891,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9370620229114861
+        },
+        "longbench_v2/66ed2c87821e116aacb1f149": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9243908878060376,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9316748626396791
+        },
+        "longbench_v2/66f120a9821e116aacb26d02": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9482276924529986,
+          "reference_correct": 13,
+          "summed_time_ratio": 0.9512226740218404
+        },
+        "longbench_v2/66f245cc821e116aacb28698": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.8855839618723761,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.8697071864757889
+        },
+        "longbench_v2/66f2aac2821e116aacb2a9de": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9559742184941371,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9451098616512852
+        },
+        "longbench_v2/66f2b676821e116aacb2b27a": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9654209298589375,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9575735034182264
+        },
+        "longbench_v2/66f41e45821e116aacb30ec3": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9714546539291592,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9592830510036999
+        },
+        "longbench_v2/66f8c6b4bb02136c067c4480": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.931692993992126,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9341403616426669
+        },
+        "longbench_v2/66f9625fbb02136c067c5456": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9467436905132165,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9433220503254114
+        },
+        "longbench_v2/66fab4bfbb02136c067c754c": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9236634607271248,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9207271849974914
+        },
+        "longbench_v2/67040276bb02136c067cd8ae": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9740267773801695,
+          "reference_correct": 13,
+          "summed_time_ratio": 0.9867611222509749
+        },
+        "longbench_v2/6704a442bb02136c067cdd91": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.937647653315695,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9308176870025139
+        }
+      },
+      "missing_timings": [],
+      "note": "pooled time/call is amortized request wall per decoder call, not pure GPU latency",
+      "outcomes": 24,
+      "paired_outcomes": {
+        "both": 12,
+        "candidate_only": 2,
+        "neither": 8,
+        "reference_only": 2
+      },
+      "per_bin": {
+        "10-15K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.8971576008979655,
+          "pooled_call_ratio": 0.9528301886792453,
+          "pooled_time_per_call_ratio": 0.9524283258365867,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.9075024614103326
+        },
+        "15-20K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.9874051657730833,
+          "pooled_call_ratio": 1.0300891530460623,
+          "pooled_time_per_call_ratio": 0.9384506015986323,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.966687785376303
+        }
+      },
+      "per_seed": {
+        "17": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.9323777863380024,
+          "reference_correct": 6,
+          "summed_time_ratio": 0.9403226433280375
+        },
+        "29": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.9501063438228451,
+          "reference_correct": 8,
+          "summed_time_ratio": 0.9366269209453572
+        }
+      },
+      "pooled_call_ratio": 0.9925515660809778,
+      "pooled_time_per_call_ratio": 0.9456352568757219,
+      "questions": 12,
+      "questions_with_complete_timing": 12,
+      "reference": "T_P",
+      "reference_calls": 5236,
+      "reference_correct": 14,
+      "reference_time_s": 995.1494710606057,
+      "strict": {
+        "candidate_correct": 14,
+        "paired_outcomes": {
+          "both": 12,
+          "candidate_only": 2,
+          "neither": 8,
+          "reference_only": 2
+        },
+        "reference_correct": 14
+      },
+      "summed_time_ratio": 0.9385917551533856,
+      "timing_complete": true
+    },
+    "T_G_original/D_native": {
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.8786906996076687,
+          1.1528159831244589
+        ],
+        "note": "question clusters (seeds and arms travel together); descriptive, not a test",
+        "quality_diff_95": [
+          0,
+          0.20833333333333334
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.8800504856062527,
+          1.125568359144925
+        ],
+        "timed_questions": 12
+      },
+      "candidate": "T_G_original",
+      "candidate_calls": 5670,
+      "candidate_correct": 14,
+      "candidate_time_s": 1068.9386366172694,
+      "decomposition_check": true,
+      "geometric_time_ratio": 1.0069053863690294,
+      "leave_one_question_out": {
+        "longbench_v2/66ebe0fb5a08c7b9b35e14f5": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9897062063126013,
+          "reference_correct": 11,
+          "summed_time_ratio": 0.9878598485350231
+        },
+        "longbench_v2/66ed2c87821e116aacb1f149": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 1.0177550821700274,
+          "reference_correct": 12,
+          "summed_time_ratio": 1.0063917372345041
+        },
+        "longbench_v2/66f120a9821e116aacb26d02": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 1.0050755852696829,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.998348466248522
+        },
+        "longbench_v2/66f245cc821e116aacb28698": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 1.044191150355427,
+          "reference_correct": 11,
+          "summed_time_ratio": 1.0434266993124666
+        },
+        "longbench_v2/66f2aac2821e116aacb2a9de": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 1.0381468884093767,
+          "reference_correct": 12,
+          "summed_time_ratio": 1.0208126014077188
+        },
+        "longbench_v2/66f2b676821e116aacb2b27a": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9821385252984062,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.9854513068458056
+        },
+        "longbench_v2/66f41e45821e116aacb30ec3": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.97260082490422,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9755766112803377
+        },
+        "longbench_v2/66f8c6b4bb02136c067c4480": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 1.0039737324110654,
+          "reference_correct": 10,
+          "summed_time_ratio": 1.00080183401542
+        },
+        "longbench_v2/66f9625fbb02136c067c5456": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 1.0255339582572671,
+          "reference_correct": 12,
+          "summed_time_ratio": 1.025456564900724
+        },
+        "longbench_v2/66fab4bfbb02136c067c754c": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 1.024426468081251,
+          "reference_correct": 10,
+          "summed_time_ratio": 1.0151028556594073
+        },
+        "longbench_v2/67040276bb02136c067cd8ae": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9860049832386782,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9781007099681986
+        },
+        "longbench_v2/6704a442bb02136c067cdd91": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9961785366798428,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.9909881111393655
+        }
+      },
+      "missing_timings": [],
+      "note": "pooled time/call is amortized request wall per decoder call, not pure GPU latency",
+      "outcomes": 24,
+      "paired_outcomes": {
+        "both": 12,
+        "candidate_only": 2,
+        "neither": 10,
+        "reference_only": 0
+      },
+      "per_bin": {
+        "10-15K": {
+          "candidate_correct": 6,
+          "geometric_time_ratio": 1.0614331877059973,
+          "pooled_call_ratio": 1.025330003567606,
+          "pooled_time_per_call_ratio": 0.9920110300168792,
+          "reference_correct": 5,
+          "summed_time_ratio": 1.0171386729463114
+        },
+        "15-20K": {
+          "candidate_correct": 8,
+          "geometric_time_ratio": 0.955178779825179,
+          "pooled_call_ratio": 1.003589375448672,
+          "pooled_time_per_call_ratio": 0.9845402241384539,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.9880741086472065
+        }
+      },
+      "per_seed": {
+        "17": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 1.0544034472998256,
+          "reference_correct": 7,
+          "summed_time_ratio": 1.1049434771722595
+        },
+        "29": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.9615469863033064,
+          "reference_correct": 5,
+          "summed_time_ratio": 0.8896361470340085
+        }
+      },
+      "pooled_call_ratio": 1.0144927536231885,
+      "pooled_time_per_call_ratio": 0.9879371120303938,
+      "questions": 12,
+      "questions_with_complete_timing": 12,
+      "reference": "D_native",
+      "reference_calls": 5589,
+      "reference_correct": 12,
+      "reference_time_s": 1066.5335595097858,
+      "strict": {
+        "candidate_correct": 14,
+        "paired_outcomes": {
+          "both": 12,
+          "candidate_only": 2,
+          "neither": 10,
+          "reference_only": 0
+        },
+        "reference_correct": 12
+      },
+      "summed_time_ratio": 1.0022550411902547,
+      "timing_complete": true
+    },
+    "T_P/D_native": {
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.8300225312763981,
+          1.1207232821548452
+        ],
+        "note": "question clusters (seeds and arms travel together); descriptive, not a test",
+        "quality_diff_95": [
+          -0.08333333333333333,
+          0.25
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.7945457904691455,
+          1.0854513856413528
+        ],
+        "timed_questions": 12
+      },
+      "candidate": "T_P",
+      "candidate_calls": 5236,
+      "candidate_correct": 14,
+      "candidate_time_s": 995.1494710606057,
+      "decomposition_check": true,
+      "geometric_time_ratio": 0.9699493105157189,
+      "leave_one_question_out": {
+        "longbench_v2/66ebe0fb5a08c7b9b35e14f5": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9921605193049916,
+          "reference_correct": 11,
+          "summed_time_ratio": 0.96913405285541
+        },
+        "longbench_v2/66ed2c87821e116aacb1f149": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9887379125937905,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9385834601600103
+        },
+        "longbench_v2/66f120a9821e116aacb26d02": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9671897402629398,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.9221756278695872
+        },
+        "longbench_v2/66f245cc821e116aacb28698": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 1.021978701121874,
+          "reference_correct": 11,
+          "summed_time_ratio": 0.9854544412130938
+        },
+        "longbench_v2/66f2aac2821e116aacb2a9de": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9435929109032204,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.916981351130954
+        },
+        "longbench_v2/66f2b676821e116aacb2b27a": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9370668863029881,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.9073957672978408
+        },
+        "longbench_v2/66f41e45821e116aacb30ec3": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9510741076291246,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9177759624820355
+        },
+        "longbench_v2/66f8c6b4bb02136c067c4480": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9693009072567099,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.9312309863433145
+        },
+        "longbench_v2/66f9625fbb02136c067c5456": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.991346196176359,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9566297792574371
+        },
+        "longbench_v2/66fab4bfbb02136c067c754c": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.968280700373152,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.9286666176534583
+        },
+        "longbench_v2/67040276bb02136c067cd8ae": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9588855985483874,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9172866290382332
+        },
+        "longbench_v2/6704a442bb02136c067cdd91": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9531256451492495,
+          "reference_correct": 10,
+          "summed_time_ratio": 0.9106047830903485
+        }
+      },
+      "missing_timings": [],
+      "note": "pooled time/call is amortized request wall per decoder call, not pure GPU latency",
+      "outcomes": 24,
+      "paired_outcomes": {
+        "both": 11,
+        "candidate_only": 3,
+        "neither": 9,
+        "reference_only": 1
+      },
+      "per_bin": {
+        "10-15K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.9561945874015492,
+          "pooled_call_ratio": 0.9075990010702818,
+          "pooled_time_per_call_ratio": 1.00025271714287,
+          "reference_correct": 5,
+          "summed_time_ratio": 0.9078283668967038
+        },
+        "15-20K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.983901893365177,
+          "pooled_call_ratio": 0.9662598707824839,
+          "pooled_time_per_call_ratio": 0.9905389902331295,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.9571180767076758
+        }
+      },
+      "per_seed": {
+        "17": {
+          "candidate_correct": 6,
+          "geometric_time_ratio": 0.9525198304079071,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.9483920800357669
+        },
+        "29": {
+          "candidate_correct": 8,
+          "geometric_time_ratio": 0.9876977202322702,
+          "reference_correct": 5,
+          "summed_time_ratio": 0.9162642416270514
+        }
+      },
+      "pooled_call_ratio": 0.9368402218643764,
+      "pooled_time_per_call_ratio": 0.9959745996464573,
+      "questions": 12,
+      "questions_with_complete_timing": 12,
+      "reference": "D_native",
+      "reference_calls": 5589,
+      "reference_correct": 12,
+      "reference_time_s": 1066.5335595097858,
+      "strict": {
+        "candidate_correct": 14,
+        "paired_outcomes": {
+          "both": 11,
+          "candidate_only": 3,
+          "neither": 9,
+          "reference_only": 1
+        },
+        "reference_correct": 12
+      },
+      "summed_time_ratio": 0.9330690649040705,
+      "timing_complete": true
+    },
+    "T_P/T_G_original": {
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.8439433995095271,
+          1.1222662573344955
+        ],
+        "note": "question clusters (seeds and arms travel together); descriptive, not a test",
+        "quality_diff_95": [
+          -0.125,
+          0.125
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.8186750999607684,
+          1.0632119156817978
+        ],
+        "timed_questions": 12
+      },
+      "candidate": "T_P",
+      "candidate_calls": 5236,
+      "candidate_correct": 14,
+      "candidate_time_s": 995.1494710606057,
+      "decomposition_check": true,
+      "geometric_time_ratio": 0.963297369987684,
+      "leave_one_question_out": {
+        "longbench_v2/66ebe0fb5a08c7b9b35e14f5": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 1.0024798399532469,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9810440765384046
+        },
+        "longbench_v2/66ed2c87821e116aacb1f149": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9714890447765024,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9326223829491821
+        },
+        "longbench_v2/66f120a9821e116aacb26d02": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9623054767601609,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9237011514975645
+        },
+        "longbench_v2/66f245cc821e116aacb28698": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9787276024835181,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9444405072847265
+        },
+        "longbench_v2/66f2aac2821e116aacb2a9de": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9089204248822345,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.8982856891327755
+        },
+        "longbench_v2/66f2b676821e116aacb2b27a": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.954108674250688,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9207920888574374
+        },
+        "longbench_v2/66f41e45821e116aacb30ec3": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9778668527479243,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9407523221344501
+        },
+        "longbench_v2/66f8c6b4bb02136c067c4480": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9654644100388086,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9304848919061495
+        },
+        "longbench_v2/66f9625fbb02136c067c5456": {
+          "candidate_correct": 14,
+          "geometric_time_ratio": 0.9666634519455554,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9328818128440671
+        },
+        "longbench_v2/66fab4bfbb02136c067c754c": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9451929743544601,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9148497735731417
+        },
+        "longbench_v2/67040276bb02136c067cd8ae": {
+          "candidate_correct": 13,
+          "geometric_time_ratio": 0.9724956920590673,
+          "reference_correct": 14,
+          "summed_time_ratio": 0.9378243157272192
+        },
+        "longbench_v2/6704a442bb02136c067cdd91": {
+          "candidate_correct": 12,
+          "geometric_time_ratio": 0.9567819522852962,
+          "reference_correct": 12,
+          "summed_time_ratio": 0.9188856787024436
+        }
+      },
+      "missing_timings": [],
+      "note": "pooled time/call is amortized request wall per decoder call, not pure GPU latency",
+      "outcomes": 24,
+      "paired_outcomes": {
+        "both": 13,
+        "candidate_only": 1,
+        "neither": 9,
+        "reference_only": 1
+      },
+      "per_bin": {
+        "10-15K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 0.900852355547792,
+          "pooled_call_ratio": 0.8851774530271399,
+          "pooled_time_per_call_ratio": 1.0083080599676906,
+          "reference_correct": 6,
+          "summed_time_ratio": 0.8925315603889369
+        },
+        "15-20K": {
+          "candidate_correct": 7,
+          "geometric_time_ratio": 1.0300709292822179,
+          "pooled_call_ratio": 0.9628040057224606,
+          "pooled_time_per_call_ratio": 1.0060929619202965,
+          "reference_correct": 8,
+          "summed_time_ratio": 0.9686703338660364
+        }
+      },
+      "per_seed": {
+        "17": {
+          "candidate_correct": 6,
+          "geometric_time_ratio": 0.9033732134005937,
+          "reference_correct": 7,
+          "summed_time_ratio": 0.8583172801407593
+        },
+        "29": {
+          "candidate_correct": 8,
+          "geometric_time_ratio": 1.027196522168408,
+          "reference_correct": 7,
+          "summed_time_ratio": 1.0299314440873601
+        }
+      },
+      "pooled_call_ratio": 0.9234567901234568,
+      "pooled_time_per_call_ratio": 1.0081356267703567,
+      "questions": 12,
+      "questions_with_complete_timing": 12,
+      "reference": "T_G_original",
+      "reference_calls": 5670,
+      "reference_correct": 14,
+      "reference_time_s": 1068.9386366172694,
+      "strict": {
+        "candidate_correct": 14,
+        "paired_outcomes": {
+          "both": 13,
+          "candidate_only": 1,
+          "neither": 9,
+          "reference_only": 1
+        },
+        "reference_correct": 14
+      },
+      "summed_time_ratio": 0.9309696899064528,
+      "timing_complete": true
+    }
+  },
+  "per_arm": {
+    "B8_P": {
+      "attempt0_time_s": 954.1117582311854,
+      "calls_per_canvas": 17.050473186119874,
+      "canvases": 317,
+      "caps": 0,
+      "decoder_calls": 5405,
+      "eos": 24,
+      "failures": 0,
+      "malformed": 0,
+      "no_final_channel": 0,
+      "not_executed": 0,
+      "outcomes": 24,
+      "output_tokens": 77393,
+      "peak_allocated_gib_max": 58.41111660003662,
+      "per_seed": {
+        "17": 8,
+        "29": 6
+      },
+      "questions_with_any_correct": 8,
+      "strict_correct": 14,
+      "task_correct": 14,
+      "unparsed": 1,
+      "warm_accepted": 24,
+      "warm_time_s": 951.9310875318479
+    },
+    "CVM_T": {
+      "attempt0_time_s": 933.7946870978922,
+      "calls_per_canvas": 16.710610932475884,
+      "canvases": 311,
+      "caps": 0,
+      "decoder_calls": 5197,
+      "eos": 24,
+      "failures": 0,
+      "malformed": 0,
+      "no_final_channel": 0,
+      "not_executed": 0,
+      "outcomes": 24,
+      "output_tokens": 76875,
+      "peak_allocated_gib_max": 58.41111660003662,
+      "per_seed": {
+        "17": 7,
+        "29": 7
+      },
+      "questions_with_any_correct": 8,
+      "strict_correct": 14,
+      "task_correct": 14,
+      "unparsed": 0,
+      "warm_accepted": 24,
+      "warm_time_s": 934.0390886827372
+    },
+    "D_native": {
+      "attempt0_time_s": 1065.7465555092786,
+      "calls_per_canvas": 17.630914826498422,
+      "canvases": 317,
+      "caps": 0,
+      "decoder_calls": 5589,
+      "eos": 24,
+      "failures": 0,
+      "malformed": 0,
+      "no_final_channel": 0,
+      "not_executed": 0,
+      "outcomes": 24,
+      "output_tokens": 78255,
+      "peak_allocated_gib_max": 58.41111660003662,
+      "per_seed": {
+        "17": 7,
+        "29": 5
+      },
+      "questions_with_any_correct": 7,
+      "strict_correct": 12,
+      "task_correct": 12,
+      "unparsed": 0,
+      "warm_accepted": 24,
+      "warm_time_s": 1066.5335595097858
+    },
+    "T_G_original": {
+      "attempt0_time_s": 1068.432150647277,
+      "calls_per_canvas": 17.66355140186916,
+      "canvases": 321,
+      "caps": 0,
+      "decoder_calls": 5670,
+      "eos": 24,
+      "failures": 0,
+      "malformed": 0,
+      "no_final_channel": 0,
+      "not_executed": 0,
+      "outcomes": 24,
+      "output_tokens": 79240,
+      "peak_allocated_gib_max": 58.41111660003662,
+      "per_seed": {
+        "17": 7,
+        "29": 7
+      },
+      "questions_with_any_correct": 7,
+      "strict_correct": 14,
+      "task_correct": 14,
+      "unparsed": 0,
+      "warm_accepted": 24,
+      "warm_time_s": 1068.9386366172694
+    },
+    "T_P": {
+      "attempt0_time_s": 994.8421153994277,
+      "calls_per_canvas": 17.11111111111111,
+      "canvases": 306,
+      "caps": 0,
+      "decoder_calls": 5236,
+      "eos": 24,
+      "failures": 0,
+      "malformed": 0,
+      "no_final_channel": 0,
+      "not_executed": 0,
+      "outcomes": 24,
+      "output_tokens": 75455,
+      "peak_allocated_gib_max": 58.41111660003662,
+      "per_seed": {
+        "17": 6,
+        "29": 8
+      },
+      "questions_with_any_correct": 8,
+      "strict_correct": 14,
+      "task_correct": 14,
+      "unparsed": 0,
+      "warm_accepted": 24,
+      "warm_time_s": 995.1494710606057
+    }
+  }
+}

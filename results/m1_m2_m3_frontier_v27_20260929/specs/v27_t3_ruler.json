@@ -1,0 +1,71 @@
+{
+ "name": "t3_ruler",
+ "ids": {
+  "ruler4k": [
+   "ruler4k/ruler_4096_cwe_p0046",
+   "ruler4k/ruler_4096_fwe_p0096",
+   "ruler4k/ruler_4096_niah_multikey_1_p0112",
+   "ruler4k/ruler_4096_niah_multikey_2_p0160",
+   "ruler4k/ruler_4096_niah_multikey_3_p0229",
+   "ruler4k/ruler_4096_niah_multiquery_p0281",
+   "ruler4k/ruler_4096_niah_multivalue_p0341",
+   "ruler4k/ruler_4096_niah_single_1_p0391",
+   "ruler4k/ruler_4096_niah_single_2_p0437",
+   "ruler4k/ruler_4096_niah_single_3_p0480",
+   "ruler4k/ruler_4096_qa_1_p0547",
+   "ruler4k/ruler_4096_qa_2_p0578",
+   "ruler4k/ruler_4096_vt_p0603"
+  ]
+ },
+ "seeds": [
+  101,
+  202
+ ],
+ "warm": true,
+ "arms": {
+  "D_native": {
+   "kind": "native"
+  },
+  "D_matched": {
+   "kind": "dense_matched"
+  },
+  "T_scope": {
+   "kind": "fresh_T"
+  },
+  "M1_R1_A8": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output"
+  },
+  "M2c_pool_R1_A8": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R6_A64": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "score_period": 64,
+    "decision_interval": 6
+   }
+  },
+  "M3_R3_A64": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "score_period": 64
+   }
+  },
+  "B_A64": {
+   "kind": "method",
+   "parent": "B_A8_matched",
+   "extra": {
+    "hold_only": true,
+    "score_period": 64
+   }
+  }
+ },
+ "selection_rule": "Tier3 confirmation, frozen after Tier2 dev and before any Tier3 output. Primary M3 = M3_R6_A64 (announced before AIME dev scoring); pre-declared secondary = M3_R3_A64; both share matched hold-only B_A64. D_matched is the same-consumer dense baseline for attribution. M3_R3_A8 kept on LB only as the current-reference sub-panel. LB/AIME ids are new (not used in any earlier v20-v27 run); RULER ids are the thirteen v20 tasks (exposed). Seeds 101/202; first output scores quality, accepted warm scores time."
+}

@@ -1,0 +1,220 @@
+{
+  "schema": "v27_vllm_spec_v1",
+  "name": "vllm_lb_v18",
+  "protocol_id": "v27_vllm_lb_v18_20261002",
+  "arms": [
+    "dense",
+    "method"
+  ],
+  "controls": [
+    "native",
+    "allkept"
+  ],
+  "datasets": {
+    "longbench_v2_32k": {
+      "indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "repeats": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "longbench_v2_64k": {
+      "indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23
+      ],
+      "repeats": [
+        0,
+        1,
+        2,
+        3
+      ]
+    },
+    "longbench_v2_96k": {
+      "indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "repeats": [
+        0,
+        1,
+        2,
+        3
+      ]
+    }
+  },
+  "control_indices": {
+    "longbench_v2_32k": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "longbench_v2_64k": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "longbench_v2_96k": [
+      0,
+      1,
+      2,
+      3
+    ]
+  },
+  "arm_settings": {
+    "dense": {
+      "compilation_config": "default",
+      "cudagraph_mode": "default"
+    },
+    "method": {
+      "compilation_config": "PIECEWISE",
+      "cudagraph_mode": "PIECEWISE"
+    },
+    "native": {
+      "compilation_config": "PIECEWISE",
+      "cudagraph_mode": "PIECEWISE"
+    },
+    "allkept": {
+      "compilation_config": "PIECEWISE",
+      "cudagraph_mode": "PIECEWISE"
+    }
+  },
+  "settings": {
+    "max_model_len": 106496,
+    "chunk": 16384,
+    "gpu_memory_utilization": 0.92,
+    "block_size": 32
+  },
+  "blocks": [
+    {
+      "engine_seed": 7001,
+      "repeats": [
+        0,
+        1
+      ]
+    },
+    {
+      "engine_seed": 7002,
+      "repeats": [
+        2,
+        3
+      ]
+    }
+  ],
+  "order_seed": 271802,
+  "launch_order": [
+    {
+      "block": 0,
+      "arm": "dense"
+    },
+    {
+      "block": 0,
+      "arm": "method"
+    },
+    {
+      "block": 0,
+      "arm": "native"
+    },
+    {
+      "block": 0,
+      "arm": "allkept"
+    },
+    {
+      "block": 1,
+      "arm": "allkept"
+    },
+    {
+      "block": 1,
+      "arm": "native"
+    },
+    {
+      "block": 1,
+      "arm": "method"
+    },
+    {
+      "block": 1,
+      "arm": "dense"
+    }
+  ],
+  "primary_receipt_method": {
+    "score_period": 64,
+    "decision_interval": 6,
+    "carry_first": true,
+    "risk_state": "dense_prefix",
+    "threshold_shift": "minus_ln2",
+    "fused_observe": true,
+    "async_route": true,
+    "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+    "q_block": 128,
+    "sensitivity": "temporal_T"
+  },
+  "selection": "The unchanged E14 eligible items by frozen manifest order, 24/24/11; no new answer-based selection. Controls use first four indices per bin. No truncation.",
+  "stopping": "Native DiffusionGemma generation config unchanged; per-request seeds unsupported. Engine seeds match across arms in a block but do not establish trajectory pairing.",
+  "timing": "One warm-up per eligible item and engine; request boundary sync only; CPU scheduler phase counts; reject timed graph captures or backend/inductor compilations. W includes prefill, S begins at final prefill scheduler completion and includes canvas commits. N counts denoising forwards only.",
+  "inference": "Batch 1 single-engine offline native vLLM serving, HTTP/network excluded. Adapter arms PIECEWISE, dense official default graph mode. No per-step profiling events.",
+  "statistics": "Item x repeat label paired geometric means, item-clustered 95% bootstrap CIs; repeat is not a matched random trajectory. Accuracy counts and clustered accuracy differences; McNemar descriptive/exploratory only.",
+  "memory_preflight": "Longest eligible input, every arm, same .92 settings; failure is recorded in a fresh run directory. A lower-memory configuration requires a new spec; no silent cache-cap change.",
+  "scoring": "Unchanged v15-lbv2-nemo-mcq-default-on-final-channel-1; decode token ids with special tokens preserved privately. Strict correctness requires EOS.",
+  "publication": "No prompts, prompt hashes, raw outputs, answers or private binding paths. Frozen input/source hashes only in private binding. Public item indices are manifest ordinal labels.",
+  "gpu_accounting": "Terminal receipt records whole worker reserved wall seconds, including loading, warmup and failures; per-request wall seconds reported separately."
+}

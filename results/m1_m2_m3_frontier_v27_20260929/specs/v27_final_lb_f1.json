@@ -1,0 +1,160 @@
+{
+ "name": "final_lb_f1",
+ "ids": {
+  "longbench_v2": [
+   "longbench_v2/66f9625fbb02136c067c5456",
+   "longbench_v2/66f2aac2821e116aacb2a9de",
+   "longbench_v2/66ed2c87821e116aacb1f149",
+   "longbench_v2/66f245cc821e116aacb28698",
+   "longbench_v2/66fab4bfbb02136c067c754c",
+   "longbench_v2/67040276bb02136c067cd8ae",
+   "longbench_v2/6704a442bb02136c067cdd91",
+   "longbench_v2/66f41e45821e116aacb30ec3",
+   "longbench_v2/66f120a9821e116aacb26d02",
+   "longbench_v2/66f2b676821e116aacb2b27a",
+   "longbench_v2/66ebe0fb5a08c7b9b35e14f5",
+   "longbench_v2/66f8c6b4bb02136c067c4480"
+  ],
+  "longbench_v2_32k": [
+   "longbench_v2/66f3b843821e116aacb2e692",
+   "longbench_v2/671b3d1bbb02136c067d5283",
+   "longbench_v2/66eefe85821e116aacb228dc",
+   "longbench_v2/66ece358821e116aacb1dc08",
+   "longbench_v2/66ee8bab821e116aacb21e44",
+   "longbench_v2/66ebdadd5a08c7b9b35e0e5b",
+   "longbench_v2/6719b96abb02136c067d4358",
+   "longbench_v2/66f52567821e116aacb329bc",
+   "longbench_v2/671b1335bb02136c067d4e88",
+   "longbench_v2/66f95c18bb02136c067c52e1",
+   "longbench_v2/66fcfb5fbb02136c067c93ae",
+   "longbench_v2/671b13f5bb02136c067d4ee3"
+  ],
+  "longbench_v2_64k": [
+   "longbench_v2/66ebd2975a08c7b9b35e01e3",
+   "longbench_v2/66f3cfa5821e116aacb2f096",
+   "longbench_v2/66efa466821e116aacb23219",
+   "longbench_v2/66ec1aef821e116aacb1aa1a",
+   "longbench_v2/66f2a557821e116aacb2a510",
+   "longbench_v2/66f950acbb02136c067c5021",
+   "longbench_v2/66ecf139821e116aacb1e0e1",
+   "longbench_v2/66ecfe1e821e116aacb1e41c",
+   "longbench_v2/66f97d7fbb02136c067c56b2",
+   "longbench_v2/66f53892821e116aacb33225",
+   "longbench_v2/66ebc3165a08c7b9b35deb38",
+   "longbench_v2/66f8c783bb02136c067c44b8"
+  ]
+ },
+ "seeds": [
+  101,
+  202,
+  303
+ ],
+ "warm": false,
+ "arms": {
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M1_R1_A8_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true
+   }
+  },
+  "M2c_R1_A8_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true,
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R3_A8_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true
+   }
+  },
+  "B_A64_fused_rp_async_fa4": {
+   "kind": "method",
+   "parent": "B_A8_matched",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "hold_only": true,
+    "route_pipeline": true
+   }
+  },
+  "B_A64_fused_rp_async_gate32k_fa4": {
+   "kind": "method",
+   "parent": "B_A8_matched",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "hold_only": true,
+    "route_pipeline": true,
+    "min_route_keys": 32768
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2"
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_gate32k_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "min_route_keys": 32768
+   }
+  }
+ },
+ "extra_gold_sha256": {
+  "longbench_v2_32k": "55098b5d5e95273028228da193ab431d6bb72543004cf3367329d3095146168f",
+  "longbench_v2_64k": "c1833d57fbfe1dd8b3376df6a8213f11803821a621d5308f6e708ac90dfae9c9"
+ },
+ "substrate": "piecewise_v3",
+ "long_context_execution": "all arms: memory-linear GLOBAL causal / LOCAL sliding prefill via the 64-row kernel, elided O(n^2) prefill mask mapping, token-chunked MoE (V27_PREFILL_DENSE64=1); canvas calls follow each arm | decoding substrate piecewise_v1 (torch 2.12.1 grouped_mm MoE; decoder compiled reduce-overhead, split at GLOBAL attention which runs eager; LOCAL attention graphed unless the arm routes LOCAL layers; official-style compiled sampler); untimed per-arm warm-up before timed requests",
+ "selection_rule": "Final-configuration panel (2026-09-30), frozen before generation, substrate piecewise_v3 (tokens identical to piecewise_v2), two H100 hosts with every arm of a cell on one host. Arms: dense D_fa4_allkept; Fan plain M1/M2c/M3 (A8); B and M3 R6 DP at -ln2 (the best settings of sweep s1 and variant panel v5), each also with a 32768-key length gate (dense below 32K keys: no measured saving there). The risk-budget variant is not included: its calibration on dev items gave the same kept-mass frontier as the per-tile threshold. LongBench-v2 pool (12 items, 10-19K tokens) and the 32K/64K panel items (12 + 12), 3 seeds.",
+ "hosts": [
+  "149.165.159.64",
+  "149.165.151.254"
+ ]
+}

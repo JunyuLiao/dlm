@@ -1,0 +1,36 @@
+# sc5 (both hosts; ov_pa4fx, adapter 013ea66a4e52; every job on the LOCAL fix). Re-planned 2026-10-05 07:15 UTC: the final
+# method is the C-gate settledness clock + sticky (settle15_sticky; COLLABORATION CANDIDATE, Junyu Liao). After sc4b
+# reaches mrcr _t50_sticky_fx (in flight at the swap): gw _t50_sticky_fx; seeds 3-4 of the final method, the
+# accepted-fraction clock + sticky, dense and lean 8192 (4096 and plain t50 dropped); AIME26 / HumanEval with the
+# final method; ablations (fixed step 4 = M3-like periodic refresh, C-gate row weights, jcgate weights; kcov90 dropped).
+gw _t50_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt34 _settle15_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+gw34 _settle15_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+mrcr34 _settle15_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt34 _t50_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+gw34 _t50_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+mrcr34 _t50_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt34 _fx dense FA4_LOCAL_FIX=1
+gw34 _fx dense FA4_LOCAL_FIX=1
+mrcr34 _fx dense FA4_LOCAL_FIX=1
+lbt34 _fx 8192 FA4_LOCAL_FIX=1
+gw34 _fx 8192 FA4_LOCAL_FIX=1
+mrcr34 _fx 8192 FA4_LOCAL_FIX=1
+aime _fx dense FA4_LOCAL_FIX=1
+aime _settle15_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+aime _t50_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+aime _fx 8192 FA4_LOCAL_FIX=1
+he _fx dense FA4_LOCAL_FIX=1
+he _settle15_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+ruler _rs4_fx 8192 MAGE_RESELECT=4 FA4_LOCAL_FIX=1
+lbt _rs4_fx 8192 MAGE_RESELECT=4 FA4_LOCAL_FIX=1
+mrcr _rs4_fx 8192 MAGE_RESELECT=4 FA4_LOCAL_FIX=1
+gw _rs4_fx 8192 MAGE_RESELECT=4 FA4_LOCAL_FIX=1
+ruler _t50_cgate_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate FA4_LOCAL_FIX=1
+lbt _t50_cgate_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate FA4_LOCAL_FIX=1
+mrcr _t50_cgate_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate FA4_LOCAL_FIX=1
+gw _t50_cgate_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate FA4_LOCAL_FIX=1
+ruler _rel50_jcg_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate FA4_LOCAL_FIX=1
+lbt _rel50_jcg_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate FA4_LOCAL_FIX=1
+mrcr _rel50_jcg_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate FA4_LOCAL_FIX=1
+gw _rel50_jcg_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate FA4_LOCAL_FIX=1

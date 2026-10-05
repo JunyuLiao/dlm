@@ -1,0 +1,43 @@
+# sc6 (both hosts; ov_pa4fx, adapter 013ea66a4e52; all on the LOCAL fix). 2026-10-05 07:45 UTC: the decisive "when to
+# re-observe" ablation is moved up, right after the seeds 3-4 dense references. All with hysteresis, 8192, S1 seeds 1-2:
+# fixed step 7 (~ the C-gate clock mean trigger step pooled over parts, 6.6), a per-part oracle step (the C-gate mean
+# trigger step of that part: ruler 2, lbt 9, mrcr 6, gw 6), periodic every 8 steps (PulseCol / M3-like). Compare with
+# settle15_sticky_fx at equal re-observation counts (receipts mage_reselections).
+gw34 _t50_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+mrcr34 _t50_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt34 _fx dense FA4_LOCAL_FIX=1
+gw34 _fx dense FA4_LOCAL_FIX=1
+mrcr34 _fx dense FA4_LOCAL_FIX=1
+ruler _rs7_sticky_fx 8192 MAGE_RESELECT=7 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt _rs7_sticky_fx 8192 MAGE_RESELECT=7 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+mrcr _rs7_sticky_fx 8192 MAGE_RESELECT=7 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+gw _rs7_sticky_fx 8192 MAGE_RESELECT=7 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+ruler _rsoracle_sticky_fx 8192 MAGE_RESELECT=2 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt _rsoracle_sticky_fx 8192 MAGE_RESELECT=9 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+mrcr _rsoracle_sticky_fx 8192 MAGE_RESELECT=6 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+gw _rsoracle_sticky_fx 8192 MAGE_RESELECT=6 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+ruler _per8_sticky_fx 8192 MAGE_RESELECT=8,16,24,32,40 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt _per8_sticky_fx 8192 MAGE_RESELECT=8,16,24,32,40 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+mrcr _per8_sticky_fx 8192 MAGE_RESELECT=8,16,24,32,40 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+gw _per8_sticky_fx 8192 MAGE_RESELECT=8,16,24,32,40 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt34 _fx 8192 FA4_LOCAL_FIX=1
+gw34 _fx 8192 FA4_LOCAL_FIX=1
+mrcr34 _fx 8192 FA4_LOCAL_FIX=1
+aime _fx dense FA4_LOCAL_FIX=1
+aime _settle15_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+aime _t50_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+aime _fx 8192 FA4_LOCAL_FIX=1
+he _fx dense FA4_LOCAL_FIX=1
+he _settle15_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+ruler _rs4_fx 8192 MAGE_RESELECT=4 FA4_LOCAL_FIX=1
+lbt _rs4_fx 8192 MAGE_RESELECT=4 FA4_LOCAL_FIX=1
+mrcr _rs4_fx 8192 MAGE_RESELECT=4 FA4_LOCAL_FIX=1
+gw _rs4_fx 8192 MAGE_RESELECT=4 FA4_LOCAL_FIX=1
+ruler _t50_cgate_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate FA4_LOCAL_FIX=1
+lbt _t50_cgate_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate FA4_LOCAL_FIX=1
+mrcr _t50_cgate_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate FA4_LOCAL_FIX=1
+gw _t50_cgate_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate FA4_LOCAL_FIX=1
+ruler _rel50_jcg_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate FA4_LOCAL_FIX=1
+lbt _rel50_jcg_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate FA4_LOCAL_FIX=1
+mrcr _rel50_jcg_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate FA4_LOCAL_FIX=1
+gw _rel50_jcg_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate FA4_LOCAL_FIX=1

@@ -1,0 +1,60 @@
+{
+ "name": "humaneval_smoke_s0",
+ "ids": {
+  "humaneval": [
+   "humaneval/0",
+   "humaneval/81"
+  ]
+ },
+ "seeds": [
+  404
+ ],
+ "warm": false,
+ "arms": {
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "carry_first": true
+   }
+  }
+ },
+ "substrate": "piecewise_v5",
+ "long_context_execution": "all arms: memory-linear GLOBAL causal / LOCAL sliding prefill via the 64-row kernel, elided O(n^2) prefill mask mapping, token-chunked MoE (V27_PREFILL_DENSE64=1); canvas calls follow each arm | decoding substrate piecewise_v1 (torch 2.12.1 grouped_mm MoE; decoder compiled reduce-overhead, split at GLOBAL attention which runs eager; LOCAL attention graphed unless the arm routes LOCAL layers; official-style compiled sampler); untimed per-arm warm-up before timed requests",
+ "hosts": [
+  "149.165.151.254"
+ ],
+ "extra_hosts": [],
+ "task_contracts": {
+  "humaneval": {
+   "dataset_revision": "6d43fb980f9fee3c892a914eda09951f772ad10d",
+   "dataset_sha256": "b796127e635a67f93fb35c04f4cb03cf06f38c8072ee7cee8833d7bee06979ef",
+   "prompt_style": "chat_complete_function_v1",
+   "extractor": "final_first_python_fence_or_plain_complete_function_v1",
+   "sandbox": "unprivileged_bwrap_readonly_net_pid_user_isolated_mpk_v1",
+   "scorer_sha256": "5926f1b93c26f939224536c58013c9af816d29dc1111f4f527b0b2576ad90bb2",
+   "thinking": true,
+   "generation_budget": 8192,
+   "test_wall_timeout_s": 5,
+   "test_cpu_limit_s": 3,
+   "test_memory_mb": 512,
+   "quality_metric": "test_pass@1; EOS not required; capped outputs reported"
+  }
+ },
+ "extra_gold_sha256": {
+  "humaneval": "7decdee43ed17c1be57276da2d9abe31fd2b5d7b05867565005729f1daf085ce"
+ },
+ "selection_rule": "Smoke test of the HumanEval pipeline (2 tasks x seed 404, dense and M3 + c0, mpk only). Not a result."
+}

@@ -1,0 +1,139 @@
+{
+ "name": "quality_fa4pw_q1v2_preview",
+ "ids": {
+  "aime26": [
+   "aime26/1",
+   "aime26/5",
+   "aime26/9",
+   "aime26/13",
+   "aime26/17",
+   "aime26/21",
+   "aime26/25",
+   "aime26/29"
+  ],
+  "longbench_v2": [
+   "longbench_v2/66f9625fbb02136c067c5456",
+   "longbench_v2/66f245cc821e116aacb28698",
+   "longbench_v2/6704a442bb02136c067cdd91",
+   "longbench_v2/66f2b676821e116aacb2b27a"
+  ]
+ },
+ "seeds": [
+  101
+ ],
+ "warm": false,
+ "arms": {
+  "D_native": {
+   "kind": "native"
+  },
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M1_R1_A8_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true
+   }
+  },
+  "M2c_R1_A8_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true,
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R3_A8_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "route_pipeline": true
+   }
+  },
+  "B_A64_fused_rp_async_fa4": {
+   "kind": "method",
+   "parent": "B_A8_matched",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "hold_only": true,
+    "route_pipeline": true
+   }
+  },
+  "M3_R6_A64_fused_rp_async_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "route_pipeline": true,
+    "decision_interval": 6
+   }
+  },
+  "M1_R1_A64_fused_dp_async_fa4": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix"
+   }
+  },
+  "M3_R6_A64_fused_dp_async_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6
+   }
+  },
+  "M3_R6_A64_fused_dp_async_gate8k_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "min_route_keys": 8192
+   }
+  }
+ },
+ "substrate": "piecewise_v2",
+ "hosts": [
+  "149.165.159.64"
+ ],
+ "selection_rule": "Small-subset accuracy preview (user rule: validate accuracy on a small subset before larger datasets): every 4th AIME26 problem (8) and every 3rd LongBench-v2 item (4), seed 101, the 10 arms of quality_fa4pw_q1v2 on piecewise_v2. Screening only; the full panel is launched after this is checked."
+}

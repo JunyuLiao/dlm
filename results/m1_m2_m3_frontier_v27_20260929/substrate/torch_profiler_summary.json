@@ -1,0 +1,11 @@
+{
+ "note": "torch.profiler on single decoder forwards of real requests (LongBench-v2 64K pool row 2, 59,895 prompt tokens, arms D_fa4 and B_A64_fused_fa4_long, forwards 9-13). The profiler inflates host time; use these for op and sync counts only.",
+ "pinned_torch_2.6": {
+  "per_forward": {"transformers::grouped_mm_fallback calls": 60, "aten::mm calls": "3643-5510 (varies with how many experts the canvas hits)",
+                  "cudaStreamSynchronize": 60, "Memcpy DtoH": 60, "cudaLaunchKernel": "6434-7486"},
+  "cause": "The host env PYTHONPATH puts bridge/runtime/.local (torch 2.6.0+cu124) ahead of the conda env. torch 2.6 has neither torch.nn.functional.grouped_mm nor torch._grouped_mm, so transformers.integrations.moe._grouped_mm falls back to a per-expert torch.mm loop with one offs.tolist() host sync per call (2 per layer, 30 layers)."
+ },
+ "torch_2.12": {
+  "per_forward": {"transformers::grouped_mm_fallback calls": 0, "aten::mm calls": "239-240", "cudaStreamSynchronize": 0, "Memcpy DtoH": 0, "cudaLaunchKernel": "about 4460-4500"}
+ }
+}

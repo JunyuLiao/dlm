@@ -1,0 +1,30 @@
+--- flash_fwd_sm90.py.orig	2026-10-02 13:59:01.239400104 +0000
++++ flash_fwd_sm90.py	2026-10-02 16:04:35.847066486 +0000
+@@ -1197,6 +1197,16 @@
+                         pipeline_q.producer_commit_w_index(0)
+                         q_producer_phase ^= 1
+                     if is_kv_load_warp:
++                        sparse_load_K_fn = tma_load_K_fn
++                        sparse_load_V_fn = tma_load_V_fn
++                        if const_expr(mPageTable is not None):
++                            # [dyh patch 2026-10-02] paged TMA KV (page_size == tile_n): the sparse block lists hold
++                            # LOGICAL KV-block indices; translate them through the page table like the dense path.
++                            def sparse_load_K_fn(src_idx, producer_state, **kw):
++                                tma_load_K_fn(src_idx=mPageTable[batch_idx, src_idx], producer_state=producer_state, **kw)
++
++                            def sparse_load_V_fn(src_idx, producer_state, **kw):
++                                tma_load_V_fn(src_idx=mPageTable[batch_idx, src_idx], producer_state=producer_state, **kw)
+                         kv_producer_state = produce_block_sparse_loads(
+                             blocksparse_tensors,
+                             batch_idx,
+@@ -1204,8 +1214,8 @@
+                             m_block,
+                             seqlen,
+                             kv_producer_state,
+-                            tma_load_K_fn,
+-                            tma_load_V_fn,
++                            sparse_load_K_fn,
++                            sparse_load_V_fn,
+                             pipeline_k,
+                             pipeline_v,
+                             self.intra_wg_overlap,

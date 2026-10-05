@@ -1,0 +1,134 @@
+{
+  "schema": "v29_32k_cost_profile_v2",
+  "arm": "dense",
+  "profile_ordinal": 1,
+  "deploy_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+  "torch": "2.13.0+cu130",
+  "engine_execution_settings": {
+    "compilation_config": "PIECEWISE",
+    "cudagraph_mode": "PIECEWISE"
+  },
+  "profiler": {
+    "range_cpu_inclusive": {
+      "prepare_metadata": {
+        "calls": 396,
+        "cpu_inclusive_ms": 148.7522669999992
+      },
+      "local_attention": {
+        "calls": 9900,
+        "cpu_inclusive_ms": 2976.712117999966
+      },
+      "global_attention": {
+        "calls": 1980,
+        "cpu_inclusive_ms": 593.1046360000239
+      },
+      "sample": {
+        "calls": 393,
+        "cpu_inclusive_ms": 513.538808000005
+      }
+    },
+    "directly_associated_gpu_ms": {
+      "unattributed": 5814.392842999838,
+      "prepare_metadata": 4.538388999991485,
+      "sample": 713.5972050000719
+    },
+    "raw_cuda_activity_sum_ms": 17297.12496100007,
+    "directly_associated_kernel_records": 72148,
+    "d2h_activity": {
+      "calls": 792,
+      "sum_ms": 1.50881799999543
+    },
+    "host_ops": {
+      "host_cuda_launch": {
+        "calls": 65452,
+        "cpu_self_ms": 725.3295329997886,
+        "cpu_inclusive_ms": 790.2351479997873,
+        "by_scope_self_ms": {
+          "unattributed": 520.8713429999124,
+          "prepare_metadata": 15.993375999984039,
+          "local_attention": 143.283833999927,
+          "global_attention": 29.58930999998117,
+          "sample": 15.591669999983642
+        }
+      },
+      "host_scalar_extract": {
+        "calls": 5512,
+        "cpu_self_ms": 4.415523000026972,
+        "cpu_inclusive_ms": 5.41498300005608,
+        "by_scope_self_ms": {
+          "unattributed": 1.1068700000002696,
+          "sample": 3.3086530000267045
+        }
+      },
+      "host_copy_api": {
+        "calls": 5154,
+        "cpu_self_ms": 54.97377200002647,
+        "cpu_inclusive_ms": 55.7977910000269,
+        "by_scope_self_ms": {
+          "unattributed": 39.51976200001099,
+          "prepare_metadata": 5.37880800002136,
+          "sample": 10.075201999994238
+        }
+      },
+      "host_sync": {
+        "calls": 399,
+        "cpu_self_ms": 3794.462598000001,
+        "cpu_inclusive_ms": 3794.462598000001,
+        "by_scope_self_ms": {
+          "unattributed": 3794.462598000001
+        }
+      }
+    },
+    "eager_scope_calls": {
+      "prepare_metadata": 396,
+      "local_attention": 9900,
+      "global_attention": 1980,
+      "sample": 393
+    },
+    "missing_eager_attention_scopes": [],
+    "interpretation": "nested CPU ranges overlap; CUDA streams overlap; totals are not additive request time; FULL graph replay may lack eager layer ranges; host sync is observed wait, not causal attribution; host_copy_api CPU duration may include implicit blocking, not pure enqueue or GPU copy time"
+  },
+  "cuda_event_spans": {
+    "available": true,
+    "spans": {
+      "local_attention": {
+        "calls": 9900,
+        "sum_ms": 2540.700126990676
+      },
+      "global_attention": {
+        "calls": 1980,
+        "sum_ms": 2278.6278777122498
+      }
+    },
+    "missing_scopes": [
+      "consumer",
+      "denoise_global_attention",
+      "denoise_local_attention",
+      "dp_build",
+      "dp_route",
+      "encoder_global_attention",
+      "encoder_local_attention",
+      "fused_observe",
+      "kv_canvas_refresh",
+      "kv_prefix_build",
+      "observation",
+      "selector",
+      "split_lists"
+    ],
+    "interpretation": "inclusive entry-stream event spans include host dispatch gaps; nested ranges and streams overlap, not additive wall time or isolated kernel time; diagnostic overhead unknown"
+  },
+  "cuda_events_enabled": true,
+  "performance_claim_allowed": false,
+  "quality_evaluated": false,
+  "profiled_native_counts": {
+    "denoising_forwards": 374,
+    "commit_forwards": 19,
+    "prefill_steps": 3,
+    "scheduler_denoising_forwards": 373,
+    "scheduler_commit_forwards": 19,
+    "speculative_unused_denoising": 1
+  },
+  "measurement": "independent profiled request; initialization and preceding requests unprofiled",
+  "native_clock": "unchanged runner plus actual async execution receipts",
+  "caveat": "profiled worker records must never be ingested as formal timing; ranges/trace overhead unknown"
+}

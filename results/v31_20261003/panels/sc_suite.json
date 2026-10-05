@@ -1,0 +1,217 @@
+{
+ "schema": "v31_screen_suite_v1",
+ "rule": "  RULER v34ofc (exploration pool)  items p0000 + p0001 of each of the 13 tasks at 32K / 64K / 128K      (78 items)\n  LongBench-v2 0shot_think         a seeded, length-class-stratified sample of the EXPLORATION split   (32 items)\n                                   (lbt_split.json; the hold-out split is never screened)\n  MRCR 2-needle ofc                a seeded sample of 8 items per bin (32K / 64K / 128K)               (24 items)\n  GraphWalks b32k                  a seeded sample of 4 items per bin (22K / 45K / 90K)                (12 items)",
+ "seeds": [
+  1,
+  2
+ ],
+ "sample_seed": 20261004,
+ "parts": {
+  "ruler": {
+   "source": "cells_ruler_v34ofc.json",
+   "source_sha256": "579678ad98c269252b460174fd23d1d9eaa8e91156c5a2bebdc73d9c2ec376e1",
+   "items": 78,
+   "cells": 156,
+   "file": "cells_sc_ruler.json",
+   "sha256": "9b52c8cdd48a29122e5d0a42d7c4a9a5cb3c2fa95560235dff925c586e1e50d1",
+   "items_by_dataset": {
+    "ruler128k_v34ofc": [
+     0,
+     1,
+     15,
+     16,
+     30,
+     31,
+     45,
+     46,
+     60,
+     61,
+     75,
+     76,
+     90,
+     91,
+     105,
+     106,
+     120,
+     121,
+     135,
+     136,
+     150,
+     151,
+     165,
+     166,
+     180,
+     181
+    ],
+    "ruler32k_v34ofc": [
+     0,
+     1,
+     15,
+     16,
+     30,
+     31,
+     45,
+     46,
+     60,
+     61,
+     75,
+     76,
+     90,
+     91,
+     105,
+     106,
+     120,
+     121,
+     135,
+     136,
+     150,
+     151,
+     165,
+     166,
+     180,
+     181
+    ],
+    "ruler64k_v34ofc": [
+     0,
+     1,
+     15,
+     16,
+     30,
+     31,
+     45,
+     46,
+     60,
+     61,
+     75,
+     76,
+     90,
+     91,
+     105,
+     106,
+     120,
+     121,
+     135,
+     136,
+     150,
+     151,
+     165,
+     166,
+     180,
+     181
+    ]
+   }
+  },
+  "lbt": {
+   "source": "cells_lbt_explore.json",
+   "source_sha256": "f8213ff4c8c8469cee8fe8962e54b388e9ce21ededdb62049dd6e61fb983a153",
+   "items": 32,
+   "cells": 64,
+   "file": "cells_sc_lbt.json",
+   "sha256": "d0f0f7724d3350028091d6d15a6d8a0bdc4054b8764eec0097941a494e812401",
+   "items_by_dataset": {
+    "longbench_v2_0shot_think": [
+     33,
+     46,
+     56,
+     96,
+     99,
+     110,
+     126,
+     132,
+     134,
+     143,
+     147,
+     149,
+     161,
+     171,
+     172,
+     177,
+     178,
+     190,
+     206,
+     211,
+     214,
+     284,
+     310,
+     317,
+     361,
+     369,
+     371,
+     382,
+     422,
+     444,
+     467,
+     493
+    ]
+   }
+  },
+  "mrcr": {
+   "source": "cells_mrcr_ofc.json",
+   "source_sha256": "481675745529fef20beaa7684f078d6d6f26b0f02876e9d2dc4ccc58f40f39be",
+   "items": 24,
+   "cells": 48,
+   "file": "cells_sc_mrcr.json",
+   "sha256": "2b0e952ad2a0801eb16581d0ca1dc8dfdf618774d397eef36424a06368522515",
+   "items_by_dataset": {
+    "mrcr2_128k_ofc": [
+     0,
+     7,
+     8,
+     10,
+     11,
+     12,
+     19,
+     22
+    ],
+    "mrcr2_32k_ofc": [
+     0,
+     4,
+     5,
+     9,
+     10,
+     13,
+     18,
+     19
+    ],
+    "mrcr2_64k_ofc": [
+     3,
+     4,
+     6,
+     9,
+     11,
+     14,
+     17,
+     20
+    ]
+   }
+  },
+  "gw": {
+   "source": "cells_graphwalks_b32k.json",
+   "source_sha256": "179c540aa7f1f0d3f9819491bb134967f5e2f009c26e1d3a1b8a66b19cf729d4",
+   "items": 12,
+   "cells": 24,
+   "file": "cells_sc_gw.json",
+   "sha256": "2dc964c7162731db0faf4c0c769967aaf15ab806437423f94263242b3592c536",
+   "items_by_dataset": {
+    "graphwalks_22k_b32k": [
+     0,
+     1,
+     6,
+     22
+    ],
+    "graphwalks_45k_b32k": [
+     10,
+     18,
+     19,
+     22
+    ],
+    "graphwalks_90k_b32k": [
+     9,
+     10,
+     16,
+     22
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,15 @@
+{
+  "schema": "v21b_current_output_contract_v1",
+  "status": "qualified_for_common_input_geometry_screen_not_task_quality",
+  "output_score_precision": "fp32_scores_bf16_pv",
+  "selector_score_precision": "legacy_bf16_qk_then_bf16_scale_published_fp32",
+  "probability_pv_precision": "bfloat16",
+  "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+  "A": "publish legacy cache and select; recompute retained current QK for final output, fully charged",
+  "D": "historical cached scores plus current projected V and T; retained current QK/V output",
+  "H": "held support with current QK/V output; no selector",
+  "score_period": 8,
+  "decision_interval": 3,
+  "evidence": "17/17 reached states lower operator error against independent FP32; median error ratio 0.4296; same-support median 0.4405; complete forward cost near neutral versus legacy",
+  "limits": "Full-network logits mixed; no proof of bug, stopping cause, unchanged quality or full-request benefit. Coarse and candidate geometry must use the same output contract."
+}

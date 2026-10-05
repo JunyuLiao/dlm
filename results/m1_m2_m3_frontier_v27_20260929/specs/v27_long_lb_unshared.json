@@ -1,0 +1,158 @@
+{
+ "name": "long_lb_unshared_v2",
+ "ids": {
+  "longbench_v2_32k": [
+   "longbench_v2/66f3b843821e116aacb2e692",
+   "longbench_v2/671b3d1bbb02136c067d5283",
+   "longbench_v2/66eefe85821e116aacb228dc",
+   "longbench_v2/66ece358821e116aacb1dc08",
+   "longbench_v2/66ee8bab821e116aacb21e44",
+   "longbench_v2/66ebdadd5a08c7b9b35e0e5b",
+   "longbench_v2/6719b96abb02136c067d4358",
+   "longbench_v2/66f52567821e116aacb329bc",
+   "longbench_v2/671b1335bb02136c067d4e88",
+   "longbench_v2/66f95c18bb02136c067c52e1",
+   "longbench_v2/66fcfb5fbb02136c067c93ae",
+   "longbench_v2/671b13f5bb02136c067d4ee3"
+  ],
+  "longbench_v2_64k": [
+   "longbench_v2/66ebd2975a08c7b9b35e01e3",
+   "longbench_v2/66f3cfa5821e116aacb2f096",
+   "longbench_v2/66efa466821e116aacb23219",
+   "longbench_v2/66ec1aef821e116aacb1aa1a",
+   "longbench_v2/66f2a557821e116aacb2a510",
+   "longbench_v2/66f950acbb02136c067c5021",
+   "longbench_v2/66ecf139821e116aacb1e0e1",
+   "longbench_v2/66ecfe1e821e116aacb1e41c",
+   "longbench_v2/66f97d7fbb02136c067c56b2",
+   "longbench_v2/66f53892821e116aacb33225",
+   "longbench_v2/66ebc3165a08c7b9b35deb38",
+   "longbench_v2/66f8c783bb02136c067c44b8"
+  ]
+ },
+ "seeds": [
+  101,
+  202
+ ],
+ "warm": false,
+ "arms": {
+  "D_native": {
+   "kind": "native"
+  },
+  "D_c64": {
+   "kind": "dense_c64"
+  },
+  "B_A64_fused": {
+   "kind": "method",
+   "parent": "B_A8_matched",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "score_period": 64,
+    "fused_observe": true,
+    "hold_only": true
+   }
+  },
+  "M1_R1_A64_fused_rp": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "score_period": 64,
+    "fused_observe": true,
+    "route_pipeline": true
+   }
+  },
+  "M1_R1_A64_fused_dp": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "score_period": 64,
+    "fused_observe": true,
+    "risk_state": "dense_prefix"
+   }
+  },
+  "M2c_R1_A64_fused_rp": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "score_period": 64,
+    "fused_observe": true,
+    "route_pipeline": true,
+    "mu_mode": "pooled_compact"
+   }
+  },
+  "M3_R3_A64_fused_rp": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "score_period": 64,
+    "fused_observe": true,
+    "route_pipeline": true
+   }
+  },
+  "M3_R6_A64_fused_rp": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "score_period": 64,
+    "fused_observe": true,
+    "route_pipeline": true,
+    "decision_interval": 6
+   }
+  },
+  "M1_R1_A64_pairs_fused_rp": {
+   "kind": "method",
+   "parent": "M1_R1_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "score_period": 64,
+    "fused_observe": true,
+    "route_pipeline": true,
+    "share_layers": "pairs"
+   }
+  },
+  "M3_R6_A64_pairs_fused_rp": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "score_period": 64,
+    "fused_observe": true,
+    "route_pipeline": true,
+    "share_layers": "pairs",
+    "decision_interval": 6
+   }
+  },
+  "M3_R6_A64_nolast_fused_rp": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "score_period": 64,
+    "fused_observe": true,
+    "route_pipeline": true,
+    "route_layers": "no_last",
+    "decision_interval": 6
+   }
+  }
+ },
+ "extra_gold_sha256": {
+  "longbench_v2_32k": "55098b5d5e95273028228da193ab431d6bb72543004cf3367329d3095146168f",
+  "longbench_v2_64k": "c1833d57fbfe1dd8b3376df6a8213f11803821a621d5308f6e708ac90dfae9c9"
+ },
+ "long_context_execution": "all arms: memory-linear GLOBAL causal / LOCAL sliding prefill via the 64-row kernel, elided O(n^2) prefill mask mapping, token-chunked MoE (V27_PREFILL_DENSE64=1); canvas calls follow each arm",
+ "selection_rule": "v27 LongBench-v2 32K/64K follow-up, same items and seeds as v27_long_lb: the A64 fused-observation variants WITHOUT cross-layer shared support (the shared-support variants inflated denoising calls per canvas about 2.4x on v27_long_lb 32K and lost RULER 64K quality, while the unshared B/A64 did not). Fan M1 (pipelined exact selector, bit-identical decisions), M1-DP (dense-prefix risk, named variant, P0 threshold, uncalibrated), M2c, M3 R3/R6, B, and native / 64-row dense. Frozen before any generation of these arms on these items. Added before any generation (user request): partial sharing (pairs: 11<-5, 23<-17) for M1 and M3 R6, and M3 R6 with the last GLOBAL layer (29, nearest the logits) kept dense."
+}

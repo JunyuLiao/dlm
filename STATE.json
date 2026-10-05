@@ -1,0 +1,1007 @@
+{
+  "schema": 26,
+  "current": {
+    "updated_local": "2026-10-03 04:40 (UTC-5)",
+    "branch": "research/cooperative-sparsity-20261003",
+    "verified_commit": "70d382993a3639ab4f4d7dfad2567ee212759a64",
+    "entry_docs": [
+      "AGENTS.md",
+      "HANDOFF.md",
+      "docs/RESEARCH_CONTEXT.md",
+      "docs/DECISIONS.md",
+      "docs/RESULTS_LEDGER.md",
+      "docs/INTAKE_AUDIT_20261001.md",
+      "docs/GROUP_CONTEXT_20261001.md"
+    ],
+    "results_dir": "results/m1_m2_m3_frontier_v27_20260929",
+    "substrate": "vLLM 0.30.0 native serving; historical HF piecewise_v5 results retained",
+    "dense_reference": "Native vLLM FA4 dynamic-causal split-KV (GLOBAL page 64), default CUDA graphs",
+    "headline": "Paused by user: AIME/HumanEval generation complete and unscored; LongBench 11/32 preserved; all GPUs idle.",
+    "running": [],
+    "legacy_note": "Top-level fields outside `current` (status, authority, next, budgets, ledgers, v24-v26 blocks) describe the v26 state of 2026-09-28 and earlier and are kept unchanged for provenance; historical ledgers are never reset. A copy of the pre-2026-10-01 file is docs/handoff_archive/STATE_v26_20260928.json.",
+    "best_configuration": {
+      "arm": "M3_R6_A64_fused_dp_async_m1ln2 + carry_first (c0)",
+      "panel": "E5 v27_lb_overhead_e5_1c93b97271a3a266 (same 288 cells as E4)",
+      "64k_request_W": "0.853 [0.802, 0.895]",
+      "64k_decode_S": "0.775",
+      "32k_request_W": "0.907 [0.858, 0.952]",
+      "32k_decode_S": "0.878",
+      "accuracy": "64K 76 vs 75, 32K 92 vs 86 (dense)",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/lb_overhead_panel_e5/summary.md",
+      "96k_pooled": {
+        "panel": "E6 + E6b, 11 items x seeds 404-909 (66 cells per arm)",
+        "request_W": "0.822 [0.703, 0.944]",
+        "decode_S": "0.727 [0.589, 0.887]",
+        "accuracy": "30 vs 25 (dense)",
+        "source": "results/m1_m2_m3_frontier_v27_20260929/lb96k_pooled_e6_e6b/summary.md"
+      }
+    },
+    "aime": {
+      "panel": "E7 v27_aime_confirm_e7_0515fa3125588ff0 (30 x seeds 404-909, 180 cells per arm)",
+      "best_arm": "M3 R6 DP -ln2 + carry_first + 2K gate",
+      "request_W": "1.005 [0.967, 1.042]",
+      "accuracy": "99 vs 99",
+      "verdict": "no speed gain on AIME; accuracy check only",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/aime_confirm_panel_e7/summary.md"
+    },
+    "v_term": {
+      "panel": "E8 v27_aime_vterm_e8_bd293196ff730851 (AIME 30 x seeds 404-909, 180 cells per arm, fixed 70% sparsity)",
+      "verdict": "no evidence that V helps selection: no V term differs from projected rank 32 (p >= 0.30); ranks 32/16/8 lowest (86-87 vs dense 99), mass-only 91, M2 tile-mean 92, rank 4 94, SparseD 94",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/aime_vterm_panel_e8/summary.md",
+      "e9": {
+        "panel": "E9 v27_lb64_vterm_e9_5b125c63817898f6 (64K, 24 items x seeds 404-707, 96 cells per arm, M3 + carry_first, fixed 88% sparsity)",
+        "verdict": "attention-mass-only ranking as accurate (54 vs dense 51) and as fast (W 0.845) as any V term; all differences n.s.; V term dropped as a claim",
+        "source": "results/m1_m2_m3_frontier_v27_20260929/lb64_vterm_panel_e9/summary.md"
+      },
+      "e11": {
+        "panel": "E11 v27_lb64_vterm_hi_e11_18d29fa43d5d11a9 (64K, 48 cells, 95% sparsity, preview)",
+        "verdict": "no V advantage (mass/r32 1.004 [0.916, 1.099]); no accuracy loss; W ~0.89",
+        "source": "results/m1_m2_m3_frontier_v27_20260929/lb64_vterm_hi_panel_e11/summary.md"
+      },
+      "scope": "Negative evidence for V in prefix ranking only; tail and observation remain V dependent."
+    },
+    "m2_vs_m3": {
+      "panel": "E10 v27_lb_m2opt_e10_c965792c1cb6542d",
+      "verdict": "tie: M2c/M3 32K 0.987 [0.914, 1.063], 64K 0.983 [0.940, 1.024]; accuracy n.s.",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/lb_m2opt_panel_e10/summary.md"
+    },
+    "deck": {
+      "builder": "scripts/v27_build_deck_1001_compact.py",
+      "pptx": "results/m1_m2_m3_frontier_v27_20260929/ppt_sample/dlm_sparse_attention_20261001_compact_v6.pptx",
+      "markdown_source": "results/m1_m2_m3_frontier_v27_20260929/weekly_slides_20261001_compact.md"
+    },
+    "skip_ratio": "emerges from one fixed log threshold (-3.874); sparse-call skipped tiles about 4% AIME, 79% 32K, 88% 64K (fidelity_v6 diagnostic)",
+    "followup_arm_policy": "Select stronger relevant arms; plain M1/M2/M3 need not repeat in every panel; retain strong dense and matched optimized reference",
+    "intake_audit": {
+      "base_commit": "6b13fe178",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/intake_audit_20261001/summary.json",
+      "runs_checked": 8826,
+      "point_or_accuracy_changes": 0,
+      "unit_tests": 17,
+      "gpu_seconds": 0
+    },
+    "v_dimension_hypothesis": {
+      "status": "Closed as negative for tested prefix-ranking V choices; not a whole-selector V-free ablation.",
+      "ruler": "R17 mass-only at least as accurate as rank-32; no supported V benefit.",
+      "aime_longbench": "V benefit unsupported in tested settings; do not extrapolate to RULER",
+      "humaneval": "E12 completed; no V advantage.",
+      "note": "Actual attention uses full V in all arms; only selector inputs are projected"
+    },
+    "dataset_coverage": {
+      "items": 503,
+      "min_input_tokens": 10334,
+      "median_input_tokens": 107706,
+      "max_input_tokens": 5174028,
+      "inputs_at_most_95074": 224,
+      "context_limit": 262144,
+      "output_reservation": 8192,
+      "within_context_with_output": 400,
+      "input_alone_within_context": 402,
+      "input_alone_over_context": 101
+    },
+    "humaneval": {
+      "panel": "E12 v27_humaneval_e12_d844fb61c76dde6a (164 x 6 seeds, 984 cells per arm)",
+      "verdict": "no accuracy loss (dense 947, main 957); main W 1.023; no V-term difference",
+      "source": "results/humaneval_ruler_v27_20261002/humaneval_e12/summary.md"
+    },
+    "peer_integration": {
+      "status": "A/B branches pending classmates; exact refs unknown; no merge attempted"
+    },
+    "slack_context": {
+      "status": "User-authorized specified four-person group research search complete; no one-to-one DM read",
+      "source": "docs/GROUP_CONTEXT_20261001.md",
+      "raw_transcript_committed": false,
+      "gpu_seconds": 0,
+      "humaneval_search": "no result in the specified group; not proof of no peer run",
+      "integration": "exact A/B refs still unknown; no merge",
+      "peer_results": "external context only, not v27 benchmark evidence"
+    },
+    "checkpoint_branch": "research/m3-output-numerics-20260927 at add23afa9 (v27 checkpoint)",
+    "q64": {
+      "panel": "E13 v27_lb_q64_e13_f038777e0ab0d142",
+      "verdict": "per-step -0.7% at 64K (CI [0.990, 0.996]); end to end n.s.; accuracy unchanged",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/lb_q64_panel_e13/summary.md"
+    },
+    "q64_bench": {
+      "verdict": "q64 -9 to -11% per sparse GLOBAL call on identical states; q64r and FA4 split-KV slower (dropped)",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/q64_bench_1002/README.md"
+    },
+    "expansion": {
+      "plan": "docs/EXPANSION_PLAN_20261002.md",
+      "models": [
+        "LLaDA2.1-mini",
+        "I-DLM-8B"
+      ],
+      "dropped": [
+        "UltraLLaDA"
+      ],
+      "datasets_added": [
+        "LongBench Pro",
+        "RULER 4K/8K"
+      ],
+      "setup_dir": "/home/exouser/dyh/dlm_models_20261002 (dllm)",
+      "status": "Both official dense toy GPU executions completed; main and other sparse variants NOT implemented. See current.v28_new_models and NEW_MODEL_PORT_AUDIT_V28_20261002.md; no benchmark quality/speed qualification."
+    },
+    "e14": {
+      "verdict": "main M3+c0 W 0.925/0.860/0.801 (12 seeds); q64 -0.4..-0.7% per step; q64c not adopted",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/lb_q64c_panel_e14/receipts.md"
+    },
+    "p15": {
+      "verdict": "c01 accuracy-first preview passed; per-step c01/q64c 0.91 AIME, 0.949 64K",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/c01_preview_p15/receipts.md"
+    },
+    "r16": {
+      "verdict": "RULER 32K/64K accuracy preserved by all arms; V term = mass-only",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/ruler_long_panel_r16/receipts.md"
+    },
+    "baseline_gap": {
+      "finding": "vLLM 0.30.0 native DiffusionGemma dense is faster than D_fa4_allkept: per step 0.76/0.90/0.98 at 32K/64K/96K, prefill ~0.5x",
+      "consequence": "speed ratios so far are vs our HF-based substrate; port the method into vLLM for paper-grade claims",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/vllm_dense_check_1002/README.md",
+      "port_status": "Resolved: unchanged main core runs in vLLM with patched paged FA4 and alias split; V18 preparing."
+    },
+    "next_steps": [
+      "Wait for explicit user resume.",
+      "Use pause receipt and private resume manifest; new directories/family required.",
+      "Strict scoring remains pending."
+    ],
+    "e15": {
+      "verdict": "c01 not adopted (per-step 0.98-1.00, 64K accuracy risk); main pooled over 18 seeds",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/c01_panel_e15/receipts.md"
+    },
+    "p16": {
+      "verdict": "64K accuracy gap mostly selection noise (worst-3 items -20pp -> -8pp on 12 fresh seeds, p 0.58; all 6 items main 45 vs dense 44); output protection and -2ln2 not adopted",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/lb64_item_check_p16/receipts.md",
+      "gpu_seconds": 4400
+    },
+    "p17": {
+      "verdict": "C gate (group member design, collaboration) not adopted: per step 1.07/1.10 vs T at 64K/96K (-ln2), 1.03/1.02 at base threshold; no accuracy gain (preview, 44 cells per arm)",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/cgate_preview_p17/receipts.md",
+      "gpu_seconds": 3200
+    },
+    "r17": {
+      "verdict": "main keeps RULER accuracy 32K/64K/92K (110/98/91 vs dense 110/97/91); fixed 88%/95% lose only at 32K (cwe); V term closed (mass-only >= rank 32; 95%/32K 107 vs 101, p 0.031)",
+      "source": "results/m1_m2_m3_frontier_v27_20260929/ruler_long_panel_r17/receipts.md",
+      "gpu_seconds": 16852
+    },
+    "vllm_port": {
+      "status": "method runs inside vLLM 0.30.0 via experiments/numerical_qk_reuse/vllm_adapter.py (unchanged core, frozen main config)",
+      "smoke_per_step_vs_vllm_default_dense": {
+        "32k": 0.96,
+        "64k": 0.85
+      },
+      "dense_baseline_correction": "vLLM dense GLOBAL call (FA4 dynamic-causal, effective 2-way split) is ~1.65x faster than the num_splits=1 FA4 config used as D_fa4_allkept in HF panels; HF speed ratios overstate the gain vs the strongest official dense",
+      "source": "docs/VLLM_PORT_NOTES_20261002.md"
+    },
+    "vllm_v18": {
+      "status": "complete_on_parent_branch_readonly",
+      "spec": "results/m1_m2_m3_frontier_v27_20260929/specs/v27_vllm_lb_v18.json",
+      "gpu_seconds": 12809.068,
+      "cpu_tests": 164,
+      "deploy_commit": "8704cd072582dbb766762f955152bc5533c61986",
+      "gpu_accounting": "10654.113 formal panel plus2154.955 qualification; closed",
+      "protocol_id": "v27_vllm_lb_v18b_20261002",
+      "qualification": "passed four arms at 96K; parsed 4/4, correct 0/4, single shared item only",
+      "formal_campaign": "v27_vllm_v18_panel_001",
+      "expected_timed_requests": 568,
+      "completion_pipeline": "Original parent finalizer completed scoring, commit and push.",
+      "message": "Parent V18b complete and pushed; see V28 interpretation and parent source commit.",
+      "source_commit": "e1d2f89c29b6a713ffd3419cf7149d1a34abbd50"
+    },
+    "variant_fairness_audit": {
+      "source": "docs/VARIANT_FAIRNESS_AUDIT_20261002.md",
+      "base_commit": "7d9195047",
+      "peer_readonly_ref": "chw/value_aware@6f7279c1625f7fa53bacb233b96fb69a385df8c1",
+      "v18b_blocker_found": false,
+      "gpu_seconds": 0,
+      "unsupported_adapter_gates_rejected": [
+        "cgate",
+        "density_gate"
+      ],
+      "historical_accuracy_inference": "question clusters required; cell McNemar exploratory; noninferiority unproven",
+      "mass_only_scope": "prefix ranking only; V-dependent tail and observation retained",
+      "r17_92k_main_discordance": {
+        "arm_only": 0,
+        "dense_only": 0
+      },
+      "cpu_tests": 188,
+      "aggregate": "results/m1_m2_m3_frontier_v27_20260929/variant_fairness_audit_20261002/historical_accuracy.json"
+    },
+    "peer_pdf_update": {
+      "source": "docs/PEER_PDF_UPDATE_20261002.md",
+      "pages": 10,
+      "cgate_state_equations": "match Eq.1-7; processed-probability convention not explicit in PDF",
+      "p17_full_replication": false,
+      "held_map_limitation": "R6 holds old maps; carry_first does not reapply new s=4 routing protection",
+      "cpu_tests": 3,
+      "gpu_seconds": 0,
+      "external_results": "Peer high-sparsity RULER V advantage reported; not a dense-quality-preserving speed claim",
+      "original_pdf_uploaded": false
+    },
+    "v28": {
+      "spec": "docs/VARIANT_CAMPAIGN_V28_20261002.md",
+      "status": "seed4_preview_running_components_closed",
+      "gpu_seconds": null,
+      "parent_branch": "research/humaneval-v27-20261001",
+      "candidates": [
+        "native_q64",
+        "kv_view",
+        "lifecycle",
+        "regroup_alias_balance",
+        "regroup_amortized"
+      ],
+      "new_model_status": "Both official dense toy executions qualified; sparse GPU adapters and benchmark quality unimplemented",
+      "gpu_seconds_note": "This object is not the campaign GPU total; use per-run receipts and dedicated current entries."
+    },
+    "v28_qualification": {
+      "cpu_tests": 92,
+      "kv_view": "rejected: incompatible native cache strides",
+      "lifecycle": "request_clear GPU-qualified; common base in frozen preview",
+      "gpu_results": "component only, not request inference",
+      "new_model_ports": false,
+      "component001": "diagnostic only; corrected nominal bins, native Q strides and finite checks",
+      "component001_gpu_seconds": 30.7184,
+      "regroup_expanded_proxy_ratio": 0.9893759,
+      "regroup_source": "results/v28_20261002/regroup_screen",
+      "q64_component_ratio": 0.9457519586071002,
+      "component002_gpu_seconds": 18.651182946981862,
+      "q64_actual_N": 66,
+      "q64_refined_routes": 60,
+      "q64_timed_allocator_retries": 0,
+      "source": "results/v28_20261002/q64_component",
+      "held_regroup": "component negative, no request expansion",
+      "qualification002": "all five request arms passed; single item only",
+      "held_regroup_ratio": 1.0275328370725616,
+      "canvas_release": "five-arm qualification004 passed; matched legacy/release comparisons in frozen preview",
+      "seed4": "running:4 engine seeds x2 sequential repeats x6 distinct questions; preview only"
+    },
+    "v28_new_models": {
+      "llada": "official dense execution smoke passed; sparse variants not implemented",
+      "idlm": "official dense toy stopping passed3/3 at868/549/1200 tokens; benchmark quality and sparse ports unimplemented",
+      "reserved_gpu_seconds_all_attempts": 916.2096867820073,
+      "event_prototype_tests": 12,
+      "idlm_diagnostic003": "results/v28_20261002/idlm_stopping_diagnostic_003/summary.json"
+    },
+    "v28_seed4_family": {
+      "spec": "results/v28_20261002/specs/v28_seed4_family.json",
+      "independent_engine_seeds": 4,
+      "sequential_repeats_per_engine": 2,
+      "questions": 6,
+      "variants": 6,
+      "timed_per_variant": 48,
+      "status": "running_seed4_preview001",
+      "generation_deploy": "dcfdb8730",
+      "inference_scope": "preview only; repeated questions clustered; no noninferiority claim",
+      "summary_cpu_tests": 17
+    },
+    "v28_regroup_triton": {
+      "status": "pure_gpu_negative_full_held_not_launched",
+      "spec": "results/v28_20261002/specs/v28_regroup_triton.json",
+      "claim": "No request claim; current standard component call slower; full held stage gated out",
+      "new_cpu_tests": 10,
+      "triton_over_torch_component": 1.6264925103225327,
+      "gpu_reserved_seconds": 40.29403461999027,
+      "report": "results/v28_20261002/regroup_triton_permutation/summary.json"
+    },
+    "v28_seed4_completion_pipeline": {
+      "status": "arm_after_this_commit_push_verify_private_status",
+      "helper": "finish_seed4_preview001.py",
+      "scorer_commit": "f0d3cd0009419ebe3767c975beb90d6536d31cc1",
+      "scorer_cpu_tests": 17,
+      "actual_nemo_toy_join_passed": true,
+      "on_failure": "preserve and stop; no automatic relaunch",
+      "publication": "aggregate only, guarded expected branch HEAD, non-force push; interpretation pending"
+    },
+    "v28_parent_v18b_review": {
+      "source_commit": "e1d2f89c29b6a713ffd3419cf7149d1a34abbd50",
+      "report": "docs/V18B_INTERPRETATION_V28_20261002.md",
+      "timed_requests": 568,
+      "questions": 59,
+      "independent_engine_seeds": 2,
+      "gpu_reserved_seconds": 10654.113,
+      "total_v18_gpu_reserved_seconds": 12809.068,
+      "main_dense_W": [
+        0.7814,
+        0.7439,
+        0.807
+      ],
+      "main_native_W": [
+        1.1377,
+        1.0065,
+        1.0446
+      ],
+      "matched_control_questions_per_bin": 4,
+      "noninferiority_established": false,
+      "no_merge": true
+    },
+    "separate_v28_campaign": "Original V28 branch owns seed4 preview and its completion coordinator; consult its live status.",
+    "v29": {
+      "status": "expanded_formal_running",
+      "spec": "docs/CONFIRMATION_CAMPAIGN_V29_20261002.md",
+      "copy_tests": 42,
+      "gpu_seconds": 55.06876852098503,
+      "expanded_questions": {
+        "longbench": 59,
+        "aime": 30,
+        "humaneval": 164
+      },
+      "distinct_engine_seeds": 8,
+      "arms": 4,
+      "copy_component": "passed10_exact_cases_real_model_pending",
+      "copy_component_source": "results/v29_20261002/paged_copy001/summary.json",
+      "profile_cpu_tests": 11,
+      "merge_cpu_tests": 11,
+      "regroup_merge": "component approximately tied; no request expansion",
+      "combined_cpu_tests": 67,
+      "regroup_component_source": "results/v29_20261002/regroup_merge001/summary.json",
+      "adapter_merge": "opt-in CPU-qualified; real-model GPU pending",
+      "profile_status": "attempt003_complete_diagnostic_only",
+      "profile_preparation_failure": "attempt001 missingTorch in systemPython;0GPU seconds; preserved",
+      "dlm2_environment": "AIME full four-arm GPU/scorer qualification passed at1931db5a6; formal running.",
+      "dense_controls_doc": "docs/V29_DENSE_CONTROLS_20261002.md"
+    },
+    "v29_cost_diagnostic": {
+      "status": "event_diagnostic003_complete",
+      "generation_source": "39e08c521",
+      "summary": "results/v29_20261002/cost32k_002/aggregate.json",
+      "gpu_reserved_seconds": 1081.689751653932,
+      "performance_claim_allowed": false,
+      "next": "Separate formal panels; no causal speed claim from instrumented spans",
+      "event_source_commit": "54163f4e7",
+      "event_summary": "results/v29_20261002/cost32k_events003/aggregate.json",
+      "event_gpu_reserved_seconds": 1092.569460863946,
+      "raw_evidence": [
+        "results/v29_20261002/cost32k_002/raw/manifest.json",
+        "results/v29_20261002/cost32k_events003/raw/manifest.json"
+      ],
+      "timeline_originally_saved": false,
+      "public_measurement_artifact_count": 24
+    },
+    "v29_observation_audit": {
+      "status": "44_GPU_tests_passed_fixed_tolerances",
+      "core_unchanged": true,
+      "QK_recomputed_for_observation": false,
+      "main_min_route_keys": 0,
+      "doc": "docs/V29_FUSED_OBSERVATION_AUDIT_20261002.md",
+      "attempt001_reserved_gpu_seconds": 0,
+      "scale_coverage": [
+        1.0,
+        0.04419417382415922
+      ],
+      "source_commit": "54163f4e7",
+      "gpu_reserved_seconds": 32.73720963302185,
+      "summary": "results/v29_20261002/fused_observe_bf16_001/summary.json",
+      "real_model_quality_qualified": false
+    },
+    "v29_closed_gpu_seconds": 2262.065190671885,
+    "v29_expanded_confirmation": {
+      "status": "all_qualifications_passed_three_formal_panels_running",
+      "engine_seeds": [
+        29001,
+        29002,
+        29003,
+        29004,
+        29005,
+        29006,
+        29007,
+        29008
+      ],
+      "timed_requests": 8096,
+      "warm_requests": 8096,
+      "CPU_tests": 33,
+      "suites": {
+        "longbench": {
+          "questions": 59,
+          "host": "dllm",
+          "status": "strict_qualification_and_actual_guard_passed_formal_panel001_running",
+          "preparation_attempt001": "CPU_missing_archived_spec_GPU0",
+          "preparation_attempt002": "source_parent_pins_rebind_and_inventory_verified",
+          "source_commit": "54163f4e7",
+          "qualification001": "one_worker_completed_then_transient_NVML_idle_guard_stop_preserved",
+          "closed_worker_gpu_reserved_seconds": 2169.317956340732,
+          "closed_worker_gpu_seconds_excludes_active": true,
+          "prior_attempt_outer_gpu_reserved_seconds": 244.35844345297664,
+          "question_identity_audit": "results/v29_20261002/expanded_question_identity_audit001/summary.json",
+          "qualification_gpu_reserved_seconds": 2413.6763997937087,
+          "qualification_results": "results/v29_20261002/longbench_qualification001/",
+          "formal_workers_expected": 32,
+          "formal_generation_complete": false
+        },
+        "aime": {
+          "questions": 30,
+          "host": "dlm2",
+          "status": "strict_qualification_and_actual_guard_passed_formal_panel001_running",
+          "CPU_tests_run": 42,
+          "CPU_tests_passed": 42,
+          "CPU_tests_skipped": 0,
+          "Linux_no_skip_required": true,
+          "protocol_id": "v29_aime_confirmation001",
+          "prior_protocol": "Original AIME001 active on dlm2; AIME002 fallback retained unlaunched.",
+          "cross_host_private_transfers": "Authorized by user; exact pinned necessary inputs/source/artifacts copied in own directories, prior rejected attempts preserved with zero execution.",
+          "source_commit": "1931db5a6",
+          "fallback_protocol": "v29_aime_confirmation002 preserved_unlaunched",
+          "fallback_CPU": "mpk strict rebind, actualv21 and Linux42 pass; CUDA uninitialized, no binding/generation/GPU",
+          "input_freeze001": "CRLF_LF_byte_pin_failure_GPU0_preserved",
+          "input_freeze002": "original_bytes_and_semantic_rows_verified_freeze_and_read_frozen_passed_GPU0",
+          "CPU_receipts": [
+            "results/v29_20261002/aime_dlm2_cpu_preparation001/summary.json",
+            "results/v29_20261002/aime_original_host_cpu_preparation002/summary.json"
+          ],
+          "qualification001_outer_gpu_reserved_seconds": 239.9943467020057,
+          "qualification001_interruption": "transient_post_exit_NVML_private_launcher_guard_no_model_failure",
+          "qualification002_launcher_CPU_toys": 4,
+          "qualification_gpu_reserved_seconds": 780.4074985230109,
+          "qualification_results": "results/v29_20261002/aime_qualification002/",
+          "formal_workers_expected": 32,
+          "formal_generation_complete": false,
+          "path_evidence": "results/v29_20261002/aime_qualification002/path_execution_receipts.jsonl",
+          "receipt_documentation_correction": "Only dense has null receipts; native/allkept/method have real receipts. Earlier README generalized incorrectly; published per-row availability flags and actual strict validation were correct."
+        },
+        "humaneval": {
+          "questions": 164,
+          "host": "mpk",
+          "status": "strict_qualification_and_actual_guard_passed_formal_panel001_running",
+          "source_commit": "54163f4e7",
+          "CPU_tests": 33,
+          "real_scorer_toys": true,
+          "qualification_failed_workers": 0,
+          "qualification_gpu_reserved_seconds": 672.3734263519291,
+          "qualification_results": "results/v29_20261002/humaneval_qualification001/",
+          "formal_workers_expected": 32,
+          "formal_generation_complete": false
+        }
+      },
+      "specs_dir": "results/v29_20261002/specs",
+      "quality_noninferiority_claim": false,
+      "coordinator_CPU_tests": 17,
+      "CPU_scoring_barrier": "active_until_all_three_strict_32of32_complete",
+      "formal_completed_workers_at_launch": 0
+    },
+    "v28_preview_reference": {
+      "branch": "research/vllm-variants-20261002",
+      "publication": "91db65396",
+      "status": "complete_scored_preview_only",
+      "questions": 6,
+      "requests": 288,
+      "gpu_reserved_seconds": 7914.0591097767465,
+      "interpretation": "docs/V29_V28_PREVIEW_INTERPRETATION_20261002.md"
+    },
+    "v29_qualification_failed_attempts_gpu_seconds": 244.35844345297664,
+    "v29_qualification_failed_attempts_accounting_note": "LongBench001 outer reserved span; previous241.732 was inner worker time and is not additive.",
+    "private_transfer_authorization": "User explicitly permits needed transfers between own hosts; private data excluded from Git/public outputs; peer chw/ljy files read-only.",
+    "artifact_policy": "Prompt commit/push; include reasonably sized sanitized traces, per-request numbers and receipts, not only conclusions; no private data in Git.",
+    "v29_trace_exporter": {
+      "status": "CPU25_passed_GPU_unrun",
+      "source": "scripts/v29_trace_profile.py",
+      "doc": "docs/V29_TRACE_EXPORT_20261002.md",
+      "private_default": true,
+      "automatic_publication": false
+    },
+    "known_closed_gpu_seconds_at_snapshot": 6128.522515340534,
+    "known_closed_gpu_seconds_scope": "V29 components/diagnostics plus ALL closed qualifications, including interrupted attempts once. Formal active-worker time excluded; this is the launch snapshot.",
+    "v29_qualification_closed_gpu_seconds": 3866.4573246686487,
+    "evidence_index": "results/v29_20261002/EVIDENCE_INDEX.md",
+    "formal_completion_20261003": {
+      "armed": true,
+      "phase": "waiting_complete_formal_inventory",
+      "cpu_tests_passed": 17,
+      "closed_workers": {
+        "longbench": 3,
+        "aime": 9,
+        "humaneval": 9
+      },
+      "failed_workers": {
+        "longbench": 0,
+        "aime": 0,
+        "humaneval": 0
+      },
+      "closed_outer_gpu_seconds": {
+        "longbench": 4573.48571906006,
+        "aime": 4544.384748636978,
+        "humaneval": 4490.277373086428
+      },
+      "accounting": "Formal-only closed outer spans; do not add inner times or mistake incomplete elapsed time for final usage.",
+      "live_status_override": "paused_by_user; prior fields historical",
+      "pause_receipt": "results/v30_20261003/pause_after_short001/status.json"
+    },
+    "performance_followups_20261003": {
+      "status": "Successor002 component and engineering queues armed and waiting; first attempts failed before GPU and are preserved.",
+      "focused_cpu_tests": 47,
+      "gpu_runs": 0,
+      "components_spec": "results/v29_20261002/specs/v29_homogeneous_cost001.json",
+      "regroup_spec": "results/v29_20261002/specs/v29_sparse_cycles001.json",
+      "fusion_family": "results/v29_20261002/specs/v29_engineering_fusion_family001.json",
+      "current_formal_main_changed": false,
+      "new_accuracy_or_speed_claim": false,
+      "component_source_commit": "1342ec0b193a929295f08964c132aee96c28c5a1",
+      "component_queue_cpu_tests": 26,
+      "component_queue_armed": true,
+      "component_gpu_started": false,
+      "engineering_queue_armed": true,
+      "engineering_queue_CPU_tests": 35,
+      "engineering_source_commit": "1342ec0b193a929295f08964c132aee96c28c5a1",
+      "engineering_GPU_started": false,
+      "recovery_receipt": "results/v29_20261002/queue_recovery002/status.json",
+      "live_status_override": "paused_by_user; prior fields historical",
+      "pause_receipt": "results/v30_20261003/pause_after_short001/status.json"
+    },
+    "junyu_value_aware_review": {
+      "commit": "b890ff49488474c5d476df44019597dc045a5969",
+      "source": "docs/JUNYU_VALUE_AWARE_CODE_REVIEW_20261003.md",
+      "new_hopper_implementation_published": true,
+      "peer_source_copied": false,
+      "cooperation_candidate": true,
+      "previous_commit": "859c0c8fc2a4509a148a3270915f79961e565dee",
+      "code_review": "docs/JUNYU_VALUE_AWARE_CODE_REVIEW_20261003.md",
+      "publication_audit": "results/v29_20261002/junyu_publication_update001/audit.json",
+      "implementation_now_published": true,
+      "previous_missing_targets_resolved": 16,
+      "python_ast_files_passed": 118,
+      "new_result_files": 0,
+      "peer_code_executed": false,
+      "peer_code_imported": false,
+      "abi4_debug_scores_guard_mismatch": true,
+      "cgate_formula_matches_historical_port_with_equal_inputs_parameters": true,
+      "vllm_cgate_qualified": false,
+      "status": "New implementation inspected; confirmed diagnostic ABI defect and dense-cache provenance risk; no new verified performance or accuracy result",
+      "additional_cooperation_candidate": "Reduce intermediate summary traffic using register/on-chip statistics, subject to unchanged dense-prefix DP semantics; not implemented or measured"
+    },
+    "dense_native_equivalence_audit": {
+      "status": "Unresolved trajectory discrepancy; not established as harmless seed noise",
+      "source": "results/v29_20261002/dense_native_accounting001/README.md",
+      "re_tabulated_profiled_requests": 8,
+      "event_scopes": 27,
+      "no_new_GPU_runs": true,
+      "same_PIECEWISE_nohook_hook_N": [
+        374,
+        99
+      ],
+      "same_PIECEWISE_nohook_hook_output_tokens": [
+        4761,
+        2107
+      ],
+      "actual_sampling_random_states_equal_verified": false,
+      "new_matched_three_condition_diagnostic_required": true,
+      "source_audit": "docs/V29_DENSE_NATIVE_AUDIT_20261003.md",
+      "cpu_wrapper_tests_passed": 6,
+      "actual_runtime_modes_previously_saved": false,
+      "new_three_condition_diagnostic_status": "Successor002 armed; waiting strict formal scores and components002; no new GPU evidence",
+      "diagnostic_public_CPU_tests": 21,
+      "diagnostic_private_queue_CPU_tests": 23,
+      "diagnostic_workers": 12,
+      "diagnostic_doc": "docs/V29_DENSE_REFERENCE_DIAG_20261003.md",
+      "frozen_launch_order": "block, fresh engine repeat, variant",
+      "actual_cost003_spec_compatibility_verified": true,
+      "diagnostic_source_commit": "bdd59ee972df55e423ad9d3ea33467aa3b99398b"
+    },
+    "v30": {
+      "entry_doc": "docs/V30_COOPERATIVE_CAMPAIGN_20261003.md",
+      "peer_cpu_receipt": "results/v30_20261003/junyu_cpu001/receipt.json",
+      "length_accounting": "results/v30_20261003/closed_length_accounting001/aggregate.json",
+      "queue_recovery": "results/v30_20261003/queue_recovery003/status.json",
+      "peer_gpu_executed": false,
+      "formal_protocols_changed": false,
+      "root_owns_critical_review": true,
+      "kernel_build": "results/v30_20261003/junyu_build002/receipt.json",
+      "kernel_gpu_qualification": "Armed29case C ABI suite; waiting formal strict scores then idle dlm2;0new GPU seconds",
+      "global_scope": "implemented;4 CPU tests; GPU/model parity pending",
+      "regroup_key6": "144 CPU snapshots; proxy0.996582; no GPU/E2E gain claim",
+      "kernel_gpu_queue_receipt": "results/v30_20261003/peer_gpu_queue001/status.json",
+      "live_status_override": "paused_by_user; prior fields historical",
+      "pause_receipt": "results/v30_20261003/pause_after_short001/status.json"
+    },
+    "v30_dense_divergence": {
+      "status": "deployed_frozen_queue_armed_waiting_prior_queues",
+      "variants": [
+        "default_dense",
+        "piecewise_dense_nohook",
+        "piecewise_native_hook",
+        "piecewise_sync_only"
+      ],
+      "seeds": [
+        28001,
+        28002
+      ],
+      "fresh_engine_repeats": 2,
+      "protocols": [
+        "sync_control",
+        "first_sample_trace"
+      ],
+      "root_cause_confirmed": false,
+      "gpu_reserved_seconds": 0,
+      "source_commit": "94134a91b4322adeb2d0d41d7dca438689129e95"
+    },
+    "v30_sensitivity": {
+      "status": "deployed_frozen_qualification_queue_armed",
+      "modes": [
+        "temporal_T",
+        "unit_v30",
+        "confidence_v30"
+      ],
+      "cpu_tests_passed": 26,
+      "seeds": [
+        30001,
+        30002,
+        30003,
+        30004,
+        30005,
+        30006,
+        30007,
+        30008
+      ],
+      "question_counts": {
+        "longbench": 59,
+        "aime": 30,
+        "humaneval": 164
+      },
+      "gpu_reserved_seconds": 0,
+      "peer_attribution": "Junyu confidence prior only; not C_gate or fresh value-aware",
+      "preparation": "campaign003 three-host strict CPU freeze passed",
+      "queue_source_commit": "94134a91b4322adeb2d0d41d7dca438689129e95",
+      "qualification_workers": 60,
+      "formal_launched": false
+    },
+    "v30_followup_queue": {
+      "phase": "stopped_by_user",
+      "armed": false,
+      "source_commit": "94134a91b4322adeb2d0d41d7dca438689129e95",
+      "receipt": "results/v30_20261003/campaign_queue001/status.json",
+      "root_review_after_nine_strict_qualifications": true,
+      "gpu_reserved_seconds": 0,
+      "current_status_receipt": "results/v30_20261003/pause_after_short001/status.json"
+    },
+    "working_status_doc": "docs/V30_WORKING_STATUS_20261003.md",
+    "standalone_peer_v30": {
+      "source": "experiments/numerical_qk_reuse/v30_peer_standalone.py",
+      "peer_commit": "b890ff49488474c5d476df44019597dc045a5969",
+      "variants": [
+        "kernel_dense",
+        "value_allkept",
+        "value_unit",
+        "value_confidence",
+        "value_temporal"
+      ],
+      "m3_installed": false,
+      "cpu_tests_passed": 10,
+      "gpu_seconds": 0,
+      "gpu_qualified": false,
+      "e2e_runner_implemented": false,
+      "armed": false,
+      "finite_policy_bound": false,
+      "receipt": "results/v30_20261003/standalone_cpu002/receipt.json"
+    },
+    "latest_formal_snapshot": {
+      "longbench": {
+        "complete_workers": 11,
+        "planned_workers": 32,
+        "timed_records": 649,
+        "questions": 59,
+        "generation_complete": false,
+        "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+        "scored": false,
+        "closed_gpu_seconds": 15243.666969622136,
+        "timed_capture_nonzero_records": 0
+      },
+      "aime": {
+        "complete_workers": 32,
+        "planned_workers": 32,
+        "timed_records": 960,
+        "questions": 30,
+        "generation_complete": true,
+        "source_commit": "1931db5a6540409946641ebb0b04c06507d48402",
+        "scored": false,
+        "closed_gpu_seconds": 15855.445644421969,
+        "timed_capture_nonzero_records": 0
+      },
+      "humaneval": {
+        "complete_workers": 32,
+        "planned_workers": 32,
+        "timed_records": 5248,
+        "questions": 164,
+        "generation_complete": true,
+        "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+        "scored": false,
+        "closed_gpu_seconds": 15475.701114565367,
+        "timed_capture_nonzero_records": 0
+      }
+    },
+    "status": "paused_by_user",
+    "pause_receipt": "results/v30_20261003/pause_after_short001/status.json",
+    "auto_resume": false
+  },
+  "task": "M3 output numerics and trajectory isolation",
+  "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
+  "branch": "research/m3-output-numerics-20260927",
+  "authority": "User v26 doc dllm_claude_v26_m1_m2_m3_frontier_20260928.md",
+  "status": "V26_SEVEN_PANEL_REPORTED",
+  "wall_start_utc": "2026-09-27T22:22:00Z",
+  "max_gpu_process_seconds": 21600,
+  "max_generation_executions": 512,
+  "max_gpu_workers": 2,
+  "charged_gpu_process_seconds": 18216.595414304735,
+  "generation_executions": 526,
+  "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
+  "push_status": "4ab56f6d verified remote at takeover",
+  "agents": {
+    "lead": "Claude Opus 5.5 (this session)"
+  },
+  "next": "Policy screen (A x R x threshold) on captured states, then frozen expansion (more distinct questions, 2 seeds, 6 core arms)",
+  "peer_refs": {
+    "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
+    "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
+  },
+  "preflight": "1047 tensor payloads perhost verified; operator19/19 perhost; all CP1/CP2 workers complete; no active GPU worker",
+  "generation_reserved": 0,
+  "completed_gpu_jobs": [
+    {
+      "host": "mpk",
+      "stage": "profile",
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/cp1_f65de1e",
+      "sha": "f65de1e431c1e1cbdb980692d5bb03df47ad0fca",
+      "supervisor_pid": 1804239,
+      "config": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/bindings/cp1_f65de1e/profile.json",
+      "config_sha256": "c7251200ed645285f1c0aac91f4dcfc3ea97d838cc0c06f146d373087fa9272e",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/profile_cp1_f65de1e.json",
+      "log": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/profile_cp1_f65de1e.log",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/profile_cp1_f65de1e.json",
+      "status": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 997.4391124248505
+    },
+    {
+      "host": "dllm",
+      "stage": "profile",
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/cp1_f65de1e",
+      "sha": "f65de1e431c1e1cbdb980692d5bb03df47ad0fca",
+      "supervisor_pid": 141156,
+      "config": "/home/exouser/dyh/m3_output_numerics_v21_20260927/bindings/cp1_f65de1e/profile.json",
+      "config_sha256": "074795bb89ea48a5bcd43c22c356196f67469883a4f66c203e05251b4b9a39d8",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/profile_cp1_f65de1e.json",
+      "log": "/home/exouser/dyh/m3_output_numerics_v21_20260927/profile_cp1_f65de1e.log",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/profile_cp1_f65de1e.json",
+      "status": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 833.4864563941956
+    },
+    {
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/natural_525880e",
+      "sha": "525880efbfc9781976a3b45d131bd56eb96a6346",
+      "supervisor_pid": 142080,
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/natural_zero_pruning_natural_525880e.json",
+      "log": "/home/exouser/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/worker.log",
+      "ledger": "/home/exouser/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/ledger.jsonl",
+      "private": "/home/exouser/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/private",
+      "host": "dllm",
+      "stage": "zero_pruning_diagnostic",
+      "maximum_seconds": 1800,
+      "status": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 140.06544661521912
+    },
+    {
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/natural_525880e",
+      "sha": "525880efbfc9781976a3b45d131bd56eb96a6346",
+      "supervisor_pid": 1805502,
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/natural_zero_pruning_natural_525880e.json",
+      "log": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/worker.log",
+      "ledger": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/ledger.jsonl",
+      "private": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/private",
+      "host": "mpk",
+      "stage": "zero_pruning_diagnostic",
+      "maximum_seconds": 1800,
+      "status": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 346.1123697757721
+    },
+    {
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/geometry_b85fa23",
+      "sha": "b85fa23c33e704a28ddeb27719f4f01654df1611",
+      "supervisor_pid": 1806084,
+      "config": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/bindings/geometry_b85fa23/diagnostic.json",
+      "config_sha256": "12e36692f0bac791981514ee1320488b98d346d338f90d0d70359e5ecd904ab8",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/geometry_geometry_b85fa23.json",
+      "log": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/geometry_geometry_b85fa23.log",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_geometry_b85fa23.json",
+      "host": "mpk",
+      "stage": "geometry_opportunity",
+      "maximum_seconds": 900,
+      "generation_reservation": 3,
+      "status": "complete_with_bootstrap_diagnostic_missing",
+      "returncode": 0,
+      "charged_process_seconds": 58.596675395965576
+    },
+    {
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/geometry_b85fa23",
+      "sha": "b85fa23c33e704a28ddeb27719f4f01654df1611",
+      "supervisor_pid": 142552,
+      "config": "/home/exouser/dyh/m3_output_numerics_v21_20260927/bindings/geometry_b85fa23/diagnostic.json",
+      "config_sha256": "e2c85830579648403275c08be71898d92a225fe3c082491f554b070506736327",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/geometry_geometry_b85fa23.json",
+      "log": "/home/exouser/dyh/m3_output_numerics_v21_20260927/geometry_geometry_b85fa23.log",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_geometry_b85fa23.json",
+      "host": "dllm",
+      "stage": "geometry_opportunity",
+      "maximum_seconds": 900,
+      "generation_reservation": 3,
+      "status": "complete_with_bootstrap_diagnostic_missing",
+      "returncode": 0,
+      "charged_process_seconds": 56.937336683273315
+    },
+    {
+      "host": "mpk",
+      "stage": "bootstrap_calibration",
+      "sha": "372acfa32c75b00a3e1715ab8c836eecfcca1345",
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/v22_cpa_372acfa",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_cpa_372acfa.json",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_cpa_372acfa.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 46.16507577896118
+    },
+    {
+      "host": "mpk",
+      "stage": "q16_validation_attention_share",
+      "sha": "4cfbf7a96918f6387609a8699c35b18df0d0fe78",
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/v22_val_4cfbf7a",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_val_4cfbf7a.json",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_val_4cfbf7a.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 78.13708424568176
+    },
+    {
+      "host": "dllm",
+      "stage": "bootstrap_calibration",
+      "sha": "372acfa32c75b00a3e1715ab8c836eecfcca1345",
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/v22_cpa_372acfa",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_cpa_372acfa.json",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_cpa_372acfa.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 47.16523480415344
+    },
+    {
+      "host": "dllm",
+      "stage": "q16_validation_attention_share",
+      "sha": "4cfbf7a96918f6387609a8699c35b18df0d0fe78",
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/v22_val_4cfbf7a",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_val_4cfbf7a.json",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_val_4cfbf7a.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 74.35434293746948
+    }
+  ],
+  "gpu_jobs": [],
+  "takeover": {
+    "utc": "2026-09-28T00:10:31Z",
+    "verified_remote": "4ab56f6d27253baeae210724ea58d1bd6cb0f626",
+    "peer_refs_unchanged": true,
+    "hosts_idle": true
+  },
+  "charge_notes": [
+    "v22 precheck: 4 pytest runs on dllm scratch copy, 16.52 s, no generation",
+    "v22 CP-A calibration 372acfa: mpk 46.17 s + dllm 47.17 s, 3 captures each",
+    "v22 validation 4cfbf7a: mpk 78.14 s + dllm 74.35 s, 3 captures each",
+    "v23 precheck pytest x2 on dllm scratch: 10.38 s, 0 captures",
+    "Track E observation parity b80d116 mpk+dllm: 80.07 s, 6 captures",
+    "Track P qualification 71e277c (harness bug after first group) mpk+dllm: 66.40 s, 6 captures",
+    "Track P qualification 6af4d42 complete mpk+dllm: 98.84 s, 6 captures",
+    "bootstrap6 lb_preview mpk 968.91 s + dllm 1065.28 s, 48 executions, 0 failures",
+    "bootstrap6 aime mpk 1836.97 s + dllm 1643.41 s, 96 executions, 0 failures",
+    "lb_rest launch refused by prefix rule before generation (6af4d42): 3.82 s, 0 executions",
+    "bootstrap6 lb_rest (separate run dir bootstrap6_001_lbrest, deploy dc52522, same protocol, method sources byte-identical): mpk 1782.23 s + dllm 1615.24 s, 96 executions (48 per host)",
+    "v24 direct-cost profile 3ae5e1d mpk+dllm: 952.35 s, 6 executions",
+    "v24 RULER stage 5cedc12 mpk+dllm (first launch refused by stale 05:52 deadline, 0 s): 132.17 s, 90 executions",
+    "v24 observation components d12b0be mpk+dllm: 80.98 s, 6 executions",
+    "v24 route alignment probe 526580d mpk+dllm: 81.00 s, 6 executions",
+    "v25 aligned16 qualification 3ee9857 mpk+dllm: 717.86 s, 6 captures",
+    "v25 direct-cost profile (arm-set v25) mpk+dllm: 811.01 s, 6 captures",
+    "v25 aligned6 pilot 90/90: mpk 1457.59 s + dllm 1390.27 s",
+    "v25b bridge 16/16 (separate allocation): 561.09 s"
+  ],
+  "decision": "Direct cost measured; BO/A observation dominated by route kernel (odd-K 2.6x slower/key). Candidate aligned_route_k16 is not bit-exact (summary z/mu, producer) -> numerical variant, not applied. No M3-specific E2E gain plausible; LB expansion not run.",
+  "panel": {
+    "protocol": "v21_bootstrap6_b8b2c59449fd0ebf",
+    "executions": "240/240",
+    "failures": 0,
+    "bindings": {
+      "lb_preview+aime": "6af4d42 run dir bootstrap6_001",
+      "lb_rest": "dc52522 run dir bootstrap6_001_lbrest"
+    },
+    "report": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/bootstrap6_report.md"
+  },
+  "remaining": {
+    "gpu_process_seconds": 3944.499057388304,
+    "executions": 2
+  },
+  "gpu_authorization": {
+    "single_source": "E:/dlm/gpu_authorization.json",
+    "current": "user standing authorization (GPUs are the user own; no approval needed), recorded 2026-09-28T15:42Z"
+  },
+  "v24_cpu": {
+    "audit": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/v24_audit.md (PASS, 120/120)",
+    "errata": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/v24_errata_and_audit.md",
+    "direct_cost_harness": "scripts/v24_profile.py; CPU-validated derived configs on both hosts at deploy v24_cpu_3ae5e1d (bindings/v24_cpu_3ae5e1d/profile.json)"
+  },
+  "ruler_stage": {
+    "protocol": "v21_bootstrap6_ruler_4dbecd0c10841a11",
+    "private": "E:/dlm/v23_private/bootstrap6_ruler_001",
+    "planned": 90,
+    "status": "complete 90/90, all arms 12/13; scored ruler_scored.*"
+  },
+  "gpu_stop_utc_history": [
+    "2026-09-28T05:52:00Z",
+    "2026-09-28T09:30:00Z"
+  ],
+  "v25": {
+    "candidate": "route_storage=aligned16 (named numerical-implementation variant)",
+    "qualification": "scripts/v21b_geometry_capture.py --aligned-qualification (parent vs aligned16 M1/M3/B, full A/D/H)",
+    "direct_cost": "scripts/v24_profile.py --arm-set v25 (native, M3 boot, M3 boot aligned16, B boot, B boot aligned16)",
+    "pilot": {
+      "protocol": "v25_aligned6_pilot_56d3b98fe1261756",
+      "private": "E:/dlm/v25_private/aligned6_pilot_001",
+      "planned": 90
+    },
+    "cpu_tests": "43 passed, 3 GPU-only skipped on both hosts at deploy v25_cpu_6fa9043",
+    "not_run": [
+      "parallel-summary builder probe (ceiling <=2-4%, cannot change M3 vs T/B ordering; 2 executions left)"
+    ],
+    "result": "aligned16 qualified (logits/decisions/tokens identical on all tested); direct odd-K LB BO/A -8-9%; request effect ~0 (LB 1.001); builder probe not run"
+  },
+  "v25b_bridge_allocation": {
+    "executions": 16,
+    "gpu_process_seconds_max": 1800,
+    "source": "v25b CP2 (16-execution bridge) under the user standing GPU authorization; separate from the exhausted 512-execution campaign ledger, which is NOT reset",
+    "protocol": "v25b_aligned_bridge_2dafaf7cd531bff3",
+    "used_executions": 16,
+    "used_seconds": 561.09,
+    "status": "complete"
+  },
+  "campaign_ledger": {
+    "executions_frozen_cap": 512,
+    "campaign_executions": 510,
+    "extra_allocations": {
+      "v25b_bridge": 16
+    }
+  },
+  "v26_budget": {
+    "gpu_process_hours_max": 12,
+    "executions_max": 1800,
+    "used_gpu_process_seconds": 2856.5334662914274,
+    "used_executions": 84,
+    "note": "independent v26 allocation; historical 512 ledger and v25b 16 are closed and not reset",
+    "charges": [
+      "M2 kernel/regression test suite on dllm: 419.2 s (incl. failed first run 4.4 s)",
+      "v26_seven panel 84/84: mpk 1800.41 s + dllm 636.92 s"
+    ]
+  },
+  "v26": {
+    "seven_panel": "v26_seven_99cf56d6ef8412d7 (84)",
+    "results_dir": "results/m1_m2_m3_frontier_v26_20260928"
+  }
+}

@@ -1,0 +1,55 @@
+{
+  "updated_local": "2026-10-03 02:43 (UTC-5)",
+  "queue": {
+    "armed": true,
+    "complete": false,
+    "gpu_started": false,
+    "source_commit": "e2ec0ae4b36f19e3b8a80fe642dec7da6ea6cb40",
+    "phase": "waiting_formal_strict_scores",
+    "updated_unix": 1791013296.043319
+  },
+  "formal_snapshot": {
+    "suites": {
+      "longbench": {
+        "started": true,
+        "complete": false,
+        "generation_complete": false,
+        "closed": 6,
+        "failed": 0,
+        "gpu_reserved_seconds": 8400.08169265918,
+        "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+        "phase": null
+      },
+      "aime": {
+        "started": true,
+        "complete": false,
+        "generation_complete": false,
+        "closed": 18,
+        "failed": 0,
+        "gpu_reserved_seconds": 8961.411461367941,
+        "source_commit": "1931db5a6540409946641ebb0b04c06507d48402",
+        "phase": null
+      },
+      "humaneval": {
+        "started": true,
+        "complete": false,
+        "generation_complete": false,
+        "closed": 18,
+        "failed": 0,
+        "gpu_reserved_seconds": 8769.673844960518,
+        "source_commit": "54163f4e7c8766aaa4187807420b3cf3167dba81",
+        "phase": null
+      }
+    },
+    "serial_cpu_scoring_may_begin": false
+  },
+  "GPU_seconds_new_peer_qualification": 0,
+  "barrier": "All original formal generation32/32 plus strict scoring, then pinned idle dlm2 twice and own exclusive lock",
+  "preflight": {
+    "source_and_kernel_bytes_verified": true,
+    "sm90_device_verified": true,
+    "collected_cases": 29,
+    "cpu_contract_tests_passed": 3
+  },
+  "scope": "One-shot original peer kernel subset only; no ATen/model/E2E launch or automatic publication"
+}

@@ -1,0 +1,54 @@
+{
+  "source_hashes": {
+    "value_direction.cu": "ae5b1e82a1d5b0024fde18cf5cfe1a3f3dd835e2ad1d3f53053d3b681783fcfb",
+    "value_direction.h": "3d84caf53362ff061c0b91c45d97b02bb495b395a01a9870ea50efddf40adacb",
+    "torch_bridge.cpp": "849d20a8abaf0fd44076aab40cc4100436eb3fe4dd683ecd0144bfa189d55cda",
+    "fmha/hopper/utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+    "fmha/hopper/utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+  },
+  "kernel": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+  "kernel_sha256": "7ef4c8cf417c16175d6d1a5d7b4304df792c3a7c1a66a1da4f41312cf166d819",
+  "bridge": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/torch_4c65c048754f9fb7/value_direction_torch_4c65c048754f9fb7.so",
+  "bridge_sha256": "824e8a7dfeac7990a9464d9e22fdaca97bdd3f401055db1ad301b71e87182a2a",
+  "bridge_provenance": {
+    "sources": {
+      "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/sources_db080045f7a5fbce/torch_bridge.cpp": "849d20a8abaf0fd44076aab40cc4100436eb3fe4dd683ecd0144bfa189d55cda",
+      "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/sources_db080045f7a5fbce/value_direction.h": "3d84caf53362ff061c0b91c45d97b02bb495b395a01a9870ea50efddf40adacb",
+      "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so": "7ef4c8cf417c16175d6d1a5d7b4304df792c3a7c1a66a1da4f41312cf166d819"
+    },
+    "torch": "2.6.0+cu124",
+    "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/torch_4c65c048754f9fb7/value_direction_torch_4c65c048754f9fb7.so"
+  },
+  "torch": "2.6.0+cu124",
+  "kernel_command": [
+    "/usr/local/cuda/bin/nvcc",
+    "-std=c++17",
+    "-O3",
+    "-arch=sm_90a",
+    "--shared",
+    "-Xcompiler=-fPIC",
+    "-lineinfo",
+    "--ptxas-options=-v",
+    "-I/home/exouser/chw/dlm_test/cutlass/include",
+    "-I/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/sources_db080045f7a5fbce",
+    "-I/usr/local/cuda/include/cccl",
+    "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/sources_db080045f7a5fbce/value_direction.cu",
+    "-o",
+    "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+    "-L/usr/local/cuda/lib64",
+    "-lcudart",
+    "-lcuda",
+    "-Xlinker=-rpath,/usr/local/cuda/lib64"
+  ],
+  "max_jobs": 4,
+  "nvcc_seconds": 0.0,
+  "bridge_seconds": 13.05993017507717,
+  "kernel_compiled_in_previous_attempt": true,
+  "kernel_first_build_wall_seconds_approx": 70,
+  "build_script_sha256": "7f7b02fad5f02c2b0d48011a818712d90823ef6ce8731f59189b0332b41ed48d",
+  "ninja_path": "/home/exouser/dyh/fan_end_to_end_campaign_20260912/env/bin/ninja",
+  "ninja_sha256": "08639e194fffa7f08b259fc4abfa4803aff66b64de52549cee42ec527d55cea6",
+  "kernel_abi_version": 4,
+  "kernel_params_size": 176,
+  "build_command": "env PATH=/home/exouser/dyh/fan_end_to_end_campaign_20260912/env/bin:/usr/local/cuda/bin:/usr/bin:/bin /home/exouser/miniconda3/envs/ljy_dlm/bin/python /home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/native_reuse_build.py --inputs /home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/inputs --build-dir /home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1"
+}

@@ -1,0 +1,60 @@
+{
+  "schema": "v29_homogeneous_cost_spec_v1",
+  "diagnostic_only": true,
+  "input_mode": "synthetic",
+  "settings": {
+    "prefixes": [
+      32768,
+      65536,
+      98304
+    ],
+    "keep_fraction": 0.25,
+    "repeats": 32,
+    "warm": 8,
+    "seed": 2914,
+    "max_model_len": 106496,
+    "output_atol": 0.02,
+    "output_rtol": 0.02,
+    "summary_atol": 0.02,
+    "summary_rtol": 0.02,
+    "dp_atol": 0.0002,
+    "dp_rtol": 0.0002,
+    "merge_atol": 0.01,
+    "merge_rtol": 0.01
+  },
+  "geometry": {
+    "query_rows": 256,
+    "query_heads": 16,
+    "kv_heads": 2,
+    "head_dim": 512,
+    "cache_page_tokens": 64,
+    "query_block": 128,
+    "alias_splits": 2,
+    "rank": 32
+  },
+  "scale": 1.0,
+  "native": {
+    "fa_version": 4,
+    "causal": true,
+    "dynamic_causal": false,
+    "num_splits": 0,
+    "max_seqlen_q": 256,
+    "softcap": 0.0
+  },
+  "sparse": {
+    "causal": false,
+    "inner_num_splits": 1,
+    "alias_splits": 2
+  },
+  "full_canvas_and_boundary_kept": true,
+  "support_construction_timed": false,
+  "selector_control": {
+    "sensitivity": 1.0,
+    "log_threshold": -3.8735877018001794,
+    "clock": "static same-state control; no sampling or adaptive history"
+  },
+  "cuda_graphs_requested": false,
+  "selector_stream": "serialized diagnostic control",
+  "quality_evaluated": false,
+  "request_speed_claim_allowed": false
+}

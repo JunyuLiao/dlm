@@ -1,0 +1,3080 @@
+{
+  "meta": {
+    "arms": [
+      "B8_G",
+      "D_native",
+      "G1",
+      "G3",
+      "T_G"
+    ],
+    "complete": true,
+    "effective_arm_fields": {
+      "B8_G": {
+        "collect": null,
+        "condition": "global_B8",
+        "consumer": "hopper",
+        "decision_interval": 8,
+        "guard_mode": "fused",
+        "kernel_variant": "generic",
+        "library": null,
+        "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+        "policy": {
+          "global": {
+            "log_threshold": -3.1366905212402343
+          },
+          "local": {
+            "log_threshold": -1.0099318265914916
+          }
+        },
+        "score_refresh_period": 8,
+        "selector": "legacy_recompute",
+        "selector_layers": "all",
+        "support_binary": {
+          "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+          "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+          "key": "e3c283b8cbb9b79c",
+          "sources": {
+            "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+            "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+            "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+            "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+            "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+          }
+        },
+        "telemetry": "minimal"
+      },
+      "D_native": {
+        "collect": null,
+        "condition": "native_dense",
+        "consumer": null,
+        "decision_interval": 1,
+        "guard_mode": null,
+        "kernel_variant": "static",
+        "library": null,
+        "plugin": null,
+        "policy": {
+          "global": {
+            "log_threshold": -3.1366905212402343
+          },
+          "local": {
+            "log_threshold": -1.0099318265914916
+          }
+        },
+        "score_refresh_period": 8,
+        "selector": "legacy_recompute",
+        "selector_layers": "local",
+        "support_binary": null,
+        "telemetry": "full"
+      },
+      "G1": {
+        "collect": null,
+        "condition": "global_M1",
+        "consumer": "hopper",
+        "decision_interval": 1,
+        "guard_mode": "fused",
+        "kernel_variant": "generic",
+        "library": null,
+        "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+        "policy": {
+          "global": {
+            "log_threshold": -3.1366905212402343
+          },
+          "local": {
+            "log_threshold": -1.0099318265914916
+          }
+        },
+        "score_refresh_period": 8,
+        "selector": "prefix_block_summary",
+        "selector_layers": "all",
+        "support_binary": {
+          "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+          "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+          "key": "e3c283b8cbb9b79c",
+          "sources": {
+            "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+            "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+            "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+            "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+            "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+          }
+        },
+        "telemetry": "minimal"
+      },
+      "G3": {
+        "collect": null,
+        "condition": "global_M3",
+        "consumer": "hopper",
+        "decision_interval": 2,
+        "guard_mode": "fused",
+        "kernel_variant": "generic",
+        "library": null,
+        "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+        "policy": {
+          "global": {
+            "log_threshold": -3.1366905212402343
+          },
+          "local": {
+            "log_threshold": -1.0099318265914916
+          }
+        },
+        "score_refresh_period": 8,
+        "selector": "prefix_block_summary",
+        "selector_layers": "all",
+        "support_binary": {
+          "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+          "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+          "key": "e3c283b8cbb9b79c",
+          "sources": {
+            "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+            "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+            "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+            "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+            "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+          }
+        },
+        "telemetry": "minimal"
+      },
+      "T_G": {
+        "collect": false,
+        "condition": "global_T",
+        "consumer": null,
+        "decision_interval": 1,
+        "guard_mode": null,
+        "kernel_variant": "static",
+        "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+        "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+        "policy": {
+          "global": {
+            "log_threshold": -3.1366905212402343
+          },
+          "local": {
+            "log_threshold": -1.0099318265914916
+          }
+        },
+        "score_refresh_period": 8,
+        "selector": "legacy_recompute",
+        "selector_layers": "local",
+        "support_binary": null,
+        "telemetry": "full"
+      }
+    },
+    "executed": 600,
+    "mode": "all30",
+    "planned_executions": 600,
+    "protocol_id": "v13_global_multiseed_all30",
+    "questions": 30,
+    "scope": "GLOBAL-only temporal methods (layers 5,11,17,23,29); LOCAL native in all arms",
+    "seeds": [
+      17,
+      29
+    ]
+  },
+  "pairs": {
+    "B8_G/D_native": {
+      "amortized_time_per_call_factor": 1.0218061692809843,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.8508551381633404,
+          1.0515724485635123
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.08333333333333333,
+          0.16666666666666666
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.8556137026646976,
+          0.9974593624694681
+        ]
+      },
+      "call_factor": 0.9074644613804659,
+      "candidate_calls": 16789,
+      "candidate_correct": 34,
+      "candidate_time_s": 2558.2580285405274,
+      "geometric_time_ratio": 0.9486931178662166,
+      "leave_one_question_out": {
+        "aime26/1": {
+          "geometric_time_ratio": 0.9482415260865689,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9270219135104328
+        },
+        "aime26/10": {
+          "geometric_time_ratio": 0.9489937826240085,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9268130343786594
+        },
+        "aime26/11": {
+          "geometric_time_ratio": 0.9512552467866112,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9299808424186128
+        },
+        "aime26/12": {
+          "geometric_time_ratio": 0.9635084504776782,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9404029040213229
+        },
+        "aime26/13": {
+          "geometric_time_ratio": 0.9477901691439727,
+          "quality_diff_mean_per_question": 0.05172413793103448,
+          "summed_time_ratio": 0.9271541863821586
+        },
+        "aime26/14": {
+          "geometric_time_ratio": 0.9542273890172014,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 0.9332075275177458
+        },
+        "aime26/15": {
+          "geometric_time_ratio": 0.949009040372554,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.926478885089663
+        },
+        "aime26/16": {
+          "geometric_time_ratio": 0.9327796284963008,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.923206007177325
+        },
+        "aime26/17": {
+          "geometric_time_ratio": 0.9513675353072987,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9306788412608602
+        },
+        "aime26/18": {
+          "geometric_time_ratio": 0.947388370588265,
+          "quality_diff_mean_per_question": 0.05172413793103448,
+          "summed_time_ratio": 0.9241134411064205
+        },
+        "aime26/19": {
+          "geometric_time_ratio": 0.9327075400153689,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9186635140403538
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 0.9468877368745878,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9260153656890029
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 0.9408552264583881,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9233031473002923
+        },
+        "aime26/21": {
+          "geometric_time_ratio": 0.9729563124351385,
+          "quality_diff_mean_per_question": 0.05172413793103448,
+          "summed_time_ratio": 0.9371189422531022
+        },
+        "aime26/22": {
+          "geometric_time_ratio": 0.9390044542738009,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9158543341561143
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 0.9695391786468742,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 0.9488433698202061
+        },
+        "aime26/24": {
+          "geometric_time_ratio": 0.9583168626784007,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 0.9342329119330443
+        },
+        "aime26/25": {
+          "geometric_time_ratio": 0.9621352020710302,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9357302945210442
+        },
+        "aime26/26": {
+          "geometric_time_ratio": 0.945904346749855,
+          "quality_diff_mean_per_question": 0.05172413793103448,
+          "summed_time_ratio": 0.9227311539929512
+        },
+        "aime26/27": {
+          "geometric_time_ratio": 0.9446151149367055,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9221045256798582
+        },
+        "aime26/28": {
+          "geometric_time_ratio": 0.9484908058822952,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9253644459278136
+        },
+        "aime26/29": {
+          "geometric_time_ratio": 0.9475230198604925,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9238787350592234
+        },
+        "aime26/3": {
+          "geometric_time_ratio": 0.9559766323266865,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9289997325012657
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 0.9475320763071249,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9243613667946877
+        },
+        "aime26/4": {
+          "geometric_time_ratio": 0.9322569243153964,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9180030242157091
+        },
+        "aime26/5": {
+          "geometric_time_ratio": 0.9526967144055614,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9284289334887174
+        },
+        "aime26/6": {
+          "geometric_time_ratio": 0.9447321991286277,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9256543894827116
+        },
+        "aime26/7": {
+          "geometric_time_ratio": 0.9387973146497635,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 0.9238271471667167
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 0.9411496991879921,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9229434772066423
+        },
+        "aime26/9": {
+          "geometric_time_ratio": 0.9456133376647159,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.923330026345168
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 30,
+      "outcomes": 60,
+      "paired_disagreements": {
+        "both": 27,
+        "candidate_only": 7,
+        "neither": 21,
+        "reference_only": 5
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.022530367123016,
+          "call_factor": 0.9037985580544496,
+          "candidate_calls": 8399,
+          "candidate_correct": 17,
+          "candidate_time_s": 1278.0169589612633,
+          "geometric_time_ratio": 0.9526562783423108,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 14,
+            "candidate_only": 3,
+            "neither": 11,
+            "reference_only": 2
+          },
+          "quality_diff_mean_per_question": 0.03333333333333333,
+          "reference_calls": 9293,
+          "reference_correct": 16,
+          "reference_time_s": 1382.8935727681965,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 1.049696540855292,
+          "speedup_summed": 1.082061989139936,
+          "summed_time_ratio": 0.9241614713726688,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.0210666960411707,
+          "call_factor": 0.9111642050390965,
+          "candidate_calls": 8390,
+          "candidate_correct": 17,
+          "candidate_time_s": 1280.2410695792641,
+          "geometric_time_ratio": 0.9447464445968057,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 13,
+            "candidate_only": 4,
+            "neither": 10,
+            "reference_only": 3
+          },
+          "quality_diff_mean_per_question": 0.03333333333333333,
+          "reference_calls": 9208,
+          "reference_correct": 16,
+          "reference_time_s": 1376.071479491191,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 1.0584850630761307,
+          "speedup_summed": 1.0748534101811156,
+          "summed_time_ratio": 0.93035942439025,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": 0.03333333333333333,
+      "reference_calls": 18501,
+      "reference_correct": 32,
+      "reference_time_s": 2758.9650522593874,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 1.0540816425960609,
+      "speedup_summed": 1.078454566146075,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.0317793793863974,
+          "call_factor": 0.8255549231644849,
+          "candidate_calls": 2901,
+          "candidate_correct": 10,
+          "candidate_time_s": 439.59726379509084,
+          "geometric_time_ratio": 0.912077784496094,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 6,
+            "candidate_only": 4,
+            "neither": 2,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.3333333333333333,
+          "reference_calls": 3514,
+          "reference_correct": 6,
+          "reference_time_s": 516.0861032316461,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 1.096397716289605,
+          "speedup_summed": 1.1739975330515455,
+          "summed_time_ratio": 0.8517905462720372,
+          "timing_complete": true
+        },
+        "reserved": {
+          "amortized_time_per_call_factor": 1.019367043736764,
+          "call_factor": 0.9266697804764129,
+          "candidate_calls": 13888,
+          "candidate_correct": 24,
+          "candidate_time_s": 2118.6607647454366,
+          "geometric_time_ratio": 0.9580743609616607,
+          "missing_timings": [],
+          "n_questions": 24,
+          "outcomes": 48,
+          "paired_disagreements": {
+            "both": 21,
+            "candidate_only": 3,
+            "neither": 19,
+            "reference_only": 5
+          },
+          "quality_diff_mean_per_question": -0.041666666666666664,
+          "reference_calls": 14987,
+          "reference_correct": 26,
+          "reference_time_s": 2242.8789490277413,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 1.0437603183496704,
+          "speedup_summed": 1.0586305209164668,
+          "summed_time_ratio": 0.9446166346444369,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 0.9272527850418055,
+      "timing_complete": true
+    },
+    "G1/B8_G": {
+      "amortized_time_per_call_factor": 1.0233306968471023,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          1.0164446247969012,
+          1.2076826950292012
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.21666666666666667,
+          0.06666666666666667
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          1.0644441195996532,
+          1.2066558067584394
+        ]
+      },
+      "call_factor": 1.103996664482697,
+      "candidate_calls": 18535,
+      "candidate_correct": 30,
+      "candidate_time_s": 2890.20141185401,
+      "geometric_time_ratio": 1.1086675518264875,
+      "leave_one_question_out": {
+        "aime26/1": {
+          "geometric_time_ratio": 1.1100035076477013,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1301515706335623
+        },
+        "aime26/10": {
+          "geometric_time_ratio": 1.1076776819300336,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1287850461873263
+        },
+        "aime26/11": {
+          "geometric_time_ratio": 1.1128557696447903,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 1.1365666070987026
+        },
+        "aime26/12": {
+          "geometric_time_ratio": 1.119037827942574,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1364450000030681
+        },
+        "aime26/13": {
+          "geometric_time_ratio": 1.1031579937731817,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 1.1256585449481846
+        },
+        "aime26/14": {
+          "geometric_time_ratio": 1.1027071427716038,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.1229114444245205
+        },
+        "aime26/15": {
+          "geometric_time_ratio": 1.1137315615136179,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1410290306827793
+        },
+        "aime26/16": {
+          "geometric_time_ratio": 1.1216286668092994,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1331660960388532
+        },
+        "aime26/17": {
+          "geometric_time_ratio": 1.1101006118101846,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1333905541034748
+        },
+        "aime26/18": {
+          "geometric_time_ratio": 1.115285763701296,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 1.1401691039348811
+        },
+        "aime26/19": {
+          "geometric_time_ratio": 1.1152716145826018,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.1314385038186154
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.114196346239661,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1328268844804326
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 1.1120347715741956,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1308521696468443
+        },
+        "aime26/21": {
+          "geometric_time_ratio": 1.0887519003009338,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 1.1208023685867354
+        },
+        "aime26/22": {
+          "geometric_time_ratio": 1.1141336713253165,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.136806562978347
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.0955652344421822,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.115138916264468
+        },
+        "aime26/24": {
+          "geometric_time_ratio": 1.101941835854411,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.1238455443618263
+        },
+        "aime26/25": {
+          "geometric_time_ratio": 1.1003101534352897,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 1.1290212028339366
+        },
+        "aime26/26": {
+          "geometric_time_ratio": 1.1036357597122743,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.1228584522763716
+        },
+        "aime26/27": {
+          "geometric_time_ratio": 1.1088828512941182,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.131075895034397
+        },
+        "aime26/28": {
+          "geometric_time_ratio": 1.109844785871142,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1335041525219987
+        },
+        "aime26/29": {
+          "geometric_time_ratio": 1.1111746424356261,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1350607717889327
+        },
+        "aime26/3": {
+          "geometric_time_ratio": 1.1003544610949458,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.127507232448598
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.1069013018672282,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1279186234846663
+        },
+        "aime26/4": {
+          "geometric_time_ratio": 1.1108921452448168,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.1317379325103363
+        },
+        "aime26/5": {
+          "geometric_time_ratio": 1.0943342567391392,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1181526251556833
+        },
+        "aime26/6": {
+          "geometric_time_ratio": 1.1334889183310952,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1367309940501296
+        },
+        "aime26/7": {
+          "geometric_time_ratio": 1.098020829228603,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 1.1218008108290913
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.1230829477784845,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1371859928766097
+        },
+        "aime26/9": {
+          "geometric_time_ratio": 1.1021598231092817,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1212972698854606
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 30,
+      "outcomes": 60,
+      "paired_disagreements": {
+        "both": 24,
+        "candidate_only": 6,
+        "neither": 20,
+        "reference_only": 10
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.0245000180840085,
+          "call_factor": 1.140850101202524,
+          "candidate_calls": 9582,
+          "candidate_correct": 14,
+          "candidate_time_s": 1493.7474348722026,
+          "geometric_time_ratio": 1.1746093971433846,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 12,
+            "candidate_only": 2,
+            "neither": 11,
+            "reference_only": 5
+          },
+          "quality_diff_mean_per_question": -0.1,
+          "reference_calls": 8399,
+          "reference_correct": 17,
+          "reference_time_s": 1278.0169589612633,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 0.8513468412835539,
+          "speedup_summed": 0.8555776760685142,
+          "summed_time_ratio": 1.1688009493131288,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.0221820457802897,
+          "call_factor": 1.067103694874851,
+          "candidate_calls": 8953,
+          "candidate_correct": 16,
+          "candidate_time_s": 1396.4539769818075,
+          "geometric_time_ratio": 1.0464276409350872,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 12,
+            "candidate_only": 4,
+            "neither": 9,
+            "reference_only": 5
+          },
+          "quality_diff_mean_per_question": -0.03333333333333333,
+          "reference_calls": 8390,
+          "reference_correct": 17,
+          "reference_time_s": 1280.2410695792641,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.9556322490740023,
+          "speedup_summed": 0.9167799946735679,
+          "summed_time_ratio": 1.0907742378868812,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": -0.06666666666666667,
+      "reference_calls": 16789,
+      "reference_correct": 34,
+      "reference_time_s": 2558.2580285405274,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.9019836454602989,
+      "speedup_summed": 0.8851487021105054,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.0271931068429487,
+          "call_factor": 1.163047225094795,
+          "candidate_calls": 3374,
+          "candidate_correct": 7,
+          "candidate_time_s": 525.1754622119479,
+          "geometric_time_ratio": 1.0977253419413247,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 7,
+            "candidate_only": 0,
+            "neither": 2,
+            "reference_only": 3
+          },
+          "quality_diff_mean_per_question": -0.25,
+          "reference_calls": 2901,
+          "reference_correct": 10,
+          "reference_time_s": 439.59726379509084,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.9109746871940684,
+          "speedup_summed": 0.8370483684511524,
+          "summed_time_ratio": 1.1946740925501929,
+          "timing_complete": true
+        },
+        "reserved": {
+          "amortized_time_per_call_factor": 1.0225542223698472,
+          "call_factor": 1.091661866359447,
+          "candidate_calls": 15161,
+          "candidate_correct": 23,
+          "candidate_time_s": 2365.025949642062,
+          "geometric_time_ratio": 1.1114201046336687,
+          "missing_timings": [],
+          "n_questions": 24,
+          "outcomes": 48,
+          "paired_disagreements": {
+            "both": 17,
+            "candidate_only": 6,
+            "neither": 18,
+            "reference_only": 7
+          },
+          "quality_diff_mean_per_question": -0.020833333333333332,
+          "reference_calls": 13888,
+          "reference_correct": 24,
+          "reference_time_s": 2118.6607647454366,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.8997497848301085,
+          "speedup_summed": 0.8958298174555285,
+          "summed_time_ratio": 1.1162834508460004,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.129753675981955,
+      "timing_complete": true
+    },
+    "G1/D_native": {
+      "amortized_time_per_call_factor": 1.045645619252978,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.9573845261227191,
+          1.1537623866311817
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.16666666666666666,
+          0.1
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.9721050979278866,
+          1.1309028327365171
+        ]
+      },
+      "call_factor": 1.0018377385006216,
+      "candidate_calls": 18535,
+      "candidate_correct": 30,
+      "candidate_time_s": 2890.20141185401,
+      "geometric_time_ratio": 1.0517852764193756,
+      "leave_one_question_out": {
+        "aime26/1": {
+          "geometric_time_ratio": 1.0525514200533008,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.047675271565546
+        },
+        "aime26/10": {
+          "geometric_time_ratio": 1.051179233302976,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.046172693818131
+        },
+        "aime26/11": {
+          "geometric_time_ratio": 1.0586098897913592,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.056985170734516
+        },
+        "aime26/12": {
+          "geometric_time_ratio": 1.078202403626856,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0687161782633976
+        },
+        "aime26/13": {
+          "geometric_time_ratio": 1.0455623015108098,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0436590323855586
+        },
+        "aime26/14": {
+          "geometric_time_ratio": 1.0522333576975658,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0479094126727875
+        },
+        "aime26/15": {
+          "geometric_time_ratio": 1.0569413204246645,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0571393042019204
+        },
+        "aime26/16": {
+          "geometric_time_ratio": 1.0462323711371793,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0461457469927469
+        },
+        "aime26/17": {
+          "geometric_time_ratio": 1.0561136830009796,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0548226075890264
+        },
+        "aime26/18": {
+          "geometric_time_ratio": 1.0566087624132596,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.053645594080487
+        },
+        "aime26/19": {
+          "geometric_time_ratio": 1.0402222440863071,
+          "quality_diff_mean_per_question": -0.017241379310344827,
+          "summed_time_ratio": 1.0394112718385695
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.055018856724807,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0490151016944815
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 1.0462637268390416,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0441193673662954
+        },
+        "aime26/21": {
+          "geometric_time_ratio": 1.0593080340735461,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0503251301247731
+        },
+        "aime26/22": {
+          "geometric_time_ratio": 1.0461764800308948,
+          "quality_diff_mean_per_question": -0.017241379310344827,
+          "summed_time_ratio": 1.0411492178008348
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.0621934175551435,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.0580921671260306
+        },
+        "aime26/24": {
+          "geometric_time_ratio": 1.0560094429900764,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0499334954721262
+        },
+        "aime26/25": {
+          "geometric_time_ratio": 1.0586471318162687,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.056459342648303
+        },
+        "aime26/26": {
+          "geometric_time_ratio": 1.0439338623404188,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.0360964754397155
+        },
+        "aime26/27": {
+          "geometric_time_ratio": 1.0474675020265352,
+          "quality_diff_mean_per_question": -0.017241379310344827,
+          "summed_time_ratio": 1.0429702016986138
+        },
+        "aime26/28": {
+          "geometric_time_ratio": 1.052677575355183,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0489044420553952
+        },
+        "aime26/29": {
+          "geometric_time_ratio": 1.0528635527930073,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.048658510055705
+        },
+        "aime26/3": {
+          "geometric_time_ratio": 1.0519131520831924,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0474539173379898
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.0488244888253144,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.042604400437469
+        },
+        "aime26/4": {
+          "geometric_time_ratio": 1.0356368945720655,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.0389388446641228
+        },
+        "aime26/5": {
+          "geometric_time_ratio": 1.04256865085683,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0381252492509006
+        },
+        "aime26/6": {
+          "geometric_time_ratio": 1.070843478502865,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0522200343035486
+        },
+        "aime26/7": {
+          "geometric_time_ratio": 1.030819005909319,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.036350042757549
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.0569891784648842,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0495583944962261
+        },
+        "aime26/9": {
+          "geometric_time_ratio": 1.042217028970321,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.0353274377441073
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 30,
+      "outcomes": 60,
+      "paired_disagreements": {
+        "both": 24,
+        "candidate_only": 6,
+        "neither": 22,
+        "reference_only": 8
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.0475823796089776,
+          "call_factor": 1.0310986764231143,
+          "candidate_calls": 9582,
+          "candidate_correct": 14,
+          "candidate_time_s": 1493.7474348722026,
+          "geometric_time_ratio": 1.1189990167885222,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 12,
+            "candidate_only": 2,
+            "neither": 12,
+            "reference_only": 4
+          },
+          "quality_diff_mean_per_question": -0.06666666666666667,
+          "reference_calls": 9293,
+          "reference_correct": 16,
+          "reference_time_s": 1382.8935727681965,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 0.8936558343634259,
+          "speedup_summed": 0.9257880820304202,
+          "summed_time_ratio": 1.0801608050589933,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.043716044237485,
+          "call_factor": 0.9723066898349262,
+          "candidate_calls": 8953,
+          "candidate_correct": 16,
+          "candidate_time_s": 1396.4539769818075,
+          "geometric_time_ratio": 0.9886087933012464,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 12,
+            "candidate_only": 4,
+            "neither": 10,
+            "reference_only": 4
+          },
+          "quality_diff_mean_per_question": 0,
+          "reference_calls": 9208,
+          "reference_correct": 16,
+          "reference_time_s": 1376.071479491191,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 1.01152246143868,
+          "speedup_summed": 0.9854041036607094,
+          "summed_time_ratio": 1.0148120921001524,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": -0.03333333333333333,
+      "reference_calls": 18501,
+      "reference_correct": 32,
+      "reference_time_s": 2758.9650522593874,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.9507644026015749,
+      "speedup_summed": 0.9545926595093464,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.0598366662884031,
+          "call_factor": 0.9601593625498008,
+          "candidate_calls": 3374,
+          "candidate_correct": 7,
+          "candidate_time_s": 525.1754622119479,
+          "geometric_time_ratio": 1.0012108978630605,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 6,
+            "candidate_only": 1,
+            "neither": 5,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.08333333333333333,
+          "reference_calls": 3514,
+          "reference_correct": 6,
+          "reference_time_s": 516.0861032316461,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.998790566637214,
+          "speedup_summed": 0.9826927196064741,
+          "summed_time_ratio": 1.017612097910379,
+          "timing_complete": true
+        },
+        "reserved": {
+          "amortized_time_per_call_factor": 1.0423580747176964,
+          "call_factor": 1.01161006205378,
+          "candidate_calls": 15161,
+          "candidate_correct": 23,
+          "candidate_time_s": 2365.025949642062,
+          "geometric_time_ratio": 1.064823106506844,
+          "missing_timings": [],
+          "n_questions": 24,
+          "outcomes": 48,
+          "paired_disagreements": {
+            "both": 18,
+            "candidate_only": 5,
+            "neither": 17,
+            "reference_only": 8
+          },
+          "quality_diff_mean_per_question": -0.0625,
+          "reference_calls": 14987,
+          "reference_correct": 26,
+          "reference_time_s": 2242.8789490277413,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.9391231218493216,
+          "speedup_summed": 0.9483527863054495,
+          "summed_time_ratio": 1.0544599166474276,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.0475672424654854,
+      "timing_complete": true
+    },
+    "G1/G3": {
+      "amortized_time_per_call_factor": 1.0178560431663553,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.8981027799806173,
+          1.0396553089253069
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.2,
+          0.06666666666666667
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.9123709800989619,
+          1.0480325510919735
+        ]
+      },
+      "call_factor": 0.9602134383256489,
+      "candidate_calls": 18535,
+      "candidate_correct": 30,
+      "candidate_time_s": 2890.20141185401,
+      "geometric_time_ratio": 0.9640579620434887,
+      "leave_one_question_out": {
+        "aime26/1": {
+          "geometric_time_ratio": 0.9684404982594649,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9784490638033363
+        },
+        "aime26/10": {
+          "geometric_time_ratio": 0.9692336678153214,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9873998998310859
+        },
+        "aime26/11": {
+          "geometric_time_ratio": 0.9643924186016823,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 0.9782051266216286
+        },
+        "aime26/12": {
+          "geometric_time_ratio": 0.9747637757107592,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 0.9838366032279444
+        },
+        "aime26/13": {
+          "geometric_time_ratio": 0.9590323767273676,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 0.9719023085646856
+        },
+        "aime26/14": {
+          "geometric_time_ratio": 0.9644630491820745,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9784582616480663
+        },
+        "aime26/15": {
+          "geometric_time_ratio": 0.960222510857706,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9716427902261894
+        },
+        "aime26/16": {
+          "geometric_time_ratio": 0.9664656725599352,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9777404952577671
+        },
+        "aime26/17": {
+          "geometric_time_ratio": 0.9651352589823646,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9798956874176582
+        },
+        "aime26/18": {
+          "geometric_time_ratio": 0.969426421030325,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 0.9854175897313532
+        },
+        "aime26/19": {
+          "geometric_time_ratio": 0.9592915717822782,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 0.971171602464224
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 0.961400917264432,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9764125119189266
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 0.9666814939314952,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9790908416814036
+        },
+        "aime26/21": {
+          "geometric_time_ratio": 0.9680161164469686,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9785383537481527
+        },
+        "aime26/22": {
+          "geometric_time_ratio": 0.9547521280928,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 0.9681143580366163
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 0.9736562829732252,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9881776224324333
+        },
+        "aime26/24": {
+          "geometric_time_ratio": 0.9644175962380743,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 0.9768341292225765
+        },
+        "aime26/25": {
+          "geometric_time_ratio": 0.9787050700909802,
+          "quality_diff_mean_per_question": -0.10344827586206896,
+          "summed_time_ratio": 0.9970750798805403
+        },
+        "aime26/26": {
+          "geometric_time_ratio": 0.9563734383279354,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 0.966945143317048
+        },
+        "aime26/27": {
+          "geometric_time_ratio": 0.9590008394645614,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 0.9715074682614543
+        },
+        "aime26/28": {
+          "geometric_time_ratio": 0.9614443308260928,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9732337681344154
+        },
+        "aime26/29": {
+          "geometric_time_ratio": 0.9600534559450884,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9711514893578818
+        },
+        "aime26/3": {
+          "geometric_time_ratio": 0.9643445231782208,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9777362772984783
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 0.9649760104428894,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.979696145930757
+        },
+        "aime26/4": {
+          "geometric_time_ratio": 0.9547801506099887,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 0.9721085327382344
+        },
+        "aime26/5": {
+          "geometric_time_ratio": 0.9437253686317439,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9648894036385911
+        },
+        "aime26/6": {
+          "geometric_time_ratio": 0.9736260905202151,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9797789984095813
+        },
+        "aime26/7": {
+          "geometric_time_ratio": 0.9683502028594396,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 0.9819641691562199
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 0.9637993499300039,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9773639574432801
+        },
+        "aime26/9": {
+          "geometric_time_ratio": 0.9634963110738614,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 0.9770520971168895
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 30,
+      "outcomes": 60,
+      "paired_disagreements": {
+        "both": 25,
+        "candidate_only": 5,
+        "neither": 21,
+        "reference_only": 9
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.0178378117385865,
+          "call_factor": 1.0047184649260774,
+          "candidate_calls": 9582,
+          "candidate_correct": 14,
+          "candidate_time_s": 1493.7474348722026,
+          "geometric_time_ratio": 1.0430505662173426,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 12,
+            "candidate_only": 2,
+            "neither": 12,
+            "reference_only": 4
+          },
+          "quality_diff_mean_per_question": -0.06666666666666667,
+          "reference_calls": 9537,
+          "reference_correct": 16,
+          "reference_time_s": 1460.6770580960438,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 0.9587262903528571,
+          "speedup_summed": 0.9778607976126914,
+          "summed_time_ratio": 1.0226404437537104,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.017898977784091,
+          "call_factor": 0.9167519967233259,
+          "candidate_calls": 8953,
+          "candidate_correct": 16,
+          "candidate_time_s": 1396.4539769818075,
+          "geometric_time_ratio": 0.8910476483896391,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 13,
+            "candidate_only": 3,
+            "neither": 9,
+            "reference_only": 5
+          },
+          "quality_diff_mean_per_question": -0.06666666666666667,
+          "reference_calls": 9766,
+          "reference_correct": 18,
+          "reference_time_s": 1496.4771311508957,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 1.122274439315638,
+          "speedup_summed": 1.0716265310692665,
+          "summed_time_ratio": 0.9331609203461977,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": -0.06666666666666667,
+      "reference_calls": 19303,
+      "reference_correct": 34,
+      "reference_time_s": 2957.1541892469395,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 1.0372820300973666,
+      "speedup_summed": 1.0231654365395872,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.022970980854185,
+          "call_factor": 0.8841719077568134,
+          "candidate_calls": 3374,
+          "candidate_correct": 7,
+          "candidate_time_s": 525.1754622119479,
+          "geometric_time_ratio": 0.9142810055064419,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 7,
+            "candidate_only": 0,
+            "neither": 5,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.0,
+          "reference_calls": 3816,
+          "reference_correct": 7,
+          "reference_time_s": 580.6365896984935,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 1.093755633090153,
+          "speedup_summed": 1.1056049482071248,
+          "summed_time_ratio": 0.9044822037217034,
+          "timing_complete": true
+        },
+        "reserved": {
+          "amortized_time_per_call_factor": 1.0165630642877312,
+          "call_factor": 0.9789500871698844,
+          "candidate_calls": 15161,
+          "candidate_correct": 23,
+          "candidate_time_s": 2365.025949642062,
+          "geometric_time_ratio": 0.9769200159905471,
+          "missing_timings": [],
+          "n_questions": 24,
+          "outcomes": 48,
+          "paired_disagreements": {
+            "both": 18,
+            "candidate_only": 5,
+            "neither": 16,
+            "reference_only": 9
+          },
+          "quality_diff_mean_per_question": -0.08333333333333333,
+          "reference_calls": 15487,
+          "reference_correct": 27,
+          "reference_time_s": 2376.517599548446,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 1.0236252545056628,
+          "speedup_summed": 1.0048589952715417,
+          "summed_time_ratio": 0.9951645003981593,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 0.977359050929306,
+      "timing_complete": true
+    },
+    "G1/T_G": {
+      "amortized_time_per_call_factor": 1.0205420768939082,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          1.0168288044733484,
+          1.2263997323611566
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.16666666666666666,
+          0.03333333333333333
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          1.01873123446165,
+          1.1911573554574553
+        ]
+      },
+      "call_factor": 1.0795620012813791,
+      "candidate_calls": 18535,
+      "candidate_correct": 30,
+      "candidate_time_s": 2890.20141185401,
+      "geometric_time_ratio": 1.1180593413168687,
+      "leave_one_question_out": {
+        "aime26/1": {
+          "geometric_time_ratio": 1.1211039472955369,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1022040149396946
+        },
+        "aime26/10": {
+          "geometric_time_ratio": 1.1168958699101346,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.0985668867195937
+        },
+        "aime26/11": {
+          "geometric_time_ratio": 1.123184597678435,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 1.1077883251188398
+        },
+        "aime26/12": {
+          "geometric_time_ratio": 1.137110777252626,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.1130645581973007
+        },
+        "aime26/13": {
+          "geometric_time_ratio": 1.1188963527407016,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.1021333800885722
+        },
+        "aime26/14": {
+          "geometric_time_ratio": 1.1180584545257743,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1010418528653176
+        },
+        "aime26/15": {
+          "geometric_time_ratio": 1.1249923430107736,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.113823334853099
+        },
+        "aime26/16": {
+          "geometric_time_ratio": 1.1090273856601396,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.099744055403824
+        },
+        "aime26/17": {
+          "geometric_time_ratio": 1.1186783903803732,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1018415273162225
+        },
+        "aime26/18": {
+          "geometric_time_ratio": 1.1283828027552656,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1158195176052492
+        },
+        "aime26/19": {
+          "geometric_time_ratio": 1.106018433929155,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.0911432887751504
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.103978860474755,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.096426480695099
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 1.1217156124939514,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1028637243008064
+        },
+        "aime26/21": {
+          "geometric_time_ratio": 1.1444215981055152,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 1.1214645488502235
+        },
+        "aime26/22": {
+          "geometric_time_ratio": 1.117700497905873,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1022314169301972
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.1062524325443064,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.0883183733472526
+        },
+        "aime26/24": {
+          "geometric_time_ratio": 1.109243253335894,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.0941574675867622
+        },
+        "aime26/25": {
+          "geometric_time_ratio": 1.1311486478972872,
+          "quality_diff_mean_per_question": -0.08620689655172414,
+          "summed_time_ratio": 1.1189608921320826
+        },
+        "aime26/26": {
+          "geometric_time_ratio": 1.1179330147638458,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1003492317934362
+        },
+        "aime26/27": {
+          "geometric_time_ratio": 1.1123429569836714,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.0948545020692395
+        },
+        "aime26/28": {
+          "geometric_time_ratio": 1.1191281804632194,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.102513464074386
+        },
+        "aime26/29": {
+          "geometric_time_ratio": 1.117440130122086,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.0992342797030688
+        },
+        "aime26/3": {
+          "geometric_time_ratio": 1.1194359965355345,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1021603172529293
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.1178995056080792,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1005506131262908
+        },
+        "aime26/4": {
+          "geometric_time_ratio": 1.1149500309356084,
+          "quality_diff_mean_per_question": -0.05172413793103448,
+          "summed_time_ratio": 1.100488718395223
+        },
+        "aime26/5": {
+          "geometric_time_ratio": 1.0960485954417938,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.087830558890395
+        },
+        "aime26/6": {
+          "geometric_time_ratio": 1.1314263247870042,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.1050892463064206
+        },
+        "aime26/7": {
+          "geometric_time_ratio": 1.106252813972707,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.0932948952388963
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.121221689796795,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.102991247445593
+        },
+        "aime26/9": {
+          "geometric_time_ratio": 1.1122160455934653,
+          "quality_diff_mean_per_question": -0.06896551724137931,
+          "summed_time_ratio": 1.093004819392685
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 30,
+      "outcomes": 60,
+      "paired_disagreements": {
+        "both": 27,
+        "candidate_only": 3,
+        "neither": 23,
+        "reference_only": 7
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.0217042144701383,
+          "call_factor": 1.1274267560889517,
+          "candidate_calls": 9582,
+          "candidate_correct": 14,
+          "candidate_time_s": 1493.7474348722026,
+          "geometric_time_ratio": 1.212654344444739,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 13,
+            "candidate_only": 1,
+            "neither": 12,
+            "reference_only": 4
+          },
+          "quality_diff_mean_per_question": -0.1,
+          "reference_calls": 8499,
+          "reference_correct": 17,
+          "reference_time_s": 1296.772076963447,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 0.8246372963417609,
+          "speedup_summed": 0.868133425162596,
+          "summed_time_ratio": 1.1518966682024785,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.019430192327759,
+          "call_factor": 1.032641291810842,
+          "candidate_calls": 8953,
+          "candidate_correct": 16,
+          "candidate_time_s": 1396.4539769818075,
+          "geometric_time_ratio": 1.0308433696976507,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 14,
+            "candidate_only": 2,
+            "neither": 11,
+            "reference_only": 3
+          },
+          "quality_diff_mean_per_question": -0.03333333333333333,
+          "reference_calls": 8670,
+          "reference_correct": 17,
+          "reference_time_s": 1326.53785646474,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.9700794799633846,
+          "speedup_summed": 0.9499331007899171,
+          "summed_time_ratio": 1.0527057107163122,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": -0.06666666666666667,
+      "reference_calls": 17169,
+      "reference_correct": 34,
+      "reference_time_s": 2623.309933428187,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.8944069094062428,
+      "speedup_summed": 0.9076564431353532,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.0298256854435903,
+          "call_factor": 1.173973556019485,
+          "candidate_calls": 3374,
+          "candidate_correct": 7,
+          "candidate_time_s": 525.1754622119479,
+          "geometric_time_ratio": 1.2158288054743152,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 7,
+            "candidate_only": 0,
+            "neither": 4,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": -0.08333333333333333,
+          "reference_calls": 2874,
+          "reference_correct": 8,
+          "reference_time_s": 434.3925739603583,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.8224842144695554,
+          "speedup_summed": 0.8271379857139024,
+          "summed_time_ratio": 1.2089881220204153,
+          "timing_complete": true
+        },
+        "reserved": {
+          "amortized_time_per_call_factor": 1.0187388225028784,
+          "call_factor": 1.060580622595313,
+          "candidate_calls": 15161,
+          "candidate_correct": 23,
+          "candidate_time_s": 2365.025949642062,
+          "geometric_time_ratio": 1.094871020810181,
+          "missing_timings": [],
+          "n_questions": 24,
+          "outcomes": 48,
+          "paired_disagreements": {
+            "both": 20,
+            "candidate_only": 3,
+            "neither": 19,
+            "reference_only": 6
+          },
+          "quality_diff_mean_per_question": -0.0625,
+          "reference_calls": 14295,
+          "reference_correct": 26,
+          "reference_time_s": 2188.9173594678286,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.9133495918633607,
+          "speedup_summed": 0.925536296884655,
+          "summed_time_ratio": 1.0804546546321188,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.1017384469234426,
+      "timing_complete": true
+    },
+    "G3/B8_G": {
+      "amortized_time_per_call_factor": 1.0053786129359872,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          1.0390887495390153,
+          1.2828732667817764
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.11666666666666667,
+          0.11666666666666667
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          1.0553703973596396,
+          1.2773093450040738
+        ]
+      },
+      "call_factor": 1.149740901780928,
+      "candidate_calls": 19303,
+      "candidate_correct": 34,
+      "candidate_time_s": 2957.1541892469395,
+      "geometric_time_ratio": 1.1500009288616562,
+      "leave_one_question_out": {
+        "aime26/1": {
+          "geometric_time_ratio": 1.1461762592979758,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1550438468820667
+        },
+        "aime26/10": {
+          "geometric_time_ratio": 1.14283863500818,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1431893464648184
+        },
+        "aime26/11": {
+          "geometric_time_ratio": 1.1539449586905421,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1618898492425593
+        },
+        "aime26/12": {
+          "geometric_time_ratio": 1.1480092467804477,
+          "quality_diff_mean_per_question": -0.017241379310344827,
+          "summed_time_ratio": 1.1551155916281415
+        },
+        "aime26/13": {
+          "geometric_time_ratio": 1.1502823267944644,
+          "quality_diff_mean_per_question": -0.034482758620689655,
+          "summed_time_ratio": 1.1582013284962431
+        },
+        "aime26/14": {
+          "geometric_time_ratio": 1.1433378849576135,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.1476334642349941
+        },
+        "aime26/15": {
+          "geometric_time_ratio": 1.1598682065043362,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1743297456230375
+        },
+        "aime26/16": {
+          "geometric_time_ratio": 1.1605468240153576,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1589640620746822
+        },
+        "aime26/17": {
+          "geometric_time_ratio": 1.1502021105110913,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1566440884032516
+        },
+        "aime26/18": {
+          "geometric_time_ratio": 1.1504594258076326,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1570415586408567
+        },
+        "aime26/19": {
+          "geometric_time_ratio": 1.162599200689866,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1650242871061454
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.1589299804393705,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1601929211805238
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 1.1503631532776617,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1550022955018344
+        },
+        "aime26/21": {
+          "geometric_time_ratio": 1.1247249728621431,
+          "quality_diff_mean_per_question": -0.017241379310344827,
+          "summed_time_ratio": 1.1453841990900617
+        },
+        "aime26/22": {
+          "geometric_time_ratio": 1.1669349965743412,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1742482213401388
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.125207379237247,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 1.128480235688312
+        },
+        "aime26/24": {
+          "geometric_time_ratio": 1.1425982273164454,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1504978283838734
+        },
+        "aime26/25": {
+          "geometric_time_ratio": 1.124250999673482,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 1.1323331869543916
+        },
+        "aime26/26": {
+          "geometric_time_ratio": 1.1539799365839805,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.161243179136794
+        },
+        "aime26/27": {
+          "geometric_time_ratio": 1.1562897608236093,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1642482759895771
+        },
+        "aime26/28": {
+          "geometric_time_ratio": 1.1543515836403553,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1646781992519684
+        },
+        "aime26/29": {
+          "geometric_time_ratio": 1.1574091375378386,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1687782845696162
+        },
+        "aime26/3": {
+          "geometric_time_ratio": 1.1410387414950756,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1531813420730816
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.1470764971236957,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1512943356667908
+        },
+        "aime26/4": {
+          "geometric_time_ratio": 1.1635056976573,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1642094420490867
+        },
+        "aime26/5": {
+          "geometric_time_ratio": 1.1595897420091132,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1588401955075243
+        },
+        "aime26/6": {
+          "geometric_time_ratio": 1.1641932456077304,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1601912226076692
+        },
+        "aime26/7": {
+          "geometric_time_ratio": 1.1339088131403898,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1424050347916768
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.1652663470462483,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1635235617358077
+        },
+        "aime26/9": {
+          "geometric_time_ratio": 1.1439170139435961,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1476330414664822
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 30,
+      "outcomes": 60,
+      "paired_disagreements": {
+        "both": 30,
+        "candidate_only": 4,
+        "neither": 22,
+        "reference_only": 4
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.0065454498433712,
+          "call_factor": 1.135492320514347,
+          "candidate_calls": 9537,
+          "candidate_correct": 16,
+          "candidate_time_s": 1460.6770580960438,
+          "geometric_time_ratio": 1.126128909936883,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 14,
+            "candidate_only": 2,
+            "neither": 11,
+            "reference_only": 3
+          },
+          "quality_diff_mean_per_question": -0.03333333333333333,
+          "reference_calls": 8399,
+          "reference_correct": 17,
+          "reference_time_s": 1278.0169589612633,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 0.887997804848157,
+          "speedup_summed": 0.8749483343204737,
+          "summed_time_ratio": 1.142924628545807,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.0042077535096092,
+          "call_factor": 1.164004767580453,
+          "candidate_calls": 9766,
+          "candidate_correct": 18,
+          "candidate_time_s": 1496.4771311508957,
+          "geometric_time_ratio": 1.1743789940148108,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 16,
+            "candidate_only": 2,
+            "neither": 11,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": 0.03333333333333333,
+          "reference_calls": 8390,
+          "reference_correct": 17,
+          "reference_time_s": 1280.2410695792641,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.8515138682626917,
+          "speedup_summed": 0.8555032635845689,
+          "summed_time_ratio": 1.1689026127264415,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": 0.0,
+      "reference_calls": 16789,
+      "reference_correct": 34,
+      "reference_time_s": 2558.2580285405274,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.8695645150390126,
+      "speedup_summed": 0.8651080954260306,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.0041273174584469,
+          "call_factor": 1.3154084798345398,
+          "candidate_calls": 3816,
+          "candidate_correct": 7,
+          "candidate_time_s": 580.6365896984935,
+          "geometric_time_ratio": 1.2006432763341381,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 7,
+            "candidate_only": 0,
+            "neither": 2,
+            "reference_only": 3
+          },
+          "quality_diff_mean_per_question": -0.25,
+          "reference_calls": 2901,
+          "reference_correct": 10,
+          "reference_time_s": 439.59726379509084,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.8328868529987092,
+          "speedup_summed": 0.7570953529183547,
+          "summed_time_ratio": 1.3208375882183498,
+          "timing_complete": true
+        },
+        "reserved": {
+          "amortized_time_per_call_factor": 1.0058935429513305,
+          "call_factor": 1.1151353686635945,
+          "candidate_calls": 15487,
+          "candidate_correct": 27,
+          "candidate_time_s": 2376.517599548446,
+          "geometric_time_ratio": 1.1376776874683494,
+          "missing_timings": [],
+          "n_questions": 24,
+          "outcomes": 48,
+          "paired_disagreements": {
+            "both": 23,
+            "candidate_only": 4,
+            "neither": 20,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": 0.0625,
+          "reference_calls": 13888,
+          "reference_correct": 24,
+          "reference_time_s": 2118.6607647454366,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.878983574183721,
+          "speedup_summed": 0.8914980327299052,
+          "summed_time_ratio": 1.1217074668553613,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.1559249130682803,
+      "timing_complete": true
+    },
+    "G3/D_native": {
+      "amortized_time_per_call_factor": 1.0273020691611503,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          1.0109163799739969,
+          1.184030294244073
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.05,
+          0.11666666666666667
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          1.0011449247234638,
+          1.1518551499636092
+        ]
+      },
+      "call_factor": 1.043349008161721,
+      "candidate_calls": 19303,
+      "candidate_correct": 34,
+      "candidate_time_s": 2957.1541892469395,
+      "geometric_time_ratio": 1.0909979667508096,
+      "leave_one_question_out": {
+        "aime26/1": {
+          "geometric_time_ratio": 1.0868519252809075,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0707509571250649
+        },
+        "aime26/10": {
+          "geometric_time_ratio": 1.0845467591652713,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.059522787066415
+        },
+        "aime26/11": {
+          "geometric_time_ratio": 1.0976961964573375,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0805353007962304
+        },
+        "aime26/12": {
+          "geometric_time_ratio": 1.1061166104994757,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 1.0862740568474127
+        },
+        "aime26/13": {
+          "geometric_time_ratio": 1.090226281075848,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 1.0738312103886696
+        },
+        "aime26/14": {
+          "geometric_time_ratio": 1.091004324727553,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0709801876553642
+        },
+        "aime26/15": {
+          "geometric_time_ratio": 1.1007254136133153,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0879917134524595
+        },
+        "aime26/16": {
+          "geometric_time_ratio": 1.082534435357607,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0699625842099807
+        },
+        "aime26/17": {
+          "geometric_time_ratio": 1.0942649469821901,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0764641799463621
+        },
+        "aime26/18": {
+          "geometric_time_ratio": 1.089931880843804,
+          "quality_diff_mean_per_question": 0.05172413793103448,
+          "summed_time_ratio": 1.0692376562587382
+        },
+        "aime26/19": {
+          "geometric_time_ratio": 1.084365040499279,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0702653055352895
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.0973765863743459,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0743564721767753
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 1.0823251850864397,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0664172545759059
+        },
+        "aime26/21": {
+          "geometric_time_ratio": 1.094308262099662,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0733612291246952
+        },
+        "aime26/22": {
+          "geometric_time_ratio": 1.0957571596312887,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0754403228894744
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.0909326382730824,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 1.0707509896059981
+        },
+        "aime26/24": {
+          "geometric_time_ratio": 1.094971148503798,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 1.07483293638371
+        },
+        "aime26/25": {
+          "geometric_time_ratio": 1.0816814627494034,
+          "quality_diff_mean_per_question": 0.05172413793103448,
+          "summed_time_ratio": 1.0595584665247852
+        },
+        "aime26/26": {
+          "geometric_time_ratio": 1.0915546380769092,
+          "quality_diff_mean_per_question": 0.05172413793103448,
+          "summed_time_ratio": 1.0715152587513372
+        },
+        "aime26/27": {
+          "geometric_time_ratio": 1.0922487853205294,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0735586043049619
+        },
+        "aime26/28": {
+          "geometric_time_ratio": 1.0948918638385443,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0777517965350014
+        },
+        "aime26/29": {
+          "geometric_time_ratio": 1.096671801213981,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0798094031128658
+        },
+        "aime26/3": {
+          "geometric_time_ratio": 1.090806373448743,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0713051583113433
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.0868917750027192,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.064212005699937
+        },
+        "aime26/4": {
+          "geometric_time_ratio": 1.084686243121434,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.068747788621545
+        },
+        "aime26/5": {
+          "geometric_time_ratio": 1.1047373372704747,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0759007667989073
+        },
+        "aime26/6": {
+          "geometric_time_ratio": 1.0998508451336857,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0739360978461028
+        },
+        "aime26/7": {
+          "geometric_time_ratio": 1.0645105488338984,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 1.0553847842004884
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.096690071996467,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0738664818803039
+        },
+        "aime26/9": {
+          "geometric_time_ratio": 1.0817031855666595,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 1.0596440464118322
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 30,
+      "outcomes": 60,
+      "paired_disagreements": {
+        "both": 29,
+        "candidate_only": 5,
+        "neither": 23,
+        "reference_only": 3
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.029223288354344,
+          "call_factor": 1.0262563219627676,
+          "candidate_calls": 9537,
+          "candidate_correct": 16,
+          "candidate_time_s": 1460.6770580960438,
+          "geometric_time_ratio": 1.0728137762741543,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 14,
+            "candidate_only": 2,
+            "neither": 12,
+            "reference_only": 2
+          },
+          "quality_diff_mean_per_question": 0,
+          "reference_calls": 9293,
+          "reference_correct": 16,
+          "reference_time_s": 1382.8935727681965,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 0.9321282240362031,
+          "speedup_summed": 0.9467483350294855,
+          "summed_time_ratio": 1.056246906384954,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.025363093014983,
+          "call_factor": 1.0605994787141615,
+          "candidate_calls": 9766,
+          "candidate_correct": 18,
+          "candidate_time_s": 1496.4771311508957,
+          "geometric_time_ratio": 1.1094903792046658,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 15,
+            "candidate_only": 3,
+            "neither": 11,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": 0.06666666666666667,
+          "reference_calls": 9208,
+          "reference_correct": 16,
+          "reference_time_s": 1376.071479491191,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.9013147105582353,
+          "speedup_summed": 0.9195406002849476,
+          "summed_time_ratio": 1.0874995619444314,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": 0.03333333333333333,
+      "reference_calls": 18501,
+      "reference_correct": 32,
+      "reference_time_s": 2758.9650522593874,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.9165919923555695,
+      "speedup_summed": 0.9329797757221371,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.0360378604322042,
+          "call_factor": 1.0859419464997153,
+          "candidate_calls": 3816,
+          "candidate_correct": 7,
+          "candidate_time_s": 580.6365896984935,
+          "geometric_time_ratio": 1.0950800594489722,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 6,
+            "candidate_only": 1,
+            "neither": 5,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.08333333333333333,
+          "reference_calls": 3514,
+          "reference_correct": 6,
+          "reference_time_s": 516.0861032316461,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.9131752435554209,
+          "speedup_summed": 0.8888280766109377,
+          "summed_time_ratio": 1.1250769708051482,
+          "timing_complete": true
+        },
+        "reserved": {
+          "amortized_time_per_call_factor": 1.0253747271921971,
+          "call_factor": 1.033362247280977,
+          "candidate_calls": 15487,
+          "candidate_correct": 27,
+          "candidate_time_s": 2376.517599548446,
+          "geometric_time_ratio": 1.0899798234015787,
+          "missing_timings": [],
+          "n_questions": 24,
+          "outcomes": 48,
+          "paired_disagreements": {
+            "both": 23,
+            "candidate_only": 4,
+            "neither": 18,
+            "reference_only": 3
+          },
+          "quality_diff_mean_per_question": 0.020833333333333332,
+          "reference_calls": 14987,
+          "reference_correct": 26,
+          "reference_time_s": 2242.8789490277413,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.9174481752141318,
+          "speedup_summed": 0.943767026784865,
+          "summed_time_ratio": 1.0595835323964475,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.0718345949417698,
+      "timing_complete": true
+    },
+    "G3/T_G": {
+      "amortized_time_per_call_factor": 1.0026389131799003,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          1.0705818465225676,
+          1.2591747620822606
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.08333333333333333,
+          0.08333333333333333
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          1.0408247699251059,
+          1.2273213950095274
+        ]
+      },
+      "call_factor": 1.1242937853107344,
+      "candidate_calls": 19303,
+      "candidate_correct": 34,
+      "candidate_time_s": 2957.1541892469395,
+      "geometric_time_ratio": 1.159742863330486,
+      "leave_one_question_out": {
+        "aime26/1": {
+          "geometric_time_ratio": 1.1576384396464698,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1264807292628085
+        },
+        "aime26/10": {
+          "geometric_time_ratio": 1.1523494354335089,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.112585576429089
+        },
+        "aime26/11": {
+          "geometric_time_ratio": 1.1646551507600948,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.132470373514342
+        },
+        "aime26/12": {
+          "geometric_time_ratio": 1.1665500971489118,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.131351033845826
+        },
+        "aime26/13": {
+          "geometric_time_ratio": 1.1666929916994657,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.13399605122475
+        },
+        "aime26/14": {
+          "geometric_time_ratio": 1.1592548366409252,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1252823917197834
+        },
+        "aime26/15": {
+          "geometric_time_ratio": 1.171595469060488,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1463300567421608
+        },
+        "aime26/16": {
+          "geometric_time_ratio": 1.1475083048967405,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1247811262168215
+        },
+        "aime26/17": {
+          "geometric_time_ratio": 1.1590897544867482,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1244477769056531
+        },
+        "aime26/18": {
+          "geometric_time_ratio": 1.1639695166921475,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 1.1323316421715657
+        },
+        "aime26/19": {
+          "geometric_time_ratio": 1.1529533527270248,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.123532943103478
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 1.1483022749926368,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1229131819914013
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 1.160377662690047,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1264161376556707
+        },
+        "aime26/21": {
+          "geometric_time_ratio": 1.1822340337741792,
+          "quality_diff_mean_per_question": -0.017241379310344827,
+          "summed_time_ratio": 1.1460609025232502
+        },
+        "aime26/22": {
+          "geometric_time_ratio": 1.1706708631679894,
+          "quality_diff_mean_per_question": -0.017241379310344827,
+          "summed_time_ratio": 1.1385343144435716
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 1.1361837353590285,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 1.1013388166677154
+        },
+        "aime26/24": {
+          "geometric_time_ratio": 1.1501690322353557,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1201056912882013
+        },
+        "aime26/25": {
+          "geometric_time_ratio": 1.155760486447808,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 1.1222433643273337
+        },
+        "aime26/26": {
+          "geometric_time_ratio": 1.16892938465373,
+          "quality_diff_mean_per_question": -0.017241379310344827,
+          "summed_time_ratio": 1.137964484747039
+        },
+        "aime26/27": {
+          "geometric_time_ratio": 1.1598977927951821,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1269645760196974
+        },
+        "aime26/28": {
+          "geometric_time_ratio": 1.164007259267566,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.132835193529902
+        },
+        "aime26/29": {
+          "geometric_time_ratio": 1.163935323811802,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1318875497270506
+        },
+        "aime26/3": {
+          "geometric_time_ratio": 1.1608257937175541,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1272572603097424
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 1.1584738827807786,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1233591330306973
+        },
+        "aime26/4": {
+          "geometric_time_ratio": 1.1677557710257076,
+          "quality_diff_mean_per_question": -0.017241379310344827,
+          "summed_time_ratio": 1.1320636341863675
+        },
+        "aime26/5": {
+          "geometric_time_ratio": 1.1614063072511178,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1274147635865766
+        },
+        "aime26/6": {
+          "geometric_time_ratio": 1.1620747798392248,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1278964420550432
+        },
+        "aime26/7": {
+          "geometric_time_ratio": 1.1424098541065566,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 1.113375548293519
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 1.1633351795456428,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1285368557389261
+        },
+        "aime26/9": {
+          "geometric_time_ratio": 1.1543542334415882,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 1.1186760896557633
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 30,
+      "outcomes": 60,
+      "paired_disagreements": {
+        "both": 29,
+        "candidate_only": 5,
+        "neither": 21,
+        "reference_only": 5
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.0037986432484243,
+          "call_factor": 1.1221320155312389,
+          "candidate_calls": 9537,
+          "candidate_correct": 16,
+          "candidate_time_s": 1460.6770580960438,
+          "geometric_time_ratio": 1.1626036011297805,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 15,
+            "candidate_only": 1,
+            "neither": 12,
+            "reference_only": 2
+          },
+          "quality_diff_mean_per_question": -0.03333333333333333,
+          "reference_calls": 8499,
+          "reference_correct": 17,
+          "reference_time_s": 1296.772076963447,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 0.8601383988732122,
+          "speedup_summed": 0.8877883511457058,
+          "summed_time_ratio": 1.1263945947358773,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.0015042893028554,
+          "call_factor": 1.12641291810842,
+          "candidate_calls": 9766,
+          "candidate_correct": 18,
+          "candidate_time_s": 1496.4771311508957,
+          "geometric_time_ratio": 1.1568891647496737,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 14,
+            "candidate_only": 4,
+            "neither": 9,
+            "reference_only": 3
+          },
+          "quality_diff_mean_per_question": 0.03333333333333333,
+          "reference_calls": 8670,
+          "reference_correct": 17,
+          "reference_time_s": 1326.53785646474,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 0.864387039372418,
+          "speedup_summed": 0.8864404466004365,
+          "summed_time_ratio": 1.1281073690117285,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": 0.0,
+      "reference_calls": 17169,
+      "reference_correct": 34,
+      "reference_time_s": 2623.309933428187,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 0.8622601023197977,
+      "speedup_summed": 0.8871062398326384,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.0067007810756092,
+          "call_factor": 1.3277661795407099,
+          "candidate_calls": 3816,
+          "candidate_correct": 7,
+          "candidate_time_s": 580.6365896984935,
+          "geometric_time_ratio": 1.329819604860804,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 7,
+            "candidate_only": 0,
+            "neither": 4,
+            "reference_only": 1
+          },
+          "quality_diff_mean_per_question": -0.08333333333333333,
+          "reference_calls": 2874,
+          "reference_correct": 8,
+          "reference_time_s": 434.3925739603583,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.7519816946184011,
+          "speedup_summed": 0.7481315881004413,
+          "summed_time_ratio": 1.3366632500294102,
+          "timing_complete": true
+        },
+        "reserved": {
+          "amortized_time_per_call_factor": 1.002140308153603,
+          "call_factor": 1.0833857992305003,
+          "candidate_calls": 15487,
+          "candidate_correct": 27,
+          "candidate_time_s": 2376.517599548446,
+          "geometric_time_ratio": 1.1207376273276966,
+          "missing_timings": [],
+          "n_questions": 24,
+          "outcomes": 48,
+          "paired_disagreements": {
+            "both": 22,
+            "candidate_only": 5,
+            "neither": 17,
+            "reference_only": 4
+          },
+          "quality_diff_mean_per_question": 0.020833333333333332,
+          "reference_calls": 14295,
+          "reference_correct": 26,
+          "reference_time_s": 2188.9173594678286,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 0.8922694978881139,
+          "speedup_summed": 0.9210608664895802,
+          "summed_time_ratio": 1.0857045786900912,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 1.127260698998871,
+      "timing_complete": true
+    },
+    "T_G/D_native": {
+      "amortized_time_per_call_factor": 1.0245982433526644,
+      "bootstrap": {
+        "geometric_time_ratio_95": [
+          0.8679545406537438,
+          1.0188129991806798
+        ],
+        "note": "question clusters; 95% percentile intervals; not a noninferiority test",
+        "quality_diff_95": [
+          -0.1,
+          0.18333333333333332
+        ],
+        "resamples": 10000,
+        "seed": 13,
+        "summed_time_ratio_95": [
+          0.8846700294863108,
+          1.0189307816017192
+        ]
+      },
+      "call_factor": 0.9280038916815307,
+      "candidate_calls": 17169,
+      "candidate_correct": 34,
+      "candidate_time_s": 2623.309933428187,
+      "geometric_time_ratio": 0.9407240184412443,
+      "leave_one_question_out": {
+        "aime26/1": {
+          "geometric_time_ratio": 0.9388526573226267,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9505275406049651
+        },
+        "aime26/10": {
+          "geometric_time_ratio": 0.9411613576720933,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9523067793733382
+        },
+        "aime26/11": {
+          "geometric_time_ratio": 0.94250748450384,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9541400164342101
+        },
+        "aime26/12": {
+          "geometric_time_ratio": 0.9481946923692882,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 0.9601565069992626
+        },
+        "aime26/13": {
+          "geometric_time_ratio": 0.9344585840768338,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 0.9469444000522748
+        },
+        "aime26/14": {
+          "geometric_time_ratio": 0.9411255318881083,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9517434872668465
+        },
+        "aime26/15": {
+          "geometric_time_ratio": 0.9395097904364516,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9491085983948659
+        },
+        "aime26/16": {
+          "geometric_time_ratio": 0.9433783012620721,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9512629250890601
+        },
+        "aime26/17": {
+          "geometric_time_ratio": 0.9440726593832565,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9573269671168402
+        },
+        "aime26/18": {
+          "geometric_time_ratio": 0.9363921178462226,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9442795877435459
+        },
+        "aime26/19": {
+          "geometric_time_ratio": 0.9405107656215952,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9525891626986479
+        },
+        "aime26/2": {
+          "geometric_time_ratio": 0.9556513213224996,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9567582689442524
+        },
+        "aime26/20": {
+          "geometric_time_ratio": 0.9327352808372216,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9467347092481859
+        },
+        "aime26/21": {
+          "geometric_time_ratio": 0.9256274399461992,
+          "quality_diff_mean_per_question": 0.05172413793103448,
+          "summed_time_ratio": 0.9365656107467814
+        },
+        "aime26/22": {
+          "geometric_time_ratio": 0.9360078858254195,
+          "quality_diff_mean_per_question": 0.05172413793103448,
+          "summed_time_ratio": 0.9445831445274159
+        },
+        "aime26/23": {
+          "geometric_time_ratio": 0.9601727293942939,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 0.9722266875562728
+        },
+        "aime26/24": {
+          "geometric_time_ratio": 0.9520088941846395,
+          "quality_diff_mean_per_question": 0.017241379310344827,
+          "summed_time_ratio": 0.9595817115682855
+        },
+        "aime26/25": {
+          "geometric_time_ratio": 0.9359045195202302,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9441432225886928
+        },
+        "aime26/26": {
+          "geometric_time_ratio": 0.933807167830124,
+          "quality_diff_mean_per_question": 0.06896551724137931,
+          "summed_time_ratio": 0.9416069421441806
+        },
+        "aime26/27": {
+          "geometric_time_ratio": 0.9416767512664813,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9526107804529589
+        },
+        "aime26/28": {
+          "geometric_time_ratio": 0.9406228828224735,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9513756305334572
+        },
+        "aime26/29": {
+          "geometric_time_ratio": 0.9422102575446047,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9539899996013357
+        },
+        "aime26/3": {
+          "geometric_time_ratio": 0.939681371099988,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9503643897729034
+        },
+        "aime26/30": {
+          "geometric_time_ratio": 0.9382099943364842,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9473479801858306
+        },
+        "aime26/4": {
+          "geometric_time_ratio": 0.9288639542913081,
+          "quality_diff_mean_per_question": 0.05172413793103448,
+          "summed_time_ratio": 0.9440704182584855
+        },
+        "aime26/5": {
+          "geometric_time_ratio": 0.9512065935695059,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.954307856831863
+        },
+        "aime26/6": {
+          "geometric_time_ratio": 0.9464544487282067,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9521584232408572
+        },
+        "aime26/7": {
+          "geometric_time_ratio": 0.9318114203999222,
+          "quality_diff_mean_per_question": 0.0,
+          "summed_time_ratio": 0.9479144623016792
+        },
+        "aime26/8": {
+          "geometric_time_ratio": 0.9427120328509235,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9515564125525824
+        },
+        "aime26/9": {
+          "geometric_time_ratio": 0.9370634717054511,
+          "quality_diff_mean_per_question": 0.034482758620689655,
+          "summed_time_ratio": 0.9472304415998591
+        }
+      },
+      "missing_timings": [],
+      "n_questions": 30,
+      "outcomes": 60,
+      "paired_disagreements": {
+        "both": 25,
+        "candidate_only": 9,
+        "neither": 19,
+        "reference_only": 7
+      },
+      "per_seed": {
+        "17": {
+          "amortized_time_per_call_factor": 1.0253284314308717,
+          "call_factor": 0.9145593457441085,
+          "candidate_calls": 8499,
+          "candidate_correct": 17,
+          "candidate_time_s": 1296.772076963447,
+          "geometric_time_ratio": 0.9227683238135755,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 13,
+            "candidate_only": 4,
+            "neither": 10,
+            "reference_only": 3
+          },
+          "quality_diff_mean_per_question": 0.03333333333333333,
+          "reference_calls": 9293,
+          "reference_correct": 16,
+          "reference_time_s": 1382.8935727681965,
+          "seeds": [
+            17
+          ],
+          "speedup_geometric": 1.0836956299791967,
+          "speedup_summed": 1.0664122071524038,
+          "summed_time_ratio": 0.937723699422251,
+          "timing_complete": true
+        },
+        "29": {
+          "amortized_time_per_call_factor": 1.0238229670775905,
+          "call_factor": 0.9415725456125109,
+          "candidate_calls": 8670,
+          "candidate_correct": 17,
+          "candidate_time_s": 1326.53785646474,
+          "geometric_time_ratio": 0.9590291040929024,
+          "missing_timings": [],
+          "n_questions": 30,
+          "outcomes": 30,
+          "paired_disagreements": {
+            "both": 12,
+            "candidate_only": 5,
+            "neither": 9,
+            "reference_only": 4
+          },
+          "quality_diff_mean_per_question": 0.03333333333333333,
+          "reference_calls": 9208,
+          "reference_correct": 16,
+          "reference_time_s": 1376.071479491191,
+          "seeds": [
+            29
+          ],
+          "speedup_geometric": 1.0427212226743108,
+          "speedup_summed": 1.0373405272869178,
+          "summed_time_ratio": 0.9640035973678007,
+          "timing_complete": true
+        }
+      },
+      "quality_diff_mean_per_question": 0.03333333333333333,
+      "reference_calls": 18501,
+      "reference_correct": 32,
+      "reference_time_s": 2758.9650522593874,
+      "seeds": [
+        17,
+        29
+      ],
+      "speedup_geometric": 1.063011021720243,
+      "speedup_summed": 1.051711434132346,
+      "strata": {
+        "development": {
+          "amortized_time_per_call_factor": 1.02914180649115,
+          "call_factor": 0.8178713716562322,
+          "candidate_calls": 2874,
+          "candidate_correct": 8,
+          "candidate_time_s": 434.3925739603583,
+          "geometric_time_ratio": 0.8234801588472577,
+          "missing_timings": [],
+          "n_questions": 6,
+          "outcomes": 12,
+          "paired_disagreements": {
+            "both": 6,
+            "candidate_only": 2,
+            "neither": 4,
+            "reference_only": 0
+          },
+          "quality_diff_mean_per_question": 0.16666666666666666,
+          "reference_calls": 3514,
+          "reference_correct": 6,
+          "reference_time_s": 516.0861032316461,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 1.2143583415535382,
+          "speedup_summed": 1.1880638256001654,
+          "summed_time_ratio": 0.8417056209036895,
+          "timing_complete": true
+        },
+        "reserved": {
+          "amortized_time_per_call_factor": 1.0231847964297556,
+          "call_factor": 0.953826649763128,
+          "candidate_calls": 14295,
+          "candidate_correct": 26,
+          "candidate_time_s": 2188.9173594678286,
+          "geometric_time_ratio": 0.9725557497347019,
+          "missing_timings": [],
+          "n_questions": 24,
+          "outcomes": 48,
+          "paired_disagreements": {
+            "both": 19,
+            "candidate_only": 7,
+            "neither": 15,
+            "reference_only": 7
+          },
+          "quality_diff_mean_per_question": 0.0,
+          "reference_calls": 14987,
+          "reference_correct": 26,
+          "reference_time_s": 2242.8789490277413,
+          "seeds": [
+            17,
+            29
+          ],
+          "speedup_geometric": 1.0282186910856106,
+          "speedup_summed": 1.024652182197062,
+          "summed_time_ratio": 0.975940926467162,
+          "timing_complete": true
+        }
+      },
+      "summed_time_ratio": 0.9508311572413326,
+      "timing_complete": true
+    }
+  },
+  "quality": {
+    "B8_G": {
+      "caps": 20,
+      "combined": 34,
+      "failures": 0,
+      "mean_per_question": 0.5666666666666667,
+      "not_executed": 0,
+      "outcomes": 60,
+      "per_seed": {
+        "17": 17,
+        "29": 17
+      }
+    },
+    "D_native": {
+      "caps": 24,
+      "combined": 32,
+      "failures": 0,
+      "mean_per_question": 0.5333333333333333,
+      "not_executed": 0,
+      "outcomes": 60,
+      "per_seed": {
+        "17": 16,
+        "29": 16
+      }
+    },
+    "G1": {
+      "caps": 26,
+      "combined": 30,
+      "failures": 0,
+      "mean_per_question": 0.5,
+      "not_executed": 0,
+      "outcomes": 60,
+      "per_seed": {
+        "17": 14,
+        "29": 16
+      }
+    },
+    "G3": {
+      "caps": 25,
+      "combined": 34,
+      "failures": 0,
+      "mean_per_question": 0.5666666666666667,
+      "not_executed": 0,
+      "outcomes": 60,
+      "per_seed": {
+        "17": 16,
+        "29": 18
+      }
+    },
+    "T_G": {
+      "caps": 23,
+      "combined": 34,
+      "failures": 0,
+      "mean_per_question": 0.5666666666666667,
+      "not_executed": 0,
+      "outcomes": 60,
+      "per_seed": {
+        "17": 17,
+        "29": 17
+      }
+    }
+  }
+}

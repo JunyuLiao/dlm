@@ -1,0 +1,1490 @@
+{
+  "arm_hashes": {
+    "B8_P": "fb5fe0dc890f4191b7f2a308ff4e4210f69957293d3079d6553db154e469b64b",
+    "CVM_T": "a6f320e89b16e650a65db6695515a7063ff7009081f69a8c25744670709bb0ec",
+    "D_native": "c8e9cb02751593ed7b9b9ca46b177d1cad74f6726489bf4fcb7e14074b629162",
+    "T_G_original": "bffc81aee219aa1ad4ca29c3d496a30b88934b23583fca7b632a154c4d10ae43",
+    "T_P": "539c9c1542bfba49f5fd17153b03d3cb4adc254488254258c2cc4ca2a7cd0007"
+  },
+  "arms": {
+    "B8_P": {
+      "condition": "global_B8P",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "name": "B8_P",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "support_build": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build/support_e3c283b8cbb9b79c/build_identity.json",
+      "v5_build": "/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926/build/v5_be53e4c706032aef/build_identity.json"
+    },
+    "CVM_T": {
+      "condition": "global_CVM",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "name": "CVM_T",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "support_build": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build/support_e3c283b8cbb9b79c/build_identity.json",
+      "v5_build": "/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926/build/v5_be53e4c706032aef/build_identity.json"
+    },
+    "D_native": {
+      "condition": "native_dense",
+      "name": "D_native"
+    },
+    "T_G_original": {
+      "collect": false,
+      "condition": "global_T",
+      "fast_t": true,
+      "name": "T_G_original",
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install"
+    },
+    "T_P": {
+      "condition": "global_TP",
+      "fast_t": true,
+      "name": "T_P",
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "v5_build": "/media/volume/dllm-1/dyh/numerical_qk_cvm_t_20260926/build/v5_be53e4c706032aef/build_identity.json"
+    }
+  },
+  "authorization": "User v14 spec 2026-09-26 (pasted): \"Initial six development questions: /2,/8,/14,/20,/23,/30; generation seeds17/29; five conditions; attempt0 plus one warm repetition =120 complete executions ... If both direct forward timing and adaptive/quality pilot are encouraging, freeze one extension to /1,/6,/16,/25 ... Pick and commit these IDs before the initial answer scores are read.\"",
+  "ceilings": {
+    "elapsed_h": 8,
+    "executions_total": 224,
+    "gpu_h": 6,
+    "this_protocol": 120
+  },
+  "development_ids": [
+    "aime26/2",
+    "aime26/8",
+    "aime26/14",
+    "aime26/20",
+    "aime26/23",
+    "aime26/30"
+  ],
+  "effective_arm_fields": {
+    "B8_P": {
+      "collect": null,
+      "condition": "global_B8P",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": {
+        "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+        "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+        "key": "e3c283b8cbb9b79c",
+        "sources": {
+          "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+          "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+          "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+        }
+      },
+      "v5_binary": {
+        "bridge_sha256": "7b7cf2b7c44623f19622b18b55d08086d04cd1eab340f51aab4e0942ca6ec1f1",
+        "kernel_sha256": "770724c9598fc567d38430cfd5e5cfa47cfb733ecc7ab952e570652288baa8ba",
+        "key": "be53e4c706032aef",
+        "sources": {
+          "torch_bridge_v5.cpp": "fb3741de02bbb47f1253ef90cb817a428912a74b8ed31a86ad2094266de4113e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10",
+          "value_direction_v5.cu": "645c957de3df9acd4bbd1172348812837aa2751d6795e115e5d08d497a1ff24e",
+          "value_direction_v5.h": "edd714c1e0c1515f1472f24c667ae1d85c7d1bffda3f7099bfc2ad48e9167182"
+        }
+      }
+    },
+    "CVM_T": {
+      "collect": null,
+      "condition": "global_CVM",
+      "fast_t": true,
+      "guard_mode": "fused",
+      "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+      "period": 8,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": {
+        "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+        "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+        "key": "e3c283b8cbb9b79c",
+        "sources": {
+          "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+          "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+          "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+        }
+      },
+      "v5_binary": {
+        "bridge_sha256": "7b7cf2b7c44623f19622b18b55d08086d04cd1eab340f51aab4e0942ca6ec1f1",
+        "kernel_sha256": "770724c9598fc567d38430cfd5e5cfa47cfb733ecc7ab952e570652288baa8ba",
+        "key": "be53e4c706032aef",
+        "sources": {
+          "torch_bridge_v5.cpp": "fb3741de02bbb47f1253ef90cb817a428912a74b8ed31a86ad2094266de4113e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10",
+          "value_direction_v5.cu": "645c957de3df9acd4bbd1172348812837aa2751d6795e115e5d08d497a1ff24e",
+          "value_direction_v5.h": "edd714c1e0c1515f1472f24c667ae1d85c7d1bffda3f7099bfc2ad48e9167182"
+        }
+      }
+    },
+    "D_native": {
+      "collect": null,
+      "condition": "native_dense",
+      "fast_t": null,
+      "guard_mode": null,
+      "library": null,
+      "period": null,
+      "plugin": null,
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": null,
+      "v5_binary": null
+    },
+    "T_G_original": {
+      "collect": false,
+      "condition": "global_T",
+      "fast_t": true,
+      "guard_mode": null,
+      "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+      "period": null,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": null,
+      "v5_binary": null
+    },
+    "T_P": {
+      "collect": null,
+      "condition": "global_TP",
+      "fast_t": true,
+      "guard_mode": null,
+      "library": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so",
+      "period": null,
+      "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+      "policy": {
+        "global": {
+          "log_threshold": -3.1366905212402343
+        },
+        "local": {
+          "log_threshold": -1.0099318265914916
+        }
+      },
+      "support_binary": null,
+      "v5_binary": {
+        "bridge_sha256": "7b7cf2b7c44623f19622b18b55d08086d04cd1eab340f51aab4e0942ca6ec1f1",
+        "kernel_sha256": "770724c9598fc567d38430cfd5e5cfa47cfb733ecc7ab952e570652288baa8ba",
+        "key": "be53e4c706032aef",
+        "sources": {
+          "torch_bridge_v5.cpp": "fb3741de02bbb47f1253ef90cb817a428912a74b8ed31a86ad2094266de4113e",
+          "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+          "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10",
+          "value_direction_v5.cu": "645c957de3df9acd4bbd1172348812837aa2751d6795e115e5d08d497a1ff24e",
+          "value_direction_v5.h": "edd714c1e0c1515f1472f24c667ae1d85c7d1bffda3f7099bfc2ad48e9167182"
+        }
+      }
+    }
+  },
+  "exposure_note": "all ten IDs were examined in v13 (and six in v10-v12); development data, not a held-out test",
+  "extension_ids": [
+    "aime26/1",
+    "aime26/6",
+    "aime26/16",
+    "aime26/25"
+  ],
+  "extension_rule": "committed before any v14 answer score is read; run (80 executions) ONLY if both the direct complete-forward gate (5.1) and the adaptive/quality pilot are encouraging; additional development checks, not pristine validation (v13 used all 30)",
+  "failure_policy": "every scheduled execution runs once; failures recorded and count as incorrect/missing; no silent retries",
+  "frozen_utc": "2026-09-26T06:05:34Z",
+  "generation": {
+    "dtype": "bfloat16",
+    "eos": true,
+    "max_new_tokens": 8192,
+    "native_adaptive": true,
+    "temperature_sentinel": 0.0,
+    "thinking": true
+  },
+  "ids": [
+    "aime26/2",
+    "aime26/8",
+    "aime26/14",
+    "aime26/20",
+    "aime26/23",
+    "aime26/30"
+  ],
+  "manifest": "/media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/private/manifest_all30.json",
+  "manifest_sha256": "a253c357e1a2a2634d895e91620d7e91b1b10640755088a8d4ca7d2b0250b57c",
+  "method_notes": {
+    "B8_P": "fresh v5 anchor (A8 / new canvas / new epoch) + held anchor bitmap, same mandatory set, v11 current-output consumer",
+    "CVM_T": "B8_P + per-step add-only restoration: restore tile iff max_valid_rows(log rho_a + log s_t) >= log tau",
+    "T_G_original": "v13 fresh original GLOBAL T (Junyu v4 binary) with the exact T-only controller fast path",
+    "T_P": "fresh T every call through the private v5 binary with the mandatory set (current canvas + edge tiles)",
+    "fallback": "all *_P arms and CVM_T use native SDPA when no complete immutable-prefix tile exists"
+  },
+  "metrics": {
+    "aggregation": "per question mean over seeds of log(candidate/reference); geometric mean over questions; summed-time ratio = calls ratio x time/call ratio; question-cluster bootstrap (descriptive)",
+    "parity_checks": "D_native and T_G_original attempt-0 token hashes vs the v13 same (id, seed) cells",
+    "primary": "CVM_T vs B8_P (live protection attribution) and CVM_T vs T_P (vs fresh T, same mandatory set)",
+    "quality": "attempt-0 final-channel correctness (frozen v13 scorer); cap/unparsed/failure = incorrect",
+    "secondary": [
+      "CVM_T vs D_native",
+      "CVM_T vs T_G_original",
+      "B8_P vs T_P",
+      "T_P vs T_G_original",
+      "T_G_original vs D_native"
+    ],
+    "time": "accepted single warm API wall (same cell, no new compilation, tokens/calls/termination identical to attempt 0)"
+  },
+  "mode": "dev6",
+  "model_path": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "planned_executions": 120,
+  "policy_file": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924/code_cp1/results/query_adaptive_v3/configs/frozen_policies.json",
+  "prompt_hashes": {
+    "aime26/14": "1047b9e164f04483712dec0cf0b51a57a40369e3d3008706d94227e051157bac",
+    "aime26/2": "5565b6edb22e83ff52f3714363dde0f997c9d7a5da4c2c51b0d3d50bd520b71b",
+    "aime26/20": "51d584847bfa0747336dcb2f50815121db86501f82491bfdbfc62a3119590446",
+    "aime26/23": "68f37866706f355379bc62d2043164edbd014c0407cd75cfcf1d8147331672cf",
+    "aime26/30": "531e2634908843397d3b97b370596b285150dda609e47b151dc834944cae5900",
+    "aime26/8": "1e7e543212214994eadfff94550f145e2a4e3093c206250ed5eed281456c2d15"
+  },
+  "protocol_id": "v14_cvm_t_dev6",
+  "schedule": [
+    {
+      "arm": "B8_P",
+      "block": 0,
+      "cell_id": "a1894a6541e24e0146241f79",
+      "id": "aime26/23",
+      "index": 0,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 0,
+      "cell_id": "60828f60ba42d7ac35b0def1",
+      "id": "aime26/23",
+      "index": 1,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 0,
+      "cell_id": "ed3195ed3a24fb4c107767d5",
+      "id": "aime26/23",
+      "index": 2,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 0,
+      "cell_id": "db8e9c0596ca8f4a94f52caf",
+      "id": "aime26/23",
+      "index": 3,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 0,
+      "cell_id": "8d465e4f6d83fdf80ccf7464",
+      "id": "aime26/23",
+      "index": 4,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 0,
+      "cell_id": "8d465e4f6d83fdf80ccf7464",
+      "id": "aime26/23",
+      "index": 5,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 0,
+      "cell_id": "db8e9c0596ca8f4a94f52caf",
+      "id": "aime26/23",
+      "index": 6,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 0,
+      "cell_id": "ed3195ed3a24fb4c107767d5",
+      "id": "aime26/23",
+      "index": 7,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 0,
+      "cell_id": "60828f60ba42d7ac35b0def1",
+      "id": "aime26/23",
+      "index": 8,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 0,
+      "cell_id": "a1894a6541e24e0146241f79",
+      "id": "aime26/23",
+      "index": 9,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 1,
+      "cell_id": "8b7e10f3f3ef053f5e6f6033",
+      "id": "aime26/14",
+      "index": 10,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 1,
+      "cell_id": "0ee31bac4964598825b20592",
+      "id": "aime26/14",
+      "index": 11,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 1,
+      "cell_id": "3d3d3a5592317ecc5d3cf2b8",
+      "id": "aime26/14",
+      "index": 12,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 1,
+      "cell_id": "fcc7e94f8db3dfee3111046e",
+      "id": "aime26/14",
+      "index": 13,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 1,
+      "cell_id": "e92cca786fc60371d1b9680d",
+      "id": "aime26/14",
+      "index": 14,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 1,
+      "cell_id": "e92cca786fc60371d1b9680d",
+      "id": "aime26/14",
+      "index": 15,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 1,
+      "cell_id": "fcc7e94f8db3dfee3111046e",
+      "id": "aime26/14",
+      "index": 16,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 1,
+      "cell_id": "3d3d3a5592317ecc5d3cf2b8",
+      "id": "aime26/14",
+      "index": 17,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 1,
+      "cell_id": "0ee31bac4964598825b20592",
+      "id": "aime26/14",
+      "index": 18,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 1,
+      "cell_id": "8b7e10f3f3ef053f5e6f6033",
+      "id": "aime26/14",
+      "index": 19,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 2,
+      "cell_id": "8eebacfbee9ea766d29f9fe3",
+      "id": "aime26/30",
+      "index": 20,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 2,
+      "cell_id": "373c3d858544d452481535e5",
+      "id": "aime26/30",
+      "index": 21,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 2,
+      "cell_id": "16455131f7f3c22094f5cbe8",
+      "id": "aime26/30",
+      "index": 22,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 2,
+      "cell_id": "17f0860bb3404f33109e67c9",
+      "id": "aime26/30",
+      "index": 23,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 2,
+      "cell_id": "51ae7d40609ab996c9dc8eef",
+      "id": "aime26/30",
+      "index": 24,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 2,
+      "cell_id": "51ae7d40609ab996c9dc8eef",
+      "id": "aime26/30",
+      "index": 25,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 2,
+      "cell_id": "17f0860bb3404f33109e67c9",
+      "id": "aime26/30",
+      "index": 26,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 2,
+      "cell_id": "16455131f7f3c22094f5cbe8",
+      "id": "aime26/30",
+      "index": 27,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 2,
+      "cell_id": "373c3d858544d452481535e5",
+      "id": "aime26/30",
+      "index": 28,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 2,
+      "cell_id": "8eebacfbee9ea766d29f9fe3",
+      "id": "aime26/30",
+      "index": 29,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 3,
+      "cell_id": "ce556b97f4f248dad9c98b62",
+      "id": "aime26/20",
+      "index": 30,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 3,
+      "cell_id": "6bf9a72796ec392c370015cd",
+      "id": "aime26/20",
+      "index": 31,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 3,
+      "cell_id": "78738c5ef2c953c96c95c92b",
+      "id": "aime26/20",
+      "index": 32,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 3,
+      "cell_id": "19c7d04a594fe96b348cba3c",
+      "id": "aime26/20",
+      "index": 33,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 3,
+      "cell_id": "5baae00f9e91d16a7e8c38f7",
+      "id": "aime26/20",
+      "index": 34,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 3,
+      "cell_id": "5baae00f9e91d16a7e8c38f7",
+      "id": "aime26/20",
+      "index": 35,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 3,
+      "cell_id": "19c7d04a594fe96b348cba3c",
+      "id": "aime26/20",
+      "index": 36,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 3,
+      "cell_id": "78738c5ef2c953c96c95c92b",
+      "id": "aime26/20",
+      "index": 37,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 3,
+      "cell_id": "6bf9a72796ec392c370015cd",
+      "id": "aime26/20",
+      "index": 38,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 3,
+      "cell_id": "ce556b97f4f248dad9c98b62",
+      "id": "aime26/20",
+      "index": 39,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 4,
+      "cell_id": "f30b84fafd9006b677e7e46b",
+      "id": "aime26/20",
+      "index": 40,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 4,
+      "cell_id": "5a94d6ca46f4def7fd22c787",
+      "id": "aime26/20",
+      "index": 41,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 4,
+      "cell_id": "f1eaa6f60a45d3a4dc3f2edf",
+      "id": "aime26/20",
+      "index": 42,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 4,
+      "cell_id": "6b8c91c9e93a64a9b93b8f5d",
+      "id": "aime26/20",
+      "index": 43,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 4,
+      "cell_id": "773afef856fd0ad5a51fb995",
+      "id": "aime26/20",
+      "index": 44,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 4,
+      "cell_id": "773afef856fd0ad5a51fb995",
+      "id": "aime26/20",
+      "index": 45,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 4,
+      "cell_id": "6b8c91c9e93a64a9b93b8f5d",
+      "id": "aime26/20",
+      "index": 46,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 4,
+      "cell_id": "f1eaa6f60a45d3a4dc3f2edf",
+      "id": "aime26/20",
+      "index": 47,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 4,
+      "cell_id": "5a94d6ca46f4def7fd22c787",
+      "id": "aime26/20",
+      "index": 48,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 4,
+      "cell_id": "f30b84fafd9006b677e7e46b",
+      "id": "aime26/20",
+      "index": 49,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 5,
+      "cell_id": "6dde3af2134b296518558afd",
+      "id": "aime26/23",
+      "index": 50,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 5,
+      "cell_id": "98c3c4f89d39c9859388218e",
+      "id": "aime26/23",
+      "index": 51,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 5,
+      "cell_id": "a33e848e4ae3cd0566185a2e",
+      "id": "aime26/23",
+      "index": 52,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 5,
+      "cell_id": "69e7269d1d23188c5b9d7984",
+      "id": "aime26/23",
+      "index": 53,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 5,
+      "cell_id": "e270f2ed7e62e884a2faaf98",
+      "id": "aime26/23",
+      "index": 54,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 5,
+      "cell_id": "e270f2ed7e62e884a2faaf98",
+      "id": "aime26/23",
+      "index": 55,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 5,
+      "cell_id": "69e7269d1d23188c5b9d7984",
+      "id": "aime26/23",
+      "index": 56,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 5,
+      "cell_id": "a33e848e4ae3cd0566185a2e",
+      "id": "aime26/23",
+      "index": 57,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 5,
+      "cell_id": "98c3c4f89d39c9859388218e",
+      "id": "aime26/23",
+      "index": 58,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 5,
+      "cell_id": "6dde3af2134b296518558afd",
+      "id": "aime26/23",
+      "index": 59,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 6,
+      "cell_id": "f9115a5afe60fbe0958b374c",
+      "id": "aime26/14",
+      "index": 60,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 6,
+      "cell_id": "f2ccb48a7064d7381258f125",
+      "id": "aime26/14",
+      "index": 61,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 6,
+      "cell_id": "8af8f6dc9c19281394ef900a",
+      "id": "aime26/14",
+      "index": 62,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 6,
+      "cell_id": "c907fbaaa8e628004653eb8f",
+      "id": "aime26/14",
+      "index": 63,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 6,
+      "cell_id": "143f5395743dc190fe941741",
+      "id": "aime26/14",
+      "index": 64,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 6,
+      "cell_id": "143f5395743dc190fe941741",
+      "id": "aime26/14",
+      "index": 65,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 6,
+      "cell_id": "c907fbaaa8e628004653eb8f",
+      "id": "aime26/14",
+      "index": 66,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 6,
+      "cell_id": "8af8f6dc9c19281394ef900a",
+      "id": "aime26/14",
+      "index": 67,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 6,
+      "cell_id": "f2ccb48a7064d7381258f125",
+      "id": "aime26/14",
+      "index": 68,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 6,
+      "cell_id": "f9115a5afe60fbe0958b374c",
+      "id": "aime26/14",
+      "index": 69,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 7,
+      "cell_id": "0cd7470fb1df3a75ac3f0274",
+      "id": "aime26/8",
+      "index": 70,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 7,
+      "cell_id": "8e5ea6d904121aca433b3db5",
+      "id": "aime26/8",
+      "index": 71,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 7,
+      "cell_id": "56676f10bcf494b9ddcb65a6",
+      "id": "aime26/8",
+      "index": 72,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 7,
+      "cell_id": "e99eb07a0850fd92cf122fd5",
+      "id": "aime26/8",
+      "index": 73,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 7,
+      "cell_id": "efb9647256180edde527eec6",
+      "id": "aime26/8",
+      "index": 74,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 7,
+      "cell_id": "efb9647256180edde527eec6",
+      "id": "aime26/8",
+      "index": 75,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 7,
+      "cell_id": "e99eb07a0850fd92cf122fd5",
+      "id": "aime26/8",
+      "index": 76,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 7,
+      "cell_id": "56676f10bcf494b9ddcb65a6",
+      "id": "aime26/8",
+      "index": 77,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 7,
+      "cell_id": "8e5ea6d904121aca433b3db5",
+      "id": "aime26/8",
+      "index": 78,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 7,
+      "cell_id": "0cd7470fb1df3a75ac3f0274",
+      "id": "aime26/8",
+      "index": 79,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 8,
+      "cell_id": "91dffe20203bfa4306c7a549",
+      "id": "aime26/8",
+      "index": 80,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 8,
+      "cell_id": "9735dea06d98f354a0f57a06",
+      "id": "aime26/8",
+      "index": 81,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 8,
+      "cell_id": "f517f53b812ceb35b4f9fde9",
+      "id": "aime26/8",
+      "index": 82,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 8,
+      "cell_id": "41f7a624ac56fd41c2718053",
+      "id": "aime26/8",
+      "index": 83,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 8,
+      "cell_id": "b7624dd8eae7a0748ba54709",
+      "id": "aime26/8",
+      "index": 84,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 8,
+      "cell_id": "b7624dd8eae7a0748ba54709",
+      "id": "aime26/8",
+      "index": 85,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 8,
+      "cell_id": "41f7a624ac56fd41c2718053",
+      "id": "aime26/8",
+      "index": 86,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 8,
+      "cell_id": "f517f53b812ceb35b4f9fde9",
+      "id": "aime26/8",
+      "index": 87,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 8,
+      "cell_id": "9735dea06d98f354a0f57a06",
+      "id": "aime26/8",
+      "index": 88,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 8,
+      "cell_id": "91dffe20203bfa4306c7a549",
+      "id": "aime26/8",
+      "index": 89,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 9,
+      "cell_id": "276a137abc1553bce84be6ef",
+      "id": "aime26/30",
+      "index": 90,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 9,
+      "cell_id": "5f38284bf287d8538c7a5d47",
+      "id": "aime26/30",
+      "index": 91,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 9,
+      "cell_id": "98334b8489844c60534e226f",
+      "id": "aime26/30",
+      "index": 92,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 9,
+      "cell_id": "83232adb71cc15542febc802",
+      "id": "aime26/30",
+      "index": 93,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 9,
+      "cell_id": "d0663f7589cac3bf8ccf8493",
+      "id": "aime26/30",
+      "index": 94,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 9,
+      "cell_id": "d0663f7589cac3bf8ccf8493",
+      "id": "aime26/30",
+      "index": 95,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 9,
+      "cell_id": "83232adb71cc15542febc802",
+      "id": "aime26/30",
+      "index": 96,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 9,
+      "cell_id": "98334b8489844c60534e226f",
+      "id": "aime26/30",
+      "index": 97,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 9,
+      "cell_id": "5f38284bf287d8538c7a5d47",
+      "id": "aime26/30",
+      "index": 98,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 9,
+      "cell_id": "276a137abc1553bce84be6ef",
+      "id": "aime26/30",
+      "index": 99,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 10,
+      "cell_id": "66c908c92bffb2ac9d4b6a0b",
+      "id": "aime26/2",
+      "index": 100,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 10,
+      "cell_id": "6d5fa5076cd02d065a493938",
+      "id": "aime26/2",
+      "index": 101,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 10,
+      "cell_id": "c6189aa344e773450d18cc01",
+      "id": "aime26/2",
+      "index": 102,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 10,
+      "cell_id": "6ab13babc5c08cc2d3341e66",
+      "id": "aime26/2",
+      "index": 103,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 10,
+      "cell_id": "e9de316152355352013a0ea6",
+      "id": "aime26/2",
+      "index": 104,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 17
+    },
+    {
+      "arm": "T_P",
+      "block": 10,
+      "cell_id": "e9de316152355352013a0ea6",
+      "id": "aime26/2",
+      "index": 105,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "T_G_original",
+      "block": 10,
+      "cell_id": "6ab13babc5c08cc2d3341e66",
+      "id": "aime26/2",
+      "index": 106,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "D_native",
+      "block": 10,
+      "cell_id": "c6189aa344e773450d18cc01",
+      "id": "aime26/2",
+      "index": 107,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 10,
+      "cell_id": "6d5fa5076cd02d065a493938",
+      "id": "aime26/2",
+      "index": 108,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "B8_P",
+      "block": 10,
+      "cell_id": "66c908c92bffb2ac9d4b6a0b",
+      "id": "aime26/2",
+      "index": 109,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 17
+    },
+    {
+      "arm": "CVM_T",
+      "block": 11,
+      "cell_id": "60dc2c7c4817d287b0bc6439",
+      "id": "aime26/2",
+      "index": 110,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 11,
+      "cell_id": "7743bf17b95648fb6a1b94b4",
+      "id": "aime26/2",
+      "index": 111,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 11,
+      "cell_id": "e9bb94033083a98b68c59fa6",
+      "id": "aime26/2",
+      "index": 112,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 11,
+      "cell_id": "53141948aae1368dc9f95a20",
+      "id": "aime26/2",
+      "index": 113,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 11,
+      "cell_id": "e93e1b30faced012111b8507",
+      "id": "aime26/2",
+      "index": 114,
+      "repeat": 0,
+      "role": "attempt0",
+      "seed": 29
+    },
+    {
+      "arm": "B8_P",
+      "block": 11,
+      "cell_id": "e93e1b30faced012111b8507",
+      "id": "aime26/2",
+      "index": 115,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_P",
+      "block": 11,
+      "cell_id": "53141948aae1368dc9f95a20",
+      "id": "aime26/2",
+      "index": 116,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "T_G_original",
+      "block": 11,
+      "cell_id": "e9bb94033083a98b68c59fa6",
+      "id": "aime26/2",
+      "index": 117,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "D_native",
+      "block": 11,
+      "cell_id": "7743bf17b95648fb6a1b94b4",
+      "id": "aime26/2",
+      "index": 118,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    },
+    {
+      "arm": "CVM_T",
+      "block": 11,
+      "cell_id": "60dc2c7c4817d287b0bc6439",
+      "id": "aime26/2",
+      "index": 119,
+      "repeat": 1,
+      "role": "warm",
+      "seed": 29
+    }
+  ],
+  "schedule_rule": "v13 plan_schedule: (question, seed) blocks shuffled by random.Random(schedule_seed); within a block all arms attempt 0 in cyclic rotation by block position, then one warm repeat per arm reversed",
+  "schedule_seed": 20260926,
+  "schema": "v14_frozen_protocol_v1",
+  "seed_semantics": "generation seed -> GenerationRequest.seed -> adapter.generate seed_everything (native sampler RNG)",
+  "seeds": [
+    17,
+    29
+  ],
+  "warm_repeats": 1
+}

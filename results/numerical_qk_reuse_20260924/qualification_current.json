@@ -1,0 +1,31 @@
+{
+  "schema": "numerical_reuse_qualification_current_v1",
+  "status": "INTEGRATED_NATIVE_SMOKE_COMPLETE_NOT_QUALITY_OR_SPEED_QUALIFIED",
+  "historical_receipt": "qualification.json preserves the earlier synthetic-only scope",
+  "cpu": {
+    "cache_runner": "11 checks PASS",
+    "math_cache_remote": "9 PASS, 2 CUDA-only skipped in CPU run",
+    "summary": "6 pytest PASS",
+    "exact_stop_observer": "6 pytest PASS after final empty-history fix"
+  },
+  "gpu": {
+    "mathematical_reference": "6 PASS",
+    "dispatch_lifecycle": "2 PASS: throwing current-QK producer spy on reuse, current-V update, encoder invalidation, R1 equality, anchor8",
+    "fresh_junyu": "12 synthetic cases PASS, including native dimensions; bitmaps exact under frozen gates",
+    "lightweight_observer": "Same-instance plain/count/events exact output-token and call parity",
+    "dense_timing_controls": "All four token sequences and calls match original quality receipts across loads",
+    "natural_generation": "4 native dense, 4 fresh Junyu T, 4 M1, 4 M3 complete, no request failures",
+    "actual_dispatch": "All eight M1/M3 request traces pass per-canvas/per-layer clock and work audit",
+    "exact_stop_diagnostic": "Dense observer parity PASS; all4 arms on frozen ID2 match primary tokens/calls; stable/confident flags validated against actual native result"
+  },
+  "limits": [
+    "Natural completion and finite outputs are not quality preservation: M1 and M3 both0/4",
+    "Fresh-history parity is synthetic mathematical qualification, not proof of exact full-model trajectory equivalence",
+    "CUDA Graph replay not qualified; native DynamicCache same-stream implementation",
+    "Timing includes incurred compilation/setup; no clean warm PROFILE or randomized performance confirmation",
+    "QK counters are dispatch elements, not measured DRAM bytes or instruction counts",
+    "Pinned Junyu LOCAL window differs from installed native dense mask semantics; disclosed in method_contract.md",
+    "Haowei executor is reference provenance only, not fully integrated into this prototype",
+    "Four questions and one seed cannot establish noninferiority"
+  ]
+}

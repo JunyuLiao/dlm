@@ -1,0 +1,743 @@
+{
+  "arms": {
+    "D": "unbound native SDPA, no T",
+    "P": "M1 preqk, LOCAL summary, generic kernels, full telemetry, separate guards"
+  },
+  "attribution": {
+    "measured": [
+      "route kernel (_route): late ordinary 15.1 ms device for ONE step, anchor route+PV 25.6 ms; the largest single added device cost; runs 32 CTAs (qb x heads) with a sequential tile scan",
+      "LOCAL layers carry most added device time (late union 47.3 ms P vs 11.5 ms D over 2 steps); GLOBAL 20.9 vs 11.1",
+      "added device events per step ~+1.0-1.4k kernels, +60 memcpy, +35 memset (includes consumer/anchor work that REPLACES dense attention; native attention modules shrink in P)",
+      "selector glue (sel_call) ~600 kernels/step (20 per layer call); V-sketch lease ~450/step; anchor scores ~208/step (anchor only)",
+      "explicit sync APIs identical (131 per window); no cudaMalloc/cudaFree in either window"
+    ],
+    "unassigned": [
+      "exact split of the ~30 ms/step unprofiled gap between host submission and device time cannot be read from profiled windows (overhead ~2x)",
+      "MoE differences between arms (trajectory-dependent)"
+    ]
+  },
+  "boundary": "D and P run their OWN natural trajectories: same absolute position, different canvases (hashes differ), so MoE expert routes and counts differ and are not attributable to the selector",
+  "consumer_only_counterfactual_ms": {
+    "canvas1": {
+      "native_decoder_forward": 110.89527893066406,
+      "native_denoising_step.anchor_inputs": 116.6475830078125,
+      "native_denoising_step.step1_inputs": 119.76316833496094,
+      "sparse_O.anchor": 156.16896057128906,
+      "sparse_O.held_same_support": 133.95359802246094,
+      "sparse_O.ordinary": 147.52734375
+    },
+    "canvas6": {
+      "native_decoder_forward": 114.583984375,
+      "native_denoising_step.anchor_inputs": 120.4085464477539,
+      "native_denoising_step.step1_inputs": 131.0793914794922,
+      "sparse_O.anchor": 163.35850524902344,
+      "sparse_O.held_same_support": 144.57999420166016,
+      "sparse_O.ordinary": 161.0336456298828
+    }
+  },
+  "deploy": "947cf49c014c",
+  "id": "aime26/2",
+  "phase_weights_from_actual_calls": {
+    "aime26/2": {
+      "anchor_fraction": 0.18627450980392157,
+      "anchors": 19,
+      "calls": 102
+    },
+    "aime26/8": {
+      "anchor_fraction": 0.1712707182320442,
+      "anchors": 31,
+      "calls": 181
+    }
+  },
+  "profiler_overhead": {
+    "D_profiled_2step_ms": {
+      "early": 476.27584100700915,
+      "late": 476.0416089557111
+    },
+    "P_profiled_2step_ms": {
+      "early": 621.1617121007293,
+      "late": 600.646449951455
+    },
+    "note": "profiled windows are ~2x unprofiled; device durations are device-measured, host gaps are inflated",
+    "unprofiled_step_replay_ms": {
+      "P_ordinary_c1": 153.6081085205078,
+      "native_step1_c1": 122.53950119018555
+    }
+  },
+  "replay_same_state_ms": {
+    "canvas1": {
+      "native_decoder_forward": 113.79460906982422,
+      "native_denoising_step.anchor_inputs": 119.86479949951172,
+      "native_denoising_step.step1_inputs": 122.53950119018555,
+      "sparse_O.anchor": 160.21717071533203,
+      "sparse_O.ordinary": 150.6114730834961,
+      "sparse_O2.anchor": 160.14761352539062,
+      "sparse_O2.ordinary": 150.81185913085938,
+      "sparse_P.anchor": 162.43568420410156,
+      "sparse_P.ordinary": 153.6081085205078,
+      "sparse_P2.anchor": 162.49703979492188,
+      "sparse_P2.ordinary": 153.97154998779297
+    },
+    "canvas6": {
+      "native_decoder_forward": 116.34460830688477,
+      "native_denoising_step.anchor_inputs": 122.14987182617188,
+      "native_denoising_step.step1_inputs": 133.33360290527344,
+      "sparse_O.anchor": 166.13525390625,
+      "sparse_O.ordinary": 163.72164916992188,
+      "sparse_O2.anchor": 166.25733947753906,
+      "sparse_O2.ordinary": 163.91544342041016,
+      "sparse_P.anchor": 168.8751678466797,
+      "sparse_P.ordinary": 166.86577606201172,
+      "sparse_P2.anchor": 168.42050170898438,
+      "sparse_P2.ordinary": 166.8708038330078
+    }
+  },
+  "schema": "v10_matched_native_sparse_trace_delta_v1",
+  "trace_files": {
+    "D": {
+      "path": {
+        "early": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/cp2_trace/chrome_D/B_early.json",
+        "late": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/cp2_trace/chrome_D/B_late.json"
+      },
+      "sha256": "a03e8c363546ce80aa837a17ea70e693c393a0c3b426d8e6b7b1b93f96965aaa",
+      "trace_json": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/cp2_trace/trace_D.json"
+    },
+    "P": {
+      "path": {
+        "early": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/cp2_trace/chrome_P/B_early.json",
+        "late": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/cp2_trace/chrome_P/B_late.json"
+      },
+      "sha256": "b87bb5317082bb7c6ae12c06e1f9a4b07b1dd2058449e98b13bc6c6313183995",
+      "trace_json": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/cp2_trace/trace_P.json"
+    }
+  },
+  "windows": "early = canvas 1 steps 0+1 (absolute 365), late = canvas 8 steps 0+1 (absolute 2157); each window = 1 anchor + 1 ordinary step",
+  "windows_detail": {
+    "early": {
+      "D": {
+        "alloc_api": {
+          "calls": 0,
+          "host_ms": 0.0
+        },
+        "by_layer_kind": {
+          "global": {
+            "events": 580,
+            "union_ms": 4.490376953125
+          },
+          "local": {
+            "events": 2150,
+            "union_ms": 10.2338310546875
+          },
+          "none": {
+            "events": 15644,
+            "union_ms": 90.5018916015625
+          }
+        },
+        "device_active_union_ms": 105.226099609375,
+        "device_idle_within_window_ms": 371.07052734375,
+        "explicit_sync_api": {
+          "calls": 131,
+          "host_ms": 10.089772
+        },
+        "kernel_union_ms": 104.78016796875,
+        "kernels": 18006,
+        "launch_api": {
+          "calls": 18006,
+          "host_ms": 81.2391240000006
+        },
+        "memcpy_api": {
+          "calls": 329,
+          "host_ms": 4.4701619999999975
+        },
+        "memcpy_events": 329,
+        "memset_api": {
+          "calls": 39,
+          "host_ms": 0.24237899999999998
+        },
+        "memset_events": 39,
+        "window_span_ms": 476.296626953125
+      },
+      "P": {
+        "alloc_api": {
+          "calls": 0,
+          "host_ms": 0.0
+        },
+        "by_layer_kind": {
+          "global": {
+            "events": 830,
+            "union_ms": 8.0626591796875
+          },
+          "local": {
+            "events": 4325,
+            "union_ms": 31.9538857421875
+          },
+          "none": {
+            "events": 16248,
+            "union_ms": 96.161966796875
+          }
+        },
+        "device_active_union_ms": 136.17851171875,
+        "device_idle_within_window_ms": 485.0031611328125,
+        "explicit_sync_api": {
+          "calls": 131,
+          "host_ms": 11.801708000000001
+        },
+        "kernel_union_ms": 135.416388671875,
+        "kernels": 20845,
+        "launch_api": {
+          "calls": 20845,
+          "host_ms": 102.07981600000026
+        },
+        "memcpy_api": {
+          "calls": 449,
+          "host_ms": 6.104782000000003
+        },
+        "memcpy_events": 449,
+        "memset_api": {
+          "calls": 109,
+          "host_ms": 0.8970050000000005
+        },
+        "memset_events": 109,
+        "window_span_ms": 621.1816728515626
+      },
+      "delta_per_step": {
+        "device_active_ms": 15.476206054687502,
+        "kernels": 1419.5,
+        "launch_api_host_ms_profiled": 10.420345999999832,
+        "memcpy": 60.0,
+        "memset": 35.0
+      },
+      "per_label": {
+        "T_begin": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 0.02,
+            "events": 17,
+            "non_kernel": {}
+          }
+        },
+        "T_observe_logits": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 3.13,
+            "events": 78,
+            "non_kernel": {
+              "gpu_memset": 10
+            }
+          }
+        },
+        "attn_module.global": {
+          "D": {
+            "device_ms": 4.49,
+            "events": 580,
+            "non_kernel": {
+              "gpu_memset": 10
+            }
+          },
+          "P": {
+            "device_ms": 2.12,
+            "events": 410,
+            "non_kernel": {
+              "gpu_memset": 10
+            }
+          }
+        },
+        "attn_module.local": {
+          "D": {
+            "device_ms": 10.23,
+            "events": 2150,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 9.12,
+            "events": 2050,
+            "non_kernel": {}
+          }
+        },
+        "decoder_model": {
+          "D": {
+            "device_ms": 13.57,
+            "events": 4129,
+            "non_kernel": {
+              "gpu_memset": 1
+            }
+          },
+          "P": {
+            "device_ms": 13.61,
+            "events": 4129,
+            "non_kernel": {
+              "gpu_memset": 1
+            }
+          }
+        },
+        "dense_mlp": {
+          "D": {
+            "device_ms": 2.57,
+            "events": 300,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 2.56,
+            "events": 300,
+            "non_kernel": {}
+          }
+        },
+        "moe_experts": {
+          "D": {
+            "device_ms": 57.0,
+            "events": 9852,
+            "non_kernel": {
+              "gpu_memcpy": 300
+            }
+          },
+          "P": {
+            "device_ms": 59.49,
+            "events": 10359,
+            "non_kernel": {
+              "gpu_memcpy": 300
+            }
+          }
+        },
+        "moe_router": {
+          "D": {
+            "device_ms": 3.66,
+            "events": 1140,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 3.65,
+            "events": 1140,
+            "non_kernel": {}
+          }
+        },
+        "outside_labels": {
+          "D": {
+            "device_ms": 13.7,
+            "events": 223,
+            "non_kernel": {
+              "gpu_memcpy": 29,
+              "gpu_memset": 28
+            }
+          },
+          "P": {
+            "device_ms": 13.7,
+            "events": 225,
+            "non_kernel": {
+              "gpu_memcpy": 29,
+              "gpu_memset": 28
+            }
+          }
+        },
+        "sel_anchor_scores": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 2.29,
+            "events": 415,
+            "non_kernel": {
+              "gpu_memcpy": 30
+            }
+          }
+        },
+        "sel_call": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 3.19,
+            "events": 1200,
+            "non_kernel": {
+              "gpu_memset": 60
+            }
+          }
+        },
+        "sel_preqk_pv": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 1.83,
+            "events": 60,
+            "non_kernel": {}
+          }
+        },
+        "sel_route": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 7.88,
+            "events": 30,
+            "non_kernel": {}
+          }
+        },
+        "sel_route_fused": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 11.01,
+            "events": 90,
+            "non_kernel": {}
+          }
+        },
+        "sel_sketch": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 2.59,
+            "events": 900,
+            "non_kernel": {
+              "gpu_memcpy": 90
+            }
+          }
+        }
+      },
+      "window_inputs": {
+        "D": {
+          "absolute": 365,
+          "canvas_sha": "7982facb39cd888a"
+        },
+        "P": {
+          "absolute": 365,
+          "canvas_sha": "90bb9b029d7f837d"
+        }
+      }
+    },
+    "late": {
+      "D": {
+        "alloc_api": {
+          "calls": 0,
+          "host_ms": 0.0
+        },
+        "by_layer_kind": {
+          "global": {
+            "events": 580,
+            "union_ms": 11.1073505859375
+          },
+          "local": {
+            "events": 2150,
+            "union_ms": 11.540439453125
+          },
+          "none": {
+            "events": 16158,
+            "union_ms": 92.9791181640625
+          }
+        },
+        "device_active_union_ms": 115.626908203125,
+        "device_idle_within_window_ms": 360.4258779296875,
+        "explicit_sync_api": {
+          "calls": 131,
+          "host_ms": 10.077677
+        },
+        "kernel_union_ms": 115.1863515625,
+        "kernels": 18520,
+        "launch_api": {
+          "calls": 18520,
+          "host_ms": 80.98004399999994
+        },
+        "memcpy_api": {
+          "calls": 329,
+          "host_ms": 4.504221000000001
+        },
+        "memcpy_events": 329,
+        "memset_api": {
+          "calls": 39,
+          "host_ms": 0.23924999999999993
+        },
+        "memset_events": 39,
+        "window_span_ms": 476.0527861328125
+      },
+      "P": {
+        "alloc_api": {
+          "calls": 0,
+          "host_ms": 0.0
+        },
+        "by_layer_kind": {
+          "global": {
+            "events": 830,
+            "union_ms": 20.9404951171875
+          },
+          "local": {
+            "events": 4325,
+            "union_ms": 47.3197998046875
+          },
+          "none": {
+            "events": 15973,
+            "union_ms": 94.749556640625
+          }
+        },
+        "device_active_union_ms": 163.0098515625,
+        "device_idle_within_window_ms": 437.647263671875,
+        "explicit_sync_api": {
+          "calls": 131,
+          "host_ms": 11.902833999999995
+        },
+        "kernel_union_ms": 161.9332509765625,
+        "kernels": 20570,
+        "launch_api": {
+          "calls": 20570,
+          "host_ms": 97.22844400000021
+        },
+        "memcpy_api": {
+          "calls": 449,
+          "host_ms": 6.193234999999997
+        },
+        "memcpy_events": 449,
+        "memset_api": {
+          "calls": 109,
+          "host_ms": 0.9208290000000005
+        },
+        "memset_events": 109,
+        "window_span_ms": 600.657115234375
+      },
+      "delta_per_step": {
+        "device_active_ms": 23.691471679687496,
+        "kernels": 1025.0,
+        "launch_api_host_ms_profiled": 8.124200000000137,
+        "memcpy": 60.0,
+        "memset": 35.0
+      },
+      "per_label": {
+        "T_begin": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 0.02,
+            "events": 17,
+            "non_kernel": {}
+          }
+        },
+        "T_observe_logits": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 3.16,
+            "events": 78,
+            "non_kernel": {
+              "gpu_memset": 10
+            }
+          }
+        },
+        "attn_module.global": {
+          "D": {
+            "device_ms": 11.11,
+            "events": 580,
+            "non_kernel": {
+              "gpu_memset": 10
+            }
+          },
+          "P": {
+            "device_ms": 2.34,
+            "events": 410,
+            "non_kernel": {
+              "gpu_memset": 10
+            }
+          }
+        },
+        "attn_module.local": {
+          "D": {
+            "device_ms": 11.54,
+            "events": 2150,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 9.78,
+            "events": 2050,
+            "non_kernel": {}
+          }
+        },
+        "decoder_model": {
+          "D": {
+            "device_ms": 13.59,
+            "events": 4129,
+            "non_kernel": {
+              "gpu_memset": 1
+            }
+          },
+          "P": {
+            "device_ms": 13.57,
+            "events": 4129,
+            "non_kernel": {
+              "gpu_memset": 1
+            }
+          }
+        },
+        "dense_mlp": {
+          "D": {
+            "device_ms": 2.57,
+            "events": 300,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 2.56,
+            "events": 300,
+            "non_kernel": {}
+          }
+        },
+        "moe_experts": {
+          "D": {
+            "device_ms": 59.46,
+            "events": 10366,
+            "non_kernel": {
+              "gpu_memcpy": 300
+            }
+          },
+          "P": {
+            "device_ms": 58.09,
+            "events": 10084,
+            "non_kernel": {
+              "gpu_memcpy": 300
+            }
+          }
+        },
+        "moe_router": {
+          "D": {
+            "device_ms": 3.66,
+            "events": 1140,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 3.65,
+            "events": 1140,
+            "non_kernel": {}
+          }
+        },
+        "outside_labels": {
+          "D": {
+            "device_ms": 13.7,
+            "events": 223,
+            "non_kernel": {
+              "gpu_memcpy": 29,
+              "gpu_memset": 28
+            }
+          },
+          "P": {
+            "device_ms": 13.71,
+            "events": 225,
+            "non_kernel": {
+              "gpu_memcpy": 29,
+              "gpu_memset": 28
+            }
+          }
+        },
+        "sel_anchor_scores": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 5.04,
+            "events": 415,
+            "non_kernel": {
+              "gpu_memcpy": 30
+            }
+          }
+        },
+        "sel_call": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 4.02,
+            "events": 1200,
+            "non_kernel": {
+              "gpu_memset": 60
+            }
+          }
+        },
+        "sel_preqk_pv": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 3.57,
+            "events": 60,
+            "non_kernel": {}
+          }
+        },
+        "sel_route": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 15.09,
+            "events": 30,
+            "non_kernel": {}
+          }
+        },
+        "sel_route_fused": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 25.58,
+            "events": 90,
+            "non_kernel": {}
+          }
+        },
+        "sel_sketch": {
+          "D": {
+            "device_ms": 0,
+            "events": 0,
+            "non_kernel": {}
+          },
+          "P": {
+            "device_ms": 2.85,
+            "events": 900,
+            "non_kernel": {
+              "gpu_memcpy": 90
+            }
+          }
+        }
+      },
+      "window_inputs": {
+        "D": {
+          "absolute": 2157,
+          "canvas_sha": "4d1507a5d7852fff"
+        },
+        "P": {
+          "absolute": 2157,
+          "canvas_sha": "b6ac40c558ec9980"
+        }
+      }
+    }
+  }
+}

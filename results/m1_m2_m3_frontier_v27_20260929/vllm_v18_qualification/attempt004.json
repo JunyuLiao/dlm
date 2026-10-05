@@ -1,0 +1,13 @@
+{
+  "protocol_id": "v27_vllm_lb_v18_20261002",
+  "qualification_only": true,
+  "complete": false,
+  "deploy_commit": "fdca7bf02a603260ae3ff803cf32556f9c96fcef",
+  "arm": "method",
+  "dataset": "longbench_v2_96k",
+  "timed_records": 0,
+  "gpu_reserved_seconds": 144.065,
+  "closed_v18_gpu_reserved_seconds": 1514.153,
+  "failure": "CUDA OOM during longest-input warmup: next 256 MiB allocation, only 50.19 MiB free; 79.12 GiB in use out of 79.18 GiB",
+  "decision": "Retain original protocol. New V18b uses common gpu_memory_utilization=0.85 for every arm; method and generation settings unchanged. Requalify every arm before formal panel."
+}

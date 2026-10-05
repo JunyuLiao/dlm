@@ -1,0 +1,9 @@
+# Bounded answer-blind Q16 screen
+
+Frozen before execution: GLOBAL layer5, call3, seed101, on the first two protocol-ordered LB inputs (mpk canvas0 and dllm canvas1). Same actual QKV/history/T/legal mask as each state; native stopping is unchanged. Each worker captures its already assigned input and writes a separately named diagnostic artifact. Failed bootstrap records from b85fa23 are preserved; the new stage also fills the six missing bootstrap states using the production neutral-ones convention for T=None.
+
+For the matched-work diagnostic, rerun Q16/K64 sequential selection at exactly five offsets from inherited global log threshold: 0, -0.25, -0.5, -1.0 and -2.0. No further search, R/A changes or task-answer feedback. Report every measured point and any nonmonotonic work sequence. The recurrence does not justify assuming monotonicity or a perfect bisection.
+
+Two distinct descriptive choices are allowed from these calibration inputs: (1) closest aggregate legal retained-pair count to Q128 at the inherited threshold, with actual mismatch disclosed; (2) smallest retained count whose square root of aggregate squared attention error divided by aggregate reference squared norm is at most 1.05 times the coarse relative-L2 error, and whose error on each calibration state is at most 1.15 times coarse. Tie toward more retention. These are opportunity screens, not a task-quality guarantee. No production threshold or geometry is promoted until the card is reviewed. Any selected geometry uses one fixed global threshold across tasks, with validation on remaining states separately disclosed.
+
+This is the small matched-work/error calibration requested by v21b, not a broad threshold-performance grid. The inherited-threshold behavior remains published. Numeric precision, masks, current-output rule, A8 and R3 are fixed throughout.

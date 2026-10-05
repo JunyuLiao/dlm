@@ -1,0 +1,278 @@
+{
+  "schema": 26,
+  "task": "M3 output numerics and trajectory isolation",
+  "parent": "452b48d81ee9763a2404dda97894ec1aa3a6da05",
+  "branch": "research/m3-output-numerics-20260927",
+  "authority": "User v26 doc dllm_claude_v26_m1_m2_m3_frontier_20260928.md",
+  "status": "V26_SEVEN_PANEL_REPORTED",
+  "wall_start_utc": "2026-09-27T22:22:00Z",
+  "max_gpu_process_seconds": 21600,
+  "max_generation_executions": 512,
+  "max_gpu_workers": 2,
+  "charged_gpu_process_seconds": 18216.595414304735,
+  "generation_executions": 526,
+  "heartbeat": "oldv20 heartbeat remains paused; no new heartbeat authorized",
+  "push_status": "4ab56f6d verified remote at takeover",
+  "agents": {
+    "lead": "Claude Opus 5.5 (this session)"
+  },
+  "next": "Policy screen (A x R x threshold) on captured states, then frozen expansion (more distinct questions, 2 seeds, 6 core arms)",
+  "peer_refs": {
+    "query_sensitivity_aware_v3": "053441c6c6741ada6728dfc97d8faa6ea2be72aa",
+    "ljy_value_aware": "47c47d9d7b29662d359525c7d59053364c673845"
+  },
+  "preflight": "1047 tensor payloads perhost verified; operator19/19 perhost; all CP1/CP2 workers complete; no active GPU worker",
+  "generation_reserved": 0,
+  "completed_gpu_jobs": [
+    {
+      "host": "mpk",
+      "stage": "profile",
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/cp1_f65de1e",
+      "sha": "f65de1e431c1e1cbdb980692d5bb03df47ad0fca",
+      "supervisor_pid": 1804239,
+      "config": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/bindings/cp1_f65de1e/profile.json",
+      "config_sha256": "c7251200ed645285f1c0aac91f4dcfc3ea97d838cc0c06f146d373087fa9272e",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/profile_cp1_f65de1e.json",
+      "log": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/profile_cp1_f65de1e.log",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/profile_cp1_f65de1e.json",
+      "status": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 997.4391124248505
+    },
+    {
+      "host": "dllm",
+      "stage": "profile",
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/cp1_f65de1e",
+      "sha": "f65de1e431c1e1cbdb980692d5bb03df47ad0fca",
+      "supervisor_pid": 141156,
+      "config": "/home/exouser/dyh/m3_output_numerics_v21_20260927/bindings/cp1_f65de1e/profile.json",
+      "config_sha256": "074795bb89ea48a5bcd43c22c356196f67469883a4f66c203e05251b4b9a39d8",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/profile_cp1_f65de1e.json",
+      "log": "/home/exouser/dyh/m3_output_numerics_v21_20260927/profile_cp1_f65de1e.log",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/profile_cp1_f65de1e.json",
+      "status": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 833.4864563941956
+    },
+    {
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/natural_525880e",
+      "sha": "525880efbfc9781976a3b45d131bd56eb96a6346",
+      "supervisor_pid": 142080,
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/natural_zero_pruning_natural_525880e.json",
+      "log": "/home/exouser/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/worker.log",
+      "ledger": "/home/exouser/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/ledger.jsonl",
+      "private": "/home/exouser/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/private",
+      "host": "dllm",
+      "stage": "zero_pruning_diagnostic",
+      "maximum_seconds": 1800,
+      "status": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 140.06544661521912
+    },
+    {
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/natural_525880e",
+      "sha": "525880efbfc9781976a3b45d131bd56eb96a6346",
+      "supervisor_pid": 1805502,
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/natural_zero_pruning_natural_525880e.json",
+      "log": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/worker.log",
+      "ledger": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/ledger.jsonl",
+      "private": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/natural/zero_pruning_001/private",
+      "host": "mpk",
+      "stage": "zero_pruning_diagnostic",
+      "maximum_seconds": 1800,
+      "status": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 346.1123697757721
+    },
+    {
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/geometry_b85fa23",
+      "sha": "b85fa23c33e704a28ddeb27719f4f01654df1611",
+      "supervisor_pid": 1806084,
+      "config": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/bindings/geometry_b85fa23/diagnostic.json",
+      "config_sha256": "12e36692f0bac791981514ee1320488b98d346d338f90d0d70359e5ecd904ab8",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/geometry_geometry_b85fa23.json",
+      "log": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/geometry_geometry_b85fa23.log",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_geometry_b85fa23.json",
+      "host": "mpk",
+      "stage": "geometry_opportunity",
+      "maximum_seconds": 900,
+      "generation_reservation": 3,
+      "status": "complete_with_bootstrap_diagnostic_missing",
+      "returncode": 0,
+      "charged_process_seconds": 58.596675395965576
+    },
+    {
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/geometry_b85fa23",
+      "sha": "b85fa23c33e704a28ddeb27719f4f01654df1611",
+      "supervisor_pid": 142552,
+      "config": "/home/exouser/dyh/m3_output_numerics_v21_20260927/bindings/geometry_b85fa23/diagnostic.json",
+      "config_sha256": "e2c85830579648403275c08be71898d92a225fe3c082491f554b070506736327",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/geometry_geometry_b85fa23.json",
+      "log": "/home/exouser/dyh/m3_output_numerics_v21_20260927/geometry_geometry_b85fa23.log",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_geometry_b85fa23.json",
+      "host": "dllm",
+      "stage": "geometry_opportunity",
+      "maximum_seconds": 900,
+      "generation_reservation": 3,
+      "status": "complete_with_bootstrap_diagnostic_missing",
+      "returncode": 0,
+      "charged_process_seconds": 56.937336683273315
+    },
+    {
+      "host": "mpk",
+      "stage": "bootstrap_calibration",
+      "sha": "372acfa32c75b00a3e1715ab8c836eecfcca1345",
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/v22_cpa_372acfa",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_cpa_372acfa.json",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_cpa_372acfa.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 46.16507577896118
+    },
+    {
+      "host": "mpk",
+      "stage": "q16_validation_attention_share",
+      "sha": "4cfbf7a96918f6387609a8699c35b18df0d0fe78",
+      "deploy": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/v22_val_4cfbf7a",
+      "receipt": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_val_4cfbf7a.json",
+      "output": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_val_4cfbf7a.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 78.13708424568176
+    },
+    {
+      "host": "dllm",
+      "stage": "bootstrap_calibration",
+      "sha": "372acfa32c75b00a3e1715ab8c836eecfcca1345",
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/v22_cpa_372acfa",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_cpa_372acfa.json",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_cpa_372acfa.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 47.16523480415344
+    },
+    {
+      "host": "dllm",
+      "stage": "q16_validation_attention_share",
+      "sha": "4cfbf7a96918f6387609a8699c35b18df0d0fe78",
+      "deploy": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/v22_val_4cfbf7a",
+      "receipt": "/home/exouser/dyh/m3_output_numerics_v21_20260927/receipts/geometry_v22_val_4cfbf7a.json",
+      "output": "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/geometry_v22_val_4cfbf7a.json",
+      "status": "complete",
+      "completeness": "complete",
+      "returncode": 0,
+      "charged_process_seconds": 74.35434293746948
+    }
+  ],
+  "gpu_jobs": [],
+  "takeover": {
+    "utc": "2026-09-28T00:10:31Z",
+    "verified_remote": "4ab56f6d27253baeae210724ea58d1bd6cb0f626",
+    "peer_refs_unchanged": true,
+    "hosts_idle": true
+  },
+  "charge_notes": [
+    "v22 precheck: 4 pytest runs on dllm scratch copy, 16.52 s, no generation",
+    "v22 CP-A calibration 372acfa: mpk 46.17 s + dllm 47.17 s, 3 captures each",
+    "v22 validation 4cfbf7a: mpk 78.14 s + dllm 74.35 s, 3 captures each",
+    "v23 precheck pytest x2 on dllm scratch: 10.38 s, 0 captures",
+    "Track E observation parity b80d116 mpk+dllm: 80.07 s, 6 captures",
+    "Track P qualification 71e277c (harness bug after first group) mpk+dllm: 66.40 s, 6 captures",
+    "Track P qualification 6af4d42 complete mpk+dllm: 98.84 s, 6 captures",
+    "bootstrap6 lb_preview mpk 968.91 s + dllm 1065.28 s, 48 executions, 0 failures",
+    "bootstrap6 aime mpk 1836.97 s + dllm 1643.41 s, 96 executions, 0 failures",
+    "lb_rest launch refused by prefix rule before generation (6af4d42): 3.82 s, 0 executions",
+    "bootstrap6 lb_rest (separate run dir bootstrap6_001_lbrest, deploy dc52522, same protocol, method sources byte-identical): mpk 1782.23 s + dllm 1615.24 s, 96 executions (48 per host)",
+    "v24 direct-cost profile 3ae5e1d mpk+dllm: 952.35 s, 6 executions",
+    "v24 RULER stage 5cedc12 mpk+dllm (first launch refused by stale 05:52 deadline, 0 s): 132.17 s, 90 executions",
+    "v24 observation components d12b0be mpk+dllm: 80.98 s, 6 executions",
+    "v24 route alignment probe 526580d mpk+dllm: 81.00 s, 6 executions",
+    "v25 aligned16 qualification 3ee9857 mpk+dllm: 717.86 s, 6 captures",
+    "v25 direct-cost profile (arm-set v25) mpk+dllm: 811.01 s, 6 captures",
+    "v25 aligned6 pilot 90/90: mpk 1457.59 s + dllm 1390.27 s",
+    "v25b bridge 16/16 (separate allocation): 561.09 s"
+  ],
+  "decision": "Direct cost measured; BO/A observation dominated by route kernel (odd-K 2.6x slower/key). Candidate aligned_route_k16 is not bit-exact (summary z/mu, producer) -> numerical variant, not applied. No M3-specific E2E gain plausible; LB expansion not run.",
+  "panel": {
+    "protocol": "v21_bootstrap6_b8b2c59449fd0ebf",
+    "executions": "240/240",
+    "failures": 0,
+    "bindings": {
+      "lb_preview+aime": "6af4d42 run dir bootstrap6_001",
+      "lb_rest": "dc52522 run dir bootstrap6_001_lbrest"
+    },
+    "report": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/bootstrap6_report.md"
+  },
+  "remaining": {
+    "gpu_process_seconds": 3944.499057388304,
+    "executions": 2
+  },
+  "gpu_authorization": {
+    "single_source": "E:/dlm/gpu_authorization.json",
+    "current": "user standing authorization (GPUs are the user own; no approval needed), recorded 2026-09-28T15:42Z"
+  },
+  "v24_cpu": {
+    "audit": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/v24_audit.md (PASS, 120/120)",
+    "errata": "results/m3_numeric_trajectory_bridge_20260927/v23_bootstrap6/v24_errata_and_audit.md",
+    "direct_cost_harness": "scripts/v24_profile.py; CPU-validated derived configs on both hosts at deploy v24_cpu_3ae5e1d (bindings/v24_cpu_3ae5e1d/profile.json)"
+  },
+  "ruler_stage": {
+    "protocol": "v21_bootstrap6_ruler_4dbecd0c10841a11",
+    "private": "E:/dlm/v23_private/bootstrap6_ruler_001",
+    "planned": 90,
+    "status": "complete 90/90, all arms 12/13; scored ruler_scored.*"
+  },
+  "gpu_stop_utc_history": [
+    "2026-09-28T05:52:00Z",
+    "2026-09-28T09:30:00Z"
+  ],
+  "v25": {
+    "candidate": "route_storage=aligned16 (named numerical-implementation variant)",
+    "qualification": "scripts/v21b_geometry_capture.py --aligned-qualification (parent vs aligned16 M1/M3/B, full A/D/H)",
+    "direct_cost": "scripts/v24_profile.py --arm-set v25 (native, M3 boot, M3 boot aligned16, B boot, B boot aligned16)",
+    "pilot": {
+      "protocol": "v25_aligned6_pilot_56d3b98fe1261756",
+      "private": "E:/dlm/v25_private/aligned6_pilot_001",
+      "planned": 90
+    },
+    "cpu_tests": "43 passed, 3 GPU-only skipped on both hosts at deploy v25_cpu_6fa9043",
+    "not_run": [
+      "parallel-summary builder probe (ceiling <=2-4%, cannot change M3 vs T/B ordering; 2 executions left)"
+    ],
+    "result": "aligned16 qualified (logits/decisions/tokens identical on all tested); direct odd-K LB BO/A -8-9%; request effect ~0 (LB 1.001); builder probe not run"
+  },
+  "v25b_bridge_allocation": {
+    "executions": 16,
+    "gpu_process_seconds_max": 1800,
+    "source": "v25b CP2 (16-execution bridge) under the user standing GPU authorization; separate from the exhausted 512-execution campaign ledger, which is NOT reset",
+    "protocol": "v25b_aligned_bridge_2dafaf7cd531bff3",
+    "used_executions": 16,
+    "used_seconds": 561.09,
+    "status": "complete"
+  },
+  "campaign_ledger": {
+    "executions_frozen_cap": 512,
+    "campaign_executions": 510,
+    "extra_allocations": {
+      "v25b_bridge": 16
+    }
+  },
+  "v26_budget": {
+    "gpu_process_hours_max": 12,
+    "executions_max": 1800,
+    "used_gpu_process_seconds": 2856.5334662914274,
+    "used_executions": 84,
+    "note": "independent v26 allocation; historical 512 ledger and v25b 16 are closed and not reset",
+    "charges": [
+      "M2 kernel/regression test suite on dllm: 419.2 s (incl. failed first run 4.4 s)",
+      "v26_seven panel 84/84: mpk 1800.41 s + dllm 636.92 s"
+    ]
+  },
+  "v26": {
+    "seven_panel": "v26_seven_99cf56d6ef8412d7 (84)",
+    "results_dir": "results/m1_m2_m3_frontier_v26_20260928"
+  }
+}

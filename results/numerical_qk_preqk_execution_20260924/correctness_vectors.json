@@ -1,0 +1,295 @@
+{
+  "correct_counts": {
+    "M1": 0,
+    "M1_routing_only": 3,
+    "M3": 0,
+    "M3R2_routing_only": 2,
+    "fresh_junyu_T": 3,
+    "native_dense": 3
+  },
+  "ids": [
+    "aime26/2",
+    "aime26/8",
+    "aime26/14",
+    "aime26/20"
+  ],
+  "note": "Correctness vectors are element-wise over the four development IDs. Equal correct-counts are NOT vector identity and are NOT population noninferiority evidence (four questions, one seed).",
+  "pairwise": {
+    "M1 vs M1_routing_only": "different count (0/4 vs 3/4)",
+    "M1 vs M3": "identical per-ID correctness vector",
+    "M1 vs M3R2_routing_only": "different count (0/4 vs 2/4)",
+    "M1 vs fresh_junyu_T": "different count (0/4 vs 3/4)",
+    "M1 vs native_dense": "different count (0/4 vs 3/4)",
+    "M1_routing_only vs M3": "different count (3/4 vs 0/4)",
+    "M1_routing_only vs M3R2_routing_only": "different count (3/4 vs 2/4)",
+    "M1_routing_only vs fresh_junyu_T": "same 3/4-style count (3/4) but DIFFERENT per-ID vector -- different questions missed",
+    "M1_routing_only vs native_dense": "identical per-ID correctness vector",
+    "M3 vs M3R2_routing_only": "different count (0/4 vs 2/4)",
+    "M3 vs fresh_junyu_T": "different count (0/4 vs 3/4)",
+    "M3 vs native_dense": "different count (0/4 vs 3/4)",
+    "M3R2_routing_only vs fresh_junyu_T": "different count (2/4 vs 3/4)",
+    "M3R2_routing_only vs native_dense": "different count (2/4 vs 3/4)",
+    "fresh_junyu_T vs native_dense": "same 3/4-style count (3/4) but DIFFERENT per-ID vector -- different questions missed"
+  },
+  "per_id": {
+    "M1": {
+      "aime26/14": {
+        "canvases": 32,
+        "capped": true,
+        "correct": false,
+        "output_tokens": 8192,
+        "total_calls": 1525,
+        "unparsed": true,
+        "wall_seconds": 328.2401758208871
+      },
+      "aime26/2": {
+        "canvases": 27,
+        "capped": false,
+        "correct": false,
+        "output_tokens": 6657,
+        "total_calls": 908,
+        "unparsed": true,
+        "wall_seconds": 211.3513059259858
+      },
+      "aime26/20": {
+        "canvases": 32,
+        "capped": true,
+        "correct": false,
+        "output_tokens": 8192,
+        "total_calls": 1042,
+        "unparsed": true,
+        "wall_seconds": 203.56914807693101
+      },
+      "aime26/8": {
+        "canvases": 32,
+        "capped": true,
+        "correct": false,
+        "output_tokens": 8192,
+        "total_calls": 1513,
+        "unparsed": true,
+        "wall_seconds": 273.4632233339362
+      }
+    },
+    "M1_routing_only": {
+      "aime26/14": {
+        "canvases": 32,
+        "capped": true,
+        "correct": false,
+        "output_tokens": 8192,
+        "total_calls": 472,
+        "unparsed": false
+      },
+      "aime26/2": {
+        "canvases": 16,
+        "capped": false,
+        "correct": true,
+        "output_tokens": 4040,
+        "total_calls": 164,
+        "unparsed": false
+      },
+      "aime26/20": {
+        "canvases": 12,
+        "capped": false,
+        "correct": true,
+        "output_tokens": 2986,
+        "total_calls": 129,
+        "unparsed": false
+      },
+      "aime26/8": {
+        "canvases": 20,
+        "capped": false,
+        "correct": true,
+        "output_tokens": 4993,
+        "total_calls": 257,
+        "unparsed": false
+      }
+    },
+    "M3": {
+      "aime26/14": {
+        "canvases": 7,
+        "capped": false,
+        "correct": false,
+        "output_tokens": 1696,
+        "total_calls": 327,
+        "unparsed": true,
+        "wall_seconds": 47.21510676201433
+      },
+      "aime26/2": {
+        "canvases": 32,
+        "capped": true,
+        "correct": false,
+        "output_tokens": 8192,
+        "total_calls": 1289,
+        "unparsed": true,
+        "wall_seconds": 195.83703711791895
+      },
+      "aime26/20": {
+        "canvases": 32,
+        "capped": true,
+        "correct": false,
+        "output_tokens": 8192,
+        "total_calls": 1506,
+        "unparsed": true,
+        "wall_seconds": 212.93086220696568
+      },
+      "aime26/8": {
+        "canvases": 32,
+        "capped": true,
+        "correct": false,
+        "output_tokens": 8192,
+        "total_calls": 1420,
+        "unparsed": true,
+        "wall_seconds": 208.01337244687602
+      }
+    },
+    "M3R2_routing_only": {
+      "aime26/14": {
+        "canvases": 32,
+        "capped": true,
+        "correct": false,
+        "output_tokens": 8192,
+        "total_calls": 627,
+        "unparsed": true
+      },
+      "aime26/2": {
+        "canvases": 14,
+        "capped": false,
+        "correct": true,
+        "output_tokens": 3395,
+        "total_calls": 148,
+        "unparsed": false
+      },
+      "aime26/20": {
+        "canvases": 32,
+        "capped": true,
+        "correct": false,
+        "output_tokens": 8192,
+        "total_calls": 664,
+        "unparsed": true
+      },
+      "aime26/8": {
+        "canvases": 14,
+        "capped": false,
+        "correct": true,
+        "output_tokens": 3552,
+        "total_calls": 173,
+        "unparsed": false
+      }
+    },
+    "fresh_junyu_T": {
+      "aime26/14": {
+        "canvases": 29,
+        "capped": false,
+        "correct": true,
+        "output_tokens": 7276,
+        "total_calls": 401,
+        "unparsed": false,
+        "wall_seconds": 64.42254605097696
+      },
+      "aime26/2": {
+        "canvases": 25,
+        "capped": false,
+        "correct": true,
+        "output_tokens": 6368,
+        "total_calls": 208,
+        "unparsed": false,
+        "wall_seconds": 38.21687605511397
+      },
+      "aime26/20": {
+        "canvases": 11,
+        "capped": false,
+        "correct": false,
+        "output_tokens": 2777,
+        "total_calls": 133,
+        "unparsed": false,
+        "wall_seconds": 21.82944390294142
+      },
+      "aime26/8": {
+        "canvases": 19,
+        "capped": false,
+        "correct": true,
+        "output_tokens": 4807,
+        "total_calls": 197,
+        "unparsed": false,
+        "wall_seconds": 35.03625515801832
+      }
+    },
+    "native_dense": {
+      "aime26/14": {
+        "canvases": 32,
+        "capped": true,
+        "correct": false,
+        "output_tokens": 8192,
+        "total_calls": 438,
+        "unparsed": true,
+        "wall_seconds": 64.4640221730806
+      },
+      "aime26/2": {
+        "canvases": 20,
+        "capped": false,
+        "correct": true,
+        "output_tokens": 4941,
+        "total_calls": 146,
+        "unparsed": false,
+        "wall_seconds": 25.30220500100404
+      },
+      "aime26/20": {
+        "canvases": 32,
+        "capped": false,
+        "correct": true,
+        "output_tokens": 8161,
+        "total_calls": 370,
+        "unparsed": false,
+        "wall_seconds": 55.348785219946876
+      },
+      "aime26/8": {
+        "canvases": 16,
+        "capped": false,
+        "correct": true,
+        "output_tokens": 3945,
+        "total_calls": 132,
+        "unparsed": false,
+        "wall_seconds": 20.112240607850254
+      }
+    }
+  },
+  "schema": "preqk_correctness_vectors_v1",
+  "vectors": {
+    "M1": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "M1_routing_only": [
+      true,
+      true,
+      false,
+      true
+    ],
+    "M3": [
+      false,
+      false,
+      false,
+      false
+    ],
+    "M3R2_routing_only": [
+      true,
+      true,
+      false,
+      false
+    ],
+    "fresh_junyu_T": [
+      true,
+      true,
+      true,
+      false
+    ],
+    "native_dense": [
+      true,
+      true,
+      false,
+      true
+    ]
+  }
+}

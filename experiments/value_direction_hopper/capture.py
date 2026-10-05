@@ -15,7 +15,7 @@ from experiments.diffusion_gemma_solattn_blasst_multibench.runner import _instal
 from experiments.diffusion_gemma_value_aware_followup.protocol import MODEL, REVISION
 from experiments.diffusion_gemma_jl_output_aware.projections import Projections
 
-SOURCE = Path(__file__).resolve().parents[2]/'results'/'diffusion_gemma_ruler4k_value_direction_s70_v19'
+SOURCE = Path('results/diffusion_gemma_ruler4k_value_direction_s70_v19')
 
 
 class Complete(Exception):

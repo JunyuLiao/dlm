@@ -1,0 +1,196 @@
+{
+  "peer_source_commit": "b890ff49488474c5d476df44019597dc045a5969",
+  "returncode": 0,
+  "cuda_initialized": false,
+  "gpu_reserved_seconds": 0,
+  "tests": [
+    {
+      "name": "test_t_prior_is_bounded_and_protects_missing_history",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.002,
+      "result": "passed"
+    },
+    {
+      "name": "test_hybrid_and_run_length_variants_are_bounded",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_confidence_tail_keeps_absolute_uncertainty_and_lifts_only_tail",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_confidence_tail_q_zero_is_base_and_first_call_is_protected",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_confidence_tail_parameters_are_validated[C_tail]",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_confidence_tail_ties_batch_and_permutation",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_confidence_tail_completed_history_uniform_thresholds_and_reset",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_margin_confidence_and_smooth_temporal_priors_match_causal_formulas",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_causal_variants_require_their_previous_step_signal",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_t_prior_relaxes_stable_accepted_queries_but_keeps_flips_high",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_t_prior_state_starts_protected_and_uses_only_previous_acceptance",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_t_prior_canvas_reset_restores_protected_prior",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_all_causal_variants_start_at_maximum_sensitivity",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_smooth_prior_uses_a_slower_trajectory_ema",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_hybrid_state_uses_previous_confidence_drift_only",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_uniform_state_reuses_one_threshold_pair_on_every_call",
+      "classname": "tests.test_query_sensitivity_uniform",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_gate_formula_and_missing_stability_protects[M_gate]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_gate_formula_and_missing_stability_protects[M_gate_norm]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_gate_formula_and_missing_stability_protects[C_gate]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_gate_formula_and_missing_stability_protects[T_gate]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_gate_formula_and_missing_stability_protects[C_gate_soft]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_gate_causal_reset_and_uniform_thresholds[M_gate]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.002,
+      "result": "passed"
+    },
+    {
+      "name": "test_gate_causal_reset_and_uniform_thresholds[M_gate_norm]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.002,
+      "result": "passed"
+    },
+    {
+      "name": "test_gate_causal_reset_and_uniform_thresholds[C_gate]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.002,
+      "result": "passed"
+    },
+    {
+      "name": "test_gate_causal_reset_and_uniform_thresholds[T_gate]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_gate_causal_reset_and_uniform_thresholds[C_gate_soft]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.002,
+      "result": "passed"
+    },
+    {
+      "name": "test_normalized_margin_is_frozen_log_clip",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_invalid_gate_parameter_rejected[0.0]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_invalid_gate_parameter_rejected[-1.0]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_invalid_gate_parameter_rejected[nan]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.001,
+      "result": "passed"
+    },
+    {
+      "name": "test_invalid_gate_parameter_rejected[inf]",
+      "classname": "tests.test_query_sensitivity_gated",
+      "seconds": 0.001,
+      "result": "passed"
+    }
+  ],
+  "execution_scope": "Peer original CPU formula tests only; no model or CUDA kernel qualification",
+  "source_modified": false
+}

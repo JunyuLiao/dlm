@@ -1,0 +1,582 @@
+{
+  "schema": "v27_intake_cpu_audit_v1",
+  "reviewed_local": "2026-10-01 22:45 UTC-5",
+  "audited_base_commit": "6b13fe178",
+  "gpu_seconds": 0,
+  "unit_tests": 17,
+  "panels": [
+    {
+      "panel": "lb_e4",
+      "cells": 288,
+      "runs": 2304,
+      "changed_point_or_quality_fields": 0,
+      "status": "pass",
+      "host_counts": [
+        96,
+        96,
+        96
+      ],
+      "timed_new_graph_runs": 0,
+      "unknown_graph_runs": 0,
+      "carry_by_host": []
+    },
+    {
+      "panel": "lb_e5",
+      "cells": 288,
+      "runs": 2016,
+      "changed_point_or_quality_fields": 0,
+      "status": "pass",
+      "host_counts": [
+        96,
+        96,
+        96
+      ],
+      "timed_new_graph_runs": 0,
+      "unknown_graph_runs": 0,
+      "carry_by_host": [
+        {
+          "dataset": "longbench_v2_32k",
+          "arm": "B_A64_fused_rp_async_c0_fa4",
+          "ratios": [
+            {
+              "n": 48,
+              "W": 0.8751,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 48,
+              "W": 0.9839,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 48,
+              "W": 0.9384,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_32k",
+          "arm": "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+          "ratios": [
+            {
+              "n": 48,
+              "W": 0.8201,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 48,
+              "W": 0.9416,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 48,
+              "W": 0.9667,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "B_A64_fused_rp_async_c0_fa4",
+          "ratios": [
+            {
+              "n": 48,
+              "W": 0.89,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 48,
+              "W": 0.8551,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 48,
+              "W": 0.8296,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+          "ratios": [
+            {
+              "n": 48,
+              "W": 0.8416,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 48,
+              "W": 0.8938,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 48,
+              "W": 0.826,
+              "host_alias": "dlm2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "panel": "lb96k_e6",
+      "cells": 36,
+      "runs": 252,
+      "changed_point_or_quality_fields": 0,
+      "status": "pass",
+      "host_counts": [
+        18,
+        18
+      ],
+      "timed_new_graph_runs": 0,
+      "unknown_graph_runs": 0,
+      "carry_by_host": [
+        {
+          "dataset": "longbench_v2_96k",
+          "arm": "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+          "ratios": [
+            {
+              "n": 18,
+              "W": 0.7124,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 18,
+              "W": 0.7761,
+              "host_alias": "dllm"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "panel": "lb96k_e6b",
+      "cells": 30,
+      "runs": 210,
+      "changed_point_or_quality_fields": 0,
+      "status": "pass",
+      "host_counts": [
+        10,
+        10,
+        10
+      ],
+      "timed_new_graph_runs": 0,
+      "unknown_graph_runs": 0,
+      "carry_by_host": [
+        {
+          "dataset": "longbench_v2_96k",
+          "arm": "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+          "ratios": [
+            {
+              "n": 10,
+              "W": 0.9881,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 10,
+              "W": 0.9485,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 10,
+              "W": 0.8491,
+              "host_alias": "dlm2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "panel": "aime_e7",
+      "cells": 180,
+      "runs": 1260,
+      "changed_point_or_quality_fields": 0,
+      "status": "pass",
+      "host_counts": [
+        60,
+        60,
+        60
+      ],
+      "timed_new_graph_runs": 3,
+      "unknown_graph_runs": 0,
+      "carry_by_host": [
+        {
+          "dataset": "aime26",
+          "arm": "B_A64_fused_rp_async_m1ln2_c0_gate2k_fa4",
+          "ratios": [
+            {
+              "n": 60,
+              "W": 1.0672,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 60,
+              "W": 1.0228,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 60,
+              "W": 1.0829,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "aime26",
+          "arm": "M3_R6_A64_fused_dp_async_m1ln2_c0_gate2k_fa4",
+          "ratios": [
+            {
+              "n": 60,
+              "W": 1.0135,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 60,
+              "W": 0.9695,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 60,
+              "W": 1.0334,
+              "host_alias": "dlm2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "panel": "aime_e8",
+      "cells": 180,
+      "runs": 1440,
+      "changed_point_or_quality_fields": 0,
+      "status": "pass",
+      "host_counts": [
+        60,
+        60,
+        60
+      ],
+      "timed_new_graph_runs": 3,
+      "unknown_graph_runs": 0,
+      "carry_by_host": []
+    },
+    {
+      "panel": "lb64_e9",
+      "cells": 96,
+      "runs": 576,
+      "changed_point_or_quality_fields": 0,
+      "status": "pass",
+      "host_counts": [
+        32,
+        32,
+        32
+      ],
+      "timed_new_graph_runs": 0,
+      "unknown_graph_runs": 0,
+      "carry_by_host": [
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "M2c_R6_A64_fused_dp_async_topk88_c0_fa4",
+          "ratios": [
+            {
+              "n": 32,
+              "W": 0.8424,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 32,
+              "W": 0.9855,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 32,
+              "W": 0.8437,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+          "ratios": [
+            {
+              "n": 32,
+              "W": 0.8182,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 32,
+              "W": 0.8995,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 32,
+              "W": 0.8219,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "M3_R6_A64_fused_dp_async_topk88_c0_fa4",
+          "ratios": [
+            {
+              "n": 32,
+              "W": 0.8383,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 32,
+              "W": 0.9617,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 32,
+              "W": 0.8442,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "M3_R6_A64_fused_dp_async_topk88_mass_c0_fa4",
+          "ratios": [
+            {
+              "n": 32,
+              "W": 0.8122,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 32,
+              "W": 0.9104,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 32,
+              "W": 0.8151,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "M3_R6_A64_fused_dp_async_topk88_r8_c0_fa4",
+          "ratios": [
+            {
+              "n": 32,
+              "W": 0.8332,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 32,
+              "W": 0.9129,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 32,
+              "W": 0.8199,
+              "host_alias": "dlm2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "panel": "lb_e10",
+      "cells": 192,
+      "runs": 576,
+      "changed_point_or_quality_fields": 0,
+      "status": "pass",
+      "host_counts": [
+        64,
+        64,
+        64
+      ],
+      "timed_new_graph_runs": 0,
+      "unknown_graph_runs": 0,
+      "carry_by_host": [
+        {
+          "dataset": "longbench_v2_32k",
+          "arm": "M2c_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+          "ratios": [
+            {
+              "n": 32,
+              "W": 0.7646,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 32,
+              "W": 0.9817,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 32,
+              "W": 0.9618,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_32k",
+          "arm": "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+          "ratios": [
+            {
+              "n": 32,
+              "W": 0.7876,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 32,
+              "W": 0.9726,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 32,
+              "W": 0.9793,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "M2c_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+          "ratios": [
+            {
+              "n": 32,
+              "W": 0.8111,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 32,
+              "W": 0.8366,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 32,
+              "W": 0.8434,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4",
+          "ratios": [
+            {
+              "n": 32,
+              "W": 0.8129,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 32,
+              "W": 0.9035,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 32,
+              "W": 0.8214,
+              "host_alias": "dlm2"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "panel": "lb64_e11",
+      "cells": 48,
+      "runs": 192,
+      "changed_point_or_quality_fields": 0,
+      "status": "pass",
+      "host_counts": [
+        16,
+        16,
+        16
+      ],
+      "timed_new_graph_runs": 0,
+      "unknown_graph_runs": 0,
+      "carry_by_host": [
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "M2c_R6_A64_fused_dp_async_topk95_c0_fa4",
+          "ratios": [
+            {
+              "n": 16,
+              "W": 0.9111,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 16,
+              "W": 0.8419,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 16,
+              "W": 0.9667,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "M3_R6_A64_fused_dp_async_topk95_c0_fa4",
+          "ratios": [
+            {
+              "n": 16,
+              "W": 0.95,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 16,
+              "W": 0.859,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 16,
+              "W": 0.8556,
+              "host_alias": "dlm2"
+            }
+          ]
+        },
+        {
+          "dataset": "longbench_v2_64k",
+          "arm": "M3_R6_A64_fused_dp_async_topk95_mass_c0_fa4",
+          "ratios": [
+            {
+              "n": 16,
+              "W": 0.8389,
+              "host_alias": "mpk"
+            },
+            {
+              "n": 16,
+              "W": 0.9075,
+              "host_alias": "dllm"
+            },
+            {
+              "n": 16,
+              "W": 0.9282,
+              "host_alias": "dlm2"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "ci_note": "Historical estimator unchanged; point metrics and quality recomputed; published CIs and CSVs not rewritten",
+  "longbench_v2": {
+    "items": 503,
+    "min_input_tokens": 10334,
+    "median_input_tokens": 107706,
+    "max_input_tokens": 5174028,
+    "inputs_at_most_95074": 224,
+    "context_limit": 262144,
+    "output_reservation": 8192,
+    "within_context_with_output": 400,
+    "input_alone_within_context": 402,
+    "input_alone_over_context": 101
+  },
+  "humaneval": {
+    "tasks": 164,
+    "generations_per_arm_with_6_seeds": 984
+  }
+}

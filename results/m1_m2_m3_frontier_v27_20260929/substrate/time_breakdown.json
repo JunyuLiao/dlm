@@ -1,0 +1,45 @@
+{
+ "script": "scripts/v27_time_breakdown.py (commit 7a7d2584a)",
+ "host": "mpk (H100 80GB), deploy v27_devmpk4_c4d31e5, run dir v27_dev_mpk4_001, substrate piecewise_v2, 2026-09-30",
+ "caveats": [
+  "Part A is ONE request per dataset (index 0), second of two attempts; decoder-call counts differ between arms because trajectories differ, so request walls across arms are not a paired effect estimate.",
+  "Part B is eager and profiled; its 'other' is inflated by eager elementwise work that inductor fuses. Only its core-attention kernels (the same kernels the compiled forward runs) are used below.",
+  "Part C/D (kernel tables) ran at 32K only; the 64K run hit OOM when another user's job took 8 GB of the GPU mid-run and was not retried while that job ran.",
+  "Kernel tables are hand-transcribed from the run output (top entries only)."
+ ],
+ "A_request_level": {
+  "longbench_v2_32k (34,879 prompt tokens)": {
+   "D_fa4_allkept": {"wall_s": 4.391, "calls": 55, "prefill_s": 1.728, "decoder_forward_s": 1.812, "forward_median_ms": 33.61, "step_other_than_forward_s": 0.249, "encoder_appends_s": 0.217},
+   "B_A64_fused_rp_async_fa4": {"wall_s": 4.013, "calls": 50, "prefill_s": 1.727, "decoder_forward_s": 1.457, "forward_median_ms": 28.13, "step_other_than_forward_s": 0.232, "encoder_appends_s": 0.219},
+   "M3_R6_A64_fused_dp_async_fa4": {"wall_s": 3.935, "calls": 47, "prefill_s": 1.732, "decoder_forward_s": 1.394, "forward_median_ms": 28.82, "step_other_than_forward_s": 0.218, "encoder_appends_s": 0.219}
+  },
+  "longbench_v2_64k (74,999 prompt tokens)": {
+   "D_fa4_allkept": {"wall_s": 10.226, "calls": 91, "prefill_s": 4.348, "decoder_forward_s": 4.392, "forward_median_ms": 44.15, "step_other_than_forward_s": 0.422, "encoder_appends_s": 0.232},
+   "B_A64_fused_rp_async_fa4": {"wall_s": 8.123, "calls": 59, "prefill_s": 4.351, "decoder_forward_s": 1.965, "forward_median_ms": 30.87, "step_other_than_forward_s": 0.275, "encoder_appends_s": 0.232},
+   "M3_R6_A64_fused_dp_async_fa4": {"wall_s": 7.776, "calls": 62, "prefill_s": 4.356, "decoder_forward_s": 2.072, "forward_median_ms": 31.6, "step_other_than_forward_s": 0.288, "encoder_appends_s": 0.233}
+  }
+ },
+ "B_core_attention_ms_per_forward": {
+  "longbench_v2_32k": {"core_global_5_layers": 7.222, "core_local_25_layers_eager": 1.276, "compiled_forward_ms": 34.29},
+  "longbench_v2_64k": {"core_global_5_layers": 15.373, "core_local_25_layers_eager": 1.248, "compiled_forward_ms": 44.241}
+ },
+ "C_compiled_forward_kernels_32k_ms": {
+  "kernel_busy_total": 32.348,
+  "moe_expert_grouped_gemm (cutlass GroupProblemShape, 60 launches)": 12.772,
+  "global_attention_fa4 (5)": 7.183,
+  "kv_concat CatArrayBatchedCopy (20 launches; decoder attention torch.cat of the encoder cache with the canvas K/V, modeling_diffusion_gemma.py:450-451)": 2.152,
+  "moe_routing sort/topk (radixSort 0.854, gatherTopK 0.252, bitonicSort 0.130)": 1.236,
+  "local_attention cuDNN SDPA flash (25)": 0.825,
+  "dense GEMMs nvjet (projections, dense MLP, router, lm_head, self-conditioning; sum of listed)": 3.49,
+  "self-conditioning softmax (1)": 0.363,
+  "inductor fused norm/elementwise (sum of listed triton kernels)": 1.9,
+  "input copies / misc copies (multi_tensor_apply 0.441, direct copy 0.301, bf16 copy 0.164)": 0.906,
+  "host_calls": {"cudaGraphLaunch": 41, "cudaLaunchKernel": 223, "cuLaunchKernelEx": 16}
+ },
+ "D_step_replay_32k": {
+  "step_ms": 38.677, "forward_ms": 34.117, "step_minus_forward_ms": 4.56, "profiled_kernel_busy_ms": 36.802,
+  "host_syncs": {"cudaStreamSynchronize": 2, "cudaMemcpyAsync": 10},
+  "non_forward_kernels_ms": "about 3.0 in total: fp32 elementwise passes over the 256 x 262,144 logits (add 0.439, div 0.262, mul 0.261, exp 0.176, clamp 0.175, where 0.224), sum reductions 0.298, argmax 0.229, compiled softmax/logsumexp 0.507, multinomial uniform 0.117, 98 device copies 0.272",
+  "sync_sources": "generation_diffusion_gemma._denoising_step `if finished_denoising.any()` and generate `if torch.all(finished_denoising)`"
+ }
+}

@@ -1,0 +1,165 @@
+{
+  "label": "SEPARATE diagnostic: every arm starts from the D_native-captured canvas-1 state (seed 17); only the D_native twin can reproduce a formal trajectory; never spliced into formal accounting",
+  "plan": "attribution_plan.md (fixed before panel output)",
+  "schema": "v15_attribution_twins_v1",
+  "states": {
+    "longbench_v2/66f2aac2821e116aacb2a9de:17:1": {
+      "arms": {
+        "B8_P": {
+          "calls_to_finish": 13,
+          "mean_churn": 0.021511363238096236,
+          "mean_executed_frac": 0.3408146867385277,
+          "mean_prefix_executed_frac": 0.328607547053924,
+          "native_stop": true,
+          "phases": {
+            "anchor": 10,
+            "ordinary": 55
+          },
+          "restored_tiles": 0,
+          "steps_confident_not_stable": 0,
+          "steps_stable_not_confident": 1
+        },
+        "CVM_T": {
+          "calls_to_finish": 17,
+          "mean_churn": 0.06000852279184983,
+          "mean_executed_frac": 0.4930574893074877,
+          "mean_prefix_executed_frac": 0.4836696654558182,
+          "native_stop": true,
+          "phases": {
+            "anchor": 15,
+            "ordinary": 70
+          },
+          "restored_tiles": 19016,
+          "steps_confident_not_stable": 0,
+          "steps_stable_not_confident": 0
+        },
+        "D_native": {
+          "calls_to_finish": 16,
+          "mean_churn": null,
+          "mean_executed_frac": null,
+          "mean_prefix_executed_frac": null,
+          "native_stop": true,
+          "phases": {},
+          "restored_tiles": 0,
+          "steps_confident_not_stable": 0,
+          "steps_stable_not_confident": 0
+        },
+        "T_G": {
+          "calls_to_finish": 12,
+          "mean_churn": 0.12926859483122827,
+          "mean_executed_frac": 0.40881628580391405,
+          "mean_prefix_executed_frac": 0.4002546293040117,
+          "native_stop": true,
+          "phases": {
+            "fresh": 60
+          },
+          "restored_tiles": 0,
+          "steps_confident_not_stable": 1,
+          "steps_stable_not_confident": 0
+        },
+        "T_P": {
+          "calls_to_finish": 13,
+          "mean_churn": 0.12424052963033319,
+          "mean_executed_frac": 0.40510839281173855,
+          "mean_prefix_executed_frac": 0.39409188227011605,
+          "native_stop": true,
+          "phases": {
+            "anchor": 65
+          },
+          "restored_tiles": 0,
+          "steps_confident_not_stable": 0,
+          "steps_stable_not_confident": 0
+        }
+      },
+      "d_native_twin_calls": 16,
+      "d_native_twin_matches_formal": true,
+      "formal_canvas1_calls_other_arms": {
+        "B8_P": 14,
+        "CVM_T": 14,
+        "T_G_original": 14,
+        "T_P": 13
+      },
+      "formal_d_native_canvas1_calls": 16,
+      "prefix_tokens": 17284
+    },
+    "longbench_v2/66f9625fbb02136c067c5456:17:1": {
+      "arms": {
+        "B8_P": {
+          "calls_to_finish": 14,
+          "mean_churn": 0.021601685881614686,
+          "mean_executed_frac": 0.3700954007250922,
+          "mean_prefix_executed_frac": 0.35537800320557184,
+          "native_stop": true,
+          "phases": {
+            "anchor": 10,
+            "ordinary": 60
+          },
+          "restored_tiles": 0,
+          "steps_confident_not_stable": 0,
+          "steps_stable_not_confident": 0
+        },
+        "CVM_T": {
+          "calls_to_finish": 13,
+          "mean_churn": 0.06403158269531559,
+          "mean_executed_frac": 0.5347492969953097,
+          "mean_prefix_executed_frac": 0.5238789507975945,
+          "native_stop": true,
+          "phases": {
+            "anchor": 10,
+            "ordinary": 55
+          },
+          "restored_tiles": 16464,
+          "steps_confident_not_stable": 0,
+          "steps_stable_not_confident": 0
+        },
+        "D_native": {
+          "calls_to_finish": 13,
+          "mean_churn": null,
+          "mean_executed_frac": null,
+          "mean_prefix_executed_frac": null,
+          "native_stop": true,
+          "phases": {},
+          "restored_tiles": 0,
+          "steps_confident_not_stable": 0,
+          "steps_stable_not_confident": 1
+        },
+        "T_G": {
+          "calls_to_finish": 15,
+          "mean_churn": 0.12408879699983767,
+          "mean_executed_frac": 0.4192180358370145,
+          "mean_prefix_executed_frac": 0.40828465551137927,
+          "native_stop": true,
+          "phases": {
+            "fresh": 75
+          },
+          "restored_tiles": 0,
+          "steps_confident_not_stable": 0,
+          "steps_stable_not_confident": 0
+        },
+        "T_P": {
+          "calls_to_finish": 16,
+          "mean_churn": 0.1190810503065586,
+          "mean_executed_frac": 0.42734731584787367,
+          "mean_prefix_executed_frac": 0.4139675826765597,
+          "native_stop": true,
+          "phases": {
+            "anchor": 80
+          },
+          "restored_tiles": 0,
+          "steps_confident_not_stable": 0,
+          "steps_stable_not_confident": 1
+        }
+      },
+      "d_native_twin_calls": 13,
+      "d_native_twin_matches_formal": true,
+      "formal_canvas1_calls_other_arms": {
+        "B8_P": 11,
+        "CVM_T": 14,
+        "T_G_original": 12,
+        "T_P": 16
+      },
+      "formal_d_native_canvas1_calls": 13,
+      "prefix_tokens": 13703
+    }
+  }
+}

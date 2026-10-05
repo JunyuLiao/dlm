@@ -1,0 +1,16 @@
+{
+  "qualification_only": true,
+  "complete": false,
+  "deploy_commit": "088dc8184823c4d6332348621af3095a9efc60f4",
+  "dataset": "longbench_v2_96k",
+  "scope": "Longest-input execution qualification only; no accuracy or speed inference.",
+  "arms": [
+    {"arm": "dense", "complete": true, "timed_records": 1, "actual_denoising_forwards": 147, "timed_graphs": 0, "gpu_reserved_seconds": 154.382},
+    {"arm": "native", "complete": true, "timed_records": 1, "actual_denoising_forwards": 157, "timed_graphs": 0, "gpu_reserved_seconds": 165.594},
+    {"arm": "allkept", "complete": true, "timed_records": 1, "actual_denoising_forwards": 198, "timed_graphs": 0, "gpu_reserved_seconds": 165.809},
+    {"arm": "method", "complete": false, "timed_records": 0, "gpu_reserved_seconds": 128.664, "failure": "v20 source byte identity drift: frozen source-hash keys still point to the earlier deploy"}
+  ],
+  "gpu_reserved_seconds": 614.449,
+  "closed_v18_gpu_reserved_seconds": 1370.088,
+  "diagnosis": "git diff 6064109..088dc8184 shows no existing method-core changes; only vllm_adapter.py was added. Rebind source paths only after verifying old and new bytes against unchanged hash values. Do not weaken validation."
+}

@@ -1,0 +1,171 @@
+{
+  "schema": "v28_family_spec_v1",
+  "protocol_id": "v28_seed4_preview_20261002",
+  "generation_deploy": "dcfdb8730efff131f92d0a8bbbab514ef1eedf18",
+  "variants": {
+    "dense": {
+      "spec": "v28_q128_request_clear_seed4.json",
+      "arm": "dense",
+      "binding_variant": "q128"
+    },
+    "native": {
+      "spec": "v28_q128_request_clear_seed4.json",
+      "arm": "native",
+      "binding_variant": "q128"
+    },
+    "allkept_release": {
+      "spec": "v28_q128_canvas_release_seed4.json",
+      "arm": "allkept",
+      "binding_variant": "q128_release"
+    },
+    "main_legacy": {
+      "spec": "v28_q128_request_clear_seed4.json",
+      "arm": "method",
+      "binding_variant": "q128"
+    },
+    "main_release": {
+      "spec": "v28_q128_canvas_release_seed4.json",
+      "arm": "method",
+      "binding_variant": "q128_release"
+    },
+    "q64_release": {
+      "spec": "v28_q64_canvas_release_seed4.json",
+      "arm": "method",
+      "binding_variant": "q64_release"
+    }
+  },
+  "launch_order": [
+    {
+      "block": 0,
+      "variant": "dense"
+    },
+    {
+      "block": 0,
+      "variant": "main_legacy"
+    },
+    {
+      "block": 0,
+      "variant": "main_release"
+    },
+    {
+      "block": 0,
+      "variant": "q64_release"
+    },
+    {
+      "block": 0,
+      "variant": "native"
+    },
+    {
+      "block": 0,
+      "variant": "allkept_release"
+    },
+    {
+      "block": 1,
+      "variant": "allkept_release"
+    },
+    {
+      "block": 1,
+      "variant": "native"
+    },
+    {
+      "block": 1,
+      "variant": "q64_release"
+    },
+    {
+      "block": 1,
+      "variant": "main_release"
+    },
+    {
+      "block": 1,
+      "variant": "main_legacy"
+    },
+    {
+      "block": 1,
+      "variant": "dense"
+    },
+    {
+      "block": 2,
+      "variant": "dense"
+    },
+    {
+      "block": 2,
+      "variant": "main_legacy"
+    },
+    {
+      "block": 2,
+      "variant": "main_release"
+    },
+    {
+      "block": 2,
+      "variant": "q64_release"
+    },
+    {
+      "block": 2,
+      "variant": "native"
+    },
+    {
+      "block": 2,
+      "variant": "allkept_release"
+    },
+    {
+      "block": 3,
+      "variant": "allkept_release"
+    },
+    {
+      "block": 3,
+      "variant": "native"
+    },
+    {
+      "block": 3,
+      "variant": "q64_release"
+    },
+    {
+      "block": 3,
+      "variant": "main_release"
+    },
+    {
+      "block": 3,
+      "variant": "main_legacy"
+    },
+    {
+      "block": 3,
+      "variant": "dense"
+    }
+  ],
+  "comparison_pairs": [
+    [
+      "main_release",
+      "dense"
+    ],
+    [
+      "q64_release",
+      "dense"
+    ],
+    [
+      "q64_release",
+      "main_release"
+    ],
+    [
+      "main_release",
+      "main_legacy"
+    ],
+    [
+      "allkept_release",
+      "dense"
+    ],
+    [
+      "native",
+      "dense"
+    ],
+    [
+      "main_release",
+      "allkept_release"
+    ]
+  ],
+  "qualification_gate": "qualification004 all five request workers complete with explicit intended-path, allocator and zero monitored timed JIT events; no overlapping GPU worker",
+  "naming": "legacy means legacy canvas-buffer retention only; every method uses request_clear. release means the same standard canvas-buffer cleanup in main/q64/allkept.",
+  "sampling": "6 fixed E14 question clusters x 4 engine seeds x 2 sequential repeats = 48 timed requests per variant; 288 timed +144 warm across24 fresh engines; repeat labels are not request seeds.",
+  "statistics": "Preview only. Paired geometric W/S/P/SN/N, question-cluster 95% bootstrap intervals, correctness and by-engine-seed N distributions. Two questions per bin cannot establish accuracy noninferiority or a request-level headline.",
+  "privacy": "Private binding paths/cells/gold/completions remain private; publish aggregates only.",
+  "runtime": "Same mpk H100/deploy/OMP1/settings/items/engine seeds; alternating within-block variant order. Immutable fresh run dirs; failures preserved and separately bound restart if needed."
+}

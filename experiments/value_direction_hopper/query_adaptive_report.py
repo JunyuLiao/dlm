@@ -224,7 +224,7 @@ def report(root):
     lines+=['','Native dense uses the original SDPA backend. Unpruned/weighted runs use the matched H100 kernel and its local-mask convention; '
             'therefore native-vs-kernel differences are not attributable to sparsity alone.','',
             '### Historical BLASST context (not a v4 matched-backend control)','']
-    historical=Path(__file__).resolve().parents[2]/'results'/'value_direction_trajectory_v2'/'summary.json'
+    historical=Path('results/value_direction_trajectory_v2/summary.json')
     if historical.exists():
         old=json.loads(historical.read_text())['summary']
         lines+=['| Archived path | Overall/G/L sparsity | Accuracy | Total calls | Interpretation |',

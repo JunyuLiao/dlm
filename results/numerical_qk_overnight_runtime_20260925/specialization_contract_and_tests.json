@@ -1,0 +1,107 @@
+{
+  "bounded_variants": {
+    "global_max": "2 geometries x 5 classes x production modes; 65 variants in the synthetic contract, 54 for the production-mode warmup",
+    "per_request": "K low 4 bits are constant within a request (each canvas adds 256; local crop is a multiple of 64): 1-2 alignment classes, 7 real misses per request here"
+  },
+  "compile_time_modes": [
+    "Q=256",
+    "H",
+    "HK",
+    "D",
+    "QB",
+    "R",
+    "RP",
+    "THRESHOLD (2 frozen values)",
+    "TRACE",
+    "STORE",
+    "LOAD",
+    "WINDOW",
+    "KDIV in {1,2,4,8,16}"
+  ],
+  "do_not_specialize": [
+    "K",
+    "KT",
+    "PREFIX_TILES (route)"
+  ],
+  "first_mismatch": {
+    "cause": "constexpr K lets the compiler prove fp32 row alignment -> different load layout/reduction order; Triton 3.2 integer specialization only tracks %16; tl.multiple_of on a scalar argument had no effect (all K then differed)",
+    "fallback": "pass K/KDIV (unspecialized) and rebuild K = K*KDIV with constexpr KDIV (pow2 <= 16): bit identity restored for every tested K",
+    "finding": "without KDIV, K%16!=0 & K%4==0 (8156, 8556) differed from static in the last ulp of block_z/mu/outputs; both within 4.8e-7 of an FP32 logsumexp reference; decisions identical in that probe"
+  },
+  "kernels": [
+    "_route",
+    "_held_eligible",
+    "_pv",
+    "_preqk_pv"
+  ],
+  "measured": {
+    "generic": {
+      "repeat": {
+        "calls": 24,
+        "compile_or_load_s": 0,
+        "misses": 0,
+        "new_disk_entries": 0
+      },
+      "request": {
+        "calls": 24,
+        "compile_or_load_s": 19.377560548018664,
+        "misses": 13,
+        "new_disk_entries": 13
+      },
+      "unseen_tail": {
+        "calls": 16,
+        "compile_or_load_s": 43.36636235425249,
+        "misses": 52,
+        "new_disk_entries": 52
+      }
+    },
+    "note": "fresh process + empty private cache; request = 12 canvases of a 109-token prompt, local+global; unseen_tail = 8 more lengths incl. new alignment classes; repeat = request again",
+    "static": {
+      "repeat": {
+        "calls": 24,
+        "compile_or_load_s": 0,
+        "misses": 0,
+        "new_disk_entries": 0
+      },
+      "request": {
+        "calls": 24,
+        "compile_or_load_s": 165.2582890947815,
+        "misses": 115,
+        "new_disk_entries": 115
+      },
+      "unseen_tail": {
+        "calls": 16,
+        "compile_or_load_s": 83.15940125682391,
+        "misses": 91,
+        "new_disk_entries": 91
+      }
+    }
+  },
+  "module": "experiments/numerical_qk_reuse/generic_kernels.py",
+  "request_level": {
+    "tokens": "S_generic == S_static == v9 S tokens on /2 and /8, same per-canvas calls/termination"
+  },
+  "runtime_scalars": [
+    "K (passed as K/KDIV)",
+    "KT",
+    "PREFIX_TILES"
+  ],
+  "schema": "v10_specialization_contract_v1",
+  "tests": {
+    "covers": [
+      "textual body identity except K/KT/PREFIX_TILES + KDIV hint",
+      "anchor route+PV with summary STORE (TRACE on)",
+      "route_only legacy and with summary LOAD under changed live T",
+      "preqk consumer trace off/on (production off)",
+      "held bitmap path (_held_eligible + _pv)",
+      "LOCAL h16/hk8/d256/window1024 and GLOBAL h16/hk2/d512 model geometry",
+      "prefix 63/64/65/127/128/129, 365, saturated local 1023 and 1645 (crop), global to 8300 (K 8556)",
+      "all 5 K alignment classes",
+      "NaN score, all-masked rows, all-kept (threshold -inf), sparse (threshold 5)",
+      "bit equality of bitmaps, eligibility, malformed flags, BF16 output, LSE, projected state, risk, invalid flags, summary buffers, physical counters",
+      "variant count bounded; zero compiles for 5 unseen lengths after initialization"
+    ],
+    "file": "tests/test_v10_generic_kernels.py",
+    "result": "35 passed on H100 (commit 901e360)"
+  }
+}

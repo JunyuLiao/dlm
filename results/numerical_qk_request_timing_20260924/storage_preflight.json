@@ -1,0 +1,39 @@
+{
+  "schema": "storage_preflight_v1",
+  "when_utc": "2026-09-25T01:45:40Z",
+  "hostname": "mpk",
+  "host_note": "STATE records host exouser@149.165.151.254; this machine hostname mpk, private IP 10.0.125.34",
+  "root": {
+    "device": "/dev/sda1",
+    "fstype": "ext4",
+    "local_block_device": true,
+    "size_bytes": 1065418129408,
+    "avail_bytes": 62272684032,
+    "inodes_free": 130182129,
+    "inodes_total": 132120576
+  },
+  "large_disk": {
+    "device": "/dev/sdb",
+    "mount": "/media/volume/dllm-1",
+    "fstype": "ext4",
+    "label": "dllm-1",
+    "local_block_device": true,
+    "mount_options": "rw,nosuid,nodev,relatime,user",
+    "avail_bytes": 1039519404032,
+    "inodes_free": 65480338
+  },
+  "other_mounts": {
+    "software": "/software ceph network filesystem, read-only (not used)"
+  },
+  "decision": "Root has ~58 GB free (> 30 GB target) and 98% inodes free: NO migration performed. Nothing moved or deleted.",
+  "bulky_artifact_root": "/media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924 (new, dyh-owned subdirectory)",
+  "untouched": [
+    "~/.triton cache (shared exouser cache, 676M, read/written only by normal JIT use)",
+    "conda env ljy_dlm",
+    "HF model snapshot",
+    "other users/projects under /home/exouser and /media/volume/dllm-1/asr"
+  ],
+  "df_hT": "Filesystem     Type  Size  Used Avail Use% Mounted on\n/dev/sda1      ext4  993G  935G   58G  95% /\n/dev/sdb       ext4  984G   16G  969G   2% /media/volume/dllm-1\n",
+  "df_i": "Filesystem        Inodes   IUsed     IFree IUse% Mounted on\n/dev/sda1      132120576 1938447 130182129    2% /\n/dev/sdb        65536000   55662  65480338    1% /media/volume/dllm-1\n",
+  "lsblk": "NAME    FSTYPE FSVER LABEL           UUID                                 FSAVAIL FSUSE% MOUNTPOINTS\nsda                                                                                      \n\u251c\u2500sda1  ext4   1.0   cloudimg-rootfs aa0bde06-47f6-4049-aaaf-13d052e53961     58G    94% /\n\u251c\u2500sda14                                                                                  \n\u2514\u2500sda15 vfat   FAT32 UEFI            A913-ACAA                              98.3M     6% /boot/efi\nsdb     ext4   1.0   dllm-1          4aab728d-6e1a-4e62-a450-031927663cbf  968.1G     2% /media/volume/dllm-1\n"
+}

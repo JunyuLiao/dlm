@@ -1,0 +1,254 @@
+{
+ "schema": "v27_dense_kernel_bench_v1",
+ "gpu": "NVIDIA H100 80GB HBM3",
+ "torch": "2.13.0+cu130",
+ "h100_bf16_dense_peak_tflops": 989.4,
+ "shape": {
+  "H": 16,
+  "HK": 2,
+  "D": 512,
+  "NQ": 256,
+  "bidirectional": true
+ },
+ "rows": [
+  {
+   "keys": 16640,
+   "gflop": 139.6,
+   "impl": {
+    "dense64_s1": {
+     "ms": 1.5453,
+     "tflops": 90.3,
+     "max_abs_err": 0.00017
+    },
+    "dense64_s2": {
+     "ms": 0.8685,
+     "tflops": 160.7,
+     "max_abs_err": 0.00018
+    },
+    "dense64_s4": {
+     "ms": 0.8804,
+     "tflops": 158.6,
+     "max_abs_err": 0.00018
+    },
+    "sdpa_flash_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_flash_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_repeat_kv": {
+     "ms": 1.6565,
+     "tflops": 84.3,
+     "max_abs_err": 0.00017
+    },
+    "sdpa_cudnn_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_cudnn_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_math_gqa": {
+     "ms": 4.9937,
+     "tflops": 28.0,
+     "max_abs_err": 0.00012
+    },
+    "sdpa_math_repeat_kv": {
+     "ms": 4.8226,
+     "tflops": 28.9,
+     "max_abs_err": 0.00012
+    },
+    "flex_attention_gqa": {
+     "ms": 5.0893,
+     "tflops": 27.4,
+     "max_abs_err": 0.00017
+    },
+    "flex_attention_gqa_m64_n32_s1": {
+     "ms": 5.1314,
+     "tflops": 27.2,
+     "max_abs_err": 0.00017
+    },
+    "flex_attention_gqa_m64_n64_s1": {
+     "ms": 3.2687,
+     "tflops": 42.7,
+     "max_abs_err": 0.00017
+    },
+    "flex_attention_gqa_m32_n64_s1": {
+     "ms": 1.589,
+     "tflops": 87.8,
+     "max_abs_err": 0.00017
+    },
+    "flex_attention_gqa_m64_n32_s2": {
+     "ms": 4.4746,
+     "tflops": 31.2,
+     "max_abs_err": 0.00017
+    },
+    "flashinfer_0.6.18.post1_single_prefill": {
+     "error": "FileNotFoundError: [Errno 2] No such file or directory: 'ninja'"
+    },
+    "vllm_triton_unified": {
+     "error": "ModuleNotFoundError: No module named 'vllm.attention'"
+    }
+   }
+  },
+  {
+   "keys": 32768,
+   "gflop": 274.9,
+   "impl": {
+    "dense64_s1": {
+     "ms": 2.9402,
+     "tflops": 93.5,
+     "max_abs_err": 0.00015
+    },
+    "dense64_s2": {
+     "ms": 1.5544,
+     "tflops": 176.8,
+     "max_abs_err": 0.00015
+    },
+    "dense64_s4": {
+     "ms": 1.548,
+     "tflops": 177.6,
+     "max_abs_err": 0.00014
+    },
+    "sdpa_flash_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_flash_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_repeat_kv": {
+     "ms": 3.1013,
+     "tflops": 88.6,
+     "max_abs_err": 0.00015
+    },
+    "sdpa_cudnn_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_cudnn_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_math_gqa": {
+     "ms": 9.7286,
+     "tflops": 28.3,
+     "max_abs_err": 0.00012
+    },
+    "sdpa_math_repeat_kv": {
+     "ms": 9.6433,
+     "tflops": 28.5,
+     "max_abs_err": 0.00012
+    },
+    "flex_attention_gqa": {
+     "ms": 9.7657,
+     "tflops": 28.1,
+     "max_abs_err": 0.00015
+    },
+    "flex_attention_gqa_m64_n32_s1": {
+     "ms": 9.7901,
+     "tflops": 28.1,
+     "max_abs_err": 0.00015
+    },
+    "flex_attention_gqa_m64_n64_s1": {
+     "ms": 6.1787,
+     "tflops": 44.5,
+     "max_abs_err": 0.00015
+    },
+    "flex_attention_gqa_m32_n64_s1": {
+     "ms": 11.3005,
+     "tflops": 24.3,
+     "max_abs_err": 0.00014
+    },
+    "flex_attention_gqa_m64_n32_s2": {
+     "ms": 11.3454,
+     "tflops": 24.2,
+     "max_abs_err": 0.00014
+    },
+    "flashinfer_0.6.18.post1_single_prefill": {
+     "error": "FileNotFoundError: [Errno 2] No such file or directory: 'ninja'"
+    },
+    "vllm_triton_unified": {
+     "error": "ModuleNotFoundError: No module named 'vllm.attention'"
+    }
+   }
+  },
+  {
+   "keys": 65536,
+   "gflop": 549.8,
+   "impl": {
+    "dense64_s1": {
+     "ms": 5.751,
+     "tflops": 95.6,
+     "max_abs_err": 9e-05
+    },
+    "dense64_s2": {
+     "ms": 2.8762,
+     "tflops": 191.1,
+     "max_abs_err": 9e-05
+    },
+    "dense64_s4": {
+     "ms": 2.859,
+     "tflops": 192.3,
+     "max_abs_err": 9e-05
+    },
+    "sdpa_flash_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_flash_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_efficient_repeat_kv": {
+     "ms": 6.1567,
+     "tflops": 89.3,
+     "max_abs_err": 9e-05
+    },
+    "sdpa_cudnn_gqa": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_cudnn_repeat_kv": {
+     "error": "RuntimeError: No available kernel. Aborting execution."
+    },
+    "sdpa_math_gqa": {
+     "skipped": "math backend materializes scores; skipped above 40K"
+    },
+    "flex_attention_gqa": {
+     "ms": 20.8986,
+     "tflops": 26.3,
+     "max_abs_err": 0.0001
+    },
+    "flex_attention_gqa_m64_n32_s1": {
+     "ms": 20.9029,
+     "tflops": 26.3,
+     "max_abs_err": 0.0001
+    },
+    "flex_attention_gqa_m64_n64_s1": {
+     "ms": 20.881,
+     "tflops": 26.3,
+     "max_abs_err": 0.0001
+    },
+    "flex_attention_gqa_m32_n64_s1": {
+     "ms": 20.8989,
+     "tflops": 26.3,
+     "max_abs_err": 0.0001
+    },
+    "flex_attention_gqa_m64_n32_s2": {
+     "ms": 20.8346,
+     "tflops": 26.4,
+     "max_abs_err": 0.0001
+    },
+    "flashinfer_0.6.18.post1_single_prefill": {
+     "error": "FileNotFoundError: [Errno 2] No such file or directory: 'ninja'"
+    },
+    "vllm_triton_unified": {
+     "error": "ModuleNotFoundError: No module named 'vllm.attention'"
+    }
+   }
+  }
+ ]
+}

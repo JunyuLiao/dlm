@@ -1,0 +1,22 @@
+{
+  "schema": "v20_historical_resource_plan_v1",
+  "stage": "historical_001",
+  "arm": "G75L30_nativeQ128",
+  "scope": "ALL_NATIVE_LEGAL",
+  "note": "New native-Q128 port, not historical vLLM grouping equivalence. Frozen100 first/warm executions paired with immutable core D_native on same question/seed/GPU. Across-stage timing caveat retained. No core retries.",
+  "production_source": "00a2c4d",
+  "wrapper_source": "05f9947",
+  "closed_gpu_process_seconds": 19146.065313577652,
+  "reserved_outer_gpu_process_seconds": {
+    "149.165.151.254": 4000,
+    "149.165.159.64": 4000
+  },
+  "max_campaign_gpu_process_seconds": 28800,
+  "remaining_unreserved_seconds": 1653.934686422348,
+  "closed_generations": 744,
+  "reserved_generations": 100,
+  "max_generations": 1000,
+  "worker_budget_seconds_perhost": 3900,
+  "block_guard_seconds": 900,
+  "deadline": "2026-09-27T19:28:00Z"
+}

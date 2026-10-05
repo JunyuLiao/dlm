@@ -1,0 +1,99 @@
+{
+  "schema": "v21_outer_resources_v1",
+  "completed_stages": [
+    {
+      "host": "mpk",
+      "stage": "cp1_f2fe318",
+      "start_epoch": 1790548955.547128,
+      "pid": 1803322,
+      "command": [
+        "/home/exouser/miniconda3/envs/ljy_dlm/bin/python",
+        "-m",
+        "pytest",
+        "tests/test_v21_output_modes.py",
+        "tests/test_v21_output_gpu.py",
+        "-q"
+      ],
+      "cwd": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/cp1_f2fe318",
+      "maximum_seconds": 900.0,
+      "status": "complete",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "child_pid": 1803327,
+      "returncode": 0,
+      "end_epoch": 1790548966.281716,
+      "charged_process_seconds": 10.734588146209717
+    },
+    {
+      "host": "mpk",
+      "stage": "diagnostic_cp1_f65de1e",
+      "start_epoch": 1790549585.0163507,
+      "pid": 1803942,
+      "command": [
+        "/home/exouser/miniconda3/envs/ljy_dlm/bin/python",
+        "-m",
+        "scripts.v21_numerical_diagnostic",
+        "--config",
+        "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/bindings/cp1_f65de1e/diagnostic.json",
+        "--out",
+        "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/diagnostics/diagnostic_cp1_f65de1e.json"
+      ],
+      "cwd": "/media/volume/dllm-1/dyh/m3_output_numerics_v21_20260927/deploy/cp1_f65de1e",
+      "maximum_seconds": 900.0,
+      "status": "complete",
+      "gpu_uuid": "GPU-6139046a-b005-8fe5-a837-f8270472ab72",
+      "child_pid": 1803947,
+      "returncode": 0,
+      "end_epoch": 1790549653.813964,
+      "charged_process_seconds": 68.7976131439209
+    },
+    {
+      "host": "dllm",
+      "stage": "cp1_f2fe318",
+      "start_epoch": 1790548957.1313667,
+      "pid": 140321,
+      "command": [
+        "/home/exouser/dyh/junyu_frontier_v18_20260926/bridge/runtime/miniconda3/envs/ljy_dlm/bin/python",
+        "-m",
+        "pytest",
+        "tests/test_v21_output_modes.py",
+        "tests/test_v21_output_gpu.py",
+        "-q"
+      ],
+      "cwd": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/cp1_f2fe318",
+      "maximum_seconds": 900.0,
+      "status": "complete",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "child_pid": 140332,
+      "returncode": 0,
+      "end_epoch": 1790548967.362231,
+      "charged_process_seconds": 10.23086428642273
+    },
+    {
+      "host": "dllm",
+      "stage": "diagnostic_cp1_f65de1e",
+      "start_epoch": 1790549584.5769396,
+      "pid": 140853,
+      "command": [
+        "/home/exouser/dyh/junyu_frontier_v18_20260926/bridge/runtime/miniconda3/envs/ljy_dlm/bin/python",
+        "-m",
+        "scripts.v21_numerical_diagnostic",
+        "--config",
+        "/home/exouser/dyh/m3_output_numerics_v21_20260927/bindings/cp1_f65de1e/diagnostic.json",
+        "--out",
+        "/home/exouser/dyh/m3_output_numerics_v21_20260927/diagnostics/diagnostic_cp1_f65de1e.json"
+      ],
+      "cwd": "/home/exouser/dyh/m3_output_numerics_v21_20260927/deploy/cp1_f65de1e",
+      "maximum_seconds": 900.0,
+      "status": "complete",
+      "gpu_uuid": "GPU-fc12ad5c-5334-5509-8fc6-465498fd3915",
+      "child_pid": 140864,
+      "returncode": 0,
+      "end_epoch": 1790549660.5607076,
+      "charged_process_seconds": 75.98376798629761
+    }
+  ],
+  "charged_completed_gpu_seconds": 165.74683356285095,
+  "generation_executions_completed": 6,
+  "generation_executions_reserved_active": 6,
+  "note": "CPU inventories uncharged GPU; every partial native capture conservatively counts as one generation execution. Profile outer receipts pending."
+}

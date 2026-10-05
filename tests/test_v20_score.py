@@ -1,0 +1,258 @@
+import unittest
+import json
+import tempfile
+from pathlib import Path
+
+from scripts.v13_seed_runs import execution_key
+from scripts.v20_panel import ARMS, HISTORICAL
+from scripts.v20_score import _first_receipt, cluster_interval, load_records, summarize_historical, summarize_subset
+
+
+def event(index, role, arm, qid="q1", seed=101, block=0):
+    return dict(index=index, block=block, dataset="aime26", id=qid, seed=seed,
+                role=role, repeat=0 if role == "attempt0" else 1, arm=arm,
+                host="h1", gpu_uuid="GPU-1", cell_id=f"{qid}-{seed}-{arm}")
+
+
+def record(spec, *, seconds=1.0, calls=4, ok=True):
+    phase = dict(phase="native_dense_decoder", fresh_decoder_calls=calls,
+                 per_canvas=[dict(decoder_calls=calls, iteration_cap=False)], initial_prefill_end_observed=True)
+    base = dict(ok=ok, host="h1", gpu_uuid="GPU-1", termination="eos",
+                completion_token_hash="h", per_canvas_calls=[calls], decoder_calls=calls,
+                canvases=1, output_tokens=10, phase_evidence=phase,
+                router_phase_evidence=dict(phase="native_dense"),
+                triton_misses=0, triton_disk_entries_added=0, new_shared_objects=[],
+                api_wall_s=seconds)
+    if spec["role"] == "warm":
+        base["acceptance"] = dict(accepted=True, reasons=[])
+    return base
+
+
+class ScoreTests(unittest.TestCase):
+    def test_private_archive_host_remap_and_receipt_parity(self):
+        from scripts.v18_protocol import sha
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            cell = root / "cells" / "cell1"
+            cell.mkdir(parents=True)
+            receipt = dict(id="q1", seed=101, fingerprint="cfg", prompt_token_hash="prompt",
+                           completion_tokens=[2, 3], per_canvas=[dict(decoder_calls=2)],
+                           termination_reason="eos", total_decoder_calls=2, output_tokens=2)
+            (cell / "attempt00.json").write_text(json.dumps(receipt))
+            record = dict(host="h1", private_receipt="/remote/cells/cell1/attempt00.json",
+                          fingerprint="cfg", prompt_token_hash="prompt",
+                          completion_token_hash=sha(json.dumps([2, 3], separators=(",", ":"))), per_canvas_calls=[2],
+                          termination="eos", decoder_calls=2, output_tokens=2)
+            self.assertEqual(_first_receipt(record, dict(id="q1", seed=101, cell_id="cell1"), {"h1": root}), receipt)
+
+    def test_question_cluster_keeps_seed_repeats_together(self):
+        point, ci = cluster_interval({"q1": [0., 1.], "q2": [1., 1.]}, seed=9, resamples=500)
+        self.assertAlmostEqual(point, .75)
+        self.assertGreaterEqual(ci[0], .5)
+        self.assertLessEqual(ci[1], 1.)
+
+    def protocol(self):
+        schedule = [event(0, "attempt0", "D_native"), event(1, "attempt0", "T_scope"),
+                    event(2, "warm", "T_scope"), event(3, "warm", "D_native")]
+        return dict(ids={"aime26": ["q1"]}, schedule=schedule)
+
+    def test_same_host_complete_pair_ratio(self):
+        p = self.protocol()
+        records = {execution_key(e): record(e, seconds=0.8 if e["arm"] == "T_scope" else 1.0)
+                   for e in p["schedule"]}
+        # T phase must agree with its own first, but the native and T labels may differ.
+        for e in p["schedule"]:
+            if e["arm"] == "T_scope":
+                records[execution_key(e)]["phase_evidence"]["phase"] = "fresh_T_decoder"
+                records[execution_key(e)]["router_phase_evidence"] = dict(phase="fresh_T", attention_calls=4)
+        quality = {"q1-101-D_native": dict(score=1., correct=True, parsed=True),
+                   "q1-101-T_scope": dict(score=0., correct=False, parsed=True)}
+        summary = summarize_subset(p, records, quality, first84=False)
+        ratio = summary["datasets"]["aime26"]["paired_request_time_ratios"]["T_scope/D_native"]
+        self.assertEqual(ratio["paired_cells"], 1)
+        self.assertAlmostEqual(ratio["geometric_ratio"], .8)
+        self.assertEqual(summary["datasets"]["aime26"]["arms"]["T_scope"]["score_mean"], 0.)
+
+    def test_missing_warm_never_implies_speed(self):
+        p = self.protocol()
+        first = [e for e in p["schedule"] if e["role"] == "attempt0"]
+        records = {execution_key(e): record(e) for e in first}
+        quality = {e["cell_id"]: dict(score=1., correct=True, parsed=True) for e in first}
+        summary = summarize_subset(p, records, quality, first84=False)
+        ratio = summary["datasets"]["aime26"]["paired_request_time_ratios"]["T_scope/D_native"]
+        self.assertEqual(ratio["paired_cells"], 0)
+        self.assertIsNone(ratio["geometric_ratio"])
+        self.assertFalse(summary["executions_complete"])
+
+    def test_descriptive_columns_use_first_work_and_accepted_warm_latency(self):
+        p = self.protocol()
+        records = {execution_key(e): record(e) for e in p["schedule"]}
+        for e in p["schedule"]:
+            row = records[execution_key(e)]
+            row["phase_evidence"]["prefill_end_to_finish_gpu_s"] = 100. if e["role"] == "attempt0" else .25
+            row["phase_evidence"]["per_canvas"] = [dict(decoder_calls=4, iteration_cap=False, native_stop=True)]
+            if e["arm"] == "T_scope":
+                row["phase_evidence"]["phase"] = "fresh_T_decoder"
+                row["router_phase_evidence"] = dict(phase="fresh_T", attention_calls=4)
+            if e["role"] == "warm":
+                row["api_wall_s"] = .8
+        first_native = next(e for e in p["schedule"] if e["arm"] == "D_native" and e["role"] == "attempt0")
+        records[execution_key(first_native)]["router_phase_evidence"] = dict(phase="native_dense", A=2, D=1, H=1)
+        # Warm phase evidence must match first for an accepted timing pair.
+        warm_native = next(e for e in p["schedule"] if e["arm"] == "D_native" and e["role"] == "warm")
+        records[execution_key(warm_native)]["router_phase_evidence"] = dict(phase="native_dense", A=2, D=1, H=1)
+        quality = {"q1-101-D_native": dict(score=1., correct=True, task_correct=True,
+                                               strict_correct=True, parsed=True, eos=True, capped=False),
+                   "q1-101-T_scope": dict(score=0., correct=False, task_correct=False,
+                                           strict_correct=False, parsed=False, eos=True, capped=False)}
+        summary = summarize_subset(p, records, quality, first84=False)
+        native = summary["datasets"]["aime26"]["arms"]["D_native"]
+        self.assertNotIn("warm_request_s_mean", native)
+        self.assertAlmostEqual(native["absolute_latency_by_host"]["h1"]["warm_prefill_end_to_finish_cuda_event_span_s_mean"], .25)
+        self.assertEqual(native["decoder_call_positions"], dict(call0=1, call1=1, call2plus=2))
+        self.assertEqual(native["native_stop_canvases"], 1)
+        self.assertEqual(native["router_phase_layer_calls"]["A"], 2)
+        self.assertEqual(native["output_tokens_per_canvas_per_request"]["median"], 10)
+        self.assertEqual(summary["datasets"]["aime26"]["arms"]["T_scope"]["eos_wrong"], 1)
+        self.assertEqual(summary["datasets"]["aime26"]["arms"]["T_scope"]["unparsed"], 1)
+
+    def test_failed_first_and_warm_are_not_scored_or_timed(self):
+        p = self.protocol()
+        records = {execution_key(e): record(e, ok=False) for e in p["schedule"]}
+        from scripts.v20_run import strict_v20_warm
+        for e in p["schedule"]:
+            if e["role"] == "warm":
+                first = next(x for x in p["schedule"] if x["arm"] == e["arm"] and x["role"] == "attempt0")
+                records[execution_key(e)]["acceptance"] = strict_v20_warm(records[execution_key(first)],
+                                                                            records[execution_key(e)])
+        summary = summarize_subset(p, records, {}, first84=False)
+        native = summary["datasets"]["aime26"]["arms"]["D_native"]
+        self.assertEqual(native["first_failed"], 1)
+        self.assertEqual(native["warm_failed"], 1)
+        self.assertEqual(native["scored"], 0)
+        self.assertEqual(native["warm_accepted"], 0)
+        self.assertEqual(native["absolute_latency_by_host"], {})
+        self.assertEqual(native["decoder_calls_total"], 0)
+
+    def test_fourteen_ledger_rows_do_not_imply_valid_paired_block(self):
+        from scripts.v20_run import strict_v20_warm
+        schedule = []
+        for role in ("attempt0", "warm"):
+            schedule += [event(len(schedule) + i, role, arm) for i, arm in enumerate(ARMS)]
+        p = dict(ids={"aime26": ["q1"]}, schedule=schedule)
+        records = {execution_key(e): record(e) for e in schedule}
+        valid = summarize_subset(p, records, {}, first84=False)
+        self.assertEqual(valid["recorded_all14_blocks"], 1)
+        self.assertEqual(valid["successful_first_all7_blocks"], 1)
+        self.assertEqual(valid["strictwarm_all7_blocks"], 1)
+        self.assertEqual(valid["complete_valid_pair_blocks"], 1)
+        warm = next(e for e in schedule if e["role"] == "warm")
+        first = next(e for e in schedule if e["role"] == "attempt0" and e["arm"] == warm["arm"])
+        records[execution_key(warm)]["new_shared_objects"] = ["new-jit.so"]
+        records[execution_key(warm)]["acceptance"] = strict_v20_warm(records[execution_key(first)],
+                                                                        records[execution_key(warm)])
+        rejected = summarize_subset(p, records, {}, first84=False)
+        self.assertTrue(rejected["executions_complete"])
+        self.assertEqual(rejected["recorded_all14_blocks"], 1)
+        self.assertEqual(rejected["strictwarm_all7_blocks"], 0)
+        self.assertEqual(rejected["complete_valid_pair_blocks"], 0)
+        self.assertEqual(rejected["failed_block_ids"], [0])
+        self.assertEqual(rejected["partial_block_ids"], [])
+        del records[execution_key(warm)]
+        partial = summarize_subset(p, records, {}, first84=False)
+        self.assertFalse(partial["executions_complete"])
+        self.assertEqual(partial["partial_block_ids"], [0])
+
+    def historical_fixture(self):
+        core, optional = [], []
+        for block in range(50):
+            qid = f"q{block}"
+            for role in ("attempt0", "warm"):
+                native = event(len(core), role, "D_native", qid=qid, block=block)
+                hist = event(len(optional), role, HISTORICAL, qid=qid, block=block)
+                core.append(native)
+                optional.append(hist)
+        protocol = dict(ids={"aime26": [f"q{x}" for x in range(50)]}, schedule=core,
+                        historical_extension=dict(arm=HISTORICAL, schedule=optional))
+        core_records = {execution_key(e): record(e, seconds=1.) for e in core}
+        hist_records = {execution_key(e): record(e, seconds=.8) for e in optional}
+        quality_core = {e["cell_id"]: dict(score=1., correct=True, parsed=True)
+                        for e in core if e["role"] == "attempt0"}
+        quality_hist = {e["cell_id"]: dict(score=0., correct=False, parsed=True)
+                        for e in optional if e["role"] == "attempt0"}
+        binding = dict(scope="GLOBAL_ONLY_NATIVE_LOCAL", historical_qualified=True,
+                       historical_scope="ALL_NATIVE_LEGAL")
+        return protocol, binding, core_records, hist_records, quality_core, quality_hist
+
+    def test_historical_extension_is_separate_same_gpu_and_uses_accepted_warm(self):
+        args = self.historical_fixture()
+        report = summarize_historical(*args)
+        self.assertEqual(report["planned_executions"], 100)
+        self.assertEqual(report["core_scope"], "GLOBAL_ONLY_NATIVE_LOCAL")
+        self.assertEqual(report["historical_scope"], "ALL_NATIVE_LEGAL")
+        row = report["datasets"]["aime26"]
+        self.assertEqual(row["paired_accepted_warm_cells"], 50)
+        self.assertEqual(row["paired_quality_cells"], 50)
+        self.assertAlmostEqual(row["paired_score_delta_mean"], -1.)
+        self.assertAlmostEqual(row["same_gpu_request_time_ratio"], .8)
+        self.assertEqual(row["by_host"]["h1"]["paired_native_warm_cells"], 50)
+
+    def test_historical_missing_failed_or_wrong_gpu_cannot_create_ratio(self):
+        from scripts.v20_run import strict_v20_warm
+        args = list(self.historical_fixture())
+        protocol, _, _, historical, _, _ = args
+        warm0 = next(e for e in protocol["historical_extension"]["schedule"] if e["role"] == "warm")
+        del historical[execution_key(warm0)]
+        first1 = next(e for e in protocol["historical_extension"]["schedule"]
+                      if e["role"] == "attempt0" and e["block"] == 1)
+        warm1 = next(e for e in protocol["historical_extension"]["schedule"]
+                     if e["role"] == "warm" and e["block"] == 1)
+        historical[execution_key(first1)]["ok"] = False
+        del args[5][first1["cell_id"]]
+        historical[execution_key(warm1)]["acceptance"] = strict_v20_warm(
+            historical[execution_key(first1)], historical[execution_key(warm1)])
+        row = summarize_historical(*args)["datasets"]["aime26"]
+        self.assertEqual(row["paired_accepted_warm_cells"], 48)
+        self.assertEqual(row["missing_block_ids"], [0])
+        self.assertEqual(row["failed_block_ids"], [1])
+        historical[execution_key(first1)]["host"] = "h2"
+        with self.assertRaisesRegex(ValueError, "crossed GPUs"):
+            summarize_historical(*args)
+
+    def test_historical_ledger_has_separate_protocol_identity(self):
+        from scripts.v18_protocol import sha
+        protocol = self.historical_fixture()[0]
+        protocol["protocol_id"] = "core-id"
+        protocol["block_assignments"] = {str(i): dict(host="h1", gpu_uuid="GPU-1") for i in range(50)}
+        spec = protocol["historical_extension"]["schedule"][0]
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            binding = root / "binding.json"
+            binding.write_text("{}")
+            ledger = root / "history.jsonl"
+            start = dict(event="start", protocol_id="core-id/historical", binding_sha256=sha(binding.read_bytes()))
+            run = dict(spec, event="run", execution_key=execution_key(spec), generation_seed=spec["seed"])
+            ledger.write_text(json.dumps(start) + "\n" + json.dumps(run) + "\n")
+            self.assertEqual(len(load_records(protocol, binding, [ledger], historical=True)), 1)
+            start["protocol_id"] = "core-id"
+            ledger.write_text(json.dumps(start) + "\n" + json.dumps(run) + "\n")
+            with self.assertRaisesRegex(ValueError, "identity drift"):
+                load_records(protocol, binding, [ledger], historical=True)
+
+    def test_wrong_gpu_pair_rejected(self):
+        p = self.protocol()
+        records = {execution_key(e): record(e) for e in p["schedule"]}
+        for e in p["schedule"]:
+            if e["arm"] == "T_scope":
+                records[execution_key(e)]["phase_evidence"]["phase"] = "fresh_T_decoder"
+                records[execution_key(e)]["router_phase_evidence"] = dict(phase="fresh_T", attention_calls=4)
+        first_t = p["schedule"][1]
+        records[execution_key(first_t)]["host"] = "h2"
+        quality = {e["cell_id"]: dict(score=1., correct=True, parsed=True)
+                   for e in p["schedule"] if e["role"] == "attempt0"}
+        with self.assertRaisesRegex(ValueError, "crossed GPUs"):
+            summarize_subset(p, records, quality, first84=False)
+
+
+if __name__ == "__main__":
+    unittest.main()

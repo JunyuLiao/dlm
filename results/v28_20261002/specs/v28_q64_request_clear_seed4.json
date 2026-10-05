@@ -1,0 +1,228 @@
+{
+  "schema": "v27_vllm_spec_v1",
+  "name": "V28 q64 request_clear four-engine-seed preview",
+  "protocol_id": "v28_q64_request_clear_seed4_20261002",
+  "arms": [
+    "dense",
+    "method"
+  ],
+  "controls": [
+    "native",
+    "allkept"
+  ],
+  "datasets": {
+    "longbench_v2_32k": {
+      "indices": [
+        0,
+        1
+      ],
+      "repeats": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "longbench_v2_64k": {
+      "indices": [
+        0,
+        1
+      ],
+      "repeats": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "longbench_v2_96k": {
+      "indices": [
+        0,
+        1
+      ],
+      "repeats": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    }
+  },
+  "control_indices": {
+    "longbench_v2_32k": [
+      0,
+      1
+    ],
+    "longbench_v2_64k": [
+      0,
+      1
+    ],
+    "longbench_v2_96k": [
+      0,
+      1
+    ]
+  },
+  "arm_settings": {
+    "dense": {
+      "compilation_config": "default",
+      "cudagraph_mode": "default"
+    },
+    "method": {
+      "compilation_config": "PIECEWISE",
+      "cudagraph_mode": "PIECEWISE"
+    },
+    "native": {
+      "compilation_config": "PIECEWISE",
+      "cudagraph_mode": "PIECEWISE"
+    },
+    "allkept": {
+      "compilation_config": "PIECEWISE",
+      "cudagraph_mode": "PIECEWISE"
+    }
+  },
+  "settings": {
+    "max_model_len": 106496,
+    "chunk": 16384,
+    "gpu_memory_utilization": 0.85,
+    "block_size": 32,
+    "cpu_threads": 1
+  },
+  "blocks": [
+    {
+      "engine_seed": 28001,
+      "repeats": [
+        0,
+        1
+      ]
+    },
+    {
+      "engine_seed": 28002,
+      "repeats": [
+        2,
+        3
+      ]
+    },
+    {
+      "engine_seed": 28003,
+      "repeats": [
+        4,
+        5
+      ]
+    },
+    {
+      "engine_seed": 28004,
+      "repeats": [
+        6,
+        7
+      ]
+    }
+  ],
+  "order_seed": 271802,
+  "launch_order": [
+    {
+      "block": 0,
+      "arm": "dense"
+    },
+    {
+      "block": 0,
+      "arm": "method"
+    },
+    {
+      "block": 0,
+      "arm": "native"
+    },
+    {
+      "block": 0,
+      "arm": "allkept"
+    },
+    {
+      "block": 1,
+      "arm": "allkept"
+    },
+    {
+      "block": 1,
+      "arm": "native"
+    },
+    {
+      "block": 1,
+      "arm": "method"
+    },
+    {
+      "block": 1,
+      "arm": "dense"
+    },
+    {
+      "block": 2,
+      "arm": "dense"
+    },
+    {
+      "block": 2,
+      "arm": "method"
+    },
+    {
+      "block": 2,
+      "arm": "native"
+    },
+    {
+      "block": 2,
+      "arm": "allkept"
+    },
+    {
+      "block": 3,
+      "arm": "allkept"
+    },
+    {
+      "block": 3,
+      "arm": "native"
+    },
+    {
+      "block": 3,
+      "arm": "method"
+    },
+    {
+      "block": 3,
+      "arm": "dense"
+    }
+  ],
+  "primary_receipt_method": {
+    "score_period": 64,
+    "decision_interval": 6,
+    "carry_first": true,
+    "risk_state": "dense_prefix",
+    "threshold_shift": "minus_ln2",
+    "fused_observe": true,
+    "async_route": true,
+    "scope": "GLOBAL_ONLY_NATIVE_LOCAL",
+    "q_block": 64,
+    "sensitivity": "temporal_T",
+    "consumer": "fa4"
+  },
+  "selection": "First two unchanged E14 eligible manifest indices per length bin, no answer-based selection or truncation. Qualification selects longest of these six by token count.",
+  "stopping": "Native DiffusionGemma generation config unchanged; per-request seeds unsupported. Engine seeds match across arms in a block but do not establish trajectory pairing.",
+  "timing": "One warm-up per eligible item and engine; request boundary sync only; CPU scheduler phase counts; reject timed graph captures or backend/inductor compilations. W includes prefill, S begins at final prefill scheduler completion and includes canvas commits. N counts denoising forwards only. Future V28 runner also records vLLM monitor Triton/CuTe JIT event deltas; these are monitor events, not proof of all compiler/autotuner activity. OMP_NUM_THREADS=1 for every arm.",
+  "inference": "Batch 1 single-engine offline native vLLM serving, HTTP/network excluded. Adapter arms PIECEWISE, dense official default graph mode. No per-step profiling events.",
+  "statistics": "Six question clusters x four independent engine-seed blocks x two sequential repeat labels = 48 requests per arm. Preview only. Report paired geometric W,S,S/N,N, correctness; bootstrap questions, stratify length bins, display by-engine-seed results and N distribution. Same engine seed is not identical random trajectory; repeats are not extra independent seeds. A request-level conclusion requires expanded question coverage.",
+  "memory_preflight": "Same 0.85 reservation for all arms, including dense. Request_clear is common adapter lifecycle engineering. Preserve allocation retry/oom counters and failed attempts.",
+  "scoring": "Unchanged v15-lbv2-nemo-mcq-default-on-final-channel-1; decode token ids with special tokens preserved privately. Strict correctness requires EOS.",
+  "publication": "No prompts, prompt hashes, raw outputs, answers or private binding paths. Frozen input/source hashes only in private binding. Public item indices are manifest ordinal labels.",
+  "gpu_accounting": "Terminal receipt records whole worker reserved wall seconds, including loading, warmup and failures; per-request wall seconds reported separately.",
+  "supersedes_qualification_only": "none: independent V28 follow-up; V18b unchanged",
+  "adapter_settings": {
+    "lifecycle": "request_clear",
+    "alias_splits": 2
+  },
+  "seed_update": "User explicitly emphasized native stopping variability across seeds. This new protocol does not modify the running one-seed qualification002 or parent V18b.",
+  "jit_event_receipts": true
+}

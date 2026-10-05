@@ -1,0 +1,55 @@
+{
+  "schema": "v18_b8_redacted_warm_summary_v1",
+  "sample": "first four frozen v15 LongBench selection rows; seed 17; warm repeat only",
+  "verified_equivalent_groups": 8,
+  "verified_equivalent_executions": 16,
+  "selection_order_pairs": [
+    {
+      "selection_index": 0,
+      "old_api_wall_s": 19.61155554582365,
+      "new_api_wall_s": 19.55456100893207,
+      "new_over_old": 0.9970938288521577,
+      "decoder_calls": 101,
+      "old_metadata_bytes": 23931840,
+      "new_metadata_bytes": 93120
+    },
+    {
+      "selection_index": 1,
+      "old_api_wall_s": 15.314089389983565,
+      "new_api_wall_s": 15.33435082109645,
+      "new_over_old": 1.001323058171917,
+      "decoder_calls": 72,
+      "old_metadata_bytes": 26810240,
+      "new_metadata_bytes": 104320
+    },
+    {
+      "selection_index": 2,
+      "old_api_wall_s": 32.34642322384752,
+      "new_api_wall_s": 32.33745074598119,
+      "new_over_old": 0.9997226129824542,
+      "decoder_calls": 193,
+      "old_metadata_bytes": 17105920,
+      "new_metadata_bytes": 66560
+    },
+    {
+      "selection_index": 3,
+      "old_api_wall_s": 51.1623188930098,
+      "new_api_wall_s": 51.29611770994961,
+      "new_over_old": 1.0026151828109984,
+      "decoder_calls": 304,
+      "old_metadata_bytes": 21958080,
+      "new_metadata_bytes": 85440
+    }
+  ],
+  "geometric_mean_new_over_old": 1.0001865486763273,
+  "total_old_api_wall_s": 118.43438705266453,
+  "total_new_api_wall_s": 118.52248028595932,
+  "total_new_over_old": 1.0007438146596361,
+  "total_old_metadata_bytes": 89806080,
+  "total_new_metadata_bytes": 349440,
+  "export_arm_plugins": {
+    "B8_P": "experiments.numerical_qk_reuse.global_scope:install",
+    "B8_no_risk_export": "experiments.value_direction_hopper.cvm:install_no_risk_export"
+  },
+  "caveat": "Four request-level warm pairs are descriptive; api_wall includes generation and scheduling, not forward-only timing."
+}

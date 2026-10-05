@@ -1,0 +1,250 @@
+{
+  "contract": {
+    "dataset_revision": "2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9",
+    "dataset_sha256": "15d61c22d92c96900b3c4948b6aeea218d3214b676a65df48e7b8555604c7fe2",
+    "final_channel_source_sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3",
+    "nemo_files": {
+      "nemo_skills/evaluation/evaluator/mcq.py": "c6d14d64dd9120080eb96bbcd68a4b7d12a45762184d0019b710a27e6c987fd2",
+      "nemo_skills/evaluation/math_grader.py": "3878306ca260de66bc30135cd468e12a2789a4b2e8215f419e23031b1aeb23c4",
+      "nemo_skills/prompt/config/eval/longbench/default.yaml": "95a5ac4100a08e0374a812f0afe8160c50a31545c547c924c3c4dc21a4cb9522",
+      "nemo_skills/prompt/utils.py": "c0434fb1a6440a2d5cff3f4bee71951f6ca1ca557934b61381bb0925eaa3144d"
+    },
+    "nemo_revision": "bcf059af55c20a89f797724598f9908d126153e6",
+    "scorer_version": "v15-lbv2-nemo-mcq-default-on-final-channel-1",
+    "task_module_sha256": "a6037c6c5189293249c962ceb64234ddad6361a2646a4b609e4348d342a04109"
+  },
+  "cost_profile_items": {
+    "66f39aa7821e116aacb2da76": "v14 cost profile lb/21",
+    "66f78ecfbb02136c067c2f12": "v14 cost profile lb/40"
+  },
+  "cost_profile_items_excluded": true,
+  "cost_profile_items_in_eligible_pool": [
+    "66f39aa7821e116aacb2da76",
+    "66f78ecfbb02136c067c2f12"
+  ],
+  "dataset_items": 503,
+  "eligible_by_domain_bin": {
+    "Long In-context Learning": {
+      "10-15K": 1,
+      "15-20K": 1
+    },
+    "Long Structured Data Understanding": {
+      "15-20K": 1
+    },
+    "Multi-Document QA": {
+      "10-15K": 10,
+      "15-20K": 7
+    },
+    "Single-Document QA": {
+      "10-15K": 3,
+      "15-20K": 26
+    }
+  },
+  "eligible_total": 49,
+  "exposure_note": "prior project LongBench panels (truncated inputs, thinking OFF, other methods) are listed per item; this is development/generalization evidence, not a pristine held-out test",
+  "frozen_utc": "2026-09-26T09:10:26Z",
+  "panel": [
+    {
+      "bin": "10-15K",
+      "dataset_index": 187,
+      "difficulty": "easy",
+      "domain": "Long In-context Learning",
+      "id": "longbench_v2/66f9625fbb02136c067c5456",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [],
+      "prompt_sha256": "857788b431e5ed1e769680d9afe8ced14083b2b1089a37b422d3eecf805e04d4",
+      "prompt_tokens_n": 13447,
+      "raw_prompt_sha256": "857788b431e5ed1e769680d9afe8ced14083b2b1089a37b422d3eecf805e04d4",
+      "source_id": "66f9625fbb02136c067c5456",
+      "sub_domain": "User guide QA"
+    },
+    {
+      "bin": "15-20K",
+      "dataset_index": 464,
+      "difficulty": "hard",
+      "domain": "Long In-context Learning",
+      "id": "longbench_v2/66f2aac2821e116aacb2a9de",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [
+        "/home/exouser/ljy/dlm/results/diffusion_gemma_official_baselines_aime26_longbench_v2",
+        "/home/exouser/ljy/dlm/results/diffusion_gemma_official_baselines_aime26_longbench_v2/preparation_rows"
+      ],
+      "prompt_sha256": "382f72b17117cf2fa82941f8dd12eff76bcfb7e4c77ab057fafa8df921aa7e3a",
+      "prompt_tokens_n": 17028,
+      "raw_prompt_sha256": "382f72b17117cf2fa82941f8dd12eff76bcfb7e4c77ab057fafa8df921aa7e3a",
+      "source_id": "66f2aac2821e116aacb2a9de",
+      "sub_domain": "User guide QA"
+    },
+    {
+      "bin": "15-20K",
+      "dataset_index": 166,
+      "difficulty": "easy",
+      "domain": "Long Structured Data Understanding",
+      "id": "longbench_v2/66ed2c87821e116aacb1f149",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [],
+      "prompt_sha256": "7cdf1a94cde3e3dc0b4fa2001c8e74a695827ec9d6496d9e4e5ef27ffd7b3500",
+      "prompt_tokens_n": 19292,
+      "raw_prompt_sha256": "7cdf1a94cde3e3dc0b4fa2001c8e74a695827ec9d6496d9e4e5ef27ffd7b3500",
+      "source_id": "66ed2c87821e116aacb1f149",
+      "sub_domain": "Table QA"
+    },
+    {
+      "bin": "10-15K",
+      "dataset_index": 461,
+      "difficulty": "easy",
+      "domain": "Multi-Document QA",
+      "id": "longbench_v2/66f245cc821e116aacb28698",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [],
+      "prompt_sha256": "3dfd41fcc663ae049b7cd15cb1def8e1ed494f3067e4a446705ef61978490466",
+      "prompt_tokens_n": 10482,
+      "raw_prompt_sha256": "3dfd41fcc663ae049b7cd15cb1def8e1ed494f3067e4a446705ef61978490466",
+      "source_id": "66f245cc821e116aacb28698",
+      "sub_domain": "Multi-news"
+    },
+    {
+      "bin": "15-20K",
+      "dataset_index": 220,
+      "difficulty": "hard",
+      "domain": "Multi-Document QA",
+      "id": "longbench_v2/66fab4bfbb02136c067c754c",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [],
+      "prompt_sha256": "83d198aafba9cdaa88f8ad92a189ff24d2918f1c3ea8db616d66e5acbab4307f",
+      "prompt_tokens_n": 17641,
+      "raw_prompt_sha256": "83d198aafba9cdaa88f8ad92a189ff24d2918f1c3ea8db616d66e5acbab4307f",
+      "source_id": "66fab4bfbb02136c067c754c",
+      "sub_domain": "Multi-news"
+    },
+    {
+      "bin": "10-15K",
+      "dataset_index": 79,
+      "difficulty": "hard",
+      "domain": "Single-Document QA",
+      "id": "longbench_v2/67040276bb02136c067cd8ae",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [],
+      "prompt_sha256": "5ed0e2d43fcd30ed0cb103ae53ecee1757c5f0d0deae5d34219c6c876779f567",
+      "prompt_tokens_n": 14450,
+      "raw_prompt_sha256": "5ed0e2d43fcd30ed0cb103ae53ecee1757c5f0d0deae5d34219c6c876779f567",
+      "source_id": "67040276bb02136c067cd8ae",
+      "sub_domain": "Legal"
+    },
+    {
+      "bin": "15-20K",
+      "dataset_index": 318,
+      "difficulty": "hard",
+      "domain": "Single-Document QA",
+      "id": "longbench_v2/6704a442bb02136c067cdd91",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [],
+      "prompt_sha256": "663c0f269728dd57f24ce9514f7cd0136886b3c368ab6bd030e33e89691c49de",
+      "prompt_tokens_n": 18139,
+      "raw_prompt_sha256": "663c0f269728dd57f24ce9514f7cd0136886b3c368ab6bd030e33e89691c49de",
+      "source_id": "6704a442bb02136c067cdd91",
+      "sub_domain": "Literary"
+    },
+    {
+      "bin": "10-15K",
+      "dataset_index": 209,
+      "difficulty": "hard",
+      "domain": "Multi-Document QA",
+      "id": "longbench_v2/66f41e45821e116aacb30ec3",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [
+        "/home/exouser/ljy/dlm/results/diffusion_gemma_official_baselines_aime26_longbench_v2",
+        "/home/exouser/ljy/dlm/results/diffusion_gemma_official_baselines_aime26_longbench_v2/preparation_rows"
+      ],
+      "prompt_sha256": "e8dd5798343b52b2bf62e2762113d0cc0c7715a774fb8bcfb18e7280b391bd26",
+      "prompt_tokens_n": 13825,
+      "raw_prompt_sha256": "e8dd5798343b52b2bf62e2762113d0cc0c7715a774fb8bcfb18e7280b391bd26",
+      "source_id": "66f41e45821e116aacb30ec3",
+      "sub_domain": "Governmental"
+    },
+    {
+      "bin": "15-20K",
+      "dataset_index": 380,
+      "difficulty": "hard",
+      "domain": "Multi-Document QA",
+      "id": "longbench_v2/66f120a9821e116aacb26d02",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [],
+      "prompt_sha256": "1a3c95d4d4d5520a8b3d43a75ea2cbbf03ded58b48bfd7f314c7a4d109577170",
+      "prompt_tokens_n": 18904,
+      "raw_prompt_sha256": "1a3c95d4d4d5520a8b3d43a75ea2cbbf03ded58b48bfd7f314c7a4d109577170",
+      "source_id": "66f120a9821e116aacb26d02",
+      "sub_domain": "Academic"
+    },
+    {
+      "bin": "10-15K",
+      "dataset_index": 315,
+      "difficulty": "hard",
+      "domain": "Single-Document QA",
+      "id": "longbench_v2/66f2b676821e116aacb2b27a",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [
+        "/home/exouser/ljy/dlm/results/diffusion_gemma_official_baselines_aime26_longbench_v2",
+        "/home/exouser/ljy/dlm/results/diffusion_gemma_official_baselines_aime26_longbench_v2/preparation_rows"
+      ],
+      "prompt_sha256": "5d0d8193b0c0859d933e730612ec61f931868478e019c897c8c41d44d6237dbd",
+      "prompt_tokens_n": 14122,
+      "raw_prompt_sha256": "5d0d8193b0c0859d933e730612ec61f931868478e019c897c8c41d44d6237dbd",
+      "source_id": "66f2b676821e116aacb2b27a",
+      "sub_domain": "Financial"
+    },
+    {
+      "bin": "15-20K",
+      "dataset_index": 208,
+      "difficulty": "hard",
+      "domain": "Single-Document QA",
+      "id": "longbench_v2/66ebe0fb5a08c7b9b35e14f5",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [],
+      "prompt_sha256": "04c57988f495b741954129f5604ed34d4022a14afd1ee3ff78d5d0f813b81d0a",
+      "prompt_tokens_n": 16426,
+      "raw_prompt_sha256": "04c57988f495b741954129f5604ed34d4022a14afd1ee3ff78d5d0f813b81d0a",
+      "source_id": "66ebe0fb5a08c7b9b35e14f5",
+      "sub_domain": "Legal"
+    },
+    {
+      "bin": "10-15K",
+      "dataset_index": 457,
+      "difficulty": "hard",
+      "domain": "Multi-Document QA",
+      "id": "longbench_v2/66f8c6b4bb02136c067c4480",
+      "length_band": "short",
+      "literal_special_token_escapes": {},
+      "prior_project_exposure": [],
+      "prompt_sha256": "43fc857f6f310abb33810576474827077dd68492e541d1793e907d641a607f46",
+      "prompt_tokens_n": 13720,
+      "raw_prompt_sha256": "43fc857f6f310abb33810576474827077dd68492e541d1793e907d641a607f46",
+      "source_id": "66f8c6b4bb02136c067c4480",
+      "sub_domain": "Multi-news"
+    }
+  ],
+  "panel_size": 12,
+  "prefiltered_over_400k_chars": 253,
+  "private_generation_manifest_sha256": "80c6b523110db96530d06ab252fc2e27b9eefceee19a34d60b526c67df06ec72",
+  "private_gold_sha256": "76cd1cc9e5770a59405e3ac601677509415b4a883925e198a5b3190f674df481",
+  "rule": "Freeze the v15 scored LongBench-v2 long-context development panel BEFORE any panel output (CPU only).\n\nEligibility: every LongBench-v2 item (pinned revision) whose UNTRUNCATED NeMo prompt, rendered and\nchat-templated exactly as the request path (thinking ON), has 10,000-20,000 tokens.\nSelection (no answers/outputs/runtime/sparsity inspected): strata = (domain, length bin) with bins\n[10000,15000) and [15000,20000]; inside a stratum items are ordered by sha256('v15/<seed>/<_id>');\nround-robin passes over (domains alphabetically x bins in order) take the next item of each\nnon-empty stratum until N=12 (or the pool is exhausted -> smaller panel, disclosed).\nThe two v14 cost-profile items are excluded when the remaining pool still has >= N items.",
+  "schema": "v15_panel_selection_v1",
+  "selection_seed": 20260926,
+  "shortfall": 0,
+  "token_counts": {
+    "above": 454,
+    "below": 0,
+    "eligible": 49
+  }
+}

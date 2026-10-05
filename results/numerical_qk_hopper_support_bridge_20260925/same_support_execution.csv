@@ -1,0 +1,60 @@
+level,canvas,absolute,layer,kind,k,kept_fraction,arm,median_ms,min_ms,p90_ms,n,boundary
+complete_attention_call,1,365,0,local,621,0.4969,H1,0.8014,0.7628,0.8576,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,0,local,621,0.4969,O,0.7729,0.699,0.8239,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,0,local,621,0.4969,consumer_hopper,0.1276,0.1206,0.1412,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,0,local,621,0.4969,consumer_triton,0.1459,0.1304,0.1706,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,0,local,621,0.4969,dense_same_mask,0.1593,0.1166,0.1714,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,0,local,621,0.4969,fresh_T,0.3813,0.348,0.4192,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,0,local,621,0.4969,native,0.0702,0.0472,0.0894,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,5,global,621,0.9062,H1,0.9215,0.8934,0.9706,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,5,global,621,0.9062,O,0.9377,0.8873,0.9755,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,5,global,621,0.9062,consumer_hopper,0.1638,0.1537,0.1819,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,5,global,621,0.9062,consumer_triton,0.2186,0.1995,0.2458,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,5,global,621,0.9062,dense_same_mask,0.188,0.1627,0.2117,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,5,global,621,0.9062,fresh_T,0.4436,0.4018,0.475,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,1,365,5,global,621,0.9062,native,0.3352,0.2953,0.356,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_denoising_step,1,365,all,all,,,fresh_T.step0_inputs@forward_order,139.769,139.624,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,1,365,all,all,,,fresh_T.step1_inputs@forward_order,141.301,140.943,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,1,365,all,all,,,native_decoder_forward@forward_order,115.861,115.109,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,1,365,all,all,,,native_denoising_step.anchor_inputs@forward_order,121.398,120.948,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,1,365,all,all,,,native_denoising_step.step1_inputs@forward_order,123.894,123.685,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,1,365,all,all,,,sparse_H1.anchor@forward_order,165.736,164.786,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,1,365,all,all,,,sparse_H1.held_same_support@forward_order,138.847,138.307,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,1,365,all,all,,,sparse_H1.ordinary@forward_order,154.222,153.015,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,1,365,all,all,,,sparse_O.anchor@forward_order,161.54,160.423,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,1,365,all,all,,,sparse_O.held_same_support@forward_order,138.324,137.946,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,1,365,all,all,,,sparse_O.ordinary@forward_order,152.378,151.794,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_attention_call,6,1645,0,local,1279,0.4094,H1,0.9892,0.9562,1.0285,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,0,local,1279,0.4094,O,0.9335,0.8774,0.9744,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,0,local,1279,0.4094,consumer_hopper,0.173,0.1641,0.1866,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,0,local,1279,0.4094,consumer_triton,0.1727,0.154,0.1918,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,0,local,1279,0.4094,dense_same_mask,0.2094,0.1628,0.2409,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,0,local,1279,0.4094,fresh_T,0.5174,0.4904,0.5455,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,0,local,1279,0.4094,native,0.0747,0.0557,0.1034,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,5,global,1901,0.8531,H1,1.8267,1.7998,1.8509,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,5,global,1901,0.8531,O,1.8362,1.8056,1.8797,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,5,global,1901,0.8531,consumer_hopper,0.3847,0.3772,0.4039,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,5,global,1901,0.8531,consumer_triton,0.4329,0.4142,0.4655,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,5,global,1901,0.8531,dense_same_mask,0.3418,0.308,0.3748,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,5,global,1901,0.8531,fresh_T,0.7919,0.7403,0.8116,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_attention_call,6,1645,5,global,1901,0.8531,native,0.7383,0.702,0.762,30,synchronized CUDA-event span around ONE call incl. host launch; interleaved rotating order
+complete_denoising_step,6,1645,all,all,,,fresh_T.step0_inputs@forward_order,141.98,141.684,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,6,1645,all,all,,,fresh_T.step1_inputs@forward_order,148.842,148.537,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,6,1645,all,all,,,native_decoder_forward@forward_order,114.992,114.821,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,6,1645,all,all,,,native_denoising_step.anchor_inputs@forward_order,120.51,120.011,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,6,1645,all,all,,,native_denoising_step.step1_inputs@forward_order,131.336,131.069,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,6,1645,all,all,,,sparse_H1.anchor@forward_order,167.538,166.889,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,6,1645,all,all,,,sparse_H1.held_same_support@forward_order,145.896,145.583,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,6,1645,all,all,,,sparse_H1.ordinary@forward_order,163.356,162.421,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,6,1645,all,all,,,sparse_O.anchor@forward_order,163.547,163.044,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,6,1645,all,all,,,sparse_O.held_same_support@forward_order,144.859,144.716,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,6,1645,all,all,,,sparse_O.ordinary@forward_order,161.227,160.575,,10,"event span, per-rep restored state (v9 harness); order native O H1 T"
+complete_denoising_step,6,1645,all,all,,,native_decoder_forward@reversed_order,118.206,117.747,,10,"event span, per-rep restored state (v9 harness); order H1 O native"
+complete_denoising_step,6,1645,all,all,,,native_denoising_step.anchor_inputs@reversed_order,124.21,123.531,,10,"event span, per-rep restored state (v9 harness); order H1 O native"
+complete_denoising_step,6,1645,all,all,,,native_denoising_step.step1_inputs@reversed_order,135.274,135.07,,10,"event span, per-rep restored state (v9 harness); order H1 O native"
+complete_denoising_step,6,1645,all,all,,,sparse_H1.anchor@reversed_order,167.06,166.7,,10,"event span, per-rep restored state (v9 harness); order H1 O native"
+complete_denoising_step,6,1645,all,all,,,sparse_H1.held_same_support@reversed_order,144.688,143.702,,10,"event span, per-rep restored state (v9 harness); order H1 O native"
+complete_denoising_step,6,1645,all,all,,,sparse_H1.ordinary@reversed_order,162.262,161.448,,10,"event span, per-rep restored state (v9 harness); order H1 O native"
+complete_denoising_step,6,1645,all,all,,,sparse_O.anchor@reversed_order,166.735,165.544,,10,"event span, per-rep restored state (v9 harness); order H1 O native"
+complete_denoising_step,6,1645,all,all,,,sparse_O.held_same_support@reversed_order,148.963,148.705,,10,"event span, per-rep restored state (v9 harness); order H1 O native"
+complete_denoising_step,6,1645,all,all,,,sparse_O.ordinary@reversed_order,164.798,164.209,,10,"event span, per-rep restored state (v9 harness); order H1 O native"

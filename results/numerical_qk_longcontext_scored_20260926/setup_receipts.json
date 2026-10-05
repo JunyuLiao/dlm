@@ -1,0 +1,48 @@
+{
+ "schema": "v15_setup_receipts_v1",
+ "note": "3 setup/compatibility executions on the excluded profile item, seed 42; unscored; never pooled with the panel",
+ "executions": [
+  {
+   "arm": "CVM_T",
+   "id": "longbench_v2/66f39aa7821e116aacb2da76",
+   "seed": 42,
+   "ok": true,
+   "api_wall_s": 44.786129569169134,
+   "decoder_calls": 239,
+   "canvases": 13,
+   "output_tokens": 3123,
+   "termination": "eos",
+   "peak_allocated_bytes": 61726940160,
+   "triton_misses": 6,
+   "new_shared_objects": 121
+  },
+  {
+   "arm": "D_native",
+   "id": "longbench_v2/66f39aa7821e116aacb2da76",
+   "seed": 42,
+   "ok": true,
+   "api_wall_s": 56.96863405010663,
+   "decoder_calls": 298,
+   "canvases": 15,
+   "output_tokens": 3647,
+   "termination": "eos",
+   "peak_allocated_bytes": 61726107648,
+   "triton_misses": 0,
+   "new_shared_objects": 0
+  },
+  {
+   "arm": "T_G_original",
+   "id": "longbench_v2/66f39aa7821e116aacb2da76",
+   "seed": 42,
+   "ok": true,
+   "api_wall_s": 97.06606447300874,
+   "decoder_calls": 531,
+   "canvases": 22,
+   "output_tokens": 5398,
+   "termination": "eos",
+   "peak_allocated_bytes": 61726107648,
+   "triton_misses": 0,
+   "new_shared_objects": 0
+  }
+ ]
+}

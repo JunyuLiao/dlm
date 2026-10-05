@@ -1,0 +1,20 @@
+Traceback (most recent call last):
+  File "/home/exouser/dyh/vllm_paired_v31_20261003/overlay5/v31_run_tests.py", line 59, in main
+    f(**kw)
+  File "/home/exouser/dyh/vllm_paired_v31_20261003/overlay5/test_v31_dp_chunked.py", line 29, in test_chunked_matches_sequential
+    s = _summary(pt, seed=pt, rank=0 if compact else 32)
+  File "/home/exouser/dyh/vllm_paired_v31_20261003/overlay5/test_v31_dp_chunked.py", line 18, in _summary
+    s.active[0, 1, 0, 7, :50] = 0                                    # partially inactive tile
+IndexError: index 7 is out of bounds for dimension 3 with size 5
+/home/exouser/dyh/dlm_models_20261002/envs/vllm/lib/python3.10/site-packages/nvidia_cutlass_dsl/dsl_packages/cutlass/base_dsl/dsl.py:2463: UserWarning: Argument aux_data (position 18) cannot be converted to a JitArgument for function 'cutlass___call___vllmvllm_flash_attncuteflash_fwd_sm90FlashAttentionForwardSm90_object_at__Tensorgmemoi64i64i641_Tensorgmemoi64i64i641_Tensorgmemoi64i64i641_Tensorgmemoi64i64i64i64'. Its type `<class 'vllm.vllm_flash_attn.cute.utils.AuxData'>` is not supported. If the value is known at compile time, annotate it: `aux_data: Constexpr`. Otherwise, implement the `JitArgument` or `DynamicExpression` protocol for type `<class 'vllm.vllm_flash_attn.cute.utils.AuxData'>`, or register a custom argument adapter.
+  exe_args, func_types, adapted_args = self.generate_mlir_function_types(
+PASS test_accepted_rule_matches_legacy_mask 
+PASS test_row_stats_match_torch 
+PASS test_state_update_matches_observe_logits 
+PASS test_chunked_matches_sequential {'pt': 1020, 'compact': False}
+PASS test_chunked_matches_sequential {'pt': 77, 'compact': False}
+PASS test_chunked_matches_sequential {'pt': 300, 'compact': True}
+FAIL test_chunked_matches_sequential {'pt': 5, 'compact': False}
+PASS test_matches_triton_fused_observation 
+PASS test_z_and_output {'prefix': 2577, 'scale': 0.05}
+PASS test_z_and_output {'prefix': 19200, 'scale': 0.044194173824159216}

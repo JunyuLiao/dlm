@@ -77,12 +77,14 @@ class Sketches:
 
 
 class Attention:
-    def __init__(self,adapter,library,thresholds,*,precision='tf32x3_register',collect=True,tma=True,mode='value',projections=None,profile=False,projection='fused',torch_library=None,blasst_tma=False):
+    def __init__(self,adapter,library,thresholds,*,precision='tf32x3_register',collect=True,tma=True,mode='value',projections=None,profile=False,projection='fused',torch_library=None,blasst_tma=False,support_geometry='legacy_junyu'):
         if mode not in ('value','blasst'):raise ValueError('Unsupported production routing mode')
         if projection not in ('fused','torch'):raise ValueError('Unsupported projection backend')
+        if support_geometry not in ('legacy_junyu','native_legal'):raise ValueError('Unsupported support geometry')
         self.kernel=Kernel(library,torch_library=torch_library);self.thresholds=thresholds;self.precision=precision
         self.cache=Sketches(adapter,projections,fused=projection=='fused');self.geometry={};self.pending=[];self.collect=collect;self.calls=0
         self.tma=tma;self.blasst_tma=blasst_tma;self.mode=mode;self.dummy={};self.lambda_records=[];self.profile=profile;self.events=[]
+        self.support_geometry=support_geometry
         self.policy_selector=None
         self.query_sensitivity=None
 
@@ -92,16 +94,19 @@ class Attention:
         b,h,nq,d=q.shape;nk=k.shape[-2];hk=k.shape[1]
         if self.profile:
             begin,ready,end=(torch.cuda.Event(enable_timing=True) for _ in range(3));begin.record()
+        if self.support_geometry=='native_legal' and is_causal is not False:
+            raise ValueError('native_legal support requires explicit is_causal=False')
+        support_window=None if self.support_geometry=='native_legal' else sliding_window
         causal=bool(is_causal) if is_causal is not None else mask is None and nq>1
         if mask is None:
-            key=(b,nq,nk,q.device,causal,sliding_window)
+            key=(b,nq,nk,q.device,causal,support_window)
             if key not in self.geometry:
-                self.geometry[key]=geometry(b,nq,nk,device=q.device,causal=causal,window=sliding_window or 0)
+                self.geometry[key]=geometry(b,nq,nk,device=q.device,causal=causal,window=support_window or 0)
             packed,validkv=self.geometry[key]
             validkv=validkv[None,None,:].expand(b,hk,nk)
-            length=nk-max(0,nk-nq-int(sliding_window)+1 if sliding_window else 0)
+            length=nk-max(0,nk-nq-int(support_window)+1 if support_window else 0)
         else:
-            valid=_attention_validity(mask,q,k,is_causal=causal,sliding_window=sliding_window)
+            valid=_attention_validity(mask,q,k,is_causal=causal,sliding_window=support_window)
             validkv=valid.reshape(b,hk,h//hk,nq,nk).any((2,3))
             # The frozen BLASST rule uses the union of valid keys across heads
             # and queries. Arbitrary masks need an explicit reduction; native

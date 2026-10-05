@@ -1,0 +1,762 @@
+{
+  "arms": {
+    "B8_G": {
+      "condition": "global_B8",
+      "config": {
+        "collect": null,
+        "consumer": "hopper",
+        "decision_interval": 8,
+        "guard_mode": "fused",
+        "kernel_variant": "generic",
+        "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+        "score_refresh_period": 8,
+        "selector": "legacy_recompute",
+        "selector_layers": "all",
+        "support_binary": {
+          "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+          "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+          "key": "e3c283b8cbb9b79c",
+          "sources": {
+            "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+            "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+            "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+            "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+            "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+          }
+        },
+        "telemetry": "minimal"
+      },
+      "dispatch_ok": true,
+      "effective": {
+        "active_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "bound_modules": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "condition": "global_B8",
+        "consumer": "hopper",
+        "decision_interval": 8,
+        "guard_mode": "fused",
+        "history_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "kernel_variant": "generic",
+        "method": "anchor bitmap held to the next A8 observation / canvas reset",
+        "native_local_layers": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          7,
+          8,
+          9,
+          10,
+          12,
+          13,
+          14,
+          15,
+          16,
+          18,
+          19,
+          20,
+          21,
+          22,
+          24,
+          25,
+          26,
+          27,
+          28
+        ],
+        "scope": "global_only_native_local",
+        "score_period": 8,
+        "selector": "legacy_recompute",
+        "selector_layers": "all",
+        "sketch_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "summary_layers": [],
+        "support_build": "e3c283b8cbb9b79c",
+        "telemetry": "minimal"
+      },
+      "fingerprint": "954e77afc7bb33beef9a527ab0c0726542d1da81cc7a655b988994dad8a0d505",
+      "per_step_counts": [
+        {
+          "encoder_calls": 30,
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        }
+      ],
+      "state_only_global": true,
+      "steps_checked": 12,
+      "tagged_modules": [
+        5,
+        11,
+        17,
+        23,
+        29
+      ]
+    },
+    "D_native": {
+      "condition": "native_dense",
+      "config": {
+        "collect": null,
+        "consumer": null,
+        "decision_interval": 1,
+        "guard_mode": null,
+        "kernel_variant": "static",
+        "plugin": null,
+        "score_refresh_period": 8,
+        "selector": "legacy_recompute",
+        "selector_layers": "local",
+        "support_binary": null,
+        "telemetry": "full"
+      },
+      "dispatch_ok": true,
+      "effective": {},
+      "fingerprint": "f5d3e15035d55e2a3b5f753e7998f02926ada8dbccbc8955a0a16bdc7bd39dc3",
+      "per_step_counts": [
+        {
+          "encoder_calls": 30,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "registry_global": 5,
+          "registry_local": 25
+        }
+      ],
+      "state_only_global": true,
+      "steps_checked": 12,
+      "tagged_modules": []
+    },
+    "G1_split": {
+      "condition": "global_M1",
+      "config": {
+        "collect": null,
+        "consumer": "hopper",
+        "decision_interval": 1,
+        "guard_mode": "fused",
+        "kernel_variant": "generic",
+        "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+        "score_refresh_period": 8,
+        "selector": "prefix_block_summary",
+        "selector_layers": "all",
+        "support_binary": {
+          "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+          "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+          "key": "e3c283b8cbb9b79c",
+          "sources": {
+            "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+            "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+            "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+            "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+            "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+          }
+        },
+        "telemetry": "minimal"
+      },
+      "dispatch_ok": true,
+      "effective": {
+        "active_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "bound_modules": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "condition": "global_M1",
+        "consumer": "hopper",
+        "decision_interval": 1,
+        "guard_mode": "fused",
+        "history_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "kernel_variant": "generic",
+        "method": "M1 historical-QK + current projected V, decision every step",
+        "native_local_layers": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          7,
+          8,
+          9,
+          10,
+          12,
+          13,
+          14,
+          15,
+          16,
+          18,
+          19,
+          20,
+          21,
+          22,
+          24,
+          25,
+          26,
+          27,
+          28
+        ],
+        "scope": "global_only_native_local",
+        "score_period": 8,
+        "selector": "prefix_block_summary",
+        "selector_layers": "all",
+        "sketch_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "summary_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "support_build": "e3c283b8cbb9b79c",
+        "telemetry": "minimal"
+      },
+      "fingerprint": "ba84838a3909b4f2936e2e656f09a2a17ad383972f092c2eaa87065dc2eadff6",
+      "per_step_counts": [
+        {
+          "encoder_calls": 30,
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "encoder_calls": 30,
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        }
+      ],
+      "state_only_global": true,
+      "steps_checked": 12,
+      "tagged_modules": [
+        5,
+        11,
+        17,
+        23,
+        29
+      ]
+    },
+    "G3_split": {
+      "condition": "global_M3",
+      "config": {
+        "collect": null,
+        "consumer": "hopper",
+        "decision_interval": 2,
+        "guard_mode": "fused",
+        "kernel_variant": "generic",
+        "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+        "score_refresh_period": 8,
+        "selector": "prefix_block_summary",
+        "selector_layers": "all",
+        "support_binary": {
+          "bridge_sha256": "291bd5f2cd2453ece6f610ee004790e6656a3c1a2170adb0983220347c4ee964",
+          "kernel_sha256": "8d5332405006339af2b681949e12eba1954369b6d482a0809a1a8800c1ec1d75",
+          "key": "e3c283b8cbb9b79c",
+          "sources": {
+            "support_bridge.cpp": "c796c435278b8cbe5d78c879411e3d9da0e00ee00e82cdccdbc2b0b573e39292",
+            "support_consumer.cu": "99f740a126cae720ecd27e3de7e5817b496d64f7823609d5606e9c1201023247",
+            "support_consumer.h": "cef90e5f9d4a6f5f2b7d0f2987bda3506c6008d45c9951c8432c7b4a202fd16e",
+            "utils_hgmma_bf16.h": "c1ce8b6491989559f75de7563b4633bd5e431904a629a9ba2889d41d2d45b737",
+            "utils_warpgroup.h": "f2452fd193afc1f0a05f36030d3b67ffe027f431c59c15bc3e028114bdbb4f10"
+          }
+        },
+        "telemetry": "minimal"
+      },
+      "dispatch_ok": true,
+      "effective": {
+        "active_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "bound_modules": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "condition": "global_M3",
+        "consumer": "hopper",
+        "decision_interval": 2,
+        "guard_mode": "fused",
+        "history_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "kernel_variant": "generic",
+        "method": "M3 decision interval 2",
+        "native_local_layers": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          7,
+          8,
+          9,
+          10,
+          12,
+          13,
+          14,
+          15,
+          16,
+          18,
+          19,
+          20,
+          21,
+          22,
+          24,
+          25,
+          26,
+          27,
+          28
+        ],
+        "scope": "global_only_native_local",
+        "score_period": 8,
+        "selector": "prefix_block_summary",
+        "selector_layers": "all",
+        "sketch_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "summary_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "support_build": "e3c283b8cbb9b79c",
+        "telemetry": "minimal"
+      },
+      "fingerprint": "ebb9aec1f06c7ba9fa5c108ccb0b077a0c3643d9f6648e3369a5f7f64e314148",
+      "per_step_counts": [
+        {
+          "encoder_calls": 30,
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "encoder_calls": 30,
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "m1_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        }
+      ],
+      "state_only_global": true,
+      "steps_checked": 12,
+      "tagged_modules": [
+        5,
+        11,
+        17,
+        23,
+        29
+      ]
+    },
+    "T_G": {
+      "condition": "global_T",
+      "config": {
+        "collect": false,
+        "consumer": null,
+        "decision_interval": 1,
+        "guard_mode": null,
+        "kernel_variant": "static",
+        "plugin": "experiments.numerical_qk_reuse.global_scope:install",
+        "score_refresh_period": 8,
+        "selector": "legacy_recompute",
+        "selector_layers": "local",
+        "support_binary": null,
+        "telemetry": "full"
+      },
+      "dispatch_ok": true,
+      "effective": {
+        "active_layers": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "bound_modules": [
+          5,
+          11,
+          17,
+          23,
+          29
+        ],
+        "collect": false,
+        "condition": "global_T",
+        "method": "fresh Junyu T",
+        "native_local_layers": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          6,
+          7,
+          8,
+          9,
+          10,
+          12,
+          13,
+          14,
+          15,
+          16,
+          18,
+          19,
+          20,
+          21,
+          22,
+          24,
+          25,
+          26,
+          27,
+          28
+        ],
+        "precision": "tf32x3_register",
+        "projection": "fused",
+        "scope": "global_only_native_local",
+        "tma": true
+      },
+      "fingerprint": "447dd5f4321adc0d40f6cbaf2ba95fb16bb201006fb58afef22bf587133e8053",
+      "per_step_counts": [
+        {
+          "T_global": 5,
+          "encoder_calls": 30,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "T_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "T_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "T_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "T_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "T_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "T_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "T_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "T_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "T_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "T_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        },
+        {
+          "T_global": 5,
+          "registry_global": 5,
+          "registry_local": 25
+        }
+      ],
+      "state_only_global": true,
+      "steps_checked": 12,
+      "tagged_modules": [
+        5,
+        11,
+        17,
+        23,
+        29
+      ]
+    }
+  },
+  "dispatch_rule": "per decoder step: 25 LOCAL registry calls, all on UNTAGGED modules -> BLASST dispatcher first branch returns the captured original native SDPA with original args; 5 GLOBAL calls reach exactly the arm router (T_G: Junyu Attention; G1/G3/B8: numerical Attention; D_native: no binding); 0 eager / 0 BLASST-mask; encoder (prefill/commit) calls counted separately",
+  "global_summary_qualification": {
+    "argmax_canvases_identical": true,
+    "canvases_run": 4,
+    "decision_calls": 205,
+    "decisions_identical": true,
+    "legacy_summary_builds": 0,
+    "qualified": true,
+    "skipped_fraction_mean": 0.03526229038834572,
+    "summary_builds": 35,
+    "summary_hits": 170,
+    "summary_misses": 0,
+    "summary_peak_bytes": 35676160
+  },
+  "id": "aime26/2",
+  "local_overhead_disclosure": "for bound arms each LOCAL call passes through the BLASST dispatcher Python function (one getattr check) before the original function; D_native has no dispatcher",
+  "probe_commit": "1858daa40547",
+  "schema": "v12_effective_config_and_dispatch_v1"
+}

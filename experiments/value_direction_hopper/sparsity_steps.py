@@ -25,15 +25,15 @@ from experiments.diffusion_gemma_ruler8k_jl import score
 from .experiment import atomic, sha, fingerprint, shard_path
 from .integration import install
 
-BASE=Path(__file__).resolve().parents[2]/'results'/'value_direction_hopper_v1'/'final_ruler4k130_v1'
-TRAJECTORY=Path(__file__).resolve().parents[2]/'results'/'value_direction_trajectory_v2'
+BASE=Path('results/value_direction_hopper_v1/final_ruler4k130_v1')
+TRAJECTORY=Path('results/value_direction_trajectory_v2')
 TARGETS=(40,50,60,65,70)
 FAMILIES=('gaussian32','blasst')
-ROOT=Path(__file__).resolve().parents[2]/'results'/'value_direction_sparsity_steps_v2'
-SOURCES={50:Path(__file__).resolve().parents[2]/'results'/'diffusion_gemma_ruler4k_gaussian_rank_sweep_v16',
-         60:Path(__file__).resolve().parents[2]/'results'/'diffusion_gemma_ruler4k_value_direction_s60_v17',
-         65:Path(__file__).resolve().parents[2]/'results'/'diffusion_gemma_ruler4k_value_direction_s65_v18',
-         70:Path(__file__).resolve().parents[2]/'results'/'diffusion_gemma_ruler4k_value_direction_s70_v19'}
+ROOT=Path('results/value_direction_sparsity_steps_v2')
+SOURCES={50:Path('results/diffusion_gemma_ruler4k_gaussian_rank_sweep_v16'),
+         60:Path('results/diffusion_gemma_ruler4k_value_direction_s60_v17'),
+         65:Path('results/diffusion_gemma_ruler4k_value_direction_s65_v18'),
+         70:Path('results/diffusion_gemma_ruler4k_value_direction_s70_v19')}
 
 
 def conditions():

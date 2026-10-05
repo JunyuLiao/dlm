@@ -1,0 +1,424 @@
+{
+  "branch": "research/numerical-qk-reuse-native-20260924",
+  "execution_identity_note": "Per-run config receipts are the authority for what ran (results/.../configs/*.json, each with its own fingerprint and source_hashes). No inherited executed_model_source_sha is carried here.",
+  "history": {
+    "v10": {
+      "budgets": {
+        "complete_requests": 72,
+        "elapsed_h": 8,
+        "gpu_process_h": 5
+      },
+      "bulky_root": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925",
+      "cp1": {
+        "commit": "901e360b51829dbd50e6b6007d4a95f420cbf0c3",
+        "deploy": "../deploy/901e360b5182",
+        "flag": "kernel_variant=generic"
+      },
+      "cp2": {
+        "commits": [
+          "947cf49c014c",
+          "48ad28963107",
+          "01efe3960713"
+        ],
+        "counterfactual_consumer_only_ms": {
+          "canvas1": {
+            "O_ord": 147.53,
+            "held_same_support": 133.95,
+            "native": 119.76
+          },
+          "canvas6": {
+            "O_ord": 161.03,
+            "held_same_support": 144.58,
+            "native": 131.08
+          }
+        },
+        "flags": {
+          "guard_mode": "fused",
+          "telemetry": "minimal"
+        },
+        "not_taken": [
+          "T-only fast path (~1.6 ms)",
+          "_route tile-parallel restructure (next decision)"
+        ],
+        "replay_ms": {
+          "canvas1": {
+            "O_ord": 150.61,
+            "P_ord": 153.61,
+            "native": 122.54
+          },
+          "canvas6": {
+            "O_ord": 163.72,
+            "P_ord": 166.87,
+            "native": 133.33
+          }
+        }
+      },
+      "cp3": {
+        "deploy": "01efe3960713",
+        "expansion": "not triggered",
+        "ledger": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/cp3/ledger.jsonl",
+        "quality": {
+          "D": "3/4 (/14 cap)",
+          "O": "3/4 (/14 cap)",
+          "P": "3/4 (/14 cap)",
+          "T": "3/4 (/20 wrong)"
+        },
+        "summed_ratios": {
+          "O/D": 1.226,
+          "O/T": 1.307
+        },
+        "warm_geo_ratios": {
+          "O/D": 1.078,
+          "O/P": 0.992,
+          "O/T": 1.091,
+          "T/D": 0.988
+        }
+      },
+      "failed_or_untaken_candidates": [
+        "tl.multiple_of scalar hint (no effect; replaced by K/KDIV)",
+        "T-only fast path (not taken)",
+        "_route tile-parallel restructure (proposed)"
+      ],
+      "filesystem": {
+        "bulky_used": "1.3G",
+        "large_disk_free_gb": 967,
+        "root_free_gb": 56
+      },
+      "final_by_utc": "2026-09-25T14:57:30Z",
+      "fresh_T_extension": "/home/exouser/dyh/numerical_qk_reuse_native_20260924/build_cp1/value_direction_db080045f7a5fbce.so (+ torch bridge), source hashes match current csrc",
+      "live_jobs": [],
+      "resource_ledger": "/media/volume/dllm-1/dyh/numerical_qk_overnight_runtime_20260925/resource_ledger.jsonl",
+      "result_root": "results/numerical_qk_overnight_runtime_20260925",
+      "start_utc": "2026-09-25T06:57:30Z",
+      "stop_launch_utc": "2026-09-25T14:27:30Z",
+      "used": {
+        "complete_requests": 56,
+        "elapsed_h_at_final": 1.6,
+        "gpu_process_h": 1.14
+      },
+      "used_at_cp1": {
+        "complete_requests": 8,
+        "gpu_process_s": 1400
+      }
+    },
+    "v11": {
+      "budgets": {
+        "complete_requests": 64,
+        "gpu_process_h": 4
+      },
+      "bugs_fixed": [
+        "aligned bar.sync across roles (synccheck)",
+        "support mask-mode parameter shadowed by import (receipt JSON; semantics unaffected)",
+        "v10 arm_config dropped guard_mode (correction appended to v10)"
+      ],
+      "cp1_commit": "ce32230285d778f173baf6c595f3851098b39676",
+      "cp2": {
+        "artifacts": "same_support_execution.{csv,json}",
+        "commit": "482ecd4e8bea"
+      },
+      "cp3": {
+        "deploy": "8cf9b5e5160d",
+        "ledger": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/panel/ledger.jsonl",
+        "quality": {
+          "Dm": "3/4 (diagnostic)",
+          "Dn": "3/4",
+          "H1": "2/4",
+          "H3": "3/4",
+          "T": "3/4"
+        },
+        "ratios": {
+          "H1_Dn": {
+            "geo": 0.8403,
+            "sum": 0.836
+          },
+          "H1_T": {
+            "geo": 0.8508,
+            "sum": 0.8918
+          },
+          "H3_T": {
+            "geo": 1.2248,
+            "sum": 1.3478
+          },
+          "T_Dn": {
+            "geo": 0.9876,
+            "sum": 0.9374
+          }
+        }
+      },
+      "mask_contract": "T/H1/H3/O: legacy Junyu query-relative local window (key >= q+(K-Q)-1023); D_native: native SDPA (no local crop beyond cache window) -- different LOCAL support",
+      "private_root": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925",
+      "resource_ledger": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/resource_ledger.jsonl",
+      "result_root": "results/numerical_qk_hopper_support_bridge_20260925",
+      "start_utc": "2026-09-25T17:54:30Z",
+      "support_build": {
+        "identity": "/media/volume/dllm-1/dyh/numerical_qk_hopper_support_bridge_20260925/build/support_e3c283b8cbb9b79c/build_identity.json",
+        "key": "e3c283b8cbb9b79c",
+        "namespace": "vd_support_v1"
+      },
+      "used": {
+        "complete_requests": 39,
+        "gpu_process_s": 2003
+      }
+    },
+    "v12": {
+      "arms_file": "/media/volume/dllm-1/dyh/numerical_qk_global_scope_20260925/arms.json",
+      "budgets": {
+        "elapsed_h": 6,
+        "gpu_h": 4,
+        "requests": 64
+      },
+      "deploys": {
+        "costs": "4809008f2444",
+        "extension": "6b84764ea0a5",
+        "panel": "4809008f2444",
+        "probe": "1858daa40547"
+      },
+      "extension": {
+        "ids": [
+          "aime26/23",
+          "aime26/30"
+        ],
+        "rule": "remaining authorized v8 six-calibration IDs; shortfall of 2 vs spec recorded"
+      },
+      "fusion": "not attempted (GLOBAL attention <=3% of step; no complete-path headroom)",
+      "private_root": "/media/volume/dllm-1/dyh/numerical_qk_global_scope_20260925",
+      "quality": {
+        "panel4": {
+          "B8_G": "3/4",
+          "D_native": "3/4",
+          "G1_split": "3/4",
+          "G3_split": "3/4",
+          "T_G": "3/4"
+        },
+        "six": {
+          "B8_G": "3/6",
+          "D_native": "3/6",
+          "G1_split": "3/6",
+          "G3_split": "4/6",
+          "T_G": "4/6"
+        }
+      },
+      "resource_ledger": "/media/volume/dllm-1/dyh/numerical_qk_global_scope_20260925/resource_ledger.jsonl",
+      "result_root": "results/numerical_qk_global_scope_20260925",
+      "scope_plugin": "experiments/numerical_qk_reuse/global_scope.py",
+      "start_utc": "2026-09-25T19:27:32Z",
+      "support_build": "e3c283b8cbb9b79c",
+      "used": {
+        "complete_requests": 54,
+        "gpu_process_s": 2523
+      }
+    },
+    "v8_v9_fields": {
+      "budget_used": "18/18 complete-request executions; 2 short profiler windows (truncated diagnostic request, S /2)",
+      "corrections_applied": [
+        "v7 panel counter line was aime26/14 alone; correct sums 32310/5100/27210/3.271e10",
+        "slowdown is NOT an aime26/14 artifact: other three requests 2.132x slower on 31% fewer forwards",
+        "scaling sweep is synthetic component stress data, not a complete-method ratio",
+        "profile harness bugs A-E repaired and pinned by tests"
+      ],
+      "cp1": {
+        "deploy_sha": "669858060b12060c098423aa719f63ecb3789637",
+        "step_replay_ms": {
+          "canvas1": {
+            "L_ordinary": 153.3,
+            "S_ordinary": 153.35,
+            "dense_eager": 129.0,
+            "native_step": 122.46
+          },
+          "canvas6": {
+            "L_ordinary": 165.75,
+            "S_ordinary": 167.35,
+            "dense_eager": 131.46,
+            "native_step": 132.17
+          }
+        },
+        "tests": "108 passed on H100 (targeted suites + 14 new v9 tests)"
+      },
+      "cp2": {
+        "attempt0_cold_s": {
+          "aime26/2": {
+            "D": 24.16,
+            "L": 63.85,
+            "S": 34.66
+          },
+          "aime26/8": {
+            "D": 20.37,
+            "L": 38.32,
+            "S": 82.27
+          }
+        },
+        "deploy_sha": "28f0f766daef595af0a813ebfb2e95d83c474c5e",
+        "determinism": "all 12 warm repeats token/call/termination-identical to own attempt0; L==S tokens; D==v7 native_dense tokens; L/S==v7 M1 and v8 tokens",
+        "executions": 18,
+        "flags": "diagnostic False, timing_events False, trace False; per-call routing telemetry (pending/call_metadata) still ON in L and S equally",
+        "ledger": "../results/v9/request_timing/ledger.jsonl",
+        "private_receipts": "../results/v9/request_timing/private",
+        "quality_attempt0": "6/6 correct (D,L,S x /2,/8); EOS; not a noninferiority claim",
+        "summary": "results/numerical_qk_request_timing_20260924/clean_request_timing.{json,csv}",
+        "warm_L_over_S": {
+          "aime26/2": 0.997,
+          "aime26/8": 0.992
+        },
+        "warm_api_median_s": {
+          "aime26/2": {
+            "D": 22.91,
+            "L": 19.53,
+            "S": 19.59
+          },
+          "aime26/8": {
+            "D": 20.36,
+            "L": 33.72,
+            "S": 33.98
+          }
+        },
+        "warm_ms_per_call": {
+          "aime26/2": {
+            "D": 156.9,
+            "L": 191.5,
+            "S": 192.1
+          },
+          "aime26/8": {
+            "D": 154.2,
+            "L": 186.3,
+            "S": 187.7
+          }
+        }
+      },
+      "cp3": {
+        "chrome_traces": "/media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924/traces_3e88d0b7c25f/{B_early,B_late}.json",
+        "deploy_sha": "3e88d0b7c25f1cb4092d7e657c0724b45f259fda",
+        "finding": "K/KT/PREFIX_TILES constexpr -> new specializations every canvas; +44-48 s cold per new prompt; warm step launch-bound (~10.7k launches, GPU active 68-80 of ~170 ms)",
+        "remedy": "none implemented this round (request budget spent; needs paired verification)",
+        "trace_json": "../results/v9/trace/request_trace_3e88d0b7c25f.json"
+      },
+      "deploy_rule": "runs execute from read-only ../deploy/<sha>/ git-archive snapshots",
+      "environment_actual": {
+        "dllm": "this checkout via PYTHONPATH=src:.",
+        "gpu": "1x H100 80GB HBM3, driver 595.91.07",
+        "torch": "2.6.0+cu124 from ~/.local user site",
+        "transformers": "5.11.0 from conda env ljy_dlm",
+        "triton": "3.2.0 from ~/.local user site (conda env triton 3.7.1 is shadowed)"
+      },
+      "evidence": {
+        "decisions_preserved": "real saturated states (local prefix 1023 asserted, global 1923) with production causal T spread 2.625: bitmaps/eligibility/malformed bit-identical, 0 disagreeing tiles; same-generation-twice tokens identical; two full 8192-budget smoke requests token-for-token identical to the v7 receipts with identical calls (102,181) and canvases (12,15)",
+        "memory": "8.23 MB per local layer, 205.8 MB resident, ON TOP of the retained score cache; total increases",
+        "natural_request_time": "NOT established; panels deliberately not run per the v8 stopping rule; the 2 smoke requests ran with --diagnostic ON so their walls are not comparable",
+        "per_call": "LOCAL Attention.__call__ 1.392 -> 0.990 ms (-29%); GLOBAL unchanged by design",
+        "per_step": "complete denoising step 206.20 -> 206.23 ms (UNCHANGED); dense 183.24, cached_scores 205.07, routing_only 214.96",
+        "support_cells": "52 real cells, one common mask, real causal T. Age 0 exact (Jaccard 1.000, errors 0.0000). Stale weights O_hh/O_hf 0.37-0.95 vs historical support choice O_hf/O_ff 0.06-0.19 -- ~an order of magnitude apart",
+        "work_avoided": "75% of local and 86% of global KV tiles skip score re-read + sketch read + tf32x3 dot per decision"
+      },
+      "method_config_unchanged": {
+        "decision_interval_M1": 1,
+        "output_mode": "historical_route_preqk_current_output",
+        "sampler": "native adaptive; temperature=0 is the native 0.8->0.4 annealing SENTINEL, not greedy",
+        "score_refresh_period": 8,
+        "support": "legacy_junyu_mask",
+        "thresholds": "frozen T_s50"
+      },
+      "new_this_round": {
+        "boundary_rule": "prefix_tiles = (prefix - crop)//64; never from tensor shape, never rounded up",
+        "cache_identity": "structural Identity + anchor score_step + Sketches lease identity + prefix tile count, compared BY VALUE",
+        "mechanism": "_route optionally STOREs per-row z/mu for wholly-immutable prefix tiles at the real score anchor and LOADs them afterwards; reused values are that kernel's own FP32 outputs, so reuse is exact by construction. alpha/risk/retained state/bitmap are never cached.",
+        "selector": "Attention(selector='legacy_recompute'|'prefix_block_summary', selector_layers='local'); default unchanged"
+      },
+      "not_started": [
+        "240-request matrix",
+        "extra seeds",
+        "M2",
+        "another M3/R2 quality trade-off",
+        "mask unification (native_mask still a separately named discrepancy)",
+        "any threshold/score_period/T/sampler/budget retuning",
+        "backend migration",
+        "frozen mass-bitmap vs fresh value-aware comparison study"
+      ],
+      "output_root": "results/numerical_qk_request_timing_20260924",
+      "storage_preflight": "root 58 GB free, no migration; bulky artifacts -> /media/volume/dllm-1/dyh/numerical_qk_request_timing_20260924",
+      "unexplained": [
+        "-0.402 ms x 25 local layers predicts ~-10 ms/step but the step did not move (minima 204.39 vs 204.36); L2 residency in the tight per-call loop is a hypothesis, not a measurement",
+        "v7's ~430 ms per real forward vs ~206 ms replayed remains unlocated; established NOT to be an /14 artifact"
+      ]
+    }
+  },
+  "live_jobs": [],
+  "model": {
+    "geometry": "30 layers: 25 sliding (head_dim 256, GQA 16/8, window 1024), 5 full (global_head_dim 512, GQA 16/2)",
+    "snapshot": "f7f5b7f5fa82ffc52addd066915886d497f5517b"
+  },
+  "next_command": "decision needed from Fan/PI: different model/workload regime, or seed follow-up of B8 fewer-calls effect; no kernel work on GLOBAL M1/M3",
+  "remote": {
+    "code_cp": ".../code_cp1 (git clone, pulled to each pushed commit)",
+    "env": "conda ljy_dlm, PYTHONPATH=src:. from code_cp1, Torch 2.6.0+cu124, transformers 5.11.0",
+    "gpu_policy": "checked idle at each launch; no concurrent jobs; shared env untouched",
+    "host": "exouser@149.165.151.254",
+    "root": "/home/exouser/dyh/numerical_qk_reuse_recovery_20260924",
+    "v8_results": ".../results/v8/{prefix_summary_qualify.json,full_forward_profile_v8.json,support_cells.json,smoke/}",
+    "v9_results": "../results/v9/{replay,request_timing}"
+  },
+  "reporting_sha": "resolve with git HEAD; not self-validating",
+  "reviewed_head_at_start": "3b67ea16261a5241c4bee3175ee9859dc9038da0",
+  "schema": 1,
+  "status": "V13_DONE: 600/600, 0 failures; G3 slower than T_G (1.160 [1.071,1.259]) and native; quality parity within noise; M1 no benefit over B8",
+  "task": "v13: frozen GLOBAL-only D_native/T_G/G1/G3/B8_G, all-30 AIME26 x seeds 17/29 (user-authorized), attempt0 + 1 warm",
+  "tests": "94 targeted tests pass on the local WSL RTX4060 (private device, never the remote timing GPU): numerical_reuse_{prefix_summary,preqk,route_only,routing_only,integration,cache,math,stop,summary,prefix_lease,native_mask}, numerical_qk_runner, preqk_correctness_vectors, preqk_profile_contracts. Two unrelated historical tests (test_diffusion_gemma_preqk, test_jl_accepted_round2) fail identically at the base commit on a missing results/diffusion_gemma_oracle/setup.json.",
+  "v13": {
+    "ceilings": {
+      "elapsed_h": 14,
+      "executions": 660,
+      "gpu_h": 12
+    },
+    "compat_seed42": "G3 aime26/2 seed42 via new driver reproduced the v12 token hash (84 calls)",
+    "completed_utc": "2026-09-26T04:42Z",
+    "deploy": "04e3dab07395",
+    "environment": "ljy_dlm python; torch 2.6.0+cu124 and triton 3.2.0 from ~/.local; transformers 5.11.0 conda; H100",
+    "key_ratios": {
+      "B8_G/D_native_summed": [
+        0.927,
+        0.856,
+        0.997
+      ],
+      "G1/B8_G": [
+        1.109,
+        1.016,
+        1.208
+      ],
+      "G3/D_native": [
+        1.091,
+        1.011,
+        1.184
+      ],
+      "G3/T_G": [
+        1.16,
+        1.071,
+        1.259
+      ],
+      "T_G/D_native": [
+        0.941,
+        0.868,
+        1.019
+      ]
+    },
+    "ledger": "/media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/ledger.jsonl",
+    "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+    "outputs": "results/numerical_qk_global_multiseed_20260925/{paired_summary.md,fan_update.md,morning_brief.md,first_output_quality.csv,warm_request_times.csv,trajectory_robustness.csv,work_decomposition.json}",
+    "planned_executions": 600,
+    "private_root": "/media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925",
+    "protocol": "results/numerical_qk_global_multiseed_20260925/frozen_protocol.json",
+    "protocol_id": "v13_global_multiseed_all30",
+    "quality": {
+      "B8_G": 34,
+      "D_native": 32,
+      "G1": 30,
+      "G3": 34,
+      "T_G": 34,
+      "of": 60
+    },
+    "resource_ledger": "/media/volume/dllm-1/dyh/numerical_qk_global_multiseed_20260925/resource_ledger.jsonl",
+    "start_utc": "2026-09-25T20:53:57Z",
+    "support_build": "e3c283b8cbb9b79c",
+    "used": {
+      "executions": 602,
+      "gpu_process_h": 7.71
+    }
+  }
+}

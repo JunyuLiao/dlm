@@ -1,0 +1,28 @@
+{
+  "schema": "v18_agent_tasks_v1",
+  "coordinator": "Astra",
+  "base": "d2bef2189c046e9a4277ab16d751ebeab11c15d8",
+  "tasks": [
+    {
+      "id": "sol_evidence",
+      "actual_model": "gpt-6-sol",
+      "scope": "bounded completion-marker race fix and restart audit",
+      "acceptance": "3bfed7d pushed;39 combined stdlib tests pass; primary CPU51988 adopts c001; remote driver6250b51 unchanged",
+      "allowed_write": "scripts/v18_coordinate.py and tests/test_v18_coordinate.py only; no remote operations by agent"
+    },
+    {
+      "id": "sol_b8",
+      "actual_model": "gpt-6-sol",
+      "scope": "completed bounded-deadline fix and independent continuation gate review",
+      "acceptance": "stage_driver3/3; reviewed prefix, missing-host, intent/orphan/uncertain safeguards; rootcombined36 pass",
+      "allowed_write": "completed stage_driver andfocusedtest; furtherreviewread-only"
+    },
+    {
+      "id": "sol_cp3_audit",
+      "actual_model": "gpt-6-sol",
+      "scope": "bounded redacted CP3 scoring, paired-key and resource audit; no GPU or controller operations",
+      "acceptance": "secondary70 936/936, allocation 156/156, exact same-GPU paired keys, two scorer locks and cross-host hashes verified; campaign 5793/7000 attempts, both GPU-hour caps met; JSON and diff checks passed",
+      "allowed_write": "HANDOFF.md, STATE.json and redacted results/junyu_frontier_v18_20260926/secondary_* plus secondary scorer locks/summaries; no raw answers or gold"
+    }
+  ]
+}

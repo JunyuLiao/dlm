@@ -1,0 +1,107 @@
+{
+  "canvas_length": 256,
+  "function": "dllm.attention.blasst.core._attention_validity",
+  "legacy_definition": "sliding_window=<config value> (Junyu's query-relative lower bound, currently inherited by fresh T, M1 and M3)",
+  "model_sliding_window": 1024,
+  "native_definition": "sliding_window=None (matches sdpa_attention_forward, which ignores the sliding_window kwarg, and DynamicSlidingWindowLayer's own already-capped stored prefix)",
+  "note": "Positive excluded_prefix_pairs means legacy silently drops native-legal prefix keys for later canvas queries; this is a real support mismatch but is shared identically by T, M1 and M3, so it does not by itself explain M1 failing relative to T.",
+  "rows": [
+    {
+      "canvas": 256,
+      "excluded_canvas_pairs": 0,
+      "excluded_prefix_pairs": 0,
+      "last_query_excluded_prefix_keys": 0,
+      "last_query_prefix_available": 0,
+      "legacy_adds_pairs_beyond_native": 0,
+      "legacy_legal_pairs": 65536,
+      "native_legal_pairs": 65536,
+      "prefix": 0,
+      "sliding_window": 1024
+    },
+    {
+      "canvas": 256,
+      "excluded_canvas_pairs": 0,
+      "excluded_prefix_pairs": 0,
+      "last_query_excluded_prefix_keys": 0,
+      "last_query_prefix_available": 1,
+      "legacy_adds_pairs_beyond_native": 0,
+      "legacy_legal_pairs": 65792,
+      "native_legal_pairs": 65792,
+      "prefix": 1,
+      "sliding_window": 1024
+    },
+    {
+      "canvas": 256,
+      "excluded_canvas_pairs": 0,
+      "excluded_prefix_pairs": 0,
+      "last_query_excluded_prefix_keys": 0,
+      "last_query_prefix_available": 64,
+      "legacy_adds_pairs_beyond_native": 0,
+      "legacy_legal_pairs": 81920,
+      "native_legal_pairs": 81920,
+      "prefix": 64,
+      "sliding_window": 1024
+    },
+    {
+      "canvas": 256,
+      "excluded_canvas_pairs": 0,
+      "excluded_prefix_pairs": 0,
+      "last_query_excluded_prefix_keys": 0,
+      "last_query_prefix_available": 256,
+      "legacy_adds_pairs_beyond_native": 0,
+      "legacy_legal_pairs": 131072,
+      "native_legal_pairs": 131072,
+      "prefix": 256,
+      "sliding_window": 1024
+    },
+    {
+      "canvas": 256,
+      "excluded_canvas_pairs": 0,
+      "excluded_prefix_pairs": 0,
+      "last_query_excluded_prefix_keys": 0,
+      "last_query_prefix_available": 512,
+      "legacy_adds_pairs_beyond_native": 0,
+      "legacy_legal_pairs": 196608,
+      "native_legal_pairs": 196608,
+      "prefix": 512,
+      "sliding_window": 1024
+    },
+    {
+      "canvas": 256,
+      "excluded_canvas_pairs": 0,
+      "excluded_prefix_pairs": 0,
+      "last_query_excluded_prefix_keys": 0,
+      "last_query_prefix_available": 768,
+      "legacy_adds_pairs_beyond_native": 0,
+      "legacy_legal_pairs": 262144,
+      "native_legal_pairs": 262144,
+      "prefix": 768,
+      "sliding_window": 1024
+    },
+    {
+      "canvas": 256,
+      "excluded_canvas_pairs": 0,
+      "excluded_prefix_pairs": 27028,
+      "last_query_excluded_prefix_keys": 232,
+      "last_query_prefix_available": 1000,
+      "legacy_adds_pairs_beyond_native": 0,
+      "legacy_legal_pairs": 294508,
+      "native_legal_pairs": 321536,
+      "prefix": 1000,
+      "sliding_window": 1024
+    },
+    {
+      "canvas": 256,
+      "excluded_canvas_pairs": 0,
+      "excluded_prefix_pairs": 32640,
+      "last_query_excluded_prefix_keys": 255,
+      "last_query_prefix_available": 1023,
+      "legacy_adds_pairs_beyond_native": 0,
+      "legacy_legal_pairs": 294784,
+      "native_legal_pairs": 327424,
+      "prefix": 1023,
+      "sliding_window": 1024
+    }
+  ],
+  "schema": "native_mask_audit_v1"
+}

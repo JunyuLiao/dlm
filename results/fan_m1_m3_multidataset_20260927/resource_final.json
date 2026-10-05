@@ -1,0 +1,72 @@
+{
+  "schema": "v20_resource_final_v1",
+  "wall_start_utc": "2026-09-27T11:58:00Z",
+  "last_gpu_stage_end_utc": "2026-09-27T16:56:14.614460+00:00",
+  "gpu_stop_utc": "2026-09-27T19:28:00Z",
+  "final_deadline_utc": "2026-09-27T19:58:00Z",
+  "aggregate_gpu_process_seconds": 21256.63526892662,
+  "aggregate_gpu_process_hours": 5.904620908035172,
+  "max_gpu_process_seconds": 28800,
+  "generation_executions": 844,
+  "max_generation_executions": 1000,
+  "max_concurrent_gpu_workers": 2,
+  "base_closed_seconds": 1649.6709160804749,
+  "additional_outer_stage_seconds": {
+    "selected_001/dllm": 1105.6609513759613,
+    "selected_001/mpk": 1407.1216332912445,
+    "ruler_selected_001/dllm": 102.43606305122375,
+    "ruler_selected_001/mpk": 111.77833843231201,
+    "bridge_001/dllm": 33.48004722595215,
+    "bridge_001/mpk": 31.684342861175537,
+    "timeline_001/dllm": 21.552814483642578,
+    "timeline_001/mpk": 26.169574737548828,
+    "initial_001/dllm": 1100.6446421146393,
+    "initial_001/mpk": 2006.2358846664429,
+    "remainder_001/dllm": 5919.138600826263,
+    "remainder_001/mpk": 5630.491504430771,
+    "historical_001/dllm": 1085.0229887962341,
+    "historical_001/mpk": 1025.5469665527344
+  },
+  "accounting": "Outer GPU-stage process receipts only, once each; includes loads, compilation/capture/replay/probes, failures and request workers. CPU-only scoring excluded. No inner worker double counting.",
+  "terminal_historical_receipts": {
+    "dllm": {
+      "artifacts": {
+        "historical_001.json": {
+          "bytes": 9228,
+          "path": "E:\\dlm\\v20_private\\watch_historical_001\\dllm\\historical_001.json",
+          "sha256": "6af321bff984f2c4587af587991053d7c483b0a2759613c132de35e6c8d10934"
+        },
+        "historical_001.stage.json": {
+          "bytes": 690,
+          "path": "E:\\dlm\\v20_private\\watch_historical_001\\dllm\\historical_001.stage.json",
+          "sha256": "057753017c113e8b23d50dd417e6e771e43dcb334ce701552e716e1729c21a57"
+        }
+      },
+      "charged_process_seconds": 1085.0229887962341,
+      "end_epoch": 1790528174.6144598,
+      "returncode": 0,
+      "status": "complete"
+    },
+    "mpk": {
+      "artifacts": {
+        "historical_001.json": {
+          "bytes": 9468,
+          "path": "E:\\dlm\\v20_private\\watch_historical_001\\mpk\\historical_001.json",
+          "sha256": "64f8e9aa63676df33f699f665286a9e167627bdfc7fe1701c19fb06ec8e6f418"
+        },
+        "historical_001.stage.json": {
+          "bytes": 667,
+          "path": "E:\\dlm\\v20_private\\watch_historical_001\\mpk\\historical_001.stage.json",
+          "sha256": "ed70a4e70bacc97afe1d441a7d6c3cb91a7a9fa01e59ab81a7064fbc3023aa9f"
+        }
+      },
+      "charged_process_seconds": 1025.5469665527344,
+      "end_epoch": 1790528114.2458344,
+      "returncode": 0,
+      "status": "complete"
+    }
+  },
+  "failures_preserved": true,
+  "scored_missing_cells": 0,
+  "scored_execution_failures": 0
+}

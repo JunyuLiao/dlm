@@ -1,0 +1,36 @@
+{
+ "schema": "v27_forward_attribution_v1",
+ "id": "longbench_v2/66f9625fbb02136c067c5456",
+ "states": {
+  "0": {
+   "keys": 13703,
+   "inclusive_ms": {
+    "embed": 0.5587720000000032,
+    "norm": 54.718786000000414,
+    "attention_block": 97.0468110000001,
+    "attn_kernel_local": 1.5446850000000767,
+    "mlp": 5.356455999999774,
+    "moe": 197.8256260000006,
+    "attn_kernel_global": 46.9087259999999,
+    "lm_head": 1.253643999999913
+   },
+   "all_kernels_ms": 457.52207200000186,
+   "note": "inclusive times: attention_block includes its kernel and projections; attn_kernel_* are the SDPA calls only; moe/mlp may nest"
+  },
+  "6": {
+   "keys": 15239,
+   "inclusive_ms": {
+    "embed": 0.2592910000000008,
+    "norm": 46.70557599999951,
+    "attention_block": 89.63195999999996,
+    "attn_kernel_local": 1.5447690000000156,
+    "mlp": 5.048739000000066,
+    "moe": 177.04638800000006,
+    "attn_kernel_global": 46.95866599999994,
+    "lm_head": 1.244299000000057
+   },
+   "all_kernels_ms": 420.0944049999999,
+   "note": "inclusive times: attention_block includes its kernel and projections; attn_kernel_* are the SDPA calls only; moe/mlp may nest"
+  }
+ }
+}

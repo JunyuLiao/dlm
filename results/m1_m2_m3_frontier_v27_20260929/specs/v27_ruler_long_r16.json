@@ -1,0 +1,123 @@
+{
+ "name": "ruler_long_r16",
+ "ids": {
+  "ruler32k": [
+   "ruler32k/ruler_32768_cwe_p0000",
+   "ruler32k/ruler_32768_fwe_p0000",
+   "ruler32k/ruler_32768_niah_multikey_1_p0000",
+   "ruler32k/ruler_32768_niah_multikey_2_p0000",
+   "ruler32k/ruler_32768_niah_multikey_3_p0000",
+   "ruler32k/ruler_32768_niah_multiquery_p0000",
+   "ruler32k/ruler_32768_niah_multivalue_p0000",
+   "ruler32k/ruler_32768_niah_single_1_p0000",
+   "ruler32k/ruler_32768_niah_single_2_p0000",
+   "ruler32k/ruler_32768_niah_single_3_p0000",
+   "ruler32k/ruler_32768_qa_1_p0000",
+   "ruler32k/ruler_32768_qa_2_p0000",
+   "ruler32k/ruler_32768_vt_p0000"
+  ],
+  "ruler64k": [
+   "ruler64k/ruler_65536_cwe_p0000",
+   "ruler64k/ruler_65536_fwe_p0000",
+   "ruler64k/ruler_65536_niah_multikey_1_p0000",
+   "ruler64k/ruler_65536_niah_multikey_2_p0000",
+   "ruler64k/ruler_65536_niah_multikey_3_p0000",
+   "ruler64k/ruler_65536_niah_multiquery_p0000",
+   "ruler64k/ruler_65536_niah_multivalue_p0000",
+   "ruler64k/ruler_65536_niah_single_1_p0000",
+   "ruler64k/ruler_65536_niah_single_2_p0000",
+   "ruler64k/ruler_65536_niah_single_3_p0000",
+   "ruler64k/ruler_65536_qa_1_p0000",
+   "ruler64k/ruler_65536_qa_2_p0000",
+   "ruler64k/ruler_65536_vt_p0000"
+  ]
+ },
+ "seeds": [
+  404,
+  505,
+  606
+ ],
+ "warm": false,
+ "extra_gold_sha256": {
+  "ruler32k": "20a3d6860db845d15d09cf33ca4edd9373358578e7806fc5234f1f7f3c11cd01",
+  "ruler64k": "2e0b5e6560f731fe82d4c7e3eebea1462b7f28a48f0c767c16eb38a7c7014d77"
+ },
+ "arms": {
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_c0_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "carry_first": true
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_c0_q64c_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "carry_first": true,
+    "q_block": 64,
+    "q_carry64": true
+   }
+  },
+  "M3_R6_A64_fused_dp_async_topk88_c0_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "carry_first": true,
+    "risk_topk": "k12"
+   }
+  },
+  "M3_R6_A64_fused_dp_async_topk88_mass_c0_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "carry_first": true,
+    "risk_topk": "k12",
+    "risk_value": "mass"
+   }
+  }
+ },
+ "substrate": "piecewise_v5",
+ "long_context_execution": "all arms: memory-linear GLOBAL causal / LOCAL sliding prefill via the 64-row kernel, elided O(n^2) prefill mask mapping, token-chunked MoE (V27_PREFILL_DENSE64=1); canvas calls follow each arm | decoding substrate piecewise_v1 (torch 2.12.1 grouped_mm MoE; decoder compiled reduce-overhead, split at GLOBAL attention which runs eager; LOCAL attention graphed unless the arm routes LOCAL layers; official-style compiled sampler); untimed per-arm warm-up before timed requests",
+ "hosts": [
+  "149.165.159.64"
+ ],
+ "selection_rule": "R16 RULER long-context accuracy check of the current pipeline (2026-10-02): all 13 RULER tasks at 32K and 64K (the frozen pinned-RULER pool of the 09-29 long-RULER panel) x seeds 404, 505, 606; dense FA4 all-kept, M3 R6 DP -ln2 + carry_first (main), the same + q64c, and the V-term question raised by a group member for RULER (value direction matters at high sparsity): fixed 88% sparsity (risk top-k k12) ranked by the M1 risk with the rank-32 projected V vs by attention mass only. RULER needs about 5 decoder calls per request, so it is an accuracy check, not a speed target. dllm (one host; the other two run E14 then P15); substrate piecewise_v5; frozen before generation."
+}

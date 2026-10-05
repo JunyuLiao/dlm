@@ -15,6 +15,7 @@ def digest(tensor):
 class Projections:
     def __init__(self):
         self.matrices = {}
+        self.banks = {}
         self.manifest = {}
 
     def get(self, layer, heads, width, family, rank, seed, device):
@@ -43,6 +44,46 @@ class Projections:
             matrix = matrix.to(device)
             self.matrices[key] = matrix
         return matrix
+
+    def get_nested_bank(self, layer, heads, width, max_rank, seed, device,
+                        family='gaussian'):
+        """Return one unscaled, reproducible bank shared by all cascade ranks.
+
+        The previous ``get`` API intentionally creates independent matrices for
+        each rank and remains unchanged for historical experiments.  Adaptive
+        routing calls this method and obtains genuinely nested projections by
+        taking the first ``r`` columns and dividing by ``sqrt(r)``.
+        """
+        if family != 'gaussian':
+            raise ValueError('nested cascade currently supports Gaussian banks only')
+        key = (layer, heads, width, family, int(max_rank), int(seed))
+        if key not in self.banks:
+            parts, records = [], []
+            for head in range(heads):
+                material = f'jl_output_nested_v1/{family}/{max_rank}/{seed}/{layer}/{head}/{width}'
+                derived = int.from_bytes(hashlib.sha256(material.encode()).digest()[:8], 'little') % (2**63-1)
+                gen = torch.Generator(device='cpu').manual_seed(derived)
+                # This is deliberately unscaled; each prefix receives its own
+                # 1/sqrt(r) normalization at use time.
+                bank = torch.randn(width, max_rank, generator=gen, dtype=torch.float32)
+                parts.append(bank)
+                records.append(dict(layer=layer, native_kv_head=head, value_width=width,
+                    family='gaussian_nested', rank=max_rank, seed=seed,
+                    derived_seed=derived, sha256=digest(bank)))
+            self.banks[key] = torch.stack(parts)
+            self.manifest[str(('nested_bank',) + key)] = records
+        bank = self.banks[key]
+        if bank.device != torch.device(device):
+            bank = bank.to(device)
+            self.banks[key] = bank
+        return bank
+
+    def get_nested(self, layer, heads, width, rank, max_rank, seed, device):
+        """Materialize R_r=W[:,:r]/sqrt(r) from the frozen bank."""
+        if not (1 <= int(rank) <= int(max_rank)):
+            raise ValueError('rank must be within nested bank')
+        bank = self.get_nested_bank(layer, heads, width, max_rank, seed, device)
+        return bank[..., :int(rank)] / math.sqrt(int(rank))
 
 
 class SketchCache:
@@ -73,6 +114,14 @@ class SketchCache:
             # This explicitly expensive control is not a low-dimensional router.
             self.projections.get(layer, h, d, c.family, d, c.projection_seed, x.device)
             z = x
+        elif c.method == 'adaptive':
+            # Cache the largest unscaled bank once.  The adaptive route applies
+            # the rank-specific 1/sqrt(r) normalization to nested prefixes.
+            bank = self.projections.get_nested_bank(layer, h, d, c.rank,
+                                                    c.projection_seed, x.device)
+            z = torch.matmul(x, bank) / math.sqrt(c.rank)
+            self.work['projection_madds'] += x.numel()*z.shape[-1]
+            self.work['projected_tokens'] += x.shape[0]*h*x.shape[-2]
         else:
             matrix = self.projections.get(layer, h, d, c.family, c.rank, c.projection_seed, x.device)
             z = torch.matmul(x, matrix)

@@ -1,0 +1,105 @@
+{
+ "name": "c01_preview_p15",
+ "ids": {
+  "aime26": [
+   "aime26/1",
+   "aime26/2",
+   "aime26/3",
+   "aime26/4",
+   "aime26/5",
+   "aime26/6",
+   "aime26/7",
+   "aime26/8",
+   "aime26/9",
+   "aime26/10"
+  ],
+  "longbench_v2_32k": [
+   "longbench_v2/66f3b843821e116aacb2e692",
+   "longbench_v2/671b3d1bbb02136c067d5283",
+   "longbench_v2/66eefe85821e116aacb228dc",
+   "longbench_v2/66ece358821e116aacb1dc08",
+   "longbench_v2/66ee8bab821e116aacb21e44",
+   "longbench_v2/66ebdadd5a08c7b9b35e0e5b",
+   "longbench_v2/6719b96abb02136c067d4358",
+   "longbench_v2/66f52567821e116aacb329bc"
+  ],
+  "longbench_v2_64k": [
+   "longbench_v2/66ebd2975a08c7b9b35e01e3",
+   "longbench_v2/66f3cfa5821e116aacb2f096",
+   "longbench_v2/66efa466821e116aacb23219",
+   "longbench_v2/66ec1aef821e116aacb1aa1a",
+   "longbench_v2/66f2a557821e116aacb2a510",
+   "longbench_v2/66f950acbb02136c067c5021",
+   "longbench_v2/66ecf139821e116aacb1e0e1",
+   "longbench_v2/66ecfe1e821e116aacb1e41c"
+  ],
+  "longbench_v2_96k": [
+   "longbench_v2/66f793f4bb02136c067c306e",
+   "longbench_v2/66fa7c81bb02136c067c6e09",
+   "longbench_v2/66ed211f821e116aacb1ee0d",
+   "longbench_v2/66f3d738821e116aacb2f446"
+  ]
+ },
+ "seeds": [
+  404,
+  505
+ ],
+ "warm": false,
+ "extra_gold_sha256": {
+  "longbench_v2_32k": "55098b5d5e95273028228da193ab431d6bb72543004cf3367329d3095146168f",
+  "longbench_v2_64k": "c1833d57fbfe1dd8b3376df6a8213f11803821a621d5308f6e708ac90dfae9c9",
+  "longbench_v2_96k": "f662d97ef724fcd889a5a1e44bffa82ba8bf24877b932019aad178191109f1a7"
+ },
+ "arms": {
+  "D_fa4_allkept": {
+   "kind": "dense_fa4_allkept"
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_c0_q64c_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "carry_first": true,
+    "q_block": 64,
+    "q_carry64": true
+   }
+  },
+  "M3_R6_A64_fused_dp_async_m1ln2_c0_q64c_c01_fa4": {
+   "kind": "method",
+   "parent": "M3_R3_A8_current_output",
+   "extra": {
+    "consumer64": 2,
+    "memory_caps": "long",
+    "fa4_consumer": true,
+    "score_period": 64,
+    "fused_observe": true,
+    "async_route": true,
+    "risk_state": "dense_prefix",
+    "decision_interval": 6,
+    "threshold_shift": "minus_ln2",
+    "carry_first": true,
+    "q_block": 64,
+    "q_carry64": true,
+    "observe_carried": true
+   }
+  }
+ },
+ "substrate": "piecewise_v5",
+ "long_context_execution": "all arms: memory-linear GLOBAL causal / LOCAL sliding prefill via the 64-row kernel, elided O(n^2) prefill mask mapping, token-chunked MoE (V27_PREFILL_DENSE64=1); canvas calls follow each arm | decoding substrate piecewise_v1 (torch 2.12.1 grouped_mm MoE; decoder compiled reduce-overhead, split at GLOBAL attention which runs eager; LOCAL attention graphed unless the arm routes LOCAL layers; official-style compiled sampler); untimed per-arm warm-up before timed requests",
+ "hosts": [
+  "149.165.151.254",
+  "149.165.168.28"
+ ],
+ "extra_hosts": [
+  "149.165.168.28"
+ ],
+ "selection_rule": "P15 accuracy-first preview of observe_carried (c01, 2026-10-02): the observation call (canvas call 1) forms its output from the FA4 block-sparse kernel on the map call 0 used (the carried map), while the fused kernel runs observation-only (no V load, no PV), so the risk table and every later decision are those of the dense observation. Stacked on M3 R6 DP -ln2 + carry_first + q64c. Small subset first (AIME26 10 problems, LongBench-v2 32K/64K 8 items, 96K 4 items x seeds 404, 505) against dense FA4 all-kept and the same pipeline without c01; mpk and dlm2, one host per cell; substrate piecewise_v5; frozen before generation."
+}
