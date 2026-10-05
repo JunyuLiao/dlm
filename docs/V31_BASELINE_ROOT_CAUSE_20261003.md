@@ -2202,3 +2202,25 @@ Total steps are no higher than dense on all four datasets.
 
 **Decision rule** (N/C ≤ 1.03 vs dense, accuracy not lower): t50_sticky passes on all four datasets. Seeds 3–4 are
 queued in sc2.
+
+**Determinism of the lean arm (LongBench think S1, 32 cells per host).** Pairs of lean 8192 runs with identical output
+hashes:
+
+| pair | mpk | dlm2 |
+|---|---|---|
+| ctl (no fix, adapter 7338e) vs old sc1 lean (no fix, adapter 789917) | 30/32 | — |
+| ctl2 (no fix, repeat) vs old sc1 lean | — | 30/32 |
+| ctl / ctl2 vs lean_fx (fix) | 30/32 | 30/32 |
+| lean_fx vs old sc1 lean | 29/32 | 29/32 |
+| t50_sticky vs t50_sticky_fx (same adapter) | 30/32 | 30/32 |
+
+- Same-seed lean runs are not bitwise reproducible. One to three long-output cells per 32 diverge mid-output
+  (thousands of characters in), with or without the fix, at the same rate.
+- So the fix adds no divergence. Dense is reproducible: 64/64 with and without the fix.
+- Official scores are unchanged by these divergences.
+- The source is not located yet. The lean path has no atomics or Triton autotuning. Next step: bisect the backends
+  (KV_COPY, MERGE, LOGIT_STATS, OBSERVE, MAGE_SELECT → torch) with repeated runs on long-output cells.
+- The forced-canvas "zero noise floor" holds for the dense reference only.
+- **Excluded:** dlm2's first ctl run (04:14 UTC, right after the gate race) diverged from every other run in the first
+  canvas of all 32 cells, while its outputs look normal. Its repeat ctl2 agrees with the other runs (30/32). The cause
+  of this one-off is unknown, and the run is excluded from analysis.
