@@ -1998,3 +1998,32 @@ all-kept:
   4. relative multi-trigger + pool 4;
   5. relative trigger + jcgate;
   6. sink 1 + recent 1024.
+
+## S1 results so far (both hosts, seeds 1–2, official scorers) — 2026-10-05 00:30 UTC
+
+Difference vs dense; 95% CIs are item-clustered bootstraps.
+
+| arm | RULER v34 | LongBench-v2 think | MRCR | GraphWalks b32k |
+|---|---|---|---|---|
+| lean 4096 | −0.16 | +1.6 | −0.111 [−0.21, −0.02] | −0.101 |
+| lean 8192 | **+1.15** (cwe 84.2 vs 85.8) | +1.6 | −0.046 | −0.099 |
+| T1: lean 4096 + trigger 0.5 + C gate | −0.06 | −6.3 (n.s.) | **−0.021**; vs lean +0.091 [+0.031, +0.167] | −0.044; vs lean +0.057 |
+| T2: T1 with a 2048 re-selection budget | −0.90 | +1.6 | −0.099 | (pending) |
+
+**Reading.**
+- **Two failure modes, two remedies.**
+  - Budget: RULER cwe needs coverage; 8192 restores it, re-selection does not.
+  - Staleness: on MRCR and GraphWalks, re-selection restores accuracy and 8192 does not.
+- **8192 costs about 1% per forward over 4096** (decode time per forward on dlm2: 0.787 vs 0.780 on LongBench, 0.848 vs
+  0.837 on GraphWalks). The held sparse call is a tiny share of a step.
+- **Decaying the budget (T2) gives back the MRCR gain** and saves nothing per forward. The budget should not go down
+  with progress. D3 becomes "up only": coverage-calibrated (KCOVER) or 8192.
+- **LongBench `0shot_think` at 32 items × 2 seeds is noisy:** T1 −6.3 and T2 +1.6 differ only in the late-canvas
+  budget. A confirmation needs more items and seeds.
+- **Final candidate: lean 8192 + mid-canvas re-selection** (sc2 job 3).
+
+**Clock trace (T0, dlm2 RULER).**
+- After step 1 the accepted fraction has a median of 1.0. Short-answer canvases are accepted almost at once, which
+  confirms the need for relative progress.
+- The traced clock stopped reading after its trigger. Fixed: it now keeps reading. LongBench traces of this run end at
+  the trigger; MRCR and GraphWalks are complete.
