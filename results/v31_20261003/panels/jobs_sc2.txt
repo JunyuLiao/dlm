@@ -1,6 +1,7 @@
-# sc2 (both hosts; overlay ov_pa4). Re-planned 2026-10-05 01:35 UTC (user: more seeds where lengths / steps swing; track
-# total steps and steps per canvas). Seeds 3-4 on LongBench-think / GraphWalks / MRCR (same items) for the references
-# and the final candidates; sticky re-selection (round 8) against the plain one; same-budget ablations; stop rule last.
+# sc2 (both hosts; overlay ov_pa4). Re-planned 2026-10-05 01:45 UTC: with both hosts, the unweighted trigger T0 keeps
+# steps per canvas at or below dense (GraphWalks 0.89, MRCR 1.06, LongBench 0.95) while C-gate rows inflate GraphWalks
+# (1.23) and cost LongBench-think accuracy (-6.3): the unweighted / sticky re-selection is the final candidate, C-gate
+# rows become an ablation. Seeds 3-4 on LongBench-think / GraphWalks / MRCR for references and candidates.
 ruler _pa4check 4096
 lbt34 - dense
 gw34 - dense
@@ -11,17 +12,17 @@ mrcr34 - 4096
 lbt34 - 8192
 gw34 - 8192
 mrcr34 - 8192
-ruler _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
-lbt _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
-mrcr _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
-gw _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
+ruler _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+lbt _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+mrcr _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+gw _t50 8192 MAGE_RESELECT_TRIGGER=0.5
 ruler _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
 lbt _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
 mrcr _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
 gw _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
-lbt34 _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
-gw34 _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
-mrcr34 _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
+lbt34 _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+gw34 _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+mrcr34 _t50 8192 MAGE_RESELECT_TRIGGER=0.5
 lbt34 _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
 gw34 _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
 mrcr34 _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
@@ -29,10 +30,10 @@ ruler _rs4 8192 MAGE_RESELECT=4
 lbt _rs4 8192 MAGE_RESELECT=4
 mrcr _rs4 8192 MAGE_RESELECT=4
 gw _rs4 8192 MAGE_RESELECT=4
-ruler _t50 8192 MAGE_RESELECT_TRIGGER=0.5
-lbt _t50 8192 MAGE_RESELECT_TRIGGER=0.5
-mrcr _t50 8192 MAGE_RESELECT_TRIGGER=0.5
-gw _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+ruler _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
+lbt _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
+mrcr _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
+gw _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
 ruler _rel_pool4_sticky 8192 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4 MAGE_STICKY=1.386
 lbt _rel_pool4_sticky 8192 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4 MAGE_STICKY=1.386
 mrcr _rel_pool4_sticky 8192 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4 MAGE_STICKY=1.386
