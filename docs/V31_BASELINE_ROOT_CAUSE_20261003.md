@@ -2416,3 +2416,28 @@ trigger is Junyu Liao's C-gate settledness, threshold 0.15 (COLLABORATION CANDID
 - **Decision:** the final method uses the C-gate settledness clock with hysteresis. It is a DLM-specific progress
   signal and a joint contribution with Junyu; accepted fraction stays as the ablation.
 - **Next:** confirm on seeds 3–4 and on S2.
+
+**The two re-observation clocks, complete (both with hysteresis, 8192, fix; S1 seeds 1–2).** Accuracy comes from the
+scored runs; times are sums over cells.
+
+| part | clock | acc | N | N/C | ms/step | S (s) | W (s) | S / dense+fix | W / dense+fix |
+|---|---|---|---|---|---|---|---|---|---|
+| RULER | dense + fix | 88.94 | 770 | 4.94 | 41.5 | 32 | 501 | 1 | 1 |
+| | accepted fraction | 89.55 | 769 | 4.93 | 43.3 | 33 | 502 | 1.04 | 1.00 |
+| | C-gate settledness | 89.29 | 791 | 5.07 | 44.0 | 35 | 504 | 1.09 | 1.005 |
+| LongBench think | dense + fix | 43.8% | 19,390 | 19.39 | 32.8 | 636 | 917 | 1 | 1 |
+| | accepted fraction | 48.4% | 18,688 | 19.65 | 24.5 | 459 | 740 | 0.72 | 0.81 |
+| | C-gate settledness | 46.9% | 17,460 | 19.49 | 24.2 | 423 | 704 | 0.66 | 0.77 |
+| MRCR | dense + fix | 0.391 | 1,125 | 13.72 | 29.1 | 33 | 133 | 1 | 1 |
+| | accepted fraction | 0.381 | 886 | 12.14 | 28.8 | 25 | 126 | 0.78 | 0.945 |
+| | C-gate settledness | 0.393 | 867 | 11.88 | 28.8 | 25 | 125 | 0.77 | 0.94 |
+| GraphWalks | dense + fix | 0.367 | 20,716 | 10.74 | 27.7 | 573 | 614 | 1 | 1 |
+| | accepted fraction | 0.362 | 18,484 | 9.03 | 25.4 | 470 | 510 | 0.82 | 0.83 |
+| | C-gate settledness | 0.370 | 21,886 | 10.36 | 24.0 | 526 | 566 | 0.92 | 0.92 |
+
+- Neither clock wins overall. The C-gate clock is faster on LongBench, the accepted-fraction clock on GraphWalks
+  (fewer steps).
+- Pooled over LongBench + GraphWalks, W is 0.816 (accepted fraction) vs 0.830 (C gate).
+- Accuracy splits the same way; every difference is inside the S1 noise.
+- The C-gate clock stays the final choice for novelty: a DLM-specific signal, joint with Junyu. Seeds 3–4 (sc5) test
+  both clocks.
