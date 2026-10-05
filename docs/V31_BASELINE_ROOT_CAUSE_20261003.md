@@ -2292,3 +2292,14 @@ Steps and speed vs dense, plain → sticky:
   outputs (T +30%) and adds steps; sticky removes both and recovers the accuracy.
 - Elsewhere the two are equivalent.
 - With 12 GraphWalks items the evidence is suggestive, not significant. Seeds 3–4 and S2 will test it.
+
+**All remaining jobs on the LOCAL fix (sc4, 05:27 UTC).** The user asked why some runs were still without the fix.
+They were sc2 jobs queued before the fix was verified. Accuracy and steps are unaffected by it, but speed should
+share one baseline.
+
+What changed (`jobs_sc4_{mpk,dlm2}.txt`, swapped in with `switch_chain.sh`):
+- Every remaining sc3 job now carries `FA4_LOCAL_FIX=1` and a `_fx` label: seeds 3–4 of the final candidate and
+  references, AIME26 / HumanEval, and the ablations rs4 / t50_cgate / kcov90 / rel50_jcg.
+- `switch_chain.sh` acts only if the expected job is in flight with its python on the GPU.
+- `_pa4check` is dropped: the ctl / ctl2 repeats already showed the ov_pa4 adapter matching the older lean at the
+  repeat rate.
