@@ -2350,3 +2350,38 @@ What changed (`jobs_sc4_{mpk,dlm2}.txt`, swapped in with `switch_chain.sh`):
 - **Requeue:** the crashed jobs are requeued (`jobs_sc4b_{mpk,dlm2}.txt`).
 - **Records:** earlier sc4 records carry adapter 7338e2769d45; later ones carry 013ea66a4e52. The behaviour outside
   the pool path is identical.
+
+**4096 + sticky, all four parts (fix):**
+
+| | accuracy vs dense | W vs dense + fix |
+|---|---|---|
+| RULER | +0.22 | 1.00 |
+| LongBench think | −0.016 | 0.93 |
+| MRCR | −0.051 | 0.94 |
+| GraphWalks | **−0.098 [−0.216, −0.008]** | 0.88 |
+
+Dropped: GraphWalks is budget-sensitive (8192 sticky −0.005), and on LongBench the outputs grow longer.
+
+**Pool re-observation + sticky (8192, relative triggers 0.25 / 0.5 / 0.75, fix):**
+
+| | accuracy vs dense | W vs dense + fix | S/N | N/C |
+|---|---|---|---|---|
+| RULER | +0.61 (as t50_sticky) | 1.005 | 1.043 | — |
+| LongBench | +0.016 (t50_sticky_fx: +0.047) | 0.826 [0.70, 0.97] | 0.744 (t50_sticky_fx: 0.748) | 1.036 |
+
+- Three cheaper re-observations cost about what one dense re-observation costs, so there is no net gain. A
+  single-trigger pool variant would save about 2% per step at most.
+
+**Per-step ratio vs dense + fix by prompt length (LongBench think, S1):**
+
+| prompt | cells | dense + fix ms/step (official dense) | lean 8192 | t50_sticky | pool sticky |
+|---|---|---|---|---|---|
+| < 48K | 10 | 26.5 (33.6) | 0.901 | 0.942 | 0.948 |
+| 48–80K | 8 | 27.8 (38.2) | 0.875 | 0.882 | 0.877 |
+| ≥ 80K | 46 | 34.6 (55.5) | **0.653** | **0.707** | 0.701 |
+
+- At about 100–120K the per-step speedup over the fixed dense is 1.41× (sticky) to 1.53× (plain lean). This is close
+  to the scale-feasibility study's estimate of about 1.6× at 128K once the non-GLOBAL context cost is removed; that
+  cost was the LOCAL bug, now fixed.
+- The gain grows with context, so 192K / 256K is the most direct performance lever: about 3 engineering days in that
+  study's plan.
