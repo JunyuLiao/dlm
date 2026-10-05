@@ -72,6 +72,10 @@ def main():
     ap.add_argument('--pool', type=int, default=4)
     ap.add_argument('--k', type=int, default=4096)
     a = ap.parse_args()
+    import os
+    import experiments.numerical_qk_reuse as pkg
+    if os.environ.get('V27_ADAPTER_DIR'):                     # the overlay holding the v31 files comes first
+        pkg.__path__.insert(0, os.environ['V27_ADAPTER_DIR'])
     from experiments.numerical_qk_reuse import v27_fa4
     from experiments.numerical_qk_reuse import vllm_adapter as va
     from experiments.numerical_qk_reuse.v31_fa4_observe import observe_dense
