@@ -2044,3 +2044,35 @@ k = 4096 tokens. Results in `results/v31_20261003/panels/pool_check_mpk.jsonl`.
   observation at 128K, and the gap grows with length.
 - So a mid-canvas re-selection costs about 1 ms per layer instead of 3.2 ms. This is the system half of the
   progress-aware re-observation claim.
+
+## The context-dependent non-GLOBAL cost is the LOCAL (sliding-window) decode attention — nsys, 2026-10-05 01:10 UTC
+
+Context: the scale-feasibility study (branch `research/v31-scale-feasibility-20261004`) found that the dense decode
+step grows by 0.305 ms per 1K prompt tokens, of which the 5 GLOBAL calls explain only 0.128.
+
+Measurement: `pf_unknown.sh` on mpk. nsys CUDA trace with per-node CUDA-graph kernels of the official dense path
+(vLLM FULL + fix) on RULER niah_single_1 at 32K / 64K / 128K. Each decode forward runs 5 × (5 LOCAL calls + 1 GLOBAL
+call). Median per-call FA4 time:
+
+| context | GLOBAL call (hd 512, window none) | LOCAL call (hd 256, window 1024) | 5 GLOBAL per forward | 25 LOCAL per forward |
+|---|---|---|---|---|
+| warm-up (tiny) | 19 µs | 17 µs | 0.09 ms | 0.42 ms |
+| 32K | 832 µs | 223 µs | 4.2 ms | 5.6 ms |
+| 64K | 1599 µs | **43 µs** | 8.0 ms | 1.1 ms |
+| 128K | 3326 µs | **826 µs** | 16.6 ms | **20.7 ms** |
+
+**Reading.**
+- A LOCAL layer attends to a 1024-token window. Its call should cost about the same at every length, as at 64K
+  (43 µs).
+- At 32K and 128K it instead grows with the context, about 4× from 32K to 128K. At 128K the 25 LOCAL calls cost more
+  than the 5 GLOBAL calls together. This is the "unknown" context-dependent cost, about 20 ms of a ~60 ms step.
+- vLLM issues the canvas's LOCAL call as FA4 varlen with a paged cache (128-token pages), `window_size=(1023, 1023)`,
+  `causal=False` and `dynamic_causal=tensor([False])`. The suspicion is that the window does not prune KV blocks on
+  this path for some lengths.
+- Under test: `scripts/v31_local_window_bench.py` sweeps 16K–131K. It compares the vLLM call, the same call without
+  dynamic_causal, and no window. It also checks the vLLM call against an FP32 windowed reference, to tell "slow but
+  correct" from "not windowed". It runs first in dlm2's gate, about 10 GPU minutes.
+- **If this is an inefficiency, it is the largest speed lever.** Fixing it for both dense and sparse would remove
+  about 20 ms per step at 128K. Estimated per-step gain of our method over the fixed dense: about 1.8× at 128K.
+- Reporting rule: compare against the official vLLM dense as it is AND against the fixed dense. The fix is a separate
+  contribution, upstreamable, and benefits the baseline equally.
