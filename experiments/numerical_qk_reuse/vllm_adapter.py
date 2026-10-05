@@ -144,6 +144,7 @@ class VllmMethodAdapter:
                  mage_reselect_trigger=None, mage_trigger_signal='accept', mage_reselect_kmin=None,
                  mage_cg_tau=2.5, mage_cg_gamma_q=0.65, mage_clock_trace=False, mage_sink=0, mage_recent=0,
                  mage_trigger_relative=False, mage_pool=None, mage_kcover=None, mage_kq=0.75, mage_kmax=16384,
+                 mage_sticky=None,
                  cg_stop=None, stall_rescue=None, stall_eps=0.01):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
@@ -215,6 +216,10 @@ class VllmMethodAdapter:
             raise ValueError('cg_stop: a stable-run length >= 1 (steps)')
         if stall_rescue is not None and (int(stall_rescue) < 1 or arm not in ('method', 'mage') or float(stall_eps) < 0):
             raise ValueError('stall_rescue: a step count >= 1 on a sparse arm (method / mage)')
+        if mage_sticky is not None and (float(mage_sticky) < 0 or (mage_reselect is None and mage_reselect_trigger is None)
+                                        or mage_granularity != 'qblock_max' or not mage_carry_first):
+            raise ValueError('mage_sticky: a log-share bonus >= 0 for held tiles in re-selections (mage_reselect / '
+                             'trigger) of the qblock_max selection with mage_carry_first')
         if mage_trigger_relative and mage_reselect_trigger is None:
             raise ValueError('mage_trigger_relative rescales the progress signal: needs mage_reselect_trigger')
         if mage_clock_trace and mage_reselect_trigger is None:
@@ -369,6 +374,8 @@ class VllmMethodAdapter:
         self.stall_eps = float(stall_eps)
         self._cg = self._cg_canvas = None
         self._stall_best, self._stall_since = -1.0, 0
+        # round 8: sticky re-selection -- held tiles get + mage_sticky on their log-share score in a re-selection
+        self.mage_sticky, self._mage_held = (None if mage_sticky is None else float(mage_sticky)), None
         # round 6: coverage-calibrated balanced budget -- see _coverage_tiles
         self.mage_kcover = None if mage_kcover is None else float(mage_kcover)
         self.mage_kq, self.mage_kmax = float(mage_kq), int(mage_kmax)
@@ -900,6 +907,7 @@ class VllmMethodAdapter:
                    else self._trig_at == (self.canvas_id, cnt[2]))
             if st is not None and st['canvas'] == self.canvas_id and st['nk'] == nk and due:
                 self._mage_units_w = self._mage_row_w if self.mage_row_weight is not None else None
+                self._mage_held = st.get('kept') if self.mage_sticky is not None else None
                 self._k_override = self._trig_k if self._trig_k is not None else self.mage_reselect_k
                 try:
                     pool = st.get('pool') if self.mage_pool is not None else None
@@ -908,7 +916,7 @@ class VllmMethodAdapter:
                     else:
                         out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
                 finally:
-                    self._mage_units_w, self._k_override = None, None
+                    self._mage_units_w, self._k_override, self._mage_held = None, None, None
                 st['lists'] = v27_fa4.block_sparse_tensors(kept)
                 if self.mage_carry_first:
                     st['kept'] = kept
@@ -1222,6 +1230,10 @@ class VllmMethodAdapter:
                 live = torch.isfinite(logw).any(-1)                                             # [QB]: a row to weigh
                 score = torch.where(live[None, :, None], weighted, score)
                 self.calls['mage_weighted_units'] = self.calls.get('mage_weighted_units', 0) + 1
+        held = self._mage_held
+        if held is not None and held.shape[-1] >= pt and held.shape[2] == score.shape[1]:          # round 8: hysteresis
+            score = score + self.mage_sticky * held[0, :, :, :pt].to(score.dtype)
+            self.calls['mage_sticky_units'] = self.calls.get('mage_sticky_units', 0) + 1
         if self.mage_sink or self.mage_recent_tiles:                                           # in-budget protection
             score = score.clone()
             score[..., :min(self.mage_sink, pt)] = float('inf')

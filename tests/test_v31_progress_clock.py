@@ -277,6 +277,35 @@ def test_stall_rescue_turns_dense_after_s_flat_steps():
         pass
 
 
+def test_sticky_reselection_keeps_held_tiles_unless_clearly_beaten():
+    torch.manual_seed(0)
+    H, n, pt, kt, qb, G = 16, 256, 40, 44, 2, 8
+    head_lse = torch.randn(H, n, pt) * 0.01
+    head_lse[:, :, 7] += 1.0                                       # held tile 7: share e^1 above the floor
+    head_lse[:, :, 9] += 1.5                                       # new tile 9: slightly larger
+    head_lse[:, :, 11] += 4.0                                      # new tile 11: clearly larger
+    mass = torch.softmax(torch.cat([head_lse, torch.randn(H, n, kt - pt)], -1), -1)
+    held = torch.zeros(1, H, qb, kt, dtype=torch.bool)
+    held[..., 7] = True
+    held[..., 3] = True                                            # held tile 3: weak, should be replaced
+    held[..., pt:] = True
+    a = _adapter(mage_reselect_trigger=0.5, mage_carry_first=True, mage_sticky=1.0)
+    plain = a._mage_units(mass, head_lse, H, n, qb, kt, pt, 2, G)
+    assert bool(plain[0, :, :, 9].all() and plain[0, :, :, 11].all()) and not bool(plain[0, :, :, 7].any())
+    a._mage_held = held
+    sticky = a._mage_units(mass, head_lse, H, n, qb, kt, pt, 2, G)
+    pre = sticky[0, :, :, :pt]
+    assert bool(pre[..., 7].all() and pre[..., 11].all()) and not bool(pre[..., 9].any() or pre[..., 3].any())
+    assert bool((pre.sum(-1) == 2).all()) and a.calls['mage_sticky_units'] == 1
+    for bad in (dict(mage_sticky=1.0), dict(mage_reselect_trigger=0.5, mage_sticky=1.0),
+                dict(mage_reselect_trigger=0.5, mage_carry_first=True, mage_sticky=-1.0)):
+        try:
+            _adapter(**bad)
+            raise AssertionError(f'accepted {bad}')
+        except ValueError:
+            pass
+
+
 if __name__ == '__main__':
     import sys
     for name, fn in list(globals().items()):

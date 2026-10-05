@@ -234,7 +234,8 @@ def main():
                                                  mage_kmax=int(os.environ.get('MAGE_KMAX', '16384')),
                                                  cg_stop=int(os.environ['CG_STOP']) if os.environ.get('CG_STOP') else None,
                                                  stall_rescue=int(os.environ['STALL_RESCUE']) if os.environ.get('STALL_RESCUE') else None,
-                                                 stall_eps=float(os.environ.get('STALL_EPS', '0.01')))
+                                                 stall_eps=float(os.environ.get('STALL_EPS', '0.01')),
+                                                 mage_sticky=float(os.environ['MAGE_STICKY']) if os.environ.get('MAGE_STICKY') else None)
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -282,7 +283,7 @@ def main():
                                'mage_reselect_k', 'mage_reselect_trigger', 'mage_trigger_signal',
                                'mage_reselect_kmin', 'mage_clock_trace', 'mage_sink', 'mage_recent_tiles',
                                'mage_trigger_relative', 'mage_pool', 'mage_kcover', 'mage_kq', 'mage_kmax',
-                               'cg_stop', 'stall_rescue', 'stall_eps')})
+                               'cg_stop', 'stall_rescue', 'stall_eps', 'mage_sticky')})
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]
