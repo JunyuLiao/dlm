@@ -32,8 +32,9 @@ prefix physical sparsity is **21.64%** and the all-GLOBAL-call
 work fraction is **81.49%** (the difference is the selection/warm
 calls that are intentionally dense). LOCAL physical sparsity is **0%**.
 Using the pinned 5-GLOBAL/25-LOCAL architecture, 16 query heads, 128-row
-query blocks, 64-key tiles, and the native 1024-token LOCAL window, the
-count-weighted overall decoder-attention sparsity is **7.52%**.
+query blocks, 64-key tiles, and the native 1024-token LOCAL window, including the always-kept current
+GLOBAL canvas tiles, the count-weighted overall decoder-attention sparsity is
+**7.31%**.
 
 ## Timing
 
@@ -53,9 +54,9 @@ calls and GLOBAL prefix work. No speed gain is claimed.
 
 | seed | dense calls | V31 calls | dense canvases | V31 canvases | V31 GLOBAL sparsity | V31 overall sparsity |
 |---:|---:|---:|---:|---:|---:|---:|
-| 42 | 9065 | 8511 | 661 | 649 | 20.89% | 7.28% |
-| 43 | 8534 | 8386 | 640 | 645 | 21.58% | 7.47% |
-| 44 | 9590 | 8102 | 673 | 621 | 22.48% | 7.84% |
+| 42 | 9065 | 8511 | 661 | 649 | 20.89% | 7.07% |
+| 43 | 8534 | 8386 | 640 | 645 | 21.58% | 7.26% |
+| 44 | 9590 | 8102 | 673 | 621 | 22.48% | 7.61% |
 
 
 The sparse public receipts and private completions remain in the authorized
