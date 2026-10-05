@@ -2265,3 +2265,30 @@ RULER v33 and the 343 LongBench hold-out items. It runs once the algorithm settl
 - So the LOCAL fix introduces no divergence, and the lean arm's run-to-run nondeterminism is pre-existing.
 - dlm2's first ctl run disagrees with every other run (0/32), including its own repeat. It is a one-off and stays
   excluded.
+
+**Sticky vs plain progress re-selection (both 8192, trigger 0.5; S1 seeds 1–2, no fix).**
+
+Accuracy, sticky minus plain t50:
+
+| | difference | CI |
+|---|---|---|
+| RULER | +0.13 | [−0.13, +0.45] |
+| LongBench | +0.031 | [−0.063, +0.125] |
+| MRCR | −0.006 | [−0.014, −0.000] |
+| GraphWalks | **+0.073** | [−0.019, +0.198] |
+
+GraphWalks accuracy vs dense: plain −0.077, sticky −0.005.
+
+Steps and speed vs dense, plain → sticky:
+
+| | N | output T | W |
+|---|---|---|---|
+| GraphWalks | 1.136 → 0.938 | 1.30 → 1.07 | 1.08 → 0.90 |
+| LongBench | 0.892 → 0.928 | — | 0.835 → 0.856 |
+| MRCR | equal | equal | equal |
+| RULER | equal | equal | equal |
+
+- Hysteresis matters where a mid-canvas re-selection swaps many tiles. On GraphWalks, plain re-selection lengthens the
+  outputs (T +30%) and adds steps; sticky removes both and recovers the accuracy.
+- Elsewhere the two are equivalent.
+- With 12 GraphWalks items the evidence is suggestive, not significant. Seeds 3–4 and S2 will test it.
