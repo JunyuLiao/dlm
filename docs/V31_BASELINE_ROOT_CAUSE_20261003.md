@@ -2224,3 +2224,30 @@ hashes:
 - **Excluded:** dlm2's first ctl run (04:14 UTC, right after the gate race) diverged from every other run in the first
   canvas of all 32 cells, while its outputs look normal. Its repeat ctl2 agrees with the other runs (30/32). The cause
   of this one-off is unknown, and the run is excluded from analysis.
+
+## Queue re-plan: algorithm first (sc3) — 2026-10-05 05:00 UTC
+
+The user's direction was "主要还是优先搞个好算法。算法在子集上不错再扩大": find a good algorithm first, and expand
+only once it looks good on the subsets.
+
+**Change.** Both hosts switched to `jobs_sc3.txt`, using overlay ov_pa4fx:
+- Each old chain runner was killed (SIGKILL) while its job was on the GPU. That job finished normally; the new
+  runner waits for the GPU.
+- The new list runs, in order:
+  1. the rest of plain t50 (seeds 1–2);
+  2. dense + fix on RULER / MRCR / GraphWalks;
+  3. variants of t50_sticky on S1 seeds 1–2, all with `FA4_LOCAL_FIX`, on all four parts:
+     - 4096 budget;
+     - two-level pool re-observation (relative triggers 0.25 / 0.5 / 0.75);
+     - C-gate settledness clock (COLLABORATION CANDIDATE, Junyu Liao);
+     - t50_sticky 8192 itself on RULER / MRCR / GraphWalks;
+  4. the sc2 tail: seeds 3–4, AIME26 / HumanEval, the overlay check and the remaining ablations.
+
+**S2 is prepared but not scheduled.** S2 is the expansion suite: `scripts/v31_expand_suite.py`, `s2_suite.json`,
+cells on both hosts. It adds new items only:
+- RULER v34: p0002–p0005 (+156 items);
+- LongBench: the other 128 exploration items;
+- MRCR and GraphWalks: +8 per bin each.
+
+S2 records which items stay free for the pre-registered confirmation: RULER v34 351, MRCR 24, GraphWalks 36, plus
+RULER v33 and the 343 LongBench hold-out items. It runs once the algorithm settles.

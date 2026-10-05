@@ -1,0 +1,67 @@
+# sc3 (both hosts; overlay ov_pa4fx = the ov_pa4 adapter + the bench with FA4_LOCAL_FIX). Re-planned 2026-10-05
+# 05:00 UTC (user: "algorithm first; expand only once it looks good on the subsets"). After sc2 lines 1-10: the
+# rest of plain t50 (seeds 1-2), dense with the LOCAL fix on the three parts that lack it, then algorithm variants of
+# the final candidate on S1 seeds 1-2, all with the fix (accuracy is unaffected by it; speed against dense+fix):
+# 4096 budget, two-level pool re-observation, C-gate settledness clock (COLLABORATION CANDIDATE, Junyu Liao), and
+# t50_sticky 8192 itself on ruler / mrcr / gw. Then the sc2 tail (seeds 3-4, AIME26 / HumanEval, overlay check,
+# ablations) minus the two ablations moved up. S2 (expansion) waits until the algorithm settles.
+mrcr _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+gw _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+ruler _fx dense FA4_LOCAL_FIX=1
+mrcr _fx dense FA4_LOCAL_FIX=1
+gw _fx dense FA4_LOCAL_FIX=1
+ruler _t50_sticky_fx 4096 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt _t50_sticky_fx 4096 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+mrcr _t50_sticky_fx 4096 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+gw _t50_sticky_fx 4096 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+ruler _rel_pool4_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt _rel_pool4_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+mrcr _rel_pool4_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+gw _rel_pool4_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+ruler _settle15_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt _settle15_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+mrcr _settle15_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+gw _settle15_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+ruler _t50_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+mrcr _t50_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+gw _t50_sticky_fx 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386 FA4_LOCAL_FIX=1
+lbt34 _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
+gw34 _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
+mrcr34 _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
+lbt34 _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+gw34 _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+mrcr34 _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+lbt34 - dense
+gw34 - dense
+mrcr34 - dense
+lbt34 - 8192
+gw34 - 8192
+mrcr34 - 8192
+lbt34 - 4096
+gw34 - 4096
+mrcr34 - 4096
+aime - dense
+aime - 4096
+aime - 8192
+aime _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
+aime _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+he - dense
+he - 4096
+he _t50_sticky 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_STICKY=1.386
+ruler _pa4check 4096
+ruler _rs4 8192 MAGE_RESELECT=4
+lbt _rs4 8192 MAGE_RESELECT=4
+mrcr _rs4 8192 MAGE_RESELECT=4
+gw _rs4 8192 MAGE_RESELECT=4
+ruler _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
+lbt _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
+mrcr _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
+gw _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
+ruler _kcov90 4096 MAGE_KCOVER=0.9
+lbt _kcov90 4096 MAGE_KCOVER=0.9
+mrcr _kcov90 4096 MAGE_KCOVER=0.9
+gw _kcov90 4096 MAGE_KCOVER=0.9
+ruler _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
+lbt _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
+mrcr _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
+gw _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
