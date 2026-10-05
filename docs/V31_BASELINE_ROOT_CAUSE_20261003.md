@@ -2303,3 +2303,29 @@ What changed (`jobs_sc4_{mpk,dlm2}.txt`, swapped in with `switch_chain.sh`):
 - `switch_chain.sh` acts only if the expected job is in flight with its python on the GPU.
 - `_pa4check` is dropped: the ctl / ctl2 repeats already showed the ov_pa4 adapter matching the older lean at the
   repeat rate.
+
+## sc4 results so far (S1 seeds 1–2, with the LOCAL fix) — 2026-10-05 06:00 UTC
+
+**Dense + fix vs official dense.** Outputs are identical in every cell of every part.
+
+| | S | W |
+|---|---|---|
+| RULER | 0.81 | 0.99 (prefill is 92–94% of W) |
+| MRCR | 0.81 | 0.95 |
+| GraphWalks | 0.75 | 0.76 |
+| LongBench think | 0.65 | 0.72 |
+
+**Variant: 4096 + t50_sticky + fix**
+
+| | RULER | LongBench think |
+|---|---|---|
+| accuracy vs dense | +0.22 | −0.016 (8192 sticky: +0.047) |
+| W vs dense + fix | 1.003 | 0.933 [0.80, 1.12] (8192 sticky: 0.806) |
+| S/N vs dense + fix | 1.006 | **0.673** (8192 sticky: 0.748) |
+| N vs dense + fix | — | 1.34 (sum) |
+
+- The cheaper step is lost to longer outputs on a few heavy requests (T mean 4,348 vs 3,685). Per-cell N/C stays at
+  1.02 (geometric), but the sum-pooled N/C is 1.20.
+- On RULER the 4096 variant's sparse saving and its observation cost cancel.
+- **Measurement noise.** An identical-configuration repeat (lean 8192 fx vs fxrep) moves LongBench W from 0.799 to
+  0.753 and N from 1.02 to 0.89. Differences between variants below about ±0.05 in W are not meaningful at S1 size.
