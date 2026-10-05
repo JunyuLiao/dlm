@@ -1,28 +1,32 @@
-# sc2 (both hosts; S1 suite, seeds 1-2; overlay ov_pa4). Re-planned 23:45 UTC:
-# - lean 8192 costs ~1% per forward over 4096 and lifts RULER to +1.15 vs dense (cwe 84.2): budget-8192 combinations move up;
-# - sink / recent dropped (its motivation, the dlm2-half LongBench deficit, was chance);
-# - the sampler-side stop rule (changes decoding; user) stays last, dense and lean alike.
+# sc2 (both hosts; S1 suite, seeds 1-2; overlay ov_pa4). Re-planned 2026-10-05 01:00 UTC around the final candidate
+# lean 8192 + mid-canvas re-selection, with the ablations the novelty claim needs at the same budget:
+# progress trigger vs fixed step (rs4), C-gate rows vs unweighted, single vs multi refresh in the candidate pool,
+# Junyu's sensitivity weights; coverage-calibrated budget; the sampler-side stop rule last (appendix only).
 ruler _pa4check 4096
-ruler _kcov90 4096 MAGE_KCOVER=0.9
-lbt _kcov90 4096 MAGE_KCOVER=0.9
-mrcr _kcov90 4096 MAGE_KCOVER=0.9
-gw _kcov90 4096 MAGE_KCOVER=0.9
 ruler _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
 lbt _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
 mrcr _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
 gw _t50_cgate 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_ROWW=cgate
+ruler _rs4 8192 MAGE_RESELECT=4
+lbt _rs4 8192 MAGE_RESELECT=4
+mrcr _rs4 8192 MAGE_RESELECT=4
+gw _rs4 8192 MAGE_RESELECT=4
+ruler _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+lbt _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+mrcr _t50 8192 MAGE_RESELECT_TRIGGER=0.5
+gw _t50 8192 MAGE_RESELECT_TRIGGER=0.5
 ruler _rel_pool4 8192 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4
 lbt _rel_pool4 8192 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4
 mrcr _rel_pool4 8192 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4
 gw _rel_pool4 8192 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4
-ruler _rel_pool4 4096 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4
-lbt _rel_pool4 4096 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4
-mrcr _rel_pool4 4096 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4
-gw _rel_pool4 4096 MAGE_RESELECT_TRIGGER=0.25,0.5,0.75 MAGE_TRIGGER_RELATIVE=1 MAGE_POOL=4
-ruler _rel50_jcg 4096 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
-lbt _rel50_jcg 4096 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
-mrcr _rel50_jcg 4096 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
-gw _rel50_jcg 4096 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
+ruler _kcov90 4096 MAGE_KCOVER=0.9
+lbt _kcov90 4096 MAGE_KCOVER=0.9
+mrcr _kcov90 4096 MAGE_KCOVER=0.9
+gw _kcov90 4096 MAGE_KCOVER=0.9
+ruler _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
+lbt _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
+mrcr _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
+gw _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
 ruler - native
 lbt - native
 mrcr - native
@@ -31,7 +35,7 @@ ruler _cgstop3 native CG_STOP=3
 lbt _cgstop3 native CG_STOP=3
 mrcr _cgstop3 native CG_STOP=3
 gw _cgstop3 native CG_STOP=3
-ruler _cgstop3 4096 CG_STOP=3
-lbt _cgstop3 4096 CG_STOP=3
-mrcr _cgstop3 4096 CG_STOP=3
-gw _cgstop3 4096 CG_STOP=3
+ruler _cgstop3 8192 CG_STOP=3
+lbt _cgstop3 8192 CG_STOP=3
+mrcr _cgstop3 8192 CG_STOP=3
+gw _cgstop3 8192 CG_STOP=3
