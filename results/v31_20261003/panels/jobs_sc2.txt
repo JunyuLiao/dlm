@@ -2,6 +2,7 @@
 # steps per canvas at or below dense (GraphWalks 0.89, MRCR 1.06, LongBench 0.95) while C-gate rows inflate GraphWalks
 # (1.23) and cost LongBench-think accuracy (-6.3): the unweighted / sticky re-selection is the final candidate, C-gate
 # rows become an ablation. Seeds 3-4 on LongBench-think / GraphWalks / MRCR for references and candidates.
+# 02:20 UTC: the sampler-side stop rule never fired on forced canvases (0 stops in 9,022 checks): dropped.
 ruler _pa4check 4096
 lbt34 - dense
 gw34 - dense
@@ -46,15 +47,3 @@ ruler _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROW
 lbt _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
 mrcr _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
 gw _rel50_jcg 8192 MAGE_RESELECT_TRIGGER=0.5 MAGE_TRIGGER_RELATIVE=1 MAGE_ROWW=jcgate
-ruler - native
-lbt - native
-mrcr - native
-gw - native
-ruler _cgstop3 native CG_STOP=3
-lbt _cgstop3 native CG_STOP=3
-mrcr _cgstop3 native CG_STOP=3
-gw _cgstop3 native CG_STOP=3
-ruler _cgstop3 8192 CG_STOP=3
-lbt _cgstop3 8192 CG_STOP=3
-mrcr _cgstop3 8192 CG_STOP=3
-gw _cgstop3 8192 CG_STOP=3
