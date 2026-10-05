@@ -2399,3 +2399,20 @@ Dropped: GraphWalks is budget-sensitive (8192 sticky −0.005), and on LongBench
   re-observation catches it.
 - This is evidence for the design choice: re-observe the whole prefix, not a step-1 shortlist.
 - Final candidate stays t50_sticky 8192: one full re-observation at 50% accepted, with hysteresis.
+
+**C-gate settledness clock + sticky (settle15_sticky_fx, 8192): all four parts (S1 seeds 1–2, fix).** The re-observation
+trigger is Junyu Liao's C-gate settledness, threshold 0.15 (COLLABORATION CANDIDATE).
+
+| | accuracy vs dense | t50_sticky | W vs dense + fix | S/N | N / N/C vs dense |
+|---|---|---|---|---|---|
+| RULER | +0.35 [−0.38, +1.15] | +0.61 | 1.005 | 1.061 | — |
+| LongBench think | +0.031 [−0.109, +0.172] | +0.047 | **0.768 [0.66, 0.89]** (t50_sticky_fx: 0.806 [0.60, 1.03]) | 0.738 | 0.90 / 0.985 |
+| MRCR | +0.001 [−0.100, +0.076] | −0.010 | 0.941 | 0.992 | — |
+| GraphWalks | **+0.004 [0.000, +0.011]** (1 better / 0 worse cells) | −0.005 | 0.922 | 0.868 | 0.96 / 0.88 [0.78, 0.99] |
+
+- The variant is at dense accuracy on all four parts, with steps not inflated.
+- It is at least as good as the accepted-fraction clock, and slightly better on GraphWalks / MRCR accuracy and on
+  LongBench W. The W differences are within the ±0.05 repeat noise.
+- **Decision:** the final method uses the C-gate settledness clock with hysteresis. It is a DLM-specific progress
+  signal and a joint contribution with Junyu; accepted fraction stays as the ablation.
+- **Next:** confirm on seeds 3–4 and on S2.
