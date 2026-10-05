@@ -2027,3 +2027,20 @@ Difference vs dense; 95% CIs are item-clustered bootstraps.
   confirms the need for relative progress.
 - The traced clock stopped reading after its trigger. Fixed: it now keeps reading. LongBench traces of this run end at
   the trigger; MRCR and GraphWalks are complete.
+
+## Round 5 GPU check: the pool re-observation is exact and 3.3× cheaper at 128K — 2026-10-05 01:06 UTC
+
+`scripts/v31_pool_observe_check.py` on mpk (H100). Synthetic GLOBAL calls; pool of 256 tiles per unit = 4 × k at
+k = 4096 tokens. Results in `results/v31_20261003/panels/pool_check_mpk.jsonl`.
+
+| keys | z vs dense observation (pool tiles) | z outside the pool | output vs FP32 reference (max / mean abs) | dense observation | pool observation | held sparse call |
+|---|---|---|---|---|---|---|
+| 64K | identical (max diff 0.0) | all −inf | 8.2e-3 / 7.4e-5 | 1.64 ms | 0.94 ms | 0.29 ms |
+| 128K | identical (max diff 0.0) | all −inf | 3.6e-4 / 2.8e-5 | 3.22 ms | **0.96 ms** | 0.29 ms |
+
+- The block-sparse kernel with the pool tiles as mask blocks writes exactly the dense observation's tile log-mass,
+  bit for bit. It is the same FA4 score path.
+- Its cost follows the pool, not the context: 0.94–0.96 ms from 64K to 128K, so 3.3× cheaper than a dense
+  observation at 128K, and the gap grows with length.
+- So a mid-canvas re-selection costs about 1 ms per layer instead of 3.2 ms. This is the system half of the
+  progress-aware re-observation claim.
