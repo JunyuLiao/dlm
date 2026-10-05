@@ -2151,3 +2151,54 @@ The FX block's per-forward times will show the actual end-to-end effect.
 - vLLM's startup memory check refused the control (rc=1, no records). The sc2 job ran alone; only startup overlapped,
   and its KV cache (279,106 tokens) equals the earlier GW runs.
 - `fxgate3.sh` replaces it. It pauses the chain only once the job's python is listed by nvidia-smi.
+
+## Final candidate t50_sticky 8192, S1 seeds 1–2 (official scorers, both hosts) — 2026-10-05 04:30 UTC
+
+The arm is lean 8192, re-selected once mid-canvas when the accepted fraction reaches 0.5 (progress trigger), with
+hysteresis: held tiles get +1.386 on their log-share score (`MAGE_STICKY`).
+
+**Accuracy** (difference vs dense, item-clustered 95% CI):
+
+| arm | RULER v34 (156 cells) | MRCR (48) | GraphWalks (24) | LongBench think (64) |
+|---|---|---|---|---|
+| lean 4096 | −0.16 | **−0.111 [−0.214, −0.025]** | −0.101 | +0.016 |
+| lean 8192 | +1.15 | −0.046 | −0.099 | +0.016 |
+| T0 (4096 + trigger 0.5) | +0.10 | −0.028 | −0.096 | 0.000 |
+| **t50_sticky 8192** | +0.61 [−0.58, +2.28] | **−0.010** [−0.110, +0.066] | **−0.005** [−0.124, +0.129] | **+0.047** [−0.094, +0.188] |
+
+- GraphWalks: this is the first variant without the ~0.10 loss. MRCR is also back to dense.
+- The fix leaves accuracy unchanged: LongBench think scores of lean 8192 and t50_sticky are identical with and without
+  `FA4_LOCAL_FIX`.
+
+**Steps vs dense** (geometric means over cells, CI in brackets):
+
+| | N | N/C |
+|---|---|---|
+| LongBench | 0.928 | 0.997 |
+| GraphWalks | 0.938 | 0.875 (T0: 1.24 / 0.89) |
+| MRCR | 0.964 | 1.029 (lean 8192: 1.144) |
+| RULER | 0.993 | 0.993 |
+
+Total steps are no higher than dense on all four datasets.
+
+**Speed vs the official dense (no fix):**
+
+| | W | S/N |
+|---|---|---|
+| LongBench | 0.856 [0.737, 0.995] | 0.845 (lean 8192: 0.817; the extra observation costs about 3%) |
+| GraphWalks | 0.901 | 0.950 |
+| MRCR | 0.974 | 0.997 |
+| RULER | 1.012 | 1.129 |
+
+- RULER canvases converge in about 5 steps, so the step-1 observation plus the re-observation are not amortized.
+  W stays near 1 because prefill dominates RULER.
+
+**With the fix, vs dense + fix (LongBench think, 64 cells):**
+
+| | W | S/N |
+|---|---|---|
+| t50_sticky | 0.806 [0.60, 1.03] | 0.748 |
+| lean 8192 | 0.799 [0.66, 0.96] | 0.698 |
+
+**Decision rule** (N/C ≤ 1.03 vs dense, accuracy not lower): t50_sticky passes on all four datasets. Seeds 3–4 are
+queued in sc2.
