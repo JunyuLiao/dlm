@@ -35,7 +35,7 @@ the compact consumer is 1.30x, 1.10x, and 1.25x the dense FA4 call at prefixes
 old FA4 sparse consumer is 0.001953125. These are clean held-map kernel
 measurements, not end-to-end or accuracy results. The AIME26 panel above is
 unchanged; a fresh panel is needed to establish total attention and request
-time after this integration.
+time after this integration. Verified commit: `121535d9`.
 
 ## V31 status (2026-10-03 23:20 UTC−5) — read this first
 
