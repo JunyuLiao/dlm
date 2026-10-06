@@ -68,7 +68,11 @@ The current integrated baseline uses the same paged FA4 consumer and the
 progress-aware re-observation path:
 
 - `qblock_max` selection, 64-key tile granularity;
-- GLOBAL budget `4096` tokens for the AIME26 half-context run;
+- The completed AIME26 reproduction used a `4096`-token GLOBAL budget. The
+  realized pooled prefix was 3505.6 tokens, so the next half-realized-prefix
+  candidate is `MAGE_K=1728` tokens (27 64-token tiles). This is a budget
+  candidate; its achieved sparsity must be measured from receipts after a full
+  run rather than assumed to be exactly 50%.
 - first exact call used for selection, with first-call carry enabled;
 - settledness trigger `0.15`, sticky log-share bonus `1.386`;
 - FA4 selection, fused logit statistics, chunked DP build, Triton K/V copy and

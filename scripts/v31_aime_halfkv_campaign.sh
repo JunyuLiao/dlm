@@ -19,6 +19,10 @@ MAX_MODEL_LEN=${MAX_MODEL_LEN:-9216}
 MEM=${MEM:-0.80}
 BLOCK=${BLOCK:-32}
 CHUNK=${CHUNK:-4096}
+# Half of the realized AIME26 GLOBAL prefix (3505.6 tokens), rounded to 64.
+# Override this for a different budget; the completed 4096-token result is
+# preserved in results/v31_20261005_aime_halfkv.
+MAGE_K=${MAGE_K:-1728}
 
 mkdir -p "$OUT_ROOT/public" "$OUT_ROOT/private" "$OUT_ROOT/cache"
 
@@ -46,7 +50,7 @@ run_arm() {
     env LOGIT_STATS=fused DP_BUILD=chunked OBSERVE=fa4 MAGE_SELECT=fa4 KV_COPY=triton MERGE=triton \
       MAGE_GRAN=qblock_max MAGE_STEP=1 MAGE_CARRY=1 \
       MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 \
-      MAGE_K=4096 LOCAL_KV_BUDGET=512 \
+      MAGE_K="$MAGE_K" LOCAL_KV_BUDGET=512 \
       timeout 21600 "$PY" "$BENCH" "$MODEL" "$MAN_DIR" "$CELLS" "$out" "$priv" "$arm" "$cg"
   else
     timeout 21600 "$PY" "$BENCH" "$MODEL" "$MAN_DIR" "$CELLS" "$out" "$priv" "$arm" "$cg"
