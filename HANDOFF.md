@@ -1148,3 +1148,26 @@ tests pass. Pure mode100repeats/warm8, full held32/warm8; eachcall output
 allocation in both backends. GPU equality/combined timing remain pending.
 
 Triton permutation negative1.62649x Torch with exact GPU equality. Reserved40.2940GPU seconds; full held GPU follow-up gated out before launch. See V28 permutation report.
+
+## V31 AIME26 GLOBAL budget sweep — 2026-10-06
+
+The complete 30-problem × seeds 42/43/44 sweep is complete under
+`results/v31_20261006_aime_global_budget_sweep/` at source commit
+`1081bf41`. It contains the dense FULL PR #51994 reference and MAGE + LOCAL
+arms with GLOBAL budgets 1024, 2048, and 4096 and LOCAL budget 512 using the
+compact Triton consumer. All four arms have 90/90 records and official scores.
+
+Pooled exact match is dense 47/90 (52.22%), then 52/90 (57.78%), 47/90
+(52.22%), and 50/90 (55.56%) for GLOBAL 1024/2048/4096. Count-weighted
+overall GLOBAL+LOCAL tile sparsity is 37.82%, 31.99%, and 22.30%; all-call
+LOCAL sparsity is about 25.4% (32.7–32.9% on sparse-only LOCAL calls).
+Mean end-to-end dense time is 5.9738 s. The sparse arms are 7.6265 s,
+7.8193 s, and 7.3819 s (0.783x, 0.764x, and 0.809x dense speedup); decode-only
+speedups are 0.783x, 0.763x, and 0.809x. These are negative end-to-end speed
+results despite physical tile skipping.
+
+The pinned native sampler is unchanged, thinking is enabled, and timing uses
+the recorded wall time including prefill and decode. `receipt.json`,
+`score.summary.json`, `summary.md`, and `final_complete.json` are the source
+of truth. Public records are sanitized; completions and logs remain private.
+The v31 unit suite passed 73 tests with 25 CUDA-dependent skips.

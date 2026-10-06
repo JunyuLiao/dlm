@@ -1,0 +1,164 @@
+{
+  "arms": {
+    "dense_full_fix51994": {
+      "records": 90,
+      "score_summary": {
+        "accuracy_by_panel_seed": {
+          "42": 53.333333333333336,
+          "43": 56.666666666666664,
+          "44": 46.666666666666664
+        },
+        "avg_at_k": 52.22222222222223,
+        "capped": 38,
+        "cells": 90,
+        "correct": 47,
+        "finished": 52,
+        "no_final_response": 32,
+        "unparsed": 32
+      }
+    },
+    "mage_k1024_local_k512_compact": {
+      "physical_tile_counts": {
+        "global_eligible_tiles": 249488960,
+        "global_kept_tiles": 106340640,
+        "global_sparsity": 0.5737661498128013,
+        "local_eligible_tiles": 393220800,
+        "local_kept_tiles": 293272000,
+        "local_sparse_eligible_tiles": 304777600,
+        "local_sparse_kept_tiles": 204828800,
+        "local_sparse_only_sparsity": 0.3279401110842791,
+        "local_sparsity": 0.25417983992708426,
+        "overall_sparsity": 0.37823779119209266
+      },
+      "records": 90,
+      "score_summary": {
+        "accuracy_by_panel_seed": {
+          "42": 60.0,
+          "43": 56.666666666666664,
+          "44": 56.666666666666664
+        },
+        "avg_at_k": 57.77777777777777,
+        "capped": 33,
+        "cells": 90,
+        "correct": 52,
+        "finished": 57,
+        "no_final_response": 33,
+        "unparsed": 34
+      }
+    },
+    "mage_k2048_local_k512_compact": {
+      "physical_tile_counts": {
+        "global_eligible_tiles": 264157280,
+        "global_kept_tiles": 153816000,
+        "global_sparsity": 0.41771053972088146,
+        "local_eligible_tiles": 403140000,
+        "local_kept_tiles": 299992000,
+        "local_sparse_eligible_tiles": 313613600,
+        "local_sparse_kept_tiles": 210465600,
+        "local_sparse_only_sparsity": 0.3289015527387843,
+        "local_sparsity": 0.25586148732450265,
+        "overall_sparsity": 0.3199312905936017
+      },
+      "records": 90,
+      "score_summary": {
+        "accuracy_by_panel_seed": {
+          "42": 56.666666666666664,
+          "43": 46.666666666666664,
+          "44": 53.333333333333336
+        },
+        "avg_at_k": 52.22222222222223,
+        "capped": 39,
+        "cells": 90,
+        "correct": 47,
+        "finished": 51,
+        "no_final_response": 33,
+        "unparsed": 33
+      }
+    },
+    "mage_k4096_local_k512_compact": {
+      "physical_tile_counts": {
+        "global_eligible_tiles": 245499520,
+        "global_kept_tiles": 202712960,
+        "global_sparsity": 0.1742836808805166,
+        "local_eligible_tiles": 382124000,
+        "local_kept_tiles": 284969600,
+        "local_sparse_eligible_tiles": 296749600,
+        "local_sparse_kept_tiles": 199595200,
+        "local_sparse_only_sparsity": 0.32739521805589633,
+        "local_sparsity": 0.25424835917136845,
+        "overall_sparsity": 0.2229695917068245
+      },
+      "records": 90,
+      "score_summary": {
+        "accuracy_by_panel_seed": {
+          "42": 50.0,
+          "43": 56.666666666666664,
+          "44": 60.0
+        },
+        "avg_at_k": 55.55555555555556,
+        "capped": 31,
+        "cells": 90,
+        "correct": 50,
+        "finished": 59,
+        "no_final_response": 27,
+        "unparsed": 27
+      }
+    }
+  },
+  "cells": 90,
+  "completed_utc": "2026-10-06 07:53:40 UTC",
+  "frozen_spec_commit": "04451f99f167a5d7461d9dfdd15974b601fcdc12",
+  "manifest_sha256": "85ebd2dd8d26ede269d4c5555279e9e2b79637c3f95036452c624e03e8122f39",
+  "native_sampler": {
+    "canvas_length": 256,
+    "confidence_threshold": 0.005,
+    "entropy_bound": 0.1,
+    "eos_stopping": true,
+    "generation_budget": 8192,
+    "max_denoising_steps": 48,
+    "stability_threshold": 1,
+    "temperature_schedule": [
+      0.8,
+      0.4
+    ],
+    "thinking": true
+  },
+  "panel_seeds": [
+    42,
+    43,
+    44
+  ],
+  "private_data": "raw completions and logs retained in the user-private run bundle; not committed",
+  "public_record_paths": {
+    "dense_full_fix51994": "dense/public/aime_dense_full_fix51994.jsonl",
+    "mage_k1024_local_k512_compact": "k1024/public/aime_mage_k1024_local_k512_compact.jsonl",
+    "mage_k2048_local_k512_compact": "k2048/public/aime_mage_k2048_local_k512_compact.jsonl",
+    "mage_k4096_local_k512_compact": "k4096/public/aime_mage_k4096_local_k512_compact.jsonl"
+  },
+  "schema": "v31_aime26_global_budget_sweep_receipt_v1",
+  "scorer": {
+    "answer_sha256": "52822957957a3f577d1e9706c36a66a8108a3f99b6aff424cfb72dff0094a9ee",
+    "answer_text_sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3",
+    "extraction_sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5",
+    "paired_script": "scripts/v31_paired_official.py",
+    "script": "scripts/v31_score_aime.py"
+  },
+  "source_commit": "1081bf4165b4222a279258b0a321608df9efa1f1",
+  "source_identity": {
+    "block_size": 64,
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "local_kernel": "compact_triton",
+    "local_window": [
+      1023,
+      1023
+    ],
+    "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+    "torch": "2.13.0+cu130",
+    "vllm": "0.30.0"
+  },
+  "status": "complete",
+  "tests": {
+    "command": "PYTHONPATH=src:. PYTHONNOUSERSITE=1 pytest -q tests/test_v31_*.py",
+    "result": "73 passed, 25 skipped"
+  }
+}

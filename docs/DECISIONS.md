@@ -1258,3 +1258,19 @@ there is no actual LOCAL speedup at this budget. The complete end-to-end
 arm was 0.833x dense speed and matched dense at 51/90 exact answers. Keep
 this as a negative kernel result; do not tune the AIME panel to force a
 positive claim. Source and receipts: `results/v31_20261006_aime_global_local/`.
+
+## 2026-10-06 — AIME26 GLOBAL budget sweep with compact LOCAL consumer
+
+The frozen V31 AIME26 panel ran all 30 problems at seeds 42/43/44 for a dense
+FULL PR #51994 reference and MAGE + LOCAL arms with GLOBAL budgets 1024, 2048,
+and 4096 and LOCAL budget 512. Thinking, native adaptive stopping, and all
+sampler settings were preserved. The compact Triton LOCAL consumer was used
+for every sparse arm on one H100.
+
+The achieved count-weighted overall GLOBAL+LOCAL physical sparsities were
+37.82%, 31.99%, and 22.30% for GLOBAL 1024/2048/4096. Pooled exact-match
+accuracy was 52.22% dense, then 57.78%, 52.22%, and 55.56%. Arithmetic-mean
+end-to-end speedups versus dense were 0.783x, 0.764x, and 0.809x; decode-only
+speedups were 0.783x, 0.763x, and 0.809x. No positive end-to-end speed claim is
+supported. Full receipts and the paired official comparison are in
+`results/v31_20261006_aime_global_budget_sweep/`.

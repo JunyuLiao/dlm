@@ -1592,3 +1592,14 @@ strictly score. Do not simply restart original supervisors/frozen queues.
 - **Claim boundary:** clean LOCAL FA4 sparse timing is slower than dense
   (0.0701 ms vs 0.0531 ms at prefix 8192); this is a negative local-kernel
   result and provides no local speedup claim.
+
+## 2026-10-06 — v31 AIME26 GLOBAL budget sweep
+
+| study | source | scope | arms | accuracy | achieved physical sparsity | end-to-end speedup |
+|---|---|---|---|---|---|---|
+| `v31_20261006_aime_global_budget_sweep` | `1081bf41` | AIME26 30 problems × seeds 42/43/44 | dense FULL; MAGE+LOCAL GLOBAL 1024/2048/4096, LOCAL 512 | dense 52.22%; sparse 57.78% / 52.22% / 55.56% | overall 37.82% / 31.99% / 22.30% | 0.783x / 0.764x / 0.809x |
+
+This is a complete protocol-identified panel. The native sampler and thinking
+setting are unchanged; public records, score summaries, and the completion
+marker are under the result directory. Sparse arms remain slower than the
+matched dense reference despite tile skipping.

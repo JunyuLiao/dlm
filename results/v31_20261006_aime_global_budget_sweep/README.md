@@ -18,3 +18,7 @@ LSE merge, qblock-max selection, first-call carry, settledness re-selection at
 
 Raw completions remain in the user-owned private run directory. Public records
 contain only hashes, lengths, timing, and sanitized receipts.
+
+The run is complete at source commit `1081bf41`; see `summary.md` for accuracy,
+physical tile accounting, denoising-call counts, and clean timing. The
+`final_complete.json` file is the completion marker.
