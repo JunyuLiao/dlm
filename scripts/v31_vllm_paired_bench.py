@@ -237,7 +237,10 @@ def main():
                                                  cg_stop=int(os.environ['CG_STOP']) if os.environ.get('CG_STOP') else None,
                                                  stall_rescue=int(os.environ['STALL_RESCUE']) if os.environ.get('STALL_RESCUE') else None,
                                                  stall_eps=float(os.environ.get('STALL_EPS', '0.01')),
-                                                 mage_sticky=float(os.environ['MAGE_STICKY']) if os.environ.get('MAGE_STICKY') else None)
+                                                 mage_sticky=float(os.environ['MAGE_STICKY']) if os.environ.get('MAGE_STICKY') else None,
+                                                 local_kv_budget=(int(os.environ['LOCAL_KV_BUDGET'])
+                                                                  if os.environ.get('LOCAL_KV_BUDGET') and arm == 'mage'
+                                                                  else None))
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -270,6 +273,8 @@ def main():
                 method_fingerprint=None if config is None else config.get('fingerprint'), fix_51994=fix_51994,
                 fa4_local_fix=fa4_local_fix,
                 mage_k=int(os.environ.get('MAGE_K', '1024')) if arm == 'mage' else None,
+                local_kv_budget=(int(os.environ['LOCAL_KV_BUDGET'])
+                                if os.environ.get('LOCAL_KV_BUDGET') and arm == 'mage' else None),
                 mage_select=os.environ.get('MAGE_SELECT', 'torch') if arm == 'mage' else None,
                 kv_copy_backend=os.environ.get('KV_COPY', 'torch') if arm != 'dense' else None,
                 merge_backend=os.environ.get('MERGE', 'torch') if arm != 'dense' else None,

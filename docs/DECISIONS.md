@@ -1230,3 +1230,16 @@ Three exporter privacy/format tests passed. No new score or speed conclusion.
 On explicit resume, verify pins and reuse completed workers; rerun interrupted
 and unstarted workers in new directories, form a new complete family, then
 strictly score. Do not simply restart original supervisors/frozen queues.
+
+## 2026-10-06 — LOCAL sparse FA4 result
+
+A new LOCAL router was qualified on the H100 using the native 1023/1023
+window, zero-copy 64-token views of paged K/V, and the pinned FA4 Q128/K64
+block-sparse consumer. The full AIME26 panel used GLOBAL budget 1728 and
+LOCAL budget 512. GLOBAL physical sparsity was 45.90%; LOCAL was 25.33%
+over all calls and 32.81% on sparse-only calls. The clean consumer timing
+was 0.0531 ms dense versus 0.0701 ms sparse at prefix 8192 (0.757x), so
+there is no actual LOCAL speedup at this budget. The complete end-to-end
+arm was 0.833x dense speed and matched dense at 51/90 exact answers. Keep
+this as a negative kernel result; do not tune the AIME panel to force a
+positive claim. Source and receipts: `results/v31_20261006_aime_global_local/`.

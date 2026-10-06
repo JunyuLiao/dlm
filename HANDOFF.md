@@ -1,3 +1,24 @@
+## V31 GLOBAL + LOCAL AIME26 run — 2026-10-06
+
+The complete 30-problem × seeds 42/43/44 panel is under
+`results/v31_20261006_aime_global_local/summary.md`. Dense and MAGE + LOCAL
+records are complete (90 cells per arm), scored 51/90 for both arms. The
+1728-token GLOBAL budget realizes 45.90% physical GLOBAL sparsity. The
+512-token LOCAL budget realizes 25.33% over all LOCAL calls (32.81% on
+sparse-only LOCAL calls), and 33.41% combined attention-work sparsity.
+End-to-end mean is 5.9326 s dense vs 7.1250 s sparse (0.833x speedup);
+decode-only is 5.9127 s vs 7.1055 s (0.832x).
+
+The clean 50-sample H100 qualification found dense local FA4 at 0.0531 ms
+and best tested sparse local FA4 at 0.0701 ms at prefix 8192 (0.757x), so
+LOCAL sparse has no actual kernel speedup at the requested budget. Do not
+headline a local speed gain. The installed FlashInfer alternative could not
+JIT-build because its nvcc command uses unsupported `--compress-mode=size`.
+The full result is a verified negative for this local kernel path.
+
+Source and runner changes are on the current branch; CPU qualification is
+21 passed. The raw attempt directory is private and ignored by Git.
+
 ## V31 status (2026-10-03 23:20 UTC−5) — read this first
 
 - **Machines:** dllm (149.165.159.64) is retired and can be shut down by the user; it is idle.

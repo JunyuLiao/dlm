@@ -1574,3 +1574,21 @@ Three exporter privacy/format tests passed. No new score or speed conclusion.
 On explicit resume, verify pins and reuse completed workers; rerun interrupted
 and unstarted workers in new directories, form a new complete family, then
 strictly score. Do not simply restart original supervisors/frozen queues.
+
+## V31 AIME26 GLOBAL + LOCAL sparse (2026-10-06)
+
+- **Status:** complete, 90 cells per arm, seeds 42/43/44.
+- **Source:** `results/v31_20261006_aime_global_local/summary.md`; raw attempt
+  is private and ignored.
+- **Configuration:** native vLLM 0.30/FA4 SM90 on one H100; PR #51994
+  mask fix; 64-token pages; GLOBAL budget 1728; LOCAL budget 512;
+  bidirectional LOCAL window 1023/1023.
+- **Accuracy:** dense 51/90; GLOBAL+LOCAL sparse 51/90.
+- **Physical sparsity:** GLOBAL 45.90%; LOCAL 25.33% all calls, 32.81%
+  sparse-only; combined 33.41%.
+- **Timing:** mean end-to-end dense 5.9326 s, sparse 7.1250 s, dense/sparse
+  speedup 0.833x; mean decode dense 5.9127 s, sparse 7.1055 s, speedup
+  0.832x.
+- **Claim boundary:** clean LOCAL FA4 sparse timing is slower than dense
+  (0.0701 ms vs 0.0531 ms at prefix 8192); this is a negative local-kernel
+  result and provides no local speedup claim.

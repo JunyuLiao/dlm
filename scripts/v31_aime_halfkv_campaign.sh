@@ -17,7 +17,9 @@ SEEDS=${SEEDS:-42,43,44}
 SEED_BASE=${SEED_BASE:-31}
 MAX_MODEL_LEN=${MAX_MODEL_LEN:-9216}
 MEM=${MEM:-0.80}
-BLOCK=${BLOCK:-32}
+# FA4 paged block sparsity requires a 64-token cache page (equal to its KV tile).
+# Dense and sparse arms use the same page size for this LOCAL-sparse campaign.
+BLOCK=${BLOCK:-64}
 CHUNK=${CHUNK:-4096}
 # Half of the realized AIME26 GLOBAL prefix (3505.6 tokens), rounded to 64.
 # Override this for a different budget; the completed 4096-token result is
@@ -34,6 +36,7 @@ if [[ ! -f "$CELLS" ]]; then
 fi
 
 export VLLM_CACHE_ROOT="$OUT_ROOT/cache/vllm" XDG_CACHE_HOME="$OUT_ROOT/cache/xdg" \
+  FA4_LOCAL_FIX_DIR="$OUT_ROOT/cache/fa4_local_fix" \
   TMPDIR="$OUT_ROOT/cache/tmp" TORCHINDUCTOR_CACHE_DIR="$OUT_ROOT/cache/inductor" \
   TRITON_CACHE_DIR="$OUT_ROOT/cache/triton" CUDA_CACHE_PATH="$OUT_ROOT/cache/cuda" \
   HF_HUB_OFFLINE=1 VLLM_ENABLE_V1_MULTIPROCESSING=0 PYTHONNOUSERSITE=1 \
@@ -50,7 +53,7 @@ run_arm() {
     env LOGIT_STATS=fused DP_BUILD=chunked OBSERVE=fa4 MAGE_SELECT=fa4 KV_COPY=triton MERGE=triton \
       MAGE_GRAN=qblock_max MAGE_STEP=1 MAGE_CARRY=1 \
       MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle MAGE_STICKY=1.386 \
-      MAGE_K="$MAGE_K" LOCAL_KV_BUDGET=512 \
+      MAGE_K="$MAGE_K" LOCAL_KV_BUDGET="${LOCAL_KV_BUDGET:-512}" \
       timeout 21600 "$PY" "$BENCH" "$MODEL" "$MAN_DIR" "$CELLS" "$out" "$priv" "$arm" "$cg"
   else
     timeout 21600 "$PY" "$BENCH" "$MODEL" "$MAN_DIR" "$CELLS" "$out" "$priv" "$arm" "$cg"
@@ -59,6 +62,6 @@ run_arm() {
 }
 
 run_arm dense default dense
-run_arm mage PIECEWISE mage4096_settle15_sticky
+run_arm mage PIECEWISE "mage_k${MAGE_K}_local_k${LOCAL_KV_BUDGET:-512}_settle15_sticky"
 
 echo "complete $(date -u +%FT%TZ)" | tee -a "$OUT_ROOT/status.log"

@@ -145,7 +145,7 @@ class VllmMethodAdapter:
                  mage_cg_tau=2.5, mage_cg_gamma_q=0.65, mage_clock_trace=False, mage_sink=0, mage_recent=0,
                  mage_trigger_relative=False, mage_pool=None, mage_kcover=None, mage_kq=0.75, mage_kmax=16384,
                  mage_sticky=None,
-                 cg_stop=None, stall_rescue=None, stall_eps=0.01):
+                 cg_stop=None, stall_rescue=None, stall_eps=0.01, local_kv_budget=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -259,6 +259,13 @@ class VllmMethodAdapter:
                                  'the sample hook does not provide the accepted-token mask')
         self.layer_types = list(layer_types)
         self.global_layers = [i for i, t in enumerate(self.layer_types) if t != 'sliding_attention']
+        self.local_kv_budget = None if local_kv_budget is None else int(local_kv_budget)
+        self.local_router = None
+        if self.local_kv_budget is not None:
+            if arm not in ('mage', 'native'):
+                raise ValueError('LOCAL routing currently supports mage and native controls')
+            from experiments.numerical_qk_reuse.v31_local_sparse import LocalSparse
+            self.local_router = LocalSparse(self.local_kv_budget)
         self.config, self.condition, self.arm = config, condition, arm
         self.lifecycle = lifecycle      # explicit V28 execution setting, readable by runner receipts
         self.canvas_buffers = canvas_buffers
@@ -453,6 +460,8 @@ class VllmMethodAdapter:
         if self._stack is not None or (self.lifecycle == 'request_clear' and self.bound):
             raise RuntimeError('previous request still bound')
         self.buffers.clear()
+        if self.local_router is not None:
+            self.local_router.clear()
         self._clear_canvas_metadata()
         self.cache = _PrefixCache(len(self.layer_types))
         self.step_ctx = None
@@ -474,6 +483,7 @@ class VllmMethodAdapter:
         self._drift_prev, self._drift_acc = {}, None
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
         self._sparse_kept, self._sparse_total, self._global_tiles = None, 0, 0
+        self._global_canvas_tiles = 0
         self._canvas_steps, self._cur_steps, self._ent_trace, self._conf_threshold = [], 0, [], None
         self._dense_next = self._dense_now = False
         self._canvas_step = 0
@@ -522,7 +532,7 @@ class VllmMethodAdapter:
         self._stack = self.runtime = self.stub = None
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
-        return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._regroup_receipt(),
+        return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._local_receipt(), **self._regroup_receipt(),
                                  **self._drift_receipt(), **self._clock_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
@@ -542,7 +552,7 @@ class VllmMethodAdapter:
                 timing = dict(global_calls_timed=len(ms), global_call_ms_mean=round(sum(ms) / len(ms), 4),
                               global_ms_total=round(sum(ms), 2))
             counters = self.runtime['counters']() if self.runtime is not None else None
-            return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._regroup_receipt(),
+            return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._local_receipt(), **self._regroup_receipt(),
                                      **self._drift_receipt(), **self._clock_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
@@ -637,7 +647,13 @@ class VllmMethodAdapter:
         if gtiles:
             out.update(global_prefix_tiles=int(gtiles),
                        global_prefix_work_fraction=round((gtiles - stotal + sk + rtiles) / gtiles, 5))
+        canvas_tiles = getattr(self, '_global_canvas_tiles', 0)
+        out.update(global_eligible_tiles=int(gtiles + canvas_tiles),
+                   global_kept_tiles=int(round(gtiles - stotal + sk + canvas_tiles)))
         return out
+
+    def _local_receipt(self):
+        return {} if self.local_router is None else self.local_router.receipt()
 
     def _clear_canvas_metadata(self):
         self._merge_cache.clear()
@@ -776,6 +792,32 @@ class VllmMethodAdapter:
         layer = int(m.group(1))
         return layer if layer in self.global_layers else None
 
+    def local_for(self, layer_name):
+        """Return a LOCAL layer index when the separately enabled local router owns it."""
+        ctx = self.step_ctx
+        if self.local_router is None or ctx is None or ctx['encoder']:
+            return None
+        m = _LAYER_RE.search(layer_name)
+        if m is None:
+            return None
+        layer = int(m.group(1))
+        return layer if layer not in self.global_layers else None
+
+    def forward_local(self, impl, layer_idx, query, kv_cache, attn_metadata, output):
+        """Run the local selector on the native paged cache, or fall back to vLLM dense."""
+        n = int(attn_metadata.num_actual_tokens)
+        ctx = self.step_ctx
+        prefix = ctx['seq_len'] - n
+        key_cache, value_cache = kv_cache.transpose(1, 2).split(impl.head_size, dim=-1)
+        q = query[:n].transpose(0, 1).unsqueeze(0)
+        table = attn_metadata.block_table[0]
+        out = self.local_router.forward(layer_idx, q, key_cache, value_cache, table, prefix, n,
+                                        float(impl.scale), self)
+        if out is None:
+            return None
+        output[:n].view(n, -1).copy_(out.reshape(n, -1))
+        return output
+
     def _buffers(self, layer, key_cache, value_cache, block_table, prefix, n):
         """Contiguous [1, hk, prefix + n, d] K/V; prefix copied once per canvas, canvas region refreshed per call."""
         page = key_cache.shape[1]
@@ -829,12 +871,19 @@ class VllmMethodAdapter:
         key_cache, value_cache = kv_cache.transpose(1, 2).split(impl.head_size, dim=-1)
         b = self._buffers(layer_idx, key_cache, value_cache, attn_metadata.block_table[0], prefix, n)
         page = key_cache.shape[1]
-        self.paged = dict(k=key_cache, v=value_cache, nk=prefix + n, prefix=prefix,
-                          table=attn_metadata.block_table[0, : (prefix + n + page - 1) // page])
+        # vLLM's hybrid cache can give GLOBAL layers KV128 pages when LOCAL
+        # layers use KV64. FA4 sparse TMA loads require KV64 pages. Split the
+        # native page through a zero-copy view and expand its logical table.
+        from experiments.numerical_qk_reuse.v31_local_sparse import alias64
+        sparse_k, sparse_v, sparse_table = alias64(key_cache, value_cache,
+                                                  attn_metadata.block_table[0], prefix + n)
+        self.paged = dict(k=sparse_k, v=sparse_v, nk=prefix + n, prefix=prefix,
+                          table=sparse_table[0])
         q = query[:n].transpose(0, 1).unsqueeze(0)                  # [1, H, n, D] view, as HF's decoder passes it
         self.calls['global_calls'] += 1
         self._cur_layer = layer_idx
         self._global_tiles += q.shape[1] * -(-n // 128) * (prefix // 64)
+        self._global_canvas_tiles += q.shape[1] * -(-n // 128) * (-(-(prefix + n) // 64) - prefix // 64)
         if self.arm == 'allkept':
             from experiments.numerical_qk_reuse import v27_fa4
             out = v27_fa4.dense(q, b['k'], b['v'], float(impl.scale))
@@ -1583,6 +1632,8 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                     a.calls['global_calls'] += 1
                     n = a.step_ctx['n']
                     a._global_tiles += self.num_heads * -(-n // 128) * ((a.step_ctx['seq_len'] - n) // 64)
+                    prefix = a.step_ctx['seq_len'] - n
+                    a._global_canvas_tiles += self.num_heads * -(-n // 128) * (-(-a.step_ctx['seq_len'] // 64) - prefix // 64)
                     if a.arm != 'native':
                         counter = 'dense_gate_calls' if gated and not a._dense_now else 'dense_fallback_calls'
                         a.calls[counter] = a.calls.get(counter, 0) + 1
@@ -1594,6 +1645,11 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                     ev[1].record()
                     a._events.append(ev)
                 return r
+            local_idx = a.local_for(getattr(layer, 'layer_name', ''))
+            if local_idx is not None:
+                r = a.forward_local(self, local_idx, query, kv_cache, attn_metadata, output)
+                return forward(self, layer, query, key, value, kv_cache, attn_metadata, output,
+                               output_scale, output_block_scale) if r is None else r
             if a.step_ctx is not None:
                 a.calls['passthrough'] += 1
         return forward(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale,
