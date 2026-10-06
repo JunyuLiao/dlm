@@ -1,5 +1,20 @@
 # Decisions and negative results (chronological)
 
+## V31 LOCAL compact consumer (2026-10-06)
+
+- The prior direct FA4 LOCAL consumer was slower than dense at the 512-token
+  budget because its block-list setup dominated the short `(1023, 1023)`
+  window. A named `local_compact_triton_q64` consumer now packs the existing
+  Q128 selector map into Q64 retained-tile lists and performs paged K/V,
+  window masking, and online softmax in one Triton kernel. The selector and
+  budget are unchanged; `LOCAL_KERNEL=fa4` remains an explicit fallback.
+- On one H100 with Q256, H16/Hkv8/D256 and 100 synchronized alternating
+  samples, compact-vs-dense median speedups are 1.30x / 1.10x / 1.25x at
+  prefixes 187 / 3500 / 8192. The maximum absolute difference from the old
+  FA4 sparse output is 0.001953125. This is held-map kernel evidence only;
+  no AIME accuracy or end-to-end claim follows. See
+  `results/v31_20261006_local_kernel_opt/attempt001/`.
+
 Read this before proposing a direction. Each item gives the decision, the reason and its provenance. Commit hashes are
 on `research/m3-output-numerics-20260927` unless another branch is named. Result paths are relative to
 `results/m1_m2_m3_frontier_v27_20260929/` (v27) unless they start with `results/`.

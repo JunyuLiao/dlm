@@ -1,6 +1,7 @@
 import torch
 
 from experiments.numerical_qk_reuse.v31_local_sparse import alias64, geometry, select
+from experiments.numerical_qk_reuse.v31_local_kernel import compact_map
 
 
 def test_local_geometry_uses_window_and_canvas_tiles():
@@ -32,3 +33,12 @@ def test_alias64_preserves_interleaved_cache_and_table_without_copy():
     assert at.tolist() == [[6, 7, 2, 3, 8]]
     assert torch.equal(ak[at[0].long()].reshape(-1, 2, 4)[:300], k[table.long()].reshape(-1, 2, 4)[:300])
     assert torch.equal(av[at[0].long()].reshape(-1, 2, 4)[:300], v[table.long()].reshape(-1, 2, 4)[:300])
+
+
+def test_compact_local_map_expands_q128_selection_to_q64():
+    kept = torch.zeros((1, 2, 1, 5), dtype=torch.bool)
+    kept[0, :, 0, [1, 4]] = True
+    indices, counts = compact_map(kept, n=128)
+    assert indices.shape == (2, 2, 2)
+    assert counts.tolist() == [[2, 2], [2, 2]]
+    assert indices.tolist() == [[[1, 4], [1, 4]], [[1, 4], [1, 4]]]

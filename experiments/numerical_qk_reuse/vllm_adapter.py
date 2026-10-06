@@ -145,7 +145,8 @@ class VllmMethodAdapter:
                  mage_cg_tau=2.5, mage_cg_gamma_q=0.65, mage_clock_trace=False, mage_sink=0, mage_recent=0,
                  mage_trigger_relative=False, mage_pool=None, mage_kcover=None, mage_kq=0.75, mage_kmax=16384,
                  mage_sticky=None,
-                 cg_stop=None, stall_rescue=None, stall_eps=0.01, local_kv_budget=None):
+                 cg_stop=None, stall_rescue=None, stall_eps=0.01, local_kv_budget=None,
+                 local_kernel='compact_triton'):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -260,12 +261,15 @@ class VllmMethodAdapter:
         self.layer_types = list(layer_types)
         self.global_layers = [i for i, t in enumerate(self.layer_types) if t != 'sliding_attention']
         self.local_kv_budget = None if local_kv_budget is None else int(local_kv_budget)
+        if local_kernel not in ('compact_triton', 'fa4'):
+            raise ValueError("local_kernel must be 'compact_triton' or 'fa4'")
+        self.local_kernel = local_kernel
         self.local_router = None
         if self.local_kv_budget is not None:
             if arm not in ('mage', 'native'):
                 raise ValueError('LOCAL routing currently supports mage and native controls')
             from experiments.numerical_qk_reuse.v31_local_sparse import LocalSparse
-            self.local_router = LocalSparse(self.local_kv_budget)
+            self.local_router = LocalSparse(self.local_kv_budget, kernel=self.local_kernel)
         self.config, self.condition, self.arm = config, condition, arm
         self.lifecycle = lifecycle      # explicit V28 execution setting, readable by runner receipts
         self.canvas_buffers = canvas_buffers

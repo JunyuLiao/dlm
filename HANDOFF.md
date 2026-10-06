@@ -19,6 +19,24 @@ The full result is a verified negative for this local kernel path.
 Source and runner changes are on the current branch; CPU qualification is
 21 passed. The raw attempt directory is private and ignored by Git.
 
+## LOCAL compact consumer qualification — 2026-10-06
+
+The named `local_compact_triton_q64` consumer is implemented in
+`experiments/numerical_qk_reuse/v31_local_kernel.py` and selected by
+`LOCAL_KERNEL=compact_triton` (the default when LOCAL routing is enabled).
+It packs the existing Q128 selector map into Q64 tile lists and runs the
+short `(1023, 1023)` window directly over native paged K/V. `LOCAL_KERNEL=fa4`
+retains the previous direct FA4 path.
+
+The final-source qualification is under
+`results/v31_20261006_local_kernel_opt/attempt002/`. With a 512-token budget,
+the compact consumer is 1.30x, 1.10x, and 1.25x the dense FA4 call at prefixes
+187, 3500, and 8192, respectively. Its maximum absolute difference from the
+old FA4 sparse consumer is 0.001953125. These are clean held-map kernel
+measurements, not end-to-end or accuracy results. The AIME26 panel above is
+unchanged; a fresh panel is needed to establish total attention and request
+time after this integration.
+
 ## V31 status (2026-10-03 23:20 UTC−5) — read this first
 
 - **Machines:** dllm (149.165.159.64) is retired and can be shut down by the user; it is idle.

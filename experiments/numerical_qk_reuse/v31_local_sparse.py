@@ -85,10 +85,13 @@ def select(z, prefix, n, budget, sticky=0.0, held=None, weights=None):
 
 
 class LocalSparse:
-    def __init__(self, budget=512):
+    def __init__(self, budget=512, kernel='compact_triton'):
         if budget < 64 or budget % 64:
             raise ValueError('local budget must be a positive multiple of 64')
+        if kernel not in ('compact_triton', 'fa4'):
+            raise ValueError("local kernel must be 'compact_triton' or 'fa4'")
         self.budget = budget
+        self.kernel = kernel
         self.clear()
 
     def clear(self):
@@ -119,7 +122,8 @@ class LocalSparse:
                 return None
             key64, value64, table64 = alias64(key, value, table, nk)
             used = torch.tensor([nk], device=query.device, dtype=torch.int32)
-            st = dict(tag=tag, key=key64, value=value64, table=table64, used=used, lists=None, kept=None)
+            st = dict(tag=tag, key=key64, value=value64, table=table64, used=used,
+                      lists=None, kept=None, compact_idx=None, compact_cnt=None)
             self.state[layer] = st
         due = st['lists'] is None or adapter._trig_at == (adapter.canvas_id, step)
         if adapter.mage_reselect is not None:
@@ -134,7 +138,13 @@ class LocalSparse:
             kept, count, total = select(z, prefix, n, self.budget,
                                        sticky=adapter.mage_sticky or 0.0, held=st['kept'],
                                        weights=adapter._mage_row_w if adapter.mage_row_weight else None)
-            st.update(lists=v27_fa4.block_sparse_tensors(kept), kept=kept, count=count, total=total)
+            compact_idx = compact_cnt = None
+            if self.kernel == 'compact_triton':
+                from experiments.numerical_qk_reuse.v31_local_kernel import compact_map
+                compact_idx, compact_cnt = compact_map(kept, n)
+            st.update(lists=v27_fa4.block_sparse_tensors(kept), kept=kept,
+                      compact_idx=compact_idx, compact_cnt=compact_cnt,
+                      count=count, total=total)
             self.calls += 1
             self.observations += 1
             self.eligible += total
@@ -146,10 +156,14 @@ class LocalSparse:
         self.kept += st['count']
         self.sparse_eligible += st['total']
         self.sparse_kept += st['count']
+        if self.kernel == 'compact_triton':
+            from experiments.numerical_qk_reuse.v31_local_kernel import forward
+            return forward(query, st['key'], st['value'], st['table'], st['compact_idx'],
+                           st['compact_cnt'], nk, scale=scale, window=WINDOW)
         return v27_fa4.load()(query.transpose(1, 2), st['key'], st['value'], softmax_scale=scale,
-                             causal=False, window_size_left=WINDOW[0], window_size_right=WINDOW[1],
-                             page_table=st['table'], seqused_k=st['used'], block_sparse_tensors=st['lists'],
-                             tile_mn=(128, 64), num_splits=1, pack_gqa=False)[0]
+                              causal=False, window_size_left=WINDOW[0], window_size_right=WINDOW[1],
+                              page_table=st['table'], seqused_k=st['used'], block_sparse_tensors=st['lists'],
+                              tile_mn=(128, 64), num_splits=1, pack_gqa=False)[0]
 
     def receipt(self):
         return dict(local_calls=self.calls, local_observations=self.observations,
@@ -159,4 +173,5 @@ class LocalSparse:
                     local_sparse_eligible_tiles=self.sparse_eligible, local_sparse_kept_tiles=self.sparse_kept,
                     local_sparse_only_sparsity=(1 - self.sparse_kept / self.sparse_eligible
                                                 if self.sparse_eligible else 0.0),
-                    local_budget=self.budget, local_window=WINDOW, local_carry_first=False)
+                    local_budget=self.budget, local_window=WINDOW, local_kernel=self.kernel,
+                    local_carry_first=False)

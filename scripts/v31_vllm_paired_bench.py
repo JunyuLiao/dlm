@@ -238,6 +238,7 @@ def main():
                                                  stall_rescue=int(os.environ['STALL_RESCUE']) if os.environ.get('STALL_RESCUE') else None,
                                                  stall_eps=float(os.environ.get('STALL_EPS', '0.01')),
                                                  mage_sticky=float(os.environ['MAGE_STICKY']) if os.environ.get('MAGE_STICKY') else None,
+                                                 local_kernel=os.environ.get('LOCAL_KERNEL', 'compact_triton'),
                                                  local_kv_budget=(int(os.environ['LOCAL_KV_BUDGET'])
                                                                   if os.environ.get('LOCAL_KV_BUDGET') and arm == 'mage'
                                                                   else None))
@@ -275,6 +276,7 @@ def main():
                 mage_k=int(os.environ.get('MAGE_K', '1024')) if arm == 'mage' else None,
                 local_kv_budget=(int(os.environ['LOCAL_KV_BUDGET'])
                                 if os.environ.get('LOCAL_KV_BUDGET') and arm == 'mage' else None),
+                local_kernel=os.environ.get('LOCAL_KERNEL', 'compact_triton') if arm == 'mage' else None,
                 mage_select=os.environ.get('MAGE_SELECT', 'torch') if arm == 'mage' else None,
                 kv_copy_backend=os.environ.get('KV_COPY', 'torch') if arm != 'dense' else None,
                 merge_backend=os.environ.get('MERGE', 'torch') if arm != 'dense' else None,

@@ -1,0 +1,19 @@
+{
+  "schema": "v31_local_kernel_qual_v1",
+  "variant": "local_compact_triton_q64",
+  "budget": 512,
+  "window": [1023, 1023],
+  "prefixes": [187, 3500, 8192],
+  "query_tokens": 256,
+  "heads": 16,
+  "kv_heads": 8,
+  "head_dim": 256,
+  "native_page_tokens": 64,
+  "samples": 100,
+  "launches_per_sample": 20,
+  "timing": "synchronized alternating CUDA events",
+  "reference": "FA4 dense with native bidirectional window",
+  "old_sparse_reference": "direct FA4 Q128/KV64 block list",
+  "source_script": "scripts/v31_local_kernel_qual.py",
+  "environment": "/home/exouser/dyh/v31_env_20261005/bin/python"
+}

@@ -1,0 +1,145 @@
+{
+  "schema": "v31_local_kernel_qual_v1",
+  "variant": "local_compact_triton_q64",
+  "budget": 512,
+  "window": [
+    1023,
+    1023
+  ],
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "torch": "2.13.0+cu130",
+  "rows": [
+    {
+      "prefix": 187,
+      "query_tokens": 256,
+      "budget": 512,
+      "eligible_tiles": 448,
+      "kept_tiles": 384,
+      "sparsity": 0.1428571428571429,
+      "q64_counts": [
+        6,
+        6,
+        6,
+        6
+      ],
+      "compact_vs_old_fa4_max_abs_error": 0.001953125,
+      "compact_vs_old_fa4_bitwise": false,
+      "timings": {
+        "dense_fa4": {
+          "median_ms": 0.050776800513267516,
+          "p10_ms": 0.05024352133274078,
+          "p90_ms": 0.05155791938304901,
+          "speedup_vs_dense": 1.0
+        },
+        "old_fa4_q128": {
+          "median_ms": 0.07101440131664277,
+          "p10_ms": 0.07033984184265138,
+          "p90_ms": 0.07155503749847411,
+          "speedup_vs_dense": 0.7150211727739734
+        },
+        "fa4_q64": {
+          "median_ms": 0.07128640115261078,
+          "p10_ms": 0.07048512279987335,
+          "p90_ms": 0.07205711841583252,
+          "speedup_vs_dense": 0.712292943566669
+        },
+        "compact_triton": {
+          "median_ms": 0.03910560011863709,
+          "p10_ms": 0.0384307187795639,
+          "p90_ms": 0.03987520068883896,
+          "speedup_vs_dense": 1.298453427622202
+        }
+      },
+      "samples": 100,
+      "launches_per_sample": 20
+    },
+    {
+      "prefix": 3500,
+      "query_tokens": 256,
+      "budget": 512,
+      "eligible_tiles": 1280,
+      "kept_tiles": 800,
+      "sparsity": 0.375,
+      "q64_counts": [
+        13,
+        13,
+        12,
+        12
+      ],
+      "compact_vs_old_fa4_max_abs_error": 0.001953125,
+      "compact_vs_old_fa4_bitwise": false,
+      "timings": {
+        "dense_fa4": {
+          "median_ms": 0.052011999487876895,
+          "p10_ms": 0.051330560445785524,
+          "p90_ms": 0.13402000308036804,
+          "speedup_vs_dense": 1.0
+        },
+        "old_fa4_q128": {
+          "median_ms": 0.07137040197849273,
+          "p10_ms": 0.07073599874973298,
+          "p90_ms": 0.0717961621284485,
+          "speedup_vs_dense": 0.7287614759904332
+        },
+        "fa4_q64": {
+          "median_ms": 0.07094879746437073,
+          "p10_ms": 0.07043344140052796,
+          "p90_ms": 0.07157760024070739,
+          "speedup_vs_dense": 0.733092051545996
+        },
+        "compact_triton": {
+          "median_ms": 0.04645520001649857,
+          "p10_ms": 0.046169119477272036,
+          "p90_ms": 0.04676095962524414,
+          "speedup_vs_dense": 1.1196163070959726
+        }
+      },
+      "samples": 100,
+      "launches_per_sample": 20
+    },
+    {
+      "prefix": 8192,
+      "query_tokens": 256,
+      "budget": 512,
+      "eligible_tiles": 1216,
+      "kept_tiles": 736,
+      "sparsity": 0.39473684210526316,
+      "q64_counts": [
+        12,
+        12,
+        11,
+        11
+      ],
+      "compact_vs_old_fa4_max_abs_error": 0.001953125,
+      "compact_vs_old_fa4_bitwise": false,
+      "timings": {
+        "dense_fa4": {
+          "median_ms": 0.05251359939575195,
+          "p10_ms": 0.05213824033737182,
+          "p90_ms": 0.05307967841625213,
+          "speedup_vs_dense": 1.0
+        },
+        "old_fa4_q128": {
+          "median_ms": 0.07178399860858917,
+          "p10_ms": 0.07129311978816985,
+          "p90_ms": 0.07240127861499787,
+          "speedup_vs_dense": 0.7315502119363485
+        },
+        "fa4_q64": {
+          "median_ms": 0.07164880037307739,
+          "p10_ms": 0.0711115175485611,
+          "p90_ms": 0.07223327875137328,
+          "speedup_vs_dense": 0.7329306160370043
+        },
+        "compact_triton": {
+          "median_ms": 0.04058799892663956,
+          "p10_ms": 0.03996031999588013,
+          "p90_ms": 0.04096800088882446,
+          "speedup_vs_dense": 1.293820853072043
+        }
+      },
+      "samples": 100,
+      "launches_per_sample": 20
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "schema": "v31_local_kernel_receipt_v1",
+  "status": "complete",
+  "variant": "local_compact_triton_q64",
+  "kernel": "experiments.numerical_qk_reuse.v31_local_kernel._compact_local",
+  "selector": "experiments.numerical_qk_reuse.v31_local_sparse.select",
+  "budget": 512,
+  "window": [1023, 1023],
+  "q_block_selector": 128,
+  "q_block_consumer": 64,
+  "kv_tile": 64,
+  "map_layout": "packed retained tile indices per head and Q64 block",
+  "native_dense_control": "FA4 dense bidirectional window",
+  "old_sparse_control": "FA4 direct Q128/KV64 block list",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "python": "/home/exouser/dyh/v31_env_20261005/bin/python",
+  "timing_file": "local_kernel_timing.json",
+  "raw_prompts": false,
+  "raw_outputs": false
+}
