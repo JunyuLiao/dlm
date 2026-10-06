@@ -1,0 +1,50 @@
+{
+  "schema": "v31_aime26_global_budget_sweep_dense_local_v1",
+  "dataset": "aime26",
+  "problems": 30,
+  "panel_seeds": [
+    42,
+    43,
+    44
+  ],
+  "thinking": true,
+  "generation_budget": 8192,
+  "canvas_length": 256,
+  "max_denoising_steps": 48,
+  "confidence_threshold": 0.005,
+  "stability_threshold": 1,
+  "entropy_bound": 0.1,
+  "temperature_schedule": [
+    0.8,
+    0.4
+  ],
+  "eos_stopping": true,
+  "arms": [
+    "dense_full_fix51994",
+    "mage_k1024_local_dense",
+    "mage_k2048_local_dense",
+    "mage_k4096_local_dense"
+  ],
+  "global_kv_budgets": [
+    1024,
+    2048,
+    4096
+  ],
+  "local_kv_budget": null,
+  "local_kernel": "native_dense",
+  "block_size": 64,
+  "local_window": [
+    1023,
+    1023
+  ],
+  "vllm": "0.30.0",
+  "torch": "2.13.0+cu130",
+  "gpu": "NVIDIA H100 80GB HBM3",
+  "manifest": "aime26_generation_manifest.json (user-private manifest bundle)",
+  "cells": "cells_aime_halfkv_20261005.json (user-private cell bundle)",
+  "dataset_revision": "79037aebdb6580008fb960d17cb21fd3099083e3",
+  "manifest_sha256": "85ebd2dd8d26ede269d4c5555279e9e2b79637c3f95036452c624e03e8122f39",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "source_commit_at_freeze": "a7ef1ca09e849fe7239791aad08c516506c0ba3c",
+  "local_scope": "all 25 LOCAL layers use native dense vLLM attention; no local sparse budget or custom local kernel"
+}
