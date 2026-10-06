@@ -1603,3 +1603,5 @@ This is a complete protocol-identified panel. The native sampler and thinking
 setting are unchanged; public records, score summaries, and the completion
 marker are under the result directory. Sparse arms remain slower than the
 matched dense reference despite tile skipping.
+
+| `v31_20261006_aime_global_dense_local_budget_sweep` | `5fb28bda` | AIME26 30 problems × seeds 42/43/44 | dense FULL; MAGE GLOBAL 1024/2048/4096; LOCAL native dense | 56.67%; 56.67% / 58.89% / 60.00% | GLOBAL 58.05% / 41.33% / 17.81%; LOCAL 0%; overall geometry-derived 22.40% / 15.89% / 6.86% | 0.920x / 0.931x / 0.917x | Complete dense-LOCAL control; no end-to-end speedup. See `results/v31_20261006_aime_global_dense_local_budget_sweep/summary.md`. |

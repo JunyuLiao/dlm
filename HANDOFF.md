@@ -1171,3 +1171,25 @@ the recorded wall time including prefill and decode. `receipt.json`,
 `score.summary.json`, `summary.md`, and `final_complete.json` are the source
 of truth. Public records are sanitized; completions and logs remain private.
 The v31 unit suite passed 73 tests with 25 CUDA-dependent skips.
+
+## V31 AIME26 GLOBAL budget sweep with dense LOCAL — 2026-10-06
+
+The follow-up dense-LOCAL panel is complete at source commit `5fb28bda` under
+`results/v31_20261006_aime_global_dense_local_budget_sweep/`. It reruns the same
+30 problems at seeds 42/43/44 with one dense FULL PR #51994 reference and MAGE
+GLOBAL budgets 1024, 2048, and 4096. Thinking and native adaptive stopping are
+unchanged. All 25 LOCAL layers stayed on native dense vLLM attention by leaving
+`LOCAL_KV_BUDGET` unset; no LOCAL router or custom LOCAL kernel was installed.
+
+Pooled exact match is 56.67% dense, then 56.67%, 58.89%, and 60.00% for GLOBAL
+1024/2048/4096. Denoising forwards are 26,163, 26,081, 25,593, and 25,836;
+forwards/canvas are 13.549, 13.368, 13.414, and 13.393. GLOBAL physical
+sparsity is 58.05%, 41.33%, and 17.81%; LOCAL is exactly 0%. Geometry-derived
+overall GLOBAL+LOCAL sparsity is 22.40%, 15.89%, and 6.86%.
+
+Arithmetic mean end-to-end time is 5.7553 s dense versus 6.2557 s, 6.1797 s,
+and 6.2762 s; dense/arm speedups are 0.920x, 0.931x, and 0.917x. Decode-only
+speedups are 0.920x, 0.931x, and 0.917x. This confirms no end-to-end benefit
+from GLOBAL sparsity when LOCAL layers remain dense. The official scorer,
+paired comparison, receipts, and completion marker are in the result directory;
+public records are sanitized and raw completions remain private.

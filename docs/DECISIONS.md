@@ -1274,3 +1274,16 @@ end-to-end speedups versus dense were 0.783x, 0.764x, and 0.809x; decode-only
 speedups were 0.783x, 0.763x, and 0.809x. No positive end-to-end speed claim is
 supported. Full receipts and the paired official comparison are in
 `results/v31_20261006_aime_global_budget_sweep/`.
+
+## 2026-10-06 — Dense-LOCAL control for GLOBAL budget sweep
+
+Run a fresh matched AIME26 panel before attributing the prior slowdown to the
+LOCAL consumer. Keep the native dense LOCAL path by omitting `LOCAL_KV_BUDGET`
+and use the same V31 MAGE GLOBAL selector at budgets 1024, 2048, and 4096.
+The complete result is `results/v31_20261006_aime_global_dense_local_budget_sweep/`.
+
+The dense reference scores 51/90 (56.67%). GLOBAL-only sparse scores 51/90,
+53/90, and 54/90; arithmetic end-to-end speedups are 0.920x, 0.931x, and
+0.917x. GLOBAL physical sparsity is 58.05%, 41.33%, and 17.81%; LOCAL is 0%.
+The matched control therefore remains slower than dense even with native dense
+LOCAL layers. The result does not support a positive end-to-end speed claim.

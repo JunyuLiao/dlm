@@ -1,0 +1,124 @@
+{
+  "arms": {
+    "dense_full_fix51994": {
+      "accuracy": 56.666666666666664,
+      "calls": 26163,
+      "calls_per_canvas": 13.548938373899533,
+      "canvases": 1931,
+      "decode_mean_s": 5.7356826666666665,
+      "prefill_mean_s": 0.018680222222222223,
+      "records": 90,
+      "wall_mean_s": 5.755309111111111
+    },
+    "mage_k1024_local_dense": {
+      "accuracy": 56.666666666666664,
+      "calls": 26081,
+      "calls_per_canvas": 13.368016401845207,
+      "canvases": 1951,
+      "decode_mean_s": 6.236303888888889,
+      "physical_tile_counts": {
+        "global_eligible_tiles": 255424800,
+        "global_kept_tiles": 107154880,
+        "global_sparsity": 0.5804836491992946,
+        "local_denominator_geometry": 406524741.9534704,
+        "local_sparsity": 0.0,
+        "overall_sparsity_geometry": 0.2239897614589212
+      },
+      "prefill_mean_s": 0.01843811111111111,
+      "records": 90,
+      "wall_mean_s": 6.2556957777777775
+    },
+    "mage_k2048_local_dense": {
+      "accuracy": 58.88888888888889,
+      "calls": 25593,
+      "calls_per_canvas": 13.413522012578616,
+      "canvases": 1908,
+      "decode_mean_s": 6.160310888888889,
+      "physical_tile_counts": {
+        "global_eligible_tiles": 249081760,
+        "global_kept_tiles": 146129600,
+        "global_sparsity": 0.41332677270306745,
+        "local_denominator_geometry": 398740048.66208893,
+        "local_sparsity": 0.0,
+        "overall_sparsity_geometry": 0.15892049113416157
+      },
+      "prefill_mean_s": 0.01848977777777778,
+      "records": 90,
+      "wall_mean_s": 6.179716888888889
+    },
+    "mage_k4096_local_dense": {
+      "accuracy": 60.0,
+      "calls": 25836,
+      "calls_per_canvas": 13.393468118195957,
+      "canvases": 1929,
+      "decode_mean_s": 6.256781888888889,
+      "physical_tile_counts": {
+        "global_eligible_tiles": 252486720,
+        "global_kept_tiles": 207527840,
+        "global_sparsity": 0.17806433542326502,
+        "local_denominator_geometry": 402636000.8789854,
+        "local_sparsity": 0.0,
+        "overall_sparsity_geometry": 0.06862665355229654
+      },
+      "prefill_mean_s": 0.01851,
+      "records": 90,
+      "wall_mean_s": 6.276189111111111
+    }
+  },
+  "cells": 90,
+  "native_sampler": {
+    "canvas_length": 256,
+    "confidence_threshold": 0.005,
+    "entropy_bound": 0.1,
+    "eos_stopping": true,
+    "generation_budget": 8192,
+    "max_denoising_steps": 48,
+    "stability_threshold": 1,
+    "temperature_schedule": [
+      0.8,
+      0.4
+    ],
+    "thinking": true
+  },
+  "panel_seeds": [
+    42,
+    43,
+    44
+  ],
+  "schema": "v31_aime26_global_budget_sweep_dense_local_receipt_v1",
+  "scope": {
+    "global_budgets": [
+      1024,
+      2048,
+      4096
+    ],
+    "global_layers": 5,
+    "global_selector": "MAGE qblock_max, FA4 observation, fused statistics, chunked build, Triton copy/LSE merge",
+    "local_budget": null,
+    "local_kernel": "native_dense",
+    "local_layers": 25,
+    "local_router_installed": false
+  },
+  "scorer": {
+    "answer_sha256": "52822957957a3f577d1e9706c36a66a8108a3f99b6aff424cfb72dff0094a9ee",
+    "paired_script": "scripts/v31_paired_official.py",
+    "script": "scripts/v31_score_aime.py"
+  },
+  "source_commit": "5fb28bda",
+  "source_identity": {
+    "block_size": 64,
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "local_window": [
+      1023,
+      1023
+    ],
+    "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+    "torch": "2.13.0+cu130",
+    "vllm": "0.30.0"
+  },
+  "status": "complete",
+  "tests": {
+    "command": "PYTHONPATH=src:. PYTHONNOUSERSITE=1 pytest -q tests/test_v31_*.py",
+    "result": "73 passed, 25 skipped"
+  }
+}
