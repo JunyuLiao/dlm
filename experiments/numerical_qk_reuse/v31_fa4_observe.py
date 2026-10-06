@@ -97,7 +97,8 @@ def _scale_tensor(scale, device):
     return t
 
 
-def observe_dense(q, k, v, scale, z_out, page_table=None, seqused_k=None, num_splits=0):
+def observe_dense(q, k, v, scale, z_out, page_table=None, seqused_k=None, num_splits=0,
+                  window_size=None):
     """Dense bidirectional attention of the canvas queries over all keys (vLLM's GLOBAL decode call: causal kernel with
     dynamic causal off) plus the prefix-tile log-mass.
     q [1, n, H, D] bf16; k / v [1, nk, HK, D] (strided views allowed) or paged caches [pages, page, HK, D] with
@@ -112,9 +113,15 @@ def observe_dense(q, k, v, scale, z_out, page_table=None, seqused_k=None, num_sp
     old = _sm90.AttentionMask
     _sm90.AttentionMask = ObservingMask
     try:
-        out = _flash_attn_fwd(q, k, v, softmax_scale=float(scale), causal=True, dynamic_causal=dyn,
-                              num_splits=num_splits, pack_gqa=False, page_table=page_table, seqused_k=seqused_k,
-                              aux_tensors=[z_out, _scale_tensor(scale, dev)])[0]
+        if window_size is None:
+            mask = dict(causal=True, dynamic_causal=dyn)
+        else:
+            mask = dict(causal=False, window_size_left=int(window_size[0]),
+                        window_size_right=int(window_size[1]))
+        out = _flash_attn_fwd(q, k, v, softmax_scale=float(scale),
+                              num_splits=num_splits, pack_gqa=False, page_table=page_table,
+                              seqused_k=seqused_k, aux_tensors=[z_out, _scale_tensor(scale, dev)],
+                              **mask)[0]
     finally:
         _sm90.AttentionMask = old
     return out

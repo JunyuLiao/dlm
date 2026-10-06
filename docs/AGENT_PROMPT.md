@@ -15,6 +15,15 @@ experiment records are authoritative.
   prefill, canvas commits, and the sampler remain native dense execution.
 - A reported sparsity number must say whether it is GLOBAL prefix sparsity,
   LOCAL sparsity, or count-weighted overall decoder-attention sparsity.
+- The next requested arm is LOCAL sparsity as well. The pinned FA4 SM90
+  consumer can combine `block_sparse_tensors` with the native bidirectional
+  `window_size_left/right=(1023,1023)`, so no separate outside kernel is needed
+  for a first implementation. The current adapter does not route LOCAL layers
+  or pass that window through its sparse consumer. A correct arm must build
+  128x64 maps over structurally window-eligible tiles, preserve the exact
+  element-level window mask at boundary tiles, and report LOCAL receipts
+  separately from GLOBAL receipts. Do not count the existing `LOCAL_KV_BUDGET`
+  metadata as achieved sparsity until this path is active and audited.
 
 ## Value-aware routing contract
 
@@ -80,6 +89,12 @@ progress-aware re-observation path:
 - LOCAL budget requests are metadata until a LOCAL routing path exists. In the
   present adapter LOCAL remains dense, so its achieved sparsity is zero and the
   512-token request must not be presented as an effective local skip budget.
+- For the planned LOCAL sparse arm, use the same FA4 block-sparse consumer with
+  `window_size=(1023,1023)` and a separately frozen local selector/budget. The
+  local prefix window is position-dependent at the first and last query rows;
+  a map that simply reuses GLOBAL prefix tiles changes the native mask and is
+  invalid. Keep an all-kept LOCAL control and a native LOCAL control in every
+  timing/accuracy comparison.
 
 Keep the MAGE/V31 arm distinct from Gaussian32. If the value-aware operator is
 added to this path, freeze the operator, projection seed, state scope, and

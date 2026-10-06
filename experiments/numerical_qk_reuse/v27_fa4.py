@@ -115,10 +115,20 @@ def sparse(q, k, v, skipped, eligible, scale):
     return sparse_lists(q, k, v, block_sparse_tensors(eligible & ~skipped), scale)
 
 
-def sparse_lists(q, k, v, lists, scale):
+def sparse_lists(q, k, v, lists, scale, window_size=None):
+    """Run FA4 over an explicit block map, optionally with a bidirectional local window.
+
+    ``window_size`` is passed in FA4's native ``(left, right)`` token convention.  Keeping
+    this separate from ``causal`` is important for DiffusionGemma LOCAL layers: their native
+    mask is bidirectional ``(1023, 1023)`` and must remain active while block sparsity skips
+    whole 128x64 tiles.
+    """
     fwd = load()
     qs, ks, vs = _layout(q, k, v)
     # block sparsity needs the KV64 block to be a multiple of the kernel's tile_n: FA4's SM90 default is 64 at
     # head_dim 512 (GLOBAL) but 80 at 256 (LOCAL layers, G75 S15/S30), where FA4 itself uses 64 for local attention
     tile = {} if q.shape[-1] > 256 else dict(tile_mn=(128, 64))
-    return fwd(qs, ks, vs, softmax_scale=scale, causal=False, block_sparse_tensors=lists, **tile)[0]
+    extra = {} if window_size is None else dict(window_size_left=int(window_size[0]),
+                                                  window_size_right=int(window_size[1]))
+    return fwd(qs, ks, vs, softmax_scale=scale, causal=False, block_sparse_tensors=lists,
+               **tile, **extra)[0]

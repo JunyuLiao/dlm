@@ -8,6 +8,13 @@ chunked build, and Triton copy/merge. The requested 512-token LOCAL budget is
 recorded but the current adapter does not route LOCAL layers through a sparse
 consumer; LOCAL is therefore dense.
 
+The follow-up target is to make LOCAL layers sparse too. The pinned FA4 SM90
+consumer already accepts a block-sparse map together with the native
+bidirectional `window_size=(1023,1023)`. The adapter currently omits that
+window-aware sparse call and does not intercept LOCAL layers, so this result
+does not include a LOCAL sparse arm. A future arm must preserve the window
+mask on boundary tiles and report LOCAL physical sparsity separately.
+
 ## Accuracy
 
 | arm | seed 42 | seed 43 | seed 44 | pooled exact match |
