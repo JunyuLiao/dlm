@@ -6,7 +6,7 @@
 set -u
 W=/home/exouser/dyh/ljy_value_20261007
 cd /home/exouser/ljy/dlm
-export WORK=$W MAN_DIR=$W/pools/aime26 CELLS=$W/cells_aime.json DATASETS=aime26 MEM=0.80 \
+export WORK=$W MAN_DIR=$W/pools/aime26 CELLS=$W/cells_aime.json DATASETS=aime26 MEM=${MEM:-0.88} MAX_MODEL_LEN=9216 \
        MAGE_K=1728 MAGE_RESELECT_TRIGGER=0.15 MAGE_TRIGGER_SIGNAL=settle VALUE_SCAN=triton
 mkdir -p $W/run_aime26
 

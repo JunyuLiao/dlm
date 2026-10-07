@@ -1340,3 +1340,48 @@ The dense reference scores 51/90 (56.67%). GLOBAL-only sparse scores 51/90,
 0.917x. GLOBAL physical sparsity is 58.05%, 41.33%, and 17.81%; LOCAL is 0%.
 The matched control therefore remains slower than dense even with native dense
 LOCAL layers. The result does not support a positive end-to-end speed claim.
+
+## 2026-10-07 — Protocol pins must be set explicitly; the bench defaults are not the frozen substrate
+
+`scripts/v31_vllm_paired_bench.py` defaults to `CHUNK=16384` and `BLOCK=32`. The
+frozen V31 AIME26 panel actually ran `CHUNK=4096` and `BLOCK=64` (visible in the
+per-cell records under `results/v31_20261006_aime_global_local/attempt001/full/`).
+Block size sets the selector tile geometry and chunk size sets forwards per canvas,
+so the defaults are a different substrate. The first v32 smoke records were collected
+under the defaults and are relabelled in `results/v32_value_aware_20261007/README.md`
+as a non-protocol probe, not study evidence. All later v32 launches pin
+`BLOCK=64 CHUNK=4096` and `MAX_MODEL_LEN=9216` on AIME26, `141312` on LongBench-v2.
+
+## 2026-10-07 — The CUDA illegal-memory-access fault was caused by private cache paths, not the host
+
+The v32 panels failed with `torch.AcceleratorError: CUDA error: an illegal memory
+access was encountered` inside vLLM's `flashinfer_autotune` dummy runs during
+`compile_or_warm_up_model`, including on the dense arm with no adapter installed.
+The fault was reproduced four times after clearing every Triton/CUDA/XDG cache, and
+the GPU showed no ECC or retired-page problem. Root cause: launching vLLM with a
+private `HOME`, `XDG_CACHE_HOME` and `TRITON_HOME`, which forced FlashInfer to
+JIT-compile fresh kernels that faulted. Re-running with the host's default cache
+paths removes the fault. Consequence: do not attribute future vLLM faults on this
+host to the GPU until private-cache launches have been excluded. Do not
+`pkill`/clear caches as a first response.
+
+## 2026-10-07 — The v31 ledger is not bitwise reproducible on this host; compare within a fresh panel
+
+With `CHUNK=4096`, `BLOCK=64`, `MAX_MODEL_LEN=9216` restored, the dense AIME26 arm
+matched 0 of 90 historical per-cell `output_hash` values, at both
+`gpu_memory_utilization` 0.80 and 0.88. Metric-level agreement does hold: fresh
+dense AIME26 is 51/90 correct, avg@k 56.67, equal to
+`results/v31_20261006_aime_global_local/score.summary.json`. The fresh
+`current_v31_control` arm scored 49/90 (avg@k 54.44) against the historical
+`mage_k1728_local_k512_settle15_sticky` 51/90 (avg@k 56.67). Conclusions must rest
+on arms run together in one panel under identical pins; cross-ledger comparison is
+metric-level only and the 2-cell control delta is reported, not hidden.
+
+## 2026-10-07 — Calibrate on the reserved dev subset before any target generation
+
+`scripts/v32_lbdev_calibration.sh` runs the matched references and a V1/V2
+objective-threshold sweep on the reserved 15-cell LongBench-v2 `0shot_think` dev
+subset, disjoint from the 488-cell target. The chosen threshold is frozen in the
+target panel. Calibration numbers, transductive calibration, and held-out target
+results are reported separately; the earlier probe threshold `0.01` was
+probe-selected on a single target-suite cell and is not a frozen value.

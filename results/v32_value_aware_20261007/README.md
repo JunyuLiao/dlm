@@ -1,10 +1,35 @@
 # Value-direction-aware selectors for the v31 cross-step reuse pipeline — 2026-10-07
 
 **Status: PARTIAL.** The selectors are implemented, mathematically qualified on CPU and on the H100
-against the real kernels, integrated into the unchanged inherited reuse pipeline, and smoke-tested
-end-to-end on one cell of each of two pools. **The accuracy and clean-timing panels were BLOCKED by a
-host GPU fault** that is independent of this study and is documented precisely below. No accuracy,
+against the real kernels, and integrated into the unchanged inherited reuse pipeline. No accuracy,
 speed or end-to-end claim is made.
+
+## Protocol deviations found on 2026-10-07 (read before using any number in this directory)
+
+Three findings materially change what the earlier measurements in this directory mean.
+
+1. **The earlier smoke records were produced under the WRONG substrate pins and are not study
+   evidence.** `smoke_records.json` was collected with `CHUNK=16384` and `BLOCK=32`, because
+   `scripts/v31_vllm_paired_bench.py` defaults to those values. The frozen v31 panel runs
+   `CHUNK=4096` and `BLOCK=64` (`results/v31_20261006_aime_global_local/attempt001/full/public/*.jsonl`
+   records `chunk=4096`, `block_size=64`). Block size changes the selector's tile geometry and chunk
+   size changes forwards per canvas, so every N / C / T / S/N and every selection map in
+   `smoke_records.json` is from a different substrate than the frozen protocol. The smoke records are
+   retained as a **non-protocol probe** (they did prove the code paths run end-to-end) and are
+   superseded by the pinned panels. All later launches set `BLOCK=64 CHUNK=4096`
+   (`MAX_MODEL_LEN=9216` on AIME26).
+2. **The blocking GPU fault was self-inflicted and is fixed.** The `illegal memory access` fault
+   below was caused by launching vLLM with a private `HOME`/`XDG_CACHE_HOME`/`TRITON_HOME`, which
+   forced FlashInfer to JIT-compile fresh kernels; those kernels faulted inside the
+   `flashinfer_autotune` dummy runs during `compile_or_warm_up_model`. Re-running with the host's
+   default cache paths removes the fault, confirmed by a clean dense AIME26 cell
+   (`output_tokens=1870`) and a clean 90-cell dense panel. It was never a host or driver fault.
+3. **The v31 ledger's per-cell hashes are not bitwise reproducible on this host.** With the frozen
+   pins restored (`chunk=4096 block=64 max_model_len=9216`), the dense arm still matched **0 of 90**
+   historical `output_hash` values, at both `gpu_memory_utilization` 0.80 and 0.88. Metric-level
+   agreement does hold: fresh dense AIME26 avg@k is 56.67 with 51/90 correct, identical to
+   `results/v31_20261006_aime_global_local/score.summary.json`. Conclusions must therefore rest on
+   this panel's own matched arms, not on bitwise equality with the ledger.
 
 Read `SOURCE_NOTE.md` first: it identifies the active control's actual formula (it is a MASS-ONLY
 selector, not MAGE eq. 5) and states exactly what this study changed.
@@ -79,7 +104,12 @@ Two hygiene repairs were needed in existing tests and are recorded in `SOURCE_NO
 `v27_fa4.dense` / `sparse_lists` / `block_sparse_tensors` at module level and never restored them, so
 every later real-kernel test inherited the stubs. Both now restore the originals.
 
-## What was measured: one cell per arm (H100, sanitized)
+## Superseded probe: one cell per arm (H100, sanitized) — NOT protocol evidence
+
+These were collected under `CHUNK=16384 / BLOCK=32` and must not be cited as study results; see
+deviation 1 above. They are kept because they establish that every code path executes end-to-end.
+A pinned, correctly warmed re-run of the same cells follows in the pinned panels.
+
 
 `smoke_records.json`. Same seed, same cell, same sampler, same pins; `MAGE_K = 1728` (27 KV64 tiles
 per unit), refresh trigger `0.15` on the settle signal, sticky `1.386`, `FIX_51994=1`,
@@ -142,7 +172,7 @@ What these single cells do and do not support:
 | **AIME26** | available | the pool of the frozen 2026-10-06 control panel (manifest `85ebd2dd…`, 30 problems, seeds 42/43/44, thinking on, budget 8192), so it is directly comparable to the control. It is **not** the official `aime26_b32k` pool. |
 | **LongBench-v2 `0shot_think`** | available and **byte-identical to the official pool** | rebuilt here with the pinned builder against the pinned LongBench checkout; every output sha256 equals `pools_summary.json`, including `longbench_v2_0shot_think_generation_manifest.json` = `3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe` and `cells_longbench_v2_0shot_think.json` = `d48c39d68533467fd4942931745377a42a9d57e3e5714aa8913f5d897e7d4957`. |
 
-## The blocking fault
+## The (now-fixed) blocking fault
 
 Every end-to-end launch began to fail, **including the plain `dense_full_fix51994` arm with no
 adapter at all**, inside vLLM's own kernels and never inside this study's code:
