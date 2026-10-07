@@ -241,7 +241,17 @@ def main():
                                                  local_kernel=os.environ.get('LOCAL_KERNEL', 'compact_triton'),
                                                  local_kv_budget=(int(os.environ['LOCAL_KV_BUDGET'])
                                                                   if os.environ.get('LOCAL_KV_BUDGET') and arm == 'mage'
-                                                                  else None))
+                                                                  else None),
+                                                 # this study's value-aware selectors (VALUE_SELECTOR set ->
+                                                 # arm 'mage' with the UNCHANGED inherited reuse contract)
+                                                 value_selector=os.environ.get('VALUE_SELECTOR') or None,
+                                                 value_threshold=float(os.environ.get('VALUE_THRESH', '1.0')),
+                                                 value_drop_fraction=float(os.environ.get('VALUE_DROP', '0.0')),
+                                                 value_shortlist=int(os.environ.get('VALUE_SHORTLIST', '0')),
+                                                 value_exact_max=int(os.environ.get('VALUE_EXACT_MAX', '256')),
+                                                 value_mu_precision=os.environ.get('VALUE_MU_PREC', 'tf32x3'),
+                                                 value_stats_split=int(os.environ.get('VALUE_STATS_SPLITS', '1')),
+                                                 value_scan=os.environ.get('VALUE_SCAN', 'triton'))
         vllm_adapter.install_vllm_patches(adapter)
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
@@ -278,6 +288,20 @@ def main():
                                 if os.environ.get('LOCAL_KV_BUDGET') and arm == 'mage' else None),
                 local_kernel=os.environ.get('LOCAL_KERNEL', 'compact_triton') if arm == 'mage' else None,
                 mage_select=os.environ.get('MAGE_SELECT', 'torch') if arm == 'mage' else None,
+                # this study's value-aware selectors, recorded so a silently ignored option shows here
+                value_selector=os.environ.get('VALUE_SELECTOR') or None,
+                value_threshold=float(os.environ.get('VALUE_THRESH', '1.0'))
+                if os.environ.get('VALUE_SELECTOR') else None,
+                value_drop_fraction=float(os.environ.get('VALUE_DROP', '0.0'))
+                if os.environ.get('VALUE_SELECTOR') else None,
+                value_shortlist=int(os.environ.get('VALUE_SHORTLIST', '0'))
+                if os.environ.get('VALUE_SELECTOR') else None,
+                value_exact_max=int(os.environ.get('VALUE_EXACT_MAX', '256'))
+                if os.environ.get('VALUE_SELECTOR') else None,
+                value_mu_precision=os.environ.get('VALUE_MU_PREC', 'tf32x3')
+                if os.environ.get('VALUE_SELECTOR') else None,
+                value_scan=os.environ.get('VALUE_SCAN', 'triton')
+                if os.environ.get('VALUE_SELECTOR') else None,
                 kv_copy_backend=os.environ.get('KV_COPY', 'torch') if arm != 'dense' else None,
                 merge_backend=os.environ.get('MERGE', 'torch') if arm != 'dense' else None,
                 logit_stats=os.environ.get('LOGIT_STATS', 'legacy') if arm == 'method' else None,

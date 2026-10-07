@@ -204,6 +204,8 @@ def test_pool_selection_runs_the_real_unit_choice():
 
 def test_pool_routes_reselections_and_is_stored_with_the_selection():
     from experiments.numerical_qk_reuse import v27_fa4
+    # module-level stubs, restored in the finally block: a later real-kernel test must not inherit them
+    real = (v27_fa4.block_sparse_tensors, v27_fa4.dense, v27_fa4.sparse_lists)
     v27_fa4.block_sparse_tensors = lambda kept, q_block=128: ('lists', kept.clone())
     v27_fa4.dense = lambda q, k, v, s: 'dense'
     v27_fa4.sparse_lists = lambda q, k, v, lists, s: 'sparse'
@@ -233,6 +235,8 @@ def test_pool_routes_reselections_and_is_stored_with_the_selection():
         assert calls == ['dense_observe', ('pool', 16 * 2 * 4)]
     finally:
         VllmMethodAdapter._mage_select_fa4, VllmMethodAdapter._mage_select_pool = o1, o2
+        (v27_fa4.block_sparse_tensors, v27_fa4.dense,
+         v27_fa4.sparse_lists) = real
     for bad in (dict(mage_pool=4), dict(mage_reselect_trigger=0.5, mage_pool=1)):
         try:
             _adapter(**bad)

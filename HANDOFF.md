@@ -1,3 +1,39 @@
+## Value-aware cross-step reuse selectors — 2026-10-07 (PARTIAL, panels blocked)
+
+The study that tests whether value-direction-aware block selection improves the v31
+cross-step reuse system is **implemented, qualified and smoke-tested but its panels did not run**.
+Start with `results/v32_value_aware_20261007/README.md`; the source-level analysis of the active
+control is `results/v32_value_aware_20261007/SOURCE_NOTE.md`.
+
+- **Read `SOURCE_NOTE.md` before anything else.** The active v31 control is a MASS-ONLY selector:
+  `MAGE_SELECT=fa4`, `MAGE_GRAN=qblock_max`, `MAGE_K=1728` (27 KV64 tiles per unit), scored by the
+  WORST row's prefix log-share per (query head, 128-row block). The word `mage` in the code does not
+  mean MAGE eq. 5, and the control never touches V. The inherited online projected-V router is the
+  separate `arm='method'` path.
+- **New arms** (`arm='mage'`, the reuse contract unchanged): `value_v1_online_discard_mass`,
+  `value_v2_online_preserve_mass`, `value_v3a_singleton_delete`, `value_v3b_greedy_exact`,
+  `value_v3b_drop_r025`, `value_v3b_shortlist64`. They change the SELECTION FORMULA at an
+  initial/refresh call only; the FA4 observation call still returns FA4's own native current-step
+  BF16 output and the later FA4 sparse consumer is untouched.
+- **Correctness: 89 new tests pass** (26 CPU mathematics, 26 H100 vs direct FP64 oracles and the real
+  kernels, 37 adapter/contract). The existing suite is 265 passed with 4 pre-existing unrelated
+  failures. Two historical tests were leaking module-level FA4 stubs and are now hygienic.
+- **What one 120K LongBench cell shows (one cell, not a panel):** V3a reaches a sketch-space
+  masked-attention objective of 0.0136 with 99.45% retained tile mass, against 0.0605 / 96.42% for V1
+  and 0.0742 / 96.83% for V2; `v3b_drop` at 0.25 is a clear negative (1.20 / 70.4%). The fused Triton
+  V1 scan is 10.0x faster than the batched reference at a bit-identical map (11.77 s vs 118.14 s
+  decode) — that is a SELECTION-COST result, not a speed result. Exact `v3b` is blocked above 256
+  optional tiles and says so rather than substituting an approximation.
+- **BLOCKED, and it is not the study's fault:** every launch now dies with `CUDA error: an illegal
+  memory access was encountered` inside vLLM's own fused-MoE / inductor kernels, reproducing on the
+  plain `dense` arm with no adapter attached. Four clean-cache reproductions did not clear it. RULER
+  v33 and HumanEval are separately unobtainable on this host (the v33 source pool is gone and its row
+  order is unrecorded, so a rebuild could not be hash-verified against the pinned manifests).
+- **Available for a relaunch:** the AIME26 pool of the frozen 2026-10-06 control panel (manifest
+  `85ebd2dd...`), and the OFFICIAL LongBench-v2 `0shot_think` pool rebuilt here byte-identically
+  (every output sha256 matches `pools_summary.json`). `scripts/v32_aime26_panel.sh` is committed,
+  ordered and resumable; raw attempts stay in the ignored user-owned run directory.
+
 ## V31 GLOBAL + LOCAL AIME26 run — 2026-10-06
 
 The complete 30-problem × seeds 42/43/44 panel is under

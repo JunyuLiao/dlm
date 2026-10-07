@@ -52,6 +52,8 @@ def test_conf_weights_follow_juyu_prior():
 
 def test_reselect_replaces_the_held_lists_and_feeds_the_carry():
     log, sel = [], []
+    # module-level stubs, restored in the finally block: a later real-kernel test must not inherit them
+    real = (v27_fa4.block_sparse_tensors, v27_fa4.dense, v27_fa4.sparse_lists)
     v27_fa4.block_sparse_tensors = lambda kept, q_block=128: ('lists', kept.clone())
     v27_fa4.dense = lambda q, k, v, s: (log.append('dense'), 'dense')[1]
     v27_fa4.sparse_lists = lambda q, k, v, lists, s: (log.append(('sparse', lists[1])), 'sparse')[1]
@@ -82,6 +84,8 @@ def test_reselect_replaces_the_held_lists_and_feeds_the_carry():
         assert [a._mage(5, q, b, 1.0, prefix + n, n) for _ in range(3)] == ['select', 'sparse', 'select']
     finally:
         VllmMethodAdapter._mage_select_fa4 = orig
+        (v27_fa4.block_sparse_tensors, v27_fa4.dense,
+         v27_fa4.sparse_lists) = real
 
 
 def test_invalid_configurations_are_refused():
@@ -133,6 +137,8 @@ def test_reselection_budget_override():
 
 def test_progress_trigger_reselects_once_at_the_flagged_call():
     log, sel = [], []
+    # module-level stubs, restored in the finally block: a later real-kernel test must not inherit them
+    real = (v27_fa4.block_sparse_tensors, v27_fa4.dense, v27_fa4.sparse_lists)
     v27_fa4.block_sparse_tensors = lambda kept, q_block=128: ('lists', kept.clone())
     v27_fa4.dense = lambda q, k, v, s: (log.append('dense'), 'dense')[1]
     v27_fa4.sparse_lists = lambda q, k, v, lists, s: (log.append(('sparse', lists[1])), 'sparse')[1]
@@ -159,6 +165,8 @@ def test_progress_trigger_reselects_once_at_the_flagged_call():
         assert a.calls['mage_reselections'] == 1
     finally:
         VllmMethodAdapter._mage_select_fa4 = orig
+        (v27_fa4.block_sparse_tensors, v27_fa4.dense,
+         v27_fa4.sparse_lists) = real
     for bad in (dict(mage_select_step=1, mage_reselect_trigger=0.0), dict(mage_select_step=1, mage_reselect=[3], mage_reselect_trigger=0.5),
                 dict(mage_select_step=0, mage_reselect_trigger=0.5)):
         try:

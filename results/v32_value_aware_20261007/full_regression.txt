@@ -1,0 +1,13 @@
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_numerical_reuse_route_only.py::test_route_only_issues_no_pv_launch
+FAILED tests/test_numerical_reuse_route_only.py::test_refactor_leaves_routing_only_output_and_bitmaps_bit_identical
+FAILED tests/test_numerical_reuse_route_only.py::test_cached_scores_mode_still_uses_its_fused_output
+FAILED tests/test_numerical_reuse_route_only.py::test_score_anchor_step_does_not_observe_the_same_qk_twice
+4 failed, 265 passed, 67 warnings in 26.55s
+
+The four failures are PRE-EXISTING and are not caused by this study: they fail identically with the
+study's four new files stashed out of the tree (verified by `git stash push -u -- <the four files>`
+and re-running). They are the `test_numerical_reuse_route_only.py` stubs that expect a
+`fused_route_only(pool=...)` signature the module does not have.

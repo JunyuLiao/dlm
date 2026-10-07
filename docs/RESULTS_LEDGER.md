@@ -1605,3 +1605,23 @@ marker are under the result directory. Sparse arms remain slower than the
 matched dense reference despite tile skipping.
 
 | `v31_20261006_aime_global_dense_local_budget_sweep` | `5fb28bda` | AIME26 30 problems × seeds 42/43/44 | dense FULL; MAGE GLOBAL 1024/2048/4096; LOCAL native dense | 56.67%; 56.67% / 58.89% / 60.00% | GLOBAL 58.05% / 41.33% / 17.81%; LOCAL 0%; overall geometry-derived 22.40% / 15.89% / 6.86% | 0.920x / 0.931x / 0.917x | Complete dense-LOCAL control; no end-to-end speedup. See `results/v31_20261006_aime_global_dense_local_budget_sweep/summary.md`. |
+
+## 2026-10-07 — value-aware cross-step reuse selectors (PARTIAL, not a panel)
+
+**No entry in the panel table on purpose: this is not a complete protocol-identified result.** The
+selectors are implemented and qualified; the accuracy and clean-timing panels did not run. Nothing
+below may be read as an accuracy or speed result.
+
+| item | value | source |
+|---|---|---|
+| status | PARTIAL — correctness/integration/smoke complete, panels blocked | `results/v32_value_aware_20261007/README.md` |
+| active control's actual selector | mass-only `qblock_max` (worst-row prefix log-share), `MAGE_K=1728` | `results/v32_value_aware_20261007/SOURCE_NOTE.md` |
+| new arms | `value_v1_online_discard_mass`, `value_v2_online_preserve_mass`, `value_v3a_singleton_delete`, `value_v3b_greedy_exact`, `value_v3b_drop_r025`, `value_v3b_shortlist64` | `results/v32_value_aware_20261007/config.json` |
+| correctness gates | 26 CPU + 26 H100 + 37 adapter = **89 passed**; existing suite 265 passed with 4 pre-existing unrelated failures | `cpu_gpu_tests.txt`, `full_regression.txt` |
+| control integration check | AIME26 cell 0 reproduces the frozen 2026-10-06 trajectory exactly (N=60, C=8, T=1827) | `smoke_records.json` |
+| selector quality, one 120K cell | V3a sketch objective 0.0136 / 99.45% retained mass; V1 0.0605 / 96.42%; V2 0.0742 / 96.83%; `v3b_drop` 1.20 / 70.4% (negative) | `smoke_records.json` |
+| selection cost, one 120K cell | fused Triton V1 scan 11.77 s decode vs 118.14 s for the batched reference at an **identical** map, counters, objective and retained mass (10.0x) | `smoke_records.json` |
+| exact V3b at 120K | **blocked**: `value_blocked` on 120/120 selection calls, fell back to the control; no approximation substituted | `receipt.json` |
+| LongBench-v2 `0shot_think` pool | rebuilt here **byte-identically** to the official pool (all output sha256 match `pools_summary.json`) | `config.json` |
+| RULER v33 / HumanEval 164 | **blocked**: sources not on this host; the v33 row order is unrecorded so a rebuild could not be hash-verified | `config.json` |
+| panels | **blocked** by a CUDA illegal memory access inside vLLM's own kernels that reproduces on the dense arm with no adapter | `README.md` |

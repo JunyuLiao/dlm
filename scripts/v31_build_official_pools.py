@@ -58,14 +58,17 @@ import v31_official as op  # noqa: E402
 
 MODEL = '/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b'
 REVISION = 'f7f5b7f5fa82ffc52addd066915886d497f5517b'
-OFC = Path('/media/volume/dllm-1/dyh/pools_v31_official')
-RULER_SRC = Path('/media/volume/dllm-1/dyh/ruler_long_v33')
+# The pool root is overridable so the SAME pinned builder runs on a host that keeps the official
+# sources locally. Every source file is still verified against its pinned sha256 below, so an
+# override changes the LOCATION of the sources, never their content.
+OFC = Path(os.environ.get('V31_POOL_ROOT', '/media/volume/dllm-1/dyh/pools_v31_official'))
+RULER_SRC = Path(os.environ.get('V31_RULER_SRC', str(OFC / 'ruler_long_v33')))
 RULER_LENGTHS = ((32768, 'ruler32k_v33', 'ruler32k_v33ofc'), (65536, 'ruler64k_v33', 'ruler64k_v33ofc'),
                  (131072, 'ruler128k_v33', 'ruler128k_v33ofc'))
 NOOP_DATASET = 'ruler32k_v33noop'
 NOOP_TASKS = ('vt', 'niah_single_1', 'niah_single_2', 'niah_single_3', 'niah_multikey_1', 'niah_multikey_2',
               'niah_multikey_3', 'niah_multivalue', 'niah_multiquery')
-LB_SRC = OFC / 'official_src/LongBench_2e00731f'
+LB_SRC = Path(os.environ.get('V31_LB_SRC', str(OFC / 'official_src/LongBench_2e00731f')))
 LB_COMMIT = '2e00731f8d0bff23dc4325161044d0ed8af94c1e'
 LB_FILE_SHA256 = {'pred.py': 'ab63f77866a1c0dc770582bc3fe6b014c3b4be4667399b0ee267075780c6a138',
                   'result.py': 'b6675c1c0b72090c01e12c94d3b176c4991fe38ceed9a301d24d22b1997465bd',

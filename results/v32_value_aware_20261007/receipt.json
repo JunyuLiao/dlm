@@ -1,0 +1,62 @@
+{
+  "schema": "v32_value_aware_receipt_v1",
+  "status": "PARTIAL - selectors proven and smoke-tested on the H100; accuracy/timing panels BLOCKED",
+  "what_this_receipt_proves": [
+    "the intended selector ran, with the intended budget, layer scope and projection identity",
+    "the inherited reuse contract (refresh clock, carry, sticky, protected tiles, budget, LOCAL scope, consumer) was unchanged",
+    "the observation call's output was FA4's native current-step BF16 output, not a projection or a cached value",
+    "no LOCAL layer was routed and no LOCAL budget was active",
+    "the physical GLOBAL tile counts the selectors realized were recorded per request"
+  ],
+  "verified_from": "results/v32_value_aware_20261007/smoke_records.json (12 sanitized one-cell H100 records, no prompt / gold / completion / token ids)",
+  "correctness_gates": {
+    "cpu_mathematical": "26 passed (tests/test_v31_value_select.py)",
+    "gpu_kernels_and_oracles": "26 passed (tests/test_v31_value_select_gpu.py, H100 SM90, real FA4 and Triton paths)",
+    "adapter_contract": "37 passed (tests/test_v31_value_adapter.py)",
+    "total_new": "89 passed",
+    "existing_regression": "265 passed, 4 pre-existing failures unrelated to this study (full_regression.txt)"
+  },
+  "per_arm_observed": [
+    {"arm": "dense_full_fix51994", "selector": "none (native vLLM FULL + PR #51994 mask fix)",
+     "ran_on": ["aime26 x1 cell", "longbench_v2_0shot_think x1 cell (120017 prompt tokens)"]},
+    {"arm": "current_v31_control", "selector": "mass-only qblock_max (unchanged)",
+     "value_selector": null,
+     "proof": "AIME26 cell 0 reproduced the frozen control trajectory exactly: 60 denoising forwards, 8 canvases, 1827 output tokens, matching the historical record in results/v31_20261006_aime_global_local"},
+    {"arm": "value_v1_online_discard_mass", "selector": "v1", "value_approximate_selector": false,
+     "kernel": "triton_value_scan (fused), verified equal to the batched reference map and counters on GPU",
+     "threshold": 0.01},
+    {"arm": "value_v2_online_preserve_mass", "selector": "v2", "value_approximate_selector": false,
+     "kernel": "triton_value_scan (fused)", "threshold": 0.01},
+    {"arm": "value_v3a_singleton_delete", "selector": "v3a", "value_approximate_selector": false,
+     "kernel": "batched reference, one full-support summary pass"},
+    {"arm": "value_v3b_greedy_exact", "selector": "v3b", "value_approximate_selector": false,
+     "blocked_at_120k_prefix": "120 of 120 selection calls reported value_blocked (1875 optional tiles > value_exact_max 256) and fell back to the inherited control. This is the designed behaviour: an approximation is never silently substituted for v3b. At short prefixes (<= 256 optional tiles) the exact greedy runs and is covered by the CPU/GPU oracles."},
+    {"arm": "value_v3b_drop_r025", "selector": "v3b_drop", "value_approximate_selector": true,
+     "approximation": "bounded batch drop-and-refine, drop_fraction 0.25"},
+    {"arm": "value_v3b_shortlist64", "selector": "v3b_shortlist", "value_approximate_selector": true,
+     "approximation": "V3a-ranked shortlist of 64, then the exact greedy on it",
+     "status": "constructed and unit-tested; its 120K one-cell run hit the host GPU fault before a record was written"}
+  ],
+  "receipts_present_in_every_value_record": {
+    "value_selector": "the selector name",
+    "value_approximate_selector": "bool, True for v3b_drop / v3b_shortlist",
+    "value_budget_tokens": "MAGE_K actually applied (1728)",
+    "value_protect_sink_tokens": 0,
+    "value_protect_recent_tokens": 0,
+    "value_aggregation": "max over the valid rows of the 128-row block",
+    "value_projection": "{family gaussian, rank 32, seed 1729, formula, records: per native KV head the derived seed and the sha256 of the matrix bytes}",
+    "value_statistics_kernel": "{z: the same FA4 in-kernel observation as the control; mu: fused_observe OUT=0 MU=1 ...; tail: FP32 canvas/boundary logits; selection: triton_value_scan | batched_reference}",
+    "value_consumer": "unchanged FA4 block-sparse consumer (v27_fa4.sparse_lists)",
+    "value_output_path": "unchanged: the observation call returns FA4 native current-step BF16 output",
+    "value_layer_scope": "{global_layers [5,11,17,23,29], local_layers_sparse [], local_window [1023,1023]}",
+    "value_last_counters": "{candidates, evaluations, passes, forced_keep, forced_skip, threshold_keeps, exact, selector, kernel}",
+    "value_last_objective": "{objective_mean, objective_max, objective_exact, retained_mass} - measured AFTER selection, never a selector input",
+    "counters.value_*": "candidates, evaluations, forced_keep, forced_skip, threshold_keeps, passes, blocked, mu_passes, sketch_builds, sketch_reuses, stat_bytes, approximation_calls"
+  },
+  "not_proven_here": [
+    "task accuracy of any arm (the panels are blocked, see README.md)",
+    "clean end-to-end / decode timing under the required separate clean pass",
+    "LOCAL physical sparsity as a measured number (LOCAL is disabled, so it is zero by construction and by receipt, not by measurement on a sparse LOCAL arm)",
+    "the full-dimensional attention-output error by distance from refresh (the diagnostic harness was not reached)"
+  ]
+}

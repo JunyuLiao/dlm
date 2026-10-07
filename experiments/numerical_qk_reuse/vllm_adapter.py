@@ -133,6 +133,18 @@ ROW_WEIGHTS = (None, 'cgate', 'conf', 'margin', 'temporal', 'mt', 'ct', 'jcgate'
 TRIGGER_SIGNALS = ('accept', 'settle')
 
 
+_VALUE_COUNTER_KEYS = dict(value_candidates=0, value_evaluations=0, value_forced_keep=0,
+                           value_forced_skip=0, value_threshold_keeps=0, value_passes=0,
+                           value_blocked=0, value_mu_passes=0, value_sketch_builds=0,
+                           value_sketch_reuses=0, value_stat_bytes=0, value_approximation_calls=0)
+
+
+def vs_rank():
+    """The shared Gaussian32 rank of this study's value-aware selectors."""
+    from experiments.numerical_qk_reuse import v31_value_select as _vs
+    return _vs.RANK
+
+
 class VllmMethodAdapter:
     def __init__(self, layer_types, config=None, condition=None, arm='method', profile=False, lifecycle='legacy',
                  canvas_buffers='legacy', kv_copy_backend='torch', merge_backend='torch', mage_k=1024,
@@ -146,7 +158,38 @@ class VllmMethodAdapter:
                  mage_trigger_relative=False, mage_pool=None, mage_kcover=None, mage_kq=0.75, mage_kmax=16384,
                  mage_sticky=None,
                  cg_stop=None, stall_rescue=None, stall_eps=0.01, local_kv_budget=None,
-                 local_kernel='compact_triton'):
+                 local_kernel='compact_triton', value_selector=None, value_threshold=1.0,
+                 value_drop_fraction=0.0, value_shortlist=0, value_exact_max=256,
+                 value_mu_precision='tf32x3', value_stats_split=1, value_scan='triton'):
+        if value_selector is not None:
+            # This study's value-aware selectors. They run ONLY inside the unchanged inherited reuse
+            # pipeline: arm='mage', the same discovery/refresh clock, carry, sticky retention,
+            # protected/sink/current-canvas tiles, structural masks, GQA/cache semantics, mask format
+            # and fixed budget. They replace the block-selection formula at an initial/refresh call
+            # and nothing else; the observation call's FA4 output and the later FA4 sparse consumer
+            # are untouched.
+            from experiments.numerical_qk_reuse import v31_value_select as _vs
+            if arm != 'mage':
+                raise ValueError('the value-aware selectors run on the mage arm only')
+            if value_selector not in _vs.VALUE_SELECTORS:
+                raise ValueError(f'value_selector must be one of {_vs.VALUE_SELECTORS}')
+            if value_selector in ('v3a', 'v3b', 'v3b_drop', 'v3b_shortlist') and value_threshold != 1.0:
+                raise ValueError('the V3 selectors minimize F(S) at a fixed budget; they take no threshold')
+            if not 0.0 <= float(value_threshold) < float('inf'):
+                raise ValueError('value_threshold must be a finite non-negative rho')
+            if not 0.0 <= float(value_drop_fraction) < 1.0:
+                raise ValueError('value_drop_fraction must be in [0, 1)')
+            if int(value_shortlist) < 0:
+                raise ValueError('value_shortlist must be >= 0')
+            if int(value_exact_max) < 1:
+                raise ValueError('value_exact_max must be >= 1')
+            if value_selector in _vs.APPROXIMATE_SELECTORS and float(value_drop_fraction) == 0.0 \
+                    and int(value_shortlist) == 0:
+                raise ValueError(f'{value_selector} is an APPROXIMATION: it needs a drop fraction or a shortlist')
+            if value_selector in ('v1', 'v2') and (float(value_drop_fraction) or int(value_shortlist)):
+                raise ValueError('the online V1/V2 selectors take neither a drop fraction nor a shortlist')
+            if value_scan not in ('triton', 'reference'):
+                raise ValueError("value_scan must be 'triton' or 'reference'")
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if lifecycle not in ('legacy', 'request_clear'):
@@ -387,6 +430,19 @@ class VllmMethodAdapter:
         self._stall_best, self._stall_since = -1.0, 0
         # round 8: sticky re-selection -- held tiles get + mage_sticky on their log-share score in a re-selection
         self.mage_sticky, self._mage_held = (None if mage_sticky is None else float(mage_sticky)), None
+        # This study's value-aware selector configuration. `value_selector` None keeps the inherited
+        # qblock_max / mass control EXACTLY as it is; every field below is ignored in that case.
+        self.value_selector = value_selector
+        self.value_threshold = float(value_threshold)
+        self.value_drop_fraction = float(value_drop_fraction)
+        self.value_shortlist = int(value_shortlist)
+        self.value_exact_max = int(value_exact_max)
+        self.value_mu_precision = value_mu_precision
+        self.value_stats_split = max(1, int(value_stats_split))
+        self.value_scan = value_scan
+        self._last_value_counters, self._value_obj = None, None
+        self._value_bank, self._value_sketch, self._value_bank_records = {}, {}, None
+        self._value_summary, self._last_value_counters, self._value_obj = {}, None, None
         # round 6: coverage-calibrated balanced budget -- see _coverage_tiles
         self.mage_kcover = None if mage_kcover is None else float(mage_kcover)
         self.mage_kq, self.mage_kmax = float(mage_kq), int(mage_kmax)
@@ -458,6 +514,8 @@ class VllmMethodAdapter:
         if self.canvas_buffers == 'release_after_invalidate':
             self.calls.update(canvas_release_calls=0, canvas_release_layers=0, canvas_release_bytes=0,
                               canvas_invalidate_epoch=0, canvas_release_epoch=0)
+        if self.value_selector is not None:
+            self.calls.update(**_VALUE_COUNTER_KEYS)
 
     # ------------------------------------------------------------------ request lifecycle
     def begin_request(self):
@@ -481,6 +539,8 @@ class VllmMethodAdapter:
         self._trig_canvas, self._trig_at = None, None
         self._trig_count, self._trig_k, self._jc = 0, None, None
         self._clock, self._trig_phi0 = [], None
+        self._value_bank, self._value_sketch, self._value_bank_records = {}, {}, None
+        self._value_summary, self._last_value_counters, self._value_obj = {}, None, None
         self._cg = self._cg_canvas = None
         self._stall_best, self._stall_since = -1.0, 0
         self._tile_means, self._residual_tiles, self._guard_cache = {}, 0, []
@@ -494,6 +554,8 @@ class VllmMethodAdapter:
         self._regroup_acc, self._regroup_n = None, 0
         if self.arm == 'mage':
             self.calls.update(mage_selections=0, mage_reused_calls=0, mage_kept_prefix_tiles=0, mage_prefix_tiles=0)
+        if self.value_selector is not None:
+            self.calls.update(**_VALUE_COUNTER_KEYS)
         if self.arm in ('allkept', 'native', 'mage'):
             return
         global _BINDING
@@ -537,7 +599,8 @@ class VllmMethodAdapter:
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
         return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._local_receipt(), **self._regroup_receipt(),
-                                 **self._drift_receipt(), **self._clock_receipt()), method=counters,
+                                 **self._drift_receipt(), **self._clock_receipt(),
+                                 **self.value_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
 
@@ -557,7 +620,8 @@ class VllmMethodAdapter:
                               global_ms_total=round(sum(ms), 2))
             counters = self.runtime['counters']() if self.runtime is not None else None
             return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._local_receipt(), **self._regroup_receipt(),
-                                     **self._drift_receipt(), **self._clock_receipt()), method=counters,
+                                     **self._drift_receipt(), **self._clock_receipt(),
+                                 **self.value_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
         finally:
@@ -966,6 +1030,8 @@ class VllmMethodAdapter:
                     pool = st.get('pool') if self.mage_pool is not None else None
                     if pool is not None and pool.shape[-1] == -(-nk // 64):
                         out, kept = self._mage_select_pool(q, b['k'], b['v'], scale, prefix, n, pool)
+                    elif self.value_selector is not None:
+                        out, kept = self._value_mage_select(layer_idx, q, b, scale, prefix, n)
                     else:
                         out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
                 finally:
@@ -988,7 +1054,11 @@ class VllmMethodAdapter:
                         return v27_fa4.sparse_lists(q, b['k'], b['v'], carried, scale)
                     self.calls['mage_warm_dense_calls'] = self.calls.get('mage_warm_dense_calls', 0) + 1
                     return v27_fa4.dense(q, b['k'], b['v'], scale)
-            if self.mage_select == 'fa4':
+            if self.mage_select == 'fa4' and self.value_selector is not None:
+                # the value-aware selector needs the FA4 observation path for its own tile masses
+                self._last_pool = None
+                out, kept = self._value_mage_select(layer_idx, q, b, scale, prefix, n)
+            elif self.mage_select == 'fa4':
                 self._last_pool = None
                 out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
             else:
@@ -1045,6 +1115,202 @@ class VllmMethodAdapter:
         return kept_kv.repeat_interleave(G, 0)[None, :, None, :].expand(1, H, qb, kt).contiguous()
 
     @torch.no_grad()
+    # ------------------------------------------------------------------ value-aware selectors (this study)
+    def _value_bank_for(self, layer_idx, kv_heads, width, device):
+        """The frozen Gaussian32 projection of this layer's values, one matrix per native KV head.
+
+        Deterministic and request-independent: derived from
+        sha256('jl_output_v1/gaussian/32/1729/<layer>/<head>/<width>') on CPU, cached for the process, and
+        never regenerated per step, canvas or variant. ``self._value_bank_records`` holds the per-head
+        sha256 of the matrix bytes for the receipt."""
+        from experiments.numerical_qk_reuse import v31_value_select as vs
+        key = (int(layer_idx), int(kv_heads), int(width), str(device))
+        bank = self._value_bank.get(key)
+        if bank is None:
+            bank, records = vs.gaussian32_bank(layer_idx, kv_heads, width, device, vs.PROJECTION_SEED)
+            self._value_bank[key] = bank
+            self._value_bank_records = records
+        return bank
+
+    def _value_sketch_for(self, layer_idx, values, valid):
+        """``[1, HK, nk, 32]`` FP32 projection of V, cached per (layer, key extent) within a request.
+
+        The prefix region is immutable within a canvas, so the projection of the prefix is computed once
+        and the canvas region is refreshed per call. Caching is by CONTENT EXTENT, never by a guessed
+        position: a different extent re-projects."""
+        from experiments.numerical_qk_reuse import v31_value_select as vs
+        nk = int(values.shape[2])
+        key = (int(layer_idx), nk)
+        bank = self._value_bank_for(layer_idx, values.shape[1], values.shape[3], values.device)
+        cached = self._value_sketch.get(key)
+        if cached is None or cached.shape[2] != nk or not torch.isfinite(cached).all():
+            sketch = vs.project_values(values, bank)
+            self._value_sketch[key] = sketch
+            self.calls['value_sketch_builds'] = self.calls.get('value_sketch_builds', 0) + 1
+        else:
+            self.calls['value_sketch_reuses'] = self.calls.get('value_sketch_reuses', 0) + 1
+        nu = vs.valid_kv_reference(values, valid)
+        return self._value_sketch[key], nu
+
+    def _value_stats(self, layer_idx, q, keys, values, valid, scale, prefix, n):
+        """The compact tile statistics of one observation call, in tile-major layout.
+
+        * ``z`` for the prefix tiles comes from the SAME FA4 in-kernel observation that produces this
+          call's dense output, so the selector and the output see identical tile masses;
+        * ``mu`` comes from one observation-only Triton pass (``OUT=0``, ``MU=1``): no value load, no PV,
+          no output partials, so the call's attention output is untouched and no second forward happens;
+        * the canvas/boundary tiles are reduced from the FP32 tail logits the control already forms,
+          so V3's reference ``O_i`` covers the complete eligible support.
+        """
+        from experiments.numerical_qk_reuse import v27_consumer64
+        from experiments.numerical_qk_reuse import v31_value_observe as vo
+        from experiments.numerical_qk_reuse import v31_value_select as vs
+        from experiments.numerical_qk_reuse.cached_executor import allocate_summary
+        from experiments.numerical_qk_reuse.v31_fa4_observe import observe_dense
+        dev = q.device
+        _, heads, _, _ = q.shape
+        kv_heads, nk = keys.shape[1], keys.shape[2]
+        group = heads // kv_heads
+        qb, pt, total_tiles = -(-n // 128), prefix // 64, -(-(prefix + n) // 64)
+        summary = allocate_summary(1, heads, qb, total_tiles, pt, vs_rank(), dev,
+                                   identity=('value', int(layer_idx), int(prefix), int(n)))
+        prefix_z = torch.empty((heads, qb, pt, 128), device=dev, dtype=torch.float32)
+        # the SAME FA4 call the control makes, so the tile masses and the OUTPUT are identical
+        out = observe_dense(q.transpose(1, 2), keys.transpose(1, 2), values.transpose(1, 2), scale,
+                            prefix_z)
+        # the observation-only statistics pass for the per-row projected within-tile mean
+        sketch, nu_kv = self._value_sketch_for(layer_idx, values, valid)
+        v27_consumer64.fused_observe(q, keys, keys, sketch, scale, pt, summary,
+                                     splits=self.value_stats_split, mu=True,
+                                     mu_precision=self.value_mu_precision, output=False)
+        z_prefix = prefix_z.permute(0, 2, 1, 3).reshape(heads, pt, qb * 128).contiguous()
+        mu_prefix = summary.mu[0].permute(0, 2, 1, 3, 4).reshape(heads, pt, qb * 128, vs_rank()).contiguous()
+        self.calls['value_mu_passes'] = self.calls.get('value_mu_passes', 0) + 1
+        # the summary buffers (z/mu/active/bad, ~1 GiB at a 128K prefix) are dead once the tile-major
+        # views exist: drop them here, not at the end of the request, or a long-context selection OOMs
+        del summary
+        # the canvas/boundary tiles from the FP32 tail logits the control already forms
+        koff = pt * 64
+        tail_n = nk - koff
+        tf32 = torch.backends.cuda.matmul.allow_tf32
+        torch.backends.cuda.matmul.allow_tf32 = False
+        try:
+            tail = torch.matmul(q[0].float().reshape(kv_heads, group, n, keys.shape[3]),
+                                keys[0, :, koff:].float().transpose(-1, -2).unsqueeze(1))
+        finally:
+            torch.backends.cuda.matmul.allow_tf32 = tf32
+        tail = tail.reshape(heads, n, tail_n) * float(scale)
+        pad = -(tail_n) % 64
+        tail_scores = torch.nn.functional.pad(tail, (0, pad), value=float('-inf')).contiguous()
+        # the padded keys have no projected value; they are masked out of every tile statistic anyway
+        tail_sketch = sketch[:, :, koff:, :]
+        if pad:
+            tail_sketch = torch.nn.functional.pad(tail_sketch, (0, 0, 0, pad))
+        tz, tmu = vo.tail_statistics(tail_scores, tail_sketch)
+        del tail, tail_scores, tail_sketch
+        z_all, mu_all = torch.cat([z_prefix, tz], 1), torch.cat([mu_prefix, tmu], 1)
+        del z_prefix, mu_prefix, tz, tmu, prefix_z
+        rows = torch.zeros((heads, qb * 128), dtype=torch.bool, device=dev)
+        rows[:, :n] = True
+        nu = nu_kv[torch.arange(heads, device=dev) // group][:, None].expand(heads, qb * 128).contiguous()
+        stats = vs.ValueStats(z=z_all, mu=mu_all, nu=nu, rows=rows, n=n, kv_heads=kv_heads, group=group,
+                              prefix_tiles=pt, total_tiles=total_tiles)
+        self.calls['value_stat_bytes'] = self.calls.get('value_stat_bytes', 0) + stats.summary_bytes()
+        return out, stats
+
+    def _value_select(self, stats, budget, protect):
+        """Run the configured value-aware selector. Returns ``(keep, counters)``."""
+        from experiments.numerical_qk_reuse import v31_value_select as vs
+        from experiments.numerical_qk_reuse import v31_value_scan as scan_mod
+        sel = self.value_selector
+        counters = vs.Counters()
+        counters.extra['selector'] = sel
+        if sel in ('v1', 'v2'):
+            if self.value_scan == 'triton' and stats.z.is_cuda:
+                keep, counters = scan_mod.value_scan(stats, budget, self.value_threshold,
+                                                      sel == 'v2', protect=protect, counters=counters)
+            else:
+                keep, counters = vs.scan_online(stats, budget, self.value_threshold, sel == 'v2',
+                                                counters=counters, protect=protect)
+                counters.extra['kernel'] = 'batched_reference'
+            return keep, counters
+        if sel == 'v3a':
+            keep, counters, _aux = vs.v3a_select(stats, budget, counters=counters, protect=protect)
+            counters.extra['kernel'] = 'batched_reference'
+            return keep, counters
+        if sel == 'v3b':
+            if stats.prefix_tiles > self.value_exact_max:
+                # The exact backward greedy's candidate-evaluation count grows as O(PT^2 * N * R).
+                # Above the frozen tile cap the arm is BLOCKED for this call and recorded as such: an
+                # approximation is never silently substituted for `v3b`.
+                counters.extra['blocked'] = f'prefix_tiles {stats.prefix_tiles} > value_exact_max ' \
+                                            f'{self.value_exact_max}; use v3b_drop or v3b_shortlist'
+                counters.exact = False
+                return None, counters
+            keep, counters, _aux = vs.v3b_greedy(stats, budget, counters=counters, protect=protect,
+                                                  exact=True)
+            counters.extra['kernel'] = 'batched_reference'
+            return keep, counters
+        # v3b_drop / v3b_shortlist: the NAMED approximations
+        keep, counters, _aux = vs.v3b_greedy(stats, budget, counters=counters, protect=protect,
+                                              exact=False,
+                                              drop_fraction=self.value_drop_fraction,
+                                              shortlist=self.value_shortlist)
+        counters.extra['kernel'] = 'batched_reference'
+        counters.extra['approximation'] = True
+        return keep, counters
+
+    def _value_mage_select(self, layer_idx, q, b, scale, prefix, n):
+        """The value-aware replacement for the SELECTION FORMULA at an initial/refresh call only.
+
+        The dense output is FA4's own native current-step BF16 output from the observation call, exactly
+        as in the inherited control. The selected map has the same ``[1, H, QB, KT]`` bool type and the
+        same quota, protected-tile policy and budget, so the later FA4 sparse consumer is unchanged.
+        Skipped blocks' old mass or value is never carried into reused attention: nothing but the map is
+        stored, and held calls run the unchanged consumer with the current step's Q/K/V."""
+        valid = torch.ones((1, b['k'].shape[1], b['nk']), dtype=torch.bool, device=q.device)
+        out, stats = self._value_stats(layer_idx, q, b['k'], b['v'], valid, scale, prefix, n)
+        budget = self._k_override if self._k_override is not None else self.mage_k
+        pt, total_tiles = stats.prefix_tiles, stats.total_tiles
+        protect = stats.z.new_zeros((stats.heads, stats.blocks, total_tiles), dtype=torch.bool)
+        if self.mage_sink or self.mage_recent_tiles:
+            from experiments.numerical_qk_reuse import v31_value_select as vs
+            protect = vs.protect_map(pt, total_tiles, self.mage_sink, self.mage_recent_tiles * 64,
+                                     stats.heads, stats.blocks, q.device)
+        keep, counters = self._value_select(stats, budget, protect if protect.any() else None)
+        self._last_value_counters = counters.as_dict()
+        if keep is None:                       # blocked exact V3b: fall back to the inherited control
+            self.calls['value_blocked'] = self.calls.get('value_blocked', 0) + 1
+            return self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
+        d = counters.as_dict()
+        for key in ('candidates', 'evaluations', 'forced_keep', 'forced_skip', 'threshold_keeps'):
+            self.calls['value_' + key] = self.calls.get('value_' + key, 0) + d[key]
+        self.calls['value_passes'] = self.calls.get('value_passes', 0) + d['passes']
+        if d.get('approximation'):
+            self.calls['value_approximation_calls'] = self.calls.get('value_approximation_calls', 0) + 1
+        kept_tiles = int(keep[:, :, :pt].sum())
+        self.calls['mage_kept_prefix_tiles'] += kept_tiles
+        self.calls['mage_prefix_tiles'] += int(pt) * stats.heads * stats.blocks
+        # the achieved V3 objective and the retained mass are RECEIPT values measured AFTER selection;
+        # they are never inputs to the selector
+        self._value_obj = self._value_objective(stats, keep, d.get('exact', True))
+        stats = None                     # the ~1 GiB tile-major statistics die with this call
+        return out, keep
+
+    def _value_objective(self, stats, keep, exact):
+        """The achieved V3 objective of this map, plus the retained attention mass, as a receipt value.
+
+        Measured AFTER selection and only as an observation; it is never a selector input."""
+        from experiments.numerical_qk_reuse import v31_value_select as vs
+        try:
+            alpha, c, ref, _live = vs.full_support(stats)
+            obj, _out = vs.objective(stats, keep, alpha, c, ref)
+            retained = float(vs.masked_attention_sketch(alpha, c, keep)[1].mean())
+            return dict(objective_mean=float(obj.mean()), objective_max=float(obj.amax()),
+                        objective_exact=bool(exact), retained_mass=retained)
+        except Exception as exc:               # a diagnostic must never break generation
+            return dict(objective_error=repr(exc)[:200])
+
     def _mage_select_fa4(self, q, k, v, scale, prefix, n):
         """MAGE eq. 5 from the FA4 observation: per-row prefix-tile log-mass from the dense FA4 pass, the
         remaining (canvas / boundary) tiles from an FP32 tail product, row-normalized, averaged over the canvas queries
@@ -1222,6 +1488,45 @@ class VllmMethodAdapter:
 
     def _clock_receipt(self):
         return dict(clock_trace=self._clock) if self.mage_clock_trace else {}
+
+    def value_receipt(self):
+        """Proof of WHICH selector ran, with what, on which statistics. Written into the record.
+
+        Includes the selector name, the frozen projection identity (family, rank, seed and the per-native-KV-head
+        matrix sha256), the budget actually applied, the protected-tile policy, the layer scope, the
+        statistics kernel path, and the counters of the last selection. LOCAL routing, if any, is
+        reported separately and must be zero for this study."""
+        if self.value_selector is None:
+            return dict(value_selector=None, value_arms_active=False)
+        from experiments.numerical_qk_reuse import v31_value_select as vs
+        return dict(
+            value_selector=self.value_selector,
+            value_arms_active=True,
+            value_approximate_selector=bool(self.value_selector in vs.APPROXIMATE_SELECTORS),
+            value_threshold=self.value_threshold,
+            value_drop_fraction=self.value_drop_fraction,
+            value_shortlist=self.value_shortlist,
+            value_exact_max=self.value_exact_max,
+            value_budget_tokens=self.mage_k,
+            value_protect_sink_tokens=self.mage_sink,
+            value_protect_recent_tokens=self.mage_recent_tiles * 64,
+            value_aggregation='max over the valid rows of the 128-row block',
+            value_projection=dict(family='gaussian', rank=vs.RANK, seed=vs.PROJECTION_SEED,
+                                  formula='R_ab ~ N(0, 1/32), per layer and native KV head',
+                                  records=self._value_bank_records),
+            value_statistics_kernel=dict(
+                z='v31_fa4_observe.observe_dense (the same FA4 in-kernel observation as the control)',
+                mu=f'v27_consumer64.fused_observe OUT=0 MU=1 mu_precision={self.value_mu_precision} '
+                   f'splits={self.value_stats_split} (observation only: no V load, no PV, no output)',
+                tail='FP32 tail logits the control already forms (canvas/boundary tiles)',
+                selection='triton_value_scan' if self.value_scan == 'triton' else 'batched_reference'),
+            value_consumer='unchanged FA4 block-sparse consumer (v27_fa4.sparse_lists)',
+            value_output_path='unchanged: the observation call returns FA4 native current-step BF16 output',
+            value_layer_scope=dict(global_layers=sorted(self.global_layers), local_layers_sparse=[],
+                                   local_window=[1023, 1023]),
+            value_last_counters=self._last_value_counters,
+            value_last_objective=self._value_obj,
+        )
 
     def _row_weight_from_logits(self, scaled, n, entropy_bound):
         """Row weights [n] for the next re-selection from the sampler's temperature-scaled logits [1, CL, V]

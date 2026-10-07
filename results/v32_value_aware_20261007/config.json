@@ -1,0 +1,160 @@
+{
+  "active_control": {
+    "KV_COPY": "triton",
+    "LOCAL_KV_BUDGET": "disabled for this study",
+    "MAGE_CARRY": 1,
+    "MAGE_GRAN": "qblock_max",
+    "MAGE_K_tokens": 1728,
+    "MAGE_RECENT": 0,
+    "MAGE_RESELECT_TRIGGER": [
+      0.15
+    ],
+    "MAGE_SELECT": "fa4",
+    "MAGE_SINK": 0,
+    "MAGE_STEP": 1,
+    "MAGE_STICKY": 1.386,
+    "MAGE_TRIGGER_SIGNAL": "settle",
+    "MERGE": "triton",
+    "adapter_arm": "mage",
+    "cudagraph_mode_dense": "default (FULL)",
+    "cudagraph_mode_sparse": "PIECEWISE",
+    "name": "current_v31_control",
+    "selector": "mass-only qblock_max: max over the 128-row block of the row's prefix log-share z - logsumexp(z), top MAGE_K/64 tiles per (query head, 128-row block); canvas/boundary tiles always kept and not charged",
+    "source_of_truth": "results/v32_value_aware_20261007/SOURCE_NOTE.md and a real record of results/v31_20261006_aime_global_local",
+    "tiles_per_unit": 27
+  },
+  "arms": [
+    "dense_full_fix51994",
+    "dense_piecewise_reference",
+    "allkept_fa4",
+    "current_v31_control",
+    "value_v1_online_discard_mass",
+    "value_v2_online_preserve_mass",
+    "value_v3a_singleton_delete",
+    "value_v3b_greedy_exact",
+    "value_v3b_drop_r025",
+    "value_v3b_shortlist64"
+  ],
+  "branch": "value-aware_cross-step-reuse",
+  "model": {
+    "name": "google/diffusiongemma-26B-A4B-it",
+    "path": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+    "revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b"
+  },
+  "runtime": {
+    "attention_kernel": "SM90 FlashAttention-4 (v27_fa4), block-sparse consumer unchanged",
+    "gpu": "NVIDIA H100 80GB HBM3, CUDA device 0, one worker at a time",
+    "python": "/home/exouser/dyh/v31_env_20261005/bin/python",
+    "torch": "2.13.0+cu130",
+    "vllm": "0.30.0"
+  },
+  "schema": "v32_value_aware_config_v1",
+  "seeds": {
+    "aime26": "42/43/44 (the frozen control panel's schedule)",
+    "dev_subset": "20261007 (only for reserving the development subset; never for selecting a variant by outcome)",
+    "longbench_v2_0shot_think": "1 (the pool's cells file)"
+  },
+  "source_commit": "cdc122212308d742ad3628293a2b7021a1ff4b03",
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/v31_value_observe.py": "1b5da5412ccbf07c3c88a158a25f339c2623582c2ea9af9ca770f35f7dbe2fce",
+    "experiments/numerical_qk_reuse/v31_value_scan.py": "2f8a48d14f3c6a523628d571ecbcdf87d89e18138b2007836e86f782bc1b418a",
+    "experiments/numerical_qk_reuse/v31_value_select.py": "2e5d16eadad5cde846cf05c240d8e43d1f2b953e14a16be97a9d5e894dc5fd96",
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "79d3b95eece77ee5f996431f3a612a6d10dcd2fe8f6665e4d99a79e5547b300e",
+    "scripts/v31_build_official_pools.py": "93c9d9d4bfe4c78d6068a5a45fe46be923968d4b9c6c2d980f47cc11144a15d1",
+    "scripts/v31_vllm_paired_bench.py": "f04b8ef31a815ad7507e1604d651816512121a26bb08a67871e2b4c1f11f3d87",
+    "scripts/v32_aime26_panel.sh": "f4aa14ea37371af568573f0bec02eea4dc6dfdcc82cb5ba94aac307aa03fb226",
+    "scripts/v32_value_arm.sh": "d37a708c2362df4b64c7cc01389b8607cef6c7c1fafcbb516e5d639cde1a8567",
+    "tests/test_v31_value_adapter.py": "375ad8d4dc42ce153ad4f7a3be812e711477e5b037f0db47f46f263e590966b5",
+    "tests/test_v31_value_select.py": "fd9addb6b9f2cef6ba1104344d56cb248f6aff5721567f71f94ffbf044cd92df",
+    "tests/test_v31_value_select_gpu.py": "b3e11e6a47f084c39b6b13b1837d6da9aa8963c2168308760bf6ad6966a2f183"
+  },
+  "status": "PARTIAL: selectors implemented, qualified and smoke-tested; the accuracy/timing panels are BLOCKED by a host GPU fault (see README.md)",
+  "study": "value-direction-aware block selectors inside the v31 cross-step reuse pipeline",
+  "study_configuration": {
+    "approximations": {
+      "v3b_drop": "drop_fraction = 0.25",
+      "v3b_shortlist": "shortlist = 64"
+    },
+    "consumer": "unchanged v27_fa4.sparse_lists over the same [1, H, QB, KT] bool map",
+    "layer_scope": {
+      "global_layers": [
+        5,
+        11,
+        17,
+        23,
+        29
+      ],
+      "local_layers_sparse": [],
+      "local_window": [
+        1023,
+        1023
+      ]
+    },
+    "mandatory_tiles": "canvas/boundary tiles j >= prefix/64, plus sink/recent protection (both 0 in this configuration)",
+    "observation_output": "unchanged: FA4's own native current-step BF16 output at the initial/refresh call",
+    "projection": {
+      "bank": "the repository's frozen Projections().get, once per (layer, native KV head), never regenerated per step/canvas/variant",
+      "derivation": "sha256('jl_output_v1/gaussian/32/1729/<layer>/<native_kv_head>/<width>')",
+      "family": "gaussian",
+      "formula": "R_ab ~ N(0, 1/32)",
+      "matrix_sha256": "recorded per native KV head in every record's value_projection.records",
+      "rank": 32,
+      "seed": 1729
+    },
+    "quota": "identical for every arm: reserve k = MAGE_K/64 optional slots, apply the frozen threshold while optional slots remain, force skip when none remain, force keep when all remaining are needed, force keep the first valid support; boundary ties are kept (>=) and the greedy argmin takes the lowest tile index",
+    "reference_scale_nu": "inherited valid-KV reference: sqrt(sum_u ||v_u||^2 / count_valid) per native KV head, clamped at 1e-12, broadcast from the KV head",
+    "row_aggregation": "max over the valid rows of the 128-row map block (the control's qblock_max aggregation, unchanged and not tuned per method)",
+    "selector_kernel": {
+      "v1": "triton_value_scan (fused; must equal the batched reference exactly)",
+      "v2": "triton_value_scan (fused; must equal the batched reference exactly)",
+      "v3a": "batched reference, one full-support summary pass",
+      "v3b": "batched reference, exact backward greedy, BLOCKED above value_exact_max optional tiles",
+      "v3b_drop": "batched reference, bounded batch drop-and-refine (drop_fraction)",
+      "v3b_shortlist": "batched reference, V3a-ranked shortlist then the exact greedy on it"
+    },
+    "statistics": {
+      "mu": "one observation-only Triton pass: v27_consumer64.fused_observe OUT=0 MU=1 mu_precision=tf32x3 splits=1 (no V load, no PV, no output partials)",
+      "reduction": "FlashAttention-style tile max + log-sum-exp; no unbounded exponential and no full token attention matrix is ever materialised",
+      "tail": "the FP32 canvas/boundary logits the control already forms, reduced to tile statistics",
+      "z": "the SAME FA4 in-kernel observation as the control (v31_fa4_observe.observe_dense)"
+    },
+    "v1_v2_threshold": 0.01,
+    "value_exact_max_optional_tiles": 256
+  },
+  "suites": {
+    "aime26": {
+      "cells": 90,
+      "generation_budget": 8192,
+      "identity": "the pool of the frozen 2026-10-06 control panel, so this study is directly comparable to it; it is NOT the official aime26_b32k pool",
+      "manifest_sha256": "85ebd2dd8d26ede269d4c5555279e9e2b79637c3f95036452c624e03e8122f39",
+      "pool": "/home/exouser/dyh/ljy_value_20261007/pools/aime26",
+      "problems": 30,
+      "seeds": [
+        42,
+        43,
+        44
+      ],
+      "thinking": true
+    },
+    "humaneval_164": {
+      "reason": "no official 164-task HumanEval pool and no human-eval dataset are present on this host; scripts/v31_build_official_pools.py has no humaneval builder",
+      "status": "BLOCKED"
+    },
+    "longbench_v2_0shot_think": {
+      "generation_budget": 16384,
+      "identity": "the OFFICIAL LongBench-v2 0shot_think pool, rebuilt here byte-identically: every output sha256 equals the pinned value in results/v31_official_20261004/pools_summary.json",
+      "items": 503,
+      "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+      "max_model_len": 141312,
+      "pool": "/home/exouser/dyh/ljy_value_20261007/pools/longbench_v2_ofc",
+      "reserved_dev_subset": "cells_lb2think_dev15.json, 15 items stratified by length class, drawn with seed 20261007 BEFORE any target run",
+      "target_subset": "cells_lb2think_target488.json, the remaining 488 items",
+      "thinking": true
+    },
+    "ruler_v33": {
+      "decision": "not attempted: an unverifiable pool is not the official pool, and rebuilding prompts to run a panel is explicitly out of scope",
+      "reason": "the frozen v33 source pool (ruler{32,64,128}k_v33_generation_manifest.json, *_gold.json, raw/<L>/manifest.json, raw/<L>/samples.jsonl, raw/<L>/official_raw/...) lived on /media/volume/dllm-1/dyh/ruler_long_v33, which does not exist on this host. The v33 packaging writer is a private orchestrator that is not in the repository, so the pinned manifest row ORDER is unrecorded and a rebuilt pool could not be hash-verified against 4142be0da51946baf..., e4d15823f033c156..., 834a1374d79ebb2e.... The RULER checkout itself IS present and verified at c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a.",
+      "status": "BLOCKED"
+    }
+  }
+}

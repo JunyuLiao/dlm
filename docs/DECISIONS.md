@@ -1,5 +1,58 @@
 # Decisions and negative results (chronological)
 
+## Value-aware selectors for the v31 cross-step reuse pipeline (2026-10-07, PARTIAL)
+
+- **The active v31 control is a MASS-ONLY selector, and the name `mage` does not say so.** The
+  effective configuration reads `MAGE_SELECT=fa4`, `MAGE_GRAN=qblock_max`, `MAGE_K=1728`, and the
+  score is `max over the 128-row block of (z_ij - logsumexp_l z_il)`, i.e. the WORST row's prefix
+  log-share, per (query head, 128-row block). It never touches V, it is not MAGE eq. 5 (which averages
+  over rows and over a KV head's query heads and keeps one set per KV head), and it is not the
+  inherited online projected-V risk (that is `arm='method'`). A weight-based or projected mean must
+  not be described as this selector. Full source analysis:
+  `results/v32_value_aware_20261007/SOURCE_NOTE.md`.
+- **Attribution.** The first cross-step-reuse implementation and the online projected-V routing state
+  are Yuhan's inherited work; Gaussian32/value-direction-aware routing and the query-sensitivity
+  `C_gate` protection are Junyu's earlier method families. `v1`, `v2`, `v3a`, `v3b`, `v3b_drop` and
+  `v3b_shortlist`, the fused Triton scan, the observation pass and the tests are this study's own work,
+  integrated inside the unchanged inherited pipeline.
+- **V2's skip update is the numerically correct one, and the two tempting alternatives are wrong.**
+  V2 must leave its normalized routing output unchanged while its denominator advances, so the
+  unnormalized numerator advances by `o_hat * Z_ij`. Advancing only the denominator is wrong;
+  advancing the numerator by `Z_ij mu_ij` silently makes V2's routing state the full-support mean,
+  which is V3's semantics, not V2's. This is now pinned by two tests, including one on the equal-mass
+  case where V2's state must end at `(2a + b)/3` while reused attention over `{A, C}` gives
+  `(a + b)/2`, with no executor compensation.
+- **An approximation is never allowed to stand in for an exact selector.** `v3b_drop` and
+  `v3b_shortlist` refuse to construct without the feature that makes them approximations; `v3b`
+  refuses an approximation feature; and at a 120K prefix the exact `v3b` reported `value_blocked` on
+  120 of 120 selection calls and fell back to the inherited control rather than quietly running a
+  cheaper rule.
+- **NEGATIVE: `v3b_drop` at `drop_fraction = 0.25` is a bad approximation.** On the one 120K cell it
+  reached a sketch-space masked-attention objective of 1.20 with 70.4% retained tile mass, against
+  0.0136 / 99.45% for `v3a`, at 2.4x its decode time. A coarse batch discards too much before the
+  refine pass recovers it. This is one cell and one setting; it is a negative for that setting, not
+  for drop-and-refine in general.
+- **Positive, and a selection-cost result only: the fused Triton V1/V2 scan.** It reproduces the
+  batched reference's map and counters exactly and is 10.0x faster (11.77 s vs 118.14 s of decode on
+  the same request, identical decisions, objective and retained mass). The cost of the value-aware
+  statistics at a 120K prefix is real and is recorded per request (`value_stat_bytes`, `value_mu_passes`).
+- **BLOCKED: the accuracy and clean-timing panels.** Every launch began failing with
+  `CUDA error: an illegal memory access was encountered` inside vLLM's own fused-MoE / inductor
+  kernels, reproducing on the plain `dense` arm with no adapter attached; four clean-cache
+  reproductions did not clear it. RULER v33 and HumanEval are separately unobtainable on this host
+  (the v33 source pool is gone and its row order is unrecorded, so a rebuilt pool could not be
+  hash-verified against the pinned manifests). LongBench-v2 `0shot_think` WAS rebuilt here
+  byte-identically to the official pool (every output sha256 matches `pools_summary.json`). No
+  accuracy, speed or end-to-end claim is made; see `results/v32_value_aware_20261007/README.md`.
+- **Test hygiene repair.** `tests/test_v31_progress_aware.py` and `tests/test_v31_progress_clock.py`
+  replaced `v27_fa4.dense` / `sparse_lists` / `block_sparse_tensors` at module level and never restored
+  them, so every later real-kernel test inherited the stubs. Both now save and restore the originals;
+  the change is hygiene only and asserts nothing new about those two behaviours.
+- **Pool builder portability.** `scripts/v31_build_official_pools.py` now takes `V31_POOL_ROOT`,
+  `V31_LB_SRC` and `V31_RULER_SRC` from the environment so the SAME pinned builder runs on a host
+  that keeps the official sources locally. Every source file is still verified against its pinned
+  sha256, so an override changes the LOCATION of the sources and never their content.
+
 ## V31 LOCAL compact consumer (2026-10-06)
 
 - The prior direct FA4 LOCAL consumer was slower than dense at the 512-token
