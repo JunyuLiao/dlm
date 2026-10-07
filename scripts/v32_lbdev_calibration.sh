@@ -22,14 +22,15 @@ mkdir -p "$OUT"
 
 export WORK=$W MAN_DIR=$W/pools/longbench_v2_ofc \
        CELLS=${CELLS:-$W/cells_lb2think_dev15.json} DATASETS=longbench_v2_0shot_think \
-       MEM=${MEM:-0.75} MAX_MODEL_LEN=141312 BLOCK=32 CHUNK=16384
+       MEM=${MEM:-0.80} MAX_MODEL_LEN=136401 BLOCK=32 CHUNK=16384
 
 run () {
   local label=$1 armspec=$2; shift 2
   echo "=== $label $(date -u) ===" >> "$OUT/driver.log"
   ( env "$@" ARM="$armspec" TAG="${label}_a${ATT}" bash "$ROOT/scripts/v32_value_arm.sh" ) \
       >> "$OUT/driver.log" 2>&1
-  echo "=== $label rc=$? $(date -u) ===" >> "$OUT/driver.log"
+  rc=$?
+  echo "=== $label rc=$rc $(date -u) ===" >> "$OUT/driver.log"
 }
 
 # matched references on the dev cells

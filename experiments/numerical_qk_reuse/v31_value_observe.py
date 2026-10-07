@@ -50,13 +50,18 @@ def tail_statistics(tail_scores, sketch):
 
 
 def build_value_stats(prefix_z, prefix_mu, tail_z, tail_mu, nu_kv, group, n, heads, prefix_tiles,
-                      total_tiles):
+                      total_tiles, need_mu=True):
     """Assemble the tile-major ``ValueStats`` of one observation call.
 
     ``prefix_z`` [H, QB, PT, 128] is the FA4 observation's z (its own layout), ``prefix_mu``
     [H, QB, PT, 128, 32] the Triton statistics pass's mu, ``tail_z``/``tail_mu`` [H, N, ...] the
     canvas tiles, ``nu_kv`` [HK] the valid-KV reference scale. The result is tile-major
-    [H, KT, QB*128, ...] with the padded rows masked."""
+    [H, KT, QB*128, ...] with the padded rows masked.
+
+    ``need_mu=False`` is for the selectors that read only ``z``/``nu`` (V1, V2). The per-row
+    rank-32 sketch is [H, PT, QB*128, 32] FP32 and at a 120k-token context it is tens of GiB, so
+    materializing it for a selector that never reads it is what pushes the engine into OOM.
+    """
     h, qb, pt, r128 = prefix_z.shape
     if r128 != 128:
         raise ValueError('FA4 observation z must carry 128 rows per query block')
@@ -65,7 +70,18 @@ def build_value_stats(prefix_z, prefix_mu, tail_z, tail_mu, nu_kv, group, n, hea
     if n:
         rows[:, :n] = True
     z = torch.cat([prefix_z.permute(0, 2, 1, 3).reshape(h, pt, n_pad), tail_z], dim=1)
-    mu = torch.cat([prefix_mu.permute(0, 2, 1, 3, 4).reshape(h, pt, n_pad, vs.RANK), tail_mu], dim=1)
+    if need_mu:
+        # Copy the permuted source straight into a preallocated destination. A permute followed by
+        # reshape materializes a second full-size tensor, which is the difference between fitting
+        # and OOM here; copy_ does the permutation during the copy.
+        kt = z.shape[1]
+        mu = torch.zeros((h, kt, n_pad, vs.RANK), dtype=torch.float32, device=z.device)
+        mu[:, :pt].view(h, pt, qb, 128, vs.RANK).copy_(prefix_mu.permute(0, 2, 1, 3))
+        if tail_mu is not None and tail_mu.shape[1]:
+            mu[:, pt:].view(h, kt - pt, tail_mu.shape[1], vs.RANK).copy_(
+                tail_mu.permute(0, 2, 1, 3))
+    else:
+        mu = None
     nu = nu_kv[torch.arange(h, device=prefix_z.device) // group][:, None].expand(h, n_pad).contiguous()
     return vs.ValueStats(z=z, mu=mu, nu=nu, rows=rows, n=n, kv_heads=int(nu_kv.shape[0]), group=int(group),
                          prefix_tiles=int(prefix_tiles), total_tiles=int(total_tiles))

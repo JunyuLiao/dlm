@@ -178,11 +178,16 @@ class ValueStats:
         if self.mu is not None and self.mu.shape != (h, pt, n_pad, RANK):
             raise ValueError('mu must be [H, PT, N, 32]')
         self.heads, self.blocks = h, n_pad // 128
-        keep = self.rows[:, None, :, None]
+        keep = self.rows[:, None, :]
         self.z = torch.where(self.rows[:, None, :], self.z, torch.full_like(self.z, -math.inf))
         self.nu = self.nu.clamp_min(EPS)
         if self.mu is not None:
-            self.mu = torch.where(keep, self.mu, torch.zeros_like(self.mu))
+            # Mask in place. torch.where here would allocate a zeros_like AND a result of the
+            # full [H, PT, N, 32] size, which at a 120k-token context is tens of GiB and OOMs the
+            # engine. Multiplying by the 0/1 mask is the same value and allocates nothing.
+            # Skipped entirely when every row is real, the usual case.
+            if not bool(self.rows.all()):
+                self.mu.mul_(self.rows[:, None, :, None])
 
     def finite_mass(self):
         """``Z_ij`` scaled by each row's largest tile log-mass. A padded row (all ``-inf``) and a

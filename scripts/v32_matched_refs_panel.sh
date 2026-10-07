@@ -21,10 +21,10 @@ OUT=$W/run_${SUITE}_refs_${STAMP}
 mkdir -p "$OUT"
 
 if [ "$SUITE" = aime26 ]; then
-  export MAN_DIR=$W/pools/aime26 CELLS=$W/cells_aime.json DATASETS=aime26 MEM=${MEM:-0.88}
+  export MAN_DIR=$W/pools/aime26 CELLS=$W/cells_aime.json DATASETS=aime26 MEM=${MEM:-0.80}
 else
   export MAN_DIR=$W/pools/longbench_v2_ofc CELLS=${CELLS:-$W/cells_lb2think_dev15.json} \
-         DATASETS=longbench_v2_0shot_think MEM=${MEM:-0.90} MAX_MODEL_LEN=141312
+         DATASETS=longbench_v2_0shot_think MEM=${MEM:-0.80} MAX_MODEL_LEN=136401
 fi
 export WORK=$W
 

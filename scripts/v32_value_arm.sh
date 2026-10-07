@@ -46,7 +46,7 @@ esac
 # window, so ask for the least that still works: weights are 50.46 GiB and the observed KV rate
 # is ~0.03234 MiB/token (MEM=0.90 gave 673,105 tokens in 21.27 GiB), so 141,312 tokens needs
 # ~4.5 GiB of KV and MEM=0.75 leaves ~8.9 GiB. The KV assertion below is what actually decides.
-: "${MEM:=0.75}"
+: "${MEM:=0.80}"
 : "${SEED_BASE:=31}"
 : "${REPEATS:=1}"
 : "${AUDIT:=1}"
@@ -98,6 +98,7 @@ add VALUE_EXACT_MAX "$VALUE_EXACT_MAX"
 add VALUE_SCAN "$VALUE_SCAN"
 add AUDIT "$AUDIT"
 
+FAILED=0
 IFS=',' read -ra ARMS <<< "$ARM"
 for a in "${ARMS[@]}"; do
   v=${a%%:*}; rest=${a#*:}; cg=${rest%%:*}; label=${rest#*:}
@@ -128,13 +129,14 @@ for a in "${ARMS[@]}"; do
   fi
   if [ "$rc" -ne 0 ]; then
     echo "FAILED $label attempt=$attempt rc=$rc $(date -u)" >> "$D/status.log"
+    FAILED=1
   else
     # The engine must hold one full prompt plus the canvas. Verify the KV pool actually covers
     # max_model_len instead of trusting gpu_memory_utilization.
     kv=$(grep -oE "GPU KV cache size: [0-9,]+ tokens" "$D/log_${TAG}_${label}.out" | tail -1 | grep -oE "[0-9,]+")
     if [ -n "${kv:-}" ] && [ -n "$MAX_MODEL_LEN" ] && [ "${kv//,/}" -lt "$MAX_MODEL_LEN" ]; then
       echo "KV_TOO_SMALL $label cache=${kv} < MAX_MODEL_LEN=$MAX_MODEL_LEN; raise MEM" >> "$D/status.log"
-      rc=1
+      rc=1; FAILED=1
     else
       echo "finished $label attempt=$attempt kv_tokens=${kv:-?} $(date -u)" >> "$D/status.log"
     fi
@@ -142,4 +144,7 @@ for a in "${ARMS[@]}"; do
   break
   done
 done
-echo "done $TAG $(date -u)" >> "$D/status.log"
+echo "done $TAG failed=$FAILED $(date -u)" >> "$D/status.log"
+# A panel driver reads this status. Without it every arm looks successful because the last
+# statement here would be an echo.
+[ "$FAILED" -eq 0 ]

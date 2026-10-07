@@ -1183,11 +1183,17 @@ class VllmMethodAdapter:
         v27_consumer64.fused_observe(q, keys, keys, sketch, scale, pt, summary,
                                      splits=self.value_stats_split, mu=True,
                                      mu_precision=self.value_mu_precision, output=False)
-        z_prefix = prefix_z.permute(0, 2, 1, 3).reshape(heads, pt, qb * 128).contiguous()
-        mu_prefix = summary.mu[0].permute(0, 2, 1, 3, 4).reshape(heads, pt, qb * 128, vs_rank()).contiguous()
-        self.calls['value_mu_passes'] = self.calls.get('value_mu_passes', 0) + 1
-        # the summary buffers (z/mu/active/bad, ~1 GiB at a 128K prefix) are dead once the tile-major
-        # views exist: drop them here, not at the end of the request, or a long-context selection OOMs
+        # V1 and V2 read only z/nu. The per-row rank-32 sketch is [H, PT, QB*128, 32] FP32, which at
+        # a 120k-token context is tens of GiB, so it is not materialized for them at all.
+        need_mu = self._value_needs_mu()
+        z_prefix = prefix_z.permute(0, 2, 1, 3).reshape(heads, pt, qb * 128)
+        if need_mu:
+            self.calls['value_mu_passes'] = self.calls.get('value_mu_passes', 0) + 1
+            # A view, not a copy: it keeps summary.mu alive until the destination is filled, so the
+            # peak is summary.mu + mu_all rather than three full-size tensors.
+            mu_src = summary.mu[0].permute(0, 2, 1, 3, 4)
+        # the summary buffers (z/mu/active/bad) are dead once the tile-major views exist: drop them
+        # here, not at the end of the request, or a long-context selection OOMs
         del summary
         # the canvas/boundary tiles from the FP32 tail logits the control already forms
         koff = pt * 64
@@ -1208,8 +1214,22 @@ class VllmMethodAdapter:
             tail_sketch = torch.nn.functional.pad(tail_sketch, (0, 0, 0, pad))
         tz, tmu = vo.tail_statistics(tail_scores, tail_sketch)
         del tail, tail_scores, tail_sketch
-        z_all, mu_all = torch.cat([z_prefix, tz], 1), torch.cat([mu_prefix, tmu], 1)
-        del z_prefix, mu_prefix, tz, tmu, prefix_z
+        z_all = torch.cat([z_prefix, tz], 1)
+        del z_prefix, tz, prefix_z
+        if need_mu:
+            # One preallocated destination, copied into from each source layout. Building
+            # mu_prefix = permute(...).reshape(...).contiguous() and then torch.cat would hold three
+            # full-size tensors at once, which is what OOMs the engine on long contexts.
+            rank = vs_rank()
+            kt = z_all.shape[1]
+            tail_tiles = tmu.shape[1]
+            mu_all = torch.zeros((heads, kt, qb * 128, rank), dtype=torch.float32, device=dev)
+            mu_all[:, :pt].view(heads, pt, qb, 128, rank).copy_(mu_src)
+            if tail_tiles:
+                mu_all[:, pt:].view(heads, kt - pt, tail_tiles, rank).copy_(tmu.permute(0, 2, 1, 3))
+            del tmu, mu_src
+        else:
+            mu_all = None
         rows = torch.zeros((heads, qb * 128), dtype=torch.bool, device=dev)
         rows[:, :n] = True
         nu = nu_kv[torch.arange(heads, device=dev) // group][:, None].expand(heads, qb * 128).contiguous()
@@ -1297,11 +1317,24 @@ class VllmMethodAdapter:
         stats = None                     # the ~1 GiB tile-major statistics die with this call
         return out, keep
 
+    def _value_needs_mu(self):
+        """Whether the configured selector reads the per-row rank-32 sketch at all.
+
+        V1 and V2 rank tiles by log-mass alone, so materializing the sketch for them is pure cost:
+        at a 120k-token context it is tens of GiB and OOMs the engine. V3a/V3b evaluate deletions
+        against it, so they need it. The objective/retained-mass receipt is reported as unavailable
+        for a selector that does not carry the sketch, never silently dropped.
+        """
+        return self.value_selector not in ('v1', 'v2')
+
     def _value_objective(self, stats, keep, exact):
         """The achieved V3 objective of this map, plus the retained attention mass, as a receipt value.
 
         Measured AFTER selection and only as an observation; it is never a selector input."""
         from experiments.numerical_qk_reuse import v31_value_select as vs
+        if stats.mu is None:
+            return dict(objective_unavailable='selector carries no rank-32 sketch (need_mu=False);'
+                                           'no V3 objective can be evaluated for this arm')
         try:
             alpha, c, ref, _live = vs.full_support(stats)
             obj, _out = vs.objective(stats, keep, alpha, c, ref)
