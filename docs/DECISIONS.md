@@ -1385,3 +1385,26 @@ subset, disjoint from the 488-cell target. The chosen threshold is frozen in the
 target panel. Calibration numbers, transductive calibration, and held-out target
 results are reported separately; the earlier probe threshold `0.01` was
 probe-selected on a single target-suite cell and is not a frozen value.
+
+## 2026-10-07 — Withdraw the v32 AIME26 panel: every generation run so far was off-pin
+
+Checking the run records rather than the launcher showed that the 90-cell AIME26 dense and
+`current_v31_control` panel carries `block_size=32, chunk=16384, max_model_len=13312`, not the
+frozen AIME26 `(64, 4096, 9216)`. The panel had been launched before the pins were fixed, so the
+AIME26 accuracies it produced (dense avg@k 56.67 / 51 of 90, control avg@k 54.44 / 49 of 90) are
+withdrawn and the panel must be re-run under the frozen pins. The same applies to every smoke
+record. `scripts/v32_panel_aggregate.py --require-pins BLOCK,CHUNK` now refuses off-pin records so
+mixed-substrate data cannot be aggregated silently. Lesson recorded: verify the pins in the emitted
+records, not in the script that was supposed to set them.
+
+## 2026-10-07 — The single H100 is shared; wait and retry, never evict
+
+A separate `run_aime_eval.py` job (math500, another tenant) holds ~61.5 GiB of the only H100 for long
+stretches, and can claim it inside a 30 s window, so a vLLM engine needing ~59 GiB is refused with
+`Free memory on device ... less than desired GPU memory utilization`. Policy: never kill or signal
+another tenant's process. `scripts/v32_wait_gpu.sh` polls for free memory before starting, and
+`scripts/v32_value_arm.sh` retries an arm on exactly that refusal, each retry into a new attempt
+directory. Requested memory was reduced to `MEM=0.75`, which still leaves ~8.9 GiB of KV for the
+141,312 tokens LongBench-v2 needs at the measured ~0.03234 MiB/token, and every successful arm now
+asserts that the engine's reported `GPU KV cache size` covers `MAX_MODEL_LEN` instead of trusting
+`gpu_memory_utilization`.

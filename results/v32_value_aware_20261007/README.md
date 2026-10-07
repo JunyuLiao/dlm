@@ -8,16 +8,25 @@ speed or end-to-end claim is made.
 
 Three findings materially change what the earlier measurements in this directory mean.
 
-1. **The earlier smoke records were produced under the WRONG substrate pins and are not study
-   evidence.** `smoke_records.json` was collected with `CHUNK=16384` and `BLOCK=32`, because
-   `scripts/v31_vllm_paired_bench.py` defaults to those values. The frozen v31 panel runs
-   `CHUNK=4096` and `BLOCK=64` (`results/v31_20261006_aime_global_local/attempt001/full/public/*.jsonl`
-   records `chunk=4096`, `block_size=64`). Block size changes the selector's tile geometry and chunk
-   size changes forwards per canvas, so every N / C / T / S/N and every selection map in
-   `smoke_records.json` is from a different substrate than the frozen protocol. The smoke records are
-   retained as a **non-protocol probe** (they did prove the code paths run end-to-end) and are
-   superseded by the pinned panels. All later launches set `BLOCK=64 CHUNK=4096`
-   (`MAX_MODEL_LEN=9216` on AIME26).
+1. **Every generation run so far was produced under the WRONG substrate pins; none of it is study
+   evidence.** This covers `smoke_records.json` *and* the 90-cell AIME26 dense and
+   `current_v31_control` panel run on 2026-10-07 13:18-13:43; their records carry
+   `block_size=32, chunk=16384, max_model_len=13312`, not the frozen AIME26
+   `(64, 4096, 9216)`. Consequently the AIME26 accuracies obtained from that panel (dense
+   avg@k 56.67 / 51 of 90, control avg@k 54.44 / 49 of 90) are **not valid study results** and are
+   withdrawn; they are recorded here only so the numbers are not silently rediscovered later.
+   `scripts/v32_panel_aggregate.py --require-pins` now refuses off-pin records so this cannot recur.
+   The underlying smoke/probe runs were collected with
+   `CHUNK=16384` and `BLOCK=32`, because `scripts/v31_vllm_paired_bench.py` defaults to those values.
+   The frozen v31 AIME26 panel runs `CHUNK=4096` and `BLOCK=64`
+   (`results/v31_20261006_aime_global_local/attempt001/full/public/*.jsonl` records
+   `chunk=4096`, `block_size=64`). Block size changes the selector's tile geometry and chunk size
+   changes forwards per canvas. The smoke records are retained as a **non-protocol probe** (they did
+   prove the code paths run end-to-end); the 90-cell AIME26 panel must be re-run. Per-suite pins are
+   now frozen once in `scripts/v32_value_arm.sh`: AIME26 `BLOCK=64 CHUNK=4096 MAX_MODEL_LEN=9216`,
+   LongBench-v2 `BLOCK=32 CHUNK=16384 MAX_MODEL_LEN=141312` (no frozen v31 LongBench pin exists in
+   this repository; the LongBench values match the earlier probe's implied `ceil(120017/16384)=8`
+   prefill steps).
 2. **The blocking GPU fault was self-inflicted and is fixed.** The `illegal memory access` fault
    below was caused by launching vLLM with a private `HOME`/`XDG_CACHE_HOME`/`TRITON_HOME`, which
    forced FlashInfer to JIT-compile fresh kernels; those kernels faulted inside the
@@ -25,11 +34,18 @@ Three findings materially change what the earlier measurements in this directory
    default cache paths removes the fault, confirmed by a clean dense AIME26 cell
    (`output_tokens=1870`) and a clean 90-cell dense panel. It was never a host or driver fault.
 3. **The v31 ledger's per-cell hashes are not bitwise reproducible on this host.** With the frozen
-   pins restored (`chunk=4096 block=64 max_model_len=9216`), the dense arm still matched **0 of 90**
-   historical `output_hash` values, at both `gpu_memory_utilization` 0.80 and 0.88. Metric-level
-   agreement does hold: fresh dense AIME26 avg@k is 56.67 with 51/90 correct, identical to
-   `results/v31_20261006_aime_global_local/score.summary.json`. Conclusions must therefore rest on
-   this panel's own matched arms, not on bitwise equality with the ledger.
+   AIME26 pins restored (`chunk=4096 block=64 max_model_len=9216`, confirmed in the run records),
+   the dense arm still matched **0 of 1** historical `output_hash` values on the probed cell, at both
+   `gpu_memory_utilization` 0.80 and 0.88. Conclusions must therefore rest on arms run together in
+   one panel under identical pins; cross-ledger comparison is metric-level only and any control delta
+   must be reported rather than hidden.
+4. **The GPU is shared and currently held by another tenant.** A separate `run_aime_eval.py` job
+   occupies ~61.5 GiB of the single H100 for long stretches, so a vLLM engine needing ~59 GiB cannot
+   always start. It is never touched. `scripts/v32_wait_gpu.sh` waits for free memory, and
+   `scripts/v32_value_arm.sh` retries an arm on the `Free memory on device` refusal, writing each
+   retry to a new attempt directory. `MEM=0.75` is now used, which still leaves ~8.9 GiB of KV for
+   the 141,312 tokens LongBench-v2 needs (measured KV rate ~0.03234 MiB/token), and each successful
+   arm asserts that the reported KV cache size really covers `MAX_MODEL_LEN`.
 
 Read `SOURCE_NOTE.md` first: it identifies the active control's actual formula (it is a MASS-ONLY
 selector, not MAGE eq. 5) and states exactly what this study changed.
