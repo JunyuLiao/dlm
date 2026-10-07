@@ -1246,7 +1246,9 @@ class VllmMethodAdapter:
         counters = vs.Counters()
         counters.extra['selector'] = sel
         if sel in ('v1', 'v2'):
-            if self.value_scan == 'triton' and stats.z.is_cuda:
+            # The fused Triton kernel is the value-aware scan: it reads MU to build rho, so it
+            # cannot serve V1, whose decision is mass-only and carries no sketch.
+            if self.value_scan == 'triton' and stats.z.is_cuda and stats.mu is not None:
                 keep, counters = scan_mod.value_scan(stats, budget, self.value_threshold,
                                                       sel == 'v2', protect=protect, counters=counters)
             else:
@@ -1320,12 +1322,13 @@ class VllmMethodAdapter:
     def _value_needs_mu(self):
         """Whether the configured selector reads the per-row rank-32 sketch at all.
 
-        V1 and V2 rank tiles by log-mass alone, so materializing the sketch for them is pure cost:
-        at a 120k-token context it is tens of GiB and OOMs the engine. V3a/V3b evaluate deletions
-        against it, so they need it. The objective/retained-mass receipt is reported as unavailable
-        for a selector that does not carry the sketch, never silently dropped.
+        Only V1 is mass-only. The fused Triton scan in v31_value_scan.py reads MU to form its rho
+        term, so V2 needs the sketch even though its decision is a prefix log-share, and V3a/V3b
+        evaluate deletions against it. For V1 the sketch is pure cost: at a 120k-token context it is
+        tens of GiB and OOMs the engine, and its V3-objective receipt then says the objective is
+        unavailable rather than disappearing.
         """
-        return self.value_selector not in ('v1', 'v2')
+        return self.value_selector != 'v1'
 
     def _value_objective(self, stats, keep, exact):
         """The achieved V3 objective of this map, plus the retained attention mass, as a receipt value.
