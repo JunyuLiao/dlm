@@ -62,14 +62,19 @@ def summary_bytes(b, h, qb, prefix_tiles, rank):
     return cells * (4 + 4 * rank + 1 + 1)
 
 
-def allocate_summary(b, h, qb, kt, prefix_tiles, rank, device, identity):
-    """Buffers sized for the leading ``prefix_tiles`` tiles only."""
+def allocate_summary(b, h, qb, kt, prefix_tiles, rank, device, identity, need_mu=True):
+    """Buffers sized for the leading ``prefix_tiles`` tiles only.
+
+    ``need_mu=False`` skips the rank-32 buffer, which is the largest of the four. A caller that
+    never reads mu (the mass-only selector) must not pay for it: at a 120k-token context this one
+    allocation is about a GiB and its absence is what lets that arm run.
+    """
     if prefix_tiles <= 0:
         return None
     shape = (b, h, qb, int(prefix_tiles), 128)
     return PrefixSummary(
         z=torch.empty(shape, device=device, dtype=torch.float32),
-        mu=torch.empty(shape + (rank,), device=device, dtype=torch.float32),
+        mu=(torch.empty(shape + (rank,), device=device, dtype=torch.float32) if need_mu else None),
         active=torch.empty(shape, device=device, dtype=torch.int8),
         bad=torch.empty(shape, device=device, dtype=torch.int8),
         prefix_tiles=int(prefix_tiles), identity=identity)

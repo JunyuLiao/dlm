@@ -41,12 +41,14 @@ def observe_mu(q, k, sketch, scale, prefix_tiles, summary, splits=2, mu_precisio
     return summary
 
 
-def tail_statistics(tail_scores, sketch):
+def tail_statistics(tail_scores, sketch, need_mu=True):
     """``(z, mu)`` of the canvas/boundary tiles from the control's own FP32 tail logits.
 
-    ``sketch`` is [1, HK, n_tail, 32]; the tail's key extent is the tail, not the whole context."""
+    ``sketch`` is [1, HK, n_tail, 32]; the tail's key extent is the tail, not the whole context.
+    ``need_mu=False`` returns ``(z, None)`` for a caller that never reads the sketch."""
     rows = torch.ones(tail_scores.shape[:2], dtype=torch.bool, device=tail_scores.device)
-    return vs.tile_statistics(tail_scores, sketch[0].float(), rows)
+    z, mu = vs.tile_statistics(tail_scores, sketch[0].float(), rows)
+    return z, (mu if need_mu else None)
 
 
 def build_value_stats(prefix_z, prefix_mu, tail_z, tail_mu, nu_kv, group, n, heads, prefix_tiles,

@@ -1172,8 +1172,10 @@ class VllmMethodAdapter:
         kv_heads, nk = keys.shape[1], keys.shape[2]
         group = heads // kv_heads
         qb, pt, total_tiles = -(-n // 128), prefix // 64, -(-(prefix + n) // 64)
+        need_mu = self._value_needs_mu()
         summary = allocate_summary(1, heads, qb, total_tiles, pt, vs_rank(), dev,
-                                   identity=('value', int(layer_idx), int(prefix), int(n)))
+                                   identity=('value', int(layer_idx), int(prefix), int(n)),
+                                   need_mu=need_mu)
         prefix_z = torch.empty((heads, qb, pt, 128), device=dev, dtype=torch.float32)
         # the SAME FA4 call the control makes, so the tile masses and the OUTPUT are identical
         out = observe_dense(q.transpose(1, 2), keys.transpose(1, 2), values.transpose(1, 2), scale,
@@ -1181,11 +1183,10 @@ class VllmMethodAdapter:
         # the observation-only statistics pass for the per-row projected within-tile mean
         sketch, nu_kv = self._value_sketch_for(layer_idx, values, valid)
         v27_consumer64.fused_observe(q, keys, keys, sketch, scale, pt, summary,
-                                     splits=self.value_stats_split, mu=True,
+                                     splits=self.value_stats_split, mu=need_mu,
                                      mu_precision=self.value_mu_precision, output=False)
         # V1 and V2 read only z/nu. The per-row rank-32 sketch is [H, PT, QB*128, 32] FP32, which at
         # a 120k-token context is tens of GiB, so it is not materialized for them at all.
-        need_mu = self._value_needs_mu()
         z_prefix = prefix_z.permute(0, 2, 1, 3).reshape(heads, pt, qb * 128)
         if need_mu:
             self.calls['value_mu_passes'] = self.calls.get('value_mu_passes', 0) + 1
@@ -1212,7 +1213,7 @@ class VllmMethodAdapter:
         tail_sketch = sketch[:, :, koff:, :]
         if pad:
             tail_sketch = torch.nn.functional.pad(tail_sketch, (0, 0, 0, pad))
-        tz, tmu = vo.tail_statistics(tail_scores, tail_sketch)
+        tz, tmu = vo.tail_statistics(tail_scores, tail_sketch, need_mu=need_mu)
         del tail, tail_scores, tail_sketch
         z_all = torch.cat([z_prefix, tz], 1)
         del z_prefix, tz, prefix_z
@@ -1222,11 +1223,12 @@ class VllmMethodAdapter:
             # full-size tensors at once, which is what OOMs the engine on long contexts.
             rank = vs_rank()
             kt = z_all.shape[1]
-            tail_tiles = tmu.shape[1]
+            tail_tiles = tmu.shape[1] if tmu is not None else 0
             mu_all = torch.zeros((heads, kt, qb * 128, rank), dtype=torch.float32, device=dev)
             mu_all[:, :pt].view(heads, pt, qb, 128, rank).copy_(mu_src)
             if tail_tiles:
-                mu_all[:, pt:].view(heads, kt - pt, tail_tiles, rank).copy_(tmu.permute(0, 2, 1, 3))
+                # tile_statistics already returns tile-major [H, tiles, N, RANK]; no permute.
+                mu_all[:, pt:].view(heads, kt - pt, tail_tiles, rank).copy_(tmu)
             del tmu, mu_src
         else:
             mu_all = None
