@@ -1132,25 +1132,34 @@ class VllmMethodAdapter:
             self._value_bank_records = records
         return bank
 
-    def _value_sketch_for(self, layer_idx, values, valid):
+    def _value_sketch_for(self, layer_idx, values, valid, need_sketch=True):
         """``[1, HK, nk, 32]`` FP32 projection of V, cached per (layer, key extent) within a request.
 
         The prefix region is immutable within a canvas, so the projection of the prefix is computed once
         and the canvas region is refreshed per call. Caching is by CONTENT EXTENT, never by a guessed
-        position: a different extent re-projects."""
+        position: a different extent re-projects.
+
+        At most ONE sketch is kept per layer. Keying the cache by (layer, extent) accumulates a new
+        projection per canvas, and at a 120k extent each is ~123 MiB, which exhausted the engine
+        partway through a request; the previous extent is unreachable once the keys have grown, so
+        replacing it loses nothing."""
         from experiments.numerical_qk_reuse import v31_value_select as vs
         nk = int(values.shape[2])
-        key = (int(layer_idx), nk)
+        if not need_sketch:
+            self._value_sketch.pop(int(layer_idx), None)
+            self.calls['value_sketch_skips'] = self.calls.get('value_sketch_skips', 0) + 1
+            return None, vs.valid_kv_reference(values, valid)
         bank = self._value_bank_for(layer_idx, values.shape[1], values.shape[3], values.device)
-        cached = self._value_sketch.get(key)
-        if cached is None or cached.shape[2] != nk or not torch.isfinite(cached).all():
-            sketch = vs.project_values(values, bank)
-            self._value_sketch[key] = sketch
-            self.calls['value_sketch_builds'] = self.calls.get('value_sketch_builds', 0) + 1
-        else:
+        entry = self._value_sketch.get(int(layer_idx))
+        if entry is not None and entry[0] == nk and bool(torch.isfinite(entry[1]).all()):
+            sketch = entry[1]
             self.calls['value_sketch_reuses'] = self.calls.get('value_sketch_reuses', 0) + 1
+        else:
+            sketch = vs.project_values(values, bank)
+            self._value_sketch[int(layer_idx)] = (nk, sketch)
+            self.calls['value_sketch_builds'] = self.calls.get('value_sketch_builds', 0) + 1
         nu = vs.valid_kv_reference(values, valid)
-        return self._value_sketch[key], nu
+        return sketch, nu
 
     def _value_stats(self, layer_idx, q, keys, values, valid, scale, prefix, n):
         """The compact tile statistics of one observation call, in tile-major layout.
@@ -1181,10 +1190,13 @@ class VllmMethodAdapter:
         out = observe_dense(q.transpose(1, 2), keys.transpose(1, 2), values.transpose(1, 2), scale,
                             prefix_z)
         # the observation-only statistics pass for the per-row projected within-tile mean
-        sketch, nu_kv = self._value_sketch_for(layer_idx, values, valid)
-        v27_consumer64.fused_observe(q, keys, keys, sketch, scale, pt, summary,
-                                     splits=self.value_stats_split, mu=need_mu,
-                                     mu_precision=self.value_mu_precision, output=False)
+        sketch, nu_kv = self._value_sketch_for(layer_idx, values, valid, need_sketch=need_mu)
+        if need_mu:
+            # z comes from observe_dense above; this pass exists only to produce mu, so a
+            # mass-only selector must not run it at all.
+            v27_consumer64.fused_observe(q, keys, keys, sketch, scale, pt, summary,
+                                         splits=self.value_stats_split, mu=True,
+                                         mu_precision=self.value_mu_precision, output=False)
         # V1 and V2 read only z/nu. The per-row rank-32 sketch is [H, PT, QB*128, 32] FP32, which at
         # a 120k-token context is tens of GiB, so it is not materialized for them at all.
         z_prefix = prefix_z.permute(0, 2, 1, 3).reshape(heads, pt, qb * 128)
@@ -1210,7 +1222,7 @@ class VllmMethodAdapter:
         pad = -(tail_n) % 64
         tail_scores = torch.nn.functional.pad(tail, (0, pad), value=float('-inf')).contiguous()
         # the padded keys have no projected value; they are masked out of every tile statistic anyway
-        tail_sketch = sketch[:, :, koff:, :]
+        tail_sketch = sketch[:, :, koff:, :] if need_mu else sketch[:, :0, :, :]
         if pad:
             tail_sketch = torch.nn.functional.pad(tail_sketch, (0, 0, 0, pad))
         tz, tmu = vo.tail_statistics(tail_scores, tail_sketch, need_mu=need_mu)
