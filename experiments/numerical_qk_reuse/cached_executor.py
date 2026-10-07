@@ -48,7 +48,8 @@ class PrefixSummary:
 
     @property
     def bytes(self):
-        return sum(t.numel() * t.element_size() for t in (self.z, self.mu, self.active, self.bad))
+        return sum(t.numel() * t.element_size() for t in (self.z, self.mu, self.active, self.bad)
+                   if t is not None)
 
     def matches(self, identity, prefix_tiles):
         return self.identity == identity and self.prefix_tiles == prefix_tiles

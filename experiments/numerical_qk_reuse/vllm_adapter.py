@@ -1228,7 +1228,7 @@ class VllmMethodAdapter:
             mu_all[:, :pt].view(heads, pt, qb, 128, rank).copy_(mu_src)
             if tail_tiles:
                 # tile_statistics already returns tile-major [H, tiles, N, RANK]; no permute.
-                mu_all[:, pt:].view(heads, kt - pt, tail_tiles, rank).copy_(tmu)
+                mu_all[:, pt:].view(heads, kt - pt, qb * 128, rank).copy_(tmu)
             del tmu, mu_src
         else:
             mu_all = None
