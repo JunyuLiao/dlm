@@ -47,7 +47,8 @@ def tail_statistics(tail_scores, sketch, need_mu=True):
     ``sketch`` is [1, HK, n_tail, 32]; the tail's key extent is the tail, not the whole context.
     ``need_mu=False`` returns ``(z, None)`` for a caller that never reads the sketch."""
     rows = torch.ones(tail_scores.shape[:2], dtype=torch.bool, device=tail_scores.device)
-    z, mu = vs.tile_statistics(tail_scores, sketch[0].float(), rows)
+    z, mu = vs.tile_statistics(tail_scores, None if not need_mu else sketch[0].float(), rows,
+                               need_mu=need_mu)
     return z, (mu if need_mu else None)
 
 

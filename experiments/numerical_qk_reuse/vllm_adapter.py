@@ -1222,8 +1222,8 @@ class VllmMethodAdapter:
         pad = -(tail_n) % 64
         tail_scores = torch.nn.functional.pad(tail, (0, pad), value=float('-inf')).contiguous()
         # the padded keys have no projected value; they are masked out of every tile statistic anyway
-        tail_sketch = sketch[:, :, koff:, :] if need_mu else sketch[:, :0, :, :]
-        if pad:
+        tail_sketch = sketch[:, :, koff:, :] if need_mu else None
+        if pad and tail_sketch is not None:
             tail_sketch = torch.nn.functional.pad(tail_sketch, (0, 0, 0, pad))
         tz, tmu = vo.tail_statistics(tail_scores, tail_sketch, need_mu=need_mu)
         del tail, tail_scores, tail_sketch

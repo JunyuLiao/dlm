@@ -512,7 +512,7 @@ def _deletion_scores(stats, alpha, ref, live):
 # --------------------------------------------------------------------------- statistics construction
 
 
-def tile_statistics(scores, sketch, rows, chunk_tiles=32):
+def tile_statistics(scores, sketch, rows, chunk_tiles=32, need_mu=True):
     """Reference tile statistics from an explicit masked score matrix (the trusted oracle).
 
     ``scores`` [H, N, nk] FP32: the native scaled attention logits AFTER the structural mask, with
@@ -524,14 +524,17 @@ def tile_statistics(scores, sketch, rows, chunk_tiles=32):
     h, n_pad, nk = scores.shape
     if rows.shape != (h, n_pad):
         raise ValueError('scores/rows must agree on (heads, padded rows)')
-    if sketch.dim() != 3 or sketch.shape[0] * (h // sketch.shape[0]) != h or sketch.shape[1] != nk:
+    if need_mu and (sketch is None or sketch.dim() != 3
+                    or sketch.shape[0] * (h // sketch.shape[0]) != h or sketch.shape[1] != nk):
         raise ValueError('sketch must be [HK, nk, 32] with HK dividing the query heads')
     kt = -(-nk // 64)
     acc = torch.float64 if scores.dtype == torch.float64 else torch.float32
     z = torch.empty((h, kt, n_pad), device=scores.device, dtype=acc)
-    mu = torch.empty((h, kt, n_pad, RANK), device=scores.device, dtype=acc)
-    kha = torch.arange(h, device=scores.device) // (h // sketch.shape[0])
-    per_head = sketch[kha].reshape(h, 1, nk, RANK)
+    # The sketch is the largest allocation here; a caller that reads only z must not pay for it.
+    mu = (torch.empty((h, kt, n_pad, RANK), device=scores.device, dtype=acc) if need_mu else None)
+    if need_mu:
+        kha = torch.arange(h, device=scores.device) // (h // sketch.shape[0])
+        per_head = sketch[kha].reshape(h, 1, nk, RANK)
     for t0 in range(0, kt, int(chunk_tiles)):
         t1 = min(kt, t0 + int(chunk_tiles))
         block = scores[:, :, t0 * 64:t1 * 64].reshape(h, n_pad, t1 - t0, 64)
@@ -543,9 +546,10 @@ def tile_statistics(scores, sketch, rows, chunk_tiles=32):
         ell = p.sum(-1).clamp_min(EPS)
         z[:, t0:t1] = torch.where(live, safe + torch.log(ell),
                                   torch.full_like(safe, -math.inf)).transpose(1, 2)
-        sk = per_head[:, :, t0 * 64:t1 * 64, :].reshape(h, 1, t1 - t0, 64, RANK)
-        num = torch.einsum('hntc,hntcr->hntr', p, sk.expand(h, n_pad, t1 - t0, 64, RANK))
-        mu[:, t0:t1] = (num / ell[..., None]).transpose(1, 2)
+        if need_mu:
+            sk = per_head[:, :, t0 * 64:t1 * 64, :].reshape(h, 1, t1 - t0, 64, RANK)
+            num = torch.einsum('hntc,hntcr->hntr', p, sk.expand(h, n_pad, t1 - t0, 64, RANK))
+            mu[:, t0:t1] = (num / ell[..., None]).transpose(1, 2)
     return z, mu
 
 
