@@ -1349,3 +1349,17 @@ V1, V2 and control generation/selector/consumer source hashes match exactly,
 despite the later execution/reporting-only protocol amendment. The frozen
 first-experiment parameter file records these measured differences before
 any target generation; no additional threshold search is performed.
+# 2026-10-08: user drops future exact greedy from the value-selector experiment
+
+The direct user confirmation is: "Drop exact greedy; retain its completed
+diagnostics." Freeze the remaining eight-arm scope in
+`results/v31_value_selectors_20261008/protocol_execution_attempt004_no_exact_20261008.json`.
+Retain the completed128-cell exact audit, runtime diagnostics and small exact
+reference/tests. Do not launch further exact generation or recompute fresh
+full-context exact masks offline. Preserve the old nine-arm frozen protocol and
+attempts; do not label them complete. Reuse only completed nonexact shards whose
+generation bytes, model/pool, host/GPU, runtime, thresholds and exact schedules
+match. The13 validated predecessor shards supply1,664 audit cells. Separate
+audit/clean coverage is8x503 per pass; V1/V2 threshold0.027 stays fixed.
+Nine focused continuation tests pass; this decision reports scope and validated
+reuse, not target accuracy or clean latency.

@@ -1,5 +1,18 @@
 ## Independent GLOBAL value selectors — 2026-10-08
 
+Confirmed user scope amendment: drop future exact-greedy generation and fresh
+full-context exact-greedy offline recomputation. Retain its completed128-cell
+audit and small mathematical reference/tests as diagnostics. Eight remaining
+arms continue under `protocol_execution_attempt004_no_exact_20261008.json`
+and `scope_amendment_no_exact_attempt001.json`. The original nine-arm family
+is preserved as an incomplete predecessor. All17 generation source hashes,
+thresholds, sampler, reuse, consumer and native-order schedules are unchanged.
+Thirteen completed nonexact audit shards (1,664 cells) passed identity validation
+for reuse; remaining work is2,360 audit and4,024 clean cells. New families are
+`longbench/audit_no_exact/attempt001` and `longbench/target_no_exact/attempt001`.
+Nine continuation tests pass. Verified generation commit `44674c3a`; the scope
+commit adds orchestration/reporting only. No exact-greedy shard02 was launched.
+
 User amendment, 2026-10-08: accept V1 trial004 at threshold
 `0.027000000000000003` and80.250158% GLOBAL sparsity for the first
 effectiveness experiment. Exact sparsity matching is no longer required.

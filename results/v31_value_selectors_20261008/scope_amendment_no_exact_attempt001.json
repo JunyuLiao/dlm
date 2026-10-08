@@ -1,0 +1,148 @@
+{
+  "schema": "independent_v31_no_exact_scope_amendment_v1",
+  "date_utc": "2026-10-08",
+  "authority": "direct user confirmation in current chat",
+  "instruction": "Drop exact greedy; retain its completed diagnostics",
+  "excluded_future_arm": "value_v3b_greedy_exact",
+  "arms": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "current_v31_control",
+    "value_v1_online_discard_mass",
+    "value_v2_online_preserve_mass",
+    "value_v3a_singleton_delete",
+    "value_v3b_approx_batch8"
+  ],
+  "retained_exact_diagnostics": {
+    "attempt": "longbench/audit/attempt001/value_v3b_greedy_exact/shard01/attempt001",
+    "cells": 128,
+    "receipt_sha256": "1f828155b498b1581f926a99b28a633179b8a3010bc90ed8a4ab5b11607f63af",
+    "status": "completed partial audit diagnostic; no full target accuracy or clean timing claim"
+  },
+  "offline": "no fresh full-context exact-greedy recomputation; retain small reference and unit tests",
+  "unchanged": [
+    "generation source bytes",
+    "thresholds",
+    "native sampler",
+    "GLOBAL layer scope",
+    "reuse lifecycle",
+    "budgets",
+    "consumer",
+    "target schedule"
+  ],
+  "predecessor_execution_sha256": "91534d11fd237b1d9858aad4b6d3de93bef9790adfdd6b30c457ca7903ec50b2",
+  "thresholds_sha256": "59184c37692b2001e8c1f8c93726bb62cc5e6d366fe050806a24659518ea06ea",
+  "reusable_completed_nonexact": {
+    "cells": 1664,
+    "shards": [
+      {
+        "arm": "dense_full_fix51994",
+        "shard": "shard01",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/dense_full_fix51994/shard01/attempt001",
+        "config_sha256": "3f04488ca61a826f286535e3ac5b7129f55e26990608136183c2cb31f02b92fa",
+        "receipt_sha256": "3313d9c0373d79a11b7b3ed0e8a699aec6d185eeda2b95e5835ec6df942534a2"
+      },
+      {
+        "arm": "dense_piecewise",
+        "shard": "shard01",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/dense_piecewise/shard01/attempt001",
+        "config_sha256": "9f1919853be1e2bb725413a470d2e2a0cce25ce8d35570fd594ddb2d64a56fea",
+        "receipt_sha256": "03cfc4485cad02f5219bf20df39f22b5e8a2eb54baca87d1e2ca6d4cb11998b9"
+      },
+      {
+        "arm": "allkept_fa4",
+        "shard": "shard01",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/allkept_fa4/shard01/attempt001",
+        "config_sha256": "d25201746feb89edc51b22fc707b21c8569e1eaf479d6d581ee5e07e0dccdf3e",
+        "receipt_sha256": "65fbd784e3980a7a5c61bb2f0e2f7573fad4379306e41f488fe5c657d033d924"
+      },
+      {
+        "arm": "allkept_fa4",
+        "shard": "shard02",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/allkept_fa4/shard02/attempt001",
+        "config_sha256": "3deee0e2e4de4b88d48a5377f7c0f57a5a682276c87b7899cfc7352ba3d31516",
+        "receipt_sha256": "43bfd44fc2e751dd8c75f5ec0647f6f0a179342b09c0fbca2ab4b886b3288462"
+      },
+      {
+        "arm": "current_v31_control",
+        "shard": "shard01",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/current_v31_control/shard01/attempt001",
+        "config_sha256": "37fcd6347c548a498bcadee099aa69a9eab039c2309292bdfc5329fde5c21d81",
+        "receipt_sha256": "20db19452acda9f7cb6fe51e5572c5d191f61bf3d2b027d78c169cc84637b841"
+      },
+      {
+        "arm": "current_v31_control",
+        "shard": "shard02",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/current_v31_control/shard02/attempt001",
+        "config_sha256": "f6c64876252efb8c9a357c88fa14ed50939b84dee857ab50c02b45d1f6cbdbe5",
+        "receipt_sha256": "2e56847091ed84967ed1ab4660becf97a154b61554e761134ec00f282ee20214"
+      },
+      {
+        "arm": "value_v1_online_discard_mass",
+        "shard": "shard01",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/value_v1_online_discard_mass/shard01/attempt001",
+        "config_sha256": "4b1669d1d4e0fbf0507bd3952eb93169a799f4a8b1f45a5b432b0ae35167b474",
+        "receipt_sha256": "1e08cb0d883d5de9c9c3ee1d01b7a95df50ff8a76859c61b7c200edc330ed446"
+      },
+      {
+        "arm": "value_v1_online_discard_mass",
+        "shard": "shard02",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/value_v1_online_discard_mass/shard02/attempt001",
+        "config_sha256": "c856835476a88d12848cde9de8475d63500f1939ab38fcfe2c85386264b2e49e",
+        "receipt_sha256": "660ac07b198940686b40e1a57034568e4245cd761e4cfe9994330ab3db47c1f5"
+      },
+      {
+        "arm": "value_v2_online_preserve_mass",
+        "shard": "shard01",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/value_v2_online_preserve_mass/shard01/attempt001",
+        "config_sha256": "3931d95234b0ec950497b9236a7be2835afe1e1462aaf38caa96bacf45703976",
+        "receipt_sha256": "91780ce163234eb80fc4f313e32a6bd384af29be6e35cd3b7ee888831258e1b7"
+      },
+      {
+        "arm": "value_v2_online_preserve_mass",
+        "shard": "shard02",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/value_v2_online_preserve_mass/shard02/attempt001",
+        "config_sha256": "1a3da0e861c9ae637d2a46125815868a844c21f5a329c3cd3bd5c93c01b82eb4",
+        "receipt_sha256": "f3d17a43f2aa04c3ba6d7aa6dc8f499d81676d2f87c53e4061ba0052764366ed"
+      },
+      {
+        "arm": "value_v3a_singleton_delete",
+        "shard": "shard01",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/value_v3a_singleton_delete/shard01/attempt001",
+        "config_sha256": "23906327f342b6c13e6e11c8b618b403d98e32624da27d61995bf5cbb34780b7",
+        "receipt_sha256": "7806194f97a9acc5046416acd0ae452d3c7d4766e8ef023b2c42b2fa7871cbd6"
+      },
+      {
+        "arm": "value_v3a_singleton_delete",
+        "shard": "shard02",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/value_v3a_singleton_delete/shard02/attempt001",
+        "config_sha256": "a9b478af81061a6437bc7af354f4e360539d7aedf97fe72d6cc69c7f79ba1209",
+        "receipt_sha256": "e15eaf48e2ce8fd20173f0142df4da8650677eb270fd7af7cc9ee6d062e71e76"
+      },
+      {
+        "arm": "value_v3b_approx_batch8",
+        "shard": "shard01",
+        "cells": 128,
+        "attempt": "longbench/audit/attempt001/value_v3b_approx_batch8/shard01/attempt001",
+        "config_sha256": "170cbfe08fbb282174369473cbc885b25cce0a72c65c03de6fedd6e2dd5d3d32",
+        "receipt_sha256": "db62a6942f784bbf752473825c69fe02a289139d4d1a93c67d5a6024db2101d1"
+      }
+    ]
+  },
+  "audit_cells_remaining": 2360,
+  "clean_cells_remaining": 4024,
+  "family": "longbench/audit_no_exact/attempt001 and longbench/target_no_exact/attempt001"
+}
