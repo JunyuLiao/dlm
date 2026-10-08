@@ -1,0 +1,41 @@
+{
+  "schema": "independent_v31_attempt_v1",
+  "purpose": "smoke",
+  "arm": "allkept_fa4",
+  "cell_count": 1,
+  "cells_sha256": "7ef6364d8e14188a16f0de439ddb6b3f9355a36198a5e538dd3d209a5b774d17",
+  "manifests_sha256": {
+    "longbench_v2_0shot_think": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe"
+  },
+  "source_commit": "d63d8b1ef3ff85dae72b611fddd2e86706b507f7",
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "b8b47a0a7f399a288b1c67f3d697db3f8a9ed16b330d95ac6fc35a1575c874a0",
+    "experiments/numerical_qk_reuse/v31_value_selectors.py": "e6e5ce23cb8d4fe86f6050401e97636754b9bcac44e644f0f802647eed43f655",
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "76eb2987bb99d5378c7eb31aef50c100335714f7f2cd28c4b8cce6707007b496",
+    "experiments/numerical_qk_reuse/v31_value_summary.py": "ef8d32e01c575bdc167125ddd00321bde391355354cdeecc4baab5e874d4934b",
+    "experiments/numerical_qk_reuse/v31_value_workspace.py": "61dcc7f7800159c37dff672b779f9348d5350f386f08dda6c125fd14d0d599d1",
+    "experiments/numerical_qk_reuse/v31_value_projection.py": "b15e32ab3ee7936cabc4a5485e67865ee7bb0e14122bbe2b0664daf8b1a1b3a6",
+    "experiments/numerical_qk_reuse/v31_value_snapshots.py": "2e2a56758f27ae0d66a86efb702a4598532aa6beb6fa211d6e6d04a73b6c096f",
+    "experiments/numerical_qk_reuse/v27_fa4.py": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+    "experiments/numerical_qk_reuse/v31_fa4_observe.py": "3b7027b52b64ab5b101d71808b69decba434405c287bf9c94ba3aa7a3b7a5133",
+    "experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+    "experiments/value_direction_hopper/projection.py": "de5a1f971187880fa7aee1f4c21f18a1d14f52dd4879526f515e6ad365886f5d",
+    "scripts/v31_vllm_paired_bench.py": "4c5eecc733f53c5d06a7362a551554328334fa0e6f38c8032e7d3c63059aca64",
+    "scripts/v31_value_campaign.py": "3b4ea071e4a0514c8dd55a2a94d32d2daf79ae0b02621fa3b300c82a4cefa8fd"
+  },
+  "runtime_settings": {
+    "BLOCK": "32",
+    "CHUNK": "16384",
+    "MEM": "0.85",
+    "MAX_MODEL_LEN": "141312",
+    "MAGE_K": "8192",
+    "MAGE_STEP": "1",
+    "MAGE_CARRY": "1",
+    "MAGE_RESELECT_TRIGGER": "0.15",
+    "MAGE_TRIGGER_SIGNAL": "settle",
+    "MAGE_GRAN": "qblock_max"
+  },
+  "threshold": null,
+  "local_scope": "native_dense",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b"
+}

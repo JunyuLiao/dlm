@@ -148,7 +148,7 @@ class VllmMethodAdapter:
                  mage_sticky=None,
                  cg_stop=None, stall_rescue=None, stall_eps=0.01, local_kv_budget=None,
                  local_kernel='compact_triton', value_selector=None, value_threshold=None, value_audit=False,
-                 value_max_tokens=None):
+                 value_max_tokens=None, value_clean_timing=False):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if value_selector is not None:
@@ -165,6 +165,7 @@ class VllmMethodAdapter:
                                                     or not math.isfinite(float(value_threshold))):
                 raise ValueError('online selectors require a finite uniform nonnegative threshold')
         self.value_selector, self.value_threshold = value_selector, value_threshold
+        self.value_clean_timing = bool(value_clean_timing)
         self._value_projection = None
         self._value_workspace = None
         if value_selector is not None and value_max_tokens is not None:
@@ -520,6 +521,9 @@ class VllmMethodAdapter:
         self._value_pending = []
         self._value_audit_events = []
         self._value_phases = {}
+        self._value_global_step_phases = {}
+        self._value_local_steps = {}
+        self._value_decode_modes = {}
         self._value_native_local_tiles = self._value_native_local_calls = 0
         self._value_nonfinite_outputs = []
         self._value_local_events = []
@@ -947,6 +951,7 @@ class VllmMethodAdapter:
                 kept = kept+units*(-(-(prefix+n)//64)-prefix//64)
             else:
                 kept = torch.tensor(eligible,device=q.device,dtype=torch.float64)
+            self._value_global_step_phases.setdefault((self.canvas_id,self._canvas_step),set()).add(phase)
             row = self._value_phases.setdefault(phase,[0,0,[]])
             row[0] += 1
             row[1] += eligible
@@ -1143,10 +1148,18 @@ class VllmMethodAdapter:
             count = int(torch.stack(kept).sum().item())
             phases[phase] = dict(calls=calls,eligible_tiles=eligible,kept_tiles=count,
                                  skipped_tiles=eligible-count,sparsity=1-count/eligible)
+        local_phases = {}
+        for key,(calls,tiles) in self._value_local_steps.items():
+            labels = self._value_global_step_phases.get(key,set())
+            phase = next(iter(labels)) if len(labels)==1 else 'mixed_or_unassigned'
+            row = local_phases.setdefault(phase,dict(calls=0,eligible_rectangles=0,skipped_tiles=0,sparsity=0.))
+            row['calls'] += calls
+            row['eligible_rectangles'] += tiles
         local = self._value_native_local_tiles
         global_eligible = sum(row['eligible_tiles'] for row in phases.values())
         global_skipped = sum(row['skipped_tiles'] for row in phases.values())
-        return dict(value_phase_tiles=phases,
+        return dict(value_phase_tiles=phases,native_local_phase_rectangles=local_phases,
+            decode_cudagraph_modes=dict(self._value_decode_modes),
             value_nonfinite_attention_calls=int(torch.stack(self._value_nonfinite_outputs).sum().item()) if self._value_nonfinite_outputs else 0,
             native_local_calls_audited=self._value_native_local_calls,
             native_local_attention_ms=sum(a.elapsed_time(b) for a,b in self._value_local_events),
@@ -1170,6 +1183,9 @@ class VllmMethodAdapter:
             lo = max(0,prefix+begin-1023)
             hi = min(nk-1,prefix+min(begin+127,n-1)+1023)
             tiles += hi//64-lo//64+1
+        step = self._value_local_steps.setdefault((self.canvas_id,self._canvas_step),[0,0])
+        step[0] += 1
+        step[1] += heads*tiles
         self._value_native_local_tiles += heads*tiles
         self._value_native_local_calls += 1
         return True
@@ -1579,13 +1595,15 @@ class VllmMethodAdapter:
         # kept wholly-prefix tiles of this map (list entries are tile indices; the first cnt entries are kept)
         pt = (self.paged['prefix'] // 64) if self.paged is not None else 0
         rows = lists.block_size[0] / 128.0                                 # 64-row (q64) maps count half blocks
-        kept_prefix = ((order < pt) & (ar < cnt[..., None])).sum() * rows
+        kept_prefix = None if getattr(self, 'value_clean_timing', False) else ((order < pt) & (ar < cnt[..., None])).sum() * rows
         self._split_cache = self._split_cache[-63:] + [(lists, (split, kept_prefix,
                                                                 order.shape[1] * order.shape[2] * pt * rows))]
         self.calls['split_list_builds'] += 1
         return split
 
     def _kept_account(self, lists):
+        if getattr(self, 'value_clean_timing', False):
+            return
         from experiments.numerical_qk_reuse import v27_fa4
         for ref, entry in self._split_cache:
             if ref is lists and isinstance(entry, tuple):
@@ -1731,6 +1749,9 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                                                     input_batch.seq_lens[0].long()]).tolist()
                 draft = input_batch.num_draft_tokens > 0
                 a.on_prepare(bool(phase) or not draft, step, seq_len, int(input_batch.num_tokens))
+                if a.value_audit and not a.step_ctx['encoder']:
+                    mode=str(cudagraph_mode)
+                    a._value_decode_modes[mode]=a._value_decode_modes.get(mode,0)+1
         return prepare_attn(self, input_batch, cudagraph_mode, block_tables, slot_mappings, attn_groups,
                             kv_cache_config, for_capture=for_capture, ubatch_idx=ubatch_idx)
 

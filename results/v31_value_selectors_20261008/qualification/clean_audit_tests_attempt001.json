@@ -1,0 +1,36 @@
+{
+  "status": "complete",
+  "utc": "2026-10-08T05:55:40.450062+00:00",
+  "cpu": {
+    "passed": 42,
+    "skipped": 21
+  },
+  "h100": {
+    "passed": 63,
+    "failed": 0
+  },
+  "test_files": [
+    "tests/test_v31_value_selectors_independent.py",
+    "tests/test_v31_mage_select_step.py",
+    "tests/test_v31_progress_clock.py",
+    "tests/test_v31_kept_accounting.py"
+  ],
+  "checks": [
+    "formula oracles",
+    "row support",
+    "GQA and masks",
+    "online skipped-mass semantics",
+    "bounded RMS above128K",
+    "workspace nonaliasing",
+    "inherited progress/carry",
+    "clean/audit paged-consumer bitwise parity",
+    "native geometry audit"
+  ],
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "ff63ec2fbf6689f05c430c116cf47ecfb40818606f75e18650c3eed994ab7164",
+    "experiments/numerical_qk_reuse/v31_value_native_audit.py": "bb829b225d2cf3dd1185ec0fccb324efc153d71b46c706ed45e10b18b4ae42e6",
+    "tests/test_v31_value_selectors_independent.py": "6ab88f137aa90b5f6575acccb515e8d01f7d4f348648ba12be0dce9fd9d02cf6",
+    "scripts/v31_vllm_paired_bench.py": "351704886fa815e7734772cb86ae70f8f7dac9ecacde9e41622ebb6830e524dc",
+    "scripts/v31_value_campaign.py": "8049de94046d89dff1e3decbc16aec90d999dee3583c2751792f219fa01bfb87"
+  }
+}

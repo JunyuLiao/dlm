@@ -339,3 +339,67 @@ def test_cuda_invalid_and_empty_rows_match_safe_reference(selector):
     gpu = Stats(*(x.cuda() for x in (s.log_mass, s.mean, s.nu, s.invalid)), 2, 1, 1)
     keep, _ = select(gpu, selector, budget=1, threshold=1.)
     assert keep.all()
+
+
+def test_native_dense_audit_excludes_prefill_and_unbound_calls():
+    from experiments.numerical_qk_reuse.v31_value_native_audit import NativeGeometryAudit
+    audit=NativeGeometryAudit(['sliding_attention']*25+['full_attention']*5,16)
+    audit.record(False,True,256,1280)
+    assert audit.calls==0
+    audit.begin_request()
+    audit.record(True,True,256,1280)
+    audit.record(False,False,256,1280)
+    audit.record(False,True,256,1280)
+    audit.logits(torch.tensor([0.,1.]))
+    result=audit.receipt()
+    assert result['global_eligible_tiles']==3200
+    assert result['native_local_eligible_rectangles']==15200
+    assert result['native_local_calls_audited']==25
+    assert result['value_nonfinite_logits_calls']==0
+    assert result['overall_skipped_rectangles']==0
+    assert not audit.bound
+
+
+def test_local_audit_phase_is_linked_to_actual_global_call_phase():
+    from experiments.numerical_qk_reuse.vllm_adapter import VllmMethodAdapter
+    a=VllmMethodAdapter(['sliding_attention']*5+['full_attention'],arm='allkept',value_audit=True)
+    a.begin_request()
+    a.step_ctx=dict(encoder=False,seq_len=1280,n=256)
+    a._value_native_local_account('model.layers.0.self_attn',16,256)
+    key=(a.canvas_id,a._canvas_step)
+    a._value_global_step_phases[key]={'held'}
+    a._value_phases={'held':[1,640,[torch.tensor(160)]]}
+    result=a._value_phase_receipt()
+    assert result['native_local_phase_rectangles']['held']['eligible_rectangles']==608
+    assert result['overall_eligible_rectangles']==1248
+    a._value_global_step_phases[key].add('refresh')
+    assert 'mixed_or_unassigned' in a._value_phase_receipt()['native_local_phase_rectangles']
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')
+def test_clean_timing_removes_counters_without_changing_paged_consumer():
+    from experiments.numerical_qk_reuse import v27_fa4
+    from experiments.numerical_qk_reuse.vllm_adapter import VllmMethodAdapter
+    torch.manual_seed(289)
+    q=torch.randn(1,16,256,512,device='cuda',dtype=torch.bfloat16)
+    k=torch.randn(1,2,640,512,device='cuda',dtype=torch.bfloat16)
+    v=torch.randn_like(k)
+    paged=lambda x:x[0].view(2,10,64,512).permute(1,2,0,3).contiguous()
+    context=dict(k=paged(k),v=paged(v),nk=640,prefix=384,
+                 table=torch.arange(10,device='cuda',dtype=torch.int32))
+    kept=torch.zeros((1,16,2,10),device='cuda',dtype=torch.bool)
+    kept[...,::3]=True
+    kept[...,6:]=True
+    lists=v27_fa4.block_sparse_tensors(kept)
+    adapters=[VllmMethodAdapter(['full_attention'],arm='allkept',
+              merge_backend='triton',value_clean_timing=clean) for clean in (False,True)]
+    outputs=[]
+    for a in adapters:
+        a.begin_request()
+        a.paged=context
+        outputs.append(a.sparse_lists(v27_fa4.sparse_lists,q,k,v,lists,512**-.5))
+    assert torch.isfinite(outputs[0]).all()
+    assert torch.equal(*outputs)
+    assert adapters[0]._kept_prefix.item()>0
+    assert adapters[1]._kept_prefix is None
+    assert adapters[1]._prefix_total==0

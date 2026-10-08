@@ -179,6 +179,17 @@ def main():
         return original_capture_begin(graph, *args, **kwargs)
     torch.cuda.CUDAGraph.capture_begin = count_capture
     import vllm.model_executor.models.diffusion_gemma as dg
+    dispatch={'bound':False,'counts':{}}
+    if os.environ.get('VALUE_AUDIT') == '1':
+        from vllm.v1.cudagraph_dispatcher import CudagraphDispatcher
+        original_dispatch=CudagraphDispatcher.dispatch
+        def audit_dispatch(instance,*args,**kwargs):
+            result=original_dispatch(instance,*args,**kwargs)
+            if dispatch['bound']:
+                mode=str(result[0])
+                dispatch['counts'][mode]=dispatch['counts'].get(mode,0)+1
+            return result
+        CudagraphDispatcher.dispatch=audit_dispatch
     from transformers import AutoConfig
     from vllm import LLM, SamplingParams
     from vllm.inputs import TokensPrompt
@@ -248,6 +259,7 @@ def main():
                                                  value_selector=os.environ.get('VALUE_SELECTOR') or None,
                                                  value_audit=os.environ.get('VALUE_AUDIT') == '1',
                                                  value_max_tokens=int(os.environ['MAX_MODEL_LEN']) if os.environ.get('MAX_MODEL_LEN') else None,
+                                                 value_clean_timing=os.environ.get('VALUE_CLEAN_TIMING') == '1',
                                                  value_threshold=(float(os.environ['VALUE_THRESHOLD'])
                                                                   if os.environ.get('VALUE_THRESHOLD') else None),
                                                  local_kernel=os.environ.get('LOCAL_KERNEL', 'compact_triton'),
@@ -255,12 +267,22 @@ def main():
                                                                   if os.environ.get('LOCAL_KV_BUDGET') and arm == 'mage'
                                                                   else None))
         vllm_adapter.install_vllm_patches(adapter)
+    native_audit = None
+    if arm == 'dense' and os.environ.get('VALUE_AUDIT') == '1':
+        from experiments.numerical_qk_reuse.v31_value_native_audit import NativeGeometryAudit
+        text = AutoConfig.from_pretrained(model_dir)
+        text = getattr(text, 'text_config', text)
+        native_audit = NativeGeometryAudit(text.layer_types,text.num_attention_heads)
+        native_audit.install()
     counter = dict(calls=0)
     inner = dg._compiled_sample_step                    # (already wrapped by the adapter for adapter arms)
 
     def counting(*args, **kwargs):
         counter['calls'] += 1
-        return inner(*args, **kwargs)
+        scaled = inner(*args, **kwargs)
+        if native_audit is not None:
+            native_audit.logits(scaled)
+        return scaled
     forcing = CanvasForcing.from_env()
     dg._compiled_sample_step = forcing.wrap(counting) if forcing is not None else counting
     rec_out = open(forcing.record_path, 'a', encoding='utf-8') if forcing is not None and forcing.record_path else None
@@ -280,6 +302,7 @@ def main():
     engine = llm.llm_engine
     tok = llm.get_tokenizer()
     meta = dict(schema='v31_vllm_paired_v1', arm=arm, cudagraph_mode=cg, vllm=vllm.__version__, torch=torch.__version__,
+                resolved_cudagraph_mode=str(engine.vllm_config.compilation_config.cudagraph_mode),
                 gpu=torch.cuda.get_device_name(), max_model_len=max_len, chunk=chunk, block_size=kw['block_size'],
                 max_model_len_source='env' if os.environ.get('MAX_MODEL_LEN') else 'derived', max_model_len_need=longest,
                 gpu_memory_utilization=kw['gpu_memory_utilization'], seed_base=seed_base, adapter_sha256=adapter_sha,
@@ -293,6 +316,8 @@ def main():
                 mage_select=os.environ.get('MAGE_SELECT', 'torch') if arm == 'mage' else None,
                 value_selector=os.environ.get('VALUE_SELECTOR') if arm == 'mage' else None,
                 value_threshold=(float(os.environ['VALUE_THRESHOLD']) if os.environ.get('VALUE_THRESHOLD') and arm == 'mage' else None),
+                value_audit=os.environ.get('VALUE_AUDIT') == '1',
+                value_clean_timing=os.environ.get('VALUE_CLEAN_TIMING') == '1',
                 kv_copy_backend=os.environ.get('KV_COPY', 'torch') if arm != 'dense' else None,
                 merge_backend=os.environ.get('MERGE', 'torch') if arm != 'dense' else None,
                 logit_stats=os.environ.get('LOGIT_STATS', 'legacy') if arm == 'method' else None,
@@ -312,6 +337,7 @@ def main():
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]
+    diagnostic_requests = 0
     for schedule_index, (warm, cell, rep) in enumerate(schedule):
         row = rows[(cell['dataset'], cell['id'])]
         ids = list(row['prompt_tokens'])
@@ -321,10 +347,15 @@ def main():
             adapter.begin_request()
             adapter.value_diagnostic = None
             diagnostic_dir = os.environ.get('VALUE_DIAGNOSTIC_DIR')
-            if diagnostic_dir and not warm and schedule_index <= 2:
+            if diagnostic_dir and not warm and diagnostic_requests < 2 and len(ids) >= 32768:
                 from experiments.numerical_qk_reuse.v31_value_snapshots import SnapshotRecorder
                 adapter.value_diagnostic = SnapshotRecorder(diagnostic_dir, schedule_index)
+                diagnostic_requests += 1
+        if native_audit is not None:
+            native_audit.begin_request()
         counter['calls'] = 0
+        dispatch['counts']={}
+        dispatch['bound']=os.environ.get('VALUE_AUDIT') == '1'
         if forcing is not None:
             forcing.begin(seed, (cell['dataset'], cell.get('index'), cell['seed'], max(rep, 0)))
         torch.manual_seed(seed)
@@ -345,7 +376,9 @@ def main():
                 if o.finished:
                     final = o
         wall = time.perf_counter() - start
-        receipts = adapter.end_request() if adapter is not None else None
+        dispatch['bound']=False
+        receipts = adapter.end_request() if adapter is not None else (
+            dict(adapter=native_audit.receipt()) if native_audit is not None else None)
         if warm:
             if forcing is not None:
                 forcing.active = False
@@ -365,6 +398,7 @@ def main():
                    step_median_ms=round(1000 * statistics.median(decode), 3) if decode else None,
                    finish_reason=o.finish_reason,
                    cuda_graph_captures=captures['count']-capture_start,
+                   cuda_graph_dispatch_counts=dict(dispatch['counts']) if os.environ.get('VALUE_AUDIT') == '1' else None,
                    peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(),
                    output_hash=hashlib.sha256(json.dumps(list(o.token_ids)).encode()).hexdigest()[:16],
                    **(forcing.receipt(o.token_ids) if forcing is not None else {}),

@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import socket
 import subprocess
 import time
 
@@ -54,10 +55,14 @@ def main():
         (cache/name).mkdir(parents=True, exist_ok=True)
     arm, graph, selector, granularity = ARM_CONFIG[args.arm]
     env = dict(os.environ)
+    for key in list(env):
+        if key.startswith(('MAGE_','VALUE_','LOCAL_')):
+            env.pop(key)
     for key in ('LOCAL_KV_BUDGET', 'LOCAL_KERNEL', 'VALUE_SELECTOR', 'VALUE_THRESHOLD',
                 'MAGE_FRAC', 'MAGE_POOL', 'MAGE_ROWW', 'MAGE_RESELECT', 'MAGE_RESELECT_K',
                 'MAGE_RESELECT_KMIN', 'MAGE_KCOVER', 'RESIDUAL', 'DROP_GUARD', 'TRACE',
-                'DRIFT_DIAG', 'CG_STOP', 'STALL_RESCUE', 'FORCE_REF', 'FORCE_RECORD', 'LIMIT', 'SHARD'):
+                'DRIFT_DIAG', 'CG_STOP', 'STALL_RESCUE', 'FORCE_REF', 'FORCE_RECORD', 'LIMIT', 'SHARD',
+                'DENSE_WHEN','DENSE_BELOW','REGROUP_DIAG','RISK_GROUP','CANVAS_RESEED','V27_ADAPTER_DIR','DATASETS','REPEATS'):
         env.pop(key, None)
     env.update(PYTHONPATH=f'{root}/src:{root}', PYTHONNOUSERSITE='1',
         HF_HUB_OFFLINE='1', VLLM_ENABLE_V1_MULTIPROCESSING='0', CUDA_VISIBLE_DEVICES='0',
@@ -79,6 +84,7 @@ def main():
     if selector:
         env['VALUE_SELECTOR'] = selector
     env['VALUE_AUDIT'] = '1' if args.purpose in ('audit', 'smoke', 'development') else '0'
+    env['VALUE_CLEAN_TIMING'] = '1' if args.purpose == 'clean' else '0'
     env.pop('VALUE_DIAGNOSTIC_DIR', None)
     if args.purpose == 'audit':
         env['VALUE_DIAGNOSTIC_DIR'] = str(attempt/'private/snapshots')
@@ -86,15 +92,19 @@ def main():
         env['VALUE_THRESHOLD'] = str(args.threshold)
     manifest_hashes = {c['dataset']: hashlib.sha256((Path(args.manifests)/(c['dataset']+'_generation_manifest.json')).read_bytes()).hexdigest() for c in cells}
     source_files = [root/'experiments/numerical_qk_reuse'/name for name in
-        ('vllm_adapter.py', 'v31_value_selectors.py', 'v31_value_kernels.py', 'v31_value_summary.py', 'v31_value_workspace.py', 'v31_value_projection.py', 'v31_value_snapshots.py', 'v27_fa4.py', 'v31_fa4_observe.py')]
+        ('vllm_adapter.py', 'v31_value_selectors.py', 'v31_value_kernels.py', 'v31_value_summary.py', 'v31_value_workspace.py', 'v31_value_projection.py', 'v31_value_snapshots.py', 'v31_value_native_audit.py', 'v27_fa4.py', 'v31_fa4_observe.py', 'v29_paged_copy.py', 'v29_lse_merge.py', 'v31_logit_stats.py')]
     source_files += [root/'experiments/diffusion_gemma_jl_output_aware/projections.py',
                      root/'experiments/value_direction_hopper/projection.py']
     source_files += [root/'scripts/v31_vllm_paired_bench.py', root/'scripts/v31_value_campaign.py']
+    gpu_identity=subprocess.check_output(['nvidia-smi','--query-gpu=uuid,driver_version','--format=csv,noheader'],text=True).strip()
     freeze = dict(schema='independent_v31_attempt_v1', purpose=args.purpose, arm=args.arm,
         cell_count=len(cells), cells_sha256=hashlib.sha256(cells_bytes).hexdigest(),
         manifests_sha256=manifest_hashes, source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
         source_sha256={str(f.relative_to(root)):hashlib.sha256(f.read_bytes()).hexdigest() for f in source_files},
-        runtime_settings={k:env[k] for k in ('BLOCK','CHUNK','MEM','MAX_MODEL_LEN','MAGE_K','MAGE_STEP','MAGE_CARRY','MAGE_RESELECT_TRIGGER','MAGE_TRIGGER_SIGNAL','MAGE_GRAN')},
+        host_fingerprint=hashlib.sha256(socket.gethostname().encode()).hexdigest(),
+        gpu_identity=gpu_identity,
+        model_source_inventory_sha256=hashlib.sha256((result_root/'model_source_fingerprints.json').read_bytes()).hexdigest(),
+        runtime_settings={k:env[k] for k in ('BLOCK','CHUNK','MEM','MAX_MODEL_LEN','MAGE_K','MAGE_STEP','MAGE_CARRY','MAGE_RESELECT_TRIGGER','MAGE_TRIGGER_SIGNAL','MAGE_GRAN','MAGE_STICKY','KV_COPY','MERGE','VALUE_AUDIT','VALUE_CLEAN_TIMING') if k in env},
         threshold=args.threshold, local_scope='native_dense', model_revision='f7f5b7f5fa82ffc52addd066915886d497f5517b')
     (attempt/'config.json').write_text(json.dumps(freeze,indent=2)+'\n')
     start = time.perf_counter()
@@ -104,6 +114,8 @@ def main():
             str(attempt/'private'/('run_'+args.arm+'.private.jsonl')), arm, graph], cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT)
     rows = [json.loads(line) for line in (attempt/'records.jsonl').read_text().splitlines()] if (attempt/'records.jsonl').exists() else []
     errors = []
+    if any(hashlib.sha256((root/f).read_bytes()).hexdigest()!=expected for f,expected in freeze['source_sha256'].items()):
+        errors.append('source changed during generation')
     for row in rows:
         if row.get('cuda_graph_captures') != 0:
             errors.append('timed CUDA graph capture')
@@ -111,6 +123,21 @@ def main():
             errors.append('unexpected LOCAL routing')
         if row.get('value_selector') != selector:
             errors.append('selector identity mismatch')
+        if row.get('value_clean_timing')!=(args.purpose=='clean') or row.get('value_audit')!=(args.purpose!='clean'):
+            errors.append('clean/audit mode mismatch')
+        if args.purpose!='clean':
+            audit=row['receipts']['adapter']
+            expected_mode='FULL' if args.arm=='dense_full_fix51994' else 'PIECEWISE'
+            modes=audit.get('decode_cudagraph_modes',{})
+            if (sum(modes.values())!=row['denoise_forwards']
+                    or any(mode.split('.')[-1]!=expected_mode for mode in modes)):
+                errors.append('unexpected actual decode CUDA graph path')
+            if audit.get('native_local_calls_audited')!=25*row['denoise_forwards']:
+                errors.append('native LOCAL layer scope mismatch')
+            if audit.get('global_calls')!=5*row['denoise_forwards']:
+                errors.append('GLOBAL layer scope mismatch')
+            if audit.get('value_nonfinite_logits_calls'):
+                errors.append('nonfinite native logits')
         if arm in ('mage','allkept') and args.purpose != 'clean':
             audit = row['receipts']['adapter']
             if audit.get('order_errors') or audit.get('value_nonfinite_attention_calls'):
