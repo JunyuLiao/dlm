@@ -1,35 +1,42 @@
 ## Independent GLOBAL value selectors — 2026-10-08
 
-The independent study is on `value-aware_cross-step-reuse_v2`, under
-`results/v31_value_selectors_20261008/`. It derives V1/V2, singleton deletion,
-exact cumulative greedy, and separately named batch8 from the supplied formulas.
-It uses Yuhan's inherited reuse lifecycle and Junyu's deterministic Gaussian32
-projection family; native LOCAL, the sampler and later FA4 consumer are preserved.
+Verified source `01f37fe33d4ad8a4f11ef4a4d5066360c96c49ab`, branch
+`value-aware_cross-step-reuse_v2`, study `results/v31_value_selectors_20261008/`.
+V1/V2, singleton deletion, exact cumulative greedy and separately named batch8
+were derived independently from the requested formulas. Yuhan's inherited
+reuse lifecycle and later FA4 consumer are preserved. Junyu's prior Gaussian32
+and C_gate families remain distinct from these new integrations.
 
-Verified model source `205e3502d102077bd01776a5f21c1f6a0d0ebb77` completed
-15/15 preliminary control cells with zero timed CUDA captures. Its all-call
-GLOBAL sparsity is 76.45235%; this is diagnostic only and is excluded from
-calibration because 11 items belong to the historical holdout. The dense FULL
-and V1 smokes and official scorer binding also
-completed. Independent selector tests now pass 21 CPU tests (13 CUDA skips)
-and 43 H100 tests, including collective row-support constraints, exact batch8
-cleanup, bounded-memory reductions, scratch reuse and native LOCAL call accounting.
-The V2 pilot failed in warm-up when the inherited whole-sequence RMS kernel
-crossed 128K. Its zero-record failure receipt is retained. A bounded 4096-token
-RMS reduction and same-stream selector scratch preserve the formula and matrix
-identity; final-source model qualification must be retried in new directories.
+Done: 63 focused H100 tests (42 CPU passes with21 CUDA skips), including
+online mass semantics, direct masked-attention oracles, row support, GQA,
+bounded RMS above128K, scratch nonaliasing, inherited clocks, and bitwise paged
+consumer parity with GPU counters enabled/disabled. All nine arms passed the
+one-cell original-S1 model gate at source `d63d8b1e`, official scoring binding,
+zero timed CUDA captures, and receipt validation. These are qualification
+receipts, not target accuracy or clean latency results. Exact greedy is costly.
+The failed V2 whole-sequence-RMS warm-up and preliminary attempts are retained.
 
-Online thresholds remain unfrozen. Next: qualify every arm in model, calibrate
-uniform thresholds, then separate clean timing and instrumented audits. Official
-RULER v33 and HumanEval manifests and cell schedules have not been located;
-their generation is blocked until those exact frozen inputs are available.
-LongBench now restores the original S1 development schedule: 32 items at seeds
-1 and 2, with its exact historical hash verified. Target evaluation retains the
-official 503-item schedule, seed 1, and labels the original 160/343 split plus
-the 11 newly exposed diagnostic holdout items. The prior 15/488 setup is retained
-and superseded in `protocol_original_s1_20261008.json`. Prior pool exposure is
-unknown. No complete
-target panel, accuracy improvement or end-to-end benefit is established.
+The updated source separates clean timing from complete target audits, records
+actual denoising graph modes, and counts native dense/LOCAL geometry without
+changing their consumers. All three final instrumentation model gates passed at `01f37fe3`: every native
+decode call used FULL, every control call used PIECEWISE, and clean all-kept
+removed GPU counters. All three match their earlier outputs and trajectories
+exactly. Next/running: audited original64-cell control reference, development-only
+uniform V1/V2 calibration, then separate503-cell clean and audit passes for every arm.
+Four native-order shards use identical first-cell warm-ups and a frozen rotated
+arm order; completed shards survive restart, failed workers receive new attempts.
+The execution freeze is `protocol_execution_attempt002_20261008.json`.
+
+The exact original S1 schedule is32 development items at seeds1,2; its historical
+SHA matches. The15-item preliminary control (76.45235% GLOBAL sparsity) is
+excluded from calibration because11 items belong to the original holdout.
+`protocol_original_s1_20261008.json` and the supersession receipt preserve that
+mistake. Target evaluation retains all503 official seed-1 items, with the
+original160/343 split and332-item sensitivity subset. This historically examined
+pool does not provide a fresh-confirmation claim. Thresholds are still unfrozen.
+Exact RULER v33 and HumanEval manifests/cell schedules remain unavailable; no
+replacement prompts or seeds are generated. No complete target panel, accuracy
+improvement, end-to-end gain, or study completion marker exists.
 
 ## V31 GLOBAL + LOCAL AIME26 run — 2026-10-06
 

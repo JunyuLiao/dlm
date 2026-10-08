@@ -1304,3 +1304,22 @@ separate approximation. These are qualification findings, not benchmark claims.
 Frozen failed attempts and existing evidence are retained. Private scorer
 records and caches stay outside Git. Exact RULER v33 and HumanEval inputs remain
 unavailable; no replacement prompts or seed schedules are invented.
+
+## 2026-10-08 — Restore permitted calibration and separate clean target timing
+
+The15-cell preliminary reference in the preceding qualification note is
+superseded and excluded from calibration. Eleven items belong to the inherited
+holdout. The restored original S1 schedule contains32 items at seeds1,2 and
+matches historical schedule SHA
+`d0f0f7724d3350028091d6d15a6d8a0bdc4054b8764eec0097941a494e812401`.
+The15-cell pilot remains diagnostic; it never froze a target threshold.
+
+All nine model arms passed one-cell qualification at `d63d8b1e`, including the
+correct native FULL/PIECEWISE references and all-kept consumer. Subsequent
+source `01f37fe3` passes63 focused H100 tests. The new clean switch removes GPU
+kept-tile accounting without changing split lists or output: the paged consumer
+parity test is bitwise equal. Full503-cell target audits are frozen separately
+from full503-cell clean timing. Audit-only native geometry and actual graph-mode
+receipts provide denominator and kernel-path checks. Uniform online calibration
+remains gated on a completed audited64-cell original development control.
+No target performance or accuracy claim is made from these qualifications.

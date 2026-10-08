@@ -1,6 +1,6 @@
 This study is incomplete. No target accuracy or end-to-end claim is available.
 
-The independent V1/V2/V3 implementation passes 43 H100 formula and integration
+The independent V1/V2/V3 implementation passes 63 focused H100 formula, integration and timing-separation
 tests. V1/V2 have distinct skip-mass state updates; both use a uniform threshold
 and no quota. Singleton scores stay fixed, with row-support constraints. Exact
 greedy uses cached summaries after each deletion. Batch8 is a separate
@@ -9,7 +9,7 @@ The later native FA4 consumer and inherited refresh/carry machinery are unchange
 The V2 pilot failed in warm-up above 128K in the inherited whole-sequence RMS
 kernel. It has a retained failure receipt and zero records. A bounded RMS
 reduction and reusable selector-only scratch preserve the current-value scale,
-projection identity and decisions in independent tests. Model retries are pending.
+projection identity and decisions in independent tests. All nine original-S1 model gates passed at source `d63d8b1e`. All three additional audit/clean instrumentation gates passed at `01f37fe3`, with exact output/trajectory equality to the previous smokes and actual native FULL/control PIECEWISE decode proof.
 
 The completed 15-item preliminary control realizes 76.45235% GLOBAL decode
 sparsity over all calls, including exact observations and current canvas tiles.
@@ -37,3 +37,10 @@ target evaluation retains the full official 503-item, seed-1 schedule. Prior
 pool exposure and the 11 pilot holdout exposures are disclosed. RULER v33 and HumanEval generation remain
 blocked by missing exact frozen manifests and cell schedules; no substitute
 prompts or schedules are generated. The study has no final completion marker.
+
+Clean source `01f37fe3` removes GPU tile accounting during timing while preserving
+bitwise paged-consumer output. Target timing and audits are each a complete
+503-cell, nine-arm plan, with four immutable resumable shards, matched warm-ups
+and a pre-frozen rotated arm order. Actual decode graph modes are recorded only
+in audits; timed CUDA capture counts remain present in clean records. This plan
+is not a completed target result. Calibration is still pending.
