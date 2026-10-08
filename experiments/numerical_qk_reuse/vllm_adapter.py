@@ -42,6 +42,7 @@ Arms:
 """
 from __future__ import annotations
 
+import math
 import re
 import sys
 from contextlib import ExitStack
@@ -146,9 +147,26 @@ class VllmMethodAdapter:
                  mage_trigger_relative=False, mage_pool=None, mage_kcover=None, mage_kq=0.75, mage_kmax=16384,
                  mage_sticky=None,
                  cg_stop=None, stall_rescue=None, stall_eps=0.01, local_kv_budget=None,
-                 local_kernel='compact_triton'):
+                 local_kernel='compact_triton', value_selector=None, value_threshold=None, value_audit=False):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
+        if value_selector is not None:
+            from .v31_value_selectors import SELECTORS
+            if value_selector not in SELECTORS:
+                raise ValueError('unknown value selector')
+            if (arm != 'mage' or mage_select != 'fa4' or mage_granularity != 'qblock_max'
+                    or local_kv_budget is not None or mage_keep_frac is not None
+                    or mage_pool is not None or mage_kcover is not None or mage_row_weight is not None
+                    or mage_critical is not None or mage_coverage is not None
+                    or residual is not None or drop_guard is not None):
+                raise ValueError('value selectors require fixed-budget GLOBAL qblock_max lifecycle, native LOCAL')
+            if value_selector in SELECTORS[:2] and (value_threshold is None or float(value_threshold) < 0
+                                                    or not math.isfinite(float(value_threshold))):
+                raise ValueError('online selectors require a finite uniform nonnegative threshold')
+        self.value_selector, self.value_threshold = value_selector, value_threshold
+        self._value_projection = None
+        self._value_pending = []
+        self.value_audit, self._value_audit_events = bool(value_audit), []
         if lifecycle not in ('legacy', 'request_clear'):
             raise ValueError('lifecycle must be legacy or request_clear')
         if canvas_buffers not in ('legacy', 'release_after_invalidate'):
@@ -494,6 +512,8 @@ class VllmMethodAdapter:
         self._regroup_acc, self._regroup_n = None, 0
         if self.arm == 'mage':
             self.calls.update(mage_selections=0, mage_reused_calls=0, mage_kept_prefix_tiles=0, mage_prefix_tiles=0)
+        self._value_pending = []
+        self._value_audit_events = []
         if self.arm in ('allkept', 'native', 'mage'):
             return
         global _BINDING
@@ -537,7 +557,7 @@ class VllmMethodAdapter:
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
         return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._local_receipt(), **self._regroup_receipt(),
-                                 **self._drift_receipt(), **self._clock_receipt()), method=counters,
+                                 **self._drift_receipt(), **self._clock_receipt(), **self._value_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
 
@@ -557,7 +577,7 @@ class VllmMethodAdapter:
                               global_ms_total=round(sum(ms), 2))
             counters = self.runtime['counters']() if self.runtime is not None else None
             return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._local_receipt(), **self._regroup_receipt(),
-                                     **self._drift_receipt(), **self._clock_receipt()), method=counters,
+                                     **self._drift_receipt(), **self._clock_receipt(), **self._value_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
         finally:
@@ -967,7 +987,7 @@ class VllmMethodAdapter:
                     if pool is not None and pool.shape[-1] == -(-nk // 64):
                         out, kept = self._mage_select_pool(q, b['k'], b['v'], scale, prefix, n, pool)
                     else:
-                        out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
+                        out, kept = self._select_initial_refresh(layer_idx, q, b, scale, prefix, n)
                 finally:
                     self._mage_units_w, self._k_override, self._mage_held = None, None, None
                 st['lists'] = v27_fa4.block_sparse_tensors(kept)
@@ -990,7 +1010,7 @@ class VllmMethodAdapter:
                     return v27_fa4.dense(q, b['k'], b['v'], scale)
             if self.mage_select == 'fa4':
                 self._last_pool = None
-                out, kept = self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
+                out, kept = self._select_initial_refresh(layer_idx, q, b, scale, prefix, n)
             else:
                 out = v27_fa4.dense(q, b['k'], b['v'], scale)             # exact first-step attention output
                 kept = self._mage_select(q, b['k'], scale, prefix, n)
@@ -1001,6 +1021,76 @@ class VllmMethodAdapter:
             return out
         self.calls['mage_reused_calls'] += 1
         return v27_fa4.sparse_lists(q, b['k'], b['v'], st['lists'], scale)
+
+    def _select_initial_refresh(self, layer_idx, q, b, scale, prefix, n):
+        if self.value_selector is None:
+            return self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
+        from experiments.diffusion_gemma_jl_output_aware.projections import Projections
+        from experiments.value_direction_hopper.projection import refresh
+        from .v31_value_kernels import statistics_cuda
+        from .v31_value_selectors import mandatory_map, select
+        from .v31_fa4_observe import observe_dense
+        events = None
+        if self.value_audit:
+            events = [torch.cuda.Event(enable_timing=True) for _ in range(3)]
+            events[0].record()
+        k, v = b['k'], b['v']
+        h, hk, nk, d = q.shape[1], k.shape[1], k.shape[2], v.shape[3]
+        qb, pt = -(-n//128), prefix//64
+        # Keep the initial/refresh model output on the inherited exact FA4 path.
+        observation = torch.empty((h, qb, pt, 128), dtype=torch.float32, device=q.device)
+        out = observe_dense(q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2), scale, observation)
+        if self._value_projection is None:
+            self._value_projection = Projections()
+        matrix = self._value_projection.get(layer_idx, hk, d, 'gaussian', 32, 1729, q.device)
+        sketch = torch.empty((1, hk, nk, 32), dtype=torch.float32, device=q.device)
+        norms = torch.empty((1, hk, nk), dtype=torch.float32, device=q.device)
+        valid = torch.ones((1, hk, nk), dtype=torch.bool, device=q.device)
+        # Every refresh projects CURRENT V, including changed canvas/boundary V.
+        nu = refresh(v, matrix, sketch, norms, valid, 0)[0]
+        stats = statistics_cuda(q, k, sketch, nu, scale, pt)
+        # Retain FA4's own observed prefix masses; the PZ pass supplies only mu.
+        stats.log_mass[:, :pt].view(h, qb, pt, 128).copy_(observation)
+        mandatory = mandatory_map(stats, self.mage_sink, self.mage_recent_tiles)
+        held = self._mage_held
+        held = None if held is None else held.reshape(h*qb, -1)
+        budget = self._k_override if self._k_override is not None else self.mage_k
+        if events is not None:
+            events[1].record()
+        kept, counters = select(stats, self.value_selector, budget=max(1, budget//64),
+            threshold=self.value_threshold, mandatory=mandatory, held=held,
+            sticky=0. if held is None else self.mage_sticky)
+        # Device counters are read once at request end, outside generation timing.
+        if events is not None:
+            events[2].record()
+            self._value_audit_events.append(events)
+            self._value_pending.append(torch.stack((kept[..., :pt].sum(), stats.invalid.sum())))
+        self.calls['value_selection_calls'] = self.calls.get('value_selection_calls', 0)+1
+        self.calls['value_candidate_evaluations'] = self.calls.get('value_candidate_evaluations', 0)+counters['candidate_evaluations']
+        self.calls['value_peak_summary_bytes'] = max(self.calls.get('value_peak_summary_bytes', 0), stats.nbytes)
+        self.calls['mage_prefix_tiles'] += pt*h*qb
+        if held is not None:
+            self.calls['mage_sticky_units'] = self.calls.get('mage_sticky_units', 0)+1
+        return out, kept
+
+    def _value_receipt(self):
+        if self.value_selector is None:
+            return {}
+        counts = torch.stack(self._value_pending).sum(0).tolist() if self._value_pending else [0, 0]
+        timings = None
+        if self._value_audit_events:
+            torch.cuda.synchronize()
+            timings = dict(discovery_ms=sum(a.elapsed_time(b) for a, b, _ in self._value_audit_events),
+                           selection_ms=sum(b.elapsed_time(c) for _, b, c in self._value_audit_events))
+        return dict(value_selector=self.value_selector, value_threshold=self.value_threshold,
+            value_selected_prefix_tiles=int(counts[0]) if self.value_audit else None,
+            value_invalid_rows=int(counts[1]) if self.value_audit else None,
+            value_audit=self.value_audit, value_audit_timings=timings,
+            value_projection_seed=1729, value_projection_rank=32,
+            value_projection_manifest={} if self._value_projection is None else self._value_projection.manifest,
+            value_scope='global_only', value_local_router_installed=self.local_router is not None,
+            value_state_role='selector_only', value_output_path='unchanged_fa4',
+            value_sticky_rule='log_risk_bonus_online_or_log_removal_penalty_fixed')
 
     def _mage_carried(self, st, prefix, n):
         """Lists for canvas call 0 from the previous canvas's selection (mage_carry_first), or None when the carry is

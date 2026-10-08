@@ -1,0 +1,110 @@
+{
+  "schema": "independent_v31_value_selectors_v2",
+  "status": "implementation_qualification",
+  "inherited_source_commit": "cdc12221",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "runtime": {
+    "vllm": "0.30.0",
+    "torch": "2.13.0+cu130",
+    "device": "H100 80GB, CUDA:0",
+    "worker_count": 1,
+    "block_size": 32,
+    "physical_query_tile": 128,
+    "physical_kv_tile": 64,
+    "chunk": 16384
+  },
+  "scope": {
+    "global_layers": [
+      5,
+      11,
+      17,
+      23,
+      29
+    ],
+    "local_layers": "native_dense",
+    "prefill": "native_dense",
+    "commits": "native_dense"
+  },
+  "reuse": {
+    "initial_call": 1,
+    "carry_first": true,
+    "progress_signal": "settle",
+    "progress_trigger": 0.15,
+    "sticky": 1.386,
+    "row_weights": null,
+    "pool": null,
+    "prefix_budget_tokens": 8192,
+    "protected_sink_tiles": 0,
+    "protected_recent_tiles": 0,
+    "canvas_boundary": "always_dense_outside_budget"
+  },
+  "projection": {
+    "family": "gaussian",
+    "rank": 32,
+    "seed": 1729,
+    "matrix_factory": "jl_output_v1, repository Projections.get",
+    "refresh": "current V every selection call"
+  },
+  "arms": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "current_v31_control",
+    "attention_mass_kvhead",
+    "value_v1_online_discard_mass",
+    "value_v2_online_preserve_mass",
+    "value_v3a_singleton_delete",
+    "value_v3b_greedy_exact",
+    "value_v3b_approx_batch8"
+  ],
+  "online_thresholds": null,
+  "threshold_policy": "one uniform GLOBAL threshold per V1/V2; no quota; freeze after development-only generation",
+  "native_sampler": {
+    "canvas": 256,
+    "max_calls": 48,
+    "confidence": 0.005,
+    "stability": 1,
+    "entropy_bound": 0.1,
+    "temperature": [
+      0.8,
+      0.4
+    ],
+    "eos_stopping": true
+  },
+  "target_pools": {
+    "ruler_v33": {
+      "cells": 585,
+      "status": "official manifests and schedule not located"
+    },
+    "longbench_v2_0shot_think": {
+      "items": 503,
+      "total_generation_cap": 16384,
+      "max_model_len": 141312,
+      "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe"
+    },
+    "humaneval": {
+      "tasks": 164,
+      "generation_cap": 8192,
+      "status": "official manifest and schedule not located"
+    }
+  },
+  "clean_timing": "no selector events or traces; actual CUDA capture_begin counter; synchronized inherited timing protocol",
+  "attribution": {
+    "reuse": "Yuhan inherited implementation",
+    "prior_gaussian32_query_protection": "Junyu",
+    "new_selectors": "independent integration by this study"
+  },
+  "independence": "new implementation and direct formula oracles; no delegated selector code or results used",
+  "development": {
+    "cohort": 15,
+    "target_remaining": 488,
+    "seed_schedule": [
+      1
+    ],
+    "split_recipe": "sort sha256(independent_v31_dev_20261008|official item id), reserve first 15 before generation",
+    "cells_sha256": "c1cc98a551cbecee2472d3c878b389812ee0aed24028f94635a8fb436e82d38c",
+    "target_cells_sha256": "d1ac9534c090a6289f236c2f67e54b5637709fe0261c029383b51ced524e12de",
+    "smoke": "first reserved development item, 120016 input tokens",
+    "prior_exposure": "unknown; development and target pool historically examined; do not claim fresh held-out confirmation"
+  }
+}

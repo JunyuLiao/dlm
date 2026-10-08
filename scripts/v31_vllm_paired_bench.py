@@ -172,6 +172,12 @@ def main():
             rows[(ds, r['id'])] = r
     import torch
     import vllm
+    captures = {'count': 0}
+    original_capture_begin = torch.cuda.CUDAGraph.capture_begin
+    def count_capture(graph, *args, **kwargs):
+        captures['count'] += 1
+        return original_capture_begin(graph, *args, **kwargs)
+    torch.cuda.CUDAGraph.capture_begin = count_capture
     import vllm.model_executor.models.diffusion_gemma as dg
     from transformers import AutoConfig
     from vllm import LLM, SamplingParams
@@ -238,6 +244,10 @@ def main():
                                                  stall_rescue=int(os.environ['STALL_RESCUE']) if os.environ.get('STALL_RESCUE') else None,
                                                  stall_eps=float(os.environ.get('STALL_EPS', '0.01')),
                                                  mage_sticky=float(os.environ['MAGE_STICKY']) if os.environ.get('MAGE_STICKY') else None,
+                                                 value_selector=os.environ.get('VALUE_SELECTOR') or None,
+                                                 value_audit=os.environ.get('VALUE_AUDIT') == '1',
+                                                 value_threshold=(float(os.environ['VALUE_THRESHOLD'])
+                                                                  if os.environ.get('VALUE_THRESHOLD') else None),
                                                  local_kernel=os.environ.get('LOCAL_KERNEL', 'compact_triton'),
                                                  local_kv_budget=(int(os.environ['LOCAL_KV_BUDGET'])
                                                                   if os.environ.get('LOCAL_KV_BUDGET') and arm == 'mage'
@@ -278,6 +288,8 @@ def main():
                                 if os.environ.get('LOCAL_KV_BUDGET') and arm == 'mage' else None),
                 local_kernel=os.environ.get('LOCAL_KERNEL', 'compact_triton') if arm == 'mage' else None,
                 mage_select=os.environ.get('MAGE_SELECT', 'torch') if arm == 'mage' else None,
+                value_selector=os.environ.get('VALUE_SELECTOR') if arm == 'mage' else None,
+                value_threshold=(float(os.environ['VALUE_THRESHOLD']) if os.environ.get('VALUE_THRESHOLD') and arm == 'mage' else None),
                 kv_copy_backend=os.environ.get('KV_COPY', 'torch') if arm != 'dense' else None,
                 merge_backend=os.environ.get('MERGE', 'torch') if arm != 'dense' else None,
                 logit_stats=os.environ.get('LOGIT_STATS', 'legacy') if arm == 'method' else None,
@@ -310,6 +322,8 @@ def main():
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
         torch.cuda.synchronize()
+        capture_start = captures['count']
+        torch.cuda.reset_peak_memory_stats()
         start = time.perf_counter()
         engine.add_request(f"{'w' if warm else 'r'}{rep}-{cell['dataset']}-{cell.get('index')}-{cell['seed']}",
                            TokensPrompt(prompt_token_ids=ids), params)
@@ -342,6 +356,8 @@ def main():
                    decode_s=round(sum(decode), 5), wall_s=round(wall, 5),
                    step_median_ms=round(1000 * statistics.median(decode), 3) if decode else None,
                    finish_reason=o.finish_reason,
+                   cuda_graph_captures=captures['count']-capture_start,
+                   peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(),
                    output_hash=hashlib.sha256(json.dumps(list(o.token_ids)).encode()).hexdigest()[:16],
                    **(forcing.receipt(o.token_ids) if forcing is not None else {}),
                    receipts=None if receipts is None else dict(adapter=receipts.get('adapter'),
