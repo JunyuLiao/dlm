@@ -1,0 +1,3941 @@
+{
+ "arms": {
+  "allkept_fa4": {
+   "N": 4863,
+   "N_per_canvas": 16.59726962457338,
+   "S_over_N": 0.032589,
+   "adapter_counters": {
+    "begins": 4863,
+    "canvas_refreshes": 22540,
+    "global_calls": 24315,
+    "global_eligible_tiles": 1096254560,
+    "global_kept_tiles": 1096254560,
+    "global_prefix_tiles": 1092382160,
+    "global_prefix_work_fraction": 15,
+    "invalidates": 369,
+    "kept_prefix_fraction": 15,
+    "kept_prefix_tiles": 1092382160,
+    "observes": 4863,
+    "order_errors": 0,
+    "passthrough": 132645,
+    "prefix_copies": 1775,
+    "sparse_prefix_tiles": 1092382160,
+    "split_fa4_calls": 24315,
+    "split_list_builds": 271,
+    "triton_kv_copy_calls": 24315,
+    "triton_kv_copy_elements": 350335723520,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 24315,
+    "value_arms_active": 0
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 293,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 10.56532,
+   "decode_s_total": 158.48,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 1096254560,
+    "kept_tiles": 1096254560,
+    "prefix_work_fraction": 15,
+    "sparsity": 0.0
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 4859.133333333333,
+   "output_tokens_total": 72887,
+   "overall_decoder_attention_sparsity": 0.0,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 1096254560,
+   "prefill_s_total": 43.383,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_allkept_a20261007_221154/public/dev_allkept_a20261007_221154_allkept_fa4.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_arms_active": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 0,
+    "forced_keep_rate": null,
+    "forced_skip": 0,
+    "threshold_keep_rate": null,
+    "threshold_keeps": 0
+   },
+   "value_objective": null,
+   "value_selectors": [
+    [
+     "None",
+     15
+    ]
+   ],
+   "wall_s_mean": 13.461,
+   "wall_s_total": 201.915
+  },
+  "current_v31_control": {
+   "N": 4457,
+   "N_per_canvas": 18.417355371900825,
+   "S_over_N": 0.024432,
+   "adapter_counters": {
+    "begins": 4457,
+    "canvas_refreshes": 21000,
+    "global_calls": 22285,
+    "global_eligible_tiles": 990841760,
+    "global_kept_tiles": 122874080,
+    "global_prefix_tiles": 987276160,
+    "global_prefix_work_fraction": 0,
+    "invalidates": 318,
+    "kept_prefix_fraction": 0,
+    "kept_prefix_tiles": 19972640,
+    "mage_carried_calls": 1210,
+    "mage_kept_prefix_tiles": 2086560,
+    "mage_prefix_tiles": 99335840,
+    "mage_reselections": 1205,
+    "mage_reused_calls": 18585,
+    "mage_selections": 1210,
+    "mage_sticky_units": 1205,
+    "mage_warm_dense_calls": 75,
+    "observes": 4457,
+    "order_errors": 0,
+    "passthrough": 120965,
+    "prefix_copies": 1285,
+    "sparse_kept_prefix_fraction": 0,
+    "sparse_only_kept_tiles": 17257760,
+    "sparse_only_prefix_tiles": 885225440,
+    "sparse_prefix_tiles": 887940320,
+    "split_fa4_calls": 19870,
+    "split_list_builds": 3589,
+    "trigger_checks": 1970,
+    "trigger_step_sum": 1952,
+    "triggers": 241,
+    "triton_kv_copy_calls": 22285,
+    "triton_kv_copy_elements": 227560765440,
+    "triton_lse_identity_builds": 15,
+    "triton_lse_merge_calls": 19870,
+    "value_arms_active": 0
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 242,
+   "capped": 0,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 7.25955,
+   "decode_s_total": 108.893,
+   "finish_reasons": [
+    [
+     "stop",
+     15
+    ]
+   ],
+   "finished": 15,
+   "global_scope": {
+    "eligible_tiles": 990841760,
+    "kept_tiles": 122874080,
+    "prefix_work_fraction": 0,
+    "sparsity": 0.8759902085677131
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 3988.6666666666665,
+   "output_tokens_total": 59830,
+   "overall_decoder_attention_sparsity": 0.8759902085677131,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 990841760,
+   "prefill_s_total": 43.287,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_control_a20261007_221154/public/dev_control_a20261007_221154_current_v31_control.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_arms_active": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 0,
+    "forced_keep_rate": null,
+    "forced_skip": 0,
+    "threshold_keep_rate": null,
+    "threshold_keeps": 0
+   },
+   "value_objective": null,
+   "value_selectors": [
+    [
+     "None",
+     15
+    ]
+   ],
+   "wall_s_mean": 10.1487,
+   "wall_s_total": 152.23
+  },
+  "dense_full_fix51994": {
+   "N": 4940,
+   "N_per_canvas": 14.834834834834835,
+   "S_over_N": 0.031095,
+   "adapter_counters": {},
+   "adapter_sha256": null,
+   "canvases": 333,
+   "capped": 2,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "default",
+     15
+    ]
+   ],
+   "decode_s_mean": 10.24057,
+   "decode_s_total": 153.609,
+   "finish_reasons": [
+    [
+     "stop",
+     13
+    ],
+    [
+     "length",
+     2
+    ]
+   ],
+   "finished": 13,
+   "global_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "prefix_work_fraction": null,
+    "sparsity": null
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 5556.533333333334,
+   "output_tokens_total": 83348,
+   "overall_decoder_attention_sparsity": null,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": null,
+   "prefill_s_total": 43.321,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_dense_a20261007_221154/public/dev_dense_a20261007_221154_dense_full_fix51994.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {},
+   "value_forced": {
+    "forced_keep": 0,
+    "forced_keep_rate": null,
+    "forced_skip": 0,
+    "threshold_keep_rate": null,
+    "threshold_keeps": 0
+   },
+   "value_objective": null,
+   "value_selectors": [
+    [
+     "None",
+     15
+    ]
+   ],
+   "wall_s_mean": 13.13209,
+   "wall_s_total": 196.981
+  },
+  "dense_piecewise": {
+   "N": 4940,
+   "N_per_canvas": 14.834834834834835,
+   "S_over_N": 0.031956,
+   "adapter_counters": {},
+   "adapter_sha256": null,
+   "canvases": 333,
+   "capped": 2,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 10.5242,
+   "decode_s_total": 157.863,
+   "finish_reasons": [
+    [
+     "stop",
+     13
+    ],
+    [
+     "length",
+     2
+    ]
+   ],
+   "finished": 13,
+   "global_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "prefix_work_fraction": null,
+    "sparsity": null
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 5556.533333333334,
+   "output_tokens_total": 83348,
+   "overall_decoder_attention_sparsity": null,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": null,
+   "prefill_s_total": 43.374,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_dense_piece_a20261007_221154/public/dev_dense_piece_a20261007_221154_dense_piecewise.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {},
+   "value_forced": {
+    "forced_keep": 0,
+    "forced_keep_rate": null,
+    "forced_skip": 0,
+    "threshold_keep_rate": null,
+    "threshold_keeps": 0
+   },
+   "value_objective": null,
+   "value_selectors": [
+    [
+     "None",
+     15
+    ]
+   ],
+   "wall_s_mean": 13.41923,
+   "wall_s_total": 201.288
+  },
+  "value_v1_t0.005": {
+   "N": 3541,
+   "N_per_canvas": 15.808035714285714,
+   "S_over_N": 0.344473,
+   "adapter_counters": {
+    "begins": 3541,
+    "canvas_refreshes": 16275,
+    "global_calls": 17705,
+    "global_eligible_tiles": 819006400,
+    "global_kept_tiles": 765707260,
+    "global_prefix_tiles": 816191600,
+    "global_prefix_work_fraction": 10,
+    "invalidates": 300,
+    "kept_prefix_fraction": 10,
+    "kept_prefix_tiles": 666134700,
+    "mage_carried_calls": 1230,
+    "mage_kept_prefix_tiles": 89551680,
+    "mage_prefix_tiles": 96757760,
+    "mage_reselections": 1095,
+    "mage_reused_calls": 14065,
+    "mage_selections": 1115,
+    "mage_warm_dense_calls": 200,
+    "observes": 3541,
+    "order_errors": 0,
+    "passthrough": 97525,
+    "prefix_copies": 1430,
+    "sparse_kept_prefix_fraction": 10,
+    "sparse_only_kept_tiles": 659165500,
+    "sparse_only_prefix_tiles": 712464640,
+    "sparse_prefix_tiles": 719433840,
+    "split_fa4_calls": 15495,
+    "split_list_builds": 3407,
+    "trigger_checks": 1631,
+    "trigger_step_sum": 1568,
+    "triggers": 223,
+    "triton_kv_copy_calls": 17705,
+    "triton_kv_copy_elements": 287434567680,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 15495,
+    "value_approximate_selector": 0,
+    "value_approximation_calls": 0,
+    "value_arms_active": 15,
+    "value_blocked": 0,
+    "value_budget_tokens": 25920,
+    "value_candidates": 3034730,
+    "value_drop_fraction": 0,
+    "value_evaluations": 0,
+    "value_exact_max": 3840,
+    "value_forced_keep": 75376022,
+    "value_forced_skip": 7559680,
+    "value_mu_passes": 0,
+    "value_passes": 2210,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 0,
+    "value_sketch_builds": 0,
+    "value_sketch_reuses": 0,
+    "value_sketch_skips": 2210,
+    "value_stat_bytes": 49757224960,
+    "value_threshold": 0,
+    "value_threshold_keeps": 14175658
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 224,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 81.31856,
+   "decode_s_total": 1219.778,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 819006400,
+    "kept_tiles": 765707260,
+    "prefix_work_fraction": 10,
+    "sparsity": 0.06507780647379557
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 3702.6,
+   "output_tokens_total": 55539,
+   "overall_decoder_attention_sparsity": 0.06507780647379557,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 819006400,
+   "prefill_s_total": 42.999,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_v1_t0.005_a20261007_221154/public/dev_v1_t0.005_a20261007_221154_value_v1.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_approximation_calls": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 1253000.0,
+     "mean": 202315.33333333334,
+     "total": 3034730.0
+    },
+    "value_drop_fraction": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_evaluations": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 25073007.0,
+     "mean": 5025068.133333334,
+     "total": 75376022.0
+    },
+    "value_forced_skip": {
+     "max": 5536000.0,
+     "mean": 503978.6666666667,
+     "total": 7559680.0
+    },
+    "value_mu_passes": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_passes": {
+     "max": 625.0,
+     "mean": 147.33333333333334,
+     "total": 2210.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_builds": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_reuses": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_skips": {
+     "max": 625.0,
+     "mean": 147.33333333333334,
+     "total": 2210.0
+    },
+    "value_stat_bytes": {
+     "max": 20539392000.0,
+     "mean": 3317148330.6666665,
+     "total": 49757224960.0
+    },
+    "value_threshold": {
+     "max": 0.005,
+     "mean": 0.005,
+     "total": 0.075
+    },
+    "value_threshold_keeps": {
+     "max": 9486993.0,
+     "mean": 945043.8666666667,
+     "total": 14175658.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 504002,
+    "forced_keep_rate": 0.9325046902579549,
+    "forced_skip": 36480,
+    "threshold_keep_rate": 0.0551013986013986,
+    "threshold_keeps": 31518
+   },
+   "value_objective": {
+    "objective_max_mean": null,
+    "objective_max_p50": null,
+    "objective_max_p90": null,
+    "retained_mass_mean": null
+   },
+   "value_selectors": [
+    [
+     "v1",
+     15
+    ]
+   ],
+   "wall_s_mean": 84.18837,
+   "wall_s_total": 1262.826
+  },
+  "value_v1_t0.01": {
+   "N": 3850,
+   "N_per_canvas": 15.843621399176955,
+   "S_over_N": 0.357395,
+   "adapter_counters": {
+    "begins": 3850,
+    "canvas_refreshes": 17725,
+    "global_calls": 19250,
+    "global_eligible_tiles": 898306880,
+    "global_kept_tiles": 840972480,
+    "global_prefix_tiles": 895244880,
+    "global_prefix_work_fraction": 10,
+    "invalidates": 319,
+    "kept_prefix_fraction": 10,
+    "kept_prefix_tiles": 728668240,
+    "mage_carried_calls": 1325,
+    "mage_kept_prefix_tiles": 100694720,
+    "mage_prefix_tiles": 109242240,
+    "mage_reselections": 1200,
+    "mage_reused_calls": 15315,
+    "mage_selections": 1210,
+    "mage_warm_dense_calls": 200,
+    "observes": 3850,
+    "order_errors": 0,
+    "passthrough": 105820,
+    "prefix_copies": 1525,
+    "sparse_kept_prefix_fraction": 10,
+    "sparse_only_kept_tiles": 721699040,
+    "sparse_only_prefix_tiles": 779033440,
+    "sparse_prefix_tiles": 786002640,
+    "split_fa4_calls": 16840,
+    "split_list_builds": 3707,
+    "trigger_checks": 1805,
+    "trigger_step_sum": 1742,
+    "triggers": 242,
+    "triton_kv_copy_calls": 19250,
+    "triton_kv_copy_elements": 312931942400,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 16840,
+    "value_approximate_selector": 0,
+    "value_approximation_calls": 0,
+    "value_arms_active": 15,
+    "value_blocked": 0,
+    "value_budget_tokens": 25920,
+    "value_candidates": 3425870,
+    "value_drop_fraction": 0,
+    "value_evaluations": 0,
+    "value_exact_max": 3840,
+    "value_forced_keep": 89372434,
+    "value_forced_skip": 8933120,
+    "value_mu_passes": 0,
+    "value_passes": 2410,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 0,
+    "value_sketch_builds": 0,
+    "value_sketch_reuses": 0,
+    "value_sketch_skips": 2410,
+    "value_stat_bytes": 56168939520,
+    "value_threshold": 0,
+    "value_threshold_keeps": 11322286
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 243,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 91.73148,
+   "decode_s_total": 1375.972,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 898306880,
+    "kept_tiles": 840972480,
+    "prefix_work_fraction": 10,
+    "sparsity": 0.06382495923887388
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 4033.4,
+   "output_tokens_total": 60501,
+   "overall_decoder_attention_sparsity": 0.06382495923887388,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 898306880,
+   "prefill_s_total": 43.0,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_v1_t0.01_a20261007_221154/public/dev_v1_t0.01_a20261007_221154_value_v1.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_approximation_calls": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 1262520.0,
+     "mean": 228391.33333333334,
+     "total": 3425870.0
+    },
+    "value_drop_fraction": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_evaluations": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 27768139.0,
+     "mean": 5958162.266666667,
+     "total": 89372434.0
+    },
+    "value_forced_skip": {
+     "max": 5564160.0,
+     "mean": 595541.3333333334,
+     "total": 8933120.0
+    },
+    "value_mu_passes": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_passes": {
+     "max": 630.0,
+     "mean": 160.66666666666666,
+     "total": 2410.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_builds": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_reuses": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_skips": {
+     "max": 630.0,
+     "mean": 160.66666666666666,
+     "total": 2410.0
+    },
+    "value_stat_bytes": {
+     "max": 20695449600.0,
+     "mean": 3744595968.0,
+     "total": 56168939520.0
+    },
+    "value_threshold": {
+     "max": 0.01,
+     "mean": 0.01,
+     "total": 0.15
+    },
+    "value_threshold_keeps": {
+     "max": 7068341.0,
+     "mean": 754819.0666666667,
+     "total": 11322286.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 515357,
+    "forced_keep_rate": 0.9295811485271385,
+    "forced_skip": 39040,
+    "threshold_keep_rate": 0.034877931591554785,
+    "threshold_keeps": 20035
+   },
+   "value_objective": {
+    "objective_max_mean": null,
+    "objective_max_p50": null,
+    "objective_max_p90": null,
+    "retained_mass_mean": null
+   },
+   "value_selectors": [
+    [
+     "v1",
+     15
+    ]
+   ],
+   "wall_s_mean": 94.60136,
+   "wall_s_total": 1419.02
+  },
+  "value_v1_t0.02": {
+   "N": 3620,
+   "N_per_canvas": 15.60344827586207,
+   "S_over_N": 0.34558,
+   "adapter_counters": {
+    "begins": 3620,
+    "canvas_refreshes": 16630,
+    "global_calls": 18100,
+    "global_eligible_tiles": 830975680,
+    "global_kept_tiles": 781851840,
+    "global_prefix_tiles": 828097680,
+    "global_prefix_work_fraction": 10,
+    "invalidates": 308,
+    "kept_prefix_fraction": 10,
+    "kept_prefix_tiles": 679975440,
+    "mage_carried_calls": 1270,
+    "mage_kept_prefix_tiles": 91763520,
+    "mage_prefix_tiles": 98998400,
+    "mage_reselections": 1095,
+    "mage_reused_calls": 14380,
+    "mage_selections": 1155,
+    "mage_warm_dense_calls": 200,
+    "observes": 3620,
+    "order_errors": 0,
+    "passthrough": 99740,
+    "prefix_copies": 1470,
+    "sparse_kept_prefix_fraction": 10,
+    "sparse_only_kept_tiles": 673006240,
+    "sparse_only_prefix_tiles": 722130080,
+    "sparse_prefix_tiles": 729099280,
+    "split_fa4_calls": 15850,
+    "split_list_builds": 3427,
+    "trigger_checks": 1716,
+    "trigger_step_sum": 1653,
+    "triggers": 231,
+    "triton_kv_copy_calls": 18100,
+    "triton_kv_copy_elements": 297732894720,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 15850,
+    "value_approximate_selector": 0,
+    "value_approximation_calls": 0,
+    "value_arms_active": 15,
+    "value_blocked": 0,
+    "value_budget_tokens": 25920,
+    "value_candidates": 3104950,
+    "value_drop_fraction": 0,
+    "value_evaluations": 0,
+    "value_exact_max": 3840,
+    "value_forced_keep": 86433460,
+    "value_forced_skip": 7594880,
+    "value_mu_passes": 0,
+    "value_passes": 2250,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 0,
+    "value_sketch_builds": 0,
+    "value_sketch_reuses": 0,
+    "value_sketch_skips": 2250,
+    "value_stat_bytes": 50908364800,
+    "value_threshold": 0,
+    "value_threshold_keeps": 5330060
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 232,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 83.39989,
+   "decode_s_total": 1250.998,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 830975680,
+    "kept_tiles": 781851840,
+    "prefix_work_fraction": 10,
+    "sparsity": 0.059115857638577296
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 3841.0,
+   "output_tokens_total": 57615,
+   "overall_decoder_attention_sparsity": 0.059115857638577296,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 830975680,
+   "prefill_s_total": 43.01,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_v1_t0.02_a20261007_221154/public/dev_v1_t0.02_a20261007_221154_value_v1.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_approximation_calls": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 1169180.0,
+     "mean": 206996.66666666666,
+     "total": 3104950.0
+    },
+    "value_drop_fraction": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_evaluations": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 28784418.0,
+     "mean": 5762230.666666667,
+     "total": 86433460.0
+    },
+    "value_forced_skip": {
+     "max": 5065600.0,
+     "mean": 506325.3333333333,
+     "total": 7594880.0
+    },
+    "value_mu_passes": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_passes": {
+     "max": 585.0,
+     "mean": 150.0,
+     "total": 2250.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_builds": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_reuses": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_skips": {
+     "max": 585.0,
+     "mean": 150.0,
+     "total": 2250.0
+    },
+    "value_stat_bytes": {
+     "max": 19165429760.0,
+     "mean": 3393890986.6666665,
+     "total": 50908364800.0
+    },
+    "value_threshold": {
+     "max": 0.02,
+     "mean": 0.02,
+     "total": 0.3
+    },
+    "value_threshold_keeps": {
+     "max": 3563742.0,
+     "mean": 355337.3333333333,
+     "total": 5330060.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 527487,
+    "forced_keep_rate": 0.9336201815604143,
+    "forced_skip": 37504,
+    "threshold_keep_rate": 0.014018610040766181,
+    "threshold_keeps": 8033
+   },
+   "value_objective": {
+    "objective_max_mean": null,
+    "objective_max_p50": null,
+    "objective_max_p90": null,
+    "retained_mass_mean": null
+   },
+   "value_selectors": [
+    [
+     "v1",
+     15
+    ]
+   ],
+   "wall_s_mean": 86.27052,
+   "wall_s_total": 1294.058
+  },
+  "value_v1_t0.05": {
+   "N": 4441,
+   "N_per_canvas": 19.73777777777778,
+   "S_over_N": 0.270337,
+   "adapter_counters": {
+    "begins": 4441,
+    "canvas_refreshes": 20770,
+    "global_calls": 22205,
+    "global_eligible_tiles": 1109495360,
+    "global_kept_tiles": 1007892160,
+    "global_prefix_tiles": 1105960560,
+    "global_prefix_work_fraction": 10,
+    "invalidates": 301,
+    "kept_prefix_fraction": 10,
+    "kept_prefix_tiles": 912369200,
+    "mage_carried_calls": 1235,
+    "mage_kept_prefix_tiles": 85680960,
+    "mage_prefix_tiles": 91988160,
+    "mage_reselections": 1020,
+    "mage_reused_calls": 18630,
+    "mage_selections": 1120,
+    "mage_warm_dense_calls": 200,
+    "observes": 4441,
+    "order_errors": 0,
+    "passthrough": 120055,
+    "prefix_copies": 1435,
+    "sparse_kept_prefix_fraction": 10,
+    "sparse_only_kept_tiles": 905400000,
+    "sparse_only_prefix_tiles": 1007003200,
+    "sparse_prefix_tiles": 1013972400,
+    "split_fa4_calls": 20065,
+    "split_list_builds": 3352,
+    "trigger_checks": 2467,
+    "trigger_step_sum": 1684,
+    "triggers": 209,
+    "triton_kv_copy_calls": 22205,
+    "triton_kv_copy_elements": 291054284800,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 20065,
+    "value_approximate_selector": 0,
+    "value_approximation_calls": 0,
+    "value_arms_active": 15,
+    "value_blocked": 0,
+    "value_budget_tokens": 25920,
+    "value_candidates": 2885330,
+    "value_drop_fraction": 0,
+    "value_evaluations": 0,
+    "value_exact_max": 3840,
+    "value_forced_keep": 83614019,
+    "value_forced_skip": 6649600,
+    "value_mu_passes": 0,
+    "value_passes": 2140,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 0,
+    "value_sketch_builds": 0,
+    "value_sketch_reuses": 0,
+    "value_sketch_skips": 2140,
+    "value_stat_bytes": 47308308480,
+    "value_threshold": 0,
+    "value_threshold_keeps": 2066941
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 225,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 80.03778,
+   "decode_s_total": 1200.567,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 1109495360,
+    "kept_tiles": 1007892160,
+    "prefix_work_fraction": 10,
+    "sparsity": 0.09157604769072669
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 3724.4,
+   "output_tokens_total": 55866,
+   "overall_decoder_attention_sparsity": 0.09157604769072669,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 1109495360,
+   "prefill_s_total": 43.069,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_v1_t0.05_a20261007_221154/public/dev_v1_t0.05_a20261007_221154_value_v1.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_approximation_calls": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 1084360.0,
+     "mean": 192355.33333333334,
+     "total": 2885330.0
+    },
+    "value_drop_fraction": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_evaluations": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 28723356.0,
+     "mean": 5574267.933333334,
+     "total": 83614019.0
+    },
+    "value_forced_skip": {
+     "max": 4563200.0,
+     "mean": 443306.6666666667,
+     "total": 6649600.0
+    },
+    "value_mu_passes": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_passes": {
+     "max": 545.0,
+     "mean": 142.66666666666666,
+     "total": 2140.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_builds": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_reuses": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_skips": {
+     "max": 545.0,
+     "mean": 142.66666666666666,
+     "total": 2140.0
+    },
+    "value_stat_bytes": {
+     "max": 17775083520.0,
+     "mean": 3153887232.0,
+     "total": 47308308480.0
+    },
+    "value_threshold": {
+     "max": 0.05,
+     "mean": 0.05,
+     "total": 0.75
+    },
+    "value_threshold_keeps": {
+     "max": 1412964.0,
+     "mean": 137796.06666666668,
+     "total": 2066941.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 533223,
+    "forced_keep_rate": 0.9357563909299423,
+    "forced_skip": 36608,
+    "threshold_keep_rate": 0.0040148358409307005,
+    "threshold_keeps": 2297
+   },
+   "value_objective": {
+    "objective_max_mean": null,
+    "objective_max_p50": null,
+    "objective_max_p90": null,
+    "retained_mass_mean": null
+   },
+   "value_selectors": [
+    [
+     "v1",
+     15
+    ]
+   ],
+   "wall_s_mean": 82.91249,
+   "wall_s_total": 1243.687
+  },
+  "value_v2_t0.005": {
+   "N": 3420,
+   "N_per_canvas": 15.336322869955158,
+   "S_over_N": 0.044377,
+   "adapter_counters": {
+    "begins": 3420,
+    "canvas_refreshes": 15675,
+    "global_calls": 17100,
+    "global_eligible_tiles": 770397120,
+    "global_kept_tiles": 726381120,
+    "global_prefix_tiles": 767679120,
+    "global_prefix_work_fraction": 10,
+    "invalidates": 299,
+    "kept_prefix_fraction": 10,
+    "kept_prefix_tiles": 627866160,
+    "mage_carried_calls": 1225,
+    "mage_kept_prefix_tiles": 88722240,
+    "mage_prefix_tiles": 95796960,
+    "mage_reselections": 1085,
+    "mage_reused_calls": 13480,
+    "mage_selections": 1110,
+    "mage_warm_dense_calls": 200,
+    "observes": 3420,
+    "order_errors": 0,
+    "passthrough": 94470,
+    "prefix_copies": 1425,
+    "sparse_kept_prefix_fraction": 10,
+    "sparse_only_kept_tiles": 620896960,
+    "sparse_only_prefix_tiles": 664912960,
+    "sparse_prefix_tiles": 671882160,
+    "split_fa4_calls": 14905,
+    "split_list_builds": 3347,
+    "trigger_checks": 1631,
+    "trigger_step_sum": 1568,
+    "triggers": 222,
+    "triton_kv_copy_calls": 17100,
+    "triton_kv_copy_elements": 285891031040,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 14905,
+    "value_approximate_selector": 0,
+    "value_approximation_calls": 0,
+    "value_arms_active": 15,
+    "value_blocked": 0,
+    "value_budget_tokens": 25920,
+    "value_candidates": 3004630,
+    "value_drop_fraction": 0,
+    "value_evaluations": 0,
+    "value_exact_max": 3840,
+    "value_forced_keep": 79665629,
+    "value_forced_skip": 7425920,
+    "value_mu_passes": 2195,
+    "value_passes": 2195,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 0,
+    "value_sketch_builds": 1110,
+    "value_sketch_reuses": 1085,
+    "value_stat_bytes": 1624555274240,
+    "value_threshold": 0,
+    "value_threshold_keeps": 9056611
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 223,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 10.11788,
+   "decode_s_total": 151.768,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 770397120,
+    "kept_tiles": 726381120,
+    "prefix_work_fraction": 10,
+    "sparsity": 0.05713416997197496
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 3685.6,
+   "output_tokens_total": 55284,
+   "overall_decoder_attention_sparsity": 0.05713416997197496,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 770397120,
+   "prefill_s_total": 43.244,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_v2_t0.005_a20261007_221154/public/dev_v2_t0.005_a20261007_221154_value_v2.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_approximation_calls": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 1241620.0,
+     "mean": 200308.66666666666,
+     "total": 3004630.0
+    },
+    "value_drop_fraction": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_evaluations": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 27947211.0,
+     "mean": 5311041.933333334,
+     "total": 79665629.0
+    },
+    "value_forced_skip": {
+     "max": 5448320.0,
+     "mean": 495061.3333333333,
+     "total": 7425920.0
+    },
+    "value_mu_passes": {
+     "max": 620.0,
+     "mean": 146.33333333333334,
+     "total": 2195.0
+    },
+    "value_passes": {
+     "max": 620.0,
+     "mean": 146.33333333333334,
+     "total": 2195.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_builds": {
+     "max": 315.0,
+     "mean": 74.0,
+     "total": 1110.0
+    },
+    "value_sketch_reuses": {
+     "max": 305.0,
+     "mean": 72.33333333333333,
+     "total": 1085.0
+    },
+    "value_stat_bytes": {
+     "max": 671319326720.0,
+     "mean": 108303684949.33333,
+     "total": 1624555274240.0
+    },
+    "value_threshold": {
+     "max": 0.005,
+     "mean": 0.005,
+     "total": 0.075
+    },
+    "value_threshold_keeps": {
+     "max": 6336309.0,
+     "mean": 603774.0666666667,
+     "total": 9056611.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 519918,
+    "forced_keep_rate": 0.9346504395347583,
+    "forced_skip": 36352,
+    "threshold_keep_rate": 0.027282328912763696,
+    "threshold_keeps": 15602
+   },
+   "value_objective": {
+    "objective_max_mean": 0.014955958815697083,
+    "objective_max_p50": 5.946977239545959e-07,
+    "objective_max_p90": 0.04712877944111824,
+    "retained_mass_mean": 0.9909106651941936
+   },
+   "value_selectors": [
+    [
+     "v2",
+     15
+    ]
+   ],
+   "wall_s_mean": 13.00392,
+   "wall_s_total": 195.059
+  },
+  "value_v2_t0.01": {
+   "N": 3795,
+   "N_per_canvas": 16.357758620689655,
+   "S_over_N": 0.044001,
+   "adapter_counters": {
+    "begins": 3795,
+    "canvas_refreshes": 17505,
+    "global_calls": 18975,
+    "global_eligible_tiles": 890660160,
+    "global_kept_tiles": 830724800,
+    "global_prefix_tiles": 887642160,
+    "global_prefix_work_fraction": 10,
+    "invalidates": 308,
+    "kept_prefix_fraction": 10,
+    "kept_prefix_tiles": 726014000,
+    "mage_carried_calls": 1270,
+    "mage_kept_prefix_tiles": 93975360,
+    "mage_prefix_tiles": 101692800,
+    "mage_reselections": 1135,
+    "mage_reused_calls": 15215,
+    "mage_selections": 1155,
+    "mage_warm_dense_calls": 200,
+    "observes": 3795,
+    "order_errors": 0,
+    "passthrough": 104115,
+    "prefix_copies": 1470,
+    "sparse_kept_prefix_fraction": 10,
+    "sparse_only_kept_tiles": 719044800,
+    "sparse_only_prefix_tiles": 778980160,
+    "sparse_prefix_tiles": 785949360,
+    "split_fa4_calls": 16685,
+    "split_list_builds": 3542,
+    "trigger_checks": 1720,
+    "trigger_step_sum": 1657,
+    "triggers": 231,
+    "triton_kv_copy_calls": 18975,
+    "triton_kv_copy_elements": 298244075520,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 16685,
+    "value_approximate_selector": 0,
+    "value_approximation_calls": 0,
+    "value_arms_active": 15,
+    "value_blocked": 0,
+    "value_budget_tokens": 25920,
+    "value_candidates": 3189350,
+    "value_drop_fraction": 0,
+    "value_evaluations": 0,
+    "value_exact_max": 3840,
+    "value_forced_keep": 88205451,
+    "value_forced_skip": 8083840,
+    "value_mu_passes": 2290,
+    "value_passes": 2290,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 0,
+    "value_sketch_builds": 1155,
+    "value_sketch_reuses": 1135,
+    "value_stat_bytes": 1724429762560,
+    "value_threshold": 0,
+    "value_threshold_keeps": 5769909
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 232,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 11.13218,
+   "decode_s_total": 166.983,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 890660160,
+    "kept_tiles": 830724800,
+    "prefix_work_fraction": 10,
+    "sparsity": 0.06729318621369573
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 3815.0,
+   "output_tokens_total": 57225,
+   "overall_decoder_attention_sparsity": 0.06729318621369573,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 890660160,
+   "prefill_s_total": 43.264,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_v2_t0.01_a20261007_221154/public/dev_v2_t0.01_a20261007_221154_value_v2.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_approximation_calls": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 1262520.0,
+     "mean": 212623.33333333334,
+     "total": 3189350.0
+    },
+    "value_drop_fraction": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_evaluations": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 30919230.0,
+     "mean": 5880363.4,
+     "total": 88205451.0
+    },
+    "value_forced_skip": {
+     "max": 5564160.0,
+     "mean": 538922.6666666666,
+     "total": 8083840.0
+    },
+    "value_mu_passes": {
+     "max": 630.0,
+     "mean": 152.66666666666666,
+     "total": 2290.0
+    },
+    "value_passes": {
+     "max": 630.0,
+     "mean": 152.66666666666666,
+     "total": 2290.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_builds": {
+     "max": 315.0,
+     "mean": 77.0,
+     "total": 1155.0
+    },
+    "value_sketch_reuses": {
+     "max": 315.0,
+     "mean": 75.66666666666667,
+     "total": 1135.0
+    },
+    "value_stat_bytes": {
+     "max": 682619535360.0,
+     "mean": 114961984170.66667,
+     "total": 1724429762560.0
+    },
+    "value_threshold": {
+     "max": 0.01,
+     "mean": 0.01,
+     "total": 0.15
+    },
+    "value_threshold_keeps": {
+     "max": 3917250.0,
+     "mean": 384660.6,
+     "total": 5769909.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 527676,
+    "forced_keep_rate": 0.9336423794189461,
+    "forced_skip": 37504,
+    "threshold_keep_rate": 0.013688780923661138,
+    "threshold_keeps": 7844
+   },
+   "value_objective": {
+    "objective_max_mean": 0.016805189939621337,
+    "objective_max_p50": 5.946977239545959e-07,
+    "objective_max_p90": 0.05420458614826202,
+    "retained_mass_mean": 0.9863402247428894
+   },
+   "value_selectors": [
+    [
+     "v2",
+     15
+    ]
+   ],
+   "wall_s_mean": 14.01962,
+   "wall_s_total": 210.294
+  },
+  "value_v2_t0.02": {
+   "N": 3948,
+   "N_per_canvas": 16.45,
+   "S_over_N": 0.044295,
+   "adapter_counters": {
+    "begins": 3948,
+    "canvas_refreshes": 18230,
+    "global_calls": 19740,
+    "global_eligible_tiles": 937805120,
+    "global_kept_tiles": 873616960,
+    "global_prefix_tiles": 934664720,
+    "global_prefix_work_fraction": 10,
+    "invalidates": 316,
+    "kept_prefix_fraction": 10,
+    "kept_prefix_tiles": 763511600,
+    "mage_carried_calls": 1310,
+    "mage_kept_prefix_tiles": 98675520,
+    "mage_prefix_tiles": 106964960,
+    "mage_reselections": 1180,
+    "mage_reused_calls": 15855,
+    "mage_selections": 1195,
+    "mage_warm_dense_calls": 200,
+    "observes": 3948,
+    "order_errors": 0,
+    "passthrough": 108180,
+    "prefix_copies": 1510,
+    "sparse_kept_prefix_fraction": 10,
+    "sparse_only_kept_tiles": 756542400,
+    "sparse_only_prefix_tiles": 820730560,
+    "sparse_prefix_tiles": 827699760,
+    "split_fa4_calls": 17365,
+    "split_list_builds": 3642,
+    "trigger_checks": 1782,
+    "trigger_step_sum": 1767,
+    "triggers": 240,
+    "triton_kv_copy_calls": 19740,
+    "triton_kv_copy_elements": 308828139520,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 17365,
+    "value_approximate_selector": 0,
+    "value_approximation_calls": 0,
+    "value_arms_active": 15,
+    "value_blocked": 0,
+    "value_budget_tokens": 25920,
+    "value_candidates": 3354530,
+    "value_drop_fraction": 0,
+    "value_evaluations": 0,
+    "value_exact_max": 3840,
+    "value_forced_keep": 95330884,
+    "value_forced_skip": 8669440,
+    "value_mu_passes": 2375,
+    "value_passes": 2375,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 0,
+    "value_sketch_builds": 1195,
+    "value_sketch_reuses": 1180,
+    "value_stat_bytes": 1813739356160,
+    "value_threshold": 0,
+    "value_threshold_keeps": 3344636
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 240,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 11.65837,
+   "decode_s_total": 174.876,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 937805120,
+    "kept_tiles": 873616960,
+    "prefix_work_fraction": 10,
+    "sparsity": 0.06844509443497171
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 3966.266666666667,
+   "output_tokens_total": 59494,
+   "overall_decoder_attention_sparsity": 0.06844509443497171,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 937805120,
+   "prefill_s_total": 43.271,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_v2_t0.02_a20261007_221154/public/dev_v2_t0.02_a20261007_221154_value_v2.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_approximation_calls": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 1262520.0,
+     "mean": 223635.33333333334,
+     "total": 3354530.0
+    },
+    "value_drop_fraction": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_evaluations": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 32605564.0,
+     "mean": 6355392.266666667,
+     "total": 95330884.0
+    },
+    "value_forced_skip": {
+     "max": 5564160.0,
+     "mean": 577962.6666666666,
+     "total": 8669440.0
+    },
+    "value_mu_passes": {
+     "max": 630.0,
+     "mean": 158.33333333333334,
+     "total": 2375.0
+    },
+    "value_passes": {
+     "max": 630.0,
+     "mean": 158.33333333333334,
+     "total": 2375.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_builds": {
+     "max": 315.0,
+     "mean": 79.66666666666667,
+     "total": 1195.0
+    },
+    "value_sketch_reuses": {
+     "max": 315.0,
+     "mean": 78.66666666666667,
+     "total": 1180.0
+    },
+    "value_stat_bytes": {
+     "max": 682619535360.0,
+     "mean": 120915957077.33333,
+     "total": 1813739356160.0
+    },
+    "value_threshold": {
+     "max": 0.02,
+     "mean": 0.02,
+     "total": 0.3
+    },
+    "value_threshold_keeps": {
+     "max": 2230916.0,
+     "mean": 222975.73333333334,
+     "total": 3344636.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 532376,
+    "forced_keep_rate": 0.9325140478959685,
+    "forced_skip": 38528,
+    "threshold_keep_rate": 0.005476893918278611,
+    "threshold_keeps": 3144
+   },
+   "value_objective": {
+    "objective_max_mean": 0.024623567454301564,
+    "objective_max_p50": 5.946977239545959e-07,
+    "objective_max_p90": 0.07486924231052398,
+    "retained_mass_mean": 0.9844466129938761
+   },
+   "value_selectors": [
+    [
+     "v2",
+     15
+    ]
+   ],
+   "wall_s_mean": 14.54638,
+   "wall_s_total": 218.196
+  },
+  "value_v2_t0.05": {
+   "N": 4233,
+   "N_per_canvas": 16.53515625,
+   "S_over_N": 0.044144,
+   "adapter_counters": {
+    "begins": 4233,
+    "canvas_refreshes": 19575,
+    "global_calls": 21165,
+    "global_eligible_tiles": 1007666880,
+    "global_kept_tiles": 939561280,
+    "global_prefix_tiles": 1004298480,
+    "global_prefix_work_fraction": 10,
+    "invalidates": 332,
+    "kept_prefix_fraction": 10,
+    "kept_prefix_tiles": 821685360,
+    "mage_carried_calls": 1390,
+    "mage_kept_prefix_tiles": 105732160,
+    "mage_prefix_tiles": 114507520,
+    "mage_reselections": 1255,
+    "mage_reused_calls": 17045,
+    "mage_selections": 1275,
+    "mage_warm_dense_calls": 200,
+    "observes": 4233,
+    "order_errors": 0,
+    "passthrough": 115785,
+    "prefix_copies": 1590,
+    "sparse_kept_prefix_fraction": 10,
+    "sparse_only_kept_tiles": 814716160,
+    "sparse_only_prefix_tiles": 882821760,
+    "sparse_prefix_tiles": 889790960,
+    "split_fa4_calls": 18635,
+    "split_list_builds": 3863,
+    "trigger_checks": 1969,
+    "trigger_step_sum": 1858,
+    "triggers": 254,
+    "triton_kv_copy_calls": 21165,
+    "triton_kv_copy_elements": 325428899840,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 18635,
+    "value_approximate_selector": 0,
+    "value_approximation_calls": 0,
+    "value_arms_active": 15,
+    "value_blocked": 0,
+    "value_budget_tokens": 25920,
+    "value_candidates": 3591010,
+    "value_drop_fraction": 0,
+    "value_evaluations": 0,
+    "value_exact_max": 3840,
+    "value_forced_keep": 104380849,
+    "value_forced_skip": 9180160,
+    "value_mu_passes": 2530,
+    "value_passes": 2530,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 0,
+    "value_sketch_builds": 1275,
+    "value_sketch_reuses": 1255,
+    "value_stat_bytes": 1941600010240,
+    "value_threshold": 0,
+    "value_threshold_keeps": 1351311
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 256,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 12.45743,
+   "decode_s_total": 186.861,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 1007666880,
+    "kept_tiles": 939561280,
+    "prefix_work_fraction": 10,
+    "sparsity": 0.06758741539664381
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 4247.4,
+   "output_tokens_total": 63711,
+   "overall_decoder_attention_sparsity": 0.06758741539664381,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 1007666880,
+   "prefill_s_total": 43.282,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_dev_v2_t0.05_a20261007_221154/public/dev_v2_t0.05_a20261007_221154_value_v2.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_approximation_calls": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 1262520.0,
+     "mean": 239400.66666666666,
+     "total": 3591010.0
+    },
+    "value_drop_fraction": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_evaluations": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 33937311.0,
+     "mean": 6958723.266666667,
+     "total": 104380849.0
+    },
+    "value_forced_skip": {
+     "max": 5564160.0,
+     "mean": 612010.6666666666,
+     "total": 9180160.0
+    },
+    "value_mu_passes": {
+     "max": 630.0,
+     "mean": 168.66666666666666,
+     "total": 2530.0
+    },
+    "value_passes": {
+     "max": 630.0,
+     "mean": 168.66666666666666,
+     "total": 2530.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_builds": {
+     "max": 315.0,
+     "mean": 85.0,
+     "total": 1275.0
+    },
+    "value_sketch_reuses": {
+     "max": 315.0,
+     "mean": 83.66666666666667,
+     "total": 1255.0
+    },
+    "value_stat_bytes": {
+     "max": 682619535360.0,
+     "mean": 129440000682.66667,
+     "total": 1941600010240.0
+    },
+    "value_threshold": {
+     "max": 0.05,
+     "mean": 0.05,
+     "total": 0.75
+    },
+    "value_threshold_keeps": {
+     "max": 899169.0,
+     "mean": 90087.4,
+     "total": 1351311.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 535592,
+    "forced_keep_rate": 0.9312311351591949,
+    "forced_skip": 39552,
+    "threshold_keep_rate": 0.0016525023607176581,
+    "threshold_keeps": 952
+   },
+   "value_objective": {
+    "objective_max_mean": 0.02742965364539979,
+    "objective_max_p50": 5.946977239545959e-07,
+    "objective_max_p90": 0.09005962312221527,
+    "retained_mass_mean": 0.9829659541447957
+   },
+   "value_selectors": [
+    [
+     "v2",
+     15
+    ]
+   ],
+   "wall_s_mean": 15.3462,
+   "wall_s_total": 230.193
+  },
+  "value_v3a": {
+   "N": 3831,
+   "N_per_canvas": 16.512931034482758,
+   "S_over_N": 0.044601,
+   "adapter_counters": {
+    "begins": 3831,
+    "canvas_refreshes": 17685,
+    "global_calls": 19155,
+    "global_eligible_tiles": 902755520,
+    "global_kept_tiles": 842051520,
+    "global_prefix_tiles": 899708720,
+    "global_prefix_work_fraction": 10,
+    "invalidates": 308,
+    "kept_prefix_fraction": 10,
+    "kept_prefix_tiles": 737016400,
+    "mage_carried_calls": 1270,
+    "mage_kept_prefix_tiles": 94424640,
+    "mage_prefix_tiles": 101988320,
+    "mage_reselections": 1140,
+    "mage_reused_calls": 15390,
+    "mage_selections": 1155,
+    "mage_warm_dense_calls": 200,
+    "observes": 3831,
+    "order_errors": 0,
+    "passthrough": 105015,
+    "prefix_copies": 1470,
+    "sparse_kept_prefix_fraction": 10,
+    "sparse_only_kept_tiles": 730047200,
+    "sparse_only_prefix_tiles": 790751200,
+    "sparse_prefix_tiles": 797720400,
+    "split_fa4_calls": 16860,
+    "split_list_builds": 3547,
+    "trigger_checks": 1686,
+    "trigger_step_sum": 1623,
+    "triggers": 231,
+    "triton_kv_copy_calls": 19155,
+    "triton_kv_copy_elements": 298306990080,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 16860,
+    "value_approximate_selector": 0,
+    "value_approximation_calls": 0,
+    "value_arms_active": 15,
+    "value_blocked": 0,
+    "value_budget_tokens": 25920,
+    "value_candidates": 3187135,
+    "value_drop_fraction": 0,
+    "value_evaluations": 101988320,
+    "value_exact_max": 3840,
+    "value_forced_keep": 0,
+    "value_forced_skip": 0,
+    "value_mu_passes": 2295,
+    "value_passes": 2295,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 0,
+    "value_sketch_builds": 1155,
+    "value_sketch_reuses": 1140,
+    "value_stat_bytes": 1729436467200,
+    "value_threshold": 15,
+    "value_threshold_keeps": 0
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 232,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 11.39098,
+   "decode_s_total": 170.865,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 902755520,
+    "kept_tiles": 842051520,
+    "prefix_work_fraction": 10,
+    "sparsity": 0.0672430117070899
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 3835.266666666667,
+   "output_tokens_total": 57529,
+   "overall_decoder_attention_sparsity": 0.0672430117070899,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 902755520,
+   "prefill_s_total": 43.225,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_v3a_a20261008_011554/public/v3a_a20261008_011554_value_v3a.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_approximation_calls": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 1259370.0,
+     "mean": 212475.66666666666,
+     "total": 3187135.0
+    },
+    "value_drop_fraction": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_evaluations": {
+     "max": 40299840.0,
+     "mean": 6799221.333333333,
+     "total": 101988320.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_forced_skip": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_mu_passes": {
+     "max": 630.0,
+     "mean": 153.0,
+     "total": 2295.0
+    },
+    "value_passes": {
+     "max": 630.0,
+     "mean": 153.0,
+     "total": 2295.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_builds": {
+     "max": 315.0,
+     "mean": 77.0,
+     "total": 1155.0
+    },
+    "value_sketch_reuses": {
+     "max": 315.0,
+     "mean": 76.0,
+     "total": 1140.0
+    },
+    "value_stat_bytes": {
+     "max": 682619535360.0,
+     "mean": 115295764480.0,
+     "total": 1729436467200.0
+    },
+    "value_threshold": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_threshold_keeps": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 0,
+    "forced_keep_rate": null,
+    "forced_skip": 0,
+    "threshold_keep_rate": null,
+    "threshold_keeps": 0
+   },
+   "value_objective": {
+    "objective_max_mean": 0.006027836506350089,
+    "objective_max_p50": 5.946977239545959e-07,
+    "objective_max_p90": 0.017364724352955815,
+    "retained_mass_mean": 0.9965497533480326
+   },
+   "value_selectors": [
+    [
+     "v3a",
+     15
+    ]
+   ],
+   "wall_s_mean": 14.27612,
+   "wall_s_total": 214.142
+  },
+  "value_v3b": {
+   "N": 4488,
+   "N_per_canvas": 18.62240663900415,
+   "S_over_N": 0.031426,
+   "adapter_counters": {
+    "begins": 4488,
+    "canvas_refreshes": 21160,
+    "global_calls": 22440,
+    "global_eligible_tiles": 1004552320,
+    "global_kept_tiles": 122932000,
+    "global_prefix_tiles": 1000961920,
+    "global_prefix_work_fraction": 0,
+    "invalidates": 317,
+    "kept_prefix_fraction": 0,
+    "kept_prefix_tiles": 20114560,
+    "mage_carried_calls": 1205,
+    "mage_kept_prefix_tiles": 2077920,
+    "mage_prefix_tiles": 99227040,
+    "mage_reselections": 1200,
+    "mage_reused_calls": 18755,
+    "mage_selections": 1205,
+    "mage_sticky_units": 1200,
+    "mage_warm_dense_calls": 75,
+    "observes": 4488,
+    "order_errors": 0,
+    "passthrough": 121710,
+    "prefix_copies": 1280,
+    "sparse_kept_prefix_fraction": 0,
+    "sparse_only_kept_tiles": 17399680,
+    "sparse_only_prefix_tiles": 899020000,
+    "sparse_prefix_tiles": 901734880,
+    "split_fa4_calls": 20035,
+    "split_list_builds": 3574,
+    "trigger_checks": 1962,
+    "trigger_step_sum": 1944,
+    "triggers": 240,
+    "triton_kv_copy_calls": 22440,
+    "triton_kv_copy_elements": 227416576000,
+    "triton_lse_identity_builds": 15,
+    "triton_lse_merge_calls": 20035,
+    "value_approximate_selector": 0,
+    "value_approximation_calls": 0,
+    "value_arms_active": 15,
+    "value_blocked": 2405,
+    "value_budget_tokens": 25920,
+    "value_candidates": 0,
+    "value_drop_fraction": 0,
+    "value_evaluations": 0,
+    "value_exact_max": 3840,
+    "value_forced_keep": 0,
+    "value_forced_skip": 0,
+    "value_mu_passes": 2405,
+    "value_passes": 0,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 0,
+    "value_sketch_builds": 1205,
+    "value_sketch_reuses": 1200,
+    "value_stat_bytes": 1683081052160,
+    "value_threshold": 15,
+    "value_threshold_keeps": 0
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 241,
+   "capped": 0,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 9.40257,
+   "decode_s_total": 141.039,
+   "finish_reasons": [
+    [
+     "stop",
+     15
+    ]
+   ],
+   "finished": 15,
+   "global_scope": {
+    "eligible_tiles": 1004552320,
+    "kept_tiles": 122932000,
+    "prefix_work_fraction": 0,
+    "sparsity": 0.8776250897514228
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 3980.0666666666666,
+   "output_tokens_total": 59701,
+   "overall_decoder_attention_sparsity": 0.8776250897514228,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 1004552320,
+   "prefill_s_total": 43.253,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_v3b_a20261008_011554/public/v3b_a20261008_011554_value_v3b.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_approximation_calls": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 470.0,
+     "mean": 160.33333333333334,
+     "total": 2405.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_drop_fraction": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_evaluations": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_forced_skip": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_mu_passes": {
+     "max": 470.0,
+     "mean": 160.33333333333334,
+     "total": 2405.0
+    },
+    "value_passes": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_builds": {
+     "max": 235.0,
+     "mean": 80.33333333333333,
+     "total": 1205.0
+    },
+    "value_sketch_reuses": {
+     "max": 235.0,
+     "mean": 80.0,
+     "total": 1200.0
+    },
+    "value_stat_bytes": {
+     "max": 467710115840.0,
+     "mean": 112205403477.33333,
+     "total": 1683081052160.0
+    },
+    "value_threshold": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_threshold_keeps": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 0,
+    "forced_keep_rate": null,
+    "forced_skip": 0,
+    "threshold_keep_rate": null,
+    "threshold_keeps": 0
+   },
+   "value_objective": null,
+   "value_selectors": [
+    [
+     "v3b",
+     15
+    ]
+   ],
+   "wall_s_mean": 12.28938,
+   "wall_s_total": 184.341
+  },
+  "value_v3b_drop": {
+   "N": 7887,
+   "N_per_canvas": 29.875,
+   "S_over_N": 0.046813,
+   "adapter_counters": {
+    "begins": 7887,
+    "canvas_refreshes": 37805,
+    "global_calls": 39435,
+    "global_eligible_tiles": 2182901440,
+    "global_kept_tiles": 1964351360,
+    "global_prefix_tiles": 2176609840,
+    "global_prefix_work_fraction": 10,
+    "invalidates": 340,
+    "kept_prefix_fraction": 10,
+    "kept_prefix_tiles": 1860934160,
+    "mage_carried_calls": 1430,
+    "mage_kept_prefix_tiles": 90478080,
+    "mage_prefix_tiles": 97125600,
+    "mage_reselections": 920,
+    "mage_reused_calls": 35570,
+    "mage_selections": 1315,
+    "mage_warm_dense_calls": 200,
+    "observes": 7887,
+    "order_errors": 0,
+    "passthrough": 207375,
+    "prefix_copies": 1630,
+    "sparse_kept_prefix_fraction": 10,
+    "sparse_only_kept_tiles": 1853964960,
+    "sparse_only_prefix_tiles": 2072515040,
+    "sparse_prefix_tiles": 2079484240,
+    "split_fa4_calls": 37200,
+    "split_list_builds": 3618,
+    "trigger_checks": 5522,
+    "trigger_step_sum": 1907,
+    "triggers": 189,
+    "triton_kv_copy_calls": 39435,
+    "triton_kv_copy_elements": 348564930560,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 37200,
+    "value_approximate_selector": 15,
+    "value_approximation_calls": 2235,
+    "value_arms_active": 15,
+    "value_blocked": 0,
+    "value_budget_tokens": 25920,
+    "value_candidates": 97125600,
+    "value_drop_fraction": 0,
+    "value_evaluations": 131859394560,
+    "value_exact_max": 3840,
+    "value_forced_keep": 0,
+    "value_forced_skip": 7005120,
+    "value_mu_passes": 2235,
+    "value_passes": 16485,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 0,
+    "value_sketch_builds": 1315,
+    "value_sketch_reuses": 920,
+    "value_stat_bytes": 1647112765440,
+    "value_threshold": 15,
+    "value_threshold_keeps": 0
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 264,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 24.61451,
+   "decode_s_total": 369.218,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 2182901440,
+    "kept_tiles": 1964351360,
+    "prefix_work_fraction": 10,
+    "sparsity": 0.100119078211795
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 4393.6,
+   "output_tokens_total": 65904,
+   "overall_decoder_attention_sparsity": 0.100119078211795,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 2182901440,
+   "prefill_s_total": 43.258,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_v3b_drop_a20261008_011554/public/v3b_drop_a20261008_011554_value_v3b_drop025.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_approximation_calls": {
+     "max": 385.0,
+     "mean": 149.0,
+     "total": 2235.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 23699840.0,
+     "mean": 6475040.0,
+     "total": 97125600.0
+    },
+    "value_drop_fraction": {
+     "max": 0.25,
+     "mean": 0.25,
+     "total": 3.75
+    },
+    "value_evaluations": {
+     "max": 50742599680.0,
+     "mean": 8790626304.0,
+     "total": 131859394560.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_forced_skip": {
+     "max": 2832160.0,
+     "mean": 467008.0,
+     "total": 7005120.0
+    },
+    "value_mu_passes": {
+     "max": 385.0,
+     "mean": 149.0,
+     "total": 2235.0
+    },
+    "value_passes": {
+     "max": 6350.0,
+     "mean": 1099.0,
+     "total": 16485.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_sketch_builds": {
+     "max": 315.0,
+     "mean": 87.66666666666667,
+     "total": 1315.0
+    },
+    "value_sketch_reuses": {
+     "max": 190.0,
+     "mean": 61.333333333333336,
+     "total": 920.0
+    },
+    "value_stat_bytes": {
+     "max": 401465999360.0,
+     "mean": 109807517696.0,
+     "total": 1647112765440.0
+    },
+    "value_threshold": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_threshold_keeps": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 0,
+    "forced_keep_rate": 0.0,
+    "forced_skip": 40416,
+    "threshold_keep_rate": 0.0,
+    "threshold_keeps": 0
+   },
+   "value_objective": {
+    "objective_max_mean": 0.36399476338663894,
+    "objective_max_p50": 5.946977239545959e-07,
+    "objective_max_p90": 1.1998845815658568,
+    "retained_mass_mean": 0.8818849245707194
+   },
+   "value_selectors": [
+    [
+     "v3b_drop",
+     15
+    ]
+   ],
+   "wall_s_mean": 27.50211,
+   "wall_s_total": 412.532
+  },
+  "value_v3b_short": {
+   "N": 3824,
+   "N_per_canvas": 16.482758620689655,
+   "S_over_N": 0.048043,
+   "adapter_counters": {
+    "begins": 3824,
+    "canvas_refreshes": 17650,
+    "global_calls": 19120,
+    "global_eligible_tiles": 901384800,
+    "global_kept_tiles": 840806240,
+    "global_prefix_tiles": 898343600,
+    "global_prefix_work_fraction": 10,
+    "invalidates": 308,
+    "kept_prefix_fraction": 10,
+    "kept_prefix_tiles": 735820880,
+    "mage_carried_calls": 1270,
+    "mage_kept_prefix_tiles": 94379680,
+    "mage_prefix_tiles": 101944160,
+    "mage_reselections": 1135,
+    "mage_reused_calls": 15360,
+    "mage_selections": 1155,
+    "mage_warm_dense_calls": 200,
+    "observes": 3824,
+    "order_errors": 0,
+    "passthrough": 104840,
+    "prefix_copies": 1470,
+    "sparse_kept_prefix_fraction": 10,
+    "sparse_only_kept_tiles": 728851680,
+    "sparse_only_prefix_tiles": 789430240,
+    "sparse_prefix_tiles": 796399440,
+    "split_fa4_calls": 16830,
+    "split_list_builds": 3532,
+    "trigger_checks": 1687,
+    "trigger_step_sum": 1624,
+    "triggers": 231,
+    "triton_kv_copy_calls": 19120,
+    "triton_kv_copy_elements": 298288640000,
+    "triton_lse_identity_builds": 16,
+    "triton_lse_merge_calls": 16830,
+    "value_approximate_selector": 15,
+    "value_approximation_calls": 2290,
+    "value_arms_active": 15,
+    "value_blocked": 0,
+    "value_budget_tokens": 25920,
+    "value_candidates": 94013280,
+    "value_drop_fraction": 0,
+    "value_evaluations": 0,
+    "value_exact_max": 3840,
+    "value_forced_keep": 0,
+    "value_forced_skip": 7930880,
+    "value_mu_passes": 2290,
+    "value_passes": 0,
+    "value_protect_recent_tokens": 0,
+    "value_protect_sink_tokens": 0,
+    "value_shortlist": 240,
+    "value_sketch_builds": 1155,
+    "value_sketch_reuses": 1135,
+    "value_stat_bytes": 1728676741120,
+    "value_threshold": 15,
+    "value_threshold_keeps": 0
+   },
+   "adapter_sha256": "c2948934b564eaffa0360bd40f5bf0be970e18d60830a22d885a1bc30558b2e8",
+   "canvases": 232,
+   "capped": 1,
+   "cells": 15,
+   "cudagraph_modes": [
+    [
+     "PIECEWISE",
+     15
+    ]
+   ],
+   "decode_s_mean": 12.24789,
+   "decode_s_total": 183.718,
+   "finish_reasons": [
+    [
+     "stop",
+     14
+    ],
+    [
+     "length",
+     1
+    ]
+   ],
+   "finished": 14,
+   "global_scope": {
+    "eligible_tiles": 901384800,
+    "kept_tiles": 840806240,
+    "prefix_work_fraction": 10,
+    "sparsity": 0.06720610332013588
+   },
+   "local_scope": {
+    "eligible_tiles": null,
+    "kept_tiles": null,
+    "note": "LOCAL native dense; adapter does not route it, so no LOCAL tile denominator exists. Global-only denominators are reported in global_scope and overall_sparsity_denominator.",
+    "routed": false,
+    "sparsity": null
+   },
+   "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+   "output_tokens_mean": 3825.133333333333,
+   "output_tokens_total": 57377,
+   "overall_decoder_attention_sparsity": 0.06720610332013588,
+   "overall_sparsity_basis": "GLOBAL eligible tiles (LOCAL is native dense, unrouted)",
+   "overall_sparsity_denominator": 901384800,
+   "prefill_s_total": 43.223,
+   "private_records": "/home/exouser/dyh/ljy_value_20261007/run_v3b_short_a20261008_011554/public/v3b_short_a20261008_011554_value_v3b_shortlist16.jsonl",
+   "prompt_tokens_max": 120016,
+   "prompt_tokens_mean": 72423.5,
+   "rng_seeds": 15,
+   "substrate": [
+    [
+     32,
+     16384
+    ]
+   ],
+   "value_counters": {
+    "value_approximate_selector": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_approximation_calls": {
+     "max": 630.0,
+     "mean": 152.66666666666666,
+     "total": 2290.0
+    },
+    "value_arms_active": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_blocked": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_budget_tokens": {
+     "max": 1728.0,
+     "mean": 1728.0,
+     "total": 25920.0
+    },
+    "value_candidates": {
+     "max": 34836480.0,
+     "mean": 6267552.0,
+     "total": 94013280.0
+    },
+    "value_drop_fraction": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_evaluations": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_exact_max": {
+     "max": 256.0,
+     "mean": 256.0,
+     "total": 3840.0
+    },
+    "value_forced_keep": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_forced_skip": {
+     "max": 5463360.0,
+     "mean": 528725.3333333334,
+     "total": 7930880.0
+    },
+    "value_mu_passes": {
+     "max": 630.0,
+     "mean": 152.66666666666666,
+     "total": 2290.0
+    },
+    "value_passes": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_recent_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_protect_sink_tokens": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    },
+    "value_shortlist": {
+     "max": 16.0,
+     "mean": 16.0,
+     "total": 240.0
+    },
+    "value_sketch_builds": {
+     "max": 315.0,
+     "mean": 77.0,
+     "total": 1155.0
+    },
+    "value_sketch_reuses": {
+     "max": 315.0,
+     "mean": 75.66666666666667,
+     "total": 1135.0
+    },
+    "value_stat_bytes": {
+     "max": 682619535360.0,
+     "mean": 115245116074.66667,
+     "total": 1728676741120.0
+    },
+    "value_threshold": {
+     "max": 1.0,
+     "mean": 1.0,
+     "total": 15.0
+    },
+    "value_threshold_keeps": {
+     "max": 0.0,
+     "mean": 0.0,
+     "total": 0.0
+    }
+   },
+   "value_forced": {
+    "forced_keep": 0,
+    "forced_keep_rate": 0.0,
+    "forced_skip": 36704,
+    "threshold_keep_rate": 0.0,
+    "threshold_keeps": 0
+   },
+   "value_objective": {
+    "objective_max_mean": 0.006167099006933086,
+    "objective_max_p50": 5.946977239545959e-07,
+    "objective_max_p90": 0.018200302496552467,
+    "retained_mass_mean": 0.9960830569267273
+   },
+   "value_selectors": [
+    [
+     "v3b_shortlist",
+     15
+    ]
+   ],
+   "wall_s_mean": 15.13283,
+   "wall_s_total": 226.993
+  }
+ },
+ "paired": {
+  "dense_full_fix51994_minus_allkept_fa4": {
+   "decode_s": {
+    "losses": 7,
+    "mean": -0.3247520000000001,
+    "median": 0.16318999999999928,
+    "n": 15,
+    "p90": 5.74013,
+    "wins": 8
+   },
+   "denoise_forwards": {
+    "losses": 6,
+    "mean": 5.133333333333334,
+    "median": 10.0,
+    "n": 15,
+    "p90": 217.6,
+    "wins": 9
+   },
+   "output_tokens": {
+    "losses": 5,
+    "mean": 697.4,
+    "median": 191.0,
+    "n": 15,
+    "p90": 3266.5999999999985,
+    "wins": 9
+   },
+   "prefill_s": {
+    "losses": 10,
+    "mean": -0.004100666666666782,
+    "median": -0.0010700000000000154,
+    "n": 15,
+    "p90": 0.002407999999999988,
+    "wins": 5
+   },
+   "wall_s": {
+    "losses": 7,
+    "mean": -0.328908,
+    "median": 0.1601499999999998,
+    "n": 15,
+    "p90": 5.741778000000001,
+    "wins": 8
+   }
+  },
+  "dense_full_fix51994_minus_current_v31_control": {
+   "decode_s": {
+    "losses": 4,
+    "mean": 2.981014,
+    "median": 1.51762,
+    "n": 15,
+    "p90": 8.246583999999999,
+    "wins": 11
+   },
+   "denoise_forwards": {
+    "losses": 5,
+    "mean": 32.2,
+    "median": 22.0,
+    "n": 15,
+    "p90": 249.1999999999999,
+    "wins": 10
+   },
+   "output_tokens": {
+    "losses": 5,
+    "mean": 1567.8666666666666,
+    "median": 409.0,
+    "n": 15,
+    "p90": 6637.799999999999,
+    "wins": 10
+   },
+   "prefill_s": {
+    "losses": 5,
+    "mean": 0.0022726666666667045,
+    "median": 0.00272,
+    "n": 15,
+    "p90": 0.008488000000000006,
+    "wins": 10
+   },
+   "wall_s": {
+    "losses": 4,
+    "mean": 2.9833933333333333,
+    "median": 1.5171000000000001,
+    "n": 15,
+    "p90": 8.251411999999998,
+    "wins": 11
+   }
+  },
+  "dense_full_fix51994_minus_dense_piecewise": {
+   "decode_s": {
+    "losses": 15,
+    "mean": -0.28362733333333323,
+    "median": -0.18149999999999977,
+    "n": 15,
+    "p90": -0.07739600000000006,
+    "wins": 0
+   },
+   "denoise_forwards": {
+    "losses": 0,
+    "mean": 0.0,
+    "median": 0.0,
+    "n": 15,
+    "p90": 0.0,
+    "wins": 0
+   },
+   "output_tokens": {
+    "losses": 0,
+    "mean": 0.0,
+    "median": 0.0,
+    "n": 15,
+    "p90": 0.0,
+    "wins": 0
+   },
+   "prefill_s": {
+    "losses": 9,
+    "mean": -0.0035273333333333936,
+    "median": -0.00018999999999991246,
+    "n": 15,
+    "p90": 0.002691999999999783,
+    "wins": 6
+   },
+   "wall_s": {
+    "losses": 15,
+    "mean": -0.2871379999999999,
+    "median": -0.18595000000000006,
+    "n": 15,
+    "p90": -0.07780999999999993,
+    "wins": 0
+   }
+  },
+  "dense_full_fix51994_minus_value_v1_t0.005": {
+   "decode_s": {
+    "losses": 15,
+    "mean": -71.07799533333333,
+    "median": -34.33043000000001,
+    "n": 15,
+    "p90": -7.614027999999999,
+    "wins": 0
+   },
+   "denoise_forwards": {
+    "losses": 4,
+    "mean": 93.26666666666667,
+    "median": 25.0,
+    "n": 15,
+    "p90": 330.59999999999997,
+    "wins": 11
+   },
+   "output_tokens": {
+    "losses": 2,
+    "mean": 1853.9333333333334,
+    "median": 268.0,
+    "n": 15,
+    "p90": 5418.399999999999,
+    "wins": 12
+   },
+   "prefill_s": {
+    "losses": 0,
+    "mean": 0.02148133333333325,
+    "median": 0.02134999999999998,
+    "n": 15,
+    "p90": 0.03759200000000007,
+    "wins": 15
+   },
+   "wall_s": {
+    "losses": 15,
+    "mean": -71.05628066666667,
+    "median": -34.2993,
+    "n": 15,
+    "p90": -7.604688000000003,
+    "wins": 0
+   }
+  },
+  "dense_full_fix51994_minus_value_v1_t0.01": {
+   "decode_s": {
+    "losses": 15,
+    "mean": -81.49090733333334,
+    "median": -34.584810000000004,
+    "n": 15,
+    "p90": -7.732334000000002,
+    "wins": 0
+   },
+   "denoise_forwards": {
+    "losses": 6,
+    "mean": 72.66666666666667,
+    "median": 7.0,
+    "n": 15,
+    "p90": 330.59999999999997,
+    "wins": 9
+   },
+   "output_tokens": {
+    "losses": 5,
+    "mean": 1523.1333333333334,
+    "median": 244.0,
+    "n": 15,
+    "p90": 5418.399999999999,
+    "wins": 9
+   },
+   "prefill_s": {
+    "losses": 0,
+    "mean": 0.021433333333333377,
+    "median": 0.020119999999999916,
+    "n": 15,
+    "p90": 0.03875800000000015,
+    "wins": 15
+   },
+   "wall_s": {
+    "losses": 15,
+    "mean": -81.46927533333333,
+    "median": -34.55724,
+    "n": 15,
+    "p90": -7.721414,
+    "wins": 0
+   }
+  },
+  "dense_full_fix51994_minus_value_v1_t0.02": {
+   "decode_s": {
+    "losses": 15,
+    "mean": -73.15932133333332,
+    "median": -35.05122,
+    "n": 15,
+    "p90": -7.759370000000001,
+    "wins": 0
+   },
+   "denoise_forwards": {
+    "losses": 6,
+    "mean": 88.0,
+    "median": 7.0,
+    "n": 15,
+    "p90": 330.59999999999997,
+    "wins": 9
+   },
+   "output_tokens": {
+    "losses": 5,
+    "mean": 1715.5333333333333,
+    "median": 172.0,
+    "n": 15,
+    "p90": 5418.399999999999,
+    "wins": 9
+   },
+   "prefill_s": {
+    "losses": 0,
+    "mean": 0.02074466666666664,
+    "median": 0.018779999999999797,
+    "n": 15,
+    "p90": 0.037140000000000485,
+    "wins": 15
+   },
+   "wall_s": {
+    "losses": 15,
+    "mean": -73.13842666666666,
+    "median": -35.01603,
+    "n": 15,
+    "p90": -7.751042000000001,
+    "wins": 0
+   }
+  },
+  "dense_full_fix51994_minus_value_v1_t0.05": {
+   "decode_s": {
+    "losses": 15,
+    "mean": -69.797208,
+    "median": -34.22372,
+    "n": 15,
+    "p90": -7.646708,
+    "wins": 0
+   },
+   "denoise_forwards": {
+    "losses": 4,
+    "mean": 33.266666666666666,
+    "median": 40.0,
+    "n": 15,
+    "p90": 330.59999999999997,
+    "wins": 11
+   },
+   "output_tokens": {
+    "losses": 3,
+    "mean": 1832.1333333333334,
+    "median": 244.0,
+    "n": 15,
+    "p90": 5418.399999999999,
+    "wins": 11
+   },
+   "prefill_s": {
+    "losses": 0,
+    "mean": 0.016815333333333293,
+    "median": 0.01706999999999992,
+    "n": 15,
+    "p90": 0.029095999999999834,
+    "wins": 15
+   },
+   "wall_s": {
+    "losses": 15,
+    "mean": -69.78039666666668,
+    "median": -34.19783,
+    "n": 15,
+    "p90": -7.637208000000001,
+    "wins": 0
+   }
+  },
+  "dense_full_fix51994_minus_value_v2_t0.005": {
+   "decode_s": {
+    "losses": 7,
+    "mean": 0.12269066666666648,
+    "median": 0.2883900000000015,
+    "n": 15,
+    "p90": 7.266313999999999,
+    "wins": 8
+   },
+   "denoise_forwards": {
+    "losses": 5,
+    "mean": 101.33333333333333,
+    "median": 57.0,
+    "n": 15,
+    "p90": 330.59999999999997,
+    "wins": 10
+   },
+   "output_tokens": {
+    "losses": 4,
+    "mean": 1870.9333333333334,
+    "median": 315.0,
+    "n": 15,
+    "p90": 5418.399999999999,
+    "wins": 10
+   },
+   "prefill_s": {
+    "losses": 3,
+    "mean": 0.005139999999999926,
+    "median": 0.005079999999999973,
+    "n": 15,
+    "p90": 0.01426799999999968,
+    "wins": 12
+   },
+   "wall_s": {
+    "losses": 7,
+    "mean": 0.12816799999999992,
+    "median": 0.280759999999999,
+    "n": 15,
+    "p90": 7.27938,
+    "wins": 8
+   }
+  },
+  "dense_full_fix51994_minus_value_v2_t0.01": {
+   "decode_s": {
+    "losses": 7,
+    "mean": -0.8916086666666667,
+    "median": 0.3922100000000004,
+    "n": 15,
+    "p90": 7.226779999999999,
+    "wins": 8
+   },
+   "denoise_forwards": {
+    "losses": 5,
+    "mean": 76.33333333333333,
+    "median": 57.0,
+    "n": 15,
+    "p90": 330.59999999999997,
+    "wins": 10
+   },
+   "output_tokens": {
+    "losses": 4,
+    "mean": 1741.5333333333333,
+    "median": 278.0,
+    "n": 15,
+    "p90": 5418.399999999999,
+    "wins": 10
+   },
+   "prefill_s": {
+    "losses": 2,
+    "mean": 0.0038393333333333465,
+    "median": 0.002850000000000019,
+    "n": 15,
+    "p90": 0.011706000000000038,
+    "wins": 13
+   },
+   "wall_s": {
+    "losses": 7,
+    "mean": -0.887534,
+    "median": 0.39315000000000033,
+    "n": 15,
+    "p90": 7.23398,
+    "wins": 8
+   }
+  },
+  "dense_full_fix51994_minus_value_v2_t0.02": {
+   "decode_s": {
+    "losses": 7,
+    "mean": -1.4177999999999997,
+    "median": 0.4269299999999996,
+    "n": 15,
+    "p90": 7.237783999999999,
+    "wins": 8
+   },
+   "denoise_forwards": {
+    "losses": 5,
+    "mean": 66.13333333333334,
+    "median": 57.0,
+    "n": 15,
+    "p90": 330.59999999999997,
+    "wins": 10
+   },
+   "output_tokens": {
+    "losses": 4,
+    "mean": 1590.2666666666667,
+    "median": 244.0,
+    "n": 15,
+    "p90": 5418.399999999999,
+    "wins": 10
+   },
+   "prefill_s": {
+    "losses": 3,
+    "mean": 0.0033113333333332734,
+    "median": 0.004570000000000185,
+    "n": 15,
+    "p90": 0.013637999999999546,
+    "wins": 12
+   },
+   "wall_s": {
+    "losses": 7,
+    "mean": -1.4142939999999997,
+    "median": 0.4307699999999999,
+    "n": 15,
+    "p90": 7.248829999999999,
+    "wins": 8
+   }
+  },
+  "dense_full_fix51994_minus_value_v2_t0.05": {
+   "decode_s": {
+    "losses": 8,
+    "mean": -2.2168613333333336,
+    "median": -0.19580999999999982,
+    "n": 15,
+    "p90": 7.236885999999999,
+    "wins": 7
+   },
+   "denoise_forwards": {
+    "losses": 6,
+    "mean": 47.13333333333333,
+    "median": 7.0,
+    "n": 15,
+    "p90": 330.59999999999997,
+    "wins": 9
+   },
+   "output_tokens": {
+    "losses": 5,
+    "mean": 1309.1333333333334,
+    "median": 244.0,
+    "n": 15,
+    "p90": 5418.399999999999,
+    "wins": 9
+   },
+   "prefill_s": {
+    "losses": 2,
+    "mean": 0.0026393333333333195,
+    "median": 0.002909999999999968,
+    "n": 15,
+    "p90": 0.008992000000000288,
+    "wins": 13
+   },
+   "wall_s": {
+    "losses": 8,
+    "mean": -2.214110666666666,
+    "median": -0.19005000000000005,
+    "n": 15,
+    "p90": 7.24294,
+    "wins": 7
+   }
+  },
+  "dense_full_fix51994_minus_value_v3a": {
+   "decode_s": {
+    "losses": 8,
+    "mean": -1.150413333333333,
+    "median": -0.20168999999999992,
+    "n": 15,
+    "p90": 7.039547999999998,
+    "wins": 7
+   },
+   "denoise_forwards": {
+    "losses": 5,
+    "mean": 73.93333333333334,
+    "median": 57.0,
+    "n": 15,
+    "p90": 330.59999999999997,
+    "wins": 10
+   },
+   "output_tokens": {
+    "losses": 3,
+    "mean": 1721.2666666666667,
+    "median": 244.0,
+    "n": 15,
+    "p90": 5418.399999999999,
+    "wins": 11
+   },
+   "prefill_s": {
+    "losses": 2,
+    "mean": 0.006377999999999928,
+    "median": 0.003929999999999989,
+    "n": 15,
+    "p90": 0.015815999999999695,
+    "wins": 13
+   },
+   "wall_s": {
+    "losses": 8,
+    "mean": -1.1440273333333335,
+    "median": -0.19765999999999995,
+    "n": 15,
+    "p90": 7.05235,
+    "wins": 7
+   }
+  },
+  "dense_full_fix51994_minus_value_v3b": {
+   "decode_s": {
+    "losses": 6,
+    "mean": 0.837998,
+    "median": 0.612070000000001,
+    "n": 15,
+    "p90": 6.310341999999997,
+    "wins": 9
+   },
+   "denoise_forwards": {
+    "losses": 6,
+    "mean": 30.133333333333333,
+    "median": 12.0,
+    "n": 15,
+    "p90": 249.1999999999999,
+    "wins": 9
+   },
+   "output_tokens": {
+    "losses": 5,
+    "mean": 1576.4666666666667,
+    "median": 409.0,
+    "n": 15,
+    "p90": 6637.799999999999,
+    "wins": 10
+   },
+   "prefill_s": {
+    "losses": 1,
+    "mean": 0.004562666666666692,
+    "median": 0.004389999999999894,
+    "n": 15,
+    "p90": 0.01244200000000024,
+    "wins": 14
+   },
+   "wall_s": {
+    "losses": 6,
+    "mean": 0.8427126666666666,
+    "median": 0.6131399999999996,
+    "n": 15,
+    "p90": 6.307399999999998,
+    "wins": 9
+   }
+  },
+  "dense_full_fix51994_minus_value_v3b_drop": {
+   "decode_s": {
+    "losses": 9,
+    "mean": -14.373942,
+    "median": -0.34767000000000015,
+    "n": 15,
+    "p90": 6.7199339999999985,
+    "wins": 6
+   },
+   "denoise_forwards": {
+    "losses": 7,
+    "mean": -196.46666666666667,
+    "median": 5.0,
+    "n": 15,
+    "p90": 330.59999999999997,
+    "wins": 8
+   },
+   "output_tokens": {
+    "losses": 6,
+    "mean": 1162.9333333333334,
+    "median": 244.0,
+    "n": 15,
+    "p90": 6798.0,
+    "wins": 9
+   },
+   "prefill_s": {
+    "losses": 5,
+    "mean": 0.004185999999999949,
+    "median": 0.0021499999999999853,
+    "n": 15,
+    "p90": 0.020052000000000087,
+    "wins": 9
+   },
+   "wall_s": {
+    "losses": 9,
+    "mean": -14.370025333333334,
+    "median": -0.3456199999999998,
+    "n": 15,
+    "p90": 6.734622,
+    "wins": 6
+   }
+  },
+  "dense_full_fix51994_minus_value_v3b_short": {
+   "decode_s": {
+    "losses": 9,
+    "mean": -2.0073200000000004,
+    "median": -0.1641999999999999,
+    "n": 15,
+    "p90": 6.534659999999999,
+    "wins": 6
+   },
+   "denoise_forwards": {
+    "losses": 5,
+    "mean": 74.4,
+    "median": 57.0,
+    "n": 15,
+    "p90": 330.59999999999997,
+    "wins": 10
+   },
+   "output_tokens": {
+    "losses": 3,
+    "mean": 1731.4,
+    "median": 244.0,
+    "n": 15,
+    "p90": 5418.399999999999,
+    "wins": 11
+   },
+   "prefill_s": {
+    "losses": 2,
+    "mean": 0.006532666666666683,
+    "median": 0.00477999999999934,
+    "n": 15,
+    "p90": 0.020712000000000327,
+    "wins": 13
+   },
+   "wall_s": {
+    "losses": 9,
+    "mean": -2.000746,
+    "median": -0.1608099999999999,
+    "n": 15,
+    "p90": 6.5494759999999985,
+    "wins": 6
+   }
+  }
+ },
+ "schema": "v32_aggregate_v1"
+}

@@ -44,8 +44,11 @@ for t in 0.005 0.01 0.02 0.05; do
   run "dev_v1_t${t}" 'mage:PIECEWISE:value_v1' VALUE_SELECTOR=v1 VALUE_THRESH=$t MAGE_TRIGGER_SIGNAL=settle MAGE_RESELECT_TRIGGER=0.15
   run "dev_v2_t${t}" 'mage:PIECEWISE:value_v2' VALUE_SELECTOR=v2 VALUE_THRESH=$t MAGE_TRIGGER_SIGNAL=settle MAGE_RESELECT_TRIGGER=0.15
 done
-run dev_v3a          'mage:PIECEWISE:value_v3a' VALUE_SELECTOR=v3a VALUE_THRESH=0.01 MAGE_TRIGGER_SIGNAL=settle MAGE_RESELECT_TRIGGER=0.15
-run dev_v3b          'mage:PIECEWISE:value_v3b' VALUE_SELECTOR=v3b VALUE_THRESH=0.01 MAGE_TRIGGER_SIGNAL=settle MAGE_RESELECT_TRIGGER=0.15
-run dev_v3b_drop     'mage:PIECEWISE:value_v3b_drop025' VALUE_SELECTOR=v3b_drop VALUE_DROP=0.25 VALUE_THRESH=0.01 MAGE_TRIGGER_SIGNAL=settle MAGE_RESELECT_TRIGGER=0.15
-run dev_v3b_short    'mage:PIECEWISE:value_v3b_shortlist16' VALUE_SELECTOR=v3b_shortlist VALUE_SHORTLIST=16 VALUE_THRESH=0.01 MAGE_TRIGGER_SIGNAL=settle MAGE_RESELECT_TRIGGER=0.15
+# V3 minimizes F(S) at a fixed budget and takes NO threshold: the launcher's 1.0 default is left
+# in place, so VALUE_THRESH must not be passed here (the adapter rejects anything else).
+COMMON='MAGE_TRIGGER_SIGNAL=settle MAGE_RESELECT_TRIGGER=0.15'
+run dev_v3a          'mage:PIECEWISE:value_v3a' VALUE_SELECTOR=v3a $COMMON
+run dev_v3b          'mage:PIECEWISE:value_v3b' VALUE_SELECTOR=v3b $COMMON
+run dev_v3b_drop     'mage:PIECEWISE:value_v3b_drop025' VALUE_SELECTOR=v3b_drop VALUE_DROP=0.25 $COMMON
+run dev_v3b_short    'mage:PIECEWISE:value_v3b_shortlist16' VALUE_SELECTOR=v3b_shortlist VALUE_SHORTLIST=16 $COMMON
 echo "done lbdev calib $STAMP" >> "$OUT/driver.log"

@@ -1,8 +1,14 @@
 # Value-direction-aware selectors for the v31 cross-step reuse pipeline — 2026-10-07
 
-**Status: PARTIAL.** The selectors are implemented, mathematically qualified on CPU and on the H100
-against the real kernels, and integrated into the unchanged inherited reuse pipeline. No accuracy,
-speed or end-to-end claim is made.
+**Status: the study ran to a negative conclusion on the calibration suite.** The selectors are
+implemented, qualified on CPU and H100, and integrated into the unchanged inherited pipeline. A
+complete 16-arm matched panel on the reserved 15-cell LongBench-v2 dev subset ran under the frozen
+v31 substrate and is reported in `CALIBRATION_RESULT.md`: **no value-aware selector beats the
+inherited mass-only control on accuracy, sparsity, or per-step cost.** No target-suite or AIME26
+panel was completed under the frozen pins, so no held-out accuracy or end-to-end speed claim is
+made.
+
+Read `CALIBRATION_RESULT.md` for the table, the mechanism behind the negative, and its limits.
 
 ## Protocol deviations found on 2026-10-07 (read before using any number in this directory)
 

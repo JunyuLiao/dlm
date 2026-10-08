@@ -1606,7 +1606,47 @@ matched dense reference despite tile skipping.
 
 | `v31_20261006_aime_global_dense_local_budget_sweep` | `5fb28bda` | AIME26 30 problems × seeds 42/43/44 | dense FULL; MAGE GLOBAL 1024/2048/4096; LOCAL native dense | 56.67%; 56.67% / 58.89% / 60.00% | GLOBAL 58.05% / 41.33% / 17.81%; LOCAL 0%; overall geometry-derived 22.40% / 15.89% / 6.86% | 0.920x / 0.931x / 0.917x | Complete dense-LOCAL control; no end-to-end speedup. See `results/v31_20261006_aime_global_dense_local_budget_sweep/summary.md`. |
 
-## 2026-10-07 — value-aware cross-step reuse selectors (PARTIAL, not a panel)
+## 2026-10-07 — value-aware cross-step reuse selectors: calibration panel, NEGATIVE (supersedes the entry below)
+
+**Calibration suite, not a held-out claim.** 15 reserved LongBench-v2 `0shot_think` dev cells, one
+seed, one repeat, frozen v31 substrate (`BLOCK=32 CHUNK=16384 MAX_MODEL_LEN=136401`, `MEM=0.80`,
+verified 174,193-token KV pool, LOCAL native dense, GLOBAL 5/11/17/23/29, `MAGE_K=1728`,
+settle/0.15, sticky 1.386). Threshold chosen here, on cells disjoint from the 488-cell target,
+before any target generation.
+
+| arm | Overall % | GLOBAL sparsity | N/C | S/N (s) | objective_max | retained mass |
+|---|---|---|---|---|---|---|
+| dense_full_fix51994 | 60.0 | - | 14.83 | 0.03110 | - | - |
+| dense_piecewise | 60.0 | - | 14.83 | 0.03196 | - | - |
+| allkept_fa4 | 66.7 | 0.00% | 16.60 | 0.03259 | - | - |
+| **current_v31_control** | **73.3** | **87.60%** | 18.42 | **0.02443** | - | - |
+| value_v1 (rho 0.005/0.01/0.02/0.05) | 66.7 / 66.7 / 66.7 / 66.7 | 6.51 / 6.38 / 5.91 / 9.16% | 15.8 / 15.8 / 15.6 / 19.7 | 0.344 / 0.357 / 0.346 / 0.270 | - | - |
+| value_v2 (rho 0.005/0.01/0.02/0.05) | 66.7 / 66.7 / 66.7 / 60.0 | 5.71 / 6.73 / 6.84 / 6.76% | 15.3 / 16.4 / 16.5 / 16.5 | 0.044 / 0.044 / 0.044 / 0.044 | 0.015 / 0.017 / 0.025 / 0.027 | 0.991 / 0.986 / 0.984 / 0.983 |
+| value_v3a | 66.7 | 6.72% | 16.51 | 0.04460 | 0.0060 | 0.9965 |
+| value_v3b | 66.7 | 87.76% | 18.62 | 0.03143 | - | - |
+| value_v3b_drop025 | **46.7** | 10.01% | 29.88 | 0.04681 | 0.3640 | 0.8819 |
+| value_v3b_shortlist16 | 66.7 | 6.72% | 16.48 | 0.04804 | 0.0062 | 0.9961 |
+
+Source: `results/v32_value_aware_20261007/CALIBRATION_RESULT.md`,
+`calibration_dev15/aggregate.json`, `calibration_dev15/score.summary.json`,
+`calibration_dev15/score_v3.summary.json`. Official scorer
+`scripts/v31_score_longbench_official.py`; the aggregator never computes the metric.
+
+Negative result, mechanism-level: the value-aware selectors keep ~93% of tiles (`forced_keep`
+504k-536k vs `forced_skip` 36k-40k), so they reach 5.7-10.0% sparsity against the control's 87.60%,
+and none of them matches the control's accuracy or per-step cost. V3b blocked on all 2405 selection
+calls and its numbers are the control's. `v3b_drop` is the sharpest failure (46.7). V1 is 11-14x
+slower because it is mass-only and cannot use the fused Triton scan. **Do not pursue this family as
+a replacement for the mass-only selector on this substrate.** Only the sparsity and cost gaps carry
+weight at n=15; the accuracy gaps are one or two items.
+
+Not completed under the frozen pins: any target-suite panel (488 cells, or the pre-registered
+120-cell subsample) and any AIME26 panel. RULER v33 and HumanEval 164 remain unavailable. The
+90-cell AIME26 dense/control numbers below are **withdrawn** (wrong substrate pins).
+
+---
+
+## 2026-10-07 — value-aware cross-step reuse selectors (WITHDRAWN probe, not a panel)
 
 **No entry in the panel table on purpose: this is not a complete protocol-identified result.** The
 selectors are implemented and qualified; the accuracy and clean-timing panels did not run. Nothing
@@ -1614,7 +1654,7 @@ below may be read as an accuracy or speed result.
 
 | item | value | source |
 |---|---|---|
-| status | PARTIAL — correctness/integration/smoke complete, panels blocked | `results/v32_value_aware_20261007/README.md` |
+| status | **WITHDRAWN** — every record here was produced under `CHUNK=16384/BLOCK=32`, not the frozen AIME26 `(64, 4096, 9216)` or LongBench `(32, 16384, 136401)` pins. Superseded by the calibration panel above. | `results/v32_value_aware_20261007/README.md` |
 | active control's actual selector | mass-only `qblock_max` (worst-row prefix log-share), `MAGE_K=1728` | `results/v32_value_aware_20261007/SOURCE_NOTE.md` |
 | new arms | `value_v1_online_discard_mass`, `value_v2_online_preserve_mass`, `value_v3a_singleton_delete`, `value_v3b_greedy_exact`, `value_v3b_drop_r025`, `value_v3b_shortlist64` | `results/v32_value_aware_20261007/config.json` |
 | correctness gates | 26 CPU + 26 H100 + 37 adapter = **89 passed**; existing suite 265 passed with 4 pre-existing unrelated failures | `cpu_gpu_tests.txt`, `full_regression.txt` |
@@ -1624,4 +1664,4 @@ below may be read as an accuracy or speed result.
 | exact V3b at 120K | **blocked**: `value_blocked` on 120/120 selection calls, fell back to the control; no approximation substituted | `receipt.json` |
 | LongBench-v2 `0shot_think` pool | rebuilt here **byte-identically** to the official pool (all output sha256 match `pools_summary.json`) | `config.json` |
 | RULER v33 / HumanEval 164 | **blocked**: sources not on this host; the v33 row order is unrecorded so a rebuild could not be hash-verified | `config.json` |
-| panels | **blocked** by a CUDA illegal memory access inside vLLM's own kernels that reproduces on the dense arm with no adapter | `README.md` |
+| "blocking fault" | **not a GPU fault**: caused by launching vLLM with a private `HOME`/`XDG_CACHE_HOME`/`TRITON_HOME`, which forced fresh FlashInfer JIT kernels to fault in `flashinfer_autotune`; default cache paths remove it. Also the GPU is shared and another tenant holds ~61.5 GiB of it. | `docs/DECISIONS.md` 2026-10-07 |

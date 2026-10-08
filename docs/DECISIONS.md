@@ -1408,3 +1408,43 @@ directory. Requested memory was reduced to `MEM=0.75`, which still leaves ~8.9 G
 141,312 tokens LongBench-v2 needs at the measured ~0.03234 MiB/token, and every successful arm now
 asserts that the engine's reported `GPU KV cache size` covers `MAX_MODEL_LEN` instead of trusting
 `gpu_memory_utilization`.
+
+## 2026-10-07 — Value-aware selectors do not beat the inherited mass-only control (negative)
+
+A complete 16-arm matched panel ran on the reserved 15-cell LongBench-v2 `0shot_think` dev subset
+under the frozen v31 substrate (`BLOCK=32 CHUNK=16384 MAX_MODEL_LEN=136401`, `MEM=0.80` with a
+verified 174,193-token KV pool, LOCAL native dense, GLOBAL 5/11/17/23/29, `MAGE_K=1728`,
+settle/0.15, sticky 1.386). Full table and limits in
+`results/v32_value_aware_20261007/CALIBRATION_RESULT.md`.
+
+The inherited mass-only control is simultaneously the most accurate (Overall 73.3), the sparsest
+(GLOBAL 87.60%) and the cheapest per step (`S/N` 0.0244). Every value arm scored 66.7 or below at
+5.7-10.0% sparsity and `S/N` 0.044-0.357. Three mechanisms explain it:
+
+* **The selectors do not enforce the budget.** `forced_keep` is 504k-536k against `forced_skip` of
+  36k-40k, about 93% forced keep, so the value-aware rho test passes nearly every tile. Raising the
+  V2 threshold from 0.005 to 0.05 moved sparsity only from 5.71% to 6.76% while retained mass fell
+  0.9909 -> 0.9830. A rho test that accepts ~93% of tiles is not making a budget decision.
+* **V1 has no fast path.** The fused Triton scan builds its rho term from MU, so the mass-only V1
+  carries no sketch and must use the batched reference scan: `S/N` 0.27-0.36, 11-14x the control.
+* **V3b never ran.** All 2405 selection calls exceeded `value_exact_max=256` and fell back to the
+  control, so its numbers are the control's. Exact greedy deletion over up to 1876 prefix tiles per
+  call is unaffordable at this context length.
+
+`v3b_drop` at drop fraction 0.25 is the sharpest negative: 131.9 billion deletion evaluations,
+`N/C` 29.9 vs 18.4, retained mass 0.8819, objective_max 0.3640, Overall 46.7 vs the control's 73.3.
+It confirms the earlier single-cell probe. Conclusion: the value-direction-aware routing family
+should not be pursued as a replacement for the mass-only selector on this substrate. `v3a` and
+`v3b_shortlist` are the least bad variants (66.7, ~6.7% sparsity, objective_max 0.006) but still
+lose to the control and behave like the all-kept consumer. n=15, one seed: only the sparsity gap and
+the per-step cost gap carry weight; the accuracy gaps are one or two items and are not established.
+
+## 2026-10-07 — Do not report the withdrawn AIME26 numbers, and do not reuse the dev result
+
+The 90-cell AIME26 dense and control accuracies from 2026-10-07 13:18-13:43 are withdrawn because
+their records carry the wrong substrate pins. The 15-cell dev15 result supersedes the earlier
+one-cell smoke probe but does NOT license any held-out claim: no 488-cell or 120-cell target panel
+and no AIME26 panel completed under the frozen pins. A 120-cell LongBench target subsample was
+pre-registered before generation (`cells_lb2think_target120.json`, four equal-count prompt-length
+strata, seed 20261007, median 109,820 vs the full target's 107,678 tokens) but was not run; if it
+is ever run it must be reported as a 120-cell subsample, never as the 488-cell target.

@@ -1,0 +1,127 @@
+{
+ "answer_text": {
+  "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+  "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+  "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+ },
+ "arms": {
+  "a20261008_011554_value_v3a": {
+   "longbench_v2_0shot_think": {
+    "capped": 1,
+    "cells": 15,
+    "finished": 14,
+    "no_final_response": 1,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 80.0,
+      "Hard": 60.0,
+      "Long": 50.0,
+      "Medium": 60.0,
+      "Overall": 66.7,
+      "Short": 75.0,
+      "items": 15
+     }
+    },
+    "truncated_items": 5,
+    "unparsed": 1,
+    "verified": 15
+   }
+  },
+  "a20261008_011554_value_v3b": {
+   "longbench_v2_0shot_think": {
+    "cells": 15,
+    "finished": 15,
+    "no_final_response": 0,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 60.0,
+      "Hard": 70.0,
+      "Long": 100.0,
+      "Medium": 40.0,
+      "Overall": 66.7,
+      "Short": 75.0,
+      "items": 15
+     }
+    },
+    "truncated_items": 5,
+    "unparsed": 1,
+    "verified": 15
+   }
+  },
+  "drop_a20261008_011554_value_v3b_drop025": {
+   "longbench_v2_0shot_think": {
+    "capped": 1,
+    "cells": 15,
+    "finished": 14,
+    "no_final_response": 4,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 40.0,
+      "Hard": 50.0,
+      "Long": 0.0,
+      "Medium": 20.0,
+      "Overall": 46.7,
+      "Short": 75.0,
+      "items": 15
+     }
+    },
+    "truncated_items": 5,
+    "unparsed": 5,
+    "verified": 15
+   }
+  },
+  "short_a20261008_011554_value_v3b_shortlist16": {
+   "longbench_v2_0shot_think": {
+    "capped": 1,
+    "cells": 15,
+    "finished": 14,
+    "no_final_response": 1,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 80.0,
+      "Hard": 60.0,
+      "Long": 50.0,
+      "Medium": 60.0,
+      "Overall": 66.7,
+      "Short": 75.0,
+      "items": 15
+     }
+    },
+    "truncated_items": 5,
+    "unparsed": 1,
+    "verified": 15
+   }
+  }
+ },
+ "coverage": {
+  "a20261008_011554_value_v3a": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 15,
+   "present": 15,
+   "scored": 15
+  },
+  "a20261008_011554_value_v3b": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 15,
+   "present": 15,
+   "scored": 15
+  },
+  "drop_a20261008_011554_value_v3b_drop025": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 15,
+   "present": 15,
+   "scored": 15
+  },
+  "short_a20261008_011554_value_v3b_shortlist16": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 15,
+   "present": 15,
+   "scored": 15
+  }
+ },
+ "metric": "LongBench-v2 pred.py extract_answer judge; result.py aggregation (one decimal)"
+}

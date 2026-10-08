@@ -1,4 +1,68 @@
-## Value-aware cross-step reuse selectors — 2026-10-07 (PARTIAL, panels blocked)
+## Value-aware cross-step reuse selectors — 2026-10-08 (calibration complete, NEGATIVE; target not run)
+
+The study ran to a **negative conclusion** on the calibration suite. Start with
+`results/v32_value_aware_20261007/CALIBRATION_RESULT.md`; the full table, mechanism and limits are
+there, `summary.md` is the metric-status sheet, `README.md` is the narrative record.
+
+**Conclusion.** On the reserved 15-cell LongBench-v2 `0shot_think` dev subset under the frozen v31
+substrate, a complete 16-arm matched panel shows that **no value-aware selector beats the inherited
+mass-only control on accuracy, GLOBAL sparsity, or per-step cost**. The control is simultaneously the
+most accurate (Overall 73.3), the sparsest (87.60%) and the cheapest (`S/N` 0.0244). Every value arm
+scored 66.7 or below at 5.7-10.0% sparsity and `S/N` 0.044-0.357.
+
+Mechanism: `forced_keep` is 504k-536k against `forced_skip` 36k-40k, so ~93% of (row, tile)
+decisions are forced keep and the selectors barely prune. V3b blocked on all 2405 selection calls and
+its numbers are the control's. `v3b_drop` at 0.25 is the sharpest failure (46.7, 131.9 billion
+evaluations, `N/C` 29.9). V1 is 11-14x slower because being mass-only it carries no sketch and cannot
+use the fused Triton scan. Recommendation: do not pursue this family as a replacement for the
+mass-only selector on this substrate.
+
+### Three corrections made on 2026-10-07/08 (read before reusing anything)
+
+1. **The "GPU fault" was self-inflicted.** Launching vLLM with a private `HOME`/`XDG_CACHE_HOME`/
+   `TRITON_HOME` forced fresh FlashInfer JIT kernels that faulted in `flashinfer_autotune` during
+   warmup, dense arm included. Default host cache paths remove it.
+2. **Substrate pins were wrong for a long time.** The bench defaults `CHUNK=16384/BLOCK=32` are NOT
+   the frozen v31 AIME26 substrate, which is `CHUNK=4096/BLOCK=64`. Pins are now frozen once in
+   `scripts/v32_value_arm.sh`: AIME26 `(64, 4096, MAX_MODEL_LEN 9216)`, LongBench-v2
+   `(32, 16384, MAX_MODEL_LEN 136401)`. Every earlier generation run, including the 90-cell AIME26
+   dense/control panel, is **withdrawn**; its accuracies (dense 56.67, control 54.44) must not be
+   cited. `scripts/v32_panel_aggregate.py --require-pins` now refuses off-pin records.
+3. **The v31 ledger is not bitwise reproducible here.** 0 of 1 historical `output_hash` matched at
+   identical pins and both `gpu_memory_utilization` values. Compare within one panel only.
+
+### Done
+
+- Six selectors implemented, qualified (89 new tests) and integrated in the unchanged inherited
+  pipeline.
+- Fixed three real memory bugs that made the value arms unusable at 120k context: a 3-way
+  full-size copy of the rank-32 sketch, a sketch cache keyed by `(layer, extent)` that accumulated
+  ~123 MiB per canvas, and an unconditional sketch allocation on the mass-only path.
+- `MAX_MODEL_LEN=141312` needs 9.15 GiB of KV, not the 4.5 GiB previously assumed, so LongBench now
+  uses the true 136,401-token requirement at `MEM=0.80` (verified 174,193-token KV pool), and every
+  successful arm asserts the KV pool covers `MAX_MODEL_LEN`.
+- Calibration-before-generation harness, a 120-cell pre-registered target subsample, a pin-guarded
+  aggregator, a shared-GPU waiter and per-arm retry-on-contention.
+
+### Running
+
+Nothing. The H100 is shared; another tenant holds ~61.5 GiB of it for long stretches. Never evict
+another tenant: `scripts/v32_wait_gpu.sh` waits and `scripts/v32_value_arm.sh` retries.
+
+### Next steps
+
+1. Do not run the 120-cell or 488-cell target panel or an AIME26 panel for this family; the
+   calibration result says the arms are dominated by the control. Record it as a negative.
+2. If the value-direction idea is revisited, the first thing to change is the DECISION RULE: a rho
+   test that accepts ~93% of tiles cannot be a budget rule. A hard top-k on the value objective
+   (V3 with `value_exact_max` raised, or a chunked exact solve so V3b stops blocking) is the honest
+   next variant, not another threshold.
+3. The 120-cell subsample is pre-registered and unrun; a future study may use it for a different
+   family, reported explicitly as a subsample.
+
+---
+
+## Superseded record (value-aware selectors — 2026-10-07, PARTIAL, panels blocked)
 
 The study that tests whether value-direction-aware block selection improves the v31
 cross-step reuse system is **implemented, qualified and smoke-tested but its panels did not run**.
