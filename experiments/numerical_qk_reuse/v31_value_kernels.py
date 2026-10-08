@@ -15,11 +15,10 @@ from triton.language.extra.cuda import libdevice as lib
 from .v31_value_selectors import Stats, EPS, SELECTORS, full_support, mandatory_map
 
 
-@tr.jit
-def _stats(Q, K, Z, LM, MU, BAD, N: tl.constexpr, NK: tl.constexpr,
-           H: tl.constexpr, HK: tl.constexpr, D: tl.constexpr, JT: tl.constexpr,
-           QB: tl.constexpr, QS0: tl.constexpr, QS1: tl.constexpr,
-           KS0: tl.constexpr, KS1: tl.constexpr, SCALE: tl.constexpr):
+@tr.jit(do_not_specialize=['N','NK','JT','KS0'])
+def _stats(Q, K, Z, LM, MU, BAD, N, NK,
+           H: tl.constexpr, HK: tl.constexpr, D: tl.constexpr, JT,
+           QB: tl.constexpr, QS0: tl.constexpr, QS1: tl.constexpr, KS0, KS1: tl.constexpr, SCALE: tl.constexpr):
     chunk, h, j = tl.program_id(0), tl.program_id(1), tl.program_id(2)
     qi = chunk*32+tl.arange(0, 32)
     kk = j*64+tl.arange(0, 64)
@@ -40,6 +39,7 @@ def _stats(Q, K, Z, LM, MU, BAD, N: tl.constexpr, NK: tl.constexpr,
     weights = weights/tl.maximum(den, 1.e-30)[:, None]
     z = tl.load(Z+(kh*NK+kk[:, None])*32+rr[None], kk[:, None]<NK, 0.)
     mu = tl.dot(weights, z, input_precision='tf32x3')
+    bad |= tl.sum(((mu!=mu) | (tl.abs(mu)==float('inf'))).to(tl.int32),1)>0
     dest = ((h*QB+qi//128)*JT+j)*128+qi%128
     tl.store(LM+dest, tl.where(active & ~bad, safe+lib.log(tl.maximum(den, 1.e-30)), -float('inf')))
     tl.store(MU+dest[:, None]*32+rr[None], tl.where(bad[:, None], 0., mu))
@@ -68,9 +68,9 @@ def statistics_cuda(q, k, sketch, nu_kv, scale, prefix_tiles):
     return Stats(lm, mu, nu, invalid, prefix_tiles, h, qb)
 
 
-@tr.jit
+@tr.jit(do_not_specialize=['JT'])
 def _online(LM, MU, NU, BAD, PROT, HELD, KEEP, STATE, FINAL_LM, RISK,
-            JT: tl.constexpr, THRESHOLD: tl.constexpr, PRESERVE: tl.constexpr,
+            JT, THRESHOLD, PRESERVE: tl.constexpr,
             STICKY: tl.constexpr):
     unit = tl.program_id(0)
     row, rr = tl.arange(0, 128), tl.arange(0, 32)
@@ -113,14 +113,16 @@ def online_cuda(stats, threshold, preserve, mandatory, held, sticky):
     _online[(u,)](stats.log_mass, stats.mean, stats.nu, stats.invalid, mandatory, held,
         keep, state, lm, risk, jt, math.log(threshold) if threshold else -math.inf,
         preserve, sticky, num_warps=8)
-    bad = stats.invalid.any((1, 2)) | (~torch.isfinite(stats.mean) & stats.valid[..., None]).any((1, 2, 3))
+    # _stats validates logits and projected means without a full-sized boolean
+    # temporary over the rank dimension. No redundant GiB tensor is allocated.
+    bad = stats.invalid.any((1, 2))
     keep |= bad[:, None]
     return keep, state, lm, risk
 
 
-@tr.jit
+@tr.jit(do_not_specialize=['JT','PT'])
 def _scores(ALPHA, G, A, RESIDUAL, NU, ROWS, KEEP, PROT, HELD, SCORES,
-            JT: tl.constexpr, PT: tl.constexpr, STICKY: tl.constexpr):
+            JT, PT, STICKY: tl.constexpr):
     unit, j = tl.program_id(0), tl.program_id(1)
     removable = tl.load(KEEP+unit*JT+j) & ~tl.load(PROT+unit*JT+j) & (j<PT)
     if not removable:
@@ -149,9 +151,9 @@ def candidate_scores(stats, alpha, g, a, residual, keep, mandatory, held, sticky
     return out
 
 
-@tr.jit
+@tr.jit(do_not_specialize=['JT','PT'])
 def _exact_update(SCORES, ALPHA, G, A, RESIDUAL, KEEP, TARGET, BAD,
-                  JT: tl.constexpr, PT: tl.constexpr, SIZE: tl.constexpr):
+                  JT, PT, SIZE: tl.constexpr):
     unit = tl.program_id(0)
     jj = tl.arange(0, SIZE)
     score = tl.load(SCORES+unit*JT+jj, jj<JT, float('inf'))
@@ -174,9 +176,9 @@ def _exact_update(SCORES, ALPHA, G, A, RESIDUAL, KEEP, TARGET, BAD,
     tl.store(BAD+unit, active & ~valid)
 
 
-@tr.jit
+@tr.jit(do_not_specialize=['JT','PT'])
 def _static_prune(ORDER, VALID, SUPPORT, KEEP, PROT, TARGET, BAD,
-                  JT: tl.constexpr, PT: tl.constexpr, SIZE: tl.constexpr):
+                  JT, PT, SIZE: tl.constexpr):
     unit = tl.program_id(0)
     row = tl.arange(0, 128)
     jj = tl.arange(0, SIZE)
@@ -197,8 +199,9 @@ def _static_prune(ORDER, VALID, SUPPORT, KEEP, PROT, TARGET, BAD,
 
 
 def fixed_cuda(stats, budget, mandatory, held, sticky, batch=1, singleton=False):
-    alpha, c, o, g = full_support(stats)
-    del c, o
+    from .v31_value_summary import full_support_cuda
+    alpha, o, g = full_support_cuda(stats)
+    del o
     u, jt, _ = alpha.shape
     pt = stats.prefix_tiles
     eligible = stats.valid.any(-1)
@@ -236,9 +239,12 @@ def fixed_cuda(stats, budget, mandatory, held, sticky, batch=1, singleton=False)
             order = torch.argsort(scores, stable=True)[:, :count]
             selected = scores.gather(1, order)
             active = torch.arange(count, device=keep.device)[None] < (keep[:, :pt].sum(-1)-target)[:, None]
+            da = (alpha.gather(1, order[..., None].expand(-1, -1, 128))*active[..., None]).sum(1)
+            safe = ((~live_rows | (a-da>0)).all(-1) & (~active | torch.isfinite(selected)).all(-1))
+            # On joint support loss, take only the first admissible deletion.
+            # Remaining deletions are handled by an exact cleanup phase below.
+            active &= safe[:, None] | (torch.arange(count,device=keep.device)[None]==0)
             torch._assert_async((~active | torch.isfinite(selected)).all(), 'no admissible deletion at requested budget')
-            # Batch8 is an approximation. Reject joint support loss rather than
-            # returning an impossible mask or compensating in the executor.
             drop = torch.zeros_like(keep).scatter_(1, order, active)
             da = (alpha.gather(1, order[..., None].expand(-1, -1, 128))*active[..., None]).sum(1)
             dg = (g.gather(1, order[..., None, None].expand(-1, -1, 128, 32))*active[..., None, None]).sum(1)
@@ -246,6 +252,15 @@ def fixed_cuda(stats, budget, mandatory, held, sticky, batch=1, singleton=False)
             a -= da
             residual -= dg
             evaluations += u*(pt-iteration*batch)
+        if batch > 1:
+            # One phase-boundary host read determines cleanup length. There are
+            # no host decisions or synchronizations for individual candidates.
+            extra = int((keep[:, :pt].sum(-1)-target).max().item())
+            for iteration in range(extra):
+                scores = candidate_scores(stats,alpha,g,a,residual,keep,mandatory,held,sticky,live_rows)
+                _exact_update[(u,)](scores,alpha,g,a,residual,keep,target,failed,
+                    jt,pt,tr.next_power_of_2(jt),num_warps=4)
+                evaluations += u*(k+extra-iteration)
         torch._assert_async((~failed).all(), 'no admissible exact deletion at requested budget')
     torch._assert_async((~stats.rows | ((alpha*keep[..., None]).sum(1)>0)).all(), 'fixed-k mask removes row support')
     bad = stats.invalid.any((1, 2))

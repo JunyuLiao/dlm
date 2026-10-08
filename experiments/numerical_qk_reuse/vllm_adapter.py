@@ -514,6 +514,10 @@ class VllmMethodAdapter:
             self.calls.update(mage_selections=0, mage_reused_calls=0, mage_kept_prefix_tiles=0, mage_prefix_tiles=0)
         self._value_pending = []
         self._value_audit_events = []
+        self._value_phases = {}
+        self._value_native_local_tiles = self._value_native_local_calls = 0
+        self._value_nonfinite_outputs = []
+        self._value_local_events = []
         if self.arm in ('allkept', 'native', 'mage'):
             return
         global _BINDING
@@ -557,7 +561,7 @@ class VllmMethodAdapter:
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
         return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._local_receipt(), **self._regroup_receipt(),
-                                 **self._drift_receipt(), **self._clock_receipt(), **self._value_receipt()), method=counters,
+                                 **self._drift_receipt(), **self._clock_receipt(), **self._value_receipt(), **self._value_phase_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
 
@@ -577,7 +581,7 @@ class VllmMethodAdapter:
                               global_ms_total=round(sum(ms), 2))
             counters = self.runtime['counters']() if self.runtime is not None else None
             return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._local_receipt(), **self._regroup_receipt(),
-                                     **self._drift_receipt(), **self._clock_receipt(), **self._value_receipt()), method=counters,
+                                     **self._drift_receipt(), **self._clock_receipt(), **self._value_receipt(), **self._value_phase_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
         finally:
@@ -908,6 +912,9 @@ class VllmMethodAdapter:
         self._cur_layer = layer_idx
         self._global_tiles += q.shape[1] * -(-n // 128) * (prefix // 64)
         self._global_canvas_tiles += q.shape[1] * -(-n // 128) * (-(-(prefix + n) // 64) - prefix // 64)
+        audit_before = None
+        if self.value_audit:
+            audit_before = (dict(self.calls), self._sparse_total, self._sparse_kept)
         if self.arm == 'allkept':
             from experiments.numerical_qk_reuse import v27_fa4
             out = v27_fa4.dense(q, b['k'], b['v'], float(impl.scale))
@@ -922,6 +929,24 @@ class VllmMethodAdapter:
                                                              scaling=float(impl.scale), is_causal=False,
                                                              sliding_window=None)
         self.paged = None
+        if audit_before is not None:
+            counts, previous_total, previous_kept = audit_before
+            phase = next((name for name, key in (
+                ('initial','mage_selections'),('refresh','mage_reselections'),
+                ('held','mage_reused_calls'),('carried','mage_carried_calls'))
+                if self.calls.get(key,0)>counts.get(key,0)), 'dense')
+            units = q.shape[1]*-(-n//128)
+            eligible = units*-(-(prefix+n)//64)
+            if self._sparse_total > previous_total:
+                kept = self._sparse_kept-(previous_kept if previous_kept is not None else 0)
+                kept = kept+units*(-(-(prefix+n)//64)-prefix//64)
+            else:
+                kept = torch.tensor(eligible,device=q.device,dtype=torch.float64)
+            row = self._value_phases.setdefault(phase,[0,0,[]])
+            row[0] += 1
+            row[1] += eligible
+            row[2].append(kept)
+            self._value_nonfinite_outputs.append(~torch.isfinite(out).all())
         diagnostic = getattr(self, 'value_diagnostic', None)
         if diagnostic is not None and self.arm == 'mage':
             diagnostic.record(self, layer_idx, q, b, float(impl.scale), prefix, n)
@@ -1090,10 +1115,52 @@ class VllmMethodAdapter:
             value_invalid_rows=int(counts[1]) if self.value_audit else None,
             value_audit=self.value_audit, value_audit_timings=timings,
             value_projection_seed=1729, value_projection_rank=32,
+            value_statistics_kernel='triton_fused_tile_softmax_pz',
+            value_prefix_mass_source='native_fa4_observation',
+            value_selection_kernel='triton_log_mass_online' if self.value_selector.startswith(('value_v1_','value_v2_')) else 'triton_parallel_cached_deletion',
             value_projection_manifest={} if self._value_projection is None else self._value_projection.manifest,
             value_scope='global_only', value_local_router_installed=self.local_router is not None,
             value_state_role='selector_only', value_output_path='unchanged_fa4',
             value_sticky_rule='log_risk_bonus_online_or_log_removal_penalty_fixed')
+
+    def _value_phase_receipt(self):
+        if not self.value_audit:
+            return {}
+        phases = {}
+        for phase,(calls,eligible,kept) in self._value_phases.items():
+            count = int(torch.stack(kept).sum().item())
+            phases[phase] = dict(calls=calls,eligible_tiles=eligible,kept_tiles=count,
+                                 skipped_tiles=eligible-count,sparsity=1-count/eligible)
+        local = self._value_native_local_tiles
+        global_eligible = sum(row['eligible_tiles'] for row in phases.values())
+        global_skipped = sum(row['skipped_tiles'] for row in phases.values())
+        return dict(value_phase_tiles=phases,
+            value_nonfinite_attention_calls=int(torch.stack(self._value_nonfinite_outputs).sum().item()) if self._value_nonfinite_outputs else 0,
+            native_local_calls_audited=self._value_native_local_calls,
+            native_local_attention_ms=sum(a.elapsed_time(b) for a,b in self._value_local_events),
+            native_local_eligible_rectangles=local,native_local_skipped_tiles=0,
+            overall_eligible_rectangles=global_eligible+local,
+            overall_skipped_rectangles=global_skipped,
+            overall_rectangle_sparsity=global_skipped/(global_eligible+local) if global_eligible+local else None,
+            overall_denominator='actual decode calls, GLOBAL full support and LOCAL window-intersecting H x Q128 x KV64 rectangles; geometry-derived, not CUDA CTA count')
+
+    def _value_native_local_account(self,layer_name,heads,n):
+        ctx = self.step_ctx
+        match = _LAYER_RE.search(layer_name)
+        if not self.value_audit or ctx is None or ctx['encoder'] or match is None:
+            return
+        if int(match.group(1)) in self.global_layers:
+            return
+        nk = ctx['seq_len']
+        prefix = nk-n
+        tiles = 0
+        for begin in range(0,n,128):
+            lo = max(0,prefix+begin-1023)
+            hi = min(nk-1,prefix+min(begin+127,n-1)+1023)
+            tiles += hi//64-lo//64+1
+        self._value_native_local_tiles += heads*tiles
+        self._value_native_local_calls += 1
+        return True
 
     def _mage_carried(self, st, prefix, n):
         """Lists for canvas call 0 from the previous canvas's selection (mage_carry_first), or None when the carry is
@@ -1716,6 +1783,7 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
     def forward_patched(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale=None,
                         output_block_scale=None):
         a = _ACTIVE
+        local_ev = None
         if a is not None and a.bound and attn_metadata is not None and output_scale is None:
             layer_idx = a.active_for(getattr(layer, 'layer_name', ''))
             if layer_idx is not None:
@@ -1748,9 +1816,18 @@ def install_vllm_patches(adapter: VllmMethodAdapter):
                 return forward(self, layer, query, key, value, kv_cache, attn_metadata, output,
                                output_scale, output_block_scale) if r is None else r
             if a.step_ctx is not None:
+                local_audited = a.value_audit and a._value_native_local_account(
+                    getattr(layer,'layer_name',''),self.num_heads,int(attn_metadata.num_actual_tokens))
+                if local_audited:
+                    local_ev = (torch.cuda.Event(enable_timing=True),torch.cuda.Event(enable_timing=True))
+                    local_ev[0].record()
                 a.calls['passthrough'] += 1
-        return forward(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale,
-                       output_block_scale)
+        result = forward(self, layer, query, key, value, kv_cache, attn_metadata, output, output_scale,
+                         output_block_scale)
+        if local_ev is not None:
+            local_ev[1].record()
+            a._value_local_events.append(local_ev)
+        return result
 
     from experiments.numerical_qk_reuse import v27_fa4
     sparse_lists = v27_fa4.sparse_lists

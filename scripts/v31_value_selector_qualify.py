@@ -49,23 +49,30 @@ def main():
         alpha, c, full, _ = full_support(stats)
         k_tiles = min(8192//64, prefix//64)
         exact_mask = None
+        exact_error = None
         for selector in SELECTORS:
             # Threshold is a DIAGNOSTIC ONLY, never a calibrated target threshold.
             start = time.perf_counter()
+            baseline_bytes = torch.cuda.memory_allocated()
+            torch.cuda.reset_peak_memory_stats()
             select_ms, (mask, receipt) = elapsed(lambda: select(stats, selector, budget=k_tiles, threshold=.01), 1 if 'v3b' in selector else 3)
+            selector_peak_bytes = torch.cuda.max_memory_allocated()
             selected = mask.reshape(h*2, -1)
             estimate = masked_output(alpha, c, selected)
             error = (estimate-full).norm(dim=-1)/stats.nu
             if selector == SELECTORS[3]:
                 exact_mask = selected
+                exact_error = float(error.max())
             row = dict(prefix=prefix, selector=selector, stats_ms=ms, select_ms=select_ms,
                 peak_cuda_bytes=torch.cuda.max_memory_allocated(),
+                selector_incremental_peak_bytes=selector_peak_bytes-baseline_bytes,
                 kept_prefix_tiles=int(mask[..., :prefix//64].sum()),
                 eligible_prefix_tiles=h*2*(prefix//64), max_relative_sketch_error=float(error.max()),
                 mean_retained_mass=float((alpha*selected[..., None]).sum(1).mean()),
                 projection_manifest=projections.manifest, gpu_seconds=time.perf_counter()-start, **receipt)
             if exact_mask is not None and selector == SELECTORS[4]:
                 row['mask_jaccard_vs_exact'] = float((selected & exact_mask).sum()/(selected | exact_mask).sum())
+                row['sketch_error_ratio_vs_exact'] = float(error.max())/exact_error
             rows.append(row)
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(json.dumps(dict(kind='synthetic_selector_diagnostic', records=rows), indent=2)+'\n')

@@ -213,6 +213,8 @@ def greedy_reference(stats, budget, mandatory=None, held=None, sticky=0., batch=
     evaluations = 0
     for unit in range(keep.shape[0]):
         k = min(budget, int(keep[unit, :pt].sum()))
+        batch_rounds = math.ceil((int(keep[unit, :pt].sum())-k)/batch)
+        iteration = 0
         if int((mandatory[unit, :pt] & keep[unit, :pt]).sum()) > k:
             raise ValueError('mandatory support exceeds prefix budget')
         while int(keep[unit, :pt].sum()) > k:
@@ -228,10 +230,12 @@ def greedy_reference(stats, budget, mandatory=None, held=None, sticky=0., batch=
             removable[pt:] = False
             score[~removable] = math.inf
             evaluations += int(removable.sum())
-            count = min(batch, int(keep[unit, :pt].sum())-k)
+            count = min(batch if iteration < batch_rounds else 1, int(keep[unit, :pt].sum())-k)
             order = score.argsort(stable=True)[:count]
-            if not bool(torch.isfinite(score[order]).all()):
+            if not bool(torch.isfinite(score[order[0]])):
                 raise ValueError('no admissible deletion at requested budget')
+            if not bool(torch.isfinite(score[order]).all()):
+                order = order[:1]
             proposed = keep[unit].clone()
             proposed[order] = False
             if bool((stats.rows[unit] & ((alpha[unit]*proposed[:, None]).sum(0) <= 0)).any()):
@@ -239,6 +243,7 @@ def greedy_reference(stats, budget, mandatory=None, held=None, sticky=0., batch=
                 proposed = keep[unit].clone()
                 proposed[order[0]] = False
             keep[unit] = proposed
+            iteration += 1
     keep[stats.invalid.any((1, 2))] = True
     return keep, evaluations
 

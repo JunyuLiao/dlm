@@ -1,0 +1,12 @@
+{
+  "affected": "kernel_diagnostics_attempt004.json",
+  "issue": "incremental peak-memory field included the later diagnostic error computation",
+  "valid_fields": [
+    "stats_ms",
+    "select_ms",
+    "sketch_error",
+    "retained_mass",
+    "mask_overlap"
+  ],
+  "replacement": "kernel_diagnostics_attempt005.json and later capture selector peak before diagnostic computation"
+}

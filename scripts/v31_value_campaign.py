@@ -86,7 +86,7 @@ def main():
         env['VALUE_THRESHOLD'] = str(args.threshold)
     manifest_hashes = {c['dataset']: hashlib.sha256((Path(args.manifests)/(c['dataset']+'_generation_manifest.json')).read_bytes()).hexdigest() for c in cells}
     source_files = [root/'experiments/numerical_qk_reuse'/name for name in
-        ('vllm_adapter.py', 'v31_value_selectors.py', 'v31_value_kernels.py', 'v31_value_snapshots.py', 'v27_fa4.py', 'v31_fa4_observe.py')]
+        ('vllm_adapter.py', 'v31_value_selectors.py', 'v31_value_kernels.py', 'v31_value_summary.py', 'v31_value_snapshots.py', 'v27_fa4.py', 'v31_fa4_observe.py')]
     source_files += [root/'experiments/diffusion_gemma_jl_output_aware/projections.py',
                      root/'experiments/value_direction_hopper/projection.py']
     source_files += [root/'scripts/v31_vllm_paired_bench.py', root/'scripts/v31_value_campaign.py']
@@ -103,9 +103,33 @@ def main():
             args.model, args.manifests, args.cells, str(attempt/'records.jsonl'),
             str(attempt/'private'/('run_'+args.arm+'.private.jsonl')), arm, graph], cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT)
     rows = [json.loads(line) for line in (attempt/'records.jsonl').read_text().splitlines()] if (attempt/'records.jsonl').exists() else []
+    errors = []
+    for row in rows:
+        if row.get('cuda_graph_captures') != 0:
+            errors.append('timed CUDA graph capture')
+        if row.get('local_kv_budget') is not None:
+            errors.append('unexpected LOCAL routing')
+        if row.get('value_selector') != selector:
+            errors.append('selector identity mismatch')
+        if arm in ('mage','allkept') and args.purpose != 'clean':
+            audit = row['receipts']['adapter']
+            if audit.get('order_errors') or audit.get('value_nonfinite_attention_calls'):
+                errors.append('attention output or lifecycle validation failure')
+            if audit.get('native_local_calls_audited') != 25*row['denoise_forwards']:
+                errors.append('native LOCAL layer scope mismatch')
+            phases = audit.get('value_phase_tiles',{})
+            if sum(x['eligible_tiles'] for x in phases.values()) != audit.get('global_eligible_tiles'):
+                errors.append('GLOBAL phase denominator mismatch')
+            if sum(x['kept_tiles'] for x in phases.values()) != audit.get('global_kept_tiles'):
+                errors.append('GLOBAL phase kept accounting mismatch')
+            if selector and (audit.get('value_scope') != 'global_only' or audit.get('value_local_router_installed')):
+                errors.append('value selector layer scope mismatch')
     receipt = dict(status='complete' if result.returncode==0 and len(rows)==len(cells) else 'failed',
         returncode=result.returncode, records=len(rows), planned=len(cells), gpu_seconds=time.perf_counter()-start,
         timed_cuda_captures=sum(r.get('cuda_graph_captures', 0) for r in rows), source_commit=freeze['source_commit'])
+    receipt['validation_errors'] = sorted(set(errors))
+    if errors:
+        receipt['status'] = 'failed_validation'
     (attempt/'receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
     if receipt['status']=='complete':
         (attempt/'attempt_complete.json').write_text(json.dumps(receipt,indent=2)+'\n')

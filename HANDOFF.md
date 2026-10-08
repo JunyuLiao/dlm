@@ -11,7 +11,8 @@ Verified model source `205e3502d102077bd01776a5f21c1f6a0d0ebb77` completed
 GLOBAL sparsity is 76.45235%; this is a development calibration reference,
 not a target result. The dense FULL smoke and official scorer binding also
 completed. Independent selector tests now pass 21 CPU tests (13 CUDA skips)
-and 34 H100 tests, including collective row-support constraints.
+and 40 H100 tests, including collective row-support constraints, exact batch8
+cleanup, bounded-memory reductions and native LOCAL call accounting.
 
 Online thresholds remain unfrozen. Next: qualify every arm in model, calibrate
 uniform thresholds, then separate clean timing and instrumented audits. Official

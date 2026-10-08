@@ -1,0 +1,38 @@
+{
+  "schema": "independent_v31_attempt_v1",
+  "purpose": "smoke",
+  "arm": "value_v1_online_discard_mass",
+  "cell_count": 1,
+  "cells_sha256": "e63c8c9b1e15120438bc0202ac759c1f0ea6d8e7d2e3575bde4432896c7c495e",
+  "manifests_sha256": {
+    "longbench_v2_0shot_think": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe"
+  },
+  "source_commit": "5bfb76e4c1f5d6f44e215bd86479c1cf692421c8",
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "f063cdd3940de00d77e5f32b9b8624dc54aa316ce38c756e16191306823b75ac",
+    "experiments/numerical_qk_reuse/v31_value_selectors.py": "a8f90e6c33612fed5570a9eea547096164fc5d4c5d2b27be142a7a5955d1714f",
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "25827554e3227e8adbd03fffc9dc2fb45254fee868e97938b4c56d16a75818be",
+    "experiments/numerical_qk_reuse/v31_value_snapshots.py": "db0f72c7236b03caa759dac398dc3534e9b6af2a87c79006588abb71d54a544e",
+    "experiments/numerical_qk_reuse/v27_fa4.py": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+    "experiments/numerical_qk_reuse/v31_fa4_observe.py": "3b7027b52b64ab5b101d71808b69decba434405c287bf9c94ba3aa7a3b7a5133",
+    "experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+    "experiments/value_direction_hopper/projection.py": "de5a1f971187880fa7aee1f4c21f18a1d14f52dd4879526f515e6ad365886f5d",
+    "scripts/v31_vllm_paired_bench.py": "660a18b4cf6311766afc91d85bcebc367f0fbcbe5348f560f3e805f49df77b1d",
+    "scripts/v31_value_campaign.py": "7b79ac53915f5f318417a205c529ce8a85ba2298bb7a398ed71e167cccd76eb7"
+  },
+  "runtime_settings": {
+    "BLOCK": "32",
+    "CHUNK": "16384",
+    "MEM": "0.85",
+    "MAX_MODEL_LEN": "141312",
+    "MAGE_K": "8192",
+    "MAGE_STEP": "1",
+    "MAGE_CARRY": "1",
+    "MAGE_RESELECT_TRIGGER": "0.15",
+    "MAGE_TRIGGER_SIGNAL": "settle",
+    "MAGE_GRAN": "qblock_max"
+  },
+  "threshold": 0.001,
+  "local_scope": "native_dense",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b"
+}

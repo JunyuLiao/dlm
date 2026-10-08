@@ -167,7 +167,11 @@ def test_same_mask_has_same_native_operator_for_all_selector_states():
 
 
 @pytest.mark.parametrize('cuda', [False, True])
-def test_singleton_joint_support_constraint(cuda):
+@pytest.mark.parametrize('selector,wanted', [
+    (SELECTORS[2],[True,False,True,False,True]),
+    (SELECTORS[3],[False,True,False,True,True]),
+    (SELECTORS[4],[False,True,False,True,True])])
+def test_joint_support_constraint(cuda,selector,wanted):
     if cuda and not torch.cuda.is_available():
         pytest.skip('CUDA unavailable')
     # Naive top-3 chooses A,B,E, losing C/D's row. Scores stay fixed while
@@ -180,8 +184,8 @@ def test_singleton_joint_support_constraint(cuda):
               torch.zeros_like(z, dtype=torch.bool), 5, 1, 1)
     if cuda:
         s = Stats(*(x.cuda() for x in (s.log_mass, s.mean, s.nu, s.invalid)), 5, 1, 1)
-    keep, _ = select(s, SELECTORS[2], budget=3)
-    assert keep.cpu().reshape(-1).tolist() == [True, False, True, False, True]
+    keep, _ = select(s, selector, budget=3)
+    assert keep.cpu().reshape(-1).tolist() == wanted
 
 
 def test_adapter_value_scope_guard():
@@ -193,6 +197,21 @@ def test_adapter_value_scope_guard():
     for extra in (dict(local_kv_budget=512), dict(mage_keep_frac=.1), dict(mage_pool=2)):
         with pytest.raises(ValueError):
             VllmMethodAdapter(types, **(options | extra))
+
+
+def test_native_local_audit_uses_actual_decode_window_rectangles():
+    from experiments.numerical_qk_reuse.vllm_adapter import VllmMethodAdapter
+    a = VllmMethodAdapter(['sliding_attention']*5+['full_attention'],arm='allkept',value_audit=True)
+    a.begin_request()
+    a.step_ctx = dict(encoder=False,seq_len=1280,n=256)
+    assert a._value_native_local_account('model.layers.0.self_attn',16,256)
+    # First Q128 intersects KV tiles 0..19; second intersects tiles 2..19.
+    assert a._value_native_local_tiles == 16*(20+18)
+    assert a._value_native_local_calls == 1
+    a._value_native_local_account('model.layers.5.self_attn',16,256)
+    a.step_ctx['encoder'] = True
+    a._value_native_local_account('model.layers.0.self_attn',16,256)
+    assert a._value_native_local_calls == 1
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')
@@ -211,6 +230,21 @@ def test_cuda_selectors_against_independent_oracles(selector):
     expected, _ = select(reference, selector, budget=2, threshold=.01)
     got, _ = select(stats, selector, budget=2, threshold=.01)
     assert torch.equal(got.cpu(), expected)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')
+def test_bounded_memory_full_support_summary_matches_formula():
+    from experiments.numerical_qk_reuse.v31_value_summary import full_support_cuda
+    torch.manual_seed(93)
+    z = torch.randn(2,67,128)
+    z[:,:,3] = -math.inf
+    s = Stats(z,torch.randn(2,67,128,32),torch.ones(2,128),
+              torch.zeros_like(z,dtype=torch.bool),63,2,1)
+    expected = full_support(s)
+    gpu = Stats(*(x.cuda() for x in (s.log_mass,s.mean,s.nu,s.invalid)),63,2,1)
+    alpha,output,g = full_support_cuda(gpu)
+    for result,reference in zip((alpha,output,g),(expected[0],expected[2],expected[3])):
+        assert torch.allclose(result.cpu(),reference,atol=2e-6,rtol=2e-5)
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')

@@ -16,9 +16,14 @@ class SnapshotRecorder:
         self.last_map = None
         self.age = 0
         self.saved = set()
+        self.first_canvas = None
 
     def record(self, adapter, layer, q, buffers, scale, prefix, n):
-        if layer != 5 or adapter.canvas_id != 0 or n != 256:
+        if layer != 5 or n != 256:
+            return
+        if self.first_canvas is None:
+            self.first_canvas = adapter.canvas_id
+        if adapter.canvas_id != self.first_canvas:
             return
         state = adapter.mage_state.get(layer)
         if state is None or state.get('kept') is None or state['canvas'] != adapter.canvas_id:
