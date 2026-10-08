@@ -1,3 +1,26 @@
+## Independent GLOBAL value selectors — 2026-10-08
+
+The independent study is on `value-aware_cross-step-reuse_v2`, under
+`results/v31_value_selectors_20261008/`. It derives V1/V2, singleton deletion,
+exact cumulative greedy, and separately named batch8 from the supplied formulas.
+It uses Yuhan's inherited reuse lifecycle and Junyu's deterministic Gaussian32
+projection family; native LOCAL, the sampler and later FA4 consumer are preserved.
+
+Verified model source `205e3502d102077bd01776a5f21c1f6a0d0ebb77` completed
+15/15 development control cells with zero timed CUDA captures. Its all-call
+GLOBAL sparsity is 76.45235%; this is a development calibration reference,
+not a target result. The dense FULL smoke and official scorer binding also
+completed. Independent selector tests now pass 21 CPU tests (13 CUDA skips)
+and 34 H100 tests, including collective row-support constraints.
+
+Online thresholds remain unfrozen. Next: qualify every arm in model, calibrate
+uniform thresholds, then separate clean timing and instrumented audits. Official
+RULER v33 and HumanEval manifests and cell schedules have not been located;
+their generation is blocked until those exact frozen inputs are available.
+LongBench uses the supplied official 503-item pool with a pre-generation
+15-development/488-target split. Prior pool exposure is unknown. No complete
+target panel, accuracy improvement or end-to-end benefit is established.
+
 ## V31 GLOBAL + LOCAL AIME26 run — 2026-10-06
 
 The complete 30-problem × seeds 42/43/44 panel is under

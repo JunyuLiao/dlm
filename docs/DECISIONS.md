@@ -1287,3 +1287,20 @@ The dense reference scores 51/90 (56.67%). GLOBAL-only sparse scores 51/90,
 0.917x. GLOBAL physical sparsity is 58.05%, 41.33%, and 17.81%; LOCAL is 0%.
 The matched control therefore remains slower than dense even with native dense
 LOCAL layers. The result does not support a positive end-to-end speed claim.
+# Independent V31 selector qualification — 2026-10-08
+
+The new study independently implements the requested V1/V2/V3 formulas and
+keeps the inherited qblock-max control unchanged. A completed 15-item
+development control receipt at source `205e3502` measures 76.45235% GLOBAL
+decode sparsity, including dense observations and current canvas tiles. This
+measured denominator is the online calibration target. No fixed-k constraint
+is applied to V1/V2, and no target threshold has been frozen.
+
+Singleton scores are computed once. A support-constrained descending ranking
+preserves every live row when unconstrained top-k would jointly remove its
+support; ties favor smaller retained tile IDs. Independent CPU/H100 regression
+tests pass. Exact greedy retains its cumulative scoring loop; batch8 is a
+separate approximation. These are qualification findings, not benchmark claims.
+Frozen failed attempts and existing evidence are retained. Private scorer
+records and caches stay outside Git. Exact RULER v33 and HumanEval inputs remain
+unavailable; no replacement prompts or seed schedules are invented.

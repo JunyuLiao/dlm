@@ -202,6 +202,7 @@ def main():
             config = json.loads(Path(config_path).read_text())
         adapter = vllm_adapter.VllmMethodAdapter(text.layer_types, config=config,
                                                  condition=None if config is None else config['condition'], arm=arm,
+                                                 profile=os.environ.get('VALUE_AUDIT') == '1',
                                                  mage_k=int(os.environ.get('MAGE_K', '1024')),
                                                  logit_stats=os.environ.get('LOGIT_STATS', 'legacy'),
                                                  dp_build=os.environ.get('DP_BUILD', 'legacy'),
@@ -282,7 +283,8 @@ def main():
                 max_model_len_source='env' if os.environ.get('MAX_MODEL_LEN') else 'derived', max_model_len_need=longest,
                 gpu_memory_utilization=kw['gpu_memory_utilization'], seed_base=seed_base, adapter_sha256=adapter_sha,
                 method_fingerprint=None if config is None else config.get('fingerprint'), fix_51994=fix_51994,
-                fa4_local_fix=fa4_local_fix,
+                fa4_local_fix=bool(fa4_local_fix),
+                fa4_local_fix_sha256=hashlib.sha256(Path(fa4_local_fix).read_bytes()).hexdigest() if fa4_local_fix else None,
                 mage_k=int(os.environ.get('MAGE_K', '1024')) if arm == 'mage' else None,
                 local_kv_budget=(int(os.environ['LOCAL_KV_BUDGET'])
                                 if os.environ.get('LOCAL_KV_BUDGET') and arm == 'mage' else None),
@@ -309,13 +311,18 @@ def main():
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]
-    for warm, cell, rep in schedule:
+    for schedule_index, (warm, cell, rep) in enumerate(schedule):
         row = rows[(cell['dataset'], cell['id'])]
         ids = list(row['prompt_tokens'])
         params = SamplingParams(max_tokens=int(row['generation_budget']), skip_special_tokens=False)
         seed = request_seed(seed_base, cell, max(rep, 0))
         if adapter is not None:
             adapter.begin_request()
+            adapter.value_diagnostic = None
+            diagnostic_dir = os.environ.get('VALUE_DIAGNOSTIC_DIR')
+            if diagnostic_dir and not warm and schedule_index <= 2:
+                from experiments.numerical_qk_reuse.v31_value_snapshots import SnapshotRecorder
+                adapter.value_diagnostic = SnapshotRecorder(diagnostic_dir, schedule_index)
         counter['calls'] = 0
         if forcing is not None:
             forcing.begin(seed, (cell['dataset'], cell.get('index'), cell['seed'], max(rep, 0)))
@@ -362,6 +369,7 @@ def main():
                    **(forcing.receipt(o.token_ids) if forcing is not None else {}),
                    receipts=None if receipts is None else dict(adapter=receipts.get('adapter'),
                                                                method=_slim(receipts.get('method')),
+                                                               timing=receipts.get('timing'),
                                                                trace=receipts.get('trace')))
         out.write(json.dumps(rec, default=str) + '\n')
         out.flush()

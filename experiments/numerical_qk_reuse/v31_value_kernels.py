@@ -174,6 +174,28 @@ def _exact_update(SCORES, ALPHA, G, A, RESIDUAL, KEEP, TARGET, BAD,
     tl.store(BAD+unit, active & ~valid)
 
 
+@tr.jit
+def _static_prune(ORDER, VALID, SUPPORT, KEEP, PROT, TARGET, BAD,
+                  JT: tl.constexpr, PT: tl.constexpr, SIZE: tl.constexpr):
+    unit = tl.program_id(0)
+    row = tl.arange(0, 128)
+    jj = tl.arange(0, SIZE)
+    retained = tl.load(KEEP+unit*JT+jj, jj<PT, False)
+    remaining = tl.sum(retained.to(tl.int32), 0)
+    target = tl.load(TARGET+unit)
+    support = tl.load(SUPPORT+unit*128+row)
+    for pos in range(PT):
+        j = tl.load(ORDER+unit*PT+PT-1-pos)
+        candidate = tl.load(KEEP+unit*JT+j) & ~tl.load(PROT+unit*JT+j)
+        valid = tl.load(VALID+(unit*JT+j)*128+row)
+        safe = tl.sum((valid & (support<=1)).to(tl.int32), 0)==0
+        drop = candidate & safe & (remaining>target)
+        tl.store(KEEP+unit*JT+j, False, drop)
+        support -= tl.where(drop & valid, 1, 0)
+        remaining -= drop.to(tl.int32)
+    tl.store(BAD+unit, remaining!=target)
+
+
 def fixed_cuda(stats, budget, mandatory, held, sticky, batch=1, singleton=False):
     alpha, c, o, g = full_support(stats)
     del c, o
@@ -194,9 +216,12 @@ def fixed_cuda(stats, budget, mandatory, held, sticky, batch=1, singleton=False)
         rank = scores[:, :pt].masked_fill(~eligible[:, :pt], -math.inf).masked_fill(mandatory[:, :pt], math.inf)
         # Stable sort defines smallest tile ID on score ties for the new arms.
         order = torch.argsort(rank, descending=True, stable=True)
-        keep[:, :pt] = False
-        keep[:, :pt].scatter_(1, order, torch.arange(pt, device=keep.device)[None] < target[:, None])
-        keep |= mandatory
+        valid = stats.valid.contiguous()
+        support = (valid & keep[..., None]).sum(1).to(torch.int32)
+        failed = torch.empty(u, dtype=torch.bool, device=keep.device)
+        _static_prune[(u,)](order, valid, support, keep, mandatory, target, failed,
+            jt, pt, tr.next_power_of_2(jt), num_warps=4)
+        torch._assert_async((~failed).all(), 'no row-supported singleton set at requested budget')
         evaluations = u*pt
     else:
         failed = torch.zeros(u, dtype=torch.bool, device=keep.device)

@@ -79,11 +79,16 @@ def main():
     if selector:
         env['VALUE_SELECTOR'] = selector
     env['VALUE_AUDIT'] = '1' if args.purpose in ('audit', 'smoke', 'development') else '0'
+    env.pop('VALUE_DIAGNOSTIC_DIR', None)
+    if args.purpose == 'audit':
+        env['VALUE_DIAGNOSTIC_DIR'] = str(attempt/'private/snapshots')
     if args.threshold is not None:
         env['VALUE_THRESHOLD'] = str(args.threshold)
     manifest_hashes = {c['dataset']: hashlib.sha256((Path(args.manifests)/(c['dataset']+'_generation_manifest.json')).read_bytes()).hexdigest() for c in cells}
     source_files = [root/'experiments/numerical_qk_reuse'/name for name in
-        ('vllm_adapter.py', 'v31_value_selectors.py', 'v31_value_kernels.py', 'v27_fa4.py', 'v31_fa4_observe.py')]
+        ('vllm_adapter.py', 'v31_value_selectors.py', 'v31_value_kernels.py', 'v31_value_snapshots.py', 'v27_fa4.py', 'v31_fa4_observe.py')]
+    source_files += [root/'experiments/diffusion_gemma_jl_output_aware/projections.py',
+                     root/'experiments/value_direction_hopper/projection.py']
     source_files += [root/'scripts/v31_vllm_paired_bench.py', root/'scripts/v31_value_campaign.py']
     freeze = dict(schema='independent_v31_attempt_v1', purpose=args.purpose, arm=args.arm,
         cell_count=len(cells), cells_sha256=hashlib.sha256(cells_bytes).hexdigest(),

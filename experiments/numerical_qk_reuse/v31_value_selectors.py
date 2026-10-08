@@ -169,21 +169,32 @@ def singleton_reference(stats, budget, mandatory=None, held=None, sticky=0.):
     score = deletion_scores(stats, alpha, g, alpha.sum(1), g.sum(1))
     if held is not None:
         score = score * torch.exp(sticky*held.to(score.dtype))
-    # Mandatory prefix support is charged against k; tail support is outside k.
-    forced = mandatory | torch.isposinf(score)
+    # Rank once. Remove lowest ranked candidates when doing so preserves each
+    # row's support. This agrees with top-k on unconstrained GLOBAL units and
+    # handles jointly inadmissible deletions without recomputing the scores.
     pt = stats.prefix_tiles
-    keep = mandatory.clone()
+    keep = eligible | mandatory
     for unit in range(keep.shape[0]):
-        required = forced[unit, :pt] & eligible[unit, :pt]
+        required = mandatory[unit, :pt] & eligible[unit, :pt]
         k = min(budget, int(eligible[unit, :pt].sum()))
         if int(required.sum()) > k:
             raise ValueError('mandatory row support exceeds prefix budget')
-        rank = score[unit, :pt].masked_fill(~eligible[unit, :pt], -math.inf).masked_fill(required, math.inf)
-        order = torch.argsort(rank, descending=True, stable=True)
-        keep[unit, order[:k]] = True
-    # Singleton rankings can collectively remove a row's support. Fail explicitly.
-    if bool((stats.rows & ((alpha*keep[..., None]).sum(1) <= 0)).any()):
-        raise ValueError('singleton ranking violates row support; map is inadmissible')
+        order = torch.argsort(score[unit, :pt], descending=True, stable=True).flip(0)
+        support = (stats.valid[unit] & keep[unit, :, None]).sum(0)
+        remaining = int(eligible[unit, :pt].sum())
+        for j in order.tolist():
+            if remaining == k:
+                break
+            if not eligible[unit, j] or mandatory[unit, j]:
+                continue
+            valid = stats.valid[unit, j]
+            if bool((valid & (support <= 1)).any()):
+                continue
+            keep[unit, j] = False
+            support -= valid.to(support.dtype)
+            remaining -= 1
+        if remaining != k:
+            raise ValueError('no row-supported singleton set at requested budget')
     bad = stats.invalid.any((1, 2))
     keep[bad] = True
     return keep, score

@@ -166,6 +166,24 @@ def test_same_mask_has_same_native_operator_for_all_selector_states():
     assert torch.equal(direct_output(s, v1[0]), direct_output(s, v2[0]))
 
 
+@pytest.mark.parametrize('cuda', [False, True])
+def test_singleton_joint_support_constraint(cuda):
+    if cuda and not torch.cuda.is_available():
+        pytest.skip('CUDA unavailable')
+    # Naive top-3 chooses A,B,E, losing C/D's row. Scores stay fixed while
+    # support constraints require retaining A,C,E instead.
+    z = torch.full((1, 5, 128), -math.inf)
+    z[:, :2, 0] = 0.
+    z[:, 2:4, 1] = 0.
+    z[:, 4, 2] = 0.
+    s = Stats(z, torch.ones(1, 5, 128, 32), torch.ones(1, 128),
+              torch.zeros_like(z, dtype=torch.bool), 5, 1, 1)
+    if cuda:
+        s = Stats(*(x.cuda() for x in (s.log_mass, s.mean, s.nu, s.invalid)), 5, 1, 1)
+    keep, _ = select(s, SELECTORS[2], budget=3)
+    assert keep.cpu().reshape(-1).tolist() == [True, False, True, False, True]
+
+
 def test_adapter_value_scope_guard():
     from experiments.numerical_qk_reuse.vllm_adapter import VllmMethodAdapter
     options = dict(arm='mage', mage_select='fa4', mage_granularity='qblock_max',

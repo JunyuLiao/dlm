@@ -922,6 +922,9 @@ class VllmMethodAdapter:
                                                              scaling=float(impl.scale), is_causal=False,
                                                              sliding_window=None)
         self.paged = None
+        diagnostic = getattr(self, 'value_diagnostic', None)
+        if diagnostic is not None and self.arm == 'mage':
+            diagnostic.record(self, layer_idx, q, b, float(impl.scale), prefix, n)
         if self.drift_diag:
             self._drift_account(layer_idx, q, out, n)
         output[:n].view(n, -1).copy_(out.reshape(n, -1))
