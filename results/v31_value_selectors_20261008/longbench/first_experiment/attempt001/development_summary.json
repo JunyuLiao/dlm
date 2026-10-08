@@ -1,0 +1,206 @@
+{
+  "value_v1_online_discard_mass": {
+    "arm": "value_v1_online_discard_mass",
+    "purpose": "development",
+    "items": 64,
+    "N": 17698,
+    "C": 971,
+    "T": 240552,
+    "N_per_C": 18.22657054582904,
+    "S_total_s": 579.67269,
+    "W_total_s": 866.32465,
+    "S_per_N_ms": 32.75357045993897,
+    "W_mean_s": 13.53632265625,
+    "S_mean_s": 9.05738578125,
+    "global_eligible_tiles": 4367728160,
+    "global_kept_tiles": 862619393,
+    "global_skipped_tiles": 3505108767,
+    "global_sparsity": 0.8025015840271524,
+    "local_sparsity": 0,
+    "overall_rectangle_sparsity": 0.753641587861209,
+    "overall_denominator_status": "audit-only actual decode calls; window-intersecting H x Q128 x KV64 rectangles, geometry-derived; not CUDA CTA count",
+    "native_local_attention_ms": 28213.74818943441,
+    "phases": {
+      "initial": {
+        "calls": 4855,
+        "eligible_tiles": 237078720,
+        "kept_tiles": 237078720
+      },
+      "refresh": {
+        "calls": 4585,
+        "eligible_tiles": 222374400,
+        "kept_tiles": 222374400
+      },
+      "held": {
+        "calls": 73875,
+        "eligible_tiles": 3654209440,
+        "kept_tiles": 359734817
+      },
+      "carried": {
+        "calls": 4855,
+        "eligible_tiles": 237700160,
+        "kept_tiles": 27066016
+      },
+      "dense": {
+        "calls": 320,
+        "eligible_tiles": 16365440,
+        "kept_tiles": 16365440
+      }
+    },
+    "selections": 4855,
+    "refreshes": 4585,
+    "held": 73875,
+    "carried": 4855,
+    "invalid_rows": 0,
+    "discovery_ms": 95785.74608182907,
+    "selection_ms": 50782.249094963074,
+    "global_attention_ms": 188812.2,
+    "candidate_evaluations": 459453120,
+    "additional_statistics_qk_rectangles": 459453120,
+    "workspace_allocated_bytes": 1239023616,
+    "peak_summary_bytes": 1161461760,
+    "peak_cuda_bytes": 75754091008,
+    "threshold": 0.027000000000000003,
+    "capped": 3,
+    "timed_cuda_captures": 0,
+    "label": "original64-cell development audit; instrumented timing is not headline latency",
+    "source_attempt": "longbench/calibration/attempt001/search001/value_v1_online_discard_mass/trial004/attempt001",
+    "receipt_sha256": "fe5723369f184055465d8144d3a481c7a19724d13e816d21e3d0a92032a97492"
+  },
+  "value_v2_online_preserve_mass": {
+    "arm": "value_v2_online_preserve_mass",
+    "purpose": "development",
+    "items": 64,
+    "N": 17127,
+    "C": 940,
+    "T": 231583,
+    "N_per_C": 18.220212765957445,
+    "S_total_s": 564.70265,
+    "W_total_s": 851.58348,
+    "S_per_N_ms": 32.97148654171775,
+    "W_mean_s": 13.305991875,
+    "S_mean_s": 8.82347890625,
+    "global_eligible_tiles": 4610272640,
+    "global_kept_tiles": 713238301,
+    "global_skipped_tiles": 3897034339,
+    "global_sparsity": 0.8452936828916044,
+    "local_sparsity": 0,
+    "overall_rectangle_sparsity": 0.7978688116800184,
+    "overall_denominator_status": "audit-only actual decode calls; window-intersecting H x Q128 x KV64 rectangles, geometry-derived; not CUDA CTA count",
+    "native_local_attention_ms": 27994.173951420933,
+    "phases": {
+      "initial": {
+        "calls": 4700,
+        "eligible_tiles": 238468800,
+        "kept_tiles": 238468800
+      },
+      "refresh": {
+        "calls": 4300,
+        "eligible_tiles": 215812480,
+        "kept_tiles": 215812480
+      },
+      "held": {
+        "calls": 71615,
+        "eligible_tiles": 3900555520,
+        "kept_tiles": 224847885
+      },
+      "carried": {
+        "calls": 4700,
+        "eligible_tiles": 239070400,
+        "kept_tiles": 17743696
+      },
+      "dense": {
+        "calls": 320,
+        "eligible_tiles": 16365440,
+        "kept_tiles": 16365440
+      }
+    },
+    "selections": 4700,
+    "refreshes": 4300,
+    "held": 71615,
+    "carried": 4700,
+    "invalid_rows": 0,
+    "discovery_ms": 94621.38765001297,
+    "selection_ms": 48527.82509636879,
+    "global_attention_ms": 179019.43,
+    "candidate_evaluations": 454281280,
+    "additional_statistics_qk_rectangles": 454281280,
+    "workspace_allocated_bytes": 1239023616,
+    "peak_summary_bytes": 1161461760,
+    "peak_cuda_bytes": 75758032896,
+    "threshold": 0.027000000000000003,
+    "capped": 4,
+    "timed_cuda_captures": 0,
+    "label": "original64-cell development audit; instrumented timing is not headline latency",
+    "source_attempt": "longbench/first_experiment/attempt001/v2_development/attempt001",
+    "receipt_sha256": "6e2577f178d74df0a8c8a1eb9db853539ea3dfe0a8301f10e89d8396f3f44380"
+  },
+  "current_v31_control": {
+    "arm": "current_v31_control",
+    "purpose": "development",
+    "items": 64,
+    "N": 17427,
+    "C": 885,
+    "T": 217830,
+    "N_per_C": 19.691525423728812,
+    "S_total_s": 429.03154,
+    "W_total_s": 715.64956,
+    "S_per_N_ms": 24.618783496872666,
+    "W_mean_s": 11.182024375,
+    "S_mean_s": 6.7036178125,
+    "global_eligible_tiles": 4710991040,
+    "global_kept_tiles": 779240320,
+    "global_skipped_tiles": 3931750720,
+    "global_sparsity": 0.8345909993494702,
+    "local_sparsity": 0,
+    "overall_rectangle_sparsity": 0.7879539391441024,
+    "overall_denominator_status": "audit-only actual decode calls; window-intersecting H x Q128 x KV64 rectangles, geometry-derived; not CUDA CTA count",
+    "native_local_attention_ms": 27927.113693073392,
+    "phases": {
+      "initial": {
+        "calls": 4425,
+        "eligible_tiles": 226638080,
+        "kept_tiles": 226638080
+      },
+      "refresh": {
+        "calls": 3995,
+        "eligible_tiles": 202021280,
+        "kept_tiles": 202021280
+      },
+      "held": {
+        "calls": 73970,
+        "eligible_tiles": 4038761760,
+        "kept_tiles": 314816320
+      },
+      "carried": {
+        "calls": 4425,
+        "eligible_tiles": 227204480,
+        "kept_tiles": 19399200
+      },
+      "dense": {
+        "calls": 320,
+        "eligible_tiles": 16365440,
+        "kept_tiles": 16365440
+      }
+    },
+    "selections": 4425,
+    "refreshes": 3995,
+    "held": 73970,
+    "carried": 4425,
+    "invalid_rows": 0,
+    "discovery_ms": null,
+    "selection_ms": null,
+    "global_attention_ms": 52736.82,
+    "candidate_evaluations": null,
+    "additional_statistics_qk_rectangles": null,
+    "workspace_allocated_bytes": null,
+    "peak_summary_bytes": null,
+    "peak_cuda_bytes": 74518027776,
+    "threshold": null,
+    "capped": 4,
+    "timed_cuda_captures": 0,
+    "label": "original64-cell development audit; instrumented timing is not headline latency",
+    "source_attempt": "longbench/reference/attempt001/current_v31_control/attempt001",
+    "receipt_sha256": "b5785e78710cbe003208f2f6f62f19ee4b023a83730252fab59a7dcc25c64f41"
+  }
+}

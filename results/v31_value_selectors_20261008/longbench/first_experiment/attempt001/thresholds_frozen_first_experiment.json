@@ -1,0 +1,57 @@
+{
+  "status": "complete",
+  "kind": "frozen first-experiment parameters with complete development audits; no exact-match claim",
+  "frozen_utc": "2026-10-08T08:41:04.203771+00:00",
+  "thresholds": {
+    "value_v1_online_discard_mass": 0.027000000000000003,
+    "value_v2_online_preserve_mass": 0.027000000000000003
+  },
+  "label": "first effectiveness experiment: shared online threshold accepted from V1 trial004; achieved sparsities differ and no exact matching is claimed",
+  "amendment_sha256": "ba9acdcf9e68616cc866fe6f94aebd19f977a4481487655939191bcc15343ba5",
+  "execution_protocol_sha256": "91534d11fd237b1d9858aad4b6d3de93bef9790adfdd6b30c457ca7903ec50b2",
+  "development_schedule_sha256": "d0f0f7724d3350028091d6d15a6d8a0bdc4054b8764eec0097941a494e812401",
+  "development_cells": 64,
+  "questions": 32,
+  "seeds": [
+    1,
+    2
+  ],
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "dc9e4a693a4233b11f1f999ab68277c74557c387a9820e2a729be2ef73743797",
+    "experiments/numerical_qk_reuse/v31_value_selectors.py": "e6e5ce23cb8d4fe86f6050401e97636754b9bcac44e644f0f802647eed43f655",
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "76eb2987bb99d5378c7eb31aef50c100335714f7f2cd28c4b8cce6707007b496",
+    "experiments/numerical_qk_reuse/v31_value_summary.py": "ef8d32e01c575bdc167125ddd00321bde391355354cdeecc4baab5e874d4934b",
+    "experiments/numerical_qk_reuse/v31_value_workspace.py": "61dcc7f7800159c37dff672b779f9348d5350f386f08dda6c125fd14d0d599d1",
+    "experiments/numerical_qk_reuse/v31_value_projection.py": "b15e32ab3ee7936cabc4a5485e67865ee7bb0e14122bbe2b0664daf8b1a1b3a6",
+    "experiments/numerical_qk_reuse/v31_value_snapshots.py": "2e2a56758f27ae0d66a86efb702a4598532aa6beb6fa211d6e6d04a73b6c096f",
+    "experiments/numerical_qk_reuse/v31_value_native_audit.py": "ef1ee7711dadf318b96aa2e6009ffb4d0dd4f3ded1c6f2d9d45fde760a97e766",
+    "experiments/numerical_qk_reuse/v27_fa4.py": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+    "experiments/numerical_qk_reuse/v31_fa4_observe.py": "3b7027b52b64ab5b101d71808b69decba434405c287bf9c94ba3aa7a3b7a5133",
+    "experiments/numerical_qk_reuse/v29_paged_copy.py": "7ee25f0ae9d55d409b121237d9b6e110a2e0b5dcbb619a60732a8395ca10154f",
+    "experiments/numerical_qk_reuse/v29_lse_merge.py": "7b4bcb126b7f7faa02047aa07d5c49e8fbff33204001f66d529343cce1c75a36",
+    "experiments/numerical_qk_reuse/v31_logit_stats.py": "1c5401a44dc9c73fd87399844353155ecece3665a241ab1f91b254c136b6d5ba",
+    "experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+    "experiments/value_direction_hopper/projection.py": "de5a1f971187880fa7aee1f4c21f18a1d14f52dd4879526f515e6ad365886f5d",
+    "scripts/v31_vllm_paired_bench.py": "3689337ad2d7e96eac825b68d297cabcf4556d69aa1b1dd6cc30140d0495a6e0",
+    "scripts/v31_value_campaign.py": "d6397baf9bc28fe2837ffd2de4162deb0f213dd9d1b80e7d20a25f3e60fcc1fc"
+  },
+  "development": {
+    "value_v1_online_discard_mass": {
+      "global_sparsity": 0.8025015840271524,
+      "source_attempt": "longbench/calibration/attempt001/search001/value_v1_online_discard_mass/trial004/attempt001",
+      "receipt_sha256": "fe5723369f184055465d8144d3a481c7a19724d13e816d21e3d0a92032a97492"
+    },
+    "value_v2_online_preserve_mass": {
+      "global_sparsity": 0.8452936828916044,
+      "source_attempt": "longbench/first_experiment/attempt001/v2_development/attempt001",
+      "receipt_sha256": "6e2577f178d74df0a8c8a1eb9db853539ea3dfe0a8301f10e89d8396f3f44380"
+    },
+    "current_v31_control": {
+      "global_sparsity": 0.8345909993494702,
+      "source_attempt": "longbench/reference/attempt001/current_v31_control/attempt001",
+      "receipt_sha256": "b5785e78710cbe003208f2f6f62f19ee4b023a83730252fab59a7dcc25c64f41"
+    }
+  },
+  "no_target_answers_used": true,
+  "no_further_threshold_search": true
+}

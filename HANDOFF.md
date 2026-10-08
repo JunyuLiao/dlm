@@ -5,8 +5,9 @@ User amendment, 2026-10-08: accept V1 trial004 at threshold
 effectiveness experiment. Exact sparsity matching is no longer required.
 The completed original64-cell control measures83.459100%. The finer search
 was stopped during trial006 (26/64 cells); every prior attempt is retained.
-V2 uses the same frozen threshold and gets one64-cell development audit,
-without another threshold search. Target scope, controls, native decoding,
+V2 completed its one64-cell development audit at the same threshold,
+achieving84.529368% GLOBAL sparsity with zero timed captures/validation errors.
+There is no further threshold search. Target scope, controls, native decoding,
 budgets and separate full503-cell audit/clean passes remain unchanged.
 The new execution freeze is `protocol_execution_attempt003_20261008.json`,
 with the user instruction recorded in
@@ -35,9 +36,8 @@ actual denoising graph modes, and counts native dense/LOCAL geometry without
 changing their consumers. All three final instrumentation model gates passed at `01f37fe3`: every native
 decode call used FULL, every control call used PIECEWISE, and clean all-kept
 removed GPU counters. All three match their earlier outputs and trajectories
-exactly. Done: audited original64-cell control reference. Next/running: one
-V2 development audit at the accepted shared threshold, then separate503-cell
-clean and audit passes for every arm.
+exactly. Done: original64-cell control and both accepted online development audits.
+Next/running: separate503-cell clean and audit passes for every arm.
 Four native-order shards use identical first-cell warm-ups and a frozen rotated
 arm order; completed shards survive restart, failed workers receive new attempts.
 The preceding exact-match execution freeze (attempt002) is retained and
@@ -50,7 +50,8 @@ excluded from calibration because11 items belong to the original holdout.
 mistake. Target evaluation retains all503 official seed-1 items, with the
 original160/343 split and332-item sensitivity subset. This historically examined
 pool does not provide a fresh-confirmation claim. Online thresholds are frozen
-by the first-experiment amendment, with V2 achieved development sparsity pending.
+by the first-experiment amendment; completed development results and source
+identity proof are in `longbench/first_experiment/attempt001/`.
 Exact RULER v33 and HumanEval manifests/cell schedules remain unavailable; no
 replacement prompts or seeds are generated. No complete target panel, accuracy
 improvement, end-to-end gain, or study completion marker exists.

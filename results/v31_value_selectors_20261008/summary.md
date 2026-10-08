@@ -51,3 +51,10 @@ at threshold0.027000000000000003 and80.250158% GLOBAL sparsity, compared with
 frozen for V2; its one development audit is pending. Exact matching is no
 longer a launch requirement. These development measurements are not target
 accuracy or clean timing results. The finer search is stopped and retained.
+
+Completed first-experiment development audits (original32 items, seeds1/2):
+V1 GLOBAL sparsity80.250158%, V2 GLOBAL sparsity84.529368%, control83.459100%.
+Both online arms use threshold0.027000000000000003. LOCAL sparsity is zero.
+All three have identical generation/selector/consumer source hashes and
+validated complete64-cell receipts. Target evaluation is next; these are not
+accuracy or clean-latency conclusions.

@@ -1341,3 +1341,11 @@ and fixed budgets remain unchanged. Protocol execution attempt003 records the
 amendment and explicit source binding. The selector and generation source
 hashes are unchanged; only execution-protocol selection and reporting labels
 were updated. These are calibration/protocol facts, not target results.
+
+The one V2 development audit completed64/64 cells at the accepted shared
+threshold, measuring84.529368% GLOBAL sparsity and zero LOCAL sparsity. Its
+receipt validates all source/layer/graph checks with zero timed captures.
+V1, V2 and control generation/selector/consumer source hashes match exactly,
+despite the later execution/reporting-only protocol amendment. The frozen
+first-experiment parameter file records these measured differences before
+any target generation; no additional threshold search is performed.
