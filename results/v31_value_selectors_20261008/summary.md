@@ -7,9 +7,12 @@ greedy uses cached summaries after each deletion. Batch8 is a separate
 approximation with a support-safe single-deletion fallback and exact cleanup.
 The later native FA4 consumer and inherited refresh/carry machinery are unchanged.
 
-The completed 15-item development control realizes 76.45235% GLOBAL decode
+The completed 15-item preliminary control realizes 76.45235% GLOBAL decode
 sparsity over all calls, including exact observations and current canvas tiles.
-This measured value is the calibration target. Thresholds remain unfrozen.
+It is excluded from calibration: 11 items belong to the original holdout. A
+supersession note preserves this deviation. Thresholds remain unfrozen; the
+calibration reference will come from a completed audited run on the existing
+32-item S1 development schedule with seeds 1 and 2.
 The one-cell V1 smoke at diagnostic threshold 0.001 passed official binding,
 reported zero invalid rows and zero timed CUDA captures, and installed no
 LOCAL router. This cell is not quality evidence. New source qualification will
@@ -24,6 +27,9 @@ explicitly superseded. Failed attempts remain intact.
 
 LongBench uses the exact supplied official 503-item manifest, seed 1, native
 thinking and total cap 16384, with a pre-generation 15/488 development/target
-split. Prior pool exposure is unknown. RULER v33 and HumanEval generation remain
+split in the superseded pilot. The restored protocol uses the original 160/343
+exploration/holdout definitions and the exact original S1 development schedule;
+target evaluation retains the full official 503-item, seed-1 schedule. Prior
+pool exposure and the 11 pilot holdout exposures are disclosed. RULER v33 and HumanEval generation remain
 blocked by missing exact frozen manifests and cell schedules; no substitute
 prompts or schedules are generated. The study has no final completion marker.

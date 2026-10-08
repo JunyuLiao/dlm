@@ -1,0 +1,64 @@
+{
+  "schema": "independent_v31_original_development_protocol_v1",
+  "supersedes": "config.json development split and calibration_reference.json",
+  "reason": "restore the pre-existing permitted development procedure before threshold calibration",
+  "source_commit": "6444bbe197bb6fdc1ea3f44a736eb6c87b0f14a6",
+  "original_split_sha256": "b6bacc196f017a01a8bd96e06237ce8efd4c407a3bb0b7d145938c32a6fcf7a8",
+  "original_suite_sha256": "be7fe51c25a9f7f2518d01065f817ca753bf400a898e33d2e3764bfaa652efa4",
+  "development": {
+    "items": 32,
+    "seeds": [
+      1,
+      2
+    ],
+    "cells": 64,
+    "schedule_sha256": "d0f0f7724d3350028091d6d15a6d8a0bdc4054b8764eec0097941a494e812401"
+  },
+  "target": {
+    "items": 503,
+    "seeds": [
+      1
+    ],
+    "cells": 503,
+    "schedule_sha256": "d48c39d68533467fd4942931745377a42a9d57e3e5714aa8913f5d897e7d4957",
+    "original_exploration": 160,
+    "original_holdout": 343
+  },
+  "arms": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "current_v31_control",
+    "value_v1_online_discard_mass",
+    "value_v2_online_preserve_mass",
+    "value_v3a_singleton_delete",
+    "value_v3b_greedy_exact",
+    "value_v3b_approx_batch8"
+  ],
+  "separate_mass_only_control": "none; current_v31_control itself is mass-only qblock_max",
+  "online_thresholds": null,
+  "reference_sparsity": "pending completed audited 64-cell current control",
+  "calibration_tolerance_absolute": 0.003,
+  "calibration_max_trials_per_arm": 12,
+  "preliminary_diagnostic_deviation": {
+    "items": 15,
+    "original_holdout_items": 11,
+    "exposed_holdout_indices": [
+      76,
+      135,
+      187,
+      189,
+      243,
+      273,
+      316,
+      327,
+      400,
+      441,
+      486
+    ],
+    "excluded_from_threshold_calibration": true,
+    "unused_for_accuracy_tuning": true
+  },
+  "manifest_sha256": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe",
+  "native_settings": "same frozen model/runtime/reuse settings as config.json; native LOCAL and sampler preserved"
+}

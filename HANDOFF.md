@@ -7,9 +7,10 @@ It uses Yuhan's inherited reuse lifecycle and Junyu's deterministic Gaussian32
 projection family; native LOCAL, the sampler and later FA4 consumer are preserved.
 
 Verified model source `205e3502d102077bd01776a5f21c1f6a0d0ebb77` completed
-15/15 development control cells with zero timed CUDA captures. Its all-call
-GLOBAL sparsity is 76.45235%; this is a development calibration reference,
-not a target result. The dense FULL smoke and official scorer binding also
+15/15 preliminary control cells with zero timed CUDA captures. Its all-call
+GLOBAL sparsity is 76.45235%; this is diagnostic only and is excluded from
+calibration because 11 items belong to the historical holdout. The dense FULL
+and V1 smokes and official scorer binding also
 completed. Independent selector tests now pass 21 CPU tests (13 CUDA skips)
 and 40 H100 tests, including collective row-support constraints, exact batch8
 cleanup, bounded-memory reductions and native LOCAL call accounting.
@@ -18,8 +19,12 @@ Online thresholds remain unfrozen. Next: qualify every arm in model, calibrate
 uniform thresholds, then separate clean timing and instrumented audits. Official
 RULER v33 and HumanEval manifests and cell schedules have not been located;
 their generation is blocked until those exact frozen inputs are available.
-LongBench uses the supplied official 503-item pool with a pre-generation
-15-development/488-target split. Prior pool exposure is unknown. No complete
+LongBench now restores the original S1 development schedule: 32 items at seeds
+1 and 2, with its exact historical hash verified. Target evaluation retains the
+official 503-item schedule, seed 1, and labels the original 160/343 split plus
+the 11 newly exposed diagnostic holdout items. The prior 15/488 setup is retained
+and superseded in `protocol_original_s1_20261008.json`. Prior pool exposure is
+unknown. No complete
 target panel, accuracy improvement or end-to-end benefit is established.
 
 ## V31 GLOBAL + LOCAL AIME26 run — 2026-10-06
