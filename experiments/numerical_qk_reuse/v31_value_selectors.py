@@ -27,6 +27,19 @@ class Stats:
     heads: int
     blocks: int
 
+    def __post_init__(self):
+        if self.log_mass.ndim != 3 or self.mean.ndim != 4:
+            raise ValueError('statistics require U,J,Q and U,J,Q,R tensors')
+        u, jt, q = self.log_mass.shape
+        if (self.mean.shape[:3] != (u, jt, q) or self.nu.shape != (u, q)
+                or self.invalid.shape != (u, jt, q) or self.invalid.dtype != torch.bool
+                or u != self.heads*self.blocks or not 0 <= self.prefix_tiles <= jt):
+            raise ValueError('invalid physical tile statistics geometry')
+        if any(x.device != self.log_mass.device for x in (self.mean, self.nu, self.invalid)):
+            raise ValueError('statistics must share one device')
+        if self.log_mass.is_cuda and (q != 128 or self.mean.shape[-1] != 32):
+            raise ValueError('CUDA selector requires Q128 and Gaussian32')
+
     @property
     def valid(self):
         return torch.isfinite(self.log_mass)

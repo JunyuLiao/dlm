@@ -52,9 +52,16 @@ def statistics_cuda(q, k, sketch, nu_kv, scale, prefix_tiles):
     if h % hk or sketch.shape != (1, hk, nk, 32) or q.dtype != torch.bfloat16:
         raise ValueError('native BF16 GQA and FP32 Gaussian32 required')
     qb, kt = tr.cdiv(n, 128), tr.cdiv(nk, 64)
-    lm = torch.full((h*qb, kt, 128), -math.inf, dtype=torch.float32, device=q.device)
-    mu = torch.zeros((*lm.shape, 32), dtype=torch.float32, device=q.device)
-    invalid = torch.zeros(lm.shape, dtype=torch.bool, device=q.device)
+    shape = (h*qb, kt, 128)
+    if n % 128:
+        lm = torch.full(shape, -math.inf, dtype=torch.float32, device=q.device)
+        mu = torch.zeros((*shape, 32), dtype=torch.float32, device=q.device)
+        invalid = torch.zeros(shape, dtype=torch.bool, device=q.device)
+    else:
+        # Every row/tile is overwritten by _stats, so no redundant zeroing pass.
+        lm = torch.empty(shape, dtype=torch.float32, device=q.device)
+        mu = torch.empty((*shape, 32), dtype=torch.float32, device=q.device)
+        invalid = torch.empty(shape, dtype=torch.bool, device=q.device)
     _stats[(tr.cdiv(n, 32), h, kt)](q, k, sketch, lm, mu, invalid, n, nk, h, hk, d, kt, qb,
         q.stride(1), q.stride(2), k.stride(1), k.stride(2), float(scale), num_warps=4)
     nu = nu_kv[torch.arange(h, device=q.device)//(h//hk)][:, None, None].expand(h, qb, 128).reshape(h*qb, 128).contiguous()
@@ -115,6 +122,10 @@ def online_cuda(stats, threshold, preserve, mandatory, held, sticky):
 def _scores(ALPHA, G, A, RESIDUAL, NU, ROWS, KEEP, PROT, HELD, SCORES,
             JT: tl.constexpr, PT: tl.constexpr, STICKY: tl.constexpr):
     unit, j = tl.program_id(0), tl.program_id(1)
+    removable = tl.load(KEEP+unit*JT+j) & ~tl.load(PROT+unit*JT+j) & (j<PT)
+    if not removable:
+        tl.store(SCORES+unit*JT+j, float('inf'))
+        return
     row, rr = tl.arange(0, 128), tl.arange(0, 32)
     ix = (unit*JT+j)*128+row
     alpha = tl.load(ALPHA+ix)
@@ -128,13 +139,12 @@ def _scores(ALPHA, G, A, RESIDUAL, NU, ROWS, KEEP, PROT, HELD, SCORES,
     impossible = tl.sum((live & (remain<=0)).to(tl.int32), 0)>0
     held = tl.load(HELD+unit*JT+j)
     score *= lib.exp(STICKY*held)
-    removable = tl.load(KEEP+unit*JT+j) & ~tl.load(PROT+unit*JT+j) & (j<PT)
     tl.store(SCORES+unit*JT+j, tl.where(impossible | ~removable, float('inf'), score))
 
 
-def candidate_scores(stats, alpha, g, a, residual, keep, mandatory, held, sticky):
+def candidate_scores(stats, alpha, g, a, residual, keep, mandatory, held, sticky, live_rows):
     out = torch.empty(keep.shape, dtype=torch.float32, device=keep.device)
-    _scores[(keep.shape[0], keep.shape[1])](alpha, g, a, residual, stats.nu, stats.rows.contiguous(),
+    _scores[(keep.shape[0], keep.shape[1])](alpha, g, a, residual, stats.nu, live_rows,
         keep, mandatory, held, out, keep.shape[1], stats.prefix_tiles, sticky, num_warps=4)
     return out
 
@@ -170,6 +180,7 @@ def fixed_cuda(stats, budget, mandatory, held, sticky, batch=1, singleton=False)
     u, jt, _ = alpha.shape
     pt = stats.prefix_tiles
     eligible = stats.valid.any(-1)
+    live_rows = stats.rows.contiguous()
     keep = eligible | mandatory
     # GLOBAL bidirectional units have the same candidate count. This guard is
     # one device assertion per call, never one synchronization per candidate.
@@ -179,7 +190,7 @@ def fixed_cuda(stats, budget, mandatory, held, sticky, batch=1, singleton=False)
     a, residual = alpha.sum(1), g.sum(1)
     evaluations = 0
     if singleton:
-        scores = candidate_scores(stats, alpha, g, a, residual, keep, torch.zeros_like(mandatory), held, sticky)
+        scores = candidate_scores(stats, alpha, g, a, residual, keep, torch.zeros_like(mandatory), held, sticky, live_rows)
         rank = scores[:, :pt].masked_fill(~eligible[:, :pt], -math.inf).masked_fill(mandatory[:, :pt], math.inf)
         # Stable sort defines smallest tile ID on score ties for the new arms.
         order = torch.argsort(rank, descending=True, stable=True)
@@ -191,7 +202,7 @@ def fixed_cuda(stats, budget, mandatory, held, sticky, batch=1, singleton=False)
         failed = torch.zeros(u, dtype=torch.bool, device=keep.device)
         for iteration in range(math.ceil(max(0, pt-k)/batch)):
             count = min(batch, pt-k-iteration*batch)
-            scores = candidate_scores(stats, alpha, g, a, residual, keep, mandatory, held, sticky)
+            scores = candidate_scores(stats, alpha, g, a, residual, keep, mandatory, held, sticky, live_rows)
             if batch == 1:
                 _exact_update[(u,)](scores, alpha, g, a, residual, keep, target, failed,
                     jt, pt, tr.next_power_of_2(jt), num_warps=4)

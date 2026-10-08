@@ -96,7 +96,7 @@ def main():
     with (attempt/'private/worker.log').open('w') as log:
         result = subprocess.run([args.python, str(root/'scripts/v31_vllm_paired_bench.py'),
             args.model, args.manifests, args.cells, str(attempt/'records.jsonl'),
-            str(attempt/'private/generations.jsonl'), arm, graph], cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT)
+            str(attempt/'private'/('run_'+args.arm+'.private.jsonl')), arm, graph], cwd=root, env=env, stdout=log, stderr=subprocess.STDOUT)
     rows = [json.loads(line) for line in (attempt/'records.jsonl').read_text().splitlines()] if (attempt/'records.jsonl').exists() else []
     receipt = dict(status='complete' if result.returncode==0 and len(rows)==len(cells) else 'failed',
         returncode=result.returncode, records=len(rows), planned=len(cells), gpu_seconds=time.perf_counter()-start,

@@ -1,0 +1,35 @@
+{
+  "schema": "independent_v31_attempt_v1",
+  "purpose": "smoke",
+  "arm": "dense_full_fix51994",
+  "cell_count": 1,
+  "cells_sha256": "e63c8c9b1e15120438bc0202ac759c1f0ea6d8e7d2e3575bde4432896c7c495e",
+  "manifests_sha256": {
+    "longbench_v2_0shot_think": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe"
+  },
+  "source_commit": "8c94eb09e57cccc3af9a71bed46e4377b14a45e1",
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "3b699ecc6cac0c3ac6b9221ae3289401a46a8c66232da36c9258f3bf78591556",
+    "experiments/numerical_qk_reuse/v31_value_selectors.py": "108c091d6a75d1256ef50e7edf4097a6f450410bde8adebc68414926d9cbf5a6",
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "d7795fb7fd5c93e0a460fa3e025bab03a08e52a9260ff40034975acca80f4ca1",
+    "experiments/numerical_qk_reuse/v27_fa4.py": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+    "experiments/numerical_qk_reuse/v31_fa4_observe.py": "3b7027b52b64ab5b101d71808b69decba434405c287bf9c94ba3aa7a3b7a5133",
+    "scripts/v31_vllm_paired_bench.py": "10f98d5a05118a141d93bf6b207d1ffb48ae3e5d1c119021989143a4a2b96cd5",
+    "scripts/v31_value_campaign.py": "d689134ae80aaf7fb03b1ebd69cb79ea44f2218f1f2169bae5daf43751f41a3c"
+  },
+  "runtime_settings": {
+    "BLOCK": "32",
+    "CHUNK": "16384",
+    "MEM": "0.85",
+    "MAX_MODEL_LEN": "141312",
+    "MAGE_K": "8192",
+    "MAGE_STEP": "1",
+    "MAGE_CARRY": "1",
+    "MAGE_RESELECT_TRIGGER": "0.15",
+    "MAGE_TRIGGER_SIGNAL": "settle",
+    "MAGE_GRAN": "qblock_max"
+  },
+  "threshold": null,
+  "local_scope": "native_dense",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b"
+}
