@@ -86,7 +86,7 @@ def main():
         env['VALUE_THRESHOLD'] = str(args.threshold)
     manifest_hashes = {c['dataset']: hashlib.sha256((Path(args.manifests)/(c['dataset']+'_generation_manifest.json')).read_bytes()).hexdigest() for c in cells}
     source_files = [root/'experiments/numerical_qk_reuse'/name for name in
-        ('vllm_adapter.py', 'v31_value_selectors.py', 'v31_value_kernels.py', 'v31_value_summary.py', 'v31_value_snapshots.py', 'v27_fa4.py', 'v31_fa4_observe.py')]
+        ('vllm_adapter.py', 'v31_value_selectors.py', 'v31_value_kernels.py', 'v31_value_summary.py', 'v31_value_workspace.py', 'v31_value_projection.py', 'v31_value_snapshots.py', 'v27_fa4.py', 'v31_fa4_observe.py')]
     source_files += [root/'experiments/diffusion_gemma_jl_output_aware/projections.py',
                      root/'experiments/value_direction_hopper/projection.py']
     source_files += [root/'scripts/v31_vllm_paired_bench.py', root/'scripts/v31_value_campaign.py']

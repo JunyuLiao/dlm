@@ -46,14 +46,22 @@ def _stats(Q, K, Z, LM, MU, BAD, N, NK,
     tl.store(BAD+dest, bad)
 
 
-def statistics_cuda(q, k, sketch, nu_kv, scale, prefix_tiles):
+def statistics_cuda(q, k, sketch, nu_kv, scale, prefix_tiles, workspace=None):
     _, h, n, d = q.shape
     hk, nk = k.shape[1:3]
     if h % hk or sketch.shape != (1, hk, nk, 32) or q.dtype != torch.bfloat16:
         raise ValueError('native BF16 GQA and FP32 Gaussian32 required')
     qb, kt = tr.cdiv(n, 128), tr.cdiv(nk, 64)
     shape = (h*qb, kt, 128)
-    if n % 128:
+    if workspace is not None:
+        lm = workspace.take('log_mass',shape,torch.float32,q.device)
+        mu = workspace.take('mean',(*shape,32),torch.float32,q.device)
+        invalid = workspace.take('invalid',shape,torch.bool,q.device)
+        if n % 128:
+            lm.fill_(-math.inf)
+            mu.zero_()
+            invalid.zero_()
+    elif n % 128:
         lm = torch.full(shape, -math.inf, dtype=torch.float32, device=q.device)
         mu = torch.zeros((*shape, 32), dtype=torch.float32, device=q.device)
         invalid = torch.zeros(shape, dtype=torch.bool, device=q.device)
@@ -65,7 +73,9 @@ def statistics_cuda(q, k, sketch, nu_kv, scale, prefix_tiles):
     _stats[(tr.cdiv(n, 32), h, kt)](q, k, sketch, lm, mu, invalid, n, nk, h, hk, d, kt, qb,
         q.stride(1), q.stride(2), k.stride(1), k.stride(2), float(scale), num_warps=4)
     nu = nu_kv[torch.arange(h, device=q.device)//(h//hk)][:, None, None].expand(h, qb, 128).reshape(h*qb, 128).contiguous()
-    return Stats(lm, mu, nu, invalid, prefix_tiles, h, qb)
+    stats = Stats(lm, mu, nu, invalid, prefix_tiles, h, qb)
+    stats.workspace = workspace
+    return stats
 
 
 @tr.jit(do_not_specialize=['JT'])

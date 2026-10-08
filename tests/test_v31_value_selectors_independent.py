@@ -248,6 +248,54 @@ def test_bounded_memory_full_support_summary_matches_formula():
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')
+def test_workspace_reuses_storage_without_aliasing_returned_maps():
+    from experiments.numerical_qk_reuse.v31_value_kernels import statistics_cuda
+    from experiments.numerical_qk_reuse.v31_value_workspace import ValueWorkspace
+    torch.manual_seed(127)
+    workspace = ValueWorkspace(1024)
+    pointers = None
+    previous_map = previous_copy = None
+    for nk in (512,768,512):
+        q=torch.randn(1,4,256,64,device='cuda',dtype=torch.bfloat16)
+        k=torch.randn(1,2,nk,64,device='cuda',dtype=torch.bfloat16)
+        z=torch.randn(1,2,nk,32,device='cuda')
+        nu=torch.ones(2,device='cuda')
+        reference=statistics_cuda(q,k,z,nu,.125,nk//64)
+        cached=statistics_cuda(q,k,z,nu,.125,nk//64,workspace=workspace)
+        if pointers is not None:
+            assert cached.mean.data_ptr()==pointers
+        pointers=cached.mean.data_ptr()
+        assert torch.equal(reference.mean,cached.mean)
+        for selector in SELECTORS:
+            want,_=select(reference,selector,budget=2,threshold=.01)
+            got,_=select(cached,selector,budget=2,threshold=.01)
+            assert torch.equal(want,got)
+        if previous_map is not None:
+            assert torch.equal(previous_map,previous_copy)
+        previous_map,previous_copy=got,got.clone()
+    with pytest.raises(ValueError):
+        workspace.take('mean',(8,17,128,32),torch.float32,'cuda')
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')
+@pytest.mark.parametrize('n',[512,131584])
+def test_bounded_current_value_reference_matches_rms(n):
+    from experiments.numerical_qk_reuse.v31_value_projection import refresh
+    from experiments.diffusion_gemma_jl_output_aware.projections import Projections
+    torch.manual_seed(198)
+    v=torch.randn(1,2,n,256,device='cuda',dtype=torch.bfloat16)
+    r=Projections().get(5,2,256,'gaussian',32,1729,'cuda')
+    z=torch.empty(1,2,n,32,device='cuda')
+    norm=torch.empty(1,2,n,device='cuda')
+    valid=torch.ones(1,2,n,device='cuda',dtype=torch.bool)
+    valid[:,:,::7]=False
+    result=refresh(v,r,z,norm,valid)
+    expected=((v.double().square().sum(-1)*valid).sum(-1)/valid.sum(-1)).sqrt()
+    assert torch.allclose(result.double(),expected,rtol=3e-6,atol=1e-6)
+    assert torch.allclose(z[:,:,:17],v[:,:,:17].float()@r,atol=2e-5,rtol=2e-5)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA unavailable')
 @pytest.mark.parametrize('preserve', [False, True])
 def test_cuda_online_state_with_large_running_max_change(preserve):
     from experiments.numerical_qk_reuse.v31_value_kernels import online_cuda

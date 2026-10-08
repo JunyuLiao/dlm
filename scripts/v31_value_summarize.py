@@ -48,6 +48,8 @@ def aggregate(config, records):
         selection_ms=sum((r.get('value_audit_timings') or {}).get('selection_ms',0) for r in a) or None,
         global_attention_ms=sum((r['receipts'].get('timing') or {}).get('global_ms_total',0) for r in records if r.get('receipts')) or None,
         candidate_evaluations=sum(r.get('value_candidate_evaluations',0) for r in a) or None,
+        additional_statistics_qk_rectangles=sum(r.get('value_statistics_qk_rectangles',0) for r in a) or None,
+        workspace_allocated_bytes=max((r.get('value_workspace_allocated_bytes',0) for r in a),default=0) or None,
         peak_summary_bytes=max((r.get('value_peak_summary_bytes',0) for r in a),default=0) or None,
         peak_cuda_bytes=max(r['peak_cuda_allocated_bytes'] for r in records),
         threshold=config.get('threshold'),capped=sum(r['finish_reason']=='length' for r in records),

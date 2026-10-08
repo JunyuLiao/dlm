@@ -38,7 +38,8 @@ def full_support_cuda(stats):
     alpha=torch.where(torch.isfinite(z),torch.exp(z-torch.where(torch.isfinite(normalizer),normalizer,0.)),0.)
     u,jt,_=z.shape
     output=torch.empty((u,128,32),device=z.device)
-    g=torch.empty_like(stats.mean)
+    workspace = getattr(stats,'workspace',None)
+    g=torch.empty_like(stats.mean) if workspace is None else workspace.take('g',tuple(stats.mean.shape),torch.float32,z.device)
     _output[(u,32)](alpha,stats.mean,output,jt,num_warps=4)
     _residual[(u,jt,4)](alpha,stats.mean,output,g,jt,num_warps=4)
     return alpha,output,g

@@ -247,6 +247,7 @@ def main():
                                                  mage_sticky=float(os.environ['MAGE_STICKY']) if os.environ.get('MAGE_STICKY') else None,
                                                  value_selector=os.environ.get('VALUE_SELECTOR') or None,
                                                  value_audit=os.environ.get('VALUE_AUDIT') == '1',
+                                                 value_max_tokens=int(os.environ['MAX_MODEL_LEN']) if os.environ.get('MAX_MODEL_LEN') else None,
                                                  value_threshold=(float(os.environ['VALUE_THRESHOLD'])
                                                                   if os.environ.get('VALUE_THRESHOLD') else None),
                                                  local_kernel=os.environ.get('LOCAL_KERNEL', 'compact_triton'),

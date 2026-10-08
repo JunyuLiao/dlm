@@ -1,0 +1,21 @@
+{
+  "status": "kernel_formula_checks_complete_model_retry_pending",
+  "h100_tests": 43,
+  "cpu_formula_passed": 24,
+  "cuda_skips": 19,
+  "root_cause": "unbounded inherited RMS reference kernel above 128K plus repeated context-sized summary allocations",
+  "changes": [
+    "reuse bounded same-stream selector-only workspace",
+    "two-stage 4096-token current-value RMS with unchanged definition",
+    "same deterministic Gaussian32 matrix factory and projection kernel"
+  ],
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "76eb2987bb99d5378c7eb31aef50c100335714f7f2cd28c4b8cce6707007b496",
+    "experiments/numerical_qk_reuse/v31_value_workspace.py": "61dcc7f7800159c37dff672b779f9348d5350f386f08dda6c125fd14d0d599d1",
+    "experiments/numerical_qk_reuse/v31_value_projection.py": "b15e32ab3ee7936cabc4a5485e67865ee7bb0e14122bbe2b0664daf8b1a1b3a6",
+    "experiments/numerical_qk_reuse/v31_value_summary.py": "ef8d32e01c575bdc167125ddd00321bde391355354cdeecc4baab5e874d4934b",
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "b8b47a0a7f399a288b1c67f3d697db3f8a9ed16b330d95ac6fc35a1575c874a0"
+  },
+  "preserved_failure": "smoke/value_v2_online_preserve_mass/attempt001",
+  "target_results": false
+}

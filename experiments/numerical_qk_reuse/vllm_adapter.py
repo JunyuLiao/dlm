@@ -147,7 +147,8 @@ class VllmMethodAdapter:
                  mage_trigger_relative=False, mage_pool=None, mage_kcover=None, mage_kq=0.75, mage_kmax=16384,
                  mage_sticky=None,
                  cg_stop=None, stall_rescue=None, stall_eps=0.01, local_kv_budget=None,
-                 local_kernel='compact_triton', value_selector=None, value_threshold=None, value_audit=False):
+                 local_kernel='compact_triton', value_selector=None, value_threshold=None, value_audit=False,
+                 value_max_tokens=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if value_selector is not None:
@@ -165,6 +166,10 @@ class VllmMethodAdapter:
                 raise ValueError('online selectors require a finite uniform nonnegative threshold')
         self.value_selector, self.value_threshold = value_selector, value_threshold
         self._value_projection = None
+        self._value_workspace = None
+        if value_selector is not None and value_max_tokens is not None:
+            from .v31_value_workspace import ValueWorkspace
+            self._value_workspace = ValueWorkspace(int(value_max_tokens))
         self._value_pending = []
         self.value_audit, self._value_audit_events = bool(value_audit), []
         if lifecycle not in ('legacy', 'request_clear'):
@@ -1054,7 +1059,7 @@ class VllmMethodAdapter:
         if self.value_selector is None:
             return self._mage_select_fa4(q, b['k'], b['v'], scale, prefix, n)
         from experiments.diffusion_gemma_jl_output_aware.projections import Projections
-        from experiments.value_direction_hopper.projection import refresh
+        from .v31_value_projection import refresh
         from .v31_value_kernels import statistics_cuda
         from .v31_value_selectors import mandatory_map, select
         from .v31_fa4_observe import observe_dense
@@ -1066,7 +1071,9 @@ class VllmMethodAdapter:
         h, hk, nk, d = q.shape[1], k.shape[1], k.shape[2], v.shape[3]
         qb, pt = -(-n//128), prefix//64
         # Keep the initial/refresh model output on the inherited exact FA4 path.
-        observation = torch.empty((h, qb, pt, 128), dtype=torch.float32, device=q.device)
+        observation = (torch.empty((h,qb,pt,128),dtype=torch.float32,device=q.device)
+            if self._value_workspace is None else self._value_workspace.take(
+                'observation',(h*qb,pt,128),torch.float32,q.device).view(h,qb,pt,128))
         out = observe_dense(q.transpose(1, 2), k.transpose(1, 2), v.transpose(1, 2), scale, observation)
         if self._value_projection is None:
             self._value_projection = Projections()
@@ -1076,7 +1083,7 @@ class VllmMethodAdapter:
         valid = torch.ones((1, hk, nk), dtype=torch.bool, device=q.device)
         # Every refresh projects CURRENT V, including changed canvas/boundary V.
         nu = refresh(v, matrix, sketch, norms, valid, 0)[0]
-        stats = statistics_cuda(q, k, sketch, nu, scale, pt)
+        stats = statistics_cuda(q,k,sketch,nu,scale,pt,workspace=self._value_workspace)
         # Retain FA4's own observed prefix masses; the PZ pass supplies only mu.
         stats.log_mass[:, :pt].view(h, qb, pt, 128).copy_(observation)
         mandatory = mandatory_map(stats, self.mage_sink, self.mage_recent_tiles)
@@ -1094,6 +1101,7 @@ class VllmMethodAdapter:
             self._value_audit_events.append(events)
             self._value_pending.append(torch.stack((kept[..., :pt].sum(), stats.invalid.sum())))
         self.calls['value_selection_calls'] = self.calls.get('value_selection_calls', 0)+1
+        self.calls['value_statistics_qk_rectangles'] = self.calls.get('value_statistics_qk_rectangles',0)+h*qb*stats.log_mass.shape[1]
         self.calls['value_candidate_evaluations'] = self.calls.get('value_candidate_evaluations', 0)+counters['candidate_evaluations']
         self.calls['value_peak_summary_bytes'] = max(self.calls.get('value_peak_summary_bytes', 0), stats.nbytes)
         self.calls['mage_prefix_tiles'] += pt*h*qb
@@ -1115,6 +1123,10 @@ class VllmMethodAdapter:
             value_invalid_rows=int(counts[1]) if self.value_audit else None,
             value_audit=self.value_audit, value_audit_timings=timings,
             value_projection_seed=1729, value_projection_rank=32,
+            value_projection_kernel='inherited_gaussian32_refresh_plus_bounded_rms4096',
+            value_discovery_work='additional full-support QK and rank32 PV; separately counted from native model-output consumer tiles',
+            value_workspace_capacity_tiles=None if self._value_workspace is None else self._value_workspace.max_tiles,
+            value_workspace_allocated_bytes=0 if self._value_workspace is None else self._value_workspace.allocated_bytes,
             value_statistics_kernel='triton_fused_tile_softmax_pz',
             value_prefix_mass_source='native_fa4_observation',
             value_selection_kernel='triton_log_mass_online' if self.value_selector.startswith(('value_v1_','value_v2_')) else 'triton_parallel_cached_deletion',

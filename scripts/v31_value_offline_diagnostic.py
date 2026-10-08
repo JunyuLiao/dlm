@@ -12,7 +12,7 @@ import time
 import torch
 
 from experiments.diffusion_gemma_jl_output_aware.projections import Projections
-from experiments.value_direction_hopper.projection import refresh
+from experiments.numerical_qk_reuse.v31_value_projection import refresh
 from experiments.numerical_qk_reuse import v27_fa4
 from experiments.numerical_qk_reuse.v31_value_kernels import statistics_cuda
 from experiments.numerical_qk_reuse.v31_value_selectors import (

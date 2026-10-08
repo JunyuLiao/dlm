@@ -12,8 +12,12 @@ GLOBAL sparsity is 76.45235%; this is diagnostic only and is excluded from
 calibration because 11 items belong to the historical holdout. The dense FULL
 and V1 smokes and official scorer binding also
 completed. Independent selector tests now pass 21 CPU tests (13 CUDA skips)
-and 40 H100 tests, including collective row-support constraints, exact batch8
-cleanup, bounded-memory reductions and native LOCAL call accounting.
+and 43 H100 tests, including collective row-support constraints, exact batch8
+cleanup, bounded-memory reductions, scratch reuse and native LOCAL call accounting.
+The V2 pilot failed in warm-up when the inherited whole-sequence RMS kernel
+crossed 128K. Its zero-record failure receipt is retained. A bounded 4096-token
+RMS reduction and same-stream selector scratch preserve the formula and matrix
+identity; final-source model qualification must be retried in new directories.
 
 Online thresholds remain unfrozen. Next: qualify every arm in model, calibrate
 uniform thresholds, then separate clean timing and instrumented audits. Official

@@ -1,11 +1,15 @@
 This study is incomplete. No target accuracy or end-to-end claim is available.
 
-The independent V1/V2/V3 implementation passes 40 H100 formula and integration
+The independent V1/V2/V3 implementation passes 43 H100 formula and integration
 tests. V1/V2 have distinct skip-mass state updates; both use a uniform threshold
 and no quota. Singleton scores stay fixed, with row-support constraints. Exact
 greedy uses cached summaries after each deletion. Batch8 is a separate
 approximation with a support-safe single-deletion fallback and exact cleanup.
 The later native FA4 consumer and inherited refresh/carry machinery are unchanged.
+The V2 pilot failed in warm-up above 128K in the inherited whole-sequence RMS
+kernel. It has a retained failure receipt and zero records. A bounded RMS
+reduction and reusable selector-only scratch preserve the current-value scale,
+projection identity and decisions in independent tests. Model retries are pending.
 
 The completed 15-item preliminary control realizes 76.45235% GLOBAL decode
 sparsity over all calls, including exact observations and current canvas tiles.
