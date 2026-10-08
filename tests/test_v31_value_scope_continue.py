@@ -1,7 +1,6 @@
 """Scope changes must preserve completed shard identity and schedule coverage."""
 import copy
 import hashlib
-import importlib.util
 import json
 from pathlib import Path
 import sys
@@ -9,7 +8,7 @@ import sys
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]/'scripts'))
-from v31_value_longbench_scope_continue import ARMS, EXCLUDED, orders, validate_attempt
+from v31_value_longbench_scope_continue_attempt002 import ARMS, EXCLUDED, orders, validate_attempt, write_once
 
 
 @pytest.fixture
@@ -78,3 +77,16 @@ def test_offline_fresh_selector_scope_excludes_exact():
     assert EXCLUDED not in diagnostic.SELECTORS
     assert 'value_v3b_approx_batch8' in diagnostic.SELECTORS
     assert len(diagnostic.SELECTORS) == 4
+
+
+def test_restart_preserves_json_roundtrip_and_original_file(tmp_path):
+    path = tmp_path/'config.json'
+    value = dict(arms=ARMS, nested={'order': [ARMS]}, source_commit='first')
+    write_once(path, value)
+    original = path.read_bytes()
+    write_once(path, value)
+    write_once(path, json.loads(json.dumps(value)))
+    assert path.read_bytes() == original
+    with pytest.raises(ValueError):
+        write_once(path, dict(value, source_commit='different'))
+    assert path.read_bytes() == original

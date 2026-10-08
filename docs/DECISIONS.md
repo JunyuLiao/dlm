@@ -1363,3 +1363,13 @@ match. The13 validated predecessor shards supply1,664 audit cells. Separate
 audit/clean coverage is8x503 per pass; V1/V2 threshold0.027 stays fixed.
 Nine focused continuation tests pass; this decision reports scope and validated
 reuse, not target accuracy or clean latency.
+# 2026-10-08: canonical JSON comparison for value-selector coordinator restarts
+
+The first eight-arm coordinator serialized its arm tuple as a JSON list but
+compared that list with the original tuple on restart. Use a separately pinned
+corrected entrypoint and execution attempt005, preserving attempt004 and its
+completed records. The new attempt002 may reuse completed matching shards from
+the original nine-arm family and the first eight-arm family. Its generation
+sources, threshold0.027, budgets, sampler and consumer remain unchanged.
+Ten continuation tests pass, including repeated metadata roundtrip without
+rewriting the saved config and rejection of changed execution identity.

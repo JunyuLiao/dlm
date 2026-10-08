@@ -1,0 +1,213 @@
+{
+  "schema": "independent_v31_execution_protocol_no_exact_restart_v1",
+  "foundation_protocol_sha256": "77be23f7a4a7f84a1a240fed4a297f10ede0b920ce48aec9a35163b2307f6fc1",
+  "model_source_inventory_sha256": "8efd551fa40908fc5747be476cec848be6831fc537679c468c76a1858bf32bf8",
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "76eb2987bb99d5378c7eb31aef50c100335714f7f2cd28c4b8cce6707007b496",
+    "experiments/numerical_qk_reuse/v31_value_native_audit.py": "ef1ee7711dadf318b96aa2e6009ffb4d0dd4f3ded1c6f2d9d45fde760a97e766",
+    "experiments/numerical_qk_reuse/v31_value_projection.py": "b15e32ab3ee7936cabc4a5485e67865ee7bb0e14122bbe2b0664daf8b1a1b3a6",
+    "experiments/numerical_qk_reuse/v31_value_selectors.py": "e6e5ce23cb8d4fe86f6050401e97636754b9bcac44e644f0f802647eed43f655",
+    "experiments/numerical_qk_reuse/v31_value_snapshots.py": "2e2a56758f27ae0d66a86efb702a4598532aa6beb6fa211d6e6d04a73b6c096f",
+    "experiments/numerical_qk_reuse/v31_value_summary.py": "ef8d32e01c575bdc167125ddd00321bde391355354cdeecc4baab5e874d4934b",
+    "experiments/numerical_qk_reuse/v31_value_workspace.py": "61dcc7f7800159c37dff672b779f9348d5350f386f08dda6c125fd14d0d599d1",
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "dc9e4a693a4233b11f1f999ab68277c74557c387a9820e2a729be2ef73743797",
+    "scripts/v31_value_calibrate.py": "45f3b916712da3c9b49d8f319681acaa322e814ac3e0d87b783d52b9c869fe20",
+    "scripts/v31_value_campaign.py": "d6397baf9bc28fe2837ffd2de4162deb0f213dd9d1b80e7d20a25f3e60fcc1fc",
+    "scripts/v31_value_longbench_pipeline.py": "ceea4d83e32553ad7fa4cdaa7f6b086c699a6ec6a4200fbb7f262a7cd071c437",
+    "scripts/v31_value_longbench_report.py": "6ac38504ca90e61b737a00d8c22186ac206c5ed431b9b579ba61a816c01b2af8",
+    "scripts/v31_value_offline_diagnostic.py": "2b8493d6b26620b92ba255a29519c0742f8daf4130e532ae495e17df15f5943b",
+    "scripts/v31_vllm_paired_bench.py": "3689337ad2d7e96eac825b68d297cabcf4556d69aa1b1dd6cc30140d0495a6e0",
+    "scripts/v31_value_longbench_scope_continue.py": "a97cf8767be3a1184e5228c54f5b978da79d4808ca35c2376ef126e450653876",
+    "scripts/v31_value_longbench_report_no_exact.py": "ea05bed1910e1bd679858ccbc63385762f203c246e9106a2a9670ac1e9563ba6",
+    "scripts/v31_value_offline_diagnostic_no_exact.py": "a43cffb88155ee0f47cedc931c3062ce9ec4b2778926a2a3bf282b3535cb4e4d",
+    "scripts/v31_value_summarize.py": "f821b8010bf57d8eb2308267ea8d39cfb4b1aabd351e40fb6b837baaa607b9cd",
+    "scripts/v31_score_longbench_official.py": "36e9aff7ad32d20e6f3db01853f31d2dbbadcc2a7e86bf35840aa9329f870f0b",
+    "experiments/numerical_qk_reuse/v27_fa4.py": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+    "experiments/numerical_qk_reuse/v31_fa4_observe.py": "3b7027b52b64ab5b101d71808b69decba434405c287bf9c94ba3aa7a3b7a5133",
+    "experiments/numerical_qk_reuse/v29_paged_copy.py": "7ee25f0ae9d55d409b121237d9b6e110a2e0b5dcbb619a60732a8395ca10154f",
+    "experiments/numerical_qk_reuse/v29_lse_merge.py": "7b4bcb126b7f7faa02047aa07d5c49e8fbff33204001f66d529343cce1c75a36",
+    "experiments/numerical_qk_reuse/v31_logit_stats.py": "1c5401a44dc9c73fd87399844353155ecece3665a241ab1f91b254c136b6d5ba",
+    "experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+    "experiments/value_direction_hopper/projection.py": "de5a1f971187880fa7aee1f4c21f18a1d14f52dd4879526f515e6ad365886f5d",
+    "scripts/v31_value_longbench_scope_continue_attempt002.py": "c7bf3d9d6263e740c15bbb21905fa96b1f863fb8ab9e06f08df9c61b21b1ab47"
+  },
+  "arms": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "current_v31_control",
+    "value_v1_online_discard_mass",
+    "value_v2_online_preserve_mass",
+    "value_v3a_singleton_delete",
+    "value_v3b_approx_batch8"
+  ],
+  "GLOBAL": [
+    5,
+    11,
+    17,
+    23,
+    29
+  ],
+  "LOCAL": "25 native dense layers",
+  "projection": {
+    "family": "gaussian",
+    "rank": 32,
+    "seed": 1729,
+    "factory": "original deterministic per-layer/per-native-KV-head factory"
+  },
+  "reuse": {
+    "optional_prefix_tokens": 8192,
+    "optional_tiles_per_unit": 128,
+    "query_tile": 128,
+    "kv_tile": 64,
+    "select_step": 1,
+    "carry_first": true,
+    "settle_trigger": 0.15,
+    "sticky": 1.386
+  },
+  "runtime": {
+    "vllm": "0.30.0",
+    "torch": "2.13.0+cu130",
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "cache_page_setting": 32,
+    "max_model_len": 141312,
+    "chunked_prefill_tokens": 16384,
+    "gpu_memory_utilization": 0.85
+  },
+  "development": {
+    "cells": 64,
+    "items": 32,
+    "seeds": [
+      1,
+      2
+    ],
+    "schedule_sha256": "d0f0f7724d3350028091d6d15a6d8a0bdc4054b8764eec0097941a494e812401",
+    "threshold_freeze": "freeze accepted V1 trial4 threshold; use the same threshold for V2; one V2 development audit with no further threshold search; report achieved sparsity differences",
+    "matched_sparsity_required": false
+  },
+  "target": {
+    "items": 503,
+    "seeds": [
+      1
+    ],
+    "native_order_shards": [
+      128,
+      128,
+      128,
+      119
+    ],
+    "arm_order": "original nine-arm rotation by2 per shard with exact greedy removed; retain relative order",
+    "warmup": "one first-cell request per shard per arm; request RNG reset before every timed request",
+    "clean": "disable GPU tile accounting, profiling events, snapshots and graph dispatch audit; retain actual CUDA capture counter",
+    "audit": "separate complete503-cell generation pass; actual tile counts, native geometry and graph-path proof",
+    "diagnostics": "post-generation private QKV snapshots: layer5, first canvas, first2long requests per shard, ages0,1,7 where reached; omit fresh exact greedy",
+    "arm_order_by_shard": [
+      [
+        "dense_full_fix51994",
+        "dense_piecewise",
+        "allkept_fa4",
+        "current_v31_control",
+        "value_v1_online_discard_mass",
+        "value_v2_online_preserve_mass",
+        "value_v3a_singleton_delete",
+        "value_v3b_approx_batch8"
+      ],
+      [
+        "allkept_fa4",
+        "current_v31_control",
+        "value_v1_online_discard_mass",
+        "value_v2_online_preserve_mass",
+        "value_v3a_singleton_delete",
+        "value_v3b_approx_batch8",
+        "dense_full_fix51994",
+        "dense_piecewise"
+      ],
+      [
+        "value_v1_online_discard_mass",
+        "value_v2_online_preserve_mass",
+        "value_v3a_singleton_delete",
+        "value_v3b_approx_batch8",
+        "dense_full_fix51994",
+        "dense_piecewise",
+        "allkept_fa4",
+        "current_v31_control"
+      ],
+      [
+        "value_v3a_singleton_delete",
+        "value_v3b_approx_batch8",
+        "dense_full_fix51994",
+        "dense_piecewise",
+        "allkept_fa4",
+        "current_v31_control",
+        "value_v1_online_discard_mass",
+        "value_v2_online_preserve_mass"
+      ]
+    ],
+    "cells_per_pass": 4024
+  },
+  "other_targets": {
+    "ruler_v33ofc": "blocked: exact585-cell manifest/schedule unavailable",
+    "humaneval": "blocked: exact164-task manifest/schedule unavailable"
+  },
+  "privacy": "sanitized records and aggregates only; private generations/QKV/caches ignored",
+  "supersedes": "protocol_execution_attempt004_no_exact_20261008.json for remaining generation only",
+  "reason": "canonical JSON comparison avoids list-versus-tuple mismatch when restarting a coordinator",
+  "amendment_sha256": "50012980dec6c0c4096f9a4735c72036b2d2373ed03e5a10b2762a1bbc3879d0",
+  "amendment": "coordinator_restart_amendment_attempt002.json",
+  "thresholds_sha256": "59184c37692b2001e8c1f8c93726bb62cc5e6d366fe050806a24659518ea06ea",
+  "generation_identity": {
+    "source_sha256": {
+      "experiments/numerical_qk_reuse/vllm_adapter.py": "dc9e4a693a4233b11f1f999ab68277c74557c387a9820e2a729be2ef73743797",
+      "experiments/numerical_qk_reuse/v31_value_selectors.py": "e6e5ce23cb8d4fe86f6050401e97636754b9bcac44e644f0f802647eed43f655",
+      "experiments/numerical_qk_reuse/v31_value_kernels.py": "76eb2987bb99d5378c7eb31aef50c100335714f7f2cd28c4b8cce6707007b496",
+      "experiments/numerical_qk_reuse/v31_value_summary.py": "ef8d32e01c575bdc167125ddd00321bde391355354cdeecc4baab5e874d4934b",
+      "experiments/numerical_qk_reuse/v31_value_workspace.py": "61dcc7f7800159c37dff672b779f9348d5350f386f08dda6c125fd14d0d599d1",
+      "experiments/numerical_qk_reuse/v31_value_projection.py": "b15e32ab3ee7936cabc4a5485e67865ee7bb0e14122bbe2b0664daf8b1a1b3a6",
+      "experiments/numerical_qk_reuse/v31_value_snapshots.py": "2e2a56758f27ae0d66a86efb702a4598532aa6beb6fa211d6e6d04a73b6c096f",
+      "experiments/numerical_qk_reuse/v31_value_native_audit.py": "ef1ee7711dadf318b96aa2e6009ffb4d0dd4f3ded1c6f2d9d45fde760a97e766",
+      "experiments/numerical_qk_reuse/v27_fa4.py": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+      "experiments/numerical_qk_reuse/v31_fa4_observe.py": "3b7027b52b64ab5b101d71808b69decba434405c287bf9c94ba3aa7a3b7a5133",
+      "experiments/numerical_qk_reuse/v29_paged_copy.py": "7ee25f0ae9d55d409b121237d9b6e110a2e0b5dcbb619a60732a8395ca10154f",
+      "experiments/numerical_qk_reuse/v29_lse_merge.py": "7b4bcb126b7f7faa02047aa07d5c49e8fbff33204001f66d529343cce1c75a36",
+      "experiments/numerical_qk_reuse/v31_logit_stats.py": "1c5401a44dc9c73fd87399844353155ecece3665a241ab1f91b254c136b6d5ba",
+      "experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+      "experiments/value_direction_hopper/projection.py": "de5a1f971187880fa7aee1f4c21f18a1d14f52dd4879526f515e6ad365886f5d",
+      "scripts/v31_vllm_paired_bench.py": "3689337ad2d7e96eac825b68d297cabcf4556d69aa1b1dd6cc30140d0495a6e0",
+      "scripts/v31_value_campaign.py": "d6397baf9bc28fe2837ffd2de4162deb0f213dd9d1b80e7d20a25f3e60fcc1fc"
+    },
+    "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+    "manifests_sha256": {
+      "longbench_v2_0shot_think": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe"
+    },
+    "model_source_inventory_sha256": "8efd551fa40908fc5747be476cec848be6831fc537679c468c76a1858bf32bf8",
+    "host_fingerprint": "66f6c4a48143633348177f67d61c43161ae04ffc6e746451b40b483cfef70cd9",
+    "gpu_identity": "GPU-1ef41b0c-39fa-fea6-ec30-392d06c5e0ee, 590.48.01",
+    "runtime_settings": {
+      "BLOCK": "32",
+      "CHUNK": "16384",
+      "MEM": "0.85",
+      "MAX_MODEL_LEN": "141312",
+      "MAGE_K": "8192",
+      "MAGE_STEP": "1",
+      "MAGE_CARRY": "1",
+      "MAGE_RESELECT_TRIGGER": "0.15",
+      "MAGE_TRIGGER_SIGNAL": "settle",
+      "MAGE_GRAN": "qblock_max",
+      "MAGE_STICKY": "1.386",
+      "KV_COPY": "triton",
+      "MERGE": "triton",
+      "VALUE_AUDIT": "1",
+      "VALUE_CLEAN_TIMING": "0"
+    }
+  },
+  "generation_source_commit": "44674c3aade62f3f259df6e5af8f939578c8d8ec",
+  "source_commit_policy": "original shards and continuation use byte-identical generation sources; orchestration/document commits recorded separately",
+  "predecessor_execution_sha256": "0119063227f8da10ec4837db84cdedaa608c449c8408302b36660126008af4c5",
+  "completed_predecessor_families": {
+    "audit": [
+      "longbench/audit/attempt001",
+      "longbench/audit_no_exact/attempt001"
+    ],
+    "clean": []
+  }
+}

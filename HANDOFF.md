@@ -1,5 +1,15 @@
 ## Independent GLOBAL value selectors — 2026-10-08
 
+Coordinator correction: a JSON-list versus Python-tuple comparison prevented
+same-stage coordinator restarts. The corrected entrypoint is
+`scripts/v31_value_longbench_scope_continue_attempt002.py`;10 focused CPU
+tests pass, including preservation of existing config bytes across restarts.
+Execution attempt005 freezes this metadata-only correction and references
+both completed predecessor audit families. Attempt002 starts after the current
+V2 shard03 worker finishes; the old queue is held, without stopping that worker.
+All17 generation sources and the eight-arm policy remain unchanged. Completed
+shards are validated and referenced in place; no completed generation repeats.
+
 Confirmed user scope amendment: drop future exact-greedy generation and fresh
 full-context exact-greedy offline recomputation. Retain its completed128-cell
 audit and small mathematical reference/tests as diagnostics. Eight remaining

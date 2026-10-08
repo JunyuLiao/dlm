@@ -1,0 +1,24 @@
+{
+  "schema": "independent_v31_coordinator_restart_amendment_v1",
+  "date_utc": "2026-10-08",
+  "reason": "canonical JSON comparison avoids list-versus-tuple mismatch when restarting a coordinator",
+  "policy": "eight arms, fixed thresholds and byte-identical generation; no selector or consumer changes",
+  "predecessor_execution_sha256": "0119063227f8da10ec4837db84cdedaa608c449c8408302b36660126008af4c5",
+  "source_sha256": {
+    "scripts/v31_value_longbench_scope_continue_attempt002.py": "c7bf3d9d6263e740c15bbb21905fa96b1f863fb8ab9e06f08df9c61b21b1ab47"
+  },
+  "completed_predecessor_families": {
+    "audit": [
+      "longbench/audit/attempt001",
+      "longbench/audit_no_exact/attempt001"
+    ],
+    "clean": []
+  },
+  "qualification": "10 CPU continuation tests pass, including repeated JSON roundtrip and rejection of changed immutable metadata",
+  "running_worker": "value_v2_online_preserve_mass shard03 finishes before switching coordinators",
+  "new_families": [
+    "longbench/audit_no_exact/attempt002",
+    "longbench/target_no_exact/attempt002"
+  ],
+  "preserve": "all predecessor protocols, records and failed attempts remain unchanged"
+}
