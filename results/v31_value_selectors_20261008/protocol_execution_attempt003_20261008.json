@@ -1,0 +1,102 @@
+{
+  "schema": "independent_v31_execution_protocol_v1",
+  "foundation_protocol_sha256": "77be23f7a4a7f84a1a240fed4a297f10ede0b920ce48aec9a35163b2307f6fc1",
+  "model_source_inventory_sha256": "8efd551fa40908fc5747be476cec848be6831fc537679c468c76a1858bf32bf8",
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "76eb2987bb99d5378c7eb31aef50c100335714f7f2cd28c4b8cce6707007b496",
+    "experiments/numerical_qk_reuse/v31_value_native_audit.py": "ef1ee7711dadf318b96aa2e6009ffb4d0dd4f3ded1c6f2d9d45fde760a97e766",
+    "experiments/numerical_qk_reuse/v31_value_projection.py": "b15e32ab3ee7936cabc4a5485e67865ee7bb0e14122bbe2b0664daf8b1a1b3a6",
+    "experiments/numerical_qk_reuse/v31_value_selectors.py": "e6e5ce23cb8d4fe86f6050401e97636754b9bcac44e644f0f802647eed43f655",
+    "experiments/numerical_qk_reuse/v31_value_snapshots.py": "2e2a56758f27ae0d66a86efb702a4598532aa6beb6fa211d6e6d04a73b6c096f",
+    "experiments/numerical_qk_reuse/v31_value_summary.py": "ef8d32e01c575bdc167125ddd00321bde391355354cdeecc4baab5e874d4934b",
+    "experiments/numerical_qk_reuse/v31_value_workspace.py": "61dcc7f7800159c37dff672b779f9348d5350f386f08dda6c125fd14d0d599d1",
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "dc9e4a693a4233b11f1f999ab68277c74557c387a9820e2a729be2ef73743797",
+    "scripts/v31_value_calibrate.py": "45f3b916712da3c9b49d8f319681acaa322e814ac3e0d87b783d52b9c869fe20",
+    "scripts/v31_value_campaign.py": "d6397baf9bc28fe2837ffd2de4162deb0f213dd9d1b80e7d20a25f3e60fcc1fc",
+    "scripts/v31_value_longbench_pipeline.py": "ceea4d83e32553ad7fa4cdaa7f6b086c699a6ec6a4200fbb7f262a7cd071c437",
+    "scripts/v31_value_longbench_report.py": "6ac38504ca90e61b737a00d8c22186ac206c5ed431b9b579ba61a816c01b2af8",
+    "scripts/v31_value_offline_diagnostic.py": "2b8493d6b26620b92ba255a29519c0742f8daf4130e532ae495e17df15f5943b",
+    "scripts/v31_vllm_paired_bench.py": "3689337ad2d7e96eac825b68d297cabcf4556d69aa1b1dd6cc30140d0495a6e0"
+  },
+  "arms": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "current_v31_control",
+    "value_v1_online_discard_mass",
+    "value_v2_online_preserve_mass",
+    "value_v3a_singleton_delete",
+    "value_v3b_greedy_exact",
+    "value_v3b_approx_batch8"
+  ],
+  "GLOBAL": [
+    5,
+    11,
+    17,
+    23,
+    29
+  ],
+  "LOCAL": "25 native dense layers",
+  "projection": {
+    "family": "gaussian",
+    "rank": 32,
+    "seed": 1729,
+    "factory": "original deterministic per-layer/per-native-KV-head factory"
+  },
+  "reuse": {
+    "optional_prefix_tokens": 8192,
+    "optional_tiles_per_unit": 128,
+    "query_tile": 128,
+    "kv_tile": 64,
+    "select_step": 1,
+    "carry_first": true,
+    "settle_trigger": 0.15,
+    "sticky": 1.386
+  },
+  "runtime": {
+    "vllm": "0.30.0",
+    "torch": "2.13.0+cu130",
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "cache_page_setting": 32,
+    "max_model_len": 141312,
+    "chunked_prefill_tokens": 16384,
+    "gpu_memory_utilization": 0.85
+  },
+  "development": {
+    "cells": 64,
+    "items": 32,
+    "seeds": [
+      1,
+      2
+    ],
+    "schedule_sha256": "d0f0f7724d3350028091d6d15a6d8a0bdc4054b8764eec0097941a494e812401",
+    "threshold_freeze": "freeze accepted V1 trial4 threshold; use the same threshold for V2; one V2 development audit with no further threshold search; report achieved sparsity differences",
+    "matched_sparsity_required": false
+  },
+  "target": {
+    "items": 503,
+    "seeds": [
+      1
+    ],
+    "native_order_shards": [
+      128,
+      128,
+      128,
+      119
+    ],
+    "arm_order": "rotate declared arm order by2positions per shard",
+    "warmup": "one first-cell request per shard per arm; request RNG reset before every timed request",
+    "clean": "disable GPU tile accounting, profiling events, snapshots and graph dispatch audit; retain actual CUDA capture counter",
+    "audit": "separate complete503-cell generation pass; actual tile counts, native geometry and graph-path proof",
+    "diagnostics": "post-generation private QKV snapshots: layer5, first canvas, first2long requests per shard, ages0,1,7 where reached"
+  },
+  "other_targets": {
+    "ruler_v33ofc": "blocked: exact585-cell manifest/schedule unavailable",
+    "humaneval": "blocked: exact164-task manifest/schedule unavailable"
+  },
+  "privacy": "sanitized records and aggregates only; private generations/QKV/caches ignored",
+  "supersedes": "protocol_execution_attempt002_20261008.json",
+  "reason": "user accepts V1 trial4 for a first effectiveness experiment; exact sparsity matching is no longer a launch requirement",
+  "amendment_sha256": "ba9acdcf9e68616cc866fe6f94aebd19f977a4481487655939191bcc15343ba5",
+  "amendment": "longbench/first_experiment/attempt001/protocol_amendment.json"
+}

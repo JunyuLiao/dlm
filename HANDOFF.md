@@ -1,5 +1,19 @@
 ## Independent GLOBAL value selectors — 2026-10-08
 
+User amendment, 2026-10-08: accept V1 trial004 at threshold
+`0.027000000000000003` and80.250158% GLOBAL sparsity for the first
+effectiveness experiment. Exact sparsity matching is no longer required.
+The completed original64-cell control measures83.459100%. The finer search
+was stopped during trial006 (26/64 cells); every prior attempt is retained.
+V2 uses the same frozen threshold and gets one64-cell development audit,
+without another threshold search. Target scope, controls, native decoding,
+budgets and separate full503-cell audit/clean passes remain unchanged.
+The new execution freeze is `protocol_execution_attempt003_20261008.json`,
+with the user instruction recorded in
+`longbench/first_experiment/attempt001/protocol_amendment.json`.
+Report realized sparsity differences; do not call this a matched-sparsity
+comparison. Selector, runner and consumer source hashes are unchanged.
+
 Verified source `01f37fe33d4ad8a4f11ef4a4d5066360c96c49ab`, branch
 `value-aware_cross-step-reuse_v2`, study `results/v31_value_selectors_20261008/`.
 V1/V2, singleton deletion, exact cumulative greedy and separately named batch8
@@ -21,11 +35,13 @@ actual denoising graph modes, and counts native dense/LOCAL geometry without
 changing their consumers. All three final instrumentation model gates passed at `01f37fe3`: every native
 decode call used FULL, every control call used PIECEWISE, and clean all-kept
 removed GPU counters. All three match their earlier outputs and trajectories
-exactly. Next/running: audited original64-cell control reference, development-only
-uniform V1/V2 calibration, then separate503-cell clean and audit passes for every arm.
+exactly. Done: audited original64-cell control reference. Next/running: one
+V2 development audit at the accepted shared threshold, then separate503-cell
+clean and audit passes for every arm.
 Four native-order shards use identical first-cell warm-ups and a frozen rotated
 arm order; completed shards survive restart, failed workers receive new attempts.
-The execution freeze is `protocol_execution_attempt002_20261008.json`.
+The preceding exact-match execution freeze (attempt002) is retained and
+superseded by the user-authorized first-experiment amendment above.
 
 The exact original S1 schedule is32 development items at seeds1,2; its historical
 SHA matches. The15-item preliminary control (76.45235% GLOBAL sparsity) is
@@ -33,7 +49,8 @@ excluded from calibration because11 items belong to the original holdout.
 `protocol_original_s1_20261008.json` and the supersession receipt preserve that
 mistake. Target evaluation retains all503 official seed-1 items, with the
 original160/343 split and332-item sensitivity subset. This historically examined
-pool does not provide a fresh-confirmation claim. Thresholds are still unfrozen.
+pool does not provide a fresh-confirmation claim. Online thresholds are frozen
+by the first-experiment amendment, with V2 achieved development sparsity pending.
 Exact RULER v33 and HumanEval manifests/cell schedules remain unavailable; no
 replacement prompts or seeds are generated. No complete target panel, accuracy
 improvement, end-to-end gain, or study completion marker exists.

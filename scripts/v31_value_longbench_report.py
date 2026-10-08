@@ -117,6 +117,10 @@ def main():
         raise ValueError('new canonical report directory required')
     clean=stage(study,args.clean,'clean')
     audit=stage(study,args.audit,'audit')
+    clean_stage=json.loads((Path(args.clean)/'config.json').read_text())
+    audit_stage=json.loads((Path(args.audit)/'config.json').read_text())
+    if any(clean_stage[k]!=audit_stage[k] for k in ('thresholds_sha256','protocol_sha256','execution_protocol_sha256')):
+        raise ValueError('clean and audit execution protocol mismatch')
     protocol=json.loads((study/'protocol_original_s1_20261008.json').read_text())
     split=json.loads((root/'results/v31_20261003/panels/lbt_split.json').read_text())
     # The inherited split's schema is validated by its frozen source hash.
@@ -174,6 +178,8 @@ def main():
         cells_per_arm=503,seeds=[1],source_commit=control['source_commit'],
         source_sha256=control['source_sha256'],protocol_sha256=digest(study/'protocol_original_s1_20261008.json'),
         thresholds_sha256=digest(args.thresholds),model_source_inventory_sha256=digest(study/'model_source_fingerprints.json'),
+        execution_protocol_sha256=clean_stage['execution_protocol_sha256'],
+        threshold_policy=calibration.get('label','development-only threshold calibration'),
         metric='official LongBench-v2 0shot_think, thinking on, total cap16384',
         uncertainty='10000 paired question-cluster bootstrap draws, seed1729; no noninferiority claim',
         exposure='historically examined pool; original32 development at seeds1,2;11 disclosed pilot holdout exposures',
@@ -184,6 +190,7 @@ def main():
     destination.mkdir(parents=True)
     (destination/'summary.json').write_text(json.dumps(result,indent=2)+'\n')
     lines=['Complete independent LongBench-v2 panel: 503 official seed-1 cells per arm.\n',
+        'Threshold policy: '+result['threshold_policy']+'. Achieved sparsity differences are reported; these are not assumed to be matched-sparsity comparisons.\n',
         'Clean timing and instrumented audits are separate. Sparsity comes from the audit pass; their output and trajectory agreement is in summary.json. The inherited reuse system is Yuhan\'s work. These Gaussian32 selectors are this study\'s integration, distinct from Junyu\'s prior Gaussian32 and C_gate families.\n',
         '| Arm | Correct /503 | W mean s | S mean s | N | C | T | N/C | S/N ms | GLOBAL skip | Overall skip | W speedup vs FULL |',
         '|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|']

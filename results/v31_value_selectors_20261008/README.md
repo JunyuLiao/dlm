@@ -1,8 +1,8 @@
 # Independent V31 value-selector study
 
-Independent implementation of the requested V1/V2/V3 formulas, using the inherited V31 reuse lifecycle and unchanged FA4 consumer. The five new selectors and four matched controls passed model qualification; development calibration is next. No target accuracy or end-to-end claim is available.
+Independent implementation of the requested V1/V2/V3 formulas, using the inherited V31 reuse lifecycle and unchanged FA4 consumer. The five new selectors and four matched controls passed model qualification. The user accepted V1 trial004 for the first effectiveness experiment: threshold0.027000000000000003 achieved80.250158% GLOBAL sparsity on the original64 development cells, versus83.459100% for the control. V2 uses the same frozen threshold and receives one development audit without further search. These are not matched-sparsity comparisons. No target accuracy or end-to-end claim is available.
 
-The control is documented in SOURCE_NOTE.md. Runtime and intended protocol are in config.json. Online thresholds remain unfrozen until development-only calibration completes. RULER and HumanEval generation require the corresponding frozen private manifests and cell schedules. All raw generation and runtime caches stay in ignored private/cache directories below this result root. Failed attempts are retained. A study completion marker is deliberately absent.
+The control is documented in SOURCE_NOTE.md. Runtime and initial protocol are in config.json; subsequent named protocol files preserve every supersession. The user amendment is in longbench/first_experiment/attempt001/protocol_amendment.json. The finer search was stopped during trial006 and remains preserved. RULER and HumanEval generation require the corresponding frozen private manifests and cell schedules. All raw generation and runtime caches stay in ignored private/cache directories below this result root. Failed attempts are retained. A study completion marker is deliberately absent.
 
 V3b exact scores every candidate after every deletion; batch8 scores once per batch and is an approximation. Sticky retention is explicitly represented as a log-risk bonus for online arms and a log-removal penalty for deletion arms. The zero-sticky mathematical oracles implement the formulas directly.
 
@@ -18,7 +18,9 @@ finite-output checks, and sampled private Q/K/V snapshots; clean requests
 disable these diagnostics. Native LOCAL eligibility and the overall rectangle
 denominator are geometry-derived from actual calls, not CUDA CTA counts.
 
-The frozen execution protocol is `protocol_execution_attempt002_20261008.json`.
+The frozen execution protocol is `protocol_execution_attempt003_20261008.json`.
+It supersedes attempt002 before any target generation, following the user's
+instruction to accept approximately80% GLOBAL sparsity for this first experiment.
 The first execution preparation freeze is retained and superseded; no generation
 used it. Source `01f37fe3` passes63 focused H100 tests. Clean timing also disables
 the inherited GPU tile counters; a bitwise paged-consumer test verifies identical

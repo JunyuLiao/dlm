@@ -1,0 +1,24 @@
+{
+  "schema": "user_authorized_first_experiment_v1",
+  "frozen_utc": "2026-10-08T08:19:54.153819+00:00",
+  "instruction": "V1 trial4 at about80 percent GLOBAL sparsity is enough; no exact match needed for the first experiment evaluating the schemes",
+  "policy": "freeze accepted V1 trial4 threshold; use the same threshold for V2; one V2 development audit with no further threshold search; report achieved sparsity differences",
+  "thresholds": {
+    "value_v1_online_discard_mass": 0.027000000000000003,
+    "value_v2_online_preserve_mass": 0.027000000000000003
+  },
+  "v1_accepted": {
+    "source_attempt": "longbench/calibration/attempt001/search001/value_v1_online_discard_mass/trial004/attempt001",
+    "cells": 64,
+    "global_eligible_tiles": 4367728160,
+    "global_kept_tiles": 862619393,
+    "global_sparsity": 0.8025015840271524,
+    "receipt_sha256": "fe5723369f184055465d8144d3a481c7a19724d13e816d21e3d0a92032a97492",
+    "source_commit": "b37a97c1a457e9d22e9ff6270d1a68dab1545229"
+  },
+  "reference_sha256": "40bd6e087e03af8a1d64793df81f5da849561f026e503bb29f93b097fedb2dbf",
+  "reference_global_sparsity": 0.8345909993494702,
+  "v2_development": "one original64-cell audit at the shared frozen threshold; no label or target-answer tuning",
+  "target_scope": "unchanged: full503 official LongBench seed1, ninearms, separate complete audit and clean passes",
+  "matched_sparsity_claim": false
+}

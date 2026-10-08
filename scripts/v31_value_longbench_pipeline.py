@@ -28,6 +28,7 @@ def main():
     p.add_argument('--stage',choices=('reference','calibration','audit','target'),required=True)
     p.add_argument('--attempt-id',required=True,help='new zero-padded stage attempt, e.g. attempt001')
     p.add_argument('--thresholds',help='completed calibration file; required for audit and target')
+    p.add_argument('--execution-protocol',help='explicit frozen execution protocol, including any user-authorized amendment')
     args=p.parse_args()
     root=Path(__file__).resolve().parents[1]
     study=root/'results/v31_value_selectors_20261008'
@@ -112,19 +113,26 @@ def main():
     if calibration['status']!='complete':
         raise ValueError('incomplete calibration')
     thresholds=calibration['thresholds']
+    execution_file=Path(args.execution_protocol) if args.execution_protocol else study/'protocol_execution_attempt002_20261008.json'
+    execution=json.loads(execution_file.read_text())
+    if execution['foundation_protocol_sha256']!=digest(study/'protocol_original_s1_20261008.json'):
+        raise ValueError('execution foundation protocol mismatch')
+    for source,expected in execution['source_sha256'].items():
+        if digest(root/source)!=expected:
+            raise ValueError('execution source pin mismatch')
     stage_config=base/'config.json'
     if not stage_config.exists():
         stage_config.write_text(json.dumps(dict(stage=args.stage,arms=ARMS,
             source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),
             arm_order_by_shard=[list(ARMS[(2*i)%len(ARMS):]+ARMS[:(2*i)%len(ARMS)]) for i in range(4)],
             thresholds_sha256=digest(thresholds_file),protocol_sha256=digest(study/'protocol_original_s1_20261008.json'),
-            execution_protocol_sha256=digest(study/'protocol_execution_attempt002_20261008.json'),
+            execution_protocol_sha256=digest(execution_file),
             schedules_sha256=dict(development=digest(development),target=digest(target))),indent=2)+'\n')
     else:
         frozen=json.loads(stage_config.read_text())
         if (frozen['thresholds_sha256']!=digest(thresholds_file)
                 or frozen['protocol_sha256']!=digest(study/'protocol_original_s1_20261008.json')
-                or frozen['execution_protocol_sha256']!=digest(study/'protocol_execution_attempt002_20261008.json')):
+                or frozen['execution_protocol_sha256']!=digest(execution_file)):
             raise ValueError('frozen stage cannot be rebound')
     # Four native-order shards limit lost work. Each arm uses the same shard
     # boundaries and first-cell warm-up. Their union is exactly the 503-item plan.

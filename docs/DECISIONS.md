@@ -1323,3 +1323,21 @@ from full503-cell clean timing. Audit-only native geometry and actual graph-mode
 receipts provide denominator and kernel-path checks. Uniform online calibration
 remains gated on a completed audited64-cell original development control.
 No target performance or accuracy claim is made from these qualifications.
+
+## 2026-10-08 — Accept coarse online thresholds for the first effectiveness experiment
+
+The user accepted V1 trial004 and explicitly removed the exact sparsity-match
+requirement. Its uniform threshold0.027000000000000003 achieved80.250158%
+GLOBAL sparsity on the original64-cell development schedule; the completed
+control reference achieved83.459100%. No accuracy or target answers selected
+this threshold. Trial005 remains preserved, and the finer trial006 was stopped
+at26/64 cells with zero new CUDA captures or invalid rows.
+
+Freeze that same threshold for V2 and perform one development audit to measure
+its realized sparsity, without further matching. Report actual sparsity
+differences for all target arms. Full503-cell LongBench audit and clean timing
+plans, official inputs/seeds, controls, sampler, reuse settings, LOCAL scope,
+and fixed budgets remain unchanged. Protocol execution attempt003 records the
+amendment and explicit source binding. The selector and generation source
+hashes are unchanged; only execution-protocol selection and reporting labels
+were updated. These are calibration/protocol facts, not target results.

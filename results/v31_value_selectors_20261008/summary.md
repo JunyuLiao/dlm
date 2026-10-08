@@ -44,3 +44,10 @@ bitwise paged-consumer output. Target timing and audits are each a complete
 and a pre-frozen rotated arm order. Actual decode graph modes are recorded only
 in audits; timed CUDA capture counts remain present in clean records. This plan
 is not a completed target result. Calibration is still pending.
+
+User amendment (2026-10-08): V1 trial004 is accepted for the first experiment,
+at threshold0.027000000000000003 and80.250158% GLOBAL sparsity, compared with
+83.459100% for the completed original64-cell control. The same threshold is
+frozen for V2; its one development audit is pending. Exact matching is no
+longer a launch requirement. These development measurements are not target
+accuracy or clean timing results. The finer search is stopped and retained.
