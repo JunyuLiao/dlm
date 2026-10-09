@@ -1,0 +1,119 @@
+{
+  "status": "complete",
+  "scope": "official audit accuracy analysis; eight authorized arms; 503 LongBench-v2 0shot_think items; seed1",
+  "conclusion": "No value-aware arm exceeds current_v31_control. V2 is closest but is a descriptive tie-like result, not a gain.",
+  "official": {
+    "current_v31_control": {
+      "correct": 268,
+      "items": 503,
+      "accuracy": 0.532803180914513,
+      "global_sparsity": 0.8316113216627912,
+      "N": 140693
+    },
+    "value_v1_online_discard_mass": {
+      "correct": 247,
+      "items": 503,
+      "accuracy": 0.49105367793240556,
+      "delta": -0.041749502982107355,
+      "ci95": [
+        -0.07554671968190854,
+        -0.007952286282306162
+      ],
+      "global_sparsity": 0.8004262489888407,
+      "N": 120301
+    },
+    "value_v2_online_preserve_mass": {
+      "correct": 266,
+      "items": 503,
+      "accuracy": 0.5288270377733598,
+      "delta": -0.003976143141153081,
+      "ci95": [
+        -0.03777335984095427,
+        0.03180914512922465
+      ],
+      "global_sparsity": 0.8411213730685299,
+      "N": 126072
+    },
+    "value_v3a_singleton_delete": {
+      "correct": 253,
+      "items": 503,
+      "accuracy": 0.5029821073558648,
+      "delta": -0.02982107355864811,
+      "ci95": [
+        -0.0636182902584493,
+        0.003976143141153081
+      ],
+      "global_sparsity": 0.8307519647020198,
+      "N": 137212
+    },
+    "value_v3b_approx_batch8": {
+      "correct": 242,
+      "items": 503,
+      "accuracy": 0.48111332007952284,
+      "delta": -0.05168986083499006,
+      "ci95": [
+        -0.09145129224652088,
+        -0.013916500994035786
+      ],
+      "global_sparsity": 0.8496984519914428,
+      "N": 171652
+    }
+  },
+  "trajectory_diagnostics": {
+    "all_sparse_arms_output_hash_mismatch_items": 503,
+    "value_v1_token_mismatch_items": 496,
+    "value_v2_token_mismatch_items": 498,
+    "value_v3a_token_mismatch_items": 500,
+    "value_v3b_batch8_token_mismatch_items": 497,
+    "value_v1_N_mismatch_items": 497,
+    "value_v2_N_mismatch_items": 499,
+    "value_v3a_N_mismatch_items": 497,
+    "value_v3b_batch8_N_mismatch_items": 496,
+    "mean_N_delta_vs_control": {
+      "value_v1_online_discard_mass": -40.54,
+      "value_v2_online_preserve_mass": -29.07,
+      "value_v3a_singleton_delete": -6.92,
+      "value_v3b_approx_batch8": 61.55
+    }
+  },
+  "offline_diagnostic": {
+    "snapshot_count": 111,
+    "source_count": 20,
+    "scope": "sampled layer5 first canvas and first two long requests per shard; ages 0,1,7; no model forwards",
+    "age0_mean_full_dimensional_row_error": {
+      "current_v31_control": 0.24952320754528046,
+      "value_v1_online_discard_mass": 0.2964733876287937,
+      "value_v2_online_preserve_mass": 0.4037719927728176,
+      "value_v3a_singleton_delete": 0.2533793542534113,
+      "value_v3b_approx_batch8": 0.2178840972483158
+    },
+    "age0_mean_retained_mass": {
+      "current_v31_control": 0.3693309985101223,
+      "value_v1_online_discard_mass": 0.28250540792942047,
+      "value_v2_online_preserve_mass": 0.22373365983366966,
+      "value_v3a_singleton_delete": 0.36091988161206245,
+      "value_v3b_approx_batch8": 0.3069355823099613
+    },
+    "age0_mask_iou_with_mass_control": {
+      "current_v31_control": 1.0,
+      "value_v1_online_discard_mass": 0.28951670229434967,
+      "value_v2_online_preserve_mass": 0.1394321033731103,
+      "value_v3a_singleton_delete": 0.7034271955490112,
+      "value_v3b_approx_batch8": 0.18259890377521515
+    },
+    "interpretation": "descriptive sampled snapshots; not a causal task-accuracy estimate"
+  },
+  "hypotheses": [
+    "cross-step held-map staleness makes current-value selection less robust than mass support",
+    "rank32 projected PV residual is not the final denoising/logit objective",
+    "value masks move outside the control support basin and alter native adaptive stopping",
+    "V2 online denominator/state semantics may destabilize early support under reuse"
+  ],
+  "next_accuracy_experiment": "matched-snapshot mass-anchor hybrid plus fresh-versus-held ablation before any timing resume",
+  "source_files": [
+    "diagnostics/complete_audit_summary_no_exact_attempt002.json",
+    "diagnostics/offline_accuracy_analysis_20261009/aggregate.json",
+    "reports/audit_scoring_no_exact_attempt002/summary.md",
+    "SOURCE_NOTE.md"
+  ]
+}
