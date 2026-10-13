@@ -1605,3 +1605,32 @@ marker are under the result directory. Sparse arms remain slower than the
 matched dense reference despite tile skipping.
 
 | `v31_20261006_aime_global_dense_local_budget_sweep` | `5fb28bda` | AIME26 30 problems × seeds 42/43/44 | dense FULL; MAGE GLOBAL 1024/2048/4096; LOCAL native dense | 56.67%; 56.67% / 58.89% / 60.00% | GLOBAL 58.05% / 41.33% / 17.81%; LOCAL 0%; overall geometry-derived 22.40% / 15.89% / 6.86% | 0.920x / 0.931x / 0.917x | Complete dense-LOCAL control; no end-to-end speedup. See `results/v31_20261006_aime_global_dense_local_budget_sweep/summary.md`. |
+
+
+## 2026-10-13 — Stable cheap refresh development panel (complete; no promotion)
+
+- Source: `results/v31_cached_refresh_stable_20261013/`; frozen protocol and
+  execution identity, complete native generation receipt, official scoring,
+  fairness audit, `final_complete.json`, and `reports/final_report.md` agree.
+- One pinned H100 / DiffusionGemma-26B-A4B / vLLM SM90 FA4; 13 arms x 154
+  cells = 2,002 native cells, 52 complete shards. Previously examined
+  development data: 64 LongBench-v2 seed-1 problems and 30 AIME26 x seeds
+  42/43/44. LOCAL, prefill and commits are dense. No graph captures, selector
+  budget violations, nonfinite-output validations or unexpected LOCAL skips.
+- Fresh V31 progress control: LongBench 34/64, mean N 240.27; AIME 49/90,
+  mean N 275.50. Stable progress s2: 31/64 / 49/90, N ratio 1.1315 / 0.9958.
+  Stable no-progress s8: 35/64 / 55/90, N ratio 1.2229 / 1.0304. The latter's
+  paired accuracy intervals are LB [-6.25,9.375] and AIME [-2.222,17.778]
+  percentage points. Seeds are clustered by AIME problem.
+- No candidate meets the frozen accuracy/aggregate-N/N-C/tail/cap screen.
+  Retain V31; no 503-cell expansion. AIME no-progress gains already occur in
+  the no-cheap hold baseline with virtually all GLOBAL tiles retained.
+- Real replay: 620 snapshots, all five GLOBAL layers and both workloads;
+  maximum retained-statistic error 1.907e-6. Selected stability lowers replay
+  swaps 96.35% and p95 immediate output change 87.19% relative to raw s2,
+  with remaining large outliers. Frozen lambda is zero; persistence/caps/guard
+  supply the tested protection. B8 and probe4 remain offline diagnostics.
+- Native source bytes are unchanged throughout all leaves; reporting commit
+  `875f01d5` fixes only schedule seed-key handling. Completed native leaves
+  record source commit `7ba92755`. Historical predecessor data are not reused
+  as source-matched controls. Clean timing is paused and intentionally absent.

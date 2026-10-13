@@ -1664,3 +1664,92 @@ reason counters, hysteresis, persistence, event/cumulative caps and a full spars
 support row-mass guard. The CPU gate is 43 passed/3 CUDA skips. GPU and real
 trajectory qualification remain pending; a collaborator's H100 worker is active
 and must not be disturbed. Clean timing remains paused.
+
+Stable-study preparation checkpoint: verified source commit `148e15f7` on
+`value-aware_cross-step-reuse_v2`. The current CPU gate is 44 passed/3 CUDA
+skips; all 16 pinned model-file hashes were independently verified. The
+coordinator is waiting for the other H100 worker and has not started GPU
+qualification or generation. It will run the GPU/FA4 gate, real trajectory
+replay, repeated native observation-only qualification, then the 13-arm
+154-cell development panel in four rotated resumable shards. Exact K, rejection
+reasons, actual observations versus all-kept shortcuts, lifetime dense reasons
+and selector/probe rectangles have explicit checks/counters. Clean timing stays
+paused. No new accuracy result or completion marker exists.
+
+Stable-study GPU gate passed 37/37 tests on the H100, including native FA4
+retained-statistics parity and bitwise held-output/RNG invariance. Trajectory
+`attempt001` then failed during model initialization with zero records when a
+collaborator's next AIME worker acquired memory after the idle check; the failed
+leaf and log are preserved. Commit `4d19b886` changes only resource waiting:
+require the known external runner to exit and two minutes of sustained idleness.
+All nine tested source files still match the completed GPU gate. The resumed
+coordinator is waiting for the H100 and will use trajectory `attempt002`;
+no new accuracy scoring has begun. Private monitoring checks every 30 minutes.
+
+
+Stable-study diagnostic checkpoint — 2026-10-13: source `9e6346c3` passed
+38/38 pinned H100 tests. Trajectory `attempt002` completed four requests,
+620 snapshots and all five GLOBAL layers in both workloads. Retained-QK
+statistics matched the dense observer within 1.91e-6. The first native
+observation-only qualification matched three control output hashes and N
+exactly, with zero mask updates. The second qualification is pending because
+another H100 runner became active. Operator `attempt002` selected zero
+hysteresis, persistence 2, event cap 2, cumulative cap 8 and removal guard
+0.025 using only the frozen Q/K/V screen. An additional reporting-only replay
+will supply pooled row-error quantiles and maxima, reversals, and observation
+work before native development generation. Prior replay attempts remain
+immutable. No development accuracy is scored; clean timing stays paused.
+
+
+Stable-study native launch checkpoint — 2026-10-13: verified source commit
+`8d87db1e`; generator bytes match both qualification rounds. H100 is available.
+The gate passed 38/38 CUDA/FA4 tests; real operator attempt004 covers all five
+GLOBAL layers in both workloads and matches the frozen production parameters
+for every frequency. All 670 private Q/K/V files are fingerprinted. Both
+three-cell repetitions have zero output-hash, N or T differences, including
+updates-disabled observations. Frozen choice: hysteresis 0, persistence 2,
+event cap 2, cumulative cap 8, removal guard 0.025, no probes. The 13-arm,
+154-cell-per-arm development panel is starting in four rotated resumable
+shards. No official development accuracy is scored yet. One H100 worker;
+monitor every 30 minutes. Clean timing remains paused; 503 expansion is later.
+
+
+## Stable cheap refresh completed — 2026-10-13
+
+Verified reporting commit `875f01d5` on `value-aware_cross-step-reuse_v2`;
+native generation bytes are frozen in the study execution identity, with all
+native leaves recorded at `7ba92755`. The study at
+`results/v31_cached_refresh_stable_20261013/` completed 13 arms x 154 cells
+(2,002 cells), all 52 shards, official scoring, paired problem-clustered
+analysis, and source/fairness checks. `final_complete.json` is present. Failed
+trajectory/scoring attempts remain preserved. No GPU worker is running; H100
+host verification shows 0 MiB / 0% utilization.
+
+Conclusion: retain V31 and do not promote a cheap-refresh arm to 503 cells.
+The fresh control scores 34/64 LongBench and 49/90 AIME, with workload mean N
+240.27 / 275.50. The highest-accuracy candidate, stable no-progress s8, scores
+35/64 / 55/90 but raises N by 22.29% / 3.04%, missing the frozen 2% trajectory
+criterion. Stable progress s2 scores 31/64 / 49/90 with LongBench N +13.15%,
+despite much lower churn and high consecutive-mask IoU. All no-progress cheap
+arms have the same AIME correctness vector as the no-cheap hold baseline;
+AIME GLOBAL sparsity is below 0.004% at this K, so it does not establish cheap
+repair benefits. Accuracy intervals remain broad and do not establish
+noninferiority. Clean timing remains paused and no speedup is claimed.
+
+Done: independent corrected selector/cache/lifecycle; 38 CUDA/FA4 tests; 620
+real snapshots with all 670 Q/K/V files fingerprinted; production-matched
+operator replay; two native reproducibility/observation-only rounds with zero
+hash/N/T differences; three additional legacy-lifecycle parity tests; native
+matrix; official scorers and final receipts. Operator-only parameters are
+hysteresis 0, persistence 2, event cap 2, cumulative cap 8, removal guard 0.025,
+no probes. Sparse native outputs remain FA4; LOCAL, prefill and commits remain
+dense; graph captures, budget errors and unexpected LOCAL skips are zero.
+
+The report is `reports/final_report.md`; detailed workload results and paired
+intervals are in `reports/native_workload_results.json`. Native source and
+runtime differ from the older panel (GPU memory utilization 0.80 vs 0.85), so
+historical N totals are not matched controls. The new control preserves the
+inherited V31 selection/lifecycle rules. Legacy STATE.json paused campaigns
+are unrelated and remain untouched. Running: none. Next: retain this negative
+study; any outside-verification/value-safety refinement needs a new frozen
+protocol. No timing or 503-cell audit is launched by this iteration.

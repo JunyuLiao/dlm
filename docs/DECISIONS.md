@@ -1653,3 +1653,32 @@ no benchmark answers enter the hysteresis/guard grid. Aggregate N must remain
 within the predeclared 2% provisional limit on each workload with cap/tail checks.
 A single longer problem is not an automatic rejection, and the 154-cell requested
 panel is distinct from a later 503-cell expansion. Clean timing remains paused.
+
+
+## 2026-10-13 — Stable cheap refresh fails the development promotion screen
+
+The corrected 13-arm study completed 2,002 native cells and 52 clean shards,
+real matched-state replay, repeated instrumentation invariance, official
+scoring and workload-separated paired intervals. Operator selection froze
+hysteresis 0, persistence 2, event/cumulative caps 2/8 and a 0.025 row guard
+before native scoring. Stable maps reduce churn substantially; this does not
+ensure native accuracy or lower N.
+
+Fresh V31 scores 34/64 LongBench and 49/90 AIME (mean N 240.27 / 275.50).
+Stable progress s2 scores 31/64 / 49/90 and increases LongBench N 13.15%.
+Stable no-progress s8 has the best candidate point accuracy, 35/64 / 55/90,
+but N rises 22.29% / 3.04%, N/C rises on LongBench, and the upper tail worsens.
+Its accuracy differences have clustered intervals spanning zero. No tested
+candidate passes all frozen aggregate/tail/cap/accuracy criteria. Retain V31;
+do not expand or launch timing. This is a negative result for these settings,
+not a general rejection of stable repair, C_gate or value-aware methods.
+
+All no-progress cheap arms match the no-cheap hold AIME correctness vector,
+and AIME GLOBAL sparsity is below 0.004% with K=128. Do not attribute that
+AIME gain to cheap re-ranking. Full/Piecewise controls are bitwise identical
+on the panel; all-kept FA4 remains a distinct consumer control. Audit selector
+overhead, duplicated QK and memory are separate from absent clean timing.
+Source: results/v31_cached_refresh_stable_20261013/reports/final_report.md and
+its final_complete.json. Failed trajectory/scoring attempts are preserved;
+the scoring correction changes only schedule-key interpretation, not policy,
+criteria, native generation or official extraction.
