@@ -1753,3 +1753,42 @@ inherited V31 selection/lifecycle rules. Legacy STATE.json paused campaigns
 are unrelated and remain untouched. Running: none. Next: retain this negative
 study; any outside-verification/value-safety refinement needs a new frozen
 protocol. No timing or 503-cell audit is launched by this iteration.
+
+
+## Refresh factor isolation completed — 2026-10-14
+
+Verified freeze commit `be9e23dc` on `value-aware_cross-step-reuse_v2`.
+The user requested analysis of existing native evidence and a complete
+operator factorial before choosing 503-problem arms; no native expansion is
+launched in this step. The previous 64-problem promotion veto is a historical
+development-screen decision, not a general rejection of the method family.
+New study: `results/v31_refresh_factor_isolation_20261014/`.
+
+Done: source/receipt/publication validation of the completed native study;
+38 paired native contrast records; 26 new factor/schedule/NumPy-oracle tests;
+38 pinned CUDA/FA4 tests; raw/stable x progress on/off x interval 1/2/4/8
+operator replay plus both held references. All 670 Q/K/V files were checked;
+620 snapshots give 570 matched post-anchor frames per arm and 480 common
+non-selection frames. All 2,550 cheap events match independent CPU maps;
+maximum QK and score differences are 1.91e-6 and 1.64e-6. Budget errors,
+stable cap errors and actual CUDA graph captures are zero. Completion,
+artifact hashes, final report and integrity receipt are present. H100 released
+and verified at 0 MiB / 0%. Existing native generation/source modules and
+frozen result leaves remain unchanged; the inherited V31 baseline retains
+Yuhan's cross-step-reuse provenance.
+
+Conclusion: the native panel has 8/16 factor settings and cannot isolate
+progress with cheap refresh. Stability has conditional native effects:
+progress s2 -2 correct relative to raw; no-progress s1/s4/s8 +4/0/+8.
+Those subset results are exploratory. Progress improves conditional operator
+error at every matched setting, while stable lowers churn but has slightly
+higher error than raw. Stable progress s8 has zero swaps because each
+nonempty anchor epoch has only one cheap event, below persistence 2.
+
+Running: none. Next: user selects 503 arms. Proposal: four crossed raw/stable
+and progress on/off arms at s2, plus stable no-progress s1/s4/s8, both held
+references and matched dense FULL/PIECEWISE/all-kept controls. This is a
+conditional factor design, not the full native interaction factorial. Keep
+output length and N/C with N, and use fresh source/runtime-matched controls.
+Clean timing stays paused. No old frozen study, private source, or legacy
+STATE.json pause is changed.

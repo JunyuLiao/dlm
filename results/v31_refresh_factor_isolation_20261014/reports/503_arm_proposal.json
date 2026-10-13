@@ -1,0 +1,38 @@
+{
+  "controls": "Fresh matched controls if source, launcher, protocol or runtime changes; do not compare against historical 268/503 as the matched reference.",
+  "core_factor_arms": [
+    "raw_global_progress_dense_s2",
+    "stable_global_progress_dense_s2",
+    "raw_global_no_progress_dense_s2",
+    "stable_global_no_progress_dense_s2"
+  ],
+  "decisions_remaining": "User chooses 503 arms after this analysis/replay. No development-accuracy tuning or rejection based only on the 64-problem panel.",
+  "frequency_additions": [
+    "stable_global_no_progress_dense_s1",
+    "stable_global_no_progress_dense_s4",
+    "stable_global_no_progress_dense_s8"
+  ],
+  "held_references": [
+    "v31_progress_dense_control",
+    "v31_no_progress_dense_hold"
+  ],
+  "minimum_method_arms": 7,
+  "native_cells_if_all_run": 6036,
+  "native_consumer_controls": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4"
+  ],
+  "native_workload": "All 503 LongBench-v2 problems with matched seed-1 cells, frozen native sampler and source/runtime; retain existing 64 as development stratum.",
+  "optional_raw_interval4": "raw_global_no_progress_dense_s4 as a raw frequency challenger; if chosen include stable counterpart for the same interval.",
+  "rationale": "Use a 2x2 cross at interval 2 to isolate stability and progress without an interval confound, then a complete stable no-progress frequency sweep. This tests conditional effects and does not claim all factorial interactions.",
+  "selection_notes": [
+    "Stable s1 explores fewer denoising calls; verify output-length mediation.",
+    "Stable s8 explores accuracy/late updates; verify N inflation against both held references.",
+    "Raw progress s2 is the near-N reference.",
+    "No-progress s2 supplies the missing matched progress comparison."
+  ],
+  "status": "proposal_not_launched",
+  "timing": "Clean timing paused",
+  "total_with_controls": 12
+}

@@ -1634,3 +1634,32 @@ matched dense reference despite tile skipping.
   `875f01d5` fixes only schedule seed-key handling. Completed native leaves
   record source commit `7ba92755`. Historical predecessor data are not reused
   as source-matched controls. Clean timing is paused and intentionally absent.
+
+
+## 2026-10-14 — V31 refresh factor isolation (operator complete; native reanalysis)
+
+Source: `results/v31_refresh_factor_isolation_20261014/`, frozen selector/
+replay identity at `be9e23dc`; `final_complete.json` and final integrity receipt
+present. This result is operator diagnostics plus reanalysis of previously
+examined native data, not new 503-cell native accuracy.
+
+- 16 raw/stable x progress on/off x s1/s2/s4/s8 operator settings plus 2 held
+  references; 670 input files / 620 snapshots checked. Matched 570 post-anchor
+  frames and 480 common non-selection frames per arm; 50 bootstrap/carry
+  pre-anchor frames excluded identically.
+- 26 new and 38 CUDA/FA4 tests pass. All 2,550 real refresh maps match a
+  separate NumPy oracle. QK max error 1.907e-6, score max error 1.639e-6;
+  budget/cap/map/capture errors zero. Offline full-dimensional attention
+  errors and selector work remain separate from native/clean timing.
+- Conditional operator progress improves common-call mean error 0.89-1.57%;
+  stable lowers churn but has higher error than raw. Stable progress s8 is
+  inert (0 swaps), with just one cheap event per nonempty anchor epoch.
+- Existing native method matrix has only 8/16 cells: progress s2 vs
+  no-progress s1/s4/s8. Native progress with cheap refresh is not identifiable.
+  Stable-minus-raw LongBench counts at matched settings are -2 (on/s2),
+  +4 (off/s1), 0 (off/s4), +8 (off/s8), with exploratory paired intervals.
+  Interval effects are nonmonotonic in native accuracy. The user will select
+  full-503 arms afterward. No native generation or clean timing launched.
+
+Report: `reports/final_report.md`; all one-factor details in
+`reports/native_factor_contrasts.json` and `operator_factor_contrasts.json`.

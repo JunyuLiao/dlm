@@ -1682,3 +1682,38 @@ Source: results/v31_cached_refresh_stable_20261013/reports/final_report.md and
 its final_complete.json. Failed trajectory/scoring attempts are preserved;
 the scoring correction changes only schedule-key interpretation, not policy,
 criteria, native generation or official extraction.
+
+
+## 2026-10-14 — Isolate refresh factors before selecting full LongBench arms
+
+The user questions the reliability of the 64-problem development subset and
+requested existing native analysis plus complete operator replay before
+choosing 503-problem arms. The source native study remains immutable. Its
+8/16 method settings do not support a matched progress-on/off comparison
+with cheap refresh: on uses s2, off uses s1/s4/s8. Compute only one-factor
+paired contrasts that exist; do not fit unbalanced pooled main effects.
+
+Frozen factor source `be9e23dc` uses the previous operator-only stability
+choice unchanged: zero hysteresis, persistence 2, event cap 2, cumulative
+cap 8, removal tolerance 0.025. Raw does not activate those constraints.
+All 16 operator settings and both held references completed on identical
+Q/K/V. Each has the same 570 post-anchor frames and 480 common sparse
+comparison frames. CPU NumPy map checks agree on 2,550 refreshes; 26 new
+and 38 CUDA/FA4 tests pass. Physical budget, stable caps and actual capture
+counter checks pass. Fresh QK/score discrepancies are at most 1.91e-6 /
+1.64e-6. This remains conditional on source V31 Q/K/V and progress events,
+not a native outcome prediction.
+
+Progress improves common sparse-call operator error by 0.89-1.57%, while
+stable reduces churn but has higher error than matched raw. Stable progress
+s8 performs zero swaps: each of its 15 nonempty anchor epochs has only one
+cheap observation, insufficient for two-event persistence. Frequency alters
+effective stable response delay and interacts with dense-refresh resets.
+Native stability effects vary by interval and do not establish a general
+win; the s8 no-progress advantage over raw is a rescue relative to a weak
+raw arm, only +1 correct over V31 on the subset, with N inflation.
+
+Proposal, not launch: four raw/stable x progress-on/off s2 arms, add stable
+no-progress s1/s4/s8, retain both held references and native-consumer controls.
+The user chooses the 503 scope next. Clean timing remains paused. Complete
+sources and report: results/v31_refresh_factor_isolation_20261014/.
