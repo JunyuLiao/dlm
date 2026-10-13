@@ -10,6 +10,7 @@ class TrajectoryRecorder:
         self.dataset = dataset
         self.calls = {}
         self.first_canvas = None
+        self.sparse_canvases = set()
 
     def record(self, adapter, layer, q, buffers, scale, prefix, n):
         if layer not in (5,11,17,23,29):
@@ -17,7 +18,10 @@ class TrajectoryRecorder:
         if self.first_canvas is None:
             self.first_canvas = adapter.canvas_id
         canvas = adapter.canvas_id-self.first_canvas
-        if canvas > 1:
+        if self.dataset=='aime26' and prefix//64>128:
+            if canvas not in self.sparse_canvases and len(self.sparse_canvases)<2:
+                self.sparse_canvases.add(canvas)
+        if canvas > 1 and canvas not in self.sparse_canvases:
             return
         key = (canvas,layer)
         call = self.calls.get(key,0)

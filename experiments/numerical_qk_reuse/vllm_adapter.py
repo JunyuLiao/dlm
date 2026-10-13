@@ -1504,15 +1504,16 @@ class VllmMethodAdapter:
         state = StableState(z, current, StableConfig(**self.stable_refresh_config.get('selector', {})), mandatory)
         self._stable_pending[layer_idx] = state
         if self._stable_totals is None:
-            self._stable_totals = dict(counts=torch.zeros(8, device=z.device, dtype=torch.float64),
+            self._stable_totals = dict(counts=torch.zeros(11, device=z.device, dtype=torch.float64),
                 drift=torch.zeros(4, device=z.device), ages=torch.zeros(128, device=z.device,dtype=torch.int64),
-                cumulative=torch.zeros((),device=z.device,dtype=torch.int32), units=0)
+                cumulative=torch.zeros((),device=z.device,dtype=torch.int32),event_max=torch.zeros((),device=z.device,dtype=torch.int32), units=0)
         retired = self._stable_rows.get(layer_idx)
         if retired is not None:
             self._stable_totals['counts'] += retired.counts
             self._stable_totals['drift'] = torch.maximum(self._stable_totals['drift'], retired.drift_max)
             self._stable_totals['ages'] += torch.bincount(retired.age.flatten().long().clamp_max(127),minlength=128)
             self._stable_totals['cumulative'] = torch.maximum(self._stable_totals['cumulative'], retired.cumulative.max())
+            self._stable_totals['event_max'] = torch.maximum(self._stable_totals['event_max'], retired.max_event_swaps)
             self._stable_totals['units'] += retired.events*retired.selected.shape[0]
         self._stable_rows[layer_idx] = state
 
@@ -1625,7 +1626,7 @@ class VllmMethodAdapter:
         tensors = list(self._stable_rows.values())
         if self._cached_events:
             torch.cuda.synchronize()
-        total = sum((s.counts for s in tensors), self._stable_totals['counts'].clone()) if tensors else torch.zeros(8)
+        total = sum((s.counts for s in tensors), self._stable_totals['counts'].clone()) if tensors else torch.zeros(11)
         counts = total.tolist()
         units = sum(s.events*s.selected.shape[0] for s in tensors)+(self._stable_totals['units'] if tensors else 0)
         hist = {str(i):int(v) for i,v in enumerate(self._stable_totals['ages'].cpu().tolist()) if v} if tensors else {}
@@ -1639,6 +1640,8 @@ class VllmMethodAdapter:
             stable_removal_guard_rejected_units=int(counts[3]),
             stable_iou_previous=counts[4]/max(1,units), stable_iou_anchor=counts[5]/max(1,units),
             stable_reentries=int(counts[6]), stable_immediate_reversals=int(counts[7]),
+            stable_rejected_update_units=int(counts[8]), stable_persistence_rejections=int(counts[9]),stable_cumulative_rejections=int(counts[10]),
+            stable_max_event_swaps=max([int(s.max_event_swaps) for s in tensors]+[int(self._stable_totals['event_max'])]) if tensors else 0,
             stable_age_histogram=hist, stable_max_cumulative_swaps=max([int(s.cumulative.max()) for s in tensors]+[int(self._stable_totals['cumulative'])]) if tensors else 0,
             stable_drift_max=dict(zip(('absolute_log_mass','common_shift','shift_residual','common_support_tv'),drift)),
             stable_selector_audit_ms=sum(a.elapsed_time(b) for a,b in self._cached_events),

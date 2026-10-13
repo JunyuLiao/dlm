@@ -122,7 +122,8 @@ class StableState:
         self.previous_additions = torch.zeros_like(selected)
         self.events = 0
         # Aggregate tensors stay on device until the request receipt.
-        self.counts = torch.zeros(8, device=anchor.device, dtype=torch.float64)
+        self.counts = torch.zeros(11, device=anchor.device, dtype=torch.float64)
+        self.max_event_swaps = torch.zeros((), device=anchor.device, dtype=torch.int32)
         self.drift_max = torch.zeros(4, device=anchor.device, dtype=torch.float32)
 
     def observe(self, fresh, tail_lse, probe_mask=None):
@@ -188,13 +189,17 @@ class StableState:
                 assert_budget(selected, self.k, self.mandatory)
         additions, removals = selected & ~old, old & ~selected
         swaps = additions.sum(-1)
+        self.max_event_swaps = torch.maximum(self.max_event_swaps,swaps.max().to(torch.int32))
         union = (selected | old).sum(-1).clamp_min(1)
         iou = (selected & old).sum(-1) / union
         anchor_iou = (selected & self.initial).sum(-1) / (selected | self.initial).sum(-1).clamp_min(1)
         reentry = (additions & self.removed_before).sum()
         reversals = (removals & self.previous_additions).sum()
         self.counts += torch.stack((swaps.sum(), (swaps>0).sum(), (swaps==0).sum(), rejected_guard.sum(),
-                                    iou.sum(), anchor_iou.sum(), reentry, reversals)).to(torch.float64)
+                                    iou.sum(), anchor_iou.sum(), reentry, reversals,
+                                    (favorable.any(-1)&(swaps==0)).sum(),
+                                    (favorable&(self.streak<cfg.persistence)).any(-1).sum(),
+                                    (favorable.any(-1)&(self.cumulative>=cfg.cumulative_cap)).sum())).to(torch.float64)
         self.removed_before |= removals
         self.previous_additions = additions
         self.age = torch.where(selected, 0, (self.age + 1).clamp_max(100000))
