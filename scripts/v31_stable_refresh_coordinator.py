@@ -23,9 +23,18 @@ def write(path,data):
     path.write_text(json.dumps(data,indent=2,sort_keys=True)+'\n')
 def idle():
     return not subprocess.check_output(['nvidia-smi','--query-compute-apps=pid','--format=csv,noheader'],text=True).strip()
+def external_runner_active():
+    # A model runner can exist before its CUDA context appears in nvidia-smi.
+    listing=subprocess.check_output(['ps','-eo','comm=,args='],text=True)
+    return any(line.lstrip().startswith('python') and 'run_aime_eval.py' in line for line in listing.splitlines())
 def wait_gpu(study):
-    last=0
-    while not idle():
+    last=0;free_since=None
+    while True:
+        free=idle() and not external_runner_active()
+        if free:
+            if free_since is None:free_since=time.monotonic()
+            if time.monotonic()-free_since>=120:return
+        else:free_since=None
         if time.monotonic()-last>=1800:
             gpu=subprocess.check_output(['nvidia-smi','--query-gpu=timestamp,utilization.gpu,memory.used','--format=csv,noheader'],text=True).strip()
             print(json.dumps({'status':'waiting_other_gpu_worker','gpu':gpu}),flush=True); last=time.monotonic()
@@ -37,6 +46,11 @@ def main():
     os.chdir(ROOT)
     runtime_env=dict(os.environ,PYTHONPATH=str(ROOT)+':'+str(ROOT/'src'),PYTHONNOUSERSITE='1')
     identity={p:digest(ROOT/p) for p in SOURCES}
+    failure=study/'coordinator_failure.json'
+    if failure.exists():
+        history=study/'coordinator_failures';history.mkdir(exist_ok=True)
+        existing=list(history.glob('attempt*.json'))
+        failure.rename(history/f'attempt{len(existing)+1:03d}.json')
     def run_logged(cmd,log):
         with log.open('w') as stream:
             proc=subprocess.Popen(cmd,cwd=ROOT,env=runtime_env,stdout=stream,stderr=subprocess.STDOUT)
@@ -70,7 +84,10 @@ def main():
     try:
         # Independent tensor GPU gate always precedes real model work.
         gate=study/'qualification/gpu_tests_complete.json'
-        if not gate.exists() or json.loads(gate.read_text()).get('sources')!=identity:
+        previous=json.loads(gate.read_text()).get('sources',{}) if gate.exists() else {}
+        # Resource-wait orchestration does not invalidate completed selector/FA4 tests.
+        gpu_inputs={p:h for p,h in identity.items() if not p.endswith('v31_stable_refresh_coordinator.py')}
+        if any(previous.get(p)!=h for p,h in gpu_inputs.items()):
             wait_gpu(study)
             tests_logs=list((study/'qualification').glob('gpu_tests_attempt*.log'))
             run_logged([str(PY),'-m','pytest','-q','tests/test_v31_stable_refresh.py','tests/test_v31_stable_lifecycle.py','tests/test_v31_fa4_observe.py'],study/'qualification'/f'gpu_tests_attempt{len(tests_logs)+1:03d}.log')
