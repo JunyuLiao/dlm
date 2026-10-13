@@ -1,0 +1,68 @@
+{
+  "budget": {
+    "KV_tile": 64,
+    "prefix_tiles": 128,
+    "short_prefix": "min(128,eligible)",
+    "tail": "mandatory outside budget",
+    "unit": "query head and Q128 block"
+  },
+  "error_scopes": [
+    "All post-anchor calls including scheduled dense output",
+    "Common V31 non-selection calls for every arm"
+  ],
+  "excluded_calls": "Before common first selection, including bootstrap/carry, excluded equally; no end-to-end carry replay claim.",
+  "factors": {
+    "cheap_reuse_interval": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "mode": [
+      "raw",
+      "stable"
+    ],
+    "progress_dense": [
+      true,
+      false
+    ]
+  },
+  "followup": "Choose 503-native arms after operator and exploratory native analysis. Small-panel gate does not veto new full-dataset evaluation.",
+  "frozen_native_data": "64 LongBench problems seed 1; 30 AIME26 problems seeds 42,43,44; development data already examined.",
+  "inference": "One-factor paired contrasts only. Bootstrap 10000, seed 51994, problem clusters. CIs exploratory and unadjusted for multiple comparisons. No fit of incomplete factorial main effects.",
+  "inherited_dense_selector": {
+    "progress_signal": "settle",
+    "progress_threshold": 0.15,
+    "sticky": 1.386
+  },
+  "monitor_minutes": 15,
+  "operator_qkv_files": 670,
+  "operator_replay": "All 16 factorial arms and 2 held-map references on identical Q/K/V; all refreshes compared to independent NumPy oracle.",
+  "operator_source_study": "results/v31_cached_refresh_stable_20261013",
+  "operator_step_snapshots": 620,
+  "progress_diagnostic_scope": "Imposed V31 trajectory events; cannot predict candidate native clocks, answers or N.",
+  "raw_effective_constraints": "Global hybrid top K; persistence, event/cumulative caps and removal guard inactive.",
+  "schema": "v31_refresh_factor_isolation_v1",
+  "scope": "Analyze completed native development evidence and complete operator factorial; no new native generation.",
+  "selector_parameters": {
+    "cumulative_cap": 8,
+    "event_cap": 2,
+    "hysteresis": 0.0,
+    "mode": "stable",
+    "persistence": 2,
+    "probes": 0,
+    "removal_tolerance": 0.025,
+    "updates_enabled": true
+  },
+  "stable_effective_constraints": "Persistence 2 cheap events, cap 2/event and 8/dense-anchor epoch, removal guard .025; hysteresis zero.",
+  "study_date": "2026-10-14",
+  "timing": "clean timing paused",
+  "validation": {
+    "CPU_map_mismatches": 0,
+    "CPU_score_max_abs": 3e-05,
+    "fixed_budget_errors": 0,
+    "fresh_stat_max_abs": 0.0003,
+    "graph_captures": 0,
+    "stable_cap_errors": 0
+  }
+}
