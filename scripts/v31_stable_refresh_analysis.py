@@ -121,6 +121,7 @@ def main():
             def unit_average(field):
                 return sum((a.get(field) or 0)*(a.get('stable_unit_updates',0)+a.get('stable_unit_noops',0)) for a in audits)/units if units else None
             diag=score_diagnostics[arm][ds]
+            stable_mode=(configs[arm][0]['stable_refresh_config'] or {}).get('selector',{}).get('mode')=='stable'
             report=dict(arm=arm,workload=ds,cells=len(vals),correct=sum(sc.values()),accuracy_pct=100*np.mean(list(sc.values())),
                 N_total=int(n.sum()),N_mean=float(n.mean()),N_median=float(np.median(n)),N_p95=float(np.quantile(n,.95)),NC_mean=float(nc.mean()),
                 NC_distribution=distribution(nc),output_tokens_distribution=distribution(t),
@@ -138,7 +139,8 @@ def main():
                 max_event_swaps=max_audit('stable_max_event_swaps'),max_cumulative_swaps=max_audit('stable_max_cumulative_swaps'),
                 iou_previous=unit_average('stable_iou_previous'),iou_anchor=unit_average('stable_iou_anchor'),
                 unit_updates=total('stable_unit_updates'),rejected_update_units=total('stable_rejected_update_units'),
-                persistence_rejections=total('stable_persistence_rejections'),cumulative_rejections=total('stable_cumulative_rejections'),
+                persistence_rejections=total('stable_persistence_rejections') if stable_mode else None,
+                cumulative_rejections=total('stable_cumulative_rejections') if stable_mode else None,
                 stable_refresh_config=configs[arm][0]['stable_refresh_config'],
                 graph_captures=sum(r['cuda_graph_captures'] for r in vals),paired={})
             for ref in ('v31_progress_dense_control','v31_no_progress_dense_hold'):
@@ -152,6 +154,19 @@ def main():
     jsonwrite(resultdir/'operator_results.json',dict(coverage=operator['coverage'],snapshots=operator['snapshots'],
         max_retained_statistic_error=operator['max_retained_statistic_error'],selector_grid=operator['selector_grid'],
         parameters=operator['parameters'],metric_scope='pooled current-Q/K/V row errors; mask applies at next call; dense evaluation offline only'))
+    op_records=[json.loads(line) for line in (study/op_pointer['leaf']/'records.jsonl').read_text().splitlines()]
+    strata=[]
+    for arm in operator['selector_grid']:
+        for ds in ('longbench_v2_0shot_think','aime26'):
+            for low,high in ((1,2),(3,5),(6,100000)):
+                subset=[r for r in op_records if r['arm']==arm and r['dataset']==ds and low<=r['anchor_age']<=high]
+                if subset:
+                    strata.append(dict(arm=arm,workload=ds,anchor_age_reuse_calls=[low,high],frames=len(subset),
+                        outside_logmass_mae=np.mean([r['outside_logmass_prediction_error'] for r in subset]),
+                        true_retained_mass=np.mean([r['true_retained_mass_mean'] for r in subset]),
+                        row_error_mean=np.mean([r['row_error_mean'] for r in subset]),
+                        row_error_max=max(r['row_error_max'] for r in subset)))
+    jsonwrite(resultdir/'operator_age_strata.json',strata)
     # Predeclared development recommendation; this is not a noninferiority claim.
     recommendations=[]
     for arm in completion['arms']:
