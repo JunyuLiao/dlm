@@ -61,3 +61,28 @@ def test_dense_reason_clock_noops_carry_and_list_sync(monkeypatch,progress_dense
     a._mage(0,q,b,.25,320,128)
     assert reasons['canvas_selection_dense']==2
     assert torch.equal(outputs[0],builds[0])
+
+
+def test_prefix_geometry_change_rebuilds_anchor_even_when_total_keys_match(monkeypatch):
+    from experiments.numerical_qk_reuse import v27_fa4
+    monkeypatch.setattr(v27_fa4,'block_sparse_tensors',lambda x:x.clone())
+    cfg=dict(selector=dict(mode='raw'),period=0,progress_dense=False)
+    a=VllmMethodAdapter(['full_attention'],arm='mage',mage_select='fa4',mage_k=128,
+        mage_granularity='qblock_max',stable_refresh_config=cfg)
+    a.begin_request()
+    def select(layer,q,b,scale,prefix,n):
+        pt=prefix//64;qb=(n+127)//128;h=q.shape[1];kt=(prefix+n+63)//64
+        mask=torch.zeros(1,h,qb,kt,dtype=torch.bool);mask[...,:2]=True;mask[...,pt:]=True
+        a._stable_prepare(layer,torch.zeros(h,n,pt),mask,prefix,n)
+        return torch.tensor(0.),mask
+    monkeypatch.setattr(a,'_select_initial_refresh',select)
+    b=dict(k=torch.zeros(1,1,512,16),v=torch.zeros(1,1,512,16))
+    a._mage(0,torch.zeros(1,1,256,16),b,.25,256,256)
+    first=a.mage_state[0]['stable']
+    a._mage(0,torch.zeros(1,1,128,16),b,.25,384,128)
+    following=a.mage_state[0]['stable']
+    assert following is not first
+    assert following.anchor.shape==(1,6,128)
+    assert a._stable_reasons['canvas_selection_dense']==1
+    assert a._stable_reasons['geometry_selection_dense']==1
+    assert a._stable_totals['counts'].shape==(11,)

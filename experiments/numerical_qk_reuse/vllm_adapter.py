@@ -599,7 +599,7 @@ class VllmMethodAdapter:
         self._stable_rows = {}
         self._stable_totals = None
         self._stable_reasons = dict(bootstrap_dense=0, canvas_selection_dense=0,
-                                   progress_selection_dense=0, emergency_dense=0,
+                                   progress_selection_dense=0, geometry_selection_dense=0, emergency_dense=0,
                                    carry_calls=0, cheap_observations=0, actual_updates=0,
                                    allkept_observation_shortcuts=0,
                                    selector_qk_rectangles=0, probe_qk_rectangles=0,
@@ -1528,7 +1528,8 @@ class VllmMethodAdapter:
         if cnt is None or cnt[:2] != [self.canvas_id, nk]:
             cnt = self._mage_count[layer_idx] = [self.canvas_id, nk, -1]
         cnt[2] += 1
-        same = st is not None and st['canvas'] == self.canvas_id and st['nk'] == nk
+        same = (st is not None and st['canvas'] == self.canvas_id and st['nk'] == nk
+                and st.get('n') == n and st.get('heads') == q.shape[1] and st['prefix'] == prefix)
         due = same and cfg.get('progress_dense', True) and self._trig_at == (self.canvas_id, cnt[2])
         if not same:
             w = self._mage_warm.get(layer_idx)
@@ -1556,10 +1557,12 @@ class VllmMethodAdapter:
                 self._mage_units_w, self._mage_held, self._k_override = None, None, None
             state = self._stable_pending.pop(layer_idx)
             self.mage_state[layer_idx] = dict(canvas=self.canvas_id, nk=nk, prefix=prefix, kept=kept,
-                lists=v27_fa4.block_sparse_tensors(kept), stable=state, reused_since_selection=0, pool=None)
+                lists=v27_fa4.block_sparse_tensors(kept), stable=state, reused_since_selection=0, pool=None,
+                n=n,heads=q.shape[1])
             key = 'mage_reselections' if due else 'mage_selections'
             self.calls[key] = self.calls.get(key, 0)+1
-            reason = 'progress_selection_dense' if due else 'canvas_selection_dense'
+            reason = ('progress_selection_dense' if due else
+                      'geometry_selection_dense' if st is not None and st['canvas']==self.canvas_id else 'canvas_selection_dense')
             self._stable_reasons[reason] += 1
             self._stable_used_kept[layer_idx] = None
             return out
