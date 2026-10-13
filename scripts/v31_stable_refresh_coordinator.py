@@ -134,7 +134,8 @@ def main():
             rotated=arms[shard:]+arms[:shard]
             for arm in rotated:
                 leaf=attempt(f'native/shard{shard+1:02d}',arm,path,parameters=True)
-                queue.append(dict(arm=arm,shard=shard+1,path=str(leaf.relative_to(study))))
+                queue.append(dict(arm=arm,shard=shard+1,path=str(leaf.relative_to(study)),
+                    artifacts_sha256={name:digest(leaf/name) for name in ('config.json','records.jsonl','receipt.json','attempt_complete.json')}))
                 write(study/'queue_state.json',dict(status='running',completed=queue,total=4*len(arms)))
         write(study/'native_generation_complete.json',dict(status='complete',shards=queue,arms=arms,cells_per_arm=154))
         run_logged([str(PY),str(ROOT/'scripts/v31_stable_refresh_analysis.py'),'--study',str(study)],study/'scoring/analysis.log')

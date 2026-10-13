@@ -41,6 +41,8 @@ def main():
         groups.setdefault(key,[]).append(f)
     records=[]; coverage=set(); start=time.perf_counter(); max_stat_error=0.
     perturbations={name:[] for name in configs}
+    row_errors={name:[] for name in configs}
+    age_histograms={name:torch.zeros(128,dtype=torch.int64) for name in configs}
     for group,files in sorted(groups.items()):
         states={}; pending={}; clocks={}; anchor_age={}; prefix=None
         for f in sorted(files):
@@ -89,14 +91,19 @@ def main():
                     oldmass=(torch.logaddexp(z.masked_fill(~old[:,:,None],-math.inf).logsumexp(1),tail)-dense_norm).exp()[valid]
                     realized=float((true_mass-oldmass).mean())
                 due=period>0 and clocks[name]%period==0 and state.k<pt
-                swaps=0; rejected=0; probe_work=0; selector_ms=0.
+                swaps=0; rejected=0; probe_work=0; selector_ms=0.; observation_ms=0.
+                noops=0; reentries=0; reversals=0; rejected_updates=0
+                persistence_rejections=0; cumulative_rejections=0; unit_iou=1.
                 outside_err=0.
                 outside=~before[:,:,None]&torch.isfinite(state.anchor)&torch.isfinite(z)
                 if outside.any(): outside_err=float((z-state.anchor).abs()[outside].mean())
                 if due:
                     # Actual partial-observation parity, independent of the offline dense evaluator.
+                    qa,qb_event=torch.cuda.Event(enable_timing=True),torch.cuda.Event(enable_timing=True)
+                    qa.record()
                     selected_ids=tile_ids(before)
                     fresh_part=observe(q,k,data['scale'],selected_ids,n)
+                    qb_event.record(); qb_event.synchronize(); observation_ms=qa.elapsed_time(qb_event)
                     dense_part=z.gather(1,selected_ids[:,:,None].expand(-1,-1,128))
                     delta=torch.nan_to_num((fresh_part-dense_part).abs()).amax()
                     max_stat_error=max(max_stat_error,float(delta))
@@ -110,8 +117,14 @@ def main():
                         fresh.scatter_(1,probe_ids[:,:,None].expand(-1,-1,128),observe(q,k,data['scale'],probe_ids,n))
                         probe_work=probe_ids.numel()
                     a,b=torch.cuda.Event(enable_timing=True),torch.cuda.Event(enable_timing=True); a.record()
+                    prior_counts=state.counts.clone()
                     selected,info=state.observe(fresh,tail,probe); b.record(); b.synchronize(); selector_ms=a.elapsed_time(b)
                     swaps=int(info['swaps'].sum()); rejected=int(info['rejected_guard'].sum())
+                    increments=(state.counts-prior_counts).cpu().tolist()
+                    noops=int(increments[2]); reentries=int(increments[6]); reversals=int(increments[7])
+                    rejected_updates=int(increments[8]); persistence_rejections=int(increments[9]); cumulative_rejections=int(increments[10])
+                    unit_iou=increments[4]/before.shape[0]
+                    age_histograms[name]+=torch.bincount(state.age.flatten().long().clamp_max(127),minlength=128).cpu()
                     hybrid=torch.where((before|probe if probe is not None else before)[:,:,None],fresh,state.anchor)
                     predict_norm=torch.logaddexp(hybrid.logsumexp(1),tail)
                     pnew=(torch.logaddexp(hybrid.masked_fill(~selected[:,:,None],-math.inf).logsumexp(1),tail)-predict_norm).exp()[valid]
@@ -119,11 +132,16 @@ def main():
                     pending[name]=(before,float((pnew-pold).mean()))
                 else: pending.pop(name,None)
                 perturbations[name].append(row_change.cpu())
+                row_errors[name].append(rowerr.cpu())
                 records.append(dict(arm=name,trajectory=group[0],dataset=data['dataset'],layer=data['layer'],canvas=data['canvas'],call=data['call'],anchor_age=anchor_age[name],
                     true_retained_mass_mean=float(true_mass.mean()),row_error_mean=float(rowerr.mean()),row_error_p95=float(torch.quantile(rowerr,.95)),row_error_max=float(rowerr.max()),relative_row_error_mean=float(rel.mean()),
                     immediate_output_change_max=immediate,realized_mass_change=realized,predicted_mass_change=predicted,
                     realized_error_improvement=error_improvement,
                     observation=due,swaps=swaps,cumulative_max=int(state.cumulative.max()),guard_rejections=rejected,
+                    unit_noops=noops,reentries=reentries,immediate_reversals=reversals,rejected_updates=rejected_updates,
+                    persistence_rejections=persistence_rejections,cumulative_rejections=cumulative_rejections,
+                    iou_previous=unit_iou,query_block_units=before.shape[0],observation_qk_ms=observation_ms,
+                    state_bytes=sum(t.numel()*t.element_size() for t in vars(state).values() if isinstance(t,torch.Tensor)),
                     iou_anchor=float((before&state.initial).sum()/((before|state.initial).sum().clamp_min(1))),
                     outside_logmass_prediction_error=outside_err,selector_ms=selector_ms,probe_rectangles=probe_work,
                     selector_rectangles=(before.sum().item()+tail_ids.numel()) if due else 0))
@@ -137,8 +155,24 @@ def main():
         aggregates[name].update(records=len(rr),swaps=sum(r['swaps'] for r in rr),max_cumulative=max((r['cumulative_max'] for r in rr),default=0),
             false_admissions=sum(r['predicted_mass_change'] is not None and r['predicted_mass_change']>0 and r['realized_mass_change']<0 for r in rr))
         changes=torch.cat(perturbations[name]) if perturbations[name] else torch.zeros(1)
+        errors=torch.cat(row_errors[name]) if row_errors[name] else torch.zeros(1)
         aggregates[name].update(row_output_change_mean=float(changes.mean()),row_output_change_p95=float(changes.quantile(.95)),
-            row_output_change_max=float(changes.max()))
+            row_output_change_max=float(changes.max()),row_error_mean=float(errors.mean()),
+            pooled_row_error_p95=float(errors.quantile(.95)),row_error_max=float(errors.max()),
+            observations=sum(r['observation'] for r in rr),unit_noops=sum(r['unit_noops'] for r in rr),
+            reentries=sum(r['reentries'] for r in rr),immediate_reversals=sum(r['immediate_reversals'] for r in rr),
+            rejected_updates=sum(r['rejected_updates'] for r in rr),guard_rejections=sum(r['guard_rejections'] for r in rr),
+            selector_rectangles=sum(r['selector_rectangles'] for r in rr),probe_rectangles=sum(r['probe_rectangles'] for r in rr),
+            observation_qk_ms=sum(r['observation_qk_ms'] for r in rr),ranking_audit_ms=sum(r['selector_ms'] for r in rr),
+            state_bytes_max=max((r['state_bytes'] for r in rr),default=0),
+            iou_previous_mean=sum(r['iou_previous'] for r in rr)/max(1,len(rr)),
+            iou_anchor_mean=sum(r['iou_anchor'] for r in rr)/max(1,len(rr)),
+            age_histogram={str(i):int(v) for i,v in enumerate(age_histograms[name]) if v})
+        paired=[r for r in rr if r['predicted_mass_change'] is not None]
+        aggregates[name].update(prediction_events=len(paired),
+            mass_improvement_sign_agreement=(sum((r['predicted_mass_change']>0)==(r['realized_mass_change']>0) for r in paired)/len(paired) if paired else None),
+            predicted_mass_mae=(sum(abs(r['predicted_mass_change']-r['realized_mass_change']) for r in paired)/len(paired) if paired else None),
+            realized_error_improvement_mean=(sum(r['realized_error_improvement'] for r in paired)/len(paired) if paired else None))
     raw=aggregates['raw_s2']; hold=aggregates['v31_progress_hold']
     acceptable=[(name,x) for name,x in aggregates.items() if name.startswith('stable_l') and
         x['row_output_change_p95']<=.5*raw['row_output_change_p95'] and x['true_retained_mass_mean']>=hold['true_retained_mass_mean']]
