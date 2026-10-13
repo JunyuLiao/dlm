@@ -87,7 +87,7 @@ def main():
         gate=study/'qualification/gpu_tests_complete.json'
         previous=json.loads(gate.read_text()).get('sources',{}) if gate.exists() else {}
         # Resource-wait orchestration does not invalidate completed selector/FA4 tests.
-        gpu_inputs={p:h for p,h in identity.items() if not p.endswith('v31_stable_refresh_coordinator.py')}
+        gpu_inputs={p:h for p,h in identity.items() if not p.endswith(('v31_stable_refresh_coordinator.py','v31_stable_snapshot_replay.py'))}
         if any(previous.get(p)!=h for p,h in gpu_inputs.items()):
             wait_gpu(study)
             tests_logs=list((study/'qualification').glob('gpu_tests_attempt*.log'))
@@ -101,7 +101,17 @@ def main():
             wait_gpu(study)
             used=[int(x.name[7:]) for x in (study/'operator').glob('attempt*') if x.is_dir()]
             name=f'attempt{max(used,default=0)+1:03d}'
-            run_logged([str(PY),str(ROOT/'scripts/v31_stable_snapshot_replay.py'),'--study',str(study),'--attempt',name],study/'operator'/f'{name}.log')
+            replay_command=[str(PY),str(ROOT/'scripts/v31_stable_snapshot_replay.py'),'--study',str(study),'--attempt',name]
+            frequency_binding=study/'specs/native_frequency_replay_binding.json'
+            if frequency_binding.exists():
+                binding=json.loads(frequency_binding.read_text());frozen=study/binding['parameter_file']
+                if digest(frozen)!=binding['parameters_sha256']:raise RuntimeError('frequency replay parameters changed')
+                replay_command+=['--frozen-parameters',str(frozen)]
+            run_logged(replay_command,study/'operator'/f'{name}.log')
+        replay_receipt=json.loads(replay.read_text())
+        replay_summary=json.loads((study/replay_receipt['leaf']/'summary.json').read_text())
+        if not replay_summary.get('native_frequency_configs_match_selected'):
+            raise RuntimeError('no-progress frequency replay does not match frozen native parameters')
         parameter_file=study/json.loads(replay.read_text()).get('parameter_file','specs/parameters.json')
         # Repetition floor and observation-only native qualifier. Never score before parameter selection.
         quals=[]

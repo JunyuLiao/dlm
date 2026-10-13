@@ -14,6 +14,7 @@ from experiments.numerical_qk_reuse.v31_fa4_observe import observe_dense
 
 def main():
     p=argparse.ArgumentParser(); p.add_argument('--study',type=Path,required=True);p.add_argument('--attempt',default='attempt001')
+    p.add_argument('--frozen-parameters',type=Path)
     args=p.parse_args(); study=args.study.resolve(); output=study/'operator'/args.attempt
     if output.exists(): raise RuntimeError('replay output already exists; preserve it and choose a new study/attempt')
     output.mkdir(parents=True)
@@ -27,7 +28,9 @@ def main():
             configs[f'stable_l{li}_g{gi}_s2']=(StableConfig(hysteresis=lam,removal_tolerance=guard),2,True)
     # Probe extension is explicitly offline; later native wiring is conditional.
     configs['stable_probe4_s2']=(StableConfig(hysteresis=math.log(1.25),removal_tolerance=.01,probes=4),2,True)
-    configs.update({f'stable_no_progress_s{s}':(StableConfig(),s,False) for s in (1,4,8)})
+    frozen_selector=(json.loads(args.frozen_parameters.read_text())['selector'] if args.frozen_parameters else None)
+    frequency_config=StableConfig(**frozen_selector) if frozen_selector else StableConfig()
+    configs.update({f'stable_no_progress_s{s}':(frequency_config,s,False) for s in (1,4,8)})
     binding=json.loads((study/'operator/trajectory_binding.json').read_text())
     trajectory_leaf=study/binding['completed_leaf']
     for name in ('receipt','config'):
@@ -178,6 +181,8 @@ def main():
         x['row_output_change_p95']<=.5*raw['row_output_change_p95'] and x['true_retained_mass_mean']>=hold['true_retained_mass_mean']]
     selected=(max(acceptable,key=lambda p:(p[1]['true_retained_mass_mean'],-p[1]['swaps']))[0] if acceptable else 'stable_l3_g0_s2')
     cfg=configs[selected][0]
+    if frozen_selector is not None and vars(cfg)!=frozen_selector:
+        raise RuntimeError('frozen operator-only choice changed; do not launch native scoring')
     probe=aggregates['stable_probe4_s2']; reference=aggregates['stable_l2_g1_s2']
     probe_good=(selected=='stable_l2_g1_s2' and reference['false_admissions']>0 and probe['false_admissions']<=.5*reference['false_admissions']
                 and probe['row_output_change_p95']<=.8*reference['row_output_change_p95'])
@@ -188,6 +193,7 @@ def main():
     parameter_file=study/'specs'/f'parameters_{args.attempt}.json'
     parameter_file.write_text(json.dumps(parameters,indent=2)+'\n')
     summary={'schema':'real_sequential_operator_replay_v1','coverage':sorted(coverage),'snapshots':len(sources),'groups':len(groups),
+        'native_frequency_configs_match_selected':vars(frequency_config)==vars(cfg),
         'max_retained_statistic_error':max_stat_error,'selector_grid':aggregates,'parameters':parameters,'gpu_seconds':time.perf_counter()-start,
         'snapshot_sha256':{str(f.relative_to(study)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sources},'offline_dense_only':True}
     (output/'summary.json').write_text(json.dumps(summary,indent=2)+'\n')
