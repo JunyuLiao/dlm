@@ -1,5 +1,23 @@
 # Decisions and negative results (chronological)
 
+## 2026-10-10 — Freeze AIME26/RULER128K value-selector performance inputs
+
+- Freeze `results/v31_value_performance_20261010/` as a new, resumable
+  performance panel. AIME26 uses all 30 problems × seeds 42/43/44 and the
+  1,728-token fixed-budget control target (46.1964% pooled physical GLOBAL
+  sparsity). RULER128K uses 104 deterministic cells, eight per each of the 13
+  pinned RULER tasks, with the existing 8,192-token / 128-KV-block budget.
+- Exact greedy remains excluded. The panel includes dense FULL/PIECEWISE,
+  all-kept FA4, the current control, V1, V2, V3a, and approximate batch-8.
+  V1/V2 thresholds must be calibrated separately per workload against measured
+  fixed-budget GLOBAL work; no requested budget is reported as achieved
+  sparsity.
+- Both pools passed CPU binding checks. GPU generation is currently blocked by
+  the execution environment (`nvidia-smi` has no device and PyTorch reports
+  zero CUDA devices). No accuracy or timing conclusion follows until an
+  authenticated H100 resumes the frozen shards.
+
+
 ## V31 LOCAL compact consumer (2026-10-06)
 
 - The prior direct FA4 LOCAL consumer was slower than dense at the 512-token
@@ -1373,3 +1391,265 @@ the original nine-arm family and the first eight-arm family. Its generation
 sources, threshold0.027, budgets, sampler and consumer remain unchanged.
 Ten continuation tests pass, including repeated metadata roundtrip without
 rewriting the saved config and rejection of changed execution identity.
+
+## 2026-10-09 — Pause clean timing after complete official audit scoring
+
+The user requested that timing stop for now. Preserve all completed clean
+shards and the incomplete current-control shard; the resumable stop marker is
+`results/v31_value_selectors_20261008/longbench/target_no_exact/attempt002/timing_stop_20261009.json`.
+The clean stage has no publishable latency result. The eight-arm audit stage is
+complete and official scoring covers 503/503 cells per arm: native FULL 247,
+PIECEWISE 247, all-kept FA4 252, current V31 control 268, V1 247, V2 266,
+V3a 253, and batch8 242. No value-aware arm exceeds the control. Audit GLOBAL
+sparsities are 0, 0, 0, 83.16, 80.04, 84.11, 83.08, and 84.97 percent in
+that order; LOCAL sparsity is zero. These are historically examined LongBench
+cells and descriptive paired cluster intervals, not noninferiority evidence.
+
+## 2026-10-09 — Accuracy diagnosis for value-aware selectors under reuse
+
+Official 503-item scoring does not show a value-aware gain over the current V31
+qblock-max control: control 268/503, V1 247, V2 266, V3a 253, and batch8 242.
+The accuracy analysis is recorded in
+`results/v31_value_selectors_20261008/reports/accuracy_analysis_no_exact_20261009/`.
+The evidence points to a cross-step objective mismatch: value selects a bitmap
+from current projected V but the bitmap is held across later Q/K/V states; the
+rank-32 PV residual is not a downstream logit or sampler objective; and every
+sparse arm changes the native adaptive trajectory. Do not interpret this as
+proof that value direction is generally useless or as a timing result. The next
+accuracy panel should use matched snapshots and a mass-anchor hybrid/fresh-vs-held
+ablation before timing resumes.
+
+## 2026-10-10 — V2 online refinement: mass anchors, jcgate, and full-V gate
+
+The fresh 15-item seed-1 development panel is under
+`results/v31_value_v2_refinement_20261010/` and is development evidence only.
+The control scored 7/15, V2 preserve-mass 6/15, mass-anchor32 7/15, jcgate
+7/15, and combined jcgate+anchor16 7/15. Mean denoising forwards were 146.9,
+144.2, 159.7, 122.9, and 180.3 respectively. Jcgate is the only refinement
+kept for an accuracy-first follow-up; it lowers calls but also lowers GLOBAL
+sparsity to 71.68%, so no speed claim is made. The anchor combination is
+rejected pending new evidence.
+
+The native-mass anchor sweep improved a contiguous masked-operator diagnostic
+monotonically as anchors increased, but also increased retained work and caused
+anchor64 long-context smoke OOM warnings. The streaming full-dimensional-V
+snapshot diagnostic found projected/full-V IoU 0.858 and full-V/control IoU
+0.156; at threshold0.027 full-V error 0.3298 exceeded mass control error
+0.2467. Thresholds near the control's tile count did not close the gap on the
+initial snapshot. Do not build or time a full-V kernel until a matched-budget
+operator advantage is demonstrated. Clean timing remains paused.
+
+
+## 2026-10-10 — Full V2+jcgate audit rejects row-weighted refinement
+
+The complete 503-item official audit is under
+results/v31_value_v2_refinement_20261010/scoring/audit/. Current V31 control
+is 268/503 (53.3%) and value_v2_online_jcgate is 256/503 (50.9%), -2.39
+percentage points. The paired discordance is 44 control-only versus 32
+jcgate-only (exact two-sided McNemar p=0.207). Jcgate has 78.07% GLOBAL
+sparsity versus 83.16% for control and 242.59 versus 279.71 mean denoising
+forwards. Because the candidate both keeps more GLOBAL work and loses
+accuracy, it is rejected before clean timing; the timing stop remains
+resumable.
+
+The evidence favors a fixed-budget mass-gated value selector for any next
+accuracy experiment: use native mass to constrain the control-sized support
+and use value residuals only for within-budget swaps. Do not launch a
+full-dimensional-V kernel or timing until a matched-work operator or accuracy
+advantage is measured.
+
+## 2026-10-10 — V3 full-row selector diagnosis
+
+The focused V3 analysis is recorded in
+`results/v31_value_selectors_20261008/reports/v3_accuracy_diagnosis_20261010/`.
+V3a's sampled fresh age-0 mask IoU with the V31 control is 0.703, but its
+singleton deletion objective replaces roughly one sixth of the fixed-budget
+support and is slightly worse in max-row/full-dimensional error; held age-7
+max-row error is 0.661 versus 0.638 for control. V3b batch8 is not exact
+greedy: its non-submodular residual objective is updated only once per eight
+deletions, and early batch choices cannot be restored. Its max-row error becomes
+worse than control on 62.5% of age-1 and 74.2% of age-7 snapshots; mean N is
++61.6 calls. The partial exact-greedy diagnostic (58/128 versus V3a 62 and
+control 67) shows batch approximation is not the sole cause. A separate
+six-snapshot full-dimensional-V check found projected/full-V IoU 0.858 but
+full-V/control IoU 0.156 and full-V error 0.330 versus mass-control 0.247,
+so rank32 alone does not explain the support divergence. Keep the next panel
+fixed-budget and mass-gated; use value residuals only for bounded swaps after
+matched-snapshot operator validation.
+
+## 2026-10-10 — AIME26/RULER128K value-selector audit
+
+The frozen accuracy panel under
+`results/v31_value_performance_20261010/` was run on the H100 host
+`megakernel` and scored with the official AIME and RULER scorers. All 90 AIME
+cells (30 problems × seeds 42/43/44) and all 104 RULER cells (eight samples per
+task across 13 tasks) completed with clean receipts and no validation errors.
+Clean timing remains paused and resumable.
+
+AIME exact-match scores were control 53/90 (58.89%), V1 50/90 (55.56%), V2
+49/90 (54.44%), V3a 53/90 (58.89%), and V3b 52/90 (57.78%); dense FULL and
+all-kept FA4 were 52/90 and dense PIECEWISE was 46/90. RULER scores on the
+frozen 104-cell subset were control 86.394, V1 86.154, V2 85.673, V3a 86.298,
+and V3b 81.490. Thus value-direction information did not improve accuracy over
+the attention-mass control in this cross-step reuse setting. V1/V2 moved the
+support and denoising trajectory, while V3a tied the control without improving
+it; V3b's larger sparsity and call trajectory is not a matched comparison.
+
+The long-prefix V1 calibration initially failed before writing records. The
+online selector was corrected to process fixed 128-tile chunks while carrying
+the exact log-mass/output/support recurrence. Unit tests passed (28 passed, 20
+skipped), and the failed attempt remains preserved. The accuracy evidence
+supports a next experiment that keeps the native mass support as a control-size
+envelope and permits only bounded value-based swaps; no timing claim is made.
+
+## 2026-10-11 — Fixed-budget online value swaps do not yet improve the official audit
+
+The new accuracy-only panel is recorded under
+`results/v31_value_next_iteration_20261011/`. The implementation anchors every
+query block to the exact V31 attention-mass budget and allows bounded
+Gaussian32 value swaps. Online swap8 was the best 15-item development arm at
+9/15 versus control 7/15, but its complete 503-item official audit scored
+264/503 versus 268/503 for control (-0.795 pp, exact McNemar p=0.741,
+paired-bootstrap 95% CI [-4.97,+3.38] pp). It used 249.86 versus 279.71 mean
+denoising forwards; this is an accuracy/audit observation, not a timing gain.
+
+Online swap16 tied the control in development, phase protection and C_gate were
+not better, projected full-information scoring inflated calls, and the
+V31∩V2 intersection retained too little support and inflated calls. The
+offline true full-dimensional-V score likewise did not beat the mass map.
+Reject all these arms before timing. The next permitted refinement is a
+confidence-gated mass-anchored online swap with a fixed per-query-block budget
+and an age/drift-triggered no-swap fallback; require a new paired accuracy gate
+before a clean timing run.
+
+## 2026-10-11 — Requested 50/75% follow-up remains accuracy-first
+
+The follow-up campaign is under `results/v31_value_followup_20261011/` with
+separate resumable attempts. At the existing s50 budget, AIME official scores
+were V2+jcgate 56.67%, mass-gated online swap8 51.11%, and C_gate swap16
+53.33%, versus the inherited V31 control 58.89%. AIME swap8 at the reduced
+s75 budget scored 52.22%. RULER128K swap8 at s50 scored 86.88 on 104 cells.
+The fixed arms realized approximately 46% GLOBAL tile sparsity at s50 and
+62% at s75; the thresholded V2+jcgate arm realized 30%, so threshold 0.074 is
+not a matched-sparsity setting for that arm. No timing claim is permitted.
+
+The auxiliary quick pool and LongBench-v1 run are diagnostic: the current
+generic short/long launcher reports dense physical accounting despite the
+requested selector budget. Threshold calibration and a matched rerun are
+required before comparing those auxiliary accuracy numbers as sparse methods.
+
+## 2026-10-11 — Full two-regime matrix queued
+
+The complete requested matrix is frozen in
+`results/v31_value_matrix_20261011/`: eight methods, two provisional target
+regimes, 90 AIME cells, 104 RULER cells, 100 samples for each short benchmark,
+and 100 LongBench-v1 samples split evenly across the five requested tasks.
+The 144-job queue runs one H100 worker sequentially and persists completion
+state. Timing remains paused. Provisional thresholds must be replaced or
+accepted only after each receipt's realized physical sparsity is audited.
+
+## 2026-10-11 — Matrix queue retries transient GPU preflight races
+
+The first restart of the full matrix stopped after AIME s75 control shard002
+observed the H100 still occupied by the previous vLLM process. No attempt
+directory or records were created for that shard, so its failed state was
+removed and the persisted queue resumed it. The queue runner now retries a
+nonzero return only when no attempt directory exists, waiting up to five
+minutes; once an attempt directory exists, the return is preserved as a real
+failure. The resumed s75 control shards completed cleanly. This is an
+execution-reliability fix and does not change selector behavior or scores.
+
+## 2026-10-11 — Matrix paused for threshold-strategy update
+
+An audit of the provisional full-matrix queue found a builder routing error:
+AIME online arms were assigned the long-context thresholds, producing clearly
+under-target physical sparsity for V1/V2. Those attempts are retained as
+diagnostics and are not publishable comparisons. A corrected queue root was
+created with AIME short-threshold routing, then paused at the user's request
+before launching the remaining jobs; its partial attempt is preserved and
+timing remains paused.
+
+## 2026-10-12 — V2 threshold sweep does not yield one equal-work threshold
+
+- The complete campaign is `results/v31_value_v2_equal_work_20261011/`. The
+  unchanged `value_v2_online_preserve_mass` selector was swept at all eleven
+  requested thresholds on the original 64-cell development panel. Realized
+  GLOBAL work, eligible work, and native calls were non-monotonic with the
+  threshold because online reuse and native stopping change the trajectory.
+- Work-first calibration selected `tau_total=0.015` and `tau_early=0.021` at
+  the common C=20 prefix. No single natural threshold met both the recommended
+  total (±2%) and early (±3%) development tolerances, so both named official
+  arms were run without adding a quota to V2.
+- A fresh current-V31 503-cell control scored 256/503 (50.9%), with
+  5,691,974,080 physical GLOBAL kept tiles and 134,521 denoising forwards.
+  `v2_work_match_total` (`tau=0.015`) scored 263/503 (52.3%) and +1.392 pp
+  paired (bootstrap [-2.187,+4.970] pp; McNemar p=0.5203), but retained
+  5,879,477,757 tiles (1.0329x control) and over-allocated C=20 work by 13.29%.
+  `v2_work_match_early` (`tau=0.021`) scored 274/503 (54.5%) and +3.579 pp
+  paired (bootstrap [0.000,+7.157] pp; McNemar p=0.0630), matched C=20 work
+  within 1.19%, but retained only 0.9221x total tiles. These accuracy results
+  are descriptive audit evidence, not a noninferiority claim.
+- Report physical FA4 consumer tiles, selector discovery/evaluation, native
+  forwards, and audit wall time separately. Do not call either arm equal
+  end-to-end work or a speedup. The next selector experiment should use a
+  fixed-budget mass anchor plus an explicit early-work guard; clean timing
+  remains paused.
+# 2026-10-12 — V31 cached-statistics partial refresh
+
+- The next selector is a selector-only cached-statistics refresh.  A dense V31
+  observation caches raw per-row prefix-tile log-mass and resets ages; every
+  two reuse calls refreshes retained QK statistics and combines them with the
+  cached discarded support.  The held map produces the current FA4 output and
+  a changed map is eligible only on the next call.
+- Global top-K and bounded swaps are separate policies.  Bounded swaps use a
+  total top-M frontier (`M=160,256,512`) and `B=8`; every query block keeps
+  exactly `K=128` KV tiles.  Stable physical tile ids define ties.  The first
+  decay arm uses lambda `log(2)/2` and floor `0.25`.
+- Value information is a near-mass tie signal only.  C_gate sensitivity is
+  likewise a ranking/tie signal and never changes K or SM work.  Strict
+  intersections are diagnostics; filled intersections are separately named
+  matched-budget variants.  Full-dimensional value omission is offline only.
+- A non-finite retained statistic or drift above the frozen operator threshold
+  `10,000,000` keeps the current output map and schedules a dense refresh on
+  the next call.  The threshold is fixed from operator stress replay and is
+  not fitted to target answers.
+- The H100 smoke completed after a resource-setting correction and exposed a
+  Python-loop selector overhead.  The bounded-swap implementation is now
+  tensorized on CUDA; the follow-up smoke reduced audited selector time from
+  47.36 s to 4.55 s on the same one-cell trajectory.  These are audit costs,
+  not clean timing; matched controls and target scoring remain pending.
+
+## 2026-10-12 — Cached-statistics refresh panel is complete but not promotable
+
+The runnable native matrix is complete under
+`results/v31_cached_refresh_20261012/`: 16 arms × 154 cells, with the primary
+bounded `M=256` arm in `attempt009` and the remaining 15 arms in `attempt010`.
+All records have complete receipts, official subset scoring, matching frozen
+source hashes, zero validation errors, zero unexpected LOCAL routing, and zero
+timed CUDA captures. The current V31 control scored 53.1% on the 64-cell
+LongBench-v2 subset and 54.44% AIME avg@k. Global-top-K variants stayed near
+V31's mean denoising count but still exceeded V31 on some cells; bounded swaps
+had 103–120 cells with higher denoising counts. No cached arm improves the
+LongBench subset control, and none passes the fixed-trajectory promotion gate.
+
+The native panel is therefore complete as an accuracy/operator study, not a
+promotion or timing result. Separate online-value-only, full-information,
+strict-intersection, and filled-intersection variants remain operator-only
+because native map wiring was not frozen. Clean timing remains paused.
+
+## 2026-10-13 — Correct first cached-refresh interpretation before refinement
+
+Source audit confirms that the cached dense layout used a reshape in place of
+row/tile transposition; the CUDA bounded no-op branch can clear a retained tile;
+the supposedly last-dense cache was mutated by observations; dense counts were
+end-state sums, and periodic/progress scheduling overlapped. The first panel's
+scores are executed-code measurements, not clean tests of intended policies.
+Do not use them to conclusively reject bounded, value-aware or C_gate ideas.
+Prior map IoU compares consecutive masks. Three global M arms were equivalent.
+
+The new study preserves historical artifacts and uses an independently derived
+opt-in stable path. Parameter selection is operator-only on real trajectories;
+no benchmark answers enter the hysteresis/guard grid. Aggregate N must remain
+within the predeclared 2% provisional limit on each workload with cap/tail checks.
+A single longer problem is not an automatic rejection, and the 154-cell requested
+panel is distinct from a later 503-cell expansion. Clean timing remains paused.

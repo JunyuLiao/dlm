@@ -1,3 +1,27 @@
+## Independent GLOBAL value selectors — 2026-10-09 audit result and timing pause
+
+The user stopped clean timing after 419 of 4,024 clean records. The partial
+`longbench/target_no_exact/attempt002` attempt is preserved; completed shards
+remain reusable and the active `current_v31_control/shard01/attempt001` has no
+completion marker, so a resume creates a new leaf attempt instead of reusing
+partial rows. The stop is recorded in
+`longbench/target_no_exact/attempt002/timing_stop_20261009.json`. No clean
+latency or end-to-end conclusion is reported.
+
+The eight-arm instrumented audit is complete and officially scored on all 503
+LongBench-v2 seed-1 cells per arm. Current V31 control scored 268/503 (53.3%).
+V2 scored 266/503 (52.9%), V3a 253/503 (50.3%), V1 247/503 (49.1%), and batch8
+242/503 (48.1%). Native FULL and PIECEWISE each scored 247/503; all-kept FA4
+scored 252/503. No value-aware arm exceeded the control. Audit GLOBAL sparsity
+was 80.04% (V1), 84.11% (V2), 83.08% (V3a), and84.97% (batch8); LOCAL sparsity
+was zero. Cluster intervals are descriptive and do not establish
+noninferiority. The sanitized report is
+`results/v31_value_selectors_20261008/reports/audit_scoring_no_exact_attempt002/`.
+
+Exact greedy remains excluded from future generation; its completed 128-cell
+diagnostic is retained. RULER and HumanEval remain blocked on their frozen
+manifests and schedules. No whole-study completion marker is created.
+
 ## Independent GLOBAL value selectors — 2026-10-08
 
 Coordinator correction: a JSON-list versus Python-tuple comparison prevented
@@ -1274,3 +1298,369 @@ speedups are 0.920x, 0.931x, and 0.917x. This confirms no end-to-end benefit
 from GLOBAL sparsity when LOCAL layers remain dense. The official scorer,
 paired comparison, receipts, and completion marker are in the result directory;
 public records are sanitized and raw completions remain private.
+
+## V31 value-selector accuracy diagnosis — 2026-10-09
+
+Verified on branch `value-aware_cross-step-reuse_v2` at commit
+`7cdfadc3620f805990a6524ace439d911dae844c` (working tree contains the
+uncommitted continuation artifacts). The eight-arm official LongBench audit is
+complete at 503/503 items per arm. The current V31 control scores 268/503
+(53.3%); V1 scores 247, V2 266, V3a 253, and batch8 242. No value-aware arm
+exceeds the control. Clean timing remains paused with a resumable marker at
+`results/v31_value_selectors_20261008/longbench/target_no_exact/attempt002/timing_stop_20261009.json`.
+
+The accuracy analysis is published at
+`results/v31_value_selectors_20261008/reports/accuracy_analysis_no_exact_20261009/summary.md`.
+The leading explanation is protocol-level: projected V chooses a map only at
+initial/refresh, while most GLOBAL calls consume a held or carried map; the
+rank-32 PV proxy is not the downstream denoising/logit objective; and each map
+changes native acceptance, re-noising, and stopping. Offline sampled snapshots
+show large early support movement for V1/V2/batch8 and do not establish a
+causal task-accuracy metric.
+
+Done: official audit scoring, trajectory diagnostics, offline sampled attention
+analysis, accuracy report, and timing pause/resume receipt. Running: no timing
+worker. Next: matched-snapshot mass-anchor hybrid and fresh-versus-held value
+ablation; do not resume clean timing or broaden selector sweeps until one of
+these shows a same-trajectory or matched-snapshot accuracy benefit.
+
+## V2 online refinement panel — 2026-10-10
+
+The timing stage remains paused and resumable. At source commit `fce50a8b`, a
+fresh 15-item seed-1 development panel was run with the official LongBench
+scorer under `results/v31_value_v2_refinement_20261010/`. V2 preserve-mass scored
+6/15 because one answer was unparsed; the current control scored 7/15. A
+32-tile native-mass anchor scored 7/15 but raised mean denoising forwards from
+146.9 to 159.7 and reduced GLOBAL sparsity to 81.61%. Settledness/J-C-gate row
+protection scored 7/15, reduced mean forwards to 122.9, and reduced GLOBAL
+sparsity to 71.68%. The combined 16-anchor/J-C-gate arm scored 7/15 and raised
+mean forwards to 180.3, so it is rejected.
+
+A six-snapshot streaming full-dimensional-V diagnostic found projected/full-V
+mask IoU 0.858, while full-V/control IoU was 0.156. At threshold 0.027 full-V
+error was 0.3298 versus 0.2467 for the mass control; lowering the threshold to
+match the control's work on one initial snapshot still left error 0.2622.
+Full-dimensional V alone does not justify a fused kernel yet. Done: anchor and
+J-C-gate selector plumbing, focused CPU/H100 qualification (48 passed),
+resumable development arms, official scoring, and full-V diagnostics. Running:
+no worker. Next: if accuracy work resumes, keep V2+J-C-gate as the only live
+refinement and calibrate its sparsity before considering clean timing.
+
+## V2 online refinement audit result — 2026-10-10
+
+The complete 503-item official audit of value_v2_online_jcgate is complete
+under results/v31_value_v2_refinement_20261010/ at source commit fce50a8b.
+The V31 attention-mass control scores 268/503 (53.3%); jcgate scores 256/503
+(50.9%), a -2.39 percentage-point paired change. Discordant pairs are 44
+control-only and 32 jcgate-only; exact paired McNemar p=0.207. Easy falls
+58.3%→52.1% and Long 42.6%→37.0%; unparsed/capped coverage is not the cause.
+
+Jcgate uses 122,023 denoising forwards (242.59/item) versus control 140,693
+(279.71/item), but its GLOBAL sparsity is only 78.07% versus 83.16%. The
+multiplicative settledness weight protects extra rows and changes the work
+budget; it does not recover accuracy. This refinement is rejected before
+timing. Done: official scoring and paired trajectory/accounting analysis.
+Running: no worker. Next: only a fixed-budget mass-gated value selector is
+justified, using native mass to define a control-sized support envelope and
+value residuals to choose swaps within that envelope. Full-dimensional V
+remains gated by the matched-work operator diagnostic.
+
+## V3 full-row selector diagnosis — 2026-10-10
+
+The focused report is at
+`results/v31_value_selectors_20261008/reports/v3_accuracy_diagnosis_20261010/summary.md`.
+V3a's high fresh-mask IoU does not imply semantic equivalence: the singleton
+score is a per-tile projected-output error, not a joint deletion objective.
+With equal budgets, IoU 0.703 still replaces about 22/128 tiles; held age-7
+max-row error is 0.661 versus 0.638 for the control. V3b is a batch-8 greedy
+approximation, not exact greedy; its non-submodular residual objective suffers
+from irreversible batch choices, and max-row error worsens on most age-1/age-7
+snapshots. Exact greedy's retained 128-cell diagnostic also did not beat the
+control, so batch approximation is not the entire issue. The additional
+full-dimensional-V diagnostic shows projected/full-V IoU 0.858 but full-V/
+mass-control IoU 0.156 and error 0.330 versus 0.247, supporting a value-objective
+support mismatch rather than rank32 alone. No timing worker is running. Next:
+matched-snapshot full-dimensional/logit checks and a fixed-budget mass-anchor
+value-swap arm.
+## Value-selector AIME26/RULER128K performance panel — 2026-10-10 preparation
+
+The new frozen panel is `results/v31_value_performance_20261010/`. Its AIME
+schedule is all 30 AIME26 problems at seeds 42/43/44. The prior completed
+1,728-token fixed-budget control diagnostic gives pooled 53.8036% kept GLOBAL
+work (46.1964% physical GLOBAL sparsity); that is the online-threshold matching
+target. Its RULER input is a new deterministic 104-cell 128K subset, eight
+samples per each of the 13 pinned RULER tasks, generated with seed 6464. The
+RULER fixed budget is 8,192 tokens / 128 KV blocks.
+
+The frozen arm list excludes exact greedy and contains dense FULL/PIECEWISE,
+all-kept FA4, the current fixed-budget control, V1, V2, V3a, and approximate
+batch-8. Uniform online thresholds remain to be calibrated from development
+trajectories before target scoring. Both pools and the pinned RULER checkout
+passed CPU validation; the shard launcher and pool builder are independently
+hash-bound and resumable.
+
+**Blocked:** this container has no CUDA device (`nvidia-smi` fails and
+`torch.cuda.device_count()` is zero), and no authenticated remote H100 runner
+is available. No performance or accuracy result exists for this panel. Resume
+from the frozen `spec/config.json` and `preflight.json` on an authenticated H100;
+do not change the pool hashes or budgets.
+
+## Value-selector AIME26/RULER128K performance panel — 2026-10-10 result
+
+The frozen panel was executed on the idle H100 host `megakernel` with the
+pinned `v31_env_20261005` interpreter. The official audit scoring is complete
+for all 90 AIME cells (30 problems × seeds 42/43/44) and all 104 RULER cells
+(eight samples from each of 13 tasks). Timing remains stopped and resumable;
+these are instrumented audit runs only.
+
+The AIME official exact-match scores are: dense FULL 52/90 (57.78%), dense
+PIECEWISE 46/90 (51.11%), all-kept FA4 52/90 (57.78%), current V31 control
+53/90 (58.89%), V1 50/90 (55.56%), V2 49/90 (54.44%), V3a 53/90 (58.89%), and
+V3b 52/90 (57.78%). The paired cluster changes versus control are V1 -3.33
+points, V2 -4.44, V3a 0.00, and V3b -1.11; none is a value-aware gain.
+
+The RULER official scores are control 86.39, V1 86.15, V2 85.67, V3a 86.30,
+and V3b 81.49 on the frozen 104-cell subset. V1, V2, and V3a are close to the
+control within the task-cluster intervals, while V3b is materially worse and
+also realizes higher sparsity and more denoising calls. V3b therefore is not a
+matched-sparsity accuracy comparison despite using the frozen 8,192-token
+budget. The complete machine-readable summaries are
+`results/v31_value_performance_20261010/aime26/scoring/audit/summary.json` and
+`results/v31_value_performance_20261010/ruler128k/scoring/audit/summary.json`.
+
+The first long-prefix V1 attempt failed before producing records; it is
+retained as a failed attempt. The online selector was then changed to carry
+the exact log-mass/output/support recurrence across 128-tile Triton chunks.
+Unit tests passed (28 passed, 20 skipped), and every final AIME/RULER shard has
+a clean receipt with zero validation errors.
+
+Done: frozen AIME/RULER audit, calibration, resumable shards, and official
+scoring. Running: no worker. Next: use the accuracy diagnosis to design a
+matched-work mass-anchored value-swap experiment before resuming any timing.
+
+## V31 fixed-budget value-aware next iteration — 2026-10-11
+
+The accuracy-only next iteration is complete under
+`results/v31_value_next_iteration_20261011/`; clean timing remains paused and
+resumable. The new fixed-budget selector path passed 34 unit tests (28 CUDA
+skips in the normal test process), direct H100 CPU/CUDA parity, and a real
+adapter smoke. It keeps exactly the native V31 mass budget per query block and
+performs bounded on-device value swaps. C_gate is a fixed-K ranking weight.
+
+The frozen 15-item official development scores were control 7/15, online
+swap8 9/15, online swap16 8/15, phase swap16 8/15, C_gate 6/15, projected
+full swap16 7/15, and both V31∩V2 arms 7/15. Six-snapshot full-dimensional
+operator checks favored online swaps slightly (error 0.1949/0.1927 at 8/16
+swaps versus mass control 0.1977), but the true full-V score was not better and
+the intersection kept only about 30–39 of 128 tiles.
+
+The only promoted arm, online swap8, completed a four-shard 503-item official
+audit with clean receipts. It scored 264/503 (52.5%) versus current V31 control
+268/503 (53.3%), paired delta −0.795 percentage points, exact McNemar p=0.741,
+and bootstrap CI [−4.97,+3.38] pp. Mean denoising forwards fell from 279.71 to
+249.86, while GLOBAL sparsity was 83.16% versus 82.50%; no timing or speed
+claim follows. The shorter trajectory is concentrated in candidate-only
+correct items, so it is not a demonstrated quality-preserving speedup.
+
+Done: implementation, H100 qualification, development scoring, full official
+audit, and sanitized report. Running: no worker. Next: only a
+mass-anchored, confidence-gated online swap with an age/drift no-swap fallback
+is justified. Require a paired accuracy gate before any timing resumption.
+
+## Follow-up sparsity panel — 2026-10-11
+
+The follow-up root is `results/v31_value_followup_20261011/`. Timing remains
+paused. Complete audit cells currently include all three requested AIME s50
+arms and the swap8 s75 arm, plus swap8 on all 104 RULER cells at s50. Official
+AIME scores are V2+jcgate 51/90 (56.67%), mass-gated swap8 46/90 (51.11%),
+C_gate swap16 48/90 (53.33%) at s50, and mass-gated swap8 47/90 (52.22%) at
+s75. RULER swap8 s50 is 86.88. These are audit scores, not clean timing.
+
+The trajectory summaries show AIME s50 mean denoising forwards of 278.11,
+284.74, and 287.29 for V2+jcgate, swap8, and C_gate swap16, respectively;
+mean canvases are 21.53, 21.57, and 21.66. The fixed arms realize about
+46.3% GLOBAL tile sparsity; V2+jcgate at threshold 0.074 realizes only 30.4%,
+so it is under-target and must be threshold-calibrated before a matched claim.
+At s75, swap8 realizes 62.4% GLOBAL tile sparsity, not an exact 75% target.
+RULER s50 swap8 realizes 47.7% GLOBAL tile sparsity, 5.59 denoising forwards,
+and one canvas per problem.
+
+The private quick pool contains 20 items each for HumanEval, MBPP, GSM8K
+4-shot, MATH500, and five LongBench-v1 tasks. The completed s50 swap8 short
+pool scores GSM8K 85%, MATH500 80%, MBPP 5%, and HumanEval 0% under the
+sanitized quick scorer; LongBench-v1 averages 17.04 F1 points over 100 items
+(HotPotQA 5.60, TriviaQA 71.76, NarrativeQA 1.55, Qasper 2.64,
+MultiFieldQA 3.62). The quick auxiliary run currently has dense physical
+accounting on short/long prompts and is therefore diagnostic, not a matched
+sparsity result.
+
+Done: resumable manifests, fixed-budget width guard for short prompts, AIME
+s50/s75 audits, RULER s50 swap8, quick auxiliary pool, and LongBench-v1
+audit. Running: no worker. Next: calibrate online thresholds to 50% and 75%
+realized GLOBAL sparsity, then repeat the requested arms under those matched
+thresholds before any timing experiment.
+
+## Full two-regime method matrix — 2026-10-11
+
+The requested full matrix is frozen under `results/v31_value_matrix_20261011/`.
+It contains eight methods, two provisional sparsity regimes, the 90-cell AIME
+panel, the 104-cell RULER panel, 100 samples each for HumanEval/MBPP/GSM8K/
+MATH500, and 20 samples per LongBench-v1 task (100 total). The queue has 144
+independently resumable audit jobs. Thresholds are provisional; completed
+receipts must be checked for realized physical sparsity before publication.
+
+The sequential H100 queue is running from `queue.jsonl`; progress is persisted
+in `queue_state.json`. The first three AIME s50 control shards and the first
+AIME s50 V1 shards completed with zero validation errors. One V1 shard wrote
+records but lost its receipt when the prior worker exited; it is retained as
+`attempt001` and has been relaunched as `attempt002`. A local 15-minute
+monitor appends snapshots to `monitor.log`. Timing remains paused.
+
+The worker was restarted after AIME s75 control shard002 hit a transient
+GPU-occupied preflight while the preceding shard's CUDA context was being
+released. That failed state had no attempt directory or records; it was reset
+to pending, and the queue runner now retries preflight-only failures for up to
+five minutes while preserving any real attempt failure. The restarted shard
+and subsequent s75 control shards completed with clean receipts; the queue is
+currently advancing through s75 V1.
+
+The provisional queue was then stopped after an audit found that its AIME
+online jobs had received `threshold_long` values from the builder. Those runs
+remain under the original root as diagnostics. A corrected root,
+`results/v31_value_matrix_matched_20261011/`, uses AIME short-threshold
+routing and is paused on the user's request pending a new threshold/calibration
+strategy; its partial control shard remains in `attempt001` and the H100 is
+idle.
+
+## V2 threshold sweep and equal-absolute-work audit — 2026-10-12
+
+The completed campaign is `results/v31_value_v2_equal_work_20261011/`, frozen
+against source commit `fce50a8b110f29c47b01cd5d2dd42d3986df328a`. Timing remains
+paused. The 64-cell development sweep covered all eleven requested thresholds
+with complete official-scorer coverage and showed a strongly non-monotonic
+realized work/trajectory curve; online reuse and native stopping prevent a
+monotone threshold-to-work mapping.
+
+Absolute GLOBAL kept tiles selected `tau_total=0.015` on development (within
+0.9% of the fresh V31 control), while `tau_early=0.021` minimized the C=20
+early-work mismatch. No single natural threshold met both development
+tolerances. On the official 503-cell audit, current V31 scored 256/503 (50.9%),
+with 134,521 denoising forwards and 5,691,974,080 kept GLOBAL tiles. The
+`v2_work_match_total` arm scored 263/503 (52.3%), 124,671 forwards, and
+5,879,477,757 kept tiles (1.0329x V31; paired +1.392 pp, bootstrap
+[-2.187,+4.970] pp, McNemar p=0.5203). Its C=20 early work was 13.29% above
+V31, so its development total match did not transfer to the early trajectory.
+
+The `v2_work_match_early` arm scored 274/503 (54.5%), 131,786 forwards, and
+5,248,339,635 kept tiles (0.9221x V31; paired +3.579 pp, bootstrap
+[0.000,+7.157] pp, McNemar p=0.0630). Its C=20 kept work was within 1.19% of
+V31, but total work was 7.79% lower. These are two distinct matched-work
+questions; neither establishes equal native stopping or throughput. Selector
+QK discovery/evaluation and audit wall time are reported separately from FA4
+consumer work, and no clean latency claim follows.
+
+All selected shards have source/protocol-matched receipts, zero validation
+errors, zero unexpected graph captures, unchanged FA4 output, GLOBAL-only
+routing, and 503/503 scorer coverage. The interrupted shard-4 attempt is
+retained and the resumed attempt is the completed record family. The natural
+threshold is therefore not a reliable equal-work control across trajectories;
+next investigate a fixed-budget, mass-anchored online V2 variant with an early
+work guard before any timing run.
+
+Done: threshold sweep, work-target selection, fresh matched V31 control, both
+explicit official V2 arms, receipts, scorer audit, phase/canvas accounting,
+and sanitized reports. Running: no worker. Next: accuracy-first fixed-budget
+or early-work-constrained selector refinement; clean timing remains paused.
+## V31 cached-statistics partial refresh — 2026-10-12
+
+The full native queue is now active under `results/v31_cached_refresh_20261012/attempt010/`.
+`dense_full_fix51994` completed 154/154 and was officially scored; the
+`dense_piecewise` worker is in progress.  A CPU-only scorer watcher is running
+alongside the queue and writes per-arm official summaries after each completed
+leaf.  The queue includes the four controls plus valid mass, decay, phase,
+C-gate, and frequency arms.  Full-information tie and strict/filled
+intersection cases remain operator diagnostics until their native maps are
+wired; they are excluded from production-arm promotion.
+
+The selector-only implementation and frozen study root are under
+`results/v31_cached_refresh_20261012/`.  `v31_cached_refresh.py` now provides
+complete-support hybrid normalization, stable global top-K, total-frontier
+bounded swaps, age/decay, value-tie hooks, strict/filled intersections, full
+information omission diagnostics, and drift fallback.  The native adapter
+installs a changed map only for the next FA4 call; LOCAL and all output paths
+remain native dense/sparse as before.  The bounded-swap CUDA path is
+tensorized after the first smoke exposed excessive Python-loop overhead.
+
+Done: synthetic replay and receipts, 65 focused CPU tests (34 CUDA skips in
+the local process), direct H100 fixed-budget/swap-cap qualification, frozen
+64-cell LongBench seed-1 and 90-cell AIME manifests, and one validated H100
+one-cell smoke (`attempt004`).  The smoke had 178 denoising forwards, 890
+GLOBAL calls, dense LOCAL accounting, zero timed CUDA captures, and no
+validation errors.  `attempt001`–`003` are preserved failed setup/resource
+attempts.  A launch refusal is recorded at `attempt006` because a user-owned
+AIME worker occupied the H100.  The follow-up `attempt007` passed with the
+tensorized path; its audited selector time was 4.55 s for the one-cell smoke,
+down from 47.36 s in the pre-tensorized receipt.  The first full primary arm
+completed in `attempt009`: 154/154 cells, official LongBench subset overall
+46.9%, AIME avg@k 54.44% (49/90), 57,597 denoising forwards, 117,805 cheap
+refreshes, 8,975,180 swaps, mean IoU 0.94679, zero forced-dense fallbacks,
+and zero timed CUDA graph captures.  It is single-arm evidence; matched
+controls and other variants remain pending.  The worker log contains two
+recoverable allocator OOM warnings during long-context requests, but all 154
+records completed and the official scorer coverage is 154/154; investigate
+memory headroom before expanding the arm matrix.
+
+No target accuracy, denoising-call comparison, or clean latency claim exists.
+Clean timing remains paused.  Do not create `final_complete.json` until every
+native arm has complete records, official scoring, receipts, and source
+identity agreement.  The current worktree is dirty; source identity is frozen
+by hashes in the study root rather than by a new commit.
+
+## V31 cached-statistics partial refresh — native panel complete — 2026-10-12
+
+The runnable native scope is complete under
+`results/v31_cached_refresh_20261012/`: the primary bounded `M=256` arm is
+`attempt009`, and the 15-arm matched matrix is `attempt010`. All 16 runnable
+arms have 154/154 records, complete receipts, official LongBench-v2-subset and
+AIME26 summaries, zero receipt validation errors, zero unexpected LOCAL skips,
+zero non-finite attention calls, zero order errors, and zero timed CUDA graph
+captures. The frozen source hashes match the current source files.
+
+The current V31 control scored 53.1% on the 64-cell LongBench-v2 subset and
+54.44% AIME avg@k. Cached global-top-K arms scored 51.6% LongBench and
+54.44–56.67% AIME with mean denoising counts near V31, but each still had
+some cells above V31's per-problem call count. Bounded-swap arms scored
+45.3–50.0% LongBench and 53.3–55.6% AIME and had 103–120 cells above V31's
+call count. No arm passes the promotion gate; the panel is 154 cells rather
+than the 503-cell audit. Clean timing remains paused.
+
+Four frozen-spec variants remain diagnostic-only because native map wiring was
+not available: separate online-value-only tie-break, full-information/full-V
+tie-break, strict intersection, and filled intersection. Synthetic/reference
+replay covers them; they are not claimed as native production results.
+
+Done: native queue, official scoring, source-identity audit, fairness audit,
+operator tables, completion marker, and sanitized report. Running: no worker.
+Next: use the negative trajectory/accuracy evidence to decide whether to wire
+the four diagnostic variants or abandon this selector before any timing run.
+
+## Stable cheap refresh — preparation and predecessor correction — 2026-10-13
+
+The governing user task starts a separate study at
+`results/v31_cached_refresh_stable_20261013/`. HEAD remains `fce50a8b` on
+`value-aware_cross-step-reuse_v2`; predecessor source bytes were independently
+hash-validated and preserved privately before changes. The first cached-refresh
+panel remains immutable. Its scores are measurements of executed code, but a
+row/tile layout bug, CUDA no-op budget bug, mutable dense anchor, end-state dense
+count and mixed clocks prevent clean intended-policy interpretation. Prior IoU
+is consecutive-map IoU; C_gate was candidate-constant and unqualified. Per-item
+N increases alone do not reject a method; the new gate is workload-separated
+aggregate N/tail/cap behavior. A 154-cell panel can complete without a 503-cell
+expansion. See the new specs/source_audit.json.
+
+The new opt-in stable path uses correct layout, immutable dense anchors,
+independent periodic clocks, explicit progress-dense disabling, request-lifetime
+reason counters, hysteresis, persistence, event/cumulative caps and a full sparse
+support row-mass guard. The CPU gate is 43 passed/3 CUDA skips. GPU and real
+trajectory qualification remain pending; a collaborator's H100 worker is active
+and must not be disturbed. Clean timing remains paused.

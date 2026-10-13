@@ -257,11 +257,29 @@ def main():
                                                  stall_eps=float(os.environ.get('STALL_EPS', '0.01')),
                                                  mage_sticky=float(os.environ['MAGE_STICKY']) if os.environ.get('MAGE_STICKY') else None,
                                                  value_selector=os.environ.get('VALUE_SELECTOR') or None,
+                                                 value_mass_anchor=int(os.environ.get('VALUE_MASS_ANCHOR', '0')),
+                                                 value_pool_factor=int(os.environ.get('VALUE_POOL_FACTOR', '2')),
+                                                 value_swap_count=int(os.environ.get('VALUE_SWAP_COUNT', '0')),
                                                  value_audit=os.environ.get('VALUE_AUDIT') == '1',
                                                  value_max_tokens=int(os.environ['MAX_MODEL_LEN']) if os.environ.get('MAX_MODEL_LEN') else None,
                                                  value_clean_timing=os.environ.get('VALUE_CLEAN_TIMING') == '1',
                                                  value_threshold=(float(os.environ['VALUE_THRESHOLD'])
                                                                   if os.environ.get('VALUE_THRESHOLD') else None),
+                                                 cached_refresh_policy=os.environ.get('CACHED_REFRESH_POLICY') or None,
+                                                 cached_refresh_period=int(os.environ.get('CACHED_REFRESH_PERIOD', '2')),
+                                                 cached_refresh_frontier_m=(int(os.environ['CACHED_REFRESH_FRONTIER_M'])
+                                                                            if os.environ.get('CACHED_REFRESH_FRONTIER_M') else None),
+                                                 cached_refresh_swap_budget=int(os.environ.get('CACHED_REFRESH_SWAP_BUDGET', '8')),
+                                                 cached_refresh_decay_lambda=float(os.environ.get('CACHED_REFRESH_DECAY_LAMBDA', '0')),
+                                                 cached_refresh_decay_floor=float(os.environ.get('CACHED_REFRESH_DECAY_FLOOR', '0.25')),
+                                                 cached_refresh_value_tiebreak=os.environ.get('CACHED_REFRESH_VALUE_TIEBREAK') == '1',
+                                                 cached_refresh_mass_tolerance=float(os.environ.get('CACHED_REFRESH_MASS_TOLERANCE', '0')),
+                                                 cached_refresh_drift_threshold=(float(os.environ['CACHED_REFRESH_DRIFT_THRESHOLD'])
+                                                                                if os.environ.get('CACHED_REFRESH_DRIFT_THRESHOLD') else None),
+                                                 cached_refresh_phase_protected=os.environ.get('CACHED_REFRESH_PHASE_PROTECTED') == '1',
+                                                 cached_refresh_frequency=os.environ.get('CACHED_REFRESH_FREQUENCY', 'periodic'),
+                                                 stable_refresh_config=(json.loads(os.environ['STABLE_REFRESH_CONFIG'])
+                                                                        if os.environ.get('STABLE_REFRESH_CONFIG') else None),
                                                  local_kernel=os.environ.get('LOCAL_KERNEL', 'compact_triton'),
                                                  local_kv_budget=(int(os.environ['LOCAL_KV_BUDGET'])
                                                                   if os.environ.get('LOCAL_KV_BUDGET') and arm == 'mage'
@@ -315,6 +333,9 @@ def main():
                 local_kernel=os.environ.get('LOCAL_KERNEL', 'compact_triton') if arm == 'mage' else None,
                 mage_select=os.environ.get('MAGE_SELECT', 'torch') if arm == 'mage' else None,
                 value_selector=os.environ.get('VALUE_SELECTOR') if arm == 'mage' else None,
+                value_mass_anchor=(int(os.environ.get('VALUE_MASS_ANCHOR', '0')) if arm == 'mage' else 0),
+                value_pool_factor=(int(os.environ.get('VALUE_POOL_FACTOR', '2')) if arm == 'mage' else None),
+                value_swap_count=(int(os.environ.get('VALUE_SWAP_COUNT', '0')) if arm == 'mage' else None),
                 value_threshold=(float(os.environ['VALUE_THRESHOLD']) if os.environ.get('VALUE_THRESHOLD') and arm == 'mage' else None),
                 value_audit=os.environ.get('VALUE_AUDIT') == '1',
                 value_clean_timing=os.environ.get('VALUE_CLEAN_TIMING') == '1',
@@ -333,7 +354,12 @@ def main():
                                'mage_reselect_k', 'mage_reselect_trigger', 'mage_trigger_signal',
                                'mage_reselect_kmin', 'mage_clock_trace', 'mage_sink', 'mage_recent_tiles',
                                'mage_trigger_relative', 'mage_pool', 'mage_kcover', 'mage_kq', 'mage_kmax',
-                               'cg_stop', 'stall_rescue', 'stall_eps', 'mage_sticky')})
+                               'cg_stop', 'stall_rescue', 'stall_eps', 'mage_sticky',
+                               'cached_refresh_policy', 'cached_refresh_period', 'cached_refresh_frontier_m',
+                               'cached_refresh_swap_budget', 'cached_refresh_decay_lambda', 'cached_refresh_decay_floor',
+                               'cached_refresh_value_tiebreak', 'cached_refresh_mass_tolerance',
+                               'cached_refresh_drift_threshold', 'cached_refresh_phase_protected',
+                               'cached_refresh_frequency')})
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
     schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]
@@ -346,8 +372,12 @@ def main():
         if adapter is not None:
             adapter.begin_request()
             adapter.value_diagnostic = None
+            trajectory_dir = os.environ.get('STABLE_TRAJECTORY_DIR')
+            if trajectory_dir and not warm:
+                from experiments.numerical_qk_reuse.v31_stable_trajectory import TrajectoryRecorder
+                adapter.value_diagnostic = TrajectoryRecorder(trajectory_dir, schedule_index, cell['dataset'])
             diagnostic_dir = os.environ.get('VALUE_DIAGNOSTIC_DIR')
-            if diagnostic_dir and not warm and diagnostic_requests < 2 and len(ids) >= 32768:
+            if diagnostic_dir and not trajectory_dir and not warm and diagnostic_requests < 2 and len(ids) >= 32768:
                 from experiments.numerical_qk_reuse.v31_value_snapshots import SnapshotRecorder
                 adapter.value_diagnostic = SnapshotRecorder(diagnostic_dir, schedule_index)
                 diagnostic_requests += 1

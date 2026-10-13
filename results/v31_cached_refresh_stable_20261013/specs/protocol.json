@@ -1,0 +1,68 @@
+{
+  "schema": "stable_cheap_refresh_protocol_v1",
+  "study_date": "2026-10-13",
+  "prior_identity": "68e73be16a84abdfe4600f4201d162b2167cc99e894fb8a67cdb20a28675a967",
+  "budget": {
+    "K_tokens": 8192,
+    "K_prefix_tiles": 128,
+    "unit": "query head and Q128 block",
+    "short_prefix_K": "min(128,eligible_prefix_tiles)",
+    "tail_boundary": "always kept outside prefix budget"
+  },
+  "controls": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "v31_progress_dense_control"
+  ],
+  "arms": [
+    "raw_global_progress_dense_s2",
+    "stable_global_progress_dense_s2",
+    "v31_no_progress_dense_hold",
+    "raw_global_no_progress_dense_s1",
+    "raw_global_no_progress_dense_s4",
+    "raw_global_no_progress_dense_s8",
+    "stable_global_no_progress_dense_s1",
+    "stable_global_no_progress_dense_s4",
+    "stable_global_no_progress_dense_s8"
+  ],
+  "conditional_probe": "operator only unless false-admission/error benefit justifies cost",
+  "operator_grid": {
+    "hysteresis": [
+      0,
+      0.09531017980432493,
+      0.22314355131420976,
+      0.4054651081081644
+    ],
+    "removal_tolerance": [
+      0.005,
+      0.01,
+      0.025
+    ],
+    "event_cap": 2,
+    "cumulative_cap": 8,
+    "persistence": 2
+  },
+  "parameter_choice_rule": "Among grid settings reduce next-step p95 perturbation >=50% vs raw and no true-retained-mass regression vs hold; choose greatest true mass with ties toward fewer changes. If no setting meets screen freeze most conservative setting and label exploratory. Never use benchmark answers.",
+  "panel": {
+    "LongBench-v2": 64,
+    "AIME26": 90,
+    "AIME_seeds": [
+      42,
+      43,
+      44
+    ],
+    "data_status": "previously examined development data"
+  },
+  "decision_gate": {
+    "aggregate_N_ratio_per_workload_max": 1.02,
+    "NC_ratio_max": 1.02,
+    "p95_N_ratio_max": 1.05,
+    "cap_hit_delta_pp_max": 2.0,
+    "accuracy": "positive paired advantage or promising paired results; nonsignificance does not establish noninferiority"
+  },
+  "clean_timing": "paused",
+  "sources": "freeze after correctness and operator selection before development generation",
+  "main_matrix_cells": 2002,
+  "monitor_minutes": 30
+}

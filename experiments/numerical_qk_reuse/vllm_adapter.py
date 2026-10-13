@@ -148,7 +148,14 @@ class VllmMethodAdapter:
                  mage_sticky=None,
                  cg_stop=None, stall_rescue=None, stall_eps=0.01, local_kv_budget=None,
                  local_kernel='compact_triton', value_selector=None, value_threshold=None, value_audit=False,
-                 value_max_tokens=None, value_clean_timing=False):
+                 value_max_tokens=None, value_clean_timing=False, value_mass_anchor=0,
+                 value_pool_factor=2, value_swap_count=0,
+                 cached_refresh_policy=None, cached_refresh_period=2,
+                 cached_refresh_frontier_m=None, cached_refresh_swap_budget=8,
+                 cached_refresh_decay_lambda=0.0, cached_refresh_decay_floor=0.25,
+                 cached_refresh_value_tiebreak=False, cached_refresh_mass_tolerance=0.0,
+                 cached_refresh_drift_threshold=None, cached_refresh_phase_protected=False,
+                 cached_refresh_frequency='periodic', stable_refresh_config=None):
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if value_selector is not None:
@@ -157,14 +164,22 @@ class VllmMethodAdapter:
                 raise ValueError('unknown value selector')
             if (arm != 'mage' or mage_select != 'fa4' or mage_granularity != 'qblock_max'
                     or local_kv_budget is not None or mage_keep_frac is not None
-                    or mage_pool is not None or mage_kcover is not None or mage_row_weight is not None
+                    or mage_pool is not None or mage_kcover is not None
+                    or (mage_row_weight is not None and mage_row_weight not in ('cgate', 'jcgate'))
                     or mage_critical is not None or mage_coverage is not None
                     or residual is not None or drop_guard is not None):
                 raise ValueError('value selectors require fixed-budget GLOBAL qblock_max lifecycle, native LOCAL')
             if value_selector in SELECTORS[:2] and (value_threshold is None or float(value_threshold) < 0
                                                     or not math.isfinite(float(value_threshold))):
                 raise ValueError('online selectors require a finite uniform nonnegative threshold')
+            if int(value_mass_anchor) < 0 or (int(value_mass_anchor) and value_selector not in SELECTORS[:2]):
+                raise ValueError('value_mass_anchor is a nonnegative online-selector anchor count')
+            if int(value_pool_factor) < 1 or int(value_swap_count) < 0:
+                raise ValueError('fixed value selectors need a positive pool factor and nonnegative swap count')
         self.value_selector, self.value_threshold = value_selector, value_threshold
+        self.value_mass_anchor = int(value_mass_anchor)
+        self.value_pool_factor = int(value_pool_factor)
+        self.value_swap_count = int(value_swap_count)
         self.value_clean_timing = bool(value_clean_timing)
         self._value_projection = None
         self._value_workspace = None
@@ -173,6 +188,57 @@ class VllmMethodAdapter:
             self._value_workspace = ValueWorkspace(int(value_max_tokens))
         self._value_pending = []
         self.value_audit, self._value_audit_events = bool(value_audit), []
+        # Cached partial refresh is an orthogonal selector on the inherited
+        # qblock_max V31 map.  It never changes the FA4 output call: the old
+        # map produces this call's output and a new map is installed for the
+        # next call only.
+        policies = (None, 'global_topk', 'bounded_swaps')
+        if cached_refresh_policy not in policies:
+            raise ValueError(f'cached_refresh_policy must be one of {policies}')
+        if cached_refresh_policy is not None and (arm != 'mage' or mage_select != 'fa4'
+                                                   or mage_granularity != 'qblock_max'
+                                                   or mage_keep_frac is not None or mage_pool is not None):
+            raise ValueError('cached refresh requires the fixed-budget FA4 qblock_max MAGE lifecycle')
+        if cached_refresh_policy is not None and int(cached_refresh_period) < 1:
+            raise ValueError('cached_refresh_period must be positive')
+        if cached_refresh_policy == 'bounded_swaps' and int(cached_refresh_swap_budget) < 0:
+            raise ValueError('cached_refresh_swap_budget must be nonnegative')
+        if cached_refresh_frontier_m is not None and int(cached_refresh_frontier_m) < 1:
+            raise ValueError('cached_refresh_frontier_m must be positive')
+        if float(cached_refresh_decay_lambda) < 0.0:
+            raise ValueError('cached_refresh_decay_lambda must be nonnegative')
+        if not 0.0 < float(cached_refresh_decay_floor) <= 1.0:
+            raise ValueError('cached_refresh_decay_floor must be in (0, 1]')
+        if float(cached_refresh_mass_tolerance) < 0.0:
+            raise ValueError('cached_refresh_mass_tolerance must be nonnegative')
+        if cached_refresh_drift_threshold is not None and float(cached_refresh_drift_threshold) <= 0.0:
+            raise ValueError('cached_refresh_drift_threshold must be positive')
+        self.cached_refresh_policy = cached_refresh_policy
+        self.cached_refresh_period = int(cached_refresh_period)
+        self.cached_refresh_frontier_m = (None if cached_refresh_frontier_m is None
+                                          else int(cached_refresh_frontier_m))
+        self.cached_refresh_swap_budget = int(cached_refresh_swap_budget)
+        self.cached_refresh_decay_lambda = float(cached_refresh_decay_lambda)
+        self.cached_refresh_decay_floor = float(cached_refresh_decay_floor)
+        self.cached_refresh_value_tiebreak = bool(cached_refresh_value_tiebreak)
+        self.cached_refresh_mass_tolerance = float(cached_refresh_mass_tolerance)
+        self.cached_refresh_drift_threshold = (None if cached_refresh_drift_threshold is None
+                                               else float(cached_refresh_drift_threshold))
+        self.cached_refresh_phase_protected = bool(cached_refresh_phase_protected)
+        if cached_refresh_frequency not in ('periodic', 'progress'):
+            raise ValueError('cached_refresh_frequency must be periodic or progress')
+        self.cached_refresh_frequency = cached_refresh_frequency
+        self._cached_pending = {}
+        self.stable_refresh_config = stable_refresh_config
+        if stable_refresh_config is not None:
+            from .v31_stable_refresh import StableConfig
+            StableConfig(**stable_refresh_config.get('selector', {}))
+            if (arm != 'mage' or mage_select != 'fa4' or mage_granularity != 'qblock_max'
+                    or cached_refresh_policy is not None or value_selector is not None
+                    or local_kv_budget is not None or mage_keep_frac is not None or mage_pool is not None):
+                raise ValueError('stable refresh requires fixed-budget GLOBAL mass-only FA4')
+            if int(stable_refresh_config.get('period', 0)) < 0:
+                raise ValueError('negative cheap observation period')
         if lifecycle not in ('legacy', 'request_clear'):
             raise ValueError('lifecycle must be legacy or request_clear')
         if canvas_buffers not in ('legacy', 'release_after_invalidate'):
@@ -505,10 +571,12 @@ class VllmMethodAdapter:
         self._trig_canvas, self._trig_at = None, None
         self._trig_count, self._trig_k, self._jc = 0, None, None
         self._clock, self._trig_phi0 = [], None
+        self._cached_force_dense = set()
         self._cg = self._cg_canvas = None
         self._stall_best, self._stall_since = -1.0, 0
         self._tile_means, self._residual_tiles, self._guard_cache = {}, 0, []
         self._drift_prev, self._drift_acc = {}, None
+        self._cached_pending = {}
         self._kept_prefix, self._prefix_total = None, 0     # realized sparsity of the sparse GLOBAL calls
         self._sparse_kept, self._sparse_total, self._global_tiles = None, 0, 0
         self._global_canvas_tiles = 0
@@ -518,9 +586,28 @@ class VllmMethodAdapter:
         self._regroup_acc, self._regroup_n = None, 0
         if self.arm == 'mage':
             self.calls.update(mage_selections=0, mage_reused_calls=0, mage_kept_prefix_tiles=0, mage_prefix_tiles=0)
+            if self.cached_refresh_policy is not None:
+                self.calls.update(cached_refresh_events=0, cached_refresh_updates=0,
+                                  cached_refresh_noop=0, cached_refresh_fallbacks=0,
+                                  cached_refresh_swaps=0, cached_refresh_iou_sum=0.0,
+                                  cached_refresh_iou_count=0, cached_refresh_max_drift=0.0,
+                                  cached_refresh_selector_ms=0.0)
         self._value_pending = []
         self._value_audit_events = []
+        self._cached_events = []
+        self._stable_pending = {}
+        self._stable_rows = {}
+        self._stable_totals = None
+        self._stable_reasons = dict(bootstrap_dense=0, canvas_selection_dense=0,
+                                   progress_selection_dense=0, emergency_dense=0,
+                                   carry_calls=0, cheap_observations=0, actual_updates=0,
+                                   selector_qk_rectangles=0, probe_qk_rectangles=0,
+                                   selector_pv_rectangles=0)
+        self._stable_used_kept = {}
         self._value_phases = {}
+        # Per-canvas physical GLOBAL accounting for equal-work diagnostics.
+        # This is receipt-only state; it does not participate in routing.
+        self._value_canvas_phases = {}
         self._value_global_step_phases = {}
         self._value_local_steps = {}
         self._value_decode_modes = {}
@@ -570,7 +657,8 @@ class VllmMethodAdapter:
         self.buffers.clear()
         self.bound, self.step_ctx = False, None
         return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._local_receipt(), **self._regroup_receipt(),
-                                 **self._drift_receipt(), **self._clock_receipt(), **self._value_receipt(), **self._value_phase_receipt()), method=counters,
+                                 **self._drift_receipt(), **self._clock_receipt(), **self._value_receipt(),
+                                 **self._cached_receipt(), **self._value_phase_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
 
@@ -590,7 +678,8 @@ class VllmMethodAdapter:
                               global_ms_total=round(sum(ms), 2))
             counters = self.runtime['counters']() if self.runtime is not None else None
             return dict(adapter=dict(self.calls, **self._kept_receipt(), **self._local_receipt(), **self._regroup_receipt(),
-                                     **self._drift_receipt(), **self._clock_receipt(), **self._value_receipt(), **self._value_phase_receipt()), method=counters,
+                                     **self._drift_receipt(), **self._clock_receipt(), **self._value_receipt(),
+                                     **self._cached_receipt(), **self._value_phase_receipt()), method=counters,
                     timing=timing,
                     trace=self._trace_receipt() or None)
         finally:
@@ -956,6 +1045,10 @@ class VllmMethodAdapter:
             row[0] += 1
             row[1] += eligible
             row[2].append(kept)
+            canvas_row = self._value_canvas_phases.setdefault((self.canvas_id, phase), [0, 0, []])
+            canvas_row[0] += 1
+            canvas_row[1] += eligible
+            canvas_row[2].append(kept)
             self._value_nonfinite_outputs.append(~torch.isfinite(out).all())
         diagnostic = getattr(self, 'value_diagnostic', None)
         if diagnostic is not None and self.arm == 'mage':
@@ -1006,17 +1099,21 @@ class VllmMethodAdapter:
 
     # ------------------------------------------------------------------ MAGE port (prior-art baseline)
     def _mage(self, layer_idx, q, b, scale, prefix, n):
+        if self.stable_refresh_config is not None:
+            return self._mage_stable(layer_idx, q, b, scale, prefix, n)
         from experiments.numerical_qk_reuse import v27_fa4
         nk = prefix + n
         st = self.mage_state.get(layer_idx)
-        if self.mage_reselect is not None or self.mage_reselect_trigger is not None:
+        cached_enabled = self.cached_refresh_policy is not None
+        if self.mage_reselect is not None or self.mage_reselect_trigger is not None or cached_enabled:
             cnt = self._mage_count.get(layer_idx)
             if cnt is None or cnt[:2] != [self.canvas_id, nk]:
                 cnt = self._mage_count[layer_idx] = [self.canvas_id, nk, -1]
             cnt[2] += 1                                                  # 0-based call index of this canvas
             due = (cnt[2] in self.mage_reselect if self.mage_reselect is not None
                    else self._trig_at == (self.canvas_id, cnt[2]))
-            if st is not None and st['canvas'] == self.canvas_id and st['nk'] == nk and due:
+            force_dense = bool(cached_enabled and layer_idx in self._cached_force_dense)
+            if st is not None and st['canvas'] == self.canvas_id and st['nk'] == nk and (due or force_dense):
                 self._mage_units_w = self._mage_row_w if self.mage_row_weight is not None else None
                 self._mage_held = st.get('kept') if self.mage_sticky is not None else None
                 self._k_override = self._trig_k if self._trig_k is not None else self.mage_reselect_k
@@ -1031,6 +1128,11 @@ class VllmMethodAdapter:
                 st['lists'] = v27_fa4.block_sparse_tensors(kept)
                 if self.mage_carry_first:
                     st['kept'] = kept
+                pending = self._cached_pending.pop(layer_idx, None)
+                if cached_enabled:
+                    st['cached'] = pending
+                    st['last_refresh_call'] = cnt[2]
+                    self._cached_force_dense.discard(layer_idx)
                 self.calls['mage_reselections'] = self.calls.get('mage_reselections', 0) + 1
                 return out
         if st is None or st['canvas'] != self.canvas_id or st['nk'] != nk:
@@ -1052,13 +1154,25 @@ class VllmMethodAdapter:
             else:
                 out = v27_fa4.dense(q, b['k'], b['v'], scale)             # exact first-step attention output
                 kept = self._mage_select(q, b['k'], scale, prefix, n)
-            self.mage_state[layer_idx] = dict(canvas=self.canvas_id, nk=nk, prefix=prefix, lists=v27_fa4.block_sparse_tensors(kept),
-                                              kept=kept if self.mage_carry_first else None, pool=self._last_pool)
+            cached = self._cached_pending.pop(layer_idx, None) if cached_enabled else None
+            self.mage_state[layer_idx] = dict(canvas=self.canvas_id, nk=nk, prefix=prefix,
+                                              lists=v27_fa4.block_sparse_tensors(kept),
+                                              kept=kept if (self.mage_carry_first or cached_enabled) else None,
+                                              pool=self._last_pool, cached=cached,
+                                              last_refresh_call=cnt[2] if cached_enabled else None)
             self._last_pool = None
             self.calls['mage_selections'] += 1
             return out
         self.calls['mage_reused_calls'] += 1
-        return v27_fa4.sparse_lists(q, b['k'], b['v'], st['lists'], scale)
+        out = v27_fa4.sparse_lists(q, b['k'], b['v'], st['lists'], scale)
+        if cached_enabled and st.get('cached') is not None:
+            last = int(st.get('last_refresh_call', cnt[2]))
+            periodic_due = cnt[2] > last and (cnt[2] - last) % self.cached_refresh_period == 0
+            progress_due = (self.cached_refresh_frequency == 'progress'
+                            and self._trig_at == (self.canvas_id, cnt[2]))
+            if periodic_due or progress_due:
+                self._cached_refresh(layer_idx, q, b, scale, prefix, n, st, cnt[2])
+        return out
 
     def _select_initial_refresh(self, layer_idx, q, b, scale, prefix, n):
         if self.value_selector is None:
@@ -1066,7 +1180,7 @@ class VllmMethodAdapter:
         from experiments.diffusion_gemma_jl_output_aware.projections import Projections
         from .v31_value_projection import refresh
         from .v31_value_kernels import statistics_cuda
-        from .v31_value_selectors import mandatory_map, select
+        from .v31_value_selectors import mandatory_map, mass_anchor_map, select
         from .v31_fa4_observe import observe_dense
         events = None
         if self.value_audit:
@@ -1092,14 +1206,29 @@ class VllmMethodAdapter:
         # Retain FA4's own observed prefix masses; the PZ pass supplies only mu.
         stats.log_mass[:, :pt].view(h, qb, pt, 128).copy_(observation)
         mandatory = mandatory_map(stats, self.mage_sink, self.mage_recent_tiles)
+        if self.value_mass_anchor:
+            mandatory = mass_anchor_map(stats, self.value_mass_anchor, mandatory)
         held = self._mage_held
         held = None if held is None else held.reshape(h*qb, -1)
+        row_weight = self._mage_units_w
+        if row_weight is not None:
+            # The sampler's sensitivity is one scalar per canvas row and is
+            # shared by the query heads. Pad the final partial block exactly
+            # as the attention statistics do, then flatten H x QB units.
+            row_weight = torch.nn.functional.pad(row_weight[:n].float(), (0, qb*128-n))
+            row_weight = row_weight.view(1, qb, 128).expand(h, -1, -1).reshape(h*qb, 128).contiguous()
         budget = self._k_override if self._k_override is not None else self.mage_k
         if events is not None:
             events[1].record()
+        # Phase-safe arms keep the exact mass budget on the first selection of
+        # every canvas, then allow the configured value swaps on later
+        # refreshes.  The C_gate arms still receive row sensitivity, but the
+        # selector owns a fixed qblock budget so SM work remains balanced.
+        phase_swaps = 0 if self.value_selector.endswith('_phase') and held is None else self.value_swap_count
         kept, counters = select(stats, self.value_selector, budget=max(1, budget//64),
             threshold=self.value_threshold, mandatory=mandatory, held=held,
-            sticky=0. if held is None else self.mage_sticky)
+            sticky=0. if held is None else self.mage_sticky, row_weight=row_weight,
+            pool_factor=self.value_pool_factor, swap_count=phase_swaps)
         # Device counters are read once at request end, outside generation timing.
         if events is not None:
             events[2].record()
@@ -1117,6 +1246,7 @@ class VllmMethodAdapter:
     def _value_receipt(self):
         if self.value_selector is None:
             return {}
+        from .v31_value_selectors import SELECTORS
         counts = torch.stack(self._value_pending).sum(0).tolist() if self._value_pending else [0, 0]
         timings = None
         if self._value_audit_events:
@@ -1134,11 +1264,59 @@ class VllmMethodAdapter:
             value_workspace_allocated_bytes=0 if self._value_workspace is None else self._value_workspace.allocated_bytes,
             value_statistics_kernel='triton_fused_tile_softmax_pz',
             value_prefix_mass_source='native_fa4_observation',
-            value_selection_kernel='triton_log_mass_online' if self.value_selector.startswith(('value_v1_','value_v2_')) else 'triton_parallel_cached_deletion',
+            value_selection_kernel=('triton_log_mass_online' if self.value_selector.startswith(('value_v1_','value_v2_'))
+                                    else 'triton_fixed_mass_gated' if self.value_selector in SELECTORS[5:]
+                                    else 'triton_parallel_cached_deletion'),
             value_projection_manifest={} if self._value_projection is None else self._value_projection.manifest,
+            value_mass_anchor=self.value_mass_anchor,
+            value_row_weight=self.mage_row_weight if self.value_selector is not None else None,
+            value_pool_factor=self.value_pool_factor,
+            value_swap_count=self.value_swap_count,
+            value_budget_policy='fixed_qblock_prefix_budget',
             value_scope='global_only', value_local_router_installed=self.local_router is not None,
             value_state_role='selector_only', value_output_path='unchanged_fa4',
             value_sticky_rule='log_risk_bonus_online_or_log_removal_penalty_fixed')
+
+    def _cached_receipt(self):
+        if self.stable_refresh_config is not None:
+            return self._stable_receipt()
+        if self.cached_refresh_policy is None:
+            return {}
+        selector_ms = None
+        if self._cached_events:
+            torch.cuda.synchronize()
+            selector_ms = round(sum(a.elapsed_time(b) for a, b in self._cached_events), 4)
+            self.calls['cached_refresh_selector_ms'] = selector_ms
+        count = int(self.calls.get('cached_refresh_iou_count', 0))
+        cached_states = [v.get('cached') for v in self.mage_state.values() if v.get('cached') is not None]
+        return dict(cached_refresh_policy=self.cached_refresh_policy,
+                    cached_refresh_period=self.cached_refresh_period,
+                    cached_refresh_frontier_m=self.cached_refresh_frontier_m,
+                    cached_refresh_swap_budget=self.cached_refresh_swap_budget,
+                    cached_refresh_decay_lambda=self.cached_refresh_decay_lambda,
+                    cached_refresh_decay_floor=self.cached_refresh_decay_floor,
+                    cached_refresh_value_tiebreak=self.cached_refresh_value_tiebreak,
+                    cached_refresh_mass_tolerance=self.cached_refresh_mass_tolerance,
+                    cached_refresh_drift_threshold=self.cached_refresh_drift_threshold,
+                    cached_refresh_phase_protected=self.cached_refresh_phase_protected,
+                    cached_refresh_mean_iou=(self.calls.get('cached_refresh_iou_sum', 0.0) / count
+                                             if count else None),
+                    cached_refresh_age_histograms={str(k): v.get('cached', {}).get('age_histogram', {})
+                                                   for k, v in self.mage_state.items()
+                                                   if v.get('cached') is not None},
+                    cached_refresh_stale_selected_fraction=(sum(
+                        v.get('cached', {}).get('stale_selected_fraction', 0.0)
+                        for v in self.mage_state.values() if v.get('cached') is not None)
+                        / max(1, sum(1 for v in self.mage_state.values() if v.get('cached') is not None))),
+                    cached_refresh_dense_refresh_count=sum(v.get('dense_refresh_count', 0) for v in cached_states),
+                    cached_refresh_cheap_refresh_count=self.calls.get('cached_refresh_events', 0),
+                    cached_refresh_noop_count=self.calls.get('cached_refresh_noop', 0),
+                    cached_refresh_swap_count=self.calls.get('cached_refresh_swaps', 0),
+                    cached_refresh_forced_dense_fallback_count=self.calls.get('cached_refresh_fallbacks', 0),
+                    cached_refresh_mean_operator_error=None,
+                    cached_refresh_max_operator_error=None,
+                    cached_refresh_value_score_agreement=None,
+                    cached_refresh_selector_ms=selector_ms)
 
     def _value_phase_receipt(self):
         if not self.value_audit:
@@ -1148,6 +1326,13 @@ class VllmMethodAdapter:
             count = int(torch.stack(kept).sum().item())
             phases[phase] = dict(calls=calls,eligible_tiles=eligible,kept_tiles=count,
                                  skipped_tiles=eligible-count,sparsity=1-count/eligible)
+        canvas_phases = {}
+        for (canvas, phase), (calls, eligible, kept) in sorted(self._value_canvas_phases.items()):
+            count = int(torch.stack(kept).sum().item())
+            entry = canvas_phases.setdefault(str(canvas), {})
+            entry[phase] = dict(calls=calls, eligible_tiles=eligible, kept_tiles=count,
+                                skipped_tiles=eligible-count,
+                                sparsity=1-count/eligible if eligible else 0.0)
         local_phases = {}
         for key,(calls,tiles) in self._value_local_steps.items():
             labels = self._value_global_step_phases.get(key,set())
@@ -1158,7 +1343,8 @@ class VllmMethodAdapter:
         local = self._value_native_local_tiles
         global_eligible = sum(row['eligible_tiles'] for row in phases.values())
         global_skipped = sum(row['skipped_tiles'] for row in phases.values())
-        return dict(value_phase_tiles=phases,native_local_phase_rectangles=local_phases,
+        return dict(value_phase_tiles=phases,value_canvas_phase_tiles=canvas_phases,
+            native_local_phase_rectangles=local_phases,
             decode_cudagraph_modes=dict(self._value_decode_modes),
             value_nonfinite_attention_calls=int(torch.stack(self._value_nonfinite_outputs).sum().item()) if self._value_nonfinite_outputs else 0,
             native_local_calls_audited=self._value_native_local_calls,
@@ -1273,6 +1459,10 @@ class VllmMethodAdapter:
             if self.mage_pool is not None:                                       # round 5: the candidate pool
                 self._last_pool = self._mage_units(mass, head_lse, H, n, qb, kt, first_canvas_tile,
                                                    min(first_canvas_tile, self.mage_pool * k_tiles), G, account=False)
+            if self.cached_refresh_policy is not None:
+                self._cached_prepare(self._cur_layer, head_lse, kept, prefix, n)
+            if self.stable_refresh_config is not None:
+                self._stable_prepare(self._cur_layer, head_lse, kept, prefix, n)
             return out, kept
         score = mass.reshape(HK, G, n, kt).mean(dim=(1, 2))                                        # [HK, KT]
         kept_kv = torch.zeros((HK, kt), device=q.device, dtype=torch.bool)
@@ -1301,6 +1491,300 @@ class VllmMethodAdapter:
             kept[0, :, :, :first_canvas_tile] |= critical
             self.calls['mage_critical_added_tiles'] = self.calls.get('mage_critical_added_tiles', 0) + int(added.sum())
         return out, kept
+
+    def _stable_prepare(self, layer_idx, head_lse, kept, prefix, n):
+        from .v31_stable_refresh import StableState, StableConfig, rows_to_tiles
+        z = rows_to_tiles(head_lse, n)
+        pt, qb, h = prefix // 64, (n+127)//128, head_lse.shape[0]
+        current = kept[0, :, :, :pt].reshape(h*qb, pt)
+        mandatory = torch.zeros_like(current)
+        mandatory[:, :min(self.mage_sink, pt)] = True
+        if self.mage_recent_tiles:
+            mandatory[:, max(0, pt-self.mage_recent_tiles):] = True
+        state = StableState(z, current, StableConfig(**self.stable_refresh_config.get('selector', {})), mandatory)
+        self._stable_pending[layer_idx] = state
+        if self._stable_totals is None:
+            self._stable_totals = dict(counts=torch.zeros(8, device=z.device, dtype=torch.float64),
+                drift=torch.zeros(4, device=z.device), ages=torch.zeros(128, device=z.device,dtype=torch.int64),
+                cumulative=torch.zeros((),device=z.device,dtype=torch.int32), units=0)
+        retired = self._stable_rows.get(layer_idx)
+        if retired is not None:
+            self._stable_totals['counts'] += retired.counts
+            self._stable_totals['drift'] = torch.maximum(self._stable_totals['drift'], retired.drift_max)
+            self._stable_totals['ages'] += torch.bincount(retired.age.flatten().long().clamp_max(127),minlength=128)
+            self._stable_totals['cumulative'] = torch.maximum(self._stable_totals['cumulative'], retired.cumulative.max())
+            self._stable_totals['units'] += retired.events*retired.selected.shape[0]
+        self._stable_rows[layer_idx] = state
+
+    def _mage_stable(self, layer_idx, q, b, scale, prefix, n):
+        """Inherited dense/carry lifecycle with separately controlled observations."""
+        from . import v27_fa4
+        from .v31_stable_observe import observe, tile_ids
+        cfg = self.stable_refresh_config
+        st, nk = self.mage_state.get(layer_idx), prefix+n
+        cnt = self._mage_count.get(layer_idx)
+        if cnt is None or cnt[:2] != [self.canvas_id, nk]:
+            cnt = self._mage_count[layer_idx] = [self.canvas_id, nk, -1]
+        cnt[2] += 1
+        same = st is not None and st['canvas'] == self.canvas_id and st['nk'] == nk
+        due = same and cfg.get('progress_dense', True) and self._trig_at == (self.canvas_id, cnt[2])
+        if not same:
+            w = self._mage_warm.get(layer_idx)
+            if w is None or w[:2] != [self.canvas_id, nk]:
+                w = self._mage_warm[layer_idx] = [self.canvas_id, nk, 0]
+            if w[2] < self.mage_select_step:
+                w[2] += 1
+                carried = self._mage_carried(st, prefix, n) if self.mage_carry_first and w[2] == 1 else None
+                if carried is not None:
+                    self.calls['mage_carried_calls'] = self.calls.get('mage_carried_calls', 0)+1
+                    self._stable_reasons['carry_calls'] += 1
+                    self._stable_used_kept[layer_idx] = None
+                    return v27_fa4.sparse_lists(q, b['k'], b['v'], carried, scale)
+                self.calls['mage_warm_dense_calls'] = self.calls.get('mage_warm_dense_calls', 0)+1
+                self._stable_reasons['bootstrap_dense'] += 1
+                self._stable_used_kept[layer_idx] = None
+                return v27_fa4.dense(q, b['k'], b['v'], scale)
+        if not same or due:
+            self._mage_units_w = self._mage_row_w if due and self.mage_row_weight is not None else None
+            self._mage_held = st.get('kept') if due and self.mage_sticky is not None else None
+            self._k_override = self._trig_k if due and self._trig_k is not None else None
+            try:
+                out, kept = self._select_initial_refresh(layer_idx, q, b, scale, prefix, n)
+            finally:
+                self._mage_units_w, self._mage_held, self._k_override = None, None, None
+            state = self._stable_pending.pop(layer_idx)
+            self.mage_state[layer_idx] = dict(canvas=self.canvas_id, nk=nk, prefix=prefix, kept=kept,
+                lists=v27_fa4.block_sparse_tensors(kept), stable=state, reused_since_selection=0, pool=None)
+            key = 'mage_reselections' if due else 'mage_selections'
+            self.calls[key] = self.calls.get(key, 0)+1
+            reason = 'progress_selection_dense' if due else 'canvas_selection_dense'
+            self._stable_reasons[reason] += 1
+            self._stable_used_kept[layer_idx] = None
+            return out
+        # Output uses the held list before collecting selector statistics or updating it.
+        self._stable_used_kept[layer_idx] = st['kept']
+        self.calls['mage_reused_calls'] += 1
+        out = v27_fa4.sparse_lists(q, b['k'], b['v'], st['lists'], scale)
+        st['reused_since_selection'] += 1
+        period = int(cfg.get('period', 0))
+        if period and st['reused_since_selection'] % period == 0:
+            state = st['stable']
+            if state.k == state.selected.shape[1]:
+                # All-kept short prefix: clock advances, no full-support QK duplication.
+                state.events += 1
+                state.counts[2] += state.selected.shape[0]
+                state.counts[4:6] += state.selected.shape[0]
+                self._stable_reasons['cheap_observations'] += 1
+                return out
+            start = end = None
+            if self.value_audit:
+                start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+                start.record()
+            h, qb, pt = q.shape[1], (n+127)//128, prefix//64
+            ids = tile_ids(state.selected)
+            tail_ids = torch.arange(pt, (nk+63)//64, device=q.device)[None].expand(h*qb, -1)
+            combined = torch.cat((ids, tail_ids), 1).contiguous()
+            ws = getattr(state, 'workspace', None)
+            if ws is None:
+                state.workspace = torch.empty((*combined.shape, 128), device=q.device)
+                state.fresh = torch.full_like(state.anchor, -math.inf)
+            observed = observe(q, b['k'], scale, combined, n, state.workspace)
+            state.fresh.fill_(-math.inf)
+            state.fresh.scatter_(1, ids[:, :, None].expand(-1,-1,128), observed[:, :state.k])
+            tail = observed[:, state.k:].logsumexp(1)
+            before = state.selected
+            selected, info = state.observe(state.fresh, tail)
+            self._stable_reasons['cheap_observations'] += 1
+            self._stable_reasons['selector_qk_rectangles'] += combined.numel()
+            # One host decision per layer/event is required to skip unchanged FA4 list builds.
+            # All ranking, guards, counters and per-unit budget logic stay on device.
+            if not torch.equal(before, selected):
+                full = st['kept'].clone()
+                full[0, :, :, :pt] = selected.reshape(h,qb,pt)
+                st['kept'] = full
+                st['lists'] = v27_fa4.block_sparse_tensors(full)
+                self._stable_reasons['actual_updates'] += 1
+            if end is not None:
+                end.record()
+                self._cached_events.append((start,end))
+        return out
+
+    def _stable_receipt(self):
+        cfg = self.stable_refresh_config
+        tensors = list(self._stable_rows.values())
+        if self._cached_events:
+            torch.cuda.synchronize()
+        total = sum((s.counts for s in tensors), self._stable_totals['counts'].clone()) if tensors else torch.zeros(8)
+        counts = total.tolist()
+        units = sum(s.events*s.selected.shape[0] for s in tensors)+(self._stable_totals['units'] if tensors else 0)
+        hist = {str(i):int(v) for i,v in enumerate(self._stable_totals['ages'].cpu().tolist()) if v} if tensors else {}
+        for s in tensors:
+            age = torch.bincount(s.age.flatten().long()).cpu().tolist()
+            for i,v in enumerate(age):
+                if v: hist[str(i)] = hist.get(str(i),0)+v
+        drift = torch.stack([s.drift_max for s in tensors]+[self._stable_totals['drift']]).amax(0).tolist() if tensors else [0.]*4
+        return dict(stable_refresh_config=cfg, stable_refresh_reasons=dict(self._stable_reasons),
+            stable_swaps=int(counts[0]), stable_unit_updates=int(counts[1]), stable_unit_noops=int(counts[2]),
+            stable_removal_guard_rejected_units=int(counts[3]),
+            stable_iou_previous=counts[4]/max(1,units), stable_iou_anchor=counts[5]/max(1,units),
+            stable_reentries=int(counts[6]), stable_immediate_reversals=int(counts[7]),
+            stable_age_histogram=hist, stable_max_cumulative_swaps=max([int(s.cumulative.max()) for s in tensors]+[int(self._stable_totals['cumulative'])]) if tensors else 0,
+            stable_drift_max=dict(zip(('absolute_log_mass','common_shift','shift_residual','common_support_tv'),drift)),
+            stable_selector_audit_ms=sum(a.elapsed_time(b) for a,b in self._cached_events),
+            stable_state_bytes=sum(sum(t.numel()*t.element_size() for t in vars(s).values() if isinstance(t,torch.Tensor)) for s in tensors),
+            stable_budget_errors=0, stable_output_error='offline_next_call_only',
+            stable_observation_work='duplicated_selected_QK_plus_mandatory_tail; no_PV; no_KV_head_union')
+
+    @torch.no_grad()
+    def _cached_prepare(self, layer_idx, head_lse, kept, prefix, n):
+        """Save the dense raw prefix statistics used by later cheap events.
+
+        ``head_lse`` is produced by the same FA4 observation that generated
+        the V31 map.  It is intentionally kept per row rather than reduced to
+        a tile scalar: the next event can then rebuild a complete hybrid
+        prefix normalizer after replacing only the retained tiles.
+        """
+        from .v31_cached_refresh import hybrid_qblock_score
+        h, rows, pt = head_lse.shape
+        qb = -(-n // 128)
+        z = torch.full((h, qb, pt, 128), float('-inf'), dtype=torch.float32, device=head_lse.device)
+        z.view(h, qb * 128, pt)[:, :n].copy_(head_lse)
+        z = z.reshape(h * qb, pt, 128).contiguous()
+        current = kept[0, :, :, :pt].reshape(h * qb, pt).to(torch.bool)
+        score = hybrid_qblock_score(z)
+        k = int(current.sum(-1).min().item()) if current.numel() else 0
+        m = self.cached_refresh_frontier_m
+        if m is None:
+            m = min(pt, max(k, 4 * max(1, self.cached_refresh_swap_budget)))
+        pool = torch.zeros_like(current)
+        if m:
+            pool.scatter_(1, score.topk(min(m, pt), dim=-1, largest=True, sorted=False).indices, True)
+        self._cached_pending[layer_idx] = dict(z=z, age=torch.zeros_like(current, dtype=torch.int16),
+                                               pool=pool, prefix_tiles=pt, qblocks=qb, k=k,
+                                               dense_refresh_count=1,
+                                               cheap_events=0,
+                                               age_histogram={0: int(current.numel())},
+                                               stale_selected_fraction=0.0)
+
+    @torch.no_grad()
+    def _cached_fresh_prefix(self, q, k, scale, prefix, n, current):
+        """Compute raw QK tile log-mass only for the retained prefix tiles.
+
+        This is a partial QK product, not a dense attention forward.  The
+        selected map is grouped by KV head so each event launches one GEMM per
+        KV head and then scatters the requested qblock/tile rows.
+        """
+        h, hk, _, d = q.shape[1], k.shape[1], k.shape[2], q.shape[-1]
+        qb, pt = -(-n // 128), prefix // 64
+        out = torch.full((h * qb, pt, 128), float('-inf'), dtype=torch.float32, device=q.device)
+        if not pt:
+            return out
+        groups = h // hk
+        qg_all = q[0, :, :n].float().reshape(hk, groups, n, d)
+        ar64 = torch.arange(64, device=q.device)
+        for kh in range(hk):
+            hs = kh * groups
+            union = current.view(h, qb, pt)[hs:hs + groups].any((0, 1))
+            tiles = torch.nonzero(union, as_tuple=False).flatten()
+            if not tiles.numel():
+                continue
+            key_idx = (tiles[:, None] * 64 + ar64[None, :]).reshape(-1)
+            keys = k[0, kh].index_select(0, key_idx).float().reshape(tiles.numel(), 64, d)
+            s = torch.matmul(qg_all[kh], keys.reshape(-1, d).transpose(0, 1)) * float(scale)
+            s = s.reshape(groups, n, tiles.numel(), 64).logsumexp(-1)
+            for gi in range(groups):
+                hi = hs + gi
+                chosen = current.view(h, qb, pt)[hi]
+                ids = torch.nonzero(chosen.any(0), as_tuple=False).flatten()
+                if not ids.numel():
+                    continue
+                loc = torch.searchsorted(tiles, ids)
+                for bi in range(qb):
+                    b_ids = torch.nonzero(chosen[bi], as_tuple=False).flatten()
+                    if not b_ids.numel():
+                        continue
+                    b_loc = torch.searchsorted(tiles, b_ids)
+                    lo, hirow = bi * 128, min(n, (bi + 1) * 128)
+                    vals = s[gi, lo:hirow].index_select(-1, b_loc).transpose(0, 1)
+                    out[hi * qb + bi].index_copy_(0, b_ids, torch.nn.functional.pad(
+                        vals, (0, 128 - (hirow - lo)), value=float('-inf')))
+        return out
+
+    @torch.no_grad()
+    def _cached_refresh(self, layer_idx, q, b, scale, prefix, n, st, call_index):
+        """Refresh a held map from retained fresh QK and cached outside QK."""
+        from .v31_cached_refresh import (advance_ages, bounded_swaps, drift_metric,
+                                         hybrid_qblock_score, map_iou, topk_fixed)
+        cache = st.get('cached')
+        if cache is None:
+            return
+        start = end = None
+        if self.value_audit:
+            start, end = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+            start.record()
+        pt, qb = cache['prefix_tiles'], cache['qblocks']
+        current = st['kept'][0, :, :, :pt].reshape(q.shape[1] * qb, pt).to(torch.bool)
+        fresh = self._cached_fresh_prefix(q, b['k'], scale, prefix, n, current)
+        old = cache['z']
+        drift_tensor, nonfinite = drift_metric(fresh, old, current)
+        drift = float(drift_tensor.item())
+        self.calls['cached_refresh_max_drift'] = max(self.calls.get('cached_refresh_max_drift', 0.0), drift)
+        if nonfinite or (self.cached_refresh_drift_threshold is not None
+                         and drift > self.cached_refresh_drift_threshold):
+            self.calls['cached_refresh_fallbacks'] = self.calls.get('cached_refresh_fallbacks', 0) + 1
+            self._cached_force_dense.add(layer_idx)
+            if end is not None:
+                end.record()
+                self._cached_events.append((start, end))
+            return
+        score = hybrid_qblock_score(old, fresh, current, current, cache['age'],
+                                    self.cached_refresh_decay_lambda, self.cached_refresh_decay_floor)
+        k = int(cache.get('k', int(current.shape[-1]))) if current.numel() else 0
+        value_score = cache.get('value_score')
+        if value_score is None and self.mage_row_weight in ('cgate', 'jcgate') and self._mage_row_w is not None:
+            # C_gate is a tie/ranking signal only.  Reduce the denoising-derived
+            # row sensitivity to the same qblock units without changing K.
+            rw = torch.nn.functional.pad(self._mage_row_w[:n].float(), (0, qb * 128 - n))
+            value_score = rw.view(1, qb, 128).expand(q.shape[1], -1, -1).reshape(q.shape[1] * qb, 128).mean(-1)
+            value_score = value_score[:, None].expand_as(score)
+        if self.cached_refresh_policy == 'global_topk':
+            selected = topk_fixed(score, k, value_score=value_score,
+                                  mass_tolerance=self.cached_refresh_mass_tolerance)
+        else:
+            selected = bounded_swaps(score, current, k,
+                                     self.cached_refresh_frontier_m or cache['pool'].shape[-1],
+                                     self.cached_refresh_swap_budget,
+                                     value_score=value_score,
+                                     mass_tolerance=self.cached_refresh_mass_tolerance)
+        if self.cached_refresh_phase_protected and int(cache.get('cheap_events', 0)) == 0:
+            selected = current.clone()
+        cache['z'] = torch.where(current[..., None], fresh, old)
+        age_before = cache['age']
+        cache['age'] = advance_ages(age_before, selected)
+        age_hist = torch.bincount(cache['age'].to(torch.int64).flatten(), minlength=1)
+        cache['age_histogram'] = {int(i): int(v) for i, v in enumerate(age_hist.tolist()) if v}
+        cache['stale_selected_fraction'] = float(
+            ((selected & (age_before > 0)).sum().float()
+             / selected.sum().clamp_min(1)).item())
+        cache['cheap_events'] = int(cache.get('cheap_events', 0)) + 1
+        iou = map_iou(current, selected)
+        swaps = ((current & ~selected).sum(-1)).sum().item()
+        self.calls['cached_refresh_events'] = self.calls.get('cached_refresh_events', 0) + 1
+        self.calls['cached_refresh_swaps'] = self.calls.get('cached_refresh_swaps', 0) + int(swaps)
+        self.calls['cached_refresh_iou_sum'] = self.calls.get('cached_refresh_iou_sum', 0.0) + float(iou.sum().item())
+        self.calls['cached_refresh_iou_count'] = self.calls.get('cached_refresh_iou_count', 0) + int(iou.numel())
+        if torch.equal(current, selected):
+            self.calls['cached_refresh_noop'] = self.calls.get('cached_refresh_noop', 0) + 1
+        else:
+            full = st['kept'].clone()
+            full[0, :, :, :pt] = selected.reshape(1, q.shape[1], qb, pt)
+            st['kept'] = full
+            st['lists'] = __import__('experiments.numerical_qk_reuse.v27_fa4', fromlist=['block_sparse_tensors']).block_sparse_tensors(full)
+            self.calls['cached_refresh_updates'] = self.calls.get('cached_refresh_updates', 0) + 1
+        st['last_refresh_call'] = call_index
+        if end is not None:
+            end.record()
+            self._cached_events.append((start, end))
 
     def _progress_observe(self, argmax, p_top, acc, scaled, n_rows, entropy_bound):
         """The progress clock, after every denoising step while the canvas has thresholds left: argmax / p_top / acc are
