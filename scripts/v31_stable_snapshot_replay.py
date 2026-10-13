@@ -6,7 +6,7 @@ import math
 from pathlib import Path
 import time
 import torch
-from experiments.numerical_qk_reuse.v31_stable_refresh import StableConfig, StableState, mass_scores
+from experiments.numerical_qk_reuse.v31_stable_refresh import StableConfig, StableState, mass_scores, stable_topk
 from experiments.numerical_qk_reuse.v31_stable_observe import observe, tile_ids
 from experiments.numerical_qk_reuse import v27_fa4
 from experiments.numerical_qk_reuse.v31_fa4_observe import observe_dense
@@ -25,7 +25,13 @@ def main():
             configs[f'stable_l{li}_g{gi}_s2']=(StableConfig(hysteresis=lam,removal_tolerance=guard),2,True)
     # Probe extension is explicitly offline; later native wiring is conditional.
     configs['stable_probe4_s2']=(StableConfig(hysteresis=math.log(1.25),removal_tolerance=.01,probes=4),2,True)
-    sources=sorted((study/'private/trajectories').glob('request*/canvas*_call*_layer*.pt'))
+    configs.update({f'stable_no_progress_s{s}':(StableConfig(),s,False) for s in (1,4,8)})
+    binding=json.loads((study/'operator/trajectory_binding.json').read_text())
+    trajectory_leaf=study/binding['completed_leaf']
+    for name in ('receipt','config'):
+        if hashlib.sha256((trajectory_leaf/f'{name}.json').read_bytes()).hexdigest()!=binding[f'{name}_sha256']:
+            raise RuntimeError('trajectory source identity mismatch')
+    sources=sorted((trajectory_leaf/'private/trajectories').glob('request*/canvas*_call*_layer*.pt'))
     if not sources: raise RuntimeError('real trajectories unavailable')
     groups={}
     for f in sources:
@@ -56,7 +62,8 @@ def main():
             for name,(cfg,period,progress) in configs.items():
                 selected_event=data['selection_event'] and (progress or name not in states)
                 if selected_event:
-                    current=data['next'].cuda()[0,:,:,:pt].reshape(h*qb,pt)
+                    current=(stable_topk(mass_scores(z)+1.386*states[name].selected,states[name].k)
+                             if name in states else data['next'].cuda()[0,:,:,:pt].reshape(h*qb,pt))
                     states[name]=StableState(z,current,cfg); clocks[name]=0; anchor_age[name]=0; pending.pop(name,None)
                     continue
                 if name not in states: continue
@@ -126,7 +133,12 @@ def main():
         x['immediate_output_change_max']<=.5*raw['immediate_output_change_max'] and x['true_retained_mass_mean']>=hold['true_retained_mass_mean']]
     selected=(max(acceptable,key=lambda p:(p[1]['true_retained_mass_mean'],-p[1]['swaps']))[0] if acceptable else 'stable_l3_g0_s2')
     cfg=configs[selected][0]
-    parameters={'schema':'operator_only_parameter_selection_v1','selector':vars(cfg),'selected_grid_arm':selected,'screen_passed':bool(acceptable),'selection_data':'real frozen Q/K/V; no target answers','conditional_probe_promoted':False}
+    probe=aggregates['stable_probe4_s2']; reference=aggregates['stable_l2_g1_s2']
+    probe_good=(selected=='stable_l2_g1_s2' and reference['false_admissions']>0 and probe['false_admissions']<=.5*reference['false_admissions']
+                and probe['immediate_output_change_max']<=.8*reference['immediate_output_change_max'])
+    parameters={'schema':'operator_only_parameter_selection_v1','selector':vars(cfg),'selected_grid_arm':selected,'screen_passed':bool(acceptable),
+        'selection_data':'real frozen Q/K/V; no target answers','conditional_probe_promoted':probe_good,
+        'probe_gate':'at least 50% fewer false admissions and 20% lower output perturbation than equal-config stable reference'}
     (study/'specs/parameters.json').write_text(json.dumps(parameters,indent=2)+'\n')
     summary={'schema':'real_sequential_operator_replay_v1','coverage':sorted(coverage),'snapshots':len(sources),'groups':len(groups),
         'max_retained_statistic_error':max_stat_error,'selector_grid':aggregates,'parameters':parameters,'gpu_seconds':time.perf_counter()-start,

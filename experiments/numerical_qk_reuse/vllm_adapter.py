@@ -1593,7 +1593,18 @@ class VllmMethodAdapter:
             state.fresh.scatter_(1, ids[:, :, None].expand(-1,-1,128), observed[:, :state.k])
             tail = observed[:, state.k:].logsumexp(1)
             before = state.selected
-            selected, info = state.observe(state.fresh, tail)
+            probe_mask = None
+            if state.config.probes:
+                from .v31_stable_refresh import mass_scores
+                hybrid = torch.where(before[...,None],state.fresh,state.anchor)
+                score = mass_scores(hybrid).masked_fill(before,-math.inf)
+                count = min(state.config.probes,pt-state.k)
+                probe_ids = score.argsort(dim=-1,descending=True,stable=True)[:,:count].contiguous()
+                probe_mask = torch.zeros_like(before).scatter_(1,probe_ids,True)
+                probe_values = observe(q,b['k'],scale,probe_ids,n)
+                state.fresh.scatter_(1,probe_ids[:,:,None].expand(-1,-1,128),probe_values)
+                self._stable_reasons['probe_qk_rectangles'] += probe_ids.numel()
+            selected, info = state.observe(state.fresh, tail,probe_mask)
             self._stable_reasons['cheap_observations'] += 1
             self._stable_reasons['selector_qk_rectangles'] += combined.numel()
             # One host decision per layer/event is required to skip unchanged FA4 list builds.

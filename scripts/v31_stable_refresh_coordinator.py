@@ -62,7 +62,7 @@ def main():
         cmd=[str(PY),str(ROOT/'scripts/v31_stable_refresh_campaign.py'),'--python',str(PY),'--model',MODEL,
             '--manifests',str(study/'private/manifests'),'--cells',str(cells),'--attempt',str(leaf),'--arm',arm,
             '--purpose','audit','--result-root',str(study),'--max-model-len','141312','--gpu-memory-utilization','0.80']
-        if trajectory: cmd+=['--trajectory-dir',str(study/'private/trajectories')]
+        if trajectory: cmd+=['--trajectory-dir',str(leaf/'private/trajectories')]
         if parameters: cmd+=['--stable-parameters',str(study/'specs/parameters.json')]
         print(json.dumps({'status':'starting','leaf':str(leaf.relative_to(study))}),flush=True)
         run_logged(cmd,study/'private'/f'launch_{base.replace("/","_")}_{arm}_{leaf.name}.log')
@@ -75,6 +75,8 @@ def main():
             run_logged([str(PY),'-m','pytest','-q','tests/test_v31_stable_refresh.py','tests/test_v31_stable_lifecycle.py','tests/test_v31_fa4_observe.py'],study/'qualification/gpu_tests.log')
             write(gate,dict(status='complete',sources=identity))
         trace=attempt('qualification/trajectory','v31_progress_dense_control',study/'private/cells_trajectory4.json',trajectory=True)
+        write(study/'operator/trajectory_binding.json',dict(completed_leaf=str(trace.relative_to(study)),
+            receipt_sha256=digest(trace/'receipt.json'),config_sha256=digest(trace/'config.json')))
         replay=study/'operator/real_replay/final_complete.json'
         if not replay.exists():
             wait_gpu(study)
@@ -100,6 +102,8 @@ def main():
             protocol_sha256=digest(study/'specs/protocol.json'),runtime_python=str(PY),model_revision=MODEL.split('/')[-1]))
         allcells=json.loads((study/'private/cells_native_panel154.json').read_text())
         protocol=json.loads((study/'specs/protocol.json').read_text()); arms=protocol['controls']+protocol['arms']
+        if json.loads((study/'specs/parameters.json').read_text()).get('conditional_probe_promoted'):
+            arms.append('stable_global_probe4_progress_dense_s2')
         queue=[]
         for shard in range(4):
             cells=[c for c in allcells if int(c['index'])%4==shard]

@@ -74,6 +74,7 @@ STABLE_ARMS = {
     'v31_no_progress_dense_hold': ('raw', 0, False, False),
     'raw_global_progress_dense_s2': ('raw', 2, True, True),
     'stable_global_progress_dense_s2': ('stable', 2, True, True),
+    'stable_global_probe4_progress_dense_s2': ('stable', 2, True, True),
     'observation_only_progress_dense_s2': ('raw', 2, True, False),
     **{f'{mode}_global_no_progress_dense_s{period}': (mode, period, False, True)
        for mode in ('raw', 'stable') for period in (1, 4, 8)},
@@ -183,6 +184,8 @@ def main():
         if mode == 'stable' and args.stable_parameters is None:
             raise ValueError('stable production arm requires operator-frozen parameters')
         parameters.update(mode=mode, updates_enabled=updates)
+        if args.arm == 'stable_global_probe4_progress_dense_s2':
+            parameters['probes'] = 4
         stable_config = dict(selector=parameters, period=period, progress_dense=progress_dense)
         env['STABLE_REFRESH_CONFIG'] = json.dumps(stable_config, sort_keys=True)
     if args.trajectory_dir:

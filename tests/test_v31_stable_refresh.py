@@ -112,6 +112,20 @@ def test_nonfinite_fails_without_implicit_dense_rescue():
     assert torch.equal(state.selected,cur)
 
 
+@pytest.mark.parametrize('device',DEVICES)
+def test_bounded_outside_probe_semantics_and_counter_budget(device):
+    raw=torch.tensor([[[1.],[0.],[2.],[1.5]]],device=device).expand(1,4,128).clone()
+    selected=torch.tensor([[1,1,0,0]],dtype=torch.bool,device=device)
+    cfg=StableConfig(hysteresis=0,persistence=1,removal_tolerance=1.,probes=1)
+    state=StableState(raw,selected,cfg)
+    fresh=raw.clone();fresh[:,2]=-10.
+    probe=torch.tensor([[0,0,1,0]],dtype=torch.bool,device=device)
+    actual,_=state.observe(fresh,torch.zeros(1,128,device=device),probe)
+    assert actual[0,3] and not actual[0,2]
+    assert torch.equal(state.anchor,raw)
+    assert state.cumulative.item()==1
+
+
 def test_drift_common_shift_separated_from_normalized_change():
     raw=torch.arange(5.)[None,:,None].expand(1,5,128); mask=torch.ones(1,5,dtype=torch.bool)
     drift=support_drift(raw+7,raw,mask)
@@ -184,3 +198,19 @@ def test_dense_fa4_retained_observation_same_snapshot_and_output_bitwise():
     fresh=observe(q,k,scale,ids,256)
     expected=z.reshape(32,97,128).gather(1,ids[:,:,None].expand(-1,-1,128))
     torch.testing.assert_close(fresh,expected,atol=3e-4,rtol=2e-5)
+    from experiments.numerical_qk_reuse import v27_fa4
+    selected=stable_topk(mass_scores(z.reshape(32,97,128)),16)
+    full=torch.ones(1,16,2,101,dtype=torch.bool,device='cuda')
+    full[0,:,:,:97]=selected.reshape(16,2,97)
+    lists=v27_fa4.block_sparse_tensors(full)
+    held=v27_fa4.sparse_lists(q,k,v,lists,scale)
+    rng=torch.cuda.get_rng_state().clone()
+    state=StableState(z.reshape(32,97,128),selected,StableConfig(updates_enabled=False))
+    all_ids=selected.to(torch.int8).argsort(dim=-1,descending=True,stable=True)[:,:16].contiguous()
+    retained=observe(q,k,scale,all_ids,256)
+    fresh_full=torch.full_like(state.anchor,-math.inf)
+    fresh_full.scatter_(1,all_ids[:,:,None].expand(-1,-1,128),retained)
+    state.observe(fresh_full,torch.zeros(32,128,device='cuda'))
+    again=v27_fa4.sparse_lists(q,k,v,lists,scale)
+    assert torch.equal(held,again)
+    assert torch.equal(torch.cuda.get_rng_state(),rng)

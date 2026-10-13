@@ -132,7 +132,8 @@ class StableState:
         self.events += 1
         self.last_observed.masked_fill_(old, self.events)
         active = old[..., None] & torch.isfinite(self.anchor)
-        invalid = (active & ~torch.isfinite(fresh)).any() | torch.isnan(fresh).any() | torch.isposinf(fresh).any()
+        invalid = ((active & ~torch.isfinite(fresh)).any() | torch.isnan(fresh).any() | torch.isposinf(fresh).any()
+                   | torch.isnan(tail_lse).any() | torch.isposinf(tail_lse).any())
         if fresh.is_cuda:
             torch._assert_async(~invalid, 'numerical-invalid observation; no silent dense rescue')
         elif bool(invalid):
