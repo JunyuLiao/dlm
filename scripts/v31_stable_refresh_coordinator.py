@@ -46,6 +46,7 @@ def main():
     os.chdir(ROOT)
     runtime_env=dict(os.environ,PYTHONPATH=str(ROOT)+':'+str(ROOT/'src'),PYTHONNOUSERSITE='1')
     identity={p:digest(ROOT/p) for p in SOURCES}
+    parameter_file=study/'specs/parameters.json'
     failure=study/'coordinator_failure.json'
     if failure.exists():
         history=study/'coordinator_failures';history.mkdir(exist_ok=True)
@@ -77,7 +78,7 @@ def main():
             '--manifests',str(study/'private/manifests'),'--cells',str(cells),'--attempt',str(leaf),'--arm',arm,
             '--purpose','audit','--result-root',str(study),'--max-model-len','141312','--gpu-memory-utilization','0.80']
         if trajectory: cmd+=['--trajectory-dir',str(leaf/'private/trajectories')]
-        if parameters: cmd+=['--stable-parameters',str(study/'specs/parameters.json')]
+        if parameters: cmd+=['--stable-parameters',str(parameter_file)]
         print(json.dumps({'status':'starting','leaf':str(leaf.relative_to(study))}),flush=True)
         run_logged(cmd,study/'private'/f'launch_{base.replace("/","_")}_{arm}_{leaf.name}.log')
         return leaf
@@ -101,6 +102,7 @@ def main():
             used=[int(x.name[7:]) for x in (study/'operator').glob('attempt*') if x.is_dir()]
             name=f'attempt{max(used,default=0)+1:03d}'
             run_logged([str(PY),str(ROOT/'scripts/v31_stable_snapshot_replay.py'),'--study',str(study),'--attempt',name],study/'operator'/f'{name}.log')
+        parameter_file=study/json.loads(replay.read_text()).get('parameter_file','specs/parameters.json')
         # Repetition floor and observation-only native qualifier. Never score before parameter selection.
         quals=[]
         for rep in (1,2):
@@ -118,11 +120,11 @@ def main():
         if floor==0 and any(mismatches): raise RuntimeError('observation-only native invariance failed beyond reproducibility floor')
         # Freeze the full inventory before the development panel.
         if any(digest(ROOT/p)!=h for p,h in identity.items()): raise RuntimeError('source changed before development freeze')
-        write(study/'specs/execution_identity.json',dict(source_sha256=identity,parameters_sha256=digest(study/'specs/parameters.json'),
+        write(study/'specs/execution_identity.json',dict(source_sha256=identity,parameter_file=str(parameter_file.relative_to(study)),parameters_sha256=digest(parameter_file),
             protocol_sha256=digest(study/'specs/protocol.json'),runtime_python=str(PY),model_revision=MODEL.split('/')[-1]))
         allcells=json.loads((study/'private/cells_native_panel154.json').read_text())
         protocol=json.loads((study/'specs/protocol.json').read_text()); arms=protocol['controls']+protocol['arms']
-        if json.loads((study/'specs/parameters.json').read_text()).get('conditional_probe_promoted'):
+        if json.loads(parameter_file.read_text()).get('conditional_probe_promoted'):
             arms.append('stable_global_probe4_progress_dense_s2')
         queue=[]
         for shard in range(4):

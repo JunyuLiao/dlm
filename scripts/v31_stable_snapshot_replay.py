@@ -40,6 +40,7 @@ def main():
         key=(f.parent.name,f.name.split('_')[0],f.name.split('_')[-1])
         groups.setdefault(key,[]).append(f)
     records=[]; coverage=set(); start=time.perf_counter(); max_stat_error=0.
+    perturbations={name:[] for name in configs}
     for group,files in sorted(groups.items()):
         states={}; pending={}; clocks={}; anchor_age={}; prefix=None
         for f in sorted(files):
@@ -78,10 +79,12 @@ def main():
                 kept_log=torch.logaddexp(z.masked_fill(~before[:,:,None],-math.inf).logsumexp(1),tail)
                 true_mass=(kept_log-dense_norm).exp()[valid]
                 immediate=0.; realized=0.; error_improvement=0.; predicted=None
+                row_change=torch.zeros_like(rowerr)
                 if name in pending:
                     old,predicted=pending[name]
                     held_output=output_for(old)
-                    immediate=float((used-held_output).norm(dim=-1).amax())
+                    row_change=(used-held_output).norm(dim=-1).reshape(-1)
+                    immediate=float(row_change.amax())
                     error_improvement=float((held_output-dense).norm(dim=-1).mean()-rowerr.mean())
                     oldmass=(torch.logaddexp(z.masked_fill(~old[:,:,None],-math.inf).logsumexp(1),tail)-dense_norm).exp()[valid]
                     realized=float((true_mass-oldmass).mean())
@@ -115,6 +118,7 @@ def main():
                     pold=(torch.logaddexp(hybrid.masked_fill(~before[:,:,None],-math.inf).logsumexp(1),tail)-predict_norm).exp()[valid]
                     pending[name]=(before,float((pnew-pold).mean()))
                 else: pending.pop(name,None)
+                perturbations[name].append(row_change.cpu())
                 records.append(dict(arm=name,trajectory=group[0],dataset=data['dataset'],layer=data['layer'],canvas=data['canvas'],call=data['call'],anchor_age=anchor_age[name],
                     true_retained_mass_mean=float(true_mass.mean()),row_error_mean=float(rowerr.mean()),row_error_p95=float(torch.quantile(rowerr,.95)),row_error_max=float(rowerr.max()),relative_row_error_mean=float(rel.mean()),
                     immediate_output_change_max=immediate,realized_mass_change=realized,predicted_mass_change=predicted,
@@ -132,18 +136,23 @@ def main():
         aggregates[name]={k:sum(r[k] for r in rr)/max(1,len(rr)) for k in ('true_retained_mass_mean','row_error_p95','immediate_output_change_max','outside_logmass_prediction_error','selector_ms')}
         aggregates[name].update(records=len(rr),swaps=sum(r['swaps'] for r in rr),max_cumulative=max((r['cumulative_max'] for r in rr),default=0),
             false_admissions=sum(r['predicted_mass_change'] is not None and r['predicted_mass_change']>0 and r['realized_mass_change']<0 for r in rr))
+        changes=torch.cat(perturbations[name]) if perturbations[name] else torch.zeros(1)
+        aggregates[name].update(row_output_change_mean=float(changes.mean()),row_output_change_p95=float(changes.quantile(.95)),
+            row_output_change_max=float(changes.max()))
     raw=aggregates['raw_s2']; hold=aggregates['v31_progress_hold']
     acceptable=[(name,x) for name,x in aggregates.items() if name.startswith('stable_l') and
-        x['immediate_output_change_max']<=.5*raw['immediate_output_change_max'] and x['true_retained_mass_mean']>=hold['true_retained_mass_mean']]
+        x['row_output_change_p95']<=.5*raw['row_output_change_p95'] and x['true_retained_mass_mean']>=hold['true_retained_mass_mean']]
     selected=(max(acceptable,key=lambda p:(p[1]['true_retained_mass_mean'],-p[1]['swaps']))[0] if acceptable else 'stable_l3_g0_s2')
     cfg=configs[selected][0]
     probe=aggregates['stable_probe4_s2']; reference=aggregates['stable_l2_g1_s2']
     probe_good=(selected=='stable_l2_g1_s2' and reference['false_admissions']>0 and probe['false_admissions']<=.5*reference['false_admissions']
-                and probe['immediate_output_change_max']<=.8*reference['immediate_output_change_max'])
+                and probe['row_output_change_p95']<=.8*reference['row_output_change_p95'])
     parameters={'schema':'operator_only_parameter_selection_v1','selector':vars(cfg),'selected_grid_arm':selected,'screen_passed':bool(acceptable),
         'selection_data':'real frozen Q/K/V; no target answers','conditional_probe_promoted':probe_good,
+        'selection_metric':'pooled next-call row output-change p95, including zero-change calls',
         'probe_gate':'at least 50% fewer false admissions and 20% lower output perturbation than equal-config stable reference'}
-    (study/'specs/parameters.json').write_text(json.dumps(parameters,indent=2)+'\n')
+    parameter_file=study/'specs'/f'parameters_{args.attempt}.json'
+    parameter_file.write_text(json.dumps(parameters,indent=2)+'\n')
     summary={'schema':'real_sequential_operator_replay_v1','coverage':sorted(coverage),'snapshots':len(sources),'groups':len(groups),
         'max_retained_statistic_error':max_stat_error,'selector_grid':aggregates,'parameters':parameters,'gpu_seconds':time.perf_counter()-start,
         'snapshot_sha256':{str(f.relative_to(study)):hashlib.sha256(f.read_bytes()).hexdigest() for f in sources},'offline_dense_only':True}
@@ -152,7 +161,8 @@ def main():
     expected={(ds,l) for ds in ('longbench_v2_0shot_think','aime26') for l in (5,11,17,23,29)}
     if not expected.issubset(coverage): raise RuntimeError('workload/layer coverage incomplete')
     (output/'final_complete.json').write_text(json.dumps({'status':'complete','snapshots':len(sources),'records':len(records)})+'\n')
-    (study/'operator/real_replay_complete.json').write_text(json.dumps({'status':'complete','leaf':str(output.relative_to(study)),'summary_sha256':hashlib.sha256((output/'summary.json').read_bytes()).hexdigest()})+'\n')
+    (study/'operator/real_replay_complete.json').write_text(json.dumps({'status':'complete','leaf':str(output.relative_to(study)),
+        'parameter_file':str(parameter_file.relative_to(study)),'summary_sha256':hashlib.sha256((output/'summary.json').read_bytes()).hexdigest()})+'\n')
 
 
 if __name__=='__main__': main()
