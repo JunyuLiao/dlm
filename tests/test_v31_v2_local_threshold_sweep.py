@@ -60,3 +60,14 @@ def test_math_symbolic_and_unclosed_answer_handling():
     assert scorer.judge(v,'1/2',r'Final answer: \boxed{0.5}')[0]
     assert not scorer.judge(v,'1/2',r'Final answer: \boxed{2}')[0]
     assert scorer.judge(v,'1/2','')==(False,False,False)
+
+
+def test_legacy_count_and_quick_token_schedules_share_binding(tmp_path):
+    pool=tmp_path/'pool';pool.mkdir()
+    sweep.write(pool/'sample_generation_manifest.json',[{'id':'one','prompt_tokens':[1,2,3]}])
+    cells=tmp_path/'cells.json'
+    for tokens in [3,[1,2,3]]:
+        sweep.write(cells,[{'dataset':'sample','index':0,'id':'one','prompt_tokens':tokens}])
+        assert len(sweep.check_inputs(pool,cells))==1
+    sweep.write(cells,[{'dataset':'sample','index':0,'id':'one','prompt_tokens':4}])
+    with pytest.raises(RuntimeError,match='input mismatch'):sweep.check_inputs(pool,cells)

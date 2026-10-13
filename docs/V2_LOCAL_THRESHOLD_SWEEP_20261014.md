@@ -53,5 +53,9 @@ evaluation/timing, and instrumented audit wall time separately. Rank observed
 adapter canvas IDs into actual ordinals for early-canvas accounting; never fill
 invented zero-valued early canvases or infer physical work from selector counts.
 
-Campaign: `results/v31_v2_local_threshold_sweep_20261014/`.
+Campaign: `results/v31_v2_local_threshold_sweep_20261014_attempt002/`.
 Entrypoint: `scripts/v31_v2_local_threshold_sweep.py`.
+
+Preparation attempt001 was retained before any GPU work: legacy LongBench
+schedules store token counts, while quick schedules store token lists. The
+validator now accepts both only after checking against the same manifest.

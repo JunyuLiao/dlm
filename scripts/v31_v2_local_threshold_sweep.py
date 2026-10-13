@@ -24,7 +24,7 @@ import time
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-DEFAULT_STUDY = ROOT / 'results/v31_v2_local_threshold_sweep_20261014'
+DEFAULT_STUDY = ROOT / 'results/v31_v2_local_threshold_sweep_20261014_attempt002'
 PYTHON = '/home/exouser/dyh/v31_env_20261005/bin/python'
 MODEL = Path('/media/volume/new-dllm/dlm-migrated-20260921/cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b')
 GRID = [.018, .0195, .021, .0225, .024]
@@ -76,7 +76,10 @@ def check_inputs(pool, cells):
     manifests = {ds: read(pool / f'{ds}_generation_manifest.json') for ds in datasets}
     for c in data:
         row = manifests[c['dataset']][c['index']]
-        if row['id'] != c['id'] or row['prompt_tokens'] != c['prompt_tokens']:
+        tokens = c['prompt_tokens']
+        token_match = (len(row['prompt_tokens']) == tokens if isinstance(tokens, int)
+                       else row['prompt_tokens'] == tokens)
+        if row['id'] != c['id'] or not token_match:
             raise RuntimeError('schedule/manifest input mismatch')
     return data
 
