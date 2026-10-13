@@ -72,15 +72,18 @@ def main():
         gate=study/'qualification/gpu_tests_complete.json'
         if not gate.exists() or json.loads(gate.read_text()).get('sources')!=identity:
             wait_gpu(study)
-            run_logged([str(PY),'-m','pytest','-q','tests/test_v31_stable_refresh.py','tests/test_v31_stable_lifecycle.py','tests/test_v31_fa4_observe.py'],study/'qualification/gpu_tests.log')
+            tests_logs=list((study/'qualification').glob('gpu_tests_attempt*.log'))
+            run_logged([str(PY),'-m','pytest','-q','tests/test_v31_stable_refresh.py','tests/test_v31_stable_lifecycle.py','tests/test_v31_fa4_observe.py'],study/'qualification'/f'gpu_tests_attempt{len(tests_logs)+1:03d}.log')
             write(gate,dict(status='complete',sources=identity))
         trace=attempt('qualification/trajectory','v31_progress_dense_control',study/'private/cells_trajectory4.json',trajectory=True)
         write(study/'operator/trajectory_binding.json',dict(completed_leaf=str(trace.relative_to(study)),
             receipt_sha256=digest(trace/'receipt.json'),config_sha256=digest(trace/'config.json')))
-        replay=study/'operator/real_replay/final_complete.json'
+        replay=study/'operator/real_replay_complete.json'
         if not replay.exists():
             wait_gpu(study)
-            run_logged([str(PY),str(ROOT/'scripts/v31_stable_snapshot_replay.py'),'--study',str(study)],study/'operator/replay.log')
+            used=[int(x.name[7:]) for x in (study/'operator').glob('attempt*') if x.is_dir()]
+            name=f'attempt{max(used,default=0)+1:03d}'
+            run_logged([str(PY),str(ROOT/'scripts/v31_stable_snapshot_replay.py'),'--study',str(study),'--attempt',name],study/'operator'/f'{name}.log')
         # Repetition floor and observation-only native qualifier. Never score before parameter selection.
         quals=[]
         for rep in (1,2):

@@ -13,11 +13,12 @@ from experiments.numerical_qk_reuse.v31_fa4_observe import observe_dense
 
 
 def main():
-    p=argparse.ArgumentParser(); p.add_argument('--study',type=Path,required=True)
-    args=p.parse_args(); study=args.study.resolve(); output=study/'operator/real_replay'
+    p=argparse.ArgumentParser(); p.add_argument('--study',type=Path,required=True);p.add_argument('--attempt',default='attempt001')
+    args=p.parse_args(); study=args.study.resolve(); output=study/'operator'/args.attempt
     if output.exists(): raise RuntimeError('replay output already exists; preserve it and choose a new study/attempt')
     output.mkdir(parents=True)
     configs={'raw_s2':(StableConfig(mode='raw',hysteresis=0),2,True),
+             'bounded8_diagnostic_s2':(StableConfig(mode='bounded_diagnostic'),2,True),
              'hold_no_progress':(StableConfig(mode='raw',updates_enabled=False),0,False),
              **{f'raw_no_progress_s{s}':(StableConfig(mode='raw',hysteresis=0),s,False) for s in (1,4,8)}}
     for li,lam in enumerate([0.,math.log(1.1),math.log(1.25),math.log(1.5)]):
@@ -148,6 +149,7 @@ def main():
     expected={(ds,l) for ds in ('longbench_v2_0shot_think','aime26') for l in (5,11,17,23,29)}
     if not expected.issubset(coverage): raise RuntimeError('workload/layer coverage incomplete')
     (output/'final_complete.json').write_text(json.dumps({'status':'complete','snapshots':len(sources),'records':len(records)})+'\n')
+    (study/'operator/real_replay_complete.json').write_text(json.dumps({'status':'complete','leaf':str(output.relative_to(study)),'summary_sha256':hashlib.sha256((output/'summary.json').read_bytes()).hexdigest()})+'\n')
 
 
 if __name__=='__main__': main()

@@ -601,6 +601,7 @@ class VllmMethodAdapter:
         self._stable_reasons = dict(bootstrap_dense=0, canvas_selection_dense=0,
                                    progress_selection_dense=0, emergency_dense=0,
                                    carry_calls=0, cheap_observations=0, actual_updates=0,
+                                   allkept_observation_shortcuts=0,
                                    selector_qk_rectangles=0, probe_qk_rectangles=0,
                                    selector_pv_rectangles=0)
         self._stable_used_kept = {}
@@ -1575,7 +1576,7 @@ class VllmMethodAdapter:
                 state.events += 1
                 state.counts[2] += state.selected.shape[0]
                 state.counts[4:6] += state.selected.shape[0]
-                self._stable_reasons['cheap_observations'] += 1
+                self._stable_reasons['allkept_observation_shortcuts'] += 1
                 return out
             start = end = None
             if self.value_audit:
@@ -1638,7 +1639,7 @@ class VllmMethodAdapter:
         return dict(stable_refresh_config=cfg, stable_refresh_reasons=dict(self._stable_reasons),
             stable_swaps=int(counts[0]), stable_unit_updates=int(counts[1]), stable_unit_noops=int(counts[2]),
             stable_removal_guard_rejected_units=int(counts[3]),
-            stable_iou_previous=counts[4]/max(1,units), stable_iou_anchor=counts[5]/max(1,units),
+            stable_iou_previous=counts[4]/units if units else None, stable_iou_anchor=counts[5]/units if units else None,
             stable_reentries=int(counts[6]), stable_immediate_reversals=int(counts[7]),
             stable_rejected_update_units=int(counts[8]), stable_persistence_rejections=int(counts[9]),stable_cumulative_rejections=int(counts[10]),
             stable_max_event_swaps=max([int(s.max_event_swaps) for s in tensors]+[int(self._stable_totals['event_max'])]) if tensors else 0,

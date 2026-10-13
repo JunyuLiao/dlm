@@ -189,6 +189,8 @@ class StableState:
                 assert_budget(selected, self.k, self.mandatory)
         additions, removals = selected & ~old, old & ~selected
         swaps = additions.sum(-1)
+        if cfg.mode != 'stable':
+            self.cumulative += swaps.to(torch.int32)
         self.max_event_swaps = torch.maximum(self.max_event_swaps,swaps.max().to(torch.int32))
         union = (selected | old).sum(-1).clamp_min(1)
         iou = (selected & old).sum(-1) / union

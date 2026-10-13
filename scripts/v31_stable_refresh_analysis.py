@@ -87,15 +87,31 @@ def main():
                 report['paired'][ref]=cluster_pair(rr,base,sc,scores[ref][ds])
             reports.append(report)
     jsonwrite(resultdir/'native_workload_results.json',reports)
+    # Predeclared development recommendation; this is not a noninferiority claim.
+    recommendations=[]
+    for arm in completion['arms']:
+        if arm in ('dense_full_fix51994','dense_piecewise','allkept_fa4','v31_progress_dense_control'):continue
+        armrows=[r for r in reports if r['arm']==arm]
+        criteria=[]
+        for r in armrows:
+            baseline=next(b for b in reports if b['arm']=='v31_progress_dense_control' and b['workload']==r['workload'])
+            criteria.append(r['paired']['v31_progress_dense_control']['aggregate_N_ratio']<=1.02
+                and r['NC_mean']<=1.02*baseline['NC_mean'] and r['N_p95']<=1.05*baseline['N_p95']
+                and r['cap_hits']/r['cells']-baseline['cap_hits']/baseline['cells']<=.02)
+        advantage=all(r['paired']['v31_progress_dense_control']['accuracy_delta_pp']>=0 for r in armrows) and any(r['paired']['v31_progress_dense_control']['accuracy_delta_pp']>0 for r in armrows)
+        recommendations.append(dict(arm=arm,trajectory_gate_passed=all(criteria),development_accuracy_advantage=advantage,
+            recommendation='gather larger audit evidence' if all(criteria) and advantage else 'retain as diagnostic; no expansion yet'))
+    jsonwrite(resultdir/'recommendations.json',recommendations)
     lines=['# Stable cheap refresh development panel','', 'Previously examined development data; fresh controls, fixed native settings, no clean timing.','',
         '| Arm | Workload | Correct / cells | Accuracy | Mean N | p95 N | Mean N/C | N ratio vs progress V31 | Paired wins/losses |','|---|---|---:|---:|---:|---:|---:|---:|---:|']
     for r in reports:
         pair=r['paired']['v31_progress_dense_control']
         lines.append(f"| {r['arm']} | {r['workload']} | {r['correct']}/{r['cells']} | {r['accuracy_pct']:.2f}% | {r['N_mean']:.2f} | {r['N_p95']:.1f} | {r['NC_mean']:.2f} | {pair['aggregate_N_ratio']:.4f} | {pair['wins']}/{pair['losses']} |")
-    lines += ['', 'Problem-clustered confidence intervals, receipt counters, and physical accounting are in native_workload_results.json. Lower N and higher sparsity are not end-to-end speed claims. The 503-cell expansion is a later gate.']
+    lines += ['', 'Problem-clustered confidence intervals, receipt counters, and physical accounting are in native_workload_results.json. Lower N and higher sparsity are not end-to-end speed claims. The 503-cell expansion is a later gate.', '', '## Development recommendation', '']
+    for r in recommendations:lines.append(f"- `{r['arm']}`: {r['recommendation']}; trajectory gate passed={r['trajectory_gate_passed']}.")
     (study/'summary.md').write_text('\n'.join(lines)+'\n')
     jsonwrite(study/'final_complete.json',dict(status='complete',arms=completion['arms'],native_cells=154*len(completion['arms']),
-        source_identity_sha256=sha(study/'specs/execution_identity.json'),operator_complete=bool((study/'operator/real_replay/final_complete.json').exists()),
+        source_identity_sha256=sha(study/'specs/execution_identity.json'),operator_complete=bool((study/'operator/real_replay_complete.json').exists()),
         official_scoring_complete=True,clean_timing='paused',data_status='previously examined development panel'))
 
 

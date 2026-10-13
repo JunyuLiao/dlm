@@ -298,6 +298,8 @@ def main():
                 errors.append('unexpected unlabelled dense rescue')
             if stable_config['selector']['mode'] == 'stable' and audit.get('stable_max_cumulative_swaps', 0) > stable_config['selector'].get('cumulative_cap', 8):
                 errors.append('cumulative stability budget violation')
+            if stable_config['selector']['mode'] == 'stable' and audit.get('stable_max_event_swaps', 0) > stable_config['selector'].get('event_cap', 2):
+                errors.append('per-event stability budget violation')
             if not stable_config['selector']['updates_enabled'] and reasons.get('actual_updates', 0):
                 errors.append('updates-disabled changed a map')
     receipt = dict(status='complete' if result.returncode==0 and len(rows)==len(cells) else 'failed',
