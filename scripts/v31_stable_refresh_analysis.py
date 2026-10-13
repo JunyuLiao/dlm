@@ -17,6 +17,7 @@ def sha(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 def jsonwrite(path,obj): path.write_text(json.dumps(obj,indent=2,sort_keys=True)+'\n')
 def scoring_inputs(study):
     return dict(native_panel_cells=study/'private/cells_native_panel154.json',
+        real_snapshot_inventory=study/'specs/real_snapshot_inventory.json',
         longbench_cells=study/'private/cells_longbench64_seed1.json',
         aime_cells=study/'private/cells_aime26_30x3_seed42_43_44.json',
         longbench_official_gold=Path('/home/exouser/dyh/ljy_value_20261007/pools/longbench_v2_ofc/longbench_v2_0shot_think_gold.json'),
@@ -49,6 +50,9 @@ def main():
         if sha(ROOT/path)!=digest:raise RuntimeError('frozen scoring source mismatch')
     for label,digest in scoring_identity['input_sha256'].items():
         if sha(scoring_inputs(study)[label])!=digest:raise RuntimeError('frozen official scoring input mismatch')
+    snapshot_inventory=json.loads((study/'specs/real_snapshot_inventory.json').read_text())
+    for path,digest in snapshot_inventory['sha256'].items():
+        if sha(study/path)!=digest:raise RuntimeError('real Q/K/V snapshot identity mismatch')
     for path,digest in identity['source_sha256'].items():
         if sha(ROOT/path)!=digest: raise RuntimeError('source identity mismatch during final analysis')
     resultdir=study/'reports';resultdir.mkdir(exist_ok=True); rows={};scores={};receipts={};score_diagnostics={};configs={}
