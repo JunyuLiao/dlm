@@ -71,3 +71,37 @@ def test_legacy_count_and_quick_token_schedules_share_binding(tmp_path):
         assert len(sweep.check_inputs(pool,cells))==1
     sweep.write(cells,[{'dataset':'sample','index':0,'id':'one','prompt_tokens':4}])
     with pytest.raises(RuntimeError,match='input mismatch'):sweep.check_inputs(pool,cells)
+
+
+def test_final_publication_uses_common_visible_canvas_cohort(tmp_path):
+    monitor=module('v31_monitor_local_threshold_sweep')
+    repo=tmp_path/'repo';root=repo/'results/study';root.mkdir(parents=True)
+    (repo/'docs').mkdir()
+    for path in ['HANDOFF.md','docs/DECISIONS.md','docs/RESULTS_LEDGER.md']:(repo/path).write_text('initial\n')
+    summaries=[];wins={}
+    for suite in ['longbench_v2','aime26','math500']:
+        wins[suite]={'threshold':.021}
+        for arm,kept in [('current_v31_control',1),('v2_tau_0p021',2)]:
+            rel=f'runs/{suite}/{arm}/shard001/attempt001';p=root/rel;p.mkdir(parents=True)
+            records=[]
+            for i,C in [(0,20),(1,19)]:
+                records.append(dict(dataset=suite,index=i,panel_seed=1,repeat=0,canvases=C,
+                    receipts={'adapter':{'value_canvas_phase_tiles':{
+                        str(cid):{'held':{'kept_tiles':kept,'eligible_tiles':4}} for cid in range(8,28)}}}))
+            (p/'records.jsonl').write_text('\n'.join(__import__('json').dumps(r) for r in records)+'\n')
+            s=dict(suite=suite,arm=arm,threshold=None if kept==1 else .021,items=2,correct=1,
+                attempts=[rel],work={'mean_N':10.,'phases':{},'cumulative_common_prefix':[]})
+            if kept==2:s.update(global_kept_ratio_vs_v31=2.,paired_vs_v31={
+                'delta_pp':0.,'problem_cluster_bootstrap_ci95_pp':[-1.,1.],
+                'problem_clusters':2,'mcnemar_exact_p':1.,'output_hash_mismatches':2,
+                'output_token_count_mismatches':0,'denoising_call_mismatches':0})
+            sweep.write(root/f'reports/{suite}/{arm}/summary.json',s);summaries.append(s)
+    sweep.write(root/'curve.json',{'status':'partial','arms':summaries})
+    sweep.write(root/'protocol.json',{'date':'2026-10-14','source_commit':'pinned'})
+    sweep.write(root/'final_complete.json',{'best_shared_threshold':.021,'workload_winners':wins})
+    monitor.publish_complete(root,repo)
+    rows=sweep.read(root/'early_work_matched_cohorts.json')
+    x=next(x for x in rows if x['suite']=='longbench_v2' and x['canvas_prefix']==20)
+    assert x['common_items']==1 and x['control_kept']==20 and x['candidate_kept']==40
+    assert sweep.read(root/'curve.json')['status']=='complete'
+    assert (root/'documentation_complete.json').exists()
