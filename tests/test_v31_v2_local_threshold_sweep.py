@@ -109,3 +109,12 @@ def test_final_publication_uses_common_visible_canvas_cohort(tmp_path):
     assert x['common_items']==1 and x['control_kept']==20 and x['candidate_kept']==40
     assert sweep.read(root/'curve.json')['status']=='complete'
     assert (root/'documentation_complete.json').exists()
+
+
+def test_monitor_reports_dead_coordinator_even_if_pid_is_zombie(monkeypatch):
+    monitor=module('v31_monitor_local_threshold_sweep')
+    monkeypatch.setattr(monitor.os,'kill',lambda pid,sig:None)
+    monkeypatch.setattr(Path,'read_text',lambda self:'123 (python worker) Z 1 2 3')
+    assert monitor.alive(123) is False
+    monkeypatch.setattr(Path,'read_text',lambda self:'123 (python worker) S 1 2 3')
+    assert monitor.alive(123) is True

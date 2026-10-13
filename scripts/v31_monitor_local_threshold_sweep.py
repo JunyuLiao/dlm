@@ -15,8 +15,11 @@ import time
 def read(p):return json.loads(Path(p).read_text())
 
 def alive(pid):
-    try:os.kill(pid,0);return True
-    except ProcessLookupError:return False
+    try:
+        os.kill(pid,0)
+        state=(Path('/proc')/str(pid)/'stat').read_text().rsplit(')',1)[1].split()[0]
+        return state!='Z'
+    except (ProcessLookupError, FileNotFoundError):return False
 
 
 def publish_complete(root,repo):
