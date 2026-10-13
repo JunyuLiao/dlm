@@ -18,6 +18,7 @@ def main():
     if output.exists(): raise RuntimeError('replay output already exists; preserve it and choose a new study/attempt')
     output.mkdir(parents=True)
     configs={'raw_s2':(StableConfig(mode='raw',hysteresis=0),2,True),
+             'v31_progress_hold':(StableConfig(mode='raw',updates_enabled=False),0,True),
              'bounded8_diagnostic_s2':(StableConfig(mode='bounded_diagnostic'),2,True),
              'hold_no_progress':(StableConfig(mode='raw',updates_enabled=False),0,False),
              **{f'raw_no_progress_s{s}':(StableConfig(mode='raw',hysteresis=0),s,False) for s in (1,4,8)}}
@@ -76,11 +77,12 @@ def main():
                 rel=rowerr/dense.norm(dim=-1).reshape(-1).clamp_min(1e-8)
                 kept_log=torch.logaddexp(z.masked_fill(~before[:,:,None],-math.inf).logsumexp(1),tail)
                 true_mass=(kept_log-dense_norm).exp()[valid]
-                immediate=0.; realized=0.; predicted=None
+                immediate=0.; realized=0.; error_improvement=0.; predicted=None
                 if name in pending:
                     old,predicted=pending[name]
                     held_output=output_for(old)
                     immediate=float((used-held_output).norm(dim=-1).amax())
+                    error_improvement=float((held_output-dense).norm(dim=-1).mean()-rowerr.mean())
                     oldmass=(torch.logaddexp(z.masked_fill(~old[:,:,None],-math.inf).logsumexp(1),tail)-dense_norm).exp()[valid]
                     realized=float((true_mass-oldmass).mean())
                 due=period>0 and clocks[name]%period==0 and state.k<pt
@@ -113,9 +115,10 @@ def main():
                     pold=(torch.logaddexp(hybrid.masked_fill(~before[:,:,None],-math.inf).logsumexp(1),tail)-predict_norm).exp()[valid]
                     pending[name]=(before,float((pnew-pold).mean()))
                 else: pending.pop(name,None)
-                records.append(dict(arm=name,dataset=data['dataset'],layer=data['layer'],canvas=data['canvas'],call=data['call'],anchor_age=anchor_age[name],
+                records.append(dict(arm=name,trajectory=group[0],dataset=data['dataset'],layer=data['layer'],canvas=data['canvas'],call=data['call'],anchor_age=anchor_age[name],
                     true_retained_mass_mean=float(true_mass.mean()),row_error_mean=float(rowerr.mean()),row_error_p95=float(torch.quantile(rowerr,.95)),row_error_max=float(rowerr.max()),relative_row_error_mean=float(rel.mean()),
                     immediate_output_change_max=immediate,realized_mass_change=realized,predicted_mass_change=predicted,
+                    realized_error_improvement=error_improvement,
                     observation=due,swaps=swaps,cumulative_max=int(state.cumulative.max()),guard_rejections=rejected,
                     iou_anchor=float((before&state.initial).sum()/((before|state.initial).sum().clamp_min(1))),
                     outside_logmass_prediction_error=outside_err,selector_ms=selector_ms,probe_rectangles=probe_work,
@@ -129,7 +132,7 @@ def main():
         aggregates[name]={k:sum(r[k] for r in rr)/max(1,len(rr)) for k in ('true_retained_mass_mean','row_error_p95','immediate_output_change_max','outside_logmass_prediction_error','selector_ms')}
         aggregates[name].update(records=len(rr),swaps=sum(r['swaps'] for r in rr),max_cumulative=max((r['cumulative_max'] for r in rr),default=0),
             false_admissions=sum(r['predicted_mass_change'] is not None and r['predicted_mass_change']>0 and r['realized_mass_change']<0 for r in rr))
-    raw=aggregates['raw_s2']; hold=aggregates['hold_no_progress']
+    raw=aggregates['raw_s2']; hold=aggregates['v31_progress_hold']
     acceptable=[(name,x) for name,x in aggregates.items() if name.startswith('stable_l') and
         x['immediate_output_change_max']<=.5*raw['immediate_output_change_max'] and x['true_retained_mass_mean']>=hold['true_retained_mass_mean']]
     selected=(max(acceptable,key=lambda p:(p[1]['true_retained_mass_mean'],-p[1]['swaps']))[0] if acceptable else 'stable_l3_g0_s2')
