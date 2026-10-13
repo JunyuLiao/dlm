@@ -116,6 +116,10 @@ def main():
             for a in audits:
                 for key,val in a.get('stable_refresh_reasons',{}).items(): reason[key]+=val
                 for key,val in a.get('stable_age_histogram',{}).items():ages[key]+=val
+            if arm in ('dense_full_fix51994','dense_piecewise'):
+                reason['native_dense_global']=total('global_calls')
+            elif arm=='allkept_fa4':
+                reason['allkept_fa4_global']=total('global_calls')
             def max_audit(field):return max((a.get(field,0) or 0 for a in audits),default=0)
             units=total('stable_unit_updates')+total('stable_unit_noops')
             def unit_average(field):
@@ -128,6 +132,7 @@ def main():
                 output_tokens_mean=float(t.mean()),cap_hits=diag.get('capped',0),unfinished_responses=diag.get('no_final_response',0),
                 unparsed_responses=diag.get('unparsed',0),finished_responses=diag.get('finished',0),
                 global_kept_tiles=total('global_kept_tiles'),global_eligible_tiles=total('global_eligible_tiles'),
+                global_calls=total('global_calls'),
                 global_physical_sparsity=1-total('global_kept_tiles')/max(1,total('global_eligible_tiles')),
                 local_calls=total('native_local_calls_audited'),local_skipped=total('native_local_skipped_tiles'),local_eligible_rectangles=total('native_local_eligible_rectangles'),
                 overall_rectangle_denominator=total('overall_eligible_rectangles'),overall_skipped_rectangles=total('overall_skipped_rectangles'),
@@ -139,6 +144,9 @@ def main():
                 max_event_swaps=max_audit('stable_max_event_swaps'),max_cumulative_swaps=max_audit('stable_max_cumulative_swaps'),
                 iou_previous=unit_average('stable_iou_previous'),iou_anchor=unit_average('stable_iou_anchor'),
                 unit_updates=total('stable_unit_updates'),rejected_update_units=total('stable_rejected_update_units'),
+                mean_swaps_per_observed_unit=total('stable_swaps')/max(1,units),
+                mask_churn_per_observed_unit=total('stable_swaps')/max(1,128*units),
+                peak_cuda_allocated_bytes_max=max(r.get('peak_cuda_allocated_bytes',0) for r in vals),
                 persistence_rejections=total('stable_persistence_rejections') if stable_mode else None,
                 cumulative_rejections=total('stable_cumulative_rejections') if stable_mode else None,
                 stable_refresh_config=configs[arm][0]['stable_refresh_config'],
@@ -196,7 +204,7 @@ def main():
         lines.append(f"| {r['arm']} | {r['workload']} | {r['correct']}/{r['cells']} | {r['accuracy_pct']:.2f}% | {r['N_mean']:.2f} | {r['N_p95']:.1f} | {r['NC_mean']:.2f} | {pair['aggregate_N_ratio']:.4f} | {pair['wins']}/{pair['losses']} |")
     lines+=['','## Selector overhead and work','',
         'Audit measurements include observation and ranking instrumentation. QK is duplicated for selected tiles and mandatory tail; no selector PV or KV-head union is used. These measurements are not clean latency.', '',
-        '| Arm | Workload | Observations / updates | QK rectangles | Probe rectangles | Audit ms/observation | Max state MiB | GLOBAL sparsity |',
+        '| Arm | Workload | Observations / updates | QK rectangles | Probe rectangles | Audit ms/observation | Max final state MiB | GLOBAL sparsity |',
         '|---|---|---:|---:|---:|---:|---:|---:|']
     for r in reports:
         why=r['dense_and_observation_reasons']
