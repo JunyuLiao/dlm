@@ -12,7 +12,9 @@ import v31_official as official
 ROOT=Path(__file__).resolve().parents[1]
 
 
-def cell_key(row): return f"{row['dataset']}|{row['index']}|{row['panel_seed']}|{row['repeat']}"
+def cell_key(row):
+    seed=row['panel_seed'] if 'panel_seed' in row else row['seed']
+    return f"{row['dataset']}|{row['index']}|{seed}|{row.get('repeat',0)}"
 def sha(path): return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 def jsonwrite(path,obj): path.write_text(json.dumps(obj,indent=2,sort_keys=True)+'\n')
 def scoring_inputs(study):
@@ -42,10 +44,13 @@ def cluster_pair(candidates,control,score,refscore):
 
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--study',type=Path,required=True);args=p.parse_args();study=args.study.resolve()
+    p=argparse.ArgumentParser();p.add_argument('--study',type=Path,required=True)
+    p.add_argument('--scoring-identity',type=Path)
+    args=p.parse_args();study=args.study.resolve()
     completion=json.loads((study/'native_generation_complete.json').read_text())
     identity=json.loads((study/'specs/execution_identity.json').read_text())
-    scoring_identity=json.loads((study/'specs/scoring_identity.json').read_text())
+    scoring_identity_file=args.scoring_identity or study/'specs/scoring_identity.json'
+    scoring_identity=json.loads(scoring_identity_file.read_text())
     for path,digest in scoring_identity['source_sha256'].items():
         if sha(ROOT/path)!=digest:raise RuntimeError('frozen scoring source mismatch')
     for label,digest in scoring_identity['input_sha256'].items():
@@ -107,7 +112,7 @@ def main():
                 if cfg[field]!=configs[reference][0][field]:raise RuntimeError(f'configuration fairness mismatch: {field}')
         fairness.append(dict(arm=arm,cells=len(rows[arm]),source_matched=True,native_sampler_bindings_matched=True,
             local_remained_dense=True,no_graph_captures=True,receipts=receipts[arm]))
-    jsonwrite(resultdir/'fairness_audit.json',dict(status='complete',arms=fairness,scoring_identity_sha256=sha(study/'specs/scoring_identity.json')))
+    jsonwrite(resultdir/'fairness_audit.json',dict(status='complete',arms=fairness,scoring_identity_sha256=sha(scoring_identity_file)))
     reports=[]
     for arm in completion['arms']:
         for ds in ('longbench_v2_0shot_think','aime26'):
@@ -218,7 +223,8 @@ def main():
     (study/'summary.md').write_text('\n'.join(lines)+'\n')
     jsonwrite(study/'final_complete.json',dict(status='complete',arms=completion['arms'],native_cells=154*len(completion['arms']),
         source_identity_sha256=sha(study/'specs/execution_identity.json'),operator_complete=bool((study/'operator/real_replay_complete.json').exists()),
-        scoring_identity_sha256=sha(study/'specs/scoring_identity.json'),fairness_audit_sha256=sha(resultdir/'fairness_audit.json'),
+        scoring_identity_sha256=sha(scoring_identity_file),scoring_identity_file=str(scoring_identity_file.relative_to(study)),
+        fairness_audit_sha256=sha(resultdir/'fairness_audit.json'),
         official_scoring_complete=True,clean_timing='paused',data_status='previously examined development panel'))
 
 
