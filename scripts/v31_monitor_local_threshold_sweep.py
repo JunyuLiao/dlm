@@ -87,6 +87,22 @@ def publish_complete(root,repo):
             p=s.get('paired_vs_v31')
             if p:
                 w.writerow({k:v for k,v in dict(suite=s['suite'],arm=s['arm'],threshold=s['threshold'],ci95_low_pp=p['problem_cluster_bootstrap_ci95_pp'][0],ci95_high_pp=p['problem_cluster_bootstrap_ci95_pp'][1],**p).items() if k in fields})
+    cost_rows=[]
+    for s in summaries:
+        a=s['work']
+        receipts=[read(root/rel/'receipt.json') for rel in s['attempts']]
+        cost_rows.append(dict(suite=s['suite'],arm=s['arm'],
+            gpu_worker_reservation_seconds=sum(r['worker_reservation_seconds'] for r in receipts),
+            gpu_seconds_definition='exclusive worker wall reservation including model load and warmup; not CUDA kernel active time',
+            physical_fa4_consumer_global_tiles=a['fa4_consumer_kept_global_tiles'],
+            value_selector_discovery_qk_rectangles=a['selector_discovery_qk_rectangles'],
+            value_selector_candidate_evaluations=a['selector_candidate_evaluations'],
+            value_selector_discovery_ms=a['selector_discovery_ms'],value_selector_selection_ms=a['selector_selection_ms'],
+            native_denoising_forwards=a['N'],output_visible_canvases=a['C'],
+            audit_wall_s=a['audit_wall_s'],audit_decode_s=a['audit_decode_s'],
+            audit_amortized_decode_s_per_N=a['audit_decode_s']/a['N'],
+            timing_status='instrumented audit; clean timing paused'))
+    (root/'cost_separation.json').write_text(json.dumps(cost_rows,indent=2)+'\n')
     relative=str(root.relative_to(repo));best=final['best_shared_threshold']
     lines=['',f'## V2 local threshold sweep completed — {protocol["date"]}','',
         f'Campaign `{relative}` completed all 503 LongBench-v2 items, 30 AIME26 problems',

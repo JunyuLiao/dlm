@@ -88,9 +88,13 @@ def test_final_publication_uses_common_visible_canvas_cohort(tmp_path):
                 records.append(dict(dataset=suite,index=i,panel_seed=1,repeat=0,canvases=C,
                     receipts={'adapter':{'value_canvas_phase_tiles':{
                         str(cid):{'held':{'kept_tiles':kept,'eligible_tiles':4}} for cid in range(8,28)}}}))
+            sweep.write(p/'receipt.json',{'worker_reservation_seconds':10.})
             (p/'records.jsonl').write_text('\n'.join(__import__('json').dumps(r) for r in records)+'\n')
             s=dict(suite=suite,arm=arm,threshold=None if kept==1 else .021,items=2,correct=1,
-                attempts=[rel],work={'mean_N':10.,'phases':{},'cumulative_common_prefix':[]})
+                attempts=[rel],work={'mean_N':10.,'phases':{},'cumulative_common_prefix':[],
+                      'fa4_consumer_kept_global_tiles':40,'selector_discovery_qk_rectangles':10,
+                      'selector_candidate_evaluations':10,'selector_discovery_ms':1.,
+                      'selector_selection_ms':1.,'N':20,'C':39,'audit_wall_s':2.,'audit_decode_s':1.})
             if kept==2:s.update(global_kept_ratio_vs_v31=2.,paired_vs_v31={
                 'delta_pp':0.,'problem_cluster_bootstrap_ci95_pp':[-1.,1.],
                 'problem_clusters':2,'mcnemar_exact_p':1.,'output_hash_mismatches':2,
