@@ -1,0 +1,4787 @@
+{
+  "arms": [
+    {
+      "N_ratio_vs_v31": 1.0024733343638894,
+      "accuracy": 0.5444444444444444,
+      "arm": "allkept_fa4",
+      "attempts": [
+        "runs/aime26/allkept_fa4/shard001/attempt001",
+        "runs/aime26/allkept_fa4/shard002/attempt001",
+        "runs/aime26/allkept_fa4/shard003/attempt001"
+      ],
+      "correct": 49,
+      "global_kept_ratio_vs_v31": 1.865439397151822,
+      "items": 90,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+        "arms": {
+          "allkept_fa4": {
+            "accuracy_by_panel_seed": {
+              "42": 50.0,
+              "43": 56.666666666666664,
+              "44": 56.666666666666664
+            },
+            "avg_at_k": 54.44444444444444,
+            "capped": 35,
+            "cells": 90,
+            "correct": 49,
+            "finished": 55,
+            "k_per_problem": [
+              3
+            ],
+            "no_final_response": 32,
+            "problems": 30,
+            "unparsed": 32,
+            "verified": 90
+          }
+        },
+        "coverage": {
+          "allkept_fa4": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 90,
+            "present": 90,
+            "scored": 90
+          }
+        },
+        "extraction": {
+          "file": "experiments/diffusion_gemma_aime30/protocol.py",
+          "module": "experiments.diffusion_gemma_aime30.protocol",
+          "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+        },
+        "metric": "exact match (avg@k over seeds)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 8,
+        "canvas_count_mismatches": 53,
+        "control_only_correct": 12,
+        "delta_pp": -4.444444444444444,
+        "denoising_call_mismatches": 90,
+        "mcnemar_exact_p": 0.5034446716308594,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 90,
+        "output_token_count_mismatches": 62,
+        "per_item_global_kept_delta": {
+          "max": 5429120.0,
+          "mean": 1298942.2222222222,
+          "median": 797760.0,
+          "min": -1730560.0,
+          "n": 90,
+          "p10": -218592.0,
+          "p25": 26120.0,
+          "p75": 2796800.0,
+          "p90": 3519104.0
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -14.444444444444443,
+          4.444444444444444
+        ],
+        "problem_clusters": 30
+      },
+      "status": "complete",
+      "suite": "aime26",
+      "threshold": null,
+      "work": {
+        "C": 1941,
+        "N": 25940,
+        "N_per_C": 13.36424523441525,
+        "T": 489518,
+        "audit_decode_s": 570.93501,
+        "audit_wall_s": 572.71994,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 1163040,
+            "item_kept_distribution": {
+              "max": 30400.0,
+              "mean": 12922.666666666666,
+              "median": 12320.0,
+              "min": 6720.0,
+              "n": 90,
+              "p10": 8560.0,
+              "p25": 10320.0,
+              "p75": 14520.0,
+              "p90": 17376.000000000007
+            },
+            "items": 90,
+            "kept_tiles": 1163040,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 3126560,
+            "item_kept_distribution": {
+              "max": 66240.0,
+              "mean": 34739.555555555555,
+              "median": 33520.0,
+              "min": 19040.0,
+              "n": 90,
+              "p10": 23952.0,
+              "p25": 27800.0,
+              "p75": 40080.0,
+              "p90": 47568.00000000001
+            },
+            "items": 90,
+            "kept_tiles": 3126560,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 5802240,
+            "item_kept_distribution": {
+              "max": 108800.0,
+              "mean": 64469.333333333336,
+              "median": 61840.0,
+              "min": 38240.0,
+              "n": 90,
+              "p10": 44144.0,
+              "p25": 50720.0,
+              "p75": 76160.0,
+              "p90": 85200.0
+            },
+            "items": 90,
+            "kept_tiles": 5802240,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 4,
+            "eligible_tiles": 9066080,
+            "item_kept_distribution": {
+              "max": 157440.0,
+              "mean": 100734.22222222222,
+              "median": 98080.0,
+              "min": 58560.0,
+              "n": 90,
+              "p10": 75600.0,
+              "p25": 84920.0,
+              "p75": 114560.0,
+              "p90": 133808.0
+            },
+            "items": 90,
+            "kept_tiles": 9066080,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 5,
+            "eligible_tiles": 13163360,
+            "item_kept_distribution": {
+              "max": 219360.0,
+              "mean": 146259.55555555556,
+              "median": 143840.0,
+              "min": 80000.0,
+              "n": 90,
+              "p10": 103488.0,
+              "p25": 121920.0,
+              "p75": 171400.0,
+              "p90": 194048.0
+            },
+            "items": 90,
+            "kept_tiles": 13163360,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 6,
+            "eligible_tiles": 18128000,
+            "item_kept_distribution": {
+              "max": 312640.0,
+              "mean": 201422.22222222222,
+              "median": 195040.0,
+              "min": 109120.0,
+              "n": 90,
+              "p10": 140752.0,
+              "p25": 167200.0,
+              "p75": 234600.0,
+              "p90": 268992.0
+            },
+            "items": 90,
+            "kept_tiles": 18128000,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 7,
+            "eligible_tiles": 23320480,
+            "item_kept_distribution": {
+              "max": 399040.0,
+              "mean": 259116.44444444444,
+              "median": 252160.0,
+              "min": 123520.0,
+              "n": 90,
+              "p10": 173312.0,
+              "p25": 217680.0,
+              "p75": 305080.0,
+              "p90": 355920.0000000001
+            },
+            "items": 90,
+            "kept_tiles": 23320480,
+            "sparsity": 0.0
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 251986240,
+        "finish_reasons": {
+          "length": 35,
+          "stop": 55
+        },
+        "global_eligible_tiles": 251986240,
+        "global_kept_tiles": 251986240,
+        "global_skipped_tiles": 0,
+        "global_sparsity": 0.0,
+        "items": 90,
+        "local_skipped_tiles": 0,
+        "mean_C": 21.566666666666666,
+        "mean_N": 288.22222222222223,
+        "mean_T": 5439.0888888888885,
+        "median_N": 262.5,
+        "median_T": 5518.5,
+        "overall_eligible_rectangles": 642885840,
+        "overall_skipped_rectangles": 0,
+        "overall_sparsity": 0.0,
+        "phases": {
+          "carried": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "dense": {
+            "calls": 129700,
+            "eligible_tiles": 251986240,
+            "kept_fraction": 1.0,
+            "kept_tiles": 251986240,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "initial": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "refresh": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "accuracy": 0.5888888888888889,
+      "arm": "current_v31_control",
+      "attempts": [
+        "runs/aime26/current_v31_control/shard001/attempt001",
+        "runs/aime26/current_v31_control/shard002/attempt001",
+        "runs/aime26/current_v31_control/shard003/attempt001"
+      ],
+      "correct": 53,
+      "items": 90,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+        "arms": {
+          "current_v31_control": {
+            "accuracy_by_panel_seed": {
+              "42": 56.666666666666664,
+              "43": 60.0,
+              "44": 60.0
+            },
+            "avg_at_k": 58.88888888888889,
+            "capped": 32,
+            "cells": 90,
+            "correct": 53,
+            "finished": 58,
+            "k_per_problem": [
+              3
+            ],
+            "no_final_response": 27,
+            "problems": 30,
+            "unparsed": 28,
+            "verified": 90
+          }
+        },
+        "coverage": {
+          "current_v31_control": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 90,
+            "present": 90,
+            "scored": 90
+          }
+        },
+        "extraction": {
+          "file": "experiments/diffusion_gemma_aime30/protocol.py",
+          "module": "experiments.diffusion_gemma_aime30.protocol",
+          "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+        },
+        "metric": "exact match (avg@k over seeds)"
+      },
+      "status": "complete",
+      "suite": "aime26",
+      "threshold": null,
+      "work": {
+        "C": 1912,
+        "N": 25876,
+        "N_per_C": 13.53347280334728,
+        "T": 482088,
+        "audit_decode_s": 575.16519,
+        "audit_wall_s": 576.96215,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 1128320,
+            "item_kept_distribution": {
+              "max": 36800.0,
+              "mean": 12536.888888888889,
+              "median": 12320.0,
+              "min": 5760.0,
+              "n": 90,
+              "p10": 8928.0,
+              "p25": 10120.0,
+              "p75": 13440.0,
+              "p90": 16416.000000000007
+            },
+            "items": 90,
+            "kept_tiles": 1128320,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 3171840,
+            "item_kept_distribution": {
+              "max": 65920.0,
+              "mean": 35242.666666666664,
+              "median": 34160.0,
+              "min": 19520.0,
+              "n": 90,
+              "p10": 24784.0,
+              "p25": 28800.0,
+              "p75": 39520.0,
+              "p90": 48688.000000000015
+            },
+            "items": 90,
+            "kept_tiles": 3171840,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 5901440,
+            "item_kept_distribution": {
+              "max": 106240.0,
+              "mean": 65571.55555555556,
+              "median": 61280.0,
+              "min": 37440.0,
+              "n": 90,
+              "p10": 46688.0,
+              "p25": 54160.0,
+              "p75": 76640.0,
+              "p90": 88432.00000000001
+            },
+            "items": 90,
+            "kept_tiles": 5901440,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 4,
+            "eligible_tiles": 9278080,
+            "item_kept_distribution": {
+              "max": 163200.0,
+              "mean": 103089.77777777778,
+              "median": 97920.0,
+              "min": 58720.0,
+              "n": 90,
+              "p10": 71920.0,
+              "p25": 82960.0,
+              "p75": 123280.0,
+              "p90": 139312.00000000006
+            },
+            "items": 90,
+            "kept_tiles": 9278080,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 5,
+            "eligible_tiles": 13427840,
+            "item_kept_distribution": {
+              "max": 239200.0,
+              "mean": 149198.22222222222,
+              "median": 138880.0,
+              "min": 87680.0,
+              "n": 90,
+              "p10": 102800.0,
+              "p25": 120240.0,
+              "p75": 182400.0,
+              "p90": 205072.0
+            },
+            "items": 90,
+            "kept_tiles": 13427840,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 6,
+            "eligible_tiles": 18665440,
+            "item_kept_distribution": {
+              "max": 398080.0,
+              "mean": 207393.77777777778,
+              "median": 197360.0,
+              "min": 115520.0,
+              "n": 90,
+              "p10": 132352.0,
+              "p25": 165760.0,
+              "p75": 250240.0,
+              "p90": 278176.00000000006
+            },
+            "items": 90,
+            "kept_tiles": 18665440,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 7,
+            "eligible_tiles": 23983840,
+            "item_kept_distribution": {
+              "max": 548480.0,
+              "mean": 266252.44444444444,
+              "median": 263280.0,
+              "min": 126400.0,
+              "n": 90,
+              "p10": 171024.0,
+              "p25": 206200.0,
+              "p75": 311840.0,
+              "p90": 355760.0
+            },
+            "items": 90,
+            "kept_tiles": 23962720,
+            "sparsity": 0.0008805929325745865
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 135081440,
+        "finish_reasons": {
+          "length": 32,
+          "stop": 58
+        },
+        "global_eligible_tiles": 250507040,
+        "global_kept_tiles": 135081440,
+        "global_skipped_tiles": 115425600,
+        "global_sparsity": 0.4607678889982493,
+        "items": 90,
+        "local_skipped_tiles": 0,
+        "mean_C": 21.244444444444444,
+        "mean_N": 287.5111111111111,
+        "mean_T": 5356.533333333334,
+        "median_N": 270.5,
+        "median_T": 5267.0,
+        "overall_eligible_rectangles": 640586240,
+        "overall_skipped_rectangles": 115425600,
+        "overall_sparsity": 0.1801874482973596,
+        "phases": {
+          "carried": {
+            "calls": 9560,
+            "eligible_tiles": 18625920,
+            "kept_fraction": 0.5211662027969625,
+            "kept_tiles": 9707200,
+            "skipped_tiles": 8918720,
+            "sparsity": 0.47883379720303754
+          },
+          "dense": {
+            "calls": 450,
+            "eligible_tiles": 101760,
+            "kept_fraction": 1.0,
+            "kept_tiles": 101760,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 100505,
+            "eligible_tiles": 197538560,
+            "kept_fraction": 0.4608299260660805,
+            "kept_tiles": 91031680,
+            "skipped_tiles": 106506880,
+            "sparsity": 0.5391700739339196
+          },
+          "initial": {
+            "calls": 9560,
+            "eligible_tiles": 17402240,
+            "kept_fraction": 1.0,
+            "kept_tiles": 17402240,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 9305,
+            "eligible_tiles": 16838560,
+            "kept_fraction": 1.0,
+            "kept_tiles": 16838560,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9803292626371928,
+      "accuracy": 0.5777777777777777,
+      "arm": "dense_full_fix51994",
+      "attempts": [
+        "runs/aime26/dense_full_fix51994/shard001/attempt001",
+        "runs/aime26/dense_full_fix51994/shard002/attempt001",
+        "runs/aime26/dense_full_fix51994/shard003/attempt001"
+      ],
+      "correct": 52,
+      "global_kept_ratio_vs_v31": 1.8071089559009734,
+      "items": 90,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+        "arms": {
+          "dense_full_fix51994": {
+            "accuracy_by_panel_seed": {
+              "42": 63.33333333333333,
+              "43": 60.0,
+              "44": 50.0
+            },
+            "avg_at_k": 57.77777777777777,
+            "capped": 30,
+            "cells": 90,
+            "correct": 52,
+            "finished": 60,
+            "k_per_problem": [
+              3
+            ],
+            "no_final_response": 29,
+            "problems": 30,
+            "unparsed": 30,
+            "verified": 90
+          }
+        },
+        "coverage": {
+          "dense_full_fix51994": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 90,
+            "present": 90,
+            "scored": 90
+          }
+        },
+        "extraction": {
+          "file": "experiments/diffusion_gemma_aime30/protocol.py",
+          "module": "experiments.diffusion_gemma_aime30.protocol",
+          "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+        },
+        "metric": "exact match (avg@k over seeds)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 10,
+        "canvas_count_mismatches": 57,
+        "control_only_correct": 11,
+        "delta_pp": -1.111111111111111,
+        "denoising_call_mismatches": 90,
+        "mcnemar_exact_p": 1.0,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 90,
+        "output_token_count_mismatches": 64,
+        "per_item_global_kept_delta": {
+          "max": 12142240.0,
+          "mean": 1211393.7777777778,
+          "median": 587280.0,
+          "min": -1632000.0,
+          "n": 90,
+          "p10": -382368.0,
+          "p25": -18040.0,
+          "p75": 2412560.0,
+          "p90": 3355056.0000000005
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -12.222222222222221,
+          10.0
+        ],
+        "problem_clusters": 30
+      },
+      "status": "complete",
+      "suite": "aime26",
+      "threshold": null,
+      "work": {
+        "C": 1923,
+        "N": 25367,
+        "N_per_C": 13.191367654706188,
+        "T": 484130,
+        "audit_decode_s": 514.11769,
+        "audit_wall_s": 515.90372,
+        "cumulative_common_prefix": [],
+        "fa4_consumer_kept_global_tiles": 244106880,
+        "finish_reasons": {
+          "length": 30,
+          "stop": 60
+        },
+        "global_eligible_tiles": 244106880,
+        "global_kept_tiles": 244106880,
+        "global_skipped_tiles": 0,
+        "global_sparsity": 0.0,
+        "items": 90,
+        "local_skipped_tiles": 0,
+        "mean_C": 21.366666666666667,
+        "mean_N": 281.85555555555555,
+        "mean_T": 5379.222222222223,
+        "median_N": 212.0,
+        "median_T": 4893.5,
+        "overall_eligible_rectangles": 626020480,
+        "overall_skipped_rectangles": 0,
+        "overall_sparsity": 0.0,
+        "phases": {
+          "carried": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "dense": {
+            "calls": 126835,
+            "eligible_tiles": 244106880,
+            "kept_fraction": 1.0,
+            "kept_tiles": 244106880,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "initial": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "refresh": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9626681094450456,
+      "accuracy": 0.5666666666666667,
+      "arm": "dense_piecewise",
+      "attempts": [
+        "runs/aime26/dense_piecewise/shard001/attempt001",
+        "runs/aime26/dense_piecewise/shard002/attempt001",
+        "runs/aime26/dense_piecewise/shard003/attempt001"
+      ],
+      "correct": 51,
+      "global_kept_ratio_vs_v31": 1.7580162011894453,
+      "items": 90,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+        "arms": {
+          "dense_piecewise": {
+            "accuracy_by_panel_seed": {
+              "42": 56.666666666666664,
+              "43": 60.0,
+              "44": 53.333333333333336
+            },
+            "avg_at_k": 56.666666666666664,
+            "capped": 31,
+            "cells": 90,
+            "correct": 51,
+            "finished": 59,
+            "k_per_problem": [
+              3
+            ],
+            "no_final_response": 30,
+            "problems": 30,
+            "unparsed": 30,
+            "verified": 90
+          }
+        },
+        "coverage": {
+          "dense_piecewise": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 90,
+            "present": 90,
+            "scored": 90
+          }
+        },
+        "extraction": {
+          "file": "experiments/diffusion_gemma_aime30/protocol.py",
+          "module": "experiments.diffusion_gemma_aime30.protocol",
+          "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+        },
+        "metric": "exact match (avg@k over seeds)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 6,
+        "canvas_count_mismatches": 53,
+        "control_only_correct": 8,
+        "delta_pp": -2.2222222222222223,
+        "denoising_call_mismatches": 89,
+        "mcnemar_exact_p": 0.79052734375,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 90,
+        "output_token_count_mismatches": 64,
+        "per_item_global_kept_delta": {
+          "max": 4214560.0,
+          "mean": 1137710.2222222222,
+          "median": 518480.0,
+          "min": -1734720.0,
+          "n": 90,
+          "p10": -328095.99999999994,
+          "p25": 11320.0,
+          "p75": 2501840.0,
+          "p90": 3331088.0000000014
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -12.222222222222221,
+          5.555555555555556
+        ],
+        "problem_clusters": 30
+      },
+      "status": "complete",
+      "suite": "aime26",
+      "threshold": null,
+      "work": {
+        "C": 1907,
+        "N": 24910,
+        "N_per_C": 13.062401678028317,
+        "T": 480873,
+        "audit_decode_s": 533.67424,
+        "audit_wall_s": 535.42287,
+        "cumulative_common_prefix": [],
+        "fa4_consumer_kept_global_tiles": 237475360,
+        "finish_reasons": {
+          "length": 31,
+          "stop": 59
+        },
+        "global_eligible_tiles": 237475360,
+        "global_kept_tiles": 237475360,
+        "global_skipped_tiles": 0,
+        "global_sparsity": 0.0,
+        "items": 90,
+        "local_skipped_tiles": 0,
+        "mean_C": 21.18888888888889,
+        "mean_N": 276.77777777777777,
+        "mean_T": 5343.033333333334,
+        "median_N": 223.0,
+        "median_T": 4840.5,
+        "overall_eligible_rectangles": 611337360,
+        "overall_skipped_rectangles": 0,
+        "overall_sparsity": 0.0,
+        "phases": {
+          "carried": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "dense": {
+            "calls": 124550,
+            "eligible_tiles": 237475360,
+            "kept_fraction": 1.0,
+            "kept_tiles": 237475360,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "initial": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "refresh": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9891018704591127,
+      "accuracy": 0.5,
+      "arm": "v2_tau_0p018",
+      "attempts": [
+        "runs/aime26/v2_tau_0p018/shard001/attempt001",
+        "runs/aime26/v2_tau_0p018/shard002/attempt001",
+        "runs/aime26/v2_tau_0p018/shard003/attempt001"
+      ],
+      "correct": 45,
+      "global_kept_ratio_vs_v31": 1.546624391922384,
+      "items": 90,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+        "arms": {
+          "v2_tau_0p018": {
+            "accuracy_by_panel_seed": {
+              "42": 53.333333333333336,
+              "43": 50.0,
+              "44": 46.666666666666664
+            },
+            "avg_at_k": 50.0,
+            "capped": 35,
+            "cells": 90,
+            "correct": 45,
+            "finished": 55,
+            "k_per_problem": [
+              3
+            ],
+            "no_final_response": 32,
+            "problems": 30,
+            "unparsed": 33,
+            "verified": 90
+          }
+        },
+        "coverage": {
+          "v2_tau_0p018": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 90,
+            "present": 90,
+            "scored": 90
+          }
+        },
+        "extraction": {
+          "file": "experiments/diffusion_gemma_aime30/protocol.py",
+          "module": "experiments.diffusion_gemma_aime30.protocol",
+          "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+        },
+        "metric": "exact match (avg@k over seeds)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 5,
+        "canvas_count_mismatches": 51,
+        "control_only_correct": 13,
+        "delta_pp": -8.888888888888888,
+        "denoising_call_mismatches": 88,
+        "mcnemar_exact_p": 0.09625244140625,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 90,
+        "output_token_count_mismatches": 63,
+        "per_item_global_kept_delta": {
+          "max": 3719758.0,
+          "mean": 820431.2222222222,
+          "median": 397425.0,
+          "min": -1547419.0,
+          "n": 90,
+          "p10": -197005.3,
+          "p25": -23511.75,
+          "p75": 1778005.75,
+          "p90": 2421013.7000000007
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -16.666666666666664,
+          -1.111111111111111
+        ],
+        "problem_clusters": 30
+      },
+      "status": "complete",
+      "suite": "aime26",
+      "threshold": 0.018,
+      "work": {
+        "C": 1937,
+        "N": 25594,
+        "N_per_C": 13.213216313887456,
+        "T": 489519,
+        "audit_decode_s": 653.12883,
+        "audit_wall_s": 655.03059,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 1096480,
+            "item_kept_distribution": {
+              "max": 22080.0,
+              "mean": 12172.81111111111,
+              "median": 11914.5,
+              "min": 6716.0,
+              "n": 90,
+              "p10": 7836.0,
+              "p25": 10074.5,
+              "p75": 13903.5,
+              "p90": 16366.800000000005
+            },
+            "items": 90,
+            "kept_tiles": 1095553,
+            "sparsity": 0.0008454326572303605
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 3096160,
+            "item_kept_distribution": {
+              "max": 62967.0,
+              "mean": 34275.77777777778,
+              "median": 33449.5,
+              "min": 20107.0,
+              "n": 90,
+              "p10": 24031.0,
+              "p25": 27579.25,
+              "p75": 39161.5,
+              "p90": 43286.9
+            },
+            "items": 90,
+            "kept_tiles": 3084820,
+            "sparsity": 0.0036626014159475417
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 5757440,
+            "item_kept_distribution": {
+              "max": 106039.0,
+              "mean": 63537.14444444444,
+              "median": 62343.0,
+              "min": 41510.0,
+              "n": 90,
+              "p10": 46760.3,
+              "p25": 50758.75,
+              "p75": 73998.25,
+              "p90": 82484.50000000001
+            },
+            "items": 90,
+            "kept_tiles": 5718343,
+            "sparsity": 0.006790691696309525
+          },
+          {
+            "canvas_prefix": 4,
+            "eligible_tiles": 9055840,
+            "item_kept_distribution": {
+              "max": 168923.0,
+              "mean": 99545.61111111111,
+              "median": 98347.0,
+              "min": 57821.0,
+              "n": 90,
+              "p10": 68210.2,
+              "p25": 80099.5,
+              "p75": 116718.75,
+              "p90": 131141.30000000002
+            },
+            "items": 90,
+            "kept_tiles": 8959105,
+            "sparsity": 0.010682057103482356
+          },
+          {
+            "canvas_prefix": 5,
+            "eligible_tiles": 13268320,
+            "item_kept_distribution": {
+              "max": 213630.0,
+              "mean": 145086.25555555554,
+              "median": 138144.0,
+              "min": 84540.0,
+              "n": 90,
+              "p10": 99560.8,
+              "p25": 120966.75,
+              "p75": 171522.75,
+              "p90": 199336.7
+            },
+            "items": 90,
+            "kept_tiles": 13057763,
+            "sparsity": 0.01586915298997915
+          },
+          {
+            "canvas_prefix": 6,
+            "eligible_tiles": 17852480,
+            "item_kept_distribution": {
+              "max": 304255.0,
+              "mean": 194238.23333333334,
+              "median": 190207.0,
+              "min": 114556.0,
+              "n": 90,
+              "p10": 128529.0,
+              "p25": 160566.75,
+              "p75": 227550.0,
+              "p90": 256889.10000000006
+            },
+            "items": 90,
+            "kept_tiles": 17481441,
+            "sparsity": 0.020783611016508607
+          },
+          {
+            "canvas_prefix": 7,
+            "eligible_tiles": 23257120,
+            "item_kept_distribution": {
+              "max": 418513.0,
+              "mean": 251595.16666666666,
+              "median": 249275.0,
+              "min": 133419.0,
+              "n": 90,
+              "p10": 157119.1,
+              "p25": 204093.25,
+              "p75": 301911.5,
+              "p90": 333680.50000000006
+            },
+            "items": 90,
+            "kept_tiles": 22643565,
+            "sparsity": 0.026381383421507087
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 208920250,
+        "finish_reasons": {
+          "length": 35,
+          "stop": 55
+        },
+        "global_eligible_tiles": 248979360,
+        "global_kept_tiles": 208920250,
+        "global_skipped_tiles": 40059110,
+        "global_sparsity": 0.16089329653670892,
+        "items": 90,
+        "local_skipped_tiles": 0,
+        "mean_C": 21.522222222222222,
+        "mean_N": 284.3777777777778,
+        "mean_T": 5439.1,
+        "median_N": 263.0,
+        "median_T": 5578.5,
+        "overall_eligible_rectangles": 634966960,
+        "overall_skipped_rectangles": 40059110,
+        "overall_sparsity": 0.06308849518721416,
+        "phases": {
+          "carried": {
+            "calls": 9685,
+            "eligible_tiles": 19146240,
+            "kept_fraction": 0.8589885011365156,
+            "kept_tiles": 16446400,
+            "skipped_tiles": 2699840,
+            "sparsity": 0.1410114988634844
+          },
+          "dense": {
+            "calls": 450,
+            "eligible_tiles": 101760,
+            "kept_fraction": 1.0,
+            "kept_tiles": 101760,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 98600,
+            "eligible_tiles": 194232480,
+            "kept_fraction": 0.807656937706814,
+            "kept_tiles": 156873210,
+            "skipped_tiles": 37359270,
+            "sparsity": 0.19234306229318598
+          },
+          "initial": {
+            "calls": 9685,
+            "eligible_tiles": 17906560,
+            "kept_fraction": 1.0,
+            "kept_tiles": 17906560,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 9550,
+            "eligible_tiles": 17592320,
+            "kept_fraction": 1.0,
+            "kept_tiles": 17592320,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 35498880,
+        "selector_discovery_ms": 11319.067231684923,
+        "selector_discovery_qk_rectangles": 35498880,
+        "selector_selection_ms": 69433.6859779805,
+        "value_selected_prefix_tiles": 25722129
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9901839542433143,
+      "accuracy": 0.5777777777777777,
+      "arm": "v2_tau_0p0195",
+      "attempts": [
+        "runs/aime26/v2_tau_0p0195/shard001/attempt001",
+        "runs/aime26/v2_tau_0p0195/shard002/attempt001",
+        "runs/aime26/v2_tau_0p0195/shard003/attempt001"
+      ],
+      "correct": 52,
+      "global_kept_ratio_vs_v31": 1.520145410057814,
+      "items": 90,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+        "arms": {
+          "v2_tau_0p0195": {
+            "accuracy_by_panel_seed": {
+              "42": 53.333333333333336,
+              "43": 66.66666666666666,
+              "44": 53.333333333333336
+            },
+            "avg_at_k": 57.77777777777777,
+            "capped": 33,
+            "cells": 90,
+            "correct": 52,
+            "finished": 57,
+            "k_per_problem": [
+              3
+            ],
+            "no_final_response": 27,
+            "problems": 30,
+            "unparsed": 27,
+            "verified": 90
+          }
+        },
+        "coverage": {
+          "v2_tau_0p0195": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 90,
+            "present": 90,
+            "scored": 90
+          }
+        },
+        "extraction": {
+          "file": "experiments/diffusion_gemma_aime30/protocol.py",
+          "module": "experiments.diffusion_gemma_aime30.protocol",
+          "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+        },
+        "metric": "exact match (avg@k over seeds)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 6,
+        "canvas_count_mismatches": 50,
+        "control_only_correct": 7,
+        "delta_pp": -1.111111111111111,
+        "denoising_call_mismatches": 88,
+        "mcnemar_exact_p": 1.0,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 90,
+        "output_token_count_mismatches": 62,
+        "per_item_global_kept_delta": {
+          "max": 3365023.0,
+          "mean": 780688.7888888889,
+          "median": 280095.0,
+          "min": -2522877.0,
+          "n": 90,
+          "p10": -240953.0,
+          "p25": -12140.0,
+          "p75": 1818822.75,
+          "p90": 2196357.6
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -8.888888888888888,
+          6.666666666666667
+        ],
+        "problem_clusters": 30
+      },
+      "status": "complete",
+      "suite": "aime26",
+      "threshold": 0.0195,
+      "work": {
+        "C": 1936,
+        "N": 25622,
+        "N_per_C": 13.234504132231406,
+        "T": 487320,
+        "audit_decode_s": 586.62425,
+        "audit_wall_s": 588.44786,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 1130880,
+            "item_kept_distribution": {
+              "max": 31845.0,
+              "mean": 12552.444444444445,
+              "median": 11520.0,
+              "min": 6716.0,
+              "n": 90,
+              "p10": 8640.0,
+              "p25": 10074.0,
+              "p75": 14512.5,
+              "p90": 16788.0
+            },
+            "items": 90,
+            "kept_tiles": 1129720,
+            "sparsity": 0.001025749858517222
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 3210080,
+            "item_kept_distribution": {
+              "max": 58430.0,
+              "mean": 35521.62222222222,
+              "median": 34165.0,
+              "min": 20436.0,
+              "n": 90,
+              "p10": 24260.3,
+              "p25": 28207.0,
+              "p75": 41553.25,
+              "p90": 47560.3
+            },
+            "items": 90,
+            "kept_tiles": 3196946,
+            "sparsity": 0.004091486816527934
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 5826240,
+            "item_kept_distribution": {
+              "max": 101470.0,
+              "mean": 64254.433333333334,
+              "median": 61161.0,
+              "min": 41327.0,
+              "n": 90,
+              "p10": 45406.4,
+              "p25": 50631.0,
+              "p75": 76718.25,
+              "p90": 86332.3
+            },
+            "items": 90,
+            "kept_tiles": 5782899,
+            "sparsity": 0.007438931454934905
+          },
+          {
+            "canvas_prefix": 4,
+            "eligible_tiles": 9194240,
+            "item_kept_distribution": {
+              "max": 165145.0,
+              "mean": 100954.06666666667,
+              "median": 102157.5,
+              "min": 58414.0,
+              "n": 90,
+              "p10": 69336.4,
+              "p25": 80668.0,
+              "p75": 118346.5,
+              "p90": 132587.50000000003
+            },
+            "items": 90,
+            "kept_tiles": 9085866,
+            "sparsity": 0.011787162397327022
+          },
+          {
+            "canvas_prefix": 5,
+            "eligible_tiles": 13215200,
+            "item_kept_distribution": {
+              "max": 221878.0,
+              "mean": 144308.85555555555,
+              "median": 145223.0,
+              "min": 81972.0,
+              "n": 90,
+              "p10": 99873.0,
+              "p25": 120382.0,
+              "p75": 162825.75,
+              "p90": 194317.6
+            },
+            "items": 90,
+            "kept_tiles": 12987797,
+            "sparsity": 0.017207685089896452
+          },
+          {
+            "canvas_prefix": 6,
+            "eligible_tiles": 18000320,
+            "item_kept_distribution": {
+              "max": 304980.0,
+              "mean": 195408.6,
+              "median": 195404.0,
+              "min": 102420.0,
+              "n": 90,
+              "p10": 126437.4,
+              "p25": 167690.25,
+              "p75": 226414.25,
+              "p90": 260097.1
+            },
+            "items": 90,
+            "kept_tiles": 17586774,
+            "sparsity": 0.022974369344544998
+          },
+          {
+            "canvas_prefix": 7,
+            "eligible_tiles": 23371840,
+            "item_kept_distribution": {
+              "max": 394121.0,
+              "mean": 252292.0888888889,
+              "median": 251690.0,
+              "min": 121228.0,
+              "n": 90,
+              "p10": 161064.8,
+              "p25": 207898.25,
+              "p75": 287391.0,
+              "p90": 335718.2
+            },
+            "items": 90,
+            "kept_tiles": 22706288,
+            "sparsity": 0.028476662513520545
+          },
+          {
+            "canvas_prefix": 8,
+            "eligible_tiles": 29161120,
+            "item_kept_distribution": {
+              "max": 474647.0,
+              "mean": 312646.8333333333,
+              "median": 316610.5,
+              "min": 150401.0,
+              "n": 90,
+              "p10": 190209.7,
+              "p25": 265864.0,
+              "p75": 365772.25,
+              "p90": 411461.80000000005
+            },
+            "items": 90,
+            "kept_tiles": 28138215,
+            "sparsity": 0.0350776993476245
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 205343431,
+        "finish_reasons": {
+          "length": 33,
+          "stop": 57
+        },
+        "global_eligible_tiles": 246088480,
+        "global_kept_tiles": 205343431,
+        "global_skipped_tiles": 40745049,
+        "global_sparsity": 0.16557072886955126,
+        "items": 90,
+        "local_skipped_tiles": 0,
+        "mean_C": 21.511111111111113,
+        "mean_N": 284.68888888888887,
+        "mean_T": 5414.666666666667,
+        "median_N": 240.5,
+        "median_T": 5247.0,
+        "overall_eligible_rectangles": 631873680,
+        "overall_skipped_rectangles": 40745049,
+        "overall_sparsity": 0.06448290265864531,
+        "phases": {
+          "carried": {
+            "calls": 9680,
+            "eligible_tiles": 19029440,
+            "kept_fraction": 0.8509111671178973,
+            "kept_tiles": 16192363,
+            "skipped_tiles": 2837077,
+            "sparsity": 0.14908883288210273
+          },
+          "dense": {
+            "calls": 450,
+            "eligible_tiles": 101760,
+            "kept_fraction": 1.0,
+            "kept_tiles": 101760,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 98805,
+            "eligible_tiles": 191731840,
+            "kept_fraction": 0.8022865059866947,
+            "kept_tiles": 153823868,
+            "skipped_tiles": 37907972,
+            "sparsity": 0.1977134940133053
+          },
+          "initial": {
+            "calls": 9680,
+            "eligible_tiles": 17790400,
+            "kept_fraction": 1.0,
+            "kept_tiles": 17790400,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 9495,
+            "eligible_tiles": 17435040,
+            "kept_fraction": 1.0,
+            "kept_tiles": 17435040,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 35225440,
+        "selector_discovery_ms": 10765.628512710333,
+        "selector_discovery_qk_rectangles": 35225440,
+        "selector_selection_ms": 6621.348320182413,
+        "value_selected_prefix_tiles": 25167216
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9692765496985624,
+      "accuracy": 0.6666666666666666,
+      "arm": "v2_tau_0p021",
+      "attempts": [
+        "runs/aime26/v2_tau_0p021/shard001/attempt001",
+        "runs/aime26/v2_tau_0p021/shard002/attempt001",
+        "runs/aime26/v2_tau_0p021/shard003/attempt001"
+      ],
+      "correct": 60,
+      "global_kept_ratio_vs_v31": 1.428390835928311,
+      "items": 90,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+        "arms": {
+          "v2_tau_0p021": {
+            "accuracy_by_panel_seed": {
+              "42": 70.0,
+              "43": 63.33333333333333,
+              "44": 66.66666666666666
+            },
+            "avg_at_k": 66.66666666666666,
+            "capped": 24,
+            "cells": 90,
+            "correct": 60,
+            "finished": 66,
+            "k_per_problem": [
+              3
+            ],
+            "no_final_response": 22,
+            "problems": 30,
+            "unparsed": 23,
+            "verified": 90
+          }
+        },
+        "coverage": {
+          "v2_tau_0p021": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 90,
+            "present": 90,
+            "scored": 90
+          }
+        },
+        "extraction": {
+          "file": "experiments/diffusion_gemma_aime30/protocol.py",
+          "module": "experiments.diffusion_gemma_aime30.protocol",
+          "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+        },
+        "metric": "exact match (avg@k over seeds)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 13,
+        "canvas_count_mismatches": 61,
+        "control_only_correct": 6,
+        "delta_pp": 7.777777777777777,
+        "denoising_call_mismatches": 90,
+        "mcnemar_exact_p": 0.1670684814453125,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 90,
+        "output_token_count_mismatches": 68,
+        "per_item_global_kept_delta": {
+          "max": 3732733.0,
+          "mean": 642973.9,
+          "median": 396591.5,
+          "min": -2493141.0,
+          "n": 90,
+          "p10": -212524.0,
+          "p25": -24915.75,
+          "p75": 1369881.25,
+          "p90": 1931124.1000000008
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -2.2222222222222214,
+          17.777777777777775
+        ],
+        "problem_clusters": 30
+      },
+      "status": "complete",
+      "suite": "aime26",
+      "threshold": 0.021,
+      "work": {
+        "C": 1931,
+        "N": 25081,
+        "N_per_C": 12.988606939409632,
+        "T": 485885,
+        "audit_decode_s": 573.54407,
+        "audit_wall_s": 575.36687,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 1140160,
+            "item_kept_distribution": {
+              "max": 34512.0,
+              "mean": 12654.633333333333,
+              "median": 12312.0,
+              "min": 6716.0,
+              "n": 90,
+              "p10": 8640.0,
+              "p25": 10070.5,
+              "p75": 14281.5,
+              "p90": 17529.000000000004
+            },
+            "items": 90,
+            "kept_tiles": 1138917,
+            "sparsity": 0.0010901978669660695
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 3103520,
+            "item_kept_distribution": {
+              "max": 64976.0,
+              "mean": 34337.188888888886,
+              "median": 33552.0,
+              "min": 18335.0,
+              "n": 90,
+              "p10": 23949.8,
+              "p25": 27528.0,
+              "p75": 39614.5,
+              "p90": 43677.800000000025
+            },
+            "items": 90,
+            "kept_tiles": 3090347,
+            "sparsity": 0.004244535237407865
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 5779520,
+            "item_kept_distribution": {
+              "max": 110591.0,
+              "mean": 63681.433333333334,
+              "median": 62085.0,
+              "min": 35465.0,
+              "n": 90,
+              "p10": 46446.2,
+              "p25": 50527.75,
+              "p75": 74064.0,
+              "p90": 85985.8
+            },
+            "items": 90,
+            "kept_tiles": 5731329,
+            "sparsity": 0.008338235701234709
+          },
+          {
+            "canvas_prefix": 4,
+            "eligible_tiles": 9014240,
+            "item_kept_distribution": {
+              "max": 148883.0,
+              "mean": 98841.27777777778,
+              "median": 95876.0,
+              "min": 53620.0,
+              "n": 90,
+              "p10": 69782.8,
+              "p25": 82599.5,
+              "p75": 115972.75,
+              "p90": 132099.6
+            },
+            "items": 90,
+            "kept_tiles": 8895715,
+            "sparsity": 0.013148640373453535
+          },
+          {
+            "canvas_prefix": 5,
+            "eligible_tiles": 13148960,
+            "item_kept_distribution": {
+              "max": 210209.0,
+              "mean": 143314.33333333334,
+              "median": 142381.5,
+              "min": 81052.0,
+              "n": 90,
+              "p10": 101277.9,
+              "p25": 114362.75,
+              "p75": 169395.0,
+              "p90": 194714.30000000002
+            },
+            "items": 90,
+            "kept_tiles": 12898290,
+            "sparsity": 0.019063865126975776
+          },
+          {
+            "canvas_prefix": 6,
+            "eligible_tiles": 18128320,
+            "item_kept_distribution": {
+              "max": 289201.0,
+              "mean": 196164.38888888888,
+              "median": 193757.5,
+              "min": 97213.0,
+              "n": 90,
+              "p10": 133037.2,
+              "p25": 157295.25,
+              "p75": 231791.25,
+              "p90": 256052.2
+            },
+            "items": 90,
+            "kept_tiles": 17654795,
+            "sparsity": 0.026120732643730937
+          },
+          {
+            "canvas_prefix": 7,
+            "eligible_tiles": 23675520,
+            "item_kept_distribution": {
+              "max": 376516.0,
+              "mean": 254419.3,
+              "median": 259323.0,
+              "min": 115388.0,
+              "n": 90,
+              "p10": 165479.0,
+              "p25": 202973.0,
+              "p75": 308059.0,
+              "p90": 333991.60000000003
+            },
+            "items": 90,
+            "kept_tiles": 22897737,
+            "sparsity": 0.03285178108020437
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 192949091,
+        "finish_reasons": {
+          "length": 24,
+          "stop": 66
+        },
+        "global_eligible_tiles": 232774400,
+        "global_kept_tiles": 192949091,
+        "global_skipped_tiles": 39825309,
+        "global_sparsity": 0.17108972893926477,
+        "items": 90,
+        "local_skipped_tiles": 0,
+        "mean_C": 21.455555555555556,
+        "mean_N": 278.6777777777778,
+        "mean_T": 5398.722222222223,
+        "median_N": 262.0,
+        "median_T": 5943.0,
+        "overall_eligible_rectangles": 610278000,
+        "overall_skipped_rectangles": 39825309,
+        "overall_sparsity": 0.06525765143098719,
+        "phases": {
+          "carried": {
+            "calls": 9655,
+            "eligible_tiles": 18474560,
+            "kept_fraction": 0.8446668824589056,
+            "kept_tiles": 15604849,
+            "skipped_tiles": 2869711,
+            "sparsity": 0.15533311754109436
+          },
+          "dense": {
+            "calls": 450,
+            "eligible_tiles": 101760,
+            "kept_fraction": 1.0,
+            "kept_tiles": 101760,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 96120,
+            "eligible_tiles": 179925600,
+            "kept_fraction": 0.7946062261290222,
+            "kept_tiles": 142970002,
+            "skipped_tiles": 36955598,
+            "sparsity": 0.2053937738709778
+          },
+          "initial": {
+            "calls": 9655,
+            "eligible_tiles": 17238720,
+            "kept_fraction": 1.0,
+            "kept_tiles": 17238720,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 9525,
+            "eligible_tiles": 17033760,
+            "kept_fraction": 1.0,
+            "kept_tiles": 17033760,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 34272480,
+        "selector_discovery_ms": 10530.434751525521,
+        "selector_discovery_qk_rectangles": 34272480,
+        "selector_selection_ms": 6564.886368636042,
+        "value_selected_prefix_tiles": 24092867
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9882903076209615,
+      "accuracy": 0.6111111111111112,
+      "arm": "v2_tau_0p0225",
+      "attempts": [
+        "runs/aime26/v2_tau_0p0225/shard001/attempt001",
+        "runs/aime26/v2_tau_0p0225/shard002/attempt001",
+        "runs/aime26/v2_tau_0p0225/shard003/attempt001"
+      ],
+      "correct": 55,
+      "global_kept_ratio_vs_v31": 1.461859556723707,
+      "items": 90,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+        "arms": {
+          "v2_tau_0p0225": {
+            "accuracy_by_panel_seed": {
+              "42": 63.33333333333333,
+              "43": 66.66666666666666,
+              "44": 53.333333333333336
+            },
+            "avg_at_k": 61.11111111111111,
+            "capped": 30,
+            "cells": 90,
+            "correct": 55,
+            "finished": 60,
+            "k_per_problem": [
+              3
+            ],
+            "no_final_response": 25,
+            "problems": 30,
+            "unparsed": 25,
+            "verified": 90
+          }
+        },
+        "coverage": {
+          "v2_tau_0p0225": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 90,
+            "present": 90,
+            "scored": 90
+          }
+        },
+        "extraction": {
+          "file": "experiments/diffusion_gemma_aime30/protocol.py",
+          "module": "experiments.diffusion_gemma_aime30.protocol",
+          "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+        },
+        "metric": "exact match (avg@k over seeds)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 11,
+        "canvas_count_mismatches": 61,
+        "control_only_correct": 9,
+        "delta_pp": 2.222222222222222,
+        "denoising_call_mismatches": 89,
+        "mcnemar_exact_p": 0.8238029479980469,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 90,
+        "output_token_count_mismatches": 66,
+        "per_item_global_kept_delta": {
+          "max": 3596586.0,
+          "mean": 693207.2666666667,
+          "median": 245206.0,
+          "min": -2127553.0,
+          "n": 90,
+          "p10": -248460.99999999997,
+          "p25": -34844.25,
+          "p75": 1719145.75,
+          "p90": 2130609.1
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -7.777777777777778,
+          13.333333333333334
+        ],
+        "problem_clusters": 30
+      },
+      "status": "complete",
+      "suite": "aime26",
+      "threshold": 0.0225,
+      "work": {
+        "C": 1941,
+        "N": 25573,
+        "N_per_C": 13.175167439464193,
+        "T": 489065,
+        "audit_decode_s": 588.11408,
+        "audit_wall_s": 589.96692,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 1194880,
+            "item_kept_distribution": {
+              "max": 53715.0,
+              "mean": 13261.633333333333,
+              "median": 12312.0,
+              "min": 7665.0,
+              "n": 90,
+              "p10": 8640.0,
+              "p25": 10560.0,
+              "p75": 14550.0,
+              "p90": 18240.0
+            },
+            "items": 90,
+            "kept_tiles": 1193547,
+            "sparsity": 0.0011155931976433164
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 3234240,
+            "item_kept_distribution": {
+              "max": 76422.0,
+              "mean": 35773.86666666667,
+              "median": 34381.0,
+              "min": 20397.0,
+              "n": 90,
+              "p10": 24133.0,
+              "p25": 26916.0,
+              "p75": 43158.0,
+              "p90": 48474.70000000001
+            },
+            "items": 90,
+            "kept_tiles": 3219648,
+            "sparsity": 0.004511724547343388
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 5827360,
+            "item_kept_distribution": {
+              "max": 100025.0,
+              "mean": 64188.2,
+              "median": 63517.0,
+              "min": 36075.0,
+              "n": 90,
+              "p10": 43866.9,
+              "p25": 52092.0,
+              "p75": 78313.5,
+              "p90": 86198.3
+            },
+            "items": 90,
+            "kept_tiles": 5776938,
+            "sparsity": 0.008652631723456206
+          },
+          {
+            "canvas_prefix": 4,
+            "eligible_tiles": 9179200,
+            "item_kept_distribution": {
+              "max": 173129.0,
+              "mean": 100568.5,
+              "median": 94666.5,
+              "min": 55243.0,
+              "n": 90,
+              "p10": 70163.7,
+              "p25": 82557.75,
+              "p75": 117649.0,
+              "p90": 134712.80000000002
+            },
+            "items": 90,
+            "kept_tiles": 9051165,
+            "sparsity": 0.013948383301377043
+          },
+          {
+            "canvas_prefix": 5,
+            "eligible_tiles": 13444640,
+            "item_kept_distribution": {
+              "max": 241109.0,
+              "mean": 146248.2111111111,
+              "median": 139799.5,
+              "min": 89130.0,
+              "n": 90,
+              "p10": 103100.2,
+              "p25": 125462.25,
+              "p75": 172502.0,
+              "p90": 188479.1
+            },
+            "items": 90,
+            "kept_tiles": 13162339,
+            "sparsity": 0.02099728962620051
+          },
+          {
+            "canvas_prefix": 6,
+            "eligible_tiles": 18397600,
+            "item_kept_distribution": {
+              "max": 314267.0,
+              "mean": 198602.04444444444,
+              "median": 194268.0,
+              "min": 117488.0,
+              "n": 90,
+              "p10": 136529.9,
+              "p25": 164355.75,
+              "p75": 227809.0,
+              "p90": 264167.6000000001
+            },
+            "items": 90,
+            "kept_tiles": 17874184,
+            "sparsity": 0.028450232639039896
+          },
+          {
+            "canvas_prefix": 7,
+            "eligible_tiles": 24044800,
+            "item_kept_distribution": {
+              "max": 513414.0,
+              "mean": 257714.14444444445,
+              "median": 251582.5,
+              "min": 144024.0,
+              "n": 90,
+              "p10": 169555.8,
+              "p25": 219738.5,
+              "p75": 302525.0,
+              "p90": 334634.60000000015
+            },
+            "items": 90,
+            "kept_tiles": 23194273,
+            "sparsity": 0.035372596153846136
+          },
+          {
+            "canvas_prefix": 8,
+            "eligible_tiles": 29833440,
+            "item_kept_distribution": {
+              "max": 581131.0,
+              "mean": 317389.15555555554,
+              "median": 309154.0,
+              "min": 155882.0,
+              "n": 90,
+              "p10": 207426.5,
+              "p25": 267638.75,
+              "p75": 366994.75,
+              "p90": 413692.4
+            },
+            "items": 90,
+            "kept_tiles": 28565024,
+            "sparsity": 0.04251658541556047
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 197470094,
+        "finish_reasons": {
+          "length": 30,
+          "stop": 60
+        },
+        "global_eligible_tiles": 243955520,
+        "global_kept_tiles": 197470094,
+        "global_skipped_tiles": 46485426,
+        "global_sparsity": 0.19054877708854467,
+        "items": 90,
+        "local_skipped_tiles": 0,
+        "mean_C": 21.566666666666666,
+        "mean_N": 284.14444444444445,
+        "mean_T": 5434.055555555556,
+        "median_N": 236.5,
+        "median_T": 5512.5,
+        "overall_eligible_rectangles": 628279920,
+        "overall_skipped_rectangles": 46485426,
+        "overall_sparsity": 0.07398839994759024,
+        "phases": {
+          "carried": {
+            "calls": 9705,
+            "eligible_tiles": 18915040,
+            "kept_fraction": 0.8269956077280302,
+            "kept_tiles": 15642655,
+            "skipped_tiles": 3272385,
+            "sparsity": 0.17300439227196984
+          },
+          "dense": {
+            "calls": 450,
+            "eligible_tiles": 101760,
+            "kept_fraction": 1.0,
+            "kept_tiles": 101760,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 98395,
+            "eligible_tiles": 189806240,
+            "kept_fraction": 0.7723307674183947,
+            "kept_tiles": 146593199,
+            "skipped_tiles": 43213041,
+            "sparsity": 0.22766923258160532
+          },
+          "initial": {
+            "calls": 9705,
+            "eligible_tiles": 17672800,
+            "kept_fraction": 1.0,
+            "kept_tiles": 17672800,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 9610,
+            "eligible_tiles": 17459680,
+            "kept_fraction": 1.0,
+            "kept_tiles": 17459680,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 35132480,
+        "selector_discovery_ms": 10805.232354775071,
+        "selector_discovery_qk_rectangles": 35132480,
+        "selector_selection_ms": 6771.8744599968195,
+        "value_selected_prefix_tiles": 24074081
+      }
+    },
+    {
+      "N_ratio_vs_v31": 1.0008888545370227,
+      "accuracy": 0.5555555555555556,
+      "arm": "v2_tau_0p024",
+      "attempts": [
+        "runs/aime26/v2_tau_0p024/shard001/attempt001",
+        "runs/aime26/v2_tau_0p024/shard002/attempt001",
+        "runs/aime26/v2_tau_0p024/shard003/attempt001"
+      ],
+      "correct": 50,
+      "global_kept_ratio_vs_v31": 1.48061167396498,
+      "items": 90,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+        "arms": {
+          "v2_tau_0p024": {
+            "accuracy_by_panel_seed": {
+              "42": 63.33333333333333,
+              "43": 46.666666666666664,
+              "44": 56.666666666666664
+            },
+            "avg_at_k": 55.55555555555556,
+            "capped": 34,
+            "cells": 90,
+            "correct": 50,
+            "finished": 56,
+            "k_per_problem": [
+              3
+            ],
+            "no_final_response": 31,
+            "problems": 30,
+            "unparsed": 31,
+            "verified": 90
+          }
+        },
+        "coverage": {
+          "v2_tau_0p024": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 90,
+            "present": 90,
+            "scored": 90
+          }
+        },
+        "extraction": {
+          "file": "experiments/diffusion_gemma_aime30/protocol.py",
+          "module": "experiments.diffusion_gemma_aime30.protocol",
+          "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+        },
+        "metric": "exact match (avg@k over seeds)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 6,
+        "canvas_count_mismatches": 55,
+        "control_only_correct": 9,
+        "delta_pp": -3.3333333333333335,
+        "denoising_call_mismatches": 88,
+        "mcnemar_exact_p": 0.60723876953125,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 90,
+        "output_token_count_mismatches": 62,
+        "per_item_global_kept_delta": {
+          "max": 3910960.0,
+          "mean": 721352.411111111,
+          "median": 320933.0,
+          "min": -2096258.0,
+          "n": 90,
+          "p10": -195480.09999999998,
+          "p25": -245.25,
+          "p75": 1629253.25,
+          "p90": 2397155.7
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -10.000000000000002,
+          3.3333333333333335
+        ],
+        "problem_clusters": 30
+      },
+      "status": "complete",
+      "suite": "aime26",
+      "threshold": 0.024,
+      "work": {
+        "C": 1958,
+        "N": 25899,
+        "N_per_C": 13.227272727272727,
+        "T": 494127,
+        "audit_decode_s": 591.01081,
+        "audit_wall_s": 592.82877,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 1160160,
+            "item_kept_distribution": {
+              "max": 39612.0,
+              "mean": 12873.777777777777,
+              "median": 12312.0,
+              "min": 6716.0,
+              "n": 90,
+              "p10": 9535.4,
+              "p25": 10305.0,
+              "p75": 14314.75,
+              "p90": 15963.300000000007
+            },
+            "items": 90,
+            "kept_tiles": 1158640,
+            "sparsity": 0.0013101641152943877
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 3167840,
+            "item_kept_distribution": {
+              "max": 66105.0,
+              "mean": 35018.46666666667,
+              "median": 34779.0,
+              "min": 20429.0,
+              "n": 90,
+              "p10": 23978.7,
+              "p25": 27485.25,
+              "p75": 39806.5,
+              "p90": 49716.8
+            },
+            "items": 90,
+            "kept_tiles": 3151662,
+            "sparsity": 0.005106949845951836
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 5897120,
+            "item_kept_distribution": {
+              "max": 120353.0,
+              "mean": 64872.97777777778,
+              "median": 63664.0,
+              "min": 40000.0,
+              "n": 90,
+              "p10": 44610.1,
+              "p25": 50629.0,
+              "p75": 73974.5,
+              "p90": 85698.3
+            },
+            "items": 90,
+            "kept_tiles": 5838568,
+            "sparsity": 0.0099289144531568
+          },
+          {
+            "canvas_prefix": 4,
+            "eligible_tiles": 9009120,
+            "item_kept_distribution": {
+              "max": 159677.0,
+              "mean": 98587.74444444444,
+              "median": 96028.5,
+              "min": 58591.0,
+              "n": 90,
+              "p10": 71730.7,
+              "p25": 81492.5,
+              "p75": 113942.5,
+              "p90": 128621.20000000001
+            },
+            "items": 90,
+            "kept_tiles": 8872897,
+            "sparsity": 0.015120566714618033
+          },
+          {
+            "canvas_prefix": 5,
+            "eligible_tiles": 13110560,
+            "item_kept_distribution": {
+              "max": 207331.0,
+              "mean": 142385.3111111111,
+              "median": 137317.5,
+              "min": 90370.0,
+              "n": 90,
+              "p10": 101185.4,
+              "p25": 118235.5,
+              "p75": 169037.75,
+              "p90": 186227.4
+            },
+            "items": 90,
+            "kept_tiles": 12814678,
+            "sparsity": 0.022568219816697432
+          },
+          {
+            "canvas_prefix": 6,
+            "eligible_tiles": 18144960,
+            "item_kept_distribution": {
+              "max": 286845.0,
+              "mean": 195450.63333333333,
+              "median": 186416.5,
+              "min": 111243.0,
+              "n": 90,
+              "p10": 138783.4,
+              "p25": 160171.25,
+              "p75": 237064.0,
+              "p90": 259768.50000000003
+            },
+            "items": 90,
+            "kept_tiles": 17590557,
+            "sparsity": 0.03055410428019678
+          },
+          {
+            "canvas_prefix": 7,
+            "eligible_tiles": 23680320,
+            "item_kept_distribution": {
+              "max": 406210.0,
+              "mean": 253011.8111111111,
+              "median": 248460.5,
+              "min": 142909.0,
+              "n": 90,
+              "p10": 175845.5,
+              "p25": 199249.0,
+              "p75": 298538.0,
+              "p90": 337760.0
+            },
+            "items": 90,
+            "kept_tiles": 22771063,
+            "sparsity": 0.03839715848434477
+          },
+          {
+            "canvas_prefix": 8,
+            "eligible_tiles": 29584000,
+            "item_kept_distribution": {
+              "max": 466187.0,
+              "mean": 313260.68888888886,
+              "median": 312942.0,
+              "min": 147818.0,
+              "n": 90,
+              "p10": 210047.80000000002,
+              "p25": 250239.5,
+              "p75": 381651.0,
+              "p90": 436897.4
+            },
+            "items": 90,
+            "kept_tiles": 28193462,
+            "sparsity": 0.04700304218496487
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 200003157,
+        "finish_reasons": {
+          "length": 34,
+          "stop": 56
+        },
+        "global_eligible_tiles": 251966880,
+        "global_kept_tiles": 200003157,
+        "global_skipped_tiles": 51963723,
+        "global_sparsity": 0.2062323548237769,
+        "items": 90,
+        "local_skipped_tiles": 0,
+        "mean_C": 21.755555555555556,
+        "mean_N": 287.76666666666665,
+        "mean_T": 5490.3,
+        "median_N": 244.5,
+        "median_T": 5424.0,
+        "overall_eligible_rectangles": 642194080,
+        "overall_skipped_rectangles": 51963723,
+        "overall_sparsity": 0.08091591719437838,
+        "phases": {
+          "carried": {
+            "calls": 9790,
+            "eligible_tiles": 19231040,
+            "kept_fraction": 0.8156229200292859,
+            "kept_tiles": 15685277,
+            "skipped_tiles": 3545763,
+            "sparsity": 0.18437707997071406
+          },
+          "dense": {
+            "calls": 450,
+            "eligible_tiles": 101760,
+            "kept_fraction": 1.0,
+            "kept_tiles": 101760,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 99795,
+            "eligible_tiles": 196886240,
+            "kept_fraction": 0.7540815447539655,
+            "kept_tiles": 148468280,
+            "skipped_tiles": 48417960,
+            "sparsity": 0.2459184552460345
+          },
+          "initial": {
+            "calls": 9790,
+            "eligible_tiles": 17977920,
+            "kept_fraction": 1.0,
+            "kept_tiles": 17977920,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 9670,
+            "eligible_tiles": 17769920,
+            "kept_fraction": 1.0,
+            "kept_tiles": 17769920,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 35747840,
+        "selector_discovery_ms": 10922.245409086347,
+        "selector_discovery_qk_rectangles": 35747840,
+        "selector_selection_ms": 6656.343554664403,
+        "value_selected_prefix_tiles": 24010320
+      }
+    },
+    {
+      "N_ratio_vs_v31": 1.0448714310041438,
+      "accuracy": 0.5009940357852882,
+      "arm": "allkept_fa4",
+      "attempts": [
+        "runs/longbench_v2/allkept_fa4/shard001/attempt001",
+        "runs/longbench_v2/allkept_fa4/shard002/attempt001",
+        "runs/longbench_v2/allkept_fa4/shard003/attempt001",
+        "runs/longbench_v2/allkept_fa4/shard004/attempt001"
+      ],
+      "correct": 252,
+      "global_kept_ratio_vs_v31": 6.22899179538558,
+      "items": 503,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "allkept_fa4": {
+            "longbench_v2_0shot_think": {
+              "capped": 26,
+              "cells": 503,
+              "finished": 477,
+              "no_final_response": 44,
+              "runs": {
+                "seed1_repeat0": {
+                  "Easy": 51.6,
+                  "Hard": 49.2,
+                  "Long": 41.7,
+                  "Medium": 41.4,
+                  "Overall": 50.1,
+                  "Short": 65.6,
+                  "items": 503
+                }
+              },
+              "truncated_items": 237,
+              "unparsed": 51,
+              "verified": 503
+            }
+          }
+        },
+        "coverage": {
+          "allkept_fa4": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 503,
+            "present": 503,
+            "scored": 503
+          }
+        },
+        "metric": "LongBench-v2 pred.py extract_answer judge; result.py aggregation (one decimal)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 31,
+        "canvas_count_mismatches": 414,
+        "control_only_correct": 47,
+        "delta_pp": -3.180914512922465,
+        "denoising_call_mismatches": 501,
+        "mcnemar_exact_p": 0.08878242522208006,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 503,
+        "output_token_count_mismatches": 496,
+        "per_item_global_kept_delta": {
+          "max": 850230240.0,
+          "mean": 60639523.81709742,
+          "median": 21743040.0,
+          "min": -26309600.0,
+          "n": 503,
+          "p10": 1472800.0000000002,
+          "p25": 6588640.0,
+          "p75": 61823840.0,
+          "p90": 116619104.0
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -6.560636182902585,
+          0.19880715705765406
+        ],
+        "problem_clusters": 503
+      },
+      "status": "complete",
+      "suite": "longbench_v2",
+      "threshold": null,
+      "work": {
+        "C": 7134,
+        "N": 147260,
+        "N_per_C": 20.641996075133164,
+        "T": 1761430,
+        "audit_decode_s": 4925.60025,
+        "audit_wall_s": 6712.9531,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 1900606240,
+            "item_kept_distribution": {
+              "max": 14438400.0,
+              "mean": 3778541.2326043737,
+              "median": 3660480.0,
+              "min": 343680.0,
+              "n": 503,
+              "p10": 727456.0,
+              "p25": 1465920.0,
+              "p75": 5414400.0,
+              "p90": 6918400.0
+            },
+            "items": 503,
+            "kept_tiles": 1900606240,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 3861703840,
+            "item_kept_distribution": {
+              "max": 23491200.0,
+              "mean": 7677343.618290259,
+              "median": 7826560.0,
+              "min": 665760.0,
+              "n": 503,
+              "p10": 1402112.0,
+              "p25": 2744400.0,
+              "p75": 11141440.0,
+              "p90": 14155520.0
+            },
+            "items": 503,
+            "kept_tiles": 3861703840,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 5770069280,
+            "item_kept_distribution": {
+              "max": 37991040.0,
+              "mean": 11471310.69582505,
+              "median": 11436800.0,
+              "min": 1028160.0,
+              "n": 503,
+              "p10": 2028032.0,
+              "p25": 4144080.0,
+              "p75": 17333760.0,
+              "p90": 21397248.0
+            },
+            "items": 503,
+            "kept_tiles": 5770069280,
+            "sparsity": 0.0
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 36334866240,
+        "finish_reasons": {
+          "length": 26,
+          "stop": 477
+        },
+        "global_eligible_tiles": 36334866240,
+        "global_kept_tiles": 36334866240,
+        "global_skipped_tiles": 0,
+        "global_sparsity": 0.0,
+        "items": 503,
+        "local_skipped_tiles": 0,
+        "mean_C": 14.182902584493041,
+        "mean_N": 292.7634194831014,
+        "mean_T": 3501.8489065606364,
+        "median_N": 162,
+        "median_T": 2202,
+        "overall_eligible_rectangles": 38689963840,
+        "overall_skipped_rectangles": 0,
+        "overall_sparsity": 0.0,
+        "phases": {
+          "carried": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "dense": {
+            "calls": 736300,
+            "eligible_tiles": 36334866240,
+            "kept_fraction": 1.0,
+            "kept_tiles": 36334866240,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "initial": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "refresh": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "accuracy": 0.532803180914513,
+      "arm": "current_v31_control",
+      "attempts": [
+        "runs/longbench_v2/current_v31_control/shard001/attempt001",
+        "runs/longbench_v2/current_v31_control/shard002/attempt001",
+        "runs/longbench_v2/current_v31_control/shard003/attempt001",
+        "runs/longbench_v2/current_v31_control/shard004/attempt001"
+      ],
+      "correct": 268,
+      "items": 503,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "current_v31_control": {
+            "longbench_v2_0shot_think": {
+              "capped": 18,
+              "cells": 503,
+              "finished": 485,
+              "no_final_response": 28,
+              "runs": {
+                "seed1_repeat0": {
+                  "Easy": 57.8,
+                  "Hard": 50.5,
+                  "Long": 43.5,
+                  "Medium": 46.5,
+                  "Overall": 53.3,
+                  "Short": 67.2,
+                  "items": 503
+                }
+              },
+              "truncated_items": 237,
+              "unparsed": 30,
+              "verified": 503
+            }
+          }
+        },
+        "coverage": {
+          "current_v31_control": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 503,
+            "present": 503,
+            "scored": 503
+          }
+        },
+        "metric": "LongBench-v2 pred.py extract_answer judge; result.py aggregation (one decimal)"
+      },
+      "status": "complete",
+      "suite": "longbench_v2",
+      "threshold": null,
+      "work": {
+        "C": 6833,
+        "N": 140936,
+        "N_per_C": 20.625786623737742,
+        "T": 1684180,
+        "audit_decode_s": 3457.98375,
+        "audit_wall_s": 5242.80582,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 1859384800,
+            "item_kept_distribution": {
+              "max": 1711040.0,
+              "mean": 923567.3956262425,
+              "median": 1067360.0,
+              "min": 245760.0,
+              "n": 503,
+              "p10": 373056.0,
+              "p25": 547440.0,
+              "p75": 1200320.0,
+              "p90": 1306720.0
+            },
+            "items": 503,
+            "kept_tiles": 464554400,
+            "sparsity": 0.7501569336266489
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 3883180320,
+            "item_kept_distribution": {
+              "max": 3101920.0,
+              "mean": 1682570.1789264414,
+              "median": 1888960.0,
+              "min": 445920.0,
+              "n": 503,
+              "p10": 747616.0,
+              "p25": 1050720.0,
+              "p75": 2201920.0,
+              "p90": 2406336.0
+            },
+            "items": 503,
+            "kept_tiles": 846332800,
+            "sparsity": 0.7820516354491619
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 5833185760,
+        "finish_reasons": {
+          "length": 18,
+          "stop": 485
+        },
+        "global_eligible_tiles": 34713640000,
+        "global_kept_tiles": 5833185760,
+        "global_skipped_tiles": 28880454240,
+        "global_sparsity": 0.8319627166727546,
+        "items": 503,
+        "local_skipped_tiles": 0,
+        "mean_C": 13.584493041749504,
+        "mean_N": 280.19085487077535,
+        "mean_T": 3348.2703777335983,
+        "median_N": 172,
+        "median_T": 2228,
+        "overall_eligible_rectangles": 36967198400,
+        "overall_skipped_rectangles": 28880454240,
+        "overall_sparsity": 0.7812454145835407,
+        "phases": {
+          "carried": {
+            "calls": 34165,
+            "eligible_tiles": 1590554560,
+            "kept_fraction": 0.09416006452491639,
+            "kept_tiles": 149766720,
+            "skipped_tiles": 1440787840,
+            "sparsity": 0.9058399354750836
+          },
+          "dense": {
+            "calls": 2515,
+            "eligible_tiles": 105707040,
+            "kept_fraction": 1.0,
+            "kept_tiles": 105707040,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 602660,
+            "eligible_tiles": 30004449760,
+            "kept_fraction": 0.08548009980237012,
+            "kept_tiles": 2564783360,
+            "skipped_tiles": 27439666400,
+            "sparsity": 0.9145199001976299
+          },
+          "initial": {
+            "calls": 34165,
+            "eligible_tiles": 1586181440,
+            "kept_fraction": 1.0,
+            "kept_tiles": 1586181440,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 31175,
+            "eligible_tiles": 1426747200,
+            "kept_fraction": 1.0,
+            "kept_tiles": 1426747200,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "N_ratio_vs_v31": 1.1590012487937786,
+      "accuracy": 0.49105367793240556,
+      "arm": "dense_full_fix51994",
+      "attempts": [
+        "runs/longbench_v2/dense_full_fix51994/shard001/attempt001",
+        "runs/longbench_v2/dense_full_fix51994/shard002/attempt001",
+        "runs/longbench_v2/dense_full_fix51994/shard003/attempt001",
+        "runs/longbench_v2/dense_full_fix51994/shard004/attempt001"
+      ],
+      "correct": 247,
+      "global_kept_ratio_vs_v31": 7.125143335054703,
+      "items": 503,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "dense_full_fix51994": {
+            "longbench_v2_0shot_think": {
+              "capped": 30,
+              "cells": 503,
+              "finished": 473,
+              "no_final_response": 48,
+              "runs": {
+                "seed1_repeat0": {
+                  "Easy": 49.0,
+                  "Hard": 49.2,
+                  "Long": 41.7,
+                  "Medium": 42.8,
+                  "Overall": 49.1,
+                  "Short": 61.1,
+                  "items": 503
+                }
+              },
+              "truncated_items": 237,
+              "unparsed": 56,
+              "verified": 503
+            }
+          }
+        },
+        "coverage": {
+          "dense_full_fix51994": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 503,
+            "present": 503,
+            "scored": 503
+          }
+        },
+        "metric": "LongBench-v2 pred.py extract_answer judge; result.py aggregation (one decimal)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 36,
+        "canvas_count_mismatches": 404,
+        "control_only_correct": 57,
+        "delta_pp": -4.174950298210735,
+        "denoising_call_mismatches": 495,
+        "mcnemar_exact_p": 0.03751423180190034,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 503,
+        "output_token_count_mismatches": 496,
+        "per_item_global_kept_delta": {
+          "max": 953044960.0,
+          "mean": 71032005.72564612,
+          "median": 22008160.0,
+          "min": -27551200.0,
+          "n": 503,
+          "p10": 1398560.0,
+          "p25": 7382400.0,
+          "p75": 67128320.0,
+          "p90": 146904192.0
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -7.952286282306163,
+          -0.3976143141153081
+        ],
+        "problem_clusters": 503
+      },
+      "status": "complete",
+      "suite": "longbench_v2",
+      "threshold": null,
+      "work": {
+        "C": 7627,
+        "N": 163345,
+        "N_per_C": 21.416677592762554,
+        "T": 1888404,
+        "audit_decode_s": 5287.57604,
+        "audit_wall_s": 7076.09854,
+        "cumulative_common_prefix": [],
+        "fa4_consumer_kept_global_tiles": 41562284640,
+        "finish_reasons": {
+          "length": 30,
+          "stop": 473
+        },
+        "global_eligible_tiles": 41562284640,
+        "global_kept_tiles": 41562284640,
+        "global_skipped_tiles": 0,
+        "global_sparsity": 0.0,
+        "items": 503,
+        "local_skipped_tiles": 0,
+        "mean_C": 15.163021868787276,
+        "mean_N": 324.741550695825,
+        "mean_T": 3754.282306163022,
+        "median_N": 167,
+        "median_T": 2478,
+        "overall_eligible_rectangles": 44172835840,
+        "overall_skipped_rectangles": 0,
+        "overall_sparsity": 0.0,
+        "phases": {
+          "carried": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "dense": {
+            "calls": 816725,
+            "eligible_tiles": 41562284640,
+            "kept_fraction": 1.0,
+            "kept_tiles": 41562284640,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "initial": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "refresh": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "N_ratio_vs_v31": 1.1590012487937786,
+      "accuracy": 0.49105367793240556,
+      "arm": "dense_piecewise",
+      "attempts": [
+        "runs/longbench_v2/dense_piecewise/shard001/attempt001",
+        "runs/longbench_v2/dense_piecewise/shard002/attempt001",
+        "runs/longbench_v2/dense_piecewise/shard003/attempt001",
+        "runs/longbench_v2/dense_piecewise/shard004/attempt001"
+      ],
+      "correct": 247,
+      "global_kept_ratio_vs_v31": 7.125143335054703,
+      "items": 503,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "dense_piecewise": {
+            "longbench_v2_0shot_think": {
+              "capped": 30,
+              "cells": 503,
+              "finished": 473,
+              "no_final_response": 48,
+              "runs": {
+                "seed1_repeat0": {
+                  "Easy": 49.0,
+                  "Hard": 49.2,
+                  "Long": 41.7,
+                  "Medium": 42.8,
+                  "Overall": 49.1,
+                  "Short": 61.1,
+                  "items": 503
+                }
+              },
+              "truncated_items": 237,
+              "unparsed": 56,
+              "verified": 503
+            }
+          }
+        },
+        "coverage": {
+          "dense_piecewise": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 503,
+            "present": 503,
+            "scored": 503
+          }
+        },
+        "metric": "LongBench-v2 pred.py extract_answer judge; result.py aggregation (one decimal)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 36,
+        "canvas_count_mismatches": 404,
+        "control_only_correct": 57,
+        "delta_pp": -4.174950298210735,
+        "denoising_call_mismatches": 495,
+        "mcnemar_exact_p": 0.03751423180190034,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 503,
+        "output_token_count_mismatches": 496,
+        "per_item_global_kept_delta": {
+          "max": 953044960.0,
+          "mean": 71032005.72564612,
+          "median": 22008160.0,
+          "min": -27551200.0,
+          "n": 503,
+          "p10": 1398560.0,
+          "p25": 7382400.0,
+          "p75": 67128320.0,
+          "p90": 146904192.0
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -7.952286282306163,
+          -0.3976143141153081
+        ],
+        "problem_clusters": 503
+      },
+      "status": "complete",
+      "suite": "longbench_v2",
+      "threshold": null,
+      "work": {
+        "C": 7627,
+        "N": 163345,
+        "N_per_C": 21.416677592762554,
+        "T": 1888404,
+        "audit_decode_s": 5390.67829,
+        "audit_wall_s": 7179.48675,
+        "cumulative_common_prefix": [],
+        "fa4_consumer_kept_global_tiles": 41562284640,
+        "finish_reasons": {
+          "length": 30,
+          "stop": 473
+        },
+        "global_eligible_tiles": 41562284640,
+        "global_kept_tiles": 41562284640,
+        "global_skipped_tiles": 0,
+        "global_sparsity": 0.0,
+        "items": 503,
+        "local_skipped_tiles": 0,
+        "mean_C": 15.163021868787276,
+        "mean_N": 324.741550695825,
+        "mean_T": 3754.282306163022,
+        "median_N": 167,
+        "median_T": 2478,
+        "overall_eligible_rectangles": 44172835840,
+        "overall_skipped_rectangles": 0,
+        "overall_sparsity": 0.0,
+        "phases": {
+          "carried": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "dense": {
+            "calls": 816725,
+            "eligible_tiles": 41562284640,
+            "kept_fraction": 1.0,
+            "kept_tiles": 41562284640,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "initial": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "refresh": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9521122218639149,
+      "accuracy": 0.95,
+      "arm": "allkept_fa4",
+      "attempts": [
+        "runs/math500/allkept_fa4/shard001/attempt001",
+        "runs/math500/allkept_fa4/shard002/attempt001",
+        "runs/math500/allkept_fa4/shard003/attempt001",
+        "runs/math500/allkept_fa4/shard004/attempt001"
+      ],
+      "correct": 95,
+      "global_kept_ratio_vs_v31": 1.0335255124069793,
+      "items": 100,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "allkept_fa4": {
+            "accuracy": 0.95,
+            "capped": 4,
+            "cells": 100,
+            "correct": 95,
+            "finished": 96,
+            "no_final_response": 4,
+            "unparsed": 4,
+            "verified": 100,
+            "verifier_errors": 0
+          }
+        },
+        "coverage": {
+          "allkept_fa4": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 100,
+            "present": 100,
+            "scored": 100
+          }
+        },
+        "math_verify_version": "0.9.0",
+        "metric": "MATH500 symbolic answer equivalence (math-verify)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 2,
+        "canvas_count_mismatches": 35,
+        "control_only_correct": 2,
+        "delta_pp": 0.0,
+        "denoising_call_mismatches": 95,
+        "mcnemar_exact_p": 1.0,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 100,
+        "output_token_count_mismatches": 97,
+        "per_item_global_kept_delta": {
+          "max": 565120.0,
+          "mean": 6336.0,
+          "median": -1280.0,
+          "min": -290560.0,
+          "n": 100,
+          "p10": -67184.0,
+          "p25": -20000.0,
+          "p75": 12320.0,
+          "p90": 46432.0000000002
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -4.0,
+          4.0
+        ],
+        "problem_clusters": 100
+      },
+      "status": "complete",
+      "suite": "math500",
+      "threshold": null,
+      "work": {
+        "C": 615,
+        "N": 5905,
+        "N_per_C": 9.601626016260163,
+        "T": 145993,
+        "audit_decode_s": 132.65902,
+        "audit_wall_s": 134.42876,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 973760,
+            "item_kept_distribution": {
+              "max": 20160.0,
+              "mean": 9737.6,
+              "median": 9280.0,
+              "min": 5600.0,
+              "n": 100,
+              "p10": 6688.0,
+              "p25": 7680.0,
+              "p75": 11280.0,
+              "p90": 13600.0
+            },
+            "items": 100,
+            "kept_tiles": 973760,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 2522720,
+            "item_kept_distribution": {
+              "max": 61760.0,
+              "mean": 25227.2,
+              "median": 23840.0,
+              "min": 13120.0,
+              "n": 100,
+              "p10": 18240.0,
+              "p25": 20160.0,
+              "p75": 28080.0,
+              "p90": 33936.0
+            },
+            "items": 100,
+            "kept_tiles": 2522720,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 4582080,
+            "item_kept_distribution": {
+              "max": 99840.0,
+              "mean": 45820.8,
+              "median": 42880.0,
+              "min": 16480.0,
+              "n": 100,
+              "p10": 34272.0,
+              "p25": 38200.0,
+              "p75": 52640.0,
+              "p90": 61568.000000000015
+            },
+            "items": 100,
+            "kept_tiles": 4582080,
+            "sparsity": 0.0
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 19532640,
+        "finish_reasons": {
+          "length": 4,
+          "stop": 96
+        },
+        "global_eligible_tiles": 19532640,
+        "global_kept_tiles": 19532640,
+        "global_skipped_tiles": 0,
+        "global_sparsity": 0.0,
+        "items": 100,
+        "local_skipped_tiles": 0,
+        "mean_C": 6.15,
+        "mean_N": 59.05,
+        "mean_T": 1459.93,
+        "median_N": 47.0,
+        "median_T": 1211.5,
+        "overall_eligible_rectangles": 89729840,
+        "overall_skipped_rectangles": 0,
+        "overall_sparsity": 0.0,
+        "phases": {
+          "carried": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "dense": {
+            "calls": 29525,
+            "eligible_tiles": 19532640,
+            "kept_fraction": 1.0,
+            "kept_tiles": 19532640,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "initial": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "refresh": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "accuracy": 0.95,
+      "arm": "current_v31_control",
+      "attempts": [
+        "runs/math500/current_v31_control/shard001/attempt001",
+        "runs/math500/current_v31_control/shard002/attempt001",
+        "runs/math500/current_v31_control/shard003/attempt001",
+        "runs/math500/current_v31_control/shard004/attempt001"
+      ],
+      "correct": 95,
+      "items": 100,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "current_v31_control": {
+            "accuracy": 0.95,
+            "capped": 3,
+            "cells": 100,
+            "correct": 95,
+            "finished": 97,
+            "no_final_response": 3,
+            "unparsed": 3,
+            "verified": 100,
+            "verifier_errors": 0
+          }
+        },
+        "coverage": {
+          "current_v31_control": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 100,
+            "present": 100,
+            "scored": 100
+          }
+        },
+        "math_verify_version": "0.9.0",
+        "metric": "MATH500 symbolic answer equivalence (math-verify)"
+      },
+      "status": "complete",
+      "suite": "math500",
+      "threshold": null,
+      "work": {
+        "C": 638,
+        "N": 6202,
+        "N_per_C": 9.721003134796238,
+        "T": 150912,
+        "audit_decode_s": 143.73794,
+        "audit_wall_s": 145.50547,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 987680,
+            "item_kept_distribution": {
+              "max": 20480.0,
+              "mean": 9876.8,
+              "median": 8800.0,
+              "min": 5600.0,
+              "n": 100,
+              "p10": 6720.0,
+              "p25": 7680.0,
+              "p75": 10560.0,
+              "p90": 14400.0
+            },
+            "items": 100,
+            "kept_tiles": 987680,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 2615040,
+            "item_kept_distribution": {
+              "max": 54080.0,
+              "mean": 26150.4,
+              "median": 24480.0,
+              "min": 12160.0,
+              "n": 100,
+              "p10": 18560.0,
+              "p25": 21440.0,
+              "p75": 28920.0,
+              "p90": 35904.00000000001
+            },
+            "items": 100,
+            "kept_tiles": 2615040,
+            "sparsity": 0.0
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 4703040,
+            "item_kept_distribution": {
+              "max": 100320.0,
+              "mean": 47030.4,
+              "median": 44640.0,
+              "min": 24960.0,
+              "n": 100,
+              "p10": 32768.0,
+              "p25": 37280.0,
+              "p75": 54640.0,
+              "p90": 63856.000000000015
+            },
+            "items": 100,
+            "kept_tiles": 4703040,
+            "sparsity": 0.0
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 18899040,
+        "finish_reasons": {
+          "length": 3,
+          "stop": 97
+        },
+        "global_eligible_tiles": 21028320,
+        "global_kept_tiles": 18899040,
+        "global_skipped_tiles": 2129280,
+        "global_sparsity": 0.1012577324294095,
+        "items": 100,
+        "local_skipped_tiles": 0,
+        "mean_C": 6.38,
+        "mean_N": 62.02,
+        "mean_T": 1509.12,
+        "median_N": 49.0,
+        "median_T": 1235.5,
+        "overall_eligible_rectangles": 95441520,
+        "overall_skipped_rectangles": 2129280,
+        "overall_sparsity": 0.02230978718696014,
+        "phases": {
+          "carried": {
+            "calls": 3190,
+            "eligible_tiles": 2536480,
+            "kept_fraction": 0.9022897874219391,
+            "kept_tiles": 2288640,
+            "skipped_tiles": 247840,
+            "sparsity": 0.0977102125780609
+          },
+          "dense": {
+            "calls": 500,
+            "eligible_tiles": 96640,
+            "kept_fraction": 1.0,
+            "kept_tiles": 96640,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 21020,
+            "eligible_tiles": 14200320,
+            "kept_fraction": 0.8675072111051019,
+            "kept_tiles": 12318880,
+            "skipped_tiles": 1881440,
+            "sparsity": 0.13249278889489813
+          },
+          "initial": {
+            "calls": 3190,
+            "eligible_tiles": 2128160,
+            "kept_fraction": 1.0,
+            "kept_tiles": 2128160,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 3110,
+            "eligible_tiles": 2066720,
+            "kept_fraction": 1.0,
+            "kept_tiles": 2066720,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "N_ratio_vs_v31": 1.026281844566269,
+      "accuracy": 0.93,
+      "arm": "dense_full_fix51994",
+      "attempts": [
+        "runs/math500/dense_full_fix51994/shard001/attempt001",
+        "runs/math500/dense_full_fix51994/shard002/attempt001",
+        "runs/math500/dense_full_fix51994/shard003/attempt001",
+        "runs/math500/dense_full_fix51994/shard004/attempt001"
+      ],
+      "correct": 93,
+      "global_kept_ratio_vs_v31": 1.214588677520128,
+      "items": 100,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "dense_full_fix51994": {
+            "accuracy": 0.93,
+            "capped": 7,
+            "cells": 100,
+            "correct": 93,
+            "finished": 93,
+            "no_final_response": 6,
+            "unparsed": 6,
+            "verified": 100,
+            "verifier_errors": 0
+          }
+        },
+        "coverage": {
+          "dense_full_fix51994": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 100,
+            "present": 100,
+            "scored": 100
+          }
+        },
+        "math_verify_version": "0.9.0",
+        "metric": "MATH500 symbolic answer equivalence (math-verify)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 1,
+        "canvas_count_mismatches": 44,
+        "control_only_correct": 3,
+        "delta_pp": -2.0,
+        "denoising_call_mismatches": 97,
+        "mcnemar_exact_p": 0.625,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 100,
+        "output_token_count_mismatches": 97,
+        "per_item_global_kept_delta": {
+          "max": 1237120.0,
+          "mean": 40555.2,
+          "median": -880.0,
+          "min": -281280.0,
+          "n": 100,
+          "p10": -62912.0,
+          "p25": -24400.0,
+          "p75": 21520.0,
+          "p90": 136016.0
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -6.0,
+          2.0
+        ],
+        "problem_clusters": 100
+      },
+      "status": "complete",
+      "suite": "math500",
+      "threshold": null,
+      "work": {
+        "C": 643,
+        "N": 6365,
+        "N_per_C": 9.89891135303266,
+        "T": 152848,
+        "audit_decode_s": 132.41054,
+        "audit_wall_s": 134.19595,
+        "cumulative_common_prefix": [],
+        "fa4_consumer_kept_global_tiles": 22954560,
+        "finish_reasons": {
+          "length": 7,
+          "stop": 93
+        },
+        "global_eligible_tiles": 22954560,
+        "global_kept_tiles": 22954560,
+        "global_skipped_tiles": 0,
+        "global_sparsity": 0.0,
+        "items": 100,
+        "local_skipped_tiles": 0,
+        "mean_C": 6.43,
+        "mean_N": 63.65,
+        "mean_T": 1528.48,
+        "median_N": 45.0,
+        "median_T": 1228.0,
+        "overall_eligible_rectangles": 100230960,
+        "overall_skipped_rectangles": 0,
+        "overall_sparsity": 0.0,
+        "phases": {
+          "carried": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "dense": {
+            "calls": 31825,
+            "eligible_tiles": 22954560,
+            "kept_fraction": 1.0,
+            "kept_tiles": 22954560,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "initial": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "refresh": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9671073847146082,
+      "accuracy": 0.95,
+      "arm": "dense_piecewise",
+      "attempts": [
+        "runs/math500/dense_piecewise/shard001/attempt001",
+        "runs/math500/dense_piecewise/shard002/attempt001",
+        "runs/math500/dense_piecewise/shard003/attempt001",
+        "runs/math500/dense_piecewise/shard004/attempt001"
+      ],
+      "correct": 95,
+      "global_kept_ratio_vs_v31": 1.0702850515158442,
+      "items": 100,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "dense_piecewise": {
+            "accuracy": 0.95,
+            "capped": 4,
+            "cells": 100,
+            "correct": 95,
+            "finished": 96,
+            "no_final_response": 4,
+            "unparsed": 4,
+            "verified": 100,
+            "verifier_errors": 0
+          }
+        },
+        "coverage": {
+          "dense_piecewise": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 100,
+            "present": 100,
+            "scored": 100
+          }
+        },
+        "math_verify_version": "0.9.0",
+        "metric": "MATH500 symbolic answer equivalence (math-verify)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 2,
+        "canvas_count_mismatches": 47,
+        "control_only_correct": 2,
+        "delta_pp": 0.0,
+        "denoising_call_mismatches": 97,
+        "mcnemar_exact_p": 1.0,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 100,
+        "output_token_count_mismatches": 97,
+        "per_item_global_kept_delta": {
+          "max": 1104000.0,
+          "mean": 13283.2,
+          "median": -1360.0,
+          "min": -218880.0,
+          "n": 100,
+          "p10": -66096.0,
+          "p25": -29200.0,
+          "p75": 10160.0,
+          "p90": 61184.00000000006
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -4.0,
+          4.0
+        ],
+        "problem_clusters": 100
+      },
+      "status": "complete",
+      "suite": "math500",
+      "threshold": null,
+      "work": {
+        "C": 619,
+        "N": 5998,
+        "N_per_C": 9.689822294022617,
+        "T": 146449,
+        "audit_decode_s": 129.67764,
+        "audit_wall_s": 131.41352,
+        "cumulative_common_prefix": [],
+        "fa4_consumer_kept_global_tiles": 20227360,
+        "finish_reasons": {
+          "length": 4,
+          "stop": 96
+        },
+        "global_eligible_tiles": 20227360,
+        "global_kept_tiles": 20227360,
+        "global_skipped_tiles": 0,
+        "global_sparsity": 0.0,
+        "items": 100,
+        "local_skipped_tiles": 0,
+        "mean_C": 6.19,
+        "mean_N": 59.98,
+        "mean_T": 1464.49,
+        "median_N": 45.0,
+        "median_T": 1166.5,
+        "overall_eligible_rectangles": 91886560,
+        "overall_skipped_rectangles": 0,
+        "overall_sparsity": 0.0,
+        "phases": {
+          "carried": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "dense": {
+            "calls": 29990,
+            "eligible_tiles": 20227360,
+            "kept_fraction": 1.0,
+            "kept_tiles": 20227360,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "initial": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          },
+          "refresh": {
+            "calls": 0,
+            "eligible_tiles": 0,
+            "kept_fraction": null,
+            "kept_tiles": 0,
+            "skipped_tiles": 0,
+            "sparsity": null
+          }
+        },
+        "selector_candidate_evaluations": 0,
+        "selector_discovery_ms": 0,
+        "selector_discovery_qk_rectangles": 0,
+        "selector_selection_ms": 0,
+        "value_selected_prefix_tiles": 0
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9777491131892938,
+      "accuracy": 0.92,
+      "arm": "v2_tau_0p018",
+      "attempts": [
+        "runs/math500/v2_tau_0p018/shard001/attempt001",
+        "runs/math500/v2_tau_0p018/shard002/attempt001",
+        "runs/math500/v2_tau_0p018/shard003/attempt001",
+        "runs/math500/v2_tau_0p018/shard004/attempt001"
+      ],
+      "correct": 92,
+      "global_kept_ratio_vs_v31": 1.0367226589287075,
+      "items": 100,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "v2_tau_0p018": {
+            "accuracy": 0.92,
+            "capped": 6,
+            "cells": 100,
+            "correct": 92,
+            "finished": 94,
+            "no_final_response": 6,
+            "unparsed": 6,
+            "verified": 100,
+            "verifier_errors": 0
+          }
+        },
+        "coverage": {
+          "v2_tau_0p018": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 100,
+            "present": 100,
+            "scored": 100
+          }
+        },
+        "math_verify_version": "0.9.0",
+        "metric": "MATH500 symbolic answer equivalence (math-verify)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 1,
+        "canvas_count_mismatches": 41,
+        "control_only_correct": 4,
+        "delta_pp": -3.0,
+        "denoising_call_mismatches": 97,
+        "mcnemar_exact_p": 0.375,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 100,
+        "output_token_count_mismatches": 96,
+        "per_item_global_kept_delta": {
+          "max": 639374.0,
+          "mean": 6940.23,
+          "median": -741.5,
+          "min": -250978.0,
+          "n": 100,
+          "p10": -72864.2,
+          "p25": -26079.75,
+          "p75": 15307.25,
+          "p90": 45018.40000000003
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -8.0,
+          1.0
+        ],
+        "problem_clusters": 100
+      },
+      "status": "complete",
+      "suite": "math500",
+      "threshold": 0.018,
+      "work": {
+        "C": 624,
+        "N": 6064,
+        "N_per_C": 9.717948717948717,
+        "T": 148027,
+        "audit_decode_s": 141.53578,
+        "audit_wall_s": 143.31749,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 965600,
+            "item_kept_distribution": {
+              "max": 19200.0,
+              "mean": 9653.53,
+              "median": 8720.0,
+              "min": 4800.0,
+              "n": 100,
+              "p10": 6720.0,
+              "p25": 7680.0,
+              "p75": 10560.0,
+              "p90": 13440.0
+            },
+            "items": 100,
+            "kept_tiles": 965353,
+            "sparsity": 0.0002557995028997784
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 2500160,
+            "item_kept_distribution": {
+              "max": 44688.0,
+              "mean": 24935.06,
+              "median": 23457.0,
+              "min": 12142.0,
+              "n": 100,
+              "p10": 18646.8,
+              "p25": 20773.0,
+              "p75": 27866.25,
+              "p90": 32524.100000000017
+            },
+            "items": 100,
+            "kept_tiles": 2493506,
+            "sparsity": 0.0026614296685012473
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 4604640,
+            "item_kept_distribution": {
+              "max": 95772.0,
+              "mean": 45762.92,
+              "median": 44167.5,
+              "min": 23310.0,
+              "n": 100,
+              "p10": 32029.0,
+              "p25": 37292.5,
+              "p75": 50908.25,
+              "p90": 59395.40000000002
+            },
+            "items": 100,
+            "kept_tiles": 4576292,
+            "sparsity": 0.006156398762986903
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 19593063,
+        "finish_reasons": {
+          "length": 6,
+          "stop": 94
+        },
+        "global_eligible_tiles": 20680320,
+        "global_kept_tiles": 19593063,
+        "global_skipped_tiles": 1087257,
+        "global_sparsity": 0.05257447660384362,
+        "items": 100,
+        "local_skipped_tiles": 0,
+        "mean_C": 6.24,
+        "mean_N": 60.64,
+        "mean_T": 1480.27,
+        "median_N": 47.0,
+        "median_T": 1239.0,
+        "overall_eligible_rectangles": 93413120,
+        "overall_skipped_rectangles": 1087257,
+        "overall_sparsity": 0.011639232262020582,
+        "phases": {
+          "carried": {
+            "calls": 3120,
+            "eligible_tiles": 2452320,
+            "kept_fraction": 0.9603118679454558,
+            "kept_tiles": 2354992,
+            "skipped_tiles": 97328,
+            "sparsity": 0.039688132054544245
+          },
+          "dense": {
+            "calls": 500,
+            "eligible_tiles": 96640,
+            "kept_fraction": 1.0,
+            "kept_tiles": 96640,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 20555,
+            "eligible_tiles": 14097120,
+            "kept_fraction": 0.9297779262714654,
+            "kept_tiles": 13107191,
+            "skipped_tiles": 989929,
+            "sparsity": 0.07022207372853462
+          },
+          "initial": {
+            "calls": 3120,
+            "eligible_tiles": 2052960,
+            "kept_fraction": 1.0,
+            "kept_tiles": 2052960,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 3025,
+            "eligible_tiles": 1981280,
+            "kept_fraction": 1.0,
+            "kept_tiles": 1981280,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 4034240,
+        "selector_discovery_ms": 1854.7503034472466,
+        "selector_discovery_qk_rectangles": 4034240,
+        "selector_selection_ms": 1117.5096005611122,
+        "value_selected_prefix_tiles": 2801948
+      }
+    },
+    {
+      "N_ratio_vs_v31": 1.0353111899387295,
+      "accuracy": 0.94,
+      "arm": "v2_tau_0p0195",
+      "attempts": [
+        "runs/math500/v2_tau_0p0195/shard001/attempt001",
+        "runs/math500/v2_tau_0p0195/shard002/attempt001",
+        "runs/math500/v2_tau_0p0195/shard003/attempt001",
+        "runs/math500/v2_tau_0p0195/shard004/attempt001"
+      ],
+      "correct": 94,
+      "global_kept_ratio_vs_v31": 1.126749983067923,
+      "items": 100,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "v2_tau_0p0195": {
+            "accuracy": 0.94,
+            "capped": 5,
+            "cells": 100,
+            "correct": 94,
+            "finished": 95,
+            "no_final_response": 6,
+            "unparsed": 6,
+            "verified": 100,
+            "verifier_errors": 0
+          }
+        },
+        "coverage": {
+          "v2_tau_0p0195": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 100,
+            "present": 100,
+            "scored": 100
+          }
+        },
+        "math_verify_version": "0.9.0",
+        "metric": "MATH500 symbolic answer equivalence (math-verify)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 2,
+        "canvas_count_mismatches": 39,
+        "control_only_correct": 3,
+        "delta_pp": -1.0,
+        "denoising_call_mismatches": 97,
+        "mcnemar_exact_p": 1.0,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 100,
+        "output_token_count_mismatches": 96,
+        "per_item_global_kept_delta": {
+          "max": 1346399.0,
+          "mean": 23954.53,
+          "median": -1812.5,
+          "min": -459888.0,
+          "n": 100,
+          "p10": -73485.5,
+          "p25": -17780.75,
+          "p75": 14617.25,
+          "p90": 104539.10000000003
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -6.0,
+          3.0
+        ],
+        "problem_clusters": 100
+      },
+      "status": "complete",
+      "suite": "math500",
+      "threshold": 0.0195,
+      "work": {
+        "C": 644,
+        "N": 6421,
+        "N_per_C": 9.970496894409937,
+        "T": 153190,
+        "audit_decode_s": 149.5837,
+        "audit_wall_s": 151.36622,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 965920,
+            "item_kept_distribution": {
+              "max": 22975.0,
+              "mean": 9656.65,
+              "median": 8800.0,
+              "min": 5600.0,
+              "n": 100,
+              "p10": 6720.0,
+              "p25": 7680.0,
+              "p75": 10796.25,
+              "p90": 12977.400000000005
+            },
+            "items": 100,
+            "kept_tiles": 965665,
+            "sparsity": 0.00026399701838664136
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 2567200,
+            "item_kept_distribution": {
+              "max": 79184.0,
+              "mean": 25594.26,
+              "median": 23776.5,
+              "min": 14209.0,
+              "n": 100,
+              "p10": 18020.2,
+              "p25": 21295.25,
+              "p75": 27450.25,
+              "p90": 34539.00000000001
+            },
+            "items": 100,
+            "kept_tiles": 2559426,
+            "sparsity": 0.003028201932066099
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 4632160,
+            "item_kept_distribution": {
+              "max": 109892.0,
+              "mean": 46003.57,
+              "median": 42614.0,
+              "min": 19302.0,
+              "n": 100,
+              "p10": 32664.0,
+              "p25": 36924.5,
+              "p75": 51696.0,
+              "p90": 61605.90000000001
+            },
+            "items": 100,
+            "kept_tiles": 4600357,
+            "sparsity": 0.006865695485475443
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 21294493,
+        "finish_reasons": {
+          "length": 5,
+          "stop": 95
+        },
+        "global_eligible_tiles": 22658400,
+        "global_kept_tiles": 21294493,
+        "global_skipped_tiles": 1363907,
+        "global_sparsity": 0.060194320869964346,
+        "items": 100,
+        "local_skipped_tiles": 0,
+        "mean_C": 6.44,
+        "mean_N": 64.21,
+        "mean_T": 1531.9,
+        "median_N": 46.0,
+        "median_T": 1208.5,
+        "overall_eligible_rectangles": 100846000,
+        "overall_skipped_rectangles": 1363907,
+        "overall_sparsity": 0.01352465144874363,
+        "phases": {
+          "carried": {
+            "calls": 3220,
+            "eligible_tiles": 2576800,
+            "kept_fraction": 0.955524681775846,
+            "kept_tiles": 2462196,
+            "skipped_tiles": 114604,
+            "sparsity": 0.04447531822415396
+          },
+          "dense": {
+            "calls": 500,
+            "eligible_tiles": 96640,
+            "kept_fraction": 1.0,
+            "kept_tiles": 96640,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 22010,
+            "eligible_tiles": 15704800,
+            "kept_fraction": 0.9204508812592328,
+            "kept_tiles": 14455497,
+            "skipped_tiles": 1249303,
+            "sparsity": 0.0795491187407672
+          },
+          "initial": {
+            "calls": 3220,
+            "eligible_tiles": 2164640,
+            "kept_fraction": 1.0,
+            "kept_tiles": 2164640,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 3155,
+            "eligible_tiles": 2115520,
+            "kept_fraction": 1.0,
+            "kept_tiles": 2115520,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 4280160,
+        "selector_discovery_ms": 1948.416863501072,
+        "selector_discovery_qk_rectangles": 4280160,
+        "selector_selection_ms": 1207.7406709827483,
+        "value_selected_prefix_tiles": 2959725
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9964527571751048,
+      "accuracy": 0.95,
+      "arm": "v2_tau_0p021",
+      "attempts": [
+        "runs/math500/v2_tau_0p021/shard001/attempt001",
+        "runs/math500/v2_tau_0p021/shard002/attempt001",
+        "runs/math500/v2_tau_0p021/shard003/attempt001",
+        "runs/math500/v2_tau_0p021/shard004/attempt001"
+      ],
+      "correct": 95,
+      "global_kept_ratio_vs_v31": 1.0345696924288217,
+      "items": 100,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "v2_tau_0p021": {
+            "accuracy": 0.95,
+            "capped": 5,
+            "cells": 100,
+            "correct": 95,
+            "finished": 95,
+            "no_final_response": 3,
+            "unparsed": 3,
+            "verified": 100,
+            "verifier_errors": 0
+          }
+        },
+        "coverage": {
+          "v2_tau_0p021": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 100,
+            "present": 100,
+            "scored": 100
+          }
+        },
+        "math_verify_version": "0.9.0",
+        "metric": "MATH500 symbolic answer equivalence (math-verify)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 1,
+        "canvas_count_mismatches": 35,
+        "control_only_correct": 1,
+        "delta_pp": 0.0,
+        "denoising_call_mismatches": 95,
+        "mcnemar_exact_p": 1.0,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 100,
+        "output_token_count_mismatches": 95,
+        "per_item_global_kept_delta": {
+          "max": 973545.0,
+          "mean": 6533.34,
+          "median": -5630.5,
+          "min": -295047.0,
+          "n": 100,
+          "p10": -69008.4,
+          "p25": -15800.0,
+          "p75": 10684.75,
+          "p90": 49808.4
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -3.0,
+          3.0
+        ],
+        "problem_clusters": 100
+      },
+      "status": "complete",
+      "suite": "math500",
+      "threshold": 0.021,
+      "work": {
+        "C": 625,
+        "N": 6180,
+        "N_per_C": 9.888,
+        "T": 147949,
+        "audit_decode_s": 143.5669,
+        "audit_wall_s": 145.34849,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 982880,
+            "item_kept_distribution": {
+              "max": 21264.0,
+              "mean": 9826.08,
+              "median": 9600.0,
+              "min": 4800.0,
+              "n": 100,
+              "p10": 7200.0,
+              "p25": 7680.0,
+              "p75": 10560.0,
+              "p90": 12984.600000000004
+            },
+            "items": 100,
+            "kept_tiles": 982608,
+            "sparsity": 0.00027673775028491665
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 2625120,
+            "item_kept_distribution": {
+              "max": 85680.0,
+              "mean": 26166.65,
+              "median": 24889.5,
+              "min": 14366.0,
+              "n": 100,
+              "p10": 18857.6,
+              "p25": 22037.25,
+              "p75": 28795.75,
+              "p90": 35292.5
+            },
+            "items": 100,
+            "kept_tiles": 2616665,
+            "sparsity": 0.0032208051441457997
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 4755520,
+            "item_kept_distribution": {
+              "max": 129661.0,
+              "mean": 47197.55,
+              "median": 44171.0,
+              "min": 19300.0,
+              "n": 100,
+              "p10": 33718.8,
+              "p25": 38077.25,
+              "p75": 52278.25,
+              "p90": 63097.50000000002
+            },
+            "items": 100,
+            "kept_tiles": 4719755,
+            "sparsity": 0.0075207337998788315
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 19552374,
+        "finish_reasons": {
+          "length": 5,
+          "stop": 95
+        },
+        "global_eligible_tiles": 20758560,
+        "global_kept_tiles": 19552374,
+        "global_skipped_tiles": 1206186,
+        "global_sparsity": 0.05810547552431378,
+        "items": 100,
+        "local_skipped_tiles": 0,
+        "mean_C": 6.25,
+        "mean_N": 61.8,
+        "mean_T": 1479.49,
+        "median_N": 47.5,
+        "median_T": 1257.5,
+        "overall_eligible_rectangles": 94534160,
+        "overall_skipped_rectangles": 1206186,
+        "overall_sparsity": 0.012759260779383875,
+        "phases": {
+          "carried": {
+            "calls": 3125,
+            "eligible_tiles": 2422880,
+            "kept_fraction": 0.9555000660371129,
+            "kept_tiles": 2315062,
+            "skipped_tiles": 107818,
+            "sparsity": 0.044499933962887095
+          },
+          "dense": {
+            "calls": 500,
+            "eligible_tiles": 96640,
+            "kept_fraction": 1.0,
+            "kept_tiles": 96640,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 21075,
+            "eligible_tiles": 14233440,
+            "kept_fraction": 0.9228318663654043,
+            "kept_tiles": 13135072,
+            "skipped_tiles": 1098368,
+            "sparsity": 0.07716813363459574
+          },
+          "initial": {
+            "calls": 3125,
+            "eligible_tiles": 2022880,
+            "kept_fraction": 1.0,
+            "kept_tiles": 2022880,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 3075,
+            "eligible_tiles": 1982720,
+            "kept_fraction": 1.0,
+            "kept_tiles": 1982720,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 4005600,
+        "selector_discovery_ms": 1857.7591679543257,
+        "selector_discovery_qk_rectangles": 4005600,
+        "selector_selection_ms": 1105.8659202083945,
+        "value_selected_prefix_tiles": 2732710
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9640438568203805,
+      "accuracy": 0.95,
+      "arm": "v2_tau_0p0225",
+      "attempts": [
+        "runs/math500/v2_tau_0p0225/shard001/attempt001",
+        "runs/math500/v2_tau_0p0225/shard002/attempt001",
+        "runs/math500/v2_tau_0p0225/shard003/attempt001",
+        "runs/math500/v2_tau_0p0225/shard004/attempt001"
+      ],
+      "correct": 95,
+      "global_kept_ratio_vs_v31": 0.9802634948653477,
+      "items": 100,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "v2_tau_0p0225": {
+            "accuracy": 0.95,
+            "capped": 2,
+            "cells": 100,
+            "correct": 95,
+            "finished": 98,
+            "no_final_response": 2,
+            "unparsed": 2,
+            "verified": 100,
+            "verifier_errors": 0
+          }
+        },
+        "coverage": {
+          "v2_tau_0p0225": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 100,
+            "present": 100,
+            "scored": 100
+          }
+        },
+        "math_verify_version": "0.9.0",
+        "metric": "MATH500 symbolic answer equivalence (math-verify)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 1,
+        "canvas_count_mismatches": 47,
+        "control_only_correct": 1,
+        "delta_pp": 0.0,
+        "denoising_call_mismatches": 95,
+        "mcnemar_exact_p": 1.0,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 100,
+        "output_token_count_mismatches": 98,
+        "per_item_global_kept_delta": {
+          "max": 652374.0,
+          "mean": -3730.01,
+          "median": -3111.5,
+          "min": -276730.0,
+          "n": 100,
+          "p10": -96675.79999999999,
+          "p25": -27822.75,
+          "p75": 10259.25,
+          "p90": 50662.900000000074
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -3.0,
+          3.0
+        ],
+        "problem_clusters": 100
+      },
+      "status": "complete",
+      "suite": "math500",
+      "threshold": 0.0225,
+      "work": {
+        "C": 622,
+        "N": 5979,
+        "N_per_C": 9.612540192926046,
+        "T": 147485,
+        "audit_decode_s": 139.55096,
+        "audit_wall_s": 141.33123,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 944960,
+            "item_kept_distribution": {
+              "max": 20074.0,
+              "mean": 9446.44,
+              "median": 8800.0,
+              "min": 4800.0,
+              "n": 100,
+              "p10": 6685.3,
+              "p25": 7680.0,
+              "p75": 10560.0,
+              "p90": 12970.200000000004
+            },
+            "items": 100,
+            "kept_tiles": 944644,
+            "sparsity": 0.00033440568912967983
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 2524960,
+            "item_kept_distribution": {
+              "max": 48908.0,
+              "mean": 25160.67,
+              "median": 24235.0,
+              "min": 14690.0,
+              "n": 100,
+              "p10": 18626.7,
+              "p25": 20760.25,
+              "p75": 27851.0,
+              "p90": 33430.1
+            },
+            "items": 100,
+            "kept_tiles": 2516067,
+            "sparsity": 0.0035220359926494416
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 4536480,
+            "item_kept_distribution": {
+              "max": 92988.0,
+              "mean": 44990.17,
+              "median": 42843.5,
+              "min": 22302.0,
+              "n": 100,
+              "p10": 33757.5,
+              "p25": 37927.5,
+              "p75": 49029.5,
+              "p90": 61352.70000000003
+            },
+            "items": 100,
+            "kept_tiles": 4499017,
+            "sparsity": 0.008258164920819655
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 18526039,
+        "finish_reasons": {
+          "length": 2,
+          "stop": 98
+        },
+        "global_eligible_tiles": 19723200,
+        "global_kept_tiles": 18526039,
+        "global_skipped_tiles": 1197161,
+        "global_sparsity": 0.06069811186825669,
+        "items": 100,
+        "local_skipped_tiles": 0,
+        "mean_C": 6.22,
+        "mean_N": 59.79,
+        "mean_T": 1474.85,
+        "median_N": 45.5,
+        "median_T": 1294.5,
+        "overall_eligible_rectangles": 91246000,
+        "overall_skipped_rectangles": 1197161,
+        "overall_sparsity": 0.013120147732503343,
+        "phases": {
+          "carried": {
+            "calls": 3110,
+            "eligible_tiles": 2376480,
+            "kept_fraction": 0.9525857570861106,
+            "kept_tiles": 2263801,
+            "skipped_tiles": 112679,
+            "sparsity": 0.047414242913889404
+          },
+          "dense": {
+            "calls": 500,
+            "eligible_tiles": 96640,
+            "kept_fraction": 1.0,
+            "kept_tiles": 96640,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 20145,
+            "eligible_tiles": 13348000,
+            "kept_fraction": 0.9187532214563979,
+            "kept_tiles": 12263518,
+            "skipped_tiles": 1084482,
+            "sparsity": 0.08124677854360207
+          },
+          "initial": {
+            "calls": 3110,
+            "eligible_tiles": 1978400,
+            "kept_fraction": 1.0,
+            "kept_tiles": 1978400,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 3030,
+            "eligible_tiles": 1923680,
+            "kept_fraction": 1.0,
+            "kept_tiles": 1923680,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 3902080,
+        "selector_discovery_ms": 1812.8247352689505,
+        "selector_discovery_qk_rectangles": 3902080,
+        "selector_selection_ms": 1084.3625279553235,
+        "value_selected_prefix_tiles": 2625865
+      }
+    },
+    {
+      "N_ratio_vs_v31": 0.9637213801999355,
+      "accuracy": 0.92,
+      "arm": "v2_tau_0p024",
+      "attempts": [
+        "runs/math500/v2_tau_0p024/shard001/attempt001",
+        "runs/math500/v2_tau_0p024/shard002/attempt001",
+        "runs/math500/v2_tau_0p024/shard003/attempt001",
+        "runs/math500/v2_tau_0p024/shard004/attempt001"
+      ],
+      "correct": 92,
+      "global_kept_ratio_vs_v31": 0.9805913951184823,
+      "items": 100,
+      "official_scorer": {
+        "answer_text": {
+          "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+          "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+          "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+        },
+        "arms": {
+          "v2_tau_0p024": {
+            "accuracy": 0.92,
+            "capped": 4,
+            "cells": 100,
+            "correct": 92,
+            "finished": 96,
+            "no_final_response": 6,
+            "unparsed": 6,
+            "verified": 100,
+            "verifier_errors": 0
+          }
+        },
+        "coverage": {
+          "v2_tau_0p024": {
+            "dropped": 0,
+            "missing": 0,
+            "planned": 100,
+            "present": 100,
+            "scored": 100
+          }
+        },
+        "math_verify_version": "0.9.0",
+        "metric": "MATH500 symbolic answer equivalence (math-verify)"
+      },
+      "paired_vs_v31": {
+        "candidate_only_correct": 1,
+        "canvas_count_mismatches": 38,
+        "control_only_correct": 4,
+        "delta_pp": -3.0,
+        "denoising_call_mismatches": 96,
+        "mcnemar_exact_p": 0.375,
+        "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+        "output_hash_mismatches": 100,
+        "output_token_count_mismatches": 95,
+        "per_item_global_kept_delta": {
+          "max": 892405.0,
+          "mean": -3668.04,
+          "median": -4313.5,
+          "min": -409689.0,
+          "n": 100,
+          "p10": -71810.4,
+          "p25": -25199.5,
+          "p75": 6857.25,
+          "p90": 41776.70000000008
+        },
+        "problem_cluster_bootstrap_ci95_pp": [
+          -8.0,
+          1.0
+        ],
+        "problem_clusters": 100
+      },
+      "status": "complete",
+      "suite": "math500",
+      "threshold": 0.024,
+      "work": {
+        "C": 613,
+        "N": 5977,
+        "N_per_C": 9.750407830342578,
+        "T": 145417,
+        "audit_decode_s": 139.6859,
+        "audit_wall_s": 141.47252,
+        "cumulative_common_prefix": [
+          {
+            "canvas_prefix": 1,
+            "eligible_tiles": 994720,
+            "item_kept_distribution": {
+              "max": 31680.0,
+              "mean": 9943.09,
+              "median": 8800.0,
+              "min": 4800.0,
+              "n": 100,
+              "p10": 7152.0,
+              "p25": 7680.0,
+              "p75": 10560.0,
+              "p90": 14400.0
+            },
+            "items": 100,
+            "kept_tiles": 994309,
+            "sparsity": 0.0004131815988418497
+          },
+          {
+            "canvas_prefix": 2,
+            "eligible_tiles": 2576160,
+            "item_kept_distribution": {
+              "max": 55524.0,
+              "mean": 25668.77,
+              "median": 23924.0,
+              "min": 15325.0,
+              "n": 100,
+              "p10": 18214.8,
+              "p25": 20420.75,
+              "p75": 28466.25,
+              "p90": 34398.200000000004
+            },
+            "items": 100,
+            "kept_tiles": 2566877,
+            "sparsity": 0.003603425253089876
+          },
+          {
+            "canvas_prefix": 3,
+            "eligible_tiles": 4532960,
+            "item_kept_distribution": {
+              "max": 97629.0,
+              "mean": 44933.67,
+              "median": 42727.5,
+              "min": 18666.0,
+              "n": 100,
+              "p10": 31436.8,
+              "p25": 37272.25,
+              "p75": 48756.75,
+              "p90": 57035.0
+            },
+            "items": 100,
+            "kept_tiles": 4493367,
+            "sparsity": 0.00873446930923727
+          }
+        ],
+        "fa4_consumer_kept_global_tiles": 18532236,
+        "finish_reasons": {
+          "length": 4,
+          "stop": 96
+        },
+        "global_eligible_tiles": 19948000,
+        "global_kept_tiles": 18532236,
+        "global_skipped_tiles": 1415764,
+        "global_sparsity": 0.07097272909564867,
+        "items": 100,
+        "local_skipped_tiles": 0,
+        "mean_C": 6.13,
+        "mean_N": 59.77,
+        "mean_T": 1454.17,
+        "median_N": 43.0,
+        "median_T": 1187.0,
+        "overall_eligible_rectangles": 91243600,
+        "overall_skipped_rectangles": 1415764,
+        "overall_sparsity": 0.015516310185043115,
+        "phases": {
+          "carried": {
+            "calls": 3065,
+            "eligible_tiles": 2357600,
+            "kept_fraction": 0.9462215812690872,
+            "kept_tiles": 2230812,
+            "skipped_tiles": 126788,
+            "sparsity": 0.053778418730912825
+          },
+          "dense": {
+            "calls": 500,
+            "eligible_tiles": 96640,
+            "kept_fraction": 1.0,
+            "kept_tiles": 96640,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "held": {
+            "calls": 20230,
+            "eligible_tiles": 13591200,
+            "kept_fraction": 0.9051609865206899,
+            "kept_tiles": 12302224,
+            "skipped_tiles": 1288976,
+            "sparsity": 0.09483901347931012
+          },
+          "initial": {
+            "calls": 3065,
+            "eligible_tiles": 1965280,
+            "kept_fraction": 1.0,
+            "kept_tiles": 1965280,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          },
+          "refresh": {
+            "calls": 3025,
+            "eligible_tiles": 1937280,
+            "kept_fraction": 1.0,
+            "kept_tiles": 1937280,
+            "skipped_tiles": 0,
+            "sparsity": 0.0
+          }
+        },
+        "selector_candidate_evaluations": 3902560,
+        "selector_discovery_ms": 1804.8461432605982,
+        "selector_discovery_qk_rectangles": 3902560,
+        "selector_selection_ms": 1082.5746557414532,
+        "value_selected_prefix_tiles": 2599129
+      }
+    }
+  ],
+  "completed_scope": "LongBench controls and initial AIME26/MATH500 grid",
+  "status": "paused_user_request"
+}

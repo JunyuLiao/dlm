@@ -1,3 +1,45 @@
+## V2 local threshold campaign — 2026-10-14 controls complete; campaign paused
+
+User scope amendment: finish the LongBench dense/all-kept controls, then stop.
+The coordinator paused at 2026-10-14 08:23:59 UTC after complete official
+all-kept scoring. The H100 is idle. No full LongBench V2 threshold arm or
+finer threshold arm was launched. Resume only on explicit user instruction.
+
+Campaign: `results/v31_v2_local_threshold_sweep_20261014_attempt002/`.
+Verified generation source commit: `ab05d324773c7a38d60b5c83a2d62e6f575b1cce`;
+orchestration HEAD at verification: `adaf3f7a`. All 886 frozen execution files
+and 24 inputs retain their hashes. Independent aggregation and scorer binding
+checks passed on 22 completed reports / 3,722 scored cells, with zero invalid
+rows, missing scorer cells, unexpected request graph captures, or LOCAL skips.
+
+LongBench-v2 seed 1 controls (503 each): inherited Yuhan V31 268/503 (53.28%),
+FULL fix51994 dense 247/503 (49.11%), PIECEWISE dense 247/503 (49.11%), and
+all-kept FA4 252/503 (50.10%). FULL/PIECEWISE output hashes, token counts,
+denoising calls, and canvases match for every item. V31 uses 280.19 calls/problem
+and 5,833,185,760 retained GLOBAL rectangles; FULL/PIECEWISE use 324.74 and
+41,562,284,640; all-kept uses 292.76 and 36,334,866,240.
+
+The five initial thresholds (0.018, 0.0195, 0.021, 0.0225, 0.024) are complete
+on all 30 AIME26 problems at seeds 42/43/44 and the fixed 100-item MATH500
+subset, with fresh V31/FULL/PIECEWISE/all-kept controls. V2 0.021 scores 60/90
+versus V31 53/90 on AIME, with 278.68 versus 287.51 calls/problem, but 1.4284x
+retained GLOBAL work. Its paired 30-problem bootstrap interval for accuracy
+delta is [-2.22, +17.78] pp. On MATH500, V2 0.021 and 0.0225 both score 95/100,
+matching V31; 0.0225 uses 59.79 versus 62.02 calls/problem and 0.9803x work.
+These are exploratory evaluated-panel results, not held-out confirmation.
+
+Sanitized tables: campaign `summary.md`, `curve.csv`, `phase_accounting.csv`,
+`paired_comparisons.csv`, and `cost_separation.json`. Scope and verification:
+`scope_amendment_controls_only_20261014.json`, `controls_complete.json`,
+`PAUSED_USER_REQUEST.json`, `receipts/controls_only_verification.json`.
+The original protocol, completed shards, and private generations remain intact.
+Clean timing remains paused; audit wall time is not clean latency.
+
+Done: the authorized controls-only scope and initial short-workload grid.
+Running: none. Pending: five initial LongBench V2 thresholds, then the two
+finer thresholds across all three workloads. No shared optimal threshold is
+selected, and no whole-campaign `final_complete.json` is present.
+
 ## Independent GLOBAL value selectors — 2026-10-09 audit result and timing pause
 
 The user stopped clean timing after 419 of 4,024 clean records. The partial
