@@ -1757,3 +1757,25 @@ every-step adapter dispatch and benchmark metadata changes have separate
 fresh parity/operator qualification. See `DIAGNOSTIC_PAUSE_20261014.json` and
 `qualification/factor_replay_source_audit.json`. This is a pending runtime
 qualification, not a completed full503 result.
+
+## 2026-10-14 — Dense causal qualification passed; unchanged full503 resumed
+
+Read-only causal-alias diagnostic attempt006 completed two native FULL cells
+with 28,410 metadata checks (four capture and 943 runtime preparation calls),
+zero dtype/alias errors, and exact output hash/N/T/C agreement with the ordinary
+FULL repeat at memory utilization 0.85. The diagnostic itself used frozen 0.80.
+The persistent int32 causal buffer is shared by capture/runtime metadata. The
+FULL/PIECEWISE free-running difference does not imply the unfixed causal flag;
+cross-mode bitwise equality was never required by this protocol, and valid mode
+differences are documented in the baseline notes. Do not infer selector effects
+from this partial dense comparison. Receipt: full503 study qualification/
+dense_mode_resolution.json and causal_alias_full_attempt006/receipt.json.
+
+The user reconfirmed H100 availability. After the external evaluator exited,
+the resource guard admitted this diagnostic at 13:30 UTC following sustained
+idleness. Startup succeeded with 11.56 GiB available KV cache; earlier failed
+leaves remain intact. At 13:34 UTC coordinator_attempt002 resumed the original
+generation source `98a37a14`, reusing the validated 126-cell FULL shard and
+starting a new PIECEWISE attempt. All 13 arms, manifests, seeds, native sampler,
+source hashes and output-consumer paths remain frozen. Monitor every 15 minutes;
+no final target accuracy or clean timing claim exists.

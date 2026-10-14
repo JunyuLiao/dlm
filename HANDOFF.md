@@ -1,4 +1,4 @@
-## Full503 refresh comparison — 2026-10-14 diagnostic pause
+## Full503 refresh comparison — 2026-10-14 native run resumed
 
 The user approved seven raw/stable/progress/frequency arms, both existing
 held controls, and a new every-step V31 mass-selection baseline that returns
@@ -21,24 +21,32 @@ bitwise sparse-output agreement and zero captures; repeated native controls
 and observation-only runs have zero output/N/T/C mismatches on two cells;
 every-step native receipts pass. Immutable 1,171-file execution copy, all model
 hashes, full503 bindings and specs are frozen before target generation.
-Diagnostic pause: FULL shard01 completed 126 records; PIECEWISE stopped after
+Preserved diagnostic pause: FULL shard01 completed 126 records; PIECEWISE stopped after
 18 records because all 18 matched output hashes differ from FULL. Both used
 memory utilization 0.80. The PIECEWISE first cell matches the earlier valid
-0.85 controls; the FULL first cell differs. This is an unresolved runtime
-control discrepancy, not selector evidence. Both attempts are preserved in
-`DIAGNOSTIC_PAUSE_20261014.json`. FULL 0.85 repeat reproduced the current FULL result on cell 0; memory setting
-is not the explanation. The causal-alias diagnostic is pending after a startup
-allocation failure; an external GPU worker is now occupying the H100.
-Running: qualified-resume session 84731 monitors every 15 minutes and waits
-for a confirmed exclusive H100 window (`EXCLUSIVE_H100_RESERVED.json`,
-`exclusive_available: true`), then 60 seconds of idle device/no external
-CPU-side evaluator. The resource question is pending in the conversation.
-Diagnostic attempts004/005 reached 1,620 metadata checks with zero causal
-alias/dtype errors but failed cache-memory profiling before generation.
-All failed/killed leaves remain intact. No additional target records ran.
-Generation source and frozen native protocol remain unchanged.
-Next: qualify dense equality and resolve source/runtime identity before
-relaunching all 13 arms with matched controls. Clean timing stays paused.
+0.85 controls; the FULL first cell differs. Both attempts are preserved in
+`DIAGNOSTIC_PAUSE_20261014.json`. FULL 0.85 repeats reproduced both current
+FULL qualification cells, so memory utilization does not explain the mode
+difference. The baseline notes already document valid free-running FULL/
+PIECEWISE differences; cross-mode output equality is not a frozen requirement.
+
+Runtime qualification completed at 13:34 UTC in causal-alias attempt006:
+28,410 metadata checks, four capture and 943 runtime preparation calls, zero
+dtype/alias errors, and two exact output/N/T/C repeats against ordinary FULL.
+See `qualification/dense_mode_resolution.json`. Attempts004/005 failed memory
+profiling with no native records and remain intact; attempt006 passed with
+exclusive device access. No selector or sampler source was changed.
+
+Running: qualified-resume session 84731 / coordinator_attempt002 monitors
+every 15 minutes. The user reconfirmed H100 availability; after the external
+evaluator exited and 60 seconds of sustained idleness, the coordinator reused
+the validated 126-cell FULL shard and launched PIECEWISE shard01 in attempt002.
+The admission guard checks CUDA processes and the external CPU-side evaluator
+before every worker. Generation source remains `98a37a14`; verified operational
+checkpoint before this update is `a6ac8607`. Failed/killed leaves are immutable.
+Next: finish 52 source-matched shards / 6,539 target cells, official scoring,
+paired factor/trajectory analysis and final receipt checks. No final accuracy
+result exists yet. Clean timing stays paused.
 The separate V2 threshold campaign below remains user-paused and untouched.
 
 ## V2 local threshold campaign — 2026-10-14 controls complete; campaign paused
