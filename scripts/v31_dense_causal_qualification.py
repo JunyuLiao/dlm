@@ -1,12 +1,12 @@
 """Read-only diagnostic of the persistent causal flag in frozen native runs."""
 import argparse
 import hashlib
-import importlib.util
 import json
 import os
 from pathlib import Path
 import subprocess
 import sys
+import runpy
 
 
 def main():
@@ -66,15 +66,12 @@ def main():
 
     dg.DiffusionGemmaModelState.prepare_attn = prepare
     bench = execution/'scripts/v31_vllm_paired_bench.py'
-    spec = importlib.util.spec_from_file_location('frozen_dense_bench', bench)
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
     sys.argv = [str(bench), protocol['model'], str(study/'private/manifests'),
                 str(study/'private/cells_qualification02.json'), str(out/'records.jsonl'),
                 str(out/'private/completions.jsonl'), 'dense', args.mode]
     status = 'failed'
     try:
-        mod.main()
+        runpy.run_path(str(bench), run_name='__main__')
         if not counts['capture_calls'] or not counts['runtime_calls'] or not counts['metadata_checks']:
             raise RuntimeError('capture/runtime causal checks did not run')
         status = 'complete'

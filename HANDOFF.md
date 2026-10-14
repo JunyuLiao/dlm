@@ -29,10 +29,13 @@ control discrepancy, not selector evidence. Both attempts are preserved in
 `DIAGNOSTIC_PAUSE_20261014.json`. FULL 0.85 repeat reproduced the current FULL result on cell 0; memory setting
 is not the explanation. The causal-alias diagnostic is pending after a startup
 allocation failure; an external GPU worker is now occupying the H100.
-Running: qualified-resume session 14648 waits for the external evaluator and
-60 seconds of continuously idle H100 before qualification and each new shard.
-A brief idle gap caused diagnostic attempt003 to overlap a new foreign worker;
-only our diagnostic was stopped, and its overlap receipt is preserved.
+Running: qualified-resume session 84731 monitors every 15 minutes and waits
+for a confirmed exclusive H100 window (`EXCLUSIVE_H100_RESERVED.json`,
+`exclusive_available: true`), then 60 seconds of idle device/no external
+CPU-side evaluator. The resource question is pending in the conversation.
+Diagnostic attempts004/005 reached 1,620 metadata checks with zero causal
+alias/dtype errors but failed cache-memory profiling before generation.
+All failed/killed leaves remain intact. No additional target records ran.
 Generation source and frozen native protocol remain unchanged.
 Next: qualify dense equality and resolve source/runtime identity before
 relaunching all 13 arms with matched controls. Clean timing stays paused.

@@ -32,6 +32,8 @@ def resource_busy():
 def main():
     p = argparse.ArgumentParser()
     p.add_argument('--study', type=Path, required=True)
+    p.add_argument('--require-reservation', action='store_true',
+                   help='wait for the user-confirmed exclusive H100 window marker')
     args = p.parse_args()
     study = args.study.resolve()
     root = Path(__file__).resolve().parents[1]
@@ -40,7 +42,9 @@ def main():
     last = 0
     idle_since = None
     while True:
-        if resource_busy():
+        reservation = study/'EXCLUSIVE_H100_RESERVED.json'
+        reserved = not args.require_reservation or (reservation.exists() and read(reservation).get('exclusive_available') is True)
+        if not reserved or resource_busy():
             idle_since = None
         elif idle_since is None:
             idle_since = time.monotonic()
@@ -48,10 +52,11 @@ def main():
             break
         if time.monotonic()-last >= 900:
             gpu = subprocess.check_output(['nvidia-smi', '--query-gpu=timestamp,utilization.gpu,memory.used', '--format=csv,noheader'], text=True).strip()
-            write(study/'progress.json', dict(status='waiting_for_idle_H100', gpu=gpu, unix=time.time()))
+            state = 'waiting_for_idle_H100' if reserved else 'waiting_for_exclusive_H100_window'
+            write(study/'progress.json', dict(status=state, gpu=gpu, unix=time.time()))
             with (study/'monitor.jsonl').open('a') as f:
-                f.write(json.dumps(dict(event='waiting_for_idle_H100', gpu=gpu, unix=time.time()))+'\n')
-            print(json.dumps(dict(event='waiting_for_idle_H100', gpu=gpu)), flush=True)
+                f.write(json.dumps(dict(event=state, gpu=gpu, unix=time.time()))+'\n')
+            print(json.dumps(dict(event=state, gpu=gpu)), flush=True)
             last = time.monotonic()
         time.sleep(5)
     qualification = study/'qualification/dense_mode_resolution.json'
