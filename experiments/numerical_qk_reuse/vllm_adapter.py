@@ -155,7 +155,13 @@ class VllmMethodAdapter:
                  cached_refresh_decay_lambda=0.0, cached_refresh_decay_floor=0.25,
                  cached_refresh_value_tiebreak=False, cached_refresh_mass_tolerance=0.0,
                  cached_refresh_drift_threshold=None, cached_refresh_phase_protected=False,
-                 cached_refresh_frequency='periodic', stable_refresh_config=None):
+                 cached_refresh_frequency='periodic', stable_refresh_config=None, mage_always_refresh=False):
+        self.mage_always_refresh = bool(mage_always_refresh)
+        if self.mage_always_refresh and (arm != 'mage' or mage_select != 'fa4'
+                or mage_granularity != 'qblock_max' or mage_select_step != 0 or mage_carry_first
+                or mage_sticky is not None or mage_reselect is not None or mage_reselect_trigger is not None
+                or value_selector is not None or cached_refresh_policy is not None or stable_refresh_config is not None):
+            raise ValueError('every-step baseline requires fresh FA4 qblock-max mass selection without reuse/bonus/trigger')
         if arm not in ('method', 'allkept', 'native', 'mage'):
             raise ValueError(arm)
         if value_selector is not None:
@@ -605,6 +611,9 @@ class VllmMethodAdapter:
                                    selector_qk_rectangles=0, probe_qk_rectangles=0,
                                    selector_pv_rectangles=0)
         self._stable_used_kept = {}
+        self._every_step_previous = {}
+        self._every_step_events = []
+        self._every_step_counts = None
         self._value_phases = {}
         # Per-canvas physical GLOBAL accounting for equal-work diagnostics.
         # This is receipt-only state; it does not participate in routing.
@@ -1100,6 +1109,9 @@ class VllmMethodAdapter:
 
     # ------------------------------------------------------------------ MAGE port (prior-art baseline)
     def _mage(self, layer_idx, q, b, scale, prefix, n):
+        if getattr(self, 'mage_always_refresh', False):
+            from .v31_every_step_refresh import forward
+            return forward(self, layer_idx, q, b, scale, prefix, n)
         if self.stable_refresh_config is not None:
             return self._mage_stable(layer_idx, q, b, scale, prefix, n)
         from experiments.numerical_qk_reuse import v27_fa4
@@ -1279,6 +1291,9 @@ class VllmMethodAdapter:
             value_sticky_rule='log_risk_bonus_online_or_log_removal_penalty_fixed')
 
     def _cached_receipt(self):
+        if self.mage_always_refresh:
+            from .v31_every_step_refresh import receipt
+            return receipt(self)
         if self.stable_refresh_config is not None:
             return self._stable_receipt()
         if self.cached_refresh_policy is None:

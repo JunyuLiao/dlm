@@ -215,6 +215,7 @@ def main():
                                                  condition=None if config is None else config['condition'], arm=arm,
                                                  profile=os.environ.get('VALUE_AUDIT') == '1',
                                                  mage_k=int(os.environ.get('MAGE_K', '1024')),
+                                                 mage_always_refresh=os.environ.get('MAGE_ALWAYS_REFRESH') == '1',
                                                  logit_stats=os.environ.get('LOGIT_STATS', 'legacy'),
                                                  dp_build=os.environ.get('DP_BUILD', 'legacy'),
                                                  observe_backend=os.environ.get('OBSERVE', 'triton'),
@@ -319,7 +320,9 @@ def main():
     llm = LLM(**kw)
     engine = llm.llm_engine
     tok = llm.get_tokenizer()
-    meta = dict(schema='v31_vllm_paired_v1', arm=arm, cudagraph_mode=cg, vllm=vllm.__version__, torch=torch.__version__,
+    meta = dict(schema='v31_vllm_paired_v1', arm=arm, study_arm=os.environ.get('STUDY_ARM'),
+                frozen_source_identity_sha256=os.environ.get('FROZEN_SOURCE_SHA256'),
+                cudagraph_mode=cg, vllm=vllm.__version__, torch=torch.__version__,
                 resolved_cudagraph_mode=str(engine.vllm_config.compilation_config.cudagraph_mode),
                 gpu=torch.cuda.get_device_name(), max_model_len=max_len, chunk=chunk, block_size=kw['block_size'],
                 max_model_len_source='env' if os.environ.get('MAX_MODEL_LEN') else 'derived', max_model_len_need=longest,
