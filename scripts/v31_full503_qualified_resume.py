@@ -1,12 +1,32 @@
 """Resume the unchanged frozen study after qualifying the dense control."""
 import argparse
-import hashlib
+import contextlib
 import json
 from pathlib import Path
 import subprocess
 import time
 
 from scripts.v31_full503_refresh_study import PY, read, write, verify
+
+
+def external_evaluator_running():
+    # A live CPU-side evaluator can be loading its next model while nvidia-smi
+    # briefly reports an empty device. Do not mistake that gap for availability.
+    for proc in Path('/proc').iterdir():
+        if not proc.name.isdigit():
+            continue
+        try:
+            args = (proc/'cmdline').read_bytes().split(b'\0')
+            if any(arg.endswith(b'run_aime_eval.py') for arg in args):
+                return True
+        except OSError:
+            pass
+    return False
+
+
+def resource_busy():
+    return external_evaluator_running() or bool(subprocess.check_output(
+        ['nvidia-smi', '--query-compute-apps=pid', '--format=csv,noheader'], text=True).strip())
 
 
 def main():
@@ -18,7 +38,14 @@ def main():
     protocol = read(study/'specs/protocol.json')
     verify(study, protocol)
     last = 0
-    while subprocess.check_output(['nvidia-smi', '--query-compute-apps=pid', '--format=csv,noheader'], text=True).strip():
+    idle_since = None
+    while True:
+        if resource_busy():
+            idle_since = None
+        elif idle_since is None:
+            idle_since = time.monotonic()
+        elif time.monotonic()-idle_since >= 60:
+            break
         if time.monotonic()-last >= 900:
             gpu = subprocess.check_output(['nvidia-smi', '--query-gpu=timestamp,utilization.gpu,memory.used', '--format=csv,noheader'], text=True).strip()
             write(study/'progress.json', dict(status='waiting_for_idle_H100', gpu=gpu, unix=time.time()))
@@ -26,7 +53,7 @@ def main():
                 f.write(json.dumps(dict(event='waiting_for_idle_H100', gpu=gpu, unix=time.time()))+'\n')
             print(json.dumps(dict(event='waiting_for_idle_H100', gpu=gpu)), flush=True)
             last = time.monotonic()
-        time.sleep(30)
+        time.sleep(5)
     qualification = study/'qualification/dense_mode_resolution.json'
     if not qualification.exists():
         for n in range(1, 1000):
@@ -62,10 +89,28 @@ def main():
     n = len(list(study.glob('coordinator_attempt*.log')))+1
     log = study/f'coordinator_attempt{n:03d}.log'
     print(json.dumps(dict(event='resume', frozen_source_commit=protocol['source_commit'], log=str(log.relative_to(study)))), flush=True)
+    from scripts import v31_full503_refresh_study as runner
+    quiet_since = None
+
+    def guarded_idle():
+        nonlocal quiet_since
+        if resource_busy():
+            quiet_since = None
+            return False
+        if quiet_since is None:
+            quiet_since = time.monotonic()
+            return False
+        if time.monotonic()-quiet_since < 60:
+            return False
+        quiet_since = None
+        return True
+
+    # Only resource admission changes. Frozen native worker sources, inputs,
+    # sampler settings and attention implementations remain unchanged.
+    runner.gpu_idle = guarded_idle
     with log.open('w') as stream:
-        result = subprocess.run([PY, str(root/'scripts/v31_full503_refresh_study.py'), '--study', str(study)], cwd=root, stdout=stream, stderr=subprocess.STDOUT)
-    if result.returncode:
-        raise RuntimeError('study coordinator stopped; inspect preserved attempt')
+        with contextlib.redirect_stdout(stream), contextlib.redirect_stderr(stream):
+            runner.run(study)
 
 
 if __name__ == '__main__':
