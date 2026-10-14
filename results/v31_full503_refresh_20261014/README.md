@@ -1,0 +1,5 @@
+# Full LongBench refresh comparison
+
+13 arms x 503 seed-1 problems (6,539 cells). Seven selected raw/stable/progress/frequency variants, both held-map controls, a fresh same-call V31 selection plus sparse-output baseline, and matched FULL/PIECEWISE/all-kept controls. Native sampler and K=128 remain fixed. No-progress hold keeps existing per-canvas initialization/carry; it is not a once-per-problem frozen mask. Every-step selection uses no previous-map bonus or cache; its dense observer output is discarded. The observer full QK/PV cost is separate from output-consumer physical work. All inputs/completions and frozen executable sources remain private.
+
+Correctness, identical-Q/K/V operator checks and repeated observation-only native qualification precede target generation. Rotated deterministic shards; a failed leaf remains intact and resumes get a new attempt leaf. Monitor the H100 every 15 minutes. Official scoring and fairness/trajectory audits gate final_complete.json. Clean timing stays paused. The separate V2 campaign remains user-paused.

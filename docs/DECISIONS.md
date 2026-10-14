@@ -1717,3 +1717,20 @@ Proposal, not launch: four raw/stable x progress-on/off s2 arms, add stable
 no-progress s1/s4/s8, retain both held references and native-consumer controls.
 The user chooses the 503 scope next. Clean timing remains paused. Complete
 sources and report: results/v31_refresh_factor_isolation_20261014/.
+
+
+## 2026-10-14 — Full503 refresh comparison and current-step extreme baseline
+
+User approved the seven factor-preserving refresh variants, V31 progress and
+no-progress hold controls, and an additional no-reuse baseline: current full
+V31 qblock-max mass selection at every GLOBAL call, then native sparse FA4
+output from that same current mask. The dense observer output is discarded.
+No cached mass, carried map or prior-map bonus influences this baseline. Its
+extra full QK/PV plus duplicate tail-QK work is counted separately. This is
+an accuracy/trajectory extreme, with no clean timing claim. Existing hold
+keeps per-canvas initialization and carry; sampler, K=128, LOCAL, prefill
+and commits remain fixed. Fresh FULL fix51994/PIECEWISE/all-kept controls
+bring the matrix to 13 arms x 503 seed-1 cells. Frozen source 98a37a14, study
+results/v31_full503_refresh_20261014/. Code and all inputs are copied/frozen
+inside the study before qualification/target generation. Prior paused V2
+campaigns and completed cached-refresh studies remain untouched.

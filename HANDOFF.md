@@ -1,3 +1,28 @@
+## Full503 refresh comparison — 2026-10-14 prepared
+
+The user approved seven raw/stable/progress/frequency arms, both existing
+held controls, and a new every-step V31 mass-selection baseline that returns
+the newly selected sparse FA4 output on the same attention call. Retain FULL
+fix51994, PIECEWISE and all-kept controls. Total: 13 x 503 = 6,539 native cells,
+seed 1. Study: `results/v31_full503_refresh_20261014/`; source freeze `98a37a14`.
+
+The every-step baseline removes map reuse, carry, previous-map sticky bonus,
+and cached statistics. Each GLOBAL call uses current full-support selection;
+the dense observer output is discarded and native sparse FA4 is the returned
+output. Full observer QK/PV and duplicate tail-QK work are separate receipt
+fields. Native sampler/model forwards, protected tail, K=128 and LOCAL/prefill/
+commit routing remain fixed. Existing no-progress hold keeps per-canvas
+initialization/carry and disables mid-canvas refresh; it is not a single mask
+for the entire problem. Yuhan's inherited V31 baseline remains attributed.
+
+Done: 36 CPU tests; immutable copy of 1,171 execution files; all model-file
+SHA checks; full503 manifest/cell binding; frozen arm/runtime/native panel
+specs. Next: CUDA/FA4 gates, identical-Q/K/V every-step CPU-map/output checks,
+repeated control and observations-disabled native qualification, then 52
+rotated source-matched resumable shards and official scoring. No target
+records exist yet. Monitor H100 every 15 minutes. Clean timing stays paused.
+The separate V2 threshold campaign below remains user-paused and untouched.
+
 ## V2 local threshold campaign — 2026-10-14 controls complete; campaign paused
 
 User scope amendment: finish the LongBench dense/all-kept controls, then stop.
