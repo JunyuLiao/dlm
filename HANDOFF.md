@@ -1,4 +1,4 @@
-## Full503 refresh comparison — 2026-10-14 prepared
+## Full503 refresh comparison — 2026-10-14 running
 
 The user approved seven raw/stable/progress/frequency arms, both existing
 held controls, and a new every-step V31 mass-selection baseline that returns
@@ -15,12 +15,16 @@ commit routing remain fixed. Existing no-progress hold keeps per-canvas
 initialization/carry and disables mid-canvas refresh; it is not a single mask
 for the entire problem. Yuhan's inherited V31 baseline remains attributed.
 
-Done: 36 CPU tests; immutable copy of 1,171 execution files; all model-file
-SHA checks; full503 manifest/cell binding; frozen arm/runtime/native panel
-specs. Next: CUDA/FA4 gates, identical-Q/K/V every-step CPU-map/output checks,
-repeated control and observations-disabled native qualification, then 52
-rotated source-matched resumable shards and official scoring. No target
-records exist yet. Monitor H100 every 15 minutes. Clean timing stays paused.
+Done: 74 frozen CPU/CUDA/FA4 tests; 20 real current-Q/K/V checks across both
+workloads and all five GLOBAL layers, with independent CPU-map agreement,
+bitwise sparse-output agreement and zero captures; repeated native controls
+and observation-only runs have zero output/N/T/C mismatches on two cells;
+every-step native receipts pass. Immutable 1,171-file execution copy, all model
+hashes, full503 bindings and specs are frozen before target generation.
+Running: coordinator session 86258; attempt001 dense_full_fix51994 shard01.
+Full matrix began at 2026-10-14 09:35 UTC. It owns one H100 worker and monitors
+every 15 minutes. Next: complete 52 rotated resumable shards, official scoring
+and final fairness/trajectory audit. Clean timing stays paused.
 The separate V2 threshold campaign below remains user-paused and untouched.
 
 ## V2 local threshold campaign — 2026-10-14 controls complete; campaign paused
