@@ -1734,3 +1734,26 @@ bring the matrix to 13 arms x 503 seed-1 cells. Frozen source 98a37a14, study
 results/v31_full503_refresh_20261014/. Code and all inputs are copied/frozen
 inside the study before qualification/target generation. Prior paused V2
 campaigns and completed cached-refresh studies remain untouched.
+
+## 2026-10-14 — Full503 dense-mode diagnostic and resource wait
+
+The approved 13-arm native study remains frozen at generation source
+`98a37a14` in `results/v31_full503_refresh_20261014/`. Stop and preserve the
+first PIECEWISE leaf after 18 records: every output hash differs from the
+126-record FULL shard, while all 18 PIECEWISE outputs match the earlier valid
+dense controls. No scoring or selector conclusion is derived from this
+partial comparison. FULL cell 0 repeats exactly at memory utilization 0.85,
+so the original 0.80 setting does not explain the discrepancy. The baseline
+notes document valid FULL/PIECEWISE free-running differences; qualify the
+actual persistent int32 causal-buffer alias during capture and runtime before
+resuming the unchanged generation source.
+
+An external H100 worker started during this diagnostic period. Wait for idle
+resources and do not terminate or modify it. The qualified resume driver
+monitors at 15-minute intervals; failed diagnostic and native leaves remain
+immutable. Timing stays paused. The raw/stable selector and observation
+modules match the completed independent factorial replay by hash; optional
+every-step adapter dispatch and benchmark metadata changes have separate
+fresh parity/operator qualification. See `DIAGNOSTIC_PAUSE_20261014.json` and
+`qualification/factor_replay_source_audit.json`. This is a pending runtime
+qualification, not a completed full503 result.

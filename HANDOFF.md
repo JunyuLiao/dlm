@@ -1,4 +1,4 @@
-## Full503 refresh comparison — 2026-10-14 running
+## Full503 refresh comparison — 2026-10-14 diagnostic pause
 
 The user approved seven raw/stable/progress/frequency arms, both existing
 held controls, and a new every-step V31 mass-selection baseline that returns
@@ -21,10 +21,17 @@ bitwise sparse-output agreement and zero captures; repeated native controls
 and observation-only runs have zero output/N/T/C mismatches on two cells;
 every-step native receipts pass. Immutable 1,171-file execution copy, all model
 hashes, full503 bindings and specs are frozen before target generation.
-Running: coordinator session 86258; attempt001 dense_full_fix51994 shard01.
-Full matrix began at 2026-10-14 09:35 UTC. It owns one H100 worker and monitors
-every 15 minutes. Next: complete 52 rotated resumable shards, official scoring
-and final fairness/trajectory audit. Clean timing stays paused.
+Diagnostic pause: FULL shard01 completed 126 records; PIECEWISE stopped after
+18 records because all 18 matched output hashes differ from FULL. Both used
+memory utilization 0.80. The PIECEWISE first cell matches the earlier valid
+0.85 controls; the FULL first cell differs. This is an unresolved runtime
+control discrepancy, not selector evidence. Both attempts are preserved in
+`DIAGNOSTIC_PAUSE_20261014.json`. FULL 0.85 repeat reproduced the current FULL result on cell 0; memory setting
+is not the explanation. The causal-alias diagnostic is pending after a startup
+allocation failure; an external GPU worker is now occupying the H100.
+Running: waiting for idle H100 to finish causal qualification and resume.
+Next: qualify dense equality and resolve source/runtime identity before
+relaunching all 13 arms with matched controls. Clean timing stays paused.
 The separate V2 threshold campaign below remains user-paused and untouched.
 
 ## V2 local threshold campaign — 2026-10-14 controls complete; campaign paused

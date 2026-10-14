@@ -1,0 +1,67 @@
+{
+  "status": "validated_source_reuse",
+  "replay_study": "results/v31_refresh_factor_isolation_20261014",
+  "replay_identity_sha256": "f5dbed4307a695d91e6e8608ea2616ec295af03843222efb35003b15d64b56a8",
+  "matched_source_files": {
+    "experiments/numerical_qk_reuse/v27_fa4.py": {
+      "replay_sha256": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+      "current_sha256": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd"
+    },
+    "experiments/numerical_qk_reuse/v31_fa4_observe.py": {
+      "replay_sha256": "3b7027b52b64ab5b101d71808b69decba434405c287bf9c94ba3aa7a3b7a5133",
+      "current_sha256": "3b7027b52b64ab5b101d71808b69decba434405c287bf9c94ba3aa7a3b7a5133"
+    },
+    "experiments/numerical_qk_reuse/v31_stable_observe.py": {
+      "replay_sha256": "386894612944b2e9806e6c1f7ed60530860218b8f74c7b7e1313c69609a296ce",
+      "current_sha256": "386894612944b2e9806e6c1f7ed60530860218b8f74c7b7e1313c69609a296ce"
+    },
+    "experiments/numerical_qk_reuse/v31_stable_refresh.py": {
+      "replay_sha256": "dfb2af90ee16236882c678ddf699d1d733eafd24f128b6fe1178b437bbbd91ba",
+      "current_sha256": "dfb2af90ee16236882c678ddf699d1d733eafd24f128b6fe1178b437bbbd91ba"
+    },
+    "experiments/numerical_qk_reuse/v31_stable_trajectory.py": {
+      "replay_sha256": "d6acec01537e1ffa55b370278ec06e8f43236fdb76a1291ca5809c5701645765",
+      "current_sha256": "d6acec01537e1ffa55b370278ec06e8f43236fdb76a1291ca5809c5701645765"
+    },
+    "scripts/v31_refresh_factor_analysis.py": {
+      "replay_sha256": "07be4f59691aafa02cab9f6c298cc7c0be119e939826a82576bce65d12b9f054",
+      "current_sha256": "07be4f59691aafa02cab9f6c298cc7c0be119e939826a82576bce65d12b9f054"
+    },
+    "scripts/v31_refresh_factorial_replay.py": {
+      "replay_sha256": "9ab2464c3eed2253fa568d8bbb203e2eb1dfd6fdff7d3a20eb6ebca0e6de34b1",
+      "current_sha256": "9ab2464c3eed2253fa568d8bbb203e2eb1dfd6fdff7d3a20eb6ebca0e6de34b1"
+    },
+    "scripts/v31_stable_refresh_campaign.py": {
+      "replay_sha256": "6e7e8c00fd0e3711a6bdc2703c9a601a52b8b3fb3ff25c959b533580542d13b7",
+      "current_sha256": "6e7e8c00fd0e3711a6bdc2703c9a601a52b8b3fb3ff25c959b533580542d13b7"
+    },
+    "scripts/v31_stable_refresh_coordinator.py": {
+      "replay_sha256": "3ffee375a023f98004b6cd7e96b3d93d1d05cb7019f8b17c0c088da9a610a1e9",
+      "current_sha256": "3ffee375a023f98004b6cd7e96b3d93d1d05cb7019f8b17c0c088da9a610a1e9"
+    },
+    "scripts/v31_stable_snapshot_replay.py": {
+      "replay_sha256": "8594a1c206f17b859a609c8283a980e16af1f5b9ae742296c9899c0ea416b8ac",
+      "current_sha256": "8594a1c206f17b859a609c8283a980e16af1f5b9ae742296c9899c0ea416b8ac"
+    },
+    "tests/test_v31_refresh_factorial.py": {
+      "replay_sha256": "e5a69c92cef38ede5b6495af88f4a7a8244e82f2c57aa2643e044243b05b00a9",
+      "current_sha256": "e5a69c92cef38ede5b6495af88f4a7a8244e82f2c57aa2643e044243b05b00a9"
+    }
+  },
+  "intentional_changes": {
+    "experiments/numerical_qk_reuse/vllm_adapter.py": {
+      "replay_sha256": "bad84b04156830e7be32d4dc731d2e4dc4aebc17a24e5eb0d0f28c8c811d4793",
+      "current_sha256": "d73d7a00b0bab3ddfac8e5d10c3d6942637a770b82bcf6b704335032cd44d475"
+    },
+    "scripts/v31_vllm_paired_bench.py": {
+      "replay_sha256": "d77a131f2ef856d83a2ad96220781f2c475de78422940dabae328d49e92a8d67",
+      "current_sha256": "270cd7706374e8044f96f3b258e4be8d5b40599be3098b72910544d0597140d9"
+    }
+  },
+  "adapter_changes": "Optional always-refresh dispatch and audit state; disabled for all raw/stable/control arms. Legacy parity tests plus updates-disabled native qualification passed.",
+  "bench_changes": "Optional constructor argument and metadata fields; native sampler unchanged.",
+  "fresh_qualification": "74 focused tests, 20 every-step native FA4/operator comparisons, repeated native controls and observation-only parity",
+  "replay_scope": "2550 previously completed independent CPU-oracle maps across all 16 factorial settings and held controls; source-identical selector and observation modules",
+  "native_full503_status": "pending",
+  "clean_timing": "paused"
+}
