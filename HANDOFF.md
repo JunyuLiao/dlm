@@ -44,6 +44,13 @@ the validated 126-cell FULL shard and launched PIECEWISE shard01 in attempt002.
 The admission guard checks CUDA processes and the external CPU-side evaluator
 before every worker. Generation source remains `98a37a14`; verified operational
 checkpoint before this update is `a6ac8607`. Failed/killed leaves are immutable.
+At 20:03 UTC all 13 first-round shards passed validation (1,638 target cells),
+and PIECEWISE shard02 was running in the rotated second round. Independent
+`qualification/first_round_fairness.json` confirms matching cells, sampler,
+source/runtime/model/input identities and completed-artifact hashes across all
+13 arms, with zero receipt, budget, LOCAL-routing or request-capture errors.
+This is a generation checkpoint; official accuracy is not scored yet. The
+completed causal-qualification checkpoint is commit `4d8c59e5`.
 Next: finish 52 source-matched shards / 6,539 target cells, official scoring,
 paired factor/trajectory analysis and final receipt checks. No final accuracy
 result exists yet. Clean timing stays paused.
