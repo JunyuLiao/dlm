@@ -2084,3 +2084,23 @@ repeat one identical cell twice per process,using two original V31 processes
 and one full-swap process on the unchanged frozen execution source. Native
 sampling,K and timing pause remain unchanged. Same-state eager evidence is
 separate and is not invalidated by this unresolved compiled execution issue.
+
+
+### 2026-10-15: Localize original V31 process-repeatability divergence
+
+Native noop diagnostics003 and005 qualify their observers by exact observed/
+unobserved repeats within each process. Across original V31 processes, first
+sampling-call CUDA/CPU RNG and canvases match, but logits already differ.
+Attempt005 has31/256 first-call argmax disagreements. Its embedding/layer0/
+self-conditioning parameter and buffer hashes match (30 entries, limited
+scope). First prefill and decode layer0 Q/K/V/attention outputs match exactly;
+small differences appear by layer1 Q/K/V and amplify thereafter. This narrows
+the first observed numerical difference to the intervening model computation,
+not to sampling RNG or the first attention operator. It does not identify a
+specific kernel. Source60d9f21f analysis and completion markers bind results.
+
+Keep native accuracy interpretation held. Test a fixed cuBLAS workspace as a
+single diagnostic runtime factor before attributing the effect to compilation
+or MoE; unchanged sampler and compiled model path, two original processes,
+observed/unobserved repeat qualification. Preserve failed observer004 and all
+completed native panels. Any repaired runtime requires fresh matched controls.

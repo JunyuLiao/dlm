@@ -16,7 +16,7 @@ from scripts import v31_value_decision_replay as io
 from scripts import v31_value_native_study as native
 
 
-def prepare(study,parent,python_hash_seed=None,trace=False,layer_trace=False):
+def prepare(study,parent,python_hash_seed=None,trace=False,layer_trace=False,cublas_workspace_config=None):
     if study.exists():raise RuntimeError('use a new immutable diagnostic attempt')
     p=native.verify(parent)
     cells=io.read(parent/'private/schedules/aime26/cells.json')
@@ -37,6 +37,7 @@ def prepare(study,parent,python_hash_seed=None,trace=False,layer_trace=False):
         coordinator_sha256=io.sha(study/'coordinator_source.py'),
         cells_sha256=io.sha(study/'private/cells.json'),suite='aime26',
         jobs=jobs,python_hash_seed=python_hash_seed,trace=trace,layer_trace=layer_trace,
+        cublas_workspace_config=cublas_workspace_config,
         trace_source_sha256=io.sha(trace_source) if trace else None,
         scope='one previously examined inactive cell, repeated with identical request seed; no task-accuracy inference',
         timing='paused; diagnostic only')
@@ -66,6 +67,8 @@ def run(study):
             arm=job['arm'];env=native.base.env_for(parent,'aime26',arm)
             env.update(STUDY_ARM=arm,FROZEN_SOURCE_SHA256=io.sha(parent/'receipts/source_fingerprints.json'))
             if p.get('python_hash_seed') is not None:env['PYTHONHASHSEED']=str(p['python_hash_seed'])
+            if p.get('cublas_workspace_config') is not None:
+                env['CUBLAS_WORKSPACE_CONFIG']=p['cublas_workspace_config']
             worker='v31_vllm_paired_bench.py'
             if arm in native.MODES:
                 worker='v31_value_refinement_worker.py'
@@ -121,7 +124,8 @@ if __name__=='__main__':
     a.add_argument('--python-hash-seed',type=int)
     a.add_argument('--trace',action='store_true')
     a.add_argument('--layer-trace',action='store_true')
+    a.add_argument('--cublas-workspace-config',choices=[':4096:8',':16:8'])
     args=a.parse_args();study=args.study.resolve()
     if args.layer_trace and not args.trace:a.error('--layer-trace requires --trace')
-    if args.stage=='prepare':prepare(study,args.parent.resolve(),args.python_hash_seed,args.trace,args.layer_trace)
+    if args.stage=='prepare':prepare(study,args.parent.resolve(),args.python_hash_seed,args.trace,args.layer_trace,args.cublas_workspace_config)
     else:run(study)

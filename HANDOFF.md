@@ -1,43 +1,36 @@
 ## Value decision/reuse refinement — 2026-10-15, native parity investigation
 
-Latest22:55 UTC: all24 AIME shards are complete; coordinator1799129 is
-SIGSTOP-held with no LongBench panel launched. Its mutable state now records
-`held_repeatability_audit`. Official AIME scoring is complete under
-`workload_checkpoints/aime26/attempt001/`, with an interpretation-hold sidecar.
-Do not promote or claim method gains from these scores yet.
+Verified source60d9f21f: native_noop_attempt005 is complete. Both original
+V31 processes reproduce their observed request exactly when repeated without
+observation, yet differ across processes (54 vs94 calls). First-call RNG and
+canvas match, while31/256 logit argmax rows differ. All30 selected parameter/
+buffer fingerprints match (embedding, layer0, self-conditioning; not a whole-
+model weight audit). Layer0 Q/K/V and attention output match exactly in both
+prefill and decode. Tiny differences first appear at layer1's inputs and
+amplify through later layers. The first observed divergence therefore lies
+between layer0 attention output and layer1 attention input; this does not
+identify a particular projection, norm, MoE kernel, or compiler defect yet.
+Block-table addresses differ across processes, as physical allocation may;
+layer0 attention nevertheless matches. Full sanitized comparison is under
+native_noop_attempt005/rng_localization/. No sampler change or extra forward.
 
-Native_noop_attempt001 is complete: each process repeats its identical seed
-exactly, but two original V31 processes use54 versus66 calls (1358 versus1646
-tokens). The third full-swap process used81 calls and activated106 swaps, so
-it is not a no-op comparator. Native_noop_attempt002 pins PYTHONHASHSEED=0;
-its original V31 processes still differ,75 versus86 calls. That hypothesis
-does not resolve process repeatability. Attempt002 is finishing its fourth
-job. Native_noop_attempt003, source56b06d1b and config63858260, is frozen and
-queued after002. It records private RNG/canvas/logit snapshots on the first
-two denoise calls of the first measured request in two original V31 processes.
-The second measured request is unobserved and must reproduce the first within
-each process, qualifying the observer itself. No sampler changes or extra
-model calls are introduced. Next: localize random-state versus numerical
-output divergence, then qualify a repair before further native expansion.
+Attempts001–003 establish within-process repeatability but cross-process
+variation. PYTHONHASHSEED=0 did not resolve it. Attempt003 localized logits
+before random-state divergence;005 localizes the early layer interval.
+Attempt004 failed before measured generation on scalar buffer hashing; its
+receipt is preserved, and005 uses the corrected observer.
 
-At22:26 UTC a new no-op exposure audit found inactive-trial output/N/C/T
-differences versus V31 in the completed first two AIME shards. Inputs,seeds,
-budgets and named native settings match. Counts are4/4 inactive trials for
-full swaps,3/3 for direction guard,5/5 for raw residual,and4/4 for combined.
-This is an execution-repeatability discrepancy, not evidence for or against
-the methods. See native002/native_noop_precheck/summary.json. The original
-native smoke gate checked activation/configuration/scoring but omitted exact
-same-seed repeatability; method-accuracy interpretation is held pending that
-additional gate. Same-state eager diagnostics remain separately qualified.
-
-Coordinator PID1799129 is being drained through the final AIME control shard
-and then SIGSTOP-held before LongBench. The scoped drain supervisor stops it
-after24 AIME completion markers. Do not resume panel expansion until the
-discrepancy is explained. Completed attempts remain immutable. The checkpoint
-watcher was stopped. A frozen native_noop_attempt001 diagnostic, coordinator
-dfd8f65e, repeats one identical request twice per process and compares two
-original V31 processes with one full-swap process. It has not yet launched
-while the last control worker owns the H100. Timing remains paused.
+All24 AIME shards (720 trials) are complete. Coordinator1799129 remains
+SIGSTOP-held with no LongBench panel launched. Mutable state records
+held_repeatability_audit. Official AIME scoring is complete under
+workload_checkpoints/aime26/attempt001/, with an interpretation-hold sidecar.
+Do not promote or claim method gains from these scores. The original native
+smoke gate checked activation/configuration/scoring but omitted exact
+same-seed process repeatability. Same-state eager evidence is separately
+qualified. Next smallest factor test: a frozen two-process original-V31
+repeat with CUBLAS_WORKSPACE_CONFIG=:4096:8, retaining compiled execution and
+the qualified read-only observer. This is a diagnostic runtime factor, not
+an asserted fix. Other campaigns and clean timing remain paused.
 
 User authorization: design, implement and evaluate the three value directions,
 starting with same-state diagnostics. Fixed per-query-tile budgets and clean
