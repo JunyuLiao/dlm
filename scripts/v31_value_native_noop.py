@@ -31,6 +31,7 @@ def prepare(study,parent,python_hash_seed=None,trace=False):
           dict(name='refinement_repeat001',arm='full_swap8')]
     if python_hash_seed is not None:
         jobs.append(dict(name='refinement_repeat002',arm='full_swap8'))
+    if trace:jobs=jobs[:2]  # Localize original-V31 divergence before examining interventions.
     protocol=dict(schema='native_noop_repeatability_v1',parent=str(parent),
         parent_protocol_sha256=io.sha(parent/'protocol.json'),source_commit=p['source_commit'],
         coordinator_sha256=io.sha(study/'coordinator_source.py'),
