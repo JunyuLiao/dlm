@@ -17,7 +17,10 @@ separately. K is fixed across tiles in each workload: LongBench/RULER K=128;
 AIME/MATH K=27, matching the recent short-workload control. Fewer available
 prefix blocks means keep all of them. C_gate changes row weights before
 aggregation, never K. Dense bootstrap, prefill and commit phases are accounted
-separately and shared with the control. No hidden model forwards, sampler edits,
+separately and shared with the control. On the first carried call, the newly
+committed previous canvas remains mandatory under the inherited carry rule;
+its equal addition across tiles is counted separately from the K selected older
+prefix blocks. No hidden model forwards, sampler edits,
 extra acceptance, altered stopping, or output-limit changes enter native arms.
 
 ## Direction 1: bounded, mass-neighbor value selection

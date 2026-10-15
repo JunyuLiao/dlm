@@ -39,9 +39,11 @@ def test_allkept_shortcut_does_not_run_correction_or_observation():
 
 
 def test_direction_guard_does_not_correct_a_row_already_at_dense_anchor():
+    from experiments.numerical_qk_reuse.v31_value_reuse_guard import ResidualDirectionCache
     a,lists,out=state();r=Runtime('residual_direction_guard');out=torch.ones_like(out)
-    r.projection=torch.eye(8)
-    r.state=dict(identity=(4,8,4),residual=torch.ones(4,1,8),
-        anchor_sparse_post=torch.zeros(4,8),anchor_dense_post=torch.ones(4,8))
+    identity=(4,8,4)
+    cache=ResidualDirectionCache.build(torch.ones(4,1,8),torch.zeros(4,1,8),torch.eye(8),identity)
+    r.state=dict(identity=identity,direction_cache=cache)
     assert torch.equal(r.output(a,29,None,None,1.,8,4,out,lists),out)
-    assert r.counts['extra_post_o_projections']==1
+    assert not r.counts.get('extra_post_o_projections',0)
+    assert r.counts['held_direction_dot_rows']==4

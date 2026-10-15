@@ -12,7 +12,7 @@ import types
 import torch
 
 from .v31_value_decision import bounded_proposal, moments
-from .v31_value_reuse_guard import SelectedOnlyCorrection, reconstruct_cuda, residual_trust
+from .v31_value_reuse_guard import SelectedOnlyCorrection, ResidualDirectionCache, reconstruct_cuda, residual_trust
 
 MODES=('full_swap8','online_swap8','residual','moments','residual_direction_guard','residual_norm_guard')
 
@@ -51,6 +51,13 @@ class Runtime:
         self.add('held_calls',1)
         if self.mode.endswith('swap8'):
             return out                         # FA4 already used the replaced map
+        if self.mode=='residual_direction_guard':
+            cache=self.state['direction_cache']
+            value,_=(cache.apply_cuda(out[0],identity) if out.is_cuda else cache.apply(out[0],identity))
+            self.add('corrected_calls',1)
+            self.add('held_direction_dot_rows',n)
+            self.add('direction_guard_fused_calls',int(out.is_cuda))
+            return value[None]
         if self.mode=='residual' or self.mode.startswith('residual_'):
             self.add('corrected_calls',1)
             correction=self.state['residual'][None]
@@ -118,13 +125,19 @@ class Runtime:
             st['kept']=kept; st['lists']=v27_fa4.block_sparse_tensors(kept)
             self.add('swapped_blocks',swaps)
         else:
-            self.state['residual']=dense-sparse
-            self.state['correction']=SelectedOnlyCorrection.from_anchor(dense,dl,sparse,sl,identity)
+            if self.mode=='moments':
+                self.state['correction']=SelectedOnlyCorrection.from_anchor(dense,dl,sparse,sl,identity)
+            else:
+                self.state['residual']=dense-sparse
             if self.mode.startswith('residual_'):
                 if not hasattr(self,'projection'):
                     self.projection=self.model.model.layers[29].self_attn.o_proj.weight.float()
-                self.state['anchor_dense_post']=dense.reshape(n,-1)@self.projection.T
-                self.state['anchor_sparse_post']=sparse.reshape(n,-1)@self.projection.T
+                if self.mode=='residual_direction_guard':
+                    self.state['direction_cache']=ResidualDirectionCache.build(dense,sparse,self.projection,identity)
+                    del self.state['residual']
+                else:
+                    self.state['anchor_dense_post']=dense.reshape(n,-1)@self.projection.T
+                    self.state['anchor_sparse_post']=sparse.reshape(n,-1)@self.projection.T
                 self.add('extra_post_o_projections',2)
         self.add('anchor_events',1)
         self.add('anchor_full_qk_rectangles',h*qb*((prefix+n+63)//64))
