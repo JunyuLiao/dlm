@@ -64,6 +64,8 @@ def prepare(study,gate):
         if io.sha(report)!=digest:raise RuntimeError('additional decision report changed')
         if any(r['frames']>0 for r in io.read(report)['metrics']):
             sparse_suites.add(io.read(report.parent.parent/'protocol.json')['suite'])
+    if g.get('coverage_complete_sha256')!=io.sha(study.parent/'coverage_complete.json'):
+        raise RuntimeError('coverage completion changed')
     if sparse_suites!={'longbench_v2','aime26','math500','ruler128k'}:
         raise RuntimeError('sparse decision coverage is required on every native workload')
     execution=study/'private/execution';execution.mkdir(parents=True)

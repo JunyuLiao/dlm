@@ -2034,3 +2034,21 @@ RULER vt/cwe items. No correctness filtering; label this purposive exploratory
 coverage. The native gate now rejects a workload with no sparse decision
 frames. All70 current H100 correctness tests pass; receipt binds every native
 refinement and test source, including the optimized full-V online kernel.
+
+## 2026-10-15 — Coverage complete; select native development and cache ablation
+
+Sourcea6f339fe coverage adds22 paired items with unchanged native output/N/C/T
+and exact suffix parity. Seven MATH items supply75 sparse frames;14 additional
+RULER vt/cwe items supply42. On MATH, mass/direction-guard/moment top1 counts
+are107/98/97 and acceptance20/21/31. On additional RULER, counts are27/20/17
+and52/34/42. The broad mean-KL gain from moments does not justify ignoring its
+MATH acceptance regression. C_gate again does not beat shuffled weights clearly.
+
+Freeze development inclusion to full_swap8, residual_direction_guard,
+full_swap8_direction_guard, and raw residual as a mechanistic cache baseline.
+The raw baseline is needed to attribute any benefit to the guard; it is not
+certified as tail-safe or novel. All changes are restricted to the qualified
+last GLOBAL layer. This is promotion to testing, not task-accuracy success.
+See `native_inclusion.md` for all panel counts, exclusions and remaining risks.
+Four fresh matched controls, actual sparse smoke activation, official scorer
+binding and unchanged native sampler are required. Clean timing stays paused.

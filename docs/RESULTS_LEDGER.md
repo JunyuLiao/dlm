@@ -1836,3 +1836,21 @@ All70 expanded pinned-H100 correctness tests pass with zero skips under
 source7ab08253, including full-V ordered online traversal and fixed-K ranking;
 receipt:`receipts/h100_qualification/attempt001/receipt.json`. Native accuracy
 remains unlaunched pending a separately frozen sparse-coverage extension.
+
+## 2026-10-15 — Purposive sparse-coverage decision extension complete
+
+Study:`v31_value_decision_reuse_20261015`, sourcea6f339fe;
+`coverage_complete.json` binds both complete reports and `coverage_analysis.json`.
+All22 new pairs preserve native output hashes,N,C,T and exact eager suffix
+parity. Seven MATH requests provide75 sparse frames;14 RULER vt/cwe requests
+provide42. Selection used prior control canvas counts and task type, not
+correctness; this is purposive exploratory coverage, not a representative or
+held-out estimate. Initial and extension panels remain separate.
+
+MATH mass/direction-guard/moment top1 counts107/98/97; acceptance20/21/31.
+Additional RULER counts27/20/17 and52/34/42. All included native candidates
+share the mass baseline's one premature dense-reference stop in additional
+RULER; moments remove it. Mixed stopping/acceptance effects prevent a claim
+that lower KL establishes accuracy or shorter native trajectories. Native
+inclusion is frozen separately in `native_inclusion.md`; no native scores or
+clean speed results exist for these new variants yet.
