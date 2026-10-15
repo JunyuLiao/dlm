@@ -1,4 +1,4 @@
-## Value decision/reuse refinement — 2026-10-15, native qualification active
+## Value decision/reuse refinement — 2026-10-15, native development active
 
 User authorization: design, implement and evaluate the three value directions,
 starting with same-state diagnostics. Fixed per-query-tile budgets and clean
@@ -6,8 +6,9 @@ timing paused. Study:`results/v31_value_decision_reuse_20261015/`; detailed
 plan:`docs/V31_VALUE_DECISION_REUSE_PLAN_20261015.md`. Native study is frozen
 from79c994ca (71 H100 tests), with protocol committed infc85f24a. Initial
 decision sourcebb2789ca and coverage sourcea6f339fe are both complete. Other
-paused campaigns remain paused. Native qualification started17:54 UTC; the
-larger official-scored development panel follows only after its smokes pass.
+paused campaigns remain paused. All32 native qualification jobs passed by
+19:55 UTC. The official-scored development panel is running its first AIME
+shard cycle; V31's first shard is complete. Other full cohorts remain partial.
 
 Completed independent operator work: full-dimensional moment, bounded-swap,
 causal derivative and reconstruction operators; 670 verified saved inputs,
@@ -54,12 +55,15 @@ with full-information admission, not the historical Gaussian32 V2 selector.
 
 Running: `native_development_attempt002/`, controlled by its frozen private
 execution source and `native_coordinator_attempt001.log` in the study root.
-Follow its `state.json`; next scheduled monitor18:24 UTC. Resume command is in
+Follow its `state.json`; next scheduled monitor20:25 UTC. Resume command is in
 the study README. Native changes are restricted to layer29, the only layer
 qualified by suffix intervention. Included modes:full_swap8,direction-guarded
 residual,raw residual as a mechanistic cache baseline,and full swaps+guard.
-Development
-uses64 LongBench,90 AIME,100 MATH and104 RULER cells with fresh V31,FULL-fix51994,
+All64 smoke problem-trials passed actual sparse activation, fixed budgets,
+compiled dispatch and official scoring/binding checks. See
+`qualification/protocol_qualification_summary.json`; these are pipeline checks,
+not method-accuracy conclusions. Development uses64 LongBench,90 AIME,
+100 MATH and104 RULER cells with fresh V31,FULL-fix51994,
 PIECEWISE and all-kept controls, official scoring and fixed prefix budgets.
 Before panels, smokes must exercise sparse anchors/held correction, verify
 actual compiled dispatch, and pass official scorer/binding checks. Report N,

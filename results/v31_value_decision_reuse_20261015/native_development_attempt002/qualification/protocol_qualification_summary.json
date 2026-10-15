@@ -1,0 +1,488 @@
+{
+  "protocol_sha256": "144e0c6fb94f331223006fc3b44654e9aaf8b1b3e0a9346579f0f778598968d3",
+  "scope": "64 native smoke problem-trials; execution/accounting/scorer qualification, not method accuracy",
+  "status": "passed",
+  "suites": {
+    "aime26": {
+      "arms": {
+        "allkept_fa4": {
+          "actual_decode_modes": {
+            "PIECEWISE": 180
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "7d2489f29712c3f42692897dc205c1ac83386d034aa0141f931e24e24ea9860a",
+          "smoke_trials": 2
+        },
+        "current_v31_control": {
+          "actual_decode_modes": {
+            "PIECEWISE": 172
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "d695834577ce81350770a49ef8a98109a26b3d86bd2d8053c29fe80ea8cc11f7",
+          "smoke_trials": 2
+        },
+        "dense_full_fix51994": {
+          "actual_decode_modes": {
+            "FULL": 192
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "2e9e246244ec01705583c593822e6bf6a65a7d587a0f4182f070a21e9853ef83",
+          "smoke_trials": 2
+        },
+        "dense_piecewise": {
+          "actual_decode_modes": {
+            "PIECEWISE": 193
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "f5f173f2949691fa9e51ec41568b1624ec0a4b846b565daf37488f974b1b515a",
+          "smoke_trials": 2
+        },
+        "full_swap8": {
+          "actual_decode_modes": {
+            "PIECEWISE": 279
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "allkept_shortcuts": 28,
+            "anchor_budget_units_checked": 2112,
+            "anchor_events": 38,
+            "anchor_full_pv_rectangles": 85120,
+            "anchor_full_qk_rectangles": 85120,
+            "budget_errors": 0,
+            "held_calls": 87,
+            "swapped_blocks": 4076,
+            "updated_budget_units_checked": 1216
+          },
+          "records_sha256": "a8e04f2f684812e52eefba1e18f73e4fcbdb521029e8f270e286e0ad927e8485",
+          "smoke_trials": 2
+        },
+        "full_swap8_direction_guard": {
+          "actual_decode_modes": {
+            "PIECEWISE": 170
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "allkept_shortcuts": 28,
+            "anchor_budget_units_checked": 1344,
+            "anchor_events": 14,
+            "anchor_full_pv_rectangles": 19136,
+            "anchor_full_qk_rectangles": 19136,
+            "budget_errors": 0,
+            "corrected_calls": 30,
+            "direction_guard_fused_calls": 30,
+            "extra_post_o_projections": 28,
+            "held_calls": 30,
+            "held_direction_dot_rows": 7680,
+            "swapped_blocks": 886,
+            "updated_budget_units_checked": 448
+          },
+          "records_sha256": "94c63917eb825a53eb2ceb0bafb310466eac02cca54729d3219c390d8c2ba5a3",
+          "smoke_trials": 2
+        },
+        "residual": {
+          "actual_decode_modes": {
+            "PIECEWISE": 150
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "allkept_shortcuts": 28,
+            "anchor_budget_units_checked": 1024,
+            "anchor_events": 4,
+            "anchor_full_pv_rectangles": 4416,
+            "anchor_full_qk_rectangles": 4416,
+            "budget_errors": 0,
+            "corrected_calls": 10,
+            "held_calls": 10
+          },
+          "records_sha256": "909779dab7271bd82c82d4cf5423b3f422ecb146ede6a9d66840037ae086217a",
+          "smoke_trials": 2
+        },
+        "residual_direction_guard": {
+          "actual_decode_modes": {
+            "PIECEWISE": 140
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "allkept_shortcuts": 27,
+            "anchor_budget_units_checked": 1056,
+            "anchor_events": 6,
+            "anchor_full_pv_rectangles": 6976,
+            "anchor_full_qk_rectangles": 6976,
+            "budget_errors": 0,
+            "corrected_calls": 12,
+            "direction_guard_fused_calls": 12,
+            "extra_post_o_projections": 12,
+            "held_calls": 12,
+            "held_direction_dot_rows": 3072
+          },
+          "records_sha256": "4639c683af8fa90f7a681fc82c374bc72d977503bc37d98fe850914c79ee977f",
+          "smoke_trials": 2
+        }
+      },
+      "qualification_sha256": "4fca091311221a991d1767b4cc93172559acb836453160dd7fdc292f4b5a9a17"
+    },
+    "longbench_v2": {
+      "arms": {
+        "allkept_fa4": {
+          "actual_decode_modes": {
+            "PIECEWISE": 319
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "6e5bf1c532e22e6a8a682020be4ce79d6ba7b3ad7a891d37d7f097b56acefb16",
+          "smoke_trials": 2
+        },
+        "current_v31_control": {
+          "actual_decode_modes": {
+            "PIECEWISE": 608
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "385cfcb4d60ea1c664d15a8ab887d637904ecc1a665f0be0136dc819c9d19fbf",
+          "smoke_trials": 2
+        },
+        "dense_full_fix51994": {
+          "actual_decode_modes": {
+            "FULL": 341
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "32bdf0632d51f88d3a4debce1eff9f7b935126ae0826061c99dbd267614948ed",
+          "smoke_trials": 2
+        },
+        "dense_piecewise": {
+          "actual_decode_modes": {
+            "PIECEWISE": 525
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "b521784928f966946d77eaf6f82d200ad4f408ca1baf061457fc34dba63f0dad",
+          "smoke_trials": 2
+        },
+        "full_swap8": {
+          "actual_decode_modes": {
+            "PIECEWISE": 417
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "anchor_budget_units_checked": 1344,
+            "anchor_events": 42,
+            "anchor_full_pv_rectangles": 1668800,
+            "anchor_full_qk_rectangles": 1668800,
+            "budget_errors": 0,
+            "held_calls": 352,
+            "swapped_blocks": 9439,
+            "updated_budget_units_checked": 1344
+          },
+          "records_sha256": "08daddd1f0ce9ff4daba6b2c9618e98dae03966e00fb65fcaea6efb160363115",
+          "smoke_trials": 2
+        },
+        "full_swap8_direction_guard": {
+          "actual_decode_modes": {
+            "PIECEWISE": 315
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "anchor_budget_units_checked": 896,
+            "anchor_events": 28,
+            "anchor_full_pv_rectangles": 1213568,
+            "anchor_full_qk_rectangles": 1213568,
+            "budget_errors": 0,
+            "corrected_calls": 271,
+            "direction_guard_fused_calls": 271,
+            "extra_post_o_projections": 56,
+            "held_calls": 271,
+            "held_direction_dot_rows": 69376,
+            "swapped_blocks": 6424,
+            "updated_budget_units_checked": 896
+          },
+          "records_sha256": "2300b2e9dc2ae6007899b86efe10460eb9675118df26f3bd5f571d5b2f8923b8",
+          "smoke_trials": 2
+        },
+        "residual": {
+          "actual_decode_modes": {
+            "PIECEWISE": 423
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "anchor_budget_units_checked": 1216,
+            "anchor_events": 38,
+            "anchor_full_pv_rectangles": 1503616,
+            "anchor_full_qk_rectangles": 1503616,
+            "budget_errors": 0,
+            "corrected_calls": 364,
+            "held_calls": 364
+          },
+          "records_sha256": "d4c3224182443318fea4f688871819767b2e333be4c26b6200548fcb2ddbd122",
+          "smoke_trials": 2
+        },
+        "residual_direction_guard": {
+          "actual_decode_modes": {
+            "PIECEWISE": 343
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "anchor_budget_units_checked": 1152,
+            "anchor_events": 36,
+            "anchor_full_pv_rectangles": 1541888,
+            "anchor_full_qk_rectangles": 1541888,
+            "budget_errors": 0,
+            "corrected_calls": 287,
+            "direction_guard_fused_calls": 287,
+            "extra_post_o_projections": 72,
+            "held_calls": 287,
+            "held_direction_dot_rows": 73472
+          },
+          "records_sha256": "ac78a8355d9414b26fadf2249f98642a8e900132e884ba3dd01736af1340539d",
+          "smoke_trials": 2
+        }
+      },
+      "qualification_sha256": "55cd22fb30dad3bd6d01d664828db1b1b5e36f4de62bd1fe112644fa3920f552"
+    },
+    "math500": {
+      "arms": {
+        "allkept_fa4": {
+          "actual_decode_modes": {
+            "PIECEWISE": 304
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "3d08a640696b89ba0e53c5db480b3a9f263f7708675fecf2d046871f382afa84",
+          "smoke_trials": 2
+        },
+        "current_v31_control": {
+          "actual_decode_modes": {
+            "PIECEWISE": 204
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "8b85a13d149ba0d66634f95fc8f081da2bf47105f34ff58b7fd2b1d3fc4f5770",
+          "smoke_trials": 2
+        },
+        "dense_full_fix51994": {
+          "actual_decode_modes": {
+            "FULL": 237
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "8f2c01624310f7b1c97634c5a676ad8b0c0eaf8bc1008439274334ee5b49d4fb",
+          "smoke_trials": 2
+        },
+        "dense_piecewise": {
+          "actual_decode_modes": {
+            "PIECEWISE": 220
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "cd9379cfddd2e462e7370901ac1c3d80231cda41210bc83d0b2e6a2ce5605bca",
+          "smoke_trials": 2
+        },
+        "full_swap8": {
+          "actual_decode_modes": {
+            "PIECEWISE": 232
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "allkept_shortcuts": 27,
+            "anchor_budget_units_checked": 1376,
+            "anchor_events": 16,
+            "anchor_full_pv_rectangles": 21056,
+            "anchor_full_qk_rectangles": 21056,
+            "budget_errors": 0,
+            "held_calls": 47,
+            "swapped_blocks": 954,
+            "updated_budget_units_checked": 512
+          },
+          "records_sha256": "de04c96cabed775d920f724ab1f20e8c324d313e3211f2785a92fd7f6d207745",
+          "smoke_trials": 2
+        },
+        "full_swap8_direction_guard": {
+          "actual_decode_modes": {
+            "PIECEWISE": 207
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "allkept_shortcuts": 28,
+            "anchor_budget_units_checked": 1408,
+            "anchor_events": 16,
+            "anchor_full_pv_rectangles": 20736,
+            "anchor_full_qk_rectangles": 20736,
+            "budget_errors": 0,
+            "corrected_calls": 36,
+            "direction_guard_fused_calls": 36,
+            "extra_post_o_projections": 32,
+            "held_calls": 36,
+            "held_direction_dot_rows": 9216,
+            "swapped_blocks": 858,
+            "updated_budget_units_checked": 512
+          },
+          "records_sha256": "ec0bb00e0bb00c8afa828273a83ff4f819f7b4a5e03daef18a0d3abe056f5cb2",
+          "smoke_trials": 2
+        },
+        "residual": {
+          "actual_decode_modes": {
+            "PIECEWISE": 228
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "allkept_shortcuts": 28,
+            "anchor_budget_units_checked": 1344,
+            "anchor_events": 14,
+            "anchor_full_pv_rectangles": 18016,
+            "anchor_full_qk_rectangles": 18016,
+            "budget_errors": 0,
+            "corrected_calls": 41,
+            "held_calls": 41
+          },
+          "records_sha256": "3e93e09c0fbb4a3bebec6b149425994112da1d128316e4afe0dafcaf192e26e7",
+          "smoke_trials": 2
+        },
+        "residual_direction_guard": {
+          "actual_decode_modes": {
+            "PIECEWISE": 229
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "allkept_shortcuts": 27,
+            "anchor_budget_units_checked": 1376,
+            "anchor_events": 16,
+            "anchor_full_pv_rectangles": 21056,
+            "anchor_full_qk_rectangles": 21056,
+            "budget_errors": 0,
+            "corrected_calls": 44,
+            "direction_guard_fused_calls": 44,
+            "extra_post_o_projections": 32,
+            "held_calls": 44,
+            "held_direction_dot_rows": 11264
+          },
+          "records_sha256": "393a49b8195b723c510b33ce8c649a9c67c4e8da5ac89cb575a5469863d9bccf",
+          "smoke_trials": 2
+        }
+      },
+      "qualification_sha256": "e420a00e668adbe2fe875544597509458708bf5cf7050b2640eee473e7aadb7e"
+    },
+    "ruler128k": {
+      "arms": {
+        "allkept_fa4": {
+          "actual_decode_modes": {
+            "PIECEWISE": 14
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "62a78be44f8292973f01bd1abd028cf91f7541fca4725c5501ace66140870d17",
+          "smoke_trials": 2
+        },
+        "current_v31_control": {
+          "actual_decode_modes": {
+            "PIECEWISE": 14
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "b0fad4bc383e9183bfe454adaa39d96bb486f39c77a3f705085db904184ad17d",
+          "smoke_trials": 2
+        },
+        "dense_full_fix51994": {
+          "actual_decode_modes": {
+            "FULL": 19
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "29c616a40cbc0b79d80497306c85b7978d9fc4b1fef17b28802d66d5c8a52095",
+          "smoke_trials": 2
+        },
+        "dense_piecewise": {
+          "actual_decode_modes": {
+            "PIECEWISE": 13
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {},
+          "records_sha256": "a80f2d0ec4bff1a5c8b2b9a86c774a1a4d4633d790e8e3394f8142a145b4cc7d",
+          "smoke_trials": 2
+        },
+        "full_swap8": {
+          "actual_decode_modes": {
+            "PIECEWISE": 16
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "anchor_budget_units_checked": 128,
+            "anchor_events": 4,
+            "anchor_full_pv_rectangles": 262528,
+            "anchor_full_qk_rectangles": 262528,
+            "budget_errors": 0,
+            "held_calls": 8,
+            "swapped_blocks": 867,
+            "updated_budget_units_checked": 128
+          },
+          "records_sha256": "e9092a42e94e1bb7ae557798d8a4bc21691338c26720e00ccd71f1e5a7542b70",
+          "smoke_trials": 2
+        },
+        "full_swap8_direction_guard": {
+          "actual_decode_modes": {
+            "PIECEWISE": 16
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "anchor_budget_units_checked": 128,
+            "anchor_events": 4,
+            "anchor_full_pv_rectangles": 262528,
+            "anchor_full_qk_rectangles": 262528,
+            "budget_errors": 0,
+            "corrected_calls": 8,
+            "direction_guard_fused_calls": 8,
+            "extra_post_o_projections": 8,
+            "held_calls": 8,
+            "held_direction_dot_rows": 2048,
+            "swapped_blocks": 865,
+            "updated_budget_units_checked": 128
+          },
+          "records_sha256": "83c733aa9cfb94ac8d5ad2627cfaf9d09a7ffa5ba4092da28e040c2cf1f61a8e",
+          "smoke_trials": 2
+        },
+        "residual": {
+          "actual_decode_modes": {
+            "PIECEWISE": 15
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "anchor_budget_units_checked": 128,
+            "anchor_events": 4,
+            "anchor_full_pv_rectangles": 262528,
+            "anchor_full_qk_rectangles": 262528,
+            "budget_errors": 0,
+            "corrected_calls": 7,
+            "held_calls": 7
+          },
+          "records_sha256": "38d14acd65d31d023669fb9f60644becec52f4f1ff8187ecc038c7f255ce5bb0",
+          "smoke_trials": 2
+        },
+        "residual_direction_guard": {
+          "actual_decode_modes": {
+            "PIECEWISE": 15
+          },
+          "cuda_graph_captures": 0,
+          "extra_refinement_work": {
+            "anchor_budget_units_checked": 128,
+            "anchor_events": 4,
+            "anchor_full_pv_rectangles": 262528,
+            "anchor_full_qk_rectangles": 262528,
+            "budget_errors": 0,
+            "corrected_calls": 7,
+            "direction_guard_fused_calls": 7,
+            "extra_post_o_projections": 8,
+            "held_calls": 7,
+            "held_direction_dot_rows": 1792
+          },
+          "records_sha256": "9db146e21df5f690e9b8932f0d6c78450e84e9b52f07b3d2da5afe73684cfabc",
+          "smoke_trials": 2
+        }
+      },
+      "qualification_sha256": "d8d24c4d03bd1619414d169a64b9cf271928a93ecbf6ff0cca970d6f6a997652"
+    }
+  },
+  "timing": "paused"
+}
