@@ -1,13 +1,13 @@
-## Value decision/reuse refinement — 2026-10-15, coverage diagnostics active
+## Value decision/reuse refinement — 2026-10-15, native qualification active
 
 User authorization: design, implement and evaluate the three value directions,
 starting with same-state diagnostics. Fixed per-query-tile budgets and clean
 timing paused. Study:`results/v31_value_decision_reuse_20261015/`; detailed
-plan:`docs/V31_VALUE_DECISION_REUSE_PLAN_20261015.md`. Latest verified native
-operator/test source is7ab08253 (70 H100 tests); initial decision batch uses
-bb2789ca, and the active coverage extension is frozen froma6f339fe. Current
-coordinator/accounting additions are committed through42e5b464. Other paused
-campaigns remain paused. No native accuracy run has launched in this study.
+plan:`docs/V31_VALUE_DECISION_REUSE_PLAN_20261015.md`. Native study is frozen
+from79c994ca (71 H100 tests), with protocol committed infc85f24a. Initial
+decision sourcebb2789ca and coverage sourcea6f339fe are both complete. Other
+paused campaigns remain paused. Native qualification started17:54 UTC; the
+larger official-scored development panel follows only after its smokes pass.
 
 Completed independent operator work: full-dimensional moment, bounded-swap,
 causal derivative and reconstruction operators; 670 verified saved inputs,
@@ -36,24 +36,29 @@ reference stop on LongBench; moments one on RULER. C_gate does not clearly
 beat shuffled row weights. None of these offline metrics is task accuracy.
 The initial MATH job qualifies invariance only, not a sparse-method benefit.
 
-Running since17:19 UTC: `coverage_protocol.json`, with eight unseen MATH
+Completed: `coverage_protocol.json`, with eight unseen MATH
 indices having at least12 canvases in prior compiled V31 controls, and all14
 remaining RULER vt/cwe items. Selection excludes correctness and is explicitly
-purposive exploratory coverage. Follow `coverage_state.json` and
-`coverage_coordinator_attempt001.log`; inspect about every30 minutes. Resume
-with the pinned interpreter and `scripts/v31_value_coverage_batch.py --stage run`.
-Completed leaves are verified; partial/failed workers use new attempt folders.
+purposive exploratory coverage. All22 pairs pass invariance and suffix parity.
+Seven MATH items contribute75 sparse frames,14 RULER items42. MATH mass/guard
+top1 counts107/98 and acceptance20/21; additional RULER27/20 and52/34. Moment
+reconstruction worsens MATH acceptance to31, despite lower KL. See
+`coverage_complete.json`, `coverage_analysis.json` and `native_inclusion.md`.
 
-All70 expanded H100 tests pass with zero skips; exact-source receipt:
-`receipts/h100_qualification/attempt001/receipt.json`. Tested optimizations:
+All71 expanded H100 tests pass with zero skips; exact-source receipt:
+`receipts/h100_qualification/attempt002/receipt.json`. Tested optimizations:
 full-V ordered online traversal, device-side disjoint pair ranking, selected-
 only LSE/moment merging, and cached-adjoint directional correction. No clean
 latency or speedup is established. The online swap remains a hybrid proposal
 with full-information admission, not the historical Gaussian32 V2 selector.
 
-Next: finish coverage, review acceptance/stop effects alongside KL/top1, and
-freeze a concrete native promotion receipt. Native changes are restricted to
-layer29, the only layer qualified by suffix intervention. Prepared development
+Running: `native_development_attempt002/`, controlled by its frozen private
+execution source and `native_coordinator_attempt001.log` in the study root.
+Follow its `state.json`; next scheduled monitor18:24 UTC. Resume command is in
+the study README. Native changes are restricted to layer29, the only layer
+qualified by suffix intervention. Included modes:full_swap8,direction-guarded
+residual,raw residual as a mechanistic cache baseline,and full swaps+guard.
+Development
 uses64 LongBench,90 AIME,100 MATH and104 RULER cells with fresh V31,FULL-fix51994,
 PIECEWISE and all-kept controls, official scoring and fixed prefix budgets.
 Before panels, smokes must exercise sparse anchors/held correction, verify
@@ -61,6 +66,12 @@ actual compiled dispatch, and pass official scorer/binding checks. Report N,
 N/C,C,T,paired intervals and separate correction/physical work. Full503 is
 reserved for development survivors under a separate frozen protocol. Timing
 remains paused throughout.
+
+Preparation001 is preserved and superseded before any generation: inherited
+metadata reversed confidence/entropy labels and incorrectly made thinking
+global. Preparation002 reads the pinned model config directly: confidence
+threshold0.005,entropy bound0.1,48 steps,stability1,temperature0.8→0.4. Actual
+sampler behavior is unchanged; RULER thinking remains bound to its input.
 
 ## RULER128K seed42 rerun complete — 2026-10-15
 
