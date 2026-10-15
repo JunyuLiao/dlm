@@ -16,7 +16,7 @@ from scripts import v31_value_decision_replay as io
 from scripts import v31_value_native_study as native
 
 
-def prepare(study,parent,python_hash_seed=None,trace=False,layer_trace=False,cublas_workspace_config=None):
+def prepare(study,parent,python_hash_seed=None,trace=False,layer_trace=False,cublas_workspace_config=None,component_trace=False):
     if study.exists():raise RuntimeError('use a new immutable diagnostic attempt')
     p=native.verify(parent)
     cells=io.read(parent/'private/schedules/aime26/cells.json')
@@ -38,6 +38,7 @@ def prepare(study,parent,python_hash_seed=None,trace=False,layer_trace=False,cub
         cells_sha256=io.sha(study/'private/cells.json'),suite='aime26',
         jobs=jobs,python_hash_seed=python_hash_seed,trace=trace,layer_trace=layer_trace,
         cublas_workspace_config=cublas_workspace_config,
+        component_trace=component_trace,
         trace_source_sha256=io.sha(trace_source) if trace else None,
         scope='one previously examined inactive cell, repeated with identical request seed; no task-accuracy inference',
         timing='paused; diagnostic only')
@@ -77,6 +78,7 @@ def run(study):
             if p.get('trace'):
                 env.update(NATIVE_RNG_TRACE_DIR=str(leaf/'private/trace'),NATIVE_RNG_BASE_WORKER=str(worker_path))
                 if p.get('layer_trace'):env['NATIVE_LAYER_TRACE']='1'
+                if p.get('component_trace'):env['NATIVE_COMPONENT_TRACE']='1'
                 worker_path=study/'private/trace_worker.py'
             cmd=[native.base.PYTHON,str(worker_path),str(io.MODEL),
                  str(parent/'private/pools/aime26'),str(study/'private/cells.json'),
@@ -125,7 +127,9 @@ if __name__=='__main__':
     a.add_argument('--trace',action='store_true')
     a.add_argument('--layer-trace',action='store_true')
     a.add_argument('--cublas-workspace-config',choices=[':4096:8',':16:8'])
+    a.add_argument('--component-trace',action='store_true')
     args=a.parse_args();study=args.study.resolve()
     if args.layer_trace and not args.trace:a.error('--layer-trace requires --trace')
-    if args.stage=='prepare':prepare(study,args.parent.resolve(),args.python_hash_seed,args.trace,args.layer_trace,args.cublas_workspace_config)
+    if args.component_trace and not args.layer_trace:a.error('--component-trace requires --layer-trace')
+    if args.stage=='prepare':prepare(study,args.parent.resolve(),args.python_hash_seed,args.trace,args.layer_trace,args.cublas_workspace_config,args.component_trace)
     else:run(study)

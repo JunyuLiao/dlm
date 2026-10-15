@@ -5,6 +5,7 @@ and token IDs stay private. No random draw, extra model call or seed reset is
 performed by the observer. The original worker still owns all generation.
 """
 import functools
+import gc
 import hashlib
 import json
 import os
@@ -47,6 +48,9 @@ if __name__=='__main__':
                 if label is not None:
                     state['seen'].add(label)
                     actual_tokens=int(attn_metadata.num_actual_tokens)
+                    state['component_phase']=phase
+                    state['component_layer']=int(match[1])
+                    state['actual_tokens']=actual_tokens
                     snapshot={name:t[:actual_tokens].detach().cpu() if t is not None else None for name,t in
                               (('query',query),('key',key),('value',value))}
                     snapshot['actual_tokens']=actual_tokens
@@ -65,6 +69,43 @@ if __name__=='__main__':
             fa.FlashAttentionImpl.forward=attention
             return result
         vllm_adapter.install_vllm_patches=install
+        if os.environ.get('NATIVE_COMPONENT_TRACE')=='1':
+            # These are Python boundaries around already compiled operations.
+            # If a CUDA graph bypasses them, report no capture rather than
+            # adding graph breaks or modifying the model forward.
+            from torch._inductor.select_algorithm import extern_kernels
+            from vllm.model_executor.layers.fused_moe.runner.moe_runner import MoERunner
+            def observe_operation(original,name):
+                @functools.wraps(original)
+                def operation(*args,**kwargs):
+                    selected=(state['request']==2 and state['calls']==0 and
+                              state.get('component_layer')==0 and
+                              not torch.cuda.is_current_stream_capturing())
+                    snapshot=None
+                    if selected:
+                        n=state['actual_tokens']
+                        inputs={}
+                        for i,t in enumerate(args):
+                            if isinstance(t,torch.Tensor):
+                                # Preserve input tensors privately; full model
+                                # weights are fingerprinted rather than copied.
+                                activation=(name in ('mm','mm_dtype') and i==0) or (name=='moe' and i in (1,2))
+                                if activation and t.ndim>=2 and t.shape[0]>=n:
+                                    inputs[str(i)]=t[:n].detach().cpu()
+                                else:
+                                    inputs[str(i)]=dict(shape=list(t.shape),dtype=str(t.dtype),sha256=digest(t))
+                        snapshot=dict(name=name,phase=state['component_phase'],inputs=inputs)
+                    result=original(*args,**kwargs)
+                    if snapshot is not None:
+                        out=result if isinstance(result,torch.Tensor) else kwargs.get('out')
+                        if isinstance(out,torch.Tensor):snapshot['output']=out[:state['actual_tokens']].detach().cpu()
+                        index=state.setdefault('component_count',0);state['component_count']=index+1
+                        torch.save(snapshot,root/f'component{index:03d}.pt')
+                    return result
+                return operation
+            for name in ('mm','mm_dtype'):
+                setattr(extern_kernels,name,observe_operation(getattr(extern_kernels,name),name))
+            MoERunner._forward_impl=observe_operation(MoERunner._forward_impl,'moe')
     original_begin=vllm_adapter.VllmMethodAdapter.begin_request
     @functools.wraps(original_begin)
     def begin(self,*args,**kwargs):
@@ -79,6 +120,15 @@ if __name__=='__main__':
                 if name=='normalizer' or name.startswith(('model.layers.0.','model.embed_tokens.','self_conditioning.')):
                     parameters['buffer:'+name]=dict(shape=list(p.shape),dtype=str(p.dtype),sha256=digest(p))
             (root/'parameter_fingerprints.json').write_text(json.dumps(parameters,indent=2,sort_keys=True)+'\n')
+            if os.environ.get('NATIVE_COMPONENT_TRACE')=='1':
+                from torch._inductor.runtime.triton_heuristics import CachingAutotuner, config_to_dict
+                kernels=[]
+                for obj in gc.get_objects():
+                    if type(obj) is CachingAutotuner:
+                        kernels.append(dict(name=getattr(obj.fn,'__name__','unknown'),
+                            source_sha256=hashlib.sha256(str(getattr(obj.fn,'src','')).encode()).hexdigest(),
+                            launchers=[config_to_dict(x.config) for x in obj.launchers]))
+                (root/'compiled_kernel_configs.json').write_text(json.dumps(kernels,indent=2,sort_keys=True)+'\n')
         return result
     vllm_adapter.VllmMethodAdapter.begin_request=begin
     original=dg._compiled_sample_step
