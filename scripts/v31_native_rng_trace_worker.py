@@ -18,7 +18,7 @@ from vllm.model_executor.models import diffusion_gemma as dg
 
 
 def digest(tensor):
-    return hashlib.sha256(tensor.detach().contiguous().cpu().view(torch.uint8).numpy().tobytes()).hexdigest()
+    return hashlib.sha256(tensor.detach().contiguous().cpu().reshape(-1).view(torch.uint8).numpy().tobytes()).hexdigest()
 
 
 if __name__=='__main__':
@@ -46,12 +46,20 @@ if __name__=='__main__':
                     if label in state['seen']:label=None
                 if label is not None:
                     state['seen'].add(label)
-                    snapshot={name:t.detach().cpu() if t is not None else None for name,t in
+                    actual_tokens=int(attn_metadata.num_actual_tokens)
+                    snapshot={name:t[:actual_tokens].detach().cpu() if t is not None else None for name,t in
                               (('query',query),('key',key),('value',value))}
+                    snapshot['actual_tokens']=actual_tokens
+                    snapshot['metadata']={}
+                    for name in ('seq_lens','query_start_loc','block_table','causal','max_query_len','max_seq_len'):
+                        value_=getattr(attn_metadata,name,None)
+                        if isinstance(value_,torch.Tensor):value_=value_.detach().cpu()
+                        if isinstance(value_,(torch.Tensor,int,float,bool,tuple,list)) or value_ is None:
+                            snapshot['metadata'][name]=value_
                 result=original_attention(self,layer,query,key,value,kv_cache,attn_metadata,output,*args,**kwargs)
                 if label is not None:
                     actual=result if isinstance(result,torch.Tensor) else output
-                    snapshot['output']=actual.detach().cpu()
+                    snapshot['output']=actual[:actual_tokens].detach().cpu()
                     torch.save(snapshot,root/f'{label}.pt')
                 return result
             fa.FlashAttentionImpl.forward=attention
