@@ -220,6 +220,7 @@ def install(root):
     original_layer=gemma4.Gemma4DecoderLayer.forward
     controller.original_layer_forward=original_layer
     original_init=dg.DiffusionGemmaForConditionalGeneration.__init__
+    @functools.wraps(original_init)
     def model_init(self,*args,**kwargs):
         original_init(self,*args,**kwargs); controller.model=self
     dg.DiffusionGemmaForConditionalGeneration.__init__=model_init
@@ -243,6 +244,7 @@ def install(root):
         controller.capture=capture
         return result
 
+    @functools.wraps(original_layer)
     def layer_forward(self,*a,**kw):
         return last_layer(self,*a,**kw) if self.layer_idx==29 else original_layer(self,*a,**kw)
     gemma4.Gemma4DecoderLayer.forward=layer_forward
