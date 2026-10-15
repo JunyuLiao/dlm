@@ -30,7 +30,7 @@ def distribution(scaled, entropy_bound=.1):
                 margin=top.values[..., 0] - top.values[..., 1])
 
 
-def compare(candidate, reference, noise, previous, entropy_bound=.1, confidence=.005):
+def compare(candidate, reference, noise, previous, entropy_bound=.1, confidence=.005, active=None):
     c, r = distribution(candidate, entropy_bound), distribution(reference, entropy_bound)
     ce = c['top1'] != r['top1']
     acceptance = c['accepted'] != r['accepted']
@@ -39,12 +39,19 @@ def compare(candidate, reference, noise, previous, entropy_bound=.1, confidence=
     stop_c = not unstable_c and bool(c['entropy'].mean() < confidence)
     stop_r = not unstable_r and bool(r['entropy'].mean() < confidence)
     kl = (r['logp'].exp() * (r['logp'] - c['logp'])).sum(-1)
-    return dict(top1_disagreement=float(ce.float().mean()), acceptance_disagreement=float(acceptance.float().mean()),
+    result=dict(top1_disagreement=float(ce.float().mean()), acceptance_disagreement=float(acceptance.float().mean()),
         common_noise_disagreement=float(((candidate + noise).argmax(-1) != (reference + noise).argmax(-1)).float().mean()),
         kl_mean=float(kl.mean()), kl_max=float(kl.max()), entropy_mean=float(c['entropy'].mean()),
         mean_entropy_delta=float(c['entropy'].mean() - r['entropy'].mean()), stop_flip=stop_c != stop_r,
         reference_stop=stop_r, candidate_stop=stop_c, max_logit_error=float((candidate-reference).abs().max()),
         margin_crossing_rows=float(((candidate-reference).abs().amax(-1) * 2 >= r['margin']).float().mean()))
+    if active is not None:
+        result['previously_unsettled_rows']=int(active.sum())
+        if bool(active.any()):
+            result.update(top1_disagreement_unsettled=float(ce[active].float().mean()),
+                acceptance_disagreement_unsettled=float(acceptance[active].float().mean()),
+                kl_unsettled_mean=float(kl[active].mean()))
+    return result
 
 
 class Controller:
@@ -210,13 +217,17 @@ class Controller:
         uniform=torch.rand((1,n,vocab),generator=generator,device=dense.device,dtype=dense.dtype)
         noise=-torch.log(-torch.log(uniform.clamp(min=1e-20))).reshape(n,vocab)
         base=scaled(logits)
-        values={'native_control':compare(base,dense,noise,previous,eb,conf)}
+        active=None
+        if self.previous_stats is not None:
+            accepted,changed,reversed_=self.previous_stats
+            active=(~accepted)|changed|reversed_
+        values={'native_control':compare(base,dense,noise,previous,eb,conf,active)}
         values['native_control']['native_suffix_max_abs']=parity
         for name,out in outputs.items():
             alternative=forward(out)
-            values[name]=compare(alternative,dense,noise,previous,eb,conf)
+            values[name]=compare(alternative,dense,noise,previous,eb,conf,active)
             if name=='mass_anchor':
-                values['same_mask_numerical_floor_vs_native']=compare(alternative,base,noise,previous,eb,conf)
+                values['same_mask_numerical_floor_vs_native']=compare(alternative,base,noise,previous,eb,conf,active)
         if not torch.equal(gpu_rng,torch.cuda.get_rng_state()) or not torch.equal(cpu_rng,torch.get_rng_state()):
             raise RuntimeError('offline suffix consumed native RNG')
         if counters!=f['adapter'].calls:
