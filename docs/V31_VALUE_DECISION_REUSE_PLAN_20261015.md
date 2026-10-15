@@ -177,6 +177,14 @@ the first two coverage-extension indices so a sparse anchor and held correction
 must actually execute; all-kept smoke success cannot qualify correction code.
 Smoke scores validate the pipeline only and do not choose a winning method.
 
+After native scoring, partition paired trials into both-correct, candidate-only,
+control-only and both-wrong outcomes, and decompose N,C,T in each group. RULER
+uses fractional-score increase/decrease/equality and both-full-credit groups.
+These outcome-conditioned summaries are descriptive and selection-biased;
+they are not an oracle selector or a causal estimate. They supplement the
+unconditional clustered intervals and reveal whether apparent call savings
+occur only on failed answers or also on equally successful trials.
+
 ## Execution and recovery
 
 One worker on the idle H100; pinned interpreter/model/runtime and user-owned
