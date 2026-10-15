@@ -173,6 +173,8 @@ class Runtime:
                     self.state['anchor_sparse_post']=sparse.reshape(n,-1)@self.projection.T
                 self.add('extra_post_o_projections',2)
         self.add('anchor_events',1)
+        if self.mode=='online_swap8':
+            self.add('online_full_v_kernel_calls',h*qb)
         self.add('anchor_full_qk_rectangles',h*qb*((prefix+n+63)//64))
         self.add('anchor_full_pv_rectangles',h*qb*((prefix+n+63)//64))
         self.counts['budget_errors']=0

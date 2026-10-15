@@ -57,12 +57,26 @@ control and full-swap plus direction-guard ablation. Runtime/model/input pins
 are frozen. The current batch state and log are in the study root. No native
 accuracy run or clean timing has launched.
 
+AIME's six paired trajectories have now passed invariance. Five requests
+contribute35 sparse frames: mass anchor has26 top1/16 acceptance disagreeing
+rows, direction guard24/12, full swaps21/14, combined swaps/guard20/11.
+These are small dense-reference decision counts, not official accuracy.
+C_gate23/15 and shuffled C_gate22/17 do not establish sensitivity-specific
+benefit. LongBench is active at the16:46 UTC monitor; MATH/RULER are queued.
+
 All59 H100 tests pass, including actual FA4 selected LSE and cached-merge
 parity. Held-step direction correction uses cached W^T W r and a fused row dot
 product/correction kernel; faster diagnostic reconstruction consumes FA4's
 selected O/LSE instead of recomputing all current block PV moments. Next:
 finish multi-workload decisions, inspect promotion evidence, then source-freeze
 compiled native development with fresh matched controls. Other campaigns stay paused.
+
+Native preparation now verifies an exact-source H100 correctness receipt.
+New device-side disjoint-pair ranking preserves the unchanged-anchor proposal;
+a single-traversal full-V online-risk kernel and retained-LSE bridge check await
+the expanded GPU suite after the active batch releases the H100. Those changes
+are not in the frozen running batch. Item-clustered decision analysis is ready
+and never treats correlated row/frame measurements as task-accuracy trials.
 
 ## RULER128K seed42 rerun complete — 2026-10-15
 

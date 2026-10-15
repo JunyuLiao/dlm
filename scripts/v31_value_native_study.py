@@ -20,8 +20,23 @@ from experiments.numerical_qk_reuse.v31_value_refinement_runtime import MODES
 
 CONTROLS=['current_v31_control','dense_full_fix51994','dense_piecewise','allkept_fa4']
 NATIVE_CODE=['experiments/numerical_qk_reuse/'+p+'.py' for p in
-    ['v31_value_decision','v31_value_reuse_guard','v31_value_reuse_merge_kernel','v31_value_refinement_runtime','v31_same_state_suffix']]
+    ['v31_value_decision','v31_value_online_kernel','v31_value_reuse_guard','v31_value_reuse_merge_kernel','v31_value_refinement_runtime','v31_same_state_suffix']]
 NATIVE_CODE+=['scripts/v31_value_refinement_worker.py']
+TEST_CODE=['tests/'+p+'.py' for p in ['test_v31_value_decision','test_v31_value_reuse_guard',
+    'test_v31_same_state_suffix','test_v31_value_refinement_runtime','test_v31_value_native_study']]
+
+
+def verify_h100_gate(gate):
+    receipt=io.ROOT/gate['h100_tests_receipt']
+    if io.sha(receipt)!=gate['h100_tests_receipt_sha256']:raise RuntimeError('H100 test evidence changed')
+    proof=io.read(receipt)
+    if (proof.get('status')!='passed' or 'H100' not in proof.get('device','') or
+            proof.get('tests_passed',0)<1 or proof.get('tests_skipped')!=0):
+        raise RuntimeError('complete H100 correctness tests required')
+    for rel in NATIVE_CODE+TEST_CODE:
+        if proof.get('source_sha256',{}).get(rel)!=io.sha(io.ROOT/rel):
+            raise RuntimeError('H100 tests do not cover the current native source: '+rel)
+    return receipt
 
 
 def prepare(study,gate):
@@ -34,6 +49,7 @@ def prepare(study,gate):
     if set(g.get('native_source_sha256',{}))!=set(NATIVE_CODE):raise RuntimeError('native source is not bound to promotion')
     for p,digest in g['native_source_sha256'].items():
         if io.sha(io.ROOT/p)!=digest:raise RuntimeError('native implementation changed after promotion')
+    h100=verify_h100_gate(g)
     batch=io.read(study.parent/'decision_batch_complete.json')
     if io.sha(study.parent/'decision_batch_complete.json')!=g['decision_batch_complete_sha256']:
         raise RuntimeError('decision evidence changed')
@@ -49,6 +65,7 @@ def prepare(study,gate):
     fingerprints={str(p.relative_to(execution)):io.sha(p) for p in execution.rglob('*') if p.is_file()}
     if 'scripts/v31_value_native_study.py' not in fingerprints:raise RuntimeError('commit native coordinator before freezing')
     shutil.copyfile(gate,study/'decision_promotion.json')
+    shutil.copyfile(h100,study/'h100_tests.json')
     oldroot=io.ROOT/'results/v31_v2_local_threshold_sweep_20261014_attempt002'
     old=io.read(oldroot/'protocol.json')
     shutil.copyfile(oldroot/'model_source_fingerprints.json',study/'model_source_fingerprints.json')
@@ -78,6 +95,7 @@ def prepare(study,gate):
     io.write(study/'private/scorer_location.json',ruler,True)
     inputs['private/scorer_location.json']=io.sha(study/'private/scorer_location.json')
     inputs['decision_promotion.json']=io.sha(study/'decision_promotion.json')
+    inputs['h100_tests.json']=io.sha(study/'h100_tests.json')
     protocol=dict(schema='value_native_development_v1',source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         execution_fingerprints=fingerprints,input_fingerprints=inputs,runtime=old['runtime'],
         model_inventory_sha256=io.sha(study/'model_source_fingerprints.json'),suites=settings,
@@ -258,5 +276,7 @@ if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--stage',choices=['prepare','run'],required=True)
     p.add_argument('--study',type=Path,required=True);p.add_argument('--gate',type=Path)
     a=p.parse_args()
-    if a.stage=='prepare':prepare(a.study.resolve(),a.gate.resolve())
+    if a.stage=='prepare':
+        if a.gate is None:p.error('--gate is required for prepare')
+        prepare(a.study.resolve(),a.gate.resolve())
     else:run(a.study.resolve())

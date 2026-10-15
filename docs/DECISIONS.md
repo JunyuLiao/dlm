@@ -2001,3 +2001,18 @@ new item follows the completed two-repeat instrument qualification. Every new
 pair must again preserve native outputs/N/C/T and exact suffix parity. Added
 fixed C_gate row permutation and bounded full-swap plus directional correction.
 K remains fixed; no full task-accuracy or clean timing gate has been bypassed.
+
+## 2026-10-15 — First complete multi-item decision panel and native readiness
+
+The six AIME uninstrumented/active pairs preserve native output hashes,N,C,T.
+Five requests provide35 sparse frames; one remains all-kept. Mass anchor has
+26 top1/16 acceptance disagreements, direction guard24/12, full swaps21/14,
+combined20/11. Full C_gate23/15 versus shuffled22/17 does not establish a
+causal sensitivity benefit. The same-mask numerical floor is substantial;
+these exploratory proxy counts do not establish task-accuracy improvement.
+Native promotion waits for all four workload panels and exact-source H100 tests.
+
+Pair admission remains a fixed-K unchanged-anchor batch proposal, with stable
+disjoint ranking now performed on the device. A full-V ordered online-risk
+kernel removes per-KV-block Python dispatch; its H100 qualification is pending.
+Neither optimization is injected into the source-frozen diagnostic worker.

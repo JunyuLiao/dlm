@@ -125,6 +125,51 @@ def test_online_threshold_changes_running_reference():
     assert not torch.allclose(lo[2:], hi[2:])
 
 
+@pytest.mark.parametrize('device', ['cpu', 'cuda'])
+def test_device_disjoint_ranking_matches_independent_stable_scan(device):
+    from experiments.numerical_qk_reuse.v31_value_decision import disjoint_pair_indices
+    if device == 'cuda' and not torch.cuda.is_available():
+        pytest.skip('CUDA gate requires H100')
+    rng = torch.Generator().manual_seed(419)
+    pairs = torch.cartesian_prod(torch.tensor([9, 3, 17, 2]), torch.tensor([6, 11, 4]))
+    for trial in range(20):
+        # Quantization deliberately makes equal-loss ties common. Some trials
+        # exhaust feasible improvements before reaching the requested limit.
+        losses = torch.randint(0, 7, (len(pairs),), generator=rng).double()
+        threshold = float(trial % 8)
+        chosen, adds, removes = [], set(), set()
+        for i in sorted(range(len(pairs)), key=lambda i: (float(losses[i]), i)):
+            a, r = pairs[i].tolist()
+            if losses[i] < threshold and a not in adds and r not in removes:
+                chosen.append(i); adds.add(a); removes.add(r)
+        ids, valid = disjoint_pair_indices(pairs.to(device), losses.to(device), threshold, 8)
+        assert ids[valid].cpu().tolist() == chosen
+        assert valid.cpu().tolist() == [True] * len(chosen) + [False] * (len(ids) - len(chosen))
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA gate requires H100')
+@pytest.mark.parametrize('rows,dim',[(3,8),(128,512)])
+def test_online_cuda_full_dimension_matches_ordered_preserve_mass_oracle(rows,dim):
+    from experiments.numerical_qk_reuse.v31_value_online_kernel import online_risks_cuda
+    rng=torch.Generator().manual_seed(71)
+    mass=torch.rand(48,rows,generator=rng).mul_(.02)
+    means=torch.randn(48,rows,dim,generator=rng)
+    numerator=mass[...,None]*means
+    rms=torch.tensor(float(dim)**.5)
+    for threshold in (.021,.2,100.):
+        denominator=torch.zeros(rows);running=torch.zeros(rows,dim);expected=[]
+        for j in range(len(mass)):
+            denominator=denominator+mass[j]
+            eta=mass[j]/denominator.clamp_min(1e-30)
+            mean=numerator[j]/mass[j].clamp_min(1e-30)[:,None]
+            risk=(eta*(mean-running).norm(dim=-1)/rms).max()
+            if j==0 or risk>=threshold:
+                running=running+eta[:,None]*(mean-running)
+            expected.append(risk)
+        actual=online_risks_cuda(mass.cuda(),numerator.cuda(),rms.cuda(),threshold)
+        torch.testing.assert_close(actual.cpu(),torch.stack(expected),atol=2e-6,rtol=2e-5)
+
+
 @pytest.mark.skipif(not torch.cuda.is_available(), reason='CUDA gate requires H100')
 def test_cuda_moments_and_fixed_budget_match_float64_reference():
     q, k, v, dq = fixture()

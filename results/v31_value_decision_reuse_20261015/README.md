@@ -68,3 +68,10 @@ will retain fresh V31, FULL fix51994, PIECEWISE dense and all-kept controls,
 use official scoring, and separate extra refinement work from physical consumer
 work. No native accuracy run, clean timing run or other paused campaign has
 been launched by this study.
+
+At the16:46 UTC monitor, AIME is complete and LongBench is active. All six
+AIME native trajectories pass invariance. Its35 sparse frames are summarized
+in `decisions_aime26_attempt001/report/summary.md`; these are same-state
+decision metrics, not official task scores. The native gate now binds H100
+test evidence to every refinement source and test file. Updated GPU pair
+ranking and the full-V ordered online-risk kernel still await that test run.

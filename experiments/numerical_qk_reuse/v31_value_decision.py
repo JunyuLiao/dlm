@@ -133,6 +133,9 @@ def online_risks(m, threshold=.021):
     """
     if m.value_rms is None:
         raise ValueError('V RMS is required for the full-V online risk')
+    if m.mass.is_cuda and m.mass.dtype == torch.float32:
+        from .v31_value_online_kernel import online_risks_cuda
+        return online_risks_cuda(m.mass,m.numerator,m.value_rms,threshold)
     running = torch.zeros_like(m.tail_numerator)
     denominator = torch.zeros_like(m.tail_mass)
     risks = []
@@ -162,6 +165,30 @@ def online_prefix_risks(m):
     mu = m.numerator / m.mass.clamp_min(1e-30)[..., None]
     eta = m.mass / running_mass.clamp_min(1e-30)
     return (eta * (mu - previous).norm(dim=-1)).amax(-1)
+
+
+def disjoint_pair_indices(pairs, losses, reference_loss, limit):
+    """Select the same stable ranked disjoint pairs entirely on the device.
+
+    Scores stay at the unchanged anchor. Each reduction picks the next ranked
+    feasible pair; it does not recompute an objective or perform exact greedy
+    optimization. Invalid trailing entries are padded and masked explicitly.
+    Only the final valid count needs to be read by the reference admission
+    loop, rather than transferring every candidate and score to Python.
+    """
+    eligible = losses < reference_loss
+    indices, valid = [], []
+    for _ in range(min(limit, len(pairs))):
+        ranked = torch.where(eligible, losses, torch.inf)
+        index = ranked.argmin()             # first index breaks equal ties
+        take = eligible[index]
+        indices.append(index)
+        valid.append(take)
+        chosen = pairs[index]
+        eligible = eligible & ((pairs[:, 0] != chosen[0]) & (pairs[:, 1] != chosen[1])) & take
+    if not indices:
+        return pairs.new_empty(0), torch.empty(0, dtype=torch.bool, device=pairs.device)
+    return torch.stack(indices), torch.stack(valid)
 
 
 @torch.inference_mode()
@@ -218,23 +245,12 @@ def bounded_proposal(m, anchor, *, swaps=2, extra=32, shortlist=16,
             loss = loss + objective(po + tangent, target_next, weight, gram)
         losses.append(loss)
     losses = torch.cat(losses)
-    # Only bounded proposal indices/scores cross to the host in this reference
-    # implementation. A native promotion requires tensorized selection.
-    order = losses.argsort(stable=True).tolist()
-    pairs_cpu, loss_cpu = pairs.tolist(), losses.tolist()
-    chosen, used_add, used_rem = [], set(), set()
-    for i in order:
-        a, r = pairs_cpu[i]
-        if loss_cpu[i] >= float(reference_loss):
-            break
-        if a not in used_add and r not in used_rem:
-            chosen.append((a, r)); used_add.add(a); used_rem.add(r)
-        if len(chosen) >= swaps:
-            break
-    for count in range(len(chosen), 0, -1):
+    indices, valid = disjoint_pair_indices(pairs, losses, reference_loss, swaps)
+    chosen = pairs[indices]
+    for count in range(int(valid.sum()), 0, -1):
         candidate = anchor.clone()
-        for a, r in chosen[:count]:
-            candidate[a], candidate[r] = True, False
+        candidate[chosen[:count, 0]] = True
+        candidate[chosen[:count, 1]] = False
         out = m.output(candidate)
         loss = objective(out, target, weight, gram)
         if lifetime:
