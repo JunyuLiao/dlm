@@ -2052,3 +2052,16 @@ last GLOBAL layer. This is promotion to testing, not task-accuracy success.
 See `native_inclusion.md` for all panel counts, exclusions and remaining risks.
 Four fresh matched controls, actual sparse smoke activation, official scorer
 binding and unchanged native sampler are required. Clean timing stays paused.
+
+## 2026-10-15 — Correct inherited sampler metadata before native generation
+
+The pre-launch model-config audit found ambiguous historical metadata:
+`confidence:0.1`/`entropy:0.005` were the reverse of the actual pinned model
+fields, and `thinking:true` could not describe non-thinking RULER inputs.
+The generation code reads model defaults, which are confidence_threshold0.005,
+entropy_bound0.1,stability_threshold1,48 steps and temperature0.8→0.4.
+No native worker was launched from preparation001; preserve it as superseded.
+Preparation002 reads the named defaults directly and binds the config hash.
+Thinking/output budgets remain bound to each private input manifest. Selector
+settings and inactive Gaussian32 metadata are not sampler settings and are
+kept separate. This correction changes metadata, not native decoding behavior.

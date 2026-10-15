@@ -45,3 +45,14 @@ def test_trajectory_decomposition_separates_canvas_length_and_denoising_rate():
     assert r['N_change_decomposition']['canvas_count_component']==9
     assert r['N_change_decomposition']['calls_per_canvas_component']==-5
     assert r['denoise_forwards']['delta']==4
+
+
+def test_native_contract_reads_real_named_model_settings(tmp_path):
+    from scripts import v31_value_native_study as study
+    study.io.write(tmp_path/'config.json',dict(canvas_length=256))
+    study.io.write(tmp_path/'generation_config.json',dict(confidence_threshold=.005,
+        sampler_config=dict(entropy_bound=.1),stability_threshold=1,max_denoising_steps=48,t_max=.8,t_min=.4))
+    contract=study.native_contract(tmp_path)
+    assert contract['confidence_threshold']==.005 and contract['entropy_bound']==.1
+    assert contract['denoise_steps']==48 and contract['canvas']==256
+    assert 'thinking' not in contract and 'projection_rank' not in contract

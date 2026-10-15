@@ -26,6 +26,17 @@ TEST_CODE=['tests/'+p+'.py' for p in ['test_v31_value_decision','test_v31_value_
     'test_v31_same_state_suffix','test_v31_value_refinement_runtime','test_v31_value_native_study']]
 
 
+def native_contract(model):
+    """Read actual model defaults; do not copy ambiguous historical labels."""
+    gen=io.read(model/'generation_config.json');config=io.read(model/'config.json')
+    return dict(canvas=config['canvas_length'],denoise_steps=gen['max_denoising_steps'],
+        confidence_threshold=gen['confidence_threshold'],entropy_bound=gen['sampler_config']['entropy_bound'],
+        stability_threshold=gen['stability_threshold'],temperature=[gen['t_max'],gen['t_min']],seed_base=31,
+        generation_config_sha256=io.sha(model/'generation_config.json'),
+        thinking_policy='frozen per-input manifests, including non-thinking RULER; no runtime rewrite',
+        output_limits='frozen per-input generation budgets; native stopping unchanged')
+
+
 def verify_h100_gate(gate):
     receipt=io.ROOT/gate['h100_tests_receipt']
     if io.sha(receipt)!=gate['h100_tests_receipt_sha256']:raise RuntimeError('H100 test evidence changed')
@@ -117,7 +128,8 @@ def prepare(study,gate):
     protocol=dict(schema='value_native_development_v1',source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         execution_fingerprints=fingerprints,input_fingerprints=inputs,runtime=old['runtime'],
         model_inventory_sha256=io.sha(study/'model_source_fingerprints.json'),suites=settings,
-        frozen_native=old['frozen_native'],
+        frozen_native=native_contract(io.MODEL),
+        inherited_v31_policy={k:old['frozen_native'][k] for k in ('select_step','carry','progress_trigger','sticky')},
         arms=CONTROLS+g['promoted_modes'],scope='value changes only at GLOBAL layer29; other GLOBAL layers retain V31 and LOCAL remains dense',
         budget='same fixed prefix K in every head/query tile, plus common mandatory/carry phases',
         native_sampler='unchanged proposal, acceptance, re-noising, self-conditioning, stopping, temperatures and budgets',
