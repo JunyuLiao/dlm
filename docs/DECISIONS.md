@@ -1870,3 +1870,30 @@ explicitly authorized future sweep resume. Verified reports and completion:
 `summary.md`, `interpretation.md`, `paired_comparisons.json`,
 `receipts/independent_verification.json`, and `final_complete.json` in the
 campaign above.
+
+
+## 2026-10-15: Historical RULER128K reporting and source provenance limit
+
+At the user's explicit choice, report the existing 104-item panel rather than
+launch a new tau=0.021 run. CPU reaggregation verified 20 completed shards,
+520 scored cells and all 104 paired prompt/seed/budget/runtime-geometry bindings
+under `results/v31_value_performance_20261010/ruler128k/`. The report is
+`results/ruler128k_historical_report_20261015/`; its completion marker certifies
+reporting only, not a new native experiment or completion of the originally
+planned dense/control family. No GPU generation or paused queue was resumed.
+
+Official scores: V31 86.394, V1 86.154, V2 85.673, V3a 86.298, batch8 81.490.
+V1/V2 use tau=0.027. V2 has 612 versus V31 577 native calls, one visible canvas
+per item, and 96,830,509 versus 99,178,720 retained GLOBAL tiles. This is +6.066%
+calls and -2.368% GLOBAL work, with no observed accuracy gain. The same
+92,898,560 full-support-phase tiles dominate both arms. Official RULER uses
+fractional target credit; scores are not binary correct/104 accuracy.
+
+One recorded execution-source hash differs across the historical comparison:
+`v31_value_kernels.py` is `f9b5dfdd...` for V31 and `192f027f...` for value arms.
+The other four recorded source hashes agree. Therefore do not describe this
+archive as a freshly verified byte-identical deployment comparison. No completed
+dense/all-kept RULER arm was found in this 104-item panel. Literal CUDA launch
+counts were not measured; retained attention tiles and logical adapter split-FA4
+calls are distinct fields. Existing source records and published summaries
+remain unchanged. Clean timing and the separate campaigns stay paused.

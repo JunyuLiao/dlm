@@ -1,3 +1,22 @@
+## Historical RULER128K report — 2026-10-15, no new generation
+
+The user explicitly chose the existing 104-item panel (8 samples x 13 tasks),
+not a fresh V2 tau=0.021 run. The verified CPU report is
+`results/ruler128k_historical_report_20261015/summary.md`, with metrics/phase/
+selector-cost CSVs and a scoped reporting completion marker. All 20 original
+shards and 104 scorer bindings per arm were checked; original artifacts remain
+unchanged. V1/V2 use tau=0.027. Scores are V31 86.394, V1 86.154, V2 85.673,
+V3a 86.298 and batch8 81.490 (official partial-credit score, not binary accuracy).
+V2 uses 5.885 versus 5.548 calls/problem, one visible canvas/problem, and
+96.831M versus 99.179M retained GLOBAL tiles.
+
+Historical provenance limit: one value-kernel source hash differs between V31
+and value arms; there is no completed dense/all-kept arm for this subset.
+Report these as historical observations, not a strict new source-matched study.
+A tau=0.021 RULER result is not present. No GPU work or paused campaign resumed;
+other thresholds and clean timing remain paused. The completed LongBench arm
+below is unchanged.
+
 ## V2 tau=0.021 LongBench complete — 2026-10-15
 
 The user authorized only the complete 503-item seed-1 V2 0.021 arm. It is done
