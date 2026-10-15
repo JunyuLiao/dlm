@@ -1,96 +1,66 @@
-## Value decision/reuse refinement — 2026-10-15, diagnostic stages
+## Value decision/reuse refinement — 2026-10-15, coverage diagnostics active
 
-Authorized by the user: design, implement and evaluate all three proposed
-value directions, starting with same-state diagnostics; fixed per-query-tile
-budgets and clean timing paused. Study:
-`results/v31_value_decision_reuse_20261015/`. Plan:
-`docs/V31_VALUE_DECISION_REUSE_PLAN_20261015.md`. Operator source freeze
-`378e147a`; whole-layer protocol `39a56aa0`; suffix diagnostic implementation
-`30ce7099`, protocol freeze `e90a7b49`. Existing paused campaigns stay paused.
+User authorization: design, implement and evaluate the three value directions,
+starting with same-state diagnostics. Fixed per-query-tile budgets and clean
+timing paused. Study:`results/v31_value_decision_reuse_20261015/`; detailed
+plan:`docs/V31_VALUE_DECISION_REUSE_PLAN_20261015.md`. Latest verified native
+operator/test source is7ab08253 (70 H100 tests); initial decision batch uses
+bb2789ca, and the active coverage extension is frozen froma6f339fe. Current
+coordinator/accounting additions are committed through42e5b464. Other paused
+campaigns remain paused. No native accuracy run has launched in this study.
 
-Completed: independent full-V moment/swap/derivative/reconstruction operators;
-35 CPU tests and all 36 pinned-H100 tests; 670 immutable input hashes;
-620-frame replay (570 usable frames including observations), all five GLOBAL
-layers, first two query heads followed by all 16 heads and both Q128 tiles.
-K=128 for LongBench; K=27 short-task operator counterfactual on source V31
-states. Zero budget errors or CUDA captures. The whole-layer report includes
-signed cross-head cancellation through the real O projection. Model decision
-and task-accuracy results are not yet established.
+Completed independent operator work: full-dimensional moment, bounded-swap,
+causal derivative and reconstruction operators; 670 verified saved inputs,
+620 frames (570 usable), all five GLOBAL layers, then all16 heads and both
+Q128 tiles with signed errors through the real O projection. K=128 on long
+workloads; K=27 on short-workload replay is counterfactual on sourceK128 states.
+The previous-query tangent worsens age1 prediction on100/100 screened units;
+it is rejected. Bounded swaps yield modest held-error gains. Cached correction
+has larger gains but harmful tails. Causal residual-direction trust improves
+those tails; its conditional surrogate-regret bound is documented separately,
+not claimed as a current-dense or task-accuracy guarantee.
 
-Findings: previous-query displacement is a poor extrapolator here: age-1
-post-O error prediction worsens on all 100 sparse screened units (mean 2.625
-for static prediction versus 4.740 for tangent prediction). Do not promote
-that predictor. Whole-layer full/online swap8 reduce mean held error by about
-1.4–2.7% on the two LongBench trajectories; cached corrections reduce mean
-more substantially but can increase row-error tails. AIME's sparse replay
-coverage is only one late trajectory; all-kept cases provide no selector
-benefit evidence. These are operator diagnostics on previously examined data.
+Completed exact eager instrumentation qualification: six runs on one item
+reproduce native outputs/N/C/T; failed constructor/compiler/observer attempts
+remain immutable and excluded. The subsequent four-workload batch completes
+all35 paired items (70 native trajectories), preserving output hashes,N,C,T
+and suffix parity. These eager states are not compiled production states.
+`decision_batch_complete.json` binds the reports;
+`decision_analysis/summary.md` gives request-clustered comparisons.
 
-Completed refinement: causal residual-direction trust lowers mean whole-layer
-error by 35.6% and 22.5% on the two LongBench trajectories, with >2% max-row
-harms 0/220 and 3/100 (unconditional residual: 26/220 and 25/100). Late AIME
-has ratio 0.8291 and 2/30 max-row harms. These remain operator observations.
-The norm-only ablation suppresses more correction. Theory and a checked
-surrogate-regret bound are in `docs/V31_CAUSAL_VALUE_RESIDUAL_GUARD_20261015.md`;
-it is not an accuracy or current-dense improvement guarantee.
+Sparse frames: LongBench99/eight items, AIME35/five, RULER14/five, MATHzero.
+LongBench mass/direction-guard/moment top1 disagreements are1068/792/573 and
+acceptance disagreements134/125/105. RULER corresponding top1 counts24/12/9
+and acceptance4/8/4 expose a decision tradeoff. Raw residual delays one dense
+reference stop on LongBench; moments one on RULER. C_gate does not clearly
+beat shuffled row weights. None of these offline metrics is task accuracy.
+The initial MATH job qualifies invariance only, not a sparse-method benefit.
 
-Eager instrumentation qualification is complete under
-`suffix_qualification_attempt006/` (source604446fb). All six uninstrumented,
-observer-disabled and active-probe runs match exactly:117 native calls,
-6 canvases,1438 output tokens and identical output hash. Both active repeats
-have12 diagnostic frames and120 extra suffix calls, zero suffix-parity failures,
-unchanged RNG/counters, actual graph NONE and zero CUDA captures. Earlier
-attempts remain excluded after constructor/compiler/observer-address/CLI failures.
-These are eager diagnostic states; compiled production accuracy remains separate.
+Running since17:19 UTC: `coverage_protocol.json`, with eight unseen MATH
+indices having at least12 canvases in prior compiled V31 controls, and all14
+remaining RULER vt/cwe items. Selection excludes correctness and is explicitly
+purposive exploratory coverage. Follow `coverage_state.json` and
+`coverage_coordinator_attempt001.log`; inspect about every30 minutes. Resume
+with the pinned interpreter and `scripts/v31_value_coverage_batch.py --stage run`.
+Completed leaves are verified; partial/failed workers use new attempt folders.
 
-The one-item decision result supports broader testing, not accuracy promotion:
-mass anchor has56/3072 top1 disagreements versus51 for direction guard;
-mean logit KL falls from0.001306 to0.000920. Moment reconstruction has lower
-KL but more acceptance disagreements (16 versus14 rows). Full/C_gate swap gains
-are small relative to the measured same-mask numerical floor. No stop flips.
+All70 expanded H100 tests pass with zero skips; exact-source receipt:
+`receipts/h100_qualification/attempt001/receipt.json`. Tested optimizations:
+full-V ordered online traversal, device-side disjoint pair ranking, selected-
+only LSE/moment merging, and cached-adjoint directional correction. No clean
+latency or speedup is established. The online swap remains a hybrid proposal
+with full-information admission, not the historical Gaussian32 V2 selector.
 
-Running: `decision_batch_protocol.json`, sourcebb2789ca, sequential paired
-uninstrumented/active runs on8 LongBench,6 AIME,8 MATH and13 RULER items.
-K=128 long,27 short; capture first two sparse canvases as well as initial
-all-kept states, excluding all-kept benefit claims. Added C_gate permutation
-control and full-swap plus direction-guard ablation. Runtime/model/input pins
-are frozen. The current batch state and log are in the study root. No native
-accuracy run or clean timing has launched.
-
-AIME's six paired trajectories have now passed invariance. Five requests
-contribute35 sparse frames: mass anchor has26 top1/16 acceptance disagreeing
-rows, direction guard24/12, full swaps21/14, combined swaps/guard20/11.
-These are small dense-reference decision counts, not official accuracy.
-C_gate23/15 and shuffled C_gate22/17 do not establish sensitivity-specific
-benefit. LongBench is active at the16:46 UTC monitor; MATH/RULER are queued.
-
-All59 H100 tests pass, including actual FA4 selected LSE and cached-merge
-parity. Held-step direction correction uses cached W^T W r and a fused row dot
-product/correction kernel; faster diagnostic reconstruction consumes FA4's
-selected O/LSE instead of recomputing all current block PV moments. Next:
-finish multi-workload decisions, inspect promotion evidence, then source-freeze
-compiled native development with fresh matched controls. Other campaigns stay paused.
-
-Native preparation now verifies an exact-source H100 correctness receipt.
-New device-side disjoint-pair ranking preserves the unchanged-anchor proposal;
-a single-traversal full-V online-risk kernel and retained-LSE bridge check await
-the expanded GPU suite after the active batch releases the H100. Those changes
-are not in the frozen running batch. Item-clustered decision analysis is ready
-and never treats correlated row/frame measurements as task-accuracy trials.
-
-Update17:15 UTC: the four-workload batch is complete; all35 native pairs pass
-invariance. See `decision_analysis/summary.md`. Sparse frames: LongBench99,
-AIME35,RULER14,MATH0. LongBench top1 disagreements fall1068→792 with direction
-guard and→573 with moments, but RULER guard acceptance disagreements rise4→8.
-Raw residual has one delayed-stop flip on LongBench; moments one on RULER.
-C_gate does not clearly beat the shuffled control. No accuracy claim.
-
-All70 expanded H100 correctness tests pass, zero skips, source7ab08253;
-receipt `receipts/h100_qualification/attempt001/receipt.json`. Full-V online
-traversal and device-side pair ranking are now qualified. A separately frozen
-coverage extension will run eight long MATH controls and14 remaining RULER
-vt/cwe items, selected without correctness. Native development remains gated
-on actual sparse coverage and review of the acceptance/stop regressions.
+Next: finish coverage, review acceptance/stop effects alongside KL/top1, and
+freeze a concrete native promotion receipt. Native changes are restricted to
+layer29, the only layer qualified by suffix intervention. Prepared development
+uses64 LongBench,90 AIME,100 MATH and104 RULER cells with fresh V31,FULL-fix51994,
+PIECEWISE and all-kept controls, official scoring and fixed prefix budgets.
+Before panels, smokes must exercise sparse anchors/held correction, verify
+actual compiled dispatch, and pass official scorer/binding checks. Report N,
+N/C,C,T,paired intervals and separate correction/physical work. Full503 is
+reserved for development survivors under a separate frozen protocol. Timing
+remains paused throughout.
 
 ## RULER128K seed42 rerun complete — 2026-10-15
 
