@@ -15,6 +15,7 @@ if __name__ == '__main__':
         @functools.wraps(original_init)
         def init(self,*args,**kwargs):
             kwargs['enforce_eager']=True
+            kwargs['compilation_config']={'cudagraph_mode':'NONE','mode':0}
             return original_init(self,*args,**kwargs)
         LLM.__init__=init
     # The bench assigns its trajectory recorder per real request, after warmup.

@@ -38,7 +38,7 @@ def prepare(study, suite='longbench_v2', panel='qualification'):
         raise RuntimeError('frozen input panel unavailable')
     pool=source/'private/manifests'
     if panel=='decisions':
-        qualification=study.parent/'suffix_qualification_attempt005'
+        qualification=study.parent/'suffix_qualification_attempt006'
         marker=io.read(qualification/'qualification_complete.json')
         if marker['reproducibility_sha256']!=io.sha(qualification/'reproducibility.json'):
             raise RuntimeError('parent diagnostic qualification changed')
@@ -91,6 +91,7 @@ def prepare(study, suite='longbench_v2', panel='qualification'):
         decision_metrics=['top1','acceptance','common_Gumbel','KL','entropy','stopping'],
         timing='paused; instrumented generation is diagnostic only; suffix calls excluded from native N',
         substrate_limit='Eager model diagnostics use common identical eager states, not production compiled V31 states. Production accuracy requires fresh compiled controls.',
+        cli_mode='PIECEWISE is required by inherited adapter CLI; diagnostic wrapper explicitly sets enforce_eager, compilation mode0 and actual graph NONE',
         full_accuracy='not automatically launched by this qualifier')
     if panel=='decisions':
         protocol['instrumentation_parent_sha256']=io.sha(qualification/'qualification_complete.json')
@@ -161,7 +162,7 @@ def run(study):
             execution=study/'private/execution'
             worker='v31_same_state_suffix_worker.py'
             command=[PY,str(execution/'scripts'/worker),str(io.MODEL),str(study/'private/manifests'),
-                str(study/'private/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/run_diagnostic.private.jsonl'),'mage','NONE']
+                str(study/'private/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/run_diagnostic.private.jsonl'),'mage','PIECEWISE']
             io.write(leaf/'config.json',dict(protocol_sha256=io.sha(study/'protocol.json'),repeat=repeat,active=active),True)
             start=time.monotonic()
             with (leaf/'private/worker.log').open('w') as stream:
@@ -178,11 +179,14 @@ def run(study):
             rows=[json.loads(x) for x in (leaf/'records.jsonl').read_text().splitlines()]
             if len(rows)!=protocol['panel_cells']:
                 raise RuntimeError('incomplete native trajectory')
+            if any(r.get('cuda_graph_captures')!=0 or not str(r.get('resolved_cudagraph_mode','')).endswith('NONE') for r in rows):
+                raise RuntimeError('diagnostic did not execute the declared eager/no-capture substrate')
             if active and not (leaf/'decisions/decisions.jsonl').exists():
                 raise RuntimeError('no same-state decisions collected')
             verify(study)
             io.write(leaf/'complete.json',dict(status='complete',protocol_sha256=io.sha(study/'protocol.json'),
-                records_sha256=io.sha(leaf/'records.jsonl'),gpu_reservation_s=time.monotonic()-start),True)
+                records_sha256=io.sha(leaf/'records.jsonl'),gpu_reservation_s=time.monotonic()-start,
+                decisions_sha256=io.sha(leaf/'decisions/decisions.jsonl') if active else None),True)
             receipts.append((repeat,active,leaf))
     rows={}
     for repeat,active,leaf in receipts:
