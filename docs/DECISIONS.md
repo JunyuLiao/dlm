@@ -1796,3 +1796,22 @@ no final target accuracy or clean timing claim exists.
   verified ordinal/visible-canvas correction. Official C=20 deltas are +7.74%
   for tau .015 (50 common items) and +3.07% for tau .021 (45); no exact
   total-plus-early work match is claimed. Entire-run work and scores are intact.
+
+
+## 2026-10-15 — User requests shard02 boundary and interim official report
+
+Finish the final FULL dense shard02 worker, pause before shard03, and report
+13 arms on the same 252 seed-1 LongBench-v2 problems (3,276 cells total).
+This explicitly replaces the earlier instruction to continue to all 503 cells.
+Suspend only the queue controller while its current native worker finishes;
+preserve all completed and failed leaves and require explicit user instruction
+to resume. Freeze a separate CPU analysis protocol for shards01/02. Official
+scoring, paired problem-cluster intervals and native trajectory metrics apply
+to these 252 problems only; do not create a full503 completion marker.
+
+A CPU reporting filename defect was found before any full503 report ran:
+the official scorer rejects bare completions.jsonl because it has no arm label.
+Use run_<arm>.private.jsonl in the separately recorded root reporter and record
+its source hash. The operational post-generation report command now uses that
+reporter. Frozen native source bytes, inputs, sampler and all generation paths
+are unchanged. This amendment authorizes no additional GPU work or resume.

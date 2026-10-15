@@ -21,7 +21,7 @@ def main():
     rows,scores,configs={},{},{}
     for arm in completion['arms']:
         collected=[];configs[arm]=[]
-        scoring=study/'scoring'/arm;private=scoring/'private/completions.jsonl';private.parent.mkdir(parents=True,exist_ok=True)
+        scoring=study/'scoring'/arm;private=scoring/f'private/run_{arm}.private.jsonl';private.parent.mkdir(parents=True,exist_ok=True)
         with private.open('w') as out:
             for entry in [e for e in completion['shards'] if e['arm']==arm]:
                 leaf=study/entry['path']
@@ -99,6 +99,7 @@ def main():
     verify(study,protocol)
     write(study/'final_complete.json',dict(status='complete',native_cells=6539,arms=13,cells_per_arm=503,
         source_commit=protocol['source_commit'],protocol_sha256=sha(study/'specs/protocol.json'),official_scoring_complete=True,
+        analysis_source_sha256=sha(__file__),scorer_source_sha256=sha(execution/'scripts/v31_score_longbench_official.py'),
         fairness_audit_sha256=sha(reportdir/'fairness_audit.json'),summary_sha256=sha(study/'summary.md'),clean_timing='paused'),True)
 
 

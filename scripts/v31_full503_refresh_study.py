@@ -187,7 +187,9 @@ def run(study):
                     artifacts_sha256={name:sha(leaf/name) for name in ('config.json','records.jsonl','receipt.json','attempt_complete.json')})
                 complete.append(entry);write(study/'queue_state.json',dict(status='running',completed=complete,total=52))
         write(study/'native_generation_complete.json',dict(status='complete',arms=ARMS,shards=complete,cells_per_arm=503),True)
-        logged([PY,str(execution/'scripts/v31_full503_refresh_report.py'),'--study',str(study)],study/f'report_attempt{len(list(study.glob("report_attempt*.log")))+1:03d}.log')
+        # Reporting can receive a separately recorded CPU-only amendment;
+        # generation always executes the immutable source copy above.
+        logged([PY,str(ROOT/'scripts/v31_full503_refresh_report.py'),'--study',str(study)],study/f'report_attempt{len(list(study.glob("report_attempt*.log")))+1:03d}.log')
         write(study/'coordinator_complete.json',dict(status='complete',native_cells=6539,clean_timing='paused'),True)
         write(study/'progress.json',dict(status='complete',native_cells=6539,unix=time.time()))
         print(json.dumps(dict(status='complete',native_cells=6539)),flush=True)

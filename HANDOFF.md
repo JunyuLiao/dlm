@@ -1,3 +1,31 @@
+## Full503 refresh study — 2026-10-15 user-requested pause after shard02
+
+The latest user instruction supersedes the earlier run-to-completion request:
+finish the final FULL dense shard02 worker, report both completed shards, then
+pause. Do not launch shard03 or resume generation without explicit user input.
+The queue coordinator (PID 1630980) is SIGSTOPped; its active native campaign
+(PID 1695904) continues normally. The boundary guard finalizes the clean 26th
+shard and terminates only that stopped coordinator after the worker exits.
+No native worker is killed. See PAUSE_AFTER_SHARD02_REQUEST.json in the study.
+
+Study: `results/v31_full503_refresh_20261014/`; generation source `98a37a14`,
+immutable 1,171-file execution copy unchanged. CPU report source is separately
+identified in `reports_shards01_02_attempt001/specs/analysis_protocol.json`.
+Twelve arms are already officially scored on 252 matched cells each; FULL
+shard02 is pending. Boundary guard session 80491 and CPU report watcher 17232
+will create PAUSED_USER_REQUEST.json and the scoped partial_complete.json.
+No full-study final_complete.json may be created from this partial panel.
+
+A CPU-only full-report filename defect was also corrected outside the frozen
+execution copy: official scoring requires run_<arm>.private.jsonl rather than
+bare completions.jsonl. The operational runner now uses the separately hashed
+root reporter after any future authorized completion. This changes no native
+worker, model, sampler, selector or source/input hash; see qualification/
+cpu_reporting_amendment.json. No resumed generation is authorized by this fix.
+Next: verify the pause and the 3,276-cell official partial report, present the
+252-problem results with uncertainty and trajectory metrics, then stop.
+Clean timing and the separate V2 threshold campaign remain paused.
+
 ## Research publication — 2026-10-15
 
 The current week is documented separately in
