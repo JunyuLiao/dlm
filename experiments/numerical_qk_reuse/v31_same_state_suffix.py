@@ -205,6 +205,13 @@ class Controller:
         top_mismatch=int((repeated.argmax(-1)!=logits.argmax(-1)).sum())
         if parity>1e-4 or top_mismatch:
             self.native_parity_failures+=1
+            (self.root/'suffix_parity_failure.json').write_text(json.dumps(dict(
+                max_logit_error=parity,mean_logit_error=float((repeated-logits).abs().mean()),
+                top1_mismatches=top_mismatch,rows=n,canvas=f['canvas'],call=f['call'],
+                captured_positions_shape=list(self.capture['positions'].shape),
+                captured_hidden_shape=list(self.capture['hidden'].shape),
+                native_logit_abs_mean=float(logits.abs().mean()),
+                repeated_logit_abs_mean=float(repeated.abs().mean())))+'\n')
             raise RuntimeError(f'native suffix parity failed: max={parity}, top1={top_mismatch}')
         def forward(out):
             projected= self.capture['layer'].self_attn.o_proj(out.reshape(n,-1))[0]
@@ -253,28 +260,29 @@ def install(root):
 
     # Explicit split custom ops survive vLLM's fullgraph tracing and execute
     # the observer outside CUDA-graph segments on every real call. Their
-    # numerical operation is only a clone; disabled/active diagnostics share
-    # the same graph boundaries and are qualified against each other.
-    @torch.library.custom_op('v31_value_diag::capture_input', mutates_args=())
-    def capture_input(hidden:torch.Tensor,positions:torch.Tensor,per_input:torch.Tensor|None)->torch.Tensor:
+    # They preserve graph-owned tensor addresses. Returning a newly allocated
+    # identity tensor here is invalid when downstream CUDA graphs do not copy
+    # their inputs: they would replay against the warmup allocation.
+    # The mutation declaration retains observer ordering; observers only read
+    # the input and make separate private copies, and return no replacement.
+    @torch.library.custom_op('v31_value_diag::capture_input', mutates_args=('hidden',))
+    def capture_input(hidden:torch.Tensor,positions:torch.Tensor,per_input:torch.Tensor|None)->None:
         from vllm.forward_context import get_forward_context
         if controller.active() and not controller.replaying:
             controller.capture=dict(layer=controller.model.model.layers[29],positions=positions.clone(),
                 hidden=hidden.clone(),per_layer_input=per_input.clone() if per_input is not None else None,
                 kwargs={},forward_context=copy.copy(get_forward_context()))
-        return hidden.clone()
     @capture_input.register_fake
     def fake_input(hidden,positions,per_input):
-        return torch.empty_like(hidden)
+        return None
 
-    @torch.library.custom_op('v31_value_diag::capture_attention', mutates_args=())
-    def capture_attention(output:torch.Tensor)->torch.Tensor:
+    @torch.library.custom_op('v31_value_diag::capture_attention', mutates_args=('output',))
+    def capture_attention(output:torch.Tensor)->None:
         if controller.active() and controller.capture is not None and not controller.replaying:
             controller.capture['native_attention']=output.clone()
-        return output.clone()
     @capture_attention.register_fake
     def fake_attention(output):
-        return torch.empty_like(output)
+        return None
 
     original_init=dg.DiffusionGemmaForConditionalGeneration.__init__
     @functools.wraps(original_init)
@@ -290,13 +298,15 @@ def install(root):
     @functools.wraps(original_layer)
     def layer_forward(self,positions,hidden_states,residual,per_layer_input=None,**kw):
         if self.layer_idx==29:
-            hidden_states=capture_input(hidden_states,positions,per_layer_input)
+            capture_input(hidden_states,positions,per_layer_input)
         return original_layer(self,positions,hidden_states,residual,per_layer_input=per_layer_input,**kw)
     gemma4.Gemma4DecoderLayer.forward=layer_forward
     @functools.wraps(original_attention)
     def attention_forward(self,*a,**kw):
         out=original_attention(self,*a,**kw)
-        return capture_attention(out) if getattr(self,'_value_suffix_last',False) else out
+        if getattr(self,'_value_suffix_last',False):
+            capture_attention(out)
+        return out
     gemma4.Gemma4Attention.forward=attention_forward
 
     class Recorder:

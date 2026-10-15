@@ -55,10 +55,10 @@ def prepare(study):
     protocol=dict(schema='value_same_state_suffix_qualification_v1',source_sha256=fingerprints,
         input_sha256={str(p.relative_to(study)):io.sha(p) for p in [study/'private/cells.json',*manifests.iterdir()] if p.is_file()},
         source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
-        layer=29,panel_cells=1,repeats=2,arms=['diagnostics_disabled','diagnostics_active'],
+        layer=29,panel_cells=1,repeats=2,arms=['uninstrumented_control','diagnostics_disabled','diagnostics_active'],
         parent='whole-layer replay must be complete first',budget=128,scope='GLOBAL layer29 interventions only',
         runtime=dict(max_model_len=141312,memory=.80,block=32,chunk=16384,graph='PIECEWISE',native_steps=48),
-        qualification='disabled/active native output hashes, N, C and T must agree in both repeats; exact same-state suffix logits; unchanged RNG and adapter counters',
+        qualification='uninstrumented/disabled/active native output hashes, N, C and T must agree in both repeats; exact same-state suffix logits; unchanged RNG and adapter counters',
         decision_metrics=['top1','acceptance','common_Gumbel','KL','entropy','stopping'],
         timing='paused; instrumented generation is diagnostic only; suffix calls excluded from native N',
         full_accuracy='not automatically launched by this qualifier')
@@ -106,8 +106,8 @@ def run(study):
         time.sleep(30)
     receipts=[]
     for repeat in (1,2):
-        for active in (False,True):
-            arm='diagnostics_active' if active else 'diagnostics_disabled'
+        for active in (None,False,True):
+            arm='uninstrumented_control' if active is None else ('diagnostics_active' if active else 'diagnostics_disabled')
             family=study/f'repeat{repeat:02d}'/arm
             done=sorted(family.glob('attempt*/complete.json'))
             if done:
@@ -120,7 +120,8 @@ def run(study):
             (leaf/'private').mkdir(parents=True);(leaf/'decisions').mkdir()
             io.write(study/'state.json',dict(stage='running',repeat=repeat,arm=arm,attempt=str(leaf.relative_to(study)),timing='paused'))
             execution=study/'private/execution'
-            command=[PY,str(execution/'scripts/v31_same_state_suffix_worker.py'),str(io.MODEL),str(study/'private/manifests'),
+            worker='v31_vllm_paired_bench.py' if active is None else 'v31_same_state_suffix_worker.py'
+            command=[PY,str(execution/'scripts'/worker),str(io.MODEL),str(study/'private/manifests'),
                 str(study/'private/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/run_diagnostic.private.jsonl'),'mage','PIECEWISE']
             io.write(leaf/'config.json',dict(protocol_sha256=io.sha(study/'protocol.json'),repeat=repeat,active=active),True)
             start=time.monotonic()
@@ -147,11 +148,11 @@ def run(study):
     rows={}
     for repeat,active,leaf in receipts:
         rows[repeat,active]=json.loads((leaf/'records.jsonl').read_text().splitlines()[0])
-    baseline=rows[1,False]
-    compare_keys=['output_hash','denoise_forwards','output_tokens']
+    baseline=rows[1,None]
+    compare_keys=['output_hash','denoise_forwards','canvases','output_tokens']
     errors=[dict(repeat=r,active=a,key=k) for (r,a),row in rows.items() for k in compare_keys if row[k]!=baseline[k]]
     io.write(study/'reproducibility.json',dict(status='passed' if not errors else 'failed',mismatches=errors,
-        checks=compare_keys,native_trajectories=4,scope='one previously examined LongBench item; layer29 suffix only'),True)
+        checks=compare_keys,native_trajectories=len(rows),scope='one previously examined LongBench item; layer29 suffix only'),True)
     if errors:raise RuntimeError('diagnostic changed native trajectory or repetition floor')
     io.write(study/'qualification_complete.json',dict(status='complete',protocol_sha256=io.sha(study/'protocol.json'),
         reproducibility_sha256=io.sha(study/'reproducibility.json'),native_accuracy_launched=False,timing='paused'),True)
@@ -161,4 +162,4 @@ def run(study):
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--stage',choices=['prepare','run'],required=True)
     p.add_argument('--study',type=Path,default=DEFAULT)
-    a=p.parse_args();{'prepare':prepare,'run':run}[a.stage](a.study)
+    a=p.parse_args();{'prepare':prepare,'run':run}[a.stage](a.study.resolve())
