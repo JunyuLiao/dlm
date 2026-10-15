@@ -267,3 +267,45 @@ RULER acceptance/stopping regressions must remain visible even when mean KL
 or top1 improves. Initial raw residual and moment stop flips both delayed a
 dense-reference stop, rather than producing a premature stop. Neither is
 task-accuracy evidence. Exact-source H100 tests now pass70 cases with no skips.
+
+## Native repeatability gate added on 2026-10-15
+
+The first native development attempt's activation, budget and substrate smoke
+checks passed, but a subsequent inactive-variant audit exposed different
+outputs for identical seeded original-V31 requests in different processes.
+Repeated requests within each process match exactly. The completed AIME scores
+are retained with an interpretation hold; further workload expansion is held.
+A fixed Python hash seed and a fixed cuBLAS workspace did not remove the
+variation. Read-only tracing qualifies itself against an unobserved repeat and
+locates the first observed difference between layer0 attention output and
+layer1 attention input. This is an unresolved runtime effect, not a method gain.
+
+Before a replacement accuracy panel, qualify process-matched comparisons:
+
+1. One warmed compiled engine, original V31 plus the four already promoted
+   refinement arms, unchanged request seeds and native sampler. The original
+   bound V31 method is restored for every control request. All adapter and
+   refinement request state resets through the existing lifecycle.
+2. On one previously examined AIME item/seed, alternate control and each
+   candidate, ending with control. Repeat the entire sequence in a second
+   engine. All five controls in each engine must agree exactly in output hash,
+   calls, canvases and length. Every candidate that makes zero actual swaps and
+   corrections must also match its same-engine control exactly.
+3. Bind request arm/index in the live execution receipt and validate all
+   original fixed-budget, scope, native-substrate and graph-capture invariants.
+   The raw engine record remains unchanged; arm validation uses that receipt
+   and the frozen request schedule. No correctness labels choose the schedule.
+4. If this passes, qualify active sparse cases and inactive/no-op cases in all
+   four workloads before a new, separately frozen accuracy campaign. Counter-
+   balance arm order, include common V31 controls in each engine/shard, and
+   cluster uncertainty by problem. Process-matched qualification does not prove
+   cross-process numerical reproducibility or establish an accuracy gain.
+5. Retain strongest dense FULL, matched PIECEWISE and all-kept references under
+   explicitly named execution paths. A source/runtime repair or a change to
+   this comparison design requires new matched controls and new run families;
+   do not mix the held original AIME panel into a replacement campaign.
+
+In parallel with this design, finish the first-layer operation trace to decide
+whether a small, reproducible runtime repair is available. Clean timing stays
+paused throughout. Kernel/configuration differences alone are not causal proof;
+any repair must pass the same-seed process and within-engine no-op gates.
