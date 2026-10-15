@@ -1,3 +1,41 @@
+## Value decision/reuse refinement — 2026-10-15, diagnostic stages
+
+Authorized by the user: design, implement and evaluate all three proposed
+value directions, starting with same-state diagnostics; fixed per-query-tile
+budgets and clean timing paused. Study:
+`results/v31_value_decision_reuse_20261015/`. Plan:
+`docs/V31_VALUE_DECISION_REUSE_PLAN_20261015.md`. Operator source freeze
+`378e147a`; whole-layer protocol `39a56aa0`; suffix diagnostic implementation
+`30ce7099`, protocol freeze `e90a7b49`. Existing paused campaigns stay paused.
+
+Completed: independent full-V moment/swap/derivative/reconstruction operators;
+35 CPU tests and all 36 pinned-H100 tests; 670 immutable input hashes;
+620-frame replay (570 usable frames including observations), all five GLOBAL
+layers, first two query heads followed by all 16 heads and both Q128 tiles.
+K=128 for LongBench; K=27 short-task operator counterfactual on source V31
+states. Zero budget errors or CUDA captures. The whole-layer report includes
+signed cross-head cancellation through the real O projection. Model decision
+and task-accuracy results are not yet established.
+
+Findings: previous-query displacement is a poor extrapolator here: age-1
+post-O error prediction worsens on all 100 sparse screened units (mean 2.625
+for static prediction versus 4.740 for tangent prediction). Do not promote
+that predictor. Whole-layer full/online swap8 reduce mean held error by about
+1.4–2.7% on the two LongBench trajectories; cached corrections reduce mean
+more substantially but can increase row-error tails. AIME's sparse replay
+coverage is only one late trajectory; all-kept cases provide no selector
+benefit evidence. These are operator diagnostics on previously examined data.
+
+Running/prepared: isolated layer29 same-state suffix qualification, with two
+repetitions of diagnostics-disabled versus diagnostics-active native generation.
+It must reproduce native suffix logits and native output hashes/N/T, preserve
+RNG and adapter counters, and report extra suffix calls separately. It tests
+only the final GLOBAL layer and cannot qualify earlier-layer native changes.
+Live state and immutable attempts are in `suffix_qualification/state.json`.
+No native accuracy panel is launched; timing remains paused. Next: resolve
+qualification, assess deterministic logit/acceptance/stop effects, then promote
+only supported candidates under the committed plan.
+
 ## RULER128K seed42 rerun complete — 2026-10-15
 
 The user subsequently authorized a fresh V31 versus V2 tau=0.021 run on the

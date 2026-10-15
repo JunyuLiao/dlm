@@ -1935,3 +1935,30 @@ recorded audit time is not clean latency. Preserve the completed immutable
 attempts, leave timing and other campaigns paused, and report this as a
 paired seed on previously examined prompts rather than held-out confirmation
 or a clean threshold ablation against the old seed-1 archive.
+
+
+## 2026-10-15 — Independent value/decision/reuse iteration, diagnostics first
+
+The user authorized the three-direction plan with fixed per-query-tile K and
+paused timing. Implement bounded true-mass-neighbor full-V proposals, causal
+query-direction error prediction, and separately labeled output reconstruction.
+Preserve historical code/results and paused queues. The new plan and source
+are frozen at 378e147a; whole-layer replay at 39a56aa0. No exact greedy.
+
+All 36 H100 mathematical/parity checks passed. Independent same-state replay
+covers all 620 saved frames, 570 usable frames, 670 verified files and all five
+GLOBAL layers. Follow-up sums signed errors through actual O weights across
+all 16 heads and both query tiles. Fixed K and capture checks pass. The tested
+past-query extrapolator loses to the static predictor on every one of 100
+sparse age-1 screened units, despite correct finite-difference derivatives;
+do not promote it into accuracy runs. Bounded swap gains are modest and cached
+correction gains have harmful tails, so operator error alone does not pass
+the decision gate. All-kept short states are excluded from sparse-benefit tables.
+
+Source-frozen last-GLOBAL-layer suffix diagnostics must reproduce native logits
+and native trajectories with diagnostics disabled/enabled before their results
+are accepted. Extra suffix forwards and privately coupled diagnostic Gumbel
+noise are explicitly offline; the latter is not claimed as the compiled
+native sampler's random realization. An isolated final-layer intervention
+cannot qualify changes at earlier layers. Native accuracy and clean timing
+remain unlaunched at this checkpoint.
