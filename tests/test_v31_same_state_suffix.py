@@ -52,6 +52,9 @@ def test_selected_fa4_lse_and_cached_merge_match_full_dimension_oracle():
         now=moments(changed[0,head],k[0,0],v[0,0],256,scale)
         expected.append(OmittedCache.build(m,mask).reconstruct(now,mask))
     torch.testing.assert_close(lse[0].T,sl,rtol=1e-5,atol=2e-5)
+    from experiments.numerical_qk_reuse.v31_stable_observe import observe, tile_ids
+    observed=observe(q,k,scale,tile_ids(kept[0].reshape(2,-1)),128)
+    torch.testing.assert_close(observed.logsumexp(1).reshape(2,128).T,sl,rtol=1e-5,atol=2e-5)
     torch.testing.assert_close(selected[0].float(),old,rtol=.02,atol=.002)
     cache=SelectedOnlyCorrection.from_anchor(dense,dl,old,sl,'fixed')
     current,new_lse=fwd(changed.transpose(1,2),k.transpose(1,2),v.transpose(1,2),softmax_scale=scale,

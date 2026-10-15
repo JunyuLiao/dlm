@@ -20,7 +20,7 @@ from experiments.numerical_qk_reuse.v31_value_refinement_runtime import MODES
 
 CONTROLS=['current_v31_control','dense_full_fix51994','dense_piecewise','allkept_fa4']
 NATIVE_CODE=['experiments/numerical_qk_reuse/'+p+'.py' for p in
-    ['v31_value_decision','v31_value_reuse_guard','v31_value_reuse_merge_kernel','v31_value_refinement_runtime']]
+    ['v31_value_decision','v31_value_reuse_guard','v31_value_reuse_merge_kernel','v31_value_refinement_runtime','v31_same_state_suffix']]
 NATIVE_CODE+=['scripts/v31_value_refinement_worker.py']
 
 
@@ -29,7 +29,7 @@ def prepare(study,gate):
         verify(study);return
     if study.exists():raise RuntimeError('preserve partial preparation; use a new attempt')
     g=io.read(gate)
-    if g.get('status')!='passed' or not g.get('promoted_modes') or any(m not in MODES for m in g['promoted_modes']):
+    if g.get('status')!='passed' or not g.get('promoted_modes') or any(m not in MODES for m in g['promoted_modes']) or len(set(g['promoted_modes']))!=len(g['promoted_modes']):
         raise RuntimeError('completed decision promotion is required')
     if set(g.get('native_source_sha256',{}))!=set(NATIVE_CODE):raise RuntimeError('native source is not bound to promotion')
     for p,digest in g['native_source_sha256'].items():
