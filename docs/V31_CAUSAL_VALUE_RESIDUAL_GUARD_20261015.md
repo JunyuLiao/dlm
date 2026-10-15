@@ -88,9 +88,9 @@ The independent native implementation is opt-in, final-GLOBAL-layer-only,
 and rejects launch without a passed decision-gate receipt. It counts extra
 O projections and observation work. It does not alter native stopping,
 acceptance, noise, output limits, or K. All-kept states bypass reconstruction.
-The current implementation explicitly computes a current O projection for
-the guard; folding it into the existing projection is future engineering,
-not a measured saving. Cached omitted-moment reconstruction has a separate
+The native direction guard uses the exact cached-adjoint implementation below,
+avoiding an extra O projection on held calls. The norm-only diagnostic still
+uses an explicit current O projection. Cached omitted-moment reconstruction has a separate
 fused selected-output/LSE merge kernel, with full-V CUDA parity checked.
 
 First qualify same-state logits/acceptance/stopping and observation-only

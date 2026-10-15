@@ -185,6 +185,12 @@ they are not an oracle selector or a causal estimate. They supplement the
 unconditional clustered intervals and reveal whether apparent call savings
 occur only on failed answers or also on equally successful trials.
 
+Report actual intervention coverage and held calls per correction anchor.
+Trials with no swaps and no applied correction must reproduce the matched
+V31 output hash and N/C/T; investigate any mismatch before promotion. Keep
+additional full-QK/PV observation rectangles separate from FA4 consumer work.
+These activation-conditioned summaries are descriptive, not causal estimates.
+
 ## Execution and recovery
 
 One worker on the idle H100; pinned interpreter/model/runtime and user-owned

@@ -24,6 +24,29 @@ def cohort_name(suite,control,candidate):
     return 'both_wrong'
 
 
+def exposure(control,candidate):
+    """Descriptive intervention coverage and an explicit native no-op check."""
+    totals=defaultdict(int);active=[];inactive=[];mismatches=[]
+    for key,row in candidate.items():
+        work=row['receipts']['adapter'].get('value_refinement_work',{})
+        for name,value in work.items():totals[name]+=value
+        changed=bool(work.get('swapped_blocks',0) or work.get('corrected_calls',0))
+        (active if changed else inactive).append(key)
+        if not changed and any(row[f]!=control[key][f] for f in
+                ('output_hash','denoise_forwards','canvases','output_tokens')):
+            mismatches.append(key)
+    anchors=totals.get('anchor_events',0);held=totals.get('held_calls',0)
+    return dict(active_trials=len(active),inactive_trials=len(inactive),
+        inactive_output_or_trajectory_mismatches=len(mismatches),
+        noop_check='passed' if not mismatches else 'investigate before promotion',
+        anchor_events=anchors,held_calls=held,held_calls_per_anchor=held/anchors if anchors else None,
+        corrected_calls=totals.get('corrected_calls',0),swapped_blocks=totals.get('swapped_blocks',0),
+        anchor_extra_full_qk_rectangles=totals.get('anchor_full_qk_rectangles',0),
+        anchor_extra_full_pv_rectangles=totals.get('anchor_full_pv_rectangles',0),
+        held_extra_qk_rectangles=totals.get('held_extra_qk_rectangles',0),
+        interpretation='activation is descriptive and post-treatment; extra FP32 moment work is not priced as FA4 consumer work')
+
+
 def load_arm(study,suite,arm):
     dest=study/f'reports/{suite}/{arm}'
     done=io.read(dest/'final_complete.json')
@@ -48,7 +71,7 @@ def run(study):
         marker=io.read(dest/'analysis_complete.json')
         if marker['summary_sha256']!=io.sha(dest/'summary.json'):raise RuntimeError('completed postmortem changed')
         return
-    result=dict(status='complete',native_complete_sha256=io.sha(study/'final_complete.json'),comparisons=[],
+    result=dict(status='complete',native_complete_sha256=io.sha(study/'final_complete.json'),comparisons=[],exposure=[],
         scope='descriptive outcome-conditioned problem-trials; repeated seeds are not independent; no oracle selection or causal claim',
         timing='paused; N reductions do not establish speedup')
     lines=['# Native outcome and trajectory decomposition','',result['scope']+'.', '',
@@ -61,6 +84,7 @@ def run(study):
             if arm in CONTROLS:continue
             candidate,vs=load_arm(study,suite,arm)
             if candidate.keys()!=control.keys():raise RuntimeError('paired cohorts differ')
+            result['exposure'].append(dict(suite=suite,arm=arm,**exposure(control,candidate)))
             groups=defaultdict(list)
             for key in control:groups[cohort_name(suite,float(cs[key]),float(vs[key]))].append(key)
             delta_sum=0
@@ -79,6 +103,13 @@ def run(study):
             if sum(map(len,groups.values()))!=len(control):raise RuntimeError('outcome partition does not conserve cells')
             if delta_sum!=sum(candidate[k]['denoise_forwards']-control[k]['denoise_forwards'] for k in control):
                 raise RuntimeError('outcome decomposition does not conserve native calls')
+    lines+=['', 'Intervention coverage and no-op checks:', '',
+        '| Workload | Variant | Active trials | Inactive trials | Inactive mismatches | Held calls / anchor |',
+        '|---|---|---:|---:|---:|---:|']
+    for r in result['exposure']:
+        ratio=r['held_calls_per_anchor']
+        formatted=f'{ratio:.3f}' if ratio is not None else 'n/a'
+        lines.append(f"| {r['suite']} | {r['arm']} | {r['active_trials']} | {r['inactive_trials']} | {r['inactive_output_or_trajectory_mismatches']} | {formatted} |")
     io.write(dest/'summary.json',result,True)
     (dest/'summary.md').write_text('\n'.join(lines)+'\n')
     io.write(dest/'analysis_complete.json',dict(status='complete',summary_sha256=io.sha(dest/'summary.json'),
