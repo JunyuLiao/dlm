@@ -1,5 +1,7 @@
 """Sanitized analysis of private native repeatability traces."""
 import argparse
+from collections import Counter
+import json
 from pathlib import Path
 import torch
 from scripts import v31_value_decision_replay as io
@@ -56,6 +58,41 @@ def components(roots,study,hashes):
     return result
 
 
+def operations(roots,study,hashes):
+    files=[sorted(root.glob('component*.pt')) for root in roots]
+    configs=[root/'compiled_kernel_configs.json' for root in roots]
+    if not any(files) and not any(p.exists() for p in configs):return None
+    result=dict(captured_operations=[len(x) for x in files],operations=[])
+    if len(files[0])!=len(files[1]):
+        result['coverage']='different operation coverage; do not align by position'
+    else:
+        result['coverage']='paired runtime boundaries' if files[0] else 'no Python runtime boundaries captured'
+        for index,pair in enumerate(zip(*files)):
+            for p in pair:hashes[str(p.relative_to(study))]=io.sha(p)
+            a,b=[torch.load(p,map_location='cpu',weights_only=True) for p in pair]
+            r=dict(index=index,phase=a['phase'],name=a['name'])
+            if (a['phase'],a['name'])!=(b['phase'],b['name']):
+                r['alignment']='name or phase mismatch';result['operations'].append(r);continue
+            r['inputs']={}
+            for k in sorted(a['inputs'].keys()|b['inputs'].keys()):
+                x,y=a['inputs'].get(k),b['inputs'].get(k)
+                r['inputs'][k]=(error(x,y) if isinstance(x,torch.Tensor) and isinstance(y,torch.Tensor)
+                                 else dict(equal=same(x,y)))
+            if 'output' in a and 'output' in b:r['output']=error(a['output'],b['output'])
+            result['operations'].append(r)
+    if all(p.exists() for p in configs):
+        counters=[]
+        for p in configs:
+            hashes[str(p.relative_to(study))]=io.sha(p)
+            counters.append(Counter(json.dumps(x,sort_keys=True) for x in io.read(p)))
+        a,b=counters
+        result['kernel_configuration_multisets_equal']=a==b
+        result['kernel_configuration_differences']=[dict(configuration=json.loads(k),count_a=a[k],count_b=b[k])
+            for k in sorted(a.keys()|b.keys()) if a[k]!=b[k]]
+        result['kernel_configuration_scope']='process-wide loaded kernels; a differing configuration is not causal proof'
+    return result
+
+
 def run(study):
     done=io.read(study/'final_complete.json');summary=io.read(study/'summary.json')
     if done['summary_sha256']!=io.sha(study/'summary.json'):raise RuntimeError('diagnostic summary changed')
@@ -84,11 +121,13 @@ def run(study):
         rows.append(r)
         del a,b
     layer_report=components(roots,study,hashes)
+    operation_report=operations(roots,study,hashes)
     result=dict(status='complete',rows=rows,input_sha256=hashes,
         diagnostic_complete_sha256=io.sha(study/'final_complete.json'),
         analysis_source_sha256=io.sha(__file__),observer_qualification='within-process observed and unobserved repeats are identical',
         scope='two original V31 processes; first two measured denoise calls; no value refinement or extra forward',timing='paused')
     if layer_report is not None:result['components']=layer_report
+    if operation_report is not None:result['operations']=operation_report
     dest=study/'rng_localization';io.write(dest/'summary.json',result,True)
     io.write(dest/'analysis_complete.json',dict(status='complete',summary_sha256=io.sha(dest/'summary.json')),True)
     print({k:v for k,v in result.items() if k in ('status','rows','observer_qualification')})
