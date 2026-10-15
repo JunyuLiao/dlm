@@ -7,10 +7,11 @@ from scripts import v31_value_decision_replay as io
 
 def error(a,b):
     if a.shape!=b.shape:raise RuntimeError('trace shapes differ')
+    a=a.reshape(-1,a.shape[-1]);b=b.reshape(-1,b.shape[-1])
     total=0.;square=0.;maximum=0.;count=0;different=0;invalid=0
     for x,y in zip(a.split(16),b.split(16)):
         mask=torch.isfinite(x)&torch.isfinite(y)
-        invalid+=int((torch.isfinite(x)!=torch.isfinite(y)).sum())
+        invalid+=int(((~mask)&(x!=y)).sum())
         delta=(x[mask].double()-y[mask].double()).abs()
         total+=float(delta.sum());square+=float(delta.square().sum())
         maximum=max(maximum,float(delta.max()) if delta.numel() else 0.)
