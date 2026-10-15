@@ -16,12 +16,14 @@ from scripts import v31_value_decision_replay as io
 from scripts import v31_value_native_study as native
 
 
-def prepare(study,parent,python_hash_seed=None):
+def prepare(study,parent,python_hash_seed=None,trace=False):
     if study.exists():raise RuntimeError('use a new immutable diagnostic attempt')
     p=native.verify(parent)
     cells=io.read(parent/'private/schedules/aime26/cells.json')
     cell=next(c for c in cells if c['index']==15 and c['seed']==44)
     study.mkdir(parents=True);(study/'private').mkdir()
+    trace_source=io.ROOT/'scripts/v31_native_rng_trace_worker.py'
+    if trace:shutil.copyfile(trace_source,study/'private/trace_worker.py')
     io.write(study/'private/cells.json',[cell,cell],True)
     shutil.copyfile(__file__,study/'coordinator_source.py')
     jobs=[dict(name='original_repeat001',arm='current_v31_control'),
@@ -33,7 +35,8 @@ def prepare(study,parent,python_hash_seed=None):
         parent_protocol_sha256=io.sha(parent/'protocol.json'),source_commit=p['source_commit'],
         coordinator_sha256=io.sha(study/'coordinator_source.py'),
         cells_sha256=io.sha(study/'private/cells.json'),suite='aime26',
-        jobs=jobs,python_hash_seed=python_hash_seed,
+        jobs=jobs,python_hash_seed=python_hash_seed,trace=trace,
+        trace_source_sha256=io.sha(trace_source) if trace else None,
         scope='one previously examined inactive cell, repeated with identical request seed; no task-accuracy inference',
         timing='paused; diagnostic only')
     io.write(study/'protocol.json',protocol,True)
@@ -44,6 +47,8 @@ def run(study):
     if p['coordinator_sha256']!=io.sha(__file__):raise RuntimeError('execute the frozen coordinator')
     if p['parent_protocol_sha256']!=io.sha(parent/'protocol.json'):raise RuntimeError('parent protocol drift')
     if p['cells_sha256']!=io.sha(study/'private/cells.json'):raise RuntimeError('diagnostic cells drift')
+    if p.get('trace') and p['trace_source_sha256']!=io.sha(study/'private/trace_worker.py'):
+        raise RuntimeError('diagnostic observer source changed')
     source=native.verify(parent);results=[]
     execution=parent/'private/execution'
     for job in p['jobs']:
@@ -64,7 +69,11 @@ def run(study):
             if arm in native.MODES:
                 worker='v31_value_refinement_worker.py'
                 env.update(VALUE_REFINEMENT=arm,VALUE_REFINEMENT_GATE=str(parent/'decision_promotion.json'))
-            cmd=[native.base.PYTHON,str(execution/'scripts'/worker),str(io.MODEL),
+            worker_path=execution/'scripts'/worker
+            if p.get('trace'):
+                env.update(NATIVE_RNG_TRACE_DIR=str(leaf/'private/trace'),NATIVE_RNG_BASE_WORKER=str(worker_path))
+                worker_path=study/'private/trace_worker.py'
+            cmd=[native.base.PYTHON,str(worker_path),str(io.MODEL),
                  str(parent/'private/pools/aime26'),str(study/'private/cells.json'),
                  str(leaf/'records.jsonl'),str(leaf/'private/generation.private.jsonl'),'mage','PIECEWISE']
             io.write(study/'state.json',dict(stage='running',job=job['name'],attempt=str(leaf.relative_to(study)),timing='paused'))
@@ -108,6 +117,7 @@ if __name__=='__main__':
     a=argparse.ArgumentParser();a.add_argument('--stage',choices=['prepare','run'],required=True)
     a.add_argument('--study',type=Path,required=True);a.add_argument('--parent',type=Path)
     a.add_argument('--python-hash-seed',type=int)
+    a.add_argument('--trace',action='store_true')
     args=a.parse_args();study=args.study.resolve()
-    if args.stage=='prepare':prepare(study,args.parent.resolve(),args.python_hash_seed)
+    if args.stage=='prepare':prepare(study,args.parent.resolve(),args.python_hash_seed,args.trace)
     else:run(study)
