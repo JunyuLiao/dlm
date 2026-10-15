@@ -8,6 +8,11 @@ from scripts import v31_value_decision_replay as io
 
 
 def report(study):
+    if (study/'report/report_complete.json').exists():
+        done=io.read(study/'report/report_complete.json')
+        assert done['summary_sha256']==io.sha(study/'report/summary.json')
+        assert done['qualification_sha256']==io.sha(study/'qualification_complete.json')
+        return
     marker=io.read(study/'qualification_complete.json')
     assert marker['protocol_sha256']==io.sha(study/'protocol.json')
     assert marker['reproducibility_sha256']==io.sha(study/'reproducibility.json')
@@ -53,7 +58,7 @@ def report(study):
     out=study/'report';out.mkdir(exist_ok=True)
     result=dict(status='complete',scope=protocol['scope'],metrics=metrics,input_sha256=inputs,
         diagnostic_frames=len(first),native_accuracy=False,timing='paused',
-        promotion='not issued: instrumentation qualification on one LongBench item is not the multi-workload decision gate')
+        promotion='not issued by this report: interpret all workloads together before native development; no task-accuracy claim')
     io.write(out/'summary.json',result,True)
     lines=['# Same-state final-layer decision diagnostic','',result['promotion'], '',
         '| Workload | Arm | Frames | Top-1 disagreement | Acceptance disagreement | Mean KL |',

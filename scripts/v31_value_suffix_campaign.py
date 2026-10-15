@@ -82,12 +82,14 @@ def prepare(study, suite='longbench_v2', panel='qualification'):
     protocol=dict(schema='value_same_state_suffix_eager_qualification_v2',source_sha256=fingerprints,
         input_sha256={str(p.relative_to(study)):io.sha(p) for p in [study/'private/cells.json',*manifests.iterdir()] if p.is_file()},
         source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
-        layer=29,suite=suite,panel=panel,panel_cells=len(selected),repeats=2,arms=['uninstrumented_control','diagnostics_disabled','diagnostics_active'],
+        layer=29,suite=suite,panel=panel,panel_cells=len(selected),repeats=2 if panel=='qualification' else 1,
+        arms=['uninstrumented_control','diagnostics_disabled','diagnostics_active'] if panel=='qualification' else ['uninstrumented_control','diagnostics_active'],
         parent='whole-layer replay must be complete first',budget=settings['mage_k']//64,scope='GLOBAL layer29 interventions only',
         runtime=dict(max_model_len=settings['max_len'],memory=.80 if suite=='longbench_v2' else settings['memory'],
             block=settings['block'],chunk=settings['chunk'],graph='NONE',enforce_eager=True,native_steps=48),
         input_selection='shorter of two archived LongBench traces' if panel=='qualification' else 'first indices at minimum native seed; RULER first index per task, independent of correctness',
-        qualification='uninstrumented/disabled/active native output hashes, N, C and T must agree in both repeats; exact same-state suffix logits; unchanged RNG and adapter counters',
+        qualification=('uninstrumented/disabled/active native output hashes, N, C and T must agree in both repeats; exact same-state suffix logits; unchanged RNG and adapter counters' if panel=='qualification' else
+            'one paired uninstrumented/active trajectory per new item after two-repeat instrumentation qualification; exact suffix logits, unchanged RNG/counters and native output/N/C/T'),
         decision_metrics=['top1','acceptance','common_Gumbel','KL','entropy','stopping'],
         timing='paused; instrumented generation is diagnostic only; suffix calls excluded from native N',
         substrate_limit='Eager model diagnostics use common identical eager states, not production compiled V31 states. Production accuracy requires fresh compiled controls.',
@@ -155,8 +157,8 @@ def run(study):
             print(json.dumps(dict(event='waiting_for_whole_layer_and_idle_h100')),flush=True);last=time.monotonic()
         time.sleep(30)
     receipts=[]
-    for repeat in (1,2):
-        for active in (None,False,True):
+    for repeat in range(1,protocol['repeats']+1):
+        for active in [dict(uninstrumented_control=None,diagnostics_disabled=False,diagnostics_active=True)[a] for a in protocol['arms']]:
             arm='uninstrumented_control' if active is None else ('diagnostics_active' if active else 'diagnostics_disabled')
             family=study/f'repeat{repeat:02d}'/arm
             done=sorted(family.glob('attempt*/complete.json'))

@@ -112,7 +112,7 @@ class Controller:
                 self.grams[h]=w.T@w
         if anchor:
             self.states[identity]=dict(age=0,list_identity=f['list_identity'],
-                masks={label:native_mask.clone() for label in ('mass_anchor','full_swap8','online_swap8','full_cgate_swap8')})
+                masks={label:native_mask.clone() for label in ('mass_anchor','full_swap8','online_swap8','full_cgate_swap8','shuffled_cgate_swap8')})
         state=self.states[identity]
         if not anchor:
             # Read current selected O/LSE from FA4 itself. Reconstructing a
@@ -129,12 +129,14 @@ class Controller:
             result['correction_residual']=(selected.float()+state['anchor_residual'][0]).to(selected.dtype)[None]
             result['correction_moments']=reconstruct_cuda(selected,selected_lse,state['selected_cache'],identity)[None]
             result['correction_direction_guard']=state['direction_cache'].apply_cuda(selected,identity)[0][None]
+            result['full_swap8_direction_guard']=state['swap_direction_cache'].apply_cuda(result['full_swap8'][0],identity)[0][None]
             current_post=selected.float().reshape(n,-1)@layer.self_attn.o_proj.weight.float().T
             alpha=residual_trust(current_post,state['anchor_sparse_post'],state['anchor_dense_post'],kind='norm')
             result['correction_norm_guard']=(selected.float()+alpha[:,None,None]*state['anchor_residual'][0]).to(selected.dtype)[None]
             return result
         anchor_dense=torch.empty((1,n,16,512),device=f['q'].device,dtype=torch.float32)
         anchor_sparse=torch.empty_like(anchor_dense)
+        anchor_swap=torch.empty_like(anchor_dense)
         dense_lse=torch.empty((n,16),device=f['q'].device,dtype=torch.float32)
         sparse_lse=torch.empty_like(dense_lse)
         for h in range(16):
@@ -144,12 +146,18 @@ class Controller:
                 m=moments(f['q'][0,h,lo:hi],f['k'][0,kh],f['v'][0,kh],f['prefix'],f['scale'])
                 mask=native_mask[0,h,qt,:pt].bool()
                 if anchor:
-                    for name,online,cgate_on in [('full_swap8',False,False),('online_swap8',True,False),('full_cgate_swap8',False,True)]:
+                    for name,online,cgate_on in [('full_swap8',False,False),('online_swap8',True,False),('full_cgate_swap8',False,True),('shuffled_cgate_swap8',False,True)]:
                         weight=None
                         if cgate_on and self.previous_stats is not None:
                             weight=c_gate(*self.previous_stats)[lo:hi]
+                            if name=='shuffled_cgate_swap8':
+                                # Fixed permutation of rows, independent of outcomes
+                                # and native RNG. All current probes have Q128 tiles.
+                                if len(weight)!=128:raise RuntimeError('shuffled C_gate requires a complete Q128 tile')
+                                weight=weight[(torch.arange(128,device=weight.device)*73+19)%128]
                         selected,_=bounded_proposal(m,mask,swaps=8,gram=self.grams[h],online=online,weight=weight)
                         state['masks'][name][0,h,qt,:pt]=selected
+                        if name=='full_swap8':anchor_swap[0,lo:hi,h]=m.output(selected)
                     anchor_dense[0,lo:hi,h]=m.dense()
                     anchor_sparse[0,lo:hi,h]=m.output(mask)
                     dense_lse[lo:hi,h]=m.log_scale
@@ -162,6 +170,7 @@ class Controller:
             state['anchor_residual']=anchor_dense-anchor_sparse
             state['selected_cache']=SelectedOnlyCorrection.from_anchor(anchor_dense[0],dense_lse,anchor_sparse[0],sparse_lse,identity)
             state['direction_cache']=ResidualDirectionCache.build(anchor_dense[0],anchor_sparse[0],weight,identity)
+            state['swap_direction_cache']=ResidualDirectionCache.build(anchor_dense[0],anchor_swap[0],weight,identity)
             return None
     def suffix(self, projected_attention):
         from vllm.forward_context import override_forward_context
