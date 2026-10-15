@@ -7,14 +7,16 @@ The reconstruction variants change attention output and say so in receipts.
 from __future__ import annotations
 
 import functools
+import inspect
 import types
 
 import torch
 
-from .v31_value_decision import bounded_proposal, moments
+from .v31_value_decision import bounded_proposal, c_gate, moments
 from .v31_value_reuse_guard import SelectedOnlyCorrection, ResidualDirectionCache, reconstruct_cuda, residual_trust
 
-MODES=('full_swap8','online_swap8','residual','moments','residual_direction_guard','residual_norm_guard')
+MODES=('full_swap8','online_swap8','full_cgate_swap8','full_swap8_direction_guard',
+       'residual','moments','residual_direction_guard','residual_norm_guard')
 
 
 class Runtime:
@@ -22,12 +24,37 @@ class Runtime:
         if mode not in MODES:
             raise ValueError('unknown explicit value refinement')
         self.mode=mode; self.model=None; self.state=None; self.grams={}; self.counts={}
+        self.previous_stats=None; self.last_sampler=None; self.stats_canvas=None
+
+    @property
+    def selects(self):
+        return self.mode.endswith('swap8') or self.mode=='full_swap8_direction_guard'
+
+    @property
+    def corrects(self):
+        return not self.mode.endswith('swap8')
+
+    @property
+    def direction_guard(self):
+        return self.mode in ('residual_direction_guard','full_swap8_direction_guard')
 
     def add(self,name,amount):
         self.counts[name]=self.counts.get(name,0)+amount
 
     def reset(self):
         self.state=None; self.counts={}
+        self.previous_stats=None; self.last_sampler=None; self.stats_canvas=None
+
+    def sample_statistics(self,scaled,canvas,entropy_bound):
+        from .v31_same_state_suffix import distribution
+        stats=distribution(scaled,entropy_bound)
+        old=self.last_sampler if self.stats_canvas==canvas else None
+        changed=stats['top1']!=old['top1'] if old is not None else torch.zeros_like(stats['accepted'])
+        reversed_=stats['accepted']!=old['accepted'] if old is not None else torch.zeros_like(stats['accepted'])
+        self.previous_stats=(stats['accepted'].clone(),changed,reversed_)
+        self.last_sampler=dict(top1=stats['top1'].clone(),accepted=stats['accepted'].clone())
+        self.stats_canvas=canvas
+        self.add('extra_sampler_stat_calls',1)
 
     @torch.inference_mode()
     def output(self,adapter,layer,q,b,scale,prefix,n,out,previous_list):
@@ -49,9 +76,9 @@ class Runtime:
         if self.state.get('allkept', False):
             return out
         self.add('held_calls',1)
-        if self.mode.endswith('swap8'):
+        if not self.corrects:
             return out                         # FA4 already used the replaced map
-        if self.mode=='residual_direction_guard':
+        if self.direction_guard:
             cache=self.state['direction_cache']
             value,_=(cache.apply_cuda(out[0],identity) if out.is_cuda else cache.apply(out[0],identity))
             self.add('corrected_calls',1)
@@ -87,13 +114,14 @@ class Runtime:
         h,qb,pt=q.shape[1],(n+127)//128,prefix//64
         expected=min(adapter.mage_k//64,pt)
         counts=kept[0,:,:,:pt].sum(-1)
+        self.add('anchor_budget_units_checked',counts.numel())
         if not bool((counts==expected).all()):
             raise RuntimeError('fixed per-query-tile budget is not the configured K')
         if expected==pt:
             self.state=dict(identity=identity,allkept=True)
             self.add('allkept_shortcuts',1)
             return
-        if not self.grams and self.mode.endswith('swap8'):
+        if not self.grams and self.selects:
             w=self.model.model.layers[29].self_attn.o_proj.weight.float()
             for head in range(h):
                 part=w[:,head*512:(head+1)*512]
@@ -109,30 +137,35 @@ class Runtime:
                 lo,hi=qt*128,min(n,(qt+1)*128)
                 m=moments(q[0,head,lo:hi],b['k'][0,kh],b['v'][0,kh],prefix,scale)
                 mask=kept[0,head,qt,:pt].bool()
-                if self.mode.endswith('swap8'):
-                    new,info=bounded_proposal(m,mask,swaps=8,online=self.mode=='online_swap8',gram=self.grams[head])
+                if self.selects:
+                    weight=None
+                    if self.mode=='full_cgate_swap8' and self.previous_stats is not None and self.stats_canvas==adapter.canvas_id:
+                        weight=c_gate(*self.previous_stats)[lo:hi]
+                    new,info=bounded_proposal(m,mask,swaps=8,online=self.mode=='online_swap8',gram=self.grams[head],weight=weight)
                     kept[0,head,qt,:pt]=new; swaps+=info['swaps']
-                else:
+                    mask=new
+                if self.corrects:
                     dense[lo:hi,head]=m.dense()
                     sparse[lo:hi,head]=m.output(mask)
                     dl[lo:hi,head]=m.log_scale
                     sl[lo:hi,head]=m.log_scale+m.selected(mask)[1].log()
                 del m
         self.state=dict(identity=identity)
-        if self.mode.endswith('swap8'):
+        if self.selects:
             if not bool((kept[0,:,:,:pt].sum(-1)==expected).all()):
                 raise RuntimeError('value refinement changed the per-tile budget')
+            self.add('updated_budget_units_checked',h*qb)
             st['kept']=kept; st['lists']=v27_fa4.block_sparse_tensors(kept)
             self.add('swapped_blocks',swaps)
-        else:
+        if self.corrects:
             if self.mode=='moments':
                 self.state['correction']=SelectedOnlyCorrection.from_anchor(dense,dl,sparse,sl,identity)
             else:
                 self.state['residual']=dense-sparse
-            if self.mode.startswith('residual_'):
+            if self.mode.startswith('residual_') or self.direction_guard:
                 if not hasattr(self,'projection'):
                     self.projection=self.model.model.layers[29].self_attn.o_proj.weight.float()
-                if self.mode=='residual_direction_guard':
+                if self.direction_guard:
                     self.state['direction_cache']=ResidualDirectionCache.build(dense,sparse,self.projection,identity)
                     del self.state['residual']
                 else:
@@ -146,7 +179,7 @@ class Runtime:
 
     def receipt(self):
         return dict(value_refinement=self.mode,value_refinement_layers=[29],
-            value_refinement_output_consumer='unchanged native FA4' if self.mode.endswith('swap8') else 'native FA4 plus cached correction',
+            value_refinement_output_consumer='native FA4 plus cached correction' if self.corrects else 'unchanged native FA4',
             value_refinement_work=dict(self.counts),value_refinement_clean_timing=False)
 
 
@@ -159,6 +192,17 @@ def install(mode):
     def init(self,*a,**kw):
         original_init(self,*a,**kw);runtime.model=self
     dg.DiffusionGemmaForConditionalGeneration.__init__=init
+    if mode=='full_cgate_swap8':
+        original_sample=dg._compiled_sample_step;signature=inspect.signature(original_sample)
+        @functools.wraps(original_sample)
+        def sample(*args,**kwargs):
+            bound=signature.bind(*args,**kwargs).arguments
+            scaled=original_sample(*args,**kwargs)
+            a=vllm_adapter._ACTIVE
+            if a is not None and a.bound and a.step_ctx is not None and not a.step_ctx['encoder'] and scaled.shape[0]==1:
+                runtime.sample_statistics(scaled[0],a.canvas_id,float(bound['entropy_bound']))
+            return scaled
+        dg._compiled_sample_step=sample
     original_install=vllm_adapter.install_vllm_patches
     def install_adapter(adapter):
         if adapter.arm!='mage' or adapter.mage_granularity!='qblock_max' or adapter.mage_select!='fa4':
@@ -173,7 +217,9 @@ def install(mode):
         def begin(self,*a,**kw):
             runtime.reset();return old_begin(*a,**kw)
         def receipt(self):
-            return dict(old_receipt(),**runtime.receipt())
+            return dict(old_receipt(),value_refinement_prefix_budget=self.mage_k//64,
+                value_refinement_sticky_feedback='deployed changed support feeds inherited next-refresh sticky term',
+                **runtime.receipt())
         adapter._mage=types.MethodType(mage,adapter)
         adapter.begin_request=types.MethodType(begin,adapter)
         adapter._value_receipt=types.MethodType(receipt,adapter)

@@ -34,26 +34,35 @@ The norm-only ablation suppresses more correction. Theory and a checked
 surrogate-regret bound are in `docs/V31_CAUSAL_VALUE_RESIDUAL_GUARD_20261015.md`;
 it is not an accuracy or current-dense improvement guarantee.
 
-Running: `suffix_qualification_attempt006/`, source `604446fb`, an explicitly
-eager model diagnostic with the native sampler unchanged. Attempt004 fixed
-observer pointer lifetime, but compilation boundaries still changed native
-trajectories (119 versus106 calls) and repeated suffix logits (4/256 top1
-mismatches). It is rejected. The new eager diagnostic must match uninstrumented,
-observer-disabled and active trajectories twice, and retain exact suffix parity.
-These are common eager states, not production compiled V31 states. Accuracy
-will use separate fresh compiled controls if a method passes the decision gate.
-Attempt005 stopped before model loading because the inherited adapter CLI
-requires PIECEWISE. Attempt006 keeps that CLI label but explicitly forces
-compilation mode0, enforce_eager=True and actual graph NONE; receipts must
-confirm NONE and zero captures. All failed attempts are retained. No native
-accuracy panel has launched.
+Eager instrumentation qualification is complete under
+`suffix_qualification_attempt006/` (source604446fb). All six uninstrumented,
+observer-disabled and active-probe runs match exactly:117 native calls,
+6 canvases,1438 output tokens and identical output hash. Both active repeats
+have12 diagnostic frames and120 extra suffix calls, zero suffix-parity failures,
+unchanged RNG/counters, actual graph NONE and zero CUDA captures. Earlier
+attempts remain excluded after constructor/compiler/observer-address/CLI failures.
+These are eager diagnostic states; compiled production accuracy remains separate.
 
-All59 H100 tests pass, including full-width fused adjoint correction. The causal
-direction guard now caches W^T W r at observations and uses one fused row dot
-product/correction kernel on held calls, removing the extra held-step O GEMM.
-Its source is `5ea0e263`; the qualification worker is an immutable separate
-snapshot. Timing and other campaigns stay paused. Next: qualify instrumentation,
-expand same-state workloads, then promote only supported native variants.
+The one-item decision result supports broader testing, not accuracy promotion:
+mass anchor has56/3072 top1 disagreements versus51 for direction guard;
+mean logit KL falls from0.001306 to0.000920. Moment reconstruction has lower
+KL but more acceptance disagreements (16 versus14 rows). Full/C_gate swap gains
+are small relative to the measured same-mask numerical floor. No stop flips.
+
+Running: `decision_batch_protocol.json`, sourcebb2789ca, sequential paired
+uninstrumented/active runs on8 LongBench,6 AIME,8 MATH and13 RULER items.
+K=128 long,27 short; capture first two sparse canvases as well as initial
+all-kept states, excluding all-kept benefit claims. Added C_gate permutation
+control and full-swap plus direction-guard ablation. Runtime/model/input pins
+are frozen. The current batch state and log are in the study root. No native
+accuracy run or clean timing has launched.
+
+All59 H100 tests pass, including actual FA4 selected LSE and cached-merge
+parity. Held-step direction correction uses cached W^T W r and a fused row dot
+product/correction kernel; faster diagnostic reconstruction consumes FA4's
+selected O/LSE instead of recomputing all current block PV moments. Next:
+finish multi-workload decisions, inspect promotion evidence, then source-freeze
+compiled native development with fresh matched controls. Other campaigns stay paused.
 
 ## RULER128K seed42 rerun complete — 2026-10-15
 

@@ -31,38 +31,40 @@ It is not the historical rank32 V2 selector or a purely online implementation.
 `full_swap8` uses mass-qualified candidates and true final-output error.
 Correction changes the output consumer and is reported separately from selection.
 
-## Sequential diagnostic qualification
+## Completed instrumentation qualification and active follow-up
 
-`suffix_qualification_attempt006/` is the current frozen last-GLOBAL-layer
-instrumentation qualification. It compares uninstrumented, observer-disabled,
-and observer-active native trajectories twice, checks repeated suffix logits,
-and checks RNG and adapter counters. All suffix calls are offline diagnostics.
-This stage cannot qualify earlier GLOBAL layers or task accuracy by itself.
+`suffix_qualification_attempt006/` passed: all six eager trajectories have
+identical output hashes,117 native calls,6 canvases and1438 output tokens.
+Both active repeats have12 frames/120 offline suffix calls, zero parity
+failures, and unchanged RNG/counters. See `report/summary.md`. These eager
+states are separate from compiled production accuracy. Failed attempts001-005
+remain immutable and excluded from method comparisons.
 
-Earlier failed attempts are immutable: constructor signature (attempt001),
-unsupported fullgraph compiler-disable boundary (attempt002), and observer
-allocation incompatible with downstream fixed-address CUDA graphs (attempt003).
-Attempt004 preserves graph-owned addresses but still changes compilation and
-fails native trajectory/suffix equivalence. Attempt005 therefore uses an explicit
-eager diagnostic model, with matched eager controls and the exact parity gate
-retained. Its states are not production compiled V31 states. Failed attempts
-are excluded from method comparisons. Production accuracy requires fresh compiled
-controls after the decision gate. Attempt005 failed at the inherited CLI
-mode check before model loading. Attempt006 explicitly overrides the runtime
-to eager/mode0/NONE behind the required PIECEWISE CLI label, and validates
-the resolved runtime mode in every record.
+`decision_batch_protocol.json` freezes paired uninstrumented/active diagnostics
+on8 LongBench,6 AIME,8 MATH and13 RULER items, independently selected by index
+and task. Each item must preserve its native trajectory; all-kept frames are
+excluded from sparse-benefit summaries. Fixed per-query-tile K, native sampler,
+and timing pause remain in force. The batch adds a C_gate row-permutation
+control and full-swap plus directional-correction arm. Follow
+`decision_batch_state.json` and `decision_batch_coordinator_attempt001.log`.
 
-Resume the current frozen coordinator from the repository root using the pinned
-H100 interpreter and the absolute study path:
+Resume the batch from the repository root with the pinned H100 interpreter:
 
 ```
 PYTHONPATH=src:. /home/exouser/dyh/v31_env_20261005/bin/python \
-  results/v31_value_decision_reuse_20261015/suffix_qualification_attempt006/coordinator_source.py \
-  --stage run --study /home/exouser/ljy/dlm/results/v31_value_decision_reuse_20261015/suffix_qualification_attempt006
+  scripts/v31_value_decision_batch.py --stage run
 ```
 
-The coordinator verifies source/input hashes, skips validated completed leaves,
-and gives failed or partial leaves a new attempt directory. A source change
-requires a newly frozen study attempt. Inspect long running experiments at
-30-minute intervals. Other paused campaigns remain paused. No native-accuracy
-worker may bypass the decision-gate receipt.
+Each workload executes its own frozen coordinator and source snapshot. Completed
+leaves are verified and skipped; failed/partial leaves receive a new attempt.
+Source changes require a new frozen attempt. Check long jobs every30 minutes.
+
+Native refinement and the native development coordinator are implemented but
+remain gated. They require a completed multi-workload decision report,
+explicit source-bound promotion, H100 correctness checks and native execution
+smokes. C_gate and combined swap/correction integration have CPU lifecycle
+checks; the expanded GPU suite must run before promotion. Native development
+will retain fresh V31, FULL fix51994, PIECEWISE dense and all-kept controls,
+use official scoring, and separate extra refinement work from physical consumer
+work. No native accuracy run, clean timing run or other paused campaign has
+been launched by this study.

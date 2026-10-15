@@ -1794,3 +1794,25 @@ Reports: `interpretation.md`, `metrics.csv`, `task_scores.csv`,
 `task_trajectory.csv`, `phase_accounting.csv`, `cost_separation.json`,
 `official_scorer_summary.json`, `receipts/independent_verification.json`,
 `final_complete.json`.
+
+## 2026-10-15: scoped value/reuse operator and eager diagnostic results
+
+Study:`results/v31_value_decision_reuse_20261015/`. Complete operator screens
+are identified by `operator_complete.json`, `whole_layer/operator_complete.json`
+and `reuse_guard/operator_complete.json`, with frozen source/input hashes.
+The past-query tangent predictor worsened age1 error prediction on100/100
+sparse screened units. Whole-layer bounded swaps gave modest mean-error gains;
+causal directional residual trust reduced LongBench error ratios to0.6444 and
+0.7753, with >2% worst-row harms0/220 and3/100. These are two previously
+examined LongBench trajectories plus limited late AIME counterfactual replay,
+not task accuracy or independent-frame uncertainty evidence.
+
+Eager observer qualification source604446fb completed under
+`suffix_qualification_attempt006/`: all six trajectories reproduce native
+output/N/C/T exactly; zero suffix parity/RNG/counter failures. The one-item,
+12-frame decision summary gives mass/direction-guard KL0.001306/0.000920 and
+Top1 disagreement counts56/51 across3072 row comparisons. Separate selected-
+consumer versus native numerical floor is measured. Actual execution is eager
+NONE; this does not establish compiled production behavior, official accuracy,
+denoising-call improvement or speedup. Failed earlier attempts are excluded.
+Broader decisions are a separate incomplete panel; clean timing remains paused.

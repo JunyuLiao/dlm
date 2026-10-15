@@ -72,3 +72,44 @@ def test_native_anchor_cache_rebuild_and_carry_lifecycle(monkeypatch):
     a.canvas_id=5
     assert r.output(a,29,q,b,scale,128,4,selected,st['lists']) is selected
     assert r.state is None
+
+
+def test_cgate_statistics_are_previous_call_only_and_reset_at_canvas():
+    r=Runtime('full_cgate_swap8')
+    first=torch.tensor([[30.,0.],[0.,30.],[1.,1.]])
+    r.sample_statistics(first,4,.1)
+    assert not r.previous_stats[1].any() and not r.previous_stats[2].any()
+    changed=first.clone();changed[0]=changed[0].flip(0)
+    r.sample_statistics(changed,4,.1)
+    assert torch.equal(r.previous_stats[1],torch.tensor([True,False,False]))
+    r.sample_statistics(first,5,.1)
+    assert not r.previous_stats[1].any() and r.stats_canvas==5
+    r.reset();assert r.previous_stats is None and r.stats_canvas is None
+
+
+def test_combined_variant_both_selects_and_corrects():
+    r=Runtime('full_swap8_direction_guard')
+    assert r.selects and r.corrects and r.direction_guard
+    assert 'plus cached correction' in r.receipt()['value_refinement_output_consumer']
+    assert not Runtime('full_cgate_swap8').corrects
+
+
+def test_combined_cache_is_built_for_changed_support(monkeypatch):
+    from experiments.numerical_qk_reuse import v27_fa4, v31_value_refinement_runtime as module
+    from experiments.numerical_qk_reuse.v31_value_decision import moments
+    monkeypatch.setattr(v27_fa4,'block_sparse_tensors',lambda mask:object())
+    monkeypatch.setattr(module,'bounded_proposal',lambda m,mask,**kw:(~mask,{'swaps':1}))
+    g=torch.Generator().manual_seed(103)
+    q=torch.randn(1,1,4,512,generator=g)
+    b=dict(k=torch.randn(1,1,132,512,generator=g),v=torch.randn(1,1,132,512,generator=g))
+    st=dict(canvas=4,nk=132,kept=torch.tensor([[[[True,False,True]]]]),lists=object())
+    a=SimpleNamespace(canvas_id=4,mage_state={29:st},mage_k=64)
+    layer=SimpleNamespace(self_attn=SimpleNamespace(o_proj=SimpleNamespace(weight=torch.randn(7,512,generator=g))))
+    r=Runtime('full_swap8_direction_guard');r.model=SimpleNamespace(model=SimpleNamespace(layers=[None]*29+[layer]))
+    m=moments(q[0,0],b['k'][0,0],b['v'][0,0],128,512**-.5)
+    dense=m.dense()[None,:,None,:]
+    r.output(a,29,q,b,512**-.5,128,4,dense,None)
+    assert torch.equal(st['kept'],torch.tensor([[[[False,True,True]]]]))
+    selected=m.output(st['kept'][0,0,0,:2])[None,:,None,:]
+    torch.testing.assert_close(r.output(a,29,q,b,512**-.5,128,4,selected,st['lists']),dense,atol=1e-6,rtol=1e-5)
+    assert r.counts['swapped_blocks']==1 and r.counts['budget_errors']==0

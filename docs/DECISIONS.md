@@ -1979,3 +1979,25 @@ Exclude its generation from scientific method comparisons. Attempt004 changes
 observers to ordered read-only side effects on original tensors, and adds an
 uninstrumented control to both repetitions. This strengthens qualification
 instead of relaxing a failed parity threshold. Native accuracy remains gated.
+
+## 2026-10-15 — Eager same-state qualification passes; broaden before accuracy
+
+Attempt006 resolves the observation/compiler problem by an explicit eager
+model diagnostic with unchanged native sampler and FA4 paths. Six runs
+(uninstrumented, observer-disabled, active; twice) produce identical native
+output hashes,117 calls,6 canvases and1438 tokens. Two active repeats each
+record12 frames/120 offline suffix calls, no parity failures, unchanged RNG/
+adapter counters, resolved graph NONE and zero captures. Source604446fb,
+protocol and completed reproducibility receipt are under
+`v31_value_decision_reuse_20261015/suffix_qualification_attempt006`.
+
+On that one item, direction-guard KL is0.000920 versus mass0.001306, while
+Top1 disagreements are51 versus56 out of3072 row comparisons. Moment merging
+has lower KL0.000556 but worse acceptance disagreement16 versus14 rows.
+These small, correlated counts are not accuracy evidence. Broad sourcebb2789ca
+same-state panels now compare8 LongBench,6 AIME,8 MATH and13 RULER inputs,
+selected independently of correctness. One uninstrumented/active pair per
+new item follows the completed two-repeat instrument qualification. Every new
+pair must again preserve native outputs/N/C/T and exact suffix parity. Added
+fixed C_gate row permutation and bounded full-swap plus directional correction.
+K remains fixed; no full task-accuracy or clean timing gate has been bypassed.
