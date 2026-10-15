@@ -171,6 +171,12 @@ must not be conflated. Receipts must show actual FULL dispatch for the strong
 dense baseline and PIECEWISE dispatch for the matched sparse arms, alongside
 the unchanged native settings and exact configured prefix budget.
 
+Native execution smokes also run the official scorer and cross-arm binding
+comparison before the development panels. MATH/RULER smoke inputs come from
+the first two coverage-extension indices so a sparse anchor and held correction
+must actually execute; all-kept smoke success cannot qualify correction code.
+Smoke scores validate the pipeline only and do not choose a winning method.
+
 ## Execution and recovery
 
 One worker on the idle H100; pinned interpreter/model/runtime and user-owned

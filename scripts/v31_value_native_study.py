@@ -96,7 +96,13 @@ def prepare(study,gate):
         if len(cells)!=cfg['count']:raise RuntimeError('panel size changed')
         schedule=study/f'private/schedules/{suite}';schedule.mkdir(parents=True)
         io.write(schedule/'cells.json',cells,True);base.check_inputs(pool,schedule/'cells.json')
-        io.write(schedule/'smoke.json',cells[:2],True)
+        smoke=cells[:2]
+        if suite in ('math500','ruler128k'):
+            coverage=io.read(study.parent/f'coverage_{suite}_attempt001/protocol.json')
+            indices=set(coverage['selection_evidence']['indices'][:2])
+            smoke=[c for c in cells if c['index'] in indices][:2]
+            if len(smoke)!=2:raise RuntimeError('two sparse-coverage smoke cells are required')
+        io.write(schedule/'smoke.json',smoke,True)
         for shard in range(cfg['shards']):io.write(schedule/f'shard{shard+1:03d}.json',cells[shard::cfg['shards']],True)
         for folder in (pool,schedule):
             for p in folder.rglob('*'):
@@ -192,16 +198,23 @@ def run_shard(study,suite,arm,shard,qual=False):
     return leaf
 
 
-def score(study,suite,arm,attempts):
-    if suite!='ruler128k':return base.score_arm(study,suite,arm,attempts)
-    dest=study/f'scoring/{suite}/{arm}';dest.mkdir(parents=True,exist_ok=True)
+def score(study,suite,arm,attempts,qual=False):
+    if not qual and suite!='ruler128k':return base.score_arm(study,suite,arm,attempts)
+    dest=study/('qualification_scoring' if qual else 'scoring')/suite/arm;dest.mkdir(parents=True,exist_ok=True)
     prefix=dest/'official';summary=Path(str(prefix)+'.summary.json')
     if not summary.exists():
         execution=study/'private/execution';pool=study/f'private/pools/{suite}'
-        ruler=io.read(study/'private/scorer_location.json')['ruler']
         files=[str(f) for a in attempts for f in (a/'private').glob('*.private.jsonl')]
-        cmd=[base.PYTHON,str(execution/'scripts/v31_score_ruler.py'),str(prefix),ruler,str(pool),str(pool),
-            '--cells',str(study/f'private/schedules/{suite}/cells.json'),*files]
+        if suite=='ruler128k':
+            ruler=io.read(study/'private/scorer_location.json')['ruler']
+            cmd=[base.PYTHON,str(execution/'scripts/v31_score_ruler.py'),str(prefix),ruler,str(pool),str(pool)]
+        elif suite=='longbench_v2':
+            cmd=[base.PYTHON,str(execution/'scripts/v31_score_longbench_official.py'),str(prefix),str(pool),str(pool)]
+        elif suite=='aime26':
+            cmd=[base.PYTHON,str(execution/'scripts/v31_score_aime.py'),str(prefix),str(pool),str(pool/'aime2026_answers.jsonl')]
+        else:
+            cmd=[base.PYTHON,str(execution/'scripts/v31_score_math500_bound.py'),str(prefix),str(pool)]
+        cmd+=['--cells',str(study/f'private/schedules/{suite}'/('smoke.json' if qual else 'cells.json')),*files]
         env=dict(os.environ,PYTHONPATH=f'{execution}/src:{execution}',PYTHONNOUSERSITE='1')
         with (dest/'scorer.log').open('w') as log:subprocess.run(cmd,cwd=execution,env=env,stdout=log,stderr=subprocess.STDOUT,check=True)
     return io.read(summary),io.read(str(prefix)+'.official.json')[arm]
@@ -305,7 +318,29 @@ def run(study):
     # Mandatory execution/accounting smokes precede the panel. These are
     # exploratory development items and are not independent confirmation.
     for suite in p['suites']:
-        for arm in p['arms']:run_shard(study,suite,arm,study/f'private/schedules/{suite}/smoke.json',True)
+        bindings={};keys=None;receipts={}
+        for arm in p['arms']:
+            leaf=run_shard(study,suite,arm,study/f'private/schedules/{suite}/smoke.json',True)
+            official,values=score(study,suite,arm,[leaf],qual=True)
+            coverage=official['coverage'][arm]
+            if coverage['scored']!=2 or coverage['missing'] or coverage['dropped']:raise RuntimeError('smoke scorer coverage failed')
+            current=set(values)
+            if keys is not None and current!=keys:raise RuntimeError('smoke score cohorts differ')
+            keys=current
+            binding=study/f'qualification_scoring/{suite}/{arm}/official.binding.json'
+            bindings.update(io.read(binding))
+            rows=base.jsonl(leaf/'records.jsonl')
+            if arm in MODES:
+                extra=defaultdict(int)
+                for row in rows:
+                    for name,value in row['receipts']['adapter']['value_refinement_work'].items():extra[name]+=value
+                if not extra.get('anchor_events',0):raise RuntimeError('smoke did not exercise sparse refinement')
+                if not arm.endswith('swap8') and not extra.get('corrected_calls',0):raise RuntimeError('smoke did not exercise held correction')
+            receipts[arm]=dict(binding_sha256=io.sha(binding),attempt=str(leaf.relative_to(study)))
+        official_rules.check_comparable(bindings,p['arms'],keys)
+        io.write(study/f'qualification/{suite}/qualification_complete.json',dict(status='passed',
+            protocol_sha256=io.sha(study/'protocol.json'),receipts=receipts,
+            inference='execution, fixed-budget, sparse activation and scorer check; not method selection'),True)
     for suite,cfg in p['suites'].items():
         arms=p['arms']
         for i in range(cfg['shards']):
