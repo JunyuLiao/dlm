@@ -78,6 +78,20 @@ the expanded GPU suite after the active batch releases the H100. Those changes
 are not in the frozen running batch. Item-clustered decision analysis is ready
 and never treats correlated row/frame measurements as task-accuracy trials.
 
+Update17:15 UTC: the four-workload batch is complete; all35 native pairs pass
+invariance. See `decision_analysis/summary.md`. Sparse frames: LongBench99,
+AIME35,RULER14,MATH0. LongBench top1 disagreements fall1068→792 with direction
+guard and→573 with moments, but RULER guard acceptance disagreements rise4→8.
+Raw residual has one delayed-stop flip on LongBench; moments one on RULER.
+C_gate does not clearly beat the shuffled control. No accuracy claim.
+
+All70 expanded H100 correctness tests pass, zero skips, source7ab08253;
+receipt `receipts/h100_qualification/attempt001/receipt.json`. Full-V online
+traversal and device-side pair ranking are now qualified. A separately frozen
+coverage extension will run eight long MATH controls and14 remaining RULER
+vt/cwe items, selected without correctness. Native development remains gated
+on actual sparse coverage and review of the acceptance/stop regressions.
+
 ## RULER128K seed42 rerun complete — 2026-10-15
 
 The user subsequently authorized a fresh V31 versus V2 tau=0.021 run on the

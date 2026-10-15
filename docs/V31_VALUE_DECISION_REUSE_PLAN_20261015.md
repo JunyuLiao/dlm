@@ -226,3 +226,24 @@ states, not production compiled V31 states. Production accuracy remains a
 separate compiled deployment with fresh V31/FULL/PIECEWISE/all-kept controls.
 This separates numerical instrumentation validity from method evaluation and
 prevents a changed compiler boundary from masquerading as a method gain.
+
+### Coverage amendment after the first multi-workload decision batch
+
+All35 uninstrumented/active item pairs preserve the native trajectory and
+suffix parity. LongBench contributes99 sparse frames, AIME35 and RULER14;
+the eight initial MATH items contribute no sparse held frames. Their complete
+run does not qualify a sparse method on MATH.
+
+Before native promotion, freeze an explicit coverage extension: the first
+eight unseen MATH indices with at least12 canvases in completed compiled V31
+controls, and all remaining seven variable-tracking plus seven common-word-
+extraction RULER items. No correctness score is used for selection. This is
+purposive exploratory coverage after inspecting the first panel, and is kept
+separate from its representative-by-index summary. New source includes the
+H100-qualified full-V online traversal and device-side disjoint ranking.
+
+The native gate must see nonempty sparse decision evidence on each workload.
+RULER acceptance/stopping regressions must remain visible even when mean KL
+or top1 improves. Initial raw residual and moment stop flips both delayed a
+dense-reference stop, rather than producing a premature stop. Neither is
+task-accuracy evidence. Exact-source H100 tests now pass70 cases with no skips.

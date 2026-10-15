@@ -53,9 +53,19 @@ def prepare(study,gate):
     batch=io.read(study.parent/'decision_batch_complete.json')
     if io.sha(study.parent/'decision_batch_complete.json')!=g['decision_batch_complete_sha256']:
         raise RuntimeError('decision evidence changed')
+    sparse_suites=set()
     for suite,digest in batch['reports_sha256'].items():
-        if io.sha(study.parent/f'decisions_{suite}_attempt001/report/summary.json')!=digest:
+        report=study.parent/f'decisions_{suite}_attempt001/report/summary.json'
+        if io.sha(report)!=digest:
             raise RuntimeError('decision report changed')
+        if any(r['frames']>0 for r in io.read(report)['metrics']):sparse_suites.add(suite)
+    for rel,digest in g.get('additional_decision_reports',{}).items():
+        report=study.parent/rel
+        if io.sha(report)!=digest:raise RuntimeError('additional decision report changed')
+        if any(r['frames']>0 for r in io.read(report)['metrics']):
+            sparse_suites.add(io.read(report.parent.parent/'protocol.json')['suite'])
+    if sparse_suites!={'longbench_v2','aime26','math500','ruler128k'}:
+        raise RuntimeError('sparse decision coverage is required on every native workload')
     execution=study/'private/execution';execution.mkdir(parents=True)
     files=subprocess.check_output(['git','ls-files'],cwd=io.ROOT,text=True).splitlines()
     for rel in files:

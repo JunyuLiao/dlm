@@ -2016,3 +2016,21 @@ Pair admission remains a fixed-K unchanged-anchor batch proposal, with stable
 disjoint ranking now performed on the device. A full-V ordered online-risk
 kernel removes per-KV-block Python dispatch; its H100 qualification is pending.
 Neither optimization is injected into the source-frozen diagnostic worker.
+
+## 2026-10-15 — Complete initial decisions; require actual sparse coverage
+
+The70 native diagnostic trajectories (35 paired items) pass invariance and
+exact eager suffix parity. Initial sparse frames:99 LongBench,35 AIME,
+14 RULER,zero MATH. The complete MATH job is not sparse-method evidence.
+LongBench direction guard reduces top1 disagreements1068→792 and moments
+→573; all eight items improve. RULER direction guard reduces24→12 top1
+disagreements but raises acceptance disagreements4→8. Initial residual and
+moment stop flips delay one dense-reference stop each (LongBench/RULER), not
+premature stopping. Do not turn mean KL improvement into an accuracy claim.
+
+Freeze a coverage extension before native promotion: eight unseen MATH indices
+with at least12 canvases in prior completed V31 controls, and all14 remaining
+RULER vt/cwe items. No correctness filtering; label this purposive exploratory
+coverage. The native gate now rejects a workload with no sparse decision
+frames. All70 current H100 correctness tests pass; receipt binds every native
+refinement and test source, including the optimized full-V online kernel.

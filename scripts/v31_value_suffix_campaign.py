@@ -37,7 +37,8 @@ def prepare(study, suite='longbench_v2', panel='qualification'):
     if len(selected)!=1:
         raise RuntimeError('frozen input panel unavailable')
     pool=source/'private/manifests'
-    if panel=='decisions':
+    selection_evidence=None
+    if panel in ('decisions','sparse_coverage'):
         qualification=study.parent/'suffix_qualification_attempt006'
         marker=io.read(qualification/'qualification_complete.json')
         if marker['reproducibility_sha256']!=io.sha(qualification/'reproducibility.json'):
@@ -59,6 +60,37 @@ def prepare(study, suite='longbench_v2', panel='qualification'):
             seed=min(c['seed'] for c in cells)
             selected=[c for c in cells if c['seed']==seed][:count]
             assert len(selected)==count
+        if panel=='sparse_coverage':
+            if io.read(study.parent/'decision_batch_complete.json')['status']!='complete':
+                raise RuntimeError('coverage extension follows the completed first diagnostic batch')
+            prior=io.read(study.parent/f'decisions_{suite}_attempt001/private/cells.json')
+            seen={c['index'] for c in prior}
+            if suite=='math500':
+                # Coverage, not correctness: the initial eight eager items had
+                # no sparse held frames. Select long native control trajectories
+                # in ascending index order, without opening scores or answers.
+                records=[];sources={}
+                for marker in sorted((source/f'runs/{suite}/current_v31_control').glob('shard*/attempt*/attempt_complete.json')):
+                    record_file=marker.parent/'records.jsonl'
+                    done=io.read(marker)
+                    if done.get('status')!='complete' or done.get('validation_errors'):
+                        raise RuntimeError('only completed valid controls can select coverage inputs')
+                    if done.get('records_sha256') is not None and done['records_sha256']!=io.sha(record_file):
+                        raise RuntimeError('source control records changed')
+                    records.extend(json.loads(x) for x in record_file.read_text().splitlines())
+                    sources[str(record_file.relative_to(io.ROOT))]=io.sha(record_file)
+                eligible=sorted({r['index'] for r in records if r['canvases']>=12 and r['index'] not in seen})[:8]
+                if len(eligible)!=8:raise RuntimeError('insufficient predeclared long MATH controls')
+                selected=[c for c in cells if c['index'] in eligible and c['seed']==min(x['seed'] for x in cells)]
+                selection_evidence=dict(rule='first eight unseen indices with >=12 canvases in completed compiled V31 controls; no correctness filtering',
+                    indices=eligible,source_records_sha256=sources)
+            elif suite=='ruler128k':
+                task_of={r['index']:r['task'] for r in info}
+                selected=[c for c in cells if c['index'] not in seen and task_of[c['index']] in ('vt','cwe')]
+                if len(selected)!=14:raise RuntimeError('expected seven remaining items for each of vt and cwe')
+                selection_evidence=dict(rule='all remaining variable-tracking and common-word-extraction items; no correctness filtering',
+                    indices=[c['index'] for c in selected],tasks=['vt','cwe'])
+            else:raise ValueError('coverage extension is restricted to MATH and RULER')
     elif suite!='longbench_v2':raise ValueError('initial instrumentation qualification uses LongBench')
     execution=study/'private/execution'; execution.mkdir(parents=True)
     files=subprocess.check_output(['git','ls-files'],cwd=io.ROOT,text=True).splitlines()
@@ -87,7 +119,8 @@ def prepare(study, suite='longbench_v2', panel='qualification'):
         parent='whole-layer replay must be complete first',budget=settings['mage_k']//64,scope='GLOBAL layer29 interventions only',
         runtime=dict(max_model_len=settings['max_len'],memory=.80 if suite=='longbench_v2' else settings['memory'],
             block=settings['block'],chunk=settings['chunk'],graph='NONE',enforce_eager=True,native_steps=48),
-        input_selection='shorter of two archived LongBench traces' if panel=='qualification' else 'first indices at minimum native seed; RULER first index per task, independent of correctness',
+        input_selection=(selection_evidence['rule'] if selection_evidence else
+            ('shorter of two archived LongBench traces' if panel=='qualification' else 'first indices at minimum native seed; RULER first index per task, independent of correctness')),
         qualification=('uninstrumented/disabled/active native output hashes, N, C and T must agree in both repeats; exact same-state suffix logits; unchanged RNG and adapter counters' if panel=='qualification' else
             'one paired uninstrumented/active trajectory per new item after two-repeat instrumentation qualification; exact suffix logits, unchanged RNG/counters and native output/N/C/T'),
         decision_metrics=['top1','acceptance','common_Gumbel','KL','entropy','stopping'],
@@ -99,8 +132,11 @@ def prepare(study, suite='longbench_v2', panel='qualification'):
     protocol['runtime_pins']=io.read(pins/'protocol.json')['runtime']
     shutil.copyfile(pins/'model_source_fingerprints.json',study/'model_source_fingerprints.json')
     protocol['model_inventory_sha256']=io.sha(study/'model_source_fingerprints.json')
-    if panel=='decisions':
+    if panel in ('decisions','sparse_coverage'):
         protocol['instrumentation_parent_sha256']=io.sha(qualification/'qualification_complete.json')
+    if selection_evidence is not None:
+        protocol['selection_evidence']=selection_evidence
+        protocol['coverage_parent_sha256']=io.sha(study.parent/'decision_batch_complete.json')
     shutil.copyfile(Path(__file__),study/'coordinator_source.py')
     protocol['coordinator_sha256']=io.sha(study/'coordinator_source.py')
     io.write(study/'protocol.json',protocol,True)
@@ -223,7 +259,7 @@ if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--stage',choices=['prepare','run'],required=True)
     p.add_argument('--study',type=Path,default=DEFAULT)
     p.add_argument('--suite',choices=['longbench_v2','aime26','math500','ruler128k'],default='longbench_v2')
-    p.add_argument('--panel',choices=['qualification','decisions'],default='qualification')
+    p.add_argument('--panel',choices=['qualification','decisions','sparse_coverage'],default='qualification')
     a=p.parse_args()
     if a.stage=='prepare':prepare(a.study.resolve(),a.suite,a.panel)
     else:run(a.study.resolve())
