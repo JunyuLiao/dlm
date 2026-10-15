@@ -99,6 +99,7 @@ def prepare(study,gate):
     protocol=dict(schema='value_native_development_v1',source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         execution_fingerprints=fingerprints,input_fingerprints=inputs,runtime=old['runtime'],
         model_inventory_sha256=io.sha(study/'model_source_fingerprints.json'),suites=settings,
+        frozen_native=old['frozen_native'],
         arms=CONTROLS+g['promoted_modes'],scope='value changes only at GLOBAL layer29; other GLOBAL layers retain V31 and LOCAL remains dense',
         budget='same fixed prefix K in every head/query tile, plus common mandatory/carry phases',
         native_sampler='unchanged proposal, acceptance, re-noising, self-conditioning, stopping, temperatures and budgets',
@@ -120,8 +121,12 @@ def validate(rows,suite,arm,planned):
     errors=base.validate_records(rows,suite,arm,None,planned)
     for row in rows:
         a=row['receipts']['adapter']
+        if row.get('study_arm')!=arm:errors.append('wrong study arm')
+        expected_graph='FULL' if arm=='dense_full_fix51994' else 'PIECEWISE'
+        if set(a.get('decode_cudagraph_modes',{}))!={expected_graph}:errors.append('wrong compiled execution substrate')
         if arm in MODES:
             if a.get('value_refinement')!=arm or a.get('value_refinement_layers')!=[29]:errors.append('wrong value refinement/scope')
+            if a.get('value_refinement_prefix_budget')!=base.SUITES[suite]['mage_k']//64:errors.append('wrong configured tile budget')
             if a.get('value_refinement_work',{}).get('budget_errors',0):errors.append('fixed budget violation')
             expected='unchanged native FA4' if arm.endswith('swap8') else 'native FA4 plus cached correction'
             if a.get('value_refinement_output_consumer')!=expected:errors.append('wrong correction consumer')
@@ -205,6 +210,30 @@ def paired(suite,control,candidate,task_of):
         inference='exploratory paired difference, not a noninferiority conclusion')
 
 
+def paired_trajectory(suite,control,candidate,task_of):
+    c={base.key(r):r for r in control};v={base.key(r):r for r in candidate}
+    if c.keys()!=v.keys():raise RuntimeError('native trajectory cohorts differ')
+    result={}
+    for field in ('denoise_forwards','canvases','output_tokens'):
+        groups=defaultdict(list)
+        for key in c:
+            cluster=task_of[int(key.split('|')[1])] if suite=='ruler128k' else tuple(key.split('|')[:2])
+            groups[cluster].append(v[key][field]-c[key][field])
+        delta=np.array([np.mean(x) for x in groups.values()]);rng=np.random.default_rng(1729)
+        boot=delta[rng.integers(len(delta),size=(20000,len(delta)))].mean(1)
+        result[field]=dict(delta=float(delta.mean()),ci95=list(map(float,np.quantile(boot,[.025,.975]))),
+            fewer_cells=sum(v[k][field]<c[k][field] for k in c),
+            more_cells=sum(v[k][field]>c[k][field] for k in c),clusters=len(groups))
+    ccan=np.mean([r['canvases'] for r in control]);vcan=np.mean([r['canvases'] for r in candidate])
+    cr=sum(r['denoise_forwards'] for r in control)/sum(r['canvases'] for r in control)
+    vr=sum(r['denoise_forwards'] for r in candidate)/sum(r['canvases'] for r in candidate)
+    result['N_change_decomposition']=dict(canvas_count_component=float((vcan-ccan)*(vr+cr)/2),
+        calls_per_canvas_component=float((vr-cr)*(vcan+ccan)/2),
+        interpretation='algebraic aggregate decomposition, not a causal estimate')
+    result['output_hash_mismatches']=sum(c[k]['output_hash']!=v[k]['output_hash'] for k in c)
+    return result
+
+
 def finish(study,paths):
     p=verify(study);summaries={};scored={};rows_by={};bindings={}
     task_of={r['index']:r['task'] for r in io.read(study/'private/pools/ruler128k/ruler128k_v33ofc_subset_rowinfo.json')['rows']}
@@ -215,6 +244,10 @@ def finish(study,paths):
             c=official['coverage'][arm]
             if c['scored']!=cfg['count'] or c['missing'] or c['dropped']:raise RuntimeError('official scorer coverage failed')
             work=base.aggregate(rows);extra=defaultdict(int)
+            local=sum(r['receipts']['adapter']['native_local_eligible_rectangles'] for r in rows)
+            work.update(local_eligible_tiles=local,local_kept_tiles=local,
+                overall_kept_rectangles=work['overall_eligible_rectangles']-work['overall_skipped_rectangles'],
+                overall_denominator='actual decode GLOBAL full-support and LOCAL window-intersecting H x Q128 x KV64 rectangles')
             for r in rows:
                 for k,v in r['receipts']['adapter'].get('value_refinement_work',{}).items():extra[k]+=v
             result=dict(arm=arm,suite=suite,score_points=float(np.mean(list(values.values())))*(1 if suite=='ruler128k' else 100),
@@ -240,7 +273,8 @@ def finish(study,paths):
             ok=(v['score_points']>=c['score_points'] and v['work']['N']<=c['work']['N'] and
                 v['p95_N']<=1.05*c['p95_N'] and v['cap_rate']<=1.05*c['cap_rate'])
             passed&=ok;gain|=v['score_points']>c['score_points']
-            comparisons.append(dict(suite=suite,arm=arm,passes_screen=bool(ok),**pair))
+            trajectory=paired_trajectory(suite,rows_by[suite,'current_v31_control'],rows_by[suite,arm],task_of)
+            comparisons.append(dict(suite=suite,arm=arm,passes_screen=bool(ok),trajectory=trajectory,**pair))
         if passed and gain:survivors.append(arm)
     io.write(study/'development_promotion.json',dict(status='complete',full503_candidates=survivors,
         comparisons=comparisons,timing='paused',requires_new_full503_protocol=True),True)

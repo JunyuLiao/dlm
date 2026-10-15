@@ -163,6 +163,14 @@ and kept tiles, and all observation/selection/correction work. Instrumented
 wall time is labeled audit time. Do not report clean S/N or speedup while
 timing is paused.
 
+For native call changes, also report paired request/task-clustered intervals
+for N, canvases and output length. Decompose the aggregate change in N into
+canvas-count and calls-per-canvas terms using the symmetric product identity.
+This is descriptive: a shorter answer and faster convergence within a canvas
+must not be conflated. Receipts must show actual FULL dispatch for the strong
+dense baseline and PIECEWISE dispatch for the matched sparse arms, alongside
+the unchanged native settings and exact configured prefix budget.
+
 ## Execution and recovery
 
 One worker on the idle H100; pinned interpreter/model/runtime and user-owned

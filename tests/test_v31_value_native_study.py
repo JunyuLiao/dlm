@@ -33,3 +33,15 @@ def test_h100_promotion_rejects_source_edits_after_passed_tests(tmp_path,monkeyp
     (tmp_path/study.NATIVE_CODE[0]).write_text('changed source')
     with pytest.raises(RuntimeError,match='current native source'):
         study.verify_h100_gate(gate)
+
+
+def test_trajectory_decomposition_separates_canvas_length_and_denoising_rate():
+    from scripts.v31_value_native_study import paired_trajectory
+    common=dict(dataset='aime',index=1,panel_seed=42,repeat=0,output_hash='a')
+    c=[dict(**common,denoise_forwards=20,canvases=2,output_tokens=400)]
+    v=[dict(**common,denoise_forwards=24,canvases=3,output_tokens=600)]
+    r=paired_trajectory('aime26',c,v,{})
+    # More canvases add nine calls; faster convergence per canvas removes five.
+    assert r['N_change_decomposition']['canvas_count_component']==9
+    assert r['N_change_decomposition']['calls_per_canvas_component']==-5
+    assert r['denoise_forwards']['delta']==4
