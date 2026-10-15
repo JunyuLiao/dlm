@@ -1,15 +1,31 @@
-## Value decision/reuse refinement — 2026-10-15, process-matched qualification
+## Value decision/reuse refinement — 2026-10-15, process-matched native evaluation
 
-Latest23:42 UTC. Native_interleaved_attempt001 is running, frozen from
-ea489245 with configcbb4b8e0. It alternates original V31 control and the four
-promoted refinement arms on the same AIME item15/seed44 in one engine, then
-repeats in a second engine. All five controls per engine and all inactive
-candidates must match exactly. Five focused request-switching tests pass.
-The worker restores the original bound V31 method for controls, resets all
-request state, and writes explicit request-arm/index receipts. This is a
-qualification diagnostic, not an accuracy panel. If it passes, qualify active
-and inactive cases on every workload before freezing a new paired campaign.
-Do not resume the old native coordinator or mix its scores into new results.
+Launched23:54 UTC: native_process_matched_attempt001. Frozen overlay source
+28714b4a, base method source79c994ca, protocol26683cda. Its coordinator runs
+from its private execution snapshot, using only that snapshot on PYTHONPATH.
+It first qualifies all four workloads, then automatically runs the frozen
+accuracy panel if those gates pass. Per-cell V31 control bookends must match
+exactly; inactive candidates must match their common control. Candidate order
+rotates. Counts/shards: AIME90/10, LongBench64/8, MATH100/10, RULER104/13.
+Fresh dense FULL, dense PIECEWISE and all-kept remain separate named reference
+paths. Process-cluster sensitivity supplements problem/task-cluster intervals.
+Native stopping and fixed per-query-tile budgets remain unchanged; clean timing
+is paused. Monitor about30 minutes; coordinator emits30-minute progress events.
+Failed attempts are preserved; export completion requires the shared raw
+attempt marker. Read this campaign's README and protocol before interpreting.
+
+Native_interleaved_attempt001 passed both nine-request sequences. Engine1's
+five V31 controls and four inactive candidates all reproduce54 calls/output.
+Engine2's five controls reproduce101 calls/output despite intervening active
+candidates (102,99,101,98 calls). This is one-cell execution qualification,
+not an accuracy result. Eight focused switching/scheduling/audit/resume tests
+pass. The request switcher used in the new panel is hash-identical to this
+GPU-qualified worker. All71 prior H100 method tests remain applicable to the
+unchanged base method sources. The combined deployment recipe is explicit.
+
+Do not resume old coordinator1799129, which remains SIGSTOP-held after AIME.
+Its native_development_attempt002 scores remain interpretation-held and are
+excluded from the new panel. Other campaigns remain paused.
 
 Original V31 within-process repeats are exact, but separate processes differ.
 A fixed PYTHONHASHSEED and fixed CUBLAS_WORKSPACE_CONFIG=:4096:8 both fail to
