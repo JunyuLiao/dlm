@@ -33,7 +33,7 @@ Correction changes the output consumer and is reported separately from selection
 
 ## Sequential diagnostic qualification
 
-`suffix_qualification_attempt004/` is the current frozen last-GLOBAL-layer
+`suffix_qualification_attempt005/` is the current frozen last-GLOBAL-layer
 instrumentation qualification. It compares uninstrumented, observer-disabled,
 and observer-active native trajectories twice, checks repeated suffix logits,
 and checks RNG and adapter counters. All suffix calls are offline diagnostics.
@@ -42,16 +42,20 @@ This stage cannot qualify earlier GLOBAL layers or task accuracy by itself.
 Earlier failed attempts are immutable: constructor signature (attempt001),
 unsupported fullgraph compiler-disable boundary (attempt002), and observer
 allocation incompatible with downstream fixed-address CUDA graphs (attempt003).
-Attempt004 preserves graph-owned tensor addresses and adds the uninstrumented
-control. Failed attempt003 results are not method comparisons.
+Attempt004 preserves graph-owned addresses but still changes compilation and
+fails native trajectory/suffix equivalence. Attempt005 therefore uses an explicit
+eager diagnostic model, with matched eager controls and the exact parity gate
+retained. Its states are not production compiled V31 states. Failed attempts
+are excluded from method comparisons. Production accuracy requires fresh compiled
+controls after the decision gate.
 
 Resume the current frozen coordinator from the repository root using the pinned
 H100 interpreter and the absolute study path:
 
 ```
 PYTHONPATH=src:. /home/exouser/dyh/v31_env_20261005/bin/python \
-  results/v31_value_decision_reuse_20261015/suffix_qualification_attempt004/coordinator_source.py \
-  --stage run --study /home/exouser/ljy/dlm/results/v31_value_decision_reuse_20261015/suffix_qualification_attempt004
+  results/v31_value_decision_reuse_20261015/suffix_qualification_attempt005/coordinator_source.py \
+  --stage run --study /home/exouser/ljy/dlm/results/v31_value_decision_reuse_20261015/suffix_qualification_attempt005
 ```
 
 The coordinator verifies source/input hashes, skips validated completed leaves,

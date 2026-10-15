@@ -34,20 +34,22 @@ The norm-only ablation suppresses more correction. Theory and a checked
 surrogate-regret bound are in `docs/V31_CAUSAL_VALUE_RESIDUAL_GUARD_20261015.md`;
 it is not an accuracy or current-dense improvement guarantee.
 
-Running: `suffix_qualification_attempt004/`, source `2c76714d`. It compares
-uninstrumented, observer-disabled and observer-active native trajectories twice,
-and checks repeated suffix logits/RNG/counters before admitting any decision
-results. Earlier immutable attempts failed at constructor signature, fullgraph
-compiler-disable, and observer-output address stability respectively. Attempt003
-returned fresh tensors across a fixed-address CUDA graph boundary; its outputs
-are invalid for method comparisons. Attempt004 retains graph-owned input addresses.
-Current implementation includes guarded residuals and unsettled-token metrics.
-The prior 50-test H100 suite passed; subsequent CPU additions pass, with the
-expanded H100 suite deferred until the active model worker releases the GPU.
-Native refinement is opt-in, final-layer-only and gated. No task-accuracy panel
-has launched; timing stays paused. Resolve instrumentation qualification, then
-broaden same-state decision coverage before native promotion. See the study
-README for the source-frozen resume command and exact stage limits.
+Running: `suffix_qualification_attempt005/`, source `3894ba76`, an explicitly
+eager model diagnostic with the native sampler unchanged. Attempt004 fixed
+observer pointer lifetime, but compilation boundaries still changed native
+trajectories (119 versus106 calls) and repeated suffix logits (4/256 top1
+mismatches). It is rejected. The new eager diagnostic must match uninstrumented,
+observer-disabled and active trajectories twice, and retain exact suffix parity.
+These are common eager states, not production compiled V31 states. Accuracy
+will use separate fresh compiled controls if a method passes the decision gate.
+All earlier failed attempts are retained. No native accuracy panel has launched.
+
+All57 H100 tests pass, including full-width fused adjoint correction. The causal
+direction guard now caches W^T W r at observations and uses one fused row dot
+product/correction kernel on held calls, removing the extra held-step O GEMM.
+Its source is `5ea0e263`; the qualification worker is an immutable separate
+snapshot. Timing and other campaigns stay paused. Next: qualify instrumentation,
+expand same-state workloads, then promote only supported native variants.
 
 ## RULER128K seed42 rerun complete — 2026-10-15
 

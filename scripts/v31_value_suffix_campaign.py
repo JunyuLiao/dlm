@@ -21,10 +21,13 @@ DEFAULT=io.DEFAULT/'suffix_qualification'
 BENCH_SOURCE=('scripts/v31_same_state_suffix_worker.py', 'experiments/numerical_qk_reuse/v31_same_state_suffix.py')
 
 
-def prepare(study):
+def prepare(study, suite='longbench_v2', panel='qualification'):
     if (study/'protocol.json').exists():
         verify(study)
         return
+    from scripts.v31_v2_local_threshold_sweep import SUITES
+    settings=dict(SUITES.get(suite,dict(dataset='ruler128k_v33ofc_subset',max_len=136192,
+        memory=.85,block=32,chunk=16384,mage_k=8192)))
     source=io.ROOT/'results/v31_cached_refresh_stable_20261013'
     cells=io.read(source/'private/cells_trajectory4.json')
     selected=[c for c in cells if c['dataset'].startswith('longbench')]
@@ -33,6 +36,30 @@ def prepare(study):
     selected=sorted(selected,key=lambda c: c['prompt_tokens'] if isinstance(c['prompt_tokens'],int) else len(c['prompt_tokens']))[:1]
     if len(selected)!=1:
         raise RuntimeError('frozen input panel unavailable')
+    pool=source/'private/manifests'
+    if panel=='decisions':
+        qualification=study.parent/'suffix_qualification_attempt005'
+        marker=io.read(qualification/'qualification_complete.json')
+        if marker['reproducibility_sha256']!=io.sha(qualification/'reproducibility.json'):
+            raise RuntimeError('parent diagnostic qualification changed')
+        if io.read(qualification/'reproducibility.json')['status']!='passed':
+            raise RuntimeError('instrumentation must qualify before a decision panel')
+        source=io.ROOT/'results/v31_v2_local_threshold_sweep_20261014_attempt002'
+        if suite=='ruler128k':source=io.ROOT/'results/v31_v2_ruler128k_seed42_tau021_20261015'
+        pool=source/f'private/pools/{suite}'
+        cells=io.read(source/f'private/schedules/{suite}/cells.json')
+        if suite=='ruler128k':
+            info=io.read(pool/(settings['dataset']+'_rowinfo.json'))['rows']
+            first={}
+            for row in sorted(info,key=lambda r:r['index']):first.setdefault(row['task'],row['index'])
+            selected=[c for c in cells if c['index'] in set(first.values())]
+            assert len(selected)==13
+        else:
+            count={'longbench_v2':8,'aime26':6,'math500':8}[suite]
+            seed=min(c['seed'] for c in cells)
+            selected=[c for c in cells if c['seed']==seed][:count]
+            assert len(selected)==count
+    elif suite!='longbench_v2':raise ValueError('initial instrumentation qualification uses LongBench')
     execution=study/'private/execution'; execution.mkdir(parents=True)
     files=subprocess.check_output(['git','ls-files'],cwd=io.ROOT,text=True).splitlines()
     files=sorted(set([p for p in files if p.endswith(('.py','.json','.yaml','.yml','.toml'))
@@ -47,7 +74,7 @@ def prepare(study):
     manifests=study/'private/manifests'; manifests.mkdir()
     dataset=selected[0]['dataset']
     # Local private copy; never publish tokens or raw generations.
-    for f in (source/'private/manifests').glob(dataset+'*'):
+    for f in pool.glob(dataset+'*'):
         if f.is_file(): shutil.copyfile(f,manifests/f.name)
     if not (manifests/(dataset+'_generation_manifest.json')).exists():
         raise RuntimeError('manifest copy incomplete')
@@ -55,20 +82,27 @@ def prepare(study):
     protocol=dict(schema='value_same_state_suffix_eager_qualification_v2',source_sha256=fingerprints,
         input_sha256={str(p.relative_to(study)):io.sha(p) for p in [study/'private/cells.json',*manifests.iterdir()] if p.is_file()},
         source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
-        layer=29,panel_cells=1,repeats=2,arms=['uninstrumented_control','diagnostics_disabled','diagnostics_active'],
-        parent='whole-layer replay must be complete first',budget=128,scope='GLOBAL layer29 interventions only',
-        runtime=dict(max_model_len=141312,memory=.80,block=32,chunk=16384,graph='NONE',enforce_eager=True,native_steps=48),
+        layer=29,suite=suite,panel=panel,panel_cells=len(selected),repeats=2,arms=['uninstrumented_control','diagnostics_disabled','diagnostics_active'],
+        parent='whole-layer replay must be complete first',budget=settings['mage_k']//64,scope='GLOBAL layer29 interventions only',
+        runtime=dict(max_model_len=settings['max_len'],memory=.80 if suite=='longbench_v2' else settings['memory'],
+            block=settings['block'],chunk=settings['chunk'],graph='NONE',enforce_eager=True,native_steps=48),
+        input_selection='shorter of two archived LongBench traces' if panel=='qualification' else 'first indices at minimum native seed; RULER first index per task, independent of correctness',
         qualification='uninstrumented/disabled/active native output hashes, N, C and T must agree in both repeats; exact same-state suffix logits; unchanged RNG and adapter counters',
         decision_metrics=['top1','acceptance','common_Gumbel','KL','entropy','stopping'],
         timing='paused; instrumented generation is diagnostic only; suffix calls excluded from native N',
         substrate_limit='Eager model diagnostics use common identical eager states, not production compiled V31 states. Production accuracy requires fresh compiled controls.',
         full_accuracy='not automatically launched by this qualifier')
-    io.write(study/'protocol.json',protocol,True)
+    if panel=='decisions':
+        protocol['instrumentation_parent_sha256']=io.sha(qualification/'qualification_complete.json')
     shutil.copyfile(Path(__file__),study/'coordinator_source.py')
+    protocol['coordinator_sha256']=io.sha(study/'coordinator_source.py')
+    io.write(study/'protocol.json',protocol,True)
 
 
 def verify(study):
     protocol=io.read(study/'protocol.json')
+    if 'coordinator_sha256' in protocol and io.sha(study/'coordinator_source.py')!=protocol['coordinator_sha256']:
+        raise RuntimeError('frozen coordinator drift')
     for rel,digest in protocol['source_sha256'].items():
         if io.sha(study/'private/execution'/rel)!=digest:
             raise RuntimeError('frozen executable source drift')
@@ -79,9 +113,11 @@ def verify(study):
 
 
 def env_for(study,leaf,active):
-    from scripts.v31_v2_local_threshold_sweep import env_for as base_env
-    env=base_env(study,'longbench_v2','current_v31_control')
-    env['MEM']='.80'
+    from scripts.v31_v2_local_threshold_sweep import env_for as base_env, SUITES
+    p=io.read(study/'protocol.json');suite=p.get('suite','longbench_v2');r=p['runtime']
+    if suite not in SUITES:SUITES[suite]=dict(block=r['block'],chunk=r['chunk'],memory=r['memory'],max_len=r['max_model_len'],mage_k=p['budget']*64)
+    env=base_env(study,suite,'current_v31_control')
+    env['MEM']=str(r['memory'])
     env['STUDY_ARM']='same_state_suffix_diagnostic'
     env['SAME_STATE_SUFFIX_DIR']=str(leaf/'decisions')
     env['SUFFIX_DIAGNOSTICS']='1' if active else '0'
@@ -150,12 +186,17 @@ def run(study):
             receipts.append((repeat,active,leaf))
     rows={}
     for repeat,active,leaf in receipts:
-        rows[repeat,active]=json.loads((leaf/'records.jsonl').read_text().splitlines()[0])
+        rr=[json.loads(x) for x in (leaf/'records.jsonl').read_text().splitlines()]
+        rows[repeat,active]={(r['dataset'],r['index'],r['panel_seed']):r for r in rr}
     baseline=rows[1,None]
     compare_keys=['output_hash','denoise_forwards','canvases','output_tokens']
-    errors=[dict(repeat=r,active=a,key=k) for (r,a),row in rows.items() for k in compare_keys if row[k]!=baseline[k]]
+    errors=[]
+    for (repeat,active),rr in rows.items():
+        if set(rr)!=set(baseline):raise RuntimeError('incomplete paired diagnostic cohort')
+        errors.extend(dict(repeat=repeat,active=active,item_index=key[1],key=k)
+            for key,row in rr.items() for k in compare_keys if row[k]!=baseline[key][k])
     io.write(study/'reproducibility.json',dict(status='passed' if not errors else 'failed',mismatches=errors,
-        checks=compare_keys,native_trajectories=len(rows),scope='one previously examined LongBench item; layer29 suffix only'),True)
+        checks=compare_keys,native_trajectories=len(rows)*len(baseline),scope=f"{len(baseline)} previously examined {protocol['suite']} items; layer29 suffix only"),True)
     if errors:raise RuntimeError('diagnostic changed native trajectory or repetition floor')
     io.write(study/'qualification_complete.json',dict(status='complete',protocol_sha256=io.sha(study/'protocol.json'),
         reproducibility_sha256=io.sha(study/'reproducibility.json'),native_accuracy_launched=False,timing='paused'),True)
@@ -165,4 +206,8 @@ def run(study):
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--stage',choices=['prepare','run'],required=True)
     p.add_argument('--study',type=Path,default=DEFAULT)
-    a=p.parse_args();{'prepare':prepare,'run':run}[a.stage](a.study.resolve())
+    p.add_argument('--suite',choices=['longbench_v2','aime26','math500','ruler128k'],default='longbench_v2')
+    p.add_argument('--panel',choices=['qualification','decisions'],default='qualification')
+    a=p.parse_args()
+    if a.stage=='prepare':prepare(a.study.resolve(),a.suite,a.panel)
+    else:run(a.study.resolve())

@@ -15,8 +15,8 @@ from pathlib import Path
 
 import torch
 
-from .v31_value_decision import OmittedCache, bounded_proposal, c_gate, moments
-from .v31_value_reuse_guard import residual_trust
+from .v31_value_decision import bounded_proposal, c_gate, moments
+from .v31_value_reuse_guard import residual_trust, SelectedOnlyCorrection, ResidualDirectionCache, reconstruct_cuda
 
 
 def distribution(scaled, entropy_bound=.1):
@@ -76,11 +76,14 @@ class Controller:
             self.last_sampler = None
             self.first_canvas = adapter.canvas_id
             self.last_canvas = adapter.canvas_id
+            self.sparse_canvases=set()
         if adapter.canvas_id != self.last_canvas:
             self.previous_stats = None; self.last_sampler = None
             self.last_canvas = adapter.canvas_id
         canvas = adapter.canvas_id - self.first_canvas
-        if canvas > 1:
+        if prefix//64>adapter.mage_k//64 and len(self.sparse_canvases)<2:
+            self.sparse_canvases.add(canvas)
+        if canvas > 1 and canvas not in self.sparse_canvases:
             self.frame = None
             return
         st = adapter.mage_state.get(layer)
@@ -108,13 +111,32 @@ class Controller:
                 w=weight[:,h*512:(h+1)*512]
                 self.grams[h]=w.T@w
         if anchor:
-            self.states[identity]=dict(age=0,list_identity=f['list_identity'], caches={},
+            self.states[identity]=dict(age=0,list_identity=f['list_identity'],
                 masks={label:native_mask.clone() for label in ('mass_anchor','full_swap8','online_swap8','full_cgate_swap8')})
         state=self.states[identity]
-        correction={kind:torch.empty((1,n,16,512),device=f['q'].device,dtype=torch.float32) for kind in ('residual','moments')}
-        if anchor:
-            anchor_dense=torch.empty_like(correction['residual'])
-            anchor_sparse=torch.empty_like(anchor_dense)
+        if not anchor:
+            # Read current selected O/LSE from FA4 itself. Reconstructing a
+            # cached complement requires no current omitted PV moments.
+            result={};forward=v27_fa4.load(); selected_lse=None
+            for name,mask in state['masks'].items():
+                out,lse=forward(f['q'].transpose(1,2),f['k'].transpose(1,2),f['v'].transpose(1,2),
+                    softmax_scale=f['scale'],causal=False,return_lse=True,
+                    block_sparse_tensors=v27_fa4.block_sparse_tensors(mask))[:2]
+                result[name]=out
+                if name=='mass_anchor':selected_lse=lse[0].T.contiguous()
+            selected=result['mass_anchor'][0]
+            result['dense_reference']=v27_fa4.dense(f['q'],f['k'],f['v'],f['scale'])
+            result['correction_residual']=(selected.float()+state['anchor_residual'][0]).to(selected.dtype)[None]
+            result['correction_moments']=reconstruct_cuda(selected,selected_lse,state['selected_cache'],identity)[None]
+            result['correction_direction_guard']=state['direction_cache'].apply_cuda(selected,identity)[0][None]
+            current_post=selected.float().reshape(n,-1)@layer.self_attn.o_proj.weight.float().T
+            alpha=residual_trust(current_post,state['anchor_sparse_post'],state['anchor_dense_post'],kind='norm')
+            result['correction_norm_guard']=(selected.float()+alpha[:,None,None]*state['anchor_residual'][0]).to(selected.dtype)[None]
+            return result
+        anchor_dense=torch.empty((1,n,16,512),device=f['q'].device,dtype=torch.float32)
+        anchor_sparse=torch.empty_like(anchor_dense)
+        dense_lse=torch.empty((n,16),device=f['q'].device,dtype=torch.float32)
+        sparse_lse=torch.empty_like(dense_lse)
         for h in range(16):
             kh=h//8
             for qt in range(qb):
@@ -128,33 +150,19 @@ class Controller:
                             weight=c_gate(*self.previous_stats)[lo:hi]
                         selected,_=bounded_proposal(m,mask,swaps=8,gram=self.grams[h],online=online,weight=weight)
                         state['masks'][name][0,h,qt,:pt]=selected
-                    state['caches'][h,qt]=OmittedCache.build(m,mask)
                     anchor_dense[0,lo:hi,h]=m.dense()
                     anchor_sparse[0,lo:hi,h]=m.output(mask)
-                for kind in correction:
-                    correction[kind][0,lo:hi,h]=state['caches'][h,qt].reconstruct(m,mask,kind)
+                    dense_lse[lo:hi,h]=m.log_scale
+                    sparse_lse[lo:hi,h]=m.log_scale+m.selected(mask)[1].log()
                 del m
         if anchor:
             weight=layer.self_attn.o_proj.weight.float()
             state['anchor_dense_post']=anchor_dense.reshape(n,-1)@weight.T
             state['anchor_sparse_post']=anchor_sparse.reshape(n,-1)@weight.T
             state['anchor_residual']=anchor_dense-anchor_sparse
+            state['selected_cache']=SelectedOnlyCorrection.from_anchor(anchor_dense[0],dense_lse,anchor_sparse[0],sparse_lse,identity)
+            state['direction_cache']=ResidualDirectionCache.build(anchor_dense[0],anchor_sparse[0],weight,identity)
             return None
-        # Offline contiguous FA4 is distinct from the native alias-split path.
-        # A same-mask numerical-floor arm measures that implementation gap.
-        result={name:v27_fa4.sparse_lists(f['q'],f['k'],f['v'],v27_fa4.block_sparse_tensors(mask),f['scale'])
-                for name,mask in state['masks'].items()}
-        result['dense_reference']=v27_fa4.dense(f['q'],f['k'],f['v'],f['scale'])
-        result.update({'correction_'+kind:o.to(f['q'].dtype) for kind,o in correction.items()})
-        current_post=result['mass_anchor'].float().reshape(n,-1)@layer.self_attn.o_proj.weight.float().T
-        for kind in ('direction','norm'):
-            alpha=residual_trust(current_post,state['anchor_sparse_post'],state['anchor_dense_post'],kind=kind)
-            result['correction_'+kind+'_guard']=(result['mass_anchor'].float()
-                +alpha[None,:,None,None]*state['anchor_residual']).to(f['q'].dtype)
-        # Pure torch full-V reconstruction is also a distinct numerical path;
-        # this is a diagnostic, not an unchanged-FA4 production claim.
-        return result
-
     def suffix(self, projected_attention):
         from vllm.forward_context import override_forward_context
         cap=self.capture; layer=cap['layer']; original=layer.self_attn.forward
