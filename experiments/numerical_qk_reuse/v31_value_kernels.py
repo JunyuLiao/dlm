@@ -78,51 +78,69 @@ def statistics_cuda(q, k, sketch, nu_kv, scale, prefix_tiles, workspace=None):
     return stats
 
 
-@tr.jit(do_not_specialize=['JT'])
-def _online(LM, MU, NU, BAD, PROT, HELD, KEEP, STATE, FINAL_LM, RISK,
-            JT, THRESHOLD, PRESERVE: tl.constexpr,
-            STICKY: tl.constexpr):
+@tr.jit(do_not_specialize=['JT', 'J0'])
+def _online_chunk(LM, MU, NU, BAD, PROT, HELD, WEIGHT, KEEP, PREVIOUS, OUTPUT,
+                  SUPPORT, RISK, JT, J0, CHUNK: tl.constexpr, THRESHOLD, PRESERVE: tl.constexpr,
+                  STICKY: tl.constexpr):
     unit = tl.program_id(0)
     row, rr = tl.arange(0, 128), tl.arange(0, 32)
-    previous = tl.full((128,), -float('inf'), tl.float32)
-    output = tl.full((128, 32), 0., tl.float32)
-    support = tl.full((128,), False, tl.int1)
+    previous = tl.load(PREVIOUS+unit*128+row)
+    output = tl.load(OUTPUT+unit*128*32+row[:, None]*32+rr[None])
+    support = tl.load(SUPPORT+unit*128+row)
     nu = tl.maximum(tl.load(NU+unit*128+row), 1.e-12)
-    for j in range(JT):
+    for local_j in range(CHUNK):
+        j = J0 + local_j
         dest = (unit*JT+j)*128+row
-        lm = tl.load(LM+dest)
-        active = lm > -float('inf')
+        in_range = j < JT
+        lm = tl.load(LM+dest, in_range, -float('inf'))
+        active = in_range & (lm > -float('inf'))
         mx = tl.maximum(previous, lm)
         safe = tl.where(mx > -float('inf'), mx, 0.)
         combined = safe+lib.log(lib.exp(previous-safe)+lib.exp(lm-safe))
         eta = tl.where(active, lib.exp(lm-tl.where(combined > -float('inf'), combined, 0.)), 0.)
-        mu = tl.load(MU+dest[:, None]*32+rr[None])
+        mu = tl.load(MU+dest[:, None]*32+rr[None], in_range, 0.)
         delta = mu-output
         rho = eta*tl.sqrt(tl.sum(delta*delta, 1))/nu
         risk = tl.max(tl.where(active, lib.log(rho), -float('inf')), 0)
         first = tl.sum((active & ~support).to(tl.int32), 0)>0
-        invalid = tl.sum(tl.load(BAD+dest).to(tl.int32), 0)>0
-        prot = tl.load(PROT+unit*JT+j)
-        held = tl.load(HELD+unit*JT+j)
+        invalid = tl.sum(tl.load(BAD+dest, in_range, False).to(tl.int32), 0)>0
+        prot = tl.load(PROT+unit*JT+j, in_range, False)
+        held = tl.load(HELD+unit*JT+j, in_range, False)
+        weight = tl.load(WEIGHT+unit*128+row)
+        weighted_rho = rho*weight
+        weighted_risk = tl.max(tl.where(active & (weight > 0), lib.log(weighted_rho), -float('inf')), 0)
+        live_weight = tl.sum((active & (weight > 0)).to(tl.int32), 0)>0
+        risk = tl.where(live_weight, weighted_risk, risk)
         take = (tl.sum(active.to(tl.int32), 0)>0) & (first | prot | invalid | (risk+STICKY*held>=THRESHOLD))
-        tl.store(KEEP+unit*JT+j, take)
-        tl.store(RISK+unit*JT+j, risk)
+        tl.store(KEEP+unit*JT+j, take, in_range)
+        tl.store(RISK+unit*JT+j, risk, in_range)
         output = tl.where(take, (1-eta[:, None])*output+eta[:, None]*mu, output)
         previous = tl.where(take | PRESERVE, combined, previous)
         support = support | (active & take)
-    tl.store(STATE+unit*128*32+row[:, None]*32+rr[None], output)
-    tl.store(FINAL_LM+unit*128+row, previous)
+    tl.store(PREVIOUS+unit*128+row, previous)
+    tl.store(OUTPUT+unit*128*32+row[:, None]*32+rr[None], output)
+    tl.store(SUPPORT+unit*128+row, support)
 
 
-def online_cuda(stats, threshold, preserve, mandatory, held, sticky):
+def online_cuda(stats, threshold, preserve, mandatory, held, sticky, row_weight=None):
     u, jt, q = stats.log_mass.shape
     keep = torch.empty((u, jt), dtype=torch.bool, device=stats.log_mass.device)
-    state = torch.empty((u, 128, 32), device=keep.device)
-    lm = torch.empty((u, 128), device=keep.device)
-    risk = torch.empty((u, jt), device=keep.device)
-    _online[(u,)](stats.log_mass, stats.mean, stats.nu, stats.invalid, mandatory, held,
-        keep, state, lm, risk, jt, math.log(threshold) if threshold else -math.inf,
-        preserve, sticky, num_warps=8)
+    state = torch.zeros((u, 128, 32), device=keep.device)
+    lm = torch.full((u, 128), -float('inf'), device=keep.device)
+    support = torch.zeros((u, 128), dtype=torch.bool, device=keep.device)
+    risk = torch.empty((u, jt), dtype=torch.float32, device=keep.device)
+    weight = torch.ones_like(stats.nu) if row_weight is None else row_weight.contiguous()
+    if weight.shape != stats.nu.shape:
+        raise ValueError('row_weight must have shape U,Q')
+    # Keep each kernel short enough for SM90 register and code-size limits.
+    # Carrying the exact state between chunks preserves the sequential V1/V2
+    # recurrence while making 2K-tile RULER prefixes practical.
+    chunk = 128
+    for j0 in range(0, jt, chunk):
+        _online_chunk[(u,)](stats.log_mass, stats.mean, stats.nu, stats.invalid,
+            mandatory, held, weight, keep, lm, state, support, risk, jt, j0,
+            min(chunk, jt-j0), math.log(threshold) if threshold else -math.inf,
+            preserve, sticky, num_warps=8)
     # _stats validates logits and projected means without a full-sized boolean
     # temporary over the rank dimension. No redundant GiB tensor is allocated.
     bad = stats.invalid.any((1, 2))
@@ -278,11 +296,138 @@ def fixed_cuda(stats, budget, mandatory, held, sticky, batch=1, singleton=False)
     return keep, evaluations
 
 
-def select_cuda(stats, selector, budget, threshold, mandatory, held, sticky):
+def _mass_score_cuda(stats):
+    pt = stats.prefix_tiles
+    z = stats.log_mass[:, :pt]
+    denom = torch.logsumexp(z, 1, keepdim=True)
+    score = z - torch.where(torch.isfinite(denom), denom, torch.zeros_like(denom))
+    score = score.amax(-1)
+    return score.masked_fill(~stats.valid[:, :pt].any(-1), -math.inf)
+
+
+def _fixed_base_cuda(stats, budget, mandatory, mass_score):
+    pt = stats.prefix_tiles
+    eligible = stats.valid.any(-1)
+    k = min(max(0, int(budget)), pt)
+    target = eligible[:, :pt].sum(-1).clamp_max(k)
+    required = mandatory[:, :pt] & eligible[:, :pt]
+    torch._assert_async((required.sum(-1) <= target).all(), 'mandatory support exceeds fixed prefix budget')
+    # Rank only non-mandatory candidates.  Putting mandatory tiles at +inf
+    # and then taking the first ``target-required`` entries can select the
+    # mandatory prefix twice and silently undershoot the fixed budget.
+    rank = mass_score.masked_fill(required, -math.inf)
+    # Short auxiliary prompts can have fewer eligible prefix tiles than the
+    # suite-wide budget.  Clamp the selection width to the actual score
+    # vector; the target already carries the per-row admissible count.
+    if rank.shape[-1] == 0:
+        return mandatory, eligible, target
+    width = max(1, min(k, rank.shape[-1]))
+    top, idx = torch.topk(rank, width, dim=-1, largest=True, sorted=True)
+    need = (target-required.sum(-1)).clamp_min(0)[:, None]
+    take = torch.arange(width, device=rank.device)[None] < need
+    take &= torch.isfinite(top)
+    keep = mandatory.clone()
+    keep[:, :pt].scatter_(1, idx, take)
+    keep[:, :pt] |= required
+    return keep, eligible, target
+
+
+def _fixed_value_score_cuda(stats, selector, threshold, held, sticky, row_weight):
+    full = selector.endswith('_full')
+    if not full:
+        if threshold is None:
+            raise ValueError('fixed online selectors require the frozen V2 threshold')
+        zero = torch.zeros_like(stats.log_mass, dtype=torch.bool)
+        _, _, _, risk = online_cuda(stats, threshold, True, zero, held, sticky, row_weight)
+        return risk[:, :stats.prefix_tiles]
+    from .v31_value_summary import full_support_cuda
+    alpha, output, g = full_support_cuda(stats)
+    a = alpha.sum(1)
+    residual = g.sum(1)
+    remain = (a[:, None]-alpha).clamp_min(torch.finfo(a.dtype).tiny)
+    err = (residual[:, None, :]-g).norm(dim=-1)/(remain*stats.nu[:, None].clamp_min(EPS))
+    if row_weight is not None:
+        err = err*row_weight[:, None]
+    score = err.amax(-1)[:, :stats.prefix_tiles]
+    score = score.masked_fill(~stats.valid[:, :stats.prefix_tiles].any(-1), -math.inf)
+    if held is not None and sticky:
+        score = score*torch.exp(sticky*held[:, :stats.prefix_tiles].to(score.dtype))
+    return score
+
+
+def fixed_mass_cuda(stats, selector, budget, threshold, mandatory, held, sticky,
+                    row_weight=None, pool_factor=2, swap_count=0):
+    """GPU fixed-budget mass-gated selector.
+
+    All ranking and swaps stay on device.  The only scalar loop is over the
+    configured swap count, so C_gate cannot create an unbalanced variable-K
+    workload.  Full selectors use the exact final-output score of the cached
+    value summary (rank32 in the live adapter; full-dimensional V is evaluated
+    by the offline diagnostic before promotion).
+    """
+    pt = stats.prefix_tiles
+    mass = _mass_score_cuda(stats)
+    base, eligible, target = _fixed_base_cuda(stats, budget, mandatory, mass)
+    if selector.startswith('value_intersection_'):
+        zero = torch.zeros_like(stats.log_mass, dtype=torch.bool)
+        v2, _, _, _ = online_cuda(stats, threshold, True, zero, held, sticky, row_weight)
+        allowed = base[:, :pt] & v2[:, :pt]
+        score = _fixed_value_score_cuda(stats, selector.replace('value_intersection_', 'value_mass_gated_'),
+                                        threshold, held, sticky, row_weight)
+        rank = score.masked_fill(~allowed | mandatory[:, :pt], -math.inf)
+        width = max(1, min(pt, int(budget)))
+        top, idx = torch.topk(rank, width, dim=-1, largest=True, sorted=True)
+        take = torch.arange(width, device=rank.device)[None] < target[:, None]
+        take &= torch.isfinite(top)
+        keep = mandatory.clone()
+        keep[:, :pt].scatter_(1, idx, take)
+        keep[:, :pt] |= mandatory[:, :pt] & allowed
+        keep |= stats.invalid.any((1, 2))[:, None]
+        return keep, stats.log_mass.shape[0]*pt
+    score = _fixed_value_score_cuda(stats, selector, threshold, held, sticky, row_weight)
+    pool = min(pt, max(int(budget), int(budget)*max(1, int(pool_factor))))
+    pool_rank = mass.clone()
+    pool_rank[:, pool:] = -math.inf
+    pool_mask = torch.isfinite(pool_rank) | base[:, :pt]
+    add = pool_mask & ~base[:, :pt] & eligible[:, :pt]
+    rem = base[:, :pt] & ~mandatory[:, :pt]
+    swaps = max(0, int(swap_count))
+    if swaps and pool:
+        width = min(swaps, pt)
+        add_score, add_idx = torch.topk(score.masked_fill(~add, -math.inf), width, dim=-1, largest=True, sorted=True)
+        rem_score, rem_idx = torch.topk(score.masked_fill(~rem, math.inf), width, dim=-1, largest=False, sorted=True)
+        valid = torch.isfinite(add_score) & torch.isfinite(rem_score) & (add_score > rem_score)
+        # A prefix of valid swaps is enough because both lists are sorted.
+        valid = valid & (torch.cumprod(valid.to(torch.int32), dim=-1) > 0)
+        drop = torch.zeros_like(base[:, :pt]).scatter_(1, rem_idx, valid)
+        add_mask = torch.zeros_like(base[:, :pt]).scatter_(1, add_idx, valid)
+        base[:, :pt] = (base[:, :pt] & ~drop) | add_mask
+    base |= stats.invalid.any((1, 2))[:, None]
+    return base, stats.log_mass.shape[0]*pt
+
+
+def select_cuda(stats, selector, budget, threshold, mandatory, held, sticky, row_weight=None,
+                pool_factor=2, swap_count=0, intersection=None):
+    first_observation = held is None
     mandatory = mandatory_map(stats) if mandatory is None else mandatory.contiguous()
     held = torch.zeros_like(mandatory) if held is None else held.contiguous()
+    if selector in ('value_mass_gated_online', 'value_mass_gated_full',
+                    'value_mass_gated_online_phase', 'value_mass_gated_full_phase',
+                    'value_mass_gated_online_cgate', 'value_mass_gated_full_cgate',
+                    'value_intersection_online', 'value_intersection_full'):
+        # Phase arms deliberately use the exact mass map on the first
+        # observation of a canvas.  The adapter represents that state with
+        # ``held is None``; mirror the CPU oracle here so the first map is not
+        # silently value-swapped on CUDA.
+        effective_swaps = 0 if selector.endswith('_phase') and first_observation else swap_count
+        keep, evaluations = fixed_mass_cuda(stats, selector, budget, threshold, mandatory, held, sticky,
+                                             row_weight, pool_factor, effective_swaps)
+        return keep.reshape(1, stats.heads, stats.blocks, -1), dict(
+            candidate_evaluations=evaluations, kernel='triton_fixed_mass_gated',
+            fixed_budget=int(budget), pool_factor=int(pool_factor), swap_count=int(effective_swaps),
+            intersection=selector.startswith('value_intersection_'))
     if selector in SELECTORS[:2]:
-        keep, _, _, _ = online_cuda(stats, threshold, selector == SELECTORS[1], mandatory, held, sticky)
+        keep, _, _, _ = online_cuda(stats, threshold, selector == SELECTORS[1], mandatory, held, sticky, row_weight)
         evaluations = stats.log_mass.shape[0]*stats.log_mass.shape[1]
         kernel = 'triton_log_mass_online'
     else:

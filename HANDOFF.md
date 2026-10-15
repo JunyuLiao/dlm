@@ -1,3 +1,21 @@
+## Research publication — 2026-10-15
+
+The current week is documented separately in
+`docs/research_week_20261015/01_VALUE_AWARE_METHODS.md`,
+`02_V2_THRESHOLD_CALIBRATION.md`, and `03_CHEAP_CACHED_REFRESH.md`.
+`results/research_week_20261015/` contains sanitized derived evidence, original
+and exported hashes, and a source inventory captured from checkpoint `53859740`
+plus the publication changes. This includes the previously untracked scripts
+and tests and the pending selector/kernel/launcher updates. Public reproduction
+entrypoints take explicit private input paths; frozen source runs are untouched.
+
+The V2 local sweep stays paused and the full503 refresh campaign retains its
+independent frozen execution/continuation. Publication launches no generation
+or timing and makes no new full503 accuracy claim. Corrected V2 C=20 differences
+are +7.74% (tau .015, 50 common visible-canvas items) and +3.07% (tau .021, 45);
+the old lifecycle-axis early-work claims are superseded, with total work and
+accuracy unchanged. Read the existing campaign sections below for their scope.
+
 ## Full503 refresh comparison — 2026-10-14 native run resumed
 
 The user approved seven raw/stable/progress/frequency arms, both existing

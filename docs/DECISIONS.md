@@ -1779,3 +1779,20 @@ generation source `98a37a14`, reusing the validated 126-cell FULL shard and
 starting a new PIECEWISE attempt. All 13 arms, manifests, seeds, native sampler,
 source hashes and output-consumer paths remain frozen. Monitor every 15 minutes;
 no final target accuracy or clean timing claim exists.
+
+## 2026-10-15 — Publish three separate research directions
+
+- Publish the existing value-aware V1/V2/V3 selectors, V2 threshold studies,
+  and cheap cached-refresh work in three distinct integration/reproduction
+  documents under `docs/research_week_20261015/`.
+- Include the pending chunked online Triton scan, device-side hybrid ranking,
+  launcher changes, missing experiment tools and tests. Registration of a
+  prototype is not a promotion or a completed native evaluation.
+- Export only selected sanitized aggregates with original/exported SHA256s;
+  leave frozen runs, private inputs/generations/tensors and live worker state
+  local. Keep the separate full503 campaign running under its own protocol,
+  the V2 local threshold campaign paused, and clean timing paused.
+- Supersede the historical lifecycle-ID early-work interpretation using the
+  verified ordinal/visible-canvas correction. Official C=20 deltas are +7.74%
+  for tau .015 (50 common items) and +3.07% for tau .021 (45); no exact
+  total-plus-early work match is claimed. Entire-run work and scores are intact.

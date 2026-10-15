@@ -1,5 +1,19 @@
 # Results ledger (verified results only)
 
+## V31 cached-statistics refresh primary arm — 2026-10-12 (single-arm panel)
+
+| arm | LongBench-v2 subset | AIME26 30×3 | mean denoising forwards | GLOBAL physical sparsity | timed captures |
+|---|---:|---:|---:|---:|---:|
+| `cached_refresh_bounded_m256` | **46.9% (64 cells)** | **54.44% avg@k (49/90)** | 374.01 | 75.53% | 0 |
+
+- This is a complete, source-identified 154-cell arm under
+  `results/v31_cached_refresh_20261012/attempt009/`, officially scored with
+  `scripts/v31_score_longbench_official.py` and `scripts/v31_score_aime.py`.
+  The LongBench subset is the frozen 64-problem seed-1 slice and AIME uses
+  seeds 42/43/44.  It is a single-arm result: matched dense/all-kept/V31
+  controls and other refresh variants are not yet complete, so this entry
+  supports no improvement claim.  Clean timing remains paused.
+
 Rules for this file:
 - An entry needs a scored, frozen panel or a documented benchmark whose summary is in the repo.
 - Historical HF entries use `D_fa4_allkept` unless stated. Current headline speed evidence must use native vLLM dense (FA4 dynamic-causal with effective split-KV).
@@ -1606,6 +1620,47 @@ matched dense reference despite tile skipping.
 
 | `v31_20261006_aime_global_dense_local_budget_sweep` | `5fb28bda` | AIME26 30 problems × seeds 42/43/44 | dense FULL; MAGE GLOBAL 1024/2048/4096; LOCAL native dense | 56.67%; 56.67% / 58.89% / 60.00% | GLOBAL 58.05% / 41.33% / 17.81%; LOCAL 0%; overall geometry-derived 22.40% / 15.89% / 6.86% | 0.920x / 0.931x / 0.917x | Complete dense-LOCAL control; no end-to-end speedup. See `results/v31_20261006_aime_global_dense_local_budget_sweep/summary.md`. |
 
+## 2026-10-12 — V2 equal absolute GLOBAL work audit
+
+- Protocol and sanitized reports: `results/v31_value_v2_equal_work_20261011/`.
+  The unchanged online V2 threshold sweep covered 11 thresholds on 64
+  development cells; the official audit used a fresh source-matched V31
+  control and two explicitly named thresholds on all 503 LongBench-v2 cells.
+- Fresh V31 control: 256/503 (50.9%), 134,521 denoising forwards,
+  5,691,974,080 GLOBAL kept tiles (83.1647% GLOBAL sparsity).
+- `v2_work_match_total` (`tau=0.015`): 263/503 (52.3%), 124,671 forwards,
+  5,879,477,757 kept tiles (1.0329x control; paired +1.392 pp, bootstrap
+  [-2.187,+4.970] pp, McNemar p=0.5203).
+- `v2_work_match_early` (`tau=0.021`): 274/503 (54.5%), 131,786 forwards,
+  5,248,339,635 kept tiles (0.9221x control; paired +3.579 pp, bootstrap
+  [0.000,+7.157] pp, McNemar p=0.0630).
+- These are audit-instrumented accuracy/work results. Native trajectories are
+  not equal, selector discovery is separate from FA4 work, and clean timing
+  remains paused.
+
+## 2026-10-12 — V31 cached-statistics refresh native subset matrix
+
+- **Source and scope:** `results/v31_cached_refresh_20261012/`; frozen V31
+  contracts, 16 runnable arms, 154 cells per arm (64 LongBench-v2 subset plus
+  90 AIME26), primary `attempt009` and matched matrix `attempt010`.
+- **Controls:** `dense_full_fix51994` 46.9% LongBench / 50.0% AIME,
+  `dense_piecewise` 39.1% / 56.67%, `allkept_fa4` 45.3% / 56.67%, and
+  `current_v31_control` 53.1% / 54.44%.
+- **Cached arms:** global-top-K M=160/256/512 each scored 51.6% LongBench,
+  with AIME 55.56% / 56.67% / 54.44%; bounded M=160/256/512 scored
+  46.9% / 46.9% / 46.9% LongBench and 53.33% / 54.44% / 53.33% AIME.
+  Decay, phase protection, C_gate, every-1, every-4, and progress-triggered
+  bounded arms scored respectively 50.0/55.56, 45.3/53.33, 48.4/53.33,
+  50.0/54.44, 46.9/54.44, and 46.9/53.33 (LongBench/AIME percentages).
+- **Audit gate:** every runnable arm has 154/154 records and source-matched
+  receipts; LOCAL remained dense and graph captures were zero. However,
+  global-top-K still has 35–37 cells above the V31 denoising-call count and
+  bounded variants 103–120, so no arm is promoted. This is not a 503-cell
+  LongBench audit and supplies no timing claim; clean timing remains paused.
+- **Limit:** separate online-value-only, full-information, strict-intersection,
+  and filled-intersection variants are operator diagnostics only because native
+  map wiring was not available.
+
 
 ## 2026-10-13 — Stable cheap refresh development panel (complete; no promotion)
 
@@ -1663,3 +1718,22 @@ examined native data, not new 503-cell native accuracy.
 
 Report: `reports/final_report.md`; all one-factor details in
 `reports/native_factor_contrasts.json` and `operator_factor_contrasts.json`.
+
+## 2026-10-15 — V2 early-work reporting correction and publication
+
+The original equal-work run bytes remain immutable. The verified correction
+receipt is published in
+`results/research_week_20261015/v2_calibration/progress_axis_correction.json`.
+Adapter lifecycle IDs included prefill/encoder events and could not define a
+denoising-canvas prefix or its eligible cohort. Through actual ordinal C=20,
+requiring both arms to reach 20 visible canvases, tau .015 retains +7.74% GLOBAL
+work on 50 paired items (882,592,957 versus 819,186,400); tau .021 retains +3.07%
+on 45 items (701,344,984 versus 680,459,200). The previous +13.29%/+1.19%
+interpretations are superseded. Accuracy, total work and paired correctness
+results are unchanged; nominal work-match arm names do not prove exact matching.
+
+Three direction-specific documents and a sanitized, hash-identified evidence
+bundle are published for the existing completed studies. The newer 13-arm
+full503 refresh study is a generation checkpoint with no final score here;
+the local V2 sweep remains user-paused. Neither supplies a new whole-campaign
+accuracy or clean throughput claim.

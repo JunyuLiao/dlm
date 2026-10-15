@@ -58,7 +58,9 @@ are this study's integration.
   step loop.
 - Preserve the existing discovery/refresh clock, first-call behavior, carry
   policy, progress trigger, sticky retention, protected/sink/current-canvas
-  tiles, structural masks, GQA/cache semantics, mask format, and fixed budget.
+  tiles, structural masks, GQA/cache semantics, and mask format. Preserve the
+  active fixed budget for the current selector and V3 arms; V1/V2 use uniform
+  threshold calibration instead of a fixed-k quota.
 - The selector must return the same kept/skipped mask or index-list interface
   that the current adapter consumes. The later sparse attention executor must
   receive exactly the same type of map as before.
@@ -75,6 +77,11 @@ The relevant implementation surface is:
 - `experiments/numerical_qk_reuse/v31_fa4_observe.py`: FA4 observation path.
 - `experiments/numerical_qk_reuse/v31_dp_chunked.py` and
   `v31_logit_stats.py`: existing optimized statistics paths.
+- `experiments/value_direction_hopper/csrc/value_direction.cu`,
+  `experiments/value_direction_hopper/integration.py`,
+  `experiments/value_direction_hopper/fused.py`, and
+  `experiments/value_direction_hopper/projection.py`: prior Gaussian32/Hopper
+  routing and kernel design to inspect and reuse or adapt where compatible.
 - `experiments/numerical_qk_reuse/v31_local_sparse.py` and
   `v31_local_kernel.py`: LOCAL implementation; do not activate or redesign it
   for this experiment.
@@ -109,15 +116,18 @@ attention output. On later held calls, execute the selected physical blocks with
 the current-step Q/K/V exactly as the existing consumer does. Never carry a
 skipped block's old mass or old value into reused attention.
 
-Do not change layer scope, budgets, sampler behavior, refresh timing, output
-renormalization, protections, cache layout, or CUDA graph policy to rescue a
-selector. Do not merge a peer branch. Do not rewrite the experiment around a
-new local kernel.
+Do not change layer scope, the current-control/V3 budgets, sampler behavior,
+refresh timing, output renormalization, protections, cache layout, or CUDA
+graph policy to rescue a selector. V1/V2 use the matched-sparsity threshold
+calibration below. Do not merge a peer branch or rewrite the experiment around
+a new local kernel.
 
 ## Baselines and named variants
 
-At minimum, implement and report these arms using the same frozen budget and
-reuse configuration as the current control:
+At minimum, implement and report these arms using the same frozen reuse
+configuration as the current control. Keep its fixed budget for the current
+control and V3 arms; calibrate V1/V2 thresholds to match its achieved physical
+GLOBAL sparsity:
 
 1. `dense_full_fix51994`: native vLLM FULL dense baseline with the exact
    DiffusionGemma mask fix corresponding to upstream PR #51994.
@@ -201,7 +211,9 @@ rho_j=\operatorname{Agg}_i\left(
 $$
 
 Higher `rho_j` favors retention. Both variants use identical ordering,
-aggregation, quota, protected-block policy, and fixed budget.
+aggregation, threshold, and protected-block policy. They are threshold-based
+online selectors; do not turn them into fixed top-k or quota-constrained
+selectors.
 
 For V1, a retained block updates:
 
@@ -226,13 +238,25 @@ leaving an unnormalized numerator unchanged is wrong. V2 is only a routing
 surrogate. It does not make the later masked attention operator mass-preserving.
 
 Force the first valid support before a previous output can approximate a block.
-Use the existing budget policy when available. Otherwise use a causal quota:
-reserve mandatory slots, apply the original threshold while optional slots
-remain, force skip when no optional slot remains, and force keep when all
-remaining blocks are needed to fill the quota. Calibrate/freeze thresholds only
-with the existing development procedure. Report forced-keep and forced-skip
-rates. Do not compute a state-dependent score trajectory and then replace it by
-an unrelated retrospective top-k mask while calling it online selection.
+For each V1/V2 arm, calibrate one uniform GLOBAL threshold on the existing
+development procedure so its measured physical GLOBAL sparsity matches the
+current v31 control's measured physical GLOBAL sparsity under the same tile
+eligibility and accounting convention. Use that one threshold across all five
+GLOBAL layers and every initial/refresh call; do not fit per-layer, per-step,
+or per-canvas thresholds. Preserve strict threshold-tie and mandatory-support
+behavior from the existing value-aware implementation. Do not add a fixed-k
+quota, retrospective top-k pass, or forced keep/skip decisions to make the
+measured sparsity match. Record the frozen threshold and compare actual
+realized sparsity after evaluation; a requested target is not a result.
+
+Calibrate on permitted development data and freeze the threshold before the
+target benchmark. Report the calibration cohort and any transductive use of
+evaluation trajectories. If full generation is needed to estimate achieved
+sparsity because the selector changes denoising trajectories, do that only on
+development items and keep it separate from target results. Do not use target
+answers or target accuracy to tune the threshold. Get the reference sparsity
+from completed, audited current-control receipts, not its configured token
+budget.
 
 ## V3: full-support selectors matching masked attention
 
@@ -277,8 +301,9 @@ $$
 
 Retain the `k` largest scores, respecting mandatory blocks and row-support
 constraints. Compute these scores once; do not recompute them after each
-deletion. A deletion that leaves a valid row without support is inadmissible,
-not a finite score obtained by denominator clamping.
+deletion. V3a follows its fixed-k objective; do not apply the V1/V2 threshold
+calibration to V3a. A deletion that leaves a valid row without support is
+inadmissible, not a finite score obtained by denominator clamping.
 
 ### V3b: cumulative backward greedy pruning
 
@@ -322,10 +347,17 @@ Optimize selector/discovery statistics without changing their definitions:
 
 - Reuse `v31_fa4_observe.py`, existing stable reductions, Gaussian projection
   code, and compatible Triton/CUDA paths where possible.
+- Inspect the prior Hopper Gaussian32 implementation listed above before
+  designing a new kernel. Reuse or adapt its fused online softmax, projected-V
+  statistics, row-wise risk, and physical-tile vote where compatible with the
+  cross-step adapter. Benchmark the adaptation against a trusted reference;
+  kernel reuse does not relax V1/V2 state-update semantics.
 - Avoid full token attention matrices, Python loops over every candidate,
   per-candidate CPU/GPU synchronization, and host-side mask construction.
 - V1/V2's sequential state dependency may be implemented as a GPU scan or a
-  fused/batched kernel, but its decisions must match the exact reference.
+  fused/batched kernel, but its decisions must match the exact reference and
+  uniform-threshold decision rule. Keep threshold calibration outside clean
+  timing runs.
 - V3a should reuse one full-support summary pass.
 - V3b must use cached `alpha`, `c`, `g`, `A`, and `r`; each greedy iteration
   scores candidate removals from these small summaries.
@@ -344,7 +376,9 @@ Add focused tests and run the relevant existing tests. At minimum verify:
 - V1 excludes skipped mass; V2 includes skipped mass but leaves its normalized
   routing output unchanged on a skip, including when the running max changes.
 - The first valid support, strict threshold ties, mandatory blocks, partial
-  tiles, empty rows, invalid scores, GQA mapping, and fixed-k quota are correct.
+  tiles, empty rows, invalid scores, GQA mapping, and threshold-based GLOBAL
+  sparsity accounting are correct. Separately test fixed-k behavior for V3a/V3b
+  where applicable.
 - Identity projection agrees with a direct full-dimensional formula reference.
 - V3a and V3b match direct masked-attention recomputation in sketch space.
 - Optimized V3b equals exact V3b when approximation features are disabled.
@@ -401,9 +435,10 @@ For every arm, benchmark, and pooled matched comparison, report:
 - end-to-end request time `W` including prefill and decode, plus dense/sparse
   speedup `W_dense / W_sparse`;
 - decode-only time `S` and speedup, with the same matched cell set;
-- initial/refresh/held-call counts, carry/reselection counts, forced-keep and
-  forced-skip rates, fallback/invalid-row counts, and C_gate counters if the
-  existing control exposes them;
+- initial/refresh/held-call counts, carry/reselection counts, frozen V1/V2
+  thresholds, achieved GLOBAL sparsity relative to the current control,
+  fallback/invalid-row counts, and C_gate counters if the existing control
+  exposes them;
 - selection/discovery latency, peak memory, candidate evaluations, and the
   amortized cost under the actual refresh/reuse schedule;
 - retained attention mass, mask overlap, fresh-mask versus reused-mask error by

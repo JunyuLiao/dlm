@@ -6,7 +6,8 @@ import torch
 
 from experiments.numerical_qk_reuse.v31_value_selectors import (
     Stats, SELECTORS, statistics_reference, online_reference, full_support,
-    masked_output, singleton_reference, greedy_reference, select, mandatory_map)
+    masked_output, singleton_reference, greedy_reference, select, mandatory_map,
+    mass_anchor_map)
 
 
 def small(means, log_mass=None, prefix=None):
@@ -42,6 +43,23 @@ def test_v2_skip_changes_running_max_but_not_normalized_output():
     assert lm.item() == pytest.approx(100.)
     _, _, discard_lm, _ = online_reference(s, 0.1, False)
     assert discard_lm.item() == 0.
+
+
+def test_mass_anchor_adds_only_top_native_mass_tiles():
+    s = small([0., 1., 2., 3.], [0., 4., 1., -2.], prefix=4)
+    got = mass_anchor_map(s, 2)
+    assert got.tolist() == [[False, True, True, False]]
+    mandatory = torch.tensor([[True, False, False, False]])
+    assert mass_anchor_map(s, 99, mandatory).tolist() == [[True, True, True, True]]
+
+
+def test_online_row_weight_protects_unsettled_rows():
+    s = Stats(torch.zeros(1, 3, 2), torch.tensor([[[[0.], [0.]], [[0.5], [0.5]], [[0.], [0.]]]]),
+              torch.ones(1, 2), torch.zeros(1, 3, 2, dtype=torch.bool), 3, 1, 1)
+    plain, *_ = online_reference(s, 1.0, True)
+    weighted, *_ = online_reference(s, 1.0, True, row_weight=torch.tensor([[1., 5.]]))
+    assert not plain[0, 1]
+    assert weighted[0, 1]
 
 
 def test_future_mass_does_not_underflow_first_support():
@@ -166,6 +184,27 @@ def test_same_mask_has_same_native_operator_for_all_selector_states():
     assert torch.equal(direct_output(s, v1[0]), direct_output(s, v2[0]))
 
 
+@pytest.mark.parametrize('selector', [SELECTORS[5], SELECTORS[6], SELECTORS[7], SELECTORS[9], SELECTORS[11]])
+def test_fixed_mass_gated_selectors_keep_equal_qblock_budget(selector):
+    # The value scores may change which tiles are retained, but never how many
+    # prefix tiles a 128-row unit owns.  This is the C_gate/SM-balance invariant.
+    s = small([0., 2., 8., 1.], [0., 3., 2., -1.], prefix=4)
+    got, meta = select(s, selector, budget=2, threshold=.027, swap_count=1,
+                       row_weight=torch.tensor([[1.]]))
+    assert got.shape == (1, 1, 1, 4)
+    assert int(got[0, 0, 0, :4].sum()) == 2
+    assert meta['fixed_budget'] == 2
+
+
+def test_intersection_selector_cannot_add_outside_v2_support():
+    s = small([0., 3., 2., 1.], [0., 4., 2., -1.], prefix=4)
+    got, _ = select(s, SELECTORS[11], budget=3, threshold=.027)
+    v2, *_ = online_reference(s, .027, True)
+    mass, *_ = select(s, SELECTORS[5], budget=3, threshold=.027)
+    assert not bool((got & ~(v2 | mandatory_map(s))).any())
+    assert not bool((got & ~mass).any())
+
+
 @pytest.mark.parametrize('cuda', [False, True])
 @pytest.mark.parametrize('selector,wanted', [
     (SELECTORS[2],[True,False,True,False,True]),
@@ -197,6 +236,15 @@ def test_adapter_value_scope_guard():
     for extra in (dict(local_kv_budget=512), dict(mage_keep_frac=.1), dict(mage_pool=2)):
         with pytest.raises(ValueError):
             VllmMethodAdapter(types, **(options | extra))
+    weighted = VllmMethodAdapter(types, **(options | dict(
+        mage_row_weight='jcgate', mage_select_step=1, mage_reselect_trigger=(.15,), mage_trigger_signal='settle')))
+    assert weighted.mage_row_weight == 'jcgate'
+    fixed = VllmMethodAdapter(types, **(dict(arm='mage', mage_select='fa4', mage_granularity='qblock_max',
+                                               value_selector=SELECTORS[5], value_threshold=.027,
+                                               mage_select_step=1, mage_reselect_trigger=(.15,),
+                                               mage_trigger_signal='settle', value_swap_count=16,
+                                               value_pool_factor=2, mage_row_weight='cgate')))
+    assert fixed.value_swap_count == 16 and fixed.mage_row_weight == 'cgate'
 
 
 def test_native_local_audit_uses_actual_decode_window_rectangles():

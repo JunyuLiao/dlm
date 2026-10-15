@@ -38,3 +38,14 @@ results/v31_value_selectors_20261008/development/current_v31_control/attempt001/
 results/v31_value_selectors_20261008/scoring/**/official.binding.json
 results/v31_value_selectors_20261008/scoring/**/official.judge_and_finished.json
 results/v31_value_selectors_20261008/scoring/**/official.official.json
+
+# Research inputs, raw generations, caches and tensor snapshots stay local.
+# Public aggregates are explicitly selected; never add a campaign wholesale.
+results/**/private/
+results/**/cache/
+results/**/*.private.jsonl
+results/**/*.pt
+results/**/*.npy
+results/**/*.npz
+results/**/*.pid
+results/**/*.log

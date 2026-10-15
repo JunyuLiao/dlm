@@ -12,7 +12,18 @@ import torch
 
 SELECTORS = ('value_v1_online_discard_mass', 'value_v2_online_preserve_mass',
              'value_v3a_singleton_delete', 'value_v3b_greedy_exact',
-             'value_v3b_approx_batch8')
+             'value_v3b_approx_batch8',
+             # Fixed-budget hybrids.  The first step is always the exact
+             # native-mass qblock budget; value information is only allowed
+             # to swap tiles inside that budget.  ``full`` uses the exact
+             # final-output omission score, while ``online`` uses the V2
+             # running residual.  Intersection arms intentionally keep only
+             # tiles present in both the mass and online V2 maps.
+             'value_mass_gated_online', 'value_mass_gated_full',
+             'value_mass_gated_online_phase', 'value_mass_gated_full_phase',
+             'value_mass_gated_online_cgate', 'value_mass_gated_full_cgate',
+             'value_intersection_online', 'value_intersection_full')
+FIXED_SELECTORS = SELECTORS[5:]
 EPS = 1e-12
 
 
@@ -94,7 +105,36 @@ def mandatory_map(stats, sink=0, recent_tiles=0):
     return keep
 
 
-def online_reference(stats, threshold, preserve_mass=False, mandatory=None, held=None, sticky=0.):
+def mass_anchor_map(stats, count, mandatory=None):
+    """Return mandatory tiles plus the top ``count`` native-mass tiles.
+
+    The online value selector sees a projected value direction, while V31's
+    control observes the exact attention mass.  This helper carries a small
+    amount of that reliable mass ordering into the online selector.  Anchors
+    are extra protections; they do not change the online state or impose a
+    fixed budget.
+    """
+    keep = mandatory_map(stats) if mandatory is None else mandatory.clone()
+    count = max(0, int(count))
+    pt = stats.prefix_tiles
+    if count == 0 or pt == 0:
+        return keep
+    z = stats.log_mass[:, :pt]
+    denom = torch.logsumexp(z, dim=1, keepdim=True)
+    share = z - torch.where(torch.isfinite(denom), denom, torch.zeros_like(denom))
+    score = share.amax(-1)
+    eligible = stats.valid[:, :pt].any(-1)
+    score = score.masked_fill(~eligible | keep[:, :pt], -math.inf)
+    k = min(count, pt)
+    order = torch.argsort(score, dim=-1, descending=True, stable=True)[:, :k]
+    finite = torch.isfinite(score.gather(1, order))
+    added = torch.zeros_like(keep[:, :pt])
+    added.scatter_(1, order, finite)
+    keep[:, :pt] |= added
+    return keep
+
+
+def online_reference(stats, threshold, preserve_mass=False, mandatory=None, held=None, sticky=0., row_weight=None):
     """Exact sequential V1/V2, no quota. Skip iff log(rho)+sticky < log(threshold).
 
     V2 advances log Z on skips and leaves the NORMALIZED output unchanged.
@@ -122,6 +162,14 @@ def online_reference(stats, threshold, preserve_mass=False, mandatory=None, held
         delta = stats.mean[:, j]-output
         rho = eta * delta.norm(dim=-1) / stats.nu.clamp_min(EPS)
         log_rho = torch.where(active, rho.log(), -math.inf).amax(-1)
+        if row_weight is not None:
+            weight = row_weight.to(rho.dtype).clamp_min(0.)
+            weighted = rho * weight
+            weighted_log = torch.where(active & (weight > 0), weighted.log(), -math.inf).amax(-1)
+            # If every row is already settled, retain the unweighted guard so
+            # a whole unit cannot become unprotected by a zero C-gate weight.
+            live = (active & (weight > 0)).any(-1)
+            log_rho = torch.where(live, weighted_log, log_rho)
         risks[:, j] = log_rho
         first = (active & ~support).any(-1)
         take = active.any(-1) & (mandatory[:, j] | first | bad |
@@ -248,16 +296,153 @@ def greedy_reference(stats, budget, mandatory=None, held=None, sticky=0., batch=
     return keep, evaluations
 
 
-def select(stats, selector, *, budget, threshold=None, mandatory=None, held=None, sticky=0.):
+def _mass_score(stats):
+    """Exact native-mass score used to build a fixed qblock budget."""
+    pt = stats.prefix_tiles
+    z = stats.log_mass[:, :pt]
+    denom = torch.logsumexp(z, dim=1, keepdim=True)
+    share = z - torch.where(torch.isfinite(denom), denom, torch.zeros_like(denom))
+    score = share.amax(-1)
+    return score.masked_fill(~stats.valid[:, :pt].any(-1), -math.inf)
+
+
+def _fixed_base(stats, budget, mandatory, score):
+    """Choose exactly the control-sized prefix set, preserving mandatory tiles."""
+    u, jt, _ = stats.log_mass.shape
+    pt = stats.prefix_tiles
+    eligible = stats.valid.any(-1)
+    keep = mandatory.clone()
+    target = eligible[:, :pt].sum(-1).clamp_max(max(0, int(budget)))
+    for unit in range(u):
+        required = mandatory[unit, :pt] & eligible[unit, :pt]
+        if int(required.sum()) > int(target[unit]):
+            raise ValueError('mandatory support exceeds fixed prefix budget')
+        order_score = score[unit, :pt].clone()
+        order_score[required] = math.inf
+        order_score[~eligible[unit, :pt]] = -math.inf
+        need = int(target[unit])-int(required.sum())
+        if need:
+            order = torch.argsort(order_score, descending=True, stable=True)[:need]
+            keep[unit, order] = torch.isfinite(order_score[order])
+        keep[unit, :pt] |= required
+    return keep, eligible, target
+
+
+def _fixed_value_score(stats, selector, threshold, row_weight=None, held=None, sticky=0.):
+    """Return a score where larger means a tile is more useful to retain."""
+    full = selector.endswith('_full')
+    if full:
+        alpha, contribution, output, g = full_support(stats)
+        a = alpha.sum(1)
+        residual = g.sum(1)
+        score = deletion_scores(stats, alpha, g, a, residual)[:, :stats.prefix_tiles]
+        score = score.masked_fill(~stats.valid[:, :stats.prefix_tiles].any(-1), -math.inf)
+        if row_weight is not None:
+            weight = row_weight.to(score.dtype).clamp_min(0.)
+            remain = (a[:, None]-alpha).clamp_min(torch.finfo(a.dtype).tiny)
+            err = (residual[:, None, :]-g).norm(dim=-1) / (remain*stats.nu[:, None].clamp_min(EPS))
+            score = (err * weight[:, None]).amax(-1)[:, :stats.prefix_tiles]
+            score = score.masked_fill(~stats.valid[:, :stats.prefix_tiles].any(-1), -math.inf)
+        if held is not None and sticky:
+            score = score * torch.exp(sticky*held[:, :stats.prefix_tiles].to(score.dtype))
+        return score
+    if threshold is None:
+        raise ValueError('fixed online selectors require the frozen V2 threshold')
+    _, _, _, score = online_reference(stats, threshold, preserve_mass=True,
+                                      mandatory=torch.zeros_like(stats.log_mass, dtype=torch.bool)[:, :, 0],
+                                      held=held, sticky=sticky, row_weight=row_weight)
+    return score[:, :stats.prefix_tiles]
+
+
+def fixed_mass_reference(stats, selector, *, budget, threshold=None, mandatory=None,
+                         held=None, sticky=0., row_weight=None, pool_factor=2,
+                         swap_count=0, intersection=None):
+    """CPU oracle for fixed-budget mass-gated and intersection selectors.
+
+    The mass support is built first, so every 128-row unit owns the same
+    prefix budget.  Value scores may replace at most ``swap_count`` tiles;
+    this prevents C_gate or a sensitivity predictor from silently changing
+    the SM workload.  ``intersection`` is an explicit support mask used by
+    the exploratory control/V2 intersection arms.
+    """
+    if selector not in FIXED_SELECTORS and selector not in ('value_mass_gated_online', 'value_mass_gated_full'):
+        raise ValueError(selector)
+    pt = stats.prefix_tiles
+    mandatory = mandatory_map(stats) if mandatory is None else mandatory.clone()
+    mass = _mass_score(stats)
+    base, eligible, target = _fixed_base(stats, budget, mandatory, mass)
+    score = _fixed_value_score(stats, selector.replace('value_intersection_', 'value_mass_gated_'), threshold,
+                               row_weight, held, sticky)
+    if selector.startswith('value_intersection_') and intersection is None:
+        zero = torch.zeros_like(stats.log_mass, dtype=torch.bool)[:, :, 0]
+        intersection, _, _, _ = online_reference(stats, threshold, preserve_mass=True, mandatory=zero,
+                                                  held=held, sticky=sticky, row_weight=row_weight)
+    if intersection is not None:
+        # The exploratory arm is the actual V31-control/V2 support
+        # intersection.  Restricting only to V2 would answer a different
+        # question and would also diverge from the CUDA path.
+        allowed = intersection[:, :pt].bool() & base[:, :pt] & eligible[:, :pt]
+        keep = mandatory.clone()
+        for unit in range(keep.shape[0]):
+            req = mandatory[unit, :pt] & allowed[unit]
+            take = min(int(target[unit]), int(allowed[unit].sum()))
+            rank = score[unit].masked_fill(~allowed[unit] | req, -math.inf)
+            order = torch.argsort(rank, descending=True, stable=True)[:max(0, take-int(req.sum()))]
+            keep[unit, order] = torch.isfinite(rank[order])
+            keep[unit, :pt] |= req
+        keep[stats.invalid.any((1, 2))] = True
+        return keep, {'candidate_evaluations': int(stats.shape[0] if hasattr(stats, 'shape') else stats.log_mass.shape[0]*pt),
+                      'kernel': 'cpu_fixed_mass_intersection', 'fixed_budget': int(budget)}
+    pool = min(pt, max(int(budget), int(budget)*max(1, int(pool_factor))))
+    pool_mask = torch.zeros_like(base)
+    if pool:
+        pscore = mass.clone()
+        pscore[:, pool:] = -math.inf
+        pool_mask[:, :pt] = torch.isfinite(pscore)
+    pool_mask |= base
+    swaps = max(0, int(swap_count))
+    for unit in range(base.shape[0]):
+        add = pool_mask[unit, :pt] & ~base[unit, :pt] & eligible[unit, :pt]
+        rem = base[unit, :pt] & ~mandatory[unit, :pt]
+        if not swaps or not bool(add.any()) or not bool(rem.any()):
+            continue
+        add_order = torch.argsort(score[unit, :pt].masked_fill(~add, -math.inf), descending=True, stable=True)
+        rem_order = torch.argsort(score[unit, :pt].masked_fill(~rem, math.inf), descending=False, stable=True)
+        for ai, ri in zip(add_order[:swaps].tolist(), rem_order[:swaps].tolist()):
+            if not torch.isfinite(score[unit, ai]) or not torch.isfinite(score[unit, ri]):
+                continue
+            if float(score[unit, ai]) <= float(score[unit, ri]):
+                break
+            base[unit, ri] = False
+            base[unit, ai] = True
+    base[stats.invalid.any((1, 2))] = True
+    return base, {'candidate_evaluations': int(stats.log_mass.shape[0]*pt),
+                  'kernel': 'cpu_fixed_mass_gated', 'fixed_budget': int(budget),
+                  'pool_factor': int(pool_factor), 'swap_count': swaps}
+
+
+def select(stats, selector, *, budget, threshold=None, mandatory=None, held=None, sticky=0., row_weight=None,
+           pool_factor=2, swap_count=0, intersection=None):
     if selector not in SELECTORS:
         raise ValueError(selector)
     if selector in SELECTORS[:2] and threshold is None:
         raise ValueError('V1/V2 require a frozen uniform GLOBAL threshold')
     if stats.log_mass.is_cuda:
         from .v31_value_kernels import select_cuda
-        return select_cuda(stats, selector, budget, threshold, mandatory, held, sticky)
+        return select_cuda(stats, selector, budget, threshold, mandatory, held, sticky, row_weight,
+                           pool_factor, swap_count, intersection)
+    if selector in FIXED_SELECTORS:
+        phase = selector.endswith('_phase')
+        base_selector = selector.replace('_phase', '').replace('_cgate', '')
+        # C_gate is a fixed-budget reallocation, not a threshold multiplier.
+        keep, meta = fixed_mass_reference(stats, base_selector, budget=budget, threshold=threshold,
+                                          mandatory=mandatory, held=held, sticky=sticky,
+                                          row_weight=row_weight, pool_factor=pool_factor,
+                                          swap_count=(0 if phase and held is None else swap_count),
+                                          intersection=intersection)
+        return keep.reshape(1, stats.heads, stats.blocks, -1), meta
     if selector in SELECTORS[:2]:
-        keep, _, _, _ = online_reference(stats, threshold, selector == SELECTORS[1], mandatory, held, sticky)
+        keep, _, _, _ = online_reference(stats, threshold, selector == SELECTORS[1], mandatory, held, sticky, row_weight)
         evaluations = stats.log_mass.shape[0]*stats.log_mass.shape[1]
     elif selector == SELECTORS[2]:
         keep, _ = singleton_reference(stats, budget, mandatory, held, sticky)

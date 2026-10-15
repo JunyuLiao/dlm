@@ -15,6 +15,20 @@ attention computation. Sparsity is applied only to eligible physical
 H100/SM90 research implementation; skipped-tile counts do not by themselves
 establish end-to-end speedup.
 
+## This week's cross-step-reuse research
+
+The 2026-10-15 publication separates three directions, each with formulas,
+implementation files, evidence limits, integration and reproduction commands:
+
+1. [Value-aware V1/V2/V3 methods](docs/research_week_20261015/01_VALUE_AWARE_METHODS.md).
+2. [V2 threshold calibration and absolute-work accounting](docs/research_week_20261015/02_V2_THRESHOLD_CALIBRATION.md).
+3. [Cheap cached refresh, stable updates and factor isolation](docs/research_week_20261015/03_CHEAP_CACHED_REFRESH.md).
+
+[Sanitized evidence and source hashes](results/research_week_20261015/README.md)
+accompany the implementation. The V2 local sweep remains user-paused; the newer
+full503 refresh study has a generation checkpoint, not a final accuracy result.
+Clean timing remains paused. Read `HANDOFF.md` for campaign-specific status.
+
 ## Method
 
 For a value vector $v_k$, Gaussian32 constructs a fixed sketch
