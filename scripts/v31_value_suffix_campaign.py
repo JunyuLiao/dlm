@@ -93,6 +93,10 @@ def prepare(study, suite='longbench_v2', panel='qualification'):
         substrate_limit='Eager model diagnostics use common identical eager states, not production compiled V31 states. Production accuracy requires fresh compiled controls.',
         cli_mode='PIECEWISE is required by inherited adapter CLI; diagnostic wrapper explicitly sets enforce_eager, compilation mode0 and actual graph NONE',
         full_accuracy='not automatically launched by this qualifier')
+    pins=io.ROOT/'results/v31_v2_local_threshold_sweep_20261014_attempt002'
+    protocol['runtime_pins']=io.read(pins/'protocol.json')['runtime']
+    shutil.copyfile(pins/'model_source_fingerprints.json',study/'model_source_fingerprints.json')
+    protocol['model_inventory_sha256']=io.sha(study/'model_source_fingerprints.json')
     if panel=='decisions':
         protocol['instrumentation_parent_sha256']=io.sha(qualification/'qualification_complete.json')
     shutil.copyfile(Path(__file__),study/'coordinator_source.py')
@@ -104,6 +108,8 @@ def verify(study):
     protocol=io.read(study/'protocol.json')
     if 'coordinator_sha256' in protocol and io.sha(study/'coordinator_source.py')!=protocol['coordinator_sha256']:
         raise RuntimeError('frozen coordinator drift')
+    if 'model_inventory_sha256' in protocol and io.sha(study/'model_source_fingerprints.json')!=protocol['model_inventory_sha256']:
+        raise RuntimeError('model inventory drift')
     for rel,digest in protocol['source_sha256'].items():
         if io.sha(study/'private/execution'/rel)!=digest:
             raise RuntimeError('frozen executable source drift')
@@ -133,6 +139,10 @@ def idle():
 
 def run(study):
     protocol=verify(study)
+    if 'runtime_pins' in protocol:
+        from scripts.v31_v2_local_threshold_sweep import runtime_identity
+        if runtime_identity()!=protocol['runtime_pins']:
+            raise RuntimeError('pinned runtime/host/GPU changed')
     last=time.monotonic(); free_since=None
     while True:
         parent_done=(study.parent/'whole_layer/operator_complete.json').exists()
