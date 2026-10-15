@@ -2104,3 +2104,30 @@ single diagnostic runtime factor before attributing the effect to compilation
 or MoE; unchanged sampler and compiled model path, two original processes,
 observed/unobserved repeat qualification. Preserve failed observer004 and all
 completed native panels. Any repaired runtime requires fresh matched controls.
+
+### 2026-10-15: Qualify comparisons within a common compiled engine
+
+The fixed cuBLAS workspace factor did not restore process repeatability.
+Attempt007's finer observer captured no matrix-operation Python boundaries
+under graph replay; its20 visible autotuner objects cover sampler-side kernels,
+not all cached model kernels. No particular runtime defect is established.
+
+Native_interleaved_attempt001 passes both frozen sequences. Engine1's five
+V31 controls and four inactive candidates all reproduce the54-call trajectory.
+Engine2's five V31 controls all reproduce the101-call trajectory despite
+intervening active candidates (102,99,101,98 calls for full swaps, direction
+guard, raw residual, combined). This is execution qualification on one
+previously examined cell, not an accuracy result. It supports an incremental
+comparison within each common engine while leaving cross-process variation
+unresolved. All original AIME accuracy results remain interpretation-held.
+
+The replacement panel will use the same frozen input cohorts and four
+promoted methods, per-cell V31 control bookends, rotated candidate order, and
+fresh independent dense FULL/PIECEWISE/all-kept references. Engine counts are
+10 AIME,8 LongBench,10 MATH,13 RULER shards, with equal-size blocks. Report
+process-cluster sensitivity alongside problem/task-cluster intervals. Preserve
+all prior attempts; use a separately named protocol and source recipe. All
+four workload smoke gates (active exposure, control bookends, inactive parity
+where observed, exact budgets, scope and scorer binding) precede expansion.
+No accuracy, denoising-trajectory benefit, or speedup follows from the single-
+cell qualification. Clean timing remains paused.
