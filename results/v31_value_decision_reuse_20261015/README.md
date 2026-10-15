@@ -94,3 +94,30 @@ PYTHONPATH=src:. /home/exouser/dyh/v31_env_20261005/bin/python \
 
 Follow `coverage_state.json`; inspect about every30 minutes. Native accuracy
 and timing remain gated/paused respectively.
+
+Coverage is complete. See `coverage_complete.json`, `coverage_analysis.json`
+and the concrete inclusion decision `native_inclusion.md`. The native panel
+contains full_swap8, residual_direction_guard, raw residual as the cache
+ablation, and full_swap8_direction_guard, alongside four fresh controls.
+
+`native_development_attempt002/protocol.json` is frozen from79c994ca, with
+71 passing exact-source H100 tests. Preparation001 remains unlaunched and
+superseded after correcting inherited sampler metadata labels. Actual pinned
+defaults are confidence_threshold0.005,entropy_bound0.1 and48 denoising steps;
+thinking/output limits remain per-input. Native operators are unchanged by
+that metadata correction. Inspect `native_development_attempt002/state.json`.
+
+Run/resume the frozen native coordinator (not a later mutable root copy):
+
+```
+study=/home/exouser/ljy/dlm/results/v31_value_decision_reuse_20261015/native_development_attempt002
+PYTHONPATH="$study/private/execution/src:$study/private/execution" \
+  /home/exouser/dyh/v31_env_20261005/bin/python \
+  "$study/private/execution/scripts/v31_value_native_study.py" \
+  --stage run --study "$study"
+```
+
+The coordinator must complete sparse execution/official-scoring smokes before
+the development panels. All completed attempts are verified before reuse;
+failed/partial workers receive new attempt directories. Clean timing stays
+paused, and full503 remains gated on completed native development results.
