@@ -1,5 +1,25 @@
 ## Value decision/reuse refinement — 2026-10-15, native parity investigation
 
+Latest22:55 UTC: all24 AIME shards are complete; coordinator1799129 is
+SIGSTOP-held with no LongBench panel launched. Its mutable state now records
+`held_repeatability_audit`. Official AIME scoring is complete under
+`workload_checkpoints/aime26/attempt001/`, with an interpretation-hold sidecar.
+Do not promote or claim method gains from these scores yet.
+
+Native_noop_attempt001 is complete: each process repeats its identical seed
+exactly, but two original V31 processes use54 versus66 calls (1358 versus1646
+tokens). The third full-swap process used81 calls and activated106 swaps, so
+it is not a no-op comparator. Native_noop_attempt002 pins PYTHONHASHSEED=0;
+its original V31 processes still differ,75 versus86 calls. That hypothesis
+does not resolve process repeatability. Attempt002 is finishing its fourth
+job. Native_noop_attempt003, source56b06d1b and config63858260, is frozen and
+queued after002. It records private RNG/canvas/logit snapshots on the first
+two denoise calls of the first measured request in two original V31 processes.
+The second measured request is unobserved and must reproduce the first within
+each process, qualifying the observer itself. No sampler changes or extra
+model calls are introduced. Next: localize random-state versus numerical
+output divergence, then qualify a repair before further native expansion.
+
 At22:26 UTC a new no-op exposure audit found inactive-trial output/N/C/T
 differences versus V31 in the completed first two AIME shards. Inputs,seeds,
 budgets and named native settings match. Counts are4/4 inactive trials for
