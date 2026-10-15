@@ -31,7 +31,7 @@ repetitions of diagnostics-disabled versus diagnostics-active native generation.
 It must reproduce native suffix logits and native output hashes/N/T, preserve
 RNG and adapter counters, and report extra suffix calls separately. It tests
 only the final GLOBAL layer and cannot qualify earlier-layer native changes.
-Live state and immutable attempts are in `suffix_qualification/state.json`.
+The first two suffix attempts failed before generation (constructor signature, then an unsupported fullgraph compiler-disable boundary). Both are retained. Attempt003 uses two explicit identity-copy split operators, and a fresh source/protocol freeze; live state is in `suffix_qualification_attempt003/state.json`. A causal value-residual trust replay is queued ahead of this attempt under `reuse_guard/`. The expanded operator/merge/lifecycle suite passes all 50 H100 tests. Native implementation is opt-in, final-layer-only, and refuses launch without a passed decision-gate receipt.
 No native accuracy panel is launched; timing remains paused. Next: resolve
 qualification, assess deterministic logit/acceptance/stop effects, then promote
 only supported candidates under the committed plan.
