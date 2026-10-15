@@ -1,36 +1,43 @@
-## Value decision/reuse refinement — 2026-10-15, native parity investigation
+## Value decision/reuse refinement — 2026-10-15, process-matched qualification
 
-Verified source60d9f21f: native_noop_attempt005 is complete. Both original
-V31 processes reproduce their observed request exactly when repeated without
-observation, yet differ across processes (54 vs94 calls). First-call RNG and
-canvas match, while31/256 logit argmax rows differ. All30 selected parameter/
-buffer fingerprints match (embedding, layer0, self-conditioning; not a whole-
-model weight audit). Layer0 Q/K/V and attention output match exactly in both
-prefill and decode. Tiny differences first appear at layer1's inputs and
-amplify through later layers. The first observed divergence therefore lies
-between layer0 attention output and layer1 attention input; this does not
-identify a particular projection, norm, MoE kernel, or compiler defect yet.
-Block-table addresses differ across processes, as physical allocation may;
-layer0 attention nevertheless matches. Full sanitized comparison is under
-native_noop_attempt005/rng_localization/. No sampler change or extra forward.
+Latest23:42 UTC. Native_interleaved_attempt001 is running, frozen from
+ea489245 with configcbb4b8e0. It alternates original V31 control and the four
+promoted refinement arms on the same AIME item15/seed44 in one engine, then
+repeats in a second engine. All five controls per engine and all inactive
+candidates must match exactly. Five focused request-switching tests pass.
+The worker restores the original bound V31 method for controls, resets all
+request state, and writes explicit request-arm/index receipts. This is a
+qualification diagnostic, not an accuracy panel. If it passes, qualify active
+and inactive cases on every workload before freezing a new paired campaign.
+Do not resume the old native coordinator or mix its scores into new results.
 
-Attempts001–003 establish within-process repeatability but cross-process
-variation. PYTHONHASHSEED=0 did not resolve it. Attempt003 localized logits
-before random-state divergence;005 localizes the early layer interval.
-Attempt004 failed before measured generation on scalar buffer hashing; its
-receipt is preserved, and005 uses the corrected observer.
+Original V31 within-process repeats are exact, but separate processes differ.
+A fixed PYTHONHASHSEED and fixed CUBLAS_WORKSPACE_CONFIG=:4096:8 both fail to
+remove the discrepancy. Fixed-workspace attempt006 uses88 vs81 denoise calls;
+first-call RNG/canvas agree but95/256 logit argmax rows differ. Attempt007
+uses86 vs101 calls and54 first-call argmax disagreements. Both qualified their
+observers using exact observed/unobserved repeats. Attempt007 captured no
+per-operation Python boundaries because the model uses CUDA graph replay.
+Its20 Python-visible autotuner objects match, but do not cover cached model
+kernels; see trace_scope_note.json. No root cause or runtime repair established.
 
-All24 AIME shards (720 trials) are complete. Coordinator1799129 remains
-SIGSTOP-held with no LongBench panel launched. Mutable state records
-held_repeatability_audit. Official AIME scoring is complete under
-workload_checkpoints/aime26/attempt001/, with an interpretation-hold sidecar.
-Do not promote or claim method gains from these scores. The original native
-smoke gate checked activation/configuration/scoring but omitted exact
-same-seed process repeatability. Same-state eager evidence is separately
-qualified. Next smallest factor test: a frozen two-process original-V31
-repeat with CUBLAS_WORKSPACE_CONFIG=:4096:8, retaining compiled execution and
-the qualified read-only observer. This is a diagnostic runtime factor, not
-an asserted fix. Other campaigns and clean timing remain paused.
+Completed attempt005 localizes the first observed difference: layer0 Q/K/V
+and attention output match exactly for both prefill and decode, while tiny
+differences appear by layer1 inputs and amplify through later layers. All30
+selected parameter/buffer fingerprints match (embedding, layer0 and self-
+conditioning only; not a whole-model weight audit). Attempt004 failed before
+measured generation on scalar hashing and is preserved;005 fixed that observer.
+The diagnostic does not identify a particular projection, norm, MoE kernel,
+or compiler defect. All source-matched same-state eager evidence remains
+separately qualified.
+
+All24 original AIME shards (720 trials) are complete. Coordinator1799129
+remains SIGSTOP-held, with no LongBench panel launched; state records
+held_repeatability_audit. Official AIME scores are under workload_checkpoints/
+aime26/attempt001 with an interpretation hold. The initial native smoke gate
+checked activation/configuration/scoring but omitted process repeatability.
+No method gains should be claimed from that held panel. Other campaigns and
+clean timing remain paused.
 
 User authorization: design, implement and evaluate the three value directions,
 starting with same-state diagnostics. Fixed per-query-tile budgets and clean
