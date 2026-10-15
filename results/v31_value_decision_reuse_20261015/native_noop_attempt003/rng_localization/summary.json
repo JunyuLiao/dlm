@@ -1,0 +1,86 @@
+{
+  "analysis_source_sha256": "f7d71c53e245821c3ff4509ea33e5579fca1a38157c759f2c8a29bdd798950dc",
+  "diagnostic_complete_sha256": "07ae6ea4eb144cfe75fc9b2a0cc22fb5237a0542ef4e27ae7dadd03151834bf3",
+  "input_sha256": {
+    "original_repeat001/attempt001/attempt_complete.json": "e0c5e52a09ec39d2152a5b92ed12d0ffbdcfe63e385bb6f28e0ef0e3536aaee7",
+    "original_repeat001/attempt001/private/trace/call000.pt": "ac6d8019caf2000c1bf85a4af17d9a8ce0d21547a9e32ed47dfe58c53d740d41",
+    "original_repeat001/attempt001/private/trace/call001.pt": "4205a8e5bb8ed99529868c9bb6d3928014f69608f9adec10c2d8d55cf6da5d6b",
+    "original_repeat002/attempt001/attempt_complete.json": "14bfe71eede3b32105a075989fc2aa1fb96316e8540946c1ed35a492cd372719",
+    "original_repeat002/attempt001/private/trace/call000.pt": "98d9988ba7796431682f9c83acbc4d2c215bb4e7f59c07f32bcf6ffa244d9ba4",
+    "original_repeat002/attempt001/private/trace/call001.pt": "8252051b37f6845428413a0f8804bd880e3ca64d4dc692a1d611de6f2c91dd82"
+  },
+  "observer_qualification": "within-process observed and unobserved repeats are identical",
+  "rows": [
+    {
+      "after": {
+        "argmax_row_disagreements": 30,
+        "canvas_token_disagreements": 0,
+        "cpu_rng_equal": true,
+        "cuda_rng_equal": true
+      },
+      "before": {
+        "canvas_token_disagreements": 0,
+        "cpu_rng_equal": true,
+        "cuda_rng_equal": true
+      },
+      "call": 0,
+      "logits": {
+        "different_finite_values": 66038448,
+        "equal": false,
+        "finite_values": 67108864,
+        "max_abs": 8.339538097381592,
+        "mean_abs": 0.5411910049082959,
+        "nonfinite_pattern_disagreement": 0,
+        "rms": 0.7232583012671971,
+        "top1_row_disagreement": 30
+      },
+      "scaled": {
+        "different_finite_values": 66038448,
+        "equal": false,
+        "finite_values": 67108864,
+        "max_abs": 10.424423217773438,
+        "mean_abs": 0.6764887568627359,
+        "nonfinite_pattern_disagreement": 0,
+        "rms": 0.904072877583319,
+        "top1_row_disagreement": 30
+      }
+    },
+    {
+      "after": {
+        "argmax_row_disagreements": 55,
+        "canvas_token_disagreements": 1,
+        "cpu_rng_equal": true,
+        "cuda_rng_equal": true
+      },
+      "before": {
+        "canvas_token_disagreements": 0,
+        "cpu_rng_equal": true,
+        "cuda_rng_equal": true
+      },
+      "call": 1,
+      "logits": {
+        "different_finite_values": 66543016,
+        "equal": false,
+        "finite_values": 67108864,
+        "max_abs": 11.912215232849121,
+        "mean_abs": 0.9922654312056495,
+        "nonfinite_pattern_disagreement": 0,
+        "rms": 1.2973759350800649,
+        "top1_row_disagreement": 55
+      },
+      "scaled": {
+        "different_finite_values": 66543016,
+        "equal": false,
+        "finite_values": 67108864,
+        "max_abs": 15.047008037567139,
+        "mean_abs": 1.2533878625915693,
+        "nonfinite_pattern_disagreement": 0,
+        "rms": 1.6387905888091945,
+        "top1_row_disagreement": 55
+      }
+    }
+  ],
+  "scope": "two original V31 processes; first two measured denoise calls; no value refinement or extra forward",
+  "status": "complete",
+  "timing": "paused"
+}
