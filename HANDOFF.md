@@ -1,3 +1,37 @@
+## RULER128K seed42 rerun complete — 2026-10-15
+
+The user subsequently authorized a fresh V31 versus V2 tau=0.021 run on the
+same 104 prompts. It is complete under
+`results/v31_v2_ruler128k_seed42_tau021_20261015/`, with official scoring,
+eight complete shards, `final_complete.json` and independent verification.
+Freeze/spec commit: `5859d086`; identical 886-file execution source snapshot
+`ab05d324` for both methods. Native panel seed42; base31 and Gaussian32
+rank32/seed1729 fixed. The old seed-1 tau=0.027 generations are not reused.
+
+Official RULER fractional scores are V31 86.250 and V2 85.769; both have the
+same 81/104 full-credit set. V2-minus-V31 is -0.481 points; 13-task-cluster
+100k-draw bootstrap 95% CI [-1.442,0.000]. The net task-average loss is in
+common-word extraction (70.00 to 63.75). No accuracy gain is established.
+
+V2 uses 586 versus 545 denoising calls (+7.52%), or 5.635 versus 5.240 per
+problem. Both commit one canvas/problem; output tokens are 2,694 versus 2,700.
+The call increase is concentrated in variable tracking (106 versus 61);
+paired calls rise on 11, fall on eight and tie on 85. Median calls are four
+for both methods. GLOBAL kept work is 95,030,781 versus 96,039,360 (-1.05%);
+GLOBAL sparsity 50.33% versus 46.00%, overall 47.98% versus 43.85%.
+Full-support phases dominate retained work. The larger sparsity percentage
+does not imply a material total-work reduction or throughput gain.
+
+Verified all 208 score cells/bindings, source/input hashes, native seed,
+phase/physical sums, unchanged FA4 output, GLOBAL-only routing and four
+qualification repeats. Zero invalid rows, request captures or LOCAL skips.
+Selector discovery/evaluation are 57,019,520 each, separate from consumer
+work; audit wall time is not clean latency. H100 is idle. No other threshold,
+dense arm, timing run or paused campaign was resumed. Reports: `summary.md`,
+`interpretation.md`, `metrics.csv`, `task_scores.csv`, `task_trajectory.csv`,
+`phase_accounting.csv`, `trajectory_distributions.json`, `cost_separation.json`,
+`receipts/independent_verification.json`. Await the user's next experiment.
+
 ## Historical RULER128K report — 2026-10-15, no new generation
 
 The user explicitly chose the existing 104-item panel (8 samples x 13 tasks),

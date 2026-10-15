@@ -1,0 +1,75 @@
+{
+  "arms": [
+    "current_v31_control",
+    "v2_tau_0p021"
+  ],
+  "clean_timing": false,
+  "coordinator_commit": "5859d086e9e395a6aa2b18bb739a608e7dfd2b10",
+  "dataset": "ruler128k_v33ofc_subset",
+  "date": "2026-10-15",
+  "execution_source_commit": "ab05d324773c7a38d60b5c83a2d62e6f575b1cce",
+  "frozen_native": {
+    "canvas": 256,
+    "carry": true,
+    "confidence": 0.1,
+    "denoise_steps": 48,
+    "entropy": 0.005,
+    "mass_anchor": 0,
+    "panel_seed": 42,
+    "progress_trigger": 0.15,
+    "projection_rank": 32,
+    "projection_seed": 1729,
+    "seed_base": 31,
+    "select_step": 1,
+    "stability": 1,
+    "sticky": 1.386,
+    "temperature": [
+      0.8,
+      0.4
+    ],
+    "thinking": false
+  },
+  "items": 104,
+  "items_per_task": 8,
+  "manifest_sha256": "568590e7997c0d43624ed0ea403a42b0ffc5b894393ab2344ebc335a34be54a6",
+  "model_inventory_sha256": "8efd551fa40908fc5747be476cec848be6831fc537679c468c76a1858bf32bf8",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "native_panel_seed": 42,
+  "other_campaigns": "remain paused",
+  "projection_rank": 32,
+  "projection_seed": 1729,
+  "protocol_sha256": "cfeb0c0cfbe24ef8353cb1d22537d94b102c1d06b019215fdf4c4d7c430de1ed",
+  "ruler": {
+    "commit": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a",
+    "sha256": {
+      "scripts/data/synthetic/constants.py": "6296e901d495ec6200dc3f68993ea13d8282e3c0dbe1a8c47967f111105d1fde",
+      "scripts/eval/evaluate.py": "b9a5fcbded7209663d97670496c74dbcd6358ddbe3d9887a0c5f0c4f974bfe1c",
+      "scripts/eval/synthetic/constants.py": "6740467c17b8dc06b6b30f4f97e54ce8de81db0dd879f1538d0b6b5727f4bd5f",
+      "scripts/pred/call_api.py": "949d06ae8a19266c637064c2dd18c7b3d21a0a7064bfc2ac52fe274b84d19e48",
+      "scripts/synthetic.yaml": "34bc71dcacdc41a829a170f04b528fbf48d62c616338005ab4991680fbf8cb0b"
+    }
+  },
+  "runtime_packages": {
+    "latex2sympy2-extended": "1.11.0",
+    "math-verify": "0.9.0",
+    "sympy": "1.14.0",
+    "torch": "2.13.0",
+    "vllm": "0.30.0"
+  },
+  "runtime_source_sha256": {
+    "diffusion_gemma.py": "748157602927082f5fd95f96bec5ac43b55d1e34a42094f0ab5e5ddc6acb0146",
+    "flash_attn_interface.py": "d6fccbb0fe1931c79013f5942199c5c9cbba0eedd7ac5ff037f55db19c38421a",
+    "flash_fwd_sm90.py": "692156e78b190853bc1824661f2dc9878f4fe0b749211f754dfdcc7c8b8de8d2"
+  },
+  "schedule_sha256": "19b8b8250a5d1c85c1a89d03b5a474a306d798197463bc91a432fa1db87c662e",
+  "schema": "ruler128k_seed42_v31_v2_public_v1",
+  "scope": "GLOBAL only; LOCAL dense; unchanged native FA4 and sampler",
+  "seed_base": 31,
+  "selector": "value_v2_online_preserve_mass",
+  "source_files": 886,
+  "status": "complete",
+  "subset_generator_seed": 6464,
+  "tasks": 13,
+  "threshold": 0.021,
+  "torch_cuda": "13.0"
+}

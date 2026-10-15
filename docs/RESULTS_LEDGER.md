@@ -1762,3 +1762,35 @@ previously examined benchmark evidence, not held-out confirmation, equal
 retained work, or a clean latency result. Other thresholds and timing stay
 paused. Sources: campaign `summary.md`, `metrics.csv`, `paired_comparisons.json`,
 `receipts/independent_verification.json`, `final_complete.json`.
+
+## RULER128K seed42 V31 versus V2 tau=0.021 — 2026-10-15
+
+Complete, source-matched paired rerun: same 104 prompts, eight per 13 tasks;
+native panel seed42, base31, Gaussian32 rank32/seed1729. Execution snapshot
+`ab05d324`, coordinator/spec `5859d086`. Source:
+`results/v31_v2_ruler128k_seed42_tau021_20261015/`.
+
+| Method | Official score /100 | Full-credit | N/problem | C/problem | N/C | Tokens/problem | GLOBAL eligible tiles | GLOBAL kept tiles | GLOBAL sparsity | Overall sparsity |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| inherited Yuhan V31 | 86.250 | 81/104 | 5.240 | 1.000 | 5.240 | 25.962 | 177,836,960 | 96,039,360 | 46.00% | 43.85% |
+| V2 tau=0.021 | 85.769 | 81/104 | 5.635 | 1.000 | 5.635 | 25.904 | 191,311,840 | 95,030,781 | 50.33% | 47.98% |
+
+RULER's primary metric gives partial credit. V2-minus-V31 -0.481 score points;
+100k-draw 13-task-cluster bootstrap 95% CI [-1.442,0.000], exploratory
+full-credit McNemar p=1.0. V2 uses 7.52% more calls, concentrated in variable
+tracking, and 1.05% fewer retained GLOBAL tiles. Overall retained work falls
+only 0.34%. No observed accuracy gain or shorter mean trajectory. Both arms
+use the same full-credit set; the net task-average loss is common-word
+extraction. This is a previously examined subset, not held-out confirmation.
+
+Eight immutable shards, 208 scored cells, source/protocol identity, physical/
+phase accounting, unchanged FA4, GLOBAL-only/LOCAL-dense routing and four
+qualification repeats independently verified; zero invalid rows, request
+captures or LOCAL skips. `C` counts committed output canvases. Physical tile
+counts are not CUDA launch counts; V2's additional 57,019,520 discovery
+rectangles and candidate evaluations are reported separately. Audit wall time
+is not clean latency. H100 idle; other studies and timing remain paused.
+Reports: `interpretation.md`, `metrics.csv`, `task_scores.csv`,
+`task_trajectory.csv`, `phase_accounting.csv`, `cost_separation.json`,
+`official_scorer_summary.json`, `receipts/independent_verification.json`,
+`final_complete.json`.

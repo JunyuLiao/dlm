@@ -1,0 +1,3 @@
+# RULER128K seed42: V31 versus V2 tau=0.021
+
+The existing 104 prompts (8 x 13 tasks) are unchanged. Only native panel seed42 and V2 threshold0.021 are requested. Both arms execute the same frozen source snapshot, native sampler and FA4 consumer; GLOBAL-only, LOCAL dense. No historical generation is reused. Four interleaved26-item shards preserve the historical order, with alternating arm order. Other campaigns and clean timing remain paused. Resume the frozen coordinator with --stage run --study <this-directory>; complete leaf attempts are validated and skipped, while partial attempts receive a new immutable directory.

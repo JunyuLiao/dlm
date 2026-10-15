@@ -1897,3 +1897,41 @@ dense/all-kept RULER arm was found in this 104-item panel. Literal CUDA launch
 counts were not measured; retained attention tiles and logical adapter split-FA4
 calls are distinct fields. Existing source records and published summaries
 remain unchanged. Clean timing and the separate campaigns stay paused.
+
+## 2026-10-15: Fresh seed42 RULER128K V31/V2 audit does not reproduce shorter V2 trajectories
+
+The user authorized only V31 and exact online preserve-mass V2 at tau=0.021
+on the same 104 RULER128K prompts. Freeze/spec commit `5859d086`; both arms
+execute the identical qualified `ab05d324` byte snapshot, runtime and model.
+Native panel seed42 replaces seed1; the subset, base31, projection rank32/
+seed1729, native sampler and GLOBAL-only/LOCAL-dense policy remain fixed.
+Eight 26-cell shards plus four qualification cells completed. No historical
+generation, differently pinned control, additional threshold or paused queue
+was reused. Campaign: `results/v31_v2_ruler128k_seed42_tau021_20261015/`.
+
+V31/V2 official fractional scores are 86.250/85.769, with identical 81/104
+full-credit sets. Delta -0.481 points, 13-task-cluster bootstrap 95% interval
+[-1.442,0.000]; full-credit McNemar p=1.0. One problem improves, five worsen,
+98 tie. The net task-average loss is common-word extraction, 70.00 to 63.75.
+Do not interpret equal full-credit counts as equal partial-credit outputs or
+the interval as evidence of noninferiority.
+
+V2 has 586 versus 545 calls, +7.52%; both commit one canvas per problem.
+Variable tracking alone adds 45 calls (106 versus 61), while all other tasks
+combined remove four. Two trajectories add 28 and 10 calls. V2 therefore does
+not show the shorter mean trajectory observed on LongBench. Retained GLOBAL
+work falls only 1.05% (95,030,781 versus 96,039,360); overall work falls 0.34%.
+GLOBAL sparsity is 50.33% versus 46.00%, partly from the longer trajectory's
+larger denominator. Full-support phases are 95.7%/94.0% of retained V2/V31
+work, limiting savings from smaller held/carried supports.
+
+Independent CPU verification passes for 886 sources, 11 inputs, all 208 score
+cells, 104 paired bindings, source/seed/physical/phase invariants and two
+qualification repeats per arm. Invalid rows, request CUDA captures and LOCAL
+skips are zero. The generic inherited `value_budget_policy` receipt label is
+static; the executed `triton_log_mass_online` branch uses tau without a quota.
+Selector discovery and evaluation each count 57,019,520 additional rectangles;
+recorded audit time is not clean latency. Preserve the completed immutable
+attempts, leave timing and other campaigns paused, and report this as a
+paired seed on previously examined prompts rather than held-out confirmation
+or a clean threshold ablation against the old seed-1 archive.
