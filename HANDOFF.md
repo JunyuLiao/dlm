@@ -1,4 +1,23 @@
-## Value decision/reuse refinement — 2026-10-15, native development active
+## Value decision/reuse refinement — 2026-10-15, native parity investigation
+
+At22:26 UTC a new no-op exposure audit found inactive-trial output/N/C/T
+differences versus V31 in the completed first two AIME shards. Inputs,seeds,
+budgets and named native settings match. Counts are4/4 inactive trials for
+full swaps,3/3 for direction guard,5/5 for raw residual,and4/4 for combined.
+This is an execution-repeatability discrepancy, not evidence for or against
+the methods. See native002/native_noop_precheck/summary.json. The original
+native smoke gate checked activation/configuration/scoring but omitted exact
+same-seed repeatability; method-accuracy interpretation is held pending that
+additional gate. Same-state eager diagnostics remain separately qualified.
+
+Coordinator PID1799129 is being drained through the final AIME control shard
+and then SIGSTOP-held before LongBench. The scoped drain supervisor stops it
+after24 AIME completion markers. Do not resume panel expansion until the
+discrepancy is explained. Completed attempts remain immutable. The checkpoint
+watcher was stopped. A frozen native_noop_attempt001 diagnostic, coordinator
+dfd8f65e, repeats one identical request twice per process and compares two
+original V31 processes with one full-swap process. It has not yet launched
+while the last control worker owns the H100. Timing remains paused.
 
 User authorization: design, implement and evaluate the three value directions,
 starting with same-state diagnostics. Fixed per-query-tile budgets and clean
@@ -6,9 +25,8 @@ timing paused. Study:`results/v31_value_decision_reuse_20261015/`; detailed
 plan:`docs/V31_VALUE_DECISION_REUSE_PLAN_20261015.md`. Native study is frozen
 from79c994ca (71 H100 tests), with protocol committed infc85f24a. Initial
 decision sourcebb2789ca and coverage sourcea6f339fe are both complete. Other
-paused campaigns remain paused. All32 native qualification jobs passed by
-19:55 UTC. The official-scored development panel is running its first AIME
-shard cycle; V31's first shard is complete. Other full cohorts remain partial.
+paused campaigns remain paused. All32 original native qualification jobs
+passed by19:55 UTC; the additional repeatability gate above is unresolved.
 
 Completed independent operator work: full-dimensional moment, bounded-swap,
 causal derivative and reconstruction operators; 670 verified saved inputs,
@@ -53,10 +71,10 @@ only LSE/moment merging, and cached-adjoint directional correction. No clean
 latency or speedup is established. The online swap remains a hybrid proposal
 with full-information admission, not the historical Gaussian32 V2 selector.
 
-Running: `native_development_attempt002/`, controlled by its frozen private
+Held expansion: `native_development_attempt002/`, controlled by its frozen private
 execution source and `native_coordinator_attempt001.log` in the study root.
-Follow its `state.json`; next scheduled monitor20:25 UTC. Resume command is in
-the study README. Native changes are restricted to layer29, the only layer
+Follow its `state.json` and `expansion_hold.json`. The ordinary resume command
+must not bypass the unresolved parity gate. Native changes are restricted to layer29, the only layer
 qualified by suffix intervention. Included modes:full_swap8,direction-guarded
 residual,raw residual as a mechanistic cache baseline,and full swaps+guard.
 All64 smoke problem-trials passed actual sparse activation, fixed budgets,

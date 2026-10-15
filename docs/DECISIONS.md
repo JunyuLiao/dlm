@@ -2065,3 +2065,22 @@ Preparation002 reads the named defaults directly and binds the config hash.
 Thinking/output budgets remain bound to each private input manifest. Selector
 settings and inactive Gaussian32 metadata are not sampler settings and are
 kept separate. This correction changes metadata, not native decoding behavior.
+
+## 2026-10-15 — Native refinement expansion held for repeatability audit
+
+The added intervention-exposure audit (analysis7f498574) found that inactive
+trials in the completed first two AIME shards differ from matched V31:
+full_swap8 4/4,direction guard3/3,raw residual5/5,and combined4/4. Inputs,
+request RNG seeds,budgets and named decoding settings match. Native002's
+`native_noop_precheck/` binds the complete shard records and sanitized counts.
+No accuracy result was used to choose this diagnostic. This does not identify
+whether the cause is inherent compiled repeatability or refinement integration.
+
+The original smoke gate qualified activation,receipts and scoring but lacked
+an exact same-seed repetition check. Hold accuracy interpretation and further
+workload expansion; drain the final AIME controls and preserve all attempts.
+The new frozen `native_noop_attempt001` (diagnostic coordinator dfd8f65e) will
+repeat one identical cell twice per process,using two original V31 processes
+and one full-swap process on the unchanged frozen execution source. Native
+sampling,K and timing pause remain unchanged. Same-state eager evidence is
+separate and is not invalidated by this unresolved compiled execution issue.
