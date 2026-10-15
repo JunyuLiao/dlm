@@ -70,3 +70,40 @@ def test_fused_merge_matches_reference_without_omitted_inputs(dtype,dim):
     actual=reconstruct_cuda(selected.to(dtype),sl,cache,'fixed')
     expected=cache.reconstruct(selected.to(dtype),sl,'fixed').to(dtype)
     torch.testing.assert_close(actual,expected,atol=1e-6 if dtype==torch.float32 else .004,rtol=1e-5 if dtype==torch.float32 else .008)
+
+
+def test_adjoint_direction_cache_matches_explicit_post_o_guard():
+    from experiments.numerical_qk_reuse.v31_value_reuse_guard import ResidualDirectionCache
+    g=torch.Generator().manual_seed(611)
+    selected=torch.randn(23,4,17,dtype=torch.float64,generator=g)
+    dense=selected+.3*torch.randn(selected.shape,dtype=torch.float64,generator=g)
+    current=selected+.2*torch.randn(selected.shape,dtype=torch.float64,generator=g)
+    w=torch.randn(31,68,dtype=torch.float64,generator=g)
+    cache=ResidualDirectionCache.build(dense,selected,w,'map1')
+    out,a=cache.apply(current,'map1')
+    explicit=residual_trust(current.flatten(1)@w.T,selected.flatten(1)@w.T,dense.flatten(1)@w.T)
+    torch.testing.assert_close(a,explicit,rtol=1e-12,atol=1e-12)
+    torch.testing.assert_close(out,current+explicit[:,None,None]*(dense-selected),rtol=1e-12,atol=1e-12)
+    with pytest.raises(ValueError,match='rebuild'):
+        cache.apply(current,'map2')
+    zero=ResidualDirectionCache.build(selected,selected,w,'zero')
+    assert torch.equal(zero.apply(current,'zero')[0],current)
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(),reason='H100 required')
+@pytest.mark.parametrize('dtype',[torch.float32,torch.bfloat16])
+@pytest.mark.parametrize('width',[68,8192])
+def test_fused_adjoint_guard_matches_reference(dtype,width):
+    from experiments.numerical_qk_reuse.v31_value_reuse_guard import ResidualDirectionCache
+    g=torch.Generator().manual_seed(612)
+    selected=torch.randn(9,1,width,generator=g).cuda()
+    dense=selected+.3*torch.randn(selected.shape,generator=g).cuda()
+    beta=torch.linspace(-.5,1.5,9,device='cuda')[:,None,None]
+    current=(selected+beta*(dense-selected)+.05*torch.randn(selected.shape,generator=g).cuda()).to(dtype)
+    w=torch.randn(128,width,generator=g).cuda()/width**.5
+    cache=ResidualDirectionCache.build(dense,selected,w,'map')
+    expected,a=cache.apply(current,'map')
+    actual,b=cache.apply_cuda(current,'map')
+    torch.testing.assert_close(b,a,rtol=2e-5,atol=2e-6)
+    torch.testing.assert_close(actual,expected,rtol=2e-5 if dtype==torch.float32 else .008,
+                               atol=2e-6 if dtype==torch.float32 else .004)

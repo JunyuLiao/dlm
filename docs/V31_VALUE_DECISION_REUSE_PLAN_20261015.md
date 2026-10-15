@@ -170,3 +170,32 @@ groups/shards. No asynchronous queue may bypass a diagnostic/promotion gate.
 Update HANDOFF and decisions as verified stages finish. Ledger entries require
 scoped completion and source/protocol identity. No claims of success before
 measured evidence, and no whole-study completion marker for partial work.
+
+## Evidence-driven amendment after the first operator screens
+
+The previous-query tangent is rejected: it worsened age-1 output-error
+prediction on all 100 screened sparse units. Its derivative implementation
+passed central finite differences; the failure is the extrapolation assumption.
+Direction 2 therefore proceeds with causal trust in the cached value residual,
+coupled to direction 3, rather than promoting a failed query predictor.
+
+For r=D0-S0 and m=St-S0, use alpha=clip(1-<m,r>/||r||^2,0,1).
+The norm-only coefficient clip(1-||m||/||r||,0,1) is the ablation. Both use
+whole-layer post-O vectors, preserve K, and require no current omitted-key
+output. They can still fail when the dense target drifts. The exact conditional
+regret bound and its assumptions are documented separately; no current-error
+improvement or task-accuracy guarantee is asserted.
+
+On the two LongBench source trajectories, the direction guard's mean-error
+ratio grows from 0.557 at reuse age1 to 0.717 at age9+, retaining an observed
+benefit beyond fresh calls. Those correlated age buckets are descriptive, not
+independent samples. The bounded full/online swap improvements are smaller
+and diminish from about 2% at age1 to 1.3% at age9+.
+
+The final-layer decision probe uses privately coupled diagnostic Gumbel draws,
+not the compiled sampler's actual noise. Native RNG is preserved and checked.
+Its first phase qualifies instrumentation on one previously captured LongBench
+item; this is not the multi-workload promotion gate. Two uninstrumented/observer-
+disabled/observer-active repetitions are now required after detecting an
+observer allocation bug in an immutable failed attempt. Native accuracy is
+not launched until valid same-state model measurements support promotion.

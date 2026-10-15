@@ -1,0 +1,76 @@
+# Reuse age and whole-layer error
+
+Ratios compare sums of mean row post-O errors on identical frames. Frames are correlated and are not independent accuracy samples. LongBench has two source trajectories; sparse AIME has one late trajectory and a counterfactual K=27 budget. A harm is a >2% maximum-row error increase.
+
+| Workload | Method | Reuse age | Frames | Error ratio | Max-row harms |
+|---|---|---:|---:|---:|---:|
+| aime26 | residual | 1 | 10 | 0.6768 | 4 |
+| aime26 | residual | 2 | 10 | 0.7838 | 4 |
+| aime26 | residual | 3 | 5 | 0.9712 | 1 |
+| aime26 | residual | 4 | 5 | 1.0244 | 2 |
+| aime26 | residual_direction_guard | 1 | 10 | 0.7008 | 1 |
+| aime26 | residual_direction_guard | 2 | 10 | 0.8003 | 1 |
+| aime26 | residual_direction_guard | 3 | 5 | 0.9309 | 0 |
+| aime26 | residual_direction_guard | 4 | 5 | 0.9796 | 0 |
+| aime26 | residual_norm_guard | 1 | 10 | 0.9603 | 0 |
+| aime26 | residual_norm_guard | 2 | 10 | 0.9809 | 0 |
+| aime26 | residual_norm_guard | 3 | 5 | 1.0000 | 0 |
+| aime26 | residual_norm_guard | 4 | 5 | 1.0000 | 0 |
+| aime26 | correction_moments | 1 | 10 | 0.7613 | 8 |
+| aime26 | correction_moments | 2 | 10 | 0.8700 | 7 |
+| aime26 | correction_moments | 3 | 5 | 1.0207 | 3 |
+| aime26 | correction_moments | 4 | 5 | 1.0804 | 2 |
+| aime26 | correction_residual | 1 | 10 | 0.6768 | 4 |
+| aime26 | correction_residual | 2 | 10 | 0.7838 | 4 |
+| aime26 | correction_residual | 3 | 5 | 0.9712 | 1 |
+| aime26 | correction_residual | 4 | 5 | 1.0244 | 2 |
+| aime26 | full_swap8 | 1 | 10 | 0.9650 | 2 |
+| aime26 | full_swap8 | 2 | 10 | 0.9699 | 6 |
+| aime26 | full_swap8 | 3 | 5 | 0.9895 | 1 |
+| aime26 | full_swap8 | 4 | 5 | 0.9981 | 1 |
+| aime26 | online_swap8 | 1 | 10 | 0.9699 | 1 |
+| aime26 | online_swap8 | 2 | 10 | 0.9742 | 4 |
+| aime26 | online_swap8 | 3 | 5 | 0.9887 | 0 |
+| aime26 | online_swap8 | 4 | 5 | 0.9944 | 0 |
+| longbench_v2_0shot_think | residual | 1 | 40 | 0.5102 | 3 |
+| longbench_v2_0shot_think | residual | 2 | 40 | 0.5736 | 9 |
+| longbench_v2_0shot_think | residual | 3 | 40 | 0.6216 | 10 |
+| longbench_v2_0shot_think | residual | 4 | 40 | 0.6675 | 8 |
+| longbench_v2_0shot_think | residual | 5-8 | 90 | 0.6868 | 12 |
+| longbench_v2_0shot_think | residual | 9+ | 70 | 0.7308 | 9 |
+| longbench_v2_0shot_think | residual_direction_guard | 1 | 40 | 0.5575 | 1 |
+| longbench_v2_0shot_think | residual_direction_guard | 2 | 40 | 0.6134 | 1 |
+| longbench_v2_0shot_think | residual_direction_guard | 3 | 40 | 0.6544 | 1 |
+| longbench_v2_0shot_think | residual_direction_guard | 4 | 40 | 0.6895 | 0 |
+| longbench_v2_0shot_think | residual_direction_guard | 5-8 | 90 | 0.6913 | 0 |
+| longbench_v2_0shot_think | residual_direction_guard | 9+ | 70 | 0.7174 | 0 |
+| longbench_v2_0shot_think | residual_norm_guard | 1 | 40 | 0.7945 | 0 |
+| longbench_v2_0shot_think | residual_norm_guard | 2 | 40 | 0.8322 | 0 |
+| longbench_v2_0shot_think | residual_norm_guard | 3 | 40 | 0.8556 | 0 |
+| longbench_v2_0shot_think | residual_norm_guard | 4 | 40 | 0.8759 | 0 |
+| longbench_v2_0shot_think | residual_norm_guard | 5-8 | 90 | 0.8654 | 0 |
+| longbench_v2_0shot_think | residual_norm_guard | 9+ | 70 | 0.8725 | 0 |
+| longbench_v2_0shot_think | correction_moments | 1 | 40 | 0.4735 | 22 |
+| longbench_v2_0shot_think | correction_moments | 2 | 40 | 0.5386 | 24 |
+| longbench_v2_0shot_think | correction_moments | 3 | 40 | 0.5869 | 26 |
+| longbench_v2_0shot_think | correction_moments | 4 | 40 | 0.6236 | 26 |
+| longbench_v2_0shot_think | correction_moments | 5-8 | 90 | 0.6053 | 54 |
+| longbench_v2_0shot_think | correction_moments | 9+ | 70 | 0.6102 | 42 |
+| longbench_v2_0shot_think | correction_residual | 1 | 40 | 0.5102 | 3 |
+| longbench_v2_0shot_think | correction_residual | 2 | 40 | 0.5736 | 9 |
+| longbench_v2_0shot_think | correction_residual | 3 | 40 | 0.6216 | 10 |
+| longbench_v2_0shot_think | correction_residual | 4 | 40 | 0.6675 | 8 |
+| longbench_v2_0shot_think | correction_residual | 5-8 | 90 | 0.6868 | 12 |
+| longbench_v2_0shot_think | correction_residual | 9+ | 70 | 0.7308 | 9 |
+| longbench_v2_0shot_think | full_swap8 | 1 | 40 | 0.9797 | 2 |
+| longbench_v2_0shot_think | full_swap8 | 2 | 40 | 0.9799 | 1 |
+| longbench_v2_0shot_think | full_swap8 | 3 | 40 | 0.9800 | 1 |
+| longbench_v2_0shot_think | full_swap8 | 4 | 40 | 0.9803 | 1 |
+| longbench_v2_0shot_think | full_swap8 | 5-8 | 90 | 0.9831 | 4 |
+| longbench_v2_0shot_think | full_swap8 | 9+ | 70 | 0.9863 | 0 |
+| longbench_v2_0shot_think | online_swap8 | 1 | 40 | 0.9817 | 3 |
+| longbench_v2_0shot_think | online_swap8 | 2 | 40 | 0.9818 | 1 |
+| longbench_v2_0shot_think | online_swap8 | 3 | 40 | 0.9819 | 1 |
+| longbench_v2_0shot_think | online_swap8 | 4 | 40 | 0.9824 | 1 |
+| longbench_v2_0shot_think | online_swap8 | 5-8 | 90 | 0.9850 | 2 |
+| longbench_v2_0shot_think | online_swap8 | 9+ | 70 | 0.9872 | 0 |

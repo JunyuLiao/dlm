@@ -1962,3 +1962,20 @@ noise are explicitly offline; the latter is not claimed as the compiled
 native sampler's random realization. An isolated final-layer intervention
 cannot qualify changes at earlier layers. Native accuracy and clean timing
 remain unlaunched at this checkpoint.
+
+## 2026-10-15 — Refine stale correction with causal value-direction trust
+
+Whole-layer replay exposes harmful residual tails. The causal coefficient
+`clip(1 - <St-S0,D0-S0>/||D0-S0||^2,0,1)` uses selected current output and
+cached anchor outputs only. It cuts LongBench >2% max-row harm counts from
+26/220 to 0/220 and 25/100 to 3/100 while preserving substantial mean-error
+reduction. The norm guard is a conservative ablation. Promote these only to
+same-state decision diagnostics; they have no accuracy/call-count result.
+Complete scoped evidence is under `v31_value_decision_reuse_20261015/reuse_guard`.
+
+Attempt003's suffix observer allocated new identity outputs across fixed-address
+CUDA-graph boundaries and failed suffix parity with 256/256 top-1 mismatches.
+Exclude its generation from scientific method comparisons. Attempt004 changes
+observers to ordered read-only side effects on original tensors, and adds an
+uninstrumented control to both repetitions. This strengthens qualification
+instead of relaxing a failed parity threshold. Native accuracy remains gated.

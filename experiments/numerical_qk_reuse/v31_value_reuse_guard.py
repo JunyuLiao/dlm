@@ -29,6 +29,54 @@ def residual_trust(current_selected, anchor_selected, anchor_dense, *, kind='dir
 
 
 @dataclass
+class ResidualDirectionCache:
+    """Exact adjoint form of the post-O direction guard, without a held-step O GEMM.
+
+    Store u = W.T W r at the observation. Then <W(St-S0), W r> =
+    <St-S0,u>. Flatten heads together so signed cross-head effects survive.
+    """
+    anchor_selected: torch.Tensor
+    residual: torch.Tensor
+    dual: torch.Tensor
+    residual_squared: torch.Tensor
+    identity: object
+
+    @classmethod
+    def build(cls, dense, selected, projection, identity):
+        dtype=torch.float64 if dense.dtype==torch.float64 else torch.float32
+        selected=selected.to(dtype).contiguous();r=dense.to(dtype)-selected
+        w=projection.to(dtype)
+        if dense.shape!=selected.shape or w.shape[1]!=selected[0].numel():
+            raise ValueError('incompatible whole-layer projection geometry')
+        post=r.reshape(len(r),-1)@w.T
+        dual=(post@w).reshape_as(r).contiguous()
+        return cls(selected,r.contiguous(),dual,post.square().sum(-1),identity)
+
+    def apply(self, current, identity):
+        if identity!=self.identity or current.shape!=self.residual.shape:
+            raise ValueError('canvas/support or output geometry changed; rebuild residual cache')
+        movement=((current.to(self.dual.dtype)-self.anchor_selected)*self.dual).flatten(1).sum(-1)
+        alpha=torch.where(self.residual_squared>1e-20,
+            (1-movement/self.residual_squared.clamp_min(1e-20)).clamp(0,1),0)
+        shape=(len(alpha),)+(1,)*(current.ndim-1)
+        return (current.to(self.dual.dtype)+alpha.reshape(shape)*self.residual).to(current.dtype),alpha
+
+    def apply_cuda(self,current,identity):
+        if identity!=self.identity or current.shape!=self.residual.shape:
+            raise ValueError('canvas/support or output geometry changed; rebuild residual cache')
+        if not current.is_cuda:
+            raise ValueError('CUDA tensor required')
+        import triton
+        from .v31_value_reuse_merge_kernel import direction_guard_kernel
+        current=current.contiguous();out=torch.empty_like(current)
+        alpha=torch.empty(len(current),device=current.device,dtype=torch.float32)
+        d=current[0].numel()
+        direction_guard_kernel[(len(current),)](current,self.anchor_selected,self.residual,self.dual,
+            self.residual_squared,out,alpha,D=d,BLOCK=triton.next_power_of_2(d),num_warps=8)
+        return out,alpha
+
+
+@dataclass
 class SelectedOnlyCorrection:
     """Cache omitted moments at an observation; consume only sparse O and LSE.
 

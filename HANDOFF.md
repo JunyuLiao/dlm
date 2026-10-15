@@ -26,15 +26,28 @@ more substantially but can increase row-error tails. AIME's sparse replay
 coverage is only one late trajectory; all-kept cases provide no selector
 benefit evidence. These are operator diagnostics on previously examined data.
 
-Running/prepared: isolated layer29 same-state suffix qualification, with two
-repetitions of diagnostics-disabled versus diagnostics-active native generation.
-It must reproduce native suffix logits and native output hashes/N/T, preserve
-RNG and adapter counters, and report extra suffix calls separately. It tests
-only the final GLOBAL layer and cannot qualify earlier-layer native changes.
-The first two suffix attempts failed before generation (constructor signature, then an unsupported fullgraph compiler-disable boundary). Both are retained. Attempt003 uses two explicit identity-copy split operators, and a fresh source/protocol freeze; live state is in `suffix_qualification_attempt003/state.json`. A causal value-residual trust replay is queued ahead of this attempt under `reuse_guard/`. The expanded operator/merge/lifecycle suite passes all 50 H100 tests. Native implementation is opt-in, final-layer-only, and refuses launch without a passed decision-gate receipt.
-No native accuracy panel is launched; timing remains paused. Next: resolve
-qualification, assess deterministic logit/acceptance/stop effects, then promote
-only supported candidates under the committed plan.
+Completed refinement: causal residual-direction trust lowers mean whole-layer
+error by 35.6% and 22.5% on the two LongBench trajectories, with >2% max-row
+harms 0/220 and 3/100 (unconditional residual: 26/220 and 25/100). Late AIME
+has ratio 0.8291 and 2/30 max-row harms. These remain operator observations.
+The norm-only ablation suppresses more correction. Theory and a checked
+surrogate-regret bound are in `docs/V31_CAUSAL_VALUE_RESIDUAL_GUARD_20261015.md`;
+it is not an accuracy or current-dense improvement guarantee.
+
+Running: `suffix_qualification_attempt004/`, source `2c76714d`. It compares
+uninstrumented, observer-disabled and observer-active native trajectories twice,
+and checks repeated suffix logits/RNG/counters before admitting any decision
+results. Earlier immutable attempts failed at constructor signature, fullgraph
+compiler-disable, and observer-output address stability respectively. Attempt003
+returned fresh tensors across a fixed-address CUDA graph boundary; its outputs
+are invalid for method comparisons. Attempt004 retains graph-owned input addresses.
+Current implementation includes guarded residuals and unsettled-token metrics.
+The prior 50-test H100 suite passed; subsequent CPU additions pass, with the
+expanded H100 suite deferred until the active model worker releases the GPU.
+Native refinement is opt-in, final-layer-only and gated. No task-accuracy panel
+has launched; timing stays paused. Resolve instrumentation qualification, then
+broaden same-state decision coverage before native promotion. See the study
+README for the source-frozen resume command and exact stage limits.
 
 ## RULER128K seed42 rerun complete — 2026-10-15
 

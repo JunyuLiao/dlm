@@ -100,3 +100,22 @@ V31's accuracy already exceeds dense on some prior panels, so fidelity alone
 cannot select a winner. Clean timing remains paused. Cached residual and
 compensated sparse attention have prior art; no first-of-its-kind claim is
 made for residual caching alone.
+
+## Exact adjoint implementation
+
+Let pre-projection residual be r and output projection be W. At observation,
+cache u = W^T W r and d = ||W r||^2, preserving signed contributions across
+all heads. A held call computes alpha = clip(1 - <St-S0,u>/d,0,1) and returns
+St + alpha r. This is algebraically the same whole-layer post-O coefficient.
+It needs two projection GEMMs at the observation, then only a row dot product
+and vector update per held call. It avoids a full W projection at every held
+call; it does not avoid the model's normal output projection.
+
+The reference cache is `ResidualDirectionCache`; one Triton kernel fuses the
+held-step coefficient reduction and correction. Both the row reduction and
+correction cover all concatenated heads. Cache identity guards canvas/support
+changes. Memory stores three pre-O vectors per row (anchor selected, residual,
+adjoint residual), plus one scalar; this trades extra cache memory for fewer
+held-step arithmetic operations. CPU double-precision tests verify equality to
+the explicit post-O calculation, including zero residual. H100 parity is
+required before native integration. No clean timing claim is made.
