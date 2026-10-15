@@ -67,6 +67,10 @@ class Controller:
             self.states.clear(); self.previous_stats = None; self.previous_request = request
             self.last_sampler = None
             self.first_canvas = adapter.canvas_id
+            self.last_canvas = adapter.canvas_id
+        if adapter.canvas_id != self.last_canvas:
+            self.previous_stats = None; self.last_sampler = None
+            self.last_canvas = adapter.canvas_id
         canvas = adapter.canvas_id - self.first_canvas
         if canvas > 1:
             self.frame = None
@@ -219,35 +223,55 @@ def install(root):
     controller=Controller(root)
     original_layer=gemma4.Gemma4DecoderLayer.forward
     controller.original_layer_forward=original_layer
+    original_attention=gemma4.Gemma4Attention.forward
+
+    # Explicit split custom ops survive vLLM's fullgraph tracing and execute
+    # the observer outside CUDA-graph segments on every real call. Their
+    # numerical operation is only a clone; disabled/active diagnostics share
+    # the same graph boundaries and are qualified against each other.
+    @torch.library.custom_op('v31_value_diag::capture_input', mutates_args=())
+    def capture_input(hidden:torch.Tensor,positions:torch.Tensor,per_input:torch.Tensor|None)->torch.Tensor:
+        from vllm.forward_context import get_forward_context
+        if controller.active() and not controller.replaying:
+            controller.capture=dict(layer=controller.model.model.layers[29],positions=positions.clone(),
+                hidden=hidden.clone(),per_layer_input=per_input.clone() if per_input is not None else None,
+                kwargs={},forward_context=copy.copy(get_forward_context()))
+        return hidden.clone()
+    @capture_input.register_fake
+    def fake_input(hidden,positions,per_input):
+        return torch.empty_like(hidden)
+
+    @torch.library.custom_op('v31_value_diag::capture_attention', mutates_args=())
+    def capture_attention(output:torch.Tensor)->torch.Tensor:
+        if controller.active() and controller.capture is not None and not controller.replaying:
+            controller.capture['native_attention']=output.clone()
+        return output.clone()
+    @capture_attention.register_fake
+    def fake_attention(output):
+        return torch.empty_like(output)
+
     original_init=dg.DiffusionGemmaForConditionalGeneration.__init__
     @functools.wraps(original_init)
     def model_init(self,*args,**kwargs):
+        config=kwargs['vllm_config'].compilation_config
+        if config.splitting_ops is None:
+            raise RuntimeError('native attention split inventory must be initialized')
+        config.splitting_ops=list(config.splitting_ops)+['v31_value_diag::capture_input','v31_value_diag::capture_attention']
         original_init(self,*args,**kwargs); controller.model=self
+        self.model.layers[29].self_attn._value_suffix_last=True
     dg.DiffusionGemmaForConditionalGeneration.__init__=model_init
 
-    @torch.compiler.disable
-    def last_layer(self,positions,hidden_states,residual,per_layer_input=None,**kwargs):
-        from vllm.forward_context import get_forward_context
-        if not controller.active() or controller.replaying:
-            return original_layer(self,positions,hidden_states,residual,per_layer_input=per_layer_input,**kwargs)
-        capture=dict(layer=self,positions=positions.clone(),hidden=hidden_states.clone(),
-            per_layer_input=per_layer_input.clone() if per_layer_input is not None else None,kwargs=kwargs,
-            forward_context=copy.copy(get_forward_context()))
-        original_attention=self.self_attn.forward
-        def attention(*a,**kw):
-            out=original_attention(*a,**kw); capture['native_attention']=out.clone(); return out
-        self.self_attn.forward=attention
-        try:
-            result=original_layer(self,positions,hidden_states,residual,per_layer_input=per_layer_input,**kwargs)
-        finally:
-            self.self_attn.forward=original_attention
-        controller.capture=capture
-        return result
-
     @functools.wraps(original_layer)
-    def layer_forward(self,*a,**kw):
-        return last_layer(self,*a,**kw) if self.layer_idx==29 else original_layer(self,*a,**kw)
+    def layer_forward(self,positions,hidden_states,residual,per_layer_input=None,**kw):
+        if self.layer_idx==29:
+            hidden_states=capture_input(hidden_states,positions,per_layer_input)
+        return original_layer(self,positions,hidden_states,residual,per_layer_input=per_layer_input,**kw)
     gemma4.Gemma4DecoderLayer.forward=layer_forward
+    @functools.wraps(original_attention)
+    def attention_forward(self,*a,**kw):
+        out=original_attention(self,*a,**kw)
+        return capture_attention(out) if getattr(self,'_value_suffix_last',False) else out
+    gemma4.Gemma4Attention.forward=attention_forward
 
     class Recorder:
         def __init__(self,directory,request,dataset):
