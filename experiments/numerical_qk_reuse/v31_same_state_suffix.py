@@ -288,9 +288,10 @@ def install(root):
     @functools.wraps(original_init)
     def model_init(self,*args,**kwargs):
         config=kwargs['vllm_config'].compilation_config
-        if config.splitting_ops is None:
-            raise RuntimeError('native attention split inventory must be initialized')
-        config.splitting_ops=list(config.splitting_ops)+['v31_value_diag::capture_input','v31_value_diag::capture_attention']
+        if os.environ.get('SUFFIX_EAGER')!='1':
+            if config.splitting_ops is None:
+                raise RuntimeError('native attention split inventory must be initialized')
+            config.splitting_ops=list(config.splitting_ops)+['v31_value_diag::capture_input','v31_value_diag::capture_attention']
         original_init(self,*args,**kwargs); controller.model=self
         self.model.layers[29].self_attn._value_suffix_last=True
     dg.DiffusionGemmaForConditionalGeneration.__init__=model_init

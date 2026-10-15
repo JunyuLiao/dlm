@@ -202,3 +202,19 @@ item; this is not the multi-workload promotion gate. Two uninstrumented/observer
 disabled/observer-active repetitions are now required after detecting an
 observer allocation bug in an immutable failed attempt. Native accuracy is
 not launched until valid same-state model measurements support promotion.
+
+### Diagnostic substrate amendment after failed compiler observation qualification
+
+Attempt004's address-preserving observer still changed compilation/fusion:
+production control took119 native calls versus106 with observers. Replaying
+its final layer disagreed on4/256 top1 rows (max logit error2.963). Reject all
+of those intervention results; do not relax the exact parity threshold.
+
+Use an explicitly eager model for same-state decision diagnostics, with the
+same native sampler/FA4/masks and matched eager uninstrumented, observer-only
+and active-probe repetitions. Require exact repeated-suffix logits and native
+trajectory invariance within this substrate. These are common eager model
+states, not production compiled V31 states. Production accuracy remains a
+separate compiled deployment with fresh V31/FULL/PIECEWISE/all-kept controls.
+This separates numerical instrumentation validity from method evaluation and
+prevents a changed compiler boundary from masquerading as a method gain.

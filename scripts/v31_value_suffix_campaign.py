@@ -52,15 +52,16 @@ def prepare(study):
     if not (manifests/(dataset+'_generation_manifest.json')).exists():
         raise RuntimeError('manifest copy incomplete')
     io.write(study/'private/cells.json',selected,True)
-    protocol=dict(schema='value_same_state_suffix_qualification_v1',source_sha256=fingerprints,
+    protocol=dict(schema='value_same_state_suffix_eager_qualification_v2',source_sha256=fingerprints,
         input_sha256={str(p.relative_to(study)):io.sha(p) for p in [study/'private/cells.json',*manifests.iterdir()] if p.is_file()},
         source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         layer=29,panel_cells=1,repeats=2,arms=['uninstrumented_control','diagnostics_disabled','diagnostics_active'],
         parent='whole-layer replay must be complete first',budget=128,scope='GLOBAL layer29 interventions only',
-        runtime=dict(max_model_len=141312,memory=.80,block=32,chunk=16384,graph='PIECEWISE',native_steps=48),
+        runtime=dict(max_model_len=141312,memory=.80,block=32,chunk=16384,graph='NONE',enforce_eager=True,native_steps=48),
         qualification='uninstrumented/disabled/active native output hashes, N, C and T must agree in both repeats; exact same-state suffix logits; unchanged RNG and adapter counters',
         decision_metrics=['top1','acceptance','common_Gumbel','KL','entropy','stopping'],
         timing='paused; instrumented generation is diagnostic only; suffix calls excluded from native N',
+        substrate_limit='Eager model diagnostics use common identical eager states, not production compiled V31 states. Production accuracy requires fresh compiled controls.',
         full_accuracy='not automatically launched by this qualifier')
     io.write(study/'protocol.json',protocol,True)
     shutil.copyfile(Path(__file__),study/'coordinator_source.py')
@@ -84,6 +85,8 @@ def env_for(study,leaf,active):
     env['STUDY_ARM']='same_state_suffix_diagnostic'
     env['SAME_STATE_SUFFIX_DIR']=str(leaf/'decisions')
     env['SUFFIX_DIAGNOSTICS']='1' if active else '0'
+    env['SUFFIX_INSTRUMENT']='0' if active is None else '1'
+    env['SUFFIX_EAGER']='1'
     return env
 
 
@@ -120,9 +123,9 @@ def run(study):
             (leaf/'private').mkdir(parents=True);(leaf/'decisions').mkdir()
             io.write(study/'state.json',dict(stage='running',repeat=repeat,arm=arm,attempt=str(leaf.relative_to(study)),timing='paused'))
             execution=study/'private/execution'
-            worker='v31_vllm_paired_bench.py' if active is None else 'v31_same_state_suffix_worker.py'
+            worker='v31_same_state_suffix_worker.py'
             command=[PY,str(execution/'scripts'/worker),str(io.MODEL),str(study/'private/manifests'),
-                str(study/'private/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/run_diagnostic.private.jsonl'),'mage','PIECEWISE']
+                str(study/'private/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/run_diagnostic.private.jsonl'),'mage','NONE']
             io.write(leaf/'config.json',dict(protocol_sha256=io.sha(study/'protocol.json'),repeat=repeat,active=active),True)
             start=time.monotonic()
             with (leaf/'private/worker.log').open('w') as stream:
