@@ -16,7 +16,7 @@ from scripts import v31_value_decision_replay as io
 from scripts import v31_value_native_study as native
 
 
-def prepare(study,parent):
+def prepare(study,parent,python_hash_seed=None):
     if study.exists():raise RuntimeError('use a new immutable diagnostic attempt')
     p=native.verify(parent)
     cells=io.read(parent/'private/schedules/aime26/cells.json')
@@ -24,13 +24,16 @@ def prepare(study,parent):
     study.mkdir(parents=True);(study/'private').mkdir()
     io.write(study/'private/cells.json',[cell,cell],True)
     shutil.copyfile(__file__,study/'coordinator_source.py')
+    jobs=[dict(name='original_repeat001',arm='current_v31_control'),
+          dict(name='original_repeat002',arm='current_v31_control'),
+          dict(name='refinement_repeat001',arm='full_swap8')]
+    if python_hash_seed is not None:
+        jobs.append(dict(name='refinement_repeat002',arm='full_swap8'))
     protocol=dict(schema='native_noop_repeatability_v1',parent=str(parent),
         parent_protocol_sha256=io.sha(parent/'protocol.json'),source_commit=p['source_commit'],
         coordinator_sha256=io.sha(study/'coordinator_source.py'),
         cells_sha256=io.sha(study/'private/cells.json'),suite='aime26',
-        jobs=[dict(name='original_repeat001',arm='current_v31_control'),
-              dict(name='original_repeat002',arm='current_v31_control'),
-              dict(name='refinement_repeat001',arm='full_swap8')],
+        jobs=jobs,python_hash_seed=python_hash_seed,
         scope='one previously examined inactive cell, repeated with identical request seed; no task-accuracy inference',
         timing='paused; diagnostic only')
     io.write(study/'protocol.json',protocol,True)
@@ -56,6 +59,7 @@ def run(study):
             if native.base.runtime_identity()!=source['runtime']:raise RuntimeError('runtime changed')
             arm=job['arm'];env=native.base.env_for(parent,'aime26',arm)
             env.update(STUDY_ARM=arm,FROZEN_SOURCE_SHA256=io.sha(parent/'receipts/source_fingerprints.json'))
+            if p.get('python_hash_seed') is not None:env['PYTHONHASHSEED']=str(p['python_hash_seed'])
             worker='v31_vllm_paired_bench.py'
             if arm in native.MODES:
                 worker='v31_value_refinement_worker.py'
@@ -90,7 +94,10 @@ def run(study):
             refinement_work=[r['receipts']['adapter'].get('value_refinement_work',{}) for r in rows]))
         print(json.dumps({'event':'diagnostic_job_complete','job':job['name'],
                           'identical_repeated_output':results[-1]['identical_repeated_output']}),flush=True)
+    reference=results[0]['records'][0]
     summary=dict(status='complete',scope=p['scope'],results=results,
+        all_process_outputs_identical=all(r==reference for job in results for r in job['records']),
+        python_hash_seed=p.get('python_hash_seed'),
         protocol_sha256=io.sha(study/'protocol.json'),timing='paused')
     io.write(study/'summary.json',summary,True)
     io.write(study/'final_complete.json',dict(status='complete',summary_sha256=io.sha(study/'summary.json')),True)
@@ -100,6 +107,7 @@ def run(study):
 if __name__=='__main__':
     a=argparse.ArgumentParser();a.add_argument('--stage',choices=['prepare','run'],required=True)
     a.add_argument('--study',type=Path,required=True);a.add_argument('--parent',type=Path)
+    a.add_argument('--python-hash-seed',type=int)
     args=a.parse_args();study=args.study.resolve()
-    if args.stage=='prepare':prepare(study,args.parent.resolve())
+    if args.stage=='prepare':prepare(study,args.parent.resolve(),args.python_hash_seed)
     else:run(study)
