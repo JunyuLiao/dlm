@@ -36,3 +36,12 @@ def test_allkept_shortcut_does_not_run_correction_or_observation():
     r.state=dict(identity=(4,8,4),allkept=True)
     assert r.output(a,29,None,None,1.,8,4,out,lists) is out
     assert not r.counts
+
+
+def test_direction_guard_does_not_correct_a_row_already_at_dense_anchor():
+    a,lists,out=state();r=Runtime('residual_direction_guard');out=torch.ones_like(out)
+    r.projection=torch.eye(8)
+    r.state=dict(identity=(4,8,4),residual=torch.ones(4,1,8),
+        anchor_sparse_post=torch.zeros(4,8),anchor_dense_post=torch.ones(4,8))
+    assert torch.equal(r.output(a,29,None,None,1.,8,4,out,lists),out)
+    assert r.counts['extra_post_o_projections']==1

@@ -16,6 +16,7 @@ from pathlib import Path
 import torch
 
 from .v31_value_decision import OmittedCache, bounded_proposal, c_gate, moments
+from .v31_value_reuse_guard import residual_trust
 
 
 def distribution(scaled, entropy_bound=.1):
@@ -104,6 +105,9 @@ class Controller:
                 masks={label:native_mask.clone() for label in ('mass_anchor','full_swap8','online_swap8','full_cgate_swap8')})
         state=self.states[identity]
         correction={kind:torch.empty((1,n,16,512),device=f['q'].device,dtype=torch.float32) for kind in ('residual','moments')}
+        if anchor:
+            anchor_dense=torch.empty_like(correction['residual'])
+            anchor_sparse=torch.empty_like(anchor_dense)
         for h in range(16):
             kh=h//8
             for qt in range(qb):
@@ -118,10 +122,16 @@ class Controller:
                         selected,_=bounded_proposal(m,mask,swaps=8,gram=self.grams[h],online=online,weight=weight)
                         state['masks'][name][0,h,qt,:pt]=selected
                     state['caches'][h,qt]=OmittedCache.build(m,mask)
+                    anchor_dense[0,lo:hi,h]=m.dense()
+                    anchor_sparse[0,lo:hi,h]=m.output(mask)
                 for kind in correction:
                     correction[kind][0,lo:hi,h]=state['caches'][h,qt].reconstruct(m,mask,kind)
                 del m
         if anchor:
+            weight=layer.self_attn.o_proj.weight.float()
+            state['anchor_dense_post']=anchor_dense.reshape(n,-1)@weight.T
+            state['anchor_sparse_post']=anchor_sparse.reshape(n,-1)@weight.T
+            state['anchor_residual']=anchor_dense-anchor_sparse
             return None
         # Offline contiguous FA4 is distinct from the native alias-split path.
         # A same-mask numerical-floor arm measures that implementation gap.
@@ -129,6 +139,11 @@ class Controller:
                 for name,mask in state['masks'].items()}
         result['dense_reference']=v27_fa4.dense(f['q'],f['k'],f['v'],f['scale'])
         result.update({'correction_'+kind:o.to(f['q'].dtype) for kind,o in correction.items()})
+        current_post=result['mass_anchor'].float().reshape(n,-1)@layer.self_attn.o_proj.weight.float().T
+        for kind in ('direction','norm'):
+            alpha=residual_trust(current_post,state['anchor_sparse_post'],state['anchor_dense_post'],kind=kind)
+            result['correction_'+kind+'_guard']=(result['mass_anchor'].float()
+                +alpha[None,:,None,None]*state['anchor_residual']).to(f['q'].dtype)
         # Pure torch full-V reconstruction is also a distinct numerical path;
         # this is a diagnostic, not an unchanged-FA4 production claim.
         return result

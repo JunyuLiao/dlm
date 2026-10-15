@@ -12,9 +12,9 @@ import types
 import torch
 
 from .v31_value_decision import bounded_proposal, moments
-from .v31_value_reuse_guard import SelectedOnlyCorrection, reconstruct_cuda
+from .v31_value_reuse_guard import SelectedOnlyCorrection, reconstruct_cuda, residual_trust
 
-MODES=('full_swap8','online_swap8','residual','moments')
+MODES=('full_swap8','online_swap8','residual','moments','residual_direction_guard','residual_norm_guard')
 
 
 class Runtime:
@@ -51,9 +51,16 @@ class Runtime:
         self.add('held_calls',1)
         if self.mode.endswith('swap8'):
             return out                         # FA4 already used the replaced map
-        if self.mode=='residual':
+        if self.mode=='residual' or self.mode.startswith('residual_'):
             self.add('corrected_calls',1)
-            return (out.float()+self.state['residual'][None]).to(out.dtype)
+            correction=self.state['residual'][None]
+            if self.mode.startswith('residual_'):
+                current=out.float().reshape(n,-1)@self.projection.T
+                kind='direction' if self.mode=='residual_direction_guard' else 'norm'
+                alpha=residual_trust(current,self.state['anchor_sparse_post'],self.state['anchor_dense_post'],kind=kind)
+                correction=correction*alpha[None,:,None,None]
+                self.add('extra_post_o_projections',1)
+            return (out.float()+correction).to(out.dtype)
         from .v31_stable_observe import observe, tile_ids
         h,qb=q.shape[1],(n+127)//128
         keep=st['kept'][0].reshape(h*qb,-1)
@@ -113,6 +120,12 @@ class Runtime:
         else:
             self.state['residual']=dense-sparse
             self.state['correction']=SelectedOnlyCorrection.from_anchor(dense,dl,sparse,sl,identity)
+            if self.mode.startswith('residual_'):
+                if not hasattr(self,'projection'):
+                    self.projection=self.model.model.layers[29].self_attn.o_proj.weight.float()
+                self.state['anchor_dense_post']=dense.reshape(n,-1)@self.projection.T
+                self.state['anchor_sparse_post']=sparse.reshape(n,-1)@self.projection.T
+                self.add('extra_post_o_projections',2)
         self.add('anchor_events',1)
         self.add('anchor_full_qk_rectangles',h*qb*((prefix+n+63)//64))
         self.add('anchor_full_pv_rectangles',h*qb*((prefix+n+63)//64))
