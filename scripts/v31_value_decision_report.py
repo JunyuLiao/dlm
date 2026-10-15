@@ -20,6 +20,8 @@ def report(study):
         assert m['protocol_sha256']==io.sha(study/'protocol.json')
         assert m['records_sha256']==io.sha(done.parent/'records.jsonl')
         p=done.parent/'decisions/decisions.jsonl'
+        if m.get('decisions_sha256') is not None and m['decisions_sha256']!=io.sha(p):
+            raise RuntimeError('completed decision records changed')
         inputs[str(p.relative_to(study))]=io.sha(p)
         r=[json.loads(x) for x in p.read_text().splitlines()]
         if not r:raise RuntimeError('no same-state decision measurements')
@@ -31,6 +33,7 @@ def report(study):
             'kl_mean','kl_max','entropy_mean','stop_flip','top1_disagreement_unsettled',
             'acceptance_disagreement_unsettled','kl_unsettled_mean']
     for r in first:
+        if r.get('sparse_benefit_eligible') is False:continue
         if 'mass_anchor' not in r['metrics']:raise RuntimeError('missing matched mask reference')
         for arm,v in r['metrics'].items():
             comparisons[r['dataset'],arm,'all'].append((r,v))

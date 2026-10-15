@@ -34,7 +34,7 @@ The norm-only ablation suppresses more correction. Theory and a checked
 surrogate-regret bound are in `docs/V31_CAUSAL_VALUE_RESIDUAL_GUARD_20261015.md`;
 it is not an accuracy or current-dense improvement guarantee.
 
-Running: `suffix_qualification_attempt005/`, source `3894ba76`, an explicitly
+Running: `suffix_qualification_attempt006/`, source `604446fb`, an explicitly
 eager model diagnostic with the native sampler unchanged. Attempt004 fixed
 observer pointer lifetime, but compilation boundaries still changed native
 trajectories (119 versus106 calls) and repeated suffix logits (4/256 top1
@@ -42,9 +42,13 @@ mismatches). It is rejected. The new eager diagnostic must match uninstrumented,
 observer-disabled and active trajectories twice, and retain exact suffix parity.
 These are common eager states, not production compiled V31 states. Accuracy
 will use separate fresh compiled controls if a method passes the decision gate.
-All earlier failed attempts are retained. No native accuracy panel has launched.
+Attempt005 stopped before model loading because the inherited adapter CLI
+requires PIECEWISE. Attempt006 keeps that CLI label but explicitly forces
+compilation mode0, enforce_eager=True and actual graph NONE; receipts must
+confirm NONE and zero captures. All failed attempts are retained. No native
+accuracy panel has launched.
 
-All57 H100 tests pass, including full-width fused adjoint correction. The causal
+All59 H100 tests pass, including full-width fused adjoint correction. The causal
 direction guard now caches W^T W r at observations and uses one fused row dot
 product/correction kernel on held calls, removing the extra held-step O GEMM.
 Its source is `5ea0e263`; the qualification worker is an immutable separate

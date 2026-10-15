@@ -33,7 +33,7 @@ Correction changes the output consumer and is reported separately from selection
 
 ## Sequential diagnostic qualification
 
-`suffix_qualification_attempt005/` is the current frozen last-GLOBAL-layer
+`suffix_qualification_attempt006/` is the current frozen last-GLOBAL-layer
 instrumentation qualification. It compares uninstrumented, observer-disabled,
 and observer-active native trajectories twice, checks repeated suffix logits,
 and checks RNG and adapter counters. All suffix calls are offline diagnostics.
@@ -47,15 +47,18 @@ fails native trajectory/suffix equivalence. Attempt005 therefore uses an explici
 eager diagnostic model, with matched eager controls and the exact parity gate
 retained. Its states are not production compiled V31 states. Failed attempts
 are excluded from method comparisons. Production accuracy requires fresh compiled
-controls after the decision gate.
+controls after the decision gate. Attempt005 failed at the inherited CLI
+mode check before model loading. Attempt006 explicitly overrides the runtime
+to eager/mode0/NONE behind the required PIECEWISE CLI label, and validates
+the resolved runtime mode in every record.
 
 Resume the current frozen coordinator from the repository root using the pinned
 H100 interpreter and the absolute study path:
 
 ```
 PYTHONPATH=src:. /home/exouser/dyh/v31_env_20261005/bin/python \
-  results/v31_value_decision_reuse_20261015/suffix_qualification_attempt005/coordinator_source.py \
-  --stage run --study /home/exouser/ljy/dlm/results/v31_value_decision_reuse_20261015/suffix_qualification_attempt005
+  results/v31_value_decision_reuse_20261015/suffix_qualification_attempt006/coordinator_source.py \
+  --stage run --study /home/exouser/ljy/dlm/results/v31_value_decision_reuse_20261015/suffix_qualification_attempt006
 ```
 
 The coordinator verifies source/input hashes, skips validated completed leaves,

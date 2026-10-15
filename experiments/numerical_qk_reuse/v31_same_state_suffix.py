@@ -249,6 +249,8 @@ class Controller:
             raise RuntimeError('offline suffix changed native attention counters')
         item=dict(schema='last_global_same_state_decision_v1',request=f['request'],dataset=f['dataset'],canvas=f['canvas'],
             call=f['call'],age=f['age'],layer=29,rows=n,metrics=values,offline_suffix_calls=self.suffix_calls,
+            prefix_tiles=f['prefix']//64,budget=f['adapter'].mage_k//64,
+            sparse_benefit_eligible=f['prefix']//64>f['adapter'].mage_k//64,
             common_noise_source='private coupled diagnostic Gumbel; not the compiled native realization',
             intervention_scope='layer29 only; all preceding native states identical',timing='paused')
         with (self.root/'decisions.jsonl').open('a') as stream:
