@@ -75,3 +75,22 @@ in `decisions_aime26_attempt001/report/summary.md`; these are same-state
 decision metrics, not official task scores. The native gate now binds H100
 test evidence to every refinement source and test file. Updated GPU pair
 ranking and the full-V ordered online-risk kernel still await that test run.
+
+The initial four-workload decision batch is now complete, with all35 native
+pairs preserving output/N/C/T and exact suffix parity. Item-level results are
+in `decision_analysis/summary.md`. MATH has zero sparse frames, so its completed
+job cannot pass the sparse-method gate. All70 expanded H100 tests subsequently
+passed; see `receipts/h100_qualification/attempt001/receipt.json`.
+
+`coverage_protocol.json` freezes a separate purposive panel: eight unseen long
+MATH controls and14 remaining RULER vt/cwe items, selected without correctness.
+The source is a6f339fe. It uses the qualified online traversal/pair-ranking
+optimizations and the same fixed budgets. Resume with:
+
+```
+PYTHONPATH=src:. /home/exouser/dyh/v31_env_20261005/bin/python \
+  scripts/v31_value_coverage_batch.py --stage run
+```
+
+Follow `coverage_state.json`; inspect about every30 minutes. Native accuracy
+and timing remain gated/paused respectively.

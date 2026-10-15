@@ -1816,3 +1816,23 @@ consumer versus native numerical floor is measured. Actual execution is eager
 NONE; this does not establish compiled production behavior, official accuracy,
 denoising-call improvement or speedup. Failed earlier attempts are excluded.
 Broader decisions are a separate incomplete panel; clean timing remains paused.
+
+## 2026-10-15 — Initial multi-workload same-state decisions complete
+
+Study:`results/v31_value_decision_reuse_20261015/`; sourcebb2789ca;
+`decision_batch_complete.json` binds all four complete reports. All35 paired
+items (70 native trajectories) preserve output hashes,N,C,T with exact eager
+suffix parity. Sparse-frame counts: LongBench99 (eight items), AIME35 (five),
+RULER14 (five), MATHzero. The initial MATH result supplies invariance evidence
+only; no sparse-method benefit can be claimed. See `decision_analysis/summary.md`
+for request-clustered descriptive comparisons and numerical-floor limits.
+
+LongBench mass/direction-guard/moment top1 disagreements are1068/792/573;
+acceptance disagreements134/125/105. RULER corresponding top1 counts24/12/9
+and acceptance4/8/4 show that lower KL/top1 error need not improve acceptance.
+Raw residual delays one dense-reference stop on LongBench; moments delay one
+on RULER. These are offline suffix interventions, not task accuracy or speedup.
+All70 expanded pinned-H100 correctness tests pass with zero skips under
+source7ab08253, including full-V ordered online traversal and fixed-K ranking;
+receipt:`receipts/h100_qualification/attempt001/receipt.json`. Native accuracy
+remains unlaunched pending a separately frozen sparse-coverage extension.
