@@ -1839,3 +1839,34 @@ measurements, not superiority/noninferiority or full503 evidence. Selector audit
 cost, native trajectory and physical output-consumer versus observation work
 remain separate. Clean timing is intentionally absent. See summary.md and
 interpretation.md in the scoped report directory.
+
+
+## 2026-10-15: Complete only V2 tau=0.021 on LongBench-v2; retain V31 as accuracy reference
+
+The user resumed only the 503-item seed-1 V2 arm. Campaign
+`results/v31_v2_tau021_longbench_20261015/` preserves the exact 886-file
+execution snapshot and 24 inputs from source `ab05d324`; coordinator/spec
+freeze is `910504b8`. Repeated V31/FULL/PIECEWISE/all-kept qualification cells
+match all output hashes and N/T/C, allowing reuse of their complete matched
+controls. Official scoring and independent source/receipt validation are
+complete for all 503 items per arm, with zero invalid/missing/capture/LOCAL
+errors. Original artifacts are unchanged.
+
+V2 scores 254/503 (50.50%) versus inherited Yuhan V31 268/503 (53.28%) and
+FULL/PIECEWISE dense 247/503 (49.11%); all-kept scores 252/503. The V2-minus-V31
+paired accuracy delta is -2.783 pp, 95% bootstrap CI [-6.362,+0.795], exact
+McNemar p=0.1654. No accuracy improvement or preservation is established.
+V2 native calls fall 11.635% (247.59 versus 280.19/problem), but only 253/503
+problems use fewer calls, 247 use more, and three tie. Kept GLOBAL work falls
+10.114% (5,243,209,214 versus 5,833,185,760), while GLOBAL sparsity is 82.54%
+versus 83.20%. This is an unequal-total-work native trajectory comparison.
+Retain per-item and early-survivor-cohort receipts rather than inferring equal
+work from sparsity. Selector discovery/selection cost stays separate, and
+audit wall time is not clean latency.
+
+All other thresholds, finer sweeps, timing and the separate refresh study
+remain paused. The completed 0.021 arm may be referenced in place on an
+explicitly authorized future sweep resume. Verified reports and completion:
+`summary.md`, `interpretation.md`, `paired_comparisons.json`,
+`receipts/independent_verification.json`, and `final_complete.json` in the
+campaign above.

@@ -1,3 +1,50 @@
+## V2 tau=0.021 LongBench complete — 2026-10-15
+
+The user authorized only the complete 503-item seed-1 V2 0.021 arm. It is done
+under `results/v31_v2_tau021_longbench_20261015/`, with `final_complete.json`,
+official scoring and independent verification. Other thresholds, finer sweeps,
+clean timing and the separate full503 refresh study remain paused. H100 is idle.
+
+Generation source is the original byte-frozen `ab05d324773c7a38d60b5c83a2d62e6f575b1cce`;
+coordinator/spec freeze `910504b8`. All 886 source files and 24 inputs match the
+2026-10-14 threshold campaign. All four controls were repeated on two cells
+each, with zero output/N/T/C differences, before reusing their completed 503
+records. Original control artifacts and pause/report markers remain unchanged.
+
+V2 scores 254/503 (50.50%), inherited Yuhan V31 268/503 (53.28%), FULL fix51994
+and PIECEWISE dense each 247/503 (49.11%), and all-kept FA4 252/503 (50.10%).
+V2-minus-V31 is -2.783 pp, paired 20k-draw bootstrap CI [-6.362, +0.795], exact
+McNemar p=0.1654. V2-minus-FULL is +1.392 pp, CI [-2.584, +5.368], p=0.5584.
+This is no demonstrated accuracy gain or preservation versus V31.
+
+V2 uses 124,538 denoising forwards / 247.59 per problem, compared with V31
+140,936 / 280.19 (-11.635%). Canvases are 6,504 versus 6,833; N/C 19.148
+versus 20.626; tokens 1,598,393 versus 1,684,180. Calls fall on 253 problems,
+rise on 247, and tie on three; median paired delta is -1 call. The mean
+trajectory reduction is not uniform. Correctness overlap: 217 both correct,
+37 V2-only, 51 V31-only, 198 both wrong.
+
+GLOBAL kept work is 5,243,209,214 versus 5,833,185,760 (-10.114%). Eligible
+work is 30,032,440,160 versus 34,713,640,000. GLOBAL sparsity is 82.54% versus
+83.20%; lower native work changes the denominator. This is not equal total
+retained work. Through canvas 8, kept-work ratio is 0.99703 on 263 paired
+native survivor items; through canvas 20 it is 1.00936 on only 42. Per-item
+differences are retained; these changing cohorts are not the full panel.
+
+Done: four immutable V2 shards; exact selector-only/FA4 and GLOBAL-only
+receipts; complete scorer coverage; all 2,515 candidate/reference cells
+independently reaggregated; source/binding/phase/work checks; zero invalid
+rows, missing scores, request captures or LOCAL skips. Selector discovery
+and evaluation each count 2,881,671,520 rectangles, separate from FA4 work.
+Recorded audit times are not clean latency or throughput evidence.
+
+Reports: `summary.md`, `interpretation.md`, `metrics.csv`,
+`paired_comparisons.json`, `native_trajectory_comparison.json`,
+`cumulative_canvas_work.{json,csv}`, `phase_accounting.csv`,
+`cost_separation.json`, `receipts/independent_verification.json`.
+Running: none. Future user-authorized sweep continuation should reference this
+completed 0.021 arm with its existing hashes instead of regenerating it.
+
 ## Full503 refresh study — 2026-10-15 paused after shard02
 
 The latest user instruction is to pause after shard02 and wait for their resume

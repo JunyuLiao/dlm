@@ -1,0 +1,62 @@
+{
+  "longbench_geometry": {
+    "block": 32,
+    "chunk": 16384,
+    "count": 503,
+    "dataset": "longbench_v2_0shot_think",
+    "mage_k": 8192,
+    "max_len": 141312,
+    "memory": 0.85,
+    "shards": 4
+  },
+  "longbench_schedule": {
+    "cells_sha256": "0b479f0af7a1a4d0cbcadac5d58c0ec962749e51b972b5d34903ef0b17bc00ce",
+    "count": 503,
+    "problem_count": 503,
+    "seeds": [
+      1
+    ]
+  },
+  "model_inventory_sha256": "8efd551fa40908fc5747be476cec848be6831fc537679c468c76a1858bf32bf8",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "native": {
+    "canvas": 256,
+    "carry": true,
+    "confidence": 0.1,
+    "denoise_steps": 48,
+    "entropy": 0.005,
+    "mass_anchor": 0,
+    "progress_trigger": 0.15,
+    "projection_rank": 32,
+    "projection_seed": 1729,
+    "seed_base": 31,
+    "select_step": 1,
+    "stability": 1,
+    "sticky": 1.386,
+    "temperature": [
+      0.8,
+      0.4
+    ],
+    "thinking": true
+  },
+  "protocol_sha256": "a273c4f38f5f50040307ada0c7a51a8f126593980e39099138e90ecdfb410768",
+  "runtime": {
+    "gpu": "NVIDIA H100 80GB HBM3, GPU-1ef41b0c-39fa-fea6-ec30-392d06c5e0ee, 590.48.01",
+    "host_sha256": "66f6c4a48143633348177f67d61c43161ae04ffc6e746451b40b483cfef70cd9",
+    "packages": {
+      "latex2sympy2-extended": "1.11.0",
+      "math-verify": "0.9.0",
+      "sympy": "1.14.0",
+      "torch": "2.13.0",
+      "vllm": "0.30.0"
+    },
+    "runtime_sources": {
+      "vllm/model_executor/models/diffusion_gemma.py": "748157602927082f5fd95f96bec5ac43b55d1e34a42094f0ab5e5ddc6acb0146",
+      "vllm/vllm_flash_attn/cute/flash_fwd_sm90.py": "692156e78b190853bc1824661f2dc9878f4fe0b749211f754dfdcc7c8b8de8d2",
+      "vllm/vllm_flash_attn/flash_attn_interface.py": "d6fccbb0fe1931c79013f5942199c5c9cbba0eedd7ac5ff037f55db19c38421a"
+    },
+    "torch_cuda": "13.0"
+  },
+  "selector": "value_v2_online_preserve_mass",
+  "threshold": 0.021
+}

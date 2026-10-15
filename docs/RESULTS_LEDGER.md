@@ -1737,3 +1737,28 @@ bundle are published for the existing completed studies. The newer 13-arm
 full503 refresh study is a generation checkpoint with no final score here;
 the local V2 sweep remains user-paused. Neither supplies a new whole-campaign
 accuracy or clean throughput claim.
+
+
+## V2 tau=0.021 LongBench-v2 completion — 2026-10-15
+
+Complete official seed-1 panel: 503 items per arm. Source `ab05d324` frozen
+bytewise; runtime and controls reproduced before reuse. Campaign:
+`results/v31_v2_tau021_longbench_20261015/`.
+
+| Method | Official correct | Accuracy | N/problem | N/C | Output tokens/problem | Kept GLOBAL tiles | GLOBAL sparsity |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| inherited Yuhan V31 | 268/503 | 53.28% | 280.19 | 20.63 | 3348.3 | 5,833,185,760 | 83.20% |
+| FULL fix51994 dense | 247/503 | 49.11% | 324.74 | 21.42 | 3754.3 | 41,562,284,640 | 0% |
+| PIECEWISE dense | 247/503 | 49.11% | 324.74 | 21.42 | 3754.3 | 41,562,284,640 | 0% |
+| all-kept FA4 | 252/503 | 50.10% | 292.76 | 20.64 | 3501.8 | 36,334,866,240 | 0% |
+| V2 tau=0.021 | 254/503 | 50.50% | 247.59 | 19.15 | 3177.7 | 5,243,209,214 | 82.54% |
+
+V2-minus-V31: -2.783 pp, paired 95% bootstrap CI [-6.362,+0.795], exact
+McNemar p=0.1654. V2-minus-FULL: +1.392 pp, CI [-2.584,+5.368], p=0.5584.
+V2 uses 11.635% fewer mean native calls and 10.114% less total retained
+GLOBAL work, with no demonstrated accuracy gain or preservation versus V31.
+The call reduction is not uniform (253 fewer / 247 more / 3 equal). This is
+previously examined benchmark evidence, not held-out confirmation, equal
+retained work, or a clean latency result. Other thresholds and timing stay
+paused. Sources: campaign `summary.md`, `metrics.csv`, `paired_comparisons.json`,
+`receipts/independent_verification.json`, `final_complete.json`.
