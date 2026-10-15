@@ -21,6 +21,18 @@ def test_guard_handles_zero_residual_and_reaches_old_dense():
     assert torch.equal(residual_trust(old,old,old),torch.zeros(2))
 
 
+def test_direction_guard_regret_bound_including_clipped_optima():
+    g=torch.Generator().manual_seed(81)
+    old,dense,current,new_dense=[torch.randn(128,17,generator=g,dtype=torch.float64) for _ in range(4)]
+    r=dense-old; r2=r.square().sum(-1)
+    alpha=residual_trust(current,old,dense)
+    oracle=(-(current-new_dense).mul(r).sum(-1)/r2).clamp(0,1)
+    regret=(current+alpha[:,None]*r-new_dense).square().sum(-1)-(current+oracle[:,None]*r-new_dense).square().sum(-1)
+    bound=((new_dense-dense)*r).sum(-1).square()/r2
+    assert bool((regret>=-1e-12).all())
+    assert bool((regret<=bound+1e-12).all())
+
+
 def example(device='cpu', dim=8):
     g=torch.Generator().manual_seed(8)
     values=torch.randn((2,5,64,dim),generator=g,device='cpu').to(device)
