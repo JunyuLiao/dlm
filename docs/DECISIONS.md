@@ -1815,3 +1815,27 @@ Use run_<arm>.private.jsonl in the separately recorded root reporter and record
 its source hash. The operational post-generation report command now uses that
 reporter. Frozen native source bytes, inputs, sampler and all generation paths
 are unchanged. This amendment authorizes no additional GPU work or resume.
+
+
+## 2026-10-15 — Two-shard interim report complete; generation paused
+
+Completed the requested boundary: 13 arms x 252 problems, 26 validated shards,
+3,276 officially scored cells, generation source 98a37a14 unchanged. Native
+sampler/source/input/runtime and completed-artifact checks pass, with zero budget,
+LOCAL-routing, order or request-capture errors. No shard03 launched, all study
+workers stopped naturally, and the queue controller terminated after the boundary.
+The H100 is idle. Resume requires explicit user instruction; 251 problems per
+arm remain. Scoped completion: full503 study reports_shards01_02_attempt001/
+partial_complete.json. No full-study final_complete.json exists.
+
+Fresh every-step scores 134/252 versus V31 130/252, mean N -7.76%, but the
+accuracy difference interval spans -3.57 to +6.75 pp and N increases on 129
+problems. No cheap-refresh arm exceeds V31's observed accuracy. Stable no-progress
+s2 leads cheap accuracy at 127/252; N is -4.15%, output length -8.16%, mean N/C
++1.10%, and p95 N rises from 727.15 to 811.65. The four crossed s2 arms show
+conditional stability/progress effects, with stability signs reversing between
+shards; every accuracy-contrast interval includes zero. Treat these as interim
+measurements, not superiority/noninferiority or full503 evidence. Selector audit
+cost, native trajectory and physical output-consumer versus observation work
+remain separate. Clean timing is intentionally absent. See summary.md and
+interpretation.md in the scoped report directory.

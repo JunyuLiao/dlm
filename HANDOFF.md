@@ -1,48 +1,37 @@
-## Full503 refresh study — 2026-10-15 user-requested pause after shard02
+## Full503 refresh study — 2026-10-15 paused after shard02
 
-The latest user instruction supersedes the earlier run-to-completion request:
-finish the final FULL dense shard02 worker, report both completed shards, then
-pause. Do not launch shard03 or resume generation without explicit user input.
-The queue coordinator (PID 1630980) is SIGSTOPped; its active native campaign
-(PID 1695904) continues normally. The boundary guard finalizes the clean 26th
-shard and terminates only that stopped coordinator after the worker exits.
-No native worker is killed. See PAUSE_AFTER_SHARD02_REQUEST.json in the study.
+The latest user instruction is to pause after shard02 and wait for their resume
+choice. This overrides the older run-to-completion instruction below. At
+03:54:07 UTC all 26 shards completed cleanly: 13 arms x 252 matched seed-1
+LongBench-v2 problems = 3,276 native cells. Shard03 never launched. The queue
+controller was suspended while FULL shard02 finished naturally, then terminated;
+no native worker was killed. H100 was verified idle (0 MiB / 0%) at 03:54 UTC.
+No study worker remains. Resume only on explicit user instruction.
 
 Study: `results/v31_full503_refresh_20261014/`; generation source `98a37a14`,
-immutable 1,171-file execution copy unchanged. CPU report source is separately
-identified in `reports_shards01_02_attempt001/specs/analysis_protocol.json`.
-Twelve arms are already officially scored on 252 matched cells each; FULL
-shard02 is pending. Boundary guard session 80491 and CPU report watcher 17232
-will create PAUSED_USER_REQUEST.json and the scoped partial_complete.json.
-No full-study final_complete.json may be created from this partial panel.
+all 1,171 frozen executable files and inputs unchanged. Verified analysis freeze
+commit: `12dbfc8d`. Scoped completion, official scoring, paired intervals and
+fairness receipts are under `reports_shards01_02_attempt001/`; see summary.md,
+interpretation.md, native_results.json and partial_complete.json. The full study
+has no final_complete.json: another 251 problems per arm / 26 shards remain.
+PAUSED_USER_REQUEST.json and queue_state.json preserve the boundary and hashes.
 
-A CPU-only full-report filename defect was also corrected outside the frozen
-execution copy: official scoring requires run_<arm>.private.jsonl rather than
-bare completions.jsonl. The operational runner now uses the separately hashed
-root reporter after any future authorized completion. This changes no native
-worker, model, sampler, selector or source/input hash; see qualification/
-cpu_reporting_amendment.json. No resumed generation is authorized by this fix.
-Next: verify the pause and the 3,276-cell official partial report, present the
-252-problem results with uncertainty and trajectory metrics, then stop.
+Observed results: fresh every-step 134/252 versus inherited Yuhan V31 130/252,
+mean N 269.02 versus 291.66 (-7.76%). Its accuracy delta interval spans -3.57 to
++6.75 pp; N increases on 129/252 problems, so this is not an established or
+uniform per-problem gain. No cheap arm beats V31's observed score. Best cheap
+accuracy is stable no-progress s2, 127/252 with mean N -4.15%, but output length
+is -8.16%, mean N/C +1.10%, and p95 N 811.65 versus V31 727.15. Stability's
+accuracy effect at s2 is -6 with progress and +2 without, with sign reversals
+between shards. All accuracy-contrast intervals include zero. This is partial,
+previously examined benchmark evidence; do not promote it to a 503-cell claim.
+
+All source/receipt/fairness, physical budget, LOCAL-dense and request-capture
+checks pass. The CPU-only full-report filename amendment is source-recorded in
+qualification/cpu_reporting_amendment.json; future authorized runs use the
+separately hashed root reporter. It changes no frozen generation source, worker,
+selector or sampler. No further generation is authorized by this amendment.
 Clean timing and the separate V2 threshold campaign remain paused.
-
-## Research publication — 2026-10-15
-
-The current week is documented separately in
-`docs/research_week_20261015/01_VALUE_AWARE_METHODS.md`,
-`02_V2_THRESHOLD_CALIBRATION.md`, and `03_CHEAP_CACHED_REFRESH.md`.
-`results/research_week_20261015/` contains sanitized derived evidence, original
-and exported hashes, and a source inventory captured from checkpoint `53859740`
-plus the publication changes. This includes the previously untracked scripts
-and tests and the pending selector/kernel/launcher updates. Public reproduction
-entrypoints take explicit private input paths; frozen source runs are untouched.
-
-The V2 local sweep stays paused and the full503 refresh campaign retains its
-independent frozen execution/continuation. Publication launches no generation
-or timing and makes no new full503 accuracy claim. Corrected V2 C=20 differences
-are +7.74% (tau .015, 50 common visible-canvas items) and +3.07% (tau .021, 45);
-the old lifecycle-axis early-work claims are superseded, with total work and
-accuracy unchanged. Read the existing campaign sections below for their scope.
 
 ## Full503 refresh comparison — 2026-10-14 native run resumed
 
