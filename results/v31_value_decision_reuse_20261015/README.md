@@ -1,21 +1,23 @@
 # Fixed-budget value direction and reuse study
 
-Current status, October16: same-state diagnostics,71 H100 method tests and
-the two-engine process-matched qualification are complete. The original native
-AIME panel remains interpretation-held because original V31 varies between
-processes despite identical request seeds. Within each common engine, repeated
-controls and inactive candidates match exactly, including after active value
-interventions. The first observed numerical difference lies after layer0
-attention and before layer1 attention; its root cause remains unresolved.
+Current status,01:05 UTC October16: the process-matched replacement passed
+all four workload qualifications, then stopped automatically on its first
+accuracy shard. One of nine V31 control bookends differed on a long capped
+AIME case; eight matched exactly. The54 raw requests and failed receipt are
+preserved. No native accuracy gain is established, and the shard is excluded
+from method inference. See `native_process_matched_attempt001/repeatability_failure/attempt001/`.
 
-`native_process_matched_attempt001/` is the separately frozen replacement.
-It uses per-problem V31 control bookends, rotated candidate order, and fresh
-named dense/all-kept references. Its AIME shared smoke passed two control
-bookends and all candidate receipt checks; all four workload qualification
-gates must pass before panel expansion. See its README, protocol and state.
-Do not resume `native_development_attempt002/` or mix its scores into the new
-campaign. Clean timing remains paused; no speedup is established. Historical
-stage notes below record progress, not current launch permission.
+A control-only input-history diagnostic is frozen under
+`native_control_history_20261016_attempt001/`: two original V31 engines,
+AIME indices0,10,20 seed42, six consecutive repeats per input, no value
+intervention. The failed pair coincided with the first active value computation;
+initialization is a hypothesis to test, not an explanation already established.
+Do not silently drop that case or retry accuracy until it happens to pass.
+
+The original independent-process AIME panel also remains interpretation-held.
+Same-state diagnostics,71 H100 method tests, the smaller interleaved diagnostic,
+and all four workload qualifications remain scoped completed evidence. Clean
+timing remains paused. Historical stage notes below are not launch permission.
 
 Authorized scope: three independently implemented directions, same-state
 diagnostics before task accuracy, fixed per-query-tile K, and clean timing paused.
