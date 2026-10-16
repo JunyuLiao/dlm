@@ -1,15 +1,21 @@
 # Fixed-budget value direction and reuse study
 
-Current status,22:33 UTC October15: same-state diagnostics and the71-test
-H100 qualification are complete. Native expansion is held for an additional
-repeatability audit: inactive variants differ from V31 despite matching
-request seeds and settings. See
-`native_development_attempt002/native_noop_precheck/summary.json` and
-`native_development_attempt002/expansion_hold.json`. The final AIME control
-shard is allowed to finish; the coordinator is held before another workload.
-`native_noop_attempt001/` freezes a same-request/same-seed repetition diagnostic.
-No method-accuracy conclusion is valid until this discrepancy is explained.
-Historical stage notes below record progress, not the current launch permission.
+Current status, October16: same-state diagnostics,71 H100 method tests and
+the two-engine process-matched qualification are complete. The original native
+AIME panel remains interpretation-held because original V31 varies between
+processes despite identical request seeds. Within each common engine, repeated
+controls and inactive candidates match exactly, including after active value
+interventions. The first observed numerical difference lies after layer0
+attention and before layer1 attention; its root cause remains unresolved.
+
+`native_process_matched_attempt001/` is the separately frozen replacement.
+It uses per-problem V31 control bookends, rotated candidate order, and fresh
+named dense/all-kept references. Its AIME shared smoke passed two control
+bookends and all candidate receipt checks; all four workload qualification
+gates must pass before panel expansion. See its README, protocol and state.
+Do not resume `native_development_attempt002/` or mix its scores into the new
+campaign. Clean timing remains paused; no speedup is established. Historical
+stage notes below record progress, not current launch permission.
 
 Authorized scope: three independently implemented directions, same-state
 diagnostics before task accuracy, fixed per-query-tile K, and clean timing paused.
