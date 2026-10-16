@@ -2193,3 +2193,11 @@ of reconstruction do not establish a better native accuracy/call tradeoff.
 Full swaps remain ineligible for the all-workload screen because AIME N rose.
 Complete the unchanged remaining workloads. Keep clean timing paused and
 report extra discovery work separately from retained consumer tiles.
+
+The complete-cohort correctness/trajectory cross-tab further shows that one
+always-wrong capped cell accounts for58.56% of net LongBench call savings:
+2549→337 calls and16384→3026 tokens. Both candidate repetitions terminate
+natively, both remain wrong, while all four controls hit the length cap.
+Twenty-six always-correct cells save38.231 calls on average (17 fewer,8 more,
+1 tie). This conditioned subset is descriptive only. Describe the headline
+N gain as concentrated tail reduction, not proof of better reasoning.

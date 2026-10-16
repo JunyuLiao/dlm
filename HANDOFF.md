@@ -17,7 +17,10 @@ The N reduction is concentrated:41/64 cells have fewer calls,22 more,1 tie;
 median paired delta-10.875. Five largest reductions explain89.69% of the net
 saving; excluding them leaves-6.602 calls/cell (sensitivity only). Algebraic
 N decomposition: -25.376 from fewer canvases and-33.640 from fewer calls/canvas.
-This is descriptive, not a causal explanation. Control bookends have6 output
+This is descriptive, not a causal explanation. One always-wrong capped case
+accounts for58.56% of net savings (2549→337 calls,16384→3026 output tokens).
+The26 always-correct cells also save38.231 calls on average; this outcome-
+conditioned subset is descriptive, not a replacement estimand. Control bookends have6 output
 hash differences/128, one official-score disagreement; seven groups have
 some control metric drift. Across engines, first-control hashes differ4/64.
 

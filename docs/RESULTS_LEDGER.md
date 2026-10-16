@@ -1938,3 +1938,9 @@ Sources: `reports/longbench_v2/summary.json`, `summary.md`, `final_complete.json
 layer29-only value changes and native sampling unchanged. The whole study
 remains incomplete (MATH/RULER pending); AIME already blocks full503 promotion
 for all four current variants under the predeclared all-workload screen.
+
+Additional complete-cohort diagnostic: `reports/longbench_v2/correctness_trajectory_diagnostic.json`.
+One always-wrong capped problem contributes58.56% of the net call saving
+(2549→337 calls;16384→3026 tokens).26 always-correct problems average38.231
+fewer calls (17 fewer,8 more,1 tie). Correctness-conditioned groups are post hoc
+descriptions, not causal estimates or substitutes for the full-cohort result.
