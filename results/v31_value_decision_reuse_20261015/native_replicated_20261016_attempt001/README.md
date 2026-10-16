@@ -31,3 +31,8 @@ PYTHONPATH. Completed engine shards verify hashes and are skipped. Interrupted
 or structurally failed workers receive new immutable attempt directories.
 Output drift does not cause a retry. Check approximately every30 minutes.
 One worker at a time; do not resume other paused coordinators.
+
+At03:38 UTC all four two-engine workload qualifications passed with official
+scoring. Replicated accuracy has started; no complete accuracy workload yet.
+The report-path CPU dry-run passed repetition arithmetic and deterministic
+resume using qualification schema; its temporary smoke reports were removed.

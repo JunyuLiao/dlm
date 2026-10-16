@@ -24,6 +24,15 @@ Follow the new study state.json and completion markers. Other coordinators
 stay paused, including PID1799129. Clean timing stays paused. No native
 method gain is established yet. Monitor long jobs about every30 minutes.
 
+At 03:38 UTC all four replicated workload qualifications passed with official
+scoring and source/fixed-K/scope/capture checks. AIME accuracy generation is
+starting under the frozen coordinator (PTY98458). Monitor its state.json;
+shared engine completion markers precede per-workload official reports.
+The CPU report integration also passed on qualified AIME schema (receipt
+replicated_report_dry_run/attempt002), including repetition arithmetic and
+identical resume. Harness attempt001 omitted a temporary protocol file; it
+is preserved as a harness failure and did not affect any generation.
+
 ## Prior process-matched attempt — repeatability hold
 
 At01:05 UTC native_process_matched_attempt001 stopped automatically on its

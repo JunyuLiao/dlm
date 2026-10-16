@@ -1,0 +1,60 @@
+{
+  "engine_audits": [
+    {
+      "attempt": "shared_qualification/longbench_v2/smoke/repeat001/attempt001",
+      "gpu_reservation_s": 440.0229945029132,
+      "groups": [
+        {
+          "control_N": [
+            218,
+            218
+          ],
+          "drift": [],
+          "index": 0,
+          "seed": 1
+        },
+        {
+          "control_N": [
+            134,
+            134
+          ],
+          "drift": [],
+          "index": 1,
+          "seed": 1
+        }
+      ],
+      "repeat": 1
+    },
+    {
+      "attempt": "shared_qualification/longbench_v2/smoke/repeat002/attempt001",
+      "gpu_reservation_s": 395.02581353602,
+      "groups": [
+        {
+          "control_N": [
+            292,
+            218
+          ],
+          "drift": [
+            "control bookend drift",
+            "control decoded text drift"
+          ],
+          "index": 0,
+          "seed": 1
+        },
+        {
+          "control_N": [
+            134,
+            134
+          ],
+          "drift": [],
+          "index": 1,
+          "seed": 1
+        }
+      ],
+      "repeat": 2
+    }
+  ],
+  "protocol_sha256": "c3c51ce17f22ba325c9ba6b85a588de15dd0969510da280fa38ae3f95821380a",
+  "scope": "structural receipt, fixed K, source, scope, sparse warmup and official scorer; drift retained",
+  "status": "passed"
+}
