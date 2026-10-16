@@ -2131,3 +2131,22 @@ four workload smoke gates (active exposure, control bookends, inactive parity
 where observed, exact budgets, scope and scorer binding) precede expansion.
 No accuracy, denoising-trajectory benefit, or speedup follows from the single-
 cell qualification. Clean timing remains paused.
+
+### 2026-10-16: Retain baseline variability in a replicated comparison
+
+All four process-matched smoke gates passed, but the first AIME accuracy
+shard failed one of nine control bookends (426 vs 446 calls, same capped
+length). Preserve the failed54-request attempt and its interpretation hold.
+The subsequent original-V31-only history diagnostic completes two engines,
+three inputs each, six repeats per input. One engine is exact; the other
+changes its sixth long-input repetition from395 to393 calls and changes output.
+This establishes that value intervention is not necessary for the drift.
+
+Run the predeclared ABBA warmup factor without selecting favorable engines.
+Prepare a separately named replicated native design with two engines per cell,
+mean-of-two-controls comparisons, reversed candidate order, official repeated
+scoring and both problem/task and engine-block uncertainty. Retain all
+structurally valid outputs. The old exact-parity study remains held; do not
+retroactively declare it valid. See V31_REPLICATED_NATIVE_PLAN_20261016.md.
+Same-state evidence, fixed K and unchanged method/sampler contracts remain.
+No new accuracy result or clean timing claim is established.

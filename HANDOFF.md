@@ -1,4 +1,23 @@
-## Value decision/reuse refinement — 2026-10-16, first-panel repeatability hold
+## Value decision/reuse refinement — 2026-10-16, replicated comparison design
+
+At 01:33 UTC the control-only history diagnostic is complete. Engine 1 repeats
+all three inputs exactly; engine 2 changes the sixth long-input repetition
+from 395 to 393 calls with a different output. No value intervention ran.
+Thus value initialization cannot be the sole explanation for observed drift.
+The frozen ABBA warmup factor is running under
+native_warmup_factor_20261016_attempt001 (source ed7c10ff, config 6adba203).
+All four jobs retain parity disagreements; structural failures still stop.
+
+Next design: docs/V31_REPLICATED_NATIVE_PLAN_20261016.md. A separately named
+two-engine-per-cell evaluation will average both control bookends, reverse
+candidate order across replicates, retain all structurally valid outcomes,
+and quantify control and engine variability. This explicitly replaces exact
+output parity as an efficacy inclusion rule; it does not relax source, K,
+scope, native-decoding or scorer gates. Do not start it before the warmup
+factor completes, the new protocol is frozen, and its workload smokes pass.
+No native method gain is established. Timing and other campaigns stay paused.
+
+## Prior process-matched attempt — repeatability hold
 
 At01:05 UTC native_process_matched_attempt001 stopped automatically on its
 first accuracy shard. All four workload qualifications had passed (72 audit
