@@ -1,0 +1,1090 @@
+{
+  "aggregation": "Average two candidate trials and four control bookends within each frozen input/seed cell",
+  "analysis_source_sha256": "e31d478eb456c422c7c53938572ee98aa24c5365512050a6787e31068847f98d",
+  "inference": "Outcome conditioning and tail trimming are post-treatment, descriptive, and selection-biased",
+  "methods": {
+    "full_swap8": {
+      "intervention_coverage": {
+        "anchor_events": 2626,
+        "corrected_calls": 0,
+        "held_calls": 20502,
+        "held_calls_per_anchor": 7.807311500380807,
+        "interpretation": "Receipt exposure counts, not causal treatment effects",
+        "trials": 128,
+        "trials_with_anchor": 128,
+        "trials_with_correction": 0,
+        "trials_with_swaps": 128
+      },
+      "outcome_conditioned": {
+        "always_full_credit_both": {
+          "N_changes": {
+            "equal": 1,
+            "fewer": 17,
+            "more": 8
+          },
+          "candidate": {
+            "C": 7.076923076923077,
+            "N": 123.5,
+            "T": 1655.7692307692307
+          },
+          "cells": 26,
+          "control": {
+            "C": 8.076923076923077,
+            "N": 161.73076923076923,
+            "T": 1930.4615384615386
+          },
+          "delta": {
+            "C": -1.0,
+            "N": -38.230769230769226,
+            "T": -274.69230769230785
+          },
+          "median_paired_delta_N": -9.5,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": -19.493320990603618,
+            "canvas_count_term": -18.737448240165634,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "always_zero_both": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 18,
+            "more": 12
+          },
+          "candidate": {
+            "C": 12.283333333333333,
+            "N": 227.46666666666667,
+            "T": 2998.45
+          },
+          "cells": 30,
+          "control": {
+            "C": 14.083333333333334,
+            "N": 311.5416666666667,
+            "T": 3470.866666666667
+          },
+          "delta": {
+            "C": -1.8000000000000007,
+            "N": -84.07500000000002,
+            "T": -472.41666666666697
+          },
+          "median_paired_delta_N": -5.0,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": -47.49934264931398,
+            "canvas_count_term": -36.57565735068607,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "higher_mean_score": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 3,
+            "more": 2
+          },
+          "candidate": {
+            "C": 15.6,
+            "N": 336.5,
+            "T": 3900.6
+          },
+          "cells": 5,
+          "control": {
+            "C": 14.95,
+            "N": 361.25,
+            "T": 3701
+          },
+          "delta": {
+            "C": 0.6500000000000004,
+            "N": -24.75,
+            "T": 199.5999999999999
+          },
+          "median_paired_delta_N": -11.75,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": -39.6136775362319,
+            "canvas_count_term": 14.863677536231894,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "lower_mean_score": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 3,
+            "more": 0
+          },
+          "candidate": {
+            "C": 10.333333333333334,
+            "N": 190.66666666666666,
+            "T": 2517.6666666666665
+          },
+          "cells": 3,
+          "control": {
+            "C": 11.666666666666666,
+            "N": 236.33333333333334,
+            "T": 2884.1666666666665
+          },
+          "delta": {
+            "C": -1.3333333333333321,
+            "N": -45.666666666666686,
+            "T": -366.5
+          },
+          "median_paired_delta_N": -16,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": -19.86082949308761,
+            "canvas_count_term": -25.805837173579086,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        }
+      },
+      "tail_sensitivity": {
+        "excluding_top5": {
+          "N_changes": {
+            "equal": 1,
+            "fewer": 36,
+            "more": 22
+          },
+          "candidate": {
+            "C": 10.313559322033898,
+            "N": 191.29661016949152,
+            "T": 2494.398305084746
+          },
+          "cells": 59,
+          "control": {
+            "C": 9.94915254237288,
+            "N": 197.89830508474577,
+            "T": 2413.0466101694915
+          },
+          "delta": {
+            "C": 0.3644067796610173,
+            "N": -6.601694915254257,
+            "T": 81.35169491525448
+          },
+          "median_paired_delta_N": -9,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": -13.605418316266222,
+            "canvas_count_term": 7.003723401011971,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "interpretation": "Post-hoc sensitivity, not a new primary estimate",
+        "net_sum_of_cell_mean_N_reductions": 3777.0,
+        "top5_cells": [
+          {
+            "candidate": {
+              "C": 12,
+              "N": 337,
+              "T": 3026
+            },
+            "control": {
+              "C": 64,
+              "N": 2549,
+              "T": 16384
+            },
+            "key": "longbench_v2_0shot_think|5|1|0",
+            "outcome_group": "always_zero_both"
+          },
+          {
+            "candidate": {
+              "C": 17,
+              "N": 237,
+              "T": 4190
+            },
+            "control": {
+              "C": 30,
+              "N": 612,
+              "T": 7516
+            },
+            "key": "longbench_v2_0shot_think|18|1|0",
+            "outcome_group": "always_zero_both"
+          },
+          {
+            "candidate": {
+              "C": 5,
+              "N": 105,
+              "T": 1104
+            },
+            "control": {
+              "C": 15,
+              "N": 418,
+              "T": 3693
+            },
+            "key": "longbench_v2_0shot_think|36|1|0",
+            "outcome_group": "always_full_credit_both"
+          },
+          {
+            "candidate": {
+              "C": 9,
+              "N": 159,
+              "T": 2199
+            },
+            "control": {
+              "C": 28.25,
+              "N": 420.5,
+              "T": 7075.75
+            },
+            "key": "longbench_v2_0shot_think|32|1|0",
+            "outcome_group": "always_zero_both"
+          },
+          {
+            "candidate": {
+              "C": 10,
+              "N": 165,
+              "T": 2371
+            },
+            "control": {
+              "C": 18,
+              "N": 391,
+              "T": 4437
+            },
+            "key": "longbench_v2_0shot_think|38|1|0",
+            "outcome_group": "always_full_credit_both"
+          }
+        ],
+        "top5_share_of_net_saving": 0.8968758273762245,
+        "top5_sum_of_N_reductions": 3387.5
+      },
+      "unconditional": {
+        "N_changes": {
+          "equal": 1,
+          "fewer": 41,
+          "more": 22
+        },
+        "candidate": {
+          "C": 10.3359375,
+          "N": 192.0234375,
+          "T": 2500.9296875
+        },
+        "cells": 64,
+        "control": {
+          "C": 11.59765625,
+          "N": 251.0390625,
+          "T": 2835.5546875
+        },
+        "delta": {
+          "C": -1.26171875,
+          "N": -59.015625,
+          "T": -334.625
+        },
+        "median_paired_delta_N": -10.875,
+        "symmetric_N_decomposition": {
+          "calls_per_canvas_term": -33.639998544519266,
+          "canvas_count_term": -25.375626455480727,
+          "interpretation": "Exact aggregate product identity; not causal attribution"
+        }
+      }
+    },
+    "full_swap8_direction_guard": {
+      "intervention_coverage": {
+        "anchor_events": 2946,
+        "corrected_calls": 33678,
+        "held_calls": 33678,
+        "held_calls_per_anchor": 11.431771894093686,
+        "interpretation": "Receipt exposure counts, not causal treatment effects",
+        "trials": 128,
+        "trials_with_anchor": 128,
+        "trials_with_correction": 128,
+        "trials_with_swaps": 128
+      },
+      "outcome_conditioned": {
+        "always_full_credit_both": {
+          "N_changes": {
+            "equal": 1,
+            "fewer": 15,
+            "more": 10
+          },
+          "candidate": {
+            "C": 7.115384615384615,
+            "N": 132.19230769230768,
+            "T": 1676.3076923076924
+          },
+          "cells": 26,
+          "control": {
+            "C": 8.076923076923077,
+            "N": 161,
+            "T": 1929.8461538461538
+          },
+          "delta": {
+            "C": -0.9615384615384617,
+            "N": -28.80769230769232,
+            "T": -253.53846153846143
+          },
+          "median_paired_delta_N": -9.5,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": -10.292446292446295,
+            "canvas_count_term": -18.515246015246017,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "always_zero_both": {
+          "N_changes": {
+            "equal": 1,
+            "fewer": 12,
+            "more": 17
+          },
+          "candidate": {
+            "C": 16.966666666666665,
+            "N": 462.51666666666665,
+            "T": 4222.083333333333
+          },
+          "cells": 30,
+          "control": {
+            "C": 14.15,
+            "N": 323.60833333333335,
+            "T": 3489.2
+          },
+          "delta": {
+            "C": 2.8166666666666647,
+            "N": 138.9083333333333,
+            "T": 732.8833333333332
+          },
+          "median_paired_delta_N": 18.0,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": 68.30835628109043,
+            "canvas_count_term": 70.59997705224293,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "higher_mean_score": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 2,
+            "more": 2
+          },
+          "candidate": {
+            "C": 14,
+            "N": 268.5,
+            "T": 3467.75
+          },
+          "cells": 4,
+          "control": {
+            "C": 15.125,
+            "N": 291.625,
+            "T": 3734.5
+          },
+          "delta": {
+            "C": -1.125,
+            "N": -23.125,
+            "T": -266.75
+          },
+          "median_paired_delta_N": 3.25,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": -1.491495720188904,
+            "canvas_count_term": -21.633504279811095,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "lower_mean_score": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 3,
+            "more": 1
+          },
+          "candidate": {
+            "C": 9.5,
+            "N": 194.375,
+            "T": 2293.375
+          },
+          "cells": 4,
+          "control": {
+            "C": 11.8125,
+            "N": 251.4375,
+            "T": 2921.375
+          },
+          "delta": {
+            "C": -2.3125,
+            "N": -57.0625,
+            "T": -628.0
+          },
+          "median_paired_delta_N": -98.75,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": -8.793409304511279,
+            "canvas_count_term": -48.26909069548872,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        }
+      },
+      "tail_sensitivity": {
+        "excluding_top5": {
+          "N_changes": {
+            "equal": 2,
+            "fewer": 27,
+            "more": 30
+          },
+          "candidate": {
+            "C": 12.559322033898304,
+            "N": 308.1864406779661,
+            "T": 3085.491525423729
+          },
+          "cells": 59,
+          "control": {
+            "C": 10.953389830508474,
+            "N": 227.85593220338984,
+            "T": 2670.8050847457625
+          },
+          "delta": {
+            "C": 1.6059322033898304,
+            "N": 80.33050847457628,
+            "T": 414.6864406779664
+          },
+          "median_paired_delta_N": 1,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": 43.9233970050865,
+            "canvas_count_term": 36.40711146948976,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "interpretation": "Post-hoc sensitivity, not a new primary estimate",
+        "net_sum_of_cell_mean_N_reductions": -3097.5,
+        "top5_cells": [
+          {
+            "candidate": {
+              "C": 14,
+              "N": 274,
+              "T": 3372
+            },
+            "control": {
+              "C": 21,
+              "N": 707,
+              "T": 5162
+            },
+            "key": "longbench_v2_0shot_think|56|1|0",
+            "outcome_group": "always_full_credit_both"
+          },
+          {
+            "candidate": {
+              "C": 18,
+              "N": 444,
+              "T": 4434
+            },
+            "control": {
+              "C": 28,
+              "N": 859,
+              "T": 7091
+            },
+            "key": "longbench_v2_0shot_think|17|1|0",
+            "outcome_group": "always_zero_both"
+          },
+          {
+            "candidate": {
+              "C": 4,
+              "N": 47,
+              "T": 891
+            },
+            "control": {
+              "C": 16,
+              "N": 346,
+              "T": 3985
+            },
+            "key": "longbench_v2_0shot_think|16|1|0",
+            "outcome_group": "always_zero_both"
+          },
+          {
+            "candidate": {
+              "C": 5,
+              "N": 133,
+              "T": 1202
+            },
+            "control": {
+              "C": 15,
+              "N": 418,
+              "T": 3693
+            },
+            "key": "longbench_v2_0shot_think|36|1|0",
+            "outcome_group": "always_full_credit_both"
+          },
+          {
+            "candidate": {
+              "C": 6,
+              "N": 83,
+              "T": 1348
+            },
+            "control": {
+              "C": 16,
+              "N": 293,
+              "T": 3967
+            },
+            "key": "longbench_v2_0shot_think|20|1|0",
+            "outcome_group": "always_zero_both"
+          }
+        ],
+        "top5_share_of_net_saving": null,
+        "top5_sum_of_N_reductions": 1642
+      },
+      "unconditional": {
+        "N_changes": {
+          "equal": 2,
+          "fewer": 32,
+          "more": 30
+        },
+        "candidate": {
+          "C": 12.3125,
+          "N": 299.4375,
+          "T": 3020.171875
+        },
+        "cells": 64,
+        "control": {
+          "C": 11.59765625,
+          "N": 251.0390625,
+          "T": 2835.5546875
+        },
+        "delta": {
+          "C": 0.71484375,
+          "N": 48.3984375,
+          "T": 184.6171875
+        },
+        "median_paired_delta_N": -1.5,
+        "symmetric_N_decomposition": {
+          "calls_per_canvas_term": 31.969373421319172,
+          "canvas_count_term": 16.429064078680845,
+          "interpretation": "Exact aggregate product identity; not causal attribution"
+        }
+      }
+    },
+    "residual": {
+      "intervention_coverage": {
+        "anchor_events": 3080,
+        "corrected_calls": 37036,
+        "held_calls": 37036,
+        "held_calls_per_anchor": 12.024675324675325,
+        "interpretation": "Receipt exposure counts, not causal treatment effects",
+        "trials": 128,
+        "trials_with_anchor": 128,
+        "trials_with_correction": 128,
+        "trials_with_swaps": 0
+      },
+      "outcome_conditioned": {
+        "always_full_credit_both": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 16,
+            "more": 10
+          },
+          "candidate": {
+            "C": 7.038461538461538,
+            "N": 124.15384615384616,
+            "T": 1684.9615384615386
+          },
+          "cells": 26,
+          "control": {
+            "C": 8.346153846153847,
+            "N": 161.8846153846154,
+            "T": 2004.1346153846155
+          },
+          "delta": {
+            "C": -1.3076923076923084,
+            "N": -37.730769230769226,
+            "T": -319.1730769230769
+          },
+          "median_paired_delta_N": -11.0,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": -13.515146936617047,
+            "canvas_count_term": -24.215622294152187,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "always_zero_both": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 13,
+            "more": 20
+          },
+          "candidate": {
+            "C": 15.363636363636363,
+            "N": 419.2121212121212,
+            "T": 3811.878787878788
+          },
+          "cells": 33,
+          "control": {
+            "C": 14.272727272727273,
+            "N": 323.4469696969697,
+            "T": 3522.3636363636365
+          },
+          "delta": {
+            "C": 1.09090909090909,
+            "N": 95.7651515151515,
+            "T": 289.5151515151515
+          },
+          "median_paired_delta_N": 19,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": 68.5208502505171,
+            "canvas_count_term": 27.24430126463441,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "higher_mean_score": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 1,
+            "more": 1
+          },
+          "candidate": {
+            "C": 14.5,
+            "N": 294.5,
+            "T": 3636
+          },
+          "cells": 2,
+          "control": {
+            "C": 13.125,
+            "N": 239.375,
+            "T": 3196.5
+          },
+          "delta": {
+            "C": 1.375,
+            "N": 55.125,
+            "T": 439.5
+          },
+          "median_paired_delta_N": 55.125,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": 28.622947454844013,
+            "canvas_count_term": 26.502052545155994,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "lower_mean_score": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 0,
+            "more": 3
+          },
+          "candidate": {
+            "C": 31,
+            "N": 1094.3333333333333,
+            "T": 7869.666666666667
+          },
+          "cells": 3,
+          "control": {
+            "C": 9.333333333333334,
+            "N": 235,
+            "T": 2245.6666666666665
+          },
+          "delta": {
+            "C": 21.666666666666664,
+            "N": 859.3333333333333,
+            "T": 5624.0
+          },
+          "median_paired_delta_N": 415,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": 204.13716077828977,
+            "canvas_count_term": 655.1961725550434,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        }
+      },
+      "tail_sensitivity": {
+        "excluding_top5": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 25,
+            "more": 34
+          },
+          "candidate": {
+            "C": 12.745762711864407,
+            "N": 334.06779661016947,
+            "T": 3146.762711864407
+          },
+          "cells": 59,
+          "control": {
+            "C": 10.711864406779661,
+            "N": 230.6949152542373,
+            "T": 2611.0466101694915
+          },
+          "delta": {
+            "C": 2.0338983050847457,
+            "N": 103.37288135593218,
+            "T": 535.7161016949153
+          },
+          "median_paired_delta_N": 6,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": 54.81711987656742,
+            "canvas_count_term": 48.55576147936476,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "interpretation": "Post-hoc sensitivity, not a new primary estimate",
+        "net_sum_of_cell_mean_N_reductions": -4867.5,
+        "top5_cells": [
+          {
+            "candidate": {
+              "C": 16,
+              "N": 345,
+              "T": 3975
+            },
+            "control": {
+              "C": 21,
+              "N": 707,
+              "T": 5162
+            },
+            "key": "longbench_v2_0shot_think|56|1|0",
+            "outcome_group": "always_full_credit_both"
+          },
+          {
+            "candidate": {
+              "C": 9,
+              "N": 168,
+              "T": 2123
+            },
+            "control": {
+              "C": 28.25,
+              "N": 420.5,
+              "T": 7075.75
+            },
+            "key": "longbench_v2_0shot_think|32|1|0",
+            "outcome_group": "always_zero_both"
+          },
+          {
+            "candidate": {
+              "C": 14,
+              "N": 280,
+              "T": 3528
+            },
+            "control": {
+              "C": 25,
+              "N": 513,
+              "T": 6349
+            },
+            "key": "longbench_v2_0shot_think|33|1|0",
+            "outcome_group": "always_zero_both"
+          },
+          {
+            "candidate": {
+              "C": 10,
+              "N": 226,
+              "T": 2521
+            },
+            "control": {
+              "C": 18,
+              "N": 424,
+              "T": 4400
+            },
+            "key": "longbench_v2_0shot_think|7|1|0",
+            "outcome_group": "always_full_credit_both"
+          },
+          {
+            "candidate": {
+              "C": 11,
+              "N": 205,
+              "T": 2676
+            },
+            "control": {
+              "C": 18,
+              "N": 391,
+              "T": 4437
+            },
+            "key": "longbench_v2_0shot_think|38|1|0",
+            "outcome_group": "always_full_credit_both"
+          }
+        ],
+        "top5_share_of_net_saving": null,
+        "top5_sum_of_N_reductions": 1231.5
+      },
+      "unconditional": {
+        "N_changes": {
+          "equal": 0,
+          "fewer": 30,
+          "more": 34
+        },
+        "candidate": {
+          "C": 12.6875,
+          "N": 327.09375,
+          "T": 3132.53125
+        },
+        "cells": 64,
+        "control": {
+          "C": 11.59765625,
+          "N": 251.0390625,
+          "T": 2835.5546875
+        },
+        "delta": {
+          "C": 1.08984375,
+          "N": 76.0546875,
+          "T": 296.9765625
+        },
+        "median_paired_delta_N": 3.0,
+        "symmetric_N_decomposition": {
+          "calls_per_canvas_term": 50.21097192638535,
+          "canvas_count_term": 25.84371557361465,
+          "interpretation": "Exact aggregate product identity; not causal attribution"
+        }
+      }
+    },
+    "residual_direction_guard": {
+      "intervention_coverage": {
+        "anchor_events": 2946,
+        "corrected_calls": 27358,
+        "held_calls": 27358,
+        "held_calls_per_anchor": 9.286490156143923,
+        "interpretation": "Receipt exposure counts, not causal treatment effects",
+        "trials": 128,
+        "trials_with_anchor": 128,
+        "trials_with_correction": 128,
+        "trials_with_swaps": 0
+      },
+      "outcome_conditioned": {
+        "always_full_credit_both": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 13,
+            "more": 11
+          },
+          "candidate": {
+            "C": 7.666666666666667,
+            "N": 140.47916666666666,
+            "T": 1828.7916666666667
+          },
+          "cells": 24,
+          "control": {
+            "C": 8.166666666666666,
+            "N": 165.66666666666666,
+            "T": 1954.7708333333333
+          },
+          "delta": {
+            "C": -0.4999999999999991,
+            "N": -25.1875,
+            "T": -125.97916666666652
+          },
+          "median_paired_delta_N": -2.0,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": -15.535229037267076,
+            "canvas_count_term": -9.652270962732901,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "always_zero_both": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 18,
+            "more": 12
+          },
+          "candidate": {
+            "C": 14.2,
+            "N": 316.25,
+            "T": 3507.516666666667
+          },
+          "cells": 30,
+          "control": {
+            "C": 13.766666666666667,
+            "N": 299.35833333333335,
+            "T": 3385.233333333333
+          },
+          "delta": {
+            "C": 0.4333333333333318,
+            "N": 16.89166666666665,
+            "T": 122.28333333333376
+          },
+          "median_paired_delta_N": -6.5,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": 7.354805101797203,
+            "canvas_count_term": 9.536861564869408,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "higher_mean_score": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 1,
+            "more": 3
+          },
+          "candidate": {
+            "C": 16.5,
+            "N": 389.5,
+            "T": 4104.25
+          },
+          "cells": 4,
+          "control": {
+            "C": 18,
+            "N": 473.5,
+            "T": 4514.25
+          },
+          "delta": {
+            "C": -1.5,
+            "N": -84.0,
+            "T": -410.0
+          },
+          "median_paired_delta_N": 6.0,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": -46.56628787878792,
+            "canvas_count_term": -37.433712121212125,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "lower_mean_score": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 1,
+            "more": 5
+          },
+          "candidate": {
+            "C": 12.833333333333334,
+            "N": 258.6666666666667,
+            "T": 3178.8333333333335
+          },
+          "cells": 6,
+          "control": {
+            "C": 10.208333333333334,
+            "N": 202.625,
+            "T": 2491.1666666666665
+          },
+          "delta": {
+            "C": 2.625,
+            "N": 56.041666666666686,
+            "T": 687.666666666667
+          },
+          "median_paired_delta_N": 66.625,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": 3.5353354978355194,
+            "canvas_count_term": 52.50633116883117,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        }
+      },
+      "tail_sensitivity": {
+        "excluding_top5": {
+          "N_changes": {
+            "equal": 0,
+            "fewer": 28,
+            "more": 31
+          },
+          "candidate": {
+            "C": 11.983050847457626,
+            "N": 254.01694915254237,
+            "T": 2937.906779661017
+          },
+          "cells": 59,
+          "control": {
+            "C": 10.745762711864407,
+            "N": 225.6949152542373,
+            "T": 2618.114406779661
+          },
+          "delta": {
+            "C": 1.2372881355932197,
+            "N": 28.32203389830508,
+            "T": 319.7923728813562
+          },
+          "median_paired_delta_N": 2,
+          "symmetric_N_decomposition": {
+            "calls_per_canvas_term": 2.21452771647267,
+            "canvas_count_term": 26.107506181832413,
+            "interpretation": "Exact aggregate product identity; not causal attribution"
+          }
+        },
+        "interpretation": "Post-hoc sensitivity, not a new primary estimate",
+        "net_sum_of_cell_mean_N_reductions": 97.5,
+        "top5_cells": [
+          {
+            "candidate": {
+              "C": 12,
+              "N": 245,
+              "T": 2956
+            },
+            "control": {
+              "C": 21,
+              "N": 707,
+              "T": 5162
+            },
+            "key": "longbench_v2_0shot_think|56|1|0",
+            "outcome_group": "always_full_credit_both"
+          },
+          {
+            "candidate": {
+              "C": 19,
+              "N": 467,
+              "T": 4783
+            },
+            "control": {
+              "C": 28,
+              "N": 859,
+              "T": 7091
+            },
+            "key": "longbench_v2_0shot_think|17|1|0",
+            "outcome_group": "higher_mean_score"
+          },
+          {
+            "candidate": {
+              "C": 6,
+              "N": 108,
+              "T": 1373
+            },
+            "control": {
+              "C": 28.25,
+              "N": 420.5,
+              "T": 7075.75
+            },
+            "key": "longbench_v2_0shot_think|32|1|0",
+            "outcome_group": "always_zero_both"
+          },
+          {
+            "candidate": {
+              "C": 5,
+              "N": 113,
+              "T": 1268
+            },
+            "control": {
+              "C": 15,
+              "N": 418,
+              "T": 3693
+            },
+            "key": "longbench_v2_0shot_think|36|1|0",
+            "outcome_group": "always_full_credit_both"
+          },
+          {
+            "candidate": {
+              "C": 4,
+              "N": 49,
+              "T": 890
+            },
+            "control": {
+              "C": 16,
+              "N": 346,
+              "T": 3985
+            },
+            "key": "longbench_v2_0shot_think|16|1|0",
+            "outcome_group": "always_zero_both"
+          }
+        ],
+        "top5_share_of_net_saving": 18.138461538461538,
+        "top5_sum_of_N_reductions": 1768.5
+      },
+      "unconditional": {
+        "N_changes": {
+          "equal": 0,
+          "fewer": 33,
+          "more": 31
+        },
+        "candidate": {
+          "C": 11.765625,
+          "N": 249.515625,
+          "T": 2884.4765625
+        },
+        "cells": 64,
+        "control": {
+          "C": 11.59765625,
+          "N": 251.0390625,
+          "T": 2835.5546875
+        },
+        "delta": {
+          "C": 0.16796875,
+          "N": -1.5234375,
+          "T": 48.921875
+        },
+        "median_paired_delta_N": -2.0,
+        "symmetric_N_decomposition": {
+          "calls_per_canvas_term": -5.12240675800922,
+          "canvas_count_term": 3.5989692580092227,
+          "interpretation": "Exact aggregate product identity; not causal attribution"
+        }
+      }
+    }
+  },
+  "status": "complete_descriptive_diagnostic",
+  "suite": "longbench_v2",
+  "timing": "paused",
+  "verification": {
+    "bookend_score_disagreements": 1,
+    "cells_per_label": 64,
+    "scope": "independent completion/hash/coverage/repetition/N-C-T/physical-work audit",
+    "score_labels": 15,
+    "scoring_complete_sha256": "71e0eaa10a4a1d54738270352660cc3855a9a1e899acf691d97191434839e935",
+    "status": "passed",
+    "suite": "longbench_v2",
+    "summary_sha256": "1bb42cd0c6684b6254435ba5054876f6da479049e30d5216c59a0ada9bd0adaf",
+    "timing": "paused",
+    "verifier_sha256": "3d675ea529111383b381f2ca50f73bd889f895cb1cc798445b035f0910db207f"
+  }
+}
