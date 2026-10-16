@@ -47,3 +47,9 @@ def test_cluster_bootstrap_rejects_unequal_weights_and_retains_constant_effect()
     result=clustered(values,dict(a=0,b=0,c=1,d=1))
     assert result['delta']==[2,3] and result['ci95']==[[2,2],[3,3]]
     with pytest.raises(RuntimeError):clustered(values,dict(a=0,b=0,c=0,d=1))
+
+
+def test_bootstrap_is_independent_of_dictionary_insertion_order_for_resume():
+    values={str(i):[i*i,i-2] for i in range(12)}
+    groups={str(i):i//2 for i in range(12)}
+    assert clustered(values,groups)==clustered(dict(reversed(list(values.items()))),groups)

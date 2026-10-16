@@ -228,9 +228,9 @@ def official(study,suite,paths,qual=False):
 def clustered(values,groups):
     """Equal-size problem/task or engine blocks; refuse estimand-changing sizes."""
     collected=defaultdict(list)
-    for key,value in values.items():collected[groups[key]].append(value)
+    for key in sorted(values):collected[groups[key]].append(values[key])
     if len({len(v) for v in collected.values()})!=1:raise RuntimeError('unequal clusters require explicit weighted estimand')
-    means=np.array([np.mean(v,axis=0) for v in collected.values()]);rng=np.random.default_rng(1729)
+    means=np.array([np.mean(collected[key],axis=0) for key in sorted(collected,key=str)]);rng=np.random.default_rng(1729)
     boot=means[rng.integers(len(means),size=(20000,len(means)))].mean(1)
     return dict(delta=list(map(float,means.mean(0))),ci95=np.quantile(boot,[.025,.975],axis=0).T.tolist(),clusters=len(means))
 
@@ -241,12 +241,12 @@ def paired_values(scores,rows,mode):
         v=scores[f'r{rep}_{mode}'];a=scores[f'r{rep}_{BEFORE}'];b=scores[f'r{rep}_{AFTER}']
         if set(v)!=keys or set(a)!=keys or set(b)!=keys:raise RuntimeError('comparison key mismatch')
         out={}
-        for key in keys:
+        for key in sorted(keys):
             vr=rows[f'r{rep}_{mode}'][key];ar=rows[f'r{rep}_{BEFORE}'][key];br=rows[f'r{rep}_{AFTER}'][key]
             out[key]=[float(v[key])-(float(a[key])+float(b[key]))/2]+[
                 vr[f]-(ar[f]+br[f])/2 for f in ('denoise_forwards','canvases','output_tokens')]
         replicas[rep]=out
-    for key in keys:values[key]=np.mean([replicas[1][key],replicas[2][key]],axis=0).tolist()
+    for key in sorted(keys):values[key]=np.mean([replicas[1][key],replicas[2][key]],axis=0).tolist()
     return values,replicas
 
 
@@ -290,7 +290,7 @@ def report_suite(study,suite,paths,engine_proofs):
         comparisons.append(dict(arm=mode,passes_screen=bool(passed),metrics=['score_points','N','C','T'],
             problem_or_task_cluster=item,paired_engine_block=engine,replicate_delta=rep_delta))
     noise={};cross_engine={};bookend_hash=0;cross_hash=0
-    for key in keys:
+    for key in sorted(keys):
         dv=[]
         for rep in (1,2):
             a=f'r{rep}_{BEFORE}';b=f'r{rep}_{AFTER}'
