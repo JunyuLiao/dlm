@@ -1,4 +1,32 @@
-## Value decision/reuse refinement — 2026-10-16, replicated evaluation
+## Value decision/reuse refinement — 2026-10-16, AIME complete
+
+At 09:38 UTC the replicated AIME workload completed and official scoring
+passed all15 labels x90 cells (1,350 scored trials). Independent verification
+checks hashes, coverage, repeat arithmetic, mean N and GLOBAL tile totals.
+V31 averages51.111%/295.300 calls; full swaps52.222%/301.672;
+direction guard51.111%/296.911; raw residual50.556%/296.861;
+combined51.111%/298.611. All four fail the joint AIME promotion screen.
+The full-swap score delta is+1.111 points, problem-cluster CI[-2.778,5.000],
+and changes sign between engine repetitions (+3.333,-1.111). Every candidate
+has higher mean N. No reliable accuracy or call reduction is established.
+
+Control bookends differ in output hash13/180 times but never in official
+correctness. First controls differ across engines on73/90 hashes. Mean
+after-minus-before control N is+2.467, with problem-cluster CI[0.194,5.878].
+This confirms the need to retain execution variability in interpretation.
+Fresh dense FULL55.556%/298.422, PIECEWISE58.889%/281.800 and
+all-kept58.889%/284.222 are separate engine references, not numerically
+matched incremental contrasts. Timing remains paused.
+
+LongBench accuracy is running, followed by MATH and RULER under the unchanged
+frozen plan. Use native_replicated_20261016_attempt001/state.json and its
+reports/aime26/{summary.json,summary.md,final_complete.json,
+independent_verification.json}. Coordinator PTY98458 remains active.
+No full503 expansion can be promoted by the existing joint screen for these
+four variants, because all four already fail AIME. Complete the remaining
+predeclared workloads; do not retune candidates from this partial study.
+
+## Replicated design and qualification history
 
 At 02:07 UTC the four-job ABBA warmup factor is complete. Control warmups have
 4/18 drifting bookends; all-method warmups have2/18. Every drift is on long

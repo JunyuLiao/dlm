@@ -1854,3 +1854,45 @@ RULER; moments remove it. Mixed stopping/acceptance effects prevent a claim
 that lower KL establishes accuracy or shorter native trajectories. Native
 inclusion is frozen separately in `native_inclusion.md`; no native scores or
 clean speed results exist for these new variants yet.
+
+## 2026-10-16 — Replicated AIME value-refinement workload complete
+
+Study: `results/v31_value_decision_reuse_20261015/native_replicated_20261016_attempt001/`.
+Frozen coordinator source `b485866c`, protocol config commit `09e19e21`;
+qualified parent execution `28714b4a` over method source `79c994ca`.
+The complete AIME subpanel has30 problems x3 seeds, two candidate engine
+repetitions and two V31 control positions per engine. All15 score labels
+cover90 cells:1,350 scored trials. This is repeated evaluation, not pass@2.
+The other three workloads remain pending; the whole study is not complete.
+
+| Method | Official accuracy (%) | N/trial | N/canvas | T/trial |
+|---|---:|---:|---:|---:|
+| V31 control | 51.111 | 295.300 | 13.472 | 5543.4 |
+| Full-value swaps | 52.222 | 301.672 | 13.514 | 5638.2 |
+| Direction-guarded residual | 51.111 | 296.911 | 13.445 | 5580.2 |
+| Raw residual | 50.556 | 296.861 | 13.518 | 5541.5 |
+| Swaps plus direction guard | 51.111 | 298.611 | 13.488 | 5589.6 |
+| Dense FULL fix51994 | 55.556 | 298.422 | 13.402 | 5626.4 |
+| Dense PIECEWISE | 58.889 | 281.800 | 13.161 | 5404.5 |
+| All-kept FA4 | 58.889 | 284.222 | 13.309 | 5390.8 |
+
+All four candidates fail the predeclared joint accuracy/N screen. The full-swap
+score delta is+1.111 points, problem-cluster95% CI[-2.778,5.000], engine-block
+CI[-1.111,3.333]; its replicate deltas are+3.333 and-1.111. Mean N increases
+for every candidate. No reliable native gain is established. FULL/PIECEWISE/
+all-kept use separate fresh engines and are contextual substrate references;
+primary incremental comparisons use the mean of the two common-engine controls.
+
+Control bookends differ in output hash13/180 times, with zero official-score
+disagreements. First-control hashes differ73/90 across engines. Mean control
+after-minus-before N is+2.467, problem-cluster CI[0.194,5.878]. All structurally
+valid outcomes are retained under the separately frozen replicated protocol.
+Earlier held campaigns are not reclassified. Fixed per-query-tile prefix K=27,
+GLOBAL layer29-only value changes, native sampler unchanged, LOCAL dense.
+Clean timing remains paused; N and tile differences are not measured speedup.
+
+Sources: `reports/aime26/summary.json`, `summary.md`, `final_complete.json`,
+`independent_verification.json`, and `scoring/aime26/attempt001/scoring_complete.json`.
+Independent verification checks official coverage, hashes, repetition arithmetic,
+mean N and aggregate GLOBAL physical tiles. Per-method phase/accounting details,
+cap rates, p95 N and both uncertainty analyses are in the complete JSON report.

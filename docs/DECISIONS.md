@@ -2157,3 +2157,22 @@ Neither restores parity. Do not infer a warmup benefit from these small counts.
 The new replicated study uses source b485866c, unchanged method code, and the
 all-method policy preselected before these results. Its15 coordinator tests
 pass; all four new workload smokes remain a launch gate for accuracy.
+
+### 2026-10-16: Completed replicated AIME gives no joint improvement
+
+All four replicated workload qualifications passed. The complete AIME cohort
+then scores15 labels x90 cells with official coverage and independent hash,
+repetition arithmetic, mean-N and tile-total verification. V31 is51.111% and
+295.300 calls/trial. Full swaps52.222%/301.672, direction guard51.111%/296.911,
+raw residual50.556%/296.861, combined51.111%/298.611. All fail the predeclared
+joint AIME screen. The full-swap gain changes sign between engine replicates;
+its problem-cluster score interval is[-2.778,5.000] percentage points.
+
+The13/180 differing control bookends never change official correctness, but
+their mean after-minus-before N is+2.467 (CI[0.194,5.878]). Across engines,
+73/90 first-control hashes differ. Do not mistake a small operator improvement
+or a single-engine score gain for robust native improvement. Continue the
+remaining frozen workloads without retuning or excluding drifting cases.
+All four current variants are ineligible for full503 under the joint screen
+because AIME mean N is higher; do not relax that rule after seeing results.
+Clean timing stays paused. Source b485866c, protocol config09e19e21.

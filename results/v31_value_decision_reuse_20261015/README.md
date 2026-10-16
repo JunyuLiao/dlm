@@ -18,6 +18,14 @@ coordinator/analysis checks are completed scoped evidence. No native accuracy
 gain or speedup has been established. Clean timing and other campaigns remain
 paused. Historical notes below are not current launch instructions.
 
+At09:38 UTC the replicated AIME workload completed: V3151.111%/295.300
+calls; full swaps52.222%/301.672; guarded residual51.111%/296.911; raw
+residual50.556%/296.861; combined51.111%/298.611. All four fail the joint
+AIME screen; the swap gain changes sign between engine replicates and its
+problem-cluster interval includes zero. See the new study's reports/aime26
+and independent verification. LongBench is running, then MATH and RULER.
+This complete workload does not complete the four-workload study.
+
 Authorized scope: three independently implemented directions, same-state
 diagnostics before task accuracy, fixed per-query-tile K, and clean timing paused.
 The inherited Yuhan V31 machinery supplies the reference maps and native sampler.
