@@ -16,22 +16,32 @@ from scripts import v31_value_decision_replay as io
 from scripts import v31_value_native_study as native
 
 
-def prepare(study,parent,python_hash_seed=None,trace=False,layer_trace=False,cublas_workspace_config=None,component_trace=False):
+def repeated_outputs_identical(rows,fields):
+    groups={}
+    for r in rows:groups.setdefault(native.base.key(r),[]).append(r)
+    return all(all(all(r[k]==group[0][k] for k in fields) for r in group) for group in groups.values())
+
+
+def prepare(study,parent,python_hash_seed=None,trace=False,layer_trace=False,cublas_workspace_config=None,component_trace=False,control_history=False):
     if study.exists():raise RuntimeError('use a new immutable diagnostic attempt')
     p=native.verify(parent)
     cells=io.read(parent/'private/schedules/aime26/cells.json')
     cell=next(c for c in cells if c['index']==15 and c['seed']==44)
+    planned=[cell,cell]
+    if control_history:
+        planned=[next(c for c in cells if c['index']==index and c['seed']==42)
+                 for index in (0,10,20) for _ in range(6)]
     study.mkdir(parents=True);(study/'private').mkdir()
     trace_source=io.ROOT/'scripts/v31_native_rng_trace_worker.py'
     if trace:shutil.copyfile(trace_source,study/'private/trace_worker.py')
-    io.write(study/'private/cells.json',[cell,cell],True)
+    io.write(study/'private/cells.json',planned,True)
     shutil.copyfile(__file__,study/'coordinator_source.py')
     jobs=[dict(name='original_repeat001',arm='current_v31_control'),
           dict(name='original_repeat002',arm='current_v31_control'),
           dict(name='refinement_repeat001',arm='full_swap8')]
     if python_hash_seed is not None:
         jobs.append(dict(name='refinement_repeat002',arm='full_swap8'))
-    if trace:jobs=jobs[:2]  # Localize original-V31 divergence before examining interventions.
+    if trace or control_history:jobs=jobs[:2]  # Original V31 only.
     protocol=dict(schema='native_noop_repeatability_v1',parent=str(parent),
         parent_protocol_sha256=io.sha(parent/'protocol.json'),source_commit=p['source_commit'],
         coordinator_sha256=io.sha(study/'coordinator_source.py'),
@@ -39,8 +49,10 @@ def prepare(study,parent,python_hash_seed=None,trace=False,layer_trace=False,cub
         jobs=jobs,python_hash_seed=python_hash_seed,trace=trace,layer_trace=layer_trace,
         cublas_workspace_config=cublas_workspace_config,
         component_trace=component_trace,
+        control_history=control_history,
         trace_source_sha256=io.sha(trace_source) if trace else None,
-        scope='one previously examined inactive cell, repeated with identical request seed; no task-accuracy inference',
+        scope=('control-only history: AIME indices0,10,20 seed42 repeated six times each in order; no task-accuracy inference'
+               if control_history else 'one previously examined inactive cell, repeated with identical request seed; no task-accuracy inference'),
         timing='paused; diagnostic only')
     io.write(study/'protocol.json',protocol,True)
 
@@ -52,7 +64,7 @@ def run(study):
     if p['cells_sha256']!=io.sha(study/'private/cells.json'):raise RuntimeError('diagnostic cells drift')
     if p.get('trace') and p['trace_source_sha256']!=io.sha(study/'private/trace_worker.py'):
         raise RuntimeError('diagnostic observer source changed')
-    source=native.verify(parent);results=[]
+    source=native.verify(parent);results=[];planned=io.read(study/'private/cells.json')
     execution=parent/'private/execution'
     for job in p['jobs']:
         family=study/job['name'];markers=list(family.glob('attempt*/attempt_complete.json'))
@@ -89,12 +101,14 @@ def run(study):
                 proc=subprocess.run(cmd,cwd=execution,env=env,stdout=log,stderr=subprocess.STDOUT)
             rows=native.base.jsonl(leaf/'records.jsonl') if (leaf/'records.jsonl').exists() else []
             errors=[]
-            if proc.returncode or len(rows)!=2:errors.append('worker or repeated-cell coverage failure')
-            if len(rows)==2:
-                if native.base.key(rows[0])!=native.base.key(rows[1]):errors.append('repeated cell changed')
-                if rows[0]['rng_seed']!=rows[1]['rng_seed']:errors.append('repeated request seed changed')
-                for r in rows:
-                    errors+=native.validate([r],'aime26',arm,[io.read(study/'private/cells.json')[0]])
+            if proc.returncode or len(rows)!=len(planned):errors.append('worker or repeated-cell coverage failure')
+            if len(rows)==len(planned):
+                seeds={}
+                for r,cell in zip(rows,planned):
+                    key=native.base.key(r)
+                    if key in seeds and seeds[key]!=r['rng_seed']:errors.append('repeated request seed changed')
+                    seeds[key]=r['rng_seed']
+                    errors+=native.validate([r],'aime26',arm,[cell])
                     if r['cuda_graph_captures']:errors.append('unexpected request capture')
             proof=dict(status='failed' if errors else 'complete',errors=errors,
                 returncode=proc.returncode,gpu_reservation_s=time.monotonic()-start,
@@ -105,14 +119,16 @@ def run(study):
             io.write(leaf/'attempt_complete.json',proof,True)
         rows=native.base.jsonl(leaf/'records.jsonl')
         fields=('output_hash','denoise_forwards','canvases','output_tokens','rng_seed')
+        identical=repeated_outputs_identical(rows,fields)
         results.append(dict(job=job['name'],arm=job['arm'],records=[{k:r[k] for k in fields} for r in rows],
-            identical_repeated_output=all(rows[0][k]==rows[1][k] for k in fields),
+            identical_repeated_output=identical,
+            cell_order=[dict(index=r['index'],seed=r['panel_seed']) for r in rows],
             refinement_work=[r['receipts']['adapter'].get('value_refinement_work',{}) for r in rows]))
         print(json.dumps({'event':'diagnostic_job_complete','job':job['name'],
                           'identical_repeated_output':results[-1]['identical_repeated_output']}),flush=True)
-    reference=results[0]['records'][0]
+    reference=results[0]['records']
     summary=dict(status='complete',scope=p['scope'],results=results,
-        all_process_outputs_identical=all(r==reference for job in results for r in job['records']),
+        all_process_outputs_identical=all(job['records']==reference for job in results),
         python_hash_seed=p.get('python_hash_seed'),
         protocol_sha256=io.sha(study/'protocol.json'),timing='paused')
     io.write(study/'summary.json',summary,True)
@@ -128,8 +144,10 @@ if __name__=='__main__':
     a.add_argument('--layer-trace',action='store_true')
     a.add_argument('--cublas-workspace-config',choices=[':4096:8',':16:8'])
     a.add_argument('--component-trace',action='store_true')
+    a.add_argument('--control-history',action='store_true')
     args=a.parse_args();study=args.study.resolve()
     if args.layer_trace and not args.trace:a.error('--layer-trace requires --trace')
     if args.component_trace and not args.layer_trace:a.error('--component-trace requires --layer-trace')
-    if args.stage=='prepare':prepare(study,args.parent.resolve(),args.python_hash_seed,args.trace,args.layer_trace,args.cublas_workspace_config,args.component_trace)
+    if args.control_history and args.trace:a.error('--control-history uses unobserved original V31 only')
+    if args.stage=='prepare':prepare(study,args.parent.resolve(),args.python_hash_seed,args.trace,args.layer_trace,args.cublas_workspace_config,args.component_trace,args.control_history)
     else:run(study)

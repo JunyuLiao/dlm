@@ -1,31 +1,35 @@
-## Value decision/reuse refinement — 2026-10-15, process-matched native evaluation
+## Value decision/reuse refinement — 2026-10-16, first-panel repeatability hold
 
-Launched23:54 UTC: native_process_matched_attempt001. Frozen overlay source
-28714b4a, base method source79c994ca, protocol26683cda. Its coordinator runs
-from its private execution snapshot, using only that snapshot on PYTHONPATH.
-It first qualifies all four workloads, then automatically runs the frozen
-accuracy panel if those gates pass. Per-cell V31 control bookends must match
-exactly; inactive candidates must match their common control. Candidate order
-rotates. Counts/shards: AIME90/10, LongBench64/8, MATH100/10, RULER104/13.
-Fresh dense FULL, dense PIECEWISE and all-kept remain separate named reference
-paths. Process-cluster sensitivity supplements problem/task-cluster intervals.
-Native stopping and fixed per-query-tile budgets remain unchanged; clean timing
-is paused. Monitor about30 minutes; coordinator emits30-minute progress events.
-Failed attempts are preserved; export completion requires the shared raw
-attempt marker. Read this campaign's README and protocol before interpreting.
+At01:05 UTC native_process_matched_attempt001 stopped automatically on its
+first accuracy shard. All four workload qualifications had passed (72 audit
+requests including control bookends). The first AIME shard completed54 requests
+with returncode0, but1/9 control bookends differed: item10/seed42 used426 vs446
+calls, both32 canvases/8192 tokens. Decoded outputs share8212 initial characters.
+The other8 pairs match exactly. No arm exports or full-panel score claims are
+valid for this failed shard. See repeatability_failure/attempt001, the immutable
+failed receipt, expansion_hold.json and mutable held_repeatability_audit state.
+There are zero successful accuracy shards in this replacement campaign.
 
-Native_interleaved_attempt001 passed both nine-request sequences. Engine1's
-five V31 controls and four inactive candidates all reproduce54 calls/output.
-Engine2's five controls reproduce101 calls/output despite intervening active
-candidates (102,99,101,98 calls). This is one-cell execution qualification,
-not an accuracy result. Eight focused switching/scheduling/audit/resume tests
-pass. The request switcher used in the new panel is hash-identical to this
-GPU-qualified worker. All71 prior H100 method tests remain applicable to the
-unchanged base method sources. The combined deployment recipe is explicit.
+The drifting group is the first long group and first active value computation
+in that engine; the preceding item0/seed42 had zero swaps/corrections in every
+candidate. Initialization is a hypothesis, not an established cause. Next:
+control-only history audit in two original V31 engines, using indices0,10,20
+seed42, six consecutive repeats each in that order (same initial input history,
+no value intervention). Do not silently drop the drifting case or rerun the
+accuracy shard until one happens to pass. An all-method warmup is a candidate
+factor to test only against this independent control-noise evidence.
 
-Do not resume old coordinator1799129, which remains SIGSTOP-held after AIME.
-Its native_development_attempt002 scores remain interpretation-held and are
-excluded from the new panel. Other campaigns remain paused.
+Frozen replacement source28714b4a/base79c994ca, protocol26683cda. Preserve it.
+Its per-cell control bookends, rotated candidate order and source recipes are
+in its README. Counts/shards: AIME90/10, LongBench64/8, MATH100/10, RULER104/13.
+All71 prior H100 method tests and eight focused comparison tests passed; the
+one-cell interleaved diagnostic also passed (engine1 all54-call inactive arms;
+engine2 all101-call controls around active candidates). Those smaller checks
+did not predict the new long-case drift. Clean timing remains paused.
+
+Old independent-process native_development_attempt002 and its coordinator
+1799129 remain held; its720 AIME trials are excluded from method conclusions.
+Other campaigns remain paused. No native accuracy gain has been established.
 
 Original V31 within-process repeats are exact, but separate processes differ.
 A fixed PYTHONHASHSEED and fixed CUBLAS_WORKSPACE_CONFIG=:4096:8 both fail to
