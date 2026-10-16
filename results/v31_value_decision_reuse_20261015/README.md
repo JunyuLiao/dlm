@@ -33,6 +33,12 @@ savings. Residual methods fail the joint tradeoff. See the complete LongBench
 report and trajectory diagnostic. MATH is running, then RULER. All-workload
 promotion remains blocked by AIME under the original screen; timing stays paused.
 
+At19:18 UTC MATH100 completed: V3195.0%/61.468 calls; full swaps95.0%/60.590;
+guard95.5%/60.970; raw94.5%/61.145; combined95.0%/60.725. Combined has a small
+call reduction with unchanged accuracy. Only46/200 candidate trials reach a
+sparse anchor. See reports/math500 and its independent/trajectory diagnostics.
+RULER128K is now running; AIME still blocks all-workload promotion.
+
 Authorized scope: three independently implemented directions, same-state
 diagnostics before task accuracy, fixed per-query-tile K, and clean timing paused.
 The inherited Yuhan V31 machinery supplies the reference maps and native sampler.

@@ -1944,3 +1944,36 @@ One always-wrong capped problem contributes58.56% of the net call saving
 (2549→337 calls;16384→3026 tokens).26 always-correct problems average38.231
 fewer calls (17 fewer,8 more,1 tie). Correctness-conditioned groups are post hoc
 descriptions, not causal estimates or substitutes for the full-cohort result.
+
+## 2026-10-16 — Replicated MATH100 workload complete
+
+Same native_replicated_20261016_attempt001, source b485866c and config09e19e21.
+All15 labels x100 cells score officially (1,500 trials). Two candidate trials
+and four control bookends per cell are averaged; not pass@2. Source-bound
+completion and independent coverage/hash/repetition/N-C-T/work checks pass.
+
+| Method | Official accuracy (%) | N/trial | N/canvas | T/trial |
+|---|---:|---:|---:|---:|
+| V31 control | 95.0 | 61.468 | 9.874 | 1474.92 |
+| Full-value swaps | 95.0 | 60.590 | 9.765 | 1469.75 |
+| Direction-guarded residual | 95.5 | 60.970 | 9.834 | 1470.93 |
+| Raw residual | 94.5 | 61.145 | 9.862 | 1470.52 |
+| Swaps plus direction guard | 95.0 | 60.725 | 9.779 | 1474.10 |
+| Dense FULL fix51994 | 95.0 | 61.370 | 9.882 | 1468.85 |
+| Dense PIECEWISE | 95.0 | 63.020 | 9.940 | 1502.55 |
+| All-kept FA4 | 95.0 | 58.560 | 9.569 | 1442.11 |
+
+Combined N delta-0.7425 has problem CI[-1.5775,-0.0575] and engine-block
+CI[-1.4325,-0.1500], but score is unchanged. Guard's+0.5-point score difference
+is one extra correct trial/200; interval[0,1.5] includes zero. Full swaps have
+opposite score/N signs across repeats. Only46/200 candidate trials have sparse
+anchors,45 correction paths where applicable. Exact prefix K=27, value changes
+at GLOBAL layer29 only; native sampling and LOCAL dense work unchanged.
+
+One control hash mismatch/200 bookends, zero official-score disagreements;
+100/100 first-control hashes differ across engines. Separate-engine reference
+contrasts retain that limitation. No structurally valid outcome was discarded.
+Sources: reports/math500/{summary.json,summary.md,final_complete.json,
+independent_verification.json,paired_trajectory_diagnostics.json} and bound
+scoring/math500/attempt001/scoring_complete.json. This completes MATH only;
+RULER remains running. AIME prevents any all-workload promotion. Timing paused.

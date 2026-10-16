@@ -2201,3 +2201,17 @@ natively, both remain wrong, while all four controls hit the length cap.
 Twenty-six always-correct cells save38.231 calls on average (17 fewer,8 more,
 1 tie). This conditioned subset is descriptive only. Describe the headline
 N gain as concentrated tail reduction, not proof of better reasoning.
+
+### 2026-10-16: MATH100 gives small call savings with limited sparse exposure
+
+The complete replicated MATH cohort has15 official labels x100 cells and
+passes independent verification. V31 is95.0%/61.468 calls; full swaps95.0%/60.590,
+guard95.5%/60.970, raw94.5%/61.145, combined95.0%/60.725. Combined saves0.7425
+calls (1.21%); problem interval[-1.5775,-0.0575], engine interval[-1.4325,-0.1500].
+There is no score improvement for this arm. Guard adds one correct trial out
+of200 and its score interval includes zero. Full swaps' score/N changes reverse
+sign across engine repetitions. Only46/200 candidate trials reach a sparse
+anchor (45 correction-path trials); do not generalize this mostly all-kept
+workload into evidence about broad value routing. One control bookend hash
+differs, none in correctness; all100 first-control hashes differ across engines.
+Finish RULER under the same protocol. AIME still blocks full503 promotion.

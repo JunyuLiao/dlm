@@ -1,3 +1,26 @@
+## Replicated MATH100 complete — 2026-10-16, 19:18 UTC
+
+Verified source b485866c / protocol config09e19e21; analysis HEAD2f5d17f6.
+The current replicated study has completed AIME, LongBench and MATH, all with
+independent official coverage/hash/arithmetic/work checks. RULER128K is running
+on PTY98458; its first pair of eight-cell engines has completed. No other GPU
+worker is authorized to resume. Timing stays paused.
+
+MATH: V3195.0%/61.468 calls, full swaps95.0%/60.590, direction guard95.5%/60.970,
+raw residual94.5%/61.145, combined95.0%/60.725. Combined N delta-0.7425 has
+problem CI[-1.5775,-0.0575] and engine-block CI[-1.4325,-0.1500]; aggregate
+score unchanged. Guard's+0.5-point gain is one extra correct candidate trial
+out of200, not robust accuracy evidence. Full swaps change sign in score and
+N across engine repetitions. Only46/200 candidate trials have a sparse anchor;
+45 run correction where applicable. This limited exposure constrains inference.
+Correction counts mean executed paths, not proof of nonzero correction per row.
+
+One of200 control bookends differs in output hash, none in correctness.
+Across engines100/100 first-control hashes differ; average control correctness
+changes-2 points. These structurally valid outcomes are retained. Full503
+remains ineligible for all four variants because AIME mean N increased.
+Complete RULER and synthesize the predeclared study without retuning.
+
 ## Replicated LongBench complete — 2026-10-16, 15:48 UTC
 
 Native_replicated_20261016_attempt001 now completes AIME and LongBench with
