@@ -1896,3 +1896,45 @@ Sources: `reports/aime26/summary.json`, `summary.md`, `final_complete.json`,
 Independent verification checks official coverage, hashes, repetition arithmetic,
 mean N and aggregate GLOBAL physical tiles. Per-method phase/accounting details,
 cap rates, p95 N and both uncertainty analyses are in the complete JSON report.
+
+## 2026-10-16 — Replicated LongBench64 workload complete
+
+Study/source/protocol: same `native_replicated_20261016_attempt001`, source
+`b485866c`, config commit`09e19e21`. All15 labels cover64 cells:960 scored
+trials. Two engine repetitions, both control bookends averaged. Previously
+examined development inputs; not held-out confirmation. Independent coverage,
+hash, repeat arithmetic, mean-N and physical GLOBAL tile checks pass.
+
+| Method | Official accuracy (%) | N/trial | N/canvas | T/trial |
+|---|---:|---:|---:|---:|
+| V31 control | 45.703 | 251.039 | 21.646 | 2835.6 |
+| Full-value swaps | 46.875 | 192.023 | 18.578 | 2500.9 |
+| Direction-guarded residual | 43.750 | 249.516 | 21.207 | 2884.5 |
+| Raw residual | 43.750 | 327.094 | 25.781 | 3132.5 |
+| Swaps plus direction guard | 47.656 | 299.438 | 24.320 | 3020.2 |
+| Dense FULL fix51994 | 51.562 | 234.625 | 20.183 | 2848.2 |
+| Dense PIECEWISE | 46.875 | 258.781 | 19.371 | 3293.0 |
+| All-kept FA4 | 51.562 | 305.953 | 23.592 | 3199.4 |
+
+Full swaps pass this workload's exploratory joint screen, with score delta
++1.172 points (problem CI[-6.250,8.594]) and N delta-59.016 (problem
+CI[-143.250,-3.988], engine-block CI[-119.172,-14.945]). Accuracy improvement
+is unresolved. N falls23.51%, GLOBAL consumer kept tiles18.87%; extra full QK
+and PV discovery are0.923M rectangles each/trial. Timing remains paused.
+No measured speedup is established. Separate-engine dense references retain
+the process-variation limitation; primary method contrasts share engines.
+
+Calls fall on41/64 cells, rise22 and tie1; median paired delta-10.875. Five
+largest reductions explain89.69% of the net call saving; omitting them leaves
+-6.602 calls/cell, a sensitivity analysis rather than a new primary estimate.
+The mean-N decomposition is-25.376 from canvas count and-33.640 from N/C;
+it is algebraic, not causal. Six of128 control bookends differ in output hash,
+seven in some control metric, and one in official correctness. Across engines,
+first-control hashes differ4/64. No cases are excluded for this drift.
+
+Sources: `reports/longbench_v2/summary.json`, `summary.md`, `final_complete.json`,
+`independent_verification.json`, `trajectory_diagnostic.json`, and the bound
+`scoring/longbench_v2/attempt001/scoring_complete.json`. Fixed K=128, GLOBAL
+layer29-only value changes and native sampling unchanged. The whole study
+remains incomplete (MATH/RULER pending); AIME already blocks full503 promotion
+for all four current variants under the predeclared all-workload screen.

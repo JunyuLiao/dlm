@@ -1,3 +1,31 @@
+## Replicated LongBench complete — 2026-10-16, 15:48 UTC
+
+Native_replicated_20261016_attempt001 now completes AIME and LongBench with
+independent official coverage/arithmetic/tile verification. MATH is running,
+then RULER; coordinator PTY98458. Method code and the frozen plan are unchanged.
+
+LongBench64: V3145.703%/251.039 calls; full swaps46.875%/192.023;
+direction guard43.750%/249.516; raw residual43.750%/327.094;
+combined47.656%/299.438. Full swaps pass the local exploratory screen:
+score+1.172 points (problem CI[-6.250,8.594]), N-59.016 (CI[-143.250,-3.988]).
+Engine-block N interval[-119.172,-14.945]. Both repeats have positive score
+point changes and lower N, but no reliable accuracy gain is established.
+N falls23.51% and GLOBAL consumer kept tiles18.87%; extra discovery remains
+0.923M QK and0.923M PV rectangles/trial, so these are not clean speedup claims.
+
+The N reduction is concentrated:41/64 cells have fewer calls,22 more,1 tie;
+median paired delta-10.875. Five largest reductions explain89.69% of the net
+saving; excluding them leaves-6.602 calls/cell (sensitivity only). Algebraic
+N decomposition: -25.376 from fewer canvases and-33.640 from fewer calls/canvas.
+This is descriptive, not a causal explanation. Control bookends have6 output
+hash differences/128, one official-score disagreement; seven groups have
+some control metric drift. Across engines, first-control hashes differ4/64.
+
+Read reports/longbench_v2/{summary.json,summary.md,final_complete.json,
+independent_verification.json,trajectory_diagnostic.json}. All four methods
+still fail the all-workload promotion rule because AIME N increased. Complete
+MATH/RULER without retuning or selecting favorable cases. Timing stays paused.
+
 ## Value decision/reuse refinement — 2026-10-16, AIME complete
 
 At 09:38 UTC the replicated AIME workload completed and official scoring

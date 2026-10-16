@@ -2176,3 +2176,20 @@ remaining frozen workloads without retuning or excluding drifting cases.
 All four current variants are ineligible for full503 under the joint screen
 because AIME mean N is higher; do not relax that rule after seeing results.
 Clean timing stays paused. Source b485866c, protocol config09e19e21.
+
+### 2026-10-16: Full-value swaps reduce LongBench calls, accuracy unresolved
+
+Complete replicated LongBench64 gives V3145.703%/251.039 calls and full
+swaps46.875%/192.023. The score delta+1.172 points has problem-cluster interval
+[-6.250,8.594]; no reliable accuracy gain is established. N drops59.016/trial
+(23.51%), with problem interval[-143.250,-3.988] and engine-block interval
+[-119.172,-14.945]. Both engine repetitions reduce calls.41/64 cells improve,
+but the largest five reductions account for89.69% of the net saving; do not
+present the mean reduction as a uniform per-question benefit.
+
+Raw residual and guarded residual score43.750%; their N is327.094 and249.516.
+Combined swaps/guard score47.656% but N rises299.438. The operator-error gains
+of reconstruction do not establish a better native accuracy/call tradeoff.
+Full swaps remain ineligible for the all-workload screen because AIME N rose.
+Complete the unchanged remaining workloads. Keep clean timing paused and
+report extra discovery work separately from retained consumer tiles.

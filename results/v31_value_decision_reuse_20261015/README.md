@@ -26,6 +26,13 @@ problem-cluster interval includes zero. See the new study's reports/aime26
 and independent verification. LongBench is running, then MATH and RULER.
 This complete workload does not complete the four-workload study.
 
+At15:48 UTC LongBench64 also completed. Full swaps improve the score point
+estimate45.703%→46.875% and reduce calls251.039→192.023 (-23.51%), but the
+accuracy interval includes zero and five cells account for89.69% of net call
+savings. Residual methods fail the joint tradeoff. See the complete LongBench
+report and trajectory diagnostic. MATH is running, then RULER. All-workload
+promotion remains blocked by AIME under the original screen; timing stays paused.
+
 Authorized scope: three independently implemented directions, same-state
 diagnostics before task accuracy, fixed per-query-tile K, and clean timing paused.
 The inherited Yuhan V31 machinery supplies the reference maps and native sampler.
