@@ -1,23 +1,22 @@
 # Fixed-budget value direction and reuse study
 
-Current status,01:05 UTC October16: the process-matched replacement passed
-all four workload qualifications, then stopped automatically on its first
-accuracy shard. One of nine V31 control bookends differed on a long capped
-AIME case; eight matched exactly. The54 raw requests and failed receipt are
-preserved. No native accuracy gain is established, and the shard is excluded
-from method inference. See `native_process_matched_attempt001/repeatability_failure/attempt001/`.
+Current status,02:07 UTC October16: the new replicated native evaluation is
+frozen under `native_replicated_20261016_attempt001/`. It uses two engines per
+cell, reversed candidate order and both control bookends. Every structurally
+valid outcome counts, including drift. Workload qualifications precede accuracy.
+See its README and `docs/V31_REPLICATED_NATIVE_PLAN_20261016.md`.
 
-A control-only input-history diagnostic is frozen under
-`native_control_history_20261016_attempt001/`: two original V31 engines,
-AIME indices0,10,20 seed42, six consecutive repeats per input, no value
-intervention. The failed pair coincided with the first active value computation;
-initialization is a hypothesis to test, not an explanation already established.
-Do not silently drop that case or retry accuracy until it happens to pass.
+The completed control-only history and ABBA warmup factor show drift without
+value intervention and despite either warmup policy. All six drifting factor
+bookends concern long AIME item10 (4/18 control-warmup,2/18 method-warmup).
+No numerical cause or repair is established. This motivates replication and
+explicit uncertainty, not exclusion of inconvenient outputs.
 
-The original independent-process AIME panel also remains interpretation-held.
-Same-state diagnostics,71 H100 method tests, the smaller interleaved diagnostic,
-and all four workload qualifications remain scoped completed evidence. Clean
-timing remains paused. Historical stage notes below are not launch permission.
+The older independent-process and exact-parity native panels remain held under
+their original protocols. Same-state diagnostics,71 H100 method tests and15
+coordinator/analysis checks are completed scoped evidence. No native accuracy
+gain or speedup has been established. Clean timing and other campaigns remain
+paused. Historical notes below are not current launch instructions.
 
 Authorized scope: three independently implemented directions, same-state
 diagnostics before task accuracy, fixed per-query-tile K, and clean timing paused.

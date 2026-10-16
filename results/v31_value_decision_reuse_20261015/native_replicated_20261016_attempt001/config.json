@@ -1,0 +1,106 @@
+{
+  "arms": [
+    "current_v31_control",
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "full_swap8",
+    "residual_direction_guard",
+    "residual",
+    "full_swap8_direction_guard"
+  ],
+  "budget": "same fixed prefix K in every head/query tile, plus common mandatory/carry phases",
+  "comparison_design": {
+    "controls_per_engine": 2,
+    "drift": "retain and score every structurally valid outcome; exact parity is an audit outcome, not an inclusion rule",
+    "estimand": "per-cell candidate minus mean of two control bookends, averaged over two fresh engines; no answer ensemble",
+    "factor_summary_sha256": "9dc2d9c30025c1e388b68b71098fe4547c614e18e47565fe35f0c2ac12f0f08c",
+    "ordering": "Latin rotation then reversed candidate order in the second engine",
+    "references": "fresh dense FULL, PIECEWISE and all-kept once per cell; unresolved process variation limits fine comparisons",
+    "repeats": 2,
+    "timing": "paused",
+    "uncertainty": "separate problem/task and paired engine-shard block bootstrap intervals; 20000 draws, seed1729",
+    "warmup": "all four methods, long AIME factor input or both qualified workload smoke inputs; chosen before factor result"
+  },
+  "coordinator_tests_receipt_sha256": "060617ab430de027d6356a3910b16647ea9f6a26067f910126d51154897ab07e",
+  "deployment_recipe": {
+    "base_protocol_sha256": "9ea5cb9fd3beb5c022bd6a75f5e2dfc8e00f09d6df8ab28b643627c30ee4eac7",
+    "base_source_commit": "28714b4a4fe44f3355a684f4eabe309a9c18f215",
+    "description": "qualified parent execution plus explicit coordinator/test overlay; method code unchanged",
+    "overlay_commit": "b485866c3faa0b31c689d01b73a60541aec7e060",
+    "overlay_files": [
+      "scripts/v31_value_replicated_study.py",
+      "tests/test_v31_value_replicated_study.py"
+    ]
+  },
+  "frozen_native": {
+    "canvas": 256,
+    "confidence_threshold": 0.005,
+    "denoise_steps": 48,
+    "entropy_bound": 0.1,
+    "generation_config_sha256": "99334f763c3dbe8b161aeaca1c150a05344299fda2d2e4a0e1d342c744461200",
+    "output_limits": "frozen per-input generation budgets; native stopping unchanged",
+    "seed_base": 31,
+    "stability_threshold": 1,
+    "temperature": [
+      0.8,
+      0.4
+    ],
+    "thinking_policy": "frozen per-input manifests, including non-thinking RULER; no runtime rewrite"
+  },
+  "inherited_v31_policy": {
+    "carry": true,
+    "progress_trigger": 0.15,
+    "select_step": 1,
+    "sticky": 1.386
+  },
+  "model_runtime": "unchanged source-bound pinned H100 runtime; private protocol retains complete identity",
+  "private_protocol_sha256": "c3c51ce17f22ba325c9ba6b85a588de15dd0969510da280fa38ae3f95821380a",
+  "promotion": "no observed accuracy loss or larger N in any workload, at least one accuracy gain; p95/cap increase <=5 percent; exploratory not noninferiority",
+  "schema": "value_native_replicated_v1",
+  "scope": "value changes only at GLOBAL layer29; other GLOBAL layers retain V31 and LOCAL remains dense",
+  "source_commit": "b485866c3faa0b31c689d01b73a60541aec7e060",
+  "suites": {
+    "aime26": {
+      "block": 64,
+      "chunk": 4096,
+      "count": 90,
+      "dataset": "aime26",
+      "mage_k": 1728,
+      "max_len": 9216,
+      "memory": 0.8,
+      "shards": 10
+    },
+    "longbench_v2": {
+      "block": 32,
+      "chunk": 16384,
+      "count": 64,
+      "dataset": "longbench_v2_0shot_think",
+      "mage_k": 8192,
+      "max_len": 141312,
+      "memory": 0.8,
+      "shards": 8
+    },
+    "math500": {
+      "block": 64,
+      "chunk": 4096,
+      "count": 100,
+      "dataset": "math500",
+      "mage_k": 1728,
+      "max_len": 16384,
+      "memory": 0.8,
+      "shards": 10
+    },
+    "ruler128k": {
+      "block": 32,
+      "chunk": 16384,
+      "count": 104,
+      "dataset": "ruler128k_v33ofc_subset",
+      "mage_k": 8192,
+      "max_len": 136192,
+      "memory": 0.85,
+      "shards": 13
+    }
+  },
+  "timing": "paused; instrumented audit only"
+}

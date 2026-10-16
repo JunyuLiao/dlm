@@ -2150,3 +2150,10 @@ structurally valid outputs. The old exact-parity study remains held; do not
 retroactively declare it valid. See V31_REPLICATED_NATIVE_PLAN_20261016.md.
 Same-state evidence, fixed K and unchanged method/sampler contracts remain.
 No new accuracy result or clean timing claim is established.
+
+The ABBA warmup factor subsequently completed all four engines:4/18 drifting
+bookends with control warmup,2/18 with all-method warmup, all on AIME item10.
+Neither restores parity. Do not infer a warmup benefit from these small counts.
+The new replicated study uses source b485866c, unchanged method code, and the
+all-method policy preselected before these results. Its15 coordinator tests
+pass; all four new workload smokes remain a launch gate for accuracy.

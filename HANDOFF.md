@@ -1,21 +1,28 @@
-## Value decision/reuse refinement — 2026-10-16, replicated comparison design
+## Value decision/reuse refinement — 2026-10-16, replicated evaluation
 
-At 01:33 UTC the control-only history diagnostic is complete. Engine 1 repeats
-all three inputs exactly; engine 2 changes the sixth long-input repetition
-from 395 to 393 calls with a different output. No value intervention ran.
-Thus value initialization cannot be the sole explanation for observed drift.
-The frozen ABBA warmup factor is running under
-native_warmup_factor_20261016_attempt001 (source ed7c10ff, config 6adba203).
-All four jobs retain parity disagreements; structural failures still stop.
+At 02:07 UTC the four-job ABBA warmup factor is complete. Control warmups have
+4/18 drifting bookends; all-method warmups have2/18. Every drift is on long
+AIME item10. Neither policy restores exact repeatability; this small factor
+is not evidence of an accuracy gain or a causal warmup benefit. The unchanged
+V31-only history also drifted (395 to393 calls on one of six long repeats),
+so value intervention is not necessary. All failed and completed attempts remain.
 
-Next design: docs/V31_REPLICATED_NATIVE_PLAN_20261016.md. A separately named
-two-engine-per-cell evaluation will average both control bookends, reverse
-candidate order across replicates, retain all structurally valid outcomes,
-and quantify control and engine variability. This explicitly replaces exact
-output parity as an efficacy inclusion rule; it does not relax source, K,
-scope, native-decoding or scorer gates. Do not start it before the warmup
-factor completes, the new protocol is frozen, and its workload smokes pass.
-No native method gain is established. Timing and other campaigns stay paused.
+New native_replicated_20261016_attempt001 is frozen from b485866c, with the
+qualified parent execution28714b4a/base79c994ca and an explicit coordinator/test
+overlay. All15 comparison/analysis CPU checks pass; unchanged methods retain
+71 H100 checks. The all-method warmup policy was selected before factor results.
+Two engines per cell, reversed candidate order, both control bookends averaged,
+all structurally valid outcomes retained; separate problem/task and engine-pair
+intervals. This explicitly replaces exact parity as an efficacy inclusion rule
+in a new study; old exact-parity and independent-process panels stay held.
+
+Plan: docs/V31_REPLICATED_NATIVE_PLAN_20261016.md. Four two-engine workload
+smokes with official scoring precede accuracy. Cohorts remain AIME90,
+LongBench64, MATH100, RULER104, with fresh dense FULL/PIECEWISE/all-kept refs.
+K, layer29 scope, native sampler, source/runtime and scorer gates are unchanged.
+Follow the new study state.json and completion markers. Other coordinators
+stay paused, including PID1799129. Clean timing stays paused. No native
+method gain is established yet. Monitor long jobs about every30 minutes.
 
 ## Prior process-matched attempt — repeatability hold
 
