@@ -328,6 +328,8 @@ def main():
                 cudagraph_mode=cg, vllm=vllm.__version__, torch=torch.__version__,
                 resolved_cudagraph_mode=str(engine.vllm_config.compilation_config.cudagraph_mode),
                 gpu=torch.cuda.get_device_name(), max_model_len=max_len, chunk=chunk, block_size=kw['block_size'],
+                float32_matmul_precision=torch.get_float32_matmul_precision(),
+                cuda_matmul_allow_tf32=torch.backends.cuda.matmul.allow_tf32,
                 max_model_len_source='env' if os.environ.get('MAX_MODEL_LEN') else 'derived', max_model_len_need=longest,
                 gpu_memory_utilization=kw['gpu_memory_utilization'], seed_base=seed_base, adapter_sha256=adapter_sha,
                 method_fingerprint=None if config is None else config.get('fingerprint'), fix_51994=fix_51994,
