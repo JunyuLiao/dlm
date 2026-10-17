@@ -45,7 +45,7 @@ def verify(study,output):
         markers=sorted((study/'runs'/pass_name).glob('*/shard*/attempt*/attempt_complete.json'))
         check(len(markers)==64,'all64 engine shards per pass required')
         rr={label:[] for label in LABELS};judges={label:{} for label in LABELS}
-        reservation=0.;checks=0;raw_trials=0;raw_captures=0;allocation_warnings=0
+        reservation=0.;checks=0;raw_trials=0;raw_captures=0;allocation_warnings=0;measured_jit_warnings=0
         log_bindings={}
         for marker in markers:
             leaf=marker.parent;receipt=base.read(marker)
@@ -54,7 +54,14 @@ def verify(study,output):
             for rel,digest in receipt['files_sha256'].items():check(base.sha(leaf/rel)==digest,'engine record hash')
             reservation+=receipt['gpu_reservation_s']
             log=leaf/'private/worker.log'
-            allocation_warnings+=log.read_text().count('memory allocation failed with OOM')
+            log_text=log.read_text()
+            allocation_warnings+=log_text.count('memory allocation failed with OOM')
+            warm=base.read(leaf/'config.json')['warmup_requests'];completed=0
+            for line in log_text.splitlines():
+                if 'JIT compilation during inference' in line and completed>=warm:measured_jit_warnings+=1
+                try:logged=json.loads(line)
+                except (ValueError,TypeError):continue
+                if isinstance(logged,dict) and 'denoise_forwards' in logged and 'wall_s' in logged:completed+=1
             log_bindings[str(log.relative_to(study))]=base.sha(log)
             raw=base.jsonl(leaf/'records.jsonl');raw_trials+=len(raw)
             raw_captures+=sum(r['cuda_graph_captures'] for r in raw)
@@ -121,6 +128,7 @@ def verify(study,output):
         proof[pass_name]=dict(engine_shards=len(markers),scored_trials=checks,raw_trials_including_explicit_warmups=raw_trials,
             all_rows_independently_rescored=True,measured_graph_captures=raw_captures,gpu_reservation_s=reservation,
             allocator_oom_warnings=allocation_warnings,
+            measured_jit_monitor_warnings=measured_jit_warnings,
             warning_scope='entire engine logs, including loading and warmup; completed requests retained; not a measured retry latency')
         bindings[pass_name]={str(m.relative_to(study)):base.sha(m) for m in markers}
         bindings[pass_name].update(log_bindings)
