@@ -1,3 +1,32 @@
+## Full503 value performance campaign — 2026-10-17, 13:09 Hong Kong
+
+New user authorization enables clean end-to-end timing on LongBench-v2 all503,
+seed42, for full-value swaps and direction-guarded residual against V31 and dense.
+The earlier all-workload promotion failure is preserved; this is an explicit new
+campaign, not promotion under that screen. Other paused campaigns stay paused.
+Verified source ec87d397; optimized runtime caedf9da. Plan in
+`docs/V31_VALUE_E2E_LONGBENCH503_PLAN_20261017.md`; new root
+`results/v31_value_e2e_longbench503_20261017/`. Native attempt001 is frozen and coordinator PTY25199 is running qualification,
+then automatically proceeds to full503 if qualification passes.
+
+86 H100 tests pass. Eight saved layer29 selection states/256 units have zero
+exact-backend mask, swap count, budget, moment or dense-reduction mismatches.
+Selection removes26 scalar reads and10 nonzero calls/unit, reducing isolated
+host medians by about19%. Factored objective rejected (slower, one mask change).
+No end-to-end gain is established yet. Reference profiler attempt001 failed;
+attempt002 and both replay attempts are preserved with their actual status.
+
+Native attempt001 freezes16 shards, separate officially scored clean/audit
+passes, common-engine V31 bookends and rotated candidates, plus FULL dense,
+PIECEWISE dense and all-kept references. Native same-state oracle qualification
+precedes full generation. Clean timing synchronizes only at request/prefill
+boundaries; every production selector/correction cost remains included.
+
+Inputs retain237 previously truncated contexts. The inherited schedule uses
+seed1; this new schedule explicitly uses panel seed42 and derived RNG seeds.
+Do not relabel old results as seed42. Next: finish source/model binding, native
+qualification, then complete clean/audit full503 and paired official analysis.
+
 ## October 17 documentation publication — 2026-10-17 (Hong Kong)
 
 Publication09cae368 is committed and pushed to origin/value-aware_cross-step-reuse_v2.

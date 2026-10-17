@@ -2256,3 +2256,15 @@ tests protect unequal control counts, required LOCAL field and changed score/wor
 No new generation or timing run. Pending public artifacts are published without
 upgrading held/partial evidence. Local private/runtime/external exclusions have
 explicit inventory/ignore rules; external checkouts and frozen runs stay intact.
+
+## 2026-10-17 — authorized full503 value-method performance study
+
+The user selected full-value swaps and direction-guarded residual for fresh
+LongBench-v2 full503 seed42 clean end-to-end evaluation against V31/dense.
+The previous failed cross-workload promotion screen is unchanged. New source
+ec87d397 uses the exact device backend, with86 passing H100 tests and256
+matched saved-state units. Factored pair scoring was slower and changed one
+mask, so it is not promoted. Reference selection incurred26 scalar reads and
+10 nonzero calls per unit; device ranking/admission removes both, giving about
+19% isolated selection savings. Native qualification and latency evidence are
+still required. See results/v31_value_e2e_longbench503_20261017/README.md.
