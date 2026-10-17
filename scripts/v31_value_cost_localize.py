@@ -62,6 +62,7 @@ def graph_compatible_selector():
     return namespace[original.__name__]
 
 
+@torch.inference_mode()
 def run(output):
     if output.exists():raise RuntimeError('preserve attempts')
     if subprocess.check_output(['nvidia-smi','--query-compute-apps=pid','--format=csv,noheader'],text=True).strip():raise RuntimeError('GPU busy')
