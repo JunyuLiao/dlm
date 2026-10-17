@@ -1,5 +1,6 @@
 ## October 17 documentation publication — 2026-10-17 (Hong Kong)
 
+Publication09cae368 is committed and pushed to origin/value-aware_cross-step-reuse_v2.
 Verified study commit6d7b71d3. New docs/research_update_20261017/01_METHODS_AND_SETUP.md,
 02_RESULTS_AND_STATISTICS.md and03_INTEGRATION_AND_REPRODUCTION.md catalogue
 all current evaluated methods, stages, setup, results, limits and reproduction.
@@ -8,7 +9,7 @@ Public-only export results/research_update_20261017/attempt001 reproduces12 tabl
 from committed numeric records and checks5370 trial scores/coverage/N-C-T/work.
 Three CPU integrity tests pass; no CUDA/generation/timing job was launched.
 
-All pending public historical evidence is being committed with original
+All pending public historical evidence was committed with original
 complete/held/failed/paused status. Publication inventory accounts for files and
 SHA256s, plus explicitly ignored compiler/write probes, runtime locks, absolute
 local control links and six independent reference/worktree checkouts. Private
