@@ -45,13 +45,17 @@ def verify(study,output):
         markers=sorted((study/'runs'/pass_name).glob('*/shard*/attempt*/attempt_complete.json'))
         check(len(markers)==64,'all64 engine shards per pass required')
         rr={label:[] for label in LABELS};judges={label:{} for label in LABELS}
-        reservation=0.;checks=0;raw_trials=0;raw_captures=0;oracle=0
+        reservation=0.;checks=0;raw_trials=0;raw_captures=0;allocation_warnings=0
+        log_bindings={}
         for marker in markers:
             leaf=marker.parent;receipt=base.read(marker)
             check(receipt['status']=='complete' and not receipt['errors'],'successful structural receipt required')
             check(receipt['protocol_sha256']==base.sha(study/'protocol.json'),'engine protocol binding')
             for rel,digest in receipt['files_sha256'].items():check(base.sha(leaf/rel)==digest,'engine record hash')
             reservation+=receipt['gpu_reservation_s']
+            log=leaf/'private/worker.log'
+            allocation_warnings+=log.read_text().count('memory allocation failed with OOM')
+            log_bindings[str(log.relative_to(study))]=base.sha(log)
             raw=base.jsonl(leaf/'records.jsonl');raw_trials+=len(raw)
             raw_captures+=sum(r['cuda_graph_captures'] for r in raw)
             for folder in (leaf/'exports').iterdir():
@@ -115,8 +119,11 @@ def verify(study,output):
         check(raw_captures==0,'warmup/measured raw capture evidence')
         records[pass_name]=rr;scores[pass_name]=judges
         proof[pass_name]=dict(engine_shards=len(markers),scored_trials=checks,raw_trials_including_explicit_warmups=raw_trials,
-            all_rows_independently_rescored=True,measured_graph_captures=raw_captures,gpu_reservation_s=reservation)
+            all_rows_independently_rescored=True,measured_graph_captures=raw_captures,gpu_reservation_s=reservation,
+            allocator_oom_warnings=allocation_warnings,
+            warning_scope='entire engine logs, including loading and warmup; completed requests retained; not a measured retry latency')
         bindings[pass_name]={str(m.relative_to(study)):base.sha(m) for m in markers}
+        bindings[pass_name].update(log_bindings)
     clean=base.read(study/'reports/clean/summary.json')['summaries']
     decomposition={}
     for reference in ('current_v31_control','dense_full_fix51994'):
