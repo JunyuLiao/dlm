@@ -38,6 +38,8 @@ def run(study,cross,output):
             support_diff=differences(*selected)
             output_delta=(aa['output'].float()-bb['output'].float()).abs() if aa['output'] is not None and bb['output'] is not None else None
             r=dict(call=call,query_equal=aa['q_hash']==bb['q_hash'],observed=[aa['observed'],bb['observed']],
+                canvas_ids=[aa['canvas'],bb['canvas']],prefix_tokens=[aa['prefix'],bb['prefix']],
+                native_steps_before=[int(a['before']['step'][0]),int(b['before']['step'][0])],
                 prior_support_equal=equal(aa['prior_support'],bb['prior_support']),selected_support_equal=equal(*selected),selected_support_differences=support_diff,
                 layer29_output_equal=aa['output_hash']==bb['output_hash'],layer29_output_max_abs=float(output_delta.max()) if output_delta is not None else None,
                 logits_equal=a['before']['logits_hash']==b['before']['logits_hash'] if a['before']['logits_hash'] is not None and b['before']['logits_hash'] is not None else None,
@@ -46,8 +48,10 @@ def run(study,cross,output):
                 after_canvas_disagreements=differences(a['after']['canvas'],b['after']['canvas']),
                 argmax_disagreements=differences(a['after']['argmax'],b['after']['argmax']),
                 reconstructed_acceptance_disagreements=differences(a['after']['reconstructed_acceptance'],b['after']['reconstructed_acceptance']),
+                accepted_counts=[int(a['after']['reconstructed_acceptance'].sum()),int(b['after']['reconstructed_acceptance'].sum())],
                 mean_entropy=[float(a['after']['entropy'].mean()),float(b['after']['entropy'].mean())],
                 commit_next=[bool(a['after']['encoder'].any()),bool(b['after']['encoder'].any())],
+                confident=[bool(a['after']['confident'].any()),bool(b['after']['confident'].any())],
                 self_conditioning_equal=a['after']['self_conditioning_hash']==b['after']['self_conditioning_hash'])
             if aa.get('cache') is not None and bb.get('cache') is not None:
                 r['cache_comparison']={k:dict(equal=equal(aa['cache'][k],bb['cache'][k]),max_abs=float((aa['cache'][k]-bb['cache'][k]).abs().max())) for k in aa['cache']}
@@ -57,6 +61,7 @@ def run(study,cross,output):
         comparisons[label]=dict(rows=rows,first_different={k:next((r['call'] for r in rows if r[k] is False),None) for k in
             ('query_equal','selected_support_equal','layer29_output_equal','logits_equal','before_cuda_rng_equal','after_cuda_rng_equal','self_conditioning_equal')},
             first_different_cache=next((r['call'] for r in rows if 'cache_comparison' in r and any(not v['equal'] for v in r['cache_comparison'].values())),None),
+            first_changed_commit=next((r['call'] for r in rows if r['commit_next'][0]!=r['commit_next'][1]),None),
             first_changed_canvas=next((r['call'] for r in rows if r['after_canvas_disagreements']),None),
             first_changed_acceptance=next((r['call'] for r in rows if r['reconstructed_acceptance_disagreements']),None))
     public=lines(study/'records.jsonl')[protocol['explicit_warmups']:];private=lines(study/'private/generation.private.jsonl')[protocol['explicit_warmups']:]
