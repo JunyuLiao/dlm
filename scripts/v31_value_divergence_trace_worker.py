@@ -18,13 +18,14 @@ def digest(t):
     return hashlib.sha256(t.detach().contiguous().cpu().reshape(-1).view(torch.uint8).numpy().tobytes()).hexdigest()
 
 
-def trace(adapter,root):
+def trace(adapter,root,runtimes=None,schedule=None):
     from vllm.model_executor.models import diffusion_gemma as dg
     from experiments.numerical_qk_reuse.v31_same_state_suffix import distribution
     state=dict(index=-1,call=0,attention=None)
     first=int(os.environ['VALUE_TRACE_FIRST_REQUEST']);last=first+4
+    limit=int(os.environ.get('VALUE_TRACE_CALL_LIMIT','6'))
     begin=adapter.begin_request;mage=adapter._mage;sample=dg._compiled_sample_step
-    def selected():return first<=state['index']<last and state['call']<6
+    def selected():return first<=state['index']<last and state['call']<limit
     def start(self,*args,**kwargs):
         result=begin(*args,**kwargs);state['index']+=1;state['call']=0;state['attention']=None
         return result
@@ -39,9 +40,14 @@ def trace(adapter,root):
         out=mage(layer,q,b,scale,prefix,n)
         if capture:
             new=self.mage_state.get(layer)
-            rec.update(output_hash=digest(out),output=out.detach().cpu(),
+            rec.update(output_hash=digest(out),output=out.detach().cpu() if state['call']<6 else None,
                        selected_support=new['kept'].detach().cpu() if new and new.get('kept') is not None else None,
                        observed=new is not None and new.get('lists') is not old_list)
+            if runtimes is not None:
+                runtime=runtimes.get(schedule[state['index']]['backend'])
+                cache=runtime.state.get('direction_cache') if runtime is not None and runtime.state is not None else None
+                rec['cache']={name:getattr(cache,name).detach().cpu() for name in
+                              ('anchor_selected','residual','dual','residual_squared')} if cache is not None and rec['observed'] else None
             state['attention']=rec
         return out
     @functools.wraps(sample)
@@ -49,7 +55,7 @@ def trace(adapter,root):
         capture=selected() and adapter.bound and adapter.step_ctx is not None and not adapter.step_ctx['encoder']
         if not capture:return sample(*args,**kwargs)
         slots=args[1]
-        before=dict(logits_hash=digest(args[0]),canvas=args[5][slots].detach().cpu(),
+        before=dict(logits_hash=digest(args[0]) if state['call']<6 else None,canvas=args[5][slots].detach().cpu(),
                     step=args[7][slots].detach().cpu(),encoder=args[8][slots].detach().cpu(),
                     cuda_rng=torch.cuda.get_rng_state(),cpu_rng=torch.get_rng_state())
         result=sample(*args,**kwargs)
@@ -73,14 +79,20 @@ if __name__=='__main__':
     from experiments.numerical_qk_reuse import vllm_adapter
     from experiments.numerical_qk_reuse.v31_value_fast_runtime import install
     from scripts.v31_value_interleaved_worker import bind_requests
+    from scripts.v31_value_cross_worker import bind
+    from experiments.numerical_qk_reuse.v31_value_refinement_runtime import Runtime
     root=Path(os.environ['VALUE_TRACE_ROOT']);root.mkdir(parents=True)
     schedule=json.loads(Path(os.environ['NATIVE_INTERLEAVED_ARMS']).read_text())
-    runtime=install('full_swap8');old_install=vllm_adapter.install_vllm_patches
+    runtime=install('full_swap8');reference=Runtime('residual_direction_guard');old_install=vllm_adapter.install_vllm_patches
     def install_adapter(adapter):
         original_mage,original_receipt=adapter._mage,adapter._value_receipt
         result=old_install(adapter)
-        bind_requests(adapter,runtime,original_mage,original_receipt,schedule)
-        trace(adapter,root)
+        if isinstance(schedule[0],dict):
+            bind(adapter,runtime,reference,original_mage,original_receipt,schedule)
+            trace(adapter,root,{'reference':reference,'device_exact':runtime},schedule)
+        else:
+            bind_requests(adapter,runtime,original_mage,original_receipt,schedule)
+            trace(adapter,root)
         return result
     vllm_adapter.install_vllm_patches=install_adapter
     runpy.run_path(os.environ['NATIVE_INTERLEAVED_BASE_WORKER'],run_name='__main__')

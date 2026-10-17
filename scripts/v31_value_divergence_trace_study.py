@@ -12,23 +12,32 @@ ROOT=Path(__file__).resolve().parents[1]
 PARENT=ROOT/'results/v31_value_e2e_longbench503_20261017/native_attempt001'
 
 
-def run(study,prior_seconds):
+def run(study,prior_seconds,backend_localization=False):
     if study.exists():raise RuntimeError('preserve attempt')
     if prior_seconds>=3000:raise RuntimeError('diagnostic GPU launch budget exhausted')
     if base.read(PARENT/'PAUSED_USER_REQUEST.json')['status']!='paused_user_request':raise RuntimeError('parent not paused')
     (study/'private').mkdir(parents=True);execution=study/'private/execution'
     shutil.copytree(PARENT/'private/execution',execution)
-    for f in ('v31_value_divergence_trace_worker.py','v31_value_divergence_trace_study.py'):
+    for f in ('v31_value_divergence_trace_worker.py','v31_value_divergence_trace_study.py','v31_value_cross_worker.py'):
         shutil.copyfile(ROOT/'scripts'/f,execution/'scripts'/f)
     (study/'private/pools').symlink_to(PARENT/'private/pools',target_is_directory=True)
     cell=base.read(PARENT/'private/schedules/longbench_v2/cells.json')[0]
     if cell['index']!=0 or cell['seed']!=42:raise RuntimeError('predeclared trace case')
     arms=['current_v31_control','full_swap8','residual_direction_guard','current_v31_control','full_swap8','residual_direction_guard','current_v31_control']
+    labels=['control_before','full_swap8','residual_direction_guard','control_after']
+    if backend_localization:
+        from scripts.v31_value_cross_study import entry
+        cell=dict(cell,seed=1)
+        c=entry('control','current_v31_control','warmup_control')
+        ref=entry('reference','residual_direction_guard');dev=entry('device_exact','residual_direction_guard')
+        arms=[c,ref,dev,dict(c,label='control_before'),ref,dev,dict(c,label='control_after')]
+        labels=[e['label'] for e in arms[3:]]
     cells=[cell]*6
     base.write(study/'private/cells.json',cells,True);base.write(study/'private/arms.json',arms,True)
     parent=base.read(PARENT/'protocol.json')
     protocol=dict(source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),parent_protocol_sha256=base.sha(PARENT/'protocol.json'),
-        runtime=parent['runtime'],scope='one question0 seed42 four-arm trace; 6 early denoise calls; no native sampler changes, added forwards or random draws',
+        runtime=parent['runtime'],scope=f"one question0 seed{cell['seed']} four-arm trace; exact full-logit fingerprints first6 calls; attention/state/RNG up to512 calls for backend localization; no added forwards or random draws",
+        backend_localization=backend_localization,trace_labels=labels,panel_seed=cell['seed'],
         arms=arms,measured_requests=4,explicit_warmups=2,implicit_warmups=1,prior_diagnostic_gpu_s=prior_seconds,
         execution_fingerprints={str(p.relative_to(execution)):base.sha(p) for p in execution.rglob('*') if p.is_file()},
         cells_sha256=base.sha(study/'private/cells.json'),suites=parent['suites'])
@@ -38,7 +47,7 @@ def run(study,prior_seconds):
     if base.runtime_identity()!=parent['runtime']:raise RuntimeError('runtime changed')
     env=base.env_for(study,'longbench_v2','current_v31_control')
     env.update(STUDY_ARM='bounded_first_divergence',PYTHONHASHSEED='0',FROZEN_SOURCE_SHA256=base.sha(study/'receipts/source_fingerprints.json'),
-        VALUE_AUDIT='1',VALUE_CLEAN_TIMING='0',VALUE_BOUNDARY_TIMING='0',VALUE_TRACE_ROOT=str(study/'private/trace'),VALUE_TRACE_FIRST_REQUEST='3',
+        VALUE_AUDIT='1',VALUE_CLEAN_TIMING='0',VALUE_BOUNDARY_TIMING='0',VALUE_TRACE_ROOT=str(study/'private/trace'),VALUE_TRACE_FIRST_REQUEST='3',VALUE_TRACE_CALL_LIMIT='512' if backend_localization else '6',
         NATIVE_INTERLEAVED_ARMS=str(study/'private/arms.json'),NATIVE_INTERLEAVED_BASE_WORKER=str(execution/'scripts/v31_vllm_paired_bench.py'))
     cmd=[base.PYTHON,str(execution/'scripts/v31_value_divergence_trace_worker.py'),str(base.MODEL),str(study/'private/pools/longbench_v2'),
          str(study/'private/cells.json'),str(study/'records.jsonl'),str(study/'private/generation.private.jsonl'),'mage','PIECEWISE']
@@ -51,9 +60,16 @@ def run(study,prior_seconds):
     errors=[]
     if proc.returncode or len(rows)!=6:errors.append('worker/coverage')
     if not errors:
-        for r,arm in zip(rows,arms[1:]):errors+=e2e.validate(r,cell,arm,'audit')
+        for r,arm in zip(rows,arms[1:]):
+            if not backend_localization:errors+=e2e.validate(r,cell,arm,'audit')
+            else:
+                a=r['receipts']['adapter']
+                if (r['index']!=0 or r['panel_seed']!=1 or r['cuda_graph_captures'] or a.get('cross_label')!=arm['label']
+                    or a['native_local_skipped_tiles']!=0 or r['sampler_calls']!=r['denoise_forwards']+r['canvases']):errors.append('trace identity/accounting')
+                if arm['backend']!='control' and (a['value_refinement_work']['budget_errors']!=0 or a['value_refinement_layers']!=[29]):errors.append('trace budget/scope')
         for index in range(3,7):
-            if len(list((study/f'private/trace/request{index:03d}').glob('call*.pt')))!=6:errors.append('trace coverage')
+            count=len(list((study/f'private/trace/request{index:03d}').glob('call*.pt')))
+            if (count<6 if backend_localization else count!=6):errors.append('trace coverage')
     receipt=dict(status='failed' if errors else 'complete',returncode=proc.returncode,errors=sorted(set(errors)),gpu_reservation_s=time.monotonic()-start,
                  protocol_sha256=base.sha(study/'protocol.json'),records=len(rows),control_bookend_hash_equal=rows[2]['output_hash']==rows[5]['output_hash'] if len(rows)==6 else None)
     base.write(study/'receipt.json',receipt,True)
@@ -65,5 +81,5 @@ def run(study,prior_seconds):
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--study',type=Path,required=True);p.add_argument('--prior-gpu-seconds',type=float,required=True)
-    a=p.parse_args();run(a.study.resolve(),a.prior_gpu_seconds)
+    p=argparse.ArgumentParser();p.add_argument('--study',type=Path,required=True);p.add_argument('--prior-gpu-seconds',type=float,required=True);p.add_argument('--backend-localization',action='store_true')
+    a=p.parse_args();run(a.study.resolve(),a.prior_gpu_seconds,a.backend_localization)
