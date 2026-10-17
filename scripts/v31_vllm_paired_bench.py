@@ -163,6 +163,9 @@ def main():
     if os.environ.get('LIMIT'):
         cells = cells[:int(os.environ['LIMIT'])]
     repeats = int(os.environ.get('REPEATS', '1'))
+    boundary_timing = os.environ.get('VALUE_BOUNDARY_TIMING') == '1'
+    if boundary_timing and (os.environ.get('VALUE_AUDIT') == '1' or os.environ.get('VALUE_CLEAN_TIMING') != '1'):
+        raise ValueError('boundary timing requires the separate clean pass')
     seed_base = int(os.environ.get('SEED_BASE', '31'))
     rows, man_sha = {}, {}
     for ds in {c['dataset'] for c in cells}:
@@ -342,6 +345,7 @@ def main():
                 value_threshold=(float(os.environ['VALUE_THRESHOLD']) if os.environ.get('VALUE_THRESHOLD') and arm == 'mage' else None),
                 value_audit=os.environ.get('VALUE_AUDIT') == '1',
                 value_clean_timing=os.environ.get('VALUE_CLEAN_TIMING') == '1',
+                timer_policy='request_and_prefill_boundaries' if boundary_timing else 'synchronized_each_engine_step',
                 kv_copy_backend=os.environ.get('KV_COPY', 'torch') if arm != 'dense' else None,
                 merge_backend=os.environ.get('MERGE', 'torch') if arm != 'dense' else None,
                 logit_stats=os.environ.get('LOGIT_STATS', 'legacy') if arm == 'method' else None,
@@ -400,15 +404,28 @@ def main():
         engine.add_request(f"{'w' if warm else 'r'}{rep}-{cell['dataset']}-{cell.get('index')}-{cell['seed']}",
                            TokensPrompt(prompt_token_ids=ids), params)
         steps, final = [], None
+        engine_steps=0
+        k = -(-len(ids) // chunk)
+        prefill_end=None
         while engine.has_unfinished_requests():
-            a = time.perf_counter()
+            a = time.perf_counter() if not boundary_timing else None
             outs = engine.step()
-            torch.cuda.synchronize()
-            steps.append(time.perf_counter() - a)
+            engine_steps+=1
+            if not boundary_timing:
+                torch.cuda.synchronize()
+                steps.append(time.perf_counter() - a)
+            elif engine_steps==k:
+                torch.cuda.synchronize()
+                prefill_end=time.perf_counter()
             for o in outs:
                 if o.finished:
                     final = o
-        wall = time.perf_counter() - start
+        if boundary_timing:
+            torch.cuda.synchronize()
+        finish=time.perf_counter()
+        wall = finish - start
+        if boundary_timing and (prefill_end is None or final is None):
+            raise RuntimeError('missing native prefill boundary or final completion')
         dispatch['bound']=False
         receipts = adapter.end_request() if adapter is not None else (
             dict(adapter=native_audit.receipt()) if native_audit is not None else None)
@@ -426,8 +443,9 @@ def main():
         rec = dict(meta, dataset=cell['dataset'], index=cell.get('index'), panel_seed=cell['seed'], repeat=rep,
                    rng_seed=seed, prompt_tokens=len(ids), **bind, output_tokens=n_out,
                    sampler_calls=counter['calls'], canvases=canvases, denoise_forwards=counter['calls'] - canvases,
-                   engine_steps=len(steps), prefill_steps=k, prefill_s=round(sum(steps[:k]), 5),
-                   decode_s=round(sum(decode), 5), wall_s=round(wall, 5),
+                   engine_steps=engine_steps, prefill_steps=k,
+                   prefill_s=round(prefill_end-start if boundary_timing else sum(steps[:k]), 5),
+                   decode_s=round(finish-prefill_end if boundary_timing else sum(decode), 5), wall_s=round(wall, 5),
                    step_median_ms=round(1000 * statistics.median(decode), 3) if decode else None,
                    finish_reason=o.finish_reason,
                    cuda_graph_captures=captures['count']-capture_start,

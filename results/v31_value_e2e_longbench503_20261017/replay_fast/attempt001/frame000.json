@@ -1,0 +1,81 @@
+{
+  "budget_errors": [],
+  "dense_reduction_mismatches": 0,
+  "frame": 0,
+  "mismatches": [
+    {
+      "backend": "factored",
+      "different_blocks": 2,
+      "fast_swaps": 7,
+      "head": 7,
+      "query_tile": 1,
+      "reference_swaps": 7
+    }
+  ],
+  "prefix": 120015,
+  "request": "request001",
+  "timing": {
+    "exact": {
+      "cuda_elapsed_ms": 4.066336154937744,
+      "cuda_samples_ms": [
+        4.155263900756836,
+        4.087967872619629,
+        4.047391891479492,
+        4.061728000640869,
+        4.066336154937744
+      ],
+      "dynamic_nonzero_calls": 0,
+      "host_ms": 4.084147047251463,
+      "host_samples_ms": [
+        4.187426995486021,
+        4.107135930098593,
+        4.065623972564936,
+        4.079833975993097,
+        4.084147047251463
+      ],
+      "host_scalar_reads": 0,
+      "peak_extra_allocated_bytes": 279940096
+    },
+    "factored": {
+      "cuda_elapsed_ms": 6.087808132171631,
+      "cuda_samples_ms": [
+        6.1645121574401855,
+        6.087808132171631,
+        6.043007850646973,
+        6.036831855773926,
+        6.088031768798828
+      ],
+      "dynamic_nonzero_calls": 0,
+      "host_ms": 6.110072019509971,
+      "host_samples_ms": [
+        6.20960199739784,
+        6.110072019509971,
+        6.066784029826522,
+        6.060192943550646,
+        6.110362941399217
+      ],
+      "host_scalar_reads": 0,
+      "peak_extra_allocated_bytes": 297769984
+    },
+    "reference": {
+      "cuda_elapsed_ms": 4.994143962860107,
+      "cuda_samples_ms": [
+        5.284063816070557,
+        5.038047790527344,
+        4.994143962860107,
+        4.9582719802856445,
+        4.958687782287598
+      ],
+      "host_ms": 5.010128021240234,
+      "host_samples_ms": [
+        5.335939000360668,
+        5.055594025179744,
+        5.010128021240234,
+        4.972804919816554,
+        4.973569069989026
+      ],
+      "peak_extra_allocated_bytes": 660094976
+    }
+  },
+  "units": 32
+}

@@ -10,11 +10,13 @@ from scripts import v31_value_decision_replay as io
 from scripts.v31_value_e2e_profile import measure
 from experiments.numerical_qk_reuse.v31_value_decision import moments, bounded_proposal
 from experiments.numerical_qk_reuse.v31_value_fast import bounded_proposal_device, dense_output
+from experiments.numerical_qk_reuse.v31_value_fast_runtime import moments_full
 
 
 CODE = ['scripts/v31_value_fast_replay.py', 'scripts/v31_value_e2e_profile.py',
         'experiments/numerical_qk_reuse/v31_value_fast.py',
         'experiments/numerical_qk_reuse/v31_value_fast_kernel.py',
+        'experiments/numerical_qk_reuse/v31_value_fast_runtime.py',
         'experiments/numerical_qk_reuse/v31_value_decision.py']
 
 
@@ -38,9 +40,13 @@ def run(output, limit):
     with safe_open(str(io.MODEL/shard),framework='pt',device='cpu') as f:w=f.get_tensor(name).float().cuda()
     grams=[w[:,h*512:(h+1)*512].T@w[:,h*512:(h+1)*512] for h in range(16)]
     del w
+    input_paths=set(paths)
+    for path in paths:
+        d=torch.load(path,weights_only=True,map_location='cpu')
+        input_paths.add(path.parent/d['prefix_file'])
     config=dict(source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         source_sha256={p:io.sha(io.ROOT/p) for p in CODE},
-        input_sha256={str(p.relative_to(io.SOURCE)):io.sha(p) for p in paths},
+        input_sha256={str(p.relative_to(io.SOURCE)):io.sha(p) for p in sorted(input_paths)},
         model_projection_shard_sha256=io.sha(io.MODEL/shard),frames=len(paths),limit_frames=limit,
         scope='All heads and Q128 tiles of saved LongBench layer29 selection states',
         fixed_prefix_k=128,tf32=False,backends=['exact','factored'])
@@ -53,13 +59,17 @@ def run(output, limit):
         k=torch.cat((prefix['k'],d['tail_k'].cuda()),2)[0].float()
         v=torch.cat((prefix['v'],d['tail_v'].cuda()),2)[0].float()
         record=dict(frame=frame,request=path.parent.name,prefix=d['prefix'],units=0,
-                    mismatches=[],budget_errors=[],dense_reduction_mismatches=0)
+                    mismatches=[],budget_errors=[],dense_reduction_mismatches=0,moment_mismatches=0)
         for h in range(16):
             for qt in range((d['n']+127)//128):
                 q=d['q'][0,h,qt*128:min((qt+1)*128,d['n'])].cuda()
                 anchor=d['next'][0,h,qt,:d['prefix']//64].cuda().bool();budget=int(anchor.sum())
                 assert budget==min(128,len(anchor))
                 m=moments(q,k[h//8],v[h//8],d['prefix'],d['scale'])
+                fm=moments_full(q,k[h//8],v[h//8],d['prefix'],d['scale'])
+                record['moment_mismatches']+=any(not torch.equal(getattr(m,name),getattr(fm,name))
+                    for name in ('mass','numerator','tail_mass','tail_numerator','log_scale'))
+                del fm
                 ref,info=bounded_proposal(m,anchor,swaps=8,gram=grams[h])
                 record['dense_reduction_mismatches']+=not torch.equal(dense_output(m),m.dense())
                 for backend in config['backends']:
@@ -72,7 +82,8 @@ def run(output, limit):
                     if bad_budget:record['budget_errors'].append(dict(head=h,query_tile=qt,backend=backend))
                 record['units']+=1
                 if path.parent.name not in profiled:
-                    timing={'reference':measure(lambda:bounded_proposal(m,anchor,swaps=8,gram=grams[h]))}
+                    timing={'reference':measure(lambda:bounded_proposal(m,anchor,swaps=8,gram=grams[h])),
+                            'moments_fast':measure(lambda:moments_full(q,k[h//8],v[h//8],d['prefix'],d['scale']))}
                     for backend in config['backends']:
                         timing[backend]=measure(lambda:bounded_proposal_device(m,anchor,budget,gram=grams[h],backend=backend))
                         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU,torch.profiler.ProfilerActivity.CUDA]) as prof:
@@ -88,6 +99,7 @@ def run(output, limit):
         del prefix,k,v
     result=dict(status='complete_diagnostic',config_sha256=io.sha(output/'config.json'),totals=totals,
                 frames=len(records),dense_reduction_mismatches=sum(r['dense_reduction_mismatches'] for r in records),
+                moment_mismatches=sum(r['moment_mismatches'] for r in records),
                 timing={r['request']:r['timing'] for r in records if 'timing' in r},
                 interpretation='Support equivalence on recorded states only; native qualification still required',
                 gpu_reservation_s=time.monotonic()-reservation,
