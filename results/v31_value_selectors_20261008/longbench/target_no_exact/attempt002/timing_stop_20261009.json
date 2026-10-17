@@ -1,0 +1,17 @@
+{
+  "status": "paused_by_user",
+  "stopped_utc": "2026-10-09T06:09:38Z",
+  "purpose": "clean timing",
+  "audit_stage": "complete",
+  "clean_stage": {
+    "records": 419,
+    "planned": 4024,
+    "complete_shards": 3,
+    "active_partial": "current_v31_control/shard01/attempt001",
+    "partial_attempt_preserved": true
+  },
+  "stop_action": "serial coordinator interrupted after the user requested that timing stop",
+  "resume_policy": "rerun the existing attempt002 clean continuation; completed shards are reused, and the incomplete current_v31_control/shard01/attempt001 is retained while a new leaf attempt is created",
+  "audit_scoring": "all eight arms scored on 503 cells before timing began",
+  "exact_greedy": "excluded from future generation; completed diagnostic retained"
+}

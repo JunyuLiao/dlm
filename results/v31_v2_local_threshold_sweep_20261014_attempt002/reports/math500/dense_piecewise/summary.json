@@ -1,0 +1,150 @@
+{
+  "N_ratio_vs_v31": 0.9671073847146082,
+  "accuracy": 0.95,
+  "arm": "dense_piecewise",
+  "attempts": [
+    "runs/math500/dense_piecewise/shard001/attempt001",
+    "runs/math500/dense_piecewise/shard002/attempt001",
+    "runs/math500/dense_piecewise/shard003/attempt001",
+    "runs/math500/dense_piecewise/shard004/attempt001"
+  ],
+  "correct": 95,
+  "global_kept_ratio_vs_v31": 1.0702850515158442,
+  "items": 100,
+  "official_scorer": {
+    "answer_text": {
+      "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+      "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+      "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+    },
+    "arms": {
+      "dense_piecewise": {
+        "accuracy": 0.95,
+        "capped": 4,
+        "cells": 100,
+        "correct": 95,
+        "finished": 96,
+        "no_final_response": 4,
+        "unparsed": 4,
+        "verified": 100,
+        "verifier_errors": 0
+      }
+    },
+    "coverage": {
+      "dense_piecewise": {
+        "dropped": 0,
+        "missing": 0,
+        "planned": 100,
+        "present": 100,
+        "scored": 100
+      }
+    },
+    "math_verify_version": "0.9.0",
+    "metric": "MATH500 symbolic answer equivalence (math-verify)"
+  },
+  "paired_vs_v31": {
+    "candidate_only_correct": 2,
+    "canvas_count_mismatches": 47,
+    "control_only_correct": 2,
+    "delta_pp": 0.0,
+    "denoising_call_mismatches": 97,
+    "mcnemar_exact_p": 1.0,
+    "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+    "output_hash_mismatches": 100,
+    "output_token_count_mismatches": 97,
+    "per_item_global_kept_delta": {
+      "max": 1104000.0,
+      "mean": 13283.2,
+      "median": -1360.0,
+      "min": -218880.0,
+      "n": 100,
+      "p10": -66096.0,
+      "p25": -29200.0,
+      "p75": 10160.0,
+      "p90": 61184.00000000006
+    },
+    "problem_cluster_bootstrap_ci95_pp": [
+      -4.0,
+      4.0
+    ],
+    "problem_clusters": 100
+  },
+  "status": "complete",
+  "suite": "math500",
+  "threshold": null,
+  "work": {
+    "C": 619,
+    "N": 5998,
+    "N_per_C": 9.689822294022617,
+    "T": 146449,
+    "audit_decode_s": 129.67764,
+    "audit_wall_s": 131.41352,
+    "cumulative_common_prefix": [],
+    "fa4_consumer_kept_global_tiles": 20227360,
+    "finish_reasons": {
+      "length": 4,
+      "stop": 96
+    },
+    "global_eligible_tiles": 20227360,
+    "global_kept_tiles": 20227360,
+    "global_skipped_tiles": 0,
+    "global_sparsity": 0.0,
+    "items": 100,
+    "local_skipped_tiles": 0,
+    "mean_C": 6.19,
+    "mean_N": 59.98,
+    "mean_T": 1464.49,
+    "median_N": 45.0,
+    "median_T": 1166.5,
+    "overall_eligible_rectangles": 91886560,
+    "overall_skipped_rectangles": 0,
+    "overall_sparsity": 0.0,
+    "phases": {
+      "carried": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "dense": {
+        "calls": 29990,
+        "eligible_tiles": 20227360,
+        "kept_fraction": 1.0,
+        "kept_tiles": 20227360,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      },
+      "held": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "initial": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "refresh": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      }
+    },
+    "selector_candidate_evaluations": 0,
+    "selector_discovery_ms": 0,
+    "selector_discovery_qk_rectangles": 0,
+    "selector_selection_ms": 0,
+    "value_selected_prefix_tiles": 0
+  }
+}

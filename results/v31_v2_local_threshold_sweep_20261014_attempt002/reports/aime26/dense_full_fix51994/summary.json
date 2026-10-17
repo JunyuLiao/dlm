@@ -1,0 +1,162 @@
+{
+  "N_ratio_vs_v31": 0.9803292626371928,
+  "accuracy": 0.5777777777777777,
+  "arm": "dense_full_fix51994",
+  "attempts": [
+    "runs/aime26/dense_full_fix51994/shard001/attempt001",
+    "runs/aime26/dense_full_fix51994/shard002/attempt001",
+    "runs/aime26/dense_full_fix51994/shard003/attempt001"
+  ],
+  "correct": 52,
+  "global_kept_ratio_vs_v31": 1.8071089559009734,
+  "items": 90,
+  "official_scorer": {
+    "answer_text": {
+      "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+      "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+      "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+    },
+    "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+    "arms": {
+      "dense_full_fix51994": {
+        "accuracy_by_panel_seed": {
+          "42": 63.33333333333333,
+          "43": 60.0,
+          "44": 50.0
+        },
+        "avg_at_k": 57.77777777777777,
+        "capped": 30,
+        "cells": 90,
+        "correct": 52,
+        "finished": 60,
+        "k_per_problem": [
+          3
+        ],
+        "no_final_response": 29,
+        "problems": 30,
+        "unparsed": 30,
+        "verified": 90
+      }
+    },
+    "coverage": {
+      "dense_full_fix51994": {
+        "dropped": 0,
+        "missing": 0,
+        "planned": 90,
+        "present": 90,
+        "scored": 90
+      }
+    },
+    "extraction": {
+      "file": "experiments/diffusion_gemma_aime30/protocol.py",
+      "module": "experiments.diffusion_gemma_aime30.protocol",
+      "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+    },
+    "metric": "exact match (avg@k over seeds)"
+  },
+  "paired_vs_v31": {
+    "candidate_only_correct": 10,
+    "canvas_count_mismatches": 57,
+    "control_only_correct": 11,
+    "delta_pp": -1.111111111111111,
+    "denoising_call_mismatches": 90,
+    "mcnemar_exact_p": 1.0,
+    "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+    "output_hash_mismatches": 90,
+    "output_token_count_mismatches": 64,
+    "per_item_global_kept_delta": {
+      "max": 12142240.0,
+      "mean": 1211393.7777777778,
+      "median": 587280.0,
+      "min": -1632000.0,
+      "n": 90,
+      "p10": -382368.0,
+      "p25": -18040.0,
+      "p75": 2412560.0,
+      "p90": 3355056.0000000005
+    },
+    "problem_cluster_bootstrap_ci95_pp": [
+      -12.222222222222221,
+      10.0
+    ],
+    "problem_clusters": 30
+  },
+  "status": "complete",
+  "suite": "aime26",
+  "threshold": null,
+  "work": {
+    "C": 1923,
+    "N": 25367,
+    "N_per_C": 13.191367654706188,
+    "T": 484130,
+    "audit_decode_s": 514.11769,
+    "audit_wall_s": 515.90372,
+    "cumulative_common_prefix": [],
+    "fa4_consumer_kept_global_tiles": 244106880,
+    "finish_reasons": {
+      "length": 30,
+      "stop": 60
+    },
+    "global_eligible_tiles": 244106880,
+    "global_kept_tiles": 244106880,
+    "global_skipped_tiles": 0,
+    "global_sparsity": 0.0,
+    "items": 90,
+    "local_skipped_tiles": 0,
+    "mean_C": 21.366666666666667,
+    "mean_N": 281.85555555555555,
+    "mean_T": 5379.222222222223,
+    "median_N": 212.0,
+    "median_T": 4893.5,
+    "overall_eligible_rectangles": 626020480,
+    "overall_skipped_rectangles": 0,
+    "overall_sparsity": 0.0,
+    "phases": {
+      "carried": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "dense": {
+        "calls": 126835,
+        "eligible_tiles": 244106880,
+        "kept_fraction": 1.0,
+        "kept_tiles": 244106880,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      },
+      "held": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "initial": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "refresh": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      }
+    },
+    "selector_candidate_evaluations": 0,
+    "selector_discovery_ms": 0,
+    "selector_discovery_qk_rectangles": 0,
+    "selector_selection_ms": 0,
+    "value_selected_prefix_tiles": 0
+  }
+}

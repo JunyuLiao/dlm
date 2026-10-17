@@ -1,0 +1,37 @@
+{
+  "status": "blocked_inputs_for_two_target_suites",
+  "checked_utc": "2026-10-08T06:18:50.954034+00:00",
+  "suites": {
+    "ruler_v33ofc": {
+      "expected_cells": 585,
+      "tasks": 13,
+      "items_per_task_per_length": 15,
+      "lengths": [
+        32768,
+        65536,
+        131072
+      ],
+      "required": [
+        "exact official v33ofc generation manifests for all three lengths",
+        "original frozen matched cell schedule",
+        "official gold/scorer binding"
+      ],
+      "reason": "exact manifests and schedules not located in readable local user data, including ignored files"
+    },
+    "humaneval": {
+      "expected_tasks": 164,
+      "generation_budget": 8192,
+      "thinking": true,
+      "required": [
+        "exact existing164-task generation manifest",
+        "corresponding frozen seed/cell schedule",
+        "official tests and check_program scorer binding"
+      ],
+      "seed_schedule": "unknown without the frozen cells; no substitute invented",
+      "reason": "exact existing pool manifest and schedule not located in readable local user data, including ignored files"
+    }
+  },
+  "user_input": "exact paths requested asynchronously; pending",
+  "unaffected_suite": "LongBench official503-item pool and original64-cell development schedule are available and hash-verified",
+  "study_completion": "no final_complete marker until requested planned target work is complete"
+}

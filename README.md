@@ -15,6 +15,32 @@ attention computation. Sparsity is applied only to eligible physical
 H100/SM90 research implementation; skipped-tile counts do not by themselves
 establish end-to-end speedup.
 
+## 2026-10-17 update: full-value selection and reuse
+
+The three-direction follow-up is complete: bounded full-V swaps, reuse-lifetime
+prediction/directional trust, and omitted-output reconstruction. Documentation
+covers every evaluated variant, including rejected diagnostics, exact formulas,
+fixed budgets, layer scope, experiment setup and evidence limits:
+
+1. [Evaluated methods and frozen setup](docs/research_update_20261017/01_METHODS_AND_SETUP.md).
+2. [All results, uncertainty and statistics](docs/research_update_20261017/02_RESULTS_AND_STATISTICS.md).
+3. [Integration, qualification and reproduction](docs/research_update_20261017/03_INTEGRATION_AND_REPRODUCTION.md).
+
+Official scoring covers **5,370 trials across AIME26, LongBench-v2, MATH100 and
+RULER128K**. Full-value swaps are the strongest candidate: LongBench calls fall
+23.51%, but accuracy uncertainty and concentrated tail savings limit the claim;
+all four candidates increase AIME calls. **No method passes the predeclared
+all-workload accuracy/call screen; no full503 expansion or timing run was launched.**
+Native value changes are GLOBAL-layer29-only, with fixed per-query-tile K.
+
+[Complete statistical tables and public exports](results/research_update_20261017/README.md),
+[source-bound plots/CSVs](results/v31_value_decision_reuse_20261015/synthesis_20261017/attempt001/summary.md)
+and [interpretation](results/v31_value_decision_reuse_20261015/conclusions_20261017.md)
+are available. Public analysis reproduces on CPU without private generations;
+full generation/scoring requires the authorized frozen inputs and pinned runtime.
+Clean timing remains paused. The October 15 publication below retains the
+definitions and source-specific results of the earlier method families.
+
 ## This week's cross-step-reuse research
 
 The 2026-10-15 publication separates three directions, each with formulas,

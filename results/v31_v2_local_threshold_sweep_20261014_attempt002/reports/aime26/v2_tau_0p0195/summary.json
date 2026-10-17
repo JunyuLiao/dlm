@@ -1,0 +1,307 @@
+{
+  "N_ratio_vs_v31": 0.9901839542433143,
+  "accuracy": 0.5777777777777777,
+  "arm": "v2_tau_0p0195",
+  "attempts": [
+    "runs/aime26/v2_tau_0p0195/shard001/attempt001",
+    "runs/aime26/v2_tau_0p0195/shard002/attempt001",
+    "runs/aime26/v2_tau_0p0195/shard003/attempt001"
+  ],
+  "correct": 52,
+  "global_kept_ratio_vs_v31": 1.520145410057814,
+  "items": 90,
+  "official_scorer": {
+    "answer_text": {
+      "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+      "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+      "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+    },
+    "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+    "arms": {
+      "v2_tau_0p0195": {
+        "accuracy_by_panel_seed": {
+          "42": 53.333333333333336,
+          "43": 66.66666666666666,
+          "44": 53.333333333333336
+        },
+        "avg_at_k": 57.77777777777777,
+        "capped": 33,
+        "cells": 90,
+        "correct": 52,
+        "finished": 57,
+        "k_per_problem": [
+          3
+        ],
+        "no_final_response": 27,
+        "problems": 30,
+        "unparsed": 27,
+        "verified": 90
+      }
+    },
+    "coverage": {
+      "v2_tau_0p0195": {
+        "dropped": 0,
+        "missing": 0,
+        "planned": 90,
+        "present": 90,
+        "scored": 90
+      }
+    },
+    "extraction": {
+      "file": "experiments/diffusion_gemma_aime30/protocol.py",
+      "module": "experiments.diffusion_gemma_aime30.protocol",
+      "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+    },
+    "metric": "exact match (avg@k over seeds)"
+  },
+  "paired_vs_v31": {
+    "candidate_only_correct": 6,
+    "canvas_count_mismatches": 50,
+    "control_only_correct": 7,
+    "delta_pp": -1.111111111111111,
+    "denoising_call_mismatches": 88,
+    "mcnemar_exact_p": 1.0,
+    "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+    "output_hash_mismatches": 90,
+    "output_token_count_mismatches": 62,
+    "per_item_global_kept_delta": {
+      "max": 3365023.0,
+      "mean": 780688.7888888889,
+      "median": 280095.0,
+      "min": -2522877.0,
+      "n": 90,
+      "p10": -240953.0,
+      "p25": -12140.0,
+      "p75": 1818822.75,
+      "p90": 2196357.6
+    },
+    "problem_cluster_bootstrap_ci95_pp": [
+      -8.888888888888888,
+      6.666666666666667
+    ],
+    "problem_clusters": 30
+  },
+  "status": "complete",
+  "suite": "aime26",
+  "threshold": 0.0195,
+  "work": {
+    "C": 1936,
+    "N": 25622,
+    "N_per_C": 13.234504132231406,
+    "T": 487320,
+    "audit_decode_s": 586.62425,
+    "audit_wall_s": 588.44786,
+    "cumulative_common_prefix": [
+      {
+        "canvas_prefix": 1,
+        "eligible_tiles": 1130880,
+        "item_kept_distribution": {
+          "max": 31845.0,
+          "mean": 12552.444444444445,
+          "median": 11520.0,
+          "min": 6716.0,
+          "n": 90,
+          "p10": 8640.0,
+          "p25": 10074.0,
+          "p75": 14512.5,
+          "p90": 16788.0
+        },
+        "items": 90,
+        "kept_tiles": 1129720,
+        "sparsity": 0.001025749858517222
+      },
+      {
+        "canvas_prefix": 2,
+        "eligible_tiles": 3210080,
+        "item_kept_distribution": {
+          "max": 58430.0,
+          "mean": 35521.62222222222,
+          "median": 34165.0,
+          "min": 20436.0,
+          "n": 90,
+          "p10": 24260.3,
+          "p25": 28207.0,
+          "p75": 41553.25,
+          "p90": 47560.3
+        },
+        "items": 90,
+        "kept_tiles": 3196946,
+        "sparsity": 0.004091486816527934
+      },
+      {
+        "canvas_prefix": 3,
+        "eligible_tiles": 5826240,
+        "item_kept_distribution": {
+          "max": 101470.0,
+          "mean": 64254.433333333334,
+          "median": 61161.0,
+          "min": 41327.0,
+          "n": 90,
+          "p10": 45406.4,
+          "p25": 50631.0,
+          "p75": 76718.25,
+          "p90": 86332.3
+        },
+        "items": 90,
+        "kept_tiles": 5782899,
+        "sparsity": 0.007438931454934905
+      },
+      {
+        "canvas_prefix": 4,
+        "eligible_tiles": 9194240,
+        "item_kept_distribution": {
+          "max": 165145.0,
+          "mean": 100954.06666666667,
+          "median": 102157.5,
+          "min": 58414.0,
+          "n": 90,
+          "p10": 69336.4,
+          "p25": 80668.0,
+          "p75": 118346.5,
+          "p90": 132587.50000000003
+        },
+        "items": 90,
+        "kept_tiles": 9085866,
+        "sparsity": 0.011787162397327022
+      },
+      {
+        "canvas_prefix": 5,
+        "eligible_tiles": 13215200,
+        "item_kept_distribution": {
+          "max": 221878.0,
+          "mean": 144308.85555555555,
+          "median": 145223.0,
+          "min": 81972.0,
+          "n": 90,
+          "p10": 99873.0,
+          "p25": 120382.0,
+          "p75": 162825.75,
+          "p90": 194317.6
+        },
+        "items": 90,
+        "kept_tiles": 12987797,
+        "sparsity": 0.017207685089896452
+      },
+      {
+        "canvas_prefix": 6,
+        "eligible_tiles": 18000320,
+        "item_kept_distribution": {
+          "max": 304980.0,
+          "mean": 195408.6,
+          "median": 195404.0,
+          "min": 102420.0,
+          "n": 90,
+          "p10": 126437.4,
+          "p25": 167690.25,
+          "p75": 226414.25,
+          "p90": 260097.1
+        },
+        "items": 90,
+        "kept_tiles": 17586774,
+        "sparsity": 0.022974369344544998
+      },
+      {
+        "canvas_prefix": 7,
+        "eligible_tiles": 23371840,
+        "item_kept_distribution": {
+          "max": 394121.0,
+          "mean": 252292.0888888889,
+          "median": 251690.0,
+          "min": 121228.0,
+          "n": 90,
+          "p10": 161064.8,
+          "p25": 207898.25,
+          "p75": 287391.0,
+          "p90": 335718.2
+        },
+        "items": 90,
+        "kept_tiles": 22706288,
+        "sparsity": 0.028476662513520545
+      },
+      {
+        "canvas_prefix": 8,
+        "eligible_tiles": 29161120,
+        "item_kept_distribution": {
+          "max": 474647.0,
+          "mean": 312646.8333333333,
+          "median": 316610.5,
+          "min": 150401.0,
+          "n": 90,
+          "p10": 190209.7,
+          "p25": 265864.0,
+          "p75": 365772.25,
+          "p90": 411461.80000000005
+        },
+        "items": 90,
+        "kept_tiles": 28138215,
+        "sparsity": 0.0350776993476245
+      }
+    ],
+    "fa4_consumer_kept_global_tiles": 205343431,
+    "finish_reasons": {
+      "length": 33,
+      "stop": 57
+    },
+    "global_eligible_tiles": 246088480,
+    "global_kept_tiles": 205343431,
+    "global_skipped_tiles": 40745049,
+    "global_sparsity": 0.16557072886955126,
+    "items": 90,
+    "local_skipped_tiles": 0,
+    "mean_C": 21.511111111111113,
+    "mean_N": 284.68888888888887,
+    "mean_T": 5414.666666666667,
+    "median_N": 240.5,
+    "median_T": 5247.0,
+    "overall_eligible_rectangles": 631873680,
+    "overall_skipped_rectangles": 40745049,
+    "overall_sparsity": 0.06448290265864531,
+    "phases": {
+      "carried": {
+        "calls": 9680,
+        "eligible_tiles": 19029440,
+        "kept_fraction": 0.8509111671178973,
+        "kept_tiles": 16192363,
+        "skipped_tiles": 2837077,
+        "sparsity": 0.14908883288210273
+      },
+      "dense": {
+        "calls": 450,
+        "eligible_tiles": 101760,
+        "kept_fraction": 1.0,
+        "kept_tiles": 101760,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      },
+      "held": {
+        "calls": 98805,
+        "eligible_tiles": 191731840,
+        "kept_fraction": 0.8022865059866947,
+        "kept_tiles": 153823868,
+        "skipped_tiles": 37907972,
+        "sparsity": 0.1977134940133053
+      },
+      "initial": {
+        "calls": 9680,
+        "eligible_tiles": 17790400,
+        "kept_fraction": 1.0,
+        "kept_tiles": 17790400,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      },
+      "refresh": {
+        "calls": 9495,
+        "eligible_tiles": 17435040,
+        "kept_fraction": 1.0,
+        "kept_tiles": 17435040,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      }
+    },
+    "selector_candidate_evaluations": 35225440,
+    "selector_discovery_ms": 10765.628512710333,
+    "selector_discovery_qk_rectangles": 35225440,
+    "selector_selection_ms": 6621.348320182413,
+    "value_selected_prefix_tiles": 25167216
+  }
+}

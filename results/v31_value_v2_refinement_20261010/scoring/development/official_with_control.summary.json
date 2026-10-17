@@ -1,0 +1,124 @@
+{
+ "answer_text": {
+  "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+  "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+  "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+ },
+ "arms": {
+  "current_v31_control": {
+   "longbench_v2_0shot_think": {
+    "cells": 15,
+    "finished": 15,
+    "no_final_response": 0,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 33.3,
+      "Hard": 66.7,
+      "Long": 25.0,
+      "Medium": 25.0,
+      "Overall": 46.7,
+      "Short": 71.4,
+      "items": 15
+     }
+    },
+    "truncated_items": 6,
+    "unparsed": 0,
+    "verified": 15
+   }
+  },
+  "value_v2_online_jcgate": {
+   "longbench_v2_0shot_think": {
+    "cells": 15,
+    "finished": 15,
+    "no_final_response": 0,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 33.3,
+      "Hard": 66.7,
+      "Long": 25.0,
+      "Medium": 25.0,
+      "Overall": 46.7,
+      "Short": 71.4,
+      "items": 15
+     }
+    },
+    "truncated_items": 6,
+    "unparsed": 0,
+    "verified": 15
+   }
+  },
+  "value_v2_online_mass_anchor32": {
+   "longbench_v2_0shot_think": {
+    "cells": 15,
+    "finished": 15,
+    "no_final_response": 0,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 33.3,
+      "Hard": 66.7,
+      "Long": 25.0,
+      "Medium": 25.0,
+      "Overall": 46.7,
+      "Short": 71.4,
+      "items": 15
+     }
+    },
+    "truncated_items": 6,
+    "unparsed": 0,
+    "verified": 15
+   }
+  },
+  "value_v2_online_preserve_mass": {
+   "longbench_v2_0shot_think": {
+    "cells": 15,
+    "finished": 15,
+    "no_final_response": 1,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 33.3,
+      "Hard": 50.0,
+      "Long": 0.0,
+      "Medium": 25.0,
+      "Overall": 40.0,
+      "Short": 71.4,
+      "items": 15
+     }
+    },
+    "truncated_items": 6,
+    "unparsed": 1,
+    "verified": 15
+   }
+  }
+ },
+ "coverage": {
+  "current_v31_control": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 15,
+   "present": 15,
+   "scored": 15
+  },
+  "value_v2_online_jcgate": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 15,
+   "present": 15,
+   "scored": 15
+  },
+  "value_v2_online_mass_anchor32": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 15,
+   "present": 15,
+   "scored": 15
+  },
+  "value_v2_online_preserve_mass": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 15,
+   "present": 15,
+   "scored": 15
+  }
+ },
+ "metric": "LongBench-v2 pred.py extract_answer judge; result.py aggregation (one decimal)"
+}

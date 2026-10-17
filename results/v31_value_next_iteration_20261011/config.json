@@ -1,0 +1,32 @@
+{
+  "schema": "v31_next_iteration_config_v1",
+  "date": "2026-10-11",
+  "source_commit": "fce50a8b110f29c47b01cd5d2dd42d3986df328a",
+  "threshold": 0.027,
+  "budget_policy": "fixed_qblock_prefix_budget",
+  "budget_tiles": 128,
+  "pool_factor": 2,
+  "development_cells": 15,
+  "full_audit_cells": 503,
+  "arms": [
+    "value_mass_gated_online_swap8",
+    "value_mass_gated_online_swap16",
+    "value_mass_gated_online_phase_swap16",
+    "value_mass_gated_online_cgate_swap16",
+    "value_mass_gated_full_swap16",
+    "value_intersection_online",
+    "value_intersection_full"
+  ],
+  "timing": "paused_resumable",
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/v31_value_selectors.py": "5c43e4305e02eb661ded09bf86d2246eca13726336cb1513eb9d1b61f430e765",
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "8574ce0af79c86f46d13d59337ed9abc01d9dd7b26ed174340346f3a7cba98be",
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "87a192d1363ee2d5e1fb934c8a58cba5147a2b00bbdeca1dce96a530c841be3e",
+    "scripts/v31_value_campaign.py": "1aa4596a30bdbc3a5b8697af85020cfbfd867aca8766fa3aa68c9599280f2320",
+    "scripts/v31_vllm_paired_bench.py": "00f4926e4d4e65b8413f2ce57dabbb6d11f8a30429031ec786f5cb857f116a9e",
+    "tests/test_v31_value_selectors_independent.py": "c43f4d6001f67795994acad0ef4b4adea4d9defa3525d3d4684dfb0161ae0ff8"
+  },
+  "official_scorer": "scripts/v31_score_longbench_official.py",
+  "control": "current_v31_control",
+  "next_gate": "confidence_gated_mass_anchored_online_swap"
+}

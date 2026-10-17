@@ -1,0 +1,98 @@
+{
+  "files_sha256": {
+    "config.json": "e9a593f0e1dda5a564f5ad2a084de826a850e570f3b2c176f7e5cd1e3390d10d",
+    "exports/r1_control_after/private/run_r1_control_after.private.jsonl": "5f20f951b90379fdd7b425ea09bec9004bd45053c5fa81a046d8dd7880aa2647",
+    "exports/r1_control_after/records.jsonl": "379a9b0f8fcc96010ffebb74347be96dacac2b2dbc159958a125163e6778a667",
+    "exports/r1_control_before/private/run_r1_control_before.private.jsonl": "5f20f951b90379fdd7b425ea09bec9004bd45053c5fa81a046d8dd7880aa2647",
+    "exports/r1_control_before/records.jsonl": "0bbaab50f9c1ef92ac218ec857f8557e83b6c287e598ab79d922ec48c7253f1d",
+    "exports/r1_full_swap8/private/run_r1_full_swap8.private.jsonl": "99ee860e908a12de6a4d1fb052468a99e84cb20a468dd310dd07a777560b784f",
+    "exports/r1_full_swap8/records.jsonl": "5d905966167ee7658daceedaa47ab693f01ecf6a83e1a051a515da7693539a79",
+    "exports/r1_full_swap8_direction_guard/private/run_r1_full_swap8_direction_guard.private.jsonl": "c7d3416947309241c99f76b9da181a05af81e94fd9091bd4799c08d03eec0267",
+    "exports/r1_full_swap8_direction_guard/records.jsonl": "83900fb82ec613caa3e3a675cd352a022f891226d414680314c99c977708f37d",
+    "exports/r1_residual/private/run_r1_residual.private.jsonl": "9660223407df25be5f222b93dbb788c2852db51a8f7d5a27497a7ef56c9a3338",
+    "exports/r1_residual/records.jsonl": "3db8a8affc47eba38ff29507e57fb7aea364a472e91ee608455c1a5c7e04b7c9",
+    "exports/r1_residual_direction_guard/private/run_r1_residual_direction_guard.private.jsonl": "d4bbb8607260a251c240a9376e3153ac1e006a6fb2468504cfb9ad3733d7649d",
+    "exports/r1_residual_direction_guard/records.jsonl": "3ec68e5d5cdacd7bd4d0a99b695d1895fd488501a6ee986f513f70e3f592d64b",
+    "private/generation.private.jsonl": "0dd700131da6c4b22d15dda8bcedc332c05848aa243e5606411664124dd104ea",
+    "receipt.json": "fbc78a2872f19b31dfde171dbeb08ae833b76819763999446be74bedf7066efc",
+    "records.jsonl": "70a6961b8f9a2db455755df1d8dee92bc6d6d05f35d0a197b655d7fa8d3f6d8c"
+  },
+  "gpu_reservation_s": 250.0208423580043,
+  "groups": [
+    {
+      "control_N": [
+        117,
+        117
+      ],
+      "drift": [],
+      "index": 28,
+      "seed": 1
+    },
+    {
+      "control_N": [
+        81,
+        81
+      ],
+      "drift": [],
+      "index": 34,
+      "seed": 1
+    }
+  ],
+  "parity_policy": "all structural-valid outcomes retained, including drift; no parity-based retries",
+  "protocol_sha256": "c3c51ce17f22ba325c9ba6b85a588de15dd0969510da280fa38ae3f95821380a",
+  "repeat": 1,
+  "returncode": 0,
+  "status": "complete",
+  "structural_errors": [],
+  "warmup_work": {
+    "full_swap8": {
+      "allkept_shortcuts": 28,
+      "anchor_budget_units_checked": 1312,
+      "anchor_events": 13,
+      "anchor_full_pv_rectangles": 16352,
+      "anchor_full_qk_rectangles": 16352,
+      "budget_errors": 0,
+      "held_calls": 25,
+      "swapped_blocks": 686,
+      "updated_budget_units_checked": 416
+    },
+    "full_swap8_direction_guard": {
+      "allkept_shortcuts": 28,
+      "anchor_budget_units_checked": 1312,
+      "anchor_events": 13,
+      "anchor_full_pv_rectangles": 16352,
+      "anchor_full_qk_rectangles": 16352,
+      "budget_errors": 0,
+      "corrected_calls": 36,
+      "direction_guard_fused_calls": 36,
+      "extra_post_o_projections": 26,
+      "held_calls": 36,
+      "held_direction_dot_rows": 9216,
+      "swapped_blocks": 678,
+      "updated_budget_units_checked": 416
+    },
+    "residual": {
+      "allkept_shortcuts": 28,
+      "anchor_budget_units_checked": 1312,
+      "anchor_events": 13,
+      "anchor_full_pv_rectangles": 16352,
+      "anchor_full_qk_rectangles": 16352,
+      "budget_errors": 0,
+      "corrected_calls": 34,
+      "held_calls": 34
+    },
+    "residual_direction_guard": {
+      "allkept_shortcuts": 28,
+      "anchor_budget_units_checked": 1344,
+      "anchor_events": 14,
+      "anchor_full_pv_rectangles": 17728,
+      "anchor_full_qk_rectangles": 17728,
+      "budget_errors": 0,
+      "corrected_calls": 26,
+      "direction_guard_fused_calls": 26,
+      "extra_post_o_projections": 28,
+      "held_calls": 26,
+      "held_direction_dot_rows": 6656
+    }
+  }
+}

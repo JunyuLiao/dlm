@@ -1,0 +1,160 @@
+{
+  "N_ratio_vs_v31": 1.1590012487937786,
+  "accuracy": 0.49105367793240556,
+  "arm": "dense_full_fix51994",
+  "attempts": [
+    "runs/longbench_v2/dense_full_fix51994/shard001/attempt001",
+    "runs/longbench_v2/dense_full_fix51994/shard002/attempt001",
+    "runs/longbench_v2/dense_full_fix51994/shard003/attempt001",
+    "runs/longbench_v2/dense_full_fix51994/shard004/attempt001"
+  ],
+  "correct": 247,
+  "global_kept_ratio_vs_v31": 7.125143335054703,
+  "items": 503,
+  "official_scorer": {
+    "answer_text": {
+      "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+      "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+      "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+    },
+    "arms": {
+      "dense_full_fix51994": {
+        "longbench_v2_0shot_think": {
+          "capped": 30,
+          "cells": 503,
+          "finished": 473,
+          "no_final_response": 48,
+          "runs": {
+            "seed1_repeat0": {
+              "Easy": 49.0,
+              "Hard": 49.2,
+              "Long": 41.7,
+              "Medium": 42.8,
+              "Overall": 49.1,
+              "Short": 61.1,
+              "items": 503
+            }
+          },
+          "truncated_items": 237,
+          "unparsed": 56,
+          "verified": 503
+        }
+      }
+    },
+    "coverage": {
+      "dense_full_fix51994": {
+        "dropped": 0,
+        "missing": 0,
+        "planned": 503,
+        "present": 503,
+        "scored": 503
+      }
+    },
+    "metric": "LongBench-v2 pred.py extract_answer judge; result.py aggregation (one decimal)"
+  },
+  "paired_vs_v31": {
+    "candidate_only_correct": 36,
+    "canvas_count_mismatches": 404,
+    "control_only_correct": 57,
+    "delta_pp": -4.174950298210735,
+    "denoising_call_mismatches": 495,
+    "mcnemar_exact_p": 0.03751423180190034,
+    "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+    "output_hash_mismatches": 503,
+    "output_token_count_mismatches": 496,
+    "per_item_global_kept_delta": {
+      "max": 953044960.0,
+      "mean": 71032005.72564612,
+      "median": 22008160.0,
+      "min": -27551200.0,
+      "n": 503,
+      "p10": 1398560.0,
+      "p25": 7382400.0,
+      "p75": 67128320.0,
+      "p90": 146904192.0
+    },
+    "problem_cluster_bootstrap_ci95_pp": [
+      -7.952286282306163,
+      -0.3976143141153081
+    ],
+    "problem_clusters": 503
+  },
+  "status": "complete",
+  "suite": "longbench_v2",
+  "threshold": null,
+  "work": {
+    "C": 7627,
+    "N": 163345,
+    "N_per_C": 21.416677592762554,
+    "T": 1888404,
+    "audit_decode_s": 5287.57604,
+    "audit_wall_s": 7076.09854,
+    "cumulative_common_prefix": [],
+    "fa4_consumer_kept_global_tiles": 41562284640,
+    "finish_reasons": {
+      "length": 30,
+      "stop": 473
+    },
+    "global_eligible_tiles": 41562284640,
+    "global_kept_tiles": 41562284640,
+    "global_skipped_tiles": 0,
+    "global_sparsity": 0.0,
+    "items": 503,
+    "local_skipped_tiles": 0,
+    "mean_C": 15.163021868787276,
+    "mean_N": 324.741550695825,
+    "mean_T": 3754.282306163022,
+    "median_N": 167,
+    "median_T": 2478,
+    "overall_eligible_rectangles": 44172835840,
+    "overall_skipped_rectangles": 0,
+    "overall_sparsity": 0.0,
+    "phases": {
+      "carried": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "dense": {
+        "calls": 816725,
+        "eligible_tiles": 41562284640,
+        "kept_fraction": 1.0,
+        "kept_tiles": 41562284640,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      },
+      "held": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "initial": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "refresh": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      }
+    },
+    "selector_candidate_evaluations": 0,
+    "selector_discovery_ms": 0,
+    "selector_discovery_qk_rectangles": 0,
+    "selector_selection_ms": 0,
+    "value_selected_prefix_tiles": 0
+  }
+}

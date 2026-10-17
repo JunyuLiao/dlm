@@ -1,0 +1,150 @@
+{
+  "N_ratio_vs_v31": 1.026281844566269,
+  "accuracy": 0.93,
+  "arm": "dense_full_fix51994",
+  "attempts": [
+    "runs/math500/dense_full_fix51994/shard001/attempt001",
+    "runs/math500/dense_full_fix51994/shard002/attempt001",
+    "runs/math500/dense_full_fix51994/shard003/attempt001",
+    "runs/math500/dense_full_fix51994/shard004/attempt001"
+  ],
+  "correct": 93,
+  "global_kept_ratio_vs_v31": 1.214588677520128,
+  "items": 100,
+  "official_scorer": {
+    "answer_text": {
+      "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+      "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+      "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+    },
+    "arms": {
+      "dense_full_fix51994": {
+        "accuracy": 0.93,
+        "capped": 7,
+        "cells": 100,
+        "correct": 93,
+        "finished": 93,
+        "no_final_response": 6,
+        "unparsed": 6,
+        "verified": 100,
+        "verifier_errors": 0
+      }
+    },
+    "coverage": {
+      "dense_full_fix51994": {
+        "dropped": 0,
+        "missing": 0,
+        "planned": 100,
+        "present": 100,
+        "scored": 100
+      }
+    },
+    "math_verify_version": "0.9.0",
+    "metric": "MATH500 symbolic answer equivalence (math-verify)"
+  },
+  "paired_vs_v31": {
+    "candidate_only_correct": 1,
+    "canvas_count_mismatches": 44,
+    "control_only_correct": 3,
+    "delta_pp": -2.0,
+    "denoising_call_mismatches": 97,
+    "mcnemar_exact_p": 0.625,
+    "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+    "output_hash_mismatches": 100,
+    "output_token_count_mismatches": 97,
+    "per_item_global_kept_delta": {
+      "max": 1237120.0,
+      "mean": 40555.2,
+      "median": -880.0,
+      "min": -281280.0,
+      "n": 100,
+      "p10": -62912.0,
+      "p25": -24400.0,
+      "p75": 21520.0,
+      "p90": 136016.0
+    },
+    "problem_cluster_bootstrap_ci95_pp": [
+      -6.0,
+      2.0
+    ],
+    "problem_clusters": 100
+  },
+  "status": "complete",
+  "suite": "math500",
+  "threshold": null,
+  "work": {
+    "C": 643,
+    "N": 6365,
+    "N_per_C": 9.89891135303266,
+    "T": 152848,
+    "audit_decode_s": 132.41054,
+    "audit_wall_s": 134.19595,
+    "cumulative_common_prefix": [],
+    "fa4_consumer_kept_global_tiles": 22954560,
+    "finish_reasons": {
+      "length": 7,
+      "stop": 93
+    },
+    "global_eligible_tiles": 22954560,
+    "global_kept_tiles": 22954560,
+    "global_skipped_tiles": 0,
+    "global_sparsity": 0.0,
+    "items": 100,
+    "local_skipped_tiles": 0,
+    "mean_C": 6.43,
+    "mean_N": 63.65,
+    "mean_T": 1528.48,
+    "median_N": 45.0,
+    "median_T": 1228.0,
+    "overall_eligible_rectangles": 100230960,
+    "overall_skipped_rectangles": 0,
+    "overall_sparsity": 0.0,
+    "phases": {
+      "carried": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "dense": {
+        "calls": 31825,
+        "eligible_tiles": 22954560,
+        "kept_fraction": 1.0,
+        "kept_tiles": 22954560,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      },
+      "held": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "initial": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      },
+      "refresh": {
+        "calls": 0,
+        "eligible_tiles": 0,
+        "kept_fraction": null,
+        "kept_tiles": 0,
+        "skipped_tiles": 0,
+        "sparsity": null
+      }
+    },
+    "selector_candidate_evaluations": 0,
+    "selector_discovery_ms": 0,
+    "selector_discovery_qk_rectangles": 0,
+    "selector_selection_ms": 0,
+    "value_selected_prefix_tiles": 0
+  }
+}

@@ -1,0 +1,70 @@
+{
+ "answer_text": {
+  "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+  "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+  "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+ },
+ "arms": {
+  "current_v31_control": {
+   "longbench_v2_0shot_think": {
+    "capped": 17,
+    "cells": 503,
+    "finished": 486,
+    "no_final_response": 27,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 53.1,
+      "Hard": 49.5,
+      "Long": 41.7,
+      "Medium": 46.5,
+      "Overall": 50.9,
+      "Short": 61.7,
+      "items": 503
+     }
+    },
+    "truncated_items": 237,
+    "unparsed": 35,
+    "verified": 503
+   }
+  },
+  "v2_work_match_total": {
+   "longbench_v2_0shot_think": {
+    "capped": 14,
+    "cells": 503,
+    "finished": 489,
+    "no_final_response": 28,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 54.2,
+      "Hard": 51.1,
+      "Long": 41.7,
+      "Medium": 48.4,
+      "Overall": 52.3,
+      "Short": 63.3,
+      "items": 503
+     }
+    },
+    "truncated_items": 237,
+    "unparsed": 34,
+    "verified": 503
+   }
+  }
+ },
+ "coverage": {
+  "current_v31_control": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 503,
+   "present": 503,
+   "scored": 503
+  },
+  "v2_work_match_total": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 503,
+   "present": 503,
+   "scored": 503
+  }
+ },
+ "metric": "LongBench-v2 pred.py extract_answer judge; result.py aggregation (one decimal)"
+}

@@ -1,0 +1,41 @@
+{
+  "additional_decision_reports": {
+    "coverage_math500_attempt001/report/summary.json": "796f35e3671662d3c6e5c346ca2f352a9309758e5a9d88cecb8663be1b32b1a7",
+    "coverage_ruler128k_attempt001/report/summary.json": "2c9852f1c55f0b903e29cf83e40464124f7944bd3cca85862a66393897d0151c"
+  },
+  "budget": "exact prefix K128 long / K27 short per head and Q128 tile, common mandatory boundary/canvas/carry work",
+  "coverage_complete_sha256": "ee7bed4cdbbf976897e0cc75eb16cf34f2c5080c9ab31b81492d28d99beccbf2",
+  "decision_batch_complete_sha256": "3b6d9c912a03c8e5ce331ad7ea3b417e68bf7a99701d7f97a101a0df68335cab",
+  "full503": "requires a separate completed development promotion",
+  "h100_tests_receipt": "results/v31_value_decision_reuse_20261015/receipts/h100_qualification/attempt002/receipt.json",
+  "h100_tests_receipt_sha256": "da16cd78f49e4eebe7562e6c9224245a9ea83b49d14092b76d3d5a853b57d662",
+  "inclusion_rationale_sha256": "994eff9c9a70c5e8c93dd665b7c11a97e92805829b849b624fed7ec8ac5f1684",
+  "native_sampler": "unchanged",
+  "native_source_sha256": {
+    "experiments/numerical_qk_reuse/v31_same_state_suffix.py": "583a25369a9c7ac21e4d85c49ea97f97732eae7c57c1e696ea13fe3aa9976be9",
+    "experiments/numerical_qk_reuse/v31_value_decision.py": "8cf4a1e77e780a16d1a05dc5c21eb47a8569ab1c9936b91ffa77c8161640dae4",
+    "experiments/numerical_qk_reuse/v31_value_online_kernel.py": "46de45d24524ae1f51f29477b77482b6725409c8129badd39dd09b4d3f0c8b6b",
+    "experiments/numerical_qk_reuse/v31_value_refinement_runtime.py": "7b8bd990223229a22dc02399d227a6e93a3b894f44a1fb3446bcc3478c5640f2",
+    "experiments/numerical_qk_reuse/v31_value_reuse_guard.py": "62ffc5fc0252468c0361a61b3f3ad6f35bf3bed1027f4005c295b21e385130f6",
+    "experiments/numerical_qk_reuse/v31_value_reuse_merge_kernel.py": "902ff90ddaa03f05fed17088b3a954fada3e30224e6229df6300ba035aa8b8ee",
+    "scripts/v31_value_refinement_worker.py": "ddde7f025ecb1871c83298492b8786793e7617854b4c8bea464c8be8f5e5cbe7"
+  },
+  "preparation": "attempt002 reads actual model generation settings; supersedes unlaunched preparation001 metadata",
+  "promoted_modes": [
+    "full_swap8",
+    "residual_direction_guard",
+    "residual",
+    "full_swap8_direction_guard"
+  ],
+  "purpose": "source-bound promotion to exploratory native testing, not accuracy success or deployment",
+  "roles": {
+    "full_swap8": "bounded fixed-budget selection",
+    "full_swap8_direction_guard": "combined selection and causal trust",
+    "residual": "mechanistic raw-cache baseline; not certified tail-safe or novel",
+    "residual_direction_guard": "causal online trust with cached reconstruction"
+  },
+  "schema": "value_native_development_inclusion_v1",
+  "scope": "GLOBAL layer29 only; other GLOBAL layers retain inherited V31; LOCAL dense",
+  "status": "passed",
+  "timing": "paused"
+}

@@ -1,0 +1,179 @@
+{
+  "status": "complete official audit-scoring comparison; clean timing intentionally paused before completion",
+  "suite": "LongBench-v2 0shot_think, official seed1, 503 cells per arm",
+  "scorer": "official extraction and aggregation; exact coverage 503/503 per arm",
+  "source_summary_sha256": "b7fa79b44b8ed152a5e978991d608628b43c538b17266a1a5caea4e6dbeac209",
+  "audit_stage_config_sha256": "53d9b03fa3039024fac6d58c65780408a54bd4bdb742e86fc44e593b17836807",
+  "threshold_policy": "V1 trial004 threshold 0.027000000000000003 accepted for first experiment; V2 uses same frozen threshold; achieved sparsity is reported, not matched by post-hoc fitting",
+  "official_accuracy": [
+    {
+      "arm": "dense_full_fix51994",
+      "correct": 247,
+      "cells": 503,
+      "accuracy": 0.49105367793240556,
+      "delta_vs_control": -0.041749502982107355,
+      "delta_ci95": [
+        -0.07952286282306163,
+        -0.003976143141153081
+      ],
+      "global_sparsity": 0.0,
+      "local_sparsity": 0,
+      "overall_rectangle_sparsity": 0.0,
+      "N": 163345,
+      "C": 7627,
+      "T": 1888404,
+      "N_per_C": 21.416677592762554,
+      "selection_ms": null,
+      "discovery_ms": null
+    },
+    {
+      "arm": "dense_piecewise",
+      "correct": 247,
+      "cells": 503,
+      "accuracy": 0.49105367793240556,
+      "delta_vs_control": -0.041749502982107355,
+      "delta_ci95": [
+        -0.07952286282306163,
+        -0.003976143141153081
+      ],
+      "global_sparsity": 0.0,
+      "local_sparsity": 0,
+      "overall_rectangle_sparsity": 0.0,
+      "N": 163345,
+      "C": 7627,
+      "T": 1888404,
+      "N_per_C": 21.416677592762554,
+      "selection_ms": null,
+      "discovery_ms": null
+    },
+    {
+      "arm": "allkept_fa4",
+      "correct": 252,
+      "cells": 503,
+      "accuracy": 0.5009940357852882,
+      "delta_vs_control": -0.03180914512922465,
+      "delta_ci95": [
+        -0.06560636182902585,
+        0.0019880715705765406
+      ],
+      "global_sparsity": 0.0,
+      "local_sparsity": 0,
+      "overall_rectangle_sparsity": 0.0,
+      "N": 147260,
+      "C": 7134,
+      "T": 1761430,
+      "N_per_C": 20.641996075133164,
+      "selection_ms": null,
+      "discovery_ms": null
+    },
+    {
+      "arm": "current_v31_control",
+      "correct": 268,
+      "cells": 503,
+      "accuracy": 0.532803180914513,
+      "delta_vs_control": 0.0,
+      "delta_ci95": [
+        0.0,
+        0.0
+      ],
+      "global_sparsity": 0.8316113216627912,
+      "local_sparsity": 0,
+      "overall_rectangle_sparsity": 0.7808421107961261,
+      "N": 140693,
+      "C": 6840,
+      "T": 1686311,
+      "N_per_C": 20.569152046783625,
+      "selection_ms": null,
+      "discovery_ms": null
+    },
+    {
+      "arm": "value_v1_online_discard_mass",
+      "correct": 247,
+      "cells": 503,
+      "accuracy": 0.49105367793240556,
+      "delta_vs_control": -0.041749502982107355,
+      "delta_ci95": [
+        -0.07554671968190854,
+        -0.007952286282306162
+      ],
+      "global_sparsity": 0.8004262489888407,
+      "local_sparsity": 0,
+      "overall_rectangle_sparsity": 0.7507024735102328,
+      "N": 120301,
+      "C": 6388,
+      "T": 1568793,
+      "N_per_C": 18.83234189104571,
+      "selection_ms": 315993.09400582314,
+      "discovery_ms": 596399.7360527515
+    },
+    {
+      "arm": "value_v2_online_preserve_mass",
+      "correct": 266,
+      "cells": 503,
+      "accuracy": 0.5288270377733598,
+      "delta_vs_control": -0.003976143141153081,
+      "delta_ci95": [
+        -0.03777335984095427,
+        0.03180914512922465
+      ],
+      "global_sparsity": 0.8411213730685299,
+      "local_sparsity": 0,
+      "overall_rectangle_sparsity": 0.7890805619531062,
+      "N": 126072,
+      "C": 6406,
+      "T": 1575774,
+      "N_per_C": 19.680299719013426,
+      "selection_ms": 308520.8746985793,
+      "discovery_ms": 602370.3796459436
+    },
+    {
+      "arm": "value_v3a_singleton_delete",
+      "correct": 253,
+      "cells": 503,
+      "accuracy": 0.5029821073558648,
+      "delta_vs_control": -0.02982107355864811,
+      "delta_ci95": [
+        -0.0636182902584493,
+        0.003976143141153081
+      ],
+      "global_sparsity": 0.8307519647020198,
+      "local_sparsity": 0,
+      "overall_rectangle_sparsity": 0.7804846484000352,
+      "N": 137212,
+      "C": 6758,
+      "T": 1664826,
+      "N_per_C": 20.30364013021604,
+      "selection_ms": 187121.77015012503,
+      "discovery_ms": 631848.938925147
+    },
+    {
+      "arm": "value_v3b_approx_batch8",
+      "correct": 242,
+      "cells": 503,
+      "accuracy": 0.48111332007952284,
+      "delta_vs_control": -0.05168986083499006,
+      "delta_ci95": [
+        -0.09145129224652088,
+        -0.013916500994035786
+      ],
+      "global_sparsity": 0.8496984519914428,
+      "local_sparsity": 0,
+      "overall_rectangle_sparsity": 0.7993989549808422,
+      "N": 171652,
+      "C": 6926,
+      "T": 1712374,
+      "N_per_C": 24.783713543170663,
+      "selection_ms": 4875715.139104962,
+      "discovery_ms": 643351.2711815834
+    }
+  ],
+  "interpretation": [
+    "current_v31_control is the accuracy reference at 268/503 (53.3%).",
+    "No value-aware arm exceeded the control: V2 reached 266/503 (52.9%), V3a 253/503 (50.3%), V1 247/503 (49.1%), and batch8 242/503 (48.1%).",
+    "The paired cluster intervals are descriptive and do not establish noninferiority.",
+    "The audit is instrumented; it does not provide clean latency.",
+    "The suite is the historically examined LongBench pool; RULER and HumanEval remain blocked on their frozen inputs.",
+    "Exact greedy is omitted from this eight-arm comparison; its completed 128-cell diagnostic is retained separately."
+  ],
+  "timing_stop_marker": "longbench/target_no_exact/attempt002/timing_stop_20261009.json"
+}

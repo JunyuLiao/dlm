@@ -1,0 +1,307 @@
+{
+  "N_ratio_vs_v31": 0.9882903076209615,
+  "accuracy": 0.6111111111111112,
+  "arm": "v2_tau_0p0225",
+  "attempts": [
+    "runs/aime26/v2_tau_0p0225/shard001/attempt001",
+    "runs/aime26/v2_tau_0p0225/shard002/attempt001",
+    "runs/aime26/v2_tau_0p0225/shard003/attempt001"
+  ],
+  "correct": 55,
+  "global_kept_ratio_vs_v31": 1.461859556723707,
+  "items": 90,
+  "official_scorer": {
+    "answer_text": {
+      "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+      "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+      "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+    },
+    "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+    "arms": {
+      "v2_tau_0p0225": {
+        "accuracy_by_panel_seed": {
+          "42": 63.33333333333333,
+          "43": 66.66666666666666,
+          "44": 53.333333333333336
+        },
+        "avg_at_k": 61.11111111111111,
+        "capped": 30,
+        "cells": 90,
+        "correct": 55,
+        "finished": 60,
+        "k_per_problem": [
+          3
+        ],
+        "no_final_response": 25,
+        "problems": 30,
+        "unparsed": 25,
+        "verified": 90
+      }
+    },
+    "coverage": {
+      "v2_tau_0p0225": {
+        "dropped": 0,
+        "missing": 0,
+        "planned": 90,
+        "present": 90,
+        "scored": 90
+      }
+    },
+    "extraction": {
+      "file": "experiments/diffusion_gemma_aime30/protocol.py",
+      "module": "experiments.diffusion_gemma_aime30.protocol",
+      "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+    },
+    "metric": "exact match (avg@k over seeds)"
+  },
+  "paired_vs_v31": {
+    "candidate_only_correct": 11,
+    "canvas_count_mismatches": 61,
+    "control_only_correct": 9,
+    "delta_pp": 2.222222222222222,
+    "denoising_call_mismatches": 89,
+    "mcnemar_exact_p": 0.8238029479980469,
+    "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+    "output_hash_mismatches": 90,
+    "output_token_count_mismatches": 66,
+    "per_item_global_kept_delta": {
+      "max": 3596586.0,
+      "mean": 693207.2666666667,
+      "median": 245206.0,
+      "min": -2127553.0,
+      "n": 90,
+      "p10": -248460.99999999997,
+      "p25": -34844.25,
+      "p75": 1719145.75,
+      "p90": 2130609.1
+    },
+    "problem_cluster_bootstrap_ci95_pp": [
+      -7.777777777777778,
+      13.333333333333334
+    ],
+    "problem_clusters": 30
+  },
+  "status": "complete",
+  "suite": "aime26",
+  "threshold": 0.0225,
+  "work": {
+    "C": 1941,
+    "N": 25573,
+    "N_per_C": 13.175167439464193,
+    "T": 489065,
+    "audit_decode_s": 588.11408,
+    "audit_wall_s": 589.96692,
+    "cumulative_common_prefix": [
+      {
+        "canvas_prefix": 1,
+        "eligible_tiles": 1194880,
+        "item_kept_distribution": {
+          "max": 53715.0,
+          "mean": 13261.633333333333,
+          "median": 12312.0,
+          "min": 7665.0,
+          "n": 90,
+          "p10": 8640.0,
+          "p25": 10560.0,
+          "p75": 14550.0,
+          "p90": 18240.0
+        },
+        "items": 90,
+        "kept_tiles": 1193547,
+        "sparsity": 0.0011155931976433164
+      },
+      {
+        "canvas_prefix": 2,
+        "eligible_tiles": 3234240,
+        "item_kept_distribution": {
+          "max": 76422.0,
+          "mean": 35773.86666666667,
+          "median": 34381.0,
+          "min": 20397.0,
+          "n": 90,
+          "p10": 24133.0,
+          "p25": 26916.0,
+          "p75": 43158.0,
+          "p90": 48474.70000000001
+        },
+        "items": 90,
+        "kept_tiles": 3219648,
+        "sparsity": 0.004511724547343388
+      },
+      {
+        "canvas_prefix": 3,
+        "eligible_tiles": 5827360,
+        "item_kept_distribution": {
+          "max": 100025.0,
+          "mean": 64188.2,
+          "median": 63517.0,
+          "min": 36075.0,
+          "n": 90,
+          "p10": 43866.9,
+          "p25": 52092.0,
+          "p75": 78313.5,
+          "p90": 86198.3
+        },
+        "items": 90,
+        "kept_tiles": 5776938,
+        "sparsity": 0.008652631723456206
+      },
+      {
+        "canvas_prefix": 4,
+        "eligible_tiles": 9179200,
+        "item_kept_distribution": {
+          "max": 173129.0,
+          "mean": 100568.5,
+          "median": 94666.5,
+          "min": 55243.0,
+          "n": 90,
+          "p10": 70163.7,
+          "p25": 82557.75,
+          "p75": 117649.0,
+          "p90": 134712.80000000002
+        },
+        "items": 90,
+        "kept_tiles": 9051165,
+        "sparsity": 0.013948383301377043
+      },
+      {
+        "canvas_prefix": 5,
+        "eligible_tiles": 13444640,
+        "item_kept_distribution": {
+          "max": 241109.0,
+          "mean": 146248.2111111111,
+          "median": 139799.5,
+          "min": 89130.0,
+          "n": 90,
+          "p10": 103100.2,
+          "p25": 125462.25,
+          "p75": 172502.0,
+          "p90": 188479.1
+        },
+        "items": 90,
+        "kept_tiles": 13162339,
+        "sparsity": 0.02099728962620051
+      },
+      {
+        "canvas_prefix": 6,
+        "eligible_tiles": 18397600,
+        "item_kept_distribution": {
+          "max": 314267.0,
+          "mean": 198602.04444444444,
+          "median": 194268.0,
+          "min": 117488.0,
+          "n": 90,
+          "p10": 136529.9,
+          "p25": 164355.75,
+          "p75": 227809.0,
+          "p90": 264167.6000000001
+        },
+        "items": 90,
+        "kept_tiles": 17874184,
+        "sparsity": 0.028450232639039896
+      },
+      {
+        "canvas_prefix": 7,
+        "eligible_tiles": 24044800,
+        "item_kept_distribution": {
+          "max": 513414.0,
+          "mean": 257714.14444444445,
+          "median": 251582.5,
+          "min": 144024.0,
+          "n": 90,
+          "p10": 169555.8,
+          "p25": 219738.5,
+          "p75": 302525.0,
+          "p90": 334634.60000000015
+        },
+        "items": 90,
+        "kept_tiles": 23194273,
+        "sparsity": 0.035372596153846136
+      },
+      {
+        "canvas_prefix": 8,
+        "eligible_tiles": 29833440,
+        "item_kept_distribution": {
+          "max": 581131.0,
+          "mean": 317389.15555555554,
+          "median": 309154.0,
+          "min": 155882.0,
+          "n": 90,
+          "p10": 207426.5,
+          "p25": 267638.75,
+          "p75": 366994.75,
+          "p90": 413692.4
+        },
+        "items": 90,
+        "kept_tiles": 28565024,
+        "sparsity": 0.04251658541556047
+      }
+    ],
+    "fa4_consumer_kept_global_tiles": 197470094,
+    "finish_reasons": {
+      "length": 30,
+      "stop": 60
+    },
+    "global_eligible_tiles": 243955520,
+    "global_kept_tiles": 197470094,
+    "global_skipped_tiles": 46485426,
+    "global_sparsity": 0.19054877708854467,
+    "items": 90,
+    "local_skipped_tiles": 0,
+    "mean_C": 21.566666666666666,
+    "mean_N": 284.14444444444445,
+    "mean_T": 5434.055555555556,
+    "median_N": 236.5,
+    "median_T": 5512.5,
+    "overall_eligible_rectangles": 628279920,
+    "overall_skipped_rectangles": 46485426,
+    "overall_sparsity": 0.07398839994759024,
+    "phases": {
+      "carried": {
+        "calls": 9705,
+        "eligible_tiles": 18915040,
+        "kept_fraction": 0.8269956077280302,
+        "kept_tiles": 15642655,
+        "skipped_tiles": 3272385,
+        "sparsity": 0.17300439227196984
+      },
+      "dense": {
+        "calls": 450,
+        "eligible_tiles": 101760,
+        "kept_fraction": 1.0,
+        "kept_tiles": 101760,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      },
+      "held": {
+        "calls": 98395,
+        "eligible_tiles": 189806240,
+        "kept_fraction": 0.7723307674183947,
+        "kept_tiles": 146593199,
+        "skipped_tiles": 43213041,
+        "sparsity": 0.22766923258160532
+      },
+      "initial": {
+        "calls": 9705,
+        "eligible_tiles": 17672800,
+        "kept_fraction": 1.0,
+        "kept_tiles": 17672800,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      },
+      "refresh": {
+        "calls": 9610,
+        "eligible_tiles": 17459680,
+        "kept_fraction": 1.0,
+        "kept_tiles": 17459680,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      }
+    },
+    "selector_candidate_evaluations": 35132480,
+    "selector_discovery_ms": 10805.232354775071,
+    "selector_discovery_qk_rectangles": 35132480,
+    "selector_selection_ms": 6771.8744599968195,
+    "value_selected_prefix_tiles": 24074081
+  }
+}

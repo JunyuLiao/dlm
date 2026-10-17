@@ -1,0 +1,147 @@
+{
+  "arms_sha256": {
+    "all_methods": "b14ad528cc7db00272167c1b71442aaa0d12658f88d1f382258061ff4459f85a",
+    "control_only": "c5a539cb1d58150f5fb111d27799096f73276a4795d758be124dab52c6baf787"
+  },
+  "cells_sha256": "c18e60e242f5ddd89a7616cf15c1612014bd0518d6a6132597e689ec9833f721",
+  "coordinator_sha256": "6f0f73292d72d04d456d3f83e7543631719f55da16173ede95875c1550e1f610",
+  "explicit_warmup_requests": 4,
+  "hypothesis": "first active computation may change persistent allocation or initialization state; not established",
+  "implicit_control_warmup": true,
+  "jobs": [
+    {
+      "name": "control_warm_repeat001",
+      "policy": "control_only"
+    },
+    {
+      "name": "method_warm_repeat001",
+      "policy": "all_methods"
+    },
+    {
+      "name": "method_warm_repeat002",
+      "policy": "all_methods"
+    },
+    {
+      "name": "control_warm_repeat002",
+      "policy": "control_only"
+    }
+  ],
+  "measured_groups": [
+    {
+      "arms": [
+        "current_v31_control",
+        "residual",
+        "full_swap8_direction_guard",
+        "full_swap8",
+        "residual_direction_guard",
+        "current_v31_control"
+      ],
+      "end": 10,
+      "start": 4
+    },
+    {
+      "arms": [
+        "current_v31_control",
+        "full_swap8",
+        "residual_direction_guard",
+        "residual",
+        "full_swap8_direction_guard",
+        "current_v31_control"
+      ],
+      "end": 16,
+      "start": 10
+    },
+    {
+      "arms": [
+        "current_v31_control",
+        "residual",
+        "full_swap8_direction_guard",
+        "full_swap8",
+        "residual_direction_guard",
+        "current_v31_control"
+      ],
+      "end": 22,
+      "start": 16
+    },
+    {
+      "arms": [
+        "current_v31_control",
+        "full_swap8_direction_guard",
+        "full_swap8",
+        "residual_direction_guard",
+        "residual",
+        "current_v31_control"
+      ],
+      "end": 28,
+      "start": 22
+    },
+    {
+      "arms": [
+        "current_v31_control",
+        "residual_direction_guard",
+        "residual",
+        "full_swap8_direction_guard",
+        "full_swap8",
+        "current_v31_control"
+      ],
+      "end": 34,
+      "start": 28
+    },
+    {
+      "arms": [
+        "current_v31_control",
+        "full_swap8_direction_guard",
+        "full_swap8",
+        "residual_direction_guard",
+        "residual",
+        "current_v31_control"
+      ],
+      "end": 40,
+      "start": 34
+    },
+    {
+      "arms": [
+        "current_v31_control",
+        "full_swap8",
+        "residual_direction_guard",
+        "residual",
+        "full_swap8_direction_guard",
+        "current_v31_control"
+      ],
+      "end": 46,
+      "start": 40
+    },
+    {
+      "arms": [
+        "current_v31_control",
+        "residual",
+        "full_swap8_direction_guard",
+        "full_swap8",
+        "residual_direction_guard",
+        "current_v31_control"
+      ],
+      "end": 52,
+      "start": 46
+    },
+    {
+      "arms": [
+        "current_v31_control",
+        "full_swap8",
+        "residual_direction_guard",
+        "residual",
+        "full_swap8_direction_guard",
+        "current_v31_control"
+      ],
+      "end": 58,
+      "start": 52
+    }
+  ],
+  "parent": "/home/exouser/ljy/dlm/results/v31_value_decision_reuse_20261015/native_process_matched_attempt001",
+  "parent_protocol_sha256": "9ea5cb9fd3beb5c022bd6a75f5e2dfc8e00f09d6df8ab28b643627c30ee4eac7",
+  "python_hash_seed": 0,
+  "schema": "value_warmup_factor_v1",
+  "scope": "execution diagnostic on the failed nine-cell AIME shard; warmup factor and all mismatches retained; no accuracy claims",
+  "source_commit": "ed7c10ff08c21e535fc0299650734bad8d896920",
+  "timing": "paused",
+  "worker_sha256": "d4e76b24553f79bc1a74ad48de09a95adb92bec44f82eddfd890fc4b534b0d3a"
+}

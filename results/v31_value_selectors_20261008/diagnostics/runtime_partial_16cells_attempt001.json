@@ -1,0 +1,55 @@
+{
+  "status": "partial instrumented runtime diagnostic; no accuracy or clean latency claim",
+  "created_utc": "2026-10-08T12:34:31.444345+00:00",
+  "cells": 16,
+  "source_commit": "44674c3aade62f3f259df6e5af8f939578c8d8ec",
+  "execution_protocol_sha256": "91534d11fd237b1d9858aad4b6d3de93bef9790adfdd6b30c457ca7903ec50b2",
+  "arms": {
+    "current_v31_control": {
+      "N": 4660,
+      "C": 181,
+      "T": 44314,
+      "W_total_s": 174.05384,
+      "discovery_ms": null,
+      "selection_ms": null,
+      "selections": 905,
+      "refreshes": 865,
+      "candidate_evaluations": null,
+      "global_sparsity": 0.8569401283397802,
+      "timed_cuda_captures": 0,
+      "record_source": "longbench/audit/attempt001/current_v31_control/shard01/attempt001",
+      "selection_share_of_instrumented_W": null
+    },
+    "value_v3a_singleton_delete": {
+      "N": 6069,
+      "C": 207,
+      "T": 50821,
+      "W_total_s": 223.24213,
+      "discovery_ms": 21732.94054532051,
+      "selection_ms": 6657.881437242031,
+      "selections": 1035,
+      "refreshes": 950,
+      "candidate_evaluations": 103940000,
+      "global_sparsity": 0.8679980605025222,
+      "timed_cuda_captures": 0,
+      "record_source": "longbench/audit/attempt001/value_v3a_singleton_delete/shard01/attempt001",
+      "selection_share_of_instrumented_W": 0.02982358857282911
+    },
+    "value_v3b_greedy_exact": {
+      "N": 3485,
+      "C": 174,
+      "T": 42622,
+      "W_total_s": 495.22615,
+      "discovery_ms": 16181.832171916962,
+      "selection_ms": 327952.89260578156,
+      "selections": 870,
+      "refreshes": 820,
+      "candidate_evaluations": 56114122880,
+      "global_sparsity": 0.8234955703111289,
+      "timed_cuda_captures": 0,
+      "record_source": "longbench/audit/attempt001/value_v3b_greedy_exact/shard01/attempt001",
+      "selection_share_of_instrumented_W": 0.6622285446876776
+    }
+  },
+  "limitation": "First16 native-order cells; audit includes counters/events. Frozen selector parameters unchanged. Official accuracy and headline latency await complete target stages."
+}

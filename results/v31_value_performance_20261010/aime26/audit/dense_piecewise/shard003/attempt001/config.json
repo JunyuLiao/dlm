@@ -1,0 +1,37 @@
+{
+  "schema": "v31_value_performance_shard_v1",
+  "suite": "aime26",
+  "arm": "dense_piecewise",
+  "purpose": "audit",
+  "shard_index": 2,
+  "shards": 3,
+  "planned_records": 30,
+  "cells_sha256": "7ba832bfe149e6050574046035a6ce8fba1b90bc451e1d7243244848d480cae8",
+  "manifests_sha256": {
+    "aime26_generation_manifest.json": "85ebd2dd8d26ede269d4c5555279e9e2b79637c3f95036452c624e03e8122f39"
+  },
+  "source_commit": "fce50a8b110f29c47b01cd5d2dd42d3986df328a",
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "255655cec10d75f295a847a1e7658116fbbb4f85d9c505c6a9678a4a68ba9768",
+    "experiments/numerical_qk_reuse/v31_value_selectors.py": "8555cf97bec2f388b261d22b80bfcb676eaa5be905c3c78e31906cc49da3d52e",
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "f9b5dfdd310b78b7a6d3c7c79a5f7a7055bbeee900a265c4712fbab2bb5fbf4d",
+    "scripts/v31_vllm_paired_bench.py": "19279ed03e7148110ffce318f29920ae269a9cf8ba23ca9928d2e92ad9bf2fff",
+    "scripts/v31_value_performance_campaign.py": "738e95b5312c41df79ef234cf13999a8608d4d00f57540d44208e62467d5afcd"
+  },
+  "gpu_identity": "GPU-1ef41b0c-39fa-fea6-ec30-392d06c5e0ee, 590.48.01",
+  "host": "megakernel",
+  "threshold": null,
+  "runtime": {
+    "BLOCK": "64",
+    "CHUNK": "4096",
+    "MEM": "0.80",
+    "MAX_MODEL_LEN": "9216",
+    "MAGE_K": "1728",
+    "MAGE_STEP": "1",
+    "MAGE_CARRY": "1",
+    "MAGE_GRAN": "qblock_max",
+    "MAGE_STICKY": "1.386",
+    "VALUE_AUDIT": "1",
+    "VALUE_CLEAN_TIMING": "0"
+  }
+}

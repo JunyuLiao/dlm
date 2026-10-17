@@ -1,0 +1,46 @@
+{
+  "schema": "v31_cached_refresh_completion_v1",
+  "completed_at_utc": "2026-10-12T23:21:23Z",
+  "frozen_spec": "specs/native_panel.json",
+  "native_scope": "16 runnable arms x 154 cells",
+  "completed_arms": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "current_v31_control",
+    "cached_refresh_global_topk_m160",
+    "cached_refresh_global_topk_m256",
+    "cached_refresh_global_topk_m512",
+    "cached_refresh_bounded_m160",
+    "cached_refresh_bounded_m256",
+    "cached_refresh_bounded_m512",
+    "cached_refresh_bounded_m256_decay",
+    "cached_refresh_bounded_m256_phase_protected",
+    "cached_refresh_bounded_m256_cgate",
+    "cached_refresh_bounded_m256_every_1_step",
+    "cached_refresh_bounded_m256_every_4_steps",
+    "cached_refresh_bounded_m256_progress_triggered"
+  ],
+  "attempts": {
+    "primary": "attempt009",
+    "matrix": "attempt010"
+  },
+  "records_per_arm": 154,
+  "official_scoring_files": 32,
+  "receipt_validation_errors": 0,
+  "source_identity_match": true,
+  "operator_replay_complete": true,
+  "diagnostic_only_native_gaps": [
+    "cached_refresh_bounded_m256_online_value_tiebreak",
+    "cached_refresh_bounded_m256_full_value_tiebreak",
+    "cached_refresh_intersection_online",
+    "cached_refresh_intersection_full"
+  ],
+  "promotion_status": "blocked",
+  "promotion_reasons": [
+    "154-cell panel is not a 503-cell LongBench-v2 audit",
+    "denoising-call gate violations versus current_v31_control",
+    "clean timing intentionally paused"
+  ],
+  "clean_timing": "paused"
+}

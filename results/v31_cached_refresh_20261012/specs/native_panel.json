@@ -1,0 +1,89 @@
+{
+  "schema": "v31_cached_refresh_native_panel_v1",
+  "model": "DiffusionGemma-26B-A4B",
+  "substrate": "pinned_vllm_sm90_flashattention4",
+  "host": "one_idle_h100_worker",
+  "sampler": "native_adaptive_denoising_unchanged",
+  "layers": {
+    "global_sparse": 5,
+    "local_dense": 25,
+    "prefill_dense": true
+  },
+  "budget": {
+    "k_tiles_per_qblock": 128,
+    "mage_k_tokens": 8192,
+    "swap_budget": 8
+  },
+  "primary_frequency": "every_2_reuse_steps",
+  "decay": {
+    "lambda": 0.3465735903,
+    "floor": 0.25
+  },
+  "drift_threshold": 10000000.0,
+  "controls": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "current_v31_control"
+  ],
+  "longbench_v2_cells": 64,
+  "aime26_cells": 90,
+  "cells_per_arm": 154,
+  "native_arms": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "current_v31_control",
+    "cached_refresh_global_topk_m160",
+    "cached_refresh_global_topk_m256",
+    "cached_refresh_global_topk_m512",
+    "cached_refresh_bounded_m160",
+    "cached_refresh_bounded_m256",
+    "cached_refresh_bounded_m512",
+    "cached_refresh_bounded_m256_decay",
+    "cached_refresh_bounded_m256_phase_protected",
+    "cached_refresh_bounded_m256_cgate",
+    "cached_refresh_bounded_m256_online_value_tiebreak",
+    "cached_refresh_bounded_m256_full_value_tiebreak",
+    "cached_refresh_intersection_online",
+    "cached_refresh_intersection_full",
+    "cached_refresh_bounded_m256_every_1_step",
+    "cached_refresh_bounded_m256_every_4_steps",
+    "cached_refresh_bounded_m256_progress_triggered"
+  ],
+  "clean_timing": "paused",
+  "manifests": "bound_local_frozen_private",
+  "promotion": "blocked_pending_matched_controls_and_variant_receipts",
+  "manifest_sha256": {
+    "aime26_generation_manifest.json": "85ebd2dd8d26ede269d4c5555279e9e2b79637c3f95036452c624e03e8122f39",
+    "longbench_v2_0shot_think_generation_manifest.json": "3209c749b5cb74a02c9198e71e8da94909752cdabd2947a4b74bd1487b6440fe"
+  },
+  "cell_sha256": {
+    "cells_aime26_30x3_seed42_43_44.json": "77f72becf89d9bfcaaa828486c70a3fdcbf0dd9999f7b4e030392ebf3f2ce5a3",
+    "cells_longbench64_seed1.json": "a9f8d736e243dea2a72ba8be86af261a85c331c298ccd8c60d155fe8abf1656b"
+  },
+  "completed_arms": [
+    "cached_refresh_bounded_m256"
+  ],
+  "pending_arms": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "current_v31_control",
+    "cached_refresh_global_topk_m160",
+    "cached_refresh_global_topk_m256",
+    "cached_refresh_global_topk_m512",
+    "cached_refresh_bounded_m160",
+    "cached_refresh_bounded_m512",
+    "cached_refresh_bounded_m256_decay",
+    "cached_refresh_bounded_m256_phase_protected",
+    "cached_refresh_bounded_m256_cgate",
+    "cached_refresh_bounded_m256_online_value_tiebreak",
+    "cached_refresh_bounded_m256_full_value_tiebreak",
+    "cached_refresh_intersection_online",
+    "cached_refresh_intersection_full",
+    "cached_refresh_bounded_m256_every_1_step",
+    "cached_refresh_bounded_m256_every_4_steps",
+    "cached_refresh_bounded_m256_progress_triggered"
+  ]
+}

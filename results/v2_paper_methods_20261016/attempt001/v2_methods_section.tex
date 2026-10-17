@@ -1,0 +1,401 @@
+% Manuscript-ready section; include in a document that loads:
+% amsmath, amssymb, booktabs, tabularx, algorithm, algpseudocode.
+% Audited against branch value-aware_cross-step-reuse_v2, commit 37bfbae3.
+% Main sources: v31_value_selectors.py:137--183;
+% v31_value_kernels.py:18--148,409--439;
+% vllm_adapter.py:1110--1257,1395--1406,1822--1879;
+% diffusion_gemma_jl_output_aware/projections.py:21--46;
+% v31_value_projection.py:14--54; v27_fa4.py:98--134.
+% Native model: pinned revision f7f5b7f5fa82ffc52addd066915886d497f5517b.
+% IMPORTANT: tau_V=0.021 instantiates the recent evaluated configuration;
+% it is not an intrinsic constant or a newly selected/calibrated threshold.
+% Earlier tau_V=0.027 and 0.015 results are different configurations.
+% Provenance: Yuhan introduced the inherited V31 cross-step reuse lifecycle.
+% Gaussian32/value-direction machinery originates in Junyu Liao's prior work.
+% The present V2 selector integration is this study's separately named variant.
+% Exact projection seed material, for each native KV head g:
+% jl_output_v1/gaussian/32/1729/{layer}/{head}/{width}
+% derived = int.from_bytes(sha256(material.encode()).digest()[:8], 'little')
+%           % (2**63-1); private CPU torch.Generator, torch.randn / sqrt(32).
+
+\section{Online Value-Direction-Aware Block Selection with Cross-Step Reuse}
+\label{sec:v2-method}
+
+Our method, V2, constructs a block-sparse attention map using an ordered
+value-direction criterion and reuses that map across denoising calls.
+The criterion estimates each candidate block's effect on a running projected
+attention output. Its defining property is that skipped blocks advance the
+running mass while leaving the normalized routing output unchanged.
+We combine this selector with the inherited V31 map-reuse lifecycle.\footnote{The
+cross-step reuse lifecycle originates in Yuhan's V31 implementation; the
+Gaussian32 machinery follows Junyu Liao's prior value-direction implementation.
+V2 denotes the selector integration studied here.}
+
+\subsection{Attention scope and block statistics}
+\label{sec:v2-statistics}
+
+We apply sparsity only to the denoising calls of the five GLOBAL layers of
+DiffusionGemma-26B-A4B. Each layer has $H_q=16$ query heads and $H_{kv}=2$
+native KV heads, with $d_k=d_v=512$. Each query head independently selects
+KV blocks for every query block of $B_q=128$ rows; each KV block contains
+$B_k=64$ keys. A canvas has at most $C=256$ query rows. LOCAL layers,
+prompt prefill, and committed-canvas encoding retain their native behavior
+and execute without this sparsity policy.
+
+At a selection event, suppress the layer and query-head indices. Let
+$\mathcal Q_b$ be the valid rows of query block $b$, $P$ the prefix length,
+and $\mathcal B_j$ the $j$th KV block in increasing token order. The keys
+consist of the prefix followed by the current canvas. We use current,
+native post-normalization and post-positional-encoding queries and keys:
+\begin{equation}
+ s_{iu}=\alpha q_i^{\mathsf T}k_u,
+ \qquad z_u=R_{\ell,g(h)}^{\mathsf T}v_u,
+ \qquad R_{\ell,g(h)}\in\mathbb R^{d_v\times r},
+ \quad R_{ab}\sim\mathcal N(0,1/r).
+ \label{eq:v2-projection}
+\end{equation}
+Here $g(h)=\lfloor h/(H_q/H_{kv})\rfloor$ is the native GQA mapping and
+$r=32$. The native scale is $\alpha=1$ in the pinned Gemma4 implementation.
+Projection matrices are fixed per layer and native KV head, using base seed
+$\sigma_R=1729$ and deterministic SHA256-derived seeds in private CPU random
+generators. Matrices are reused, whereas current values are reprojected at
+every selection event; projection generation does not consume sampler RNG.
+
+For each row and block, compute
+\begin{align}
+ Z_{ij}&=\sum_{u\in\mathcal B_j\cap\mathcal K_i}\exp(s_{iu}),
+ & L_{ij}&=\log Z_{ij}, \label{eq:v2-mass}\\
+ \mu_{ij}&=\frac{1}{Z_{ij}}
+       \sum_{u\in\mathcal B_j\cap\mathcal K_i}\exp(s_{iu})z_u,
+ & \nu_{\ell g}&=\max\!\left\{\epsilon,
+       \sqrt{\frac{1}{|\mathcal K|}
+       \sum_{u\in\mathcal K}\|v_u\|_2^2}\right\}.
+ \label{eq:v2-mean-scale}
+\end{align}
+$\mathcal K_i$ contains structurally valid keys for row $i$; GLOBAL
+denoising attention is bidirectional over the prefix and current canvas.
+$\mathcal K$ contains all valid current keys, including canvas keys.
+The scale $\nu_i=\nu_{\ell,g(h)}$ uses full-dimensional values and is shared
+within a native KV head. For empty row/block intersections, set
+$L_{ij}=-\infty$ and $\mu_{ij}=0$. All reductions are numerically stabilized.
+The quantity $\mu_{ij}$ is an attention-weighted within-block mean.
+
+\subsection{Mass-inclusive online selection}
+\label{sec:v2-selection}
+
+At each selection event, initialize the running mass $A_i=0$, normalized
+projected routing output $\widehat o_i=0$, and retained-support indicator
+$u_i=0$. Scan all KV blocks from oldest to newest, including the protected
+canvas blocks. Before block $j$, calculate
+\begin{equation}
+ \eta_{ij}=\frac{Z_{ij}}{A_i+Z_{ij}},
+ \qquad
+ \rho_{bj}=\max_{i\in\mathcal I_{bj}}
+ \frac{\eta_{ij}\|\mu_{ij}-\widehat o_i\|_2}{\nu_i},
+ \quad
+ \mathcal I_{bj}=\{i\in\mathcal Q_b:L_{ij}>-\infty\}.
+ \label{eq:v2-risk}
+\end{equation}
+Set $\eta_{ij}=0$ outside $\mathcal I_{bj}$ and $\rho_{bj}=0$ if this set
+is empty. The vector $\eta_{ij}(\mu_{ij}-\widehat o_i)$ is the hypothetical
+change in the routing output when incorporating the block. The maximum
+permits any valid row to retain the entire physical tile.
+
+For an unprotected block with existing retained support, retain it if
+\begin{equation}
+ \log\rho_{bj}+\lambda\overline M_{bj}\ \ge\ \log\tau_V.
+ \label{eq:v2-threshold}
+\end{equation}
+$\tau_V\ge0$ is one shared threshold across all GLOBAL layers, heads,
+query blocks, and selection events in an experimental configuration.
+$\overline M_{bj}$ indicates membership in the currently held map at a
+within-canvas refresh; it is zero at each canvas's initial selection.
+The sticky bonus $\lambda=1.386$ lowers a held tile's effective retention
+threshold by a factor $\exp(\lambda)\approx4$. Equality retains the tile.
+We additionally retain every tile intersecting the current canvas
+($j\ge\lfloor P/B_k\rfloor$), including a mixed prefix/canvas boundary
+tile, and every tile providing the first retained support for any active
+row. Invalid logits or projected means cause all tiles of the affected
+query-head/query-block unit to be retained. Padded and empty rows do not vote.
+
+With retained-tile indicator $M_{bj}\in\{0,1\}$, update
+\begin{align}
+ A_i'&=A_i+Z_{ij}, \label{eq:v2-mass-update}\\
+ \widehat o_i'&=
+ \begin{cases}
+  (1-\eta_{ij})\widehat o_i+\eta_{ij}\mu_{ij}, & M_{bj}=1,\\
+  \widehat o_i, & M_{bj}=0.
+ \end{cases}
+ \label{eq:v2-output-update}
+\end{align}
+Thus $A_i$ includes every previously scanned block, including skipped
+blocks. Equivalently, a skipped block contributes the virtual numerator
+$Z_{ij}\widehat o_i$, preserving the normalized state. Online denotes this
+ordered scan; its states restart at each selection event. Selection is
+order dependent and has variable support, with no fixed top-$k$ quota.
+With the convention $\log0=-\infty$, $\tau_V=0$ retains every active tile.
+
+\begin{algorithm}[t]
+\caption{V2 selection for one layer, query head, and query block}
+\label{alg:v2-selector}
+\small
+\begin{algorithmic}[1]
+\Require Current statistics $L_{ij},\mu_{ij},\nu_i$; prefix length $P$;
+held mask $\overline M$ (zero at initial selection); $\tau_V,\lambda$
+\Ensure Retained-block mask $M\in\{0,1\}^{J}$
+\If{invalid logits or projected means affect this query unit}
+    \State \Return $\boldsymbol 1_J$ \Comment{retain all tiles}
+\EndIf
+\State $\ell_i\gets-\infty$, $\widehat o_i\gets0$, $u_i\gets0$ for all $i\in\mathcal Q_b$
+\State $M\gets\boldsymbol 0_J$
+\For{$j=0,\ldots,J-1$ in increasing token order}
+    \State $\mathcal I\gets\{i\in\mathcal Q_b:L_{ij}>-\infty\}$
+    \State $\ell_i^+\gets\operatorname{logaddexp}(\ell_i,L_{ij})$ for all $i$
+    \State $\eta_i\gets\exp(L_{ij}-\ell_i^+)$ for $i\in\mathcal I$; $0$ otherwise
+    \State $v\gets\displaystyle\max_{i\in\mathcal I}
+        \log\!\left(\eta_i\|\mu_{ij}-\widehat o_i\|_2/\nu_i\right)$
+        \Comment{$\max\varnothing=-\infty$}
+    \State $p\gets[j\ge\lfloor P/B_k\rfloor]$
+    \State $f\gets[\exists i\in\mathcal I:u_i=0]$
+    \State $M_j\gets[\mathcal I\ne\varnothing]\land
+        \bigl(p\lor f\lor[v+\lambda\overline M_j\ge\log\tau_V]\bigr)$
+    \If{$M_j=1$}
+        \State $\widehat o_i\gets(1-\eta_i)\widehat o_i+\eta_i\mu_{ij}$ for $i\in\mathcal I$
+        \State $u_i\gets1$ for $i\in\mathcal I$
+    \EndIf
+    \State $\ell_i\gets\ell_i^+$ for all $i$ \Comment{also on a skip}
+\EndFor
+\State \Return $M$
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Map reuse, carry, and progress-triggered refresh}
+\label{sec:v2-reuse}
+
+Number denoising calls within a canvas from $t=0$. Call $0$ executes
+full-support FA4 unless a valid previous-canvas map can be carried. Carry
+requires an immediately preceding canvas, its previous total KV length
+equal to the new prefix length, and compatible query-block and KV-tile
+geometry. It preserves decisions only for tiles wholly inside the old
+prefix; all newer tiles, including the previous and current canvases, are
+retained. Call $1$ executes full-support FA4 and constructs a fresh V2 map,
+which applies from the following call. Subsequent ordinary calls reuse the
+held map. A progress refresh likewise produces a full-support output and
+installs a replacement map for subsequent calls. The sticky bonus uses
+only a map selected within the same canvas. Maps and request-specific
+histories are cleared between requests.
+
+After call $t$, let $a_{it}$ be the acceptance indicator obtained by
+evaluating the native entropy-bound rule on the refresh hook's row statistics,
+$y_{it}$ the argmax token of the temperature-scaled logits, and
+$p_{it}^{\max}$ its probability. Track a re-noising exponential moving
+average $d_{it}$ and an accepted stable-run length $r_{it}$:
+\begin{align}
+ d_{it}&=\gamma d_{i,t-1}+(1-\gamma)(1-a_{it}),
+          \qquad d_{i,-1}=1, \label{eq:v2-renoise}\\
+ r_{it}&=
+ \begin{cases}
+   a_{it}, & t=0,\\
+   a_{it}(r_{i,t-1}+1), & t>0,\ y_{it}=y_{i,t-1},\\
+   0, & \text{otherwise}.
+ \end{cases}
+ \label{eq:v2-run}
+\end{align}
+Define settledness and its mean over the $n_q$ valid canvas rows by
+\begin{equation}
+ c_{it}=\left(1-e^{-r_{it}/\tau_s}\right)(1-d_{it})
+        \left(1-\sqrt{\max\{0,1-p_{it}^{\max}\}}\right),
+ \qquad \phi_t=\frac{1}{n_q}\sum_i c_{it}.
+ \label{eq:v2-progress}
+\end{equation}
+The first completed call satisfying $\phi_t\ge\delta$ schedules selection
+at the next denoising call in every GLOBAL layer. We use $\gamma=0.65$,
+$\tau_s=2.5$, and $\delta=0.15$, with one threshold crossing per canvas.
+The threshold is latched after firing. A refresh is executed only if native
+decoding requests the next call; a crossing after call $0$ coincides with
+the regular call-$1$ selection. The clock resets per canvas and uses
+absolute settledness. Its C-gate-derived statistics determine refresh timing;
+V2's tile score uses unit row weights.
+
+\begin{algorithm}[t]
+\caption{V2 within the unchanged native denoising loop}
+\label{alg:v2-reuse}
+\small
+\begin{algorithmic}[1]
+\Require Native model and sampler; per-layer held maps with geometry metadata
+\For{each canvas $c$ requested by native generation}
+    \State Reset progress history; $\mathit{fired}\gets\mathsf{false}$;
+           $\mathit{pending}\gets\mathsf{false}$; $t\gets0$
+    \While{the native sampler requests another denoising forward}
+        \State $\mathit{select}\gets(t=1)\lor\mathit{pending}$;
+               $\mathit{pending}\gets\mathsf{false}$
+        \For{each decoder layer $\ell$ in model order}
+            \If{$\ell$ is LOCAL}
+                \State Execute native LOCAL attention
+            \ElsIf{$t=0$}
+                \If{the previous-canvas map passes the carry checks}
+                    \State Execute current-Q/K/V FA4 on the carried map
+                \Else
+                    \State Execute full-support FA4
+                \EndIf
+            \ElsIf{$\mathit{select}$}
+                \State Execute full-support FA4; retain its output and prefix masses
+                \State Compute current projections, tile means, and RMS scales
+                \State $\overline M^\ell\gets M^\ell$ if selected in $c$; zero otherwise
+                \State $M^\ell\gets$ Algorithm~\ref{alg:v2-selector} independently for all $(h,b)$
+                \State Store $M^\ell$ and its current-canvas geometry metadata
+            \Else
+                \State Execute current-Q/K/V FA4 on held map $M^\ell$
+            \EndIf
+        \EndFor
+        \State Execute the unchanged native sampler and stopping logic
+        \If{$\neg\mathit{fired}$}
+            \State Update Eqs.~\eqref{eq:v2-renoise}--\eqref{eq:v2-progress} from completed-call statistics
+            \If{$\phi_t\ge\delta$}
+                \State $\mathit{pending}\gets\mathsf{true}$;
+                       $\mathit{fired}\gets\mathsf{true}$
+            \EndIf
+        \EndIf
+        \State $t\gets t+1$
+    \EndWhile
+    \State Commit the canvas using the native encoder path
+\EndFor
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Executed attention and native decoding}
+\label{sec:v2-execution}
+
+On a held or carried call, FA4 evaluates attention using the current
+queries, keys, and original full-dimensional values over the retained keys
+$\mathcal S_{b,t}$:
+\begin{equation}
+ o_{it}=\frac{\sum_{u\in\mathcal S_{b,t}\cap\mathcal K_i}
+                     \exp(s_{iu,t})v_{u,t}}
+                  {\sum_{u\in\mathcal S_{b,t}\cap\mathcal K_i}
+                     \exp(s_{iu,t})}.
+ \label{eq:v2-executed}
+\end{equation}
+Only the block map is reused. Attention probabilities and outputs are
+recomputed; current canvas K/V are refreshed each call. The projected
+routing state is discarded after selection and never becomes model output.
+The mass-inclusive recurrence is therefore a routing surrogate, whereas
+Eq.~\eqref{eq:v2-executed} renormalizes over retained keys. The threshold
+does not provide a bound on final dense-attention error or an exact physical
+sparsity target.
+
+Native proposal sampling, acceptance, re-noising, self-conditioning, and
+adaptive stopping are preserved. With $D_{\max}=48$, the pinned runtime uses
+\begin{equation}
+ T_t=T_{\min}+(T_{\max}-T_{\min})
+       \frac{\max\{D_{\max}-t,1\}}{D_{\max}},
+ \qquad (T_{\min},T_{\max})=(0.4,0.8).
+ \label{eq:v2-temperature}
+\end{equation}
+Acceptance follows the native entropy-bound rule: for row entropies sorted
+as $H_{\pi(1),t}\le\cdots\le H_{\pi(C),t}$, position $\pi(k)$ is accepted
+when $\sum_{m=1}^{k}H_{\pi(m),t}-\max_{m\le k}H_{\pi(m),t}\le B_{\rm ent}$,
+with $B_{\rm ent}=0.1$. Native early stopping requires agreement of two
+consecutive denoising argmax states and mean processed-logit entropy below
+$\theta_{\rm conf}=0.005$; otherwise the $48$-call cap applies. The generation
+configuration's stability parameter is $1$ (the runtime stores two states).
+EOS handling follows the native model configuration; thinking mode and
+output limits remain workload-specific. Selection and refresh execute
+inside already requested model forwards. Their attention perturbations can
+change the resulting native trajectory and call count through the unchanged
+sampler.
+
+\subsection{Implementation and hyperparameters}
+\label{sec:v2-implementation}
+
+Native Q/K/V tensors use BF16; projected values, tile summaries, and
+selection states use FP32. Projection and projected-value products use
+TF32x3 for FP32 inputs; the value-norm reduction preserves the inherited
+norm-then-square rounding convention. The refresh hook obtains argmax,
+top-token probability, and entropy from fused FP32 logit reductions without
+replacing the native sampler's computations. Full-support FA4 writes the prefix tile log
+masses without feeding the observer statistics into its output. A separate
+current-QK/projected-value pass supplies $\mu_{ij}$; its prefix log masses
+are replaced with the FA4-observed values. This implementation reprojects
+all current values at each selection. The selector stores $\log A_i$ and
+uses log-sum-exp updates, avoiding underflow relative to a future large
+logit. GPU scans process $128$ KV tiles per chunk and carry the running
+state across chunks, preserving the sequential decision rule. Retained maps
+are converted to explicit FA4 block lists. Selection work is incurred only
+at initial/refresh events. Physical consumer work includes full-support
+bootstrap/selection calls and retained work on held/carried calls; the
+additional discovery and selection passes are accounted for separately.
+
+Table~\ref{tab:v2-hyperparameters} specifies the V2 configuration with
+$\tau_V=0.021$. The threshold is fixed per experimental configuration and
+shared across its initial and refresh selections. Other thresholds and
+their selection procedures are reported as separate experimental settings.
+
+\begin{table*}[t]
+\centering
+\caption{V2 hyperparameters, fixed model geometry, and execution settings.
+Values specify the $\tau_V=0.021$ configuration. Workload-specific settings
+are bound to the corresponding evaluation protocol.}
+\label{tab:v2-hyperparameters}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.08}
+\begin{tabularx}{\textwidth}{@{}l l X@{}}
+\toprule
+Parameter & Symbol & Value or policy \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Block selection}} \\
+Uniform retention threshold & $\tau_V$ & $0.021$; shared across GLOBAL layers and selection events \\
+Projection rank & $r$ & $32$ \\
+Projection distribution & $R_{ab}$ & $\mathcal N(0,1/r)$; fixed per layer/native KV head \\
+Projection base seed & $\sigma_R$ & $1729$; SHA256-derived per-layer/head CPU seeds \\
+Reference-scale floor & $\epsilon$ & $10^{-12}$ \\
+Sticky log-risk bonus & $\lambda$ & $1.386$; within-canvas refresh only \\
+Row aggregation & --- & Maximum over active rows of each query block \\
+Row sensitivity weights & $w_i$ & $1$ \\
+Scan order & --- & Increasing KV token index, prefix then canvas \\
+Fixed support quota & --- & None; threshold-based variable support \\
+Mandatory canvas/boundary tiles & --- & All retained \\
+Additional sink/recent protections & --- & $0$ tiles / $0$ tokens \\
+Additional mass anchors & --- & $0$ tiles \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Reuse and progress clock}} \\
+Initial selection call & $t_{\rm sel}$ & $1$ (zero-based); full-support output \\
+Cross-canvas first-call carry & --- & Enabled, subject to continuation and geometry checks \\
+Progress threshold & $\delta$ & $0.15$; one latched crossing per canvas \\
+Re-noising EMA coefficient & $\gamma$ & $0.65$; initial state $d_{i,-1}=1$ \\
+Stable-run time scale & $\tau_s$ & $2.5$; initial run length $0$ \\
+Progress definition & $\phi_t$ & Absolute mean settledness; no relative rescaling \\
+Periodic/cheap refresh & --- & Disabled; full-support progress refresh only \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Native model and sampler}} \\
+Sparse GLOBAL layers & $\mathcal L_G$ & $\{5,11,17,23,29\}$, zero-based \\
+Query / KV heads & $H_q,H_{kv}$ & $16,2$ in each GLOBAL layer \\
+GLOBAL head dimensions & $d_k,d_v$ & $512,512$ \\
+Query / KV tile sizes & $B_q,B_k$ & $128,64$ \\
+Native attention scale & $\alpha$ & $1$ \\
+Canvas length & $C$ & $256$; final valid length may be shorter \\
+Maximum denoising calls & $D_{\max}$ & $48$ per canvas \\
+Native temperature bounds & $T_{\min},T_{\max}$ & $0.4,0.8$; exact schedule in Eq.~\eqref{eq:v2-temperature} \\
+Entropy-bound acceptance & $B_{\rm ent}$ & $0.1$ \\
+Stopping entropy threshold & $\theta_{\rm conf}$ & $0.005$ \\
+Native stability setting & --- & $1$; agreement of two consecutive argmax states \\
+Thinking / output limit / generation seed & --- & Workload-specific; unchanged within each comparison \\
+\midrule
+\multicolumn{3}{@{}l}{\textit{Execution}} \\
+Batch size / hardware & --- & $1$ / NVIDIA H100 (SM90) \\
+Attention consumer & --- & Pinned FlashAttention-4 block-sparse interface \\
+vLLM / decode graph mode & --- & $0.30.0$ / PIECEWISE \\
+Native / routing precision & --- & BF16 / FP32 \\
+Selector scan chunk & $J_{\rm chunk}$ & $128$ KV tiles; recurrence preserved across chunks \\
+LOCAL / prefill / canvas commit & --- & Native dense execution \\
+\bottomrule
+\end{tabularx}
+\vspace{2pt}
+\begin{minipage}{\textwidth}
+\footnotesize
+The inherited launcher field \texttt{MAGE\_K=8192} is inactive as a support
+constraint for V2. Experimental target sparsity and realized physical work
+must be reported separately from $\tau_V$.
+\end{minipage}
+\end{table*}

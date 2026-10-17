@@ -1,0 +1,758 @@
+{
+  "status": "complete",
+  "kind": "sampled offline diagnostic; not accuracy or clean timing",
+  "excluded_fresh_selector": "value_v3b_greedy_exact",
+  "scope_amendment": "user drops future exact greedy; completed exact runs retained separately",
+  "operator": "unchanged contiguous FA4 masked-attention operator; model alias2/paged merge rounding not included",
+  "scope": "sampled layer 5, first canvas, first two long audit requests per shard; not all layers or calls",
+  "fresh_rule": "initial age0 uses no sticky; held ages simulate refresh with inherited sticky",
+  "mass_source": "native FA4 prefix observation, same as production selectors",
+  "thresholds_sha256": "59184c37692b2001e8c1f8c93726bb62cc5e6d366fe050806a24659518ea06ea",
+  "projection_manifest": {
+    "(5, 2, 512, 'gaussian', 32, 1729)": [
+      {
+        "layer": 5,
+        "native_kv_head": 0,
+        "value_width": 512,
+        "family": "gaussian",
+        "rank": 32,
+        "seed": 1729,
+        "derived_seed": 3047666021545547009,
+        "sha256": "98ca100fcad5576bbacd786adfd158693d0cc2ea20850bc9eac5e725235fa33e"
+      },
+      {
+        "layer": 5,
+        "native_kv_head": 1,
+        "value_width": 512,
+        "family": "gaussian",
+        "rank": 32,
+        "seed": 1729,
+        "derived_seed": 3849110760871015434,
+        "sha256": "b2a00a2a7bbe2b36d444abc9132de70555e8d1b31ad3a2ce541a829789f2b22d"
+      }
+    ]
+  },
+  "gpu_seconds": 16.636518106010044,
+  "diagnostics": [
+    {
+      "snapshot_sha256": "344b546dc9111d4d25fd5409f63501352b5ecd8f6424794ea1360ebeeae6b4e4",
+      "phase": "held_far",
+      "distance_from_refresh": 7,
+      "layer": 5,
+      "prefix_tokens": 120016,
+      "generating_selector": "value_v2_online_preserve_mass",
+      "reused_full_dimensional_error": {
+        "max_row": 0.7512828707695007,
+        "mean_row": 0.3334417939186096,
+        "rms_row": 0.35404253005981445
+      },
+      "reused_retained_mass": {
+        "min_row": 0.017136627808213234,
+        "mean_row": 0.279092013835907
+      },
+      "reused_sketch_max_error": 0.8272666335105896,
+      "fresh": {
+        "current_v31_control": {
+          "full_dimensional_error": {
+            "max_row": 0.5495203733444214,
+            "mean_row": 0.2533578872680664,
+            "rms_row": 0.26657846570014954
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.531976044178009,
+            "mean_row": 0.13174323737621307,
+            "rms_row": 0.15779851377010345
+          },
+          "mask_iou_with_reused": 0.4095522463321686,
+          "mask_iou_with_mass_control": 1.0,
+          "retained_mass": {
+            "min_row": 0.07854953408241272,
+            "mean_row": 0.35715556144714355
+          },
+          "sketch_max_error": 0.600053608417511,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v1_online_discard_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.6252492070198059,
+            "mean_row": 0.2447580099105835,
+            "rms_row": 0.2631474733352661
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5086250901222229,
+            "mean_row": 0.1043141707777977,
+            "rms_row": 0.12296721339225769
+          },
+          "mask_iou_with_reused": 0.5095979571342468,
+          "mask_iou_with_mass_control": 0.46226415038108826,
+          "retained_mass": {
+            "min_row": 0.0845995545387268,
+            "mean_row": 0.3513811528682709
+          },
+          "sketch_max_error": 0.6775277853012085,
+          "kept_prefix_tiles": 5349
+        },
+        "value_v2_online_preserve_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.7512828707695007,
+            "mean_row": 0.30865365266799927,
+            "rms_row": 0.3294144868850708
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5183655023574829,
+            "mean_row": 0.03536670282483101,
+            "rms_row": 0.05945925787091255
+          },
+          "mask_iou_with_reused": 0.7695280313491821,
+          "mask_iou_with_mass_control": 0.4314405620098114,
+          "retained_mass": {
+            "min_row": 0.024174273014068604,
+            "mean_row": 0.299111545085907
+          },
+          "sketch_max_error": 0.8028201460838318,
+          "kept_prefix_tiles": 3424
+        },
+        "value_v3a_singleton_delete": {
+          "full_dimensional_error": {
+            "max_row": 0.5431775450706482,
+            "mean_row": 0.2551485300064087,
+            "rms_row": 0.26842033863067627
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5323904156684875,
+            "mean_row": 0.12737834453582764,
+            "rms_row": 0.15286456048488617
+          },
+          "mask_iou_with_reused": 0.41067516803741455,
+          "mask_iou_with_mass_control": 0.7912458181381226,
+          "retained_mass": {
+            "min_row": 0.07621423900127411,
+            "mean_row": 0.3529776930809021
+          },
+          "sketch_max_error": 0.6046361327171326,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v3b_approx_batch8": {
+          "full_dimensional_error": {
+            "max_row": 0.5277851223945618,
+            "mean_row": 0.2500249743461609,
+            "rms_row": 0.26323291659355164
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.41848817467689514,
+            "mean_row": 0.10813236236572266,
+            "rms_row": 0.13270047307014465
+          },
+          "mask_iou_with_reused": 0.5317906737327576,
+          "mask_iou_with_mass_control": 0.3795786201953888,
+          "retained_mass": {
+            "min_row": 0.06831303983926773,
+            "mean_row": 0.32430344820022583
+          },
+          "sketch_max_error": 0.5605870485305786,
+          "kept_prefix_tiles": 4096
+        }
+      }
+    },
+    {
+      "snapshot_sha256": "b7490a66728aa58aa9b1bb346b92875c71d36ab6bf931646abf9bb7904dc90aa",
+      "phase": "held_near",
+      "distance_from_refresh": 1,
+      "layer": 5,
+      "prefix_tokens": 120016,
+      "generating_selector": "value_v2_online_preserve_mass",
+      "reused_full_dimensional_error": {
+        "max_row": 0.7951758503913879,
+        "mean_row": 0.41639214754104614,
+        "rms_row": 0.4389171898365021
+      },
+      "reused_retained_mass": {
+        "min_row": 0.012647660449147224,
+        "mean_row": 0.19449564814567566
+      },
+      "reused_sketch_max_error": 0.7634550333023071,
+      "fresh": {
+        "current_v31_control": {
+          "full_dimensional_error": {
+            "max_row": 0.54652339220047,
+            "mean_row": 0.27146363258361816,
+            "rms_row": 0.2896268963813782
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.6283035278320312,
+            "mean_row": 0.2172708511352539,
+            "rms_row": 0.24656499922275543
+          },
+          "mask_iou_with_reused": 0.27843302488327026,
+          "mask_iou_with_mass_control": 1.0,
+          "retained_mass": {
+            "min_row": 0.08070684224367142,
+            "mean_row": 0.3120099902153015
+          },
+          "sketch_max_error": 0.5368144512176514,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v1_online_discard_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.6383721232414246,
+            "mean_row": 0.29134461283683777,
+            "rms_row": 0.3122043311595917
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5968605279922485,
+            "mean_row": 0.14937789738178253,
+            "rms_row": 0.169214129447937
+          },
+          "mask_iou_with_reused": 0.43963831663131714,
+          "mask_iou_with_mass_control": 0.4135708212852478,
+          "retained_mass": {
+            "min_row": 0.061772387474775314,
+            "mean_row": 0.2631600797176361
+          },
+          "sketch_max_error": 0.6192923188209534,
+          "kept_prefix_tiles": 3917
+        },
+        "value_v2_online_preserve_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.7884420156478882,
+            "mean_row": 0.3964497447013855,
+            "rms_row": 0.4211660623550415
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5854894518852234,
+            "mean_row": 0.03032355010509491,
+            "rms_row": 0.046795763075351715
+          },
+          "mask_iou_with_reused": 0.7425451278686523,
+          "mask_iou_with_mass_control": 0.30385756492614746,
+          "retained_mass": {
+            "min_row": 0.012960129417479038,
+            "mean_row": 0.20763829350471497
+          },
+          "sketch_max_error": 0.7569847106933594,
+          "kept_prefix_tiles": 2175
+        },
+        "value_v3a_singleton_delete": {
+          "full_dimensional_error": {
+            "max_row": 0.5504090785980225,
+            "mean_row": 0.2741174101829529,
+            "rms_row": 0.2925451993942261
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.6298465728759766,
+            "mean_row": 0.21039490401744843,
+            "rms_row": 0.23922719061374664
+          },
+          "mask_iou_with_reused": 0.2830268442630768,
+          "mask_iou_with_mass_control": 0.7521613836288452,
+          "retained_mass": {
+            "min_row": 0.08181089162826538,
+            "mean_row": 0.3066733181476593
+          },
+          "sketch_max_error": 0.5429792404174805,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v3b_approx_batch8": {
+          "full_dimensional_error": {
+            "max_row": 0.5329257845878601,
+            "mean_row": 0.2546709179878235,
+            "rms_row": 0.27428317070007324
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.467992901802063,
+            "mean_row": 0.18047823011875153,
+            "rms_row": 0.20841339230537415
+          },
+          "mask_iou_with_reused": 0.41064372658729553,
+          "mask_iou_with_mass_control": 0.27482402324676514,
+          "retained_mass": {
+            "min_row": 0.06520473957061768,
+            "mean_row": 0.26207005977630615
+          },
+          "sketch_max_error": 0.5097614526748657,
+          "kept_prefix_tiles": 4096
+        }
+      }
+    },
+    {
+      "snapshot_sha256": "afb3f4f855bcb7581d969d2cb1ed9a7db2654eab934b44316af2f591f0c188b7",
+      "phase": "initial_or_refresh",
+      "distance_from_refresh": 0,
+      "layer": 5,
+      "prefix_tokens": 120016,
+      "generating_selector": "value_v2_online_preserve_mass",
+      "reused_full_dimensional_error": {
+        "max_row": 0.7968620657920837,
+        "mean_row": 0.422357439994812,
+        "rms_row": 0.44606903195381165
+      },
+      "reused_retained_mass": {
+        "min_row": 0.010047240182757378,
+        "mean_row": 0.19510996341705322
+      },
+      "reused_sketch_max_error": 0.78557950258255,
+      "fresh": {
+        "current_v31_control": {
+          "full_dimensional_error": {
+            "max_row": 0.5547176599502563,
+            "mean_row": 0.2744869887828827,
+            "rms_row": 0.29317957162857056
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5510223507881165,
+            "mean_row": 0.2300877720117569,
+            "rms_row": 0.25895434617996216
+          },
+          "mask_iou_with_reused": 0.159060537815094,
+          "mask_iou_with_mass_control": 1.0,
+          "retained_mass": {
+            "min_row": 0.08231709897518158,
+            "mean_row": 0.31678229570388794
+          },
+          "sketch_max_error": 0.5415909886360168,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v1_online_discard_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.6364898681640625,
+            "mean_row": 0.2998029589653015,
+            "rms_row": 0.320864200592041
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.46912384033203125,
+            "mean_row": 0.14700958132743835,
+            "rms_row": 0.17146490514278412
+          },
+          "mask_iou_with_reused": 0.47674113512039185,
+          "mask_iou_with_mass_control": 0.30987975001335144,
+          "retained_mass": {
+            "min_row": 0.05989605188369751,
+            "mean_row": 0.2562578320503235
+          },
+          "sketch_max_error": 0.6832839250564575,
+          "kept_prefix_tiles": 3645
+        },
+        "value_v2_online_preserve_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.7968620657920837,
+            "mean_row": 0.422357439994812,
+            "rms_row": 0.44606903195381165
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.0,
+            "mean_row": 0.0,
+            "rms_row": 0.0
+          },
+          "mask_iou_with_reused": 1.0,
+          "mask_iou_with_mass_control": 0.159060537815094,
+          "retained_mass": {
+            "min_row": 0.010047240182757378,
+            "mean_row": 0.19510996341705322
+          },
+          "sketch_max_error": 0.78557950258255,
+          "kept_prefix_tiles": 1654
+        },
+        "value_v3a_singleton_delete": {
+          "full_dimensional_error": {
+            "max_row": 0.5564404129981995,
+            "mean_row": 0.27957749366760254,
+            "rms_row": 0.2989199161529541
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5391092896461487,
+            "mean_row": 0.22060099244117737,
+            "rms_row": 0.24940340220928192
+          },
+          "mask_iou_with_reused": 0.16730768978595734,
+          "mask_iou_with_mass_control": 0.7269222736358643,
+          "retained_mass": {
+            "min_row": 0.08061856031417847,
+            "mean_row": 0.3100849986076355
+          },
+          "sketch_max_error": 0.550978422164917,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v3b_approx_batch8": {
+          "full_dimensional_error": {
+            "max_row": 0.483163982629776,
+            "mean_row": 0.2359880656003952,
+            "rms_row": 0.25674137473106384
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.6726785898208618,
+            "mean_row": 0.22526244819164276,
+            "rms_row": 0.2520405650138855
+          },
+          "mask_iou_with_reused": 0.0658472329378128,
+          "mask_iou_with_mass_control": 0.15073677897453308,
+          "retained_mass": {
+            "min_row": 0.0445355549454689,
+            "mean_row": 0.26097536087036133
+          },
+          "sketch_max_error": 0.4755569398403168,
+          "kept_prefix_tiles": 4096
+        }
+      }
+    },
+    {
+      "snapshot_sha256": "15ebd0275357245e3b09e5aa19516e364c00a8d2ae1d835b67e8a4e23125dab1",
+      "phase": "held_far",
+      "distance_from_refresh": 7,
+      "layer": 5,
+      "prefix_tokens": 120016,
+      "generating_selector": "value_v2_online_preserve_mass",
+      "reused_full_dimensional_error": {
+        "max_row": 0.548385500907898,
+        "mean_row": 0.2658625543117523,
+        "rms_row": 0.28396302461624146
+      },
+      "reused_retained_mass": {
+        "min_row": 0.04545209929347038,
+        "mean_row": 0.33590325713157654
+      },
+      "reused_sketch_max_error": 0.728489100933075,
+      "fresh": {
+        "current_v31_control": {
+          "full_dimensional_error": {
+            "max_row": 0.5289166569709778,
+            "mean_row": 0.24515286087989807,
+            "rms_row": 0.257518470287323
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5144467949867249,
+            "mean_row": 0.08472859859466553,
+            "rms_row": 0.09894196689128876
+          },
+          "mask_iou_with_reused": 0.4209498167037964,
+          "mask_iou_with_mass_control": 1.0,
+          "retained_mass": {
+            "min_row": 0.05981207266449928,
+            "mean_row": 0.35801243782043457
+          },
+          "sketch_max_error": 0.5789461731910706,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v1_online_discard_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.4721202552318573,
+            "mean_row": 0.20241394639015198,
+            "rms_row": 0.21894291043281555
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.48257166147232056,
+            "mean_row": 0.07477963715791702,
+            "rms_row": 0.08699991554021835
+          },
+          "mask_iou_with_reused": 0.6215858459472656,
+          "mask_iou_with_mass_control": 0.39982131123542786,
+          "retained_mass": {
+            "min_row": 0.09561575204133987,
+            "mean_row": 0.4066389203071594
+          },
+          "sketch_max_error": 0.6241456270217896,
+          "kept_prefix_tiles": 8118
+        },
+        "value_v2_online_preserve_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.5411478281021118,
+            "mean_row": 0.2476831078529358,
+            "rms_row": 0.2663494944572449
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.45490676164627075,
+            "mean_row": 0.025201376527547836,
+            "rms_row": 0.040972284972667694
+          },
+          "mask_iou_with_reused": 0.851692795753479,
+          "mask_iou_with_mass_control": 0.4055570662021637,
+          "retained_mass": {
+            "min_row": 0.052132733166217804,
+            "mean_row": 0.35334229469299316
+          },
+          "sketch_max_error": 0.7190125584602356,
+          "kept_prefix_tiles": 5853
+        },
+        "value_v3a_singleton_delete": {
+          "full_dimensional_error": {
+            "max_row": 0.519370973110199,
+            "mean_row": 0.24567466974258423,
+            "rms_row": 0.25795233249664307
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5103356242179871,
+            "mean_row": 0.08275122940540314,
+            "rms_row": 0.09705743938684464
+          },
+          "mask_iou_with_reused": 0.4133034348487854,
+          "mask_iou_with_mass_control": 0.793132483959198,
+          "retained_mass": {
+            "min_row": 0.05419589579105377,
+            "mean_row": 0.3551563620567322
+          },
+          "sketch_max_error": 0.582160234451294,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v3b_approx_batch8": {
+          "full_dimensional_error": {
+            "max_row": 0.5622096657752991,
+            "mean_row": 0.2521130442619324,
+            "rms_row": 0.2645367681980133
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.6209948658943176,
+            "mean_row": 0.07786884903907776,
+            "rms_row": 0.10210643708705902
+          },
+          "mask_iou_with_reused": 0.5502541661262512,
+          "mask_iou_with_mass_control": 0.38722294569015503,
+          "retained_mass": {
+            "min_row": 0.03707072138786316,
+            "mean_row": 0.32173433899879456
+          },
+          "sketch_max_error": 0.5418938398361206,
+          "kept_prefix_tiles": 4096
+        }
+      }
+    },
+    {
+      "snapshot_sha256": "00a0db1786649645637294afc642ed12d5deb361cdc3e11eb06a5439ebfe397f",
+      "phase": "held_near",
+      "distance_from_refresh": 1,
+      "layer": 5,
+      "prefix_tokens": 120016,
+      "generating_selector": "value_v2_online_preserve_mass",
+      "reused_full_dimensional_error": {
+        "max_row": 0.7658759355545044,
+        "mean_row": 0.42044949531555176,
+        "rms_row": 0.4404192566871643
+      },
+      "reused_retained_mass": {
+        "min_row": 0.009801311418414116,
+        "mean_row": 0.20866848528385162
+      },
+      "reused_sketch_max_error": 0.7463368773460388,
+      "fresh": {
+        "current_v31_control": {
+          "full_dimensional_error": {
+            "max_row": 0.5277003645896912,
+            "mean_row": 0.27549493312835693,
+            "rms_row": 0.29259195923805237
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5498431324958801,
+            "mean_row": 0.20495420694351196,
+            "rms_row": 0.22506208717823029
+          },
+          "mask_iou_with_reused": 0.2602829039096832,
+          "mask_iou_with_mass_control": 1.0,
+          "retained_mass": {
+            "min_row": 0.07669852674007416,
+            "mean_row": 0.32640212774276733
+          },
+          "sketch_max_error": 0.5165590047836304,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v1_online_discard_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.6180717349052429,
+            "mean_row": 0.2999582588672638,
+            "rms_row": 0.32120707631111145
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5727576613426208,
+            "mean_row": 0.14423391222953796,
+            "rms_row": 0.16407109797000885
+          },
+          "mask_iou_with_reused": 0.40869101881980896,
+          "mask_iou_with_mass_control": 0.4019264578819275,
+          "retained_mass": {
+            "min_row": 0.05339575558900833,
+            "mean_row": 0.27527496218681335
+          },
+          "sketch_max_error": 0.6542568206787109,
+          "kept_prefix_tiles": 3589
+        },
+        "value_v2_online_preserve_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.7440721988677979,
+            "mean_row": 0.38666456937789917,
+            "rms_row": 0.40895622968673706
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.6286417245864868,
+            "mean_row": 0.04402043670415878,
+            "rms_row": 0.06368649005889893
+          },
+          "mask_iou_with_reused": 0.6895927786827087,
+          "mask_iou_with_mass_control": 0.2794846296310425,
+          "retained_mass": {
+            "min_row": 0.014219041913747787,
+            "mean_row": 0.22409334778785706
+          },
+          "sketch_max_error": 0.7358369827270508,
+          "kept_prefix_tiles": 2039
+        },
+        "value_v3a_singleton_delete": {
+          "full_dimensional_error": {
+            "max_row": 0.5256635546684265,
+            "mean_row": 0.2778380215167999,
+            "rms_row": 0.29462549090385437
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5520963072776794,
+            "mean_row": 0.20127595961093903,
+            "rms_row": 0.22089052200317383
+          },
+          "mask_iou_with_reused": 0.2567274272441864,
+          "mask_iou_with_mass_control": 0.7652426362037659,
+          "retained_mass": {
+            "min_row": 0.08290384709835052,
+            "mean_row": 0.3228685259819031
+          },
+          "sketch_max_error": 0.5108671188354492,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v3b_approx_batch8": {
+          "full_dimensional_error": {
+            "max_row": 0.5545143485069275,
+            "mean_row": 0.2591469883918762,
+            "rms_row": 0.27486106753349304
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5402534008026123,
+            "mean_row": 0.17412173748016357,
+            "rms_row": 0.19775788486003876
+          },
+          "mask_iou_with_reused": 0.3603476583957672,
+          "mask_iou_with_mass_control": 0.2632828652858734,
+          "retained_mass": {
+            "min_row": 0.06543803215026855,
+            "mean_row": 0.2759203016757965
+          },
+          "sketch_max_error": 0.46752068400382996,
+          "kept_prefix_tiles": 4096
+        }
+      }
+    },
+    {
+      "snapshot_sha256": "98e6b76729de69067b036afb5b3c1122cefab096d8bc5cdfec7840c6ebc98bbd",
+      "phase": "initial_or_refresh",
+      "distance_from_refresh": 0,
+      "layer": 5,
+      "prefix_tokens": 120016,
+      "generating_selector": "value_v2_online_preserve_mass",
+      "reused_full_dimensional_error": {
+        "max_row": 0.7912548780441284,
+        "mean_row": 0.4422515034675598,
+        "rms_row": 0.4660322368144989
+      },
+      "reused_retained_mass": {
+        "min_row": 0.010632732883095741,
+        "mean_row": 0.2253114879131317
+      },
+      "reused_sketch_max_error": 0.7040270566940308,
+      "fresh": {
+        "current_v31_control": {
+          "full_dimensional_error": {
+            "max_row": 0.5252218246459961,
+            "mean_row": 0.29074621200561523,
+            "rms_row": 0.3113382160663605
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5148657560348511,
+            "mean_row": 0.21332800388336182,
+            "rms_row": 0.23648233711719513
+          },
+          "mask_iou_with_reused": 0.13482265174388885,
+          "mask_iou_with_mass_control": 1.0,
+          "retained_mass": {
+            "min_row": 0.09209569543600082,
+            "mean_row": 0.34696102142333984
+          },
+          "sketch_max_error": 0.530235230922699,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v1_online_discard_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.6448241472244263,
+            "mean_row": 0.338750422000885,
+            "rms_row": 0.3599758446216583
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.3618013560771942,
+            "mean_row": 0.12494046986103058,
+            "rms_row": 0.1451188623905182
+          },
+          "mask_iou_with_reused": 0.5151006579399109,
+          "mask_iou_with_mass_control": 0.29052969813346863,
+          "retained_mass": {
+            "min_row": 0.0461604967713356,
+            "mean_row": 0.2756063640117645
+          },
+          "sketch_max_error": 0.6035250425338745,
+          "kept_prefix_tiles": 2820
+        },
+        "value_v2_online_preserve_mass": {
+          "full_dimensional_error": {
+            "max_row": 0.7912548780441284,
+            "mean_row": 0.4422515034675598,
+            "rms_row": 0.4660322368144989
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.0,
+            "mean_row": 0.0,
+            "rms_row": 0.0
+          },
+          "mask_iou_with_reused": 1.0,
+          "mask_iou_with_mass_control": 0.13482265174388885,
+          "retained_mass": {
+            "min_row": 0.010632732883095741,
+            "mean_row": 0.2253114879131317
+          },
+          "sketch_max_error": 0.7040270566940308,
+          "kept_prefix_tiles": 1375
+        },
+        "value_v3a_singleton_delete": {
+          "full_dimensional_error": {
+            "max_row": 0.5362874269485474,
+            "mean_row": 0.2958860695362091,
+            "rms_row": 0.3159613609313965
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.5125699639320374,
+            "mean_row": 0.20703844726085663,
+            "rms_row": 0.2296309769153595
+          },
+          "mask_iou_with_reused": 0.13973626494407654,
+          "mask_iou_with_mass_control": 0.7227281928062439,
+          "retained_mass": {
+            "min_row": 0.08916351199150085,
+            "mean_row": 0.34184446930885315
+          },
+          "sketch_max_error": 0.5298345685005188,
+          "kept_prefix_tiles": 4096
+        },
+        "value_v3b_approx_batch8": {
+          "full_dimensional_error": {
+            "max_row": 0.5248708128929138,
+            "mean_row": 0.2464790791273117,
+            "rms_row": 0.271150141954422
+          },
+          "fresh_vs_reused_error": {
+            "max_row": 0.6954630613327026,
+            "mean_row": 0.22719670832157135,
+            "rms_row": 0.26563891768455505
+          },
+          "mask_iou_with_reused": 0.06667894870042801,
+          "mask_iou_with_mass_control": 0.16331830620765686,
+          "retained_mass": {
+            "min_row": 0.05758582800626755,
+            "mean_row": 0.2849747836589813
+          },
+          "sketch_max_error": 0.45047110319137573,
+          "kept_prefix_tiles": 4096
+        }
+      }
+    }
+  ]
+}

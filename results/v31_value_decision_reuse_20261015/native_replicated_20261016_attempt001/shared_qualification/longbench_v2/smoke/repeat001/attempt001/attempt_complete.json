@@ -1,0 +1,94 @@
+{
+  "files_sha256": {
+    "config.json": "d9642c9ba3a80183ba4b9ac5e62dddd26be6a3205f858e359e940f47a33c8cfc",
+    "exports/r1_control_after/private/run_r1_control_after.private.jsonl": "a57dbce9f5adc260ed21f4ec2a4831acfb3ed974f1ea5387a2a711335e9dd47a",
+    "exports/r1_control_after/records.jsonl": "eb897d9473229d3767b3a632533896d6ee7f1fa5683468b07e4502aec576842a",
+    "exports/r1_control_before/private/run_r1_control_before.private.jsonl": "a57dbce9f5adc260ed21f4ec2a4831acfb3ed974f1ea5387a2a711335e9dd47a",
+    "exports/r1_control_before/records.jsonl": "fa86de998806edeb6efbe6868a9a18268568568c5d47988342ec0823a62b2e34",
+    "exports/r1_full_swap8/private/run_r1_full_swap8.private.jsonl": "806c15f2efac61c661fb11bff34e6a8698258ef0712f6ce72a3449b9bafbd00d",
+    "exports/r1_full_swap8/records.jsonl": "392aae4b8ebbb0cfa82bb7fae40919da8039dc1741680eb3cbc8641bef451b4d",
+    "exports/r1_full_swap8_direction_guard/private/run_r1_full_swap8_direction_guard.private.jsonl": "4acd87a9f95715105a21a3e4ce2e8fada362efa09da0eb7f57314f317d2e1da1",
+    "exports/r1_full_swap8_direction_guard/records.jsonl": "821b587e5db4029567308097c1a60ec46417a29c1449d0d2142ad28f058c5ef9",
+    "exports/r1_residual/private/run_r1_residual.private.jsonl": "7ee1586d9ff5e1052092cdcdf2b753225dd7300f40b479880637540832a7da4f",
+    "exports/r1_residual/records.jsonl": "b91492c3f2dbb906f9f2ba6ebed083250e15b1ecf51102cb64895a93ad767480",
+    "exports/r1_residual_direction_guard/private/run_r1_residual_direction_guard.private.jsonl": "7cd19de278ecef4d0028480dc59434b9611d0e16a2d7b445a6eeda1d66294fbd",
+    "exports/r1_residual_direction_guard/records.jsonl": "e6513e09fa58b1dc2d4c9289b18e039360dabaadf4a612974559dc250161bfd2",
+    "private/generation.private.jsonl": "38be4a92d158e375b37a45d991eefacd396aa85fa15af0d03e9f3b0100eeb4de",
+    "receipt.json": "c1251a56863ae39dd4fec06cc7c812ed96e7a639098883c31e2d554da9b4a7ba",
+    "records.jsonl": "77857d64a252caaffcd4b67dd61736de476682709a3bce4ab6d263f131328661"
+  },
+  "gpu_reservation_s": 440.0229945029132,
+  "groups": [
+    {
+      "control_N": [
+        218,
+        218
+      ],
+      "drift": [],
+      "index": 0,
+      "seed": 1
+    },
+    {
+      "control_N": [
+        134,
+        134
+      ],
+      "drift": [],
+      "index": 1,
+      "seed": 1
+    }
+  ],
+  "parity_policy": "all structural-valid outcomes retained, including drift; no parity-based retries",
+  "protocol_sha256": "c3c51ce17f22ba325c9ba6b85a588de15dd0969510da280fa38ae3f95821380a",
+  "repeat": 1,
+  "returncode": 0,
+  "status": "complete",
+  "structural_errors": [],
+  "warmup_work": {
+    "full_swap8": {
+      "anchor_budget_units_checked": 960,
+      "anchor_events": 30,
+      "anchor_full_pv_rectangles": 1335936,
+      "anchor_full_qk_rectangles": 1335936,
+      "budget_errors": 0,
+      "held_calls": 260,
+      "swapped_blocks": 6817,
+      "updated_budget_units_checked": 960
+    },
+    "full_swap8_direction_guard": {
+      "anchor_budget_units_checked": 1280,
+      "anchor_events": 40,
+      "anchor_full_pv_rectangles": 1626240,
+      "anchor_full_qk_rectangles": 1626240,
+      "budget_errors": 0,
+      "corrected_calls": 368,
+      "direction_guard_fused_calls": 368,
+      "extra_post_o_projections": 80,
+      "held_calls": 368,
+      "held_direction_dot_rows": 94208,
+      "swapped_blocks": 8973,
+      "updated_budget_units_checked": 1280
+    },
+    "residual": {
+      "anchor_budget_units_checked": 1216,
+      "anchor_events": 38,
+      "anchor_full_pv_rectangles": 1664768,
+      "anchor_full_qk_rectangles": 1664768,
+      "budget_errors": 0,
+      "corrected_calls": 354,
+      "held_calls": 354
+    },
+    "residual_direction_guard": {
+      "anchor_budget_units_checked": 1344,
+      "anchor_events": 42,
+      "anchor_full_pv_rectangles": 1911296,
+      "anchor_full_qk_rectangles": 1911296,
+      "budget_errors": 0,
+      "corrected_calls": 394,
+      "direction_guard_fused_calls": 394,
+      "extra_post_o_projections": 84,
+      "held_calls": 394,
+      "held_direction_dot_rows": 100864
+    }
+  }
+}

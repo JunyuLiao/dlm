@@ -1,0 +1,27 @@
+{
+  "current_campaign": "Ranks actual receipt IDs, reports visible-output canvas count separately; no sampler or selector changes.",
+  "finding": "Adapter canvas IDs advance during encoder phases/prefill and are not denoising-canvas ordinals. Earlier zero-based range aggregation and cohort eligibility on max lifecycle ID were incorrect. Accuracy and total work are unaffected.",
+  "historical_corrections": [
+    {
+      "eligible_common_visible_canvas_cohort": 50,
+      "historical_arm": "v2_work_match_total",
+      "ordinal_control_kept": 819186400,
+      "ordinal_relative_delta": 0.07740186726732769,
+      "ordinal_v2_kept": 882592957,
+      "prefix": 20,
+      "previous_lifecycle_id_cohort": 147,
+      "previous_lifecycle_id_relative_delta": 0.1328549789580929
+    },
+    {
+      "eligible_common_visible_canvas_cohort": 45,
+      "historical_arm": "v2_work_match_early",
+      "ordinal_control_kept": 680459200,
+      "ordinal_relative_delta": 0.030693660986580825,
+      "ordinal_v2_kept": 701344984,
+      "prefix": 20,
+      "previous_lifecycle_id_cohort": 134,
+      "previous_lifecycle_id_relative_delta": 0.011934609393084245
+    }
+  ],
+  "status": "reporting_correction"
+}

@@ -1,0 +1,100 @@
+{
+  "status": "completed128-cell exact-greedy diagnostic only; future exact generation excluded",
+  "scope": "first shard of historically examined LongBench-v2 pool; seed1; instrumented audit; no clean timing pass",
+  "generation_attempt": "longbench/audit/attempt001/value_v3b_greedy_exact/shard01/attempt001",
+  "source_commit": "44674c3aade62f3f259df6e5af8f939578c8d8ec",
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "dc9e4a693a4233b11f1f999ab68277c74557c387a9820e2a729be2ef73743797",
+    "experiments/numerical_qk_reuse/v31_value_selectors.py": "e6e5ce23cb8d4fe86f6050401e97636754b9bcac44e644f0f802647eed43f655",
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "76eb2987bb99d5378c7eb31aef50c100335714f7f2cd28c4b8cce6707007b496",
+    "experiments/numerical_qk_reuse/v31_value_summary.py": "ef8d32e01c575bdc167125ddd00321bde391355354cdeecc4baab5e874d4934b",
+    "experiments/numerical_qk_reuse/v31_value_workspace.py": "61dcc7f7800159c37dff672b779f9348d5350f386f08dda6c125fd14d0d599d1",
+    "experiments/numerical_qk_reuse/v31_value_projection.py": "b15e32ab3ee7936cabc4a5485e67865ee7bb0e14122bbe2b0664daf8b1a1b3a6",
+    "experiments/numerical_qk_reuse/v31_value_snapshots.py": "2e2a56758f27ae0d66a86efb702a4598532aa6beb6fa211d6e6d04a73b6c096f",
+    "experiments/numerical_qk_reuse/v31_value_native_audit.py": "ef1ee7711dadf318b96aa2e6009ffb4d0dd4f3ded1c6f2d9d45fde760a97e766",
+    "experiments/numerical_qk_reuse/v27_fa4.py": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+    "experiments/numerical_qk_reuse/v31_fa4_observe.py": "3b7027b52b64ab5b101d71808b69decba434405c287bf9c94ba3aa7a3b7a5133",
+    "experiments/numerical_qk_reuse/v29_paged_copy.py": "7ee25f0ae9d55d409b121237d9b6e110a2e0b5dcbb619a60732a8395ca10154f",
+    "experiments/numerical_qk_reuse/v29_lse_merge.py": "7b4bcb126b7f7faa02047aa07d5c49e8fbff33204001f66d529343cce1c75a36",
+    "experiments/numerical_qk_reuse/v31_logit_stats.py": "1c5401a44dc9c73fd87399844353155ecece3665a241ab1f91b254c136b6d5ba",
+    "experiments/diffusion_gemma_jl_output_aware/projections.py": "25b44eee55bc79df708ba741b7a601e7c4986cc9eb48f1fb1a8793daacd78c28",
+    "experiments/value_direction_hopper/projection.py": "de5a1f971187880fa7aee1f4c21f18a1d14f52dd4879526f515e6ad365886f5d",
+    "scripts/v31_vllm_paired_bench.py": "3689337ad2d7e96eac825b68d297cabcf4556d69aa1b1dd6cc30140d0495a6e0",
+    "scripts/v31_value_campaign.py": "d6397baf9bc28fe2837ffd2de4162deb0f213dd9d1b80e7d20a25f3e60fcc1fc"
+  },
+  "cells_sha256": "123965f1439dbdefdefb1a57498efe958484e63f450027159e27ef8500615ad7",
+  "receipt_sha256": "1f828155b498b1581f926a99b28a633179b8a3010bc90ed8a4ab5b11607f63af",
+  "official_scoring_sha256": "134969bd37ff26553003e25e76b00f8111e4c4a150a08eed74ffc88678f7a888",
+  "official_correct": 58,
+  "official_cells": 128,
+  "metrics": {
+    "arm": "value_v3b_greedy_exact",
+    "purpose": "audit",
+    "items": 128,
+    "N": 36653,
+    "C": 1632,
+    "T": 401640,
+    "N_per_C": 22.45894607843137,
+    "S_total_s": 4660.27138,
+    "W_total_s": 5117.07356,
+    "S_per_N_ms": 127.14570103402177,
+    "W_mean_s": 39.9771371875,
+    "S_mean_s": 36.40837015625,
+    "global_eligible_tiles": 9347219360,
+    "global_kept_tiles": 1474208640,
+    "global_skipped_tiles": 7873010720,
+    "global_sparsity": 0.8422837227605194,
+    "local_sparsity": 0,
+    "overall_rectangle_sparsity": 0.7925774056234781,
+    "overall_denominator_status": "audit-only actual decode calls; window-intersecting H x Q128 x KV64 rectangles, geometry-derived; not CUDA CTA count",
+    "native_local_attention_ms": 59207.87468483299,
+    "phases": {
+      "initial": {
+        "calls": 8160,
+        "eligible_tiles": 383593920,
+        "kept_tiles": 383593920
+      },
+      "refresh": {
+        "calls": 7580,
+        "eligible_tiles": 352396320,
+        "kept_tiles": 352396320
+      },
+      "held": {
+        "calls": 158725,
+        "eligible_tiles": 8199672000,
+        "kept_tiles": 675526720
+      },
+      "carried": {
+        "calls": 8160,
+        "eligible_tiles": 384638400,
+        "kept_tiles": 35772960
+      },
+      "dense": {
+        "calls": 640,
+        "eligible_tiles": 26918720,
+        "kept_tiles": 26918720
+      }
+    },
+    "selections": 8160,
+    "refreshes": 7580,
+    "held": 158725,
+    "carried": 8160,
+    "invalid_rows": 0,
+    "discovery_ms": 163767.76578068733,
+    "selection_ms": 3628013.519375205,
+    "global_attention_ms": 3853289.06,
+    "candidate_evaluations": 625525973280,
+    "additional_statistics_qk_rectangles": 735990240,
+    "workspace_allocated_bytes": 2396651520,
+    "peak_summary_bytes": 1161461760,
+    "peak_cuda_bytes": 76919983616,
+    "threshold": null,
+    "capped": 3,
+    "timed_cuda_captures": 0
+  },
+  "limitations": [
+    "not a full503-item accuracy result",
+    "instrumented timing is diagnostic only",
+    "no selection or generation was rerun for this summary"
+  ]
+}

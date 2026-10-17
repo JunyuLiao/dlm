@@ -1,0 +1,289 @@
+{
+  "N_ratio_vs_v31": 0.9692765496985624,
+  "accuracy": 0.6666666666666666,
+  "arm": "v2_tau_0p021",
+  "attempts": [
+    "runs/aime26/v2_tau_0p021/shard001/attempt001",
+    "runs/aime26/v2_tau_0p021/shard002/attempt001",
+    "runs/aime26/v2_tau_0p021/shard003/attempt001"
+  ],
+  "correct": 60,
+  "global_kept_ratio_vs_v31": 1.428390835928311,
+  "items": 90,
+  "official_scorer": {
+    "answer_text": {
+      "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+      "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+      "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+    },
+    "answers_sha256": "433385cade38a10ddc6eca85b261e2f1838ba351328eb116e9710c46bdf1f5fe",
+    "arms": {
+      "v2_tau_0p021": {
+        "accuracy_by_panel_seed": {
+          "42": 70.0,
+          "43": 63.33333333333333,
+          "44": 66.66666666666666
+        },
+        "avg_at_k": 66.66666666666666,
+        "capped": 24,
+        "cells": 90,
+        "correct": 60,
+        "finished": 66,
+        "k_per_problem": [
+          3
+        ],
+        "no_final_response": 22,
+        "problems": 30,
+        "unparsed": 23,
+        "verified": 90
+      }
+    },
+    "coverage": {
+      "v2_tau_0p021": {
+        "dropped": 0,
+        "missing": 0,
+        "planned": 90,
+        "present": 90,
+        "scored": 90
+      }
+    },
+    "extraction": {
+      "file": "experiments/diffusion_gemma_aime30/protocol.py",
+      "module": "experiments.diffusion_gemma_aime30.protocol",
+      "sha256": "dede7aa20037ae16761e2848cfa0a1897beab0fd49fd5f4f8278b627970465e5"
+    },
+    "metric": "exact match (avg@k over seeds)"
+  },
+  "paired_vs_v31": {
+    "candidate_only_correct": 13,
+    "canvas_count_mismatches": 61,
+    "control_only_correct": 6,
+    "delta_pp": 7.777777777777777,
+    "denoising_call_mismatches": 90,
+    "mcnemar_exact_p": 0.1670684814453125,
+    "mcnemar_scope": "cell-level exploratory; repeated AIME seeds are clustered in the primary bootstrap",
+    "output_hash_mismatches": 90,
+    "output_token_count_mismatches": 68,
+    "per_item_global_kept_delta": {
+      "max": 3732733.0,
+      "mean": 642973.9,
+      "median": 396591.5,
+      "min": -2493141.0,
+      "n": 90,
+      "p10": -212524.0,
+      "p25": -24915.75,
+      "p75": 1369881.25,
+      "p90": 1931124.1000000008
+    },
+    "problem_cluster_bootstrap_ci95_pp": [
+      -2.2222222222222214,
+      17.777777777777775
+    ],
+    "problem_clusters": 30
+  },
+  "status": "complete",
+  "suite": "aime26",
+  "threshold": 0.021,
+  "work": {
+    "C": 1931,
+    "N": 25081,
+    "N_per_C": 12.988606939409632,
+    "T": 485885,
+    "audit_decode_s": 573.54407,
+    "audit_wall_s": 575.36687,
+    "cumulative_common_prefix": [
+      {
+        "canvas_prefix": 1,
+        "eligible_tiles": 1140160,
+        "item_kept_distribution": {
+          "max": 34512.0,
+          "mean": 12654.633333333333,
+          "median": 12312.0,
+          "min": 6716.0,
+          "n": 90,
+          "p10": 8640.0,
+          "p25": 10070.5,
+          "p75": 14281.5,
+          "p90": 17529.000000000004
+        },
+        "items": 90,
+        "kept_tiles": 1138917,
+        "sparsity": 0.0010901978669660695
+      },
+      {
+        "canvas_prefix": 2,
+        "eligible_tiles": 3103520,
+        "item_kept_distribution": {
+          "max": 64976.0,
+          "mean": 34337.188888888886,
+          "median": 33552.0,
+          "min": 18335.0,
+          "n": 90,
+          "p10": 23949.8,
+          "p25": 27528.0,
+          "p75": 39614.5,
+          "p90": 43677.800000000025
+        },
+        "items": 90,
+        "kept_tiles": 3090347,
+        "sparsity": 0.004244535237407865
+      },
+      {
+        "canvas_prefix": 3,
+        "eligible_tiles": 5779520,
+        "item_kept_distribution": {
+          "max": 110591.0,
+          "mean": 63681.433333333334,
+          "median": 62085.0,
+          "min": 35465.0,
+          "n": 90,
+          "p10": 46446.2,
+          "p25": 50527.75,
+          "p75": 74064.0,
+          "p90": 85985.8
+        },
+        "items": 90,
+        "kept_tiles": 5731329,
+        "sparsity": 0.008338235701234709
+      },
+      {
+        "canvas_prefix": 4,
+        "eligible_tiles": 9014240,
+        "item_kept_distribution": {
+          "max": 148883.0,
+          "mean": 98841.27777777778,
+          "median": 95876.0,
+          "min": 53620.0,
+          "n": 90,
+          "p10": 69782.8,
+          "p25": 82599.5,
+          "p75": 115972.75,
+          "p90": 132099.6
+        },
+        "items": 90,
+        "kept_tiles": 8895715,
+        "sparsity": 0.013148640373453535
+      },
+      {
+        "canvas_prefix": 5,
+        "eligible_tiles": 13148960,
+        "item_kept_distribution": {
+          "max": 210209.0,
+          "mean": 143314.33333333334,
+          "median": 142381.5,
+          "min": 81052.0,
+          "n": 90,
+          "p10": 101277.9,
+          "p25": 114362.75,
+          "p75": 169395.0,
+          "p90": 194714.30000000002
+        },
+        "items": 90,
+        "kept_tiles": 12898290,
+        "sparsity": 0.019063865126975776
+      },
+      {
+        "canvas_prefix": 6,
+        "eligible_tiles": 18128320,
+        "item_kept_distribution": {
+          "max": 289201.0,
+          "mean": 196164.38888888888,
+          "median": 193757.5,
+          "min": 97213.0,
+          "n": 90,
+          "p10": 133037.2,
+          "p25": 157295.25,
+          "p75": 231791.25,
+          "p90": 256052.2
+        },
+        "items": 90,
+        "kept_tiles": 17654795,
+        "sparsity": 0.026120732643730937
+      },
+      {
+        "canvas_prefix": 7,
+        "eligible_tiles": 23675520,
+        "item_kept_distribution": {
+          "max": 376516.0,
+          "mean": 254419.3,
+          "median": 259323.0,
+          "min": 115388.0,
+          "n": 90,
+          "p10": 165479.0,
+          "p25": 202973.0,
+          "p75": 308059.0,
+          "p90": 333991.60000000003
+        },
+        "items": 90,
+        "kept_tiles": 22897737,
+        "sparsity": 0.03285178108020437
+      }
+    ],
+    "fa4_consumer_kept_global_tiles": 192949091,
+    "finish_reasons": {
+      "length": 24,
+      "stop": 66
+    },
+    "global_eligible_tiles": 232774400,
+    "global_kept_tiles": 192949091,
+    "global_skipped_tiles": 39825309,
+    "global_sparsity": 0.17108972893926477,
+    "items": 90,
+    "local_skipped_tiles": 0,
+    "mean_C": 21.455555555555556,
+    "mean_N": 278.6777777777778,
+    "mean_T": 5398.722222222223,
+    "median_N": 262.0,
+    "median_T": 5943.0,
+    "overall_eligible_rectangles": 610278000,
+    "overall_skipped_rectangles": 39825309,
+    "overall_sparsity": 0.06525765143098719,
+    "phases": {
+      "carried": {
+        "calls": 9655,
+        "eligible_tiles": 18474560,
+        "kept_fraction": 0.8446668824589056,
+        "kept_tiles": 15604849,
+        "skipped_tiles": 2869711,
+        "sparsity": 0.15533311754109436
+      },
+      "dense": {
+        "calls": 450,
+        "eligible_tiles": 101760,
+        "kept_fraction": 1.0,
+        "kept_tiles": 101760,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      },
+      "held": {
+        "calls": 96120,
+        "eligible_tiles": 179925600,
+        "kept_fraction": 0.7946062261290222,
+        "kept_tiles": 142970002,
+        "skipped_tiles": 36955598,
+        "sparsity": 0.2053937738709778
+      },
+      "initial": {
+        "calls": 9655,
+        "eligible_tiles": 17238720,
+        "kept_fraction": 1.0,
+        "kept_tiles": 17238720,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      },
+      "refresh": {
+        "calls": 9525,
+        "eligible_tiles": 17033760,
+        "kept_fraction": 1.0,
+        "kept_tiles": 17033760,
+        "skipped_tiles": 0,
+        "sparsity": 0.0
+      }
+    },
+    "selector_candidate_evaluations": 34272480,
+    "selector_discovery_ms": 10530.434751525521,
+    "selector_discovery_qk_rectangles": 34272480,
+    "selector_selection_ms": 6564.886368636042,
+    "value_selected_prefix_tiles": 24092867
+  }
+}

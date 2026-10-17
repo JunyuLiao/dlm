@@ -1,0 +1,41 @@
+{
+ "answer_text": {
+  "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+  "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+  "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+ },
+ "arms": {
+  "value_v1_online_discard_mass": {
+   "longbench_v2_0shot_think": {
+    "capped": 13,
+    "cells": 503,
+    "finished": 490,
+    "no_final_response": 30,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 53.1,
+      "Hard": 46.6,
+      "Long": 34.3,
+      "Medium": 44.7,
+      "Overall": 49.1,
+      "Short": 63.3,
+      "items": 503
+     }
+    },
+    "truncated_items": 237,
+    "unparsed": 36,
+    "verified": 503
+   }
+  }
+ },
+ "coverage": {
+  "value_v1_online_discard_mass": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 503,
+   "present": 503,
+   "scored": 503
+  }
+ },
+ "metric": "LongBench-v2 pred.py extract_answer judge; result.py aggregation (one decimal)"
+}

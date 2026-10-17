@@ -2021,3 +2021,14 @@ Consolidated evidence: results/v31_value_decision_reuse_20261015/
 conclusions_20261017.md and synthesis_20261017/attempt001/summary.md, CSVs and
 uncertainty figures. This is an exploratory completed study, not held-out
 confirmation or a demonstrated across-workload accuracy/speedup improvement.
+
+## 2026-10-17 — Publication and public arithmetic reproduction
+
+The completed study above is indexed in docs/research_update_20261017/ and the
+dated README entry. results/research_update_20261017/attempt001 contains12 public
+Markdown/CSV exports and a binding marker for all input/output hashes. It
+reproduces existing results only:358 input/seed cells,5370 official trials,
+all native arms and both uncertainty analyses, all diagnostic-only families,
+phase/extra-work accounting, repeat/control-noise and trajectory exposure.
+Public validation does not rescore private answers or verify private model/input
+bytes. Three CPU integrity tests passed; no new experiments or clean timing.

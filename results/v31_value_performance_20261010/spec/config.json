@@ -1,0 +1,110 @@
+{
+  "schema": "v31_value_performance_panel_v1",
+  "study": "value_aware_cross_step_reuse_performance_20261010",
+  "status": "preparation",
+  "model": "google/diffusiongemma-26B-A4B-it",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "global_layers": [
+    5,
+    11,
+    17,
+    23,
+    29
+  ],
+  "local_scope": "native_dense",
+  "tile_geometry": "Q128xKV64",
+  "projection": {
+    "family": "gaussian",
+    "rank": 32,
+    "seed": 1729
+  },
+  "native_decoding": true,
+  "exact_greedy": "excluded_by_user",
+  "arms": [
+    "dense_full_fix51994",
+    "dense_piecewise",
+    "allkept_fa4",
+    "current_v31_control",
+    "value_v1_online_discard_mass",
+    "value_v2_online_preserve_mass",
+    "value_v3a_singleton_delete",
+    "value_v3b_approx_batch8"
+  ],
+  "aime26": {
+    "dataset": "aime26",
+    "problems": 30,
+    "seeds": [
+      42,
+      43,
+      44
+    ],
+    "cells": 90,
+    "generation_budget": 8192,
+    "fixed_budget_tokens": 1728,
+    "fixed_budget_kv_tiles": 27,
+    "control_reference": "spec/aime26_control_sparsity_reference.json",
+    "online_match_tolerance_absolute_work_fraction": 0.03,
+    "calibration": {
+      "arms": [
+        "value_v1_online_discard_mass",
+        "value_v2_online_preserve_mass"
+      ],
+      "threshold_scope": "one uniform GLOBAL threshold per arm",
+      "quota": false,
+      "development_note": "calibration trajectories overlap the historically examined AIME pool; report as exploratory"
+    },
+    "runtime": {
+      "block_size": 64,
+      "chunk": 4096,
+      "max_model_len": 9216,
+      "gpu_memory_utilization": 0.8
+    }
+  },
+  "ruler128k": {
+    "dataset": "ruler128k_v33ofc_subset",
+    "context_length": 131072,
+    "tasks": 13,
+    "samples_per_task": 8,
+    "cells": 104,
+    "generator_seed": 6464,
+    "fixed_budget_tokens": 8192,
+    "fixed_budget_kv_tiles": 128,
+    "online_match": "measured audited pooled GLOBAL work fraction on the same development subset",
+    "runtime": {
+      "block_size": 32,
+      "chunk": 16384,
+      "max_model_len": 136192,
+      "gpu_memory_utilization": 0.85
+    },
+    "scoring": "official RULER string_match_all/string_match_part aggregation"
+  },
+  "execution": {
+    "audit_before_timing": true,
+    "clean_timing_separate": true,
+    "one_worker_per_gpu": true,
+    "resume_rule": "completed shards only; new attempt directory after interruption",
+    "cuda_capture_counter_required": true,
+    "private_raw_generations": true
+  },
+  "frozen_at_utc": "2026-10-10T08:11:59.034383+00:00",
+  "source_commit": "fce50a8b110f29c47b01cd5d2dd42d3986df328a",
+  "source_tree_note": "working tree contains unrelated uncommitted study changes; every shard records source hashes",
+  "inputs": {
+    "aime_cells_sha256": "7ba832bfe149e6050574046035a6ce8fba1b90bc451e1d7243244848d480cae8",
+    "aime_cells_path": "private/aime26/cells_aime26_seed42_43_44.json",
+    "ruler_manifest_sha256": "568590e7997c0d43624ed0ea403a42b0ffc5b894393ab2344ebc335a34be54a6",
+    "ruler_rowinfo_sha256": "c09f790842b45a23445665cdf5ecafd312cd768c1c3812d7b732c2d615f1bc17",
+    "ruler_cells_sha256": "7c1e536ac25935319bfe00c59dc4ba30a2855c9137f137bde3a63b9c39f3a2fe",
+    "ruler_pool_path": "private/ruler128k_pool",
+    "aime_manifest_sha256": "85ebd2dd8d26ede269d4c5555279e9e2b79637c3f95036452c624e03e8122f39",
+    "aime_manifest_path": "private/aime26/aime26_generation_manifest.json"
+  },
+  "pinned_source_files": {
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "255655cec10d75f295a847a1e7658116fbbb4f85d9c505c6a9678a4a68ba9768",
+    "experiments/numerical_qk_reuse/v31_value_selectors.py": "8555cf97bec2f388b261d22b80bfcb676eaa5be905c3c78e31906cc49da3d52e",
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "f9b5dfdd310b78b7a6d3c7c79a5f7a7055bbeee900a265c4712fbab2bb5fbf4d",
+    "scripts/v31_vllm_paired_bench.py": "19279ed03e7148110ffce318f29920ae269a9cf8ba23ca9928d2e92ad9bf2fff",
+    "scripts/v31_value_performance_campaign.py": "738e95b5312c41df79ef234cf13999a8608d4d00f57540d44208e62467d5afcd",
+    "scripts/v31_build_ruler_subset_pool.py": "f4eb98be80b9c26ee02738a311002005f82a18e0e4357fd9ddd597109638484a"
+  }
+}

@@ -49,3 +49,21 @@ results/**/*.npy
 results/**/*.npz
 results/**/*.pid
 results/**/*.log
+
+# Local build probes, runtime locks and independent checkouts. Their identities
+# are recorded in results/research_update_20261017/publication_inventory.json.
+/a.out
+/test_write
+/worktrees/
+/reference/LiveCodeBench/
+/reference/LongBench/
+/reference/NeMo-Skills/
+/reference/RULER/
+/reference/TensorRT-LLM-value-aware/
+results/**/*.lock
+# Absolute local links to already-published older control runs; preserve the
+# links locally and publish their relative target mapping in the inventory.
+/results/v31_v2_tau021_longbench_20261015/runs/longbench_v2/allkept_fa4
+/results/v31_v2_tau021_longbench_20261015/runs/longbench_v2/current_v31_control
+/results/v31_v2_tau021_longbench_20261015/runs/longbench_v2/dense_full_fix51994
+/results/v31_v2_tau021_longbench_20261015/runs/longbench_v2/dense_piecewise

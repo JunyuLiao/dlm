@@ -1,0 +1,24 @@
+{
+  "schema": "v2_refinement_panel_v1",
+  "status": "complete_accuracy_only",
+  "source_commit": "fce50a8b110f29c47b01cd5d2dd42d3986df328a",
+  "dataset": "longbench_v2_0shot_think",
+  "development_items": 15,
+  "seed": 1,
+  "threshold": 0.027,
+  "global_budget_tokens": 8192,
+  "timing": "paused_resumable",
+  "arms": [
+    "value_v2_online_preserve_mass",
+    "value_v2_online_mass_anchor32",
+    "value_v2_online_jcgate",
+    "value_v2_online_jcgate_anchor16"
+  ],
+  "local_scope": "native_dense",
+  "official_scorer": "scripts/v31_score_longbench_official.py",
+  "raw_completions": "private attempt files only",
+  "official_refinement_audit_items": 503,
+  "official_refinement_audit": "scoring/audit/official_with_control.summary.json",
+  "candidate": "value_v2_online_jcgate",
+  "decision": "reject_jcgate_before_timing"
+}

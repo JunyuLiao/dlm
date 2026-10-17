@@ -1,0 +1,140 @@
+{
+  "arm": "current_v31_control",
+  "purpose": "development",
+  "items": 64,
+  "N": 17427,
+  "C": 885,
+  "T": 217830,
+  "N_per_C": 19.691525423728812,
+  "S_total_s": 429.03154,
+  "W_total_s": 715.64956,
+  "S_per_N_ms": 24.618783496872666,
+  "W_mean_s": 11.182024375,
+  "S_mean_s": 6.7036178125,
+  "global_eligible_tiles": 4710991040,
+  "global_kept_tiles": 779240320,
+  "global_skipped_tiles": 3931750720,
+  "global_sparsity": 0.8345909993494702,
+  "local_sparsity": 0,
+  "overall_rectangle_sparsity": 0.7879539391441024,
+  "overall_denominator_status": "audit-only actual decode calls; window-intersecting H x Q128 x KV64 rectangles, geometry-derived; not CUDA CTA count",
+  "native_local_attention_ms": 27927.113693073392,
+  "phases": {
+    "initial": {
+      "calls": 4425,
+      "eligible_tiles": 226638080,
+      "kept_tiles": 226638080
+    },
+    "refresh": {
+      "calls": 3995,
+      "eligible_tiles": 202021280,
+      "kept_tiles": 202021280
+    },
+    "held": {
+      "calls": 73970,
+      "eligible_tiles": 4038761760,
+      "kept_tiles": 314816320
+    },
+    "carried": {
+      "calls": 4425,
+      "eligible_tiles": 227204480,
+      "kept_tiles": 19399200
+    },
+    "dense": {
+      "calls": 320,
+      "eligible_tiles": 16365440,
+      "kept_tiles": 16365440
+    }
+  },
+  "selections": 4425,
+  "refreshes": 3995,
+  "held": 73970,
+  "carried": 4425,
+  "invalid_rows": 0,
+  "discovery_ms": null,
+  "selection_ms": null,
+  "global_attention_ms": 52736.82,
+  "candidate_evaluations": null,
+  "additional_statistics_qk_rectangles": null,
+  "workspace_allocated_bytes": null,
+  "peak_summary_bytes": null,
+  "peak_cuda_bytes": 74518027776,
+  "threshold": null,
+  "capped": 4,
+  "timed_cuda_captures": 0,
+  "label": "completed calibration-reference audit; no clean latency claim",
+  "questions": 32,
+  "seeds": [
+    1,
+    2
+  ],
+  "source_commit": "b37a97c1a457e9d22e9ff6270d1a68dab1545229",
+  "cells_sha256": "d0f0f7724d3350028091d6d15a6d8a0bdc4054b8764eec0097941a494e812401",
+  "phase_global_local_overall": {
+    "dense": {
+      "global_calls": 320,
+      "global_eligible_tiles": 16365440,
+      "global_kept_tiles": 16365440,
+      "local_calls": 1600,
+      "local_eligible_rectangles": 1024000,
+      "local_skipped_tiles": 0,
+      "global_skipped_tiles": 0,
+      "global_sparsity": 0.0,
+      "local_sparsity": 0.0,
+      "overall_eligible_rectangles": 17389440,
+      "overall_sparsity": 0.0
+    },
+    "initial": {
+      "global_calls": 4425,
+      "global_eligible_tiles": 226638080,
+      "global_kept_tiles": 226638080,
+      "local_calls": 22125,
+      "local_eligible_rectangles": 14160000,
+      "local_skipped_tiles": 0,
+      "global_skipped_tiles": 0,
+      "global_sparsity": 0.0,
+      "local_sparsity": 0.0,
+      "overall_eligible_rectangles": 240798080,
+      "overall_sparsity": 0.0
+    },
+    "held": {
+      "global_calls": 73970,
+      "global_eligible_tiles": 4038761760,
+      "global_kept_tiles": 314816320,
+      "local_calls": 369850,
+      "local_eligible_rectangles": 236704000,
+      "local_skipped_tiles": 0,
+      "global_skipped_tiles": 3723945440,
+      "global_sparsity": 0.9220512774192454,
+      "local_sparsity": 0.0,
+      "overall_eligible_rectangles": 4275465760,
+      "overall_sparsity": 0.8710034529664904
+    },
+    "refresh": {
+      "global_calls": 3995,
+      "global_eligible_tiles": 202021280,
+      "global_kept_tiles": 202021280,
+      "local_calls": 19975,
+      "local_eligible_rectangles": 12784000,
+      "local_skipped_tiles": 0,
+      "global_skipped_tiles": 0,
+      "global_sparsity": 0.0,
+      "local_sparsity": 0.0,
+      "overall_eligible_rectangles": 214805280,
+      "overall_sparsity": 0.0
+    },
+    "carried": {
+      "global_calls": 4425,
+      "global_eligible_tiles": 227204480,
+      "global_kept_tiles": 19399200,
+      "local_calls": 22125,
+      "local_eligible_rectangles": 14160000,
+      "local_skipped_tiles": 0,
+      "global_skipped_tiles": 207805280,
+      "global_sparsity": 0.9146178807741819,
+      "local_sparsity": 0.0,
+      "overall_eligible_rectangles": 241364480,
+      "overall_sparsity": 0.8609604859836875
+    }
+  }
+}

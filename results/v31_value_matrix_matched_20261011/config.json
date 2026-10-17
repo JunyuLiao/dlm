@@ -1,0 +1,76 @@
+{
+  "schema": "v31_full_method_matrix_matched_v2",
+  "date": "2026-10-11",
+  "timing": "paused",
+  "methods": [
+    "current_v31_control",
+    "value_v1_online_discard_mass",
+    "value_v2_online_preserve_mass",
+    "value_v3a_singleton_delete",
+    "value_v3b_approx_batch8",
+    "value_v2_online_jcgate",
+    "value_mass_gated_online_swap8",
+    "value_mass_gated_online_cgate_swap16"
+  ],
+  "regimes": {
+    "s50": {
+      "short_mage_k": 1728,
+      "long_mage_k": 8192,
+      "threshold_short": {
+        "value_v1_online_discard_mass": 0.095,
+        "value_v2_online_preserve_mass": 0.074,
+        "value_v3a_singleton_delete": 0.074,
+        "value_v3b_approx_batch8": 0.074,
+        "value_v2_online_jcgate": 0.074,
+        "value_mass_gated_online_swap8": 0.074,
+        "value_mass_gated_online_cgate_swap16": 0.074
+      },
+      "threshold_long": {
+        "value_v1_online_discard_mass": 0.027,
+        "value_v2_online_preserve_mass": 0.027,
+        "value_v3a_singleton_delete": 0.027,
+        "value_v3b_approx_batch8": 0.027,
+        "value_v2_online_jcgate": 0.027,
+        "value_mass_gated_online_swap8": 0.027,
+        "value_mass_gated_online_cgate_swap16": 0.027
+      }
+    },
+    "s75": {
+      "short_mage_k": 864,
+      "long_mage_k": 4096,
+      "threshold_short": {
+        "value_v1_online_discard_mass": 0.15,
+        "value_v2_online_preserve_mass": 0.15,
+        "value_v3a_singleton_delete": 0.15,
+        "value_v3b_approx_batch8": 0.15,
+        "value_v2_online_jcgate": 0.15,
+        "value_mass_gated_online_swap8": 0.15,
+        "value_mass_gated_online_cgate_swap16": 0.15
+      },
+      "threshold_long": {
+        "value_v1_online_discard_mass": 0.08,
+        "value_v2_online_preserve_mass": 0.08,
+        "value_v3a_singleton_delete": 0.08,
+        "value_v3b_approx_batch8": 0.08,
+        "value_v2_online_jcgate": 0.08,
+        "value_mass_gated_online_swap8": 0.08,
+        "value_mass_gated_online_cgate_swap16": 0.08
+      }
+    }
+  },
+  "sample_plan": {
+    "aime26": 90,
+    "ruler128k": 104,
+    "humaneval": 100,
+    "mbpp": 100,
+    "gsm8k_4shot": 100,
+    "math500": 100,
+    "longbench_v1_total": 100,
+    "longbench_v1_per_task": 20
+  },
+  "caveat": "s75 budgets remain approximate and must be reported from receipts; provisional diagnostics in parent root are not merged.",
+  "parent_provisional_root": "results/v31_value_matrix_20261011",
+  "threshold_routing": "AIME uses threshold_short; RULER/LongBench uses threshold_long",
+  "status": "paused_user_request",
+  "pause_reason": "threshold/calibration strategy update pending"
+}

@@ -1,0 +1,173 @@
+{
+  "files_sha256": {
+    "config.json": "844801f11edadbccabceb4822ed6225ba42a6bdb76fd42fb5cd649bd45e66d71",
+    "exports/r1_control_after/private/run_r1_control_after.private.jsonl": "2064b31a96ccc69df5dfdfb77b5d6f0a8815a15e4e2523e077e562b849e48031",
+    "exports/r1_control_after/records.jsonl": "c72b19bdf5da153669c86bdb8f3fb8df3c7e38d2f1e9affeda76334687c9b876",
+    "exports/r1_control_before/private/run_r1_control_before.private.jsonl": "b431fd35578a8520978eb02b0a2ef31bccb13f6deafe9a0c6eb502613b464270",
+    "exports/r1_control_before/records.jsonl": "546e96bac90b440d71909bb8604e1045c071b15a9917c7f31bce90daf453a20a",
+    "exports/r1_full_swap8/private/run_r1_full_swap8.private.jsonl": "c0a4ed3011849aed8b02cc41c781c11d13bca89d852b7f19fd00b8cfd5659efe",
+    "exports/r1_full_swap8/records.jsonl": "cfc298f45e65706d4e0e96b3a9bc76d1410d15a67e92767999489a8597b047a2",
+    "exports/r1_full_swap8_direction_guard/private/run_r1_full_swap8_direction_guard.private.jsonl": "74dc2ac268e9e0cf859c87d22f4200a1c189698f0114afb84a786b87183aaeba",
+    "exports/r1_full_swap8_direction_guard/records.jsonl": "288b38c4bd7a8c9fc47e52fd92fe29e5cb8c25ef8d8c23ed810624e9df9a45d1",
+    "exports/r1_residual/private/run_r1_residual.private.jsonl": "1a2484ab910ee3af7883dc7990cbf6a4b63780bea2942a16e113e0fc524d2827",
+    "exports/r1_residual/records.jsonl": "a29bf97b68c175426de2ca9456e27ef57ae9ada272207ccb80c65baeb77a51b4",
+    "exports/r1_residual_direction_guard/private/run_r1_residual_direction_guard.private.jsonl": "b768923114ea3ad093cb2476b05913f276c4fb5ee670957fdcd043139ac6fc88",
+    "exports/r1_residual_direction_guard/records.jsonl": "b6537f4dd739de25f8ac2243f5a0b8861b06341d616b7c335343805e7a45bb5d",
+    "private/generation.private.jsonl": "6c3d88476c9df9577e5acc8c2bf5ca12609d67ad70d3292b5d845909ecb14351",
+    "receipt.json": "30481aa1cd7eeeca30d53e498f31ef4a959ed9efd7d403dac33090c8a8a081fc",
+    "records.jsonl": "862b9d2d537453293c544d456097853884d9b86d1a19aa1daba42d66c843a49b"
+  },
+  "gpu_reservation_s": 695.0652174589923,
+  "groups": [
+    {
+      "control_N": [
+        196,
+        196
+      ],
+      "drift": [],
+      "index": 3,
+      "seed": 42
+    },
+    {
+      "control_N": [
+        476,
+        476
+      ],
+      "drift": [],
+      "index": 13,
+      "seed": 42
+    },
+    {
+      "control_N": [
+        139,
+        139
+      ],
+      "drift": [],
+      "index": 23,
+      "seed": 42
+    },
+    {
+      "control_N": [
+        159,
+        159
+      ],
+      "drift": [],
+      "index": 3,
+      "seed": 43
+    },
+    {
+      "control_N": [
+        432,
+        467
+      ],
+      "drift": [
+        "control bookend drift",
+        "control decoded text drift"
+      ],
+      "index": 13,
+      "seed": 43
+    },
+    {
+      "control_N": [
+        254,
+        254
+      ],
+      "drift": [],
+      "index": 23,
+      "seed": 43
+    },
+    {
+      "control_N": [
+        144,
+        145
+      ],
+      "drift": [
+        "control bookend drift",
+        "control decoded text drift"
+      ],
+      "index": 3,
+      "seed": 44
+    },
+    {
+      "control_N": [
+        503,
+        468
+      ],
+      "drift": [
+        "control bookend drift",
+        "control decoded text drift"
+      ],
+      "index": 13,
+      "seed": 44
+    },
+    {
+      "control_N": [
+        148,
+        144
+      ],
+      "drift": [
+        "control bookend drift",
+        "control decoded text drift"
+      ],
+      "index": 23,
+      "seed": 44
+    }
+  ],
+  "parity_policy": "all structural-valid outcomes retained, including drift; no parity-based retries",
+  "protocol_sha256": "c3c51ce17f22ba325c9ba6b85a588de15dd0969510da280fa38ae3f95821380a",
+  "repeat": 1,
+  "returncode": 0,
+  "status": "complete",
+  "structural_errors": [],
+  "warmup_work": {
+    "full_swap8": {
+      "allkept_shortcuts": 14,
+      "anchor_budget_units_checked": 2048,
+      "anchor_events": 50,
+      "anchor_full_pv_rectangles": 134400,
+      "anchor_full_qk_rectangles": 134400,
+      "budget_errors": 0,
+      "held_calls": 234,
+      "swapped_blocks": 5510,
+      "updated_budget_units_checked": 1600
+    },
+    "full_swap8_direction_guard": {
+      "allkept_shortcuts": 14,
+      "anchor_budget_units_checked": 1984,
+      "anchor_events": 48,
+      "anchor_full_pv_rectangles": 128384,
+      "anchor_full_qk_rectangles": 128384,
+      "budget_errors": 0,
+      "corrected_calls": 237,
+      "direction_guard_fused_calls": 237,
+      "extra_post_o_projections": 96,
+      "held_calls": 237,
+      "held_direction_dot_rows": 60672,
+      "swapped_blocks": 4933,
+      "updated_budget_units_checked": 1536
+    },
+    "residual": {
+      "allkept_shortcuts": 14,
+      "anchor_budget_units_checked": 2048,
+      "anchor_events": 50,
+      "anchor_full_pv_rectangles": 134400,
+      "anchor_full_qk_rectangles": 134400,
+      "budget_errors": 0,
+      "corrected_calls": 274,
+      "held_calls": 274
+    },
+    "residual_direction_guard": {
+      "allkept_shortcuts": 14,
+      "anchor_budget_units_checked": 2016,
+      "anchor_events": 49,
+      "anchor_full_pv_rectangles": 132480,
+      "anchor_full_qk_rectangles": 132480,
+      "budget_errors": 0,
+      "corrected_calls": 227,
+      "direction_guard_fused_calls": 227,
+      "extra_post_o_projections": 98,
+      "held_calls": 227,
+      "held_direction_dot_rows": 58112
+    }
+  }
+}

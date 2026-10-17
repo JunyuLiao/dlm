@@ -2242,3 +2242,17 @@ checks1,099 files,225 attempts,1,710 bound artifacts and5,370 records. Audit002
 corrects the independent LOCAL-check field name; all records require the actual
 native_local_skipped_tiles field and have zero skips. No generation changed.
 GPU is idle, completed/failed attempts preserved, no further queue running.
+
+### 2026-10-17: Publish complete method/setup/statistic and reproduction references
+
+Added the dated README entry and three publication documents for every new
+operator,decision and native variant. Earlier V1/V2/V3, threshold/equal-work
+and cached-refresh families retain the October15 references and distinct results.
+A new stdlib public exporter reproduces all native/diagnostic tables from
+numeric evidence, without CUDA or private generations. It validates source-bound
+reports/scorer outputs, complete cohorts, unequal repetitions, score arithmetic,
+N-C-T/work and zero capture/LOCAL-skip/budget-error receipts. Three integrity
+tests protect unequal control counts, required LOCAL field and changed score/work.
+No new generation or timing run. Pending public artifacts are published without
+upgrading held/partial evidence. Local private/runtime/external exclusions have
+explicit inventory/ignore rules; external checkouts and frozen runs stay intact.

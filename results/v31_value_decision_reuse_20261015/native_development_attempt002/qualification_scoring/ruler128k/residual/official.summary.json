@@ -1,0 +1,48 @@
+{
+ "answer_text": {
+  "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+  "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+  "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+ },
+ "arms": {
+  "residual": {
+   "cells": 2,
+   "finished": 2,
+   "nulls": 0,
+   "official": {
+    "_overall": 80.0,
+    "ruler128k_v33ofc_subset": {
+     "avg": 80.0,
+     "cells": 2,
+     "cwe": 60.0,
+     "tasks": {
+      "cwe": 60.0,
+      "vt": 100.0
+     },
+     "without_cwe": 100.0
+    }
+   },
+   "verified": 2
+  }
+ },
+ "coverage": {
+  "residual": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 2,
+   "present": 2,
+   "scored": 2
+  }
+ },
+ "metric": "RULER per-sample score 0-100 (string_match_all / string_match_part, unrounded), official aggregation",
+ "ruler": {
+  "commit": "c3f5e3b4f87f97e048793bb510a3a6b19a46bf3a",
+  "sha256": {
+   "scripts/data/synthetic/constants.py": "6296e901d495ec6200dc3f68993ea13d8282e3c0dbe1a8c47967f111105d1fde",
+   "scripts/eval/evaluate.py": "b9a5fcbded7209663d97670496c74dbcd6358ddbe3d9887a0c5f0c4f974bfe1c",
+   "scripts/eval/synthetic/constants.py": "6740467c17b8dc06b6b30f4f97e54ce8de81db0dd879f1538d0b6b5727f4bd5f",
+   "scripts/pred/call_api.py": "949d06ae8a19266c637064c2dd18c7b3d21a0a7064bfc2ac52fe274b84d19e48",
+   "scripts/synthetic.yaml": "34bc71dcacdc41a829a170f04b528fbf48d62c616338005ab4991680fbf8cb0b"
+  }
+ }
+}

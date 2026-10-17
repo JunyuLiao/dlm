@@ -1,0 +1,94 @@
+{
+  "files_sha256": {
+    "config.json": "c2a8b2c63b0631919578846e512448dfe8d478ba25e6f463312b75f9272c566a",
+    "exports/r2_control_after/private/run_r2_control_after.private.jsonl": "787c1f14d088d89189617f1733c813c0ccf8ca0bed869f3e961278c0ed1f426b",
+    "exports/r2_control_after/records.jsonl": "fa3aa2159faf561792bdfb3ec28967fa436f056435532be028b4e4807f8c949f",
+    "exports/r2_control_before/private/run_r2_control_before.private.jsonl": "787c1f14d088d89189617f1733c813c0ccf8ca0bed869f3e961278c0ed1f426b",
+    "exports/r2_control_before/records.jsonl": "3a5868832cc454a2db6420793a1bc6b9d29d0e407212c906c5b02ab5d654fc24",
+    "exports/r2_full_swap8/private/run_r2_full_swap8.private.jsonl": "7e57bdfb5770455e20558c6b6744925cb88c9d0d885db80ecac9db9d3e04ba89",
+    "exports/r2_full_swap8/records.jsonl": "83685fab90afd846f0044c13740c7c953f94d38de933acd0f7f0f862e4f1481b",
+    "exports/r2_full_swap8_direction_guard/private/run_r2_full_swap8_direction_guard.private.jsonl": "ce9481eaa3c337c7df3bf80bbb4bd8bbe860ff518fc57c9e44ae49d05a0f1055",
+    "exports/r2_full_swap8_direction_guard/records.jsonl": "ce14c350d2f078cd52bdae449113115d9c3b5dae50eb42f07f8f0140f960fb97",
+    "exports/r2_residual/private/run_r2_residual.private.jsonl": "56ed4fbfe59a17c8288f2e14585c0b6efcfc6abb3923bc8d2d1e32de148e7a63",
+    "exports/r2_residual/records.jsonl": "74cfd0f71f614578a69b78b277f5321ae1b6fa0eaa8b7a1d3ef4d3b0bd3c7ee2",
+    "exports/r2_residual_direction_guard/private/run_r2_residual_direction_guard.private.jsonl": "53aa6ac07b9ebde834c6d8e704da62b7454f729a6ad4e98d416d32ba68b51c68",
+    "exports/r2_residual_direction_guard/records.jsonl": "39dfc7b6b4f4903ba26c0a49d3a290f2e5a8a2b62faabf7ac3e18d746a0b1ddd",
+    "private/generation.private.jsonl": "f33ea7cf8faef7c488f79f6bf1771e5cc20340815277a7dc13ebdb558d894da2",
+    "receipt.json": "c4275886dd68fd50f73ebe130416b5d5911e9bf9e52f0b51d654bf3ca8c01ecb",
+    "records.jsonl": "89d9c655db54e8b927b75a848cf130a7a7f56d6d22f3b859b8a712adf0d4f5f3"
+  },
+  "gpu_reservation_s": 310.0180319530191,
+  "groups": [
+    {
+      "control_N": [
+        7,
+        7
+      ],
+      "drift": [],
+      "index": 21,
+      "seed": 42
+    },
+    {
+      "control_N": [
+        14,
+        14
+      ],
+      "drift": [],
+      "index": 22,
+      "seed": 42
+    }
+  ],
+  "parity_policy": "all structural-valid outcomes retained, including drift; no parity-based retries",
+  "protocol_sha256": "c3c51ce17f22ba325c9ba6b85a588de15dd0969510da280fa38ae3f95821380a",
+  "repeat": 2,
+  "returncode": 0,
+  "status": "complete",
+  "structural_errors": [],
+  "warmup_work": {
+    "full_swap8": {
+      "anchor_budget_units_checked": 128,
+      "anchor_events": 4,
+      "anchor_full_pv_rectangles": 262528,
+      "anchor_full_qk_rectangles": 262528,
+      "budget_errors": 0,
+      "held_calls": 12,
+      "swapped_blocks": 884,
+      "updated_budget_units_checked": 128
+    },
+    "full_swap8_direction_guard": {
+      "anchor_budget_units_checked": 128,
+      "anchor_events": 4,
+      "anchor_full_pv_rectangles": 262528,
+      "anchor_full_qk_rectangles": 262528,
+      "budget_errors": 0,
+      "corrected_calls": 10,
+      "direction_guard_fused_calls": 10,
+      "extra_post_o_projections": 8,
+      "held_calls": 10,
+      "held_direction_dot_rows": 2560,
+      "swapped_blocks": 884,
+      "updated_budget_units_checked": 128
+    },
+    "residual": {
+      "anchor_budget_units_checked": 128,
+      "anchor_events": 4,
+      "anchor_full_pv_rectangles": 262528,
+      "anchor_full_qk_rectangles": 262528,
+      "budget_errors": 0,
+      "corrected_calls": 12,
+      "held_calls": 12
+    },
+    "residual_direction_guard": {
+      "anchor_budget_units_checked": 128,
+      "anchor_events": 4,
+      "anchor_full_pv_rectangles": 262528,
+      "anchor_full_qk_rectangles": 262528,
+      "budget_errors": 0,
+      "corrected_calls": 11,
+      "direction_guard_fused_calls": 11,
+      "extra_post_o_projections": 8,
+      "held_calls": 11,
+      "held_direction_dot_rows": 2816
+    }
+  }
+}

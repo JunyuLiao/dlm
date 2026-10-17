@@ -1,0 +1,45 @@
+{
+  "schema": "v31_value_performance_preflight_v1",
+  "status": "blocked_no_cuda",
+  "utc": "2026-10-10T08:13:23.164674+00:00",
+  "checks": {
+    "nvidia_smi": {
+      "status": "blocked",
+      "error": "Command '['nvidia-smi', '--query-gpu=uuid,driver_version', '--format=csv,noheader']' returned non-zero exit status 9."
+    },
+    "torch_cuda": {
+      "status": "blocked",
+      "available": false,
+      "device_count": 0
+    },
+    "aime_cells": {
+      "status": "pass",
+      "count": 90
+    },
+    "ruler_pool": {
+      "status": "pass",
+      "rows": 104,
+      "tasks": [
+        "cwe",
+        "fwe",
+        "niah_multikey_1",
+        "niah_multikey_2",
+        "niah_multikey_3",
+        "niah_multiquery",
+        "niah_multivalue",
+        "niah_single_1",
+        "niah_single_2",
+        "niah_single_3",
+        "qa_1",
+        "qa_2",
+        "vt"
+      ],
+      "manifest_sha256": "568590e7997c0d43624ed0ea403a42b0ffc5b894393ab2344ebc335a34be54a6"
+    },
+    "remote_access": {
+      "status": "blocked",
+      "reason": "no configured authenticated GPU runner or mounted H100; SSH access to authorized addresses is unavailable from this environment"
+    }
+  },
+  "next_action": "resume the frozen shard campaign on an authenticated H100 host; do not change config.json or pool hashes"
+}

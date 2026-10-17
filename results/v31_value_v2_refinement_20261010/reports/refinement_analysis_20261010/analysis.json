@@ -1,0 +1,265 @@
+{
+  "schema": "v2_refinement_analysis_v1",
+  "source_commit": "fce50a8b110f29c47b01cd5d2dd42d3986df328a",
+  "timing_status": "paused",
+  "official_audit_503": {
+    "native_full_fix51994": {
+      "correct": 247,
+      "items": 503,
+      "accuracy": 49.1,
+      "global_sparsity": 0.0
+    },
+    "dense_piecewise": {
+      "correct": 247,
+      "items": 503,
+      "accuracy": 49.1,
+      "global_sparsity": 0.0
+    },
+    "allkept_fa4": {
+      "correct": 252,
+      "items": 503,
+      "accuracy": 50.1,
+      "global_sparsity": 0.0
+    },
+    "current_v31_control": {
+      "correct": 268,
+      "items": 503,
+      "accuracy": 53.3,
+      "global_sparsity": 83.1611
+    },
+    "value_v1_online_discard_mass": {
+      "correct": 247,
+      "items": 503,
+      "accuracy": 49.1,
+      "global_sparsity": 80.0426
+    },
+    "value_v2_online_preserve_mass": {
+      "correct": 266,
+      "items": 503,
+      "accuracy": 52.9,
+      "global_sparsity": 84.1121
+    },
+    "value_v3a_singleton_delete": {
+      "correct": 253,
+      "items": 503,
+      "accuracy": 50.3,
+      "global_sparsity": 83.0752
+    },
+    "value_v3b_approx_batch8": {
+      "correct": 242,
+      "items": 503,
+      "accuracy": 48.1,
+      "global_sparsity": 84.9698
+    }
+  },
+  "development_panel": {
+    "cells": 15,
+    "seed": 1,
+    "scorer": "official LongBench-v2 pred.py extraction; development only",
+    "arms": {
+      "current_v31_control": {
+        "items": 15,
+        "official_correct": 7,
+        "official_accuracy": 0.4666666666666667,
+        "denoise_forwards_total": 2203,
+        "denoise_forwards_mean": 146.86666666666667,
+        "denoise_forwards_median": 83,
+        "canvases_mean": 9.333333333333334,
+        "output_tokens_mean": 2230.9333333333334,
+        "global_eligible_tiles": 362431040,
+        "global_kept_tiles": 85344000,
+        "global_sparsity": 0.7645234801081056,
+        "graph_captures": 0
+      },
+      "value_v2_online_preserve_mass": {
+        "items": 15,
+        "official_correct": 6,
+        "official_accuracy": 0.4,
+        "denoise_forwards_total": 2163,
+        "denoise_forwards_mean": 144.2,
+        "denoise_forwards_median": 79,
+        "canvases_mean": 8.133333333333333,
+        "output_tokens_mean": 1958.7333333333333,
+        "global_eligible_tiles": 431008960,
+        "global_kept_tiles": 74592229,
+        "global_sparsity": 0.8269357811030194,
+        "graph_captures": 0
+      },
+      "value_v2_online_mass_anchor32": {
+        "items": 15,
+        "official_correct": 7,
+        "official_accuracy": 0.4666666666666667,
+        "denoise_forwards_total": 2396,
+        "denoise_forwards_mean": 159.73333333333332,
+        "denoise_forwards_median": 147,
+        "canvases_mean": 8.733333333333333,
+        "output_tokens_mean": 2095.866666666667,
+        "global_eligible_tiles": 523066880,
+        "global_kept_tiles": 96185009,
+        "global_sparsity": 0.8161133639354111,
+        "graph_captures": 0
+      },
+      "value_v2_online_jcgate": {
+        "items": 15,
+        "official_correct": 7,
+        "official_accuracy": 0.4666666666666667,
+        "denoise_forwards_total": 1843,
+        "denoise_forwards_mean": 122.86666666666666,
+        "denoise_forwards_median": 82,
+        "canvases_mean": 7.866666666666666,
+        "output_tokens_mean": 1873.3333333333333,
+        "global_eligible_tiles": 327828480,
+        "global_kept_tiles": 92840355,
+        "global_sparsity": 0.7168020453866608,
+        "graph_captures": 0
+      },
+      "value_v2_online_jcgate_anchor16": {
+        "items": 15,
+        "official_correct": 7,
+        "official_accuracy": 0.4666666666666667,
+        "denoise_forwards_total": 2705,
+        "denoise_forwards_mean": 180.33333333333334,
+        "denoise_forwards_median": 80,
+        "canvases_mean": 8.8,
+        "output_tokens_mean": 2121,
+        "global_eligible_tiles": 599234240,
+        "global_kept_tiles": 140762605,
+        "global_sparsity": 0.7650958580070458,
+        "graph_captures": 0
+      }
+    },
+    "paired_vs_control": {
+      "value_v2_online_preserve_mass": {
+        "both_correct": 6,
+        "control_only": 1,
+        "other_only": 0,
+        "mean_denoise_delta": -2.6666666666666665,
+        "median_denoise_delta": -7,
+        "flipped_indices": [
+          "147"
+        ]
+      },
+      "value_v2_online_mass_anchor32": {
+        "both_correct": 7,
+        "control_only": 0,
+        "other_only": 0,
+        "mean_denoise_delta": 12.866666666666667,
+        "median_denoise_delta": 19,
+        "flipped_indices": []
+      },
+      "value_v2_online_jcgate": {
+        "both_correct": 7,
+        "control_only": 0,
+        "other_only": 0,
+        "mean_denoise_delta": -24,
+        "median_denoise_delta": 7,
+        "flipped_indices": []
+      },
+      "value_v2_online_jcgate_anchor16": {
+        "both_correct": 6,
+        "control_only": 1,
+        "other_only": 1,
+        "mean_denoise_delta": 33.46666666666667,
+        "median_denoise_delta": 13,
+        "flipped_indices": [
+          "147",
+          "189"
+        ]
+      }
+    }
+  },
+  "offline_diagnostics": {
+    "mass_anchor_sweep": "diagnostics/mass_anchor_six_snapshots.json",
+    "full_dim_v2_six": "diagnostics/full_dim_v2_six_snapshots.json",
+    "full_dim_initial_t0012": "diagnostics/full_dim_v2_initial_t0012.json",
+    "full_dim_initial_t0010": "diagnostics/full_dim_v2_initial_t0010.json"
+  },
+  "conclusions": {
+    "low_iou": "V2 optimizes sequential value-state risk, not top attention mass. Projected/full-dimensional V mask IoU is 0.858 on six snapshots, while either V mask/control IoU is 0.156; the low control overlap is therefore objective and reuse related, not mainly rank32 projection error.",
+    "online_gap": "Online selection lacks future row-normalized denominator and complete future value direction at the decision point. It can be self-consistent with an alternative support, but it changes the sampler trajectory; the full-dimensional diagnostic at threshold0.027 kept fewer tiles and had higher operator error, so full V alone does not remove the gap.",
+    "trajectory": "On the completed 503-item audit, V2 had mean denoising delta -29.07 vs control; among V2-only correct items delta was -198.87, while control-only items had +204.25. Shorter trajectories are a real basin change, not simply early truncation.",
+    "refinement": "The complete jcgate audit is negative for the stated objective: 256/503 (50.9%) versus control 268/503 (53.3%), -2.39 percentage points (paired exact p=0.207; bootstrap 95% CI shown above). Row protection reduced GLOBAL sparsity to 78.07% from 83.16% while lowering accuracy, so it is rejected before timing. The remaining candidate should be a fixed-budget mass-gated value selector, not another uncalibrated row-weight threshold."
+  },
+  "status": "complete",
+  "official_refinement_audit_503": {
+    "scoring_summary": "scoring/audit/official_with_control.summary.json",
+    "candidate": "value_v2_online_jcgate",
+    "control": {
+      "correct": 268,
+      "items": 503,
+      "accuracy": 0.532803180914513,
+      "global_sparsity": 0.8316113216627912,
+      "denoise_forwards_total": 140693,
+      "denoise_forwards_mean": 279.70775347912524
+    },
+    "candidate_metrics": {
+      "correct": 256,
+      "items": 503,
+      "accuracy": 0.5089463220675944,
+      "delta_vs_control_pp": -2.3856858846918487,
+      "bootstrap_ci95_pp": [
+        -5.7654075546719685,
+        0.9940357852882704
+      ],
+      "global_sparsity": 0.7807008735584424,
+      "denoise_forwards_total": 122023,
+      "denoise_forwards_mean": 242.59045725646124
+    },
+    "paired": {
+      "both_correct": 224,
+      "control_only": 44,
+      "value_v2_online_jcgate_only": 32,
+      "both_wrong": 203,
+      "mcnemar_exact_two_sided_p": 0.20673684180839233
+    },
+    "trajectory_deltas_vs_control": {
+      "sampler_calls_mean": -37.88469184890656,
+      "sampler_calls_median": -1,
+      "sampler_calls_lower_count": 254,
+      "sampler_calls_same_count": 4,
+      "sampler_calls_higher_count": 245,
+      "denoise_forwards_mean": -37.11729622266402,
+      "denoise_forwards_median": -1,
+      "denoise_forwards_lower_count": 255,
+      "denoise_forwards_same_count": 4,
+      "denoise_forwards_higher_count": 244,
+      "canvases_mean": -0.7673956262425448,
+      "canvases_median": 0,
+      "canvases_lower_count": 209,
+      "canvases_same_count": 100,
+      "canvases_higher_count": 194,
+      "output_tokens_mean": -198.92047713717693,
+      "output_tokens_median": -21,
+      "output_tokens_lower_count": 262,
+      "output_tokens_same_count": 5,
+      "output_tokens_higher_count": 236
+    },
+    "difficulty_accuracy": {
+      "control": {
+        "Overall": 53.3,
+        "Easy": 58.3,
+        "Hard": 50.2,
+        "Short": 67.2,
+        "Medium": 47.0,
+        "Long": 42.6
+      },
+      "value_v2_online_jcgate": {
+        "Overall": 50.9,
+        "Easy": 52.1,
+        "Hard": 50.2,
+        "Short": 62.2,
+        "Medium": 48.4,
+        "Long": 37.0
+      }
+    },
+    "coverage": {
+      "planned": 503,
+      "control_present": 503,
+      "candidate_present": 503,
+      "control_unparsed": 30,
+      "candidate_unparsed": 28,
+      "control_capped": 18,
+      "candidate_capped": 11
+    }
+  }
+}

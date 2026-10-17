@@ -1,3 +1,20 @@
+## October 17 documentation publication — 2026-10-17 (Hong Kong)
+
+Verified study commit6d7b71d3. New docs/research_update_20261017/01_METHODS_AND_SETUP.md,
+02_RESULTS_AND_STATISTICS.md and03_INTEGRATION_AND_REPRODUCTION.md catalogue
+all current evaluated methods, stages, setup, results, limits and reproduction.
+README.md has the dated2026-10-17 entry before the preserved October15 references.
+Public-only export results/research_update_20261017/attempt001 reproduces12 tables
+from committed numeric records and checks5370 trial scores/coverage/N-C-T/work.
+Three CPU integrity tests pass; no CUDA/generation/timing job was launched.
+
+All pending public historical evidence is being committed with original
+complete/held/failed/paused status. Publication inventory accounts for files and
+SHA256s, plus explicitly ignored compiler/write probes, runtime locks, absolute
+local control links and six independent reference/worktree checkouts. Private
+prompts/gold/completions/snapshots/caches/logs remain ignored. External checkout
+sources/data and frozen result files are preserved. Timing remains paused.
+
 ## Three-direction value study complete — 2026-10-17, 01:58 UTC
 
 Verified implementation/report commit7b3ed5d8; frozen native coordinator/source

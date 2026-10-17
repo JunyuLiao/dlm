@@ -1,0 +1,128 @@
+{
+  "status": "complete",
+  "scope": "V3a/V3b/current-control diagnosis",
+  "official": {
+    "control_correct": 268,
+    "v3a_correct": 253,
+    "v3b_correct": 242,
+    "items": 503,
+    "control_global_sparsity": 0.8316113216627912,
+    "v3a_global_sparsity": 0.8307519647020198,
+    "v3b_global_sparsity": 0.8496984519914428,
+    "v3a_mean_N_delta": -6.92,
+    "v3b_mean_N_delta": 61.55
+  },
+  "fresh_snapshot_deltas": {
+    "value_v3a_singleton_delete": {
+      "0": {
+        "n": 40,
+        "max_row_error_delta": {
+          "mean": 0.0018891170620918274,
+          "median": 0.0005172789096832275,
+          "p90": 0.012658357620239258,
+          "worse_fraction": 0.5
+        },
+        "mean_row_error_delta": 0.0038561467081308365,
+        "retained_mass_delta": -0.008411116898059845,
+        "mask_iou_mean": 0.7034271955490112
+      },
+      "1": {
+        "n": 40,
+        "max_row_error_delta": {
+          "mean": 0.0015539847314357757,
+          "median": 0.0003436058759689331,
+          "p90": 0.007278919219970703,
+          "worse_fraction": 0.55
+        },
+        "mean_row_error_delta": 0.0012747522443532944,
+        "retained_mass_delta": -0.0027263857424259185,
+        "mask_iou_mean": 0.8488610267639161
+      },
+      "7": {
+        "n": 31,
+        "max_row_error_delta": {
+          "mean": 0.003004157735455421,
+          "median": 0.0037157535552978516,
+          "p90": 0.012893319129943848,
+          "worse_fraction": 0.6451612903225806
+        },
+        "mean_row_error_delta": 0.0011762558452544673,
+        "retained_mass_delta": -0.002386011423603181,
+        "mask_iou_mean": 0.8277606694929062
+      }
+    },
+    "value_v3b_approx_batch8": {
+      "0": {
+        "n": 40,
+        "max_row_error_delta": {
+          "mean": -0.034370385110378265,
+          "median": -0.036907657980918884,
+          "p90": -4.601478576660156e-05,
+          "worse_fraction": 0.0
+        },
+        "mean_row_error_delta": -0.031639110296964645,
+        "retained_mass_delta": -0.06239541620016098,
+        "mask_iou_mean": 0.18259890377521515
+      },
+      "1": {
+        "n": 40,
+        "max_row_error_delta": {
+          "mean": 0.041422215104103086,
+          "median": 0.003612220287322998,
+          "p90": 0.17305633425712585,
+          "worse_fraction": 0.625
+        },
+        "mean_row_error_delta": -0.006124814972281456,
+        "retained_mass_delta": -0.02794029489159584,
+        "mask_iou_mean": 0.6416091553866863
+      },
+      "7": {
+        "n": 31,
+        "max_row_error_delta": {
+          "mean": 0.08833033711679521,
+          "median": 0.01643925905227661,
+          "p90": 0.3105539083480835,
+          "worse_fraction": 0.7419354838709677
+        },
+        "mean_row_error_delta": 0.00308430963946927,
+        "retained_mass_delta": -0.030263695986040177,
+        "mask_iou_mean": 0.5577108826368086
+      }
+    }
+  },
+  "held_max_row_error": {},
+  "exact_partial": {
+    "correct": 58,
+    "items": 128,
+    "N": 36653,
+    "global_sparsity": 0.8422837227605194,
+    "selection_ms": 3628013.519375205,
+    "candidate_evaluations": 625525973280
+  },
+  "interpretation": [
+    "IoU is support overlap, not semantic equivalence",
+    "V3a singleton score is not joint-set optimal",
+    "V3b batch8 is not exact greedy and has no non-submodular greedy guarantee",
+    "held-map age amplifies V3b rare-row errors",
+    "exact greedy partial diagnostic still does not beat control, so batch8 is not the sole cause"
+  ],
+  "source_files": [
+    "diagnostics/complete_audit_summary_no_exact_attempt002.json",
+    "diagnostics/offline_accuracy_analysis_20261009/aggregate.json",
+    "diagnostics/exact_completed_shard01/attempt001/summary.json",
+    "experiments/numerical_qk_reuse/v31_value_selectors.py",
+    "experiments/numerical_qk_reuse/v31_value_kernels.py",
+    "experiments/numerical_qk_reuse/v31_value_summary.py",
+    "experiments/numerical_qk_reuse/vllm_adapter.py",
+    "results/v31_value_v2_refinement_20261010/diagnostics/full_dim_v2_six_snapshots.json"
+  ],
+  "full_dimensional_value_check": {
+    "snapshots": 6,
+    "projected_vs_full_v_iou": 0.8584093948205312,
+    "full_v_vs_mass_control_iou": 0.15565104658404985,
+    "full_v_error_mean": 0.3298481156428655,
+    "mass_control_error_mean": 0.24673905223608017,
+    "full_v_error_at_approximately_138_tiles": 0.2622,
+    "interpretation": "separate V2 operator diagnostic; supports objective/support mismatch, not a V3 generation result"
+  }
+}

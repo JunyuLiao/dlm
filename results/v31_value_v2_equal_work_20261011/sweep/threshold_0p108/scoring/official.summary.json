@@ -1,0 +1,104 @@
+{
+ "answer_text": {
+  "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+  "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+  "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+ },
+ "arms": {
+  "current_v31_control": {
+   "longbench_v2_0shot_think": {
+    "capped": 5,
+    "cells": 64,
+    "finished": 59,
+    "mean_over_runs": {
+     "Easy": 45.5,
+     "Hard": 45.2,
+     "Long": 25.0,
+     "Medium": 41.7,
+     "Overall": 45.3,
+     "Short": 83.3
+    },
+    "no_final_response": 6,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 45.5,
+      "Hard": 42.9,
+      "Long": 12.5,
+      "Medium": 44.4,
+      "Overall": 43.8,
+      "Short": 83.3,
+      "items": 32
+     },
+     "seed2_repeat0": {
+      "Easy": 45.5,
+      "Hard": 47.6,
+      "Long": 37.5,
+      "Medium": 38.9,
+      "Overall": 46.9,
+      "Short": 83.3,
+      "items": 32
+     }
+    },
+    "truncated_items": 44,
+    "unparsed": 6,
+    "verified": 64
+   }
+  },
+  "value_v2_online_preserve_mass": {
+   "longbench_v2_0shot_think": {
+    "capped": 5,
+    "cells": 64,
+    "finished": 59,
+    "mean_over_runs": {
+     "Easy": 31.8,
+     "Hard": 38.1,
+     "Long": 25.0,
+     "Medium": 30.6,
+     "Overall": 35.9,
+     "Short": 66.7
+    },
+    "no_final_response": 5,
+    "runs": {
+     "seed1_repeat0": {
+      "Easy": 36.4,
+      "Hard": 38.1,
+      "Long": 25.0,
+      "Medium": 33.3,
+      "Overall": 37.5,
+      "Short": 66.7,
+      "items": 32
+     },
+     "seed2_repeat0": {
+      "Easy": 27.3,
+      "Hard": 38.1,
+      "Long": 25.0,
+      "Medium": 27.8,
+      "Overall": 34.4,
+      "Short": 66.7,
+      "items": 32
+     }
+    },
+    "truncated_items": 44,
+    "unparsed": 7,
+    "verified": 64
+   }
+  }
+ },
+ "coverage": {
+  "current_v31_control": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 64,
+   "present": 64,
+   "scored": 64
+  },
+  "value_v2_online_preserve_mass": {
+   "dropped": 0,
+   "missing": 0,
+   "planned": 64,
+   "present": 64,
+   "scored": 64
+  }
+ },
+ "metric": "LongBench-v2 pred.py extract_answer judge; result.py aggregation (one decimal)"
+}

@@ -1,0 +1,37 @@
+{
+  "schema": "v31_value_performance_shard_v1",
+  "suite": "ruler128k",
+  "arm": "value_v1_online_discard_mass",
+  "purpose": "audit",
+  "shard_index": 2,
+  "shards": 4,
+  "planned_records": 26,
+  "cells_sha256": "7c1e536ac25935319bfe00c59dc4ba30a2855c9137f137bde3a63b9c39f3a2fe",
+  "manifests_sha256": {
+    "ruler128k_v33ofc_subset_generation_manifest.json": "568590e7997c0d43624ed0ea403a42b0ffc5b894393ab2344ebc335a34be54a6"
+  },
+  "source_commit": "fce50a8b110f29c47b01cd5d2dd42d3986df328a",
+  "source_sha256": {
+    "experiments/numerical_qk_reuse/vllm_adapter.py": "255655cec10d75f295a847a1e7658116fbbb4f85d9c505c6a9678a4a68ba9768",
+    "experiments/numerical_qk_reuse/v31_value_selectors.py": "8555cf97bec2f388b261d22b80bfcb676eaa5be905c3c78e31906cc49da3d52e",
+    "experiments/numerical_qk_reuse/v31_value_kernels.py": "192f027f8fae0c11c8b145c3b6894f5f3d941a86ab01a441905a86d13182f47c",
+    "scripts/v31_vllm_paired_bench.py": "19279ed03e7148110ffce318f29920ae269a9cf8ba23ca9928d2e92ad9bf2fff",
+    "scripts/v31_value_performance_campaign.py": "738e95b5312c41df79ef234cf13999a8608d4d00f57540d44208e62467d5afcd"
+  },
+  "gpu_identity": "GPU-1ef41b0c-39fa-fea6-ec30-392d06c5e0ee, 590.48.01",
+  "host": "megakernel",
+  "threshold": 0.027,
+  "runtime": {
+    "BLOCK": "32",
+    "CHUNK": "16384",
+    "MEM": "0.85",
+    "MAX_MODEL_LEN": "136192",
+    "MAGE_K": "8192",
+    "MAGE_STEP": "1",
+    "MAGE_CARRY": "1",
+    "MAGE_GRAN": "qblock_max",
+    "MAGE_STICKY": "1.386",
+    "VALUE_AUDIT": "1",
+    "VALUE_CLEAN_TIMING": "0"
+  }
+}
