@@ -1,3 +1,26 @@
+## Bounded pause investigation underway — 2026-10-17, 10:24 UTC
+
+Full503 remains paused at17 complete engines,64 matched questions per pass.
+CPU official rescoring and trajectory/tail analysis are complete under
+results/v31_value_investigation_20261017/attempt001/cpu_analysis/attempt001/;
+CPU_FINDINGS.md reproduces the negative clean accuracy/latency comparison.
+The saved-state cost profile attempt003 passes64 units of graph-selector
+mask/swap/pair-score/budget parity; attempts001–002 are preserved failures.
+The graph is diagnostic only; production value methods are unchanged.
+
+Bounded native cross is running in native_cross/attempt001, coordinator PTY15508:
+96 measured requests on questions0/49, seeds1/42, reference/device in one engine,
+four engines audit/clean/clean/audit. First two engines completed; do not infer
+final cross results yet. First audit engine has one guard backend discrepancy
+(question0 seed1); second clean engine matches backends but has a141-call V31
+bookend difference on question0 seed42. All valid outcomes are retained.
+
+If needed, one four-arm post-hoc trace localizes question0 seed1 residual
+reference/device mismatch; read TRACE_GATE_ADDENDUM.md. Total diagnostics target
+<=60 GPU minutes; no full503 launch. Frozen cross source dcae0ca0; latest trace
+source128c28c5. Finish the bounded cross/necessary trace, write the final go/no-go
+report, verify idle GPU, and retain explicit authorization requirement for resume.
+
 ## FULL503 PAUSED BY USER — 2026-10-17, 17:49 Hong Kong
 
 Do not resume full503 without new explicit user authorization. Active queue
