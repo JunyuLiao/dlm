@@ -1,5 +1,18 @@
 # Fixed-budget value direction and reuse study
 
+**Completed 2026-10-17.** All three directions were implemented and screened
+on same states before native evaluation. The replicated study has official
+scores for all four workloads (5,370 trials), independent verification and a
+bound completion marker. No candidate passes the all-workload accuracy/call
+screen, so no full503 expansion is launched. GPU is idle; timing stays paused.
+
+Read [conclusions_20261017.md](conclusions_20261017.md) for interpretation and
+[synthesis_20261017/attempt001/summary.md](synthesis_20261017/attempt001/summary.md)
+for complete tables, references, intervals, work CSVs and figures. Use the root
+final_complete.json and native_replicated_20261016_attempt001/final_complete.json
+for completion bindings. The older paused/failed panels remain preserved.
+The following dated notes are historical, not current run instructions.
+
 Current status,02:07 UTC October16: the new replicated native evaluation is
 frozen under `native_replicated_20261016_attempt001/`. It uses two engines per
 cell, reversed candidate order and both control bookends. Every structurally

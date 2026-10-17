@@ -1,3 +1,39 @@
+## Three-direction value study complete — 2026-10-17, 01:58 UTC
+
+Verified implementation/report commit7b3ed5d8; frozen native coordinator/source
+b485866c, protocol config09e19e21, unchanged method source79c994ca. The
+replicated native study completed all four workloads and official scoring:
+358 input/seed cells,5,370 trials. Coordinator PTY98458 exited0. GPU compute
+process list is empty. Old held attempts remain preserved; no queue is running.
+Clean timing stays paused; no full503 candidate passes the frozen joint screen.
+
+Read results/v31_value_decision_reuse_20261015/conclusions_20261017.md and
+synthesis_20261017/attempt001/{summary.md,results.csv,comparisons.csv,
+accuracy_calls.png}. The native final_complete.json binds all four reports.
+Independent score/coverage/N-C-T/work checks pass. Final integrity audit002
+checks1,099 frozen files,225 attempts,1,710 bound files and5,370 measured
+records; zero graph captures,LOCAL skips or reported fixed-budget errors.
+The first integrity check used a nonexistent LOCAL field with a default zero;
+audit002 requires native_local_skipped_tiles on every record and supersedes it.
+No generation or reported metric changed.
+
+Full-value swaps are strongest: AIME52.222%/301.672 calls vs V3151.111%/295.300;
+LongBench46.875%/192.023 vs45.703%/251.039; MATH95%/60.590 vs95%/61.468;
+RULER87.308/5.231 vs86.250/5.240. No robust across-workload accuracy/call
+improvement is established. AIME N rises for all four candidates. LongBench
+swap N falls23.51%, but five cells explain89.69% of net savings; one always-
+wrong capped cell explains58.56%. RULER's+1.058 points comes from three changed
+cells, has task CI[0,3.077], and essentially unchanged N. All RULER repetitions
+match exactly. Guard/raw/combined correction does not improve the joint tradeoff.
+
+The three directions are fully documented with rejected and refined hypotheses.
+Previous-query tangent,C_gate and omitted moments stopped at diagnostics.
+Native scope is GLOBAL layer29 only, fixed per-query-tile K. Future work should
+focus on decision-aware admission/lifetime of bounded swaps and an independently
+frozen AIME regression check; this predictor is not solved here. No new campaign
+is launched. Native GPU reservation74,655.1s plus qualification4,830.6s, not
+clean timing. Historical progress notes below are not current launch instructions.
+
 ## Replicated MATH100 complete — 2026-10-16, 19:18 UTC
 
 Verified source b485866c / protocol config09e19e21; analysis HEAD2f5d17f6.

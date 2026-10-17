@@ -1977,3 +1977,47 @@ Sources: reports/math500/{summary.json,summary.md,final_complete.json,
 independent_verification.json,paired_trajectory_diagnostics.json} and bound
 scoring/math500/attempt001/scoring_complete.json. This completes MATH only;
 RULER remains running. AIME prevents any all-workload promotion. Timing paused.
+
+## 2026-10-17 — Replicated RULER128K and four-workload study complete
+
+Source b485866c, protocol config09e19e21; same replicated native study.
+Official balanced13-task x8-cell coverage:104 cells x15 labels=1,560 trials.
+All candidate score/hash/N-C-T vectors agree across the two repetitions.
+Zero control hash or correctness disagreements within/across engines.
+Independent coverage,hash,repetition,N-C-T,task balance and work checks pass.
+
+| Method | Official task-average score | N/trial (=N/C) | T/trial |
+|---|---:|---:|---:|
+| V31 control | 86.250 | 5.240 | 25.962 |
+| Full-value swaps | 87.308 | 5.231 | 26.010 |
+| Direction-guarded residual | 86.058 | 5.317 | 25.894 |
+| Raw residual | 86.346 | 5.375 | 25.894 |
+| Swaps plus direction guard | 85.962 | 5.481 | 25.971 |
+| Dense FULL fix51994 | 86.538 | 5.750 | 25.769 |
+| Dense PIECEWISE | 86.538 | 5.654 | 25.712 |
+| All-kept FA4 | 84.856 | 5.558 | 25.683 |
+
+Every trial has one canvas. Full swaps gain1.058 points (task CI[0,3.077]),
+N delta-0.0096 (CI[-0.0577,0.0481]). Three changed cells drive the score:
+multikey3 index5 changes0→100; cwe48 changes60→90 and cwe74 changes80→60.
+Eleven tasks unchanged. Identical repetitions do not add independent evidence.
+All correction arms increase mean N; none passes this workload's joint screen.
+Fixed K128; value changes only GLOBAL layer29. Full swaps have208/208 anchor
+trials,0.942 held calls/anchor,108,390 extra QK and PV rectangles each/trial.
+GLOBAL kept work falls only0.022%; no clean speedup is established.
+
+Sources under native_replicated_20261016_attempt001: reports/ruler128k/
+{summary.json,summary.md,final_complete.json,independent_verification.json,
+paired_trajectory_diagnostics.json,task_diagnostic.json}; bound official scoring;
+root final_complete.json and development_promotion.json. All four workloads
+now complete:358 input/seed cells,5,370 officially scored trials. No candidate
+passes the predeclared all-workload screen; AIME N increases for all. No full503
+or timing expansion. Final integrity audit002 verifies1,099 execution files,
+225 attempts,1,710 bound files and5,370 measured records; zero graph captures,
+LOCAL skips and reported fixed-budget errors. See gpu_accounting.json for
+74,655.1 native and4,830.6 qualification reservation seconds; not clean latency.
+
+Consolidated evidence: results/v31_value_decision_reuse_20261015/
+conclusions_20261017.md and synthesis_20261017/attempt001/summary.md, CSVs and
+uncertainty figures. This is an exploratory completed study, not held-out
+confirmation or a demonstrated across-workload accuracy/speedup improvement.

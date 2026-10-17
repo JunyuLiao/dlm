@@ -2215,3 +2215,30 @@ anchor (45 correction-path trials); do not generalize this mostly all-kept
 workload into evidence about broad value routing. One control bookend hash
 differs, none in correctness; all100 first-control hashes differ across engines.
 Finish RULER under the same protocol. AIME still blocks full503 promotion.
+
+### 2026-10-17: Complete three-direction study; no full503 promotion
+
+RULER completes the frozen replicated campaign. V3186.250/5.240 calls,
+full swaps87.308/5.231, guard86.058/5.317, raw86.346/5.375, combined85.962/5.481.
+All104 cells x15 score labels pass official coverage and independent arithmetic,
+N-C-T,balanced13-task and work checks. Repetitions match exactly for all candidate
+scores,output hashes,N/C/T. Full swaps improve two cells and worsen one:
+multikey3 gains100 points on one cell; cwe changes+30 and-20. Task-average gain
+1.058 has interval[0,3.077]; call reduction0.0096 has interval[-0.0577,0.0481].
+This is a narrow signal, not a broad accuracy or speedup result.
+
+All four workloads are complete:5,370 native generation trials on358 fixed
+input/seed cells. None passes the unchanged all-workload screen because AIME
+mean N rises. Do not launch full503 or relax the rule after seeing results.
+Bounded full-value swaps remain the strongest research direction; correction's
+large same-state operator gains do not produce a consistent native tradeoff.
+The combined method loses swap benefits on LongBench/RULER. Further research
+would require a better decision/lifetime admission objective and fresh frozen
+validation; this iteration does not establish such a predictor or novelty claim.
+
+Keep GLOBAL layer29 scope, prior examined inputs, runtime variation and extra
+QK/PV discovery costs explicit. Timing stays paused. Final source/attempt audit
+checks1,099 files,225 attempts,1,710 bound artifacts and5,370 records. Audit002
+corrects the independent LOCAL-check field name; all records require the actual
+native_local_skipped_tiles field and have zero skips. No generation changed.
+GPU is idle, completed/failed attempts preserved, no further queue running.
