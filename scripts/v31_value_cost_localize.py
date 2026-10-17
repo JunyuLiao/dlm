@@ -51,6 +51,17 @@ def profile(fn, output):
                     for x in prof.key_averages() if x.key in ('aten::mm','aten::bmm','aten::index','aten::index_select','aten::sort','aten::copy_','aten::empty','aten::_local_scalar_dense','aten::nonzero')})
 
 
+def graph_compatible_selector():
+    original=inspect.unwrap(bounded_proposal_device)
+    source=inspect.getsource(original)
+    old='pool[torch.argsort(score, descending=True, stable=True)[:min(pt, budget+extra)]] = True'
+    new='pool.index_fill_(0, torch.argsort(score, descending=True, stable=True)[:min(pt, budget+extra)], True)'
+    if source.count(old)!=1:raise RuntimeError('unexpected selector source')
+    namespace=dict(original.__globals__)
+    exec(compile(source.replace(old,new),'<diagnostic index_fill graph prototype>','exec'),namespace)
+    return namespace[original.__name__]
+
+
 def run(output):
     if output.exists():raise RuntimeError('preserve attempts')
     if subprocess.check_output(['nvidia-smi','--query-compute-apps=pid','--format=csv,noheader'],text=True).strip():raise RuntimeError('GPU busy')
@@ -74,6 +85,7 @@ def run(output):
     del w
     moment_profile=scoped(moments_full,[('scores =','qk_normalize'),('pt =','mass_reduce'),('num =','block_pv'),('tail =','tail')])
     selection_profile=scoped(bounded_proposal_device,[('ids =','candidate_construction'),('num, den =','anchor_and_dense_reductions'),('losses =','pair_objective'),('losses = torch.where','pair_validity'),('limit =','disjoint_rank'),('chosen =','combined_admission')])
+    graph_selector=graph_compatible_selector()
     io.write(output/'config.json',dict(source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         source_sha256=io.sha(__file__),inputs={str(p.relative_to(io.SOURCE)):io.sha(p) for p in paths},
         tf32=False,selection='first actual observation request001/002; all heads and query tiles for graph parity',
@@ -96,14 +108,15 @@ def run(output):
         if not torch.equal(selection_profile(m,anchor,budget,gram=gram)[0],call()[0]):raise RuntimeError('profile wrapper changed selection')
         row['moment_profile']=profile(lambda:moment_profile(q,k[0],v[0],d['prefix'],d['scale']),output/f'private/{path.parent.name}_moments.json')
         row['selection_profile']=profile(lambda:selection_profile(m,anchor,budget,gram=gram),output/f'private/{path.parent.name}_selection.json')
+        io.write(output/f'{path.parent.name}_profile.json',row,True)
         # One bounded engineering prototype: capture the exact unchanged selector.
         # The moments/mask/Gram are fixed-address inputs updated between replays.
         stream=torch.cuda.Stream();stream.wait_stream(torch.cuda.current_stream())
         with torch.cuda.stream(stream):
-            for _ in range(3):call()
+            for _ in range(3):graph_selector(m,anchor,budget,gram=gram)
         torch.cuda.current_stream().wait_stream(stream)
         graph=torch.cuda.CUDAGraph()
-        with torch.cuda.graph(graph):captured=call()
+        with torch.cuda.graph(graph):captured=graph_selector(m,anchor,budget,gram=gram)
         graph.replay();torch.cuda.synchronize()
         row['graph_selection']=measure(lambda:(graph.replay(),captured),20)
         row['graph_parity']=dict(units=0,mask_mismatches=0,swap_mismatches=0,pair_loss_mismatches=0,budget_errors=0)
