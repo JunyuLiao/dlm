@@ -43,6 +43,8 @@ def trace(adapter,root,runtimes=None,schedule=None):
             rec.update(output_hash=digest(out),output=out.detach().cpu() if state['call']<6 else None,
                        selected_support=new['kept'].detach().cpu() if new and new.get('kept') is not None else None,
                        observed=new is not None and new.get('lists') is not old_list)
+            if rec['observed'] or state['call']==0:
+                rec.update(k_hash=digest(b['k']),v_hash=digest(b['v']))
             if runtimes is not None:
                 runtime=runtimes.get(schedule[state['index']]['backend'])
                 cache=runtime.state.get('direction_cache') if runtime is not None and runtime.state is not None else None

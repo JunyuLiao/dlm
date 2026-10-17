@@ -51,6 +51,8 @@ def run(study,cross,output):
                 self_conditioning_equal=a['after']['self_conditioning_hash']==b['after']['self_conditioning_hash'])
             if aa.get('cache') is not None and bb.get('cache') is not None:
                 r['cache_comparison']={k:dict(equal=equal(aa['cache'][k],bb['cache'][k]),max_abs=float((aa['cache'][k]-bb['cache'][k]).abs().max())) for k in aa['cache']}
+            for key in ('k_hash','v_hash'):
+                r[key+'_equal']=aa[key]==bb[key] if key in aa and key in bb else None
             rows.append(r)
         comparisons[label]=dict(rows=rows,first_different={k:next((r['call'] for r in rows if r[k] is False),None) for k in
             ('query_equal','selected_support_equal','layer29_output_equal','logits_equal','before_cuda_rng_equal','after_cuda_rng_equal','self_conditioning_equal')},
