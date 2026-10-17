@@ -1,3 +1,26 @@
+## FULL503 PAUSED BY USER — 2026-10-17, 17:49 Hong Kong
+
+Do not resume full503 without new explicit user authorization. Active queue
+PTY25199/coordinator2023384 was stopped, its already-running shard003 audit
+PIECEWISE worker2062543 finished with exit0, and the frozen validation/export
+rules finalized that attempt. The stopped coordinator was killed without
+releasing its queue. There are17 complete engine jobs,64 questions with all-arm
+coverage in both passes, plus the additional32-question audit PIECEWISE shard.
+All frozen protocols, sources, generations and attempts are preserved.
+
+Read results/v31_value_e2e_longbench503_20261017/native_attempt001/
+PAUSE_AND_RESUME.md and PAUSED_USER_REQUEST.json. Resume only through
+scripts/v31_value_e2e_resume.py after explicit authorization; the old frozen
+coordinator does not itself read the pause marker. Current source ec87d397 is
+unchanged. Pause finalizer and investigation plan are committed at45fd9464.
+
+The new task is a bounded investigation of the accuracy/latency reversal,
+trajectory mechanism and actual observation overhead. Detailed staged plan:
+results/v31_value_investigation_20261017/attempt001/PLAN.md. CPU analyses first;
+saved-state profiling <=10 GPU minutes; a predeclared small crossed diagnostic
+only if needed. Target <=60 diagnostic GPU minutes. Full503 stays paused even
+if a diagnostic kernel improves. Finish with an evidence-based go/no-go report.
+
 ## Full503 progress checkpoint — 2026-10-17, 17:38 Hong Kong
 
 Active coordinator PTY25199; frozen source ec87d397; independent reporting

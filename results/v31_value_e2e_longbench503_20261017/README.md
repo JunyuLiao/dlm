@@ -1,3 +1,9 @@
+**Paused by explicit user request on2026-10-17.**17 engine jobs are complete;
+all-arm matched coverage is64 questions in both passes. No full503 worker is
+running. Read native_attempt001/PAUSE_AND_RESUME.md. Do not use the old direct
+resume command below without new explicit authorization; use the guarded resume
+wrapper documented in that file. Targeted investigation is separate.
+
 # Full503 LongBench-v2 seed42 value-method performance
 
 User-authorized new campaign. Clean timing is enabled for this study; historical
