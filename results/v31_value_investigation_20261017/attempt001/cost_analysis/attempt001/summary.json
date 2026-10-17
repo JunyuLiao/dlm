@@ -1,0 +1,268 @@
+{
+  "break_even": {
+    "full_swap8": {
+      "amortized_step_ms": [
+        24.420746423927177,
+        40.29655699904392
+      ],
+      "current_N_ratio": 1.156111833550065,
+      "current_generation_ratio": 1.9076946129817567,
+      "current_request_ratio": 1.5978126509019641,
+      "interpretation": "Required N change holds amortized cost and prefill mix fixed; not a controlled forward price. Removing audit event elapsed from audit S is an optimistic accounting counterfactual, not measured clean latency or a formal implementation lower bound.",
+      "needed_N_reduction_at_observed_amortized_cost": 0.39397436797127394,
+      "zero_value_observation_audit_proxy_S": 6.861923630628585,
+      "zero_value_observation_audit_proxy_delta_S": 0.4556588650035849
+    },
+    "residual_direction_guard": {
+      "amortized_step_ms": [
+        24.420746423927177,
+        28.789742722096896
+      ],
+      "current_N_ratio": 1.2105331599479845,
+      "current_generation_ratio": 1.4271037267445223,
+      "current_request_ratio": 1.2811241420924118,
+      "interpretation": "Required N change holds amortized cost and prefill mix fixed; not a controlled forward price. Removing audit event elapsed from audit S is an optimistic accounting counterfactual, not measured clean latency or a formal implementation lower bound.",
+      "needed_N_reduction_at_observed_amortized_cost": 0.15175530883839394,
+      "zero_value_observation_audit_proxy_S": 7.282544137146473,
+      "zero_value_observation_audit_proxy_delta_S": 0.8762793715214734
+    }
+  },
+  "old_swap_savings_at_current_control_step_cost": {
+    "calls_saved": 59.015625,
+    "interpretation": "Cross-study illustrative break-even: assumes old trajectory saving, current control amortized S/N and old observation count; not an observed speedup.",
+    "maximum_extra_ms_per_anchor": 70.24916926365037,
+    "old_anchors_per_problem": 20.515625,
+    "saved_s": 1.4412056131745772
+  },
+  "profiles": {
+    "request001": {
+      "graph_parity": {
+        "budget_errors": 0,
+        "mask_mismatches": 0,
+        "pair_loss_mismatches": 0,
+        "swap_mismatches": 0,
+        "units": 32
+      },
+      "moments": {
+        "activity_gap_ms": 0.4406779785156252,
+        "activity_span_ms": 2.0697421875,
+        "activity_union_ms": 1.629064208984375,
+        "copies_memsets": 15,
+        "interpretation": "Chrome kernel/copy/memset categories only. Excludes gpu_user_annotation spans, which include gaps and double count activity in raw profiler event totals. Instrumented timing, not production timing.",
+        "kernel_union_ms": 1.301966064453125,
+        "kernels": 34,
+        "stages": {
+          "stage:block_pv": {
+            "activity_events": 30,
+            "cpu_scope_ms": 1.140091,
+            "gpu_activity_union_ms": 0.86192919921875,
+            "gpu_scope_span_ms": 0.917121
+          },
+          "stage:mass_reduce": {
+            "activity_events": 2,
+            "cpu_scope_ms": 0.12323300000000001,
+            "gpu_activity_union_ms": 0.069873046875,
+            "gpu_scope_span_ms": 0.071283
+          },
+          "stage:qk_normalize": {
+            "activity_events": 13,
+            "cpu_scope_ms": 0.5574260000000001,
+            "gpu_activity_union_ms": 0.680368896484375,
+            "gpu_scope_span_ms": 0.697391
+          },
+          "stage:setup": {
+            "activity_events": 1,
+            "cpu_scope_ms": 2.304288,
+            "gpu_activity_union_ms": 0.00393505859375,
+            "gpu_scope_span_ms": 0.0039369999999999995
+          },
+          "stage:tail": {
+            "activity_events": 3,
+            "cpu_scope_ms": 0.116187,
+            "gpu_activity_union_ms": 0.0129580078125,
+            "gpu_scope_span_ms": 0.057334
+          }
+        },
+        "trace_sha256": "08754d77b24c63072d6758dd606c4cf5ca77da5437f03d70b1e1798e7185e525"
+      },
+      "numerator_bytes": 491520000,
+      "prefix": 120015,
+      "selection": {
+        "activity_gap_ms": 5.946851806640625,
+        "activity_span_ms": 8.02168701171875,
+        "activity_union_ms": 2.074835205078125,
+        "copies_memsets": 18,
+        "interpretation": "Chrome kernel/copy/memset categories only. Excludes gpu_user_annotation spans, which include gaps and double count activity in raw profiler event totals. Instrumented timing, not production timing.",
+        "kernel_union_ms": 2.054870361328125,
+        "kernels": 404,
+        "stages": {
+          "stage:anchor_and_dense_reductions": {
+            "activity_events": 31,
+            "cpu_scope_ms": 0.644422,
+            "gpu_activity_union_ms": 0.270724609375,
+            "gpu_scope_span_ms": 0.5475610000000001
+          },
+          "stage:candidate_construction": {
+            "activity_events": 43,
+            "cpu_scope_ms": 3.275065,
+            "gpu_activity_union_ms": 0.120722900390625,
+            "gpu_scope_span_ms": 1.1245560000000001
+          },
+          "stage:combined_admission": {
+            "activity_events": 71,
+            "cpu_scope_ms": 1.57975,
+            "gpu_activity_union_ms": 0.379345947265625,
+            "gpu_scope_span_ms": 1.513028
+          },
+          "stage:disjoint_rank": {
+            "activity_events": 1,
+            "cpu_scope_ms": 0.14087200000000002,
+            "gpu_activity_union_ms": 0.003679931640625,
+            "gpu_scope_span_ms": 0.003682
+          },
+          "stage:pair_objective": {
+            "activity_events": 273,
+            "cpu_scope_ms": 4.335171999999999,
+            "gpu_activity_union_ms": 1.2960439453125,
+            "gpu_scope_span_ms": 4.183020000000001
+          },
+          "stage:pair_validity": {
+            "activity_events": 3,
+            "cpu_scope_ms": 0.12628799999999998,
+            "gpu_activity_union_ms": 0.00431787109375,
+            "gpu_scope_span_ms": 0.057468000000000005
+          },
+          "stage:setup": {
+            "activity_events": 0,
+            "cpu_scope_ms": 0.036484,
+            "gpu_activity_union_ms": 0.0,
+            "gpu_scope_span_ms": 0
+          }
+        },
+        "trace_sha256": "c76d88affb31c0142a11705e5077fc0c0caee87ff4801755de1a3a10dd8ec6b0"
+      },
+      "warmed_ms": {
+        "dense_selected_reductions": 0.2979090204462409,
+        "graph_selection": 2.175720001105219,
+        "moments": 1.7658979631960392,
+        "reference_selection": 4.943795036524534,
+        "selection": 4.0736510418355465
+      }
+    },
+    "request002": {
+      "graph_parity": {
+        "budget_errors": 0,
+        "mask_mismatches": 0,
+        "pair_loss_mismatches": 0,
+        "swap_mismatches": 0,
+        "units": 32
+      },
+      "moments": {
+        "activity_gap_ms": 0.572549072265625,
+        "activity_span_ms": 1.13723193359375,
+        "activity_union_ms": 0.564682861328125,
+        "copies_memsets": 5,
+        "interpretation": "Chrome kernel/copy/memset categories only. Excludes gpu_user_annotation spans, which include gaps and double count activity in raw profiler event totals. Instrumented timing, not production timing.",
+        "kernel_union_ms": 0.45615966796875,
+        "kernels": 24,
+        "stages": {
+          "stage:block_pv": {
+            "activity_events": 10,
+            "cpu_scope_ms": 0.453318,
+            "gpu_activity_union_ms": 0.289587158203125,
+            "gpu_scope_span_ms": 0.34731799999999996
+          },
+          "stage:mass_reduce": {
+            "activity_events": 2,
+            "cpu_scope_ms": 0.09726399999999999,
+            "gpu_activity_union_ms": 0.0242119140625,
+            "gpu_scope_span_ms": 0.035185
+          },
+          "stage:qk_normalize": {
+            "activity_events": 13,
+            "cpu_scope_ms": 0.388361,
+            "gpu_activity_union_ms": 0.233709716796875,
+            "gpu_scope_span_ms": 0.29342599999999996
+          },
+          "stage:setup": {
+            "activity_events": 1,
+            "cpu_scope_ms": 0.613634,
+            "gpu_activity_union_ms": 0.00377392578125,
+            "gpu_scope_span_ms": 0.003776
+          },
+          "stage:tail": {
+            "activity_events": 3,
+            "cpu_scope_ms": 0.091647,
+            "gpu_activity_union_ms": 0.013400146484375,
+            "gpu_scope_span_ms": 0.053639000000000006
+          }
+        },
+        "trace_sha256": "00c11279b7d4678fa664969053ad195016fcdb5e94c2e7a84e787eb9936b5c41"
+      },
+      "numerator_bytes": 162529280,
+      "prefix": 39743,
+      "selection": {
+        "activity_gap_ms": 5.5059575195312505,
+        "activity_span_ms": 7.496054931640625,
+        "activity_union_ms": 1.990097412109375,
+        "copies_memsets": 15,
+        "interpretation": "Chrome kernel/copy/memset categories only. Excludes gpu_user_annotation spans, which include gaps and double count activity in raw profiler event totals. Instrumented timing, not production timing.",
+        "kernel_union_ms": 1.974867919921875,
+        "kernels": 404,
+        "stages": {
+          "stage:anchor_and_dense_reductions": {
+            "activity_events": 29,
+            "cpu_scope_ms": 0.562816,
+            "gpu_activity_union_ms": 0.173196044921875,
+            "gpu_scope_span_ms": 0.49326299999999995
+          },
+          "stage:candidate_construction": {
+            "activity_events": 42,
+            "cpu_scope_ms": 3.344411,
+            "gpu_activity_union_ms": 0.1284677734375,
+            "gpu_scope_span_ms": 0.9792609999999999
+          },
+          "stage:combined_admission": {
+            "activity_events": 71,
+            "cpu_scope_ms": 1.422551,
+            "gpu_activity_union_ms": 0.37560302734375,
+            "gpu_scope_span_ms": 1.362644
+          },
+          "stage:disjoint_rank": {
+            "activity_events": 1,
+            "cpu_scope_ms": 0.112868,
+            "gpu_activity_union_ms": 0.00377490234375,
+            "gpu_scope_span_ms": 0.003777
+          },
+          "stage:pair_objective": {
+            "activity_events": 273,
+            "cpu_scope_ms": 4.250492,
+            "gpu_activity_union_ms": 1.304320556640625,
+            "gpu_scope_span_ms": 4.118582999999999
+          },
+          "stage:pair_validity": {
+            "activity_events": 3,
+            "cpu_scope_ms": 0.114274,
+            "gpu_activity_union_ms": 0.004735107421875,
+            "gpu_scope_span_ms": 0.055485
+          },
+          "stage:setup": {
+            "activity_events": 0,
+            "cpu_scope_ms": 0.030506000000000002,
+            "gpu_activity_union_ms": 0.0,
+            "gpu_scope_span_ms": 0
+          }
+        },
+        "trace_sha256": "395803aee7482ce39fd9b6eea150266968832517f539c4ff079644fe3dd526fd"
+      },
+      "warmed_ms": {
+        "dense_selected_reductions": 0.24953193496912718,
+        "graph_selection": 2.1604555076919496,
+        "moments": 0.6857389817014337,
+        "reference_selection": 6.716717965900898,
+        "selection": 5.4668879602104425
+      }
+    }
+  },
+  "status": "complete_cost_diagnostic"
+}

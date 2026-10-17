@@ -1,0 +1,227 @@
+{
+  "dense_selected_reductions": {
+    "cuda_elapsed_ms": 0.2844800055027008,
+    "cuda_samples_ms": [
+      0.2933120131492615,
+      0.28275200724601746,
+      0.2844800055027008,
+      0.286624014377594,
+      0.2812480032444,
+      0.2839359939098358,
+      0.29094401001930237
+    ],
+    "host_ms": 0.2979219425469637,
+    "host_samples_ms": [
+      0.3195080207660794,
+      0.2957889810204506,
+      0.2979219425469637,
+      0.2995410468429327,
+      0.2938519464805722,
+      0.2969839842990041,
+      0.3028189530596137
+    ],
+    "peak_extra_allocated_bytes": 168036352
+  },
+  "moment_profile": {
+    "kernel_events": 54,
+    "kernel_span_ms": 2.16641,
+    "kernel_sum_ms": 3.4715540000000016,
+    "kernel_union_ms": 1.839341,
+    "operations": {
+      "aten::bmm": {
+        "count": 15,
+        "self_cpu_ms": 0.34776700000000166,
+        "self_device_ms": 0.5372680000000001
+      },
+      "aten::copy_": {
+        "count": 17,
+        "self_cpu_ms": 0.10763900000000012,
+        "self_device_ms": 0.3344600000000014
+      },
+      "aten::empty": {
+        "count": 4,
+        "self_cpu_ms": 0.02107699999999977,
+        "self_device_ms": 0.0
+      },
+      "aten::mm": {
+        "count": 2,
+        "self_cpu_ms": 0.1418760000000011,
+        "self_device_ms": 0.38385699999999995
+      }
+    },
+    "stages": {
+      "stage:block_pv": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.0,
+        "device_kernel_ms": 1.0142920000000004
+      },
+      "stage:mass_reduce": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.0,
+        "device_kernel_ms": 0.0713779999999997
+      },
+      "stage:qk_normalize": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.0,
+        "device_kernel_ms": 0.697299
+      },
+      "stage:setup": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.0,
+        "device_kernel_ms": 0.0037109999999997852
+      },
+      "stage:tail": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.0,
+        "device_kernel_ms": 0.052661000000000055
+      }
+    }
+  },
+  "moments": {
+    "cuda_elapsed_ms": 1.7612799406051636,
+    "cuda_samples_ms": [
+      1.7985919713974,
+      1.7687679529190063,
+      1.7612799406051636,
+      1.7571200132369995,
+      1.7582720518112183,
+      1.7513600587844849,
+      1.763424038887024
+    ],
+    "host_ms": 1.7785769887268543,
+    "host_samples_ms": [
+      1.850212924182415,
+      1.7869729781523347,
+      1.7785769887268543,
+      1.7726980149745941,
+      1.7740670591592789,
+      1.7671639798209071,
+      1.787410001270473
+    ],
+    "peak_extra_allocated_bytes": 649454592
+  },
+  "numerator_bytes": 491520000,
+  "prefix": 120015,
+  "reference_selection": {
+    "cuda_elapsed_ms": 5.002208232879639,
+    "cuda_samples_ms": [
+      5.058720111846924,
+      5.015456199645996,
+      4.997663974761963,
+      5.002175807952881,
+      5.002208232879639,
+      5.020607948303223,
+      4.989408016204834
+    ],
+    "host_ms": 5.02370297908783,
+    "host_samples_ms": [
+      5.085857002995908,
+      5.0301969749853015,
+      5.02370297908783,
+      5.0182819832116365,
+      5.017278017476201,
+      5.035956972278655,
+      5.004256032407284
+    ],
+    "peak_extra_allocated_bytes": 660094976
+  },
+  "request": "request001",
+  "selection": {
+    "cuda_elapsed_ms": 4.125247955322266,
+    "cuda_samples_ms": [
+      4.344160079956055,
+      4.222879886627197,
+      4.12611198425293,
+      4.116960048675537,
+      4.073696136474609,
+      4.114048004150391,
+      4.125247955322266
+    ],
+    "host_ms": 4.144667997024953,
+    "host_samples_ms": [
+      4.387942026369274,
+      4.241829970851541,
+      4.144732956774533,
+      4.136643023230135,
+      4.092820920050144,
+      4.133692942559719,
+      4.144667997024953
+    ],
+    "peak_extra_allocated_bytes": 279940096
+  },
+  "selection_profile": {
+    "kernel_events": 428,
+    "kernel_span_ms": 8.113016000000002,
+    "kernel_sum_ms": 9.617046000000002,
+    "kernel_union_ms": 7.53999,
+    "operations": {
+      "aten::copy_": {
+        "count": 26,
+        "self_cpu_ms": 0.11505900000000246,
+        "self_device_ms": 0.04047700000000032
+      },
+      "aten::empty": {
+        "count": 29,
+        "self_cpu_ms": 0.08902100000000292,
+        "self_device_ms": 0.0
+      },
+      "aten::index": {
+        "count": 69,
+        "self_cpu_ms": 0.5363010000000058,
+        "self_device_ms": 0.34095500000000223
+      },
+      "aten::index_select": {
+        "count": 5,
+        "self_cpu_ms": 0.051552999999999884,
+        "self_device_ms": 0.0020799999999999274
+      },
+      "aten::mm": {
+        "count": 20,
+        "self_cpu_ms": 0.3884940000000015,
+        "self_device_ms": 0.5215110000000004
+      },
+      "aten::sort": {
+        "count": 5,
+        "self_cpu_ms": 0.09519799999999941,
+        "self_device_ms": 0.06639199999999937
+      }
+    },
+    "stages": {
+      "stage:anchor_and_dense_reductions": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.0,
+        "device_kernel_ms": 0.5602280000000001
+      },
+      "stage:candidate_construction": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.0,
+        "device_kernel_ms": 1.172866
+      },
+      "stage:combined_admission": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.0,
+        "device_kernel_ms": 1.5257560000000012
+      },
+      "stage:disjoint_rank": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.0,
+        "device_kernel_ms": 0.0037109999999993307
+      },
+      "stage:pair_objective": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.0,
+        "device_kernel_ms": 4.208508
+      },
+      "stage:pair_validity": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.0,
+        "device_kernel_ms": 0.06892100000000027
+      },
+      "stage:setup": {
+        "count": 1,
+        "cpu_inclusive_ms": 0.035512,
+        "device_kernel_ms": 0.0
+      }
+    }
+  }
+}

@@ -1,3 +1,38 @@
+## Bounded pause investigation complete; full503 stays paused — 2026-10-17
+
+Verified investigation source c8feb508; independent receipt at10:50 UTC.
+Read results/v31_value_investigation_20261017/attempt001/summary.md and its
+final_complete.json. This marker completes the bounded investigation only.
+The parent full503 remains incomplete and paused at17/128 engine jobs, with64
+matched questions per pass and one extra32-question audit PIECEWISE shard.
+No GPU worker remains. Do not resume without new explicit user authorization;
+the exact guarded procedure remains in the parent's PAUSE_AND_RESUME.md.
+
+Decision: no-go for full503 continuation of either current value method.
+Official clean64 seed42: V31 30/64,240.31 calls,8.914s/request; swaps29/64,
+277.83 calls,14.242s; directional residual30/64,290.91 calls,11.420s.
+Accuracy intervals include zero; both methods lose latency in both shards.
+Historical gains and current losses are tail-sensitive, with real seed/method
+interaction on the two predeclared crossed inputs; no single cause explains
+the reversal. Reference/device swaps agree in16/16 pairs. Two intermittent
+audit residual mismatches remain unlocalized; the final trace agrees exactly.
+
+The residual trace shows output/logit/self-conditioning divergence at call2,
+before token/acceptance divergence at6, support divergence at8, and RNG
+divergence at19 after different commit timing. V31 is correct in218 calls;
+both residual implementations are wrong in321. This is one exploratory case.
+The fixed-shape graph prototype passes64 saved units and reduces selection
+time, but no production implementation is promoted; expensive moment and
+pair work remain. Four tests and independent scoring/receipt checks pass.
+100 new measured diagnostic requests; conservative GPU reservation2732.85s
+(45.55min), including failed profile allowances, below the60-minute target.
+
+Next: retain pause. Swaps merit only a bounded engineering feasibility gate
+(complete observation near/below70ms, an optimistic cross-study allowance)
+before any new native panel. Residual needs an objective tied to native
+decisions before more accuracy work. No follow-up is queued or authorized
+by this recommendation. Earlier running checkpoints below are historical.
+
 ## Bounded pause investigation underway — 2026-10-17, 10:24 UTC
 
 Full503 remains paused at17 complete engines,64 matched questions per pass.

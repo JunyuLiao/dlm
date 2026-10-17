@@ -1,0 +1,396 @@
+{
+  "analysis_sha256": "7c88f87270d789f40f52a4806b06cc9512179addfcceb54a33afea4a76bec1a0",
+  "bootstrap_samples": 20000,
+  "bootstrap_seed": 20261017,
+  "official_sha256": "fa730a09481178e020725b810a7f235e4347ed10fec49c19ac9ec5efdbdd4b04",
+  "parent_status": "paused; incomplete full503",
+  "source_commit": "e107cda001c941935f915c7cd95a837be22efb75",
+  "sources": {
+    "audit": {
+      "bindings": {
+        "runs/audit/allkept_fa4/shard001/attempt001/attempt_complete.json": "a0df13e8c255aa47c1ef91bc8ff82c81f267030c4e5f0c73d9f68205a7065410",
+        "runs/audit/allkept_fa4/shard001/attempt001/private/worker.log": "5d118f2d6e0f588f51c5e997bf58ca6922c056bffe9673167a70d59d0d31f044",
+        "runs/audit/allkept_fa4/shard002/attempt001/attempt_complete.json": "56310b41691b27a30ff743f8ec23d04608b9bd8b1f5b84e1892d23cfa94f4c71",
+        "runs/audit/allkept_fa4/shard002/attempt001/private/worker.log": "fd363fff4329e97f818f1196fcd33111aa18ca75c9a512d0ba8c86776ec64ced",
+        "runs/audit/dense_full_fix51994/shard001/attempt001/attempt_complete.json": "aa4d83f5795174564fc995fe4e36ea004c546aed4a12818dbe651a24ff6b51e8",
+        "runs/audit/dense_full_fix51994/shard001/attempt001/private/worker.log": "76ce58c2834f2348922be39ead69daf8a5f51b05d59013ce4ef927d640cd4001",
+        "runs/audit/dense_full_fix51994/shard002/attempt001/attempt_complete.json": "d9827e62b0c6eb6345b262fd0eab4346371975fa2af44d8f827cbba9fa3cc1a8",
+        "runs/audit/dense_full_fix51994/shard002/attempt001/private/worker.log": "d9537567fbff2672773bbf719ddf84235a34b86954133514f8361c11d74b1e96",
+        "runs/audit/dense_piecewise/shard001/attempt001/attempt_complete.json": "38a75c5d9901e7c820ee77499c74398fc2315f24711c4d05d7e3198a36e18c92",
+        "runs/audit/dense_piecewise/shard001/attempt001/private/worker.log": "77bdf89bd61310e75e09bd742faa8975531df073bc8d68ba7edaafb8c5cbd72d",
+        "runs/audit/dense_piecewise/shard002/attempt001/attempt_complete.json": "63a37679d0eaecac028c6f6e7610ff67f0c7ffebda336a6f2727160d933e9877",
+        "runs/audit/dense_piecewise/shard002/attempt001/private/worker.log": "0fca03d712609c40d5cfcf75847c4793ec2ad46a84c0147e70fd4554fae6e38d",
+        "runs/audit/dense_piecewise/shard003/attempt001/attempt_complete.json": "d98e20db41231b1e726114c3a8d540e3101afc144bfaf74795be0df22f0680ff",
+        "runs/audit/dense_piecewise/shard003/attempt001/private/worker.log": "5d90a5a40d1e932eb66a8f474e4b1d2e53ea710a96231ad7d1b3bb84bd348ae0",
+        "runs/audit/shared/shard001/attempt001/attempt_complete.json": "b50fd63fef561a9b43848d58584186441a9539b0aaac0e405a2550ad6fc99146",
+        "runs/audit/shared/shard001/attempt001/private/worker.log": "3c95bc53a6b1bb85ab1944fca5f5fad61fb2b5cbefeeae697c09b9ad3c6a1136",
+        "runs/audit/shared/shard002/attempt001/attempt_complete.json": "0f30b45dbf108e483fdc6918cae37e964163d667a3d278dd61922f71dd698828",
+        "runs/audit/shared/shard002/attempt001/private/worker.log": "2ef28fc6cd9078a1cd6d847ce88331bead5bbaa584897cbfe932c3986b324d72"
+      },
+      "engines": [
+        {
+          "engine": "runs/audit/allkept_fa4/shard001/attempt001",
+          "gpu_reservation_s": 560.0249263499863,
+          "warnings": {
+            "allocator_oom": 1,
+            "measured_jit": 0,
+            "warmup_jit": 4
+          }
+        },
+        {
+          "engine": "runs/audit/allkept_fa4/shard002/attempt001",
+          "gpu_reservation_s": 660.0276272380725,
+          "warnings": {
+            "allocator_oom": 1,
+            "measured_jit": 0,
+            "warmup_jit": 4
+          }
+        },
+        {
+          "engine": "runs/audit/dense_full_fix51994/shard001/attempt001",
+          "gpu_reservation_s": 520.0203679950209,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 1
+          }
+        },
+        {
+          "engine": "runs/audit/dense_full_fix51994/shard002/attempt001",
+          "gpu_reservation_s": 590.0216066889698,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 1
+          }
+        },
+        {
+          "engine": "runs/audit/dense_piecewise/shard001/attempt001",
+          "gpu_reservation_s": 520.0206044269726,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 1
+          }
+        },
+        {
+          "engine": "runs/audit/dense_piecewise/shard002/attempt001",
+          "gpu_reservation_s": 610.0224014809355,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 1
+          }
+        },
+        {
+          "engine": "runs/audit/dense_piecewise/shard003/attempt001",
+          "gpu_reservation_s": 856.5954979410162,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 1
+          }
+        },
+        {
+          "engine": "runs/audit/shared/shard001/attempt001",
+          "gpu_reservation_s": 1620.0971515900455,
+          "warnings": {
+            "allocator_oom": 2,
+            "measured_jit": 0,
+            "warmup_jit": 8
+          }
+        },
+        {
+          "engine": "runs/audit/shared/shard002/attempt001",
+          "gpu_reservation_s": 1750.101638199063,
+          "warnings": {
+            "allocator_oom": 2,
+            "measured_jit": 0,
+            "warmup_jit": 8
+          }
+        }
+      ],
+      "parser": {
+        "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+        "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+        "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+      },
+      "protocol_sha256": "30c01e85953b0d9115347ab2b5c885ae5ab5b814d84b28bb2a5744650f0fe022",
+      "source_identity_sha256": "2aa06d8524f28b6714411dd02dc29e5efc8910588613c8b16059063ea0d67355"
+    },
+    "clean": {
+      "bindings": {
+        "runs/clean/allkept_fa4/shard001/attempt001/attempt_complete.json": "979839d5207f9cca713fc639812413a743b067ad8da9d9acad18609515f2f671",
+        "runs/clean/allkept_fa4/shard001/attempt001/private/worker.log": "ffe689a4b691f3bbc02e3b98f065cb67e871248d5df917a323a0566d507599b4",
+        "runs/clean/allkept_fa4/shard002/attempt001/attempt_complete.json": "9bd3ce0194340f85901abd118cdde90f0b0767bf6f678d842c40b3764728c47e",
+        "runs/clean/allkept_fa4/shard002/attempt001/private/worker.log": "3ef030763e4a21d2262a30c7720a1b73f888c11c75f92bbd249368d8f302449c",
+        "runs/clean/dense_full_fix51994/shard001/attempt001/attempt_complete.json": "1e0a7f12efb3c0cbe355df8dd2109ac9d6124fad4be67be6e40816ffbc16ac43",
+        "runs/clean/dense_full_fix51994/shard001/attempt001/private/worker.log": "d8d321544b873935904eb1bd9b0155b1c62a99cca10811834c7c305663d23e10",
+        "runs/clean/dense_full_fix51994/shard002/attempt001/attempt_complete.json": "6cce81a8d424a45a2dac71dfabaa328070c3429ed4be37f24284296621393eb6",
+        "runs/clean/dense_full_fix51994/shard002/attempt001/private/worker.log": "33c3077115b7487f1043384b48b5d522f92ee38cda54cbf93444b84a9347a8c1",
+        "runs/clean/dense_piecewise/shard001/attempt001/attempt_complete.json": "a9a5f8d52dabf05f04786bf5a065715d568fc3b162786e41d5ce7399eca7a4c9",
+        "runs/clean/dense_piecewise/shard001/attempt001/private/worker.log": "06a9206202f35e4d1c1fa932d1699a1ae5761eec6d5238068f9a210c0d5cf634",
+        "runs/clean/dense_piecewise/shard002/attempt001/attempt_complete.json": "97c0357903a317b094e944e7be9d0b20474c37973cb1a3e788199e2d2c1f3ac4",
+        "runs/clean/dense_piecewise/shard002/attempt001/private/worker.log": "d4b7107b1968e585a517400e07bf07f77243c1c781bc2dbab96ad14899591686",
+        "runs/clean/shared/shard001/attempt001/attempt_complete.json": "d1f5b4bd2d3b7eef367094d8019c0253458e148c78d3c58dbb093d811a856d8d",
+        "runs/clean/shared/shard001/attempt001/private/worker.log": "dae0444ca922c1ac5be98465d2f217415f2a0383f1656694bcf070a10d9552b9",
+        "runs/clean/shared/shard002/attempt001/attempt_complete.json": "9c8d1f62babcdf55fb53fd54b17264c67b379e7b30747eab07db75a503c1456f",
+        "runs/clean/shared/shard002/attempt001/private/worker.log": "dddcb227788020db1decdb15f27702224ad8f864f239d1b988e97fa5bc83e91e"
+      },
+      "engines": [
+        {
+          "engine": "runs/clean/allkept_fa4/shard001/attempt001",
+          "gpu_reservation_s": 540.0194200479891,
+          "warnings": {
+            "allocator_oom": 1,
+            "measured_jit": 0,
+            "warmup_jit": 4
+          }
+        },
+        {
+          "engine": "runs/clean/allkept_fa4/shard002/attempt001",
+          "gpu_reservation_s": 630.021555784042,
+          "warnings": {
+            "allocator_oom": 1,
+            "measured_jit": 0,
+            "warmup_jit": 4
+          }
+        },
+        {
+          "engine": "runs/clean/dense_full_fix51994/shard001/attempt001",
+          "gpu_reservation_s": 500.01814615598414,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 1
+          }
+        },
+        {
+          "engine": "runs/clean/dense_full_fix51994/shard002/attempt001",
+          "gpu_reservation_s": 570.0200401800685,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 1
+          }
+        },
+        {
+          "engine": "runs/clean/dense_piecewise/shard001/attempt001",
+          "gpu_reservation_s": 500.01805868698284,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 1
+          }
+        },
+        {
+          "engine": "runs/clean/dense_piecewise/shard002/attempt001",
+          "gpu_reservation_s": 580.0201060200343,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 1
+          }
+        },
+        {
+          "engine": "runs/clean/shared/shard001/attempt001",
+          "gpu_reservation_s": 1540.064396656002,
+          "warnings": {
+            "allocator_oom": 2,
+            "measured_jit": 0,
+            "warmup_jit": 8
+          }
+        },
+        {
+          "engine": "runs/clean/shared/shard002/attempt001",
+          "gpu_reservation_s": 1680.069291816908,
+          "warnings": {
+            "allocator_oom": 2,
+            "measured_jit": 0,
+            "warmup_jit": 8
+          }
+        }
+      ],
+      "parser": {
+        "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+        "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+        "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+      },
+      "protocol_sha256": "30c01e85953b0d9115347ab2b5c885ae5ab5b814d84b28bb2a5744650f0fe022",
+      "source_identity_sha256": "2aa06d8524f28b6714411dd02dc29e5efc8910588613c8b16059063ea0d67355"
+    },
+    "old": {
+      "bindings": {
+        "shared_runs/longbench_v2/shard001/repeat001/attempt001/attempt_complete.json": "a9a828335829c9c4213a265fae9609701a6bb7d6d7018d67fb8e7354410270e4",
+        "shared_runs/longbench_v2/shard001/repeat002/attempt001/attempt_complete.json": "2a981e1bee0f59f1e219665de1ddc2840857a595f53cf5207b5011d5c180b34c",
+        "shared_runs/longbench_v2/shard002/repeat001/attempt001/attempt_complete.json": "282799134bbf7a7887677e19df692e28eb91e2e3a2bee6c41c5fd36755f0fdf1",
+        "shared_runs/longbench_v2/shard002/repeat002/attempt001/attempt_complete.json": "b7d360a246d6a5730873770bce9330ac3920b37c6e0c8036895697d296e0e7e2",
+        "shared_runs/longbench_v2/shard003/repeat001/attempt001/attempt_complete.json": "990e092fbda038d68e8a5ade9e1feb529feb2be15e6a3b24a845f43a6df2f403",
+        "shared_runs/longbench_v2/shard003/repeat002/attempt001/attempt_complete.json": "de602e1748d98e12a84ee0ff280599f7f2c68a11799946419c855b5f1f220fec",
+        "shared_runs/longbench_v2/shard004/repeat001/attempt001/attempt_complete.json": "be5aca9682b3a5594b1738ed0e232ec95f0c8be272bfeee2136079109f95945b",
+        "shared_runs/longbench_v2/shard004/repeat002/attempt001/attempt_complete.json": "f57eda5691e10f4a43b88baf30f1e607c4b58981ee6f57bdff6fb65daa06347e",
+        "shared_runs/longbench_v2/shard005/repeat001/attempt001/attempt_complete.json": "c24821fc99eff13eadf87cb50c78b325c6df759e968f7654ca8015c21aa0c9e5",
+        "shared_runs/longbench_v2/shard005/repeat002/attempt001/attempt_complete.json": "162ffdcdb0e5ac2824ada1787f8bbd023d75f057a3a6a384d74942643bfec8db",
+        "shared_runs/longbench_v2/shard006/repeat001/attempt001/attempt_complete.json": "cae77e75952cb77cacbabff436ddb1ca3cc2a1c1f241c9ab8551af2f60200eb5",
+        "shared_runs/longbench_v2/shard006/repeat002/attempt001/attempt_complete.json": "f8832cda87b10b5c05d774685836d9e5958f6872714202c1b2e16a790b76450e",
+        "shared_runs/longbench_v2/shard007/repeat001/attempt001/attempt_complete.json": "fc695baeb0da1e59a22155f7441d6667fc1ec43b93ed86069772e7b18507f26f",
+        "shared_runs/longbench_v2/shard007/repeat002/attempt001/attempt_complete.json": "7f3ea8cdb39e9fc5d74af6dba57ec8a8b143e232db31e185cc4279774b74d830",
+        "shared_runs/longbench_v2/shard008/repeat001/attempt001/attempt_complete.json": "170e397dfce17626ead9d7239b1208c6c1e84fb645ccd8d8db4bf6124d489704",
+        "shared_runs/longbench_v2/shard008/repeat002/attempt001/attempt_complete.json": "7665411403c422c814b0d914874edda9073ef23c1b3c5a9533406d869e3c275f"
+      },
+      "engines": [
+        {
+          "engine": "shared_runs/longbench_v2/shard001/repeat001/attempt001",
+          "gpu_reservation_s": 770.0580101469532,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard001/repeat002/attempt001",
+          "gpu_reservation_s": 765.0556000950746,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard002/repeat001/attempt001",
+          "gpu_reservation_s": 970.0667030430632,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard002/repeat002/attempt001",
+          "gpu_reservation_s": 955.0651434510946,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard003/repeat001/attempt001",
+          "gpu_reservation_s": 760.051665866049,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard003/repeat002/attempt001",
+          "gpu_reservation_s": 755.0497416409198,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard004/repeat001/attempt001",
+          "gpu_reservation_s": 690.0512481119949,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard004/repeat002/attempt001",
+          "gpu_reservation_s": 695.0517329249997,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard005/repeat001/attempt001",
+          "gpu_reservation_s": 775.0559061729582,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard005/repeat002/attempt001",
+          "gpu_reservation_s": 805.0571148369927,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard006/repeat001/attempt001",
+          "gpu_reservation_s": 1445.0861762450077,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard006/repeat002/attempt001",
+          "gpu_reservation_s": 1445.0881803340744,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard007/repeat001/attempt001",
+          "gpu_reservation_s": 710.0504152199719,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard007/repeat002/attempt001",
+          "gpu_reservation_s": 715.0501410869183,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard008/repeat001/attempt001",
+          "gpu_reservation_s": 855.0596532290801,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        },
+        {
+          "engine": "shared_runs/longbench_v2/shard008/repeat002/attempt001",
+          "gpu_reservation_s": 870.0582777410746,
+          "warnings": {
+            "allocator_oom": 0,
+            "measured_jit": 0,
+            "warmup_jit": 0
+          }
+        }
+      ],
+      "parser": {
+        "file": "experiments/diffusion_gemma_aime26_modes/protocol.py",
+        "module": "experiments.diffusion_gemma_aime26_modes.protocol",
+        "sha256": "7f6a4911eb94211c73ac88f5c6d1ba83e66e42d92f3be8d4eaf17cc704cf14d3"
+      },
+      "protocol_sha256": "c3c51ce17f22ba325c9ba6b85a588de15dd0969510da280fa38ae3f95821380a",
+      "source_identity_sha256": "bb4678c6ffd65e48e0ee3b25929287c663f24790da95028d9184de85bf6150c2"
+    }
+  }
+}

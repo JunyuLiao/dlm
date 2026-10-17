@@ -2032,3 +2032,50 @@ all native arms and both uncertainty analyses, all diagnostic-only families,
 phase/extra-work accounting, repeat/control-noise and trajectory exposure.
 Public validation does not rescore private answers or verify private model/input
 bytes. Three CPU integrity tests passed; no new experiments or clean timing.
+
+## 2026-10-17 — Completed bounded investigation of paused full503 (diagnostic)
+
+Source c8feb508; results/v31_value_investigation_20261017/attempt001/
+{summary.md,receipt.json,final_complete.json}. Complete diagnostic investigation,
+not a complete503-question benchmark or held-out confirmation. Parent source
+ec87d397, protocol30c01e85 remains frozen and paused at17/128 engine jobs.
+Officially rescored64 matched seed42 questions in each clean/audit pass;
+clean V31 averages two matched bookends. All rates below are partial-cohort.
+
+| Method | Clean correct | N/problem | N/C | T/problem | S seconds | W seconds |
+|---|---:|---:|---:|---:|---:|---:|
+| V31 | 30/64 | 240.3125 | 18.31 | 3229.67 | 5.8686 | 8.9137 |
+| Full-value swaps | 29/64 | 277.8281 | 20.49 | 3336.42 | 11.1955 | 14.2424 |
+| Direction-guarded residual | 30/64 | 290.9063 | 19.83 | 3628.95 | 8.3751 | 11.4195 |
+| Dense FULL fix51994 | 30/64 | 252.1250 | 18.79 | 3298.75 | 7.5873 | 10.6434 |
+
+CPU_FINDINGS.md includes dense PIECEWISE/all-kept, intervals, cap rates,
+physical-work checks, conditional/tail analysis and the exact decomposition
+N=C*(N/C). Swaps/residual add15.61%/21.05% calls and59.78%/28.11% request
+time. Accuracy intervals span zero; neither superiority nor noninferiority.
+W excludes startup, warmup, offline tokenization and scoring. S/N is amortized.
+
+Predeclared96-request cross: questions0/49, seeds1/42, reference/device,
+four engines audit/clean/clean/audit. Swaps match output/score/N in16/16 pairs.
+Clean seed1 meanN280→176 still increases W9.366→10.312s; seed42N224.125→233.
+One control bookend varies100→241 calls; residual has two audit backend
+mismatches with no consistent direction. These two inputs are diagnostic.
+
+Post-hoc four-request residual trace on question0/seed1: V31 correct,N218;
+both residual implementations wrong,N321, with26 bit-identical caches and
+matching321-call traces. Output/self-conditioning first change at call2,
+acceptance/canvas at6, support at8, commit at18 and RNG at19. The intermittent
+backend discrepancy remains unresolved. No extra native forward/random draw.
+
+Saved-state graph prototype:64 units,zero mask/swap/pair-loss/budget mismatches;
+selection4.074→2.176ms at120K,5.467→2.160ms at40K, excluding moments/capture/
+input copies/native integration. No production promotion. Audit observation
+cost remains181.83ms swaps/52.71ms residual,26.36/29.11 observations per problem.
+Fixed tile budgets, layer29 value scope, dense LOCAL and native sampler remain.
+
+Four CPU tests;120 saved diagnostic records independently checked,100 measured
+requests officially rescored. Zero measured graph captures; failed profiling
+attempts preserved. Conservative diagnostic reservation2732.85s=45.55min;
+parent already-running shard belongs to its original panel. GPU idle.
+Decision: no-go for either current full503 continuation. Explicit authorization
+is still required to resume; see parent PAUSE_AND_RESUME.md.

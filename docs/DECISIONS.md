@@ -2273,3 +2273,42 @@ Native qualification subsequently passed all eight clean/audit engines and
 official smoke scoring (14:09 Hong Kong checkpoint). The actual-state oracle
 found no mask or correction-cache mismatch. Clean/audit trajectories can differ;
 retain both independently scored passes. Full503 is running under ec87d397.
+
+## 2026-10-17 — Pause full503 and reject continuation of current value methods
+
+The user paused full503 pending a bounded investigation. The coordinator was
+stopped before another launch; its active audit PIECEWISE shard003 finished
+naturally and was finalized with frozen validation rules. All17 completed jobs,
+private generations, attempts and source/protocol identities are preserved.
+The guarded resume requires explicit new user authorization. Parent full503
+is incomplete; its completion marker is absent.
+
+The committed staged plan and completed evidence are under
+results/v31_value_investigation_20261017/attempt001/. Independent verifier
+c8feb508 binds CPU analysis, four crossed engines, one exploratory trace,
+saved-state profiling and official scoring. Four tests pass;100 new measured
+requests and25 warmups stay within45.55 conservative GPU minutes. GPU is idle.
+
+Neither current method passes the joint accuracy/latency objective. On clean64
+seed42, V31 scores30/64 at8.914s/request, swaps29/64 at14.242s, residual30/64
+at11.420s. Accuracy intervals include zero. Previous savings and current
+losses have large tail contributions; removing tails is descriptive only.
+The crossed two-input experiment establishes seed-dependent swap behavior
+with identical reference/device outputs in16/16 pairs. Residual has two audit
+backend discrepancies of opposite signs; the final trace does not reproduce
+them, so their cause remains unresolved.
+
+The residual trace demonstrates continuous self-conditioning divergence before
+sampled-token/support divergence and later changed RNG consumption. Better
+saved-state operator error is therefore insufficient as an admission objective.
+It does not prove lower current dense error caused the observed wrong answer.
+Graphing the unchanged selector math passes64 saved units and reduces launch
+cost, but duplicate QK/full-PV and pair evaluation still prevent a demonstrated
+latency benefit. The graph is diagnostic only; no production variant changed.
+
+No-go for resuming either current full503 arm. For swaps, a future complete
+observation implementation would first need a source-qualified engineering
+gate near/below70ms on representative states, then a predeclared multi-seed
+native accuracy/latency screen. This is an optimistic allowance, not a speedup
+claim. Directional residual needs a decision objective redesign before more
+accuracy work. No further experiment is queued; full503 remains paused.
