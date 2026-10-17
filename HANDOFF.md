@@ -1,3 +1,16 @@
+## Full503 native qualification passed — 2026-10-17, 14:09 Hong Kong
+
+Frozen native source ec87d397, campaign
+results/v31_value_e2e_longbench503_20261017/native_attempt001. PTY25199 is
+running full503 after all eight clean/audit qualification engines and official
+smoke scoring passed. Current job: audit/shared/shard001. Source-bound actual
+observation masks and correction caches match the reference. No fixed-budget
+violations or measured graph captures. The clean and instrumented trajectories
+can differ; they are scored separately and clean quality is paired with latency.
+No full-panel accuracy or speedup claim yet. Follow state.json and immutable
+engine completion markers; monitor about every30 minutes. Other campaigns stay
+paused. Resume uses the frozen coordinator, retaining every failed attempt.
+
 ## Full503 value performance campaign — 2026-10-17, 13:09 Hong Kong
 
 New user authorization enables clean end-to-end timing on LongBench-v2 all503,

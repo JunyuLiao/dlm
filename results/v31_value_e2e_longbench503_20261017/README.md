@@ -2,9 +2,9 @@
 
 User-authorized new campaign. Clean timing is enabled for this study; historical
 paused/held campaigns remain unchanged. Source ec87d397 freezes the experiment
-coordinator. Native qualification is running on PTY25199, then full generation proceeds
-automatically if it passes. Neither native qualification nor full accuracy/timing
-is complete yet.
+coordinator. All eight native qualification engines and both official smoke-scoring passes
+are complete. Full503 generation is running on PTY25199. Full-panel accuracy
+and end-to-end performance are not complete yet.
 
 Methods: full-value bounded swaps (`full_swap8`, `device_exact_v1`) and
 direction-guarded residual (`residual_direction_guard`, same backend) change only

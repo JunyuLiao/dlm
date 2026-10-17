@@ -2268,3 +2268,8 @@ mask, so it is not promoted. Reference selection incurred26 scalar reads and
 10 nonzero calls per unit; device ranking/admission removes both, giving about
 19% isolated selection savings. Native qualification and latency evidence are
 still required. See results/v31_value_e2e_longbench503_20261017/README.md.
+
+Native qualification subsequently passed all eight clean/audit engines and
+official smoke scoring (14:09 Hong Kong checkpoint). The actual-state oracle
+found no mask or correction-cache mismatch. Clean/audit trajectories can differ;
+retain both independently scored passes. Full503 is running under ec87d397.
