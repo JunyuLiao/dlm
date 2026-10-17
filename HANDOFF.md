@@ -1,3 +1,19 @@
+## Full503 progress checkpoint — 2026-10-17, 17:38 Hong Kong
+
+Active coordinator PTY25199; frozen source ec87d397; independent reporting
+verifier source9fd00e0a. In results/v31_value_e2e_longbench503_20261017/
+native_attempt001, shards001–002 are complete for all methods and both passes:
+16/128 full-panel engine jobs,64/503 questions with complete comparison coverage.
+All completed jobs pass structural receipts. Shard003 audit/dense_piecewise is
+running. Qualification (eight engines plus official scoring) passed earlier.
+Full-panel official accuracy/latency reports are still pending. No gain claimed.
+
+Completed clean jobs have no measured JIT warnings or CUDA captures. Value-kernel
+JIT occurs in excluded warmups. A few allocator OOM warnings recover and requests
+finish; retained unchanged and independently counted from logs. Timing includes
+production allocation work. Monitor every30 minutes; do not resume other studies.
+The immutable frozen coordinator verifies and reuses completed engine attempts.
+
 ## Full503 native qualification passed — 2026-10-17, 14:09 Hong Kong
 
 Frozen native source ec87d397, campaign
