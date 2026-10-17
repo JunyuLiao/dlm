@@ -24,10 +24,11 @@ def run(study,cross,output):
     for rel,digest in marker['files_sha256'].items():require(sha(study/rel)==digest,'trace binding')
     require(marker['protocol_sha256']==sha(study/'protocol.json'),'protocol binding')
     protocol=read(study/'protocol.json');labels=protocol['trace_labels']
-    frames={i:[torch.load(p,map_location='cpu',weights_only=True) for p in sorted((study/f'private/trace/request{i:03d}').glob('call*.pt'))] for i in range(3,7)}
+    first=protocol['trace_first_request']
+    frames={i:[torch.load(p,map_location='cpu',weights_only=True) for p in sorted((study/f'private/trace/request{i:03d}').glob('call*.pt'))] for i in range(first,first+4)}
     comparisons={}
-    pairs=[(3,4,labels[1]),(3,5,labels[2]),(3,6,'control_after')]
-    if protocol.get('backend_localization'):pairs.append((4,5,'reference_vs_device_guard'))
+    pairs=[(first,first+1,labels[1]),(first,first+2,labels[2]),(first,first+3,'control_after')]
+    if protocol.get('backend_localization'):pairs.append((first+1,first+2,'reference_vs_device_guard'))
     for baseline,i,label in pairs:
         rows=[]
         for call,(a,b) in enumerate(zip(frames[baseline],frames[i])):
@@ -56,7 +57,7 @@ def run(study,cross,output):
             first_different_cache=next((r['call'] for r in rows if 'cache_comparison' in r and any(not v['equal'] for v in r['cache_comparison'].values())),None),
             first_changed_canvas=next((r['call'] for r in rows if r['after_canvas_disagreements']),None),
             first_changed_acceptance=next((r['call'] for r in rows if r['reconstructed_acceptance_disagreements']),None))
-    public=lines(study/'records.jsonl')[2:];private=lines(study/'private/generation.private.jsonl')[2:]
+    public=lines(study/'records.jsonl')[protocol['explicit_warmups']:];private=lines(study/'private/generation.private.jsonl')[protocol['explicit_warmups']:]
     pool=study/'private/pools/longbench_v2';pools=official.Pools(pool,fields=('thinking',));gold=read(pool/'longbench_v2_0shot_think_gold.json');final,_=official.load_final_response()
     cross_rows=[r for p in cross.glob('engine*/attempt001/scored.json') for r in read(p)]
     trials=[]

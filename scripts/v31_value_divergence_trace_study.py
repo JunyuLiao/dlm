@@ -30,15 +30,18 @@ def run(study,prior_seconds,backend_localization=False):
         cell=dict(cell,seed=1)
         c=entry('control','current_v31_control','warmup_control')
         ref=entry('reference','residual_direction_guard');dev=entry('device_exact','residual_direction_guard')
-        arms=[c,ref,dev,dict(c,label='control_before'),ref,dev,dict(c,label='control_after')]
-        labels=[e['label'] for e in arms[3:]]
-    cells=[cell]*6
+        warm_arms=[entry(b,m) for m in ('full_swap8','residual_direction_guard') for b in ('reference','device_exact')]
+        arms=[c,*warm_arms,dict(c,label='control_before'),ref,dev,dict(c,label='control_after')]
+        labels=[e['label'] for e in arms[5:]]
+    warm_count=4 if backend_localization else 2
+    first=warm_count+1
+    cells=[dict(cell,seed=42)]*warm_count+[cell]*4
     base.write(study/'private/cells.json',cells,True);base.write(study/'private/arms.json',arms,True)
     parent=base.read(PARENT/'protocol.json')
     protocol=dict(source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),parent_protocol_sha256=base.sha(PARENT/'protocol.json'),
         runtime=parent['runtime'],scope=f"one question0 seed{cell['seed']} four-arm trace; exact full-logit fingerprints first6 calls; attention/state/RNG up to512 calls for backend localization; no added forwards or random draws",
         backend_localization=backend_localization,trace_labels=labels,panel_seed=cell['seed'],
-        arms=arms,measured_requests=4,explicit_warmups=2,implicit_warmups=1,prior_diagnostic_gpu_s=prior_seconds,
+        arms=arms,measured_requests=4,explicit_warmups=warm_count,implicit_warmups=1,trace_first_request=first,prior_diagnostic_gpu_s=prior_seconds,
         execution_fingerprints={str(p.relative_to(execution)):base.sha(p) for p in execution.rglob('*') if p.is_file()},
         cells_sha256=base.sha(study/'private/cells.json'),suites=parent['suites'])
     base.write(study/'protocol.json',protocol,True)
@@ -47,7 +50,7 @@ def run(study,prior_seconds,backend_localization=False):
     if base.runtime_identity()!=parent['runtime']:raise RuntimeError('runtime changed')
     env=base.env_for(study,'longbench_v2','current_v31_control')
     env.update(STUDY_ARM='bounded_first_divergence',PYTHONHASHSEED='0',FROZEN_SOURCE_SHA256=base.sha(study/'receipts/source_fingerprints.json'),
-        VALUE_AUDIT='1',VALUE_CLEAN_TIMING='0',VALUE_BOUNDARY_TIMING='0',VALUE_TRACE_ROOT=str(study/'private/trace'),VALUE_TRACE_FIRST_REQUEST='3',VALUE_TRACE_CALL_LIMIT='512' if backend_localization else '6',
+        VALUE_AUDIT='1',VALUE_CLEAN_TIMING='0',VALUE_BOUNDARY_TIMING='0',VALUE_TRACE_ROOT=str(study/'private/trace'),VALUE_TRACE_FIRST_REQUEST=str(first),VALUE_TRACE_CALL_LIMIT='512' if backend_localization else '6',
         NATIVE_INTERLEAVED_ARMS=str(study/'private/arms.json'),NATIVE_INTERLEAVED_BASE_WORKER=str(execution/'scripts/v31_vllm_paired_bench.py'))
     cmd=[base.PYTHON,str(execution/'scripts/v31_value_divergence_trace_worker.py'),str(base.MODEL),str(study/'private/pools/longbench_v2'),
          str(study/'private/cells.json'),str(study/'records.jsonl'),str(study/'private/generation.private.jsonl'),'mage','PIECEWISE']
@@ -58,20 +61,20 @@ def run(study,prior_seconds,backend_localization=False):
         proc.wait()
     rows=base.jsonl(study/'records.jsonl') if (study/'records.jsonl').exists() else []
     errors=[]
-    if proc.returncode or len(rows)!=6:errors.append('worker/coverage')
+    if proc.returncode or len(rows)!=len(cells):errors.append('worker/coverage')
     if not errors:
-        for r,arm in zip(rows,arms[1:]):
-            if not backend_localization:errors+=e2e.validate(r,cell,arm,'audit')
+        for r,arm,planned in zip(rows,arms[1:],cells):
+            if not backend_localization:errors+=e2e.validate(r,planned,arm,'audit')
             else:
                 a=r['receipts']['adapter']
-                if (r['index']!=0 or r['panel_seed']!=1 or r['cuda_graph_captures'] or a.get('cross_label')!=arm['label']
+                if (r['index']!=0 or r['panel_seed']!=planned['seed'] or r['cuda_graph_captures'] or a.get('cross_label')!=arm['label']
                     or a['native_local_skipped_tiles']!=0 or r['sampler_calls']!=r['denoise_forwards']+r['canvases']):errors.append('trace identity/accounting')
                 if arm['backend']!='control' and (a['value_refinement_work']['budget_errors']!=0 or a['value_refinement_layers']!=[29]):errors.append('trace budget/scope')
-        for index in range(3,7):
+        for index in range(first,first+4):
             count=len(list((study/f'private/trace/request{index:03d}').glob('call*.pt')))
             if (count<6 if backend_localization else count!=6):errors.append('trace coverage')
     receipt=dict(status='failed' if errors else 'complete',returncode=proc.returncode,errors=sorted(set(errors)),gpu_reservation_s=time.monotonic()-start,
-                 protocol_sha256=base.sha(study/'protocol.json'),records=len(rows),control_bookend_hash_equal=rows[2]['output_hash']==rows[5]['output_hash'] if len(rows)==6 else None)
+                 protocol_sha256=base.sha(study/'protocol.json'),records=len(rows),control_bookend_hash_equal=rows[warm_count]['output_hash']==rows[-1]['output_hash'] if len(rows)==len(cells) else None)
     base.write(study/'receipt.json',receipt,True)
     if errors:raise RuntimeError('preserved trace failure '+str(errors))
     base.write(study/'final_complete.json',dict(receipt,files_sha256={str(p.relative_to(study)):base.sha(p) for p in
