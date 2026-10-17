@@ -54,13 +54,18 @@ def run(output):
     for request in ('request001', 'request002'):
         for group, paths in sorted(groups.items()):
             if group[0] == request and group[2] == 'layer29':
-                selected.append(paths[0])
-                break
+                for path in paths:
+                    state = torch.load(path, weights_only=True, map_location='cpu')
+                    if state['selection_event'] and state['next'] is not None:
+                        selected.append(path)
+                        break
+                if len(selected) and selected[-1].parent.name == request:
+                    break
     if len(selected) != 2:
         raise RuntimeError('Missing predeclared LongBench layer29 states')
     config = dict(source_commit=subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
                   source_sha256=io.sha(__file__), inputs={str(p.relative_to(io.SOURCE)):io.sha(p) for p in selected},
-                  input_policy='First saved layer29 canvas per request001/002, independent of correctness',
+                  input_policy='First actual layer29 selection event per request001/002, independent of correctness',
                   tf32=False, device=torch.cuda.get_device_name(), timing='isolated kernel/module diagnostics only')
     io.write(output/'config.json', config, True)
     result=[]; start_time=time.monotonic()

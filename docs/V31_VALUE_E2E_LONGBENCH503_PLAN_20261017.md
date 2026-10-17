@@ -30,11 +30,15 @@ comparisons are diagnostic, not an extra full503 arm unless a correctness
 ambiguity makes them necessary.
 
 Use all503 original LongBench-v2 question identities, same frozen prompt/token
-manifests and native budgets, no correctness-based filtering or truncation.
+manifests and native budgets, no correctness-based filtering or additional truncation.
 Set panel_seed42 for every question and preserve the established request-seed
 derivation (base31, dataset, index, panel seed42, repeat0); record actual derived
 RNG seeds. This keeps comparisons matched to the repository's seed42 convention.
 Check full manifest coverage, context capacity and storage before freezing.
+Input audit: the existing503-row manifest already truncates237 contexts, with
+prompt lengths10,285–120,017 tokens and a16,384-token output budget. Preserve
+those exact inputs across arms; this is full question coverage, not untruncated
+multi-million-token context evaluation. Report the cap and truncated subgroup.
 
 ## 1. Measure overhead before selecting optimizations
 
