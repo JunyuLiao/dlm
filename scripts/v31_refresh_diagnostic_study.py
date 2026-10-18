@@ -29,17 +29,24 @@ DEFAULT_STUDY = ROOT / 'results/v31_refresh_diagnostic_20261018/attempt001'
 LB_PARENT = ROOT / 'results/v31_value_e2e_longbench503_20261017/native_attempt001'
 RULER_PARENT = ROOT / 'results/v31_v2_ruler128k_seed42_tau021_20261015'
 SPEC = 'docs/REFRESH_DIAGNOSTIC_PLAN_20261018.md'
+RECOVERY_SPEC = 'docs/REFRESH_DIAGNOSTIC_RECOVERY_20261018.md'
 FACTORIAL = ('dense_fresh', 'dense_hold', 'sparse_fresh', 'sparse_hold')
 BUDGET = dict(qualification=900., headroom=1500., factorial=3900., reserve=900.)
+RECOVERY_BUDGET = dict(qualification=900., headroom=1800., factorial=3900., reserve=600.)
+REFERENCE_ENGINES = (1, 2, 3, 4, 5)
 TOTAL_SECONDS = 7200.
 MIN_START_SECONDS = 180.
 SALT = 'v31-refresh-diagnostic-20261018-metadata-v1'
-REQUIRED = [SPEC, 'scripts/v31_refresh_diagnostic_study.py',
+REQUIRED = [SPEC, RECOVERY_SPEC, 'scripts/v31_refresh_diagnostic_study.py',
     'scripts/v31_refresh_diagnostic_worker.py', 'scripts/v31_refresh_headroom_profile.py',
     'scripts/v31_refresh_diagnostic_report.py', 'experiments/numerical_qk_reuse/v31_refresh_diagnostic.py',
     'tests/test_v31_refresh_diagnostic.py', 'tests/test_v31_refresh_diagnostic_worker.py',
     'tests/test_v31_refresh_diagnostic_study.py',
     'tests/test_v31_refresh_headroom_profile.py', 'tests/test_v31_refresh_diagnostic_report.py']
+RECOVERY_SOURCE_ALLOWLIST = frozenset((RECOVERY_SPEC,
+    'scripts/v31_refresh_diagnostic_study.py', 'scripts/v31_refresh_diagnostic_report.py',
+    'scripts/v31_refresh_headroom_profile.py', 'tests/test_v31_refresh_diagnostic_study.py',
+    'tests/test_v31_refresh_diagnostic_report.py', 'tests/test_v31_refresh_headroom_profile.py'))
 
 
 def digest_metadata(value):
@@ -156,7 +163,7 @@ def pause_unchanged():
 def committed_sources():
     tracked = subprocess.check_output(['git', 'ls-files', '-z'], cwd=ROOT).decode().split('\0')
     files = [p for p in tracked if p and (p.startswith(('src/', 'scripts/', 'experiments/', 'tests/'))
-             and Path(p).suffix in ('.py', '.json', '.yaml', '.yml', '.toml') or p == SPEC)]
+             and Path(p).suffix in ('.py', '.json', '.yaml', '.yml', '.toml') or p in (SPEC, RECOVERY_SPEC))]
     if not set(REQUIRED) <= set(files):
         raise RuntimeError('commit the specification and every diagnostic implementation/test before prepare')
     changed = subprocess.check_output(['git', 'diff', 'HEAD', '--name-only'], cwd=ROOT, text=True).splitlines()
@@ -173,7 +180,7 @@ def native_contract():
         thinking_policy='unchanged per-input manifests', output_limits='unchanged per-input native budgets')
 
 
-def prepare(study):
+def prepare(study, parent=None):
     if study.exists():
         raise RuntimeError('preserve existing attempt; select a new directory')
     files, commit = committed_sources(); pause_unchanged()
@@ -251,12 +258,162 @@ def prepare(study):
         ruler_checkout=ruler_checkout, reserve_policy='fresh source and successor after root review for fixes; no automatic reserve spending or phase borrowing',
         timing='only headroom clean records permit latency claims; profiling and factorial are audit only',
         failure_policy='preserve completed rows, stop on structural failure; missing or mismatched causal prefixes remain outcomes')
+    if parent is not None:
+        bind_successor(study, protocol, parent)
     base.write(study / 'protocol.json', protocol, True)
     base.write(study / 'receipts/source_fingerprints.json', dict(source_commit=commit,
         protocol_sha256=base.sha(study / 'protocol.json'), execution_fingerprints=protocol['execution_fingerprints']), True)
     print(json.dumps(dict(event='prepared', study=str(study.relative_to(ROOT)), engines=len(plans),
                          measured_factorial_requests=288, source_commit=commit)), flush=True)
     return protocol
+
+
+def _contained(root, relative):
+    """References and marker members must stay inside their declared directory."""
+    rel = Path(relative)
+    if rel.is_absolute() or '..' in rel.parts or not rel.parts:
+        raise RuntimeError('unsafe artifact reference')
+    path = (root / rel).resolve()
+    if root.resolve() not in path.parents:
+        raise RuntimeError('artifact reference escapes its root')
+    return path
+
+
+def plan_artifact_leaf(study, plan):
+    reference = plan.get('source_reference')
+    if reference is None:
+        return _contained(study, plan['folder'])
+    attempt = reference['attempt']
+    if Path(attempt).name != attempt or attempt in ('.', '..', study.name):
+        raise RuntimeError('reference must name a distinct sibling attempt')
+    parent = _contained(study.parent, attempt)
+    return _contained(parent, reference['folder'])
+
+
+def validate_completion(leaf, plan, protocol_hash, source_commit, marker_hash=None):
+    marker_path = leaf / 'attempt_complete.json'
+    if marker_hash is not None and base.sha(marker_path) != marker_hash:
+        raise RuntimeError('referenced completion marker changed')
+    marker = base.read(marker_path)
+    checks = dict(status='complete', errors=[], returncode=0, timed_out=False,
+                  protocol_sha256=protocol_hash, source_commit=source_commit,
+                  records=plan['request_count'], private_records=plan['request_count'],
+                  measured_records=plan['measured_count'], planned_measured=plan['measured_count'])
+    if any(marker.get(key) != value for key, value in checks.items()):
+        raise RuntimeError('completed engine identity or coverage mismatch')
+    required = {'records.jsonl', 'private/generation.private.jsonl', 'scored.json', 'config.json', 'receipt.json'}
+    if plan['phase'] == 'qualification':
+        required.add('qualification.json')
+    members = marker.get('files_sha256', {})
+    if not required <= set(members):
+        raise RuntimeError('completion marker omits required artifact hashes')
+    for name, digest in members.items():
+        if base.sha(_contained(leaf, name)) != digest:
+            raise RuntimeError('completed engine content changed')
+    config = base.read(leaf / 'config.json')
+    if config.get('protocol_sha256') != protocol_hash or config.get('source_commit') != source_commit:
+        raise RuntimeError('completed config identity mismatch')
+    for name in ('cells', 'arms'):
+        if base.sha(leaf / f'private/{name}.json') != plan[name + '_sha256']:
+            raise RuntimeError('completed engine schedule drift')
+    return marker
+
+
+def _recovery_parent(study, protocol):
+    recovery = protocol['recovery']
+    attempt = recovery['parent_attempt']
+    if Path(attempt).name != attempt or attempt in ('.', '..', study.name):
+        raise RuntimeError('recovery requires a distinct sibling parent')
+    parent = _contained(study.parent, attempt)
+    if base.sha(parent / 'protocol.json') != recovery['parent_protocol_sha256']:
+        raise RuntimeError('parent protocol changed')
+    if base.sha(parent / 'state.json') != recovery['parent_state_sha256']:
+        raise RuntimeError('parent terminal state changed')
+    original, state = base.read(parent / 'protocol.json'), base.read(parent / 'state.json')
+    if original.get('recovery') or state.get('status') != 'failed' or set(state.get('completed_engines', [])) != set(REFERENCE_ENGINES):
+        raise RuntimeError('recovery requires the preserved failed parent with engines 1 through 5 complete')
+    if (state.get('failure') or {}).get('engine') != 6:
+        raise RuntimeError('recovery is limited to the failed profiling engine 6')
+    if state.get('protocol_sha256') != recovery['parent_protocol_sha256'] or original['source_commit'] != recovery['parent_source_commit']:
+        raise RuntimeError('parent source/protocol identity mismatch')
+    if recovery.get('referenced_engines') != list(REFERENCE_ENGINES):
+        raise RuntimeError('unexpected recovery reference set')
+    ledger = base.read(study.parent / 'gpu_budget.json')
+    parent_reservations = [row for row in ledger['reservations'] if row.get('attempt') == attempt]
+    if (len(parent_reservations) != 6 or {row.get('engine') for row in parent_reservations} != set(range(1, 7))
+            or any(row.get('elapsed_s') is None for row in parent_reservations)
+            or digest_metadata(parent_reservations) != recovery['parent_reservations_sha256']):
+        raise RuntimeError('parent GPU reservations changed or are incomplete')
+    if not math.isclose(sum(charged_seconds(parent_reservations).values()), state.get('cumulative_gpu_seconds', -1), abs_tol=1e-6):
+        raise RuntimeError('parent failed work is missing from campaign accounting')
+    if protocol['budgets_seconds'] != RECOVERY_BUDGET or protocol['total_gpu_seconds'] != TOTAL_SECONDS:
+        raise RuntimeError('recovery budget differs from the frozen addendum')
+    if protocol['execution_fingerprints'].get(RECOVERY_SPEC) != recovery['addendum_sha256']:
+        raise RuntimeError('recovery addendum fingerprint mismatch')
+    same_fields = ('cohorts', 'expected_cells', 'frozen_native', 'headroom_inputs', 'qualification_input',
+                   'input_fingerprints', 'model_identity', 'model_inventory_sha256', 'panel_seeds',
+                   'parent_protocols', 'ruler_checkout', 'runtime', 'selection', 'spec_sha256', 'suites',
+                   'measured_factorial_requests', 'minimum_engine_start_seconds', 'total_gpu_seconds')
+    if any(protocol.get(key) != original.get(key) for key in same_fields):
+        raise RuntimeError('recovery changed native, runtime, cohort, or input identity')
+    old_source, new_source = original['execution_fingerprints'], protocol['execution_fingerprints']
+    changed = {key for key in set(old_source) | set(new_source) if old_source.get(key) != new_source.get(key)}
+    if changed - RECOVERY_SOURCE_ALLOWLIST:
+        raise RuntimeError('recovery changed protected execution source: ' + ', '.join(sorted(changed - RECOVERY_SOURCE_ALLOWLIST)))
+    if len(original['plans']) != len(protocol['plans']):
+        raise RuntimeError('recovery changed plan inventory')
+    for old, new in zip(original['plans'], protocol['plans']):
+        if old != {key: value for key, value in new.items() if key != 'source_reference'}:
+            raise RuntimeError('recovery changed a frozen plan or schedule')
+    return parent, original
+
+
+def validate_references(study, protocol):
+    referenced = [plan for plan in protocol['plans'] if 'source_reference' in plan]
+    if 'recovery' not in protocol:
+        if referenced:
+            raise RuntimeError('artifact references require a frozen recovery contract')
+        return []
+    parent, original = _recovery_parent(study, protocol)
+    for rel, digest in original['execution_fingerprints'].items():
+        if base.sha(_contained(parent / 'private/execution', rel)) != digest:
+            raise RuntimeError('parent frozen source changed: ' + rel)
+    if [plan['engine'] for plan in referenced] != list(REFERENCE_ENGINES):
+        raise RuntimeError('only completed parent engines 1 through 5 may be referenced')
+    for plan in referenced:
+        reference = plan['source_reference']
+        expected = dict(attempt=parent.name, folder=plan['folder'],
+                        protocol_sha256=protocol['recovery']['parent_protocol_sha256'],
+                        source_commit=original['source_commit'])
+        if any(reference.get(key) != value for key, value in expected.items()) or not reference.get('marker_sha256'):
+            raise RuntimeError('source reference identity mismatch')
+        validate_completion(plan_artifact_leaf(study, plan), plan, reference['protocol_sha256'],
+                            reference['source_commit'], reference['marker_sha256'])
+        for name in ('cells', 'arms'):
+            if base.sha(study / plan['folder'] / f'private/{name}.json') != plan[name + '_sha256']:
+                raise RuntimeError('successor reference schedule drift')
+    return [plan['engine'] for plan in referenced]
+
+
+def bind_successor(study, protocol, parent):
+    parent = parent.resolve()
+    if parent.parent != study.resolve().parent or parent == study.resolve():
+        raise RuntimeError('successor must share the parent campaign directory and budget ledger')
+    original = base.read(parent / 'protocol.json')
+    ledger = base.read(study.parent / 'gpu_budget.json')
+    parent_reservations = [row for row in ledger['reservations'] if row.get('attempt') == parent.name]
+    protocol['budgets_seconds'] = dict(RECOVERY_BUDGET)
+    protocol['recovery'] = dict(parent_attempt=parent.name, parent_protocol_sha256=base.sha(parent / 'protocol.json'),
+        parent_state_sha256=base.sha(parent / 'state.json'), parent_source_commit=original['source_commit'],
+        parent_reservations_sha256=digest_metadata(parent_reservations),
+        referenced_engines=list(REFERENCE_ENGINES), addendum_sha256=protocol['execution_fingerprints'][RECOVERY_SPEC])
+    _recovery_parent(study, protocol)
+    for plan in protocol['plans']:
+        if plan['engine'] in REFERENCE_ENGINES:
+            plan['source_reference'] = dict(attempt=parent.name, folder=plan['folder'],
+                protocol_sha256=protocol['recovery']['parent_protocol_sha256'], source_commit=original['source_commit'],
+                marker_sha256=base.sha(parent / plan['folder'] / 'attempt_complete.json'))
+    validate_references(study, protocol)
 
 
 def verify(study, protocol, *, inputs=True):
@@ -284,6 +441,7 @@ def verify(study, protocol, *, inputs=True):
             raise RuntimeError('model metadata drift')
     if base.runtime_identity() != protocol['runtime']:
         raise RuntimeError('runtime drift')
+    return validate_references(study, protocol)
 
 
 def require_idle():
@@ -474,27 +632,26 @@ def run(study, stop_after=None):
         if remaining <= 0:
             raise RuntimeError('campaign GPU budget exhausted')
         campaign_deadline = time.monotonic() + remaining
-        verify(study, protocol)
+        referenced = verify(study, protocol)
         completed = list(previous.get('completed_engines', [])) if previous else []
         skipped = list(previous.get('skipped', [])) if previous else []
         failure, stopped = None, False
-        base.write(study / 'state.json', dict(status='running', source_commit=protocol['source_commit']))
+        base.write(study / 'state.json', dict(status='running', source_commit=protocol['source_commit'], referenced_engines=referenced))
         phases = ('qualification', 'headroom', 'factorial')
         for plan in protocol['plans']:
             phase = plan['phase']; leaf = study / plan['folder']
+            if plan['engine'] in referenced:
+                if plan['engine'] not in completed:
+                    completed.append(plan['engine'])
+                continue
             if plan['engine'] in completed:
-                marker = base.read(leaf / 'attempt_complete.json')
-                if marker['protocol_sha256'] != base.sha(study / 'protocol.json'):
-                    raise RuntimeError('completed engine protocol drift')
-                for name, digest in marker['files_sha256'].items():
-                    if base.sha(leaf / name) != digest:
-                        raise RuntimeError('completed engine content changed')
+                validate_completion(leaf, plan, base.sha(study / 'protocol.json'), protocol['source_commit'])
                 continue
             if stop_after is not None and phases.index(phase) > phases.index(stop_after):
                 stopped = True; break
             if phase == 'factorial':
                 qualification_plan = next(p for p in protocol['plans'] if p['phase'] == 'qualification')
-                qpath = study / qualification_plan['folder'] / 'qualification.json'
+                qpath = plan_artifact_leaf(study, qualification_plan) / 'qualification.json'
                 if not qpath.exists() or base.read(qpath).get('causal_status') != 'qualified':
                     skipped.append(dict(engine=plan['engine'], phase=phase, reason='causal_gate_unresolved'))
                     continue
@@ -577,7 +734,7 @@ def run(study, stop_after=None):
         final_status = ('failed' if failure else 'complete_diagnostic' if len(completed) == len(protocol['plans'])
                         else 'phase_stop' if stopped else 'causal_gate_unresolved'
                         if any(row['reason'] == 'causal_gate_unresolved' for row in skipped) else 'budget_limited_partial')
-        state = dict(status=final_status, completed_engines=completed, skipped=skipped, failure=failure,
+        state = dict(status=final_status, completed_engines=completed, referenced_engines=referenced, skipped=skipped, failure=failure,
             cumulative_gpu_seconds=sum(charged_seconds(reservations).values()),
             phase_gpu_seconds=dict(charged_seconds(reservations)), parent_full503='paused',
             protocol_sha256=base.sha(study / 'protocol.json'))
@@ -589,14 +746,21 @@ def run(study, stop_after=None):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action', choices=('prepare', 'run', 'verify'))
+    parser.add_argument('action', choices=('prepare', 'successor', 'run', 'verify'))
     parser.add_argument('--study', type=Path, default=DEFAULT_STUDY)
     parser.add_argument('--stop-after', choices=('qualification', 'headroom', 'factorial'))
+    parser.add_argument('--parent', type=Path)
     args = parser.parse_args(); study = args.study.resolve()
     if ROOT / 'results' not in study.parents:
         raise RuntimeError('study must be inside canonical results root')
     if args.action == 'prepare':
+        if args.parent is not None:
+            raise RuntimeError('use successor to bind a parent attempt')
         prepare(study)
+    elif args.action == 'successor':
+        if args.parent is None:
+            raise RuntimeError('successor requires --parent')
+        prepare(study, args.parent)
     elif args.action == 'verify':
         verify(study, base.read(study / 'protocol.json'))
     else:

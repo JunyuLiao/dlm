@@ -1,10 +1,11 @@
 """Independent factorial arithmetic, correlation, and attribution guards."""
 import copy
+import hashlib
 import json
 
 import pytest
 
-from scripts.v31_refresh_diagnostic_report import REQUIRED_LABELS, run, summarize_trials
+from scripts.v31_refresh_diagnostic_report import REQUIRED_LABELS, run, run_headroom, summarize_trials
 
 
 def trials(indices=(0, 1), seeds=(1, 42), engines=(1, 2)):
@@ -199,3 +200,73 @@ def test_immutable_output_bindings_and_private_payload_exclusion(tmp_path):
     assert not (output / "final_complete.json").exists()
     with pytest.raises(ValueError, match="immutable"):
         run(None, output, scored_paths=[source], bootstrap_samples=10)
+
+
+def _referenced_headroom_study(tmp_path, *, old_row_source="old-source"):
+    parent, study = tmp_path / "attempt001", tmp_path / "attempt002"
+    parent.mkdir()
+    study.mkdir()
+    old_plan = dict(engine=2, phase="headroom", suite="longbench_v2", family="shared",
+                    pass_name="clean", repeat=0, folder="headroom/clean", measured_count=1,
+                    request_count=3, cells_sha256="cells", arms_sha256="arms")
+    def write(path, obj):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(obj))
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    old_protocol_sha = write(parent / "protocol.json", dict(source_commit="old-source", plans=[old_plan]))
+    base = dict(trials(indices=(0,), seeds=(42,), engines=(2,))[0], phase="headroom", family="shared",
+                pass_name="clean", sample_repeat=0, label="dynamic", native_receipt={},
+                cuda_graph_captures=0, value_clean_timing=True,
+                source_commit=old_row_source, protocol_sha256=old_protocol_sha)
+    scored_sha = write(parent / old_plan["folder"] / "scored.json", [base])
+    marker_sha = write(parent / old_plan["folder"] / "attempt_complete.json",
+                       dict(status="complete", source_commit="old-source", protocol_sha256=old_protocol_sha,
+                            files_sha256={"scored.json": scored_sha}))
+    reference = dict(attempt=parent.name, folder=old_plan["folder"], protocol_sha256=old_protocol_sha,
+                     source_commit="old-source", marker_sha256=marker_sha)
+    linked = dict(old_plan, source_reference=reference)
+    profile = dict(old_plan, engine=6, pass_name="profile", folder="headroom/profile")
+    new_protocol_sha = write(study / "protocol.json", dict(source_commit="new-source", plans=[linked, profile]))
+    profile_row = dict(base, engine=6, pass_name="profile", source_commit="new-source",
+                       protocol_sha256=new_protocol_sha, value_clean_timing=False,
+                       native_receipt={"headroom": {"complete_scope_inventory": True, "spans": {
+                           "denoise/global_refresh": {"cuda_inclusive_span_ms": 100},
+                           "denoise/discovery": {"cuda_inclusive_span_ms": 80}}}})
+    new_scored_sha = write(study / profile["folder"] / "scored.json", [profile_row])
+    write(study / profile["folder"] / "attempt_complete.json",
+          dict(status="complete", source_commit="new-source", protocol_sha256=new_protocol_sha,
+               files_sha256={"scored.json": new_scored_sha}))
+    return study, parent
+
+
+def test_headroom_successor_references_original_source_without_relabeling(tmp_path):
+    study, parent = _referenced_headroom_study(tmp_path)
+    original = {str(p): p.read_bytes() for p in parent.rglob("*.json")}
+    result = run_headroom(study, tmp_path / "report")
+    assert result["source_commits"] == ["new-source", "old-source"]
+    assert result["mixed_execution_sources"] is True
+    assert result["engine_coverage"][0]["source_reference"]["attempt"] == "attempt001"
+    assert result["engine_coverage"][0]["source_commit"] == "old-source"
+    assert result["engine_coverage"][1]["source_commit"] == "new-source"
+    assert result["clean_arms"]["dynamic"]["timing_verification"] == {"passed": 1}
+    assert result["audit_arms"]["dynamic"]["refresh_time_proxy"][0]["refresh_span_over_audit_request"] == .05
+    assert result["critical_path_headroom"]["request_latency_gain_bound"] is None
+    assert "references/attempt001/protocol.json" in result["input_sha256"]
+    assert "old-source" in (tmp_path / "report" / "summary.md").read_text()
+    assert original == {str(p): p.read_bytes() for p in parent.rglob("*.json")}
+
+
+@pytest.mark.parametrize("changed", ["protocol.json", "headroom/clean/attempt_complete.json", "headroom/clean/scored.json"])
+def test_headroom_successor_rejects_changed_reference_bytes(tmp_path, changed):
+    study, parent = _referenced_headroom_study(tmp_path)
+    path = parent / changed
+    path.write_text(path.read_text() + " ")
+    with pytest.raises(ValueError, match="changed"):
+        run_headroom(study, tmp_path / "report")
+    assert not (tmp_path / "report").exists()
+
+
+def test_headroom_successor_rejects_wrong_row_source_even_with_valid_hashes(tmp_path):
+    study, _ = _referenced_headroom_study(tmp_path, old_row_source="wrong-source")
+    with pytest.raises(ValueError, match="row source identity"):
+        run_headroom(study, tmp_path / "report")

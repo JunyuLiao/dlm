@@ -195,6 +195,12 @@ class HeadroomCollector:
         self.warmup_requests, self.cuda_events, self.max_spans = warmup_requests, cuda_events, max_spans
         self.torch = torch_module
         self.request_index, self.active, self.profiler = -1, False, None
+        # Hooks are installed before model loading, profiling and graph capture.
+        # Keep a complete inert state until a scheduled request begins.
+        self.metadata = {}
+        self.phase, self.seen_denoise = 'prefill', False
+        self.spans, self.stacks, self.phase_calls = [], defaultdict(list), defaultdict(int)
+        self.dropped_spans = 0
         self.patches = []
         self.last_receipt = None
 
@@ -346,6 +352,8 @@ def install(adapter, *, output_dir, profile_request_indices=(), warmup_requests=
 
     @wraps(forward)
     def attention(*args, **kwargs):
+        if not collector.active:
+            return forward(*args, **kwargs)
         layer = args[1] if len(args) > 1 else kwargs.get('layer')
         name = getattr(layer, 'layer_name', '')
         before = dict(adapter.calls) if adapter is not None else {}
@@ -393,6 +401,8 @@ def install(adapter, *, output_dir, profile_request_indices=(), warmup_requests=
             continue
         original = getattr(adapter, name)
         def wrapped(*args, _original=original, _label=label, **kwargs):
+            if not collector.active:
+                return _original(*args, **kwargs)
             with collector.scope(collector.phase + '/' + _label):
                 return _original(*args, **kwargs)
         collector._patch(adapter, name, wrapped)

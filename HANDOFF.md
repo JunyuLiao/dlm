@@ -1,3 +1,27 @@
+## Refresh profiling recovery being prepared — 2026-10-18
+
+The bounded diagnostic's attempt001 is preserved as failed. Source 6aab8632
+completed qualification and all 20 clean headroom measurements (engines001–005).
+Engine006 failed before its first request because a profiling hook read an
+uninitialized phase during model startup. It used 70.189 GPU-reservation seconds;
+the campaign has charged 1,521.995 seconds in total. No factorial engine ran.
+
+The profiler now bypasses inactive hooks, with startup regression coverage.
+An immutable successor will reference the five completed engines under their
+original source/protocol hashes and rerun only missing work. Read
+docs/REFRESH_DIAGNOSTIC_RECOVERY_20261018.md: 300 seconds of the existing reserve
+are explicitly assigned to headroom (1,800 seconds total); factorial remains
+3,900 seconds and the campaign cap remains 7,200 seconds. Native worker,
+sampler, selectors and factorial instrumentation are unchanged. No older
+full503 campaign is resumed. Do not resume the failed attempt in place.
+
+The clean headroom inputs show material trajectory/consumer sensitivity:
+at 41K, V31/FULL/PIECEWISE are correct but fixed16/all-kept are wrong; at 112K
+all are wrong. Every clean repetition is stable with zero measured graph
+captures and no measured JIT. These are two selected inputs, not accuracy or
+latency confirmation. Next: freeze and validate successor, collect profiles,
+then run the bounded factorial under its original coverage/interpretation gates.
+
 ## Refresh diagnostic qualified; runtime headroom underway — 2026-10-18
 
 Verified source6aab8632. User authorized the bounded study in

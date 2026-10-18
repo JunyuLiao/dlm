@@ -583,6 +583,9 @@ def render_headroom_markdown(report: Mapping[str, Any]) -> str:
     for family, arm in report["clean_arms"].items():
         lines.append(f"| {family} | {arm['trials']} | {_format(arm['means']['score'])} | "
                      f"{_format(arm['means']['denoise_forwards'])} | {_format(arm['means']['wall_s'])} |")
+    if report.get("source_commits"):
+        lines.extend(["", "Execution sources: " + ", ".join(report["source_commits"]) + ". "
+                      + report.get("source_interpretation", "")])
     lines.extend(["", "JSON reports paired dynamic/fixed16 ratios and substrate-control differences. "
                   "Audit spans, physical rectangles, and profiler activity are separate. "
                   "The removable request-critical-path bound remains **unresolved**: inclusive spans and disjoint activity labels do not establish overlap or latency savings.", ""])
@@ -634,9 +637,47 @@ def _headroom_from_study(study: Path) -> tuple[dict[str, Any] | None, dict[str, 
     for plan in protocol.get("plans", []):
         if plan.get("phase") != "headroom":
             continue
-        path = study / plan["folder"] / "scored.json"
+        reference = plan.get("source_reference")
+        source_commit = protocol.get("source_commit")
+        source_protocol_sha = _sha(study / "protocol.json")
+        leaf = study / plan["folder"]
+        binding_prefix = plan["folder"]
+        if reference is not None:
+            _require(isinstance(reference, Mapping), "invalid source reference")
+            _require(plan.get("pass_name") == "clean", "only clean headroom leaves may be referenced")
+            _require(all(isinstance(reference.get(field), str) and reference[field]
+                         for field in ("attempt", "folder", "protocol_sha256", "source_commit", "marker_sha256")),
+                     "incomplete source reference")
+            attempt = Path(reference["attempt"])
+            folder = Path(reference["folder"])
+            _require(len(attempt.parts) == 1 and attempt.name not in (".", "..")
+                     and not attempt.is_absolute() and not folder.is_absolute() and ".." not in folder.parts,
+                     "source reference must remain within a named sibling attempt")
+            parent = study.parent / attempt
+            parent_protocol = parent / "protocol.json"
+            _require(parent.resolve() != study.resolve(), "source reference must name a prior attempt")
+            _require(parent_protocol.exists() and _sha(parent_protocol) == reference["protocol_sha256"],
+                     "reference parent protocol changed")
+            old_protocol = _read_json(parent_protocol)
+            _require(old_protocol.get("source_commit") == reference["source_commit"], "reference parent source changed")
+            old_plans = [old for old in old_protocol.get("plans", []) if old.get("folder") == reference["folder"]]
+            _require(len(old_plans) == 1, "reference parent plan not unique")
+            _require(all(old_plans[0].get(key) == plan.get(key) for key in
+                         ("engine", "phase", "suite", "family", "pass_name", "repeat", "measured_count",
+                          "request_count", "cells_sha256", "arms_sha256")),
+                     "reference plan identity mismatch")
+            leaf = parent / folder
+            source_commit = reference["source_commit"]
+            source_protocol_sha = reference["protocol_sha256"]
+            binding_prefix = f"references/{reference['attempt']}/{reference['folder']}"
+            bindings[f"references/{reference['attempt']}/protocol.json"] = source_protocol_sha
+            marker = leaf / "attempt_complete.json"
+            _require(marker.exists() and _sha(marker) == reference["marker_sha256"], "reference completion marker changed")
+        provenance = dict(source_commit=source_commit, source_reference=dict(reference) if reference else None)
+        path = leaf / "scored.json"
         if not path.exists():
-            execution.append(dict(engine=plan["engine"], status="no_scored_rows"))
+            _require(reference is None, "reference scored rows missing")
+            execution.append(dict(engine=plan["engine"], status="no_scored_rows", **provenance))
             continue
         data = _read_json(path)
         _require(isinstance(data, list), "headroom scored payload must be a list")
@@ -644,22 +685,33 @@ def _headroom_from_study(study: Path) -> tuple[dict[str, Any] | None, dict[str, 
             _require(row.get("phase") == "headroom" and row.get("engine") == plan["engine"]
                      and row.get("suite") == plan["suite"] and row.get("family") == plan["family"]
                      and row.get("pass_name") == plan["pass_name"], "headroom plan/row identity mismatch")
+            if reference is not None:
+                _require(row.get("source_commit") == source_commit and row.get("protocol_sha256") == source_protocol_sha,
+                         "reference row source identity mismatch")
         marker = path.parent / "attempt_complete.json"
         status = "unverified_or_partial"
         if marker.exists():
             receipt = _read_json(marker)
-            _require(receipt.get("protocol_sha256") == _sha(study / "protocol.json"), "headroom protocol changed")
+            _require(receipt.get("protocol_sha256") == source_protocol_sha, "headroom protocol changed")
             _require(receipt.get("files_sha256", {}).get("scored.json") == _sha(path), "headroom scored bytes changed")
+            if reference is not None:
+                _require(receipt.get("status") == "complete" and receipt.get("source_commit") == source_commit,
+                         "reference source is not complete or source changed")
             status = receipt.get("status", "unverified")
-            bindings[str(marker.relative_to(study))] = _sha(marker)
+            bindings[f"{binding_prefix}/attempt_complete.json"] = _sha(marker)
         execution.append(dict(engine=plan["engine"], status=status, measured_rows=len(data),
-                              planned_rows=plan.get("measured_count")))
+                              planned_rows=plan.get("measured_count"), **provenance))
         rows.extend(data)
-        bindings[str(path.relative_to(study))] = _sha(path)
+        bindings[f"{binding_prefix}/scored.json"] = _sha(path)
     if not rows:
         return None, bindings
     report = summarize_headroom_trials(rows)
     report["engine_coverage"] = execution
+    report["source_commits"] = sorted({entry["source_commit"] for entry in execution
+                                        if entry.get("measured_rows", 0) and entry.get("source_commit")})
+    report["mixed_execution_sources"] = len(report["source_commits"]) > 1
+    report["source_interpretation"] = ("Referenced clean leaves retain their original protocol and source; "
+                                       "successor profiling is a separate execution source. Compare native trajectories before cost transfer.")
     return report, bindings
 
 

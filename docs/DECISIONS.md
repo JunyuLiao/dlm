@@ -2331,3 +2331,25 @@ accuracy work. No further experiment is queued; full503 remains paused.
 - Qualification used471.963 GPU-reservation seconds. Runtime headroom is a
   separate clean/profile phase; the larger panel remains subject to the frozen
   budget and gates. See qualification/summary.md and native completion receipt.
+
+## 2026-10-18 — Preserve profiling failure and recover with explicit provenance
+
+Attempt001 completed qualification and all 20 clean headroom requests, then
+engine006 failed before any request because the profiling hook accessed an
+uninitialized phase during model startup. Preserve the failed attempt and its
+70.189-second reservation. The total charged reservation is 1,521.995 seconds.
+The repair makes inactive hooks pass through directly and adds startup tests.
+
+Use a new committed-source successor with explicit, hash-validated references
+to the five completed engines. Their original source/protocol identities stay
+visible. Only profiling and coordinator/report tooling change; active native
+and factorial code must remain byte-identical. The recovery addendum assigns
+300 seconds of the existing reserve to headroom, with the 7,200-second total
+and 3,900-second factorial limits unchanged. All attempts share one budget
+ledger. No result or missing cell is imputed and no old full503 work resumes.
+
+The clean controls demonstrate why consumer and trajectory controls are needed:
+FULL and PIECEWISE differ in N on both selected inputs; all-kept FA4 also flips
+the 41K answer relative to both. Fixed16's faster 41K request is incorrect while
+dynamic V31 is correct. These observations prevent promotion from timing alone;
+they do not establish benchmark-level accuracy differences.

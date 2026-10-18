@@ -88,3 +88,108 @@ def test_invalid_intervals_and_unbounded_profile_rejected(tmp_path):
         HeadroomCollector(tmp_path, profile_request_indices=(1,2))
     with pytest.raises(ValueError):
         HeadroomCollector(tmp_path, profile_request_indices=(0,))
+
+
+def test_collector_is_inert_before_first_request(tmp_path):
+    # This fake intentionally has no CUDA or profiler attributes. Startup must
+    # neither initialize torch nor record events, even when events are enabled.
+    collector = HeadroomCollector(tmp_path, torch_module=SimpleNamespace())
+    collector.record_phase(False)
+    with collector.scope('startup') as span:
+        assert span is None
+    assert collector.request_index == -1 and collector.phase == 'prefill'
+    assert not collector.active and collector.spans == []
+    assert dict(collector.phase_calls) == {} and collector.dropped_spans == 0
+    assert list(tmp_path.iterdir()) == []
+
+
+def fake_install_modules(monkeypatch):
+    import sys
+    from types import ModuleType
+    from scripts.v31_refresh_headroom_profile import install
+
+    class FlashAttentionImpl:
+        def forward(self, layer, value):
+            return value
+
+    class NativeGeometryAudit:
+        def record(self, encoder, draft, *args, **kwargs):
+            return (encoder, draft, args, kwargs)
+
+    names = ['vllm', 'vllm.v1', 'vllm.v1.attention', 'vllm.v1.attention.backends',
+             'vllm.v1.attention.backends.flash_attn']
+    for name in names:
+        module = ModuleType(name)
+        module.__path__ = []
+        monkeypatch.setitem(sys.modules, name, module)
+    fa = sys.modules[names[-1]]
+    fa.FlashAttentionImpl = FlashAttentionImpl
+    sys.modules[names[-2]].flash_attn = fa
+    audit = ModuleType('experiments.numerical_qk_reuse.v31_value_native_audit')
+    audit.NativeGeometryAudit = NativeGeometryAudit
+    monkeypatch.setitem(sys.modules, audit.__name__, audit)
+    return install, FlashAttentionImpl, NativeGeometryAudit
+
+
+@pytest.mark.parametrize('native', [False, True])
+def test_installed_hooks_pass_through_startup_and_excluded_warmup(monkeypatch, tmp_path, native):
+    install, Flash, Native = fake_install_modules(monkeypatch)
+    monkeypatch.delenv('VALUE_CLEAN_TIMING', raising=False)
+
+    class Layer:
+        @property
+        def layer_name(self):
+            raise AssertionError('inactive hook inspected layer state')
+
+    class Adapter:
+        @property
+        def calls(self):
+            raise AssertionError('inactive hook read uninitialized adapter counters')
+
+        def begin_request(self):
+            return 'original_begin'
+
+        def end_request(self):
+            return {'adapter': {'original': True}}
+
+        def on_prepare(self, encoder):
+            return encoder
+
+        def _buffers(self, value):
+            return value
+
+        sparse_lists = _buffers
+        _select_initial_refresh = _buffers
+        on_sample = _buffers
+
+    adapter = None if native else Adapter()
+    original_forward = Flash.forward
+    collector = install(adapter, output_dir=tmp_path, cuda_events=True)
+    collector.torch = SimpleNamespace()  # Any accidental CUDA call fails.
+    value = object()
+    try:
+        assert Flash().forward(Layer(), value) is value
+        if adapter is None:
+            assert Native().record(True, False, 'payload') == (True, False, ('payload',), {})
+            collector.begin_request()
+        else:
+            assert adapter._buffers(value) is value
+            assert adapter.sparse_lists(value) is value
+            assert adapter._select_initial_refresh(value) is value
+            assert adapter.on_sample(value) is value
+            assert adapter.on_prepare(True) is True
+            assert adapter.begin_request() == 'original_begin'
+        # First request is the excluded implicit warmup and must also bypass
+        # all state reads/events; startup has not shifted its index.
+        assert collector.request_index == 0 and not collector.active
+        assert Flash().forward(Layer(), value) is value
+        if adapter is not None:
+            assert adapter._buffers(value) is value
+            assert adapter.end_request()['adapter']['original'] is True
+        else:
+            assert collector.end_request(boundary_completed=True)['warmup'] is True
+        assert collector.spans == [] and dict(collector.phase_calls) == {}
+        assert list(tmp_path.iterdir()) == []
+    finally:
+        collector.close()
+    assert Flash.forward is original_forward
