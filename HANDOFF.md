@@ -1,3 +1,31 @@
+## Numerical replay and refresh attribution completed — 2026-10-18
+
+Verified execution checkpoint 9d864986; native source 6aab8632, capture/trace
+wrappers 62ae618b, bootstrap correction eaf69a67, CPU-analysis recovery 9d864986.
+Read results/v31_refresh_repeatability_20261018/analysis/attempt001/summary.md.
+All six snapshots and 192 replacement operator replays completed; output, z,
+active FP32 partial outputs and partial LSE match captures and both processes
+exactly. Layout/input/RNG/configuration checks pass. These are three unique
+first-refresh states, and they do not reproduce the old failing engine history.
+The old full-engine control drift remains unlocalized.
+
+Clean and NVTX runs each reproduce all eight original measured requests exactly.
+Request boundaries and all attention phase counts qualify; an independent parent-
+interval analyzer reproduces all 165 grouped CPU/GPU sums. Dynamic V31 progress
+refresh has only a 2.4–3.0% generous fixed-trajectory deletion screen. All dense
+GLOBAL decode phases give about 8%; including nonoverlapping held/carried buffer
+upkeep gives 10.04% at 41K and 9.13% at 112K, before any replacement cost. No-go
+for another cheap-refresh selector targeting >=10% improvement on these requests.
+Qualify a better runtime opportunity first; repeated sparse-path host execution
+and feasible long-output/concurrency regimes deserve measurement before a selector.
+
+Charged reservation 1334.421052 seconds (22.24/45 minutes), including the preserved
+238.743-second partial replay. Its CPU comparison recovery uses the existing
+reserve explicitly. All workers finished and GPU idle is verified. Capture index
+329 is 36K, distinct from runtime index339 at 41K; the description correction is
+preserved alongside the frozen protocol. No selector trial or further GPU work
+is queued. Older full503 stays paused at 17/128; older refresh coverage is unchanged.
+
 ## Bounded numerical repeatability and runtime attribution — 2026-10-18
 
 User authorized the follow-up in docs/REFRESH_REPEATABILITY_PLAN_20261018.md.

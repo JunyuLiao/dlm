@@ -1,0 +1,1027 @@
+{
+  "status": "complete_cpu_synthesis",
+  "numerical": [
+    {
+      "snapshot": "snapshot000.pt",
+      "event": {
+        "request": 2,
+        "canvas": 5,
+        "layer": 5,
+        "prefix": 70815,
+        "n": 256,
+        "call": 9
+      },
+      "auto_comparisons": 320,
+      "all_comparisons_exact": true,
+      "max_abs": 0.0,
+      "config_matches_capture": true,
+      "cross_process_hashes_match": true,
+      "input_and_rng_checks": true,
+      "native_capture_rng_unchanged": true,
+      "conditional_split1_repetitions": 0
+    },
+    {
+      "snapshot": "snapshot001.pt",
+      "event": {
+        "request": 3,
+        "canvas": 5,
+        "layer": 5,
+        "prefix": 70815,
+        "n": 256,
+        "call": 9
+      },
+      "auto_comparisons": 320,
+      "all_comparisons_exact": true,
+      "max_abs": 0.0,
+      "config_matches_capture": true,
+      "cross_process_hashes_match": true,
+      "input_and_rng_checks": true,
+      "native_capture_rng_unchanged": true,
+      "conditional_split1_repetitions": 0
+    },
+    {
+      "snapshot": "snapshot002.pt",
+      "event": {
+        "request": 4,
+        "canvas": 3,
+        "layer": 5,
+        "prefix": 36314,
+        "n": 256,
+        "call": 6
+      },
+      "auto_comparisons": 320,
+      "all_comparisons_exact": true,
+      "max_abs": 0.0,
+      "config_matches_capture": true,
+      "cross_process_hashes_match": true,
+      "input_and_rng_checks": true,
+      "native_capture_rng_unchanged": true,
+      "conditional_split1_repetitions": 0
+    },
+    {
+      "snapshot": "snapshot003.pt",
+      "event": {
+        "request": 5,
+        "canvas": 3,
+        "layer": 5,
+        "prefix": 36314,
+        "n": 256,
+        "call": 6
+      },
+      "auto_comparisons": 320,
+      "all_comparisons_exact": true,
+      "max_abs": 0.0,
+      "config_matches_capture": true,
+      "cross_process_hashes_match": true,
+      "input_and_rng_checks": true,
+      "native_capture_rng_unchanged": true,
+      "conditional_split1_repetitions": 0
+    },
+    {
+      "snapshot": "snapshot004.pt",
+      "event": {
+        "request": 6,
+        "canvas": 7,
+        "layer": 5,
+        "prefix": 111616,
+        "n": 256,
+        "call": 6
+      },
+      "auto_comparisons": 320,
+      "all_comparisons_exact": true,
+      "max_abs": 0.0,
+      "config_matches_capture": true,
+      "cross_process_hashes_match": true,
+      "input_and_rng_checks": true,
+      "native_capture_rng_unchanged": true,
+      "conditional_split1_repetitions": 0
+    },
+    {
+      "snapshot": "snapshot005.pt",
+      "event": {
+        "request": 7,
+        "canvas": 7,
+        "layer": 5,
+        "prefix": 111616,
+        "n": 256,
+        "call": 6
+      },
+      "auto_comparisons": 320,
+      "all_comparisons_exact": true,
+      "max_abs": 0.0,
+      "config_matches_capture": true,
+      "cross_process_hashes_match": true,
+      "input_and_rng_checks": true,
+      "native_capture_rng_unchanged": true,
+      "conditional_split1_repetitions": 0
+    }
+  ],
+  "numerical_sample_gate_passed": true,
+  "numerical_scope": "three unique input states, two native captures each, sixteen auto replays per snapshot in each of two processes; not a replay of the old failing engine history",
+  "attribution_gate_passed": true,
+  "missing_measured_attention_activity": [],
+  "measured_jit_warning_lines": [],
+  "runtime_metrics": [
+    {
+      "request": 3,
+      "index": 339,
+      "policy": "control",
+      "clean_W": 8.62558,
+      "clean_S": 7.53368,
+      "N": 325,
+      "C": 16,
+      "T": 3965,
+      "traced_W": 8.91032,
+      "progress": {
+        "cpu_s": 0.144999282,
+        "gpu_activity_sum_s": 0.111064295,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.029686534354791214
+      },
+      "all_dense_global_decode": {
+        "cpu_s": 0.306720928,
+        "gpu_activity_sum_s": 0.395432769,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.08140365018932061
+      },
+      "held_carried_buffer_cpu_plus_gpu_s": 0.163881933,
+      "dense_plus_buffer_deletion_fraction": 0.10040317636611104,
+      "phases": {
+        "prefill/local_attention": {
+          "calls": 75,
+          "cpu_s": 0.017876536,
+          "gpu_activity_sum_s": 0.065990099,
+          "gpu_union_s": 0.065990099
+        },
+        "prefill/global_dense": {
+          "calls": 15,
+          "cpu_s": 0.003558628,
+          "gpu_activity_sum_s": 0.442086479,
+          "gpu_union_s": 0.442086479
+        },
+        "denoise/local_attention": {
+          "calls": 8125,
+          "cpu_s": 1.785816909,
+          "gpu_activity_sum_s": 0.388457578,
+          "gpu_union_s": 0.388457578
+        },
+        "denoise/global_bootstrap_dense": {
+          "calls": 5,
+          "cpu_s": 0.004671954,
+          "gpu_activity_sum_s": 0.005546942,
+          "gpu_union_s": 0.005546942
+        },
+        "denoise/kv_buffer": {
+          "calls": 1625,
+          "cpu_s": 0.170542581,
+          "gpu_activity_sum_s": 0.012697752,
+          "gpu_union_s": 0.012697752
+        },
+        "denoise/global_initial": {
+          "calls": 80,
+          "cpu_s": 0.140023278,
+          "gpu_activity_sum_s": 0.110780608,
+          "gpu_union_s": 0.110780608
+        },
+        "denoise/selection": {
+          "calls": 160,
+          "cpu_s": 0.205337065,
+          "gpu_activity_sum_s": 0.215869,
+          "gpu_union_s": 0.215869
+        },
+        "denoise/observation": {
+          "calls": 160,
+          "cpu_s": 0.0307908,
+          "gpu_activity_sum_s": 0.171706089,
+          "gpu_union_s": 0.171706089
+        },
+        "denoise/mask_rank": {
+          "calls": 160,
+          "cpu_s": 0.058483513,
+          "gpu_activity_sum_s": 0.013805528,
+          "gpu_union_s": 0.013805528
+        },
+        "denoise/global_held": {
+          "calls": 1380,
+          "cpu_s": 0.849443178,
+          "gpu_activity_sum_s": 0.295517122,
+          "gpu_union_s": 0.295517122
+        },
+        "denoise/global_refresh": {
+          "calls": 80,
+          "cpu_s": 0.144999282,
+          "gpu_activity_sum_s": 0.111064295,
+          "gpu_union_s": 0.111064295
+        },
+        "commit/local_attention": {
+          "calls": 400,
+          "cpu_s": 0.082581722,
+          "gpu_activity_sum_s": 0.019263161,
+          "gpu_union_s": 0.019263161
+        },
+        "commit/global_dense": {
+          "calls": 80,
+          "cpu_s": 0.017026414,
+          "gpu_activity_sum_s": 0.168040924,
+          "gpu_union_s": 0.168040924
+        },
+        "denoise/global_carried": {
+          "calls": 80,
+          "cpu_s": 0.108196802,
+          "gpu_activity_sum_s": 0.032586994,
+          "gpu_union_s": 0.032586994
+        }
+      }
+    },
+    {
+      "request": 4,
+      "index": 339,
+      "policy": "fixed16",
+      "clean_W": 4.43228,
+      "clean_S": 3.3427,
+      "N": 146,
+      "C": 8,
+      "T": 2024,
+      "traced_W": 4.55942,
+      "progress": {
+        "cpu_s": 0.054168002,
+        "gpu_activity_sum_s": 0.040886346,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.02144592579891162
+      },
+      "all_dense_global_decode": {
+        "cpu_s": 0.136736047,
+        "gpu_activity_sum_s": 0.183366059,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.07222064174646005
+      },
+      "held_carried_buffer_cpu_plus_gpu_s": 0.074511352,
+      "dense_plus_buffer_deletion_fraction": 0.08903170783434258,
+      "phases": {
+        "prefill/local_attention": {
+          "calls": 75,
+          "cpu_s": 0.017666333,
+          "gpu_activity_sum_s": 0.066167261,
+          "gpu_union_s": 0.066167261
+        },
+        "prefill/global_dense": {
+          "calls": 15,
+          "cpu_s": 0.003427556,
+          "gpu_activity_sum_s": 0.442962529,
+          "gpu_union_s": 0.442962529
+        },
+        "denoise/local_attention": {
+          "calls": 3650,
+          "cpu_s": 0.801536092,
+          "gpu_activity_sum_s": 0.174692172,
+          "gpu_union_s": 0.174692172
+        },
+        "denoise/global_bootstrap_dense": {
+          "calls": 5,
+          "cpu_s": 0.00463728,
+          "gpu_activity_sum_s": 0.00567907,
+          "gpu_union_s": 0.00567907
+        },
+        "denoise/kv_buffer": {
+          "calls": 730,
+          "cpu_s": 0.07696401,
+          "gpu_activity_sum_s": 0.006363134,
+          "gpu_union_s": 0.006363134
+        },
+        "denoise/global_initial": {
+          "calls": 40,
+          "cpu_s": 0.069789634,
+          "gpu_activity_sum_s": 0.054585642,
+          "gpu_union_s": 0.054585642
+        },
+        "denoise/selection": {
+          "calls": 70,
+          "cpu_s": 0.089875941,
+          "gpu_activity_sum_s": 0.092862262,
+          "gpu_union_s": 0.092862262
+        },
+        "denoise/observation": {
+          "calls": 70,
+          "cpu_s": 0.013763292,
+          "gpu_activity_sum_s": 0.073697596,
+          "gpu_union_s": 0.073697596
+        },
+        "denoise/mask_rank": {
+          "calls": 70,
+          "cpu_s": 0.0251148,
+          "gpu_activity_sum_s": 0.005948351,
+          "gpu_union_s": 0.005948351
+        },
+        "denoise/global_held": {
+          "calls": 615,
+          "cpu_s": 0.37708457,
+          "gpu_activity_sum_s": 0.13078053,
+          "gpu_union_s": 0.13078053
+        },
+        "denoise/global_refresh": {
+          "calls": 30,
+          "cpu_s": 0.054168002,
+          "gpu_activity_sum_s": 0.040886346,
+          "gpu_union_s": 0.040886346
+        },
+        "commit/local_attention": {
+          "calls": 200,
+          "cpu_s": 0.039924617,
+          "gpu_activity_sum_s": 0.009642556,
+          "gpu_union_s": 0.009642556
+        },
+        "commit/global_dense": {
+          "calls": 40,
+          "cpu_s": 0.008141131,
+          "gpu_activity_sum_s": 0.082215001,
+          "gpu_union_s": 0.082215001
+        },
+        "denoise/global_carried": {
+          "calls": 40,
+          "cpu_s": 0.053911521,
+          "gpu_activity_sum_s": 0.016132058,
+          "gpu_union_s": 0.016132058
+        }
+      }
+    },
+    {
+      "request": 5,
+      "index": 254,
+      "policy": "control",
+      "clean_W": 10.92038,
+      "clean_S": 6.02356,
+      "N": 238,
+      "C": 11,
+      "T": 2622,
+      "traced_W": 11.07927,
+      "progress": {
+        "cpu_s": 0.097688301,
+        "gpu_activity_sum_s": 0.168335757,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.02436032976874431
+      },
+      "all_dense_global_decode": {
+        "cpu_s": 0.212873164,
+        "gpu_activity_sum_s": 0.652118935,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.07920897432140639
+      },
+      "held_carried_buffer_cpu_plus_gpu_s": 0.132423787,
+      "dense_plus_buffer_deletion_fraction": 0.09133527276523343,
+      "phases": {
+        "prefill/local_attention": {
+          "calls": 175,
+          "cpu_s": 0.041251951,
+          "gpu_activity_sum_s": 0.173245968,
+          "gpu_union_s": 0.173245968
+        },
+        "prefill/global_dense": {
+          "calls": 35,
+          "cpu_s": 0.008202785,
+          "gpu_activity_sum_s": 3.180611597,
+          "gpu_union_s": 3.180611597
+        },
+        "denoise/local_attention": {
+          "calls": 5950,
+          "cpu_s": 1.317808433,
+          "gpu_activity_sum_s": 0.275885129,
+          "gpu_union_s": 0.275885129
+        },
+        "denoise/global_bootstrap_dense": {
+          "calls": 5,
+          "cpu_s": 0.007343207,
+          "gpu_activity_sum_s": 0.01421289,
+          "gpu_union_s": 0.01421289
+        },
+        "denoise/kv_buffer": {
+          "calls": 1190,
+          "cpu_s": 0.126874559,
+          "gpu_activity_sum_s": 0.020425686,
+          "gpu_union_s": 0.020425686
+        },
+        "denoise/global_initial": {
+          "calls": 55,
+          "cpu_s": 0.096479044,
+          "gpu_activity_sum_s": 0.168234358,
+          "gpu_union_s": 0.168234358
+        },
+        "denoise/selection": {
+          "calls": 110,
+          "cpu_s": 0.140628404,
+          "gpu_activity_sum_s": 0.332202565,
+          "gpu_union_s": 0.332202565
+        },
+        "denoise/observation": {
+          "calls": 110,
+          "cpu_s": 0.022211479,
+          "gpu_activity_sum_s": 0.283156901,
+          "gpu_union_s": 0.283156901
+        },
+        "denoise/mask_rank": {
+          "calls": 110,
+          "cpu_s": 0.041951344,
+          "gpu_activity_sum_s": 0.018024498,
+          "gpu_union_s": 0.018024498
+        },
+        "denoise/global_held": {
+          "calls": 1020,
+          "cpu_s": 0.631128319,
+          "gpu_activity_sum_s": 0.218533801,
+          "gpu_union_s": 0.218533801
+        },
+        "denoise/global_refresh": {
+          "calls": 55,
+          "cpu_s": 0.097688301,
+          "gpu_activity_sum_s": 0.168335757,
+          "gpu_union_s": 0.168335757
+        },
+        "commit/local_attention": {
+          "calls": 275,
+          "cpu_s": 0.055360438,
+          "gpu_activity_sum_s": 0.012875451,
+          "gpu_union_s": 0.012875451
+        },
+        "commit/global_dense": {
+          "calls": 55,
+          "cpu_s": 0.011362612,
+          "gpu_activity_sum_s": 0.30133593,
+          "gpu_union_s": 0.30133593
+        },
+        "denoise/global_carried": {
+          "calls": 55,
+          "cpu_s": 0.076259009,
+          "gpu_activity_sum_s": 0.033128749,
+          "gpu_union_s": 0.033128749
+        }
+      }
+    },
+    {
+      "request": 6,
+      "index": 254,
+      "policy": "fixed16",
+      "clean_W": 11.61957,
+      "clean_S": 6.72215,
+      "N": 279,
+      "C": 13,
+      "T": 3170,
+      "traced_W": 11.85617,
+      "progress": {
+        "cpu_s": 0.080890326,
+        "gpu_activity_sum_s": 0.138157018,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.018851587795417558
+      },
+      "all_dense_global_decode": {
+        "cpu_s": 0.211520446,
+        "gpu_activity_sum_s": 0.708275789,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.0791592317960131
+      },
+      "held_carried_buffer_cpu_plus_gpu_s": 0.155017723,
+      "dense_plus_buffer_deletion_fraction": 0.09250032126834297,
+      "phases": {
+        "prefill/local_attention": {
+          "calls": 175,
+          "cpu_s": 0.040964712,
+          "gpu_activity_sum_s": 0.173561449,
+          "gpu_union_s": 0.173561449
+        },
+        "prefill/global_dense": {
+          "calls": 35,
+          "cpu_s": 0.008240507,
+          "gpu_activity_sum_s": 3.183043253,
+          "gpu_union_s": 3.183043253
+        },
+        "denoise/local_attention": {
+          "calls": 6975,
+          "cpu_s": 1.545419814,
+          "gpu_activity_sum_s": 0.32318712,
+          "gpu_union_s": 0.32318712
+        },
+        "denoise/global_bootstrap_dense": {
+          "calls": 5,
+          "cpu_s": 0.006260878,
+          "gpu_activity_sum_s": 0.014342937,
+          "gpu_union_s": 0.014342937
+        },
+        "denoise/kv_buffer": {
+          "calls": 1395,
+          "cpu_s": 0.145127471,
+          "gpu_activity_sum_s": 0.023931475,
+          "gpu_union_s": 0.023931475
+        },
+        "denoise/global_initial": {
+          "calls": 65,
+          "cpu_s": 0.111016733,
+          "gpu_activity_sum_s": 0.199118727,
+          "gpu_union_s": 0.199118727
+        },
+        "denoise/selection": {
+          "calls": 110,
+          "cpu_s": 0.138333546,
+          "gpu_activity_sum_s": 0.332913921,
+          "gpu_union_s": 0.332913921
+        },
+        "denoise/observation": {
+          "calls": 110,
+          "cpu_s": 0.021300203,
+          "gpu_activity_sum_s": 0.283922929,
+          "gpu_union_s": 0.283922929
+        },
+        "denoise/mask_rank": {
+          "calls": 110,
+          "cpu_s": 0.040609748,
+          "gpu_activity_sum_s": 0.017984061,
+          "gpu_union_s": 0.017984061
+        },
+        "denoise/global_held": {
+          "calls": 1215,
+          "cpu_s": 0.736242348,
+          "gpu_activity_sum_s": 0.260316095,
+          "gpu_union_s": 0.260316095
+        },
+        "commit/local_attention": {
+          "calls": 325,
+          "cpu_s": 0.065496428,
+          "gpu_activity_sum_s": 0.015189017,
+          "gpu_union_s": 0.015189017
+        },
+        "commit/global_dense": {
+          "calls": 65,
+          "cpu_s": 0.013352509,
+          "gpu_activity_sum_s": 0.356657107,
+          "gpu_union_s": 0.356657107
+        },
+        "denoise/global_carried": {
+          "calls": 65,
+          "cpu_s": 0.087992941,
+          "gpu_activity_sum_s": 0.03924529,
+          "gpu_union_s": 0.03924529
+        },
+        "denoise/global_refresh": {
+          "calls": 45,
+          "cpu_s": 0.080890326,
+          "gpu_activity_sum_s": 0.138157018,
+          "gpu_union_s": 0.138157018
+        }
+      }
+    },
+    {
+      "request": 7,
+      "index": 339,
+      "policy": "fixed16",
+      "clean_W": 4.43471,
+      "clean_S": 3.34364,
+      "N": 146,
+      "C": 8,
+      "T": 2024,
+      "traced_W": 4.55648,
+      "progress": {
+        "cpu_s": 0.054173747,
+        "gpu_activity_sum_s": 0.040922762,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.021443681548511628
+      },
+      "all_dense_global_decode": {
+        "cpu_s": 0.136006193,
+        "gpu_activity_sum_s": 0.183289632,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.07199925699763908
+      },
+      "held_carried_buffer_cpu_plus_gpu_s": 0.074488756,
+      "dense_plus_buffer_deletion_fraction": 0.08879601619948091,
+      "phases": {
+        "prefill/local_attention": {
+          "calls": 75,
+          "cpu_s": 0.017571557,
+          "gpu_activity_sum_s": 0.066302555,
+          "gpu_union_s": 0.066302555
+        },
+        "prefill/global_dense": {
+          "calls": 15,
+          "cpu_s": 0.003482719,
+          "gpu_activity_sum_s": 0.439911371,
+          "gpu_union_s": 0.439911371
+        },
+        "denoise/local_attention": {
+          "calls": 3650,
+          "cpu_s": 0.803399935,
+          "gpu_activity_sum_s": 0.174752118,
+          "gpu_union_s": 0.174752118
+        },
+        "denoise/global_bootstrap_dense": {
+          "calls": 5,
+          "cpu_s": 0.004567733,
+          "gpu_activity_sum_s": 0.005622365,
+          "gpu_union_s": 0.005622365
+        },
+        "denoise/kv_buffer": {
+          "calls": 730,
+          "cpu_s": 0.076837091,
+          "gpu_activity_sum_s": 0.006364636,
+          "gpu_union_s": 0.006364636
+        },
+        "denoise/global_initial": {
+          "calls": 40,
+          "cpu_s": 0.069086176,
+          "gpu_activity_sum_s": 0.054609892,
+          "gpu_union_s": 0.054609892
+        },
+        "denoise/selection": {
+          "calls": 70,
+          "cpu_s": 0.089384963,
+          "gpu_activity_sum_s": 0.092922544,
+          "gpu_union_s": 0.092922544
+        },
+        "denoise/observation": {
+          "calls": 70,
+          "cpu_s": 0.01338111,
+          "gpu_activity_sum_s": 0.073760311,
+          "gpu_union_s": 0.073760311
+        },
+        "denoise/mask_rank": {
+          "calls": 70,
+          "cpu_s": 0.025202975,
+          "gpu_activity_sum_s": 0.005957344,
+          "gpu_union_s": 0.005957344
+        },
+        "denoise/global_held": {
+          "calls": 615,
+          "cpu_s": 0.378519976,
+          "gpu_activity_sum_s": 0.130758434,
+          "gpu_union_s": 0.130758434
+        },
+        "denoise/global_refresh": {
+          "calls": 30,
+          "cpu_s": 0.054173747,
+          "gpu_activity_sum_s": 0.040922762,
+          "gpu_union_s": 0.040922762
+        },
+        "commit/local_attention": {
+          "calls": 200,
+          "cpu_s": 0.040134412,
+          "gpu_activity_sum_s": 0.009638875,
+          "gpu_union_s": 0.009638875
+        },
+        "commit/global_dense": {
+          "calls": 40,
+          "cpu_s": 0.008178537,
+          "gpu_activity_sum_s": 0.082134613,
+          "gpu_union_s": 0.082134613
+        },
+        "denoise/global_carried": {
+          "calls": 40,
+          "cpu_s": 0.05373945,
+          "gpu_activity_sum_s": 0.016103162,
+          "gpu_union_s": 0.016103162
+        }
+      }
+    },
+    {
+      "request": 8,
+      "index": 339,
+      "policy": "control",
+      "clean_W": 8.62777,
+      "clean_S": 7.53817,
+      "N": 325,
+      "C": 16,
+      "T": 3965,
+      "traced_W": 8.92133,
+      "progress": {
+        "cpu_s": 0.145290237,
+        "gpu_activity_sum_s": 0.111098752,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.02971671579098654
+      },
+      "all_dense_global_decode": {
+        "cpu_s": 0.305817387,
+        "gpu_activity_sum_s": 0.395717647,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.08131128136239144
+      },
+      "held_carried_buffer_cpu_plus_gpu_s": 0.164732952,
+      "dense_plus_buffer_deletion_fraction": 0.1004046220518164,
+      "phases": {
+        "prefill/local_attention": {
+          "calls": 75,
+          "cpu_s": 0.01760417,
+          "gpu_activity_sum_s": 0.066286426,
+          "gpu_union_s": 0.066286426
+        },
+        "prefill/global_dense": {
+          "calls": 15,
+          "cpu_s": 0.003456823,
+          "gpu_activity_sum_s": 0.440644027,
+          "gpu_union_s": 0.440644027
+        },
+        "denoise/local_attention": {
+          "calls": 8125,
+          "cpu_s": 1.804762725,
+          "gpu_activity_sum_s": 0.388591329,
+          "gpu_union_s": 0.388591329
+        },
+        "denoise/global_bootstrap_dense": {
+          "calls": 5,
+          "cpu_s": 0.004688022,
+          "gpu_activity_sum_s": 0.005639998,
+          "gpu_union_s": 0.005639998
+        },
+        "denoise/kv_buffer": {
+          "calls": 1625,
+          "cpu_s": 0.170581351,
+          "gpu_activity_sum_s": 0.012735444,
+          "gpu_union_s": 0.012735444
+        },
+        "denoise/global_initial": {
+          "calls": 80,
+          "cpu_s": 0.139333829,
+          "gpu_activity_sum_s": 0.110792169,
+          "gpu_union_s": 0.110792169
+        },
+        "denoise/selection": {
+          "calls": 160,
+          "cpu_s": 0.206082536,
+          "gpu_activity_sum_s": 0.215915568,
+          "gpu_union_s": 0.215915568
+        },
+        "denoise/observation": {
+          "calls": 160,
+          "cpu_s": 0.031865082,
+          "gpu_activity_sum_s": 0.171761188,
+          "gpu_union_s": 0.171761188
+        },
+        "denoise/mask_rank": {
+          "calls": 160,
+          "cpu_s": 0.058618836,
+          "gpu_activity_sum_s": 0.013804696,
+          "gpu_union_s": 0.013804696
+        },
+        "denoise/global_held": {
+          "calls": 1380,
+          "cpu_s": 0.854230963,
+          "gpu_activity_sum_s": 0.296068774,
+          "gpu_union_s": 0.296068774
+        },
+        "denoise/global_refresh": {
+          "calls": 80,
+          "cpu_s": 0.145290237,
+          "gpu_activity_sum_s": 0.111098752,
+          "gpu_union_s": 0.111098752
+        },
+        "commit/local_attention": {
+          "calls": 400,
+          "cpu_s": 0.080166663,
+          "gpu_activity_sum_s": 0.019276182,
+          "gpu_union_s": 0.019276182
+        },
+        "commit/global_dense": {
+          "calls": 80,
+          "cpu_s": 0.016505299,
+          "gpu_activity_sum_s": 0.168186728,
+          "gpu_union_s": 0.168186728
+        },
+        "denoise/global_carried": {
+          "calls": 80,
+          "cpu_s": 0.108172467,
+          "gpu_activity_sum_s": 0.03263486,
+          "gpu_union_s": 0.03263486
+        }
+      }
+    },
+    {
+      "request": 9,
+      "index": 254,
+      "policy": "fixed16",
+      "clean_W": 11.63244,
+      "clean_S": 6.72125,
+      "N": 279,
+      "C": 13,
+      "T": 3170,
+      "traced_W": 11.85124,
+      "progress": {
+        "cpu_s": 0.080742074,
+        "gpu_activity_sum_s": 0.138223239,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.0188236786950975
+      },
+      "all_dense_global_decode": {
+        "cpu_s": 0.212792382,
+        "gpu_activity_sum_s": 0.708340671,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.07918657246459039
+      },
+      "held_carried_buffer_cpu_plus_gpu_s": 0.155106972,
+      "dense_plus_buffer_deletion_fraction": 0.09252057392945932,
+      "phases": {
+        "prefill/local_attention": {
+          "calls": 175,
+          "cpu_s": 0.041031158,
+          "gpu_activity_sum_s": 0.173577722,
+          "gpu_union_s": 0.173577722
+        },
+        "prefill/global_dense": {
+          "calls": 35,
+          "cpu_s": 0.00799648,
+          "gpu_activity_sum_s": 3.189868513,
+          "gpu_union_s": 3.189868513
+        },
+        "denoise/local_attention": {
+          "calls": 6975,
+          "cpu_s": 1.542811932,
+          "gpu_activity_sum_s": 0.323339624,
+          "gpu_union_s": 0.323339624
+        },
+        "denoise/global_bootstrap_dense": {
+          "calls": 5,
+          "cpu_s": 0.006595025,
+          "gpu_activity_sum_s": 0.014118937,
+          "gpu_union_s": 0.014118937
+        },
+        "denoise/kv_buffer": {
+          "calls": 1395,
+          "cpu_s": 0.145165118,
+          "gpu_activity_sum_s": 0.023894927,
+          "gpu_union_s": 0.023894927
+        },
+        "denoise/global_initial": {
+          "calls": 65,
+          "cpu_s": 0.112061524,
+          "gpu_activity_sum_s": 0.199130948,
+          "gpu_union_s": 0.199130948
+        },
+        "denoise/selection": {
+          "calls": 110,
+          "cpu_s": 0.139202851,
+          "gpu_activity_sum_s": 0.332995374,
+          "gpu_union_s": 0.332995374
+        },
+        "denoise/observation": {
+          "calls": 110,
+          "cpu_s": 0.021530906,
+          "gpu_activity_sum_s": 0.283994923,
+          "gpu_union_s": 0.283994923
+        },
+        "denoise/mask_rank": {
+          "calls": 110,
+          "cpu_s": 0.040859251,
+          "gpu_activity_sum_s": 0.017975321,
+          "gpu_union_s": 0.017975321
+        },
+        "denoise/global_held": {
+          "calls": 1215,
+          "cpu_s": 0.738089242,
+          "gpu_activity_sum_s": 0.260156246,
+          "gpu_union_s": 0.260156246
+        },
+        "commit/local_attention": {
+          "calls": 325,
+          "cpu_s": 0.065347738,
+          "gpu_activity_sum_s": 0.015198808,
+          "gpu_union_s": 0.015198808
+        },
+        "commit/global_dense": {
+          "calls": 65,
+          "cpu_s": 0.013393759,
+          "gpu_activity_sum_s": 0.356867547,
+          "gpu_union_s": 0.356867547
+        },
+        "denoise/global_carried": {
+          "calls": 65,
+          "cpu_s": 0.087973326,
+          "gpu_activity_sum_s": 0.039232678,
+          "gpu_union_s": 0.039232678
+        },
+        "denoise/global_refresh": {
+          "calls": 45,
+          "cpu_s": 0.080742074,
+          "gpu_activity_sum_s": 0.138223239,
+          "gpu_union_s": 0.138223239
+        }
+      }
+    },
+    {
+      "request": 10,
+      "index": 254,
+      "policy": "control",
+      "clean_W": 10.89959,
+      "clean_S": 6.00547,
+      "N": 238,
+      "C": 11,
+      "T": 2622,
+      "traced_W": 11.10205,
+      "progress": {
+        "cpu_s": 0.097202938,
+        "gpu_activity_sum_s": 0.168528552,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.024379952823913562
+      },
+      "all_dense_global_decode": {
+        "cpu_s": 0.211041166,
+        "gpu_activity_sum_s": 0.652926072,
+        "optimistic_fixed_trajectory_deletion_fraction": 0.07926603092409898
+      },
+      "held_carried_buffer_cpu_plus_gpu_s": 0.130869328,
+      "dense_plus_buffer_deletion_fraction": 0.09127284292344942,
+      "phases": {
+        "prefill/local_attention": {
+          "calls": 175,
+          "cpu_s": 0.041453789,
+          "gpu_activity_sum_s": 0.173396533,
+          "gpu_union_s": 0.173396533
+        },
+        "prefill/global_dense": {
+          "calls": 35,
+          "cpu_s": 0.008132326,
+          "gpu_activity_sum_s": 3.193815568,
+          "gpu_union_s": 3.193815568
+        },
+        "denoise/local_attention": {
+          "calls": 5950,
+          "cpu_s": 1.322925452,
+          "gpu_activity_sum_s": 0.275909776,
+          "gpu_union_s": 0.275909776
+        },
+        "denoise/global_bootstrap_dense": {
+          "calls": 5,
+          "cpu_s": 0.00630813,
+          "gpu_activity_sum_s": 0.014640854,
+          "gpu_union_s": 0.014640854
+        },
+        "denoise/kv_buffer": {
+          "calls": 1190,
+          "cpu_s": 0.124617398,
+          "gpu_activity_sum_s": 0.020384787,
+          "gpu_union_s": 0.020384787
+        },
+        "denoise/global_initial": {
+          "calls": 55,
+          "cpu_s": 0.095882055,
+          "gpu_activity_sum_s": 0.16826781,
+          "gpu_union_s": 0.16826781
+        },
+        "denoise/selection": {
+          "calls": 110,
+          "cpu_s": 0.139288707,
+          "gpu_activity_sum_s": 0.332423915,
+          "gpu_union_s": 0.332423915
+        },
+        "denoise/observation": {
+          "calls": 110,
+          "cpu_s": 0.022353835,
+          "gpu_activity_sum_s": 0.283375433,
+          "gpu_union_s": 0.283375433
+        },
+        "denoise/mask_rank": {
+          "calls": 110,
+          "cpu_s": 0.041363358,
+          "gpu_activity_sum_s": 0.01802812,
+          "gpu_union_s": 0.01802812
+        },
+        "denoise/global_held": {
+          "calls": 1020,
+          "cpu_s": 0.629623301,
+          "gpu_activity_sum_s": 0.218521783,
+          "gpu_union_s": 0.218521783
+        },
+        "denoise/global_refresh": {
+          "calls": 55,
+          "cpu_s": 0.097202938,
+          "gpu_activity_sum_s": 0.168528552,
+          "gpu_union_s": 0.168528552
+        },
+        "commit/local_attention": {
+          "calls": 275,
+          "cpu_s": 0.055200698,
+          "gpu_activity_sum_s": 0.01286066,
+          "gpu_union_s": 0.01286066
+        },
+        "commit/global_dense": {
+          "calls": 55,
+          "cpu_s": 0.011648043,
+          "gpu_activity_sum_s": 0.301488856,
+          "gpu_union_s": 0.301488856
+        },
+        "denoise/global_carried": {
+          "calls": 55,
+          "cpu_s": 0.074699351,
+          "gpu_activity_sum_s": 0.033131269,
+          "gpu_union_s": 0.033131269
+        }
+      }
+    }
+  ],
+  "reservation_seconds": {
+    "capture": 234.2265015259618,
+    "attribution": 567.8462174820015,
+    "replay": 385.97047580301296,
+    "recovery": 146.37785720697138
+  },
+  "total_reservation_seconds": 1334.4210520179477,
+  "cap_seconds": 2700.0,
+  "assumptions": "Deletion screen sums inclusive parent CPU duration and associated GPU activity duration; deliberately double counts overlap, assumes unchanged future trajectory, and is not a measured speedup.",
+  "further_selector_launched": false,
+  "input_sha256": {
+    "results/v31_refresh_repeatability_20261018/attempt001/protocol.json": "fd2423ee833314643e1afd9a35f05a1c0db0b504b81f2d0e103c09623ed0a958",
+    "results/v31_refresh_repeatability_20261018/attempt001/protocol_description_correction.json": "d320b035ba101a29e40320be3246052afc3db263459b7f471a4c664fbc8c2911",
+    "results/v31_refresh_repeatability_20261018/attempt001/capture/probe.json": "756b3503af8cb70aad5e3b73e43486ec715bd6e477b32cb21dbf20b4bfe8f878",
+    "results/v31_refresh_repeatability_20261018/attempt001/capture/historical_hash_comparison.json": "bae86ce90ba05498553fb330baf6008e989f3a2de599d080affe18fee9a342d4",
+    "results/v31_refresh_repeatability_20261018/replay_corrected/attempt002/protocol.json": "a0ed3723731e95264036b10eb4979fec6635846b41594edd180f0ab91ed513f2",
+    "results/v31_refresh_repeatability_20261018/analysis/attempt001/kv_buffer_attribution.json": "1b30f7f06966fe701c72082fe725b192c9ed3e7402a022c5f54c11166468d835",
+    "results/v31_refresh_repeatability_20261018/attempt001/nvtx/attribution.json": "a67b03697d25feb0ad756829b6f993a843c24e9c01ada9dec26326a6f63fca20",
+    "results/v31_refresh_repeatability_20261018/attempt001/clean/records.jsonl": "3be03899213ab1d55db42fcc9a1f0e1cbadee0ca3a81f12826363c916b229793",
+    "results/v31_refresh_repeatability_20261018/attempt001/nvtx/records.jsonl": "9dc35407e71f419f54c62cf5f653ca3a9625935de2c290e1357e66c2d525401b",
+    "results/v31_refresh_repeatability_20261018/gpu_budget.json": "8fc6ed58a522fbfcb879499b016f5c25085886e48a31d731e81747ba71e80bd7",
+    "results/v31_refresh_repeatability_20261018/replay_corrected/attempt002/engine001/receipt.json": "a9a901284bb09d24497302bdbeeae681a113bc0a71e3d14a0620a468a459b1df",
+    "results/v31_refresh_repeatability_20261018/replay_corrected/attempt002/engine001/bootstrap_receipt.json": "f051bf3bd6e9294da3068d5afc86ae3bd4e3d2a6afdfb0ab4af736b6123d651e",
+    "results/v31_refresh_repeatability_20261018/replay_corrected/attempt002/engine001/analysis/summary.json": "efce53ce7508337e6ac1045dc30c722847354cc864d70a7d47f5a7c4fcd49184",
+    "results/v31_refresh_repeatability_20261018/replay_corrected/attempt002/engine002/receipt.json": "f39d3c798e2d822c06cef8c2c67683f5e581d32e268f6851b0515591dc415471",
+    "results/v31_refresh_repeatability_20261018/replay_corrected/attempt002/engine002/bootstrap_receipt.json": "f051bf3bd6e9294da3068d5afc86ae3bd4e3d2a6afdfb0ab4af736b6123d651e",
+    "results/v31_refresh_repeatability_20261018/replay_corrected/attempt002/engine002/analysis/summary.json": "f4a137bb5ab174ef788f2076b00f505f58ff360e81da2d41e9ae34ce8897d703"
+  },
+  "analysis_source_sha256": "3e913071ea7128da8459ac1a3f5a907c5e7f2e051462529f16fb79119950f32d"
+}

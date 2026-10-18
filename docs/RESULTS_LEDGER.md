@@ -2116,3 +2116,36 @@ Total reservation 5423.862923 s (90.40 min), within 7200 s including failures an
 external processing; all reservations closed and GPU idle verified. No older
 full503 work resumed. Consolidated report:
 results/v31_refresh_diagnostic_20261018/analysis/attempt001/summary.md.
+
+## 2026-10-18 — Complete bounded repeatability and refresh attribution follow-up
+
+Campaign results/v31_refresh_repeatability_20261018; completion and source/input
+bindings in analysis/attempt001/final_complete.json. Sources 62ae618b/eaf69a67/
+9d864986 wrap unchanged original native6aab8632. Six snapshots, two independent
+successful replay processes, 192 measured operator calls; eight clean and eight
+NVTX measured native requests. Native capture has six measured requests plus
+warmups and is diagnostic, not clean timing. All replacements and control/trace
+coverage complete; partial/unstarted predecessors remain preserved.
+
+Numerical gate passes on three unique first-refresh states: all replay outputs,
+z, active FP32 partial outputs and partial LSE match captures and repeats exactly;
+resolved auto splitting is16 in all cases. No fixed-split localization was needed.
+The historical control drift remains unexplained because its actual Q/K/V state
+was not reproduced. No global determinism or task-accuracy claim follows.
+
+Runtime parity and attribution gates pass. New clean and annotated requests
+match original clean output/N/C/T/finish/native counters exactly. All attention
+scopes reconcile; independent nonoverlapping-parent accounting reproduces165
+CPU/GPU/call/activity groups. Dynamic41K/112K clean W is8.626675/10.909985s.
+Progress-only optimistic deletion screens are2.970%/2.437%; all dense GLOBAL
+decode phases8.136%/7.924%; additionally removing nonoverlapping held/carried
+buffer upkeep10.040%/9.130%. CPU/GPU overlap is double-counted deliberately;
+these are fixed-trajectory cost screens, not measured speedups. Replacement
+costs leave no established >=10% net request benefit in these measured settings.
+
+Decision: no new selector sweep here; qualify a larger execution/workload
+opportunity first. Partial attempt238.743s and CPU-only recovery are charged.
+Total1334.421052s=22.24/45min, GPU idle, no further work queued. Twenty-nine
+relevant CPU tests and source/snapshot/cache/trace integrity checks passed.
+The capture329 versus runtime339 description correction remains explicit.
+No older full503 campaign resumed. See analysis/attempt001/summary.md for limits.

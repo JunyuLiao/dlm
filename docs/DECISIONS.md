@@ -2423,3 +2423,40 @@ current-output necessity nor cheap refresh accuracy/latency is established.
 Use answer quality, native decisions and physical work together, since fewer
 calls can accompany a worse answer. See the consolidated analysis at
 results/v31_refresh_diagnostic_20261018/analysis/attempt001/summary.md.
+
+## 2026-10-18 — Numerical sample passes; measured refresh opportunity is too small
+
+Completed the separately authorized 2700-second follow-up under native source
+6aab8632, capture/NVTX source 62ae618b and recovered CPU replay source 9d864986.
+Six first-refresh captures (three unique inputs) and 192 measured automatic-split
+operator replays match exactly for output, observation z, active partial outputs
+and partial LSE. Layout, input, RNG and recorded configuration checks pass in two
+independent processes. The recaptured 70K event has the old geometry but different
+Q/K/V bytes; this does not explain or erase the old full-engine control drift.
+
+All eight clean and eight NVTX-measured requests reproduce the original clean
+outputs/trajectories/counters. Qualified request windows, full attention scope
+counts, zero ambiguous launch attribution and an independent 165-group arithmetic
+reproduction support phase-specific cost accounting. No monitored runtime JIT
+occurs after warmup and no measured request captures a new CUDA graph.
+
+Dynamic V31's progress-refresh CPU-plus-GPU deletion screen is 2.97%/2.44% of
+clean request W at 41K/112K. Even free replacement of bootstrap, initialization,
+refresh and GLOBAL commit attention gives 8.14%/7.92%. Adding held/carried KV-buffer
+upkeep without double counting gives 10.04%/9.13%, before replacement costs. These
+are deliberately generous fixed-trajectory screens, not measured savings or
+universal algorithmic bounds. The 41K extended ceiling leaves only about 3.5ms
+per request beyond the 10% bar. No credible >=10% net opportunity is established.
+
+Do not start another cheap-refresh selector sweep in these measured settings.
+First qualify runtime margin in repeated sparse execution or a feasible long-
+output/concurrency/model regime. Different trajectories and workloads require
+new measurements. Preserve V31/fixed16 as controls; this result does not promote
+fixed16 from a faster but incorrect answer or revive refresh-timing novelty.
+
+Preserve two unstarted original replay leaves, the correctly bootstrapped but
+CPU-slow partial replay, and its explicit CPU-only repair. Preserve the capture
+index description correction (329 is36K; runtime339 is41K). Total reservation
+1334.421052s=22.24min, within45min; all reservations closed and GPU idle. No selector
+or older full503 continuation. Full report:
+results/v31_refresh_repeatability_20261018/analysis/attempt001/summary.md.
