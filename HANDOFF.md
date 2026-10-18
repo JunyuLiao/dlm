@@ -1,3 +1,20 @@
+## Bounded numerical repeatability and runtime attribution — 2026-10-18
+
+User authorized the follow-up in docs/REFRESH_REPEATABILITY_PLAN_20261018.md.
+Verified starting checkpoint 8ac2e3cb. Freeze new wrappers/tests before preparing
+results/v31_refresh_repeatability_20261018/attempt001. Native source remains the
+original 6aab8632 snapshot; production selectors and installed packages stay
+unchanged. The new 2700-second cap allocates capture 900, isolated replay 600,
+attribution 900 and recovery 300, counting startup, warmups and failures.
+
+Planned: six first-refresh snapshots (three inputs, two repeats), two isolated
+layout-preserving operator processes, then the original clean schedule and an
+NVTX/CUDA trace. Go requires operator repeatability and complete, clean-parity
+phase attribution; a selector trial additionally needs plausible >=10% request
+benefit after replacement cost at matched quality. Unknowns do not pass. Both
+older campaigns remain preserved; full503 stays paused. No selector trial or
+batch/model expansion belongs to this protocol. CPU diagnostics: 26 tests pass.
+
 ## Bounded refresh diagnostics finished — 2026-10-18
 
 Verified repository checkpoint 2f5687d4; native sources 6aab8632/db755c43 and
