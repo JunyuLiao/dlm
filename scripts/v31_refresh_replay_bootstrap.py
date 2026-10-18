@@ -11,7 +11,8 @@ import time
 
 ROOT=Path(__file__).resolve().parents[1]
 REL='scripts/v31_refresh_replay_bootstrap.py'
-REQUIRED=(REL,'docs/REFRESH_REPLAY_BOOTSTRAP_20261018.md','tests/test_v31_refresh_replay_bootstrap.py')
+REQUIRED=(REL,'docs/REFRESH_REPLAY_BOOTSTRAP_20261018.md','tests/test_v31_refresh_replay_bootstrap.py',
+          'docs/REFRESH_REPLAY_CPU_RECOVERY_20261018.md','scripts/v31_refresh_replay_metrics_fast.py')
 
 
 def boot_observer(apply_patch,load_observer):
@@ -22,6 +23,9 @@ def boot_observer(apply_patch,load_observer):
 
 def child(parent,output):
     import hashlib
+    import importlib.util
+    import torch
+    torch.set_num_threads(1)
     from scripts.v31_vllm_paired_bench import apply_fa4_local_fix
     def load():
         from experiments.numerical_qk_reuse import v31_fa4_observe
@@ -33,10 +37,12 @@ def child(parent,output):
     assert getattr(flash_fwd_sm90,'_v31_fa4_local_fix',False)
     assert interface.FlashAttentionForwardSm90 is flash_fwd_sm90.FlashAttentionForwardSm90
     receipt=dict(native_patch_applied=True,observer_module_matches=True,interface_class_matches=True,
-                 patched_sm90_sha256=hashlib.sha256(Path(path).read_bytes()).hexdigest())
+                 patched_sm90_sha256=hashlib.sha256(Path(path).read_bytes()).hexdigest(),cpu_diagnostic_threads=torch.get_num_threads())
     (output/'bootstrap_receipt.json').write_text(json.dumps(receipt,indent=2)+'\n')
-    from scripts.v31_refresh_operator_replay import run
-    run(parent/'capture/private',output/'analysis')
+    from scripts import v31_refresh_operator_replay as operator
+    spec=importlib.util.spec_from_file_location('fast_metrics',Path(__file__).with_name('fast_metrics.py'))
+    metrics=importlib.util.module_from_spec(spec);spec.loader.exec_module(metrics);metrics.install(operator)
+    operator.run(parent/'capture/private',output/'analysis')
 
 
 def prepare(parent,output):
@@ -51,14 +57,18 @@ def prepare(parent,output):
     if base.read(parent/'capture/receipt.json')['status']!='complete_diagnostic':raise RuntimeError('completed capture required')
     snapshots=sorted((parent/'capture/private').glob('snapshot*.pt'))
     if len(snapshots)!=6:raise RuntimeError('six snapshots required')
+    failed=output.parent/'attempt001/engine001/receipt.json'
+    if base.read(failed)['status']!='failed_or_partial':raise RuntimeError('preserved slow replay failure required')
     output.mkdir(parents=True);source=output/'private/bootstrap.py';source.parent.mkdir();shutil.copy2(ROOT/REL,source)
+    shutil.copy2(ROOT/'scripts/v31_refresh_replay_metrics_fast.py',output/'private/fast_metrics.py')
     for i in (1,2):shutil.copytree(ext.ORIGINAL/'private/cache',output/f'engine{i:03d}/private/cache')
     protocol=dict(schema='native_replay_bootstrap_v1',source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         source_fingerprints={r:base.sha(ROOT/r) for r in REQUIRED},bootstrap_sha256=base.sha(source),
         parent_protocol_sha256=base.sha(parent/'protocol.json'),capture_receipt_sha256=base.sha(parent/'capture/receipt.json'),
         native_patch_expected_sha256=base.jsonl(parent/'capture/records.jsonl')[0]['fa4_local_fix_sha256'],
         snapshot_sha256={x.name:base.sha(x) for x in snapshots},engines=2,per_engine_seconds=300.,
-        phase='replay',phase_seconds=600.,campaign_seconds=2700.,original_replay_leaves='skipped_unstarted')
+        phases=['replay','recovery'],phase_seconds=[600.,300.],campaign_seconds=2700.,original_replay_leaves='skipped_unstarted',
+        failed_replay_receipt_sha256=base.sha(failed),fast_metrics_sha256=base.sha(output/'private/fast_metrics.py'),cpu_diagnostic_threads=1)
     base.write(output/'protocol.json',protocol,True);print(json.dumps(dict(event='prepared_corrected_replay',source=protocol['source_commit'])),flush=True)
 
 
@@ -75,19 +85,21 @@ def run(parent,output):
         for rel,h in protocol['source_fingerprints'].items():assert base.sha(ROOT/rel)==h
         for name,h in protocol['snapshot_sha256'].items():assert base.sha(parent/'capture/private'/name)==h
         assert base.sha(output/'private/bootstrap.py')==protocol['bootstrap_sha256']
+        assert base.sha(output/'private/fast_metrics.py')==protocol['fast_metrics_sha256']
         for i in (1,2):
             leaf=output/f'engine{i:03d}'
             if (leaf/'receipt.json').exists():continue
             if (leaf/'private/worker.log').exists():raise RuntimeError('preserve previous replay')
             ledger=base.read(follow.CAMPAIGN/'gpu_budget.json')
             if any(r.get('elapsed_s') is None for r in ledger['reservations']):raise RuntimeError('unresolved reservation')
-            seconds=min(300.,follow.available('replay',ledger['reservations']))
+            phase=protocol['phases'][i-1]
+            seconds=min(300.,follow.available(phase,ledger['reservations']))
             if seconds<120:raise RuntimeError('replay phase exhausted')
             study.require_idle();base.SUITES.update(original['suites'])
             env=base.env_for(leaf,'longbench_v2','current_v31_control')
             execution=parent/'private/execution';env.update(PYTHONPATH=f'{execution}/src:{execution}',PYTHONDONTWRITEBYTECODE='1',PYTHONHASHSEED='0')
             command=[base.PYTHON,str(output/'private/bootstrap.py'),'child','--parent',str(parent),'--output',str(leaf)]
-            reservation=dict(attempt=str(output.relative_to(follow.CAMPAIGN)),job=f'engine{i:03d}',phase='replay',reserved_s=seconds,elapsed_s=None,status='started')
+            reservation=dict(attempt=str(output.relative_to(follow.CAMPAIGN)),job=f'engine{i:03d}',phase=phase,reserved_s=seconds,elapsed_s=None,status='started')
             ledger['reservations'].append(reservation);base.write(follow.CAMPAIGN/'gpu_budget.json',ledger)
             start=time.monotonic();error=None;process=None
             print(json.dumps(dict(event='launch_corrected_replay',engine=i,limit_s=seconds)),flush=True)
@@ -107,5 +119,5 @@ def run(parent,output):
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('action',choices=('prepare','run','child'))
     p.add_argument('--parent',type=Path,default=ROOT/'results/v31_refresh_repeatability_20261018/attempt001')
-    p.add_argument('--output',type=Path,default=ROOT/'results/v31_refresh_repeatability_20261018/replay_corrected/attempt001')
+    p.add_argument('--output',type=Path,default=ROOT/'results/v31_refresh_repeatability_20261018/replay_corrected/attempt002')
     a=p.parse_args();globals()[a.action](a.parent,a.output)
