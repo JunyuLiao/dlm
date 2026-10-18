@@ -1,3 +1,15 @@
+## HumanEval164 K256 campaign preparation — 2026-10-18
+
+User authorized all164 HumanEval tasks, seed42, thinking on/off, V31/dense,
+online V2, singleton V3a, full swaps and direction-guarded residual at K256.
+Plan: docs/HUMANEVAL_VALUE_K256_PLAN_20261018.md. Current source is being frozen
+before generation; 96 H100 checks pass with zero skips, including K4 parity and
+thinking-aware extraction. The local unprivileged scorer preflight passes.
+Results: results/humaneval_value_k256_20261018/. Native sampler/output8192 are
+fixed; V2 threshold uses first-canvas physical work only, with separate audit
+and clean runs. No HumanEval accuracy or latency result is claimed yet.
+Older LongBench full503 remains paused and is outside this authorization.
+
 ## Numerical replay and refresh attribution completed — 2026-10-18
 
 Verified execution checkpoint 9d864986; native source 6aab8632, capture/trace
