@@ -1,0 +1,250 @@
+[
+  {
+    "canvases": 17,
+    "cuda_graph_captures": 0,
+    "dataset": "longbench_v2_0shot_think",
+    "decode_s": 9.37337,
+    "denoise_forwards": 354,
+    "diagnostic_receipt": null,
+    "engine": 7,
+    "engine_repeat": 0,
+    "family": "dense_full_fix51994",
+    "finish_reason": "stop",
+    "group_id": "339:42:0",
+    "index": 339,
+    "label": "dense_full_fix51994",
+    "native_receipt": {
+      "decode_cudagraph_modes": {
+        "FULL": 354
+      },
+      "global_calls": 1770,
+      "global_eligible_tiles": 38613120,
+      "global_kept_tiles": 38613120,
+      "headroom": {
+        "clean_timing": false,
+        "complete_scope_inventory": false,
+        "diagnostic_only": true,
+        "dropped_spans": 0,
+        "expected_attention_calls_from_prepare": 11220,
+        "interpretation": "CPU exclusive means exclusive among this collector scopes only. CUDA event spans include dispatch gaps and nested work; never sum parent and child spans. Use separate clean request time for latency. Missing FULL graph eager scopes are not zero cost.",
+        "observed_attention_calls": 90,
+        "phase_calls": {
+          "commit": 17,
+          "denoise": 354,
+          "prefill": 3
+        },
+        "request_index": 3,
+        "schema": "v31_refresh_headroom_audit_v1",
+        "spans": {
+          "prefill/global_dense": {
+            "calls": 15,
+            "cpu_exclusive_own_scopes_ms": 3.7589379999999997,
+            "cpu_inclusive_ms": 3.7589379999999997,
+            "cuda_inclusive_span_ms": 442.57507038116455
+          },
+          "prefill/local_attention": {
+            "calls": 75,
+            "cpu_exclusive_own_scopes_ms": 19.112982999999996,
+            "cpu_inclusive_ms": 19.112982999999996,
+            "cuda_inclusive_span_ms": 66.07744020223618
+          }
+        },
+        "spans_recorded": 90,
+        "warmup": false
+      },
+      "native_dense_geometry_source": "actual prepare_attn decode metadata; Q128 x KV64 rectangles, not CUDA CTA count",
+      "native_local_calls_audited": 8850,
+      "native_local_eligible_rectangles": 5664000,
+      "native_local_phase_rectangles": {
+        "dense": {
+          "calls": 8850,
+          "eligible_rectangles": 5664000,
+          "skipped_tiles": 0,
+          "sparsity": 0
+        }
+      },
+      "native_local_skipped_tiles": 0,
+      "order_errors": 0,
+      "overall_eligible_rectangles": 44277120,
+      "overall_rectangle_sparsity": 0,
+      "overall_skipped_rectangles": 0,
+      "value_nonfinite_attention_calls": null,
+      "value_nonfinite_logits_calls": 0,
+      "value_phase_tiles": {
+        "dense": {
+          "calls": 1770,
+          "eligible_tiles": 38613120,
+          "kept_tiles": 38613120,
+          "skipped_tiles": 0,
+          "sparsity": 0
+        }
+      }
+    },
+    "output_hash": "8f329e74f7e6353e",
+    "output_tokens": 4309,
+    "panel_seed": 42,
+    "pass_name": "profile",
+    "peak_cuda_allocated_bytes": 67468640768,
+    "phase": "headroom",
+    "policy": "control",
+    "prefill_s": 1.09137,
+    "prompt_tokens": 41189,
+    "protocol_sha256": "6f77c44a6a361f54ea6e124ff7bf5afb746738c3e51d2dab99b098776f4eb693",
+    "refresh_post_event_states": null,
+    "rng_seed": 117963222,
+    "sample_repeat": 0,
+    "score": 0.0,
+    "score_scale": "0 to 1; official RULER percent divided by 100",
+    "source_commit": "db755c43be763a8af9edfe8a147ec333d8b8542b",
+    "suite": "longbench_v2",
+    "value_clean_timing": false,
+    "wall_s": 10.46727
+  },
+  {
+    "canvases": 30,
+    "cuda_graph_captures": 0,
+    "dataset": "longbench_v2_0shot_think",
+    "decode_s": 33.36395,
+    "denoise_forwards": 993,
+    "diagnostic_receipt": null,
+    "engine": 7,
+    "engine_repeat": 0,
+    "family": "dense_full_fix51994",
+    "finish_reason": "stop",
+    "group_id": "254:42:0",
+    "index": 254,
+    "label": "dense_full_fix51994",
+    "native_receipt": {
+      "decode_cudagraph_modes": {
+        "FULL": 993
+      },
+      "global_calls": 4965,
+      "global_eligible_tiles": 288677760,
+      "global_kept_tiles": 288677760,
+      "headroom": {
+        "clean_timing": false,
+        "complete_scope_inventory": false,
+        "diagnostic_only": true,
+        "dropped_spans": 0,
+        "expected_attention_calls_from_prepare": 30900,
+        "interpretation": "CPU exclusive means exclusive among this collector scopes only. CUDA event spans include dispatch gaps and nested work; never sum parent and child spans. Use separate clean request time for latency. Missing FULL graph eager scopes are not zero cost.",
+        "observed_attention_calls": 210,
+        "phase_calls": {
+          "commit": 30,
+          "denoise": 993,
+          "prefill": 7
+        },
+        "profiler": {
+          "cuda_activities": 719001,
+          "devices": {
+            "0": {
+              "activity_envelope_ms": 38292.81722607422,
+              "activity_union_ms": 35111.43254174805,
+              "no_activity_within_envelope_ms": 3181.3846843261717
+            }
+          },
+          "exclusive_activity_categories": {
+            "copy_or_memset": {
+              "activities": 17300,
+              "activity_sum_ms": 20.53134619140647,
+              "activity_union_ms": 20.53134619140625
+            },
+            "kernel_name_moe_candidate": {
+              "activities": 185400,
+              "activity_sum_ms": 8679.428833740341,
+              "activity_union_ms": 8679.428673828124
+            },
+            "kernel_name_other_gemm": {
+              "activities": 62613,
+              "activity_sum_ms": 140.68664111329863,
+              "activity_union_ms": 140.68664111328124
+            },
+            "prefill/global_dense": {
+              "activities": 35,
+              "activity_sum_ms": 3183.6250454101564,
+              "activity_union_ms": 3183.6250454101564
+            },
+            "prefill/local_attention": {
+              "activities": 175,
+              "activity_sum_ms": 173.83958837890617,
+              "activity_union_ms": 173.83958837890626
+            },
+            "unattributed_rest": {
+              "activities": 453478,
+              "activity_sum_ms": 22914.735180424086,
+              "activity_union_ms": 22914.733781494142
+            }
+          },
+          "gpu_activity_available": true,
+          "interpretation": "Each raw CUDA activity occurs in one category. Concurrent activities overlap; category sums/unions are not additive request wall time. Device union counts busy intervals. No-activity gaps are not proof of host causality. MoE fallback is only a kernel-name candidate. FULL graph replay can lack eager layer/phase associations; unknown work is retained.",
+          "scope_linked_activities": 210,
+          "unlinked_activities": 718791
+        },
+        "request_index": 4,
+        "schema": "v31_refresh_headroom_audit_v1",
+        "spans": {
+          "prefill/global_dense": {
+            "calls": 35,
+            "cpu_exclusive_own_scopes_ms": 12.488851000000002,
+            "cpu_inclusive_ms": 12.488851000000002,
+            "cuda_inclusive_span_ms": 3183.7584266662598
+          },
+          "prefill/local_attention": {
+            "calls": 175,
+            "cpu_exclusive_own_scopes_ms": 64.353284,
+            "cpu_inclusive_ms": 64.353284,
+            "cuda_inclusive_span_ms": 174.61680072546005
+          }
+        },
+        "spans_recorded": 210,
+        "warmup": false
+      },
+      "native_dense_geometry_source": "actual prepare_attn decode metadata; Q128 x KV64 rectangles, not CUDA CTA count",
+      "native_local_calls_audited": 24825,
+      "native_local_eligible_rectangles": 15093600,
+      "native_local_phase_rectangles": {
+        "dense": {
+          "calls": 24825,
+          "eligible_rectangles": 15093600,
+          "skipped_tiles": 0,
+          "sparsity": 0
+        }
+      },
+      "native_local_skipped_tiles": 0,
+      "order_errors": 0,
+      "overall_eligible_rectangles": 303771360,
+      "overall_rectangle_sparsity": 0,
+      "overall_skipped_rectangles": 0,
+      "value_nonfinite_attention_calls": null,
+      "value_nonfinite_logits_calls": 0,
+      "value_phase_tiles": {
+        "dense": {
+          "calls": 4965,
+          "eligible_tiles": 288677760,
+          "kept_tiles": 288677760,
+          "skipped_tiles": 0,
+          "sparsity": 0
+        }
+      }
+    },
+    "output_hash": "4d76cb6d02dec0c4",
+    "output_tokens": 7641,
+    "panel_seed": 42,
+    "pass_name": "profile",
+    "peak_cuda_allocated_bytes": 67468974592,
+    "phase": "headroom",
+    "policy": "control",
+    "prefill_s": 4.92521,
+    "prompt_tokens": 111616,
+    "protocol_sha256": "6f77c44a6a361f54ea6e124ff7bf5afb746738c3e51d2dab99b098776f4eb693",
+    "refresh_post_event_states": null,
+    "rng_seed": 337499645,
+    "sample_repeat": 0,
+    "score": 0.0,
+    "score_scale": "0 to 1; official RULER percent divided by 100",
+    "source_commit": "db755c43be763a8af9edfe8a147ec333d8b8542b",
+    "suite": "longbench_v2",
+    "value_clean_timing": false,
+    "wall_s": 38.29554
+  }
+]

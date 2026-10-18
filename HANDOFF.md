@@ -1,3 +1,56 @@
+## Bounded refresh diagnostics finished — 2026-10-18
+
+Verified repository checkpoint 2f5687d4; native sources 6aab8632/db755c43 and
+external runner 2f5687d4 remain frozen. The consolidated report is
+results/v31_refresh_diagnostic_20261018/analysis/attempt001/summary.md.
+All 288 factorial measurements, 20 clean headroom measurements and the single
+external trace have finished. The trace reproduces all eight measured clean
+requests exactly; independent request-window attribution passes. GPU idle was
+verified after completion. Charged reservation is 5423.862923 seconds (90.40 min)
+within the 7200-second cap, including failures, warmups and external processing.
+All reservations are closed; no further GPU work is queued.
+
+Future support has the stronger provisional mechanism signal, particularly with
+sparse current output. Dense-output necessity is not established. Two V31 A/A
+bookends and one same-arm engine repeat vary in trajectory without score changes;
+causal promotion remains unresolved. A fresh mask does not imply a deployable
+cheap selector: all four diagnostic arms pay for dense observation. External
+tracing resolves output parity and request windows, but does not identify
+refresh-specific removable critical-path cost. The >=10% incremental request
+benefit gate is not established. Next: qualify numerical repeatability and
+phase-specific runtime headroom before investing in support-maintenance methods.
+
+Attempt003 remains budget_limited_partial solely because the all-kept profile
+was skipped unstarted under its phase cap; its factorial subpanel is complete.
+No global final_complete.json is asserted. The older full503 campaign remains
+paused at 17/128 engine jobs. Preserve all failed attempts and frozen reports.
+The consolidated analysis marker describes report completion only.
+
+## Refresh factorial complete; external trace running — 2026-10-18, 08:38 UTC
+
+Execution source db755c43; all four factorial engines finished288 measured
+requests/48 paired groups with all-six recorded prefixes matched and intended
+factor separation. Native scope, fixedK, RNG, sampler-call and graph-capture
+receipts pass. Report: attempt003/factorial_analysis/attempt001/mechanism_review.md.
+The whole attempt remains budget_limited_partial because headroom engine008 was
+skipped under its phase cap; no campaign final_complete.json is asserted.
+
+LongBench technical repeats reproduce all answer scores. DF/DH/SF/SH means are
+50/56.25/62.5/50% on eight exploratory questions x two seeds x two engines.
+Two V31 bookends differ in output/N (maximum9 calls), and one sparse/fresh
+technical repeat differs by33 calls; no score changes result from these drifts.
+Current-output effects are seed/tail sensitive. Future support has the stronger
+provisional signal, especially when current output is sparse, but clean causal
+promotion remains unresolved under the frozen A/A rule. More calls can accompany
+better answers; no N-only method or latency claim is promoted.
+
+Qualification/headroom/factorial charged5097.580 seconds (84.96min). A single
+external Nsight trace is running in session24282 under runner source2f5687d4,
+using the original6aab8632 clean worker and copied cache. It has a600-second
+reserve and original7200-second campaign cap. After it terminates, inspect its
+parity, segmentation and receipt before final headroom interpretation. Preserve
+the old full503 pause. No additional GPU experiment is queued by this checkpoint.
+
 ## Refresh factorial running; headroom attribution limited — 2026-10-18, 07:56 UTC
 
 Verified execution source db755c43, active attempt003. The qualification and all

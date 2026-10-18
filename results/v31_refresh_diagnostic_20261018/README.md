@@ -1,39 +1,40 @@
 # Bounded runtime headroom and refresh diagnostic
 
-Authorized 2026-10-18. The preregistered design is in
-`docs/REFRESH_DIAGNOSTIC_PLAN_20261018.md`.
+Authorized and executed 2026-10-18. The frozen plan is
+`docs/REFRESH_DIAGNOSTIC_PLAN_20261018.md`, with recovery and external-profile
+addenda. Read [the consolidated report](analysis/attempt001/summary.md) for
+coverage, findings, go/no-go decisions and evidence links.
 
-This campaign owns only its new attempts and GPU-budget ledger. The previous
-full503 value-method campaign remains paused. Native sampler behavior and input
-generation limits remain unchanged. The total GPU reservation cap is7200s,
-including initialization, warmups, failed workers and successor attempts.
+Execution has finished: 288 factorial measurements (48 six-arm groups), 20 clean
+runtime measurements, shared/FULL diagnostic profiles, and one external trace.
+The four factorial arms cross dense/sparse current output with fresh/held future
+support at one genuine progress refresh, retaining V31 bookends. Native sampler,
+dense prefill/commit and input generation limits are preserved; sparse-method
+arms retain fixed K and dense LOCAL routing.
+These oracle interventions are diagnostic and do not measure deployable speed.
 
-The four diagnostic policies cross current dense/sparse output (sparse uses the
-common pre-refresh map) with future fresh/held support. These instrumented runs
-are not speed measurements. Separate clean and profiled headroom controls use
-inherited V31, fixed16, corrected FULL dense, PIECEWISE dense, and all-kept FA4.
+The external trace reproduces all eight measured original-clean requests and
+qualifies request/prefill boundaries. Refresh-specific critical-path savings
+remain unresolved. Future support has the stronger provisional mechanism signal,
+but repeatability limitations prevent causal promotion and no new method passes
+the quality/runtime gates. See the report for uncertainty and per-case evidence.
 
-Each attempt has its own immutable protocol, source snapshot, input bindings,
-worker receipts, official scored outputs and completion markers. `state.json`
-reports partial coverage and budget use. An analysis completion marker never
-stands for campaign completion. No performance or accuracy gain is established
-by the design or CPU tests alone.
+Total charged reservation is 5423.862923 seconds (90.40 minutes) of 7200 seconds,
+including initialization, warmups, failures and external processing. All
+reservations are closed; GPU idle was verified. The final allocations were
+qualification 900 s, headroom 1800 s, factorial 3900 s and reserve 600 s.
+No further GPU work is queued. The prior full503 campaign remains paused.
 
-Active execution is attempt003, source `db755c43`, after the preserved profiling
-startup failure in attempt001 and CPU-only preparation failure in attempt002.
-The recovery contract is `docs/REFRESH_DIAGNOSTIC_RECOVERY_20261018.md`.
-Attempt003 explicitly references attempt001's completed qualification and clean
-timing engines, retaining their original source/protocol hashes. New profiling
-and factorial leaves use the successor source; native execution code is unchanged.
+Attempt001 preserves the profiling startup failure; attempt002 preserves a
+CPU-only preparation failure. Attempt003 source `db755c43` explicitly references
+attempt001's completed qualification/clean engines under original `6aab8632`
+source and protocol hashes; native/factorial code is unchanged. The external
+runner `2f5687d4` executes the original clean worker with copied private caches.
 
-The recovery allocation is qualification 900 s, headroom 1,800 s, factorial
-3,900 s and reserve 600 s. The shared 7,200 s cap includes the failed worker.
-All 67 diagnostic CPU tests pass. Native qualification and 20 clean headroom
-measurements are complete. Shared/FULL profiles completed, but all six profiled
-requests have different trajectories from their clean counterparts; clean
-critical-path attribution remains unresolved. The all-kept profile was skipped
-unstarted under the phase budget. Factorial engines are running under the
-unchanged 3,900-second cap. A one-shot external trace of the original clean worker
-is planned within the remaining 600-second reserve after factorial completion.
-These statements are a checkpoint, not a final result. Use the active attempt's
-state and final report for coverage and completion.
+The all-kept profile was skipped unstarted under its phase budget. Therefore
+attempt003 remains `budget_limited_partial` despite complete factorial coverage,
+and has no global `final_complete.json`. Each completed leaf retains its own
+source, protocol, receipt, score and completion marker. The consolidated
+`analysis_complete.json` marks report completion only. Main diagnostic CPU tests
+(67), external runner tests (20), and independent artifact/analysis checks passed.
+Raw generations, input pools, caches and profiler traces remain private/ignored.

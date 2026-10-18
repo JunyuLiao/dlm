@@ -2079,3 +2079,40 @@ attempts preserved. Conservative diagnostic reservation2732.85s=45.55min;
 parent already-running shard belongs to its original panel. GPU idle.
 Decision: no-go for either current full503 continuation. Explicit authorization
 is still required to resume; see parent PAUSE_AND_RESUME.md.
+
+## 2026-10-18 — Completed refresh diagnostic subpanels; overall profile coverage partial
+
+Sources 6aab8632 (qualification/clean native worker), db755c43 (recovery and
+factorial), 2f5687d4 (external runner). Protocol hashes and completed-leaf receipts
+are bound in results/v31_refresh_diagnostic_20261018/analysis/attempt001/.
+All 288 measured factorial requests and 20 clean controls completed. The overall
+attempt remains budget_limited_partial because the all-kept profile was skipped;
+there is no global final_complete.json. This entry records completed diagnostic
+subpanels, not a complete benchmark, held-out confirmation or promoted method.
+
+Factorial: first eligible mid-canvas refresh; dense/sparse current output crossed
+with exact fresh/held future support, plus V31 before/after controls. Eight
+LongBench questions and four RULER questions, seeds 1/42, two engines. All 48
+groups exposed; recorded prefix, five GLOBAL layers, fixed K, native-call/RNG and
+zero measured graph-capture checks pass. LongBench DF/DH/SF/SH accuracy is
+50/56.25/62.5/50%, mean N 126.375/142.8125/133.53125/150.5625; technical repeats
+are not independent answer observations. Holding support adds 12.88% mean N;
+its question-cluster interval spans zero. The sparse-current conditional contrast
+is stronger (+12.75% N with repeated adverse answer changes), but two A/A output
+variations and one same-arm engine variation leave causal promotion unresolved.
+RULER normalized task scores are .875/.875/.875/.8875, mean N
+5.5/5.75/5.875/6.125; all engine repeats agree. All arms pay dense-oracle cost.
+See factorial_analysis/attempt001/mechanism_review.md and independent verification.
+
+Two-input clean controls are stable but differ in quality/trajectory across V31,
+fixed16, FULL, PIECEWISE and all-kept. No latency-only promotion follows. All six
+Python-profiled requests differ from clean trajectories. The external trace
+reproduces eight measured original-clean requests exactly and independently
+qualifies request/prefill windows. Its heuristic activity categories do not
+identify removable refresh critical-path costs; the >=10% request-benefit gate
+remains unresolved. See external_headroom/attempt001/verification.md.
+
+Total reservation 5423.862923 s (90.40 min), within 7200 s including failures and
+external processing; all reservations closed and GPU idle verified. No older
+full503 work resumed. Consolidated report:
+results/v31_refresh_diagnostic_20261018/analysis/attempt001/summary.md.

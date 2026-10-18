@@ -1,0 +1,860 @@
+{
+  "aa_compared_post_calls": {
+    "['longbench_v2', 11, 125, 1]": [
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17
+    ],
+    "['longbench_v2', 11, 335, 42]": [
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ]
+  },
+  "aa_disagreements": [
+    {
+      "anchor_differences": {
+        "returned_output_sha256": [
+          "41f5d5da49f5f4744627fe1ad5c01cb7fc9b4d3077e743f5f174445e07b2c7c8",
+          "4feda779da9711b64acbb7747b9058501609ae8a5bd389cdd4ec6e71c1d2c3d5"
+        ]
+      },
+      "anchor_sha256": [
+        "606ad04c08cef5674dee583f97570d961e9dd49486fe3d929efed87f4d2a68fb",
+        "94b4f3080e4f6eee850171669547bb617366b74fa84504dce2ac79be5d9cb1b3"
+      ],
+      "differences": {
+        "denoise_forwards": [
+          51,
+          60
+        ],
+        "output_hash": [
+          "f2c6335c3da1ec86",
+          "70d6284fc5cddcaa"
+        ],
+        "output_tokens": [
+          890,
+          899
+        ]
+      },
+      "group": [
+        "longbench_v2",
+        11,
+        125,
+        1
+      ],
+      "post_differences": [
+        {
+          "call": 10,
+          "fields": [
+            "argmax",
+            "self_conditioning"
+          ]
+        },
+        {
+          "call": 11,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        },
+        {
+          "call": 12,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        },
+        {
+          "call": 13,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        },
+        {
+          "call": 14,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        },
+        {
+          "call": 15,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        },
+        {
+          "call": 16,
+          "fields": [
+            "argmax"
+          ]
+        },
+        {
+          "call": 17,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        }
+      ],
+      "prefix_metadata_equal": true,
+      "prefix_signature": "46c75c90cfe13338e578d57c6dad55c49b0e2ea97fe649ebbe1a1005ba74c907"
+    },
+    {
+      "anchor_differences": {},
+      "anchor_sha256": [
+        "988698caddb346d510c2bf646394e86f457331520cc73697454b12731377d355",
+        "988698caddb346d510c2bf646394e86f457331520cc73697454b12731377d355"
+      ],
+      "differences": {
+        "denoise_forwards": [
+          113,
+          109
+        ],
+        "output_hash": [
+          "92ba00930c7525e8",
+          "11a83da26b0ec4ae"
+        ],
+        "output_tokens": [
+          2275,
+          2279
+        ]
+      },
+      "group": [
+        "longbench_v2",
+        11,
+        335,
+        42
+      ],
+      "post_differences": [],
+      "prefix_metadata_equal": true,
+      "prefix_signature": "7a798048abe6b0f0790141b4a25ef10bc7fb4082b9daddacf1ee391aafa28a0f"
+    }
+  ],
+  "all_report_input_output_bindings_verified": true,
+  "bindings": {
+    "analysis_files": {
+      "analysis_complete.json": "c4c28f37ad2b482cb68f35e70296cfc56c38ca41209698429ec3161ce8b895f7",
+      "factorial_terminal_receipt.json": "9a3e0eb65bb5eff83ad9aeeaeaa6f23c22ecddd1a7c7796e34ae5693a547efd7",
+      "mechanism_review.json": "91719027a531f1fe4f2b54ef347a90ffedf0b7c753ef340bab6ca06d8850f4d2",
+      "mechanism_review.md": "2cc5b67cb4aefa607b8b770e0a03ed7841de56a50cd60777a10b26fec568c86e",
+      "mechanism_review_analysis.py": "5839d2f778cb8d5699d7463165b70aa8930745e7956085060f744f538764befe",
+      "mechanism_review_receipt.json": "4adf54504f46492863bf4e16353f7a7f80509594f2714dc9c41c2afe59dcb3b1",
+      "summary.json": "8d3b3559934e49a0848369098e260758d0956d42282202238f0fdd97b72f7714",
+      "summary.md": "5cf43cc7d546bcce04af31297205c13d2d32e8c8421a19c09fdc22ab78e69b0f"
+    },
+    "protocol_sha256": "6f77c44a6a361f54ea6e124ff7bf5afb746738c3e51d2dab99b098776f4eb693",
+    "source_commit": "db755c43be763a8af9edfe8a147ec333d8b8542b",
+    "study_state_sha256": "e91c126e464d17d479e7c4664630b80b1d1957ee70711c14d05ebc24d7037b10"
+  },
+  "campaign_status": "budget_limited_partial",
+  "comparison_scope": {
+    "events": "entire five-layer event list for cross-engine comparisons; current-output hashes on all five layers for future-support factor separation",
+    "outcomes": [
+      "score",
+      "denoise_forwards",
+      "canvases",
+      "output_tokens",
+      "output_hash",
+      "finish_reason"
+    ],
+    "post_fields": [
+      "call",
+      "canvas",
+      "argmax",
+      "step",
+      "encoder",
+      "confident",
+      "cuda_rng",
+      "cpu_rng",
+      "self_conditioning"
+    ],
+    "post_limit": "self_conditioning is recorded only for the first post-event call; later compact-state equality does not prove hidden-state equality",
+    "prefix": "entire prefix_metadata dictionary and prefix_signature; tensor fingerprints are contiguous bytes only"
+  },
+  "cross_engine_disagreements": [
+    {
+      "anchors_equal": true,
+      "cell": [
+        "longbench_v2",
+        77,
+        1,
+        "sparse_fresh"
+      ],
+      "differences": {
+        "canvases": [
+          11,
+          12
+        ],
+        "denoise_forwards": [
+          186,
+          219
+        ],
+        "output_hash": [
+          "99867a9e0baca48d",
+          "b7aa989e2b62d212"
+        ],
+        "output_tokens": [
+          2597,
+          2991
+        ]
+      },
+      "engines": [
+        9,
+        11
+      ],
+      "events_equal": true,
+      "post_differences": [],
+      "prefix_metadata_equal": true,
+      "recorded_post_calls": [
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14
+      ]
+    },
+    {
+      "anchors_equal": false,
+      "cell": [
+        "longbench_v2",
+        125,
+        1,
+        "control_after"
+      ],
+      "differences": {
+        "denoise_forwards": [
+          51,
+          60
+        ],
+        "output_hash": [
+          "f2c6335c3da1ec86",
+          "70d6284fc5cddcaa"
+        ],
+        "output_tokens": [
+          890,
+          899
+        ]
+      },
+      "engines": [
+        9,
+        11
+      ],
+      "events_equal": true,
+      "post_differences": [
+        {
+          "call": 10,
+          "fields": [
+            "self_conditioning",
+            "argmax"
+          ]
+        },
+        {
+          "call": 11,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        },
+        {
+          "call": 12,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        },
+        {
+          "call": 13,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        },
+        {
+          "call": 14,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        },
+        {
+          "call": 15,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        },
+        {
+          "call": 16,
+          "fields": [
+            "argmax"
+          ]
+        },
+        {
+          "call": 17,
+          "fields": [
+            "argmax",
+            "canvas"
+          ]
+        }
+      ],
+      "prefix_metadata_equal": true,
+      "recorded_post_calls": [
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17
+      ]
+    },
+    {
+      "anchors_equal": true,
+      "cell": [
+        "longbench_v2",
+        335,
+        42,
+        "control_after"
+      ],
+      "differences": {
+        "denoise_forwards": [
+          113,
+          109
+        ],
+        "output_hash": [
+          "92ba00930c7525e8",
+          "11a83da26b0ec4ae"
+        ],
+        "output_tokens": [
+          2275,
+          2279
+        ]
+      },
+      "engines": [
+        9,
+        11
+      ],
+      "events_equal": true,
+      "post_differences": [],
+      "prefix_metadata_equal": true,
+      "recorded_post_calls": [
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16
+      ]
+    }
+  ],
+  "current_factor_first_post_changed_counts": {
+    "argmax": 34,
+    "call": 0,
+    "canvas": 36,
+    "confident": 0,
+    "cpu_rng": 0,
+    "cuda_rng": 0,
+    "encoder": 0,
+    "self_conditioning": 48,
+    "step": 0
+  },
+  "errors": [],
+  "factor_separation_differences": [],
+  "factorial_coverage_complete": true,
+  "fresh_equals_old_support_events": [
+    {
+      "group": [
+        "ruler128k",
+        10,
+        21,
+        42
+      ],
+      "label": "dense_fresh",
+      "layer": 5
+    },
+    {
+      "group": [
+        "ruler128k",
+        10,
+        21,
+        42
+      ],
+      "label": "sparse_fresh",
+      "layer": 5
+    },
+    {
+      "group": [
+        "ruler128k",
+        12,
+        21,
+        42
+      ],
+      "label": "sparse_fresh",
+      "layer": 5
+    },
+    {
+      "group": [
+        "ruler128k",
+        12,
+        21,
+        42
+      ],
+      "label": "dense_fresh",
+      "layer": 5
+    }
+  ],
+  "frozen_execution_files_changed": [],
+  "frozen_execution_files_checked": 1154,
+  "groups": 48,
+  "markers": [
+    {
+      "engine": 9,
+      "marker_sha256": "7be68476e055f863fef25ed046d176e91405964950b67363475df44560f36ff0",
+      "measured_records": 96,
+      "records": 100,
+      "records_sha256": "669e42c146484077da4654becfbdb94210744497d89f30cef093a9fd1a6962f3",
+      "scored_sha256": "ad80f3ae59beff783ca73047dc5e55207a0da755e8f7bfdc5fdef37c204d3243"
+    },
+    {
+      "engine": 10,
+      "marker_sha256": "b919351fd582e08203e6c9e209a05c2d9aaea2e4e0ff2f8f00815f335f66106c",
+      "measured_records": 48,
+      "records": 52,
+      "records_sha256": "3704b7fe64bbd57b4ac25207e8c6e1cb312d5092430ef99fb4476445b43962a1",
+      "scored_sha256": "70c4962339f386eda8e0c31aebfde377fbcc1905b0c264a9bbd25407141bfd0d"
+    },
+    {
+      "engine": 11,
+      "marker_sha256": "cd811a896e218981ab699fea9ec2a6a66163e2cedffb7817a7e2cdf69d93af23",
+      "measured_records": 96,
+      "records": 100,
+      "records_sha256": "a2bd72f45d7da56ea99dc4ef6377c8d8916be0b92c9e2d8ef6c90f77e2fb3fae",
+      "scored_sha256": "24701dc72f8bc40bafe681c5af48f586f0a1bc602e437f92131afdf18c8b722f"
+    },
+    {
+      "engine": 12,
+      "marker_sha256": "21a9feba3704426d93ea22a483e673adddcf1e2c23009d55c79bd6412eea5f2e",
+      "measured_records": 48,
+      "records": 52,
+      "records_sha256": "5748d54813d2f8a393c6230e55169a16a5a20e6dc23c7b753212614a86d37d00",
+      "scored_sha256": "84610128b067edc78a7b2c57934ed93b72e2ad0700daca7f6e8db57be1762737"
+    }
+  ],
+  "next_layer_consumption": {
+    "carried": 160,
+    "held": 800
+  },
+  "no_op_parity": {
+    "dense_fresh_matches_control_after_all_outcome_fields": 46,
+    "dense_fresh_matches_control_before_all_outcome_fields": 48,
+    "groups": 48
+  },
+  "noop_anchor_disagreements": [
+    {
+      "control": "control_after",
+      "differences": {
+        "returned_output_sha256": [
+          "4feda779da9711b64acbb7747b9058501609ae8a5bd389cdd4ec6e71c1d2c3d5",
+          "41f5d5da49f5f4744627fe1ad5c01cb7fc9b4d3077e743f5f174445e07b2c7c8"
+        ]
+      },
+      "group": [
+        "longbench_v2",
+        11,
+        125,
+        1
+      ]
+    }
+  ],
+  "qualification_in_estimator": false,
+  "qualification_outside_estimator": {
+    "comparisons": [
+      {
+        "control_anchors_equal": true,
+        "entire_event_records_equal": true,
+        "event_records_sha256": [
+          "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        ],
+        "label": "control_before",
+        "outcomes": [
+          {
+            "canvases": 24,
+            "denoise_forwards": 515,
+            "finish_reason": "stop",
+            "output_hash": "f6e0aa2a94f74b84",
+            "output_tokens": 6035,
+            "score": 1.0
+          },
+          {
+            "canvases": 14,
+            "denoise_forwards": 403,
+            "finish_reason": "stop",
+            "output_hash": "b2faa42a5f82b590",
+            "output_tokens": 3357,
+            "score": 1.0
+          }
+        ],
+        "post_differences": [],
+        "prefix_metadata_equal": true,
+        "prefix_signature": "53cfc02c05c851662fc320ad040cd3ca83a1031bf8dc509d97921931bbc76805",
+        "recorded_post_calls": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ]
+      },
+      {
+        "control_anchors_equal": true,
+        "entire_event_records_equal": true,
+        "event_records_sha256": [
+          "b85e1a0c89a794696ff0c094486c1dbd96be7fbb1e3f507d6011c6c35a4c70f2",
+          "b85e1a0c89a794696ff0c094486c1dbd96be7fbb1e3f507d6011c6c35a4c70f2"
+        ],
+        "label": "sparse_fresh",
+        "outcomes": [
+          {
+            "canvases": 14,
+            "denoise_forwards": 404,
+            "finish_reason": "stop",
+            "output_hash": "28ec5c40c049694b",
+            "output_tokens": 3477,
+            "score": 0.0
+          },
+          {
+            "canvases": 14,
+            "denoise_forwards": 375,
+            "finish_reason": "stop",
+            "output_hash": "5d56f454bbf67f67",
+            "output_tokens": 3508,
+            "score": 1.0
+          }
+        ],
+        "post_differences": [
+          {
+            "call": 10,
+            "fields": [
+              "argmax",
+              "canvas"
+            ]
+          },
+          {
+            "call": 11,
+            "fields": [
+              "argmax",
+              "canvas"
+            ]
+          },
+          {
+            "call": 12,
+            "fields": [
+              "argmax",
+              "canvas"
+            ]
+          },
+          {
+            "call": 13,
+            "fields": [
+              "argmax",
+              "canvas"
+            ]
+          }
+        ],
+        "prefix_metadata_equal": true,
+        "prefix_signature": "53cfc02c05c851662fc320ad040cd3ca83a1031bf8dc509d97921931bbc76805",
+        "recorded_post_calls": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ]
+      },
+      {
+        "control_anchors_equal": true,
+        "entire_event_records_equal": true,
+        "event_records_sha256": [
+          "46a052eee830af689fb41334fcafbac9d8c00b1122ca5b95e175d60e80189ab4",
+          "46a052eee830af689fb41334fcafbac9d8c00b1122ca5b95e175d60e80189ab4"
+        ],
+        "label": "sparse_hold",
+        "outcomes": [
+          {
+            "canvases": 12,
+            "denoise_forwards": 351,
+            "finish_reason": "stop",
+            "output_hash": "38ca7cace1080304",
+            "output_tokens": 3060,
+            "score": 0.0
+          },
+          {
+            "canvases": 14,
+            "denoise_forwards": 403,
+            "finish_reason": "stop",
+            "output_hash": "bdf75b7a154f605f",
+            "output_tokens": 3558,
+            "score": 0.0
+          }
+        ],
+        "post_differences": [
+          {
+            "call": 11,
+            "fields": [
+              "argmax"
+            ]
+          },
+          {
+            "call": 12,
+            "fields": [
+              "argmax"
+            ]
+          },
+          {
+            "call": 13,
+            "fields": [
+              "argmax",
+              "canvas"
+            ]
+          }
+        ],
+        "prefix_metadata_equal": true,
+        "prefix_signature": "53cfc02c05c851662fc320ad040cd3ca83a1031bf8dc509d97921931bbc76805",
+        "recorded_post_calls": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ]
+      },
+      {
+        "control_anchors_equal": true,
+        "entire_event_records_equal": true,
+        "event_records_sha256": [
+          "1bf9e639407193bdf029b47f1b2aa829d11d3067be9f766a60fad98743bfaae2",
+          "1bf9e639407193bdf029b47f1b2aa829d11d3067be9f766a60fad98743bfaae2"
+        ],
+        "label": "dense_fresh",
+        "outcomes": [
+          {
+            "canvases": 24,
+            "denoise_forwards": 515,
+            "finish_reason": "stop",
+            "output_hash": "f6e0aa2a94f74b84",
+            "output_tokens": 6035,
+            "score": 1.0
+          },
+          {
+            "canvases": 14,
+            "denoise_forwards": 403,
+            "finish_reason": "stop",
+            "output_hash": "b2faa42a5f82b590",
+            "output_tokens": 3357,
+            "score": 1.0
+          }
+        ],
+        "post_differences": [],
+        "prefix_metadata_equal": true,
+        "prefix_signature": "53cfc02c05c851662fc320ad040cd3ca83a1031bf8dc509d97921931bbc76805",
+        "recorded_post_calls": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ]
+      },
+      {
+        "control_anchors_equal": true,
+        "entire_event_records_equal": true,
+        "event_records_sha256": [
+          "4b00b6b648ac526f680dceefa433c6560c6411c79cba0ec4e912095c7a9bd64a",
+          "4b00b6b648ac526f680dceefa433c6560c6411c79cba0ec4e912095c7a9bd64a"
+        ],
+        "label": "dense_hold",
+        "outcomes": [
+          {
+            "canvases": 64,
+            "denoise_forwards": 2064,
+            "finish_reason": "length",
+            "output_hash": "d375204c3c6de07f",
+            "output_tokens": 16384,
+            "score": 0.0
+          },
+          {
+            "canvases": 10,
+            "denoise_forwards": 275,
+            "finish_reason": "stop",
+            "output_hash": "d3c69844cfd1c492",
+            "output_tokens": 2447,
+            "score": 0.0
+          }
+        ],
+        "post_differences": [],
+        "prefix_metadata_equal": true,
+        "prefix_signature": "53cfc02c05c851662fc320ad040cd3ca83a1031bf8dc509d97921931bbc76805",
+        "recorded_post_calls": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ]
+      },
+      {
+        "control_anchors_equal": true,
+        "entire_event_records_equal": true,
+        "event_records_sha256": [
+          "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+        ],
+        "label": "control_after",
+        "outcomes": [
+          {
+            "canvases": 24,
+            "denoise_forwards": 515,
+            "finish_reason": "stop",
+            "output_hash": "f6e0aa2a94f74b84",
+            "output_tokens": 6035,
+            "score": 1.0
+          },
+          {
+            "canvases": 14,
+            "denoise_forwards": 403,
+            "finish_reason": "stop",
+            "output_hash": "b2faa42a5f82b590",
+            "output_tokens": 3357,
+            "score": 1.0
+          }
+        ],
+        "post_differences": [],
+        "prefix_metadata_equal": true,
+        "prefix_signature": "53cfc02c05c851662fc320ad040cd3ca83a1031bf8dc509d97921931bbc76805",
+        "recorded_post_calls": [
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13
+        ]
+      }
+    ],
+    "group": {
+      "index": 422,
+      "panel_seed": 42,
+      "suite": "longbench_v2"
+    },
+    "marker_sha256": "43f220600d44006bd824bcd3b0558c38784bb23ecae6e0ffa90ebdfe6e31ef1d",
+    "scored_sha256": "3cf1cd8c7662e0a75577fe612d3490c1184932f6770fbdc38e00d96d4e24ef8e"
+  },
+  "rows": 288,
+  "score_summary": {
+    "longbench_v2": {
+      "control_after": {
+        "mean_N": 126.53125,
+        "mean_score": 0.5,
+        "rows": 32
+      },
+      "control_before": {
+        "mean_N": 126.375,
+        "mean_score": 0.5,
+        "rows": 32
+      },
+      "dense_fresh": {
+        "mean_N": 126.375,
+        "mean_score": 0.5,
+        "rows": 32
+      },
+      "dense_hold": {
+        "mean_N": 142.8125,
+        "mean_score": 0.5625,
+        "rows": 32
+      },
+      "sparse_fresh": {
+        "mean_N": 133.53125,
+        "mean_score": 0.625,
+        "rows": 32
+      },
+      "sparse_hold": {
+        "mean_N": 150.5625,
+        "mean_score": 0.5,
+        "rows": 32
+      }
+    },
+    "ruler128k": {
+      "control_after": {
+        "mean_N": 5.5,
+        "mean_score": 0.875,
+        "rows": 16
+      },
+      "control_before": {
+        "mean_N": 5.5,
+        "mean_score": 0.875,
+        "rows": 16
+      },
+      "dense_fresh": {
+        "mean_N": 5.5,
+        "mean_score": 0.875,
+        "rows": 16
+      },
+      "dense_hold": {
+        "mean_N": 5.75,
+        "mean_score": 0.875,
+        "rows": 16
+      },
+      "sparse_fresh": {
+        "mean_N": 5.875,
+        "mean_score": 0.875,
+        "rows": 16
+      },
+      "sparse_hold": {
+        "mean_N": 6.125,
+        "mean_score": 0.8875,
+        "rows": 16
+      }
+    }
+  },
+  "status": "structural_verification_passed_with_trajectory_repeatability_limitations",
+  "summary_recomputed_exactly": true,
+  "verification_time_utc": "2026-10-18T08:38:10.905794+00:00"
+}

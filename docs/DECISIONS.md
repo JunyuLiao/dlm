@@ -2360,3 +2360,66 @@ shadowed the requested parent variable. Preserve this CPU-only failure, correct
 the parameter and test the real preparation path for both ordinary and successor
 cases. Attempt003 is a new preparation under the same recovery contract and
 budgets; it references attempt001's completed engines directly.
+
+## 2026-10-18 — Complete the bounded first-refresh factorial
+
+Attempt003 source db755c43 completed all288 measured requests:48 six-arm groups,
+eight LongBench questions and four RULER questions, two seeds and two engines.
+All groups reached the eligible event; all-six recorded prefixes match. Current
+output and future support separate as intended across five GLOBAL layers, with
+fixedK, unchanged LOCAL scope/RNG/native-call counts and zero measured captures.
+Read factorial_analysis/attempt001/mechanism_review.md for the qualified gates.
+
+The current-output main N effect is+5.54%, but its conditional signs depend on
+seed and question tails; extra calls sometimes accompany beneficial answers.
+Future-support removal has a+12.88% main N effect, with stronger provisional
+evidence under sparse current output. This is a one-event exploratory mechanism
+screen, not a cheap-selector evaluation or deployable timing result. Technical
+repeats are not independent accuracy observations.
+
+Two LongBench A/A bookends differ in output and N (maximum9 calls), and one
+sparse/fresh same-arm repeat differs by33 calls. Official scores repeat, and
+RULER repeats exactly. Recorded-prefix equality is not a cloned full-engine
+checkpoint; full self-conditioning is recorded only at the first post-event
+state. The source audit identifies unrecorded layout/auxiliary/resolved-kernel
+configuration inputs, without establishing the cause of variability. Preserve
+these cases; causal promotion remains unresolved under the frozen A/A rule.
+
+All clean timing controls completed, but all six Python-instrumented profile
+requests differ from their clean trajectories. Progress refresh occupies about
+1.5% of profiled request spans on the selected inputs, which is descriptive and
+cannot establish a clean critical-path bound. The all-kept profile was skipped
+under the headroom phase cap. A single external original-clean-worker trace uses
+at most the existing600-second reserve; no original campaign is resumed.
+
+## 2026-10-18 — Close bounded refresh execution without method promotion
+
+The one-shot external trace (runner 2f5687d4, original worker 6aab8632) completed
+under its 600-second reserve. All eight measured requests and both explicit
+warmups reproduce the clean outputs, trajectories and native counters exactly.
+A unique source-consistent synchronization alignment qualifies request/prefill
+windows, with no GPU activity crossing boundaries. Independent parity and full
+SQLite-summary recomputation pass. Monitored JIT warnings precede measurement;
+zero new request-time graph captures and unchanged original caches are verified.
+
+Dynamic-arm attention-named decode GPU activity is about 1.043/1.099 seconds on
+the two inputs, while traced prefill accounts for 12.25%/44.27% of request time.
+These heuristic activity categories do not isolate refresh, selection or commit,
+and are not removable critical-path costs. The trace incurs overhead; it is not
+clean timing. Thus the >=10% incremental refresh-benefit gate remains unresolved.
+No batching or alternate-model benefit was tested.
+
+Close execution at 5423.862923 GPU-reservation seconds (90.40 minutes), including
+failures, warmups and external processing. All reservations are finalized and
+GPU idle was verified. All 288 factorial and 20 clean measurements completed;
+the all-kept profile remains missing, so the overall attempt stays partial.
+No additional GPU work or full503 continuation is queued. The completed
+factorial and external trace are recorded as diagnostic subpanels only.
+
+Prioritize a bounded native-operator repeatability check and parity-preserving
+refresh-phase attribution before a new method sweep. Future-support maintenance
+is the provisional algorithmic lead if runtime headroom qualifies; neither dense
+current-output necessity nor cheap refresh accuracy/latency is established.
+Use answer quality, native decisions and physical work together, since fewer
+calls can accompany a worse answer. See the consolidated analysis at
+results/v31_refresh_diagnostic_20261018/analysis/attempt001/summary.md.

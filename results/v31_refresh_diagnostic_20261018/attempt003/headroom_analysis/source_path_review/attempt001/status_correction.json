@@ -1,0 +1,66 @@
+{
+  "correction": {
+    "engine9_captured_records_status": "Complete finalized public records; the captured full-file and complete-line prefix hashes equal the completion marker records hash.",
+    "engine9_measured_records": 96,
+    "engine9_planned_measured_records": 96,
+    "engine9_status_at_review": "complete",
+    "engine9_total_records": 100,
+    "external_trace_status_at_review": "pending",
+    "factorial_panel_complete_at_review": false,
+    "source_of_error": "Stale engine-liveness assumption during report writing; completion marker was not consulted.",
+    "whole_factorial_status_at_review": "still_running_engine10"
+  },
+  "created_utc": "2026-10-18T08:23:37.180114+00:00",
+  "engine10_context": {
+    "completion": {
+      "filesystem_mtime_utc": "2026-10-18T08:12:13.334989+00:00",
+      "path": "results/v31_refresh_diagnostic_20261018/attempt003/factorial/engine010_ruler128k_shared_audit/attempt001/attempt_complete.json",
+      "sha256": "b919351fd582e08203e6c9e209a05c2d9aaea2e4e0ff2f8f00815f335f66106c"
+    },
+    "config": {
+      "filesystem_mtime_utc": "2026-10-18T08:01:42.940576+00:00",
+      "path": "results/v31_refresh_diagnostic_20261018/attempt003/factorial/engine010_ruler128k_shared_audit/attempt001/config.json",
+      "sha256": "758f25a21d52d92f4b3fa2ade298d2805a2923f09c98559215abd25829c86047"
+    },
+    "interpretation": "Config precedes review and completion follows review; filesystem timestamps establish temporal context and are explicitly not embedded execution timestamps."
+  },
+  "engine9_completion": {
+    "filesystem_mtime_utc": "2026-10-18T08:01:42.618579+00:00",
+    "path": "results/v31_refresh_diagnostic_20261018/attempt003/factorial/engine009_longbench_v2_shared_audit/attempt001/attempt_complete.json",
+    "sha256": "7be68476e055f863fef25ed046d176e91405964950b67363475df44560f36ff0"
+  },
+  "engine9_records_sha256": "669e42c146484077da4654becfbdb94210744497d89f30cef093a9fd1a6962f3",
+  "gpu_seconds_added": 0,
+  "incorrect_claims": [
+    {
+      "location": "receipt.json.factorial_status",
+      "original": "engine9_active_snapshot_not_final_panel"
+    },
+    {
+      "location": "summary.md Separate cross-engine context example",
+      "original": "the still-running main factorial engine9"
+    },
+    {
+      "location": "summary.md Separate cross-engine context example",
+      "original": "Engine9 was still active when the complete-record prefix was captured, and its file may subsequently grow."
+    }
+  ],
+  "native_source_commit": "db755c43be763a8af9edfe8a147ec333d8b8542b",
+  "original_files_preserved": true,
+  "original_receipt": {
+    "filesystem_mtime_utc": "2026-10-18T08:05:24.128130+00:00",
+    "path": "results/v31_refresh_diagnostic_20261018/attempt003/headroom_analysis/source_path_review/attempt001/receipt.json",
+    "sha256": "5ef8e19b4f3b934687cff42200beccaee2c3535a4e3b2df8aa129a83ce0e9f51"
+  },
+  "original_review_created_utc": "2026-10-18T08:05:24.122279+00:00",
+  "original_summary": {
+    "filesystem_mtime_utc": "2026-10-18T08:05:24.127131+00:00",
+    "path": "results/v31_refresh_diagnostic_20261018/attempt003/headroom_analysis/source_path_review/attempt001/summary.md",
+    "sha256": "0007ecadab96e0a5610a5ff9d72c1128068d7591c1be8732fced33c6f0c87eb7"
+  },
+  "protocol_sha256": "6f77c44a6a361f54ea6e124ff7bf5afb746738c3e51d2dab99b098776f4eb693",
+  "schema": "v31_source_path_review_status_correction_v1",
+  "scientific_claims_changed": false,
+  "scope": "Correct engine9 lifecycle claims in the preserved source review; no scientific result changes.",
+  "status": "complete_status_only_correction"
+}

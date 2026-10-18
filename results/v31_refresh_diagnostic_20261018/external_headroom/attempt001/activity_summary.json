@@ -1,0 +1,834 @@
+{
+  "alignment": {
+    "candidate_count": 1,
+    "qualification": "unique consecutive triplets + frozen source order + complete schedule + timing agreement; GPU boundary crossings still require validation",
+    "status": "candidate",
+    "sync_offset": 3276,
+    "thread": 317911417824133,
+    "windows": [
+      {
+        "end_ns": 180036879442,
+        "prefill_end_ns": 163661187119,
+        "request_index": 0,
+        "start_ns": 162541760049
+      },
+      {
+        "end_ns": 188952590192,
+        "prefill_end_ns": 181122416300,
+        "request_index": 1,
+        "start_ns": 180037749126
+      },
+      {
+        "end_ns": 193515143041,
+        "prefill_end_ns": 190047190468,
+        "request_index": 2,
+        "start_ns": 188959290581
+      },
+      {
+        "end_ns": 202431483113,
+        "prefill_end_ns": 194610315586,
+        "request_index": 3,
+        "start_ns": 193519958753
+      },
+      {
+        "end_ns": 206992603564,
+        "prefill_end_ns": 203527352381,
+        "request_index": 4,
+        "start_ns": 202437851084
+      },
+      {
+        "end_ns": 218077319240,
+        "prefill_end_ns": 211901826406,
+        "request_index": 5,
+        "start_ns": 206998138161
+      },
+      {
+        "end_ns": 229946157078,
+        "prefill_end_ns": 222999478539,
+        "request_index": 6,
+        "start_ns": 218086249081
+      },
+      {
+        "end_ns": 234508642726,
+        "prefill_end_ns": 231047164682,
+        "request_index": 7,
+        "start_ns": 229955414753
+      },
+      {
+        "end_ns": 243429098492,
+        "prefill_end_ns": 235607474864,
+        "request_index": 8,
+        "start_ns": 234513527318
+      },
+      {
+        "end_ns": 255282275399,
+        "prefill_end_ns": 248339199001,
+        "request_index": 9,
+        "start_ns": 243436272836
+      },
+      {
+        "end_ns": 266395547033,
+        "prefill_end_ns": 260207526352,
+        "request_index": 10,
+        "start_ns": 255291401723
+      }
+    ]
+  },
+  "clean_reproduction_parity": "matched",
+  "critical_path_refresh_bound": "unresolved: matching output and request windows do not identify refresh phases or causal latency savings",
+  "gpu_activities_crossing_boundaries": 0,
+  "interpretation": "Whole-process totals include startup and all warmups. Names are heuristic; no layer, refresh or critical-path attribution. Phase GPU sums may overlap; union is per device. Trace timings are not clean latency.",
+  "original_clean_request_window_transfer_eligible": true,
+  "request_windows": [
+    {
+      "label": "implicit_warmup_control",
+      "phases": {
+        "decode": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 7603,
+              "activity_sum_ms": 11.975478999999861
+            },
+            "name_attention_candidate": {
+              "activities": 18995,
+              "activity_sum_ms": 1043.245957000031
+            },
+            "name_moe_candidate": {
+              "activities": 51150,
+              "activity_sum_ms": 3566.7256039998306
+            },
+            "name_other_gemm": {
+              "activities": 20961,
+              "activity_sum_ms": 51.31880299999736
+            },
+            "unknown": {
+              "activities": 163755,
+              "activity_sum_ms": 1988.194303000108
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 6661.067986
+            }
+          }
+        },
+        "prefill": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 388,
+              "activity_sum_ms": 0.5096289999999993
+            },
+            "name_attention_candidate": {
+              "activities": 90,
+              "activity_sum_ms": 497.58616300000017
+            },
+            "name_moe_candidate": {
+              "activities": 450,
+              "activity_sum_ms": 295.531152
+            },
+            "name_other_gemm": {
+              "activities": 90,
+              "activity_sum_ms": 2.0393260000000004
+            },
+            "unknown": {
+              "activities": 1084,
+              "activity_sum_ms": 267.1354529999996
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 1062.796027
+            }
+          }
+        }
+      },
+      "policy": "control",
+      "request_index": 0,
+      "warmup": true
+    },
+    {
+      "label": "warmup_0_control",
+      "phases": {
+        "decode": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 7601,
+              "activity_sum_ms": 11.947356999999888
+            },
+            "name_attention_candidate": {
+              "activities": 18995,
+              "activity_sum_ms": 1042.5573940000234
+            },
+            "name_moe_candidate": {
+              "activities": 51150,
+              "activity_sum_ms": 3566.3505459998782
+            },
+            "name_other_gemm": {
+              "activities": 20961,
+              "activity_sum_ms": 51.365350999997666
+            },
+            "unknown": {
+              "activities": 163749,
+              "activity_sum_ms": 1988.3667330001208
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 6660.191957
+            }
+          }
+        },
+        "prefill": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 388,
+              "activity_sum_ms": 0.5031359999999993
+            },
+            "name_attention_candidate": {
+              "activities": 90,
+              "activity_sum_ms": 503.2222770000002
+            },
+            "name_moe_candidate": {
+              "activities": 450,
+              "activity_sum_ms": 297.3840540000002
+            },
+            "name_other_gemm": {
+              "activities": 90,
+              "activity_sum_ms": 2.059838
+            },
+            "unknown": {
+              "activities": 1087,
+              "activity_sum_ms": 268.83040500000055
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 1071.993054
+            }
+          }
+        }
+      },
+      "policy": "control",
+      "request_index": 1,
+      "warmup": true
+    },
+    {
+      "label": "warmup_1_fixed16",
+      "phases": {
+        "decode": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 3186,
+              "activity_sum_ms": 5.151166999999975
+            },
+            "name_attention_candidate": {
+              "activities": 8580,
+              "activity_sum_ms": 474.6622990000109
+            },
+            "name_moe_candidate": {
+              "activities": 23100,
+              "activity_sum_ms": 1642.0617729999797
+            },
+            "name_other_gemm": {
+              "activities": 9464,
+              "activity_sum_ms": 23.125310000000248
+            },
+            "unknown": {
+              "activities": 71717,
+              "activity_sum_ms": 883.7827849999558
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 3028.49735
+            }
+          }
+        },
+        "prefill": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 388,
+              "activity_sum_ms": 0.5008319999999993
+            },
+            "name_attention_candidate": {
+              "activities": 90,
+              "activity_sum_ms": 506.28572599999984
+            },
+            "name_moe_candidate": {
+              "activities": 450,
+              "activity_sum_ms": 298.0123990000005
+            },
+            "name_other_gemm": {
+              "activities": 90,
+              "activity_sum_ms": 2.072991999999999
+            },
+            "unknown": {
+              "activities": 1087,
+              "activity_sum_ms": 269.4081479999997
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 1076.275585
+            }
+          }
+        }
+      },
+      "policy": "fixed16",
+      "request_index": 2,
+      "warmup": true
+    },
+    {
+      "label": "dynamic",
+      "phases": {
+        "decode": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 7601,
+              "activity_sum_ms": 11.934208999999896
+            },
+            "name_attention_candidate": {
+              "activities": 18995,
+              "activity_sum_ms": 1043.4382310000285
+            },
+            "name_moe_candidate": {
+              "activities": 51150,
+              "activity_sum_ms": 3566.205726999873
+            },
+            "name_other_gemm": {
+              "activities": 20961,
+              "activity_sum_ms": 51.375042999997305
+            },
+            "unknown": {
+              "activities": 163749,
+              "activity_sum_ms": 1988.4518650000975
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 6660.993043
+            }
+          }
+        },
+        "prefill": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 388,
+              "activity_sum_ms": 0.5025279999999991
+            },
+            "name_attention_candidate": {
+              "activities": 90,
+              "activity_sum_ms": 507.35059200000023
+            },
+            "name_moe_candidate": {
+              "activities": 450,
+              "activity_sum_ms": 298.44532099999975
+            },
+            "name_other_gemm": {
+              "activities": 90,
+              "activity_sum_ms": 2.0716479999999997
+            },
+            "unknown": {
+              "activities": 1087,
+              "activity_sum_ms": 270.0402049999998
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 1078.40223
+            }
+          }
+        }
+      },
+      "policy": "control",
+      "request_index": 3,
+      "warmup": false
+    },
+    {
+      "label": "fixed16",
+      "phases": {
+        "decode": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 3186,
+              "activity_sum_ms": 5.160735999999991
+            },
+            "name_attention_candidate": {
+              "activities": 8580,
+              "activity_sum_ms": 474.6802470000126
+            },
+            "name_moe_candidate": {
+              "activities": 23100,
+              "activity_sum_ms": 1642.095911999968
+            },
+            "name_other_gemm": {
+              "activities": 9464,
+              "activity_sum_ms": 23.123745000000127
+            },
+            "unknown": {
+              "activities": 71717,
+              "activity_sum_ms": 883.7244449999594
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 3028.494333
+            }
+          }
+        },
+        "prefill": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 388,
+              "activity_sum_ms": 0.5016639999999989
+            },
+            "name_attention_candidate": {
+              "activities": 90,
+              "activity_sum_ms": 507.3489389999999
+            },
+            "name_moe_candidate": {
+              "activities": 450,
+              "activity_sum_ms": 298.0113810000001
+            },
+            "name_other_gemm": {
+              "activities": 90,
+              "activity_sum_ms": 2.0650880000000007
+            },
+            "unknown": {
+              "activities": 1087,
+              "activity_sum_ms": 269.8459810000001
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 1077.767805
+            }
+          }
+        }
+      },
+      "policy": "fixed16",
+      "request_index": 4,
+      "warmup": false
+    },
+    {
+      "label": "dynamic",
+      "phases": {
+        "decode": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 5473,
+              "activity_sum_ms": 10.072609999999946
+            },
+            "name_attention_candidate": {
+              "activities": 13860,
+              "activity_sum_ms": 1097.8887170000255
+            },
+            "name_moe_candidate": {
+              "activities": 37350,
+              "activity_sum_ms": 2692.779127999911
+            },
+            "name_other_gemm": {
+              "activities": 15299,
+              "activity_sum_ms": 35.814663999999105
+            },
+            "unknown": {
+              "activities": 118317,
+              "activity_sum_ms": 1478.6808950000272
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 5314.920846
+            }
+          }
+        },
+        "prefill": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 900,
+              "activity_sum_ms": 1.2611840000000105
+            },
+            "name_attention_candidate": {
+              "activities": 210,
+              "activity_sum_ms": 3352.762828000001
+            },
+            "name_moe_candidate": {
+              "activities": 1050,
+              "activity_sum_ms": 788.009591
+            },
+            "name_other_gemm": {
+              "activities": 210,
+              "activity_sum_ms": 5.386624999999994
+            },
+            "unknown": {
+              "activities": 2511,
+              "activity_sum_ms": 725.8989499999982
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 4873.308426
+            }
+          }
+        }
+      },
+      "policy": "control",
+      "request_index": 5,
+      "warmup": false
+    },
+    {
+      "label": "fixed16",
+      "phases": {
+        "decode": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 5958,
+              "activity_sum_ms": 11.063426999999866
+            },
+            "name_attention_candidate": {
+              "activities": 16235,
+              "activity_sum_ms": 1247.1788490000436
+            },
+            "name_moe_candidate": {
+              "activities": 43800,
+              "activity_sum_ms": 3100.692497999911
+            },
+            "name_other_gemm": {
+              "activities": 17922,
+              "activity_sum_ms": 41.43395699999843
+            },
+            "unknown": {
+              "activities": 133875,
+              "activity_sum_ms": 1701.2193480000592
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 6101.034095
+            }
+          }
+        },
+        "prefill": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 900,
+              "activity_sum_ms": 1.2330240000000094
+            },
+            "name_attention_candidate": {
+              "activities": 210,
+              "activity_sum_ms": 3361.9928250000003
+            },
+            "name_moe_candidate": {
+              "activities": 1050,
+              "activity_sum_ms": 789.2210360000003
+            },
+            "name_other_gemm": {
+              "activities": 210,
+              "activity_sum_ms": 5.383170000000001
+            },
+            "unknown": {
+              "activities": 2511,
+              "activity_sum_ms": 728.2023520000007
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 4886.015767
+            }
+          }
+        }
+      },
+      "policy": "fixed16",
+      "request_index": 6,
+      "warmup": false
+    },
+    {
+      "label": "fixed16",
+      "phases": {
+        "decode": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 3186,
+              "activity_sum_ms": 5.1493449999999905
+            },
+            "name_attention_candidate": {
+              "activities": 8580,
+              "activity_sum_ms": 474.77287900001124
+            },
+            "name_moe_candidate": {
+              "activities": 23100,
+              "activity_sum_ms": 1642.367061999978
+            },
+            "name_other_gemm": {
+              "activities": 9464,
+              "activity_sum_ms": 23.10329700000034
+            },
+            "unknown": {
+              "activities": 71717,
+              "activity_sum_ms": 883.636768999958
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 3028.725928
+            }
+          }
+        },
+        "prefill": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 388,
+              "activity_sum_ms": 0.49756799999999907
+            },
+            "name_attention_candidate": {
+              "activities": 90,
+              "activity_sum_ms": 507.0771180000001
+            },
+            "name_moe_candidate": {
+              "activities": 450,
+              "activity_sum_ms": 298.96452199999993
+            },
+            "name_other_gemm": {
+              "activities": 90,
+              "activity_sum_ms": 2.075235
+            },
+            "unknown": {
+              "activities": 1087,
+              "activity_sum_ms": 270.51771500000007
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 1079.127198
+            }
+          }
+        }
+      },
+      "policy": "fixed16",
+      "request_index": 7,
+      "warmup": false
+    },
+    {
+      "label": "dynamic",
+      "phases": {
+        "decode": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 7601,
+              "activity_sum_ms": 11.94860799999983
+            },
+            "name_attention_candidate": {
+              "activities": 18995,
+              "activity_sum_ms": 1043.1953330000324
+            },
+            "name_moe_candidate": {
+              "activities": 51150,
+              "activity_sum_ms": 3566.3660639998793
+            },
+            "name_other_gemm": {
+              "activities": 20961,
+              "activity_sum_ms": 51.34419699999754
+            },
+            "unknown": {
+              "activities": 163749,
+              "activity_sum_ms": 1988.098097000113
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 6660.566827
+            }
+          }
+        },
+        "prefill": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 388,
+              "activity_sum_ms": 0.5015999999999995
+            },
+            "name_attention_candidate": {
+              "activities": 90,
+              "activity_sum_ms": 509.472108
+            },
+            "name_moe_candidate": {
+              "activities": 450,
+              "activity_sum_ms": 298.9765050000003
+            },
+            "name_other_gemm": {
+              "activities": 90,
+              "activity_sum_ms": 2.0736319999999995
+            },
+            "unknown": {
+              "activities": 1087,
+              "activity_sum_ms": 270.80497899999983
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 1081.823096
+            }
+          }
+        }
+      },
+      "policy": "control",
+      "request_index": 8,
+      "warmup": false
+    },
+    {
+      "label": "fixed16",
+      "phases": {
+        "decode": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 5958,
+              "activity_sum_ms": 11.015295999999882
+            },
+            "name_attention_candidate": {
+              "activities": 16235,
+              "activity_sum_ms": 1247.2897750000416
+            },
+            "name_moe_candidate": {
+              "activities": 43800,
+              "activity_sum_ms": 3100.970771999895
+            },
+            "name_other_gemm": {
+              "activities": 17922,
+              "activity_sum_ms": 41.4596479999987
+            },
+            "unknown": {
+              "activities": 133875,
+              "activity_sum_ms": 1701.942083000081
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 6102.164134
+            }
+          }
+        },
+        "prefill": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 900,
+              "activity_sum_ms": 1.2451530000000084
+            },
+            "name_attention_candidate": {
+              "activities": 210,
+              "activity_sum_ms": 3355.944607
+            },
+            "name_moe_candidate": {
+              "activities": 1050,
+              "activity_sum_ms": 787.3822880000012
+            },
+            "name_other_gemm": {
+              "activities": 210,
+              "activity_sum_ms": 5.353632
+            },
+            "unknown": {
+              "activities": 2511,
+              "activity_sum_ms": 725.7563730000013
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 4875.667461
+            }
+          }
+        }
+      },
+      "policy": "fixed16",
+      "request_index": 9,
+      "warmup": false
+    },
+    {
+      "label": "dynamic",
+      "phases": {
+        "decode": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 5473,
+              "activity_sum_ms": 10.036318999999942
+            },
+            "name_attention_candidate": {
+              "activities": 13860,
+              "activity_sum_ms": 1100.1963810000188
+            },
+            "name_moe_candidate": {
+              "activities": 37350,
+              "activity_sum_ms": 2693.0728189998867
+            },
+            "name_other_gemm": {
+              "activities": 15299,
+              "activity_sum_ms": 35.80943799999904
+            },
+            "unknown": {
+              "activities": 118312,
+              "activity_sum_ms": 1478.8841640000653
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 5317.695441
+            }
+          }
+        },
+        "prefill": {
+          "categories": {
+            "copy_or_memset": {
+              "activities": 900,
+              "activity_sum_ms": 1.2415680000000093
+            },
+            "name_attention_candidate": {
+              "activities": 210,
+              "activity_sum_ms": 3364.924496
+            },
+            "name_moe_candidate": {
+              "activities": 1050,
+              "activity_sum_ms": 789.9219279999992
+            },
+            "name_other_gemm": {
+              "activities": 210,
+              "activity_sum_ms": 5.393696000000004
+            },
+            "unknown": {
+              "activities": 2511,
+              "activity_sum_ms": 728.2454479999997
+            }
+          },
+          "devices": {
+            "0": {
+              "gpu_busy_union_ms": 4889.712896
+            }
+          }
+        }
+      },
+      "policy": "control",
+      "request_index": 10,
+      "warmup": false
+    }
+  ],
+  "segmentation_status": "qualified",
+  "status": "complete_cpu_summary",
+  "whole_process_categories": {
+    "copy_or_memset": {
+      "activities": 83823,
+      "activity_sum_ms": 6524.604978002812
+    },
+    "name_attention_candidate": {
+      "activities": 175885,
+      "activity_sum_ms": 27673.317517028314
+    },
+    "name_moe_candidate": {
+      "activities": 459690,
+      "activity_sum_ms": 37014.91521100305
+    },
+    "name_other_gemm": {
+      "activities": 187693,
+      "activity_sum_ms": 484.4141810002949
+    },
+    "unknown": {
+      "activities": 1455719,
+      "activity_sum_ms": 23243.05127800537
+    }
+  }
+}

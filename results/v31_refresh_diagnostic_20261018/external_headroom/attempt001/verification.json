@@ -1,0 +1,144 @@
+{
+  "all10_records_match": true,
+  "budget": {
+    "campaign_elapsed_s": 5423.862922743894,
+    "campaign_limit_s": 7200,
+    "external_elapsed_s": 326.2826988749439,
+    "external_reservation_s": 600,
+    "ledger_sha256": "a9c2cdb656190920e3fab60d926e44a3f0715662a3edda729b3a9446ec0590fe",
+    "phase_elapsed_s": {
+      "factorial": 2931.87282536109,
+      "headroom": 1693.7446937569184,
+      "qualification": 471.96270475094207,
+      "reserve": 326.2826988749439
+    }
+  },
+  "dynamic_trace_by_input": [
+    {
+      "attention_named_decode_activity_sum_mean_s": 1.0990425490000222,
+      "index": 254,
+      "prompt_tokens": 111616,
+      "trace_W_mean_s": 11.091655,
+      "trace_prefill_fraction_of_summed_W": 0.4426683844746343,
+      "trace_prefill_mean_s": 4.909924999999999,
+      "trace_repeats": 2
+    },
+    {
+      "attention_named_decode_activity_sum_mean_s": 1.0433167820000304,
+      "index": 339,
+      "prompt_tokens": 41189,
+      "trace_W_mean_s": 8.91354,
+      "trace_prefill_fraction_of_summed_W": 0.12252763772866898,
+      "trace_prefill_mean_s": 1.092155,
+      "trace_repeats": 2
+    }
+  ],
+  "dynamic_trace_comparisons": [
+    {
+      "attention_named_decode_activity_sum_s": 1.0434382310000285,
+      "decode_gpu_busy_union_s": 6.660993043,
+      "decode_s": 7.82116,
+      "index": 339,
+      "prefill_fraction": 0.12235398674973517,
+      "prefill_s": 1.09036,
+      "prompt_tokens": 41189,
+      "request_index": 3,
+      "wall_s": 8.91152
+    },
+    {
+      "attention_named_decode_activity_sum_s": 1.0978887170000255,
+      "decode_gpu_busy_union_s": 5.314920846,
+      "decode_s": 6.17547,
+      "index": 254,
+      "prefill_fraction": 0.4426053576215547,
+      "prefill_s": 4.9037,
+      "prompt_tokens": 111616,
+      "request_index": 5,
+      "wall_s": 11.07917
+    },
+    {
+      "attention_named_decode_activity_sum_s": 1.0431953330000323,
+      "decode_gpu_busy_union_s": 6.660566826999999,
+      "decode_s": 7.82162,
+      "index": 339,
+      "prefill_fraction": 0.12270121001933698,
+      "prefill_s": 1.09395,
+      "prompt_tokens": 41189,
+      "request_index": 8,
+      "wall_s": 8.91556
+    },
+    {
+      "attention_named_decode_activity_sum_s": 1.1001963810000188,
+      "decode_gpu_busy_union_s": 5.317695441,
+      "decode_s": 6.18799,
+      "index": 254,
+      "prefill_fraction": 0.44273126959854614,
+      "prefill_s": 4.91615,
+      "prompt_tokens": 111616,
+      "request_index": 10,
+      "wall_s": 11.10414
+    }
+  ],
+  "files_sha256": {
+    "activity_summary.json": "3beb404b05463a34f38cdfe92d00dab4bbe3c210db8ecab7cef9a069b693a580",
+    "config.json": "cd40b8c563274834e8d24b08e9a90159e223f75c81782f9dcb17959ff9c7300a",
+    "parity.json": "a7c8995cbb02c0b87621e8594cbe996b6e214ef9c71ebfe95b723f92a2b4f34c",
+    "private/export.log": "a98413a55efd468d3765e24b97a87070eb1b7d25ed6c388cee234a330e011389",
+    "private/generation.private.jsonl": "4f2ddcd423fc2f1950756598c3d77104a5f023a5760309d123a4da894dd74fe5",
+    "private/nsys/trace.nsys-rep": "d35c1703b086eb1c34057a8f86d01c3de1bfe82c1b9dada1a8cee9f3336cc233",
+    "private/nsys/trace.sqlite": "e608747ba3f3c644a0636a7278ff9b919744374e3d7dffafe70a7af81c7efee7",
+    "private/summary.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/validation.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/worker.log": "9b0156240b4573a786c312559bdd1d62e59feae64a4b9d31eb91ae487f5d75e6",
+    "protocol.json": "f19d78f0e8fa2959871e7898f3e089e787e76f2e18d824f8d825cd2ae6f07999",
+    "receipt.json": "9a0688b9b57e51ec107095e9f57b9ece4d858a32801df7a4732ebc69069bcd8e",
+    "records.jsonl": "5845925330152fea0b33625297a2671233deeb271b3a987c23aa6560237a1f27",
+    "validation.json": "89200452c5cfb1b6492a110e0492188e180c50a742adcb70cd5b81db3051a384"
+  },
+  "full_parity_recomputed_exactly": true,
+  "full_sqlite_summary_recomputed_exactly": true,
+  "interpretation": "Traced request windows reproduce original outputs and counters. Kernel-name activities are heuristic and not refresh-specific or critical-path savings. No incremental clean-latency benefit or refresh removable-time bound is established.",
+  "jit_warning_review": {
+    "first_two_records_are_explicit_warmups": true,
+    "implicit_warmup_unrecorded": true,
+    "observed_warnings_all_before_first_explicit_warmup_completion": true,
+    "observed_warnings_during_measured_requests": 0,
+    "public_record_log_lines": [
+      212,
+      213,
+      214,
+      215,
+      216,
+      217,
+      218,
+      219,
+      220,
+      221
+    ],
+    "qualification": "Warnings are classified by frozen execution order and merged log order; no claim that every possible compilation event is monitored",
+    "warning_log_lines": [
+      204,
+      205,
+      206,
+      209,
+      210,
+      211
+    ]
+  },
+  "measured_matches": 8,
+  "native_source_commit": "6aab86325990edf6e5ab6bb72bcd909781234e97",
+  "original_cache_unchanged": true,
+  "original_completion_sha256": "45b47c1378227e2898a280f29f4eec1ad64eb16d3247663c68c6954a89484afc",
+  "original_protocol_sha256": "1e7714be3fd4690b41e37727a7b8ae283800c24f579f90eec03d90e37bfb964e",
+  "request_segmentation": {
+    "gpu_boundary_crossings": 0,
+    "request_windows": 11,
+    "sync_count": 33,
+    "sync_offset": 3276,
+    "unique_candidates": 1
+  },
+  "review_scope": "CPU-only read-only validation; no new trace or model invocation",
+  "runner_commit": "2f5687d4c221e9b38cb5897e6e4443374aa81ae5",
+  "status": "verified_complete_external_diagnostic",
+  "verification_time_utc": "2026-10-18T08:45:06.726608+00:00"
+}
