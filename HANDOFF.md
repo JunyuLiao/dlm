@@ -1,14 +1,36 @@
-## HumanEval164 K256 campaign preparation — 2026-10-18
+## HumanEval164 K256 complete — 2026-10-19 (Hong Kong)
 
-User authorized all164 HumanEval tasks, seed42, thinking on/off, V31/dense,
-online V2, singleton V3a, full swaps and direction-guarded residual at K256.
-Plan: docs/HUMANEVAL_VALUE_K256_PLAN_20261018.md. Current source is being frozen
-before generation; 96 H100 checks pass with zero skips, including K4 parity and
-thinking-aware extraction. The local unprivileged scorer preflight passes.
-Results: results/humaneval_value_k256_20261018/. Native sampler/output8192 are
-fixed; V2 threshold uses first-canvas physical work only, with separate audit
-and clean runs. No HumanEval accuracy or latency result is claimed yet.
-Older LongBench full503 remains paused and is outside this authorization.
+Verified native source20e6c0be; protocol7b81c845fdce07743d3ed5dd91c4b6b4a54640e071b594ef7f690d6f400bd4d5.
+Read results/humaneval_value_k256_20261018/attempt001/analysis/attempt001/summary.md
+and verified_complete.json. All164 questions, seed42, thinking on/off, separate
+audit/clean passes, all requested methods and three dense controls are complete.
+There are58 completed engines, no failed jobs, 5,904 selected scored records,
+96 passed H100 tests, 328 canonical checks, and 5,904 independent official-test
+rescoring agreements. Native configuration/output8192 and K4 prefix selection
+are fixed; LOCAL stays dense. GPU reservation15,032.143 seconds; H100 released.
+
+Clean thinking-on correct counts V31/V2/V3a/swaps/guard/dense FULL are
+159/155/160/160/159/158; mean N51.79/56.54/49.77/50.23/52.79/48.10;
+mean W1.170/1.324/1.150/1.837/1.317/0.954 seconds. Without thinking they are
+155/154/154/154/154/157, N10.28/10.68/9.34/10.07/10.05/10.34,
+W0.250/0.256/0.235/0.309/0.258/0.221 seconds. V3a is the closest clean point
+candidate; its paired accuracy and latency intervals include no improvement.
+Every requested sparse method is slower than dense FULL in these clean runs.
+
+Important limit: audit and clean outputs differ substantially even in dense
+controls. Audit thinking-on V31/V2/V3a/swaps/guard/dense FULL score
+162/158/161/158/159/156; non-thinking156/159/158/156/157/153. Do not pool passes
+or attach audit work to clean outputs as if trajectories matched. First-canvas
+audit calibration selects tau0.119043883153 (thinking) and0.144224957031
+(non-thinking), within0.085/0.115 percentage points of V31 GLOBAL sparsity.
+This matching has not been verified on clean trajectories. The cross-pass
+divergence cause remains unlocalized; technical V31 bookends have no score drift.
+
+Done: native matrix, official scoring, source/input/coverage verification,
+CPU reporting with separate populations and public sanitized per-item evidence.
+Running/queued: none. Older LongBench full503 and refresh campaigns remain
+paused; this HumanEval authorization did not resume them. Any future claimed
+accuracy/speed gain needs replication and a qualified audit/clean relationship.
 
 ## Numerical replay and refresh attribution completed — 2026-10-18
 

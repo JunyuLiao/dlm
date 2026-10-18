@@ -2149,3 +2149,41 @@ Total1334.421052s=22.24/45min, GPU idle, no further work queued. Twenty-nine
 relevant CPU tests and source/snapshot/cache/trace integrity checks passed.
 The capture329 versus runtime339 description correction remains explicit.
 No older full503 campaign resumed. See analysis/attempt001/summary.md for limits.
+
+## HumanEval164 value methods K256, seed42, thinking on/off — complete (2026-10-19 Hong Kong)
+
+Campaign: results/humaneval_value_k256_20261018/attempt001. Native source20e6c0be;
+protocol SHA2567b81c845fdce07743d3ed5dd91c4b6b4a54640e071b594ef7f690d6f400bd4d5.
+All164 questions per method/setting/pass, native output8192, two resumable shards,
+Q128/KV64 prefixK4, LOCAL dense. V2 variable threshold; V2/V3a Gaussian32 on all
+GLOBAL layers, swaps/residual full V at layer29. Three source-matched dense
+controls included. All58 engine jobs and5,904 selected scored records complete.
+H100 tests96/96, canonical tests328/328, independent official rescore agreements
+5,904/5,904. Native completion and verified completion markers are present.
+
+| Method | Clean thinking correct/164 | N | W(s) | Clean non-thinking correct/164 | N | W(s) |
+|---|---:|---:|---:|---:|---:|---:|
+| V31 |159|51.787|1.16967|155|10.280|0.24978|
+| V2 |155|56.537|1.32367|154|10.677|0.25614|
+| V3a |160|49.774|1.15001|154|9.335|0.23545|
+| full swaps |160|50.232|1.83676|154|10.073|0.30871|
+| direction-guarded residual |159|52.793|1.31692|154|10.055|0.25756|
+| dense FULL fix51994 |158|48.104|0.95358|157|10.335|0.22114|
+
+Important: audit is a different measured population. In the same row order its
+thinking correct counts are162/158/161/158/159/156; non-thinking156/159/158/156/
+157/153. Audit/clean hash and correctness differences also affect dense controls;
+the cause is unlocalized. The report separates accuracy, N/C, T, tails/caps,
+latency, amortized S/N, audit work, selector cost and paired uncertainty.
+Clean V3a request-speedup intervals vs V31 are[0.943,1.103]/[0.994,1.155];
+accuracy differences+0.610/-0.610pp have intervals including0. No robust advantage
+is established, and all sparse methods are slower than dense FULL.
+
+V2 tau0.119043883153/0.144224957031 meets first-canvas audit sparsity matching
+within0.085/0.115pp; clean transfer is unverified. Whole-trajectory audit GLOBAL
+sparsity V31/V2/V3a/swaps/guard is48.168/29.977/54.401/53.977/48.881% with
+thinking and14.243/8.374/38.823/35.044/8.261% without. LOCAL skips0; the overall
+denominator is denoising GLOBAL full-support plus LOCAL window-intersecting
+rectangles, excluding dense prefill/commits. GPU reservation15,032.143 seconds.
+No older LongBench campaign resumed. Authoritative report and public numeric
+per-item evidence: analysis/attempt001/summary.md and per_item_metrics.jsonl.

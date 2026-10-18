@@ -2460,3 +2460,36 @@ index description correction (329 is36K; runtime339 is41K). Total reservation
 1334.421052s=22.24min, within45min; all reservations closed and GPU idle. No selector
 or older full503 continuation. Full report:
 results/v31_refresh_repeatability_20261018/analysis/attempt001/summary.md.
+
+## HumanEval164 K256 completed; separate audit and clean evidence (2026-10-19 Hong Kong)
+
+User authorized a new HumanEval campaign, not an older LongBench resume.
+Native source20e6c0be, protocol7b81c845fdce07743d3ed5dd91c4b6b4a54640e071b594ef7f690d6f400bd4d5,
+results/humaneval_value_k256_20261018/attempt001. All164 tasks, seed42,
+thinking on/off, fixed native output8192, V31/V2/V3a/full swaps/directional
+residual and FULL/PIECEWISE/all-kept controls. K256 is four prefix blocks;
+V2 is a variable threshold, calibrated on first-canvas audit work only.
+V2/V3a Gaussian32 cover all GLOBAL layers; full-value modifications stay at29.
+LOCAL remains dense. All58 engines completed without structural failures;
+96 H100 tests,328 canonical controls and5,904 independent official rescores pass.
+
+Clean thinking-on correct159/155/160/160/159/158 for V31/V2/V3a/swaps/guard/
+dense FULL, with mean N51.787/56.537/49.774/50.232/52.793/48.104 and
+W1.16967/1.32367/1.15001/1.83676/1.31692/0.95358 seconds. Thinking-off
+correct155/154/154/154/154/157, N10.280/10.677/9.335/10.073/10.055/10.335,
+W0.24978/0.25614/0.23545/0.30871/0.25756/0.22114. V3a is the closest clean
+point, but both latency intervals include1 and its accuracy intervals include0.
+All sparse arms are slower than dense FULL. No joint improvement is promoted.
+
+Audit trajectories differ from clean even in dense controls; accuracy rankings
+and call differences change across passes. Keep complete per-pass results.
+Do not interpret audit masks as clean masks. First-canvas audit thresholds
+0.119043883153/0.144224957031 match GLOBAL sparsity within0.085/0.115pp,
+but transfer to clean is unverified. Whole-trajectory GLOBAL sparsity for V2
+is29.98/8.37% versus V31 48.17/14.24%; first-canvas matching is not total-work
+matching. The divergence cause is unlocalized. No additional GPU trial is queued.
+
+GPU engine reservation15,032.143s; no measured captures, LOCAL skips or fixed-K
+budget errors. Preserve all calibration and qualification outputs privately.
+Report: analysis/attempt001/summary.md, source and final verification receipts.
+Older full503 and refresh campaigns stay paused; legacy STATE.json is unchanged.
