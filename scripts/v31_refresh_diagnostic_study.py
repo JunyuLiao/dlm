@@ -180,7 +180,7 @@ def native_contract():
         thinking_policy='unchanged per-input manifests', output_limits='unchanged per-input native budgets')
 
 
-def prepare(study, parent=None):
+def prepare(study, recovery_parent=None):
     if study.exists():
         raise RuntimeError('preserve existing attempt; select a new directory')
     files, commit = committed_sources(); pause_unchanged()
@@ -258,8 +258,8 @@ def prepare(study, parent=None):
         ruler_checkout=ruler_checkout, reserve_policy='fresh source and successor after root review for fixes; no automatic reserve spending or phase borrowing',
         timing='only headroom clean records permit latency claims; profiling and factorial are audit only',
         failure_policy='preserve completed rows, stop on structural failure; missing or mismatched causal prefixes remain outcomes')
-    if parent is not None:
-        bind_successor(study, protocol, parent)
+    if recovery_parent is not None:
+        bind_successor(study, protocol, recovery_parent)
     base.write(study / 'protocol.json', protocol, True)
     base.write(study / 'receipts/source_fingerprints.json', dict(source_commit=commit,
         protocol_sha256=base.sha(study / 'protocol.json'), execution_fingerprints=protocol['execution_fingerprints']), True)

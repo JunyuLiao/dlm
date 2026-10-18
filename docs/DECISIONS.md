@@ -2353,3 +2353,10 @@ FULL and PIECEWISE differ in N on both selected inputs; all-kept FA4 also flips
 the 41K answer relative to both. Fixed16's faster 41K request is incorrect while
 dynamic V31 is correct. These observations prevent promotion from timing alone;
 they do not establish benchmark-level accuracy differences.
+
+The first recovery preparation (attempt002, source 35e2e9bc) failed its parent
+campaign check before protocol freeze or GPU launch. The pool-copy loop had
+shadowed the requested parent variable. Preserve this CPU-only failure, correct
+the parameter and test the real preparation path for both ordinary and successor
+cases. Attempt003 is a new preparation under the same recovery contract and
+budgets; it references attempt001's completed engines directly.

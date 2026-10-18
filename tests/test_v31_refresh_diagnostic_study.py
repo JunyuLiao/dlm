@@ -112,6 +112,45 @@ def write_json(path, value):
     path.write_text(json.dumps(value, sort_keys=True, indent=2))
 
 
+@pytest.mark.parametrize('with_recovery', [False, True])
+def test_prepare_preserves_requested_parent_across_both_pool_iterations(tmp_path, monkeypatch, with_recovery):
+    """Exercise actual preparation/copy loops, mocking only external boundaries."""
+    root = tmp_path / 'repo'; root.mkdir()
+    source = root / 'scripts/snapshot.py'; source.parent.mkdir(); source.write_text('# frozen\n')
+    spec = root / study.SPEC; spec.parent.mkdir(); spec.write_text('frozen specification\n')
+    lb_parent, ruler_parent = root / 'lb_inputs', root / 'ruler_inputs'
+    lb = [cell(i, length, 'lb') for i, length in enumerate((18000, 19000, 40000, 41000, 80000, 81000, 110000, 111000))]
+    ruler = [cell(i, 130000, 'ruler') for i in range(4)]
+    for suite, parent, cells in [('longbench_v2', lb_parent, lb), ('ruler128k', ruler_parent, ruler)]:
+        write_json(parent / f'private/schedules/{suite}/cells.json', cells)
+        write_json(parent / 'protocol.json', {'suites': {suite: {'dataset': cells[0]['dataset']}}})
+        write_json(parent / f'private/pools/{suite}/pool.json', {'suite': suite})
+    write_json(lb_parent / 'model_source_fingerprints.json', {'files': []})
+    write_json(ruler_parent / 'private/pools/ruler128k/ruler_rowinfo.json',
+               {'rows': [{'task_base': str(i)} for i in range(4)]})
+    write_json(ruler_parent / 'private/scorer_location.json', {'ruler': 'mock-checkout'})
+    monkeypatch.setattr(study, 'ROOT', root)
+    monkeypatch.setattr(study, 'LB_PARENT', lb_parent)
+    monkeypatch.setattr(study, 'RULER_PARENT', ruler_parent)
+    monkeypatch.setattr(study, 'committed_sources', lambda: (['scripts/snapshot.py'], 'frozen-commit'))
+    monkeypatch.setattr(study, 'pause_unchanged', lambda: None)
+    monkeypatch.setattr(study.base, 'runtime_identity', lambda: {'gpu': 'mock-h100'})
+    monkeypatch.setattr(study.base, 'check_inputs', lambda *args: None)
+    monkeypatch.setattr(study, 'native_contract', lambda: {'canvas': 256})
+    monkeypatch.setattr(study.official, 'ruler_verify_checkout', lambda path: {'checkout': path})
+    requested_parent = root / 'results/campaign/attempt001'
+    successor = root / 'results/campaign/attempt003'
+    calls = []
+    monkeypatch.setattr(study, 'bind_successor', lambda path, protocol, parent: calls.append((path, parent)))
+    protocol = study.prepare(successor, requested_parent if with_recovery else None)
+    assert calls == ([(successor, requested_parent)] if with_recovery else [])
+    assert protocol['parent_protocols'] == {suite: study.base.sha(parent / 'protocol.json')
+        for suite, parent in [('longbench_v2', lb_parent), ('ruler128k', ruler_parent)]}
+    for suite in ('longbench_v2', 'ruler128k'):
+        assert study.base.read(successor / f'private/pools/{suite}/pool.json') == {'suite': suite}
+    assert len(protocol['plans']) == 12
+
+
 @pytest.fixture
 def recovery_case(tmp_path):
     parent, successor = tmp_path / 'campaign/attempt001', tmp_path / 'campaign/attempt002'

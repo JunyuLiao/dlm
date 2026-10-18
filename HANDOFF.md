@@ -1,5 +1,12 @@
 ## Refresh profiling recovery being prepared — 2026-10-18
 
+Recovery source 35e2e9bc passed 65 CPU tests, but attempt002 preparation caught
+a coordinator variable-shadowing bug before protocol freeze or GPU launch.
+That preparation is preserved with preparation_failed.json (zero GPU charge).
+The parameter is corrected and a full preparation integration test covers both
+ordinary and successor preparation. The next fresh successor is attempt003,
+still referencing attempt001; budgets and all scientific schedules are unchanged.
+
 The bounded diagnostic's attempt001 is preserved as failed. Source 6aab8632
 completed qualification and all 20 clean headroom measurements (engines001–005).
 Engine006 failed before its first request because a profiling hook read an
