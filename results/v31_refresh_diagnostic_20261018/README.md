@@ -29,5 +29,11 @@ and factorial leaves use the successor source; native execution code is unchange
 The recovery allocation is qualification 900 s, headroom 1,800 s, factorial
 3,900 s and reserve 600 s. The shared 7,200 s cap includes the failed worker.
 All 67 diagnostic CPU tests pass. Native qualification and 20 clean headroom
-measurements are complete; profiling is underway. This paragraph is a checkpoint,
-not a final result. Use the active attempt's state and final report for completion.
+measurements are complete. Shared/FULL profiles completed, but all six profiled
+requests have different trajectories from their clean counterparts; clean
+critical-path attribution remains unresolved. The all-kept profile was skipped
+unstarted under the phase budget. Factorial engines are running under the
+unchanged 3,900-second cap. A one-shot external trace of the original clean worker
+is planned within the remaining 600-second reserve after factorial completion.
+These statements are a checkpoint, not a final result. Use the active attempt's
+state and final report for coverage and completion.

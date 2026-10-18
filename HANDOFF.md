@@ -1,3 +1,29 @@
+## Refresh factorial running; headroom attribution limited — 2026-10-18, 07:56 UTC
+
+Verified execution source db755c43, active attempt003. The qualification and all
+20 clean runtime measurements are complete. Shared and FULL profiles finished;
+the all-kept profile was skipped unstarted because less than180 seconds remained
+in the headroom phase. Charged reservation before factorial:2165.707 seconds.
+The global campaign is consequently partial even if all factorial engines finish.
+
+All six profiled requests differ from their matched clean trajectories. Shared
+attention scopes are complete, but FULL replayed decode scopes are unobserved.
+The descriptive progress-refresh spans are about1.5% of profiled request time;
+these cannot establish a removable clean-latency bound. Read attempt003/
+headroom_analysis/attempt001/trajectory_and_scope_review.md for provenance and
+the nonadditive scope accounting. Do not promote fixed16 from its faster but
+wrong 41K clean answer or pool these two inputs into a benchmark claim.
+
+The factorial coordinator is running in session6165 (engine009 at this
+checkpoint), with its unchanged3900-second phase cap. Early groups have matching
+prefixes and exact dense/fresh versus both V31 controls. Wait for official
+scoring, repeat coverage and tail analysis before interpreting treatment effects.
+One standalone external Nsight check is being prepared under
+docs/REFRESH_EXTERNAL_PROFILE_20261018.md, using at most the remaining600-second
+reserve after factorial reaches a terminal state. It must run the original clean
+worker without Python hooks and preserve old artifacts/caches. No older campaign
+is resumed; the total7200-second reservation cap remains unchanged.
+
 ## Refresh profiling recovery running — 2026-10-18
 
 Verified successor source db755c43. Attempt003 is frozen under
