@@ -1,4 +1,19 @@
-## Refresh profiling recovery being prepared — 2026-10-18
+## Refresh profiling recovery running — 2026-10-18
+
+Verified successor source db755c43. Attempt003 is frozen under
+results/v31_refresh_diagnostic_20261018/attempt003, protocol SHA256
+6f77c44a6a361f54ea6e124ff7bf5afb746738c3e51d2dab99b098776f4eb693.
+All 67 CPU tests pass. Its five explicit references validate attempt001's
+completed qualification and clean controls without changing their source labels.
+Native and factorial execution source matches the original qualified snapshot.
+
+Headroom engines006–008 are running in coordinator session46741 with an intact
+phase stop before factorial. The shared ledger leaves 749.968 seconds for
+headroom and 3,900 seconds for factorial; the total campaign cap is unchanged.
+Analyze profiles and native trajectory parity against referenced clean results
+before the factorial continuation. Failed attempts001/002 remain preserved.
+
+## Refresh profiling recovery preparation history — 2026-10-18
 
 Recovery source 35e2e9bc passed 65 CPU tests, but attempt002 preparation caught
 a coordinator variable-shadowing bug before protocol freeze or GPU launch.

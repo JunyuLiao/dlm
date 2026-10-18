@@ -18,3 +18,16 @@ worker receipts, official scored outputs and completion markers. `state.json`
 reports partial coverage and budget use. An analysis completion marker never
 stands for campaign completion. No performance or accuracy gain is established
 by the design or CPU tests alone.
+
+Active execution is attempt003, source `db755c43`, after the preserved profiling
+startup failure in attempt001 and CPU-only preparation failure in attempt002.
+The recovery contract is `docs/REFRESH_DIAGNOSTIC_RECOVERY_20261018.md`.
+Attempt003 explicitly references attempt001's completed qualification and clean
+timing engines, retaining their original source/protocol hashes. New profiling
+and factorial leaves use the successor source; native execution code is unchanged.
+
+The recovery allocation is qualification 900 s, headroom 1,800 s, factorial
+3,900 s and reserve 600 s. The shared 7,200 s cap includes the failed worker.
+All 67 diagnostic CPU tests pass. Native qualification and 20 clean headroom
+measurements are complete; profiling is underway. This paragraph is a checkpoint,
+not a final result. Use the active attempt's state and final report for completion.
