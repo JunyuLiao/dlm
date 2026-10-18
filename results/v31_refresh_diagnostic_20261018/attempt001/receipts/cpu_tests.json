@@ -1,0 +1,15 @@
+{
+  "source_commit": "6aab86325990edf6e5ab6bb72bcd909781234e97",
+  "status": "passed",
+  "tests_passed": 46,
+  "test_files": [
+    "tests/test_v31_refresh_diagnostic.py",
+    "tests/test_v31_refresh_diagnostic_worker.py",
+    "tests/test_v31_refresh_headroom_profile.py",
+    "tests/test_v31_refresh_diagnostic_report.py",
+    "tests/test_v31_refresh_diagnostic_study.py"
+  ],
+  "scope": "CPU lifecycle, input-state fingerprints, native-call/RNG guards, fixed budgets, schedules, deadline accounting and analysis",
+  "independent_review": "A second agent reran all 46 tests and reviewed coordinator and actual adapter integration before launch.",
+  "native_qualification": "Separate required GPU gate; CPU tests do not establish native correctness or speed."
+}

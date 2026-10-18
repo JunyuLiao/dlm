@@ -1,3 +1,26 @@
+## Refresh diagnostic qualified; runtime headroom underway — 2026-10-18
+
+Verified source6aab8632. User authorized the bounded study in
+docs/REFRESH_DIAGNOSTIC_PLAN_20261018.md, under
+results/v31_refresh_diagnostic_20261018/attempt001. The7200s campaign GPU cap
+includes startup, warmups and failures. Older full503/value campaigns stay paused.
+
+All46 CPU tests pass. Native qualification is complete: one metadata-selected
+LongBench question422/seed42, four excluded treatment warmups, six measured
+requests. All six prefix fingerprints match, the current-output/future-support
+factors separate correctly, and dense_fresh matches both original V31 controls
+exactly (correct,515 calls,6035 output tokens). The other three interventions
+are wrong on this item; this is qualification only, not aggregate evidence.
+All structural/RNG/graph-capture checks pass. Reservation471.963s. Read
+qualification/summary.md and the engine's qualification.json/attempt_complete.json.
+
+Headroom continuation has been launched with --stop-after headroom, coordinator
+session85682: clean V31/fixed16/FULLfix/PIECEWISE/all-kept, then separate audit
+profiles. This phase has1500s of GPU reservation. Inspect completed receipts and
+measured JIT/capture behavior before accepting latency. Next: analyze headroom,
+then apply the preregistered research-triage criteria to the remaining factorial
+panel (up to288 measured requests,3900s phase cap). No full503 resume is authorized.
+
 ## Bounded pause investigation complete; full503 stays paused — 2026-10-17
 
 Verified investigation source c8feb508; independent receipt at10:50 UTC.

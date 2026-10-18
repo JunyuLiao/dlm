@@ -2312,3 +2312,22 @@ gate near/below70ms on representative states, then a predeclared multi-seed
 native accuracy/latency screen. This is an optimistic allowance, not a speedup
 claim. Directional residual needs a decision objective redesign before more
 accuracy work. No further experiment is queued; full503 remains paused.
+
+
+## 2026-10-18 — Qualify a bounded refresh-output/support factorial
+
+- User authorized a new runtime-headroom and 2x2 diagnostic under a7200s GPU
+  reservation cap; original paused campaigns remain paused. Frozen source6aab8632,
+  plan docs/REFRESH_DIAGNOSTIC_PLAN_20261018.md, attempt
+  results/v31_refresh_diagnostic_20261018/attempt001. All46 CPU tests pass.
+- The six measured qualification runs on metadata-selected LongBench index422,
+  seed42 match all pre-event fingerprints. Dense/fresh reproduces both V31
+  controls exactly; current output and subsequent support are separated across
+  all five GLOBAL layers, with no added native forwards or RNG consumption.
+- Only V31/dense_fresh is correct in this one-item qualification. Dense/held
+  reaches the unchanged output limit; both sparse-output branches use fewer
+  calls but are wrong. Do not treat fewer calls as either quality or clean-speed
+  evidence. No aggregate necessity or noninferiority claim follows.
+- Qualification used471.963 GPU-reservation seconds. Runtime headroom is a
+  separate clean/profile phase; the larger panel remains subject to the frozen
+  budget and gates. See qualification/summary.md and native completion receipt.
