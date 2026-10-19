@@ -21,7 +21,9 @@ def cpu_fingerprints(value):
         if isinstance(item,list):return [collect(v) for v in item]
         return item
     staged=collect(value)
-    words=torch.stack(tensors).detach().cpu().tolist() if tensors else []
+    # CUDA concatenation supports signed 64-bit words broadly. Views preserve
+    # the exact bits; restore unsigned interpretation on CPU before JSON output.
+    words=torch.stack([x.view(torch.int64) for x in tensors]).detach().cpu().view(torch.uint64).tolist() if tensors else []
     def restore(item):
         if isinstance(item,Ref):return words[item.index]
         if isinstance(item,dict):return {key:restore(v) for key,v in item.items()}

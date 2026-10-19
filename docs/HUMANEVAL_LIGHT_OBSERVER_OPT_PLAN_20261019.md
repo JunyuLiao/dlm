@@ -24,6 +24,11 @@ the six native-binding/scalar tests under the new source. Per-step observation,
 native sampler, models, methods and graph dispatch remain unchanged. This changes
 observation overhead and receives a new frozen source/protocol; never rewrite
 attempt009 or treat the two observers as automatically equivalent.
+Stage checksum words through signed64-bit views for the GPU stack and restore
+unsigned views on CPU; this changes no bits. The final source-bound preflight
+combines4 checksum tests,1 actual CUDA high-bit batch-drain test and7 CPU binding,
+scalar and drain tests. Require all12 to pass with no skips, plus one words/one
+fold runtime-length compiled variant, before native use.
 
 The initial checksum H100 preflight is bounded180s and charges existing phasek256.
 Its first attempt passes4 checks and records one dynamic words/one fold variant,

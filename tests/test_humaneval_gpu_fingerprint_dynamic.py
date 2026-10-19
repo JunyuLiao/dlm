@@ -3,6 +3,7 @@ import pytest
 import torch
 from scripts.v31_humaneval_gpu_fingerprint import fingerprint_cuda as fixed
 from scripts.v31_humaneval_gpu_fingerprint_dynamic import fingerprint_cuda
+from scripts.v31_humaneval_graph_fingerprint import cpu_fingerprints
 
 
 @pytest.mark.skipif(not torch.cuda.is_available(),reason='CUDA diagnostic')
@@ -26,3 +27,12 @@ def test_runtime_lengths_match_numpy_fixed_kernel_repeats_and_tail_bit(count):
     assert torch.equal(digest,fingerprint_cuda(device))
     device[-1]^=1
     assert not torch.equal(digest,fingerprint_cuda(device))
+
+
+@pytest.mark.skipif(not torch.cuda.is_available(),reason='CUDA diagnostic')
+def test_gpu_checksum_drain_preserves_unsigned_high_bits():
+    digest=fingerprint_cuda(torch.tensor([1,-1,3,42],device='cuda',dtype=torch.int32))
+    high=torch.tensor([2**64-1,2**63],dtype=torch.uint64,device='cuda')
+    actual=cpu_fingerprints(dict(digest=digest,nested=[dict(high=high)]))
+    assert actual['digest']==digest.cpu().tolist()
+    assert actual['nested']==[dict(high=[2**64-1,2**63])]
