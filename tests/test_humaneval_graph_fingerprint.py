@@ -18,10 +18,14 @@ def test_native_dispatch_called_once_and_result_preserved(tmp_path,monkeypatch,a
         def __call__(self,*a,**k):calls.append((a,k));order.append('native');return result_token
     engine=ModuleType('vllm.v1.engine.llm_engine');engine.LLMEngine=Engine
     graph=ModuleType('vllm.compilation.cuda_graph');graph.CUDAGraphWrapper=Graph
+    context=ModuleType('vllm.forward_context')
+    context.is_forward_context_available=lambda:True
+    context.get_forward_context=lambda:SimpleNamespace(batch_descriptor=None,
+        cudagraph_runtime_mode=SimpleNamespace(name='PIECEWISE'))
     import vllm.model_executor.models.diffusion_gemma as dg
     fingerprint=ModuleType('humaneval_gpu_fingerprint')
     fingerprint.fingerprint_cuda=lambda x:pytest.fail('CPU tensor must not launch GPU work')
-    for m in (engine,graph,fingerprint):monkeypatch.setitem(sys.modules,m.__name__,m)
+    for m in (engine,graph,fingerprint,context):monkeypatch.setitem(sys.modules,m.__name__,m)
     monkeypatch.setattr(dg,'_compiled_sample_step',lambda *a,**k:result_token)
     monkeypatch.setattr(torch.cuda,'is_current_stream_capturing',lambda:False)
     state=dict(active=active,index=0)
@@ -38,6 +42,7 @@ def test_native_dispatch_called_once_and_result_preserved(tmp_path,monkeypatch,a
     if active:
         trace=json.loads(files[0].read_text())
         assert [e['point'] for e in trace['events']]==['before','after']
+        assert all(e['native_runtime_mode']=='PIECEWISE' for e in trace['events'])
         assert trace['native_graph_dispatch_preserved'] and trace['graph_bypasses']==0
         assert trace['extra_forwards']==0 and state['graph_samples']==1
 

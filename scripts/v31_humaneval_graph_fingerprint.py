@@ -8,6 +8,7 @@ def install(state,destination):
     from torch.utils._pytree import tree_flatten
     from vllm.v1.engine.llm_engine import LLMEngine
     from vllm.compilation.cuda_graph import CUDAGraphWrapper
+    from vllm.forward_context import is_forward_context_available,get_forward_context
     import vllm.model_executor.models.diffusion_gemma as dg
     from humaneval_gpu_fingerprint import fingerprint_cuda
     add,step,sample=LLMEngine.add_request,LLMEngine.step,dg._compiled_sample_step
@@ -50,7 +51,14 @@ def install(state,destination):
         if torch.cuda.is_current_stream_capturing():raise RuntimeError('boundary observer entered capture')
         identity=identities.setdefault(id(self),len(identities))
         call=state['graph_calls'];state['graph_calls']+=1
-        metadata=dict(call=call,wrapper=identity,mode=self.runtime_mode.name,sampler_index=state['graph_samples'])
+        context=get_forward_context() if is_forward_context_available() else None
+        descriptor=getattr(context,'batch_descriptor',None)
+        entries=getattr(self,'concrete_cudagraph_entries',{})
+        entry=entries.get(descriptor) if descriptor is not None else None
+        metadata=dict(call=call,wrapper=identity,wrapper_mode=self.runtime_mode.name,
+            native_runtime_mode=context.cudagraph_runtime_mode.name if context is not None else 'NO_CONTEXT',
+            captured_entry_ready=entry is not None and entry.cudagraph is not None,
+            sampler_index=state['graph_samples'])
         state['graph_events'].append(dict(point='before',**metadata,values=values((args,kwargs))))
         result=graph(self,*args,**kwargs)
         state['graph_events'].append(dict(point='after',**metadata,values=values(result)))
