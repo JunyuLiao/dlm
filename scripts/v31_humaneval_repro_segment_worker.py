@@ -76,14 +76,14 @@ def install(schedule, root):
         return add(self, request_id, *args, **kwargs)
 
     @functools.wraps(forward)
-    def attention(self, layer, query, key, value, kv_cache, metadata, output, *args, **kwargs):
+    def attention(self, layer, query, key, value, kv_cache, attn_metadata, output, *args, **kwargs):
         nonlocal previous_trace
         name = getattr(layer, 'layer_name', '')
-        native = state['active'] and not state['prefilled'] and metadata is not None
+        native = state['active'] and not state['prefilled'] and attn_metadata is not None
         if native and name == 'model.layers.1.self_attn.attn':
             state['segment'] = False
             sys.settrace(previous_trace)
-        result = forward(self, layer, query, key, value, kv_cache, metadata, output, *args, **kwargs)
+        result = forward(self, layer, query, key, value, kv_cache, attn_metadata, output, *args, **kwargs)
         if native and name == 'model.layers.0.self_attn.attn':
             if torch.cuda.is_current_stream_capturing():
                 raise RuntimeError('prefill segment unexpectedly captured')
