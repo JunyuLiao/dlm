@@ -142,7 +142,7 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         prefix=max(indices)+1
         conditions=None;attention_modes={};pure_groups=[];graph_modes=None;last_modes=None
         if last_global:
-            focused=[i for i,r in enumerate(rows) if r['index']==129 and r['seed']==42 and arms[i+1]['arm'] in ('full_swap8','residual_direction_guard')]
+            focused=[i for i,r in enumerate(rows) if i>=8 and r['index']==129 and r['seed']==42 and arms[i+1]['arm'] in ('full_swap8','residual_direction_guard')]
             assert len(focused)==2
             prefix=len(rows);selected=rows+[rows[i] for i in focused]*2
             entries=arms+[arms[i+1] for i in focused]*2
