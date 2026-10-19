@@ -9,6 +9,13 @@ New native attempt009 freezes the same158-request full/light/pure schedule and
 two1400s ceilings; inspect live receipts/process/budget before taking any action.
 Both full accuracy matrices stay gated and K128 has done no GPU work.
 
+Prepared only (not deployed or H100-tested):90fb720c adds separate runtime-length
+integer-checksum kernels and four independent NumPy/static-kernel oracle tests.
+The existing checksum specializes N at compile time, so broad graph tracing can
+JIT many tensor sizes. Do not substitute this new kernel before its own bounded
+GPU preflight and a new frozen attempt. Attempt009 still uses its tested static
+checksum unchanged; its source/protocol are immutable.
+
 Observer interpretation is corrected in
 docs/HUMANEVAL_OBSERVER_SEMANTICS_20261019.md. Full sampler snapshots are cloned
 on GPU each step and copied/hashed on CPU at request completion. Residual cache

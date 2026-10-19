@@ -64,13 +64,19 @@ def compare(root,destination,workspace,quiet=False):
             data[name][label]=dict(trajectory=read(leaf/f'private/trajectory/request{index+1:03d}.json'),
                 residual=read(leaf/f'private/residual/request{index+1:03d}.json'))
             if p.get('graph_boundary_fingerprints'):
-                data[name][label]['graphs']=read(leaf/f'private/graphs/request{index+1:03d}.json')
-                data[name][label]['graph_only']=read(leaf/f"private/graphs/request{group['final']+1:03d}.json")
+                data[name][label]['graphs_path']=leaf/f'private/graphs/request{index+1:03d}.json'
+                data[name][label]['graph_only_path']=leaf/f"private/graphs/request{group['final']+1:03d}.json"
                 data[name][label]['native_graph_only']={k:rows[group['final']][k] for k in FIELDS}
     left,right=list(data);contrasts=[]
     assert set(data[left])==set(data[right])
     for label,x in data[left].items():
-        y=data[right][label];a,b=x['trajectory'],y['trajectory']
+        y=data[right][label]
+        if p.get('graph_boundary_fingerprints'):
+            # Only four graph traces are needed for one case. Do not retain the
+            # full parsed graph corpus in memory while analyzing later cases.
+            x=dict(x,graphs=read(x['graphs_path']),graph_only=read(x['graph_only_path']))
+            y=dict(y,graphs=read(y['graphs_path']),graph_only=read(y['graph_only_path']))
+        a,b=x['trajectory'],y['trajectory']
         fingerprints=all('logits_gpu128_sha256' in trace['initial'] and all(
             'logits_gpu128_sha256' in call[side] for call in trace['calls'] for side in ('before','after'))
             for trace in (a,b))
