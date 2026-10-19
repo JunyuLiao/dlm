@@ -1,3 +1,15 @@
+# Completed bounded V31 failure-map screen
+
+Current complete result: [attempt003/summary.md](attempt003/summary.md),
+[verification marker](attempt003/verified_complete.json), and sanitized
+[publication/attempt002](publication/attempt002/README.md).
+All320 screen requests complete; no same-type two-seed candidate passed.
+Confirmation and repair were gated out. Reservation89.263/240min; GPU idle.
+K2048/all-kept and mixed-type failures are exploratory leads. Measured JIT and
+bookend drift prevent a clean-speedup or universal-preservation claim.
+
+The earlier guide and qualification-only publication below remain historical.
+
 # V31 budget-versus-convergence failure map
 
 Three-stage plan: `../../docs/V31_FAILURE_MAP_PLAN_20261019.md`.

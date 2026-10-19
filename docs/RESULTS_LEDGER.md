@@ -2187,3 +2187,39 @@ denominator is denoising GLOBAL full-support plus LOCAL window-intersecting
 rectangles, excluding dense prefill/commits. GPU reservation15,032.143 seconds.
 No older LongBench campaign resumed. Authoritative report and public numeric
 per-item evidence: analysis/attempt001/summary.md and per_item_metrics.jsonl.
+
+## V31 budget-versus-convergence failure map — complete gated diagnostic (2026-10-19)
+
+Campaign: results/v31_failure_map_20261019/attempt003. Native5dcade2c;
+analysis7cff0c2f; protocol0ca7a002319049af7f0a7b379647ddca576af676909aa702ea78c0d9c31cb7e4.
+Six qualification families,20 measured qualification records,320 screen records,
+16 development LongBench-v2 questions,seeds1/42,KV8192/4096/2048; native sampler
+and output limits fixed. GLOBAL only, LOCAL dense; corrected FULL, PIECEWISE,
+all-kept and fixed16 controls. All340 official rescores and376 structural/binding
+checks pass; final_complete.json and verified_complete.json are present.
+
+| Arm | Accuracy | Mean N | Pooled N/C | Mean T |
+|---|---:|---:|---:|---:|
+| FULL fix51994 |50.00%|332.66|23.09|3557|
+| PIECEWISE |56.25%|288.38|22.84|3108|
+| all-kept FA4 |59.38%|203.31|19.36|2559|
+| V31 K8192 pooled bookends |62.50%|201.41|20.79|2348|
+| V31 K4096 pooled bookends |60.94%|183.16|20.25|2188|
+| V31 K2048 pooled bookends |56.25%|238.08|21.83|2667|
+| fixed16 K8192 |59.38%|285.78|25.19|2771|
+
+Zero same-type candidates on both seeds; confirmation and repair gated out.
+K2048 versus all-kept: accuracy−3.125pp(CI−21.875,+12.5), N/C ratio1.1274
+[0.9858,1.2905], N ratio1.1710[0.8047,1.7313]. These are exploratory16-question
+cluster intervals, not noninferiority or population confirmation. Mixed-type and
+single-seed failures remain in the per-item map. Five of96 V31 bookend pairs
+change output/N, with one score flip. All six screen engines have measured JIT
+warnings; no clean speedup claim. No recorded CUDA captures or qualification
+K/tail/LOCAL-scope errors. Audit work is separate, denoising-only; four dense
+qualification finite-output metrics are unmeasured.
+
+GPU reservation5355.761s=89.263/240min, including all startup/warmup, recovery and
+the preserved zero-record path failure. All charges closed; GPU idle. No new
+selector and no older campaign resume. Canonical summary and independent
+verification are under attempt003; sanitized completed evidence is under
+results/v31_failure_map_20261019/publication/attempt002.

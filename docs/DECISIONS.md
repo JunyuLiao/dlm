@@ -2526,3 +2526,29 @@ Qualification bookends show output/call drift on one of two inputs at K4096
 and K2048, without score drift; K8192 matches. This does not diagnose clean
 repeatability or justify a quality claim. Keep the frozen clean bookends,
 new-seed/process replication gates, and common-prefix/sham checks for repairs.
+
+## V31 budget screen completed without promoted failures (2026-10-19)
+
+Native5dcade2c, analysis7cff0c2f, protocol0ca7a002319049af7f0a7b379647ddca576af676909aa702ea78c0d9c31cb7e4.
+All320 screen requests and20 qualification requests complete;340 official
+rescores and376 record checks agree. Frozen same-type two-seed candidates are
+zero at all three budgets. Stop before confirmation/repair; no gate relaxation
+or selector trial. The completed diagnostic is not a global noninferiority claim.
+
+The important control result is all-kept meanN203.31 versus FULL332.66 and
+V31K8192 201.41. Preserve consumer-path/output-length confounding. K2048 relative
+to all-kept has−3.125pp accuracy and+12.74% N/C, with intervals including no
+difference. Retain this exploratory regime and the mixed-type question462 case
+for independent follow-up under a new frozen endpoint. Do not call them
+confirmed failures or repair evidence. K4096 is a strong fixed-budget reference
+for any future selector; fixed16 remains an explicit comparator.
+
+Five of96 bookend pairs change output/calls and one changes score. All six screen
+engines have one post-warmup fused-MoE JIT warning. Report raw times with this
+limit and make no qualified warm-speedup claim. No measured graph captures,
+fixed-K/tail violations or LOCAL skips. Total5355.761 seconds within14400;
+GPU idle, older campaigns paused. Complete report: results/v31_failure_map_20261019/attempt003/summary.md.
+Sanitized export: publication/attempt002; earlier qualification publication is
+unchanged. MAGE's static unmasking and SparseD's early-dense protection remain
+prior art; adaptive convergence is a research question requiring a demonstrated
+failure mechanism, not established novelty by naming a new selector.

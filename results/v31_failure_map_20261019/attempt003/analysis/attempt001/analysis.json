@@ -1,0 +1,590 @@
+{
+  "bookend_drift": [
+    {
+      "differences": {
+        "canvases": 1,
+        "denoise_forwards": 2,
+        "output_hash": 2,
+        "output_tokens": 2,
+        "score": 0
+      },
+      "pairs": 6,
+      "phase": "qualification"
+    },
+    {
+      "differences": {
+        "canvases": 4,
+        "denoise_forwards": 5,
+        "output_hash": 5,
+        "output_tokens": 5,
+        "score": 1
+      },
+      "pairs": 96,
+      "phase": "screen"
+    }
+  ],
+  "candidate_selection": {
+    "candidates": [],
+    "rule": "same type both seeds, FULL and all-kept controls; largest qualifying K; metadata order max8"
+  },
+  "confirmed_failures": null,
+  "paired_question_cluster_intervals": {
+    "screen": [
+      {
+        "estimates": {
+          "NC_ratio": {
+            "ci95": [
+              0.6728402493546937,
+              1.2996659122085543
+            ],
+            "estimate": 0.900360611524417
+          },
+          "N_ratio": {
+            "ci95": [
+              0.3452681249106891,
+              0.9740095355233168
+            ],
+            "estimate": 0.6054485674025364
+          },
+          "T_ratio": {
+            "ci95": [
+              0.47290675320652664,
+              0.9180799731067188
+            ],
+            "estimate": 0.6601221333801951
+          },
+          "W_ratio": {
+            "ci95": [
+              0.4313244262764717,
+              0.8755405147758828
+            ],
+            "estimate": 0.6396976721608343
+          },
+          "accuracy_delta_pp": {
+            "ci95": [
+              -3.125,
+              28.125
+            ],
+            "estimate": 12.5
+          }
+        },
+        "k": 8192,
+        "population_flag_accuracy": false,
+        "population_flag_convergence": false,
+        "questions": 16
+      },
+      {
+        "estimates": {
+          "NC_ratio": {
+            "ci95": [
+              0.6513554586117584,
+              1.2138597860586098
+            ],
+            "estimate": 0.8767553263551044
+          },
+          "N_ratio": {
+            "ci95": [
+              0.2867752828857858,
+              0.9281785054982998
+            ],
+            "estimate": 0.550587130108032
+          },
+          "T_ratio": {
+            "ci95": [
+              0.4122593531336147,
+              0.8687835537466321
+            ],
+            "estimate": 0.6151085141903172
+          },
+          "W_ratio": {
+            "ci95": [
+              0.3822556686282224,
+              0.8349956329089785
+            ],
+            "estimate": 0.5985718009638769
+          },
+          "accuracy_delta_pp": {
+            "ci95": [
+              -4.6875,
+              28.125
+            ],
+            "estimate": 10.9375
+          }
+        },
+        "k": 4096,
+        "population_flag_accuracy": false,
+        "population_flag_convergence": false,
+        "questions": 16
+      },
+      {
+        "estimates": {
+          "NC_ratio": {
+            "ci95": [
+              0.6819166742607397,
+              1.3487047810376465
+            ],
+            "estimate": 0.9453645320926327
+          },
+          "N_ratio": {
+            "ci95": [
+              0.3443858146320931,
+              1.5005094454596866
+            ],
+            "estimate": 0.7156881164866135
+          },
+          "T_ratio": {
+            "ci95": [
+              0.4754285123684744,
+              1.1807454547173106
+            ],
+            "estimate": 0.7500043932870574
+          },
+          "W_ratio": {
+            "ci95": [
+              0.4178001583075483,
+              1.0586067887082777
+            ],
+            "estimate": 0.6838696073923544
+          },
+          "accuracy_delta_pp": {
+            "ci95": [
+              -9.375,
+              25.0
+            ],
+            "estimate": 6.25
+          }
+        },
+        "k": 2048,
+        "population_flag_accuracy": false,
+        "population_flag_convergence": false,
+        "questions": 16
+      }
+    ]
+  },
+  "protocol_sha256": "0ca7a002319049af7f0a7b379647ddca576af676909aa702ea78c0d9c31cb7e4",
+  "repair": {
+    "groups": [],
+    "mechanistic_leads": [],
+    "qualified_groups": 0
+  },
+  "source_commit": "5dcade2c27bbc8092bdbc94b231f9e324b0bcaee",
+  "state": {
+    "cap_s": 14400.0,
+    "completed_phases": [
+      "qualification",
+      "screen"
+    ],
+    "gpu_reservation_s": 5355.761282600462,
+    "older_campaigns_remain_paused": true,
+    "phase": "confirmation",
+    "protocol_sha256": "0ca7a002319049af7f0a7b379647ddca576af676909aa702ea78c0d9c31cb7e4",
+    "status": "complete_no_screen_candidates"
+  },
+  "summaries": {
+    "qualification": [
+      {
+        "C": 8.5,
+        "N": 131.0,
+        "N_per_C": 15.411764705882353,
+        "S": 3.32305,
+        "S_per_N": 0.02536679389312977,
+        "T": 2026.0,
+        "W": 6.291835,
+        "accuracy": 0.0,
+        "caps": 0,
+        "family": "shared",
+        "k": 2048,
+        "label": "control_before",
+        "max_N": 192,
+        "median_N": 131.0,
+        "p90_N": 179.8,
+        "p95_N": 185.9,
+        "questions": 2,
+        "records": 2
+      },
+      {
+        "C": 7.5,
+        "N": 115.0,
+        "N_per_C": 15.333333333333334,
+        "S": 2.94656,
+        "S_per_N": 0.025622260869565216,
+        "T": 1742.5,
+        "W": 5.90795,
+        "accuracy": 0.0,
+        "caps": 0,
+        "family": "shared",
+        "k": 2048,
+        "label": "control_after",
+        "max_N": 160,
+        "median_N": 115.0,
+        "p90_N": 151.0,
+        "p95_N": 155.5,
+        "questions": 2,
+        "records": 2
+      },
+      {
+        "C": 8.5,
+        "N": 115.0,
+        "N_per_C": 13.529411764705882,
+        "S": 3.0777799999999997,
+        "S_per_N": 0.026763304347826086,
+        "T": 1976.0,
+        "W": 6.034995,
+        "accuracy": 0.5,
+        "caps": 0,
+        "family": "shared",
+        "k": 4096,
+        "label": "control_before",
+        "max_N": 125,
+        "median_N": 115.0,
+        "p90_N": 123.0,
+        "p95_N": 124.0,
+        "questions": 2,
+        "records": 2
+      },
+      {
+        "C": 8.5,
+        "N": 110.0,
+        "N_per_C": 12.941176470588236,
+        "S": 2.9556,
+        "S_per_N": 0.02686909090909091,
+        "T": 1952.5,
+        "W": 5.911095,
+        "accuracy": 0.5,
+        "caps": 0,
+        "family": "shared",
+        "k": 4096,
+        "label": "control_after",
+        "max_N": 115,
+        "median_N": 110.0,
+        "p90_N": 114.0,
+        "p95_N": 114.5,
+        "questions": 2,
+        "records": 2
+      },
+      {
+        "C": 8.0,
+        "N": 98.5,
+        "N_per_C": 12.3125,
+        "S": 2.7654500000000004,
+        "S_per_N": 0.028075634517766502,
+        "T": 1950.0,
+        "W": 5.721135,
+        "accuracy": 0.0,
+        "caps": 0,
+        "family": "shared",
+        "k": 8192,
+        "label": "control_before",
+        "max_N": 113,
+        "median_N": 98.5,
+        "p90_N": 110.1,
+        "p95_N": 111.55,
+        "questions": 2,
+        "records": 2
+      },
+      {
+        "C": 10.0,
+        "N": 153.5,
+        "N_per_C": 15.35,
+        "S": 3.814025,
+        "S_per_N": 0.024847068403908795,
+        "T": 2399.5,
+        "W": 6.7816849999999995,
+        "accuracy": 0.0,
+        "caps": 0,
+        "family": "shared",
+        "k": 8192,
+        "label": "fixed16",
+        "max_N": 227,
+        "median_N": 153.5,
+        "p90_N": 212.3,
+        "p95_N": 219.65,
+        "questions": 2,
+        "records": 2
+      },
+      {
+        "C": 8.0,
+        "N": 98.5,
+        "N_per_C": 12.3125,
+        "S": 2.766525,
+        "S_per_N": 0.028086548223350254,
+        "T": 1950.0,
+        "W": 5.730130000000001,
+        "accuracy": 0.0,
+        "caps": 0,
+        "family": "shared",
+        "k": 8192,
+        "label": "control_after",
+        "max_N": 113,
+        "median_N": 98.5,
+        "p90_N": 110.1,
+        "p95_N": 111.55,
+        "questions": 2,
+        "records": 2
+      },
+      {
+        "C": 9.0,
+        "N": 130.0,
+        "N_per_C": 14.444444444444445,
+        "S": 4.00365,
+        "S_per_N": 0.030797307692307697,
+        "T": 2180.0,
+        "W": 6.967765,
+        "accuracy": 0.5,
+        "caps": 0,
+        "family": "allkept_fa4",
+        "k": null,
+        "label": "allkept_fa4",
+        "max_N": 162,
+        "median_N": 130.0,
+        "p90_N": 155.6,
+        "p95_N": 158.8,
+        "questions": 2,
+        "records": 2
+      },
+      {
+        "C": 10.0,
+        "N": 154.0,
+        "N_per_C": 15.4,
+        "S": 4.347195,
+        "S_per_N": 0.02822853896103896,
+        "T": 2506.5,
+        "W": 7.302305,
+        "accuracy": 0.5,
+        "caps": 0,
+        "family": "dense_full_fix51994",
+        "k": null,
+        "label": "dense_full_fix51994",
+        "max_N": 220,
+        "median_N": 154.0,
+        "p90_N": 206.8,
+        "p95_N": 213.4,
+        "questions": 2,
+        "records": 2
+      },
+      {
+        "C": 11.5,
+        "N": 184.5,
+        "N_per_C": 16.043478260869566,
+        "S": 5.247965,
+        "S_per_N": 0.028444254742547425,
+        "T": 2810.5,
+        "W": 8.21458,
+        "accuracy": 0.0,
+        "caps": 0,
+        "family": "dense_piecewise",
+        "k": null,
+        "label": "dense_piecewise",
+        "max_N": 278,
+        "median_N": 184.5,
+        "p90_N": 259.3,
+        "p95_N": 268.65,
+        "questions": 2,
+        "records": 2
+      }
+    ],
+    "screen": [
+      {
+        "C": 10.5,
+        "N": 203.3125,
+        "N_per_C": 19.363095238095237,
+        "S": 6.2375715625,
+        "S_per_N": 0.03067972486935137,
+        "T": 2559.03125,
+        "W": 8.948696250000001,
+        "accuracy": 0.59375,
+        "caps": 0,
+        "family": "allkept_fa4",
+        "k": null,
+        "label": "allkept_fa4",
+        "max_N": 472,
+        "median_N": 170.0,
+        "p90_N": 366.1000000000001,
+        "p95_N": 398.9,
+        "questions": 16,
+        "records": 32
+      },
+      {
+        "C": 14.40625,
+        "N": 332.65625,
+        "N_per_C": 23.09110629067245,
+        "S": 9.1241615625,
+        "S_per_N": 0.02742819821512447,
+        "T": 3556.5625,
+        "W": 11.855052812500002,
+        "accuracy": 0.5,
+        "caps": 2,
+        "family": "dense_full_fix51994",
+        "k": null,
+        "label": "dense_full_fix51994",
+        "max_N": 2666,
+        "median_N": 208.5,
+        "p90_N": 514.6000000000001,
+        "p95_N": 1091.4499999999996,
+        "questions": 16,
+        "records": 32
+      },
+      {
+        "C": 12.625,
+        "N": 288.375,
+        "N_per_C": 22.84158415841584,
+        "S": 8.134470624999999,
+        "S_per_N": 0.028207960554833118,
+        "T": 3107.75,
+        "W": 10.8528596875,
+        "accuracy": 0.5625,
+        "caps": 1,
+        "family": "dense_piecewise",
+        "k": null,
+        "label": "dense_piecewise",
+        "max_N": 2525,
+        "median_N": 202.5,
+        "p90_N": 447.60000000000014,
+        "p95_N": 523.9,
+        "questions": 16,
+        "records": 32
+      },
+      {
+        "C": 10.34375,
+        "N": 221.53125,
+        "N_per_C": 21.416918429003022,
+        "S": 5.0954715625,
+        "S_per_N": 0.023001141204683315,
+        "T": 2522.84375,
+        "W": 7.808602187499999,
+        "accuracy": 0.5625,
+        "caps": 0,
+        "family": "shared",
+        "k": 2048,
+        "label": "control_before",
+        "max_N": 1081,
+        "median_N": 164.5,
+        "p90_N": 357.1000000000001,
+        "p95_N": 693.85,
+        "questions": 16,
+        "records": 32
+      },
+      {
+        "C": 11.46875,
+        "N": 254.625,
+        "N_per_C": 22.201634877384198,
+        "S": 5.6932109375,
+        "S_per_N": 0.022359198576337752,
+        "T": 2812.03125,
+        "W": 8.4060184375,
+        "accuracy": 0.5625,
+        "caps": 1,
+        "family": "shared",
+        "k": 2048,
+        "label": "control_after",
+        "max_N": 2140,
+        "median_N": 164.5,
+        "p90_N": 357.1000000000001,
+        "p95_N": 693.85,
+        "questions": 16,
+        "records": 32
+      },
+      {
+        "C": 9.0,
+        "N": 182.125,
+        "N_per_C": 20.23611111111111,
+        "S": 4.35966625,
+        "S_per_N": 0.0239377693891558,
+        "T": 2173.71875,
+        "W": 7.074540625,
+        "accuracy": 0.59375,
+        "caps": 0,
+        "family": "shared",
+        "k": 4096,
+        "label": "control_before",
+        "max_N": 587,
+        "median_N": 162.0,
+        "p90_N": 309.3,
+        "p95_N": 458.04999999999984,
+        "questions": 16,
+        "records": 32
+      },
+      {
+        "C": 9.09375,
+        "N": 184.1875,
+        "N_per_C": 20.254295532646047,
+        "S": 4.4038246875,
+        "S_per_N": 0.023909465558194776,
+        "T": 2201.625,
+        "W": 7.117660000000001,
+        "accuracy": 0.625,
+        "caps": 0,
+        "family": "shared",
+        "k": 4096,
+        "label": "control_after",
+        "max_N": 587,
+        "median_N": 162.0,
+        "p90_N": 309.3,
+        "p95_N": 458.04999999999984,
+        "questions": 16,
+        "records": 32
+      },
+      {
+        "C": 9.65625,
+        "N": 200.71875,
+        "N_per_C": 20.78640776699029,
+        "S": 4.8461575,
+        "S_per_N": 0.024144019928382377,
+        "T": 2338.8125,
+        "W": 7.5589196874999995,
+        "accuracy": 0.625,
+        "caps": 0,
+        "family": "shared",
+        "k": 8192,
+        "label": "control_before",
+        "max_N": 707,
+        "median_N": 163.5,
+        "p90_N": 387.3000000000002,
+        "p95_N": 407.0,
+        "questions": 16,
+        "records": 32
+      },
+      {
+        "C": 11.34375,
+        "N": 285.78125,
+        "N_per_C": 25.19283746556474,
+        "S": 6.073676875,
+        "S_per_N": 0.02125288791689448,
+        "T": 2770.9375,
+        "W": 8.785190937500001,
+        "accuracy": 0.59375,
+        "caps": 1,
+        "family": "shared",
+        "k": 8192,
+        "label": "fixed16",
+        "max_N": 2856,
+        "median_N": 179.5,
+        "p90_N": 334.50000000000006,
+        "p95_N": 620.6999999999998,
+        "questions": 16,
+        "records": 32
+      },
+      {
+        "C": 9.71875,
+        "N": 202.09375,
+        "N_per_C": 20.794212218649516,
+        "S": 4.8948309375,
+        "S_per_N": 0.024220595330137623,
+        "T": 2356.71875,
+        "W": 7.6083796875,
+        "accuracy": 0.625,
+        "caps": 0,
+        "family": "shared",
+        "k": 8192,
+        "label": "control_after",
+        "max_N": 707,
+        "median_N": 163.5,
+        "p90_N": 387.3000000000002,
+        "p95_N": 407.0,
+        "questions": 16,
+        "records": 32
+      }
+    ]
+  },
+  "uncertainty": "20000 question-cluster bootstrap draws, seed1729; selected confirmation is not population inference"
+}

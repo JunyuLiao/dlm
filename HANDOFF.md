@@ -1,3 +1,46 @@
+## V31 budget failure map complete — 2026-10-19 (Hong Kong)
+
+Verified native source5dcade2c; analysis source7cff0c2f. Protocol SHA256
+0ca7a002319049af7f0a7b379647ddca576af676909aa702ea78c0d9c31cb7e4.
+Authoritative result: results/v31_failure_map_20261019/attempt003/summary.md
+and verified_complete.json; sanitized export publication/attempt002.
+
+All six qualification families and320 screen requests completed. Independent
+verification checked376 records and340/340 measured official rescores. No
+same-type case passes both screening seeds at K8192/4096/2048, so confirmation
+and same-budget repair were gated out. No selector or training experiment ran.
+This is a completed negative diagnostic under the frozen criterion, not a
+noninferiority or universal-preservation result.
+
+Pooled V31 accuracy/N/C: K8192 62.50%/20.79, K4096 60.94%/20.25,
+K2048 56.25%/21.83. FULL50.00%/23.09, PIECEWISE56.25%/22.84,
+all-kept59.38%/19.36. All-kept meanN203.31 already differs sharply from
+FULL332.66; V31K8192 meanN201.41. Consumer path and output length confound a
+claim that sparsity itself improves denoising calls.
+
+K2048 versus all-kept is an exploratory pressure signal: accuracy−3.125pp
+(CI−21.875,+12.5), N/C+12.74% (ratioCI0.9858,1.2905), N+17.10%
+(ratioCI0.8047,1.7313). Question462 at K4096 fails convergence on seed1 and
+accuracy on seed42; the frozen same-type gate excludes this mixed case.
+Five of96 V31 bookends change output/N; one changes score. K2048 question53,
+seed42 changesN1081→2140 and reaches the output cap in one bookend.
+
+Every screen engine has one measured fused-MoE JIT warning, so raw W/S are
+retained but no warm speedup is claimed. No recorded CUDA captures. Qualification
+checks59,360 fixed-budget units with zero K/tail violations or LOCAL skips.
+Four dense qualification records lack a finite-output metric; this is explicitly
+unmeasured. Physical work is denoising-only and remains separate from clean
+trajectories. Plots retain both FULL/all-kept references and within-seed failures.
+
+Reservation5355.761s=89.263/240min, including cold startup,650.094s recovery and
+1.001s zero-record path failure. All charges closed; H100 idleness verified.
+Done: plan, complete screen, independent scoring/coverage/accounting, figures,
+sanitized publication and research interpretation. Running/queued: none.
+Next: independently confirm the K2048 aggregate signal and exploratory mixed
+case with a predeclared endpoint and additional seeds/questions before a new
+selector. Any new method must retain optimized K4096 and fixed16 controls.
+Older full503/refresh studies remain paused. Legacy STATE.json is unchanged.
+
 ## V31 failure map running — 2026-10-19 (Hong Kong)
 
 Verified native execution source5dcade2c; source remains frozen across all
@@ -16,7 +59,16 @@ records and1.001s charged. Commit77956613 documents the absolute-path correction
 attempt003 references all verified completed qualifications and retains both
 parents. No native source, protocol, question, seed, gate or total-budget change.
 
-Running: clean320-request screen, then gated independent confirmation and repair.
+Screen interim: FULL32 and K8192's96 measured requests are complete. V31
+bookends each score20/32 versus FULL16/32; mean N200.72/202.09 versus332.66,
+pooled N/C20.79 versus23.09. One of32 V31 pairs changes output/N/C but no score.
+The paired accuracy difference is+12.5pp, question-cluster95%CI[-3.125,28.125].
+These are incomplete-screen descriptive results, not a claim or promotion.
+A fused-MoE JIT warning occurs after warmup in K8192 (before record index393,
+seed1, control_before finishes); request timings are not fully warm-qualified.
+The independent verifier will retain this warning; do not claim clean speedup.
+
+Running: remaining screen families, then gated independent confirmation/repair.
 Hard cap remains14,400s, with screen5400/confirmation3600/repair3600 allocations.
 Source/spec/protocol and shared gpu_budget.json live under the campaign root.
 CPU verification source40b9f612 checks official scoring, coverage, physical work,

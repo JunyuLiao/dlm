@@ -1,0 +1,176 @@
+{
+  "bookend_drift": [
+    {
+      "after": {
+        "canvases": 7,
+        "denoise_forwards": 117,
+        "finish_reason": "stop",
+        "output_tokens": 1683,
+        "score": 0.0
+      },
+      "before": {
+        "canvases": 7,
+        "denoise_forwards": 103,
+        "finish_reason": "stop",
+        "output_tokens": 1586,
+        "score": 0.0
+      },
+      "index": 105,
+      "k": 4096,
+      "score_changed": false,
+      "seed": 42
+    },
+    {
+      "after": {
+        "canvases": 7,
+        "denoise_forwards": 159,
+        "finish_reason": "stop",
+        "output_tokens": 1622,
+        "score": 1.0
+      },
+      "before": {
+        "canvases": 5,
+        "denoise_forwards": 113,
+        "finish_reason": "stop",
+        "output_tokens": 1159,
+        "score": 0.0
+      },
+      "index": 106,
+      "k": 4096,
+      "score_changed": true,
+      "seed": 1
+    },
+    {
+      "after": {
+        "canvases": 11,
+        "denoise_forwards": 133,
+        "finish_reason": "stop",
+        "output_tokens": 2703,
+        "score": 1.0
+      },
+      "before": {
+        "canvases": 10,
+        "denoise_forwards": 127,
+        "finish_reason": "stop",
+        "output_tokens": 2370,
+        "score": 1.0
+      },
+      "index": 407,
+      "k": 4096,
+      "score_changed": false,
+      "seed": 42
+    },
+    {
+      "after": {
+        "canvases": 15,
+        "denoise_forwards": 270,
+        "finish_reason": "stop",
+        "output_tokens": 3669,
+        "score": 1.0
+      },
+      "before": {
+        "canvases": 13,
+        "denoise_forwards": 226,
+        "finish_reason": "stop",
+        "output_tokens": 3096,
+        "score": 1.0
+      },
+      "index": 407,
+      "k": 8192,
+      "score_changed": false,
+      "seed": 42
+    },
+    {
+      "after": {
+        "canvases": 64,
+        "denoise_forwards": 2140,
+        "finish_reason": "length",
+        "output_tokens": 16384,
+        "score": 0.0
+      },
+      "before": {
+        "canvases": 28,
+        "denoise_forwards": 1081,
+        "finish_reason": "stop",
+        "output_tokens": 7130,
+        "score": 0.0
+      },
+      "index": 53,
+      "k": 2048,
+      "score_changed": false,
+      "seed": 42
+    }
+  ],
+  "confirmed_cases": [],
+  "note": "Within-seed and mixed-type cases are exploratory; original same-type two-seed promotion remains unchanged",
+  "within_seed_cases": {
+    "2048": {
+      "1": [
+        {
+          "failure_type": "convergence",
+          "index": 462,
+          "k": 2048
+        }
+      ],
+      "42": [
+        {
+          "failure_type": "accuracy",
+          "index": 53,
+          "k": 2048
+        },
+        {
+          "failure_type": "convergence",
+          "index": 377,
+          "k": 2048
+        }
+      ]
+    },
+    "4096": {
+      "1": [
+        {
+          "failure_type": "convergence",
+          "index": 462,
+          "k": 4096
+        }
+      ],
+      "42": [
+        {
+          "failure_type": "convergence",
+          "index": 56,
+          "k": 4096
+        },
+        {
+          "failure_type": "convergence",
+          "index": 377,
+          "k": 4096
+        },
+        {
+          "failure_type": "accuracy",
+          "index": 462,
+          "k": 4096
+        }
+      ]
+    },
+    "8192": {
+      "1": [
+        {
+          "failure_type": "convergence",
+          "index": 462,
+          "k": 8192
+        }
+      ],
+      "42": [
+        {
+          "failure_type": "convergence",
+          "index": 56,
+          "k": 8192
+        },
+        {
+          "failure_type": "convergence",
+          "index": 407,
+          "k": 8192
+        }
+      ]
+    }
+  }
+}
