@@ -137,3 +137,17 @@ def test_scalar_bf16_and_short_byte_arguments_preserve_bits_with_zero_padding(tm
         assert Graph()(x) is x and torch.equal(x,saved)
         assert seen[-2:]==[expected,expected]
     e.step()
+
+
+def test_checksum_drain_batches_cpu_transfer_and_preserves_unsigned_words(monkeypatch):
+    calls=[];original=torch.Tensor.cpu
+    def copy(self,*args,**kwargs):
+        calls.append(tuple(self.shape));return original(self,*args,**kwargs)
+    monkeypatch.setattr(torch.Tensor,'cpu',copy)
+    data=dict(first=torch.tensor([0,2**64-1],dtype=torch.uint64),
+        nested=[dict(second=torch.tensor([2**63,17],dtype=torch.uint64))])
+    actual=observer.cpu_fingerprints(data)
+    assert actual==dict(first=[0,2**64-1],nested=[dict(second=[2**63,17])])
+    assert calls==[(2,2)]
+    with pytest.raises(ValueError,match='only two-word'):
+        observer.cpu_fingerprints(dict(unexpected=torch.ones(2)))

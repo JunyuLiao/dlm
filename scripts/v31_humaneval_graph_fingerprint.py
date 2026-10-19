@@ -5,6 +5,31 @@ import os
 from pathlib import Path
 
 
+def cpu_fingerprints(value):
+    """Drain tiny checksum tensors together; never accept full activation data."""
+    import torch
+    tensors=[]
+    class Ref:
+        def __init__(self,index):self.index=index
+    def collect(item):
+        if isinstance(item,torch.Tensor):
+            if item.dtype!=torch.uint64 or tuple(item.shape)!=(2,):
+                raise ValueError('only two-word checksum tensors may be drained')
+            tensors.append(item)
+            return Ref(len(tensors)-1)
+        if isinstance(item,dict):return {key:collect(v) for key,v in item.items()}
+        if isinstance(item,list):return [collect(v) for v in item]
+        return item
+    staged=collect(value)
+    words=torch.stack(tensors).detach().cpu().tolist() if tensors else []
+    def restore(item):
+        if isinstance(item,Ref):return words[item.index]
+        if isinstance(item,dict):return {key:restore(v) for key,v in item.items()}
+        if isinstance(item,list):return [restore(v) for v in item]
+        return item
+    return restore(staged)
+
+
 def install(state,destination):
     import torch
     from torch.utils._pytree import tree_flatten
@@ -40,10 +65,7 @@ def install(state,destination):
         return result
 
     def cpu(value):
-        if isinstance(value,torch.Tensor):return value.detach().cpu().tolist()
-        if isinstance(value,dict):return {k:cpu(v) for k,v in value.items()}
-        if isinstance(value,list):return [cpu(v) for v in value]
-        return value
+        return cpu_fingerprints(value)
 
     @functools.wraps(add)
     def begin(self,*args,**kwargs):
