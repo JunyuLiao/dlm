@@ -16,6 +16,15 @@ read,write,sha=campaign.read,campaign.write,campaign.sha
 FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','native_interval_steps')
 
 
+def observation_policy_errors(row,digest):
+    a=row.get('adapter',{});calls=a.get('observing_fa4_calls')
+    okay=(a.get('observing_fa4_numerical_policy')=='no_intra_wg_overlap' and
+        a.get('observing_fa4_intra_wg_overlap') is False and a.get('observing_fa4_policy_sha256')==digest and
+        a.get('observing_fa4_extra_forwards')==0 and a.get('observing_fa4_plain_arguments_preserved') is True and
+        type(calls) is int and calls>=0)
+    return [] if okay else ['missing or incorrect observation numerical-policy receipt']
+
+
 def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False,torch_guard=False,dtype_adapter=False,graph_trace=False,graph_optimized=False,last_global=False,observe_no_overlap=False):
     graph_trace=graph_trace or graph_optimized
     torch_guard=torch_guard or dtype_adapter
@@ -366,6 +375,8 @@ def run_job(root,part):
             for i in range(checked,len(public)):
                 errors.extend(campaign.validate(public[i],rows[i],'shared',arms[i+1],native_part,
                     oracle=native_part=='audit',prefix_budget=256))
+                if p.get('observing_fa4_no_overlap'):
+                    errors.extend(observation_policy_errors(public[i],sha(root/'private/observe_no_overlap.py')))
             checked=len(public)
             if errors or time.monotonic()-start>=reserve:
                 if not errors:errors.append('GPU reservation expired')
@@ -384,11 +395,9 @@ def run_job(root,part):
         observed=0
         for row in public:
             a=row.get('adapter',{})
-            if (a.get('observing_fa4_numerical_policy')!='no_intra_wg_overlap' or a.get('observing_fa4_intra_wg_overlap') is not False or
-                a.get('observing_fa4_policy_sha256')!=sha(root/'private/observe_no_overlap.py') or
-                a.get('observing_fa4_extra_forwards')!=0 or a.get('observing_fa4_plain_arguments_preserved') is not True or
-                'observing_fa4_calls' not in a):errors.append('missing or incorrect observation numerical-policy receipt')
-            observed+=a.get('observing_fa4_calls',0)
+            row_errors=observation_policy_errors(row,sha(root/'private/observe_no_overlap.py'))
+            errors.extend(row_errors)
+            if not row_errors:observed+=a['observing_fa4_calls']
         if not observed:errors.append('numerical-policy observation path never executed')
     errors.extend(campaign.policy_errors(leaf/'private/kernel_inventory.json','PIECEWISE'))
     if p.get('cublas_workspace_config') and (leaf/'private/kernel_inventory.json').exists():
