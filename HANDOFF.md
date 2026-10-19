@@ -64,6 +64,17 @@ existing phasek256. Preserve the pass-specific request prefix and qualified
 numerical policy; observe only duplicate residual requests, with native
 bookends. Compare production caches, held corrections and sampler trajectories
 before proposing another correction. Baseline qualification remains complete.
+Those two diagnostic engines completed at370.783/360.297s; their residual
+bookends, all184 sampler calls and production-cache fingerprints agree across
+passes. Both match the earlier clean result. Independent unobserved prefix
+comparisons also change a measured V31 and V3a case, plus a full-swap warmup;
+the remaining issue is not established as residual-specific. Evidence:
+results/humaneval_residual_repro_20261019/attempt001/analysis/attempt001/summary.json.
+Next bounded stage: docs/HUMANEVAL_MIXED_REPRO_PLAN_20261019.md, two identical
+clean engines, repeated six-arm groups, qualified full sampler trace augmented
+with all-logit integer fingerprints. Three H100 fingerprint/oracle tests pass.
+The matrices stay held; actual deterministic Inductor metadata alone is not a
+universal reproducibility guarantee. No new correction has been promoted.
 
 Next: freeze work-only thresholds, qualify every method, run the authorized
 matrices and independent official rescores, then publish complete qualified

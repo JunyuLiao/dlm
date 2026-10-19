@@ -16,7 +16,7 @@ read,write,sha=campaign.read,campaign.write,campaign.sha
 FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','native_interval_steps')
 
 
-def prepare(root):
+def prepare(root,mixed=False):
     parent=campaign.verify(PARENT)
     failure=read(PARENT/'receipts/early_residual_qualification_failure.json')
     assert failure['status']=='failed_method_qualification'
@@ -27,32 +27,54 @@ def prepare(root):
         shutil.copyfile(ROOT/'scripts'/name,root/'private'/name)
     trajectory=campaign.INVESTIGATION/'private/source_addenda/attempt031/worker.py'
     shutil.copyfile(trajectory,root/'private/trajectory_worker.py')
-    shutil.copyfile(SPEC,root/'spec.md')
+    if mixed:
+        shutil.copyfile(ROOT/'scripts/v31_humaneval_gpu_fingerprint.py',root/'private/humaneval_gpu_fingerprint.py')
+        gate=read(ROOT/'results/humaneval_mixed_repro_preflight_20261019/attempt001/receipt.json')
+        assert gate['status']=='complete'
+        tested=read(ROOT/'results/humaneval_mixed_repro_preflight_20261019/attempt001/sources.json')
+        assert tested['scripts/v31_humaneval_gpu_fingerprint.py']==sha(root/'private/humaneval_gpu_fingerprint.py')
+        path=root/'private/trajectory_worker.py';source=path.read_text()
+        assert source.count('point = dict(canvas=')==1
+        source=source.replace('import functools','from humaneval_gpu_fingerprint import fingerprint_cuda\nimport functools',1)
+        source=source.replace('point = dict(canvas=','point = dict(logits_gpu128=fingerprint_cuda(args[0]),canvas=',1)
+        path.write_text(source)
+    spec=ROOT/'docs/HUMANEVAL_MIXED_REPRO_PLAN_20261019.md' if mixed else SPEC
+    shutil.copyfile(spec,root/'spec.md')
     jobs={}
-    for part in ('audit','clean'):
-        original=PARENT/f'qualification/thinking_on/{part}/shared/qualification/attempt001'
+    for part in (('clean001','clean002') if mixed else ('audit','clean')):
+        native_part='clean' if mixed else part
+        original=PARENT/f'qualification/thinking_on/{native_part}/shared/qualification/attempt001'
         campaign.verify_leaf(PARENT,original)
         rows=read(original/'private/cells.json');arms=read(original/'private/arms.json')
         indices=[i for i,r in enumerate(rows) if r['index']==129 and r['seed']==43]
         assert len(indices)==6
         target=next(i for i in indices if arms[i+1]['arm']=='residual_direction_guard')
         prefix=max(indices)+1
-        selected=rows[:prefix]+[rows[target]]*2
-        entries=arms[:prefix+1]+[arms[target+1]]*2
-        live=['clean']*len(entries);live[prefix+1]='observe'
+        if mixed:
+            selected=rows[:prefix]+[rows[i] for i in indices]*2
+            entries=arms[:prefix+1]+[arms[i+1] for i in indices]*2
+            live=['clean']*len(entries)
+            for i in range(prefix+1,prefix+7):live[i]='observe'
+            bookends=[dict(original=i,observed=prefix+j,final=prefix+6+j,
+                           arm=arms[i+1]['arm'],label=arms[i+1]['label']) for j,i in enumerate(indices)]
+        else:
+            selected=rows[:prefix]+[rows[target]]*2
+            entries=arms[:prefix+1]+[arms[target+1]]*2
+            live=['clean']*len(entries);live[prefix+1]='observe'
+            bookends=[dict(original=target,observed=prefix,final=prefix+1,arm='residual_direction_guard')]
         folder=root/'private'/part;folder.mkdir()
         write(folder/'cells.json',selected,True);write(folder/'arms.json',entries,True)
         write(folder/'live.json',live,True)
         jobs[part]=dict(original=str(original.relative_to(ROOT)),
             original_marker_sha256=sha(original/'attempt_complete.json'),
             original_target_row=target,observed_row=prefix,final_bookend_row=prefix+1,
-            requests=len(selected),warmup_requests=8)
+            requests=len(selected),warmup_requests=8,native_pass=native_part,bookend_groups=bookends)
     p=dict(schema='humaneval_residual_repro_v1',source_commit=subprocess.check_output(
         ['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         parent_protocol_sha256=sha(PARENT/'protocol.json'),failure_receipt_sha256=sha(PARENT/'receipts/early_residual_qualification_failure.json'),
         runtime=parent['runtime'],jobs=jobs,phase='k256',maximum_job_reservation_s=750,
         phase_cap_s=campaign.phase_caps()['k256'],maximum_new_reservation_s=1500,
-        seed=43,index=129,prefix_budget_tokens=256,full_accuracy_released=False,
+        seed=43,index=129,prefix_budget_tokens=256,full_accuracy_released=False,mixed_group=mixed,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
     write(root/'protocol.json',p,True)
     return p
@@ -68,6 +90,7 @@ def verify(root):
 
 def run_job(root,part):
     p=verify(root);config=p['jobs'][part];leaf=root/'runs'/part/'attempt001'
+    native_part=config.get('native_pass',part)
     if (leaf/'attempt_complete.json').exists():return read(leaf/'attempt_complete.json')
     if leaf.exists():raise RuntimeError('new immutable diagnostic attempt required')
     (leaf/'private').mkdir(parents=True)
@@ -103,8 +126,8 @@ def run_job(root,part):
         while proc.poll() is None:
             public=campaign.read_complete_jsonl(leaf/'records.jsonl')
             for i in range(checked,len(public)):
-                errors.extend(campaign.validate(public[i],rows[i],'shared',arms[i+1],part,
-                    oracle=part=='audit',prefix_budget=256))
+                errors.extend(campaign.validate(public[i],rows[i],'shared',arms[i+1],native_part,
+                    oracle=native_part=='audit',prefix_budget=256))
             checked=len(public)
             if errors or time.monotonic()-start>=reserve:
                 if not errors:errors.append('GPU reservation expired')
@@ -117,15 +140,16 @@ def run_job(root,part):
     write(campaign.INVESTIGATION/'gpu_budget.json',budget)
     public=campaign.base.jsonl(leaf/'records.jsonl') if (leaf/'records.jsonl').exists() else []
     for i in range(checked,len(public)):
-        errors.extend(campaign.validate(public[i],rows[i],'shared',arms[i+1],part,part=='audit',256))
+        errors.extend(campaign.validate(public[i],rows[i],'shared',arms[i+1],native_part,native_part=='audit',256))
     if proc.returncode or len(public)!=len(rows):errors.append('worker/coverage failure')
     errors.extend(campaign.policy_errors(leaf/'private/kernel_inventory.json','PIECEWISE'))
     bookends=[]
     if len(public)==len(rows):
-        a=public[config['original_target_row']]
-        for name,index in [('observed',config['observed_row']),('final_unobserved',config['final_bookend_row'])]:
-            diff={key:a[key]!=public[index][key] for key in FIELDS}
-            bookends.append(dict(variant=name,differences=diff,passed=not any(diff.values())))
+        for group in config['bookend_groups']:
+            a=public[group['original']]
+            for name,index in [('observed',group['observed']),('final_unobserved',group['final'])]:
+                diff={key:a[key]!=public[index][key] for key in FIELDS}
+                bookends.append(dict(arm=group['arm'],variant=name,differences=diff,passed=not any(diff.values())))
     result=dict(status='failed' if errors else 'complete',errors=sorted(set(errors)),records=len(public),
         observer_qualified=bool(bookends) and all(r['passed'] for r in bookends),bookends=bookends,
         gpu_reservation_s=reservation['elapsed_s'],protocol_sha256=sha(root/'protocol.json'),
@@ -139,7 +163,8 @@ def run_job(root,part):
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(__doc__);parser.add_argument('action',choices=['prepare','run'])
-    parser.add_argument('--study',type=Path,default=DEFAULT);args=parser.parse_args();root=args.study.absolute()
-    if args.action=='prepare':prepare(root)
+    parser.add_argument('--study',type=Path,default=DEFAULT);parser.add_argument('--mixed',action='store_true')
+    args=parser.parse_args();root=args.study.absolute()
+    if args.action=='prepare':prepare(root,args.mixed)
     else:
-        for part in ('audit','clean'):run_job(root,part)
+        for part in read(root/'protocol.json')['jobs']:run_job(root,part)

@@ -2616,3 +2616,24 @@ native full sampler fingerprints. Exclude independent oracle work from the
 production-cache trace. Native formulas/budgets remain fixed; diagnostic copies
 are not latency evidence. Initial ceiling1500s charges existing phasek256,
 without expanding total43200s or borrowing from other phase caps.
+
+## Residual trace pair is inconclusive; broaden the remaining variation (2026-10-19)
+
+The two bounded engines (370.783/360.297s) qualify their residual observation:
+both unobserved/observed/unobserved bookends agree. All184 sampler calls and all
+production residual/cache fingerprints agree across passes, reproducing the
+earlier clean result. The original residual difference was not captured.
+Independent unobserved prefix comparisons change the audit residual case,
+clean measured V31 question129,seed43 and V3a question116,seed42, plus a clean
+full-swap warmup. Preserve all contrasts. The earlier baseline diagnostic is
+complete within its declared cohort/context; mixed-method reproducibility is
+unresolved despite actual deterministic Inductor kernel metadata.
+
+Next freeze two identical clean mixed-prefix engines with per-arm bookends.
+An integer-only two-seed128-bit all-logit fingerprint supplements the full
+sampler observer. Three H100 tests compare an independent NumPy oracle, repeats
+and a tail bit change, covering partial and multistage reductions. This is a
+noncryptographic first-divergence locator, never equality or root-cause proof.
+Any detected change needs actual tensor comparison/replay. Keep native formulas,
+both full matrices and K128 hold unchanged; no compiler/library flag is promoted
+without evidence. The bounded stage still charges existing phasek256.
