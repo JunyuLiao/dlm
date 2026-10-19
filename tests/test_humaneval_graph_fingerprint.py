@@ -7,8 +7,8 @@ import torch
 from scripts import v31_humaneval_graph_fingerprint as observer
 
 
-@pytest.mark.parametrize('active',[False,True])
-def test_native_dispatch_called_once_and_result_preserved(tmp_path,monkeypatch,active):
+@pytest.mark.parametrize('active,mode',[(False,'off'),(True,'full'),(False,'graph_only')])
+def test_native_dispatch_called_once_and_result_preserved(tmp_path,monkeypatch,active,mode):
     calls=[];order=[];result_token=object()
     class Engine:
         def add_request(self,*a,**k):return result_token
@@ -28,18 +28,23 @@ def test_native_dispatch_called_once_and_result_preserved(tmp_path,monkeypatch,a
     for m in (engine,graph,fingerprint,context):monkeypatch.setitem(sys.modules,m.__name__,m)
     monkeypatch.setattr(dg,'_compiled_sample_step',lambda *a,**k:result_token)
     monkeypatch.setattr(torch.cuda,'is_current_stream_capturing',lambda:False)
+    schedule=tmp_path/'modes.json';schedule.write_text(json.dumps([mode]))
+    monkeypatch.setenv('HUMANEVAL_GRAPH_MODES',str(schedule))
     state=dict(active=active,index=0)
     observer.install(state,tmp_path)
-    request=Engine();assert request.add_request('request') is result_token
     value=torch.ones(2,4);saved=value.clone()
+    assert Graph()(value) is result_token  # Native startup before any request.
+    assert dg._compiled_sample_step() is result_token and state['graph_mode']=='off'
+    calls.clear();order.clear()
+    request=Engine();assert request.add_request('request') is result_token
     assert Graph()(value,flag=2) is result_token
     assert len(calls)==1 and calls[0][0][0] is value and calls[0][1]==dict(flag=2)
     assert torch.equal(value,saved)
     assert dg._compiled_sample_step() is result_token
     request.step()
     files=list(tmp_path.glob('request*.json'))
-    assert len(files)==int(active)
-    if active:
+    assert len(files)==int(mode!='off')
+    if mode!='off':
         trace=json.loads(files[0].read_text())
         assert [e['point'] for e in trace['events']]==['before','after']
         assert all(e['native_runtime_mode']=='PIECEWISE' for e in trace['events'])

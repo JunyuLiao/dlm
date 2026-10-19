@@ -1,6 +1,8 @@
 """Observe native graph boundaries without bypassing or replaying a graph."""
 import functools
 import json
+import os
+from pathlib import Path
 
 
 def install(state,destination):
@@ -14,6 +16,8 @@ def install(state,destination):
     add,step,sample=LLMEngine.add_request,LLMEngine.step,dg._compiled_sample_step
     graph=CUDAGraphWrapper.__call__
     identities={}
+    state.update(graph_mode='off',graph_events=[],graph_logits=[],graph_samples=0,graph_calls=0)
+    modes=json.loads(Path(os.environ['HUMANEVAL_GRAPH_MODES']).read_text()) if os.environ.get('HUMANEVAL_GRAPH_MODES') else None
 
     def values(value):
         leaves,_=tree_flatten(value)
@@ -36,18 +40,22 @@ def install(state,destination):
     @functools.wraps(add)
     def begin(self,*args,**kwargs):
         result=add(self,*args,**kwargs)
-        state.update(graph_events=[],graph_samples=0,graph_calls=0)
+        mode=modes[state['index']] if modes is not None else 'full' if state['active'] else 'off'
+        if mode not in ('off','full','graph_only'):raise RuntimeError('unknown graph observation mode')
+        state.update(graph_events=[],graph_logits=[],graph_samples=0,graph_calls=0,graph_mode=mode)
         return result
 
     @functools.wraps(sample)
     def sampler(*args,**kwargs):
+        if state['graph_mode']=='graph_only' and args:
+            state['graph_logits'].append(dict(sampler_index=state['graph_samples'],gpu128=fingerprint_cuda(args[0])))
         result=sample(*args,**kwargs)
-        if state['active']:state['graph_samples']+=1
+        if state['graph_mode']!='off':state['graph_samples']+=1
         return result
 
     @functools.wraps(graph)
     def boundary(self,*args,**kwargs):
-        if not state['active']:return graph(self,*args,**kwargs)
+        if state['graph_mode']=='off':return graph(self,*args,**kwargs)
         if torch.cuda.is_current_stream_capturing():raise RuntimeError('boundary observer entered capture')
         identity=identities.setdefault(id(self),len(identities))
         call=state['graph_calls'];state['graph_calls']+=1
@@ -66,15 +74,15 @@ def install(state,destination):
 
     @functools.wraps(step)
     def finish(self,*args,**kwargs):
-        active,index=state['active'],state['index']
+        active,index=state['graph_mode']!='off',state['index']
         result=step(self,*args,**kwargs)
         if active and any(o.finished for o in result):
             destination.mkdir(parents=True,exist_ok=True)
             with (destination/f'request{index:03d}.json').open('x') as f:
-                json.dump(cpu(dict(events=state['graph_events'],extra_forwards=0,
+                json.dump(cpu(dict(events=state['graph_events'],logits_before=state['graph_logits'],mode=state['graph_mode'],extra_forwards=0,
                     native_graph_dispatch_preserved=True,graph_bypasses=0,
                     partial_activation_argument_scope=True,clean_timing=False)),f,sort_keys=True)
-            state.update(graph_events=[])
+            state.update(graph_events=[],graph_logits=[])
         return result
 
     LLMEngine.add_request,LLMEngine.step=begin,finish

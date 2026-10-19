@@ -34,8 +34,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
     assert not root.exists()
     (root/'private').mkdir(parents=True)
     if graph_trace:
-        gate=ROOT/'results/humaneval_graph_preflight_20261019/attempt002'
-        receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==4
+        gate=ROOT/'results/humaneval_graph_preflight_20261019/attempt003'
+        receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==5
         for name,digest in receipt['files_sha256'].items():assert sha(gate/name)==digest
         assert receipt['observer_source_sha256']==sha(ROOT/'scripts/v31_humaneval_graph_fingerprint.py')
         shutil.copyfile(ROOT/'scripts/v31_humaneval_graph_fingerprint.py',root/'private/graph_fingerprint.py')
@@ -111,7 +111,7 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         assert len(indices)==6
         target=next(i for i in indices if arms[i+1]['arm']=='residual_direction_guard')
         prefix=max(indices)+1
-        conditions=None;attention_modes={}
+        conditions=None;attention_modes={};pure_groups=[];graph_modes=None
         if crossover:
             base_indices=[i for i,r in enumerate(rows) if r['index']==116 and r['seed']==42]
             assert len(base_indices)==6
@@ -146,6 +146,19 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
             bookends=[dict(original=i,observed=i,final=prefix+i-8,arm=arms[i+1]['arm'],
                 label=f"seed{rows[i]['seed']:02d}_q{rows[i]['index']:03d}_"+arms[i+1]['label'])
                 for i in range(8,len(rows))]
+            if graph_trace:
+                targets={(129,43,'value_v2_online_preserve_mass'),(129,43,'control_before'),
+                    (116,43,'control_before'),(116,43,'residual_direction_guard'),
+                    (145,42,'value_v2_online_preserve_mass'),(116,42,'value_v3a_singleton_delete')}
+                focused=[i for i,r in enumerate(rows) if (r['index'],r['seed'],arms[i+1]['label']) in targets]
+                assert len(focused)==6
+                graph_modes=['off']+['full']*prefix+['graph_only']*(prefix-8)+['off']*len(focused)
+                end=len(selected)
+                pure_groups=[dict(original=prefix+i-8,final=end+j,arm=arms[i+1]['arm'],
+                    label=f"seed{rows[i]['seed']:02d}_q{rows[i]['index']:03d}_"+arms[i+1]['label'])
+                    for j,i in enumerate(focused)]
+                selected += [rows[i] for i in focused];entries += [arms[i+1] for i in focused]
+                live += ['clean']*len(focused)
         elif mixed:
             selected=rows[:prefix]+[rows[i] for i in indices]*2
             entries=arms[:prefix+1]+[arms[i+1] for i in indices]*2
@@ -159,7 +172,7 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
             live=['clean']*len(entries);live[prefix+1]='observe'
             bookends=[dict(original=target,observed=prefix,final=prefix+1,arm='residual_direction_guard')]
         assert len(entries)==len(selected)+1 and len(live)==len(entries)
-        if all_cases:assert len(selected)==152 and len(bookends)==72
+        if all_cases:assert len(selected)==152+len(pure_groups) and len(bookends)==72
         if attention and not crossover:assert len(selected)==82 and len(bookends)==2
         if crossover:assert len(selected)==74 and len(bookends)==4
         for group in bookends:
@@ -170,11 +183,18 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         folder=root/'private'/part;folder.mkdir()
         write(folder/'cells.json',selected,True);write(folder/'arms.json',entries,True)
         write(folder/'live.json',live,True)
+        if graph_trace:
+            assert len(graph_modes)==len(entries)
+            for group in pure_groups:
+                assert selected[group['original']]==selected[group['final']]
+                assert entries[group['original']+1]==entries[group['final']+1]
+            write(folder/'graph_modes.json',graph_modes,True)
         if crossover:write(folder/'attention_modes.json',attention_modes,True)
         jobs[part]=dict(original=str(original.relative_to(ROOT)),
             original_marker_sha256=sha(original/'attempt_complete.json'),
             original_target_row=target,observed_row=prefix,final_bookend_row=prefix+1,
             requests=len(selected),warmup_requests=8,native_pass=native_part,bookend_groups=bookends)
+        if graph_trace:jobs[part]['graph_pure_bookend_groups']=pure_groups
         if crossover:jobs[part]['conditions']=condition_rows
     p=dict(schema='humaneval_residual_repro_v1',source_commit=subprocess.check_output(
         ['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
@@ -190,7 +210,7 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         torch_deterministic_guard=torch_guard,
         index_put_dtype_adapter=dtype_adapter,fresh_private_compiler_cache=dtype_adapter,
         graph_boundary_fingerprints=graph_trace,
-        graph_preflight_receipt_sha256=sha(ROOT/'results/humaneval_graph_preflight_20261019/attempt002/receipt.json') if graph_trace else None,
+        graph_preflight_receipt_sha256=sha(ROOT/'results/humaneval_graph_preflight_20261019/attempt003/receipt.json') if graph_trace else None,
         dtype_regression_receipt_sha256=sha(ROOT/'results/humaneval_index_put_fallback_20261019/attempt001/receipt.json') if dtype_adapter else None,
         guard_preflight_receipt_sha256=sha(ROOT/'results/humaneval_selector_definedness_20261019/attempt003/receipt.json') if torch_guard else None,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
@@ -240,7 +260,8 @@ def run_job(root,part):
         if p.get('trace_crossover'):env['HUMANEVAL_ATTENTION_MODES']=str(root/f'private/{part}/attention_modes.json')
     if p.get('graph_boundary_fingerprints'):
         env.update(HUMANEVAL_GRAPH_TRACE_SOURCE=str(root/'private/graph_fingerprint.py'),
-            HUMANEVAL_GRAPH_TRACE_DIR=str(leaf/'private/graphs'))
+            HUMANEVAL_GRAPH_TRACE_DIR=str(leaf/'private/graphs'),
+            HUMANEVAL_GRAPH_MODES=str(root/f'private/{part}/graph_modes.json'))
     command=list(launch['command']);command[1]=str(root/'private/v31_humaneval_residual_repro_worker.py')
     command[4:7]=[str(root/f'private/{part}/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/generation.private.jsonl')]
     write(leaf/'private/launch.json',dict(command=command,environment=env),True)
@@ -290,22 +311,29 @@ def run_job(root,part):
             adapter=actual.get('policy',{}).get('index_put_dtype_adapter',{})
             if adapter.get('native_sampler_python_changed') is not False:
                 errors.append('missing native sampler identity for compiler adapter')
-    bookends=[]
+    bookends=[];graph_bookends=[]
     if len(public)==len(rows):
         if p.get('graph_boundary_fingerprints'):
             for group in config['bookend_groups']:
                 trace=read(leaf/f"private/graphs/request{group['observed']+1:03d}.json")
                 if not trace.get('events') or trace.get('graph_bypasses')!=0 or trace.get('extra_forwards')!=0:
                     errors.append('missing native graph-boundary coverage')
+                light=read(leaf/f"private/graphs/request{group['final']+1:03d}.json")
+                if light.get('mode')!='graph_only' or len(light.get('logits_before',[]))!=public[group['final']]['sampler_calls']:
+                    errors.append('missing graph-only logit coverage')
         for group in config['bookend_groups']:
             a=public[group['original']]
-            variants=([('within_engine_unobserved',group['final'])] if p.get('two_way_observer',p.get('full_cohort_trace')) else
+            variants=([('full_sampler_vs_graph_only' if p.get('graph_boundary_fingerprints') else 'within_engine_unobserved',group['final'])] if p.get('two_way_observer',p.get('full_cohort_trace')) else
                       [('observed',group['observed']),('final_unobserved',group['final'])])
             for name,index in variants:
                 diff={key:a[key]!=public[index][key] for key in FIELDS}
                 bookends.append(dict(arm=group['arm'],variant=name,differences=diff,passed=not any(diff.values())))
+        for group in config.get('graph_pure_bookend_groups',[]):
+            diff={key:public[group['original']][key]!=public[group['final']][key] for key in FIELDS}
+            graph_bookends.append(dict(label=group['label'],variant='graph_only_vs_pure',differences=diff,passed=not any(diff.values())))
     result=dict(status='failed' if errors else 'complete',errors=sorted(set(errors)),records=len(public),
         observer_qualified=bool(bookends) and all(r['passed'] for r in bookends),bookends=bookends,
+        graph_observer_qualified=bool(graph_bookends) and all(r['passed'] for r in graph_bookends),graph_bookends=graph_bookends,
         gpu_reservation_s=reservation['elapsed_s'],protocol_sha256=sha(root/'protocol.json'),
         files_sha256={str(f.relative_to(leaf)):sha(f) for f in leaf.rglob('*') if f.is_file()})
     write(leaf/('failed_attempt.json' if errors else 'attempt_complete.json'),result,True)
