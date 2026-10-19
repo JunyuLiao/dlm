@@ -44,7 +44,21 @@ def phase_caps():
         raise RuntimeError('GPU allocation addendum drift')
     if sum(add['caps_s'].values())!=43200:
         raise RuntimeError('unauthorized total GPU-budget change')
-    return add['caps_s']
+    continuation=INVESTIGATION/'allocation_addendum002.json'
+    if not continuation.exists():return add['caps_s']
+    newer=read(continuation);ledger=read(INVESTIGATION/'gpu_budget.json')
+    if (newer['prior_allocation_sha256']!=sha(INVESTIGATION/'allocation_addendum.json') or
+        newer['prior_caps_s']!=add['caps_s'] or
+        sha(ROOT/newer['spec_file'])!=newer['spec_sha256'] or
+        newer['total_cap_s']!=43200 or sum(newer['caps_s'].values())!=43200 or
+        ledger['caps_s']!=newer['caps_s'] or ledger['allocation_addendum_sha256']!=sha(continuation)):
+        raise RuntimeError('continuation allocation binding drift')
+    return newer['caps_s']
+
+
+def allocation_file():
+    continuation=INVESTIGATION/'allocation_addendum002.json'
+    return continuation if continuation.exists() else INVESTIGATION/'allocation_addendum.json'
 
 
 def prepare(study,budget):
@@ -241,7 +255,7 @@ def reserve(study,p,leaf):
         raise RuntimeError('another GPU reservation is open')
     spent=sum(r['elapsed_s'] for r in budget['reservations'] if r['phase']==phase)
     total=sum(r['elapsed_s'] for r in budget['reservations'])
-    remaining=min(caps[phase]-spent,sum(caps.values())-total)
+    remaining=min(min(caps[phase],p.get('phase_cap_s',caps[phase]))-spent,sum(caps.values())-total)
     reservation=min(p['maximum_job_reservation_s'],remaining-30)
     if reservation<180:raise RuntimeError('phase GPU budget exhausted; preserve resumable state')
     record=dict(name=str(leaf.relative_to(ROOT)),phase=phase,reserved_s=reservation,

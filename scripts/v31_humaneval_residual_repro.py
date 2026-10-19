@@ -16,7 +16,8 @@ read,write,sha=campaign.read,campaign.write,campaign.sha
 FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','native_interval_steps')
 
 
-def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False,torch_guard=False,dtype_adapter=False,graph_trace=False):
+def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False,torch_guard=False,dtype_adapter=False,graph_trace=False,graph_optimized=False):
+    graph_trace=graph_trace or graph_optimized
     torch_guard=torch_guard or dtype_adapter
     cublas=cublas or torch_guard
     all_cases=all_cases or cublas or graph_trace
@@ -34,10 +35,17 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
     assert not root.exists()
     (root/'private').mkdir(parents=True)
     if graph_trace:
-        gate=ROOT/'results/humaneval_graph_preflight_20261019/attempt004'
-        receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==6
+        gate=ROOT/('results/humaneval_dynamic_fingerprint_preflight_20261019/attempt003' if graph_optimized else
+                   'results/humaneval_graph_preflight_20261019/attempt004')
+        receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==(12 if graph_optimized else 6)
         for name,digest in receipt['files_sha256'].items():assert sha(gate/name)==digest
-        assert receipt['observer_source_sha256']==sha(ROOT/'scripts/v31_humaneval_graph_fingerprint.py')
+        tested=gate/'private/execution/scripts/v31_humaneval_graph_fingerprint.py'
+        assert sha(tested)==sha(ROOT/'scripts/v31_humaneval_graph_fingerprint.py')
+        if graph_optimized:
+            assert read(gate/'protocol.json')['cublas_workspace_config'] is None
+            assert read(gate/'private/launch.json')['cublas_workspace_config'] is None
+            counts=read(gate/'private/compiled_variants.json')
+            assert counts['dynamic_words']==counts['dynamic_fold']==1
         shutil.copyfile(ROOT/'scripts/v31_humaneval_graph_fingerprint.py',root/'private/graph_fingerprint.py')
     if dtype_adapter:
         gate=ROOT/'results/humaneval_index_put_fallback_20261019/attempt001'
@@ -79,11 +87,15 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
             policy=policy.replace(marker,'policy = dict(index_put_dtype_adapter=adapter_receipt, name=',1)
         (root/'private/cublas_policy.py').write_text(policy)
     if mixed or all_cases or attention:
-        shutil.copyfile(ROOT/'scripts/v31_humaneval_gpu_fingerprint.py',root/'private/humaneval_gpu_fingerprint.py')
-        gate=read(ROOT/'results/humaneval_mixed_repro_preflight_20261019/attempt001/receipt.json')
-        assert gate['status']=='complete'
-        tested=read(ROOT/'results/humaneval_mixed_repro_preflight_20261019/attempt001/sources.json')
-        assert tested['scripts/v31_humaneval_gpu_fingerprint.py']==sha(root/'private/humaneval_gpu_fingerprint.py')
+        source=ROOT/('scripts/v31_humaneval_gpu_fingerprint_dynamic.py' if graph_optimized else 'scripts/v31_humaneval_gpu_fingerprint.py')
+        shutil.copyfile(source,root/'private/humaneval_gpu_fingerprint.py')
+        if graph_optimized:
+            assert sha(ROOT/'results/humaneval_dynamic_fingerprint_preflight_20261019/attempt003/private/execution/scripts/v31_humaneval_gpu_fingerprint_dynamic.py')==sha(source)
+        else:
+            gate=read(ROOT/'results/humaneval_mixed_repro_preflight_20261019/attempt001/receipt.json')
+            assert gate['status']=='complete'
+            tested=read(ROOT/'results/humaneval_mixed_repro_preflight_20261019/attempt001/sources.json')
+            assert tested['scripts/v31_humaneval_gpu_fingerprint.py']==sha(root/'private/humaneval_gpu_fingerprint.py')
         path=root/'private/trajectory_worker.py';source=path.read_text()
         assert source.count('point = dict(canvas=')==1
         source=source.replace('import functools','from humaneval_gpu_fingerprint import fingerprint_cuda\nimport functools',1)
@@ -91,7 +103,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         path.write_text(source)
     if attention:
         shutil.copyfile(ROOT/'scripts/v31_humaneval_attention_fingerprint.py',root/'private/attention_fingerprint.py')
-    spec=(ROOT/'docs/HUMANEVAL_GRAPH_BOUNDARY_PLAN_20261019.md' if graph_trace else
+    spec=(ROOT/'docs/HUMANEVAL_OPTIMIZED_GRAPH_NATIVE_PLAN_20261019.md' if graph_optimized else
+          ROOT/'docs/HUMANEVAL_GRAPH_BOUNDARY_PLAN_20261019.md' if graph_trace else
           ROOT/'docs/HUMANEVAL_GUARDED_DTYPE_NATIVE_PLAN_20261019.md' if dtype_adapter else
           ROOT/'docs/HUMANEVAL_TORCH_GUARD_PLAN_20261019.md' if torch_guard else
           ROOT/'docs/HUMANEVAL_BLAS_WORKSPACE_PLAN_20261019.md' if cublas else
@@ -199,8 +212,9 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
     p=dict(schema='humaneval_residual_repro_v1',source_commit=subprocess.check_output(
         ['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         parent_protocol_sha256=sha(PARENT/'protocol.json'),failure_receipt_sha256=sha(PARENT/'receipts/early_residual_qualification_failure.json'),
-        runtime=parent['runtime'],jobs=jobs,phase='k256',maximum_job_reservation_s=1400 if graph_trace else 1200 if dtype_adapter else 900 if crossover else 1000 if all_cases else 750,
-        phase_cap_s=campaign.phase_caps()['k256'],maximum_new_reservation_s=2800 if graph_trace else 2400 if dtype_adapter else 900 if crossover else 2000 if all_cases else 1500,
+        runtime=parent['runtime'],jobs=jobs,phase='k256',maximum_job_reservation_s=1500 if graph_optimized else 1400 if graph_trace else 1200 if dtype_adapter else 900 if crossover else 1000 if all_cases else 750,
+        phase_cap_s=campaign.phase_caps()['k256'],maximum_new_reservation_s=3000 if graph_optimized else 2800 if graph_trace else 2400 if dtype_adapter else 900 if crossover else 2000 if all_cases else 1500,
+        phase_allocation_file=str(campaign.allocation_file().relative_to(ROOT)),phase_allocation_sha256=sha(campaign.allocation_file()),
         seed=None if all_cases or attention else 43,index=None if all_cases or attention else 129,
         seeds=[42] if crossover else [42,43] if all_cases or attention else [43],cohort=parent['cohort'] if all_cases else [116] if attention else [129],
         prefix_budget_tokens=256,full_accuracy_released=False,mixed_group=mixed or all_cases or attention,
@@ -210,7 +224,9 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         torch_deterministic_guard=torch_guard,
         index_put_dtype_adapter=dtype_adapter,fresh_private_compiler_cache=dtype_adapter,
         graph_boundary_fingerprints=graph_trace,
-        graph_preflight_receipt_sha256=sha(ROOT/'results/humaneval_graph_preflight_20261019/attempt004/receipt.json') if graph_trace else None,
+        graph_optimized=graph_optimized,
+        graph_preflight_receipt_sha256=sha(ROOT/('results/humaneval_dynamic_fingerprint_preflight_20261019/attempt003/receipt.json' if graph_optimized else
+                                               'results/humaneval_graph_preflight_20261019/attempt004/receipt.json')) if graph_trace else None,
         dtype_regression_receipt_sha256=sha(ROOT/'results/humaneval_index_put_fallback_20261019/attempt001/receipt.json') if dtype_adapter else None,
         guard_preflight_receipt_sha256=sha(ROOT/'results/humaneval_selector_definedness_20261019/attempt003/receipt.json') if torch_guard else None,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
@@ -223,6 +239,7 @@ def verify(root):
     assert sha(PARENT/'protocol.json')==p['parent_protocol_sha256']
     assert campaign.base.runtime_identity()==p['runtime']
     for name,digest in p['files_sha256'].items():assert sha(root/name)==digest
+    if p.get('phase_allocation_file'):assert sha(ROOT/p['phase_allocation_file'])==p['phase_allocation_sha256']
     return p
 
 
@@ -269,7 +286,7 @@ def run_job(root,part):
     budget=read(campaign.INVESTIGATION/'gpu_budget.json')
     assert all('elapsed_s' in r for r in budget['reservations'])
     spent=sum(r['elapsed_s'] for r in budget['reservations'] if r['phase']=='k256')
-    reserve=min(p['maximum_job_reservation_s'],campaign.phase_caps()['k256']-spent-30)
+    reserve=min(p['maximum_job_reservation_s'],min(p['phase_cap_s'],campaign.phase_caps()['k256'])-spent-30)
     if reserve<180:raise RuntimeError('existing phase budget exhausted')
     reservation=dict(name=str(leaf.relative_to(ROOT)),phase='k256',reserved_s=reserve,
                      protocol_sha256=sha(root/'protocol.json'))
@@ -353,7 +370,8 @@ if __name__=='__main__':
     parser.add_argument('--torch-guard',action='store_true')
     parser.add_argument('--dtype-adapter',action='store_true')
     parser.add_argument('--graph-trace',action='store_true')
+    parser.add_argument('--graph-optimized',action='store_true')
     args=parser.parse_args();root=args.study.absolute()
-    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover,args.cublas_workspace,args.torch_guard,args.dtype_adapter,args.graph_trace)
+    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover,args.cublas_workspace,args.torch_guard,args.dtype_adapter,args.graph_trace,args.graph_optimized)
     else:
         for part in read(root/'protocol.json')['jobs']:run_job(root,part)
