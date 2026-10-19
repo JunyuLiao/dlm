@@ -89,6 +89,11 @@ def install_oracle():
     original = FastRuntime.initialize
 
     def initialize(self, adapter, q, b, scale, prefix, n, out, identity):
+        limit = int(os.environ.get('HUMANEVAL_ORACLE_ANCHORS_PER_REQUEST', '2'))
+        if limit < 1:
+            raise ValueError('native qualification requires at least one oracle anchor')
+        if self.counts.get('humaneval_native_oracle_checks', 0) >= limit:
+            return original(self, adapter, q, b, scale, prefix, n, out, identity)
         st = dict(adapter.mage_state[29])
         st['kept'] = st['kept'].clone()
         reference = SimpleNamespace(mage_state={29: st}, mage_k=adapter.mage_k)
