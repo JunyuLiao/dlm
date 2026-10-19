@@ -160,11 +160,14 @@ def job(study, name, mode, family, pass_name, trace=False, overrides=None, wrapp
         inventory_path=Path(env['HUMANEVAL_KERNEL_INVENTORY'])
         inventory=read(inventory_path) if inventory_path.exists() else {}
         effective=inventory.get('policy',{})
+        helpers=effective.get('native_helpers',{})
         policy_checks=dict(receipt_present=bool(inventory),
-            process_compiler_deterministic=inventory.get('torch_inductor_deterministic') is True,
             actual_kernels_deterministic=bool(inventory.get('kernels')) and all(
                 k['deterministic'] for k in inventory.get('kernels',[])),
             explicit_model_compiler_deterministic=effective.get('effective_inductor_compile_config',{}).get('deterministic') is True,
+            explicit_native_helper_compilation=set(helpers)=={'_softcap_logits','_compute_num_rejected','_compiled_sample_step'} and all(
+                h.get('original_python_callable_preserved') is True and h.get('options',{}).get('deterministic') is True
+                for h in helpers.values()),
             no_unvetted_combo_benchmark=effective.get('effective_inductor_compile_config',{}).get('benchmark_combo_kernel') is False,
             native_graph_mode=effective.get('effective_cudagraph_mode')==(
                 'FULL_AND_PIECEWISE' if family=='dense_full' else 'PIECEWISE'))

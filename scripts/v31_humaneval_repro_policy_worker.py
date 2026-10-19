@@ -8,6 +8,7 @@ import atexit
 import functools
 import hashlib
 import json
+import inspect
 from pathlib import Path
 import runpy
 
@@ -57,6 +58,30 @@ def compilation_options(current):
     return options
 
 
+def recompile_native_helpers():
+    import torch
+    import vllm.model_executor.models.diffusion_gemma as dg
+    from vllm.platforms import current_platform
+    if current_platform.simple_compile_backend != 'inductor':
+        raise RuntimeError('this numerical policy is pinned to the native Inductor backend')
+    receipts = {}
+    options = dict(deterministic=True, benchmark_combo_kernel=False)
+    for name in ('_softcap_logits', '_compute_num_rejected', '_compiled_sample_step'):
+        previous = getattr(dg, name)
+        native = getattr(previous, '_torchdynamo_orig_callable', None)
+        if native is None or native.__module__ != dg.__name__:
+            raise RuntimeError('expected the untouched native compiled helper')
+        replacement = torch.compile(native, dynamic=True,
+            backend=current_platform.simple_compile_backend, options=options)
+        if replacement._torchdynamo_orig_callable is not native:
+            raise RuntimeError('native helper Python identity changed')
+        setattr(dg, name, replacement)
+        receipts[name] = dict(source_sha256=hashlib.sha256(inspect.getsource(native).encode()).hexdigest(),
+            backend=current_platform.simple_compile_backend, dynamic=True, options=options,
+            original_python_callable_preserved=True)
+    return receipts
+
+
 def install_compilation_policy():
     from torch._inductor import config
     from vllm import LLM
@@ -64,6 +89,7 @@ def install_compilation_policy():
     original = LLM.__init__
     policy = dict(name='explicit_inductor_cfgdet', native_sampler_changed=False,
                   extra_forwards=0, intermediate_observer=False)
+    policy['native_helpers'] = recompile_native_helpers()
 
     @functools.wraps(original)
     def initialize(self, *args, **kwargs):
