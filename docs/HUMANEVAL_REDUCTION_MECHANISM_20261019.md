@@ -1,4 +1,4 @@
-# HumanEval numerical mechanism — diagnostic, qualification pending
+# HumanEval numerical mechanism — baseline qualification complete
 
 Native source20e6c0be; investigation plan c467882a and unchanged total ceiling
 43200 H100 reservation seconds. Canonical root:
@@ -52,21 +52,36 @@ segment (both512), yet their final generations differ. Other compiled segments
 and sampler reductions therefore still need the end-to-end qualification gate.
 Unused padded positions differ and are excluded from the valid-row comparison.
 
-## Candidate correction and gates
+## Qualified correction and remaining panel gates
 
 Pinned Torch's triton_heuristics.py explicitly filters reduction configurations
 for deterministic numerics and forbids reduction block/warp tuning in that mode.
-The next contrast sets the supported TORCHINDUCTOR_DETERMINISTIC=1 policy only.
-It retains native CUDA graph modes, model formulas, sampler/stopping settings,
-selector budgets and layer scopes. This is a named numerical-runtime variant;
-the actual compiler policy and selected configurations must be receipted.
+The environment-only TORCHINDUCTOR_DETERMINISTIC=1 contrast was ineffective:
+actual generated-kernel metadata still reported40 nondeterministic kernels.
+Explicit model options alone left24 native helper/sampler kernels uncontrolled.
+Both failed stages are preserved.
 
-Do not call the discrepancy resolved until independent same-method process
-repeats and audit/clean pairs agree, for dense/V31 and both thinking modes,
-followed by the requested methods and accounting checks. Do not silently switch
-to eager execution. Measure any deterministic-policy latency cost against matched
-controls before reporting a method speedup. No K256/K128 full rerun is released
-while qualification fails; K128 still requires fresh work-only V2 calibration.
+Qualified source10341ab2, frozen private/source_addenda/attempt027/worker.py,
+binds deterministic compiler options to the model and recompiles the three
+unchanged original native helper Python callables with the same options.
+Actual53/53 recorded kernels are deterministic. Horizontal combo fusion and
+its unsupported benchmarking are disabled in this named numerical/compiler
+policy. Native FULL/PIECEWISE graphs, model and sampler formulas, stopping
+settings, selector budgets, and layer scopes are preserved. Its latency must
+be measured with matched controls; this is not a claim about original defaults.
+
+Two independent unobserved native clean FULL engines agree on all12 output/N/C/T
+pairs. Eleven additional qualification engines cover dense/V31, both thinking
+modes, independent same-mode and audit/clean comparisons. All declared full
+pre/post sampler-state, valid history, emission and CPU/CUDA RNG comparisons
+pass, as do clean/observed/clean bookends; measured CUDA captures are zero.
+Authoritative marker: qualification/attempt001/baseline_runtime_qualified.json.
+This completes the six-question baseline diagnostic, not full164 method accuracy.
+
+Every requested method must still pass independent process-prefix and audit/clean
+comparisons plus accounting checks in each corrected panel. No eager fallback
+or reproducibility-gate relaxation is permitted. K256 uses a new frozen protocol;
+K128 follows verified K256 completion and requires fresh work-only V2 calibration.
 
 Authoritative sanitized operator evidence: operator_diagnostics/attempt002/summary.json
 and operator_complete.json; valid-row comparison:

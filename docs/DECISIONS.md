@@ -2572,3 +2572,27 @@ formulas and selector budgets. Independent processes, audit/clean equivalence
 and both thinking modes remain gates before full generation or latency claims.
 No full matrix is launched while qualification fails; no accuracy-based tuning
 or relaxed reproducibility criterion is authorized by diagnostic progress.
+
+## HumanEval baseline numerics qualified; corrected panels released (2026-10-19)
+
+Qualified source10341ab2 explicitly binds deterministic options to the model and
+the unchanged native compiled helper callables. Actual53/53 kernel receipts pass.
+Horizontal combo fusion/benchmarking are disabled; retain that policy identity
+and matched native graph/FA4 controls when measuring latency. The environment-only
+and model-only failures remain diagnostics, not successful runtime variants.
+
+Two independent unobserved FULL engines match12/12 output/N/C/T pairs. Eleven
+further dense/V31 engines, both thinking modes, pass all declared pre/post
+sampler-state, valid-history, emission and RNG comparisons, including same-mode,
+audit/clean and bookend contrasts. Baseline marker:
+results/humaneval_reproducibility_20261019/attempt001/qualification/attempt001/baseline_runtime_qualified.json.
+This is a six-question baseline qualification, not a full accuracy result.
+
+H100 preflight passes122 checks at both prefix budgets; two additional CPU
+reporting tests reject population/trajectory mismatches without requiring
+different methods to agree. K256 execution10a222c6 is frozen in a new study;
+work-only calibration precedes method qualification and full generation. Its
+CPU output-metadata telemetry records emission intervals without new device
+operations. K128 is gated on independently sealed K256 completion and fresh
+threshold calibration. Keep original panels and older pauses intact. Diagnosis
+10477.365s, preflight31.295s; the43200s shared ceiling and phase caps are unchanged.

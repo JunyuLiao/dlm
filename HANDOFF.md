@@ -24,11 +24,12 @@ RNG fingerprints agree; all native bookends match and measured captures are zero
 This is a complete baseline diagnostic, not a164-question accuracy result.
 
 Diagnosis closes at10477.365/10800s. Shared total ceiling43200s remains unchanged;
-K256 and K128 each have16200s. No reservations remain from diagnosis. Active next
-stage: H100 preflight for both K2/K4 budgets, phasek256, under
-results/humaneval_cfgdet_preflight_20261019/attempt001. Read gpu_budget.json for
-its actual open/closed charge; only one GPU worker. Relevant original96 tests,
+K256 and K128 each have16200s. The H100 preflight completed122 checks with zero
+failures/errors/skips, charging31.295s to phasek256, under
+results/humaneval_cfgdet_preflight_20261019/attempt001. Relevant original96 tests,
 full-V512 K2/long-prefix cases and numerical/trajectory safeguards are included.
+Two additional CPU reporting-gate tests pass. Read gpu_budget.json for actual
+open/closed charges; only one GPU worker.
 
 Corrected-panel plan93639f9d: docs/HUMANEVAL_CFGDET_K256_K128_PLAN_20261019.md.
 New harness: v31_humaneval_cfgdet_worker.py, cfgdet_base_worker.py and cfgdet_study.py.
@@ -41,9 +42,17 @@ qualification, giving independent same-order engine replication without extra co
 launches; the seed43 six-question check follows only in qualification. Main
 supervisor fails early if that prefix differs. Preserve source/method identities.
 
-Next: finish data-derived reporting/independent verification, pass H100 gate,
-freeze new K256 then K128 protocols/execution, run the authorized matrices and
-publish only complete qualified results. Full method performance is unmeasured.
+Running: corrected K256, frozen execution10a222c6, under
+results/humaneval_value_cfgdet_k256_20261019/attempt001. Canonical scorer gate
+passes328/328. Previous-threshold and expanded-grid thinking-on work calibration
+have completed; midpoint calibration is active. Newly recorded CPU emission
+interval telemetry passes native record validation so far. No final threshold
+or corrected method accuracy is available yet. Sourcebe673388 queues K128 only
+after independently verified K256 completion; no K128 GPU work has launched.
+
+Next: freeze work-only thresholds, qualify every method, run the authorized
+matrices and independent official rescores, then publish complete qualified
+results. Full corrected method performance is unmeasured.
 New numerical-policy/CPU-telemetry costs and all consumer differences stay visible.
 No selector improvement or clean speedup is established. Legacy STATE.json unused.
 
