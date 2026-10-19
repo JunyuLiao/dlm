@@ -2552,3 +2552,23 @@ Sanitized export: publication/attempt002; earlier qualification publication is
 unchanged. MAGE's static unmasking and SparseD's early-dense protection remain
 prior art; adaptive convergence is a research question requiring a demonstrated
 failure mechanism, not established novelty by naming a new selector.
+
+## Qualify compiler numerics before HumanEval K256/K128 (2026-10-19)
+
+Investigation results/humaneval_reproducibility_20261019/attempt001 preserves
+the original K256 study and both older LongBench pauses. Same-process audit
+interventions agree while independent native processes drift. The reproduced
+same-input operator contrast (evidence582bc68d) changes only R0_BLOCK512/1024
+and reproduces the recorded fused-normalization output differences. It establishes
+one numerical mechanism, not complete end-to-end repair or a selector advantage.
+Read docs/HUMANEVAL_REDUCTION_MECHANISM_20261019.md for observer exclusions.
+
+Require actual selected-kernel receipts, not an environment-variable claim:
+TORCHINDUCTOR_DETERMINISTIC=1 alone still receipts40 nondeterministic kernels.
+The next named runtime variant explicitly binds deterministic compiler options
+to vLLM and the separately compiled native sampler. Sourceb59cd177 fails closed
+on missing/ineffective receipts or changed graph mode. It preserves native sampler
+formulas and selector budgets. Independent processes, audit/clean equivalence
+and both thinking modes remain gates before full generation or latency claims.
+No full matrix is launched while qualification fails; no accuracy-based tuning
+or relaxed reproducibility criterion is authorized by diagnostic progress.
