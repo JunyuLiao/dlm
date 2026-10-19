@@ -2267,3 +2267,20 @@ the exact instruction-level hazard, universal determinism, native repair or a
 method advantage. Observation-only no-overlap native qualification is pending;
 corrected full164 K256/K128 panels remain held. Sanitized complete publication:
 results/humaneval_fa4_overlap_screen_20261019/attempt001/publication/attempt001/.
+
+
+## HumanEval observing-only correction: native diagnostic qualification — 2026-10-19
+
+Complete diagnostic, source `d62691b2`, protocol `5163cde0b3f9b17ad32a6a88c845ba59ab359d7fd58974d652abee31c1937048`.
+Evidence: `results/humaneval_mixed_repro_20261019/attempt015/qualification/attempt001/qualification.json`
+and its completion marker, source-bound to both native engine leaves and full
+analysis. Two152-request engines complete in872.172127s and872.199699s. All72
+complete sampler/cache traces match across independent processes; observed/pure
+native comparisons and all warmups pass. Scope: six examined questions,seeds42/43,
+thinking on,K256. Native stopping/formulas are preserved, measured captures0.
+
+The minimal observing-only FA4 overlap=False correction has helper SHA
+`f13970b24c6f8f27c09ba38ea882368aba9db8be9abf40833f914c44cc1a9e63`.
+No full164 accuracy, clean latency, seed-robust superiority or universal numerical
+stability is established by this diagnostic. Corrected panels require their own
+audit/clean/control gates and official scoring before joining this ledger.

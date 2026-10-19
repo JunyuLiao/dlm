@@ -2831,3 +2831,32 @@ source-bound regressions pass0.382s. Fresh015 source d62691b2 uses two1000s,
 Both full matrices stay gated. Native qualification must precede corrected
 audit/clean/control qualification, calibration and official-scored full runs.
 No silent slower-mode performance claim, budget expansion or old-campaign resume.
+
+
+## 2026-10-19 — Qualify observing-only FA4 correction before corrected HumanEval panels
+
+Native attempt015 (`d62691b2`, protocol `5163cde0`) completes both independent
+152-request engines. Strict qualification passes all 72 complete sampler/cache
+trace comparisons across processes and observed/pure native output and trajectory
+comparisons; no warmup changes. The certificate binds the qualified helper SHA
+`f13970b2`, all leaf markers and analysis hashes. This is bounded diagnostic
+qualification, not full164 audit/clean or latency qualification. The earlier
+operator factorial supports the observing-only non-overlap correction; the exact
+instruction-level hazard remains unproved.
+
+Freeze corrected K256 (`55370024`) and K128 (`187719fc`) from deploy `435511e4`.
+Use all164 questions, seed42, both thinking settings, unchanged native decoding,
+work-only V2 calibration, strict audit/clean equivalence, independent process
+prefix replication and official independent rescoring. Share only newly run,
+source-matched budget-independent dense FULL/PIECEWISE/all-kept controls across
+budgets. Every selector arm remains fresh at its own budget. Full-value refinements
+remain layer29-only; V2/V3a retain all five GLOBAL layers; LOCAL remains dense.
+
+Allocation003 explicitly revises the investigation's self-imposed 43200s estimate
+to a bounded combined 65831s including all earlier usage, with a shared 36000s
+allowance for the already-requested corrected panels. The user supplied no numeric
+hour ceiling. The completed original K256 campaign cost 15032.143s; its cost plus
+the unexpected diagnosis explains the revision. Preserve original protocols,
+allocation001/002, actual charges and all paused campaigns. No extra GPU or new
+method sweep is introduced. Each reservation remains at most1800s, one worker,
+with immutable attempts and a combined/phase accounting check.

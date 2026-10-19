@@ -1,3 +1,37 @@
+## HumanEval native correction qualified; corrected K256/K128 panels frozen — 2026-10-19 UTC
+
+Verified deploy HEAD `435511e4`. Native diagnostic attempt015, source `d62691b2`,
+protocol `5163cde0`, is complete: two independent 152-request engines, 872.172s
+and 872.200s. All 72 complete sampler/cache traces match across processes;
+observed/pure native outputs, denoising counts, canvases, lengths and emission
+intervals match, with zero changed warmups. Strict certificate:
+`results/humaneval_mixed_repro_20261019/attempt015/qualification/attempt001/`.
+Scope remains six examined questions, seeds42/43, thinking on, K256. The native
+certificate alone does not establish full164 audit/clean equivalence or latency.
+
+Both corrected studies are frozen from identical executable source fingerprints:
+`results/humaneval_value_observe_no_overlap_k256_20261019/attempt001/`
+(protocol `55370024`) and `humaneval_value_observe_no_overlap_k128_20261019/attempt001/`
+(protocol `187719fc`). K256 is running work-only calibration; inspect its state,
+worker and budget before launching anything. Run K256 to completion, independently
+verify/rescore, then run K128. Only source-matched dense FULL/PIECEWISE/all-kept
+references are shared with K128; all selector arms run freshly at each budget.
+One 164-question primary shard per family preserves the qualification prefix.
+Audit/clean qualification and primary-prefix replication gates remain strict.
+Matrix orchestration preflight002 passes 20 CPU checks (8 GPU checks deselected,
+not rerun); policy and receipt preflights separately pass 4 and 2 CPU checks.
+
+Allocation003 explicitly revises the self-imposed estimate, preserving every
+prior charge and original protocol. Closed pre-evaluation usage is 29829.941s;
+retired diagnosis/K256/K128 caps are 10478/19353/0s. The already-requested two
+corrected panels share a bounded 36000s evaluation allowance on the existing
+H100, combined ceiling 65831s including prior usage. See
+`docs/HUMANEVAL_EVALUATION_ALLOCATION_20261019.md` and the immutable hash-linked
+addendum. Do not resume retired or older paused campaigns. Report actual clean
+latency including the observing correction; do not infer speedup from N or tiles.
+Original unqualified HumanEval rankings remain historical, with no new accuracy
+or method-superiority claim until the full gates and official scoring complete.
+
 ## HumanEval observing-FA4 failure isolated; native correction qualifying — 2026-10-19 UTC
 
 Verified HEADd62691b2. Complete operator screen sourcec7e7c67e, protocol906d41b7,
