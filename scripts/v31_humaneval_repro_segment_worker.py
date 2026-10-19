@@ -7,6 +7,7 @@ operator, extra forward, or sampler change. Clean bookends qualify dispatch and
 observation together. All other segments and requests retain native dispatch.
 """
 import functools
+import atexit
 import hashlib
 import json
 import linecache
@@ -15,6 +16,42 @@ from pathlib import Path
 import re
 import runpy
 import sys
+
+
+def install_kernel_inventory(path):
+    """Retain tuning objects, then record selected configurations after exit."""
+    from torch._inductor.runtime.triton_heuristics import CachingAutotuner
+    original = CachingAutotuner.precompile
+    inventory = {}
+
+    @functools.wraps(original)
+    def precompile(self, *args, **kwargs):
+        inventory[id(self)] = self
+        return original(self, *args, **kwargs)
+
+    def save():
+        import torch
+        from torch._inductor import config
+        rows = []
+        for kernel in inventory.values():
+            filename = Path(kernel.filename) if kernel.filename else None
+            rows.append(dict(name=getattr(kernel.fn, '__name__', None),
+                file=filename.name if filename else None,
+                source_sha256=hashlib.sha256(filename.read_bytes()).hexdigest()
+                    if filename and filename.is_file() else None,
+                heuristic=str(kernel.heuristic_type),
+                deterministic=kernel.deterministic_mode,
+                selected_configs=[dict(kwargs=x.config.kwargs, num_warps=x.config.num_warps,
+                    num_stages=x.config.num_stages, num_ctas=x.config.num_ctas)
+                    for x in kernel.launchers]))
+        if path.exists():
+            raise RuntimeError('immutable kernel inventory required')
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(dict(torch_inductor_deterministic=config.deterministic,
+            torch_deterministic_algorithms=torch.are_deterministic_algorithms_enabled(),
+            kernels=sorted(rows, key=lambda x:(x['file'] or '', x['name'] or ''))), indent=2)+'\n')
+    CachingAutotuner.precompile = precompile
+    atexit.register(save)
 
 
 def copy_to_captured_outputs(fresh, captured):
@@ -176,6 +213,7 @@ def install(schedule, root):
 
 
 if __name__ == '__main__':
+    install_kernel_inventory(Path(os.environ['HUMANEVAL_REPRO_TRACE']).parent/'kernel_inventory.json')
     install(json.loads(Path(os.environ['HUMANEVAL_REPRO_LIVE_SCHEDULE']).read_text()),
             Path(os.environ['HUMANEVAL_REPRO_TRACE']))
     runpy.run_path(os.environ['HUMANEVAL_REPRO_BASE'], run_name='__main__')
