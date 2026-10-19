@@ -56,11 +56,16 @@ def prepare(study,budget):
     gate=read(PREFLIGHT/'preflight_complete.json')
     if gate['status']!='complete' or sha(PREFLIGHT/'tests.xml')!=gate['tests_sha256']:
         raise RuntimeError('qualified H100 tests required')
+    if sha(PREFLIGHT/'source_fingerprints.json')!=gate['source_fingerprints_sha256']:
+        raise RuntimeError('H100 preflight source identity drift')
+    for rel,digest in read(PREFLIGHT/'source_fingerprints.json').items():
+        if sha(ROOT/rel)!=digest:raise RuntimeError('tested worker/test source changed')
     for rel,digest in read(PARENT/'verified_complete.json')['files_sha256'].items():
         if sha(PARENT/rel)!=digest:raise RuntimeError('original campaign drift')
     study.mkdir(parents=True)
     execution=study/'private/execution'
-    shutil.copytree(PARENT/'private/execution',execution)
+    shutil.copytree(PARENT/'private/execution',execution,
+                    ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
     # The inherited selector/native execution remains byte-identical. Overlay
     # only the generalized harness and the qualified numerical-policy worker.
     overlays=['v31_humaneval_cfgdet_worker.py','v31_humaneval_cfgdet_base_worker.py','v31_humaneval_cfgdet_study.py',
@@ -102,6 +107,7 @@ def prepare(study,budget):
         execution_fingerprints={str(f.relative_to(execution)):sha(f) for f in execution.rglob('*') if f.is_file()},
         input_fingerprints={str(f.relative_to(study)):sha(f) for root in (study/'private/pools',study/'private/schedules')
                             for f in root.rglob('*') if f.is_file()},
+        humaneval_source_sha256=sha(study/'private/HumanEval.jsonl.gz'),
         model_inventory_sha256=sha(study/'model_source_fingerprints.json'),spec_sha256=sha(study/'spec.md'),
         preflight_tests_sha256=sha(study/'preflight_tests.xml'),runtime=base.runtime_identity(),
         suites={mode:settings for mode in MODES},native=original['native'],manifests=original['manifests'],
@@ -125,6 +131,8 @@ def verify(study):
                     ('preflight_tests.xml','preflight_tests_sha256')]:
         if sha(study/rel)!=p[key]:raise RuntimeError('protocol/source identity drift')
     if p['prefix_budget_tokens'] not in (128,256):raise RuntimeError('unsupported prefix budget')
+    if sha(study/'private/HumanEval.jsonl.gz')!=p['humaneval_source_sha256']:
+        raise RuntimeError('canonical HumanEval source drift')
     if sha(INVESTIGATION/'qualification/attempt001/baseline_runtime_qualified.json')!=p['baseline_runtime_qualification_sha256']:
         raise RuntimeError('baseline qualification identity drift')
     base.SUITES.update(p['suites'])
@@ -204,7 +212,7 @@ def validate(row, cell, family, live, pass_name, oracle=False, prefix_budget=256
             if pass_name == 'audit':
                 checks.append((a.get('value_refinement_work', {}).get('budget_errors') == 0, 'refined budget'))
                 if oracle:
-                    checks.append((a.get('value_refinement_work', {}).get('humaneval_native_oracle_checks', 0) > 0, 'native oracle'))
+                    checks.append((0 < a.get('value_refinement_work', {}).get('humaneval_native_oracle_checks', 0) <= 2, 'bounded native oracle'))
     if pass_name == 'audit':
         checks += [(a.get('global_calls') == 5*row['denoise_forwards'], 'GLOBAL calls'),
                    (a.get('native_local_calls_audited') == 25*row['denoise_forwards'], 'LOCAL calls'),
