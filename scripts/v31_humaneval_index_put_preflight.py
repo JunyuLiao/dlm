@@ -52,7 +52,7 @@ raise SystemExit(code)
         ['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),runtime=parent['runtime'],
         parent_protocol_sha256=sha(ROOT/'results/humaneval_value_cfgdet_k256_20261019/attempt001/protocol.json'),
         phase='k256',maximum_job_reservation_s=180,native_model_forwards=0,
-        native_sampler_calls=0,cublas_workspace_config=':4096:8',
+        native_sampler_calls=0,cublas_workspace_config=None if dynamic_fp else ':4096:8',
         dynamic_fingerprint=dynamic_fp,expected_tests=4 if dynamic_fp else 1,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
     write(root/'protocol.json',p,True)
@@ -96,7 +96,7 @@ def run(root):
         tests=len(cases),gpu_reservation_s=reservation['elapsed_s'],protocol_sha256=sha(root/'protocol.json'),
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
     write(root/('receipt.json' if passed else 'failed_attempt.json'),receipt,True)
-    print(json.dumps(receipt),flush=True)
+    print(json.dumps({k:v for k,v in receipt.items() if k!='files_sha256'}),flush=True)
     if not passed:raise RuntimeError('preserved failed dtype regression; native probe remains gated')
 
 

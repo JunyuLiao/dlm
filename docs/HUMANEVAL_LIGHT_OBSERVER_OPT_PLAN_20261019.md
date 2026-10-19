@@ -26,6 +26,10 @@ observation overhead and receives a new frozen source/protocol; never rewrite
 attempt009 or treat the two observers as automatically equivalent.
 
 The initial checksum H100 preflight is bounded180s and charges existing phasek256.
+Its first attempt passes4 checks and records one dynamic words/one fold variant,
+but a legacy unused protocol field names a BLAS configuration absent from its
+actual launch. Preserve that computational evidence, correct the manifest field
+toNone for this integer-only preflight, and use a new attempt for native gating.
 Freeze any subsequent native schedule/caps separately after its CPU/H100 checks
 pass. Source-bind both optimized files and use the exact declared full/light/pure
 comparisons. Complete all needed seed43 cases and pure native bookends before
