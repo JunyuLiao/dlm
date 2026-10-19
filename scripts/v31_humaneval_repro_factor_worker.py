@@ -1,6 +1,9 @@
 """One-factor dense native diagnostics; no model or sampler formulas change."""
 import os
 import runpy
+import atexit
+import json
+from pathlib import Path
 
 
 if __name__=='__main__':
@@ -33,6 +36,24 @@ if __name__=='__main__':
                 result['inputs_embeds'][input_batch.num_tokens:].zero_()
             return result
         dg.DiffusionGemmaModelState.prepare_inputs=prepare
+    elif factor=='full_precision_bf16_reduction':
+        import torch
+        torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction=(False,False)
+    elif factor=='prefer_cublaslt':
+        import torch
+        torch.backends.cuda.preferred_blas_library(backend='cublaslt')
     else:
         raise ValueError(factor)
+    if os.environ.get('HUMANEVAL_REPRO_FACTOR_RECEIPT'):
+        def receipt():
+            import torch
+            path=Path(os.environ['HUMANEVAL_REPRO_FACTOR_RECEIPT'])
+            if path.exists():raise RuntimeError('immutable factor receipt required')
+            path.parent.mkdir(parents=True,exist_ok=True)
+            path.write_text(json.dumps(dict(factor=factor,
+                bf16_reduced_precision_reduction=torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction,
+                fp16_reduced_precision_reduction=torch.backends.cuda.matmul.allow_fp16_reduced_precision_reduction,
+                blas_library=str(torch.backends.cuda.preferred_blas_library()),
+                float32_matmul_precision=torch.get_float32_matmul_precision()),indent=2)+'\n')
+        atexit.register(receipt)
     runpy.run_path(os.environ['HUMANEVAL_REPRO_BASE'],run_name='__main__')
