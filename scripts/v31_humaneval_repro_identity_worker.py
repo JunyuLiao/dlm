@@ -15,9 +15,9 @@ def install(path):
     def tensor_hash(t):
         h=hashlib.sha256()
         if not t.is_contiguous():
-            h.update(t.detach().cpu().contiguous().view(torch.uint8).numpy().tobytes())
+            h.update(t.detach().cpu().contiguous().reshape(-1).view(torch.uint8).numpy().tobytes())
         else:
-            flat=t.detach().view(torch.uint8).reshape(-1)
+            flat=t.detach().reshape(-1).view(torch.uint8)
             for start in range(0,flat.numel(),128*1024*1024):
                 h.update(flat[start:start+128*1024*1024].cpu().numpy().tobytes())
         return dict(shape=list(t.shape),dtype=str(t.dtype),sha256=h.hexdigest())
