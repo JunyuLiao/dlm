@@ -45,9 +45,14 @@ def install(schedule, root):
             values[name] = dict(value=x.detach().clone(), shape=list(x.shape),
                                 stride=list(x.stride()), offset=x.storage_offset(),
                                 alignment=x.data_ptr() % 256)
+        kernels = {}
+        for name in re.findall(r'\b(\w+)\.run\(', source):
+            kernel = frame.f_globals.get(name)
+            kernels[name] = [str(getattr(launcher, 'config', None))
+                             for launcher in getattr(kernel, 'launchers', [])]
         state['entries'].append(dict(file=Path(frame.f_code.co_filename).name,
             source_sha256=hashlib.sha256(Path(frame.f_code.co_filename).read_bytes()).hexdigest(),
-            line=lineno, source=source, values=values))
+            line=lineno, source=source, values=values, launch_configs=kernels))
         if len(state['entries']) > 128:
             raise RuntimeError('bounded first-segment observer exceeded expected kernels')
 
