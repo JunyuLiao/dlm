@@ -39,6 +39,14 @@ if __name__=='__main__':
     elif factor=='full_precision_bf16_reduction':
         import torch
         torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction=(False,False)
+    elif factor=='full_precision_bf16_accumulation':
+        import torch
+        # Boolean form retains the existing split-K policy and cuBLAS backend.
+        torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction=False
+    elif factor=='cublaslt_full_precision_bf16_reduction':
+        import torch
+        torch.backends.cuda.preferred_blas_library(backend='cublaslt')
+        torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction=(False,False)
     elif factor=='prefer_cublaslt':
         import torch
         torch.backends.cuda.preferred_blas_library(backend='cublaslt')
