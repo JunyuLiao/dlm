@@ -24,9 +24,11 @@ def test_trajectory_observer_adds_no_sampler_call_or_rng_consumption(tmp_path,mo
     monkeypatch.setattr(torch.cuda,'get_rng_state',lambda:torch.zeros(4,dtype=torch.uint8))
     install(['clean','observe','clean'],tmp_path)
     state = inspect.getclosurevars(dg._compiled_sample_step).nonlocals['state']
-    args = [torch.zeros(1),torch.tensor([0]),None,None,None,torch.zeros(1,4),
+    args = [torch.zeros(1),torch.tensor([0]),torch.tensor([0]),None,torch.tensor([4]),torch.zeros(1,4),
             torch.zeros(1,4),torch.zeros(1,dtype=torch.int32),torch.zeros(1,dtype=torch.int32),
-            None,torch.zeros(1,4,3)]
+            torch.zeros(1,4),torch.zeros(1,4,3),None,None,torch.zeros(1,1,4),
+            torch.zeros(1,dtype=torch.int32),torch.zeros(1,4),torch.zeros(1,dtype=torch.int32),
+            torch.zeros(1,4)]
     rng_before = torch.get_rng_state().clone()
     for name,repetitions in [('clean',1),('observe',2),('clean',1)]:
         LLMEngine.add_request(None,name)
