@@ -1,10 +1,40 @@
 """Private startup identity probe: hashes actual loaded parameters and buffers."""
 import functools
+import atexit
 import hashlib
 import json
 import os
 from pathlib import Path
 import runpy
+import sys
+
+
+def install_cache_probe(path):
+    from vllm.vllm_flash_attn.cute import interface
+    original=interface._flash_attn_fwd.compile_cache
+    observed={}
+    class Probe:
+        def __contains__(self,key):
+            frame=sys._getframe(1)
+            values=frame.f_locals
+            if frame.f_code.co_name=='_flash_attn_fwd':
+                dyn=values.get('dynamic_causal')
+                tag=(dyn is not None,str(dyn.dtype) if dyn is not None else None)
+                h=hashlib.sha256(repr(key).encode()).hexdigest()
+                entry=observed.setdefault(h,dict(calls=0,contexts=[]))
+                entry['calls']+=1
+                if list(tag) not in entry['contexts']:entry['contexts'].append(list(tag))
+            return key in original
+        def __getitem__(self,key):return original[key]
+        def __setitem__(self,key,value):original[key]=value
+        def __getattr__(self,key):return getattr(original,key)
+    interface._flash_attn_fwd.compile_cache=Probe()
+    def flush():
+        if path.exists():raise RuntimeError('immutable cache probe required')
+        path.parent.mkdir(parents=True,exist_ok=True)
+        path.write_text(json.dumps(dict(cache_type=type(original).__name__,keys=observed,
+            dynamic_context_collisions=sum(len(e['contexts'])>1 for e in observed.values())),indent=2)+'\n')
+    atexit.register(flush)
 
 
 def install(path):
@@ -50,5 +80,7 @@ def install(path):
 
 
 if __name__=='__main__':
-    install(Path(os.environ['HUMANEVAL_REPRO_MODEL_IDENTITY']))
+    path=Path(os.environ['HUMANEVAL_REPRO_MODEL_IDENTITY'])
+    install_cache_probe(path.with_name(path.stem+'_fa4_cache.json'))
+    install(path)
     runpy.run_path(os.environ['HUMANEVAL_REPRO_BASE'],run_name='__main__')
