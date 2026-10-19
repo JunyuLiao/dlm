@@ -2782,3 +2782,27 @@ read write-only outputs only after native return and call every original once.
 Private raw operands support the next exact-input replay. No sampler/selector
 change, qualification relaxation, full matrix release or total budget increase.
 Plan: docs/HUMANEVAL_LAST_GLOBAL_CAPTURE_PLAN_20261019.md.
+
+## Capture before changing the FA4 observation kernel (2026-10-19 UTC)
+
+Source666f54a2 native013 engine1 completes84 requests610.873s. Full/layer-only
+swaps and residual repeats match native metrics; pure swaps changes N156/187,
+C13/16,T3307/3981, whereas residual pure repeats match. Complete captured
+operands at the earlier changes100/154 match in this engine; the exact old
+operator discrepancy was not reproduced by adding the target capture.
+
+Both call100 swaps and154 residual are observing_dense_fwd anchors with
+contiguous full KV, num_splits=0, pack_gqa=False, causal=True/dynamic=False.
+These anchor outputs precede swaps or residual correction. This is useful
+localization, not proof of an automatic-split defect. Prepare an exact-input
+operator replay after engine2 closes: automatic/single-split, observing/plain,
+freed FP32 scratch zero/finite/NaN factors; sixteen repeats, max240s. Compare
+actual outputs to captured bytes and a separate FP64 oracle, record actual
+kernel configuration and input preservation. All-stable replay is a negative.
+No silent numerical-policy promotion or release of full accuracy follows.
+
+Capture wrappers passed4 CPU checks10.771s. Operand restoration passed4 CPU
+checks1.933s. Final comparison distinguishes logical used KV/active lists from
+physical translation/padding and must pass its exact-source updated preflight.
+011/012 never launched on GPU and remain immutable preparation/supersession
+records. Plan: HUMANEVAL_OBSERVE_OPERAND_REPLAY_PLAN_20261019.md.

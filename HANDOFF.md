@@ -1,5 +1,28 @@
 ## HumanEval layer29 localization and targeted operand capture — 2026-10-19 UTC
 
+Current native attempt013, source666f54a2, has four targeted layer29 probes:
+q129/42 swaps and residual in original full-observer and later layer-only
+contexts, followed by pure repeats. Engine1 completes84 requests610.873s;
+engine2 is running (inspect current receipts). Engine1 full/layer native metrics
+match. The pure swaps repeat changes N156/187,C13/16,T3307/3981 and output;
+residual pure repeat matches. Both previously evidenced calls100/154 are dense
+observing FA4 anchors (automatic num_splits=0), and their complete captured
+full/layer tensors match in engine1. This localizes the earlier observed changes
+to an observation consumer, not a demonstrated swap/correction failure.
+
+First analysis is diagnostic-only under013/analysis/attempt001. Physical page
+table/padding differences must be separated from logical used KV; the final
+analyzer refinement does this and requires its updated CPU preflight. Operand
+restoration passed four CPU tests with alias/stride/alignment checks. Prepared
+next plan: HUMANEVAL_OBSERVE_OPERAND_REPLAY_PLAN_20261019.md, at most240s after
+both engines close. Replay complete captured contiguous operands16 times across
+automatic/single-split observing/plain kernels and freed-scratch poison factors.
+These are diagnostic factors, not promoted repairs. Do not release full matrices.
+
+Preparation011 failed before GPU by including warmup duplicates. Frozen012 was
+superseded before GPU to capture both original and layer-only target operands.
+Both are preserved with explicit zero-GPU markers; never launch them.
+
 Verified HEAD3f0c2745 and frozen native source822b771c. Attempt010 expired at
 132/158 rows after1503.675s. Partial analysis verifies52 completed full/light
 contrasts, with two raw-logit changes: full_swap8 q129/42 at100 and residual
