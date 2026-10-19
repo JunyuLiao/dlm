@@ -1,3 +1,31 @@
+## HumanEval guarded runtime rejected; asynchronous localization next — 2026-10-19 UTC
+
+Verified source7208c88c; native attempt007 source0ae97265. Both engines complete
+997.189/897.178s with guard=True, fill=False,32MiB cuBLAS and deterministic42/42
+recorded kernels. All72 fully observed independent trajectories match, but
+unobserved repeats fail1/72 and3/72. First engine: V2 q129 seed43 N158/159,
+T3583/3574. Second: V31-before q129/43 and q116/43, residual q116/43. This guard
+is not a qualified repair. Its compatibility adapter works but does not solve
+the native evaluation discrepancy. Complete analysis remains explicitly unresolved.
+
+Next source-bound plan: docs/HUMANEVAL_GRAPH_BOUNDARY_PLAN_20261019.md. Two
+158-request engines:80 full sampler-observed requests,72 asynchronous graph/logit
+fingerprint-only repeats,6 pure native bookends. Preserve native graph dispatch
+and return objects, no bypass/extra model forward. Compare full/light/pure
+observation and independent engines, then require real tensor capture/replay for
+any operator claim. The lighter mode performs no per-step CPU tensor copies or
+RNG-state digests. Original explicit compiler policy10341ab2 applies; rejected
+global guard/workspace/adapter factors are not promoted. Five CPU binding tests
+pass in10.893s under results/humaneval_graph_preflight_20261019/attempt003.
+
+Closed charges before the next diagnostic: diagnosis10477.365s,k25612947.123s,
+k1280; no open reservation. At most two1400s reservations remain within existing
+phasek256/total caps. K128 and full accuracy remain held; historical pauses stay.
+The adapter's original per-function source field followed functools.wraps to the
+original fallback; authoritative frozen full-file SHA bindings remain intact.
+Current source fixes that metadata only, checked on CPU, without rewriting the
+old run or claiming another GPU qualification. No reliable method ranking yet.
+
 ## HumanEval guarded-runtime compatibility stage — 2026-10-19 UTC
 
 Verified source8018d92f/22ae91c6. Mixed-method reproducibility remains unresolved.

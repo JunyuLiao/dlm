@@ -316,7 +316,7 @@ def run_job(root,part):
         if p.get('graph_boundary_fingerprints'):
             for group in config['bookend_groups']:
                 trace=read(leaf/f"private/graphs/request{group['observed']+1:03d}.json")
-                if not trace.get('events') or trace.get('graph_bypasses')!=0 or trace.get('extra_forwards')!=0:
+                if not trace.get('events') or not any(e['values'] for e in trace['events']) or trace.get('graph_bypasses')!=0 or trace.get('extra_forwards')!=0:
                     errors.append('missing native graph-boundary coverage')
                 light=read(leaf/f"private/graphs/request{group['final']+1:03d}.json")
                 if light.get('mode')!='graph_only' or len(light.get('logits_before',[]))!=public[group['final']]['sampler_calls']:

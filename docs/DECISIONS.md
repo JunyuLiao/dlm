@@ -2700,3 +2700,29 @@ Preserve native Python helper identity. The compatibility fix is not yet a cause
 or repair for the earlier intermittent model-logit divergence. Fresh compiler
 cache namespaces are mandatory for any later adapter-enabled native attempt.
 No full accuracy run is released; existing resource caps and holds persist.
+
+## Guard compatibility succeeds, native repeatability still fails (2026-10-19 UTC)
+
+The indexed-assignment operator regression passes, charging7.082s. Its narrow
+compiler adapter retains native Python helper identity. Guarded native attempt007
+completes997.189/897.178s, actual guard=True/fill=False/32MiB cuBLAS,42/42 recorded
+kernels deterministic. All72 fully observed independent trajectories agree.
+Unobserved repeats still fail1/72 and3/72, across V2, V31 and residual. Reject the
+guard as a qualified repair. Do not claim observation alone is the cause.
+
+Recorded source/name/config entries match across earlier failing engine pairs:
+37 unique entries in each pair for attempts002/003/005, with no selected-config
+differences. Next compare native graph boundaries and before-sampler logits with
+asynchronous fingerprints, avoiding full observer per-step CPU tensor copies.
+Two158-request engines include80 full-observed,72 light-observed,6 pure native
+requests, with independent and within-engine contrasts. Keep native dispatch,
+outputs, sampler and methods unchanged; disclose partial activation argument
+scope and possible padded storage differences. A localized hash difference still
+requires actual tensor capture and exact-input operator replay.
+
+Five source-bound CPU tests pass; no CUDA/model operation. Two1400s reservations
+charge existing phasek256, no total/phase expansion. Full matrices remain gated.
+The adapter metadata source hash originally unwrapped functools.wraps to the
+old fallback; immutable complete-file bindings are the actual source authority.
+Current code fingerprints its code object instead, CPU-checked; no mathematical
+change or rewrite of old qualification artifacts.
