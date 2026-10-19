@@ -1,3 +1,21 @@
+## HumanEval lightweight graph localization attempt009 — 2026-10-19 UTC
+
+Verified sourcebc2ff03d. Attempt008 failed165.015s on a scalar BF16 diagnostic
+argument; retain it. No complete request/accuracy evidence came from that worker.
+Only diagnostic views are fixed: flatten scalars and zero-pad copied bytes to a
+word extent for the unchanged tested integer fingerprint kernel. Six CPU tests
+pass10.939s, source-bound under humaneval_graph_preflight_20261019/attempt004.
+New native attempt009 freezes the same158-request full/light/pure schedule and
+two1400s ceilings; inspect live receipts/process/budget before taking any action.
+Both full accuracy matrices stay gated and K128 has done no GPU work.
+
+Observer interpretation is corrected in
+docs/HUMANEVAL_OBSERVER_SEMANTICS_20261019.md. Full sampler snapshots are cloned
+on GPU each step and copied/hashed on CPU at request completion. Residual cache
+tracing additionally uses CPU copies during residual forwards. The light observer
+avoids the full snapshots and RNG-state reads; it still changes GPU work and
+allocation/lifetime. Do not claim a proved synchronization or allocator cause.
+
 ## HumanEval guarded runtime rejected; asynchronous localization next — 2026-10-19 UTC
 
 Verified source7208c88c; native attempt007 source0ae97265. Both engines complete

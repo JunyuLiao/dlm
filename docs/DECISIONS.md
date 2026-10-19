@@ -2726,3 +2726,18 @@ The adapter metadata source hash originally unwrapped functools.wraps to the
 old fallback; immutable complete-file bindings are the actual source authority.
 Current code fingerprints its code object instead, CPU-checked; no mathematical
 change or rewrite of old qualification artifacts.
+
+## Scalar diagnostic coverage and observer interpretation correction (2026-10-19 UTC)
+
+Graph attempt008 stops165.015s on a zero-dimensional BF16 argument in diagnostic
+fingerprinting. Preserve it, flatten diagnostic scalar views and zero-pad copied
+byte extents to4 without changing native inputs or existing fingerprint kernels.
+Six source-bound CPU checks pass10.939s, including scalar BF16/bool/byte cases.
+Attempt009 is the new immutable native retry; phase/total caps remain unchanged.
+
+Correct earlier shorthand about full sampler tracing's per-step CPU copies:
+trajectory_worker retains GPU snapshots and hashes them on CPU at request finish.
+Residual cache tracing separately does CPU copies inside residual forwards.
+Graph-only mode avoids full snapshots and generator-state reads but changes GPU
+work and allocation/lifetime. See HUMANEVAL_OBSERVER_SEMANTICS_20261019.md.
+These are exact source distinctions, not a proved race/synchronization cause.
