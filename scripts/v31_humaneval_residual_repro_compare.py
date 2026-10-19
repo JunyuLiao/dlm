@@ -42,15 +42,30 @@ def compare(root,destination,workspace,quiet=False):
         if p.get('mixed_group'):assert fingerprints
         first=next((i for i,(u,v) in enumerate(zip(a['calls'],b['calls'])) if u!=v),None)
         first_residual=next((i for i,(u,v) in enumerate(zip(x['residual']['events'],y['residual']['events'])) if u!=v),None)
+        initial_changed=[k for k in a['initial'] if a['initial'][k]!=b['initial'].get(k)]
+        call_changes=[dict(call=i,fields=[side+'.'+key for side in ('before','after')
+            for key in u[side] if u[side][key]!=v[side].get(key)])
+            for i,(u,v) in enumerate(zip(a['calls'],b['calls'])) if u!=v]
+        initial_argmax_only=(initial_changed==['argmax_sha256'] and
+            len(a['calls'])==len(b['calls']) and
+            call_changes==[dict(call=0,fields=['before.argmax_sha256'])] and
+            a['initial']['encoder_phase']==b['initial']['encoder_phase']==[False] and
+            a['initial']['step']==b['initial']['step']==[0])
         contrasts.append(dict(label=label,sampler_calls=[len(a['calls']),len(b['calls'])],
             all_logit_fingerprints_present=fingerprints,
-            initial_fields_changed=[k for k in a['initial'] if a['initial'][k]!=b['initial'].get(k)],
+            initial_fields_changed=initial_changed,
+            changed_calls=len(call_changes),
+            first_raw_logit_changed_call=next((r['call'] for r in call_changes if
+                any(f in ('before.logits_gpu128_sha256','after.logits_gpu128_sha256') for f in r['fields'])),None),
+            differences_confined_to_inactive_initial_argmax=initial_argmax_only,
             full_trajectories_equal=a==b,first_changed_call=first,
             first_changed_fields=[side+'.'+key for side in ('before','after')
                 for key in a['calls'][first][side] if a['calls'][first][side][key]!=b['calls'][first][side].get(key)] if first is not None else [],
             residual_events=[len(x['residual']['events']),len(y['residual']['events'])],
             residual_fingerprints_equal=x['residual']==y['residual'],first_residual_event_changed=first_residual))
     result=dict(status='complete_diagnostic_reproducibility_unresolved',protocol_sha256=sha(root/'protocol.json'),
+        original_prefix_reference_context='Different numerical/runtime policy; changes are not same-protocol reproducibility failures'
+            if p.get('torch_deterministic_guard') else 'Prior source-matched qualification context',
         jobs=inventory,contrasts=contrasts,full_accuracy_released=False,
         limitations=['instrumentation qualification is reported per job, not assumed',
             'equal fingerprints in a bounded pair do not repair original independent-prefix differences',
