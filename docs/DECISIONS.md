@@ -2741,3 +2741,26 @@ Residual cache tracing separately does CPU copies inside residual forwards.
 Graph-only mode avoids full snapshots and generator-state reads but changes GPU
 work and allocation/lifetime. See HUMANEVAL_OBSERVER_SEMANTICS_20261019.md.
 These are exact source distinctions, not a proved race/synchronization cause.
+
+## Preserve partial graph evidence; optimize observation before continuation (2026-10-19 UTC)
+
+Attempt009 expires1403.290s,113/158 rows. All33 completed seed42 full/light
+contrasts match raw logits and native outputs/trajectories. Seed43 light cases,
+pure repeats, second engine and exit compiler inventory are absent. The partial
+analyzer verifies every failed-marker/source/file binding and refuses technical
+qualification or full accuracy. Absence of later contrasts is never agreement.
+
+Runtime-length checksum kernels and batched tiny-word CPU drain pass the final
+12-check CPU/H100 preflight in13.898s. It includes independent NumPy/static
+agreement, repetition, tail bit, input preservation, actual CUDA unsigned high
+bits and seven wrapper/scalar/drain checks. Record one dynamic words/one fold
+variant on tested sizes; no inference-speed or native-equivalence claim follows.
+Earlier computational preflights remain preserved; final source/metadata gating
+uses attempt003. No native selector/sampler/graph formula changes.
+
+Explicit allocation_addendum002 reassigns3600s from unused K128 capacity to
+execution continuation/K256:10800/19800/12600, same43200s total. All old limits,
+ledgers, receipts and scientific gates remain. Attempt010 freezes two1500s
+158-request engines after the combined checks. It is still a diagnostic; a
+matching bounded trace does not repair prior native failures. No full matrix
+or historical campaign resumes from this stage alone.

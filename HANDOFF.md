@@ -1,3 +1,28 @@
+## HumanEval optimized graph localization attempt010 — 2026-10-19 UTC
+
+Verified native source822b771c. Current attempt010 freezes two158-request engines,
+1500s each, with the same80 full/72 light/6 pure schedule. Runtime-length integer
+checksums and one batched request-finished CPU drain replace009's expensive
+observation implementation. Source-bound combined preflight attempt003 passes
+all12 CPU/H100 checks13.898s, no skips; one dynamic words/one fold variant on the
+tested sizes. Exact files match the native snapshot. This is an observation
+optimization, not a repaired model or a method speed result. Inspect current
+process/receipt state before launching anything else.
+
+Attempt009 expires1403.290s at113/158 public rows. Its33 completed seed42
+full/light contrasts all match raw logits and native output/N/C/T/intervals.
+Pure bookends, seed43 light cases, second engine and exit compiler inventory
+are missing. Partial analysis lives under attempt009/analysis/attempt001 and
+explicitly refuses qualification/full accuracy. Preserve the partial attempt.
+
+The original phase split was self-imposed. Hashed allocation_addendum002.json
+reassigns3600s from unused K128 to remaining execution diagnosis/K256 work,
+retaining total43200s: diagnosis10800,k25619800,k12812600. Prior allocations and
+all charges remain. Frozen older limits stay bounded by their original caps.
+Closed charges before010: diagnosis10477.365s,k25614539.281s,k1280. No total
+budget expansion, scientific gate relaxation, K128 cancellation or old-campaign
+resume. K128 and both full matrices remain held pending genuine qualification.
+
 ## HumanEval lightweight graph localization attempt009 — 2026-10-19 UTC
 
 Verified sourcebc2ff03d. Attempt008 failed165.015s on a scalar BF16 diagnostic
