@@ -63,7 +63,7 @@ def replay(study, left_name, right_name, out):
     sys.modules[spec.name] = module
     spec.loader.exec_module(module)
     kernel = getattr(module,name)
-    if kernel.inductor_meta['mutated_arg_names'] != ['in_out_ptr0']:
+    if list(kernel.mutated_arg_names) != ['in_out_ptr0']:
         raise RuntimeError('unexpected in-place operator signature')
     call = ast.parse(entry['source']).body[0].value
     prior = {}
