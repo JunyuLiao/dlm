@@ -1,9 +1,37 @@
 """The line observer must capture completed outputs without modifying inputs."""
 import inspect
+import functools
 import sys
 from types import SimpleNamespace
 
 import torch
+
+
+def test_native_helper_recompilation_keeps_exact_python_functions(monkeypatch):
+    from scripts.v31_humaneval_repro_policy_worker import recompile_native_helpers
+    import vllm.model_executor.models.diffusion_gemma as dg
+    from vllm.platforms import current_platform
+    names = ('_softcap_logits', '_compute_num_rejected', '_compiled_sample_step')
+    native = {name:getattr(dg,name)._torchdynamo_orig_callable for name in names}
+    calls = []
+    def compile_existing(fn, **options):
+        calls.append((fn,options))
+        @functools.wraps(fn)
+        def wrapped(*args, **kwargs):
+            return fn(*args, **kwargs)
+        wrapped._torchdynamo_orig_callable = fn
+        return wrapped
+    monkeypatch.setattr(torch,'compile',compile_existing)
+    monkeypatch.setattr(current_platform,'simple_compile_backend','inductor')
+    for name in names:
+        monkeypatch.setattr(dg,name,getattr(dg,name))
+    receipts = recompile_native_helpers()
+    assert [fn for fn,options in calls] == list(native.values())
+    for name in names:
+        assert getattr(dg,name)._torchdynamo_orig_callable is native[name]
+        assert receipts[name]['original_python_callable_preserved']
+    assert all(options == dict(dynamic=True,backend='inductor',
+        options=dict(deterministic=True,benchmark_combo_kernel=False)) for _,options in calls)
 
 
 def test_compiler_policy_preserves_native_graph_and_other_options():
