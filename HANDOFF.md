@@ -9,6 +9,16 @@ intervals match, with zero changed warmups. Strict certificate:
 Scope remains six examined questions, seeds42/43, thinking on, K256. The native
 certificate alone does not establish full164 audit/clean equivalence or latency.
 
+Sequential continuation is running under
+`results/humaneval_no_overlap_queue_20261019/attempt001/`, controller source
+`8576cb1f`, queue protocol `6390c044`. It attaches to the existing K256
+coordinator, requires qualified completion and independent owner certificates,
+then runs K128 without another manual launch. Source-bound controller/protocol,
+30-minute GPU/progress snapshots, stage logs and immutable failure markers are
+in that directory. Do not launch a duplicate coordinator. Four focused CPU
+queue checks pass0.07s. A failed scientific gate stops continuation; preserve
+and investigate it rather than bypassing the gate.
+
 Both corrected studies are frozen from identical executable source fingerprints:
 `results/humaneval_value_observe_no_overlap_k256_20261019/attempt001/`
 (protocol `55370024`) and `humaneval_value_observe_no_overlap_k128_20261019/attempt001/`
