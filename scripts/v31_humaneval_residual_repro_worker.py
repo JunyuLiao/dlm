@@ -93,6 +93,9 @@ if __name__=='__main__':
     if os.environ.get('HUMANEVAL_ATTENTION_TRACE_DIR'):
         attention=runpy.run_path(os.environ['HUMANEVAL_ATTENTION_TRACE_SOURCE'])
         attention['install'](state,Path(os.environ['HUMANEVAL_ATTENTION_TRACE_DIR']))
+    if os.environ.get('HUMANEVAL_GRAPH_TRACE_DIR'):
+        graphs=runpy.run_path(os.environ['HUMANEVAL_GRAPH_TRACE_SOURCE'])
+        graphs['install'](state,Path(os.environ['HUMANEVAL_GRAPH_TRACE_DIR']))
     trajectory=runpy.run_path(os.environ['HUMANEVAL_TRAJECTORY_SOURCE'])
     trajectory['install'](schedule,Path(os.environ['HUMANEVAL_TRAJECTORY_DIR']))
     runpy.run_path(os.environ['HUMANEVAL_REPRO_BASE'],run_name='__main__')

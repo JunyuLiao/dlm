@@ -16,10 +16,10 @@ read,write,sha=campaign.read,campaign.write,campaign.sha
 FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','native_interval_steps')
 
 
-def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False,torch_guard=False,dtype_adapter=False):
+def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False,torch_guard=False,dtype_adapter=False,graph_trace=False):
     torch_guard=torch_guard or dtype_adapter
     cublas=cublas or torch_guard
-    all_cases=all_cases or cublas
+    all_cases=all_cases or cublas or graph_trace
     attention=attention or crossover
     parent=campaign.verify(PARENT)
     if torch_guard:
@@ -33,6 +33,12 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
     assert read(PARENT/'receipts/controller_stopped_after_active_work.json')['gpu_reservations_closed']
     assert not root.exists()
     (root/'private').mkdir(parents=True)
+    if graph_trace:
+        gate=ROOT/'results/humaneval_graph_preflight_20261019/attempt001'
+        receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==4
+        for name,digest in receipt['files_sha256'].items():assert sha(gate/name)==digest
+        assert receipt['observer_source_sha256']==sha(ROOT/'scripts/v31_humaneval_graph_fingerprint.py')
+        shutil.copyfile(ROOT/'scripts/v31_humaneval_graph_fingerprint.py',root/'private/graph_fingerprint.py')
     if dtype_adapter:
         gate=ROOT/'results/humaneval_index_put_fallback_20261019/attempt001'
         receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==1
@@ -85,7 +91,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         path.write_text(source)
     if attention:
         shutil.copyfile(ROOT/'scripts/v31_humaneval_attention_fingerprint.py',root/'private/attention_fingerprint.py')
-    spec=(ROOT/'docs/HUMANEVAL_GUARDED_DTYPE_NATIVE_PLAN_20261019.md' if dtype_adapter else
+    spec=(ROOT/'docs/HUMANEVAL_GRAPH_BOUNDARY_PLAN_20261019.md' if graph_trace else
+          ROOT/'docs/HUMANEVAL_GUARDED_DTYPE_NATIVE_PLAN_20261019.md' if dtype_adapter else
           ROOT/'docs/HUMANEVAL_TORCH_GUARD_PLAN_20261019.md' if torch_guard else
           ROOT/'docs/HUMANEVAL_BLAS_WORKSPACE_PLAN_20261019.md' if cublas else
           ROOT/'docs/HUMANEVAL_TRACE_CROSSOVER_PLAN_20261019.md' if crossover else
@@ -172,8 +179,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
     p=dict(schema='humaneval_residual_repro_v1',source_commit=subprocess.check_output(
         ['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         parent_protocol_sha256=sha(PARENT/'protocol.json'),failure_receipt_sha256=sha(PARENT/'receipts/early_residual_qualification_failure.json'),
-        runtime=parent['runtime'],jobs=jobs,phase='k256',maximum_job_reservation_s=1200 if dtype_adapter else 900 if crossover else 1000 if all_cases else 750,
-        phase_cap_s=campaign.phase_caps()['k256'],maximum_new_reservation_s=2400 if dtype_adapter else 900 if crossover else 2000 if all_cases else 1500,
+        runtime=parent['runtime'],jobs=jobs,phase='k256',maximum_job_reservation_s=1400 if graph_trace else 1200 if dtype_adapter else 900 if crossover else 1000 if all_cases else 750,
+        phase_cap_s=campaign.phase_caps()['k256'],maximum_new_reservation_s=2800 if graph_trace else 2400 if dtype_adapter else 900 if crossover else 2000 if all_cases else 1500,
         seed=None if all_cases or attention else 43,index=None if all_cases or attention else 129,
         seeds=[42] if crossover else [42,43] if all_cases or attention else [43],cohort=parent['cohort'] if all_cases else [116] if attention else [129],
         prefix_budget_tokens=256,full_accuracy_released=False,mixed_group=mixed or all_cases or attention,
@@ -182,6 +189,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         cublas_workspace_config=':4096:8' if cublas else None,
         torch_deterministic_guard=torch_guard,
         index_put_dtype_adapter=dtype_adapter,fresh_private_compiler_cache=dtype_adapter,
+        graph_boundary_fingerprints=graph_trace,
+        graph_preflight_receipt_sha256=sha(ROOT/'results/humaneval_graph_preflight_20261019/attempt001/receipt.json') if graph_trace else None,
         dtype_regression_receipt_sha256=sha(ROOT/'results/humaneval_index_put_fallback_20261019/attempt001/receipt.json') if dtype_adapter else None,
         guard_preflight_receipt_sha256=sha(ROOT/'results/humaneval_selector_definedness_20261019/attempt003/receipt.json') if torch_guard else None,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
@@ -229,6 +238,9 @@ def run_job(root,part):
         env.update(HUMANEVAL_ATTENTION_TRACE_SOURCE=str(root/'private/attention_fingerprint.py'),
                    HUMANEVAL_ATTENTION_TRACE_DIR=str(leaf/'private/attention'))
         if p.get('trace_crossover'):env['HUMANEVAL_ATTENTION_MODES']=str(root/f'private/{part}/attention_modes.json')
+    if p.get('graph_boundary_fingerprints'):
+        env.update(HUMANEVAL_GRAPH_TRACE_SOURCE=str(root/'private/graph_fingerprint.py'),
+            HUMANEVAL_GRAPH_TRACE_DIR=str(leaf/'private/graphs'))
     command=list(launch['command']);command[1]=str(root/'private/v31_humaneval_residual_repro_worker.py')
     command[4:7]=[str(root/f'private/{part}/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/generation.private.jsonl')]
     write(leaf/'private/launch.json',dict(command=command,environment=env),True)
@@ -280,6 +292,11 @@ def run_job(root,part):
                 errors.append('missing native sampler identity for compiler adapter')
     bookends=[]
     if len(public)==len(rows):
+        if p.get('graph_boundary_fingerprints'):
+            for group in config['bookend_groups']:
+                trace=read(leaf/f"private/graphs/request{group['observed']+1:03d}.json")
+                if not trace.get('events') or trace.get('graph_bypasses')!=0 or trace.get('extra_forwards')!=0:
+                    errors.append('missing native graph-boundary coverage')
         for group in config['bookend_groups']:
             a=public[group['original']]
             variants=([('within_engine_unobserved',group['final'])] if p.get('two_way_observer',p.get('full_cohort_trace')) else
@@ -307,7 +324,8 @@ if __name__=='__main__':
     parser.add_argument('--cublas-workspace',action='store_true')
     parser.add_argument('--torch-guard',action='store_true')
     parser.add_argument('--dtype-adapter',action='store_true')
+    parser.add_argument('--graph-trace',action='store_true')
     args=parser.parse_args();root=args.study.absolute()
-    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover,args.cublas_workspace,args.torch_guard,args.dtype_adapter)
+    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover,args.cublas_workspace,args.torch_guard,args.dtype_adapter,args.graph_trace)
     else:
         for part in read(root/'protocol.json')['jobs']:run_job(root,part)
