@@ -52,7 +52,7 @@ def analyze(root,out):
     def policy(c):
         return {k:v for k,v in c.get('overrides',{}).items()
                 if k not in ('HUMANEVAL_REPRO_TRACE','HUMANEVAL_REPRO_MODEL_IDENTITY',
-                             'HUMANEVAL_REPRO_FACTOR_RECEIPT')}
+                             'HUMANEVAL_REPRO_FACTOR_RECEIPT','HUMANEVAL_KERNEL_INVENTORY')}
     pairs=[];within=[]
     for i,a in enumerate(leaves):
         for b in leaves[i+1:]:
