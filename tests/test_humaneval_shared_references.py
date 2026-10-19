@@ -106,3 +106,20 @@ def test_owner_verification_preserves_requesting_budget_environment(tmp_path,mon
     monkeypatch.setattr(campaign,'verify',lambda path:campaign.base.SUITES.update(b['suites']))
     assert campaign.reference_owner(own,a)==owner
     assert campaign.base.SUITES['thinking_on']['mage_k']==128
+
+
+def test_total_limit_revision_requires_explicit_bounded_task_scope(tmp_path,monkeypatch):
+    inv=tmp_path/'investigation';inv.mkdir();(tmp_path/'spec.md').write_text('self-imposed estimate revised before generation')
+    write(inv/'protocol.json',{'frozen':True});caps={'diagnosis':10800,'k256':16200,'k128':16200}
+    write(inv/'allocation_addendum.json',dict(spec_file='spec.md',spec_sha256=campaign.sha(tmp_path/'spec.md'),
+        prior_protocol_sha256=campaign.sha(inv/'protocol.json'),caps_s=caps))
+    changed=dict(prior_allocation_sha256=campaign.sha(inv/'allocation_addendum.json'),prior_caps_s=caps,
+        spec_file='spec.md',spec_sha256=campaign.sha(tmp_path/'spec.md'),prior_total_cap_s=43200,total_cap_s=65878,
+        caps_s={'diagnosis':10478,'k256':19400,'k128':0,'evaluation':36000})
+    path=inv/'allocation_addendum002.json';write(path,changed)
+    write(inv/'gpu_budget.json',dict(caps_s=changed['caps_s'],allocation_addendum_sha256=campaign.sha(path)))
+    monkeypatch.setattr(campaign,'ROOT',tmp_path);monkeypatch.setattr(campaign,'INVESTIGATION',inv)
+    with pytest.raises(RuntimeError,match='binding'):campaign.phase_caps()
+    changed.update(self_imposed_limit_revision=True,scope='humaneval_corrected_k256_k128');write(path,changed)
+    write(inv/'gpu_budget.json',dict(caps_s=changed['caps_s'],allocation_addendum_sha256=campaign.sha(path)))
+    assert campaign.phase_caps()['evaluation']==36000

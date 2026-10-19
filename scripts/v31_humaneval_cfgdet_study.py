@@ -48,9 +48,13 @@ def phase_caps():
     files=sorted(INVESTIGATION.glob('allocation_addendum[0-9][0-9][0-9].json'))
     for number,path in enumerate(files,2):
         newer=read(path)
+        revised=(newer['total_cap_s']!=sum(caps.values()))
+        declared_revision=(newer.get('self_imposed_limit_revision') is True and
+            newer.get('prior_total_cap_s')==sum(caps.values()) and
+            newer.get('scope')=='humaneval_corrected_k256_k128' and newer['caps_s'].get('evaluation')==36000)
         if (path.name!=f'allocation_addendum{number:03d}.json' or newer['prior_allocation_sha256']!=sha(current) or
             newer['prior_caps_s']!=caps or sha(ROOT/newer['spec_file'])!=newer['spec_sha256'] or
-            newer['total_cap_s']!=43200 or sum(newer['caps_s'].values())!=43200 or
+            sum(newer['caps_s'].values())!=newer['total_cap_s'] or (revised and not declared_revision) or
             any(type(v) is not int or v<0 for v in newer['caps_s'].values())):
             raise RuntimeError('continuation allocation binding drift')
         current,caps=path,newer['caps_s']
@@ -124,9 +128,9 @@ def prepare(study,budget,observe_no_overlap=False,single_primary_shard=False,sha
         if proof['status']!='native_no_overlap_qualified':raise RuntimeError('observing-FA4 native correction unqualified')
         if proof['policy_source_sha256']!=sha(ROOT/'scripts/v31_humaneval_observe_no_overlap.py'):
             raise RuntimeError('qualified observing policy source changed')
-        preflight=ROOT/'results/humaneval_no_overlap_matrix_preflight_20261019/attempt001'
+        preflight=ROOT/'results/humaneval_no_overlap_matrix_preflight_20261019/attempt002'
         checked=read(preflight/'receipt.json')
-        if checked['status']!='complete' or checked['tests']!=19:raise RuntimeError('matrix orchestration CPU preflight required')
+        if checked['status']!='complete' or checked['tests']!=20:raise RuntimeError('matrix orchestration CPU preflight required')
         for name,digest in checked['files_sha256'].items():
             if sha(preflight/name)!=digest:raise RuntimeError('matrix preflight artifact drift')
         for name,digest in checked['source_sha256'].items():

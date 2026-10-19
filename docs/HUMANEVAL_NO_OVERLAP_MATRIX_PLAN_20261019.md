@@ -40,13 +40,20 @@ common-source runs, not inherited unqualified results. Verify linked completion
 markers against their actual owner protocol and expose shared-control provenance
 in reports. Do not share V31 or any selector/correction arm between budgets.
 
-Before freezing, explicitly reassign the unused investigation allocations into
-one shared evaluation phase, closing diagnosis/K256 phases at their actual
-charged usage rounded up. Keep the overall43200s ceiling, all prior charges,
-immutable addenda and one-GPU rule. A shared phase lets the two required budgets
-use the remaining capacity without silently expanding it. No active reservation
-may exist during redistribution. If capacity is exhausted, preserve partial
-state and report the remaining work; never manufacture a completed panel.
+The original investigation plan explicitly calls43200s a self-imposed maximum;
+the user supplied no numerical time limit for the already requested reruns.
+Its repair work consumed most of that estimate. The original completed K256
+campaign alone charged15032.143s, so the remaining allowance cannot reasonably
+cover both complete corrected panels with the required gates. Before freezing,
+retire diagnosis/K256 phases at actual usage rounded up and document an explicit
+self-limit revision granting one36000s shared evaluation phase (two prior-panel
+costs plus20% margin). This is a new bounded estimate for the authorized K256/K128
+work, not extra GPUs or an unbounded sweep. Preserve every prior charge, frozen
+protocol and immutable addendum; never edit an old limit in place. Record the
+exact resulting combined ceiling and resource rationale in allocation003 and
+announce the revision. No active reservation may exist during redistribution.
+Stop earlier when the requested work is complete. If the new capacity is
+exhausted, preserve partial state; never manufacture a completed panel.
 
 Audit and clean remain separate. Report each pass's own accuracy and trajectory
 until their equivalence is verified. Final tables include pass@1,N,N/C,C,T,
