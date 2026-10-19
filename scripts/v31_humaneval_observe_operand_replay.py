@@ -23,6 +23,8 @@ def main(root):
     from experiments.numerical_qk_reuse import v31_fa4_observe as observe
     from vllm.vllm_flash_attn.cute import interface,flash_fwd_sm90 as sm90
     assert sha(Path(interface.__file__))==p['interface_sha256']
+    assert observe._sm90 is sm90 and interface.FlashAttentionForwardSm90 is sm90.FlashAttentionForwardSm90
+    assert observe._flash_attn_fwd is interface._flash_attn_fwd
     fwd=interface._flash_attn_fwd;original_mask=sm90.AttentionMask
     original_config=interface._get_fwd_config;configurations=[]
     def config(*args,**kwargs):
@@ -48,6 +50,7 @@ def main(root):
             q,k,v=(tensor(raw[name]) for name in ('q','k','v'))
             kwargs=dict(raw['scalar_kwargs']);kwargs.update({key:tensor(value) for key,value in raw['tensor_kwargs'].items()})
             assert raw.get('block_sparse_tensors') is None
+            assert kwargs['causal'] is True and not bool(kwargs['dynamic_causal'].item())
             aux=[]
             for i,item in enumerate(raw['aux']):
                 if i==0:
