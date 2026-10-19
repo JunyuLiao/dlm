@@ -19,6 +19,7 @@ INVESTIGATION=ROOT/'results/humaneval_reproducibility_20261019/attempt001'
 PARENT=ROOT/'results/humaneval_value_k256_20261018/attempt001'
 SPEC=ROOT/'docs/HUMANEVAL_CFGDET_K256_K128_PLAN_20261019.md'
 PREFLIGHT=ROOT/'results/humaneval_cfgdet_preflight_20261019/attempt001'
+DEFAULT=ROOT/'results/humaneval_value_cfgdet_k256_20261019/attempt001'
 MODES=inherited.MODES
 CANDIDATES=inherited.CANDIDATES
 REFERENCES=inherited.REFERENCES
@@ -33,6 +34,7 @@ match=inherited.match
 choose_threshold=inherited.choose_threshold
 refinement_points=inherited.refinement_points
 extract=inherited.extract
+he,official,run_all=inherited.he,inherited.official,inherited.run_all
 
 
 def phase_caps():
@@ -91,8 +93,12 @@ def prepare(study,budget):
     p=dict(schema='humaneval164_cfgdet_fixed_budget_v1',prefix_budget_tokens=budget,
         source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         selector_parent_protocol_sha256=sha(PARENT/'protocol.json'),
+        selector_source_commit=original['source_commit'],
         baseline_runtime_qualification_sha256=sha(qualification),
         numerical_policy_sha256=sha(execution/'scripts/v31_humaneval_cfgdet_policy_worker.py'),
+        compiler_policy=dict(inductor_deterministic=True,horizontal_combo_fusion=False,
+            benchmark_combo_kernel=False,native_graph_modes_retained=True,
+            native_helper_python_functions_preserved=True),
         execution_fingerprints={str(f.relative_to(execution)):sha(f) for f in execution.rglob('*') if f.is_file()},
         input_fingerprints={str(f.relative_to(study)):sha(f) for root in (study/'private/pools',study/'private/schedules')
                             for f in root.rglob('*') if f.is_file()},
