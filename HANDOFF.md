@@ -1,3 +1,23 @@
+## V31 budget failure map authorized — 2026-10-19 (Hong Kong)
+
+Starting checkpoint f4d3f349. The new three-stage contract is documented in
+`docs/V31_FAILURE_MAP_PLAN_20261019.md`: establish reproducible native failures,
+confirm them independently and diagnose same-K output versus support repair,
+then conditionally design a new algorithm. No new production selector yet.
+Canonical attempt: results/v31_failure_map_20261019/attempt001.
+
+Hard cap14,400 H100 reservation seconds: qualification900, screen5400,
+confirmation3600, repair3600, recovery900; startup/warmups/partials count.
+Screen16 metadata-selected development LongBench questions, seeds1/42,
+K8192/4096/2048, V31 bookends, fixed16 atK8192, and FULL-fix/PIECEWISE/all-kept.
+Replicate selected cases with seeds43/44 in two engine processes before repair.
+Only qualified common-prefix/sham-parity cases can support a repair mechanism.
+Native sampler and output budgets remain unchanged; audit and clean stay separate.
+
+Done: plan, new isolated wrappers, CPU gates and mask checks. Next: freeze,
+GPU qualification, screen and gated confirmation/repair; report all reversals.
+Older full503 and refresh studies remain paused. No push requested.
+
 ## HumanEval164 K256 complete — 2026-10-19 (Hong Kong)
 
 Verified native source20e6c0be; protocol7b81c845fdce07743d3ed5dd91c4b6b4a54640e071b594ef7f690d6f400bd4d5.

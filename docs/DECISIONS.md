@@ -2493,3 +2493,17 @@ GPU engine reservation15,032.143s; no measured captures, LOCAL skips or fixed-K
 budget errors. Preserve all calibration and qualification outputs privately.
 Report: analysis/attempt001/summary.md, source and final verification receipts.
 Older full503 and refresh campaigns stay paused; legacy STATE.json is unchanged.
+
+## Freeze V31 budget failure-map diagnostic (2026-10-19 Hong Kong)
+
+User authorized the three-stage plan and bounded execution. Follow
+`docs/V31_FAILURE_MAP_PLAN_20261019.md`. The14,400-second cap includes all
+GPU startup, warmups and failures and has independent phase limits. Select16
+LongBench development questions by metadata hash before generation; map
+K8192/4096/2048 with unchanged native decoding and corrected dense controls.
+Promote only same-type failures on both screening seeds; confirm against all
+three dense consumers on two new seeds in two processes. Do not relax gates.
+At most four confirmed cases enter an audit-only first-held-call output/support
+factorial with same K, native prefix checks, V31 bookends and a sham. This
+identifies possible repair mechanisms; it is not a deployable selector or
+held-out quality claim. Older paused studies are not resumed.
