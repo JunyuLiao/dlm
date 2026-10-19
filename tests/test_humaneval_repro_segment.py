@@ -7,6 +7,40 @@ from types import SimpleNamespace
 import torch
 
 
+def test_trajectory_observer_adds_no_sampler_call_or_rng_consumption(tmp_path,monkeypatch):
+    from scripts.v31_humaneval_repro_trajectory_worker import install
+    from vllm.v1.engine.llm_engine import LLMEngine
+    import vllm.model_executor.models.diffusion_gemma as dg
+    calls = []
+    def sample(*args, **kwargs):
+        calls.append(1)
+        args[7].add_(1)
+        args[5].add_(1)
+        return args[0]
+    monkeypatch.setattr(dg,'_compiled_sample_step',sample)
+    monkeypatch.setattr(LLMEngine,'add_request',lambda *a,**k:None)
+    monkeypatch.setattr(LLMEngine,'step',lambda *a,**k:[])
+    monkeypatch.setattr(torch.cuda,'is_current_stream_capturing',lambda:False)
+    monkeypatch.setattr(torch.cuda,'get_rng_state',lambda:torch.zeros(4,dtype=torch.uint8))
+    install(['clean','observe','clean'],tmp_path)
+    state = inspect.getclosurevars(dg._compiled_sample_step).nonlocals['state']
+    args = [torch.zeros(1),torch.tensor([0]),None,None,None,torch.zeros(1,4),
+            torch.zeros(1,4),torch.zeros(1,dtype=torch.int32),torch.zeros(1,dtype=torch.int32),
+            None,torch.zeros(1,4,3)]
+    rng_before = torch.get_rng_state().clone()
+    for name,repetitions in [('clean',1),('observe',2),('clean',1)]:
+        LLMEngine.add_request(None,name)
+        for _ in range(repetitions):
+            assert dg._compiled_sample_step(*args) is args[0]
+        assert len(state['entries']) == (2 if name == 'observe' else 0)
+        if name == 'observe':
+            assert state['initial']['step'].item() == 1
+            assert state['entries'][-1]['step'].item() == 3
+    assert len(calls) == 4
+    assert args[7].item() == 4
+    assert torch.equal(torch.get_rng_state(),rng_before)
+
+
 def test_native_helper_recompilation_keeps_exact_python_functions(monkeypatch):
     from scripts.v31_humaneval_repro_policy_worker import recompile_native_helpers
     import vllm.model_executor.models.diffusion_gemma as dg
