@@ -23,7 +23,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
     parent=campaign.verify(PARENT)
     if torch_guard:
         gate=ROOT/'results/humaneval_selector_definedness_20261019/attempt003'
-        assert read(gate/'receipt.json')['status']=='complete'
+        receipt=read(gate/'receipt.json');assert receipt['status']=='complete'
+        for name,digest in receipt['files_sha256'].items():assert sha(gate/name)==digest
         flags=read(gate/'private/runtime_flags.json')
         assert flags['guard'] is True and flags['fill'] is False and flags['cublas_bytes']==33554432
     failure=read(PARENT/'receipts/early_residual_qualification_failure.json')
