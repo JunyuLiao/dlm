@@ -78,6 +78,7 @@ def install(schedule, destination):
     FastRuntime.initialize=anchor
     ResidualDirectionCache.build=cache
     ResidualDirectionCache.apply_cuda=held
+    return state
 
 
 if __name__=='__main__':
@@ -88,7 +89,10 @@ if __name__=='__main__':
     receipt.update(intermediate_observer=True,residual_fingerprints=True)
     functions['install_kernel_inventory'](Path(os.environ['HUMANEVAL_KERNEL_INVENTORY']),receipt)
     schedule=json.loads(Path(os.environ['HUMANEVAL_REPRO_LIVE_SCHEDULE']).read_text())
-    install(schedule,Path(os.environ['HUMANEVAL_RESIDUAL_TRACE_DIR']))
+    state=install(schedule,Path(os.environ['HUMANEVAL_RESIDUAL_TRACE_DIR']))
+    if os.environ.get('HUMANEVAL_ATTENTION_TRACE_DIR'):
+        attention=runpy.run_path(os.environ['HUMANEVAL_ATTENTION_TRACE_SOURCE'])
+        attention['install'](state,Path(os.environ['HUMANEVAL_ATTENTION_TRACE_DIR']))
     trajectory=runpy.run_path(os.environ['HUMANEVAL_TRAJECTORY_SOURCE'])
     trajectory['install'](schedule,Path(os.environ['HUMANEVAL_TRAJECTORY_DIR']))
     runpy.run_path(os.environ['HUMANEVAL_REPRO_BASE'],run_name='__main__')

@@ -86,6 +86,15 @@ qualification case in two identical clean engines and append unobserved repeats,
 covering the previously unobserved V3a question116. Two1000s reservations stay
 within phasek256; closed charge5851.700s before this stage. This observation check
 is two-way, not a three-way bookend. All full evaluation remains held.
+Attempt002 completes877.086/867.093s and captures two unequal observed process
+trajectories out of72: V3a116/seed42 first raw logits differ at sampler call229,
+V31 control-after116/seed43 at call128 (zero-based). Earlier sampler fields and
+logit fingerprints, plus initial/default RNG state, match. Both jobs also fail
+some two-way observed/unobserved comparisons. No native causal operator or
+repair is established by those instrumented traces. New targeted plan:
+docs/HUMANEVAL_ATTENTION_TRACE_PLAN_20261019.md, attempt003, two750s jobs; track
+all attention layers, actual GLOBAL cache/maps and progress state on those two
+cases. Raw capture is initially disabled. Closed phasek256 charge7595.879s.
 
 Next: freeze work-only thresholds, qualify every method, run the authorized
 matrices and independent official rescores, then publish complete qualified

@@ -2637,3 +2637,23 @@ noncryptographic first-divergence locator, never equality or root-cause proof.
 Any detected change needs actual tensor comparison/replay. Keep native formulas,
 both full matrices and K128 hold unchanged; no compiler/library flag is promoted
 without evidence. The bounded stage still charges existing phasek256.
+
+## Full-cohort traces locate remaining differences before sampler updates (2026-10-19)
+
+Mixed trace attempt002 completes877.086/867.093s. Two of72 independent observed
+method/case contrasts differ: V3a116/42 at raw-logit input to call229, and V31
+control-after116/43 at call128 (zero-based). Both have step5/11, valid canvas256,
+and encoder_phase=False. Prior complete sampler/logit records match; the first
+changed before-field is logits, with unchanged default CPU/CUDA RNG hashes.
+This bounds the recorded change upstream of the sampler update. It does not
+identify an attention, MLP, cache or selector operator yet.
+
+Both engines fail some observed/unobserved trajectory checks. Preserve the
+instrumentation limit and all native repeats; do not promote a repair or release
+full accuracy. Next freeze attention/map/cache/progress fingerprints on only
+those two cases, with identical original prefixes and unobserved repeats.
+Observer imports follow native mask-fix setup and wrap the already patched
+adapter path; output buffers are read only after their native forward. The
+integer fingerprint implementation remains source-tested; tensor proof/replay
+must follow a localized change. Two750s reservations charge existing phasek256;
+no budget expansion. Existing43200s total and both campaign holds persist.

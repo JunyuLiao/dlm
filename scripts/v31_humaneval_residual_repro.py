@@ -16,7 +16,7 @@ read,write,sha=campaign.read,campaign.write,campaign.sha
 FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','native_interval_steps')
 
 
-def prepare(root,mixed=False,all_cases=False):
+def prepare(root,mixed=False,all_cases=False,attention=False):
     parent=campaign.verify(PARENT)
     failure=read(PARENT/'receipts/early_residual_qualification_failure.json')
     assert failure['status']=='failed_method_qualification'
@@ -27,7 +27,7 @@ def prepare(root,mixed=False,all_cases=False):
         shutil.copyfile(ROOT/'scripts'/name,root/'private'/name)
     trajectory=campaign.INVESTIGATION/'private/source_addenda/attempt031/worker.py'
     shutil.copyfile(trajectory,root/'private/trajectory_worker.py')
-    if mixed or all_cases:
+    if mixed or all_cases or attention:
         shutil.copyfile(ROOT/'scripts/v31_humaneval_gpu_fingerprint.py',root/'private/humaneval_gpu_fingerprint.py')
         gate=read(ROOT/'results/humaneval_mixed_repro_preflight_20261019/attempt001/receipt.json')
         assert gate['status']=='complete'
@@ -38,12 +38,15 @@ def prepare(root,mixed=False,all_cases=False):
         source=source.replace('import functools','from humaneval_gpu_fingerprint import fingerprint_cuda\nimport functools',1)
         source=source.replace('point = dict(canvas=','point = dict(logits_gpu128=fingerprint_cuda(args[0]),canvas=',1)
         path.write_text(source)
-    spec=(ROOT/'docs/HUMANEVAL_FULL_TRACE_PLAN_20261019.md' if all_cases else
+    if attention:
+        shutil.copyfile(ROOT/'scripts/v31_humaneval_attention_fingerprint.py',root/'private/attention_fingerprint.py')
+    spec=(ROOT/'docs/HUMANEVAL_ATTENTION_TRACE_PLAN_20261019.md' if attention else
+          ROOT/'docs/HUMANEVAL_FULL_TRACE_PLAN_20261019.md' if all_cases else
           ROOT/'docs/HUMANEVAL_MIXED_REPRO_PLAN_20261019.md' if mixed else SPEC)
     shutil.copyfile(spec,root/'spec.md')
     jobs={}
-    for part in (('clean001','clean002') if mixed or all_cases else ('audit','clean')):
-        native_part='clean' if mixed or all_cases else part
+    for part in (('clean001','clean002') if mixed or all_cases or attention else ('audit','clean')):
+        native_part='clean' if mixed or all_cases or attention else part
         original=PARENT/f'qualification/thinking_on/{native_part}/shared/qualification/attempt001'
         campaign.verify_leaf(PARENT,original)
         rows=read(original/'private/cells.json');arms=read(original/'private/arms.json')
@@ -51,7 +54,16 @@ def prepare(root,mixed=False,all_cases=False):
         assert len(indices)==6
         target=next(i for i in indices if arms[i+1]['arm']=='residual_direction_guard')
         prefix=max(indices)+1
-        if all_cases:
+        if attention:
+            targets=[i for i,r in enumerate(rows) if (r['index'],r['seed'],arms[i+1]['label']) in (
+                (116,42,'value_v3a_singleton_delete'),(116,43,'control_after'))]
+            assert len(targets)==2
+            prefix=len(rows);selected=rows+[rows[i] for i in targets]
+            entries=arms+[arms[i+1] for i in targets];live=['clean']*len(entries)
+            for i in targets:live[i+1]='observe'
+            bookends=[dict(original=i,observed=i,final=prefix+j,arm=arms[i+1]['arm'],
+                label=f"seed{rows[i]['seed']:02d}_q{rows[i]['index']:03d}_"+arms[i+1]['label']) for j,i in enumerate(targets)]
+        elif all_cases:
             prefix=len(rows)
             selected=rows+rows[8:]
             entries=arms+arms[9:]
@@ -73,6 +85,7 @@ def prepare(root,mixed=False,all_cases=False):
             bookends=[dict(original=target,observed=prefix,final=prefix+1,arm='residual_direction_guard')]
         assert len(entries)==len(selected)+1 and len(live)==len(entries)
         if all_cases:assert len(selected)==152 and len(bookends)==72
+        if attention:assert len(selected)==82 and len(bookends)==2
         for group in bookends:
             positions=[group[key] for key in ('original','observed','final')]
             assert all(selected[i]==selected[positions[0]] for i in positions)
@@ -90,10 +103,10 @@ def prepare(root,mixed=False,all_cases=False):
         parent_protocol_sha256=sha(PARENT/'protocol.json'),failure_receipt_sha256=sha(PARENT/'receipts/early_residual_qualification_failure.json'),
         runtime=parent['runtime'],jobs=jobs,phase='k256',maximum_job_reservation_s=1000 if all_cases else 750,
         phase_cap_s=campaign.phase_caps()['k256'],maximum_new_reservation_s=2000 if all_cases else 1500,
-        seed=None if all_cases else 43,index=None if all_cases else 129,
-        seeds=[42,43] if all_cases else [43],cohort=parent['cohort'] if all_cases else [129],
-        prefix_budget_tokens=256,full_accuracy_released=False,mixed_group=mixed or all_cases,
-        full_cohort_trace=all_cases,
+        seed=None if all_cases or attention else 43,index=None if all_cases or attention else 129,
+        seeds=[42,43] if all_cases or attention else [43],cohort=parent['cohort'] if all_cases else [116] if attention else [129],
+        prefix_budget_tokens=256,full_accuracy_released=False,mixed_group=mixed or all_cases or attention,
+        full_cohort_trace=all_cases,two_way_observer=all_cases or attention,attention_fingerprints=attention,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
     write(root/'protocol.json',p,True)
     return p
@@ -125,6 +138,9 @@ def run_job(root,part):
         HUMANEVAL_TRAJECTORY_DIR=str(leaf/'private/trajectory'),
         HUMANEVAL_RESIDUAL_TRACE_DIR=str(leaf/'private/residual'),
         FROZEN_SOURCE_SHA256=sha(root/'protocol.json'))
+    if p.get('attention_fingerprints'):
+        env.update(HUMANEVAL_ATTENTION_TRACE_SOURCE=str(root/'private/attention_fingerprint.py'),
+                   HUMANEVAL_ATTENTION_TRACE_DIR=str(leaf/'private/attention'))
     command=list(launch['command']);command[1]=str(root/'private/v31_humaneval_residual_repro_worker.py')
     command[4:7]=[str(root/f'private/{part}/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/generation.private.jsonl')]
     write(leaf/'private/launch.json',dict(command=command,environment=env),True)
@@ -166,7 +182,7 @@ def run_job(root,part):
     if len(public)==len(rows):
         for group in config['bookend_groups']:
             a=public[group['original']]
-            variants=([('within_engine_unobserved',group['final'])] if p.get('full_cohort_trace') else
+            variants=([('within_engine_unobserved',group['final'])] if p.get('two_way_observer',p.get('full_cohort_trace')) else
                       [('observed',group['observed']),('final_unobserved',group['final'])])
             for name,index in variants:
                 diff={key:a[key]!=public[index][key] for key in FIELDS}
@@ -186,7 +202,8 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(__doc__);parser.add_argument('action',choices=['prepare','run'])
     parser.add_argument('--study',type=Path,default=DEFAULT);parser.add_argument('--mixed',action='store_true')
     parser.add_argument('--all-cases',action='store_true')
+    parser.add_argument('--attention',action='store_true')
     args=parser.parse_args();root=args.study.absolute()
-    if args.action=='prepare':prepare(root,args.mixed,args.all_cases)
+    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention)
     else:
         for part in read(root/'protocol.json')['jobs']:run_job(root,part)
