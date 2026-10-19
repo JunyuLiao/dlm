@@ -16,7 +16,8 @@ read,write,sha=campaign.read,campaign.write,campaign.sha
 FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','native_interval_steps')
 
 
-def prepare(root,mixed=False,all_cases=False,attention=False):
+def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False):
+    attention=attention or crossover
     parent=campaign.verify(PARENT)
     failure=read(PARENT/'receipts/early_residual_qualification_failure.json')
     assert failure['status']=='failed_method_qualification'
@@ -40,12 +41,14 @@ def prepare(root,mixed=False,all_cases=False,attention=False):
         path.write_text(source)
     if attention:
         shutil.copyfile(ROOT/'scripts/v31_humaneval_attention_fingerprint.py',root/'private/attention_fingerprint.py')
-    spec=(ROOT/'docs/HUMANEVAL_ATTENTION_TRACE_PLAN_20261019.md' if attention else
+    spec=(ROOT/'docs/HUMANEVAL_TRACE_CROSSOVER_PLAN_20261019.md' if crossover else
+          ROOT/'docs/HUMANEVAL_ATTENTION_TRACE_PLAN_20261019.md' if attention else
           ROOT/'docs/HUMANEVAL_FULL_TRACE_PLAN_20261019.md' if all_cases else
           ROOT/'docs/HUMANEVAL_MIXED_REPRO_PLAN_20261019.md' if mixed else SPEC)
     shutil.copyfile(spec,root/'spec.md')
     jobs={}
-    for part in (('clean001','clean002') if mixed or all_cases or attention else ('audit','clean')):
+    job_names=('crossover001',) if crossover else ('clean001','clean002') if mixed or all_cases or attention else ('audit','clean')
+    for part in job_names:
         native_part='clean' if mixed or all_cases or attention else part
         original=PARENT/f'qualification/thinking_on/{native_part}/shared/qualification/attempt001'
         campaign.verify_leaf(PARENT,original)
@@ -54,7 +57,25 @@ def prepare(root,mixed=False,all_cases=False,attention=False):
         assert len(indices)==6
         target=next(i for i in indices if arms[i+1]['arm']=='residual_direction_guard')
         prefix=max(indices)+1
-        if attention:
+        conditions=None;attention_modes={}
+        if crossover:
+            base_indices=[i for i,r in enumerate(rows) if r['index']==116 and r['seed']==42]
+            assert len(base_indices)==6
+            start,end=min(base_indices),max(base_indices)+1
+            target=next(i for i in base_indices if arms[i+1]['arm']=='value_v3a_singleton_delete')
+            offset=target-start;prefix=end
+            conditions=('unobserved','sampler','post_only','pre_post','sampler','unobserved')
+            selected=rows[:start]+[rows[i] for _ in conditions for i in base_indices]
+            entries=arms[:start+1]+[arms[i+1] for _ in conditions for i in base_indices]
+            live=['clean']*len(entries);bookends=[];condition_rows=[]
+            for number,condition in enumerate(conditions):
+                row=start+6*number+offset;condition_rows.append(dict(condition=condition,row=row))
+                if condition!='unobserved':
+                    live[row+1]='observe'
+                    bookends.append(dict(original=start+offset,observed=row,final=start+30+offset,
+                        arm='value_v3a_singleton_delete',label=f'cycle{number:03d}_{condition}'))
+                if condition in ('post_only','pre_post'):attention_modes[str(row+1)]=condition
+        elif attention:
             targets=[i for i,r in enumerate(rows) if (r['index'],r['seed'],arms[i+1]['label']) in (
                 (116,42,'value_v3a_singleton_delete'),(116,43,'control_after'))]
             assert len(targets)==2
@@ -85,7 +106,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False):
             bookends=[dict(original=target,observed=prefix,final=prefix+1,arm='residual_direction_guard')]
         assert len(entries)==len(selected)+1 and len(live)==len(entries)
         if all_cases:assert len(selected)==152 and len(bookends)==72
-        if attention:assert len(selected)==82 and len(bookends)==2
+        if attention and not crossover:assert len(selected)==82 and len(bookends)==2
+        if crossover:assert len(selected)==74 and len(bookends)==4
         for group in bookends:
             positions=[group[key] for key in ('original','observed','final')]
             assert all(selected[i]==selected[positions[0]] for i in positions)
@@ -94,19 +116,22 @@ def prepare(root,mixed=False,all_cases=False,attention=False):
         folder=root/'private'/part;folder.mkdir()
         write(folder/'cells.json',selected,True);write(folder/'arms.json',entries,True)
         write(folder/'live.json',live,True)
+        if crossover:write(folder/'attention_modes.json',attention_modes,True)
         jobs[part]=dict(original=str(original.relative_to(ROOT)),
             original_marker_sha256=sha(original/'attempt_complete.json'),
             original_target_row=target,observed_row=prefix,final_bookend_row=prefix+1,
             requests=len(selected),warmup_requests=8,native_pass=native_part,bookend_groups=bookends)
+        if crossover:jobs[part]['conditions']=condition_rows
     p=dict(schema='humaneval_residual_repro_v1',source_commit=subprocess.check_output(
         ['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         parent_protocol_sha256=sha(PARENT/'protocol.json'),failure_receipt_sha256=sha(PARENT/'receipts/early_residual_qualification_failure.json'),
-        runtime=parent['runtime'],jobs=jobs,phase='k256',maximum_job_reservation_s=1000 if all_cases else 750,
-        phase_cap_s=campaign.phase_caps()['k256'],maximum_new_reservation_s=2000 if all_cases else 1500,
+        runtime=parent['runtime'],jobs=jobs,phase='k256',maximum_job_reservation_s=900 if crossover else 1000 if all_cases else 750,
+        phase_cap_s=campaign.phase_caps()['k256'],maximum_new_reservation_s=900 if crossover else 2000 if all_cases else 1500,
         seed=None if all_cases or attention else 43,index=None if all_cases or attention else 129,
-        seeds=[42,43] if all_cases or attention else [43],cohort=parent['cohort'] if all_cases else [116] if attention else [129],
+        seeds=[42] if crossover else [42,43] if all_cases or attention else [43],cohort=parent['cohort'] if all_cases else [116] if attention else [129],
         prefix_budget_tokens=256,full_accuracy_released=False,mixed_group=mixed or all_cases or attention,
-        full_cohort_trace=all_cases,two_way_observer=all_cases or attention,attention_fingerprints=attention,
+        full_cohort_trace=all_cases,two_way_observer=all_cases or (attention and not crossover),attention_fingerprints=attention,
+        trace_crossover=crossover,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
     write(root/'protocol.json',p,True)
     return p
@@ -141,6 +166,7 @@ def run_job(root,part):
     if p.get('attention_fingerprints'):
         env.update(HUMANEVAL_ATTENTION_TRACE_SOURCE=str(root/'private/attention_fingerprint.py'),
                    HUMANEVAL_ATTENTION_TRACE_DIR=str(leaf/'private/attention'))
+        if p.get('trace_crossover'):env['HUMANEVAL_ATTENTION_MODES']=str(root/f'private/{part}/attention_modes.json')
     command=list(launch['command']);command[1]=str(root/'private/v31_humaneval_residual_repro_worker.py')
     command[4:7]=[str(root/f'private/{part}/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/generation.private.jsonl')]
     write(leaf/'private/launch.json',dict(command=command,environment=env),True)
@@ -203,7 +229,8 @@ if __name__=='__main__':
     parser.add_argument('--study',type=Path,default=DEFAULT);parser.add_argument('--mixed',action='store_true')
     parser.add_argument('--all-cases',action='store_true')
     parser.add_argument('--attention',action='store_true')
+    parser.add_argument('--crossover',action='store_true')
     args=parser.parse_args();root=args.study.absolute()
-    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention)
+    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover)
     else:
         for part in read(root/'protocol.json')['jobs']:run_job(root,part)

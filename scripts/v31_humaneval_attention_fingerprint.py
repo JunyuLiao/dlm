@@ -17,6 +17,7 @@ def install(state,destination):
     install_adapter=vllm_adapter.install_vllm_patches
     sparse=observe=None
     raw_targets=json.loads(os.environ.get('HUMANEVAL_ATTENTION_CAPTURE','[]'))
+    modes=json.loads(Path(os.environ['HUMANEVAL_ATTENTION_MODES']).read_text()) if os.environ.get('HUMANEVAL_ATTENTION_MODES') else None
 
     def fingerprint(value):
         if value is None:return None
@@ -54,8 +55,10 @@ def install(state,destination):
 
         @functools.wraps(forward)
         def attention(self,layer,query,key,value,kv_cache,attn_metadata,output,*args,**kwargs):
-            active=state['active'] and attn_metadata is not None
+            mode=modes.get(str(state['index']),'off') if modes is not None else 'pre_post'
+            active=state['active'] and attn_metadata is not None and mode!='off'
             if not active:return forward(self,layer,query,key,value,kv_cache,attn_metadata,output,*args,**kwargs)
+            if mode not in ('pre_post','post_only'):raise RuntimeError('unknown attention diagnostic mode')
             if torch.cuda.is_current_stream_capturing():raise RuntimeError('attention diagnostic captured')
             name=getattr(layer,'layer_name','');match=re.search(r'\.layers\.(\d+)\.',name)
             if not match:raise RuntimeError('missing attention layer identity')
@@ -64,19 +67,26 @@ def install(state,destination):
             old=adapter.mage_state.get(index);old_lists=old.get('lists') if old else None
             event=dict(layer=index,sampler_index=state['attention_samples'],
                 context=context,canvas=adapter.canvas_id,
-                current_inputs={k:fingerprint(v[:n]) if v is not None else None
-                    for k,v in [('q',query),('k',key),('v',value)]},
+                input_fingerprints_after_forward=mode=='post_only',
                 trigger_at=adapter._trig_at,trigger_count=adapter._trig_count)
-            if index==0:
+            if mode=='pre_post':event['current_inputs']={k:fingerprint(v[:n]) if v is not None else None
+                for k,v in [('q',query),('k',key),('v',value)]}
+            if index==0 and mode=='pre_post':
                 clock=getattr(adapter,'_jc',None)
                 event['progress_state']=None if clock is None else {k:fingerprint(v) for k,v in clock.items()}
             capture=any(t['request']==state['index'] and t['layer']==index and
                 t['sampler_index']==state['attention_samples'] for t in raw_targets)
             raw={k:v[:n].detach().clone() if v is not None else None
                  for k,v in [('q',query),('k',key),('v',value)]} if capture else None
-            state['attention_current_event']=event
+            state['attention_current_event']=event if mode=='pre_post' else None
             try:out=forward(self,layer,query,key,value,kv_cache,attn_metadata,output,*args,**kwargs)
             finally:state['attention_current_event']=None
+            if mode=='post_only':
+                event['current_inputs']={k:fingerprint(v[:n]) if v is not None else None
+                    for k,v in [('q',query),('k',key),('v',value)]}
+                if index==0:
+                    clock=getattr(adapter,'_jc',None)
+                    event['progress_state']=None if clock is None else {k:fingerprint(v) for k,v in clock.items()}
             event['output']=fingerprint(output[:n])
             current=adapter.mage_state.get(index);buffer=adapter.buffers.get(index)
             prefix=context.get('seq_len',n)-n

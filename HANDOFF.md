@@ -95,6 +95,13 @@ repair is established by those instrumented traces. New targeted plan:
 docs/HUMANEVAL_ATTENTION_TRACE_PLAN_20261019.md, attempt003, two750s jobs; track
 all attention layers, actual GLOBAL cache/maps and progress state on those two
 cases. Raw capture is initially disabled. Closed phasek256 charge7595.879s.
+Attempt003 completes525.730/500.678s. Both two-way observation checks pass and
+all targeted sampler/logit/attention traces match. Layer coverage is30/30,
+8760/15300 events on the two cases. The fault did not recur; no causal operator
+is localized. Next: docs/HUMANEVAL_TRACE_CROSSOVER_PLAN_20261019.md, attempt004,
+one900s engine with identical six-arm groups and controlled V3a observation
+modes. Post-only mode adds no fingerprint before/inside a native forward.
+Closed phasek256 charge8622.288s; both full matrices stay held.
 
 Next: freeze work-only thresholds, qualify every method, run the authorized
 matrices and independent official rescores, then publish complete qualified
