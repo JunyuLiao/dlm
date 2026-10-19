@@ -21,6 +21,11 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
     all_cases=all_cases or cublas
     attention=attention or crossover
     parent=campaign.verify(PARENT)
+    if torch_guard:
+        gate=ROOT/'results/humaneval_selector_definedness_20261019/attempt003'
+        assert read(gate/'receipt.json')['status']=='complete'
+        flags=read(gate/'private/runtime_flags.json')
+        assert flags['guard'] is True and flags['fill'] is False and flags['cublas_bytes']==33554432
     failure=read(PARENT/'receipts/early_residual_qualification_failure.json')
     assert failure['status']=='failed_method_qualification'
     assert read(PARENT/'receipts/controller_stopped_after_active_work.json')['gpu_reservations_closed']
@@ -154,6 +159,7 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         trace_crossover=crossover,
         cublas_workspace_config=':4096:8' if cublas else None,
         torch_deterministic_guard=torch_guard,
+        guard_preflight_receipt_sha256=sha(ROOT/'results/humaneval_selector_definedness_20261019/attempt003/receipt.json') if torch_guard else None,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
     write(root/'protocol.json',p,True)
     return p
