@@ -10,11 +10,13 @@ def test_completed_kernel_snapshot_is_detached_and_inert(tmp_path, monkeypatch):
     from scripts.v31_humaneval_repro_segment_worker import install
     from vllm.v1.engine.llm_engine import LLMEngine
     from vllm.v1.attention.backends.flash_attn import FlashAttentionImpl
+    from vllm.compilation.cuda_graph import CUDAGraphWrapper
     import vllm.model_executor.models.diffusion_gemma as dg
 
     # Restore every runtime binding when the test exits.
     for owner, attr in [(LLMEngine, 'add_request'), (LLMEngine, 'step'),
-                        (FlashAttentionImpl, 'forward'), (dg.DiffusionSampler, '_finish_prefills')]:
+                        (FlashAttentionImpl, 'forward'), (dg.DiffusionSampler, '_finish_prefills'),
+                        (CUDAGraphWrapper, '__call__')]:
         monkeypatch.setattr(owner, attr, getattr(owner, attr))
     install([], tmp_path / 'unused')
     bindings = inspect.getclosurevars(FlashAttentionImpl.forward).nonlocals

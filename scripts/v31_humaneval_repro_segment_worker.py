@@ -1,9 +1,10 @@
 """Observe existing generated Python calls between native attention layers 0/1.
 
-No recompilation, replacement operator, forward replay, or sampler change. Python
-line tracing snapshots completed kernel arguments in the already loaded Inductor
-wrapper. Only question zero's first prefill is observed; clean bookends qualify
-whether the deferred snapshots alter its generation.
+The observed first-prefill segment bypasses its piecewise CUDA graph, executing
+the same loaded compiled runnable once. This is an explicitly changed diagnostic
+dispatch, not clean timing or a production repair. No recompilation, replacement
+operator, extra forward, or sampler change. Clean bookends qualify dispatch and
+observation together. All other segments and requests retain native dispatch.
 """
 import functools
 import hashlib
@@ -20,10 +21,13 @@ def install(schedule, root):
     import torch
     from vllm.v1.engine.llm_engine import LLMEngine
     from vllm.v1.attention.backends.flash_attn import FlashAttentionImpl
+    from vllm.compilation.cuda_graph import CUDAGraphWrapper
+    from vllm.config import CUDAGraphMode
     import vllm.model_executor.models.diffusion_gemma as dg
     state = dict(index=-1, active=False, segment=False, prefilled=False, entries=[])
     add, step = LLMEngine.add_request, LLMEngine.step
     forward = FlashAttentionImpl.forward
+    graph_call = CUDAGraphWrapper.__call__
     finish = dg.DiffusionSampler._finish_prefills
     frames = {}
     previous_trace = None
@@ -77,7 +81,7 @@ def install(schedule, root):
     def begin(self, request_id, *args, **kwargs):
         i = state['index'] + 1
         state.update(index=i, active=schedule[i] == 'observe' and '-humaneval-0-' in request_id,
-                     segment=False, prefilled=False, entries=[])
+                     segment=False, prefilled=False, entries=[], graph_bypasses=0)
         return add(self, request_id, *args, **kwargs)
 
     @functools.wraps(forward)
@@ -99,11 +103,18 @@ def install(schedule, root):
             sys.settrace(trace)
         return result
 
+    @functools.wraps(graph_call)
+    def segment_dispatch(self, *args, **kwargs):
+        if state['segment'] and self.runtime_mode == CUDAGraphMode.PIECEWISE:
+            state['graph_bypasses'] += 1
+            return self.runnable(*args, **kwargs)
+        return graph_call(self, *args, **kwargs)
+
     @functools.wraps(finish)
     def end_prefill(self, *args, **kwargs):
         result = finish(self, *args, **kwargs)
         if state['active']:
-            if state['segment'] or not state['entries']:
+            if state['segment'] or not state['entries'] or state['graph_bypasses'] != 1:
                 raise RuntimeError('native compiled first segment was not observed')
             state['prefilled'] = True
         return result
@@ -126,11 +137,15 @@ def install(schedule, root):
             if path.exists():
                 raise RuntimeError('immutable observation required')
             torch.save(cpu(state['entries']), path)
+            path.with_suffix('.json').write_text(json.dumps(dict(
+                diagnostic_dispatch='single first-prefill compiled segment outside its CUDA graph',
+                graph_bypasses=state['graph_bypasses'], extra_forwards=0))+'\n')
             state.update(active=False, entries=[])
         return result
 
     LLMEngine.add_request, LLMEngine.step = begin, engine_step
     FlashAttentionImpl.forward = attention
+    CUDAGraphWrapper.__call__ = segment_dispatch
     dg.DiffusionSampler._finish_prefills = end_prefill
 
 
