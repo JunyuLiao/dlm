@@ -67,7 +67,7 @@ def prepare(study):
     return p
 
 
-def job(study, name, mode, family, pass_name, trace=False, overrides=None):
+def job(study, name, mode, family, pass_name, trace=False, overrides=None, wrapper=None):
     p = read(study/'protocol.json')
     if base.runtime_identity() != p['runtime']:
         raise RuntimeError('runtime drift')
@@ -92,6 +92,11 @@ def job(study, name, mode, family, pass_name, trace=False, overrides=None):
     if trace:
         env.update(HUMANEVAL_REPRO_TRACE=str(leaf/'private/trace'),HUMANEVAL_REPRO_BASE=str(worker))
         worker = execution/'scripts/v31_humaneval_repro_worker.py'
+    if wrapper is not None:
+        if trace:
+            raise ValueError('factor and observer are independent diagnostics')
+        env['HUMANEVAL_REPRO_BASE']=str(worker)
+        worker=Path(wrapper).resolve()
     cmd = [base.PYTHON,str(worker),str(base.MODEL),str(study/f'private/pools/{mode}'),
            str(leaf/'private/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/generation.private.jsonl'),
            'mage' if family=='v31' else 'allkept' if family=='allkept' else 'dense',
@@ -99,7 +104,8 @@ def job(study, name, mode, family, pass_name, trace=False, overrides=None):
     selected_env={k:v for k,v in env.items() if k not in os.environ or os.environ[k]!=v}
     write(leaf/'private/launch.json',dict(command=cmd,environment=selected_env),True)
     write(leaf/'config.json',dict(mode=mode,family=family,pass_name=pass_name,trace=trace,
-        warmups=8,repetitions=2,cohort=p['cohort'],overrides=overrides or {},protocol_sha256=sha(study/'protocol.json')),True)
+        warmups=8,repetitions=2,cohort=p['cohort'],overrides=overrides or {},protocol_sha256=sha(study/'protocol.json'),
+        worker_sha256=sha(worker)),True)
     base.wait_idle()
     budget=read(study/'gpu_budget.json')
     charged=sum(r.get('elapsed_s',r['reserved_s']) for r in budget['reservations'] if r['phase']=='diagnosis')
