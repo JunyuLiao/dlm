@@ -16,11 +16,11 @@ read,write,sha=campaign.read,campaign.write,campaign.sha
 FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','native_interval_steps')
 
 
-def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False,torch_guard=False,dtype_adapter=False,graph_trace=False,graph_optimized=False,last_global=False):
+def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False,torch_guard=False,dtype_adapter=False,graph_trace=False,graph_optimized=False,last_global=False,observe_no_overlap=False):
     graph_trace=graph_trace or graph_optimized
     torch_guard=torch_guard or dtype_adapter
     cublas=cublas or torch_guard
-    all_cases=all_cases or cublas or graph_trace or last_global
+    all_cases=all_cases or cublas or graph_trace or last_global or observe_no_overlap
     attention=attention or crossover
     parent=campaign.verify(PARENT)
     if torch_guard:
@@ -34,6 +34,26 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
     assert read(PARENT/'receipts/controller_stopped_after_active_work.json')['gpu_reservations_closed']
     assert not root.exists()
     (root/'private').mkdir(parents=True)
+    if observe_no_overlap:
+        assert not (last_global or graph_trace or torch_guard or cublas or attention or crossover)
+        gate=ROOT/'results/humaneval_observe_policy_preflight_20261019/attempt001'
+        receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==4
+        for name,digest in receipt['files_sha256'].items():assert sha(gate/name)==digest
+        assert receipt['policy_source_sha256']==sha(ROOT/'scripts/v31_humaneval_observe_no_overlap.py')
+        screen=ROOT/'results/humaneval_fa4_overlap_screen_20261019/attempt001'
+        done=read(screen/'receipt.json');assert done['status']=='complete_operator_screen'
+        for name,digest in done['files_sha256'].items():assert sha(screen/name)==digest
+        positive=False
+        for engine in ('engine001','engine002'):
+            data=read(screen/f'runs/{engine}/private/operator_summary.json')
+            for case in data['cases']:
+                assert case['qkv_preserved']
+                for variant in case['variants']:
+                    if variant['name']=='split0_observe_overlap1' and variant['first_changed_repeat'] is not None:positive=True
+                    if variant['name'].endswith('observe_overlap0'):
+                        assert variant['repeat_matches']==variant['repeats']==variant['aux_native_matches']
+        assert positive,'no repeated native-path same-input positive supports this repair'
+        shutil.copyfile(ROOT/'scripts/v31_humaneval_observe_no_overlap.py',root/'private/observe_no_overlap.py')
     if last_global:
         gate=ROOT/'results/humaneval_last_global_preflight_20261019/attempt001'
         receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==4
@@ -118,7 +138,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         path.write_text(source)
     if attention:
         shutil.copyfile(ROOT/'scripts/v31_humaneval_attention_fingerprint.py',root/'private/attention_fingerprint.py')
-    spec=(ROOT/'docs/HUMANEVAL_LAST_GLOBAL_CAPTURE_PLAN_20261019.md' if last_global else
+    spec=(ROOT/'docs/HUMANEVAL_OBSERVE_NO_OVERLAP_NATIVE_PLAN_20261019.md' if observe_no_overlap else
+          ROOT/'docs/HUMANEVAL_LAST_GLOBAL_CAPTURE_PLAN_20261019.md' if last_global else
           ROOT/'docs/HUMANEVAL_OPTIMIZED_GRAPH_NATIVE_PLAN_20261019.md' if graph_optimized else
           ROOT/'docs/HUMANEVAL_GRAPH_BOUNDARY_PLAN_20261019.md' if graph_trace else
           ROOT/'docs/HUMANEVAL_GUARDED_DTYPE_NATIVE_PLAN_20261019.md' if dtype_adapter else
@@ -259,6 +280,9 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         graph_boundary_fingerprints=graph_trace,
         graph_optimized=graph_optimized,
         last_global_probe=last_global,
+        observing_fa4_no_overlap=observe_no_overlap,
+        observing_fa4_overlap_screen_sha256=sha(ROOT/'results/humaneval_fa4_overlap_screen_20261019/attempt001/receipt.json') if observe_no_overlap else None,
+        observing_fa4_policy_preflight_sha256=sha(ROOT/'results/humaneval_observe_policy_preflight_20261019/attempt001/receipt.json') if observe_no_overlap else None,
         last_global_preflight_receipt_sha256=sha(ROOT/'results/humaneval_last_global_preflight_20261019/attempt001/receipt.json') if last_global else None,
         graph_preflight_receipt_sha256=sha(ROOT/('results/humaneval_dynamic_fingerprint_preflight_20261019/attempt003/receipt.json' if graph_optimized else
                                                'results/humaneval_graph_preflight_20261019/attempt004/receipt.json')) if graph_trace else None,
@@ -317,6 +341,9 @@ def run_job(root,part):
     if p.get('last_global_probe'):
         env.update(HUMANEVAL_LAST_GLOBAL_SOURCE=str(root/'private/last_global_probe.py'),HUMANEVAL_LAST_GLOBAL_DIR=str(leaf/'private/last_global'),
             HUMANEVAL_LAST_GLOBAL_MODES=str(root/f'private/{part}/last_modes.json'),HUMANEVAL_LAST_GLOBAL_RAW_CALLS=str(root/f'private/{part}/raw_calls.json'))
+    if p.get('observing_fa4_no_overlap'):
+        policy=root/'private/observe_no_overlap.py'
+        env.update(HUMANEVAL_OBSERVE_NO_OVERLAP_SOURCE=str(policy),HUMANEVAL_OBSERVE_NO_OVERLAP_SHA256=sha(policy))
     command=list(launch['command']);command[1]=str(root/'private/v31_humaneval_residual_repro_worker.py')
     command[4:7]=[str(root/f'private/{part}/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/generation.private.jsonl')]
     write(leaf/'private/launch.json',dict(command=command,environment=env),True)
@@ -353,6 +380,16 @@ def run_job(root,part):
     for i in range(checked,len(public)):
         errors.extend(campaign.validate(public[i],rows[i],'shared',arms[i+1],native_part,native_part=='audit',256))
     if proc.returncode or len(public)!=len(rows):errors.append('worker/coverage failure')
+    if p.get('observing_fa4_no_overlap'):
+        observed=0
+        for row in public:
+            a=row.get('adapter',{})
+            if (a.get('observing_fa4_numerical_policy')!='no_intra_wg_overlap' or a.get('observing_fa4_intra_wg_overlap') is not False or
+                a.get('observing_fa4_policy_sha256')!=sha(root/'private/observe_no_overlap.py') or
+                a.get('observing_fa4_extra_forwards')!=0 or a.get('observing_fa4_plain_arguments_preserved') is not True or
+                'observing_fa4_calls' not in a):errors.append('missing or incorrect observation numerical-policy receipt')
+            observed+=a.get('observing_fa4_calls',0)
+        if not observed:errors.append('numerical-policy observation path never executed')
     errors.extend(campaign.policy_errors(leaf/'private/kernel_inventory.json','PIECEWISE'))
     if p.get('cublas_workspace_config') and (leaf/'private/kernel_inventory.json').exists():
         actual=read(leaf/'private/kernel_inventory.json').get('blas_workspace',{})
@@ -419,7 +456,8 @@ if __name__=='__main__':
     parser.add_argument('--graph-trace',action='store_true')
     parser.add_argument('--graph-optimized',action='store_true')
     parser.add_argument('--last-global',action='store_true')
+    parser.add_argument('--observe-no-overlap',action='store_true')
     args=parser.parse_args();root=args.study.absolute()
-    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover,args.cublas_workspace,args.torch_guard,args.dtype_adapter,args.graph_trace,args.graph_optimized,args.last_global)
+    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover,args.cublas_workspace,args.torch_guard,args.dtype_adapter,args.graph_trace,args.graph_optimized,args.last_global,args.observe_no_overlap)
     else:
         for part in read(root/'protocol.json')['jobs']:run_job(root,part)

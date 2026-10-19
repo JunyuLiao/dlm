@@ -86,6 +86,12 @@ if __name__=='__main__':
     if hashlib.sha256(policy.read_bytes()).hexdigest()!=os.environ['HUMANEVAL_POLICY_SOURCE_SHA256']:
         raise RuntimeError('qualified numerical policy drift')
     functions=runpy.run_path(str(policy));receipt=functions['install_compilation_policy']()
+    if os.environ.get('HUMANEVAL_OBSERVE_NO_OVERLAP_SOURCE'):
+        correction=Path(os.environ['HUMANEVAL_OBSERVE_NO_OVERLAP_SOURCE'])
+        assert hashlib.sha256(correction.read_bytes()).hexdigest()==os.environ['HUMANEVAL_OBSERVE_NO_OVERLAP_SHA256']
+        runpy.run_path(str(correction))['install']()
+        receipt.update(observing_fa4_numerical_policy='no_intra_wg_overlap',
+            observing_fa4_policy_sha256=hashlib.sha256(correction.read_bytes()).hexdigest())
     receipt.update(intermediate_observer=True,residual_fingerprints=True)
     functions['install_kernel_inventory'](Path(os.environ['HUMANEVAL_KERNEL_INVENTORY']),receipt)
     schedule=json.loads(Path(os.environ['HUMANEVAL_REPRO_LIVE_SCHEDULE']).read_text())
