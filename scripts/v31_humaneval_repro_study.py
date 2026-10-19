@@ -67,7 +67,7 @@ def prepare(study):
     return p
 
 
-def job(study, name, mode, family, pass_name, trace=False, overrides=None, wrapper=None):
+def job(study, name, mode, family, pass_name, trace=False, overrides=None, wrapper=None, variants=None):
     p = read(study/'protocol.json')
     if base.runtime_identity() != p['runtime']:
         raise RuntimeError('runtime drift')
@@ -79,7 +79,8 @@ def job(study, name, mode, family, pass_name, trace=False, overrides=None, wrapp
     (leaf/'private').mkdir(parents=True)
     cells = read(study/f'private/schedules/{mode}/cohort.json')
     warm = read(study/f'private/schedules/{mode}/warmup.json')
-    rows = [c for c in warm for _ in range(4)] + cells + cells
+    rows = ([c for c in warm for _ in range(4)] +
+            ([c for c in cells for _ in variants] if variants else cells + cells))
     write(leaf/'private/cells.json',rows,True)
     execution = study/'private/execution'
     base.SUITES[mode]=old.SETTINGS
@@ -88,6 +89,10 @@ def job(study, name, mode, family, pass_name, trace=False, overrides=None, wrapp
         VALUE_AUDIT=str(int(pass_name=='audit')),VALUE_CLEAN_TIMING=str(int(pass_name=='clean')),
         VALUE_BOUNDARY_TIMING=str(int(pass_name=='clean')), STUDY_ARM=family)
     env.update(overrides or {})
+    if variants:
+        live_schedule=['clean']*9+[v for c in cells for v in variants]
+        write(leaf/'private/live_schedule.json',live_schedule,True)
+        env['HUMANEVAL_REPRO_LIVE_SCHEDULE']=str(leaf/'private/live_schedule.json')
     worker = execution/'scripts/v31_vllm_paired_bench.py'
     if trace:
         env.update(HUMANEVAL_REPRO_TRACE=str(leaf/'private/trace'),HUMANEVAL_REPRO_BASE=str(worker))
@@ -105,7 +110,7 @@ def job(study, name, mode, family, pass_name, trace=False, overrides=None, wrapp
     write(leaf/'private/launch.json',dict(command=cmd,environment=selected_env),True)
     write(leaf/'config.json',dict(mode=mode,family=family,pass_name=pass_name,trace=trace,
         warmups=8,repetitions=2,cohort=p['cohort'],overrides=overrides or {},protocol_sha256=sha(study/'protocol.json'),
-        worker_sha256=sha(worker)),True)
+        worker_sha256=sha(worker),variants=variants),True)
     base.wait_idle()
     budget=read(study/'gpu_budget.json')
     charged=sum(r.get('elapsed_s',r['reserved_s']) for r in budget['reservations'] if r['phase']=='diagnosis')
