@@ -10,7 +10,10 @@ import runpy
 def install(path):
     import torch
     import vllm.model_executor.models.diffusion_gemma as dg
+    from vllm.v1.worker.gpu.model_runner import GPUModelRunner
     original=dg.DiffusionGemmaForConditionalGeneration.load_weights
+    original_runner=GPUModelRunner.load_model
+    state={}
 
     def tensor_hash(t):
         h=hashlib.sha256()
@@ -25,15 +28,25 @@ def install(path):
     @functools.wraps(original)
     def load(self,*args,**kwargs):
         result=original(self,*args,**kwargs)
-        params={n:tensor_hash(p) for n,p in self.named_parameters()}
-        buffers={n:tensor_hash(p) for n,p in self.named_buffers()}
+        state['loaded_names']=sorted(result) if result is not None else None
+        return result
+
+    @functools.wraps(original_runner)
+    def runner_load(self,*args,**kwargs):
+        result=original_runner(self,*args,**kwargs)
+        params={n:tensor_hash(p) for n,p in self.model.named_parameters()}
+        buffers={n:tensor_hash(p) for n,p in self.model.named_buffers()}
         if path.exists():raise RuntimeError('immutable startup identity required')
         path.parent.mkdir(parents=True,exist_ok=True)
         path.write_text(json.dumps(dict(parameters=params,buffers=buffers,
-            loaded_names=sorted(result) if result is not None else None,
-            tensor_bytes=sum(p.numel()*p.element_size() for p in self.parameters())),indent=2)+'\n')
+            loaded_names=state.get('loaded_names'),
+            allow_bf16_reduced_precision_reduction=torch.backends.cuda.matmul.allow_bf16_reduced_precision_reduction,
+            allow_tf32=torch.backends.cuda.matmul.allow_tf32,default_dtype=str(torch.get_default_dtype()),
+            float32_matmul_precision=torch.get_float32_matmul_precision(),
+            tensor_bytes=sum(p.numel()*p.element_size() for p in self.model.parameters())),indent=2)+'\n')
         return result
     dg.DiffusionGemmaForConditionalGeneration.load_weights=load
+    GPUModelRunner.load_model=runner_load
 
 
 if __name__=='__main__':
