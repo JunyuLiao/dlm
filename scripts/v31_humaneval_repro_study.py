@@ -18,6 +18,19 @@ write, read, sha = base.write, base.read, base.sha
 CAPS = dict(diagnosis=7200, k256=18000, k128=18000)
 
 
+def effective_caps(study):
+    path=study/'allocation_addendum.json'
+    if not path.exists():return CAPS
+    item=read(path)
+    spec=ROOT/item['spec_file']
+    if item['prior_protocol_sha256']!=sha(study/'protocol.json') or sha(spec)!=item['spec_sha256']:
+        raise RuntimeError('allocation addendum identity drift')
+    caps=item['caps_s']
+    if caps!=dict(diagnosis=10800,k256=16200,k128=16200) or sum(caps.values())!=sum(CAPS.values()):
+        raise RuntimeError('invalid allocation or total-budget expansion')
+    return caps
+
+
 def prepare(study):
     if study.exists():
         raise RuntimeError('new immutable study required')
@@ -114,11 +127,15 @@ def job(study, name, mode, family, pass_name, trace=False, overrides=None, wrapp
     base.wait_idle()
     budget=read(study/'gpu_budget.json')
     charged=sum(r.get('elapsed_s',r['reserved_s']) for r in budget['reservations'] if r['phase']=='diagnosis')
-    remaining=CAPS['diagnosis']-charged
+    caps=effective_caps(study)
+    remaining=min(caps['diagnosis']-charged,
+                  sum(caps.values())-sum(r.get('elapsed_s',r['reserved_s']) for r in budget['reservations']))
     if remaining < 180:
         raise RuntimeError('diagnosis budget exhausted')
     reserve=min(900,remaining)
     entry=dict(name=name,phase='diagnosis',reserved_s=reserve)
+    budget.update(caps_s=caps,initial_caps_s=CAPS,
+                  allocation_addendum_sha256=sha(study/'allocation_addendum.json') if (study/'allocation_addendum.json').exists() else None)
     budget['reservations'].append(entry);write(study/'gpu_budget.json',budget)
     write(study/'state.json',dict(status='running',job=name,full_runs_qualified=False))
     start=time.monotonic()
