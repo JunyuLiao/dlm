@@ -19,7 +19,7 @@ def qualify(root,analysis,destination):
     marker=read(analysis/'analysis_complete.json');assert marker['protocol_sha256']==sha(root/'protocol.json')
     for name,digest in marker['files_sha256'].items():assert sha(analysis/name)==digest
     report=read(analysis/'summary.json');assert report['protocol_sha256']==sha(root/'protocol.json')
-    contrasts=report['contrasts'];errors=[];leaves={};records={};within=[]
+    contrasts=report['contrasts'];errors=[];leaves={};records={};private={};within=[]
     if len(contrasts)!=72:errors.append('missing independent observed-case coverage')
     for row in contrasts:
         if not row['all_logit_fingerprints_present']:errors.append('missing raw-logit coverage '+row['label'])
@@ -31,6 +31,8 @@ def qualify(root,analysis,destination):
         assert receipt['status']=='complete' and receipt['protocol_sha256']==sha(root/'protocol.json')
         for name,digest in receipt['files_sha256'].items():assert sha(leaf/name)==digest
         data=jsonl(leaf/'records.jsonl');records[job]=data;leaves[job]=sha(leaf/'attempt_complete.json')
+        private[job]=jsonl(leaf/'private/generation.private.jsonl')
+        if len(private[job])!=len(data):errors.append('private output coverage '+job)
         if len(data)!=152 or len(config['bookend_groups'])!=72:errors.append('native coverage '+job)
         if receipt['observer_qualified'] is not True or len(receipt['bookends'])!=72:errors.append('observer equivalence '+job)
         for i,row in enumerate(data):
@@ -42,6 +44,8 @@ def qualify(root,analysis,destination):
         for group in config['bookend_groups']:
             a,b=data[group['original']],data[group['final']]
             changed=[k for k in FIELDS if a[k]!=b[k]]
+            if private[job][group['original']]['completion']!=private[job][group['final']]['completion']:
+                changed.append('private_completion')
             within.append(dict(job=job,label=group['label'],passed=not changed,fields_changed=changed))
             if changed:errors.append('observed versus pure '+job+' '+group['label'])
     assert len(records)==2
@@ -52,9 +56,12 @@ def qualify(root,analysis,destination):
         for a,b in zip(groups,other):
             x,y=records[left][a[context]],records[right][b[context]]
             changed=[k for k in FIELDS if x[k]!=y[k]]
+            if private[left][a[context]]['completion']!=private[right][b[context]]['completion']:
+                changed.append('private_completion')
             independent.append(dict(context=context,label=a['label'],passed=not changed,fields_changed=changed))
             if changed:errors.append('independent '+context+' '+a['label'])
-    warmup_changes=[i for i in range(8) if any(records[left][i][k]!=records[right][i][k] for k in FIELDS)]
+    warmup_changes=[i for i in range(8) if any(records[left][i][k]!=records[right][i][k] for k in FIELDS) or
+        private[left][i]['completion']!=private[right][i]['completion']]
     if warmup_changes:errors.append('independent warmup native metrics mismatch')
     result=dict(status='failed_native_no_overlap_qualification' if errors else 'native_no_overlap_qualified',
         errors=sorted(set(errors)),protocol_sha256=sha(root/'protocol.json'),source_commit=p['source_commit'],

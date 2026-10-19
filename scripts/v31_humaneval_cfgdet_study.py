@@ -85,6 +85,7 @@ def reference_owner(study,p):
         not reference_compatible(p,other,read(study/'receipts/source_fingerprints.json'),read(owner/'receipts/source_fingerprints.json'))):
         raise RuntimeError('shared reference source/runtime/data binding drift')
     verify(owner)
+    base.SUITES.update(p['suites'])
     return owner
 
 
@@ -123,6 +124,13 @@ def prepare(study,budget,observe_no_overlap=False,single_primary_shard=False,sha
         if proof['status']!='native_no_overlap_qualified':raise RuntimeError('observing-FA4 native correction unqualified')
         if proof['policy_source_sha256']!=sha(ROOT/'scripts/v31_humaneval_observe_no_overlap.py'):
             raise RuntimeError('qualified observing policy source changed')
+        preflight=ROOT/'results/humaneval_no_overlap_matrix_preflight_20261019/attempt001'
+        checked=read(preflight/'receipt.json')
+        if checked['status']!='complete' or checked['tests']!=19:raise RuntimeError('matrix orchestration CPU preflight required')
+        for name,digest in checked['files_sha256'].items():
+            if sha(preflight/name)!=digest:raise RuntimeError('matrix preflight artifact drift')
+        for name,digest in checked['source_sha256'].items():
+            if sha(ROOT/name)!=digest:raise RuntimeError('tested matrix orchestration source changed')
         if 'evaluation' not in phase_caps():raise RuntimeError('remaining evaluation allocation must be frozen first')
     if shared_references is not None and not observe_no_overlap:
         raise RuntimeError('shared references require the new common-source protocol')

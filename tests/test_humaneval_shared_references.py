@@ -88,3 +88,15 @@ def test_allocation_chain_keeps_total_and_rejects_ledger_drift(tmp_path,monkeypa
     bad=dict(caps);bad['evaluation']+=1
     write(inv/'gpu_budget.json',dict(caps_s=bad,allocation_addendum_sha256=campaign.sha(prior)))
     with pytest.raises(RuntimeError,match='ledger'):campaign.phase_caps()
+
+
+def test_owner_verification_preserves_requesting_budget_environment(tmp_path,monkeypatch):
+    own,owner=tmp_path/'k128',tmp_path/'k256';a,b=protocol(128),protocol(256);source={'execution':'identical'}
+    write(owner/'protocol.json',b);write(owner/'receipts/source_fingerprints.json',source)
+    write(own/'receipts/source_fingerprints.json',source)
+    a['shared_references']=dict(study='k256',families=list(campaign.REFERENCES),protocol_sha256=campaign.sha(owner/'protocol.json'),
+        source_fingerprints_sha256=campaign.sha(owner/'receipts/source_fingerprints.json'))
+    monkeypatch.setattr(campaign,'ROOT',tmp_path);monkeypatch.setattr(campaign.base,'SUITES',{})
+    monkeypatch.setattr(campaign,'verify',lambda path:campaign.base.SUITES.update(b['suites']))
+    assert campaign.reference_owner(own,a)==owner
+    assert campaign.base.SUITES['thinking_on']['mage_k']==128
