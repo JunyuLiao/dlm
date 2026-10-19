@@ -53,7 +53,7 @@ def compilation_options(current):
         raise RuntimeError('this frozen native worker expects dictionary compilation settings')
     options = dict(current or {})
     options['inductor_compile_config'] = dict(options.get('inductor_compile_config') or {},
-                                             deterministic=True)
+        deterministic=True, benchmark_combo_kernel=False)
     return options
 
 

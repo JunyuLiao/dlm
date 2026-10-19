@@ -11,7 +11,8 @@ def test_compiler_policy_preserves_native_graph_and_other_options():
     original = dict(cudagraph_mode='PIECEWISE',inductor_compile_config=dict(combo_kernels=True))
     fixed = compilation_options(original)
     assert fixed['cudagraph_mode'] == 'PIECEWISE'
-    assert fixed['inductor_compile_config'] == dict(combo_kernels=True,deterministic=True)
+    assert fixed['inductor_compile_config'] == dict(combo_kernels=True,deterministic=True,
+                                                   benchmark_combo_kernel=False)
     assert original['inductor_compile_config'] == dict(combo_kernels=True)
     assert 'cudagraph_mode' not in compilation_options(None)
 

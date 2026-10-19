@@ -165,6 +165,7 @@ def job(study, name, mode, family, pass_name, trace=False, overrides=None, wrapp
             actual_kernels_deterministic=bool(inventory.get('kernels')) and all(
                 k['deterministic'] for k in inventory.get('kernels',[])),
             explicit_model_compiler_deterministic=effective.get('effective_inductor_compile_config',{}).get('deterministic') is True,
+            no_unvetted_combo_benchmark=effective.get('effective_inductor_compile_config',{}).get('benchmark_combo_kernel') is False,
             native_graph_mode=effective.get('effective_cudagraph_mode')==(
                 'FULL_AND_PIECEWISE' if family=='dense_full' else 'PIECEWISE'))
         good=good and all(policy_checks.values())
