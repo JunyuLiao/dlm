@@ -16,6 +16,14 @@ PARENT=ROOT/'results/humaneval_value_cfgdet_k256_20261019/attempt001'
 
 def prepare(root,overlap_screen=False):
     parent=campaign.verify(PARENT);assert not root.exists()
+    previous=None
+    if overlap_screen:
+        prior=ROOT/'results/humaneval_observe_operand_replay_20261019/attempt002'
+        receipt=read(prior/'receipt.json');assert receipt['status']=='complete_operator_diagnostic'
+        for name,digest in receipt['files_sha256'].items():assert sha(prior/name)==digest
+        observed=read(prior/'private/operator_summary.json')
+        assert any(v['first_changed_repeat'] is not None for c in observed['cases'] for v in c['variants'])
+        previous=dict(receipt=str((prior/'receipt.json').relative_to(ROOT)),sha256=sha(prior/'receipt.json'))
     for name in ('clean001','clean002'):
         leaf=NATIVE/'runs'/name/'attempt001';marker=read(leaf/'attempt_complete.json')
         assert marker['status']=='complete'
@@ -42,6 +50,7 @@ def prepare(root,overlap_screen=False):
     p=dict(status='frozen_before_gpu',source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         runtime=parent['runtime'],cases=cases,repeats=256 if overlap_screen else 16,phase='k256',maximum_job_reservation_s=180 if overlap_screen else 240,
         overlap_screen=overlap_screen,engines=['engine001','engine002'] if overlap_screen else None,
+        prior_operand_replay=previous,
         phase_cap_s=campaign.phase_caps()['k256'],phase_allocation_file=str(campaign.allocation_file().relative_to(ROOT)),
         phase_allocation_sha256=sha(campaign.allocation_file()),native_model_forwards=0,native_sampler_calls=0,
         native_protocol_sha256=sha(NATIVE/'protocol.json'),native_base_worker=str(PARENT/'private/execution/scripts/v31_humaneval_cfgdet_base_worker.py'),
