@@ -1,3 +1,25 @@
+## HumanEval layer29 localization and targeted operand capture — 2026-10-19 UTC
+
+Verified HEAD3f0c2745 and frozen native source822b771c. Attempt010 expired at
+132/158 rows after1503.675s. Partial analysis verifies52 completed full/light
+contrasts, with two raw-logit changes: full_swap8 q129/42 at100 and residual
+q129/42 at154. First differing recorded boundary is the BF16[256,16,512]
+attention output before wrapper30, identifying layer29; earlier recorded
+boundaries match. Swaps retains N156/C13/T3307 and final output. Residual changes
+N153/159,T3168/3182 and output. This is not equal-input operator proof.
+
+Next source-bound plan: HUMANEVAL_LAST_GLOBAL_CAPTURE_PLAN_20261019.md. Two
+84-request engines,750s each: original80-request observed prefix, two independent
+layer29-only probe requests, two pure repeats. Capture actual paged FA4 inputs,
+partial outputs/LSE, alias2 merge, moments, cache and correction. Private raw
+operands at evidenced calls permit replay. Require four exact-source CPU tests
+and reuse only the already tested checksum/batched-drain utilities. No native
+operator is repeated/replaced and no full matrix is released by this stage.
+
+Closed charges now: diagnosis10477.365s,k25616042.956s,k1280. No open GPU
+reservation. Remaining k2563757.044s under allocation002; total ceiling43200s
+unchanged. Both corrected full matrices and historical campaigns stay held.
+
 ## HumanEval optimized graph localization attempt010 — 2026-10-19 UTC
 
 Verified native source822b771c. Current attempt010 freezes two158-request engines,

@@ -96,6 +96,11 @@ if __name__=='__main__':
     if os.environ.get('HUMANEVAL_GRAPH_TRACE_DIR'):
         graphs=runpy.run_path(os.environ['HUMANEVAL_GRAPH_TRACE_SOURCE'])
         graphs['install'](state,Path(os.environ['HUMANEVAL_GRAPH_TRACE_DIR']))
+    if os.environ.get('HUMANEVAL_LAST_GLOBAL_DIR'):
+        last=runpy.run_path(os.environ['HUMANEVAL_LAST_GLOBAL_SOURCE'])
+        last['install'](state,Path(os.environ['HUMANEVAL_LAST_GLOBAL_DIR']),
+            json.loads(Path(os.environ['HUMANEVAL_LAST_GLOBAL_MODES']).read_text()),
+            json.loads(Path(os.environ['HUMANEVAL_LAST_GLOBAL_RAW_CALLS']).read_text()))
     trajectory=runpy.run_path(os.environ['HUMANEVAL_TRAJECTORY_SOURCE'])
     trajectory['install'](schedule,Path(os.environ['HUMANEVAL_TRAJECTORY_DIR']))
     runpy.run_path(os.environ['HUMANEVAL_REPRO_BASE'],run_name='__main__')

@@ -2764,3 +2764,21 @@ ledgers, receipts and scientific gates remain. Attempt010 freezes two1500s
 158-request engines after the combined checks. It is still a diagnostic; a
 matching bounded trace does not repair prior native failures. No full matrix
 or historical campaign resumes from this stage alone.
+
+## Localize the remaining HumanEval drift before an operator claim (2026-10-19 UTC)
+
+Attempt010 expires1503.675s at132/158 public rows. Of52 completed full/light
+contrasts, two q129/seed42 cases differ in raw logits. The first changed graph
+input is layer29's BF16 attention output before wrapper30; earlier recorded
+boundaries match. Full swaps changes logits at100 without changing native
+N/C/T/output; direction residual changes at154 and N153/159,T3168/3182/output.
+These partial hashes do not establish equality of actual masks, paged KV,
+cached moments or correction state. Pure repeats/engine2/inventory are absent.
+
+Freeze a smaller two750s,84-request capture after exact-source CPU preflight.
+Keep the original80-request prefix and only two q129/42 targeted probe/pure
+contrasts. Observe actual FA4 operands/partials, merge, moments and cache at29;
+read write-only outputs only after native return and call every original once.
+Private raw operands support the next exact-input replay. No sampler/selector
+change, qualification relaxation, full matrix release or total budget increase.
+Plan: docs/HUMANEVAL_LAST_GLOBAL_CAPTURE_PLAN_20261019.md.
