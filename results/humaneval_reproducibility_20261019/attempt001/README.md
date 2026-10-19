@@ -37,12 +37,26 @@ Verified findings:
 - Disabling BF16 split-K using Torch's tuple flag with the existing cuBLAS
   backend fails during initialization, before generation. The failed attempt
   is retained. A separate supported boolean accumulation-precision contrast
-  retains the backend and split-K policy. Its results are pending.
+  retains the backend and split-K policy. Its12/12 paired outputs and N still
+  differ, so accumulation precision alone is not a fix.
 
-Next: observe completed kernels in the unchanged first compiled prefill
-segment, then qualify any correction on V31/dense and both thinking settings.
-The observer includes selected Triton configurations and clean bookends;
-its focused CPU regression passes. Non-thinking diagnostics remain pending.
+A concrete mechanism is now reproduced: changing only a fused-normalization
+kernel's R0_BLOCK512/1024 changes11 BF16 layer-output elements and10 BF16
+elements feeding the next projection. Replays with the same configuration are
+exact and match the corresponding recorded operator outputs. See
+docs/HUMANEVAL_REDUCTION_MECHANISM_20261019.md and
+operator_diagnostics/attempt002/summary.json. This is operator causal evidence;
+the complete execution discrepancy is not yet declared resolved.
+
+The qualified first-segment observer runs that one compiled segment outside
+its CUDA graph and copies outputs into the native graph's bound addresses.
+Two same-engine bookends match. The earlier pointer-unsafe attempt is excluded;
+its queued repetition was cancelled after the active worker finished, without
+interrupting native generation. Focused CPU regressions:2 passed.
+
+Active candidate: supported TORCHINDUCTOR_DETERMINISTIC=1, with actual selected
+kernel and effective-policy receipts. Qualify it across processes/passes on
+V31/dense and both thinking settings. Non-thinking diagnostics remain pending.
 No selector improvement or accuracy ranking is established. Raw activations,
 RNG bytes and completions are private. Sanitized comparisons and independently
 rescored diagnostic records are under analysis/.

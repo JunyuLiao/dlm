@@ -1,0 +1,177 @@
+{
+  "kind": "same_input_operator_only_counterfactual",
+  "native_forwards": 0,
+  "generated_wrapper_sha256": "7f3c1a52fb0f327c373f0bf2036ba92b84870cca3950ab6929508bc9970dc42a",
+  "kernel_text_sha256": "3330d1350e26c96561a20c5d7c902d3223b9dd6d7d43761bf90a646152dd7c97",
+  "native_markers_sha256": {
+    "dense_on_segment004": "b55614ecfd96e5b2e5c1fd5ab73e2837ac63d4d77b568fbb209e1072321e126b",
+    "dense_on_segment005": "0f7c13e664c76cbdfa794b55c7c171d1fe8632f7c6273ad053e5a7b86d595789"
+  },
+  "prompt_tokens": 171,
+  "padded_rows": 176,
+  "configs": [
+    512,
+    1024
+  ],
+  "num_warps": 8,
+  "native_selected_configs": {
+    "dense_on_segment004": {
+      "triton_red_fused_add_mul_rms_norm_2": [
+        "XBLOCK: 1, R0_BLOCK: 512, num_warps: 8, num_ctas: 1, num_stages: 1, maxnreg: None"
+      ]
+    },
+    "dense_on_segment005": {
+      "triton_red_fused_add_mul_rms_norm_2": [
+        "XBLOCK: 1, R0_BLOCK: 512, num_warps: 8, num_ctas: 1, num_stages: 1, maxnreg: None"
+      ]
+    }
+  },
+  "same_config_repeat_errors": {
+    "512": {
+      "buf19": {
+        "different": 0,
+        "elements": 481536,
+        "max_abs": 0.0,
+        "mean_abs": 0.0
+      },
+      "buf17": {
+        "different": 0,
+        "elements": 481536,
+        "max_abs": 0.0,
+        "mean_abs": 0.0
+      },
+      "buf21": {
+        "different": 0,
+        "elements": 481536,
+        "max_abs": 0.0,
+        "mean_abs": 0.0
+      }
+    },
+    "1024": {
+      "buf19": {
+        "different": 0,
+        "elements": 481536,
+        "max_abs": 0.0,
+        "mean_abs": 0.0
+      },
+      "buf17": {
+        "different": 0,
+        "elements": 481536,
+        "max_abs": 0.0,
+        "mean_abs": 0.0
+      },
+      "buf21": {
+        "different": 0,
+        "elements": 481536,
+        "max_abs": 0.0,
+        "mean_abs": 0.0
+      }
+    }
+  },
+  "between_config_errors": {
+    "buf19": {
+      "different": 11,
+      "elements": 481536,
+      "max_abs": 0.0078125,
+      "mean_abs": 1.643192055716849e-08
+    },
+    "buf17": {
+      "different": 86596,
+      "elements": 481536,
+      "max_abs": 0.0001220703125,
+      "mean_abs": 1.0598510032598445e-07
+    },
+    "buf21": {
+      "different": 10,
+      "elements": 481536,
+      "max_abs": 0.03125,
+      "mean_abs": 6.727877249748133e-08
+    }
+  },
+  "native_match_errors": {
+    "512": {
+      "dense_on_segment004": {
+        "buf19": {
+          "different": 0,
+          "elements": 481536,
+          "max_abs": 0.0,
+          "mean_abs": 0.0
+        },
+        "buf17": {
+          "different": 0,
+          "elements": 481536,
+          "max_abs": 0.0,
+          "mean_abs": 0.0
+        },
+        "buf21": {
+          "different": 0,
+          "elements": 481536,
+          "max_abs": 0.0,
+          "mean_abs": 0.0
+        }
+      },
+      "dense_on_segment005": {
+        "buf19": {
+          "different": 0,
+          "elements": 481536,
+          "max_abs": 0.0,
+          "mean_abs": 0.0
+        },
+        "buf17": {
+          "different": 0,
+          "elements": 481536,
+          "max_abs": 0.0,
+          "mean_abs": 0.0
+        },
+        "buf21": {
+          "different": 0,
+          "elements": 481536,
+          "max_abs": 0.0,
+          "mean_abs": 0.0
+        }
+      }
+    },
+    "1024": {
+      "dense_on_segment004": {
+        "buf19": {
+          "different": 11,
+          "elements": 481536,
+          "max_abs": 0.0078125,
+          "mean_abs": 1.643192055716849e-08
+        },
+        "buf17": {
+          "different": 86596,
+          "elements": 481536,
+          "max_abs": 0.0001220703125,
+          "mean_abs": 1.0598510032598445e-07
+        },
+        "buf21": {
+          "different": 10,
+          "elements": 481536,
+          "max_abs": 0.03125,
+          "mean_abs": 6.727877249748133e-08
+        }
+      },
+      "dense_on_segment005": {
+        "buf19": {
+          "different": 11,
+          "elements": 481536,
+          "max_abs": 0.0078125,
+          "mean_abs": 1.643192055716849e-08
+        },
+        "buf17": {
+          "different": 86596,
+          "elements": 481536,
+          "max_abs": 0.0001220703125,
+          "mean_abs": 1.0598510032598445e-07
+        },
+        "buf21": {
+          "different": 10,
+          "elements": 481536,
+          "max_abs": 0.03125,
+          "mean_abs": 6.727877249748133e-08
+        }
+      }
+    }
+  }
+}
