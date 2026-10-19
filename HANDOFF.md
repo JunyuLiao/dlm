@@ -1,29 +1,39 @@
 ## HumanEval reproducibility investigation active — 2026-10-19 (Hong Kong)
 
-Starting checkpoint63ccf1e6; diagnostic plan c467882a. Current diagnostic source
-1544b2d6, with immutable per-job observer/factor hashes and the original
-20e6c0be execution snapshot. Root: results/humaneval_reproducibility_20261019/attempt001.
-Original K256 and older paused LongBench campaigns are unchanged.
+Starting checkpoint63ccf1e6; plan c467882a; current diagnostic source7a29df5e.
+Original native snapshot20e6c0be and K256 results are immutable. Root:
+results/humaneval_reproducibility_20261019/attempt001. Older LongBench campaigns
+remain paused. No production selector/sampler change or full K256/K128 rerun.
 
-Qualification fails. Two independent unobserved dense FULL clean engines differ
-on all12 measured paired records (six unique questions, twice each), despite
-matching prompt and RNG metadata. Within one dense engine, clean/sync/geometry/
-finite/audit/clean bookends agree exactly on every question. Thus process drift
-already occurs without audit; do not attribute it to per-step synchronization.
+Qualification fails. Independent FULL, PIECEWISE and V31 clean engines each
+change all12 measured output pairs (six unique questions, twice). Within-engine
+clean/sync/geometry/finite/audit/clean groups and two native attention-observer
+clean/observed/clean groups match. Audit synchronization is not established as
+causal; process drift occurs without audit. All900 loaded parameters and187
+buffers match. Valid initial inputs, initial noise and default RNG match.
 
-The original deferred observer comparison is confounded by independent-process
-drift. Its instrumented traces have equal initial canvases/default RNG state but
-different first denoising logits. Same-engine observer qualification and actual
-model-input/loaded-tensor fingerprints are the next localization checks.
+Earliest localized discrepancy: layer0 prefill Q/K/V/native attention output
+and logical cache match, but layer1 Q/K/V differ (Q397/700416,max0.03125).
+The post-attention0-to-QKV1 interval is unresolved. Do not blame a specific GEMM,
+MoE, cache write or sampler without the next completed-kernel comparison.
+Native FA4 compile-context probes show no dynamic-causal specialization collision.
+CUBLAS4096:8 and small cuBLASLt workspace probes fail to restore repeatability.
+The BF16 tuple flag without cuBLASLt fails before generation; failed attempt
+retained. The supported BF16 accumulation-only pair is running serially.
 
-Active: serial independent repeats, same-engine replication and explicit cuBLAS
-workspace contrasts, within7200s diagnostic reserve. Later K256/K128 matrices
-are gated and unstarted; K128 will need fresh work-only V2 calibration. Total
-self-imposed campaign ceiling43200s. Read gpu_budget.json/state.json for live
-charges and current leaf; no competing worker. Intermediate analysis/attempt002
-officially scores and independently rescores184 saved rows, with zero mismatch;
-these are diagnostic records including64 warmups, not a HumanEval accuracy panel.
-No root cause or reliable selector advantage is established.
+Next frozen observer: private/source_addenda/attempt017/worker.py, snapshots
+existing generated Python kernel-call outputs and selected Triton configurations
+between native attention0/1 on question0 only. No recompilation or extra forwards.
+Its detached post-kernel CPU regression passes; native clean bookends are required.
+Non-thinking diagnostic repeats remain pending. Any correction needs independent
+process/pass/mode qualification before work-only V2 calibration and full matrices.
+
+Allocation addendum2fb5ae9d keeps total43200s: diagnosis10800, K25616200,
+K12816200. Read gpu_budget.json for actual closed charges/active reservation;
+state.json remains full_runs_qualified=false. Internal HOLD markers suspend
+older diagnostic queues, not the active job or either user-paused campaign.
+Current analysis remains partial and explicitly unqualified; official diagnostic
+rescoring must not be presented as full HumanEval accuracy or clean timing.
 
 ## V31 budget failure map complete — 2026-10-19 (Hong Kong)
 

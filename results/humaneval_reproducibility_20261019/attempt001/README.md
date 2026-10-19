@@ -17,8 +17,8 @@ Verified findings:
 - Two post-load fingerprints match all900 actual parameters and187 model
   buffers (51.676GB of parameters), yet their12 output pairs differ.
 - Native FA4 probes find zero dynamic-causal specialization-context collisions.
-- Deferred observation has identical clean/observed/clean groups in the first
-  engine. Across both observed processes, all six valid prefill/initial-denoise
+- Deferred observation has identical clean/observed/clean groups in independent
+  engines. Across both observed processes, all six valid prefill/initial-denoise
   token IDs, positions, embeddings and default CPU/CUDA RNG states agree, but
   first denoising logits differ. Q0 full-logit mean/max absolute differences
   are0.740/9.923, with20/256 row argmax changes. Physical page IDs differ, while
@@ -26,11 +26,23 @@ Verified findings:
 - Input padding is not a sufficient explanation: question23 has no unused
   rows; question129 has identical unused rows; both still diverge. The frozen
   padding probe is currently unstarted.
-- Four cuBLAS4096:8 workspace tests remain nonrepeatable. A separate cuBLASLt
-  workspace contrast is running. No numerical policy is promoted as a fix.
+- Four cuBLAS4096:8 workspace tests and the two small-cuBLASLt-workspace tests
+  remain nonrepeatable. V31 clean independent repeats also change all12 output
+  pairs. No numerical policy is promoted as a fix.
+- Native attention observation is inert in both engines' six question groups.
+  Layer0 prefill Q/K/V/output and logical cached K/V match exactly across
+  processes. Layer1 Q/K/V first differ (Q397/700416 elements, max0.03125);
+  the interval after layer0 attention and through layer1 Q/K/V remains under
+  investigation. This does not yet identify a particular GEMM or MoE operator.
+- Disabling BF16 split-K using Torch's tuple flag with the existing cuBLAS
+  backend fails during initialization, before generation. The failed attempt
+  is retained. A separate supported boolean accumulation-precision contrast
+  retains the backend and split-K policy. Its results are pending.
 
-Next: compare native per-layer prefill Q/K/V/output and logical cache states,
-qualify V31 and non-thinking paths, identify and test the smallest correction.
+Next: observe completed kernels in the unchanged first compiled prefill
+segment, then qualify any correction on V31/dense and both thinking settings.
+The observer includes selected Triton configurations and clean bookends;
+its focused CPU regression passes. Non-thinking diagnostics remain pending.
 No selector improvement or accuracy ranking is established. Raw activations,
 RNG bytes and completions are private. Sanitized comparisons and independently
 rescored diagnostic records are under analysis/.
