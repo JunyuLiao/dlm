@@ -18,6 +18,9 @@ def graph_contrast(left,right,first_logit):
     first=next((i for i,(c,d) in enumerate(zip(u,v)) if c!=d),None)
     relevant=next((i for i,(c,d) in enumerate(zip(u,v)) if c!=d and
         c['sampler_index']==d['sampler_index']==first_logit),None) if first_logit is not None else None
+    changed_return=next((i for i,(c,d) in enumerate(zip(u,v)) if
+        c['point']==d['point']=='after' and c['values']!=d['values'] and
+        c['sampler_index']==d['sampler_index']==first_logit),None) if first_logit is not None else None
     def metadata(events,index):
         return {k:value for k,value in events[index].items() if k!='values'} if index is not None else None
     return dict(events=[len(u),len(v)],events_equal=u==v,first_changed_event=first,
@@ -25,6 +28,12 @@ def graph_contrast(left,right,first_logit):
         first_changed_at_logit_call=relevant,
         first_changed_at_logit_call_metadata=[metadata(events,relevant) for events in (u,v)],
         values_at_first_changed_logit_boundary=[events[relevant]['values'] if relevant is not None else None for events in (u,v)],
+        first_changed_return_at_logit_call=changed_return,
+        first_changed_return_metadata=[metadata(events,changed_return) for events in (u,v)],
+        inputs_before_first_changed_return=[next((e['values'] for e in events[:changed_return+1]
+            if e['point']=='before' and e['call']==events[changed_return]['call']),None)
+            if changed_return is not None else None for events in (u,v)],
+        first_changed_return_values=[events[changed_return]['values'] if changed_return is not None else None for events in (u,v)],
         limitation='Partial activation argument fingerprints include storage extents; actual tensor capture/replay is required')
 
 
