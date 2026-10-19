@@ -2,6 +2,7 @@
 import argparse
 import hashlib
 import json
+import struct
 from pathlib import Path
 
 FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','native_interval_steps')
@@ -10,6 +11,25 @@ FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_cal
 def read(path):return json.loads(path.read_text())
 def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def jsonl(path):return [json.loads(line) for line in path.read_text().splitlines()]
+
+
+def graph_contrast(left,right,first_logit):
+    u,v=left['events'],right['events']
+    first=next((i for i,(c,d) in enumerate(zip(u,v)) if c!=d),None)
+    relevant=next((i for i,(c,d) in enumerate(zip(u,v)) if c!=d and
+        c['sampler_index']==d['sampler_index']==first_logit),None) if first_logit is not None else None
+    def metadata(events,index):
+        return {k:value for k,value in events[index].items() if k!='values'} if index is not None else None
+    return dict(events=[len(u),len(v)],events_equal=u==v,first_changed_event=first,
+        first_changed_metadata=[metadata(events,first) for events in (u,v)],
+        first_changed_at_logit_call=relevant,
+        first_changed_at_logit_call_metadata=[metadata(events,relevant) for events in (u,v)],
+        values_at_first_changed_logit_boundary=[events[relevant]['values'] if relevant is not None else None for events in (u,v)],
+        limitation='Partial activation argument fingerprints include storage extents; actual tensor capture/replay is required')
+
+
+def logit_digests(trace):
+    return [hashlib.sha256(struct.pack('<QQ',*row['gpu128'])).hexdigest() for row in trace['logits_before']]
 
 
 def compare(root,destination,workspace,quiet=False):
@@ -24,6 +44,8 @@ def compare(root,destination,workspace,quiet=False):
             if changed:differences.append(dict(row=i,index=rows[i]['index'],seed=rows[i]['panel_seed'],
                 warmup=i<c['warmup_requests'],method=rows[i]['receipts']['adapter']['humaneval_live_arm'],fields=changed))
         inventory.append(dict(job=name,observer_qualified=marker['observer_qualified'],
+            graph_observer_qualified=marker.get('graph_observer_qualified'),
+            graph_pure_bookends=marker.get('graph_bookends'),
             original_prefix_changes=differences,gpu_reservation_s=marker['gpu_reservation_s'],
             marker_sha256=sha(leaf/'attempt_complete.json')))
         groups=c.get('bookend_groups',[dict(observed=c['observed_row'],label='residual_direction_guard')])
@@ -34,6 +56,8 @@ def compare(root,destination,workspace,quiet=False):
                 residual=read(leaf/f'private/residual/request{index+1:03d}.json'))
             if p.get('graph_boundary_fingerprints'):
                 data[name][label]['graphs']=read(leaf/f'private/graphs/request{index+1:03d}.json')
+                data[name][label]['graph_only']=read(leaf/f"private/graphs/request{group['final']+1:03d}.json")
+                data[name][label]['native_graph_only']={k:rows[group['final']][k] for k in FIELDS}
     left,right=list(data);contrasts=[]
     assert set(data[left])==set(data[right])
     for label,x in data[left].items():
@@ -66,21 +90,22 @@ def compare(root,destination,workspace,quiet=False):
             residual_events=[len(x['residual']['events']),len(y['residual']['events'])],
             residual_fingerprints_equal=x['residual']==y['residual'],first_residual_event_changed=first_residual))
         if p.get('graph_boundary_fingerprints'):
-            u,v=x['graphs']['events'],y['graphs']['events']
-            first_graph=next((i for i,(c,d) in enumerate(zip(u,v)) if c!=d),None)
-            first_logit=contrasts[-1]['first_raw_logit_changed_call']
-            relevant=next((i for i,(c,d) in enumerate(zip(u,v)) if c!=d and
-                c['sampler_index']==d['sampler_index']==first_logit),None) if first_logit is not None else None
-            def event_at(events,index):
-                if index is None:return None
-                return {k:value for k,value in events[index].items() if k!='values'}
-            contrasts[-1]['graphs']=dict(events=[len(u),len(v)],
-                equal=x['graphs']==y['graphs'],first_changed_event=first_graph,
-                first_changed_metadata=[event_at(events,first_graph) for events in (u,v)],
-                first_changed_at_logit_call=relevant,
-                first_changed_at_logit_call_metadata=[event_at(events,relevant) for events in (u,v)],
-                values_at_first_changed_logit_boundary=[events[relevant]['values'] if relevant is not None else None for events in (u,v)],
-                limitation='Partial activation argument fingerprints include storage extents; actual tensor capture/replay is required')
+            contrasts[-1]['graphs_full_observer']=graph_contrast(x['graphs'],y['graphs'],contrasts[-1]['first_raw_logit_changed_call'])
+            dl,dr=logit_digests(x['graph_only']),logit_digests(y['graph_only'])
+            first_light=next((i for i,(c,d) in enumerate(zip(dl,dr)) if c!=d),None)
+            contrasts[-1]['graph_only_independent']=dict(logits_equal=dl==dr,
+                sampler_calls=[len(dl),len(dr)],first_raw_logit_changed_call=first_light,
+                native_metrics_equal=x['native_graph_only']==y['native_graph_only'],
+                boundaries=graph_contrast(x['graph_only'],y['graph_only'],first_light))
+            within=[]
+            for job,z in ((left,x),(right,y)):
+                full=[call['before']['logits_gpu128_sha256'] for call in z['trajectory']['calls']]
+                light=logit_digests(z['graph_only'])
+                first_within=next((i for i,(c,d) in enumerate(zip(full,light)) if c!=d),None)
+                within.append(dict(job=job,logits_equal=full==light,sampler_calls=[len(full),len(light)],
+                    first_raw_logit_changed_call=first_within,
+                    boundaries=graph_contrast(z['graphs'],z['graph_only'],first_within)))
+            contrasts[-1]['full_vs_graph_only']=within
     result=dict(status='complete_diagnostic_reproducibility_unresolved',protocol_sha256=sha(root/'protocol.json'),
         original_prefix_reference_context='Different numerical/runtime policy; changes are not same-protocol reproducibility failures'
             if p.get('torch_deterministic_guard') else 'Prior source-matched qualification context',
