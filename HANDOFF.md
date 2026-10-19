@@ -1,3 +1,39 @@
+## HumanEval mixed-method reproducibility remains unresolved — 2026-10-20 (Hong Kong)
+
+Verified diagnostic sourceb13808d4; native selector source20e6c0be and model/helper
+compiler policy10341ab2 remain. Current run:
+results/humaneval_mixed_repro_20261019/attempt005, fixed BLAS workspace as one
+diagnostic factor, two1000s full-cohort engines. Inspect its receipts before any
+conclusion; require actual33554432-byte cuBLAS configuration, not only an env var.
+No candidate numerical fix or selector improvement has been promoted here.
+
+Corrected K256 attempt001 is held with QUALIFICATION_FAILED.json; K128 followup
+is explicitly held and has done no GPU work. No corrected full164 accuracy or
+clean-performance matrix is available. Older LongBench pauses remain intact.
+Do not resume any of these merely because a diagnostic pair agrees.
+
+Completed diagnostics: attempt002 captures first raw-logit differences upstream
+of sampler updates on V3a116/42 and V31-control-after116/43; initial/default RNG
+and prior sampler/logit records agree. Its observation checks fail on some
+cases. Attention attempt003 has full30-layer coverage and matching targeted
+traces, but the fault does not recur. Crossover attempt004 changes first versus
+final unobserved V3a: N274/C20/T5089 to N272/C19/T4787; all four observed cases
+match the final unobserved case. This does not establish tracing as the cause.
+
+Operator screen results/humaneval_selector_definedness_20261019/attempt002
+passes4 checks in22.915s, including native observer NaN-prefill/reference parity
+and H16/HK2/D512 scratch poisoning, canaries and growth/reuse. Its failed
+attempt001 started no worker;36.299s is conservatively charged as a wall upper
+bound, explicitly not measured active GPU work. Closed phase charges before
+attempt005: diagnosis10477.365s, k2569192.128s, k1280. Caps10800/16200/16200 and
+total43200s remain. Read the mutable ledger for current reservations.
+
+Next: compare every attempt005 state/repeat and effective BLAS setting. Matching
+outputs alone does not identify a causal operator. Preserve all negative and
+inconclusive evidence; require a qualified final numerical/runtime protocol
+before full accuracy, fresh work-only K128 calibration, official rescores and
+paper claims. Legacy STATE.json does not own this diagnostic controller.
+
 ## HumanEval baseline reproducibility qualified — 2026-10-19 (Hong Kong)
 
 Native selector/model source20e6c0be; qualified numerical-policy source10341ab2,

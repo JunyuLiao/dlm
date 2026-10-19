@@ -2657,3 +2657,27 @@ adapter path; output buffers are read only after their native forward. The
 integer fingerprint implementation remains source-tested; tensor proof/replay
 must follow a localized change. Two750s reservations charge existing phasek256;
 no budget expansion. Existing43200s total and both campaign holds persist.
+
+## Preserve observation/context negatives; test fixed BLAS workspace (2026-10-20 Hong Kong)
+
+Attention attempt003 has matching per-layer/progress/cache/map/output and full
+sampler traces with30-layer coverage, at525.730/500.678s. The original fault did
+not recur, so no operator is localized by those matching traces. One-engine
+crossover510.626s has first unobserved V3aN274/C20/T5089 and final unobserved
+N272/C19/T4787; all four traced conditions match the latter. A V31 bookend pair
+also differs. This excludes a simple tracing-only explanation, not every
+timing/context mechanism. Retain failed observation checks.
+
+Native FA4/selector definedness screen passes4 checks in22.915s. NaN-prefilled
+observation outputs match reference/native outputs, and native-dimension scratch
+poisoning, canaries, growth/shrink and returned-map ownership pass. Do not infer
+global memory/race correctness from this bounded negative. A controller binding
+failure before worker launch is preserved separately and charged a conservative
+36.299s wall upper bound; active GPU/model work was zero in that attempt.
+
+Sourceb13808d4 freezes a one-factor fixed-BLAS-workspace diagnostic, without a
+Torch algorithm-guard, memory-fill, sampler, selector or graph-mode change.
+Require actual configured bytes in the exit receipt. Two1000s full-cohort jobs
+charge existing phasek256. This is a diagnostic candidate, not a promoted cause
+or repair. Both full matrices and K128 hold remain; no accuracy or speed claim
+is released. All caps and total43200s remain unchanged.
