@@ -85,6 +85,7 @@ def verify(study):
             selected=[r for r in phases['screen'] if r['label']==label]
             assert len(selected)==32 and len({(r['index'],r['panel_seed']) for r in selected})==32
     repair_failure_visibility=[]
+    repair_extra_work=[]
     if 'repair' in phases:
         original={r['index']:r['failure_type'] for r in s.base.read(study/'confirmation/confirmed_failures.json')['repair_cases']}
         grouped=defaultdict(list)
@@ -96,6 +97,31 @@ def verify(study):
             repair_failure_visibility.append(dict(index=index,seed=seed,repeat=repeat,original_failure_type=original[index],
                 visible_against_clean_reference=visible,
                 caveat='cross-pass descriptive check only; instrumented controls do not establish a matched dense causal comparison'))
+        for r in phases['repair']:
+            d=r['native_receipt']['refresh_diagnostic']
+            if not d['events']:continue
+            dense_rectangles=0;tail_rectangles=0;tail_products=0
+            for event in d['events']:
+                batch,n,h,dimension=event['dense_output']['shape']
+                assert batch==1 and n==event['query_rows']
+                nk=event['prefix']+n;tail=nk-64*(event['prefix']//64)
+                dense_rectangles+=h*((n+127)//128)*((nk+63)//64)
+                tail_rectangles+=h*((n+127)//128)*((tail+63)//64)
+                tail_products+=h*n*tail*dimension
+            extra=d['extra_diagnostic_work']
+            assert extra['observer_qk_rectangles']==extra['observer_pv_rectangles']==dense_rectangles
+            changed=sum(event['changed_prefix_blocks'] for event in d['events'])
+            partner_label={'sparse_fresh':'sparse_hold','dense_fresh':'dense_hold'}.get(r['label'])
+            partner=next((x for x in grouped[(r['index'],r['panel_seed'],r['engine_repeat'])] if x['label']==partner_label),None)
+            noop_drift=(changed==0 and partner is not None and any(r[f]!=partner[f] for f in
+                        ('output_hash','denoise_forwards','canvases','score')))
+            repair_extra_work.append(dict(index=r['index'],seed=r['panel_seed'],repeat=r['engine_repeat'],label=r['label'],
+                dense_qk_rectangles=dense_rectangles,dense_pv_rectangles=dense_rectangles,
+                additional_fp32_tail_qk_rectangles=tail_rectangles,additional_fp32_tail_scalar_products=tail_products,
+                changed_prefix_blocks=changed,zero_change_fresh_support_outcome_drift=noop_drift,
+                first_post_event_call=d['first_post_event_call'],
+                other_unpriced_diagnostic_work='normalization, selection, list construction, finite/norm reductions, tensor hashing and state capture',
+                note='Tail product derived from the frozen _mage_select_fa4 implementation and recorded output shape; audit-only, no speed claim'))
     pass_finished=[]
     for phase,rows in phases.items():
         groups=defaultdict(list)
@@ -104,6 +130,16 @@ def verify(study):
             pass_finished.append(dict(phase=phase,family=family,k=k,label=label,records=len(group),
                 correct_and_finished=sum(r['score']==1 and r['finish_reason'] not in s.official.CAPPED for r in group),
                 correct_but_capped=sum(r['score']==1 and r['finish_reason'] in s.official.CAPPED for r in group)))
+    paired_references=[]
+    for phase in ('screen','confirmation'):
+        if phase not in phases:continue
+        for reference in s.REFS:
+            # Reuse the frozen estimator with a temporary reference alias. The
+            # original rows and published arm labels remain untouched.
+            comparison=[r for r in phases[phase] if r['family']=='shared']
+            comparison += [dict(r,label='dense_full_fix51994') for r in phases[phase] if r['label']==reference]
+            paired_references.extend(dict(phase=phase,reference_label=reference,**item)
+                                     for item in s.paired_intervals(comparison))
     s.base.write(dest/'per_item.json',per_item,True)
     s.base.write(dest/'physical_work.json',dict(aggregate=dict(work),phases=dict(phase_work),
         denominator='audit denoising GLOBAL full support plus LOCAL window-intersecting rectangles; not clean work'),True)
@@ -112,7 +148,9 @@ def verify(study):
         gpu_seconds_by_phase=dict(charges),total_gpu_seconds=sum(charges.values()),
         measured_jit_warnings=jit,clean_timing_jit_qualified=not any(x['pass_name']=='clean' for x in jit),
         repair_failure_visibility=repair_failure_visibility,
+        repair_extra_work=repair_extra_work,
         pass_and_finished=pass_finished,
+        paired_reference_intervals=paired_references,
         old_campaigns_remain_paused=True,analysis_script_sha256=s.base.sha(Path(__file__)))
     s.base.write(dest/'verified_complete.json',result,True)
     print(json.dumps(result,sort_keys=True))

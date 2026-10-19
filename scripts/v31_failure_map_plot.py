@@ -18,16 +18,19 @@ def plot(study):
     if dest.exists():raise RuntimeError('new figure attempt required')
     dest.mkdir(parents=True)
     data=sorted(analysis['paired_question_cluster_intervals']['screen'],key=lambda x:x['k'])
-    metrics=[('accuracy_delta_pp','Accuracy difference (percentage points)',0),('NC_ratio','Calls per canvas / dense FULL',1)]
-    if verification['clean_timing_jit_qualified']:metrics.append(('W_ratio','Request time / dense FULL',1))
+    allkept=sorted((x for x in verification['paired_reference_intervals'] if x['phase']=='screen' and x['reference_label']=='allkept_fa4'),key=lambda x:x['k'])
+    metrics=[('accuracy_delta_pp','Accuracy difference (percentage points)',0),('NC_ratio','Calls per canvas / reference',1)]
+    if verification['clean_timing_jit_qualified']:metrics.append(('W_ratio','Request time / reference',1))
     fig,axes=plt.subplots(1,len(metrics),figsize=(4.1*len(metrics),3.5),layout='constrained')
     for ax,(metric,label,reference) in zip(axes,metrics):
-        y=np.array([x['estimates'][metric]['estimate'] for x in data])
-        ci=np.array([x['estimates'][metric]['ci95'] for x in data])
-        ax.errorbar(range(len(data)),y,yerr=np.stack([y-ci[:,0],ci[:,1]-y]),fmt='o-',color='#225ea8',capsize=4)
+        for series,name,color,offset in ((data,'Dense FULL','#225ea8',-.04),(allkept,'All-kept FA4','#d95f02',.04)):
+            y=np.array([x['estimates'][metric]['estimate'] for x in series])
+            ci=np.array([x['estimates'][metric]['ci95'] for x in series])
+            ax.errorbar(np.arange(len(data))+offset,y,yerr=np.stack([y-ci[:,0],ci[:,1]-y]),fmt='o-',color=color,capsize=4,label=name)
         ax.axhline(reference,color='#666666',ls='--',lw=1)
         ax.set_xticks(range(len(data)),[str(x['k']) for x in data]);ax.set_xlabel('V31 prefix budget (tokens)')
         ax.set_ylabel(label);ax.grid(axis='y',alpha=.2)
+    axes[0].legend(fontsize=8)
     fig.suptitle('V31 budget screen: 16 development questions, two seeds\n95% question-cluster intervals; native sampler unchanged',fontsize=11)
     fig.savefig(dest/'budget_frontier.png',dpi=180);fig.savefig(dest/'budget_frontier.pdf');plt.close(fig)
     rows=s.load_phase(study,'screen');p=s.base.read(study/'protocol.json')
@@ -47,7 +50,24 @@ def plot(study):
     for (i,j),v in np.ndenumerate(grid):ax.text(j,i,('—','A','C')[v],ha='center',va='center')
     ax.set_title('Repeated candidate failures on both screening seeds\nA: accuracy; C: convergence; —: gate not met (not proof of safety)',fontsize=10)
     fig.savefig(dest/'candidate_failure_map.png',dpi=180);fig.savefig(dest/'candidate_failure_map.pdf');plt.close(fig)
-    s.base.write(dest/'figure_data.json',dict(cases=all_cases,cohort=cohort,comparisons=data,script_sha256=s.base.sha(Path(__file__))),True)
+    seeds=(1,42);seed_grid=np.zeros((len(cohort),len(s.KS)*2),dtype=int);seed_cases={}
+    for j,k in enumerate(s.KS):
+        for offset,seed in enumerate(seeds):
+            found=s.cases(rows,k,[seed],[0],('dense_full_fix51994','allkept_fa4'))
+            seed_cases[f'{k}:{seed}']=found;by={x['index']:x for x in found}
+            for i,c in enumerate(cohort):
+                if c['index'] in by:seed_grid[i,2*j+offset]=1 if by[c['index']]['failure_type']=='accuracy' else 2
+    fig,ax=plt.subplots(figsize=(8.2,6.5),layout='constrained')
+    ax.imshow(seed_grid,cmap=ListedColormap(['#eeeeee','#e69f00','#56b4e9']),vmin=0,vmax=2,aspect='auto')
+    ax.set_xticks(range(len(s.KS)*2),[f'{k}\nseed {seed}' for k in s.KS for seed in seeds],fontsize=8)
+    ax.set_yticks(range(len(cohort)),[f"Index {x['index']} | {x['prompt_tokens']/1024:.1f}K" for x in cohort],fontsize=8)
+    for (i,j),v in np.ndenumerate(seed_grid):ax.text(j,i,('—','A','C')[v],ha='center',va='center')
+    for x in (1.5,3.5):ax.axvline(x,color='white',lw=3)
+    ax.set_title('Exploratory within-seed failures: A = accuracy; C = convergence\nPromotion requires the same failure type on both seeds; — = gate not met',fontsize=10)
+    ax.set_xlabel('V31 prefix budget (tokens) and seed')
+    fig.savefig(dest/'seed_failure_map.png',dpi=180);fig.savefig(dest/'seed_failure_map.pdf');plt.close(fig)
+    s.base.write(dest/'figure_data.json',dict(cases=all_cases,within_seed_cases=seed_cases,cohort=cohort,
+        comparisons_full=data,comparisons_allkept=allkept,script_sha256=s.base.sha(Path(__file__))),True)
     print(dest)
 
 
