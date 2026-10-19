@@ -1,39 +1,40 @@
 ## HumanEval reproducibility investigation active — 2026-10-19 (Hong Kong)
 
-Starting checkpoint63ccf1e6; plan c467882a; current diagnostic source7a29df5e.
-Original native snapshot20e6c0be and K256 results are immutable. Root:
-results/humaneval_reproducibility_20261019/attempt001. Older LongBench campaigns
-remain paused. No production selector/sampler change or full K256/K128 rerun.
+Starting checkpoint63ccf1e6; plan c467882a; candidate-policy sourceb59cd177.
+Original native execution20e6c0be and K256 study remain immutable. Root:
+results/humaneval_reproducibility_20261019/attempt001. Older LongBench studies
+remain paused. No full corrected K256/K128 generation or calibration has started.
 
-Qualification fails. Independent FULL, PIECEWISE and V31 clean engines each
-change all12 measured output pairs (six unique questions, twice). Within-engine
-clean/sync/geometry/finite/audit/clean groups and two native attention-observer
-clean/observed/clean groups match. Audit synchronization is not established as
-causal; process drift occurs without audit. All900 loaded parameters and187
-buffers match. Valid initial inputs, initial noise and default RNG match.
+A numerical mechanism is reproduced, but overall qualification has not passed.
+See docs/HUMANEVAL_REDUCTION_MECHANISM_20261019.md (evidence582bc68d).
+Native process repeats fail without audit despite matching loaded weights,
+valid initial inputs/noise. Changing only a fused normalization kernel's
+R0_BLOCK512/1024 on identical saved inputs changes11 BF16 layer outputs and10
+BF16 normalized inputs to the next Q/K/V projection; same-config repeats match.
+These replays exactly match corresponding recorded operator outputs. The earlier
+pointer-unsafe observation supports only pre-dispatch operator values; exclude
+its final output from native claims. Corrected one-segment observers match their
+native clean bookends. This proves one mechanism, not a complete repair.
 
-Earliest localized discrepancy: layer0 prefill Q/K/V/native attention output
-and logical cache match, but layer1 Q/K/V differ (Q397/700416,max0.03125).
-The post-attention0-to-QKV1 interval is unresolved. Do not blame a specific GEMM,
-MoE, cache write or sampler without the next completed-kernel comparison.
-Native FA4 compile-context probes show no dynamic-causal specialization collision.
-CUBLAS4096:8 and small cuBLASLt workspace probes fail to restore repeatability.
-The BF16 tuple flag without cuBLASLt fails before generation; failed attempt
-retained. The supported BF16 accumulation-only pair is running serially.
+Two qualified processes agree throughout their first segment (both512) but have
+different final outputs, requiring consistent numerics across the whole model.
+Environment-only TORCHINDUCTOR_DETERMINISTIC=1 is ineffective: actual receipts
+show all40 kernels nondeterministic. Do not call this a tested deterministic
+execution. Its remaining queue was stopped after the active worker completed.
 
-Next frozen observer: private/source_addenda/attempt017/worker.py, snapshots
-existing generated Python kernel-call outputs and selected Triton configurations
-between native attention0/1 on question0 only. No recompilation or extra forwards.
-Its detached post-kernel CPU regression passes; native clean bookends are required.
-Non-thinking diagnostic repeats remain pending. Any correction needs independent
-process/pass/mode qualification before work-only V2 calibration and full matrices.
+Active: dense_on_cfgdet_clean001 with private/source_addenda/attempt025/worker.py.
+The new wrapper explicitly sets vLLM's inductor_compile_config.deterministic and
+process compiler policy for the separately compiled native sampler. It preserves
+native graph modes and has no intermediate observer/extra forwards. Controller
+fails closed on actual per-kernel policy, explicit options and graph-mode receipts.
+CPU focused regressions:3 passed. Independent same-method clean/audit and both-mode
+V31/dense qualification remain required before either full matrix.
 
-Allocation addendum2fb5ae9d keeps total43200s: diagnosis10800, K25616200,
-K12816200. Read gpu_budget.json for actual closed charges/active reservation;
-state.json remains full_runs_qualified=false. Internal HOLD markers suspend
-older diagnostic queues, not the active job or either user-paused campaign.
-Current analysis remains partial and explicitly unqualified; official diagnostic
-rescoring must not be presented as full HumanEval accuracy or clean timing.
+Closed GPU reservation7547.243s before this active job; total ceiling43200s.
+Allocation addendum2fb5ae9d: diagnosis10800, K25616200, K12816200. Use the live
+budget/state files for updated charges and open reservations. Internal HOLD files
+stop superseded diagnostic queues, not the current worker or older user pauses.
+No selector advantage, accuracy ranking or clean speedup is established.
 
 ## V31 budget failure map complete — 2026-10-19 (Hong Kong)
 
