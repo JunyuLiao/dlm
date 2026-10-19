@@ -37,7 +37,8 @@ def test_trajectory_observer_adds_no_sampler_call_or_rng_consumption(tmp_path,mo
         assert len(state['entries']) == (2 if name == 'observe' else 0)
         if name == 'observe':
             assert state['initial']['step'].item() == 1
-            assert state['entries'][-1]['step'].item() == 3
+            assert state['entries'][-1]['before']['step'].item() == 2
+            assert state['entries'][-1]['after']['step'].item() == 3
     assert len(calls) == 4
     assert args[7].item() == 4
     assert torch.equal(torch.get_rng_state(),rng_before)

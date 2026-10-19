@@ -36,7 +36,8 @@ def inspect_job(study,name):
             len(trace['calls']) != rows[i]['sampler_calls'] or trace['extra_forwards'] != 0):
             raise RuntimeError('native trajectory call-count mismatch')
         if not REQUIRED_STATE <= trace['initial'].keys() or not all(
-            REQUIRED_STATE | {'sampled_sha256','num_sampled_sha256','draft_sha256'} <= x.keys()
+            REQUIRED_STATE <= x['before'].keys() and
+            REQUIRED_STATE | {'sampled_sha256','num_sampled_sha256','draft_sha256'} <= x['after'].keys()
             for x in trace['calls']):
             raise RuntimeError('required trajectory field absent')
         traces.append(dict(index=rows[i]['index'],path=path,digest=sha(path)))
@@ -64,7 +65,8 @@ def compare(left,right):
             first = next((i for i,(p,q) in enumerate(zip(u['calls'],v['calls'])) if p != q),None)
             changed.append(dict(index=x['index'],initial_changed=u['initial'] != v['initial'],
                 calls=[len(u['calls']),len(v['calls'])],first_changed_call=first,
-                first_changed_fields=[k for k in u['calls'][first] if u['calls'][first].get(k) != v['calls'][first].get(k)]
+                first_changed_fields=[side+'.'+k for side in ('before','after')
+                    for k in u['calls'][first][side] if u['calls'][first][side].get(k) != v['calls'][first][side].get(k)]
                     if first is not None else []))
     return dict(left=sa['job'],right=sb['job'],differences=diffs,trajectory_changes=changed,
                 passed=not any(diffs.values()) and not changed)
@@ -72,7 +74,7 @@ def compare(left,right):
 
 def qualify(study,out):
     policy = study/'private/source_addenda/attempt027/worker.py'
-    observer = study/'private/source_addenda/attempt029/worker.py'
+    observer = study/'private/source_addenda/attempt031/worker.py'
     freeze = dict(protocol_sha256=sha(study/'protocol.json'),policy_sha256=sha(policy),
         observer_sha256=sha(observer),controller_sha256=sha(ROOT/'scripts/v31_humaneval_repro_study.py'),
         source_sha256=sha(Path(__file__)),seed=42,cohort=read(study/'protocol.json')['cohort'],

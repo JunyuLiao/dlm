@@ -47,10 +47,11 @@ def install(schedule, root):
             return sample(*args, **kwargs)
         if torch.cuda.is_current_stream_capturing():
             raise RuntimeError('native sampler unexpectedly captured')
+        before = snapshot(args)
         if not state['entries']:
-            state['initial'] = snapshot(args)
+            state['initial'] = before
         result = sample(*args, **kwargs)
-        state['entries'].append(snapshot(args,after=True))
+        state['entries'].append(dict(before=before,after=snapshot(args,after=True)))
         if len(state['entries']) > 4096:
             raise RuntimeError('diagnostic state retention bound exceeded')
         return result
@@ -79,7 +80,8 @@ def install(schedule, root):
                 raise RuntimeError('immutable trajectory observation required')
             path.write_text(json.dumps(dict(
                 initial=fingerprint(state['initial']),
-                calls=[fingerprint(point) for point in state['entries']],
+                calls=[{side:fingerprint(point) for side,point in call.items()}
+                       for call in state['entries']],
                 native_sampler_calls=len(state['entries']),extra_forwards=0,
                 clean_timing=False),sort_keys=True)+'\n')
             state.update(active=False, entries=[], initial=None)
