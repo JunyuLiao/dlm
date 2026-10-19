@@ -103,3 +103,37 @@ def test_activation_fingerprints_read_native_output_after_dispatch(tmp_path,monk
     events=json.loads(next(tmp_path.glob('request*.json')).read_text())['events']
     assert events[0]['values'][0]['gpu128']==[8,0]
     assert events[1]['values'][0]['gpu128']==[16,0]
+
+
+def test_scalar_bf16_and_short_byte_arguments_preserve_bits_with_zero_padding(tmp_path,monkeypatch):
+    class FakeCuda(torch.Tensor):
+        @property
+        def is_cuda(self):return True
+    class Engine:
+        def add_request(self,*a,**k):pass
+        def step(self):return [SimpleNamespace(finished=True)]
+    class Graph:
+        runtime_mode=SimpleNamespace(name='PIECEWISE')
+        def __call__(self,x):return x
+    import vllm.model_executor.models.diffusion_gemma as dg
+    seen=[]
+    def fingerprint(x):
+        assert x.ndim==1 and x.numel()*x.element_size()%4==0
+        seen.append(x.detach().contiguous().view(torch.uint8).tolist())
+        return torch.zeros(2,dtype=torch.uint64)
+    modules={'vllm.v1.engine.llm_engine':('LLMEngine',Engine),
+        'vllm.compilation.cuda_graph':('CUDAGraphWrapper',Graph),
+        'humaneval_gpu_fingerprint':('fingerprint_cuda',fingerprint)}
+    for name,(key,v) in modules.items():
+        module=ModuleType(name);setattr(module,key,v);monkeypatch.setitem(sys.modules,name,module)
+    monkeypatch.setattr(dg,'_compiled_sample_step',lambda *a,**k:None)
+    monkeypatch.setattr(torch.cuda,'is_current_stream_capturing',lambda:False)
+    observer.install(dict(active=True,index=0),tmp_path)
+    e=Engine();e.add_request('request')
+    for value,expected in ((torch.tensor(1.25,dtype=torch.bfloat16),[160,63,0,0]),
+                           (torch.tensor(True),[1,0,0,0]),
+                           (torch.tensor([7],dtype=torch.uint8),[7,0,0,0])):
+        x=value.as_subclass(FakeCuda);saved=x.clone()
+        assert Graph()(x) is x and torch.equal(x,saved)
+        assert seen[-2:]==[expected,expected]
+    e.step()

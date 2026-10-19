@@ -27,8 +27,16 @@ def install(state,destination):
             # Exclude model parameters and large persistent storage. This is an
             # activation-boundary locator, not a claim that every argument is read.
             if x.numel()>4*256*2816 or (x.ndim>=2 and x.shape[0]>512) or (x.ndim==1 and x.numel()>512):continue
+            # The tested word fingerprint requires rank>=1 and a byte extent
+            # divisible by four. Preserve every original byte, padding only the
+            # diagnostic copy for scalar BF16/byte/bool arguments.
+            flat=x.detach().reshape(-1)
+            padding=(-flat.numel()*flat.element_size())%4
+            if padding:
+                raw=flat.contiguous().view(torch.uint8)
+                flat=torch.nn.functional.pad(raw,(0,padding))
             result.append(dict(leaf=i,shape=list(x.shape),stride=list(x.stride()),
-                dtype=str(x.dtype),gpu128=fingerprint_cuda(x)))
+                dtype=str(x.dtype),diagnostic_zero_padding_bytes=padding,gpu128=fingerprint_cuda(flat)))
         return result
 
     def cpu(value):

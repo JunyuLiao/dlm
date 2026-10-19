@@ -34,6 +34,12 @@ this partial argument scope and never infer equal complete inputs from these
 fingerprints. Parameters and native model settings remain independently bound.
 CPU-only binding tests (including independent graph-only mode and pre-request
 native startup passthrough) must pass and be source-bound before launch.
+Attempt008 stops after165.015s on a scalar BF16 diagnostic argument before
+completing its first recorded request. Preserve it. For a new immutable retry,
+flatten scalar diagnostic views and zero-pad only their copied bytes to the
+existing word fingerprint's four-byte extent. Preserve all original bytes and
+record the padding length. Explicit BF16/bool/byte CPU regressions must pass;
+native inputs and the tested integer fingerprint kernels remain unchanged.
 
 The earliest changed boundary at the first changed raw-logit call will distinguish a graph segment from its outside
 operators. Require all traces and exact observed/unobserved outcomes, preserving

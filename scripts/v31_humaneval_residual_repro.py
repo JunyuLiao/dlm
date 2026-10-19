@@ -34,8 +34,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
     assert not root.exists()
     (root/'private').mkdir(parents=True)
     if graph_trace:
-        gate=ROOT/'results/humaneval_graph_preflight_20261019/attempt003'
-        receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==5
+        gate=ROOT/'results/humaneval_graph_preflight_20261019/attempt004'
+        receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==6
         for name,digest in receipt['files_sha256'].items():assert sha(gate/name)==digest
         assert receipt['observer_source_sha256']==sha(ROOT/'scripts/v31_humaneval_graph_fingerprint.py')
         shutil.copyfile(ROOT/'scripts/v31_humaneval_graph_fingerprint.py',root/'private/graph_fingerprint.py')
@@ -210,7 +210,7 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         torch_deterministic_guard=torch_guard,
         index_put_dtype_adapter=dtype_adapter,fresh_private_compiler_cache=dtype_adapter,
         graph_boundary_fingerprints=graph_trace,
-        graph_preflight_receipt_sha256=sha(ROOT/'results/humaneval_graph_preflight_20261019/attempt003/receipt.json') if graph_trace else None,
+        graph_preflight_receipt_sha256=sha(ROOT/'results/humaneval_graph_preflight_20261019/attempt004/receipt.json') if graph_trace else None,
         dtype_regression_receipt_sha256=sha(ROOT/'results/humaneval_index_put_fallback_20261019/attempt001/receipt.json') if dtype_adapter else None,
         guard_preflight_receipt_sha256=sha(ROOT/'results/humaneval_selector_definedness_20261019/attempt003/receipt.json') if torch_guard else None,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
