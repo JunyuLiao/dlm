@@ -3,7 +3,9 @@ from pathlib import Path
 
 
 def checker():
-    tree=ast.parse(Path(__file__).with_name('controller.py').read_text())
+    source=Path(__file__).with_name('controller.py')
+    if not source.exists():source=Path(__file__).parents[1]/'scripts/v31_humaneval_residual_repro.py'
+    tree=ast.parse(source.read_text())
     node=next(x for x in tree.body if isinstance(x,ast.FunctionDef) and x.name=='observation_policy_errors')
     namespace={};exec(compile(ast.Module(body=[node],type_ignores=[]),'<frozen actual receipt validator>','exec'),namespace)
     return namespace[node.name]
