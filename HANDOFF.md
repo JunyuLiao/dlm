@@ -75,6 +75,17 @@ clean engines, repeated six-arm groups, qualified full sampler trace augmented
 with all-logit integer fingerprints. Three H100 fingerprint/oracle tests pass.
 The matrices stay held; actual deterministic Inductor metadata alone is not a
 universal reproducibility guarantee. No new correction has been promoted.
+The next mixed-prefix pair (f43143f4) also completes:400.400/400.395s. All
+per-arm bookends and926 observed sampler calls, including all-logit fingerprints,
+agree; the original measured prefix is identical in both processes. Only a
+full-swap warmup differs from the original clean engine. CPU cache comparison
+finds no changed common native artifacts; do not spend a cache-factor GPU pair.
+Latest completed evidence: results/humaneval_mixed_repro_20261019/attempt001/analysis/attempt001/.
+Next stage: docs/HUMANEVAL_FULL_TRACE_PLAN_20261019.md. Trace every original
+qualification case in two identical clean engines and append unobserved repeats,
+covering the previously unobserved V3a question116. Two1000s reservations stay
+within phasek256; closed charge5851.700s before this stage. This observation check
+is two-way, not a three-way bookend. All full evaluation remains held.
 
 Next: freeze work-only thresholds, qualify every method, run the authorized
 matrices and independent official rescores, then publish complete qualified

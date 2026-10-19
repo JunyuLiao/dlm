@@ -12,7 +12,7 @@ def sha(path):return hashlib.sha256(path.read_bytes()).hexdigest()
 def jsonl(path):return [json.loads(line) for line in path.read_text().splitlines()]
 
 
-def compare(root,destination,workspace):
+def compare(root,destination,workspace,quiet=False):
     p=read(root/'protocol.json');data={};inventory=[]
     for name,c in p['jobs'].items():
         leaf=root/'runs'/name/'attempt001';marker=read(leaf/'attempt_complete.json')
@@ -36,9 +36,14 @@ def compare(root,destination,workspace):
     assert set(data[left])==set(data[right])
     for label,x in data[left].items():
         y=data[right][label];a,b=x['trajectory'],y['trajectory']
+        fingerprints=all('logits_gpu128_sha256' in trace['initial'] and all(
+            'logits_gpu128_sha256' in call[side] for call in trace['calls'] for side in ('before','after'))
+            for trace in (a,b))
+        if p.get('mixed_group'):assert fingerprints
         first=next((i for i,(u,v) in enumerate(zip(a['calls'],b['calls'])) if u!=v),None)
         first_residual=next((i for i,(u,v) in enumerate(zip(x['residual']['events'],y['residual']['events'])) if u!=v),None)
         contrasts.append(dict(label=label,sampler_calls=[len(a['calls']),len(b['calls'])],
+            all_logit_fingerprints_present=fingerprints,
             initial_fields_changed=[k for k in a['initial'] if a['initial'][k]!=b['initial'].get(k)],
             full_trajectories_equal=a==b,first_changed_call=first,
             first_changed_fields=[side+'.'+key for side in ('before','after')
@@ -57,10 +62,13 @@ def compare(root,destination,workspace):
     (destination/'analysis_complete.json').write_text(json.dumps(dict(status=result['status'],
         protocol_sha256=sha(root/'protocol.json'),analysis_source_sha256=sha(Path(__file__)),
         files_sha256={'summary.json':sha(destination/'summary.json')}),indent=2)+'\n')
-    print(text)
+    print(json.dumps(dict(status=result['status'],contrasts=len(contrasts),
+        changed_trajectories=sum(not r['full_trajectories_equal'] for r in contrasts),
+        observer_qualified=[r['observer_qualified'] for r in inventory])) if quiet else text)
 
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser(__doc__);parser.add_argument('--study',type=Path,required=True)
     parser.add_argument('--destination',type=Path,required=True);parser.add_argument('--workspace',type=Path,default=Path.cwd())
-    args=parser.parse_args();compare(args.study,args.destination,args.workspace)
+    parser.add_argument('--quiet',action='store_true')
+    args=parser.parse_args();compare(args.study,args.destination,args.workspace,args.quiet)
