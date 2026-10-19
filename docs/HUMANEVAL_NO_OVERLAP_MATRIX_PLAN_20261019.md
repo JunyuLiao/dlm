@@ -47,7 +47,7 @@ campaign alone charged15032.143s, so the remaining allowance cannot reasonably
 cover both complete corrected panels with the required gates. Before freezing,
 retire diagnosis/K256 phases at actual usage rounded up and document an explicit
 self-limit revision granting one36000s shared evaluation phase (two prior-panel
-costs plus20% margin). This is a new bounded estimate for the authorized K256/K128
+costs plus about20% margin). This is a new bounded estimate for the authorized K256/K128
 work, not extra GPUs or an unbounded sweep. Preserve every prior charge, frozen
 protocol and immutable addendum; never edit an old limit in place. Record the
 exact resulting combined ceiling and resource rationale in allocation003 and
