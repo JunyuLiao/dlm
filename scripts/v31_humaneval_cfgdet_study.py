@@ -68,6 +68,7 @@ def prepare(study,budget):
     shutil.copyfile(INVESTIGATION/'private/source_addenda/attempt027/worker.py',
                     execution/'scripts/v31_humaneval_cfgdet_policy_worker.py')
     shutil.copytree(PARENT/'private/pools',study/'private/pools')
+    shutil.copyfile(PARENT/'private/HumanEval.jsonl.gz',study/'private/HumanEval.jsonl.gz')
     shutil.copytree(PARENT/'private/schedules',study/'private/schedules')
     shutil.copytree(INVESTIGATION/'private/cache',study/'private/cache')
     cohort=read(INVESTIGATION/'protocol.json')['cohort']
@@ -305,6 +306,14 @@ def run_job(study,stage,mode,pass_name,family,cells_file,threshold=None,calibrat
          str(leaf/'private/cells.json'),str(leaf/'records.jsonl'),str(leaf/'private/generation.private.jsonl'),arm,cg]
     write(leaf/'private/launch.json',dict(command=cmd,environment={k:v for k,v in env.items()
         if k not in os.environ or os.environ[k]!=v}),True)
+    replicas={}
+    if stage=='runs':
+        sources=selected_paths(study,mode,pass_name,'qualification')
+        labels=['control_before',*CANDIDATES,'control_after'] if shared else [family]
+        for label in labels:
+            for path in sources[label]:
+                for row in base.jsonl(path/'records.jsonl'):
+                    if row['panel_seed']==42:replicas[(label,row['index'])]=row
     budget,reservation=reserve(study,p,leaf)
     write(study/'state.json',dict(stage=stage,mode=mode,pass_name=pass_name,family=family,
         active_attempt=str(leaf.relative_to(study)),resumable=True,full_accuracy_released=False))
@@ -322,6 +331,12 @@ def run_job(study,stage,mode,pass_name,family,cells_file,threshold=None,calibrat
             for i in range(checked,len(public)):
                 errors.extend(validate(public[i],rows[i],family,entries[i+1] if shared else None,
                                        pass_name,oracle,p['prefix_budget_tokens']))
+                if stage=='runs' and i>=warm_count and rows[i]['index'] in p['cohort']:
+                    label=entries[i+1]['label'] if shared else family
+                    reference=replicas.get((label,rows[i]['index']))
+                    if reference is None or any(public[i][key]!=reference[key] for key in (
+                        'output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','rng_seed','prompt_sha256')):
+                        errors.append('independent primary-prefix replication failed')
             checked=len(public)
             if errors or time.monotonic()-start>=reservation['reserved_s']:
                 if not errors:errors.append('GPU reservation expired')

@@ -1,6 +1,7 @@
 """K128/K256 evaluation dispatch derived from the frozen original worker.
 
-Only budget checks/labels are generalized. Selectors and native decoding remain
+Budget checks/labels are generalized and diagnostic oracle work is bounded.
+Selectors and native decoding remain
 those of the source-matched original execution plus the named compiler policy.
 """
 import functools
