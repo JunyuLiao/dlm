@@ -22,6 +22,10 @@ qualify dense/V31, thinking on/off, independent same-mode and audit/clean: all
 recorded pre/post sampler states, valid stability history, emissions and CPU/CUDA
 RNG fingerprints agree; all native bookends match and measured captures are zero.
 This is a complete baseline diagnostic, not a164-question accuracy result.
+Verified sanitized diagnostic export:
+results/humaneval_reproducibility_20261019/attempt001/publication/attempt001/.
+Its exporter rechecks native completion/file bindings and publishes numeric/hash
+evidence only; no prompts, completions, activation arrays or RNG bytes.
 
 Diagnosis closes at10477.365/10800s. Shared total ceiling43200s remains unchanged;
 K256 and K128 each have16200s. The H100 preflight completed122 checks with zero

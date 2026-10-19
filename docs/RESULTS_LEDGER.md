@@ -1,5 +1,30 @@
 # Results ledger (verified results only)
 
+## HumanEval baseline numerical reproducibility diagnostic — 2026-10-19
+
+Complete six-question diagnostic only; no corrected full164 accuracy or speedup
+claim. Protocol-bound marker and verified sanitized evidence:
+`results/humaneval_reproducibility_20261019/attempt001/publication/attempt001/`.
+Native selector source20e6c0be, qualified numerical policy10341ab2. The exporter
+rechecks source completion/file hashes before publishing numeric/hash evidence.
+
+Same-input R0_BLOCK512/1024 normalization replay changes11 BF16 layer-output,
+86596 internal FP32 and10 next-QKV BF16 elements out of481536 valid elements;
+each configuration repeats exactly and matches the corresponding saved output.
+This identifies one numerical mechanism, not proof that no other cause exists.
+The failed segment002 dispatch is excluded from final-trajectory evidence.
+
+After explicit deterministic model/native-helper compilation, two independent
+unobserved FULL engines match12/12 output/N/C/T pairs. Eleven further dense/V31
+engines cover both thinking modes, independent same-mode and audit/clean
+contrasts. All declared pre/post sampler-state, valid-history, emission and RNG
+comparisons pass, with identical bookends and zero measured captures.
+Horizontal combo fusion/benchmarking are disabled; native FULL/PIECEWISE graphs
+and native sampler formulas/stopping remain. New requested-method/full164
+qualification and matched latency measurements are separate gates.
+Diagnosis reservation10477.365/10800s, including failed attempts; older paused
+campaigns and original K256 results remain intact.
+
 ## V31 cached-statistics refresh primary arm — 2026-10-12 (single-arm panel)
 
 | arm | LongBench-v2 subset | AIME26 30×3 | mean denoising forwards | GLOBAL physical sparsity | timed captures |
