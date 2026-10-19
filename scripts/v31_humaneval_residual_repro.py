@@ -17,7 +17,7 @@ FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_cal
 
 
 def observation_policy_errors(row,digest):
-    a=row.get('adapter',{});calls=a.get('observing_fa4_calls')
+    a=(row.get('receipts') or {}).get('adapter') or {};calls=a.get('observing_fa4_calls')
     okay=(a.get('observing_fa4_numerical_policy')=='no_intra_wg_overlap' and
         a.get('observing_fa4_intra_wg_overlap') is False and a.get('observing_fa4_policy_sha256')==digest and
         a.get('observing_fa4_extra_forwards')==0 and a.get('observing_fa4_plain_arguments_preserved') is True and
@@ -49,6 +49,10 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==4
         for name,digest in receipt['files_sha256'].items():assert sha(gate/name)==digest
         assert receipt['policy_source_sha256']==sha(ROOT/'scripts/v31_humaneval_observe_no_overlap.py')
+        validation=ROOT/'results/humaneval_observe_receipt_preflight_20261019/attempt001'
+        checked=read(validation/'receipt.json');assert checked['status']=='complete' and checked['tests']==2
+        for name,digest in checked['files_sha256'].items():assert sha(validation/name)==digest
+        assert checked['controller_source_sha256']==sha(Path(__file__))
         screen=ROOT/'results/humaneval_fa4_overlap_screen_20261019/attempt001'
         done=read(screen/'receipt.json');assert done['status']=='complete_operator_screen'
         for name,digest in done['files_sha256'].items():assert sha(screen/name)==digest
@@ -394,7 +398,7 @@ def run_job(root,part):
     if p.get('observing_fa4_no_overlap'):
         observed=0
         for row in public:
-            a=row.get('adapter',{})
+            a=(row.get('receipts') or {}).get('adapter') or {}
             row_errors=observation_policy_errors(row,sha(root/'private/observe_no_overlap.py'))
             errors.extend(row_errors)
             if not row_errors:observed+=a['observing_fa4_calls']
