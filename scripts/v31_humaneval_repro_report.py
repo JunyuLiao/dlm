@@ -51,7 +51,8 @@ def analyze(root,out):
     scores={(r['job'],r['position']):r['score'] for r in per_item}
     def policy(c):
         return {k:v for k,v in c.get('overrides',{}).items()
-                if k not in ('HUMANEVAL_REPRO_TRACE','HUMANEVAL_REPRO_MODEL_IDENTITY')}
+                if k not in ('HUMANEVAL_REPRO_TRACE','HUMANEVAL_REPRO_MODEL_IDENTITY',
+                             'HUMANEVAL_REPRO_FACTOR_RECEIPT')}
     pairs=[];within=[]
     for i,a in enumerate(leaves):
         for b in leaves[i+1:]:
