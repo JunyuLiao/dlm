@@ -13,7 +13,8 @@ def write(path,value):
     with path.open('x') as f:json.dump(value,f,indent=2,sort_keys=True)
 
 
-def main(root):
+def main(root,leaf=None):
+    leaf=leaf or root
     p=json.loads((root/'protocol.json').read_text())
     for name,digest in p['files_sha256'].items():assert sha(root/name)==digest
     from scripts.v31_humaneval_operand_restore import tensor
@@ -66,14 +67,22 @@ def main(root):
             scores=qq@kk.transpose(-1,-2)*float(kwargs['softmax_scale'])
             oracle=(scores.softmax(-1)@vv).permute(0,2,1,3).float().cpu()
             del qq,kk,vv,scores
-            for name,splits,observing,poison in (
+            variants=[
                 ('native_auto_observe',0,True,None),('native_auto_observe_scratch_zero',0,True,0.),
                 ('native_auto_observe_scratch_finite',0,True,37.),('native_auto_observe_scratch_nan',0,True,float('nan')),
-                ('single_split_observe',1,True,None),('native_auto_plain',0,False,None),('single_split_plain',1,False,None)):
+                ('single_split_observe',1,True,None),('native_auto_plain',0,False,None),('single_split_plain',1,False,None)]
+            if p.get('overlap_screen'):
+                variants=[(f"split{splits}_{'observe' if observing else 'plain'}_overlap{int(overlap)}",splits,observing,None,overlap)
+                    for splits in (0,1) for observing in (True,False) for overlap in (True,False)]
+                if leaf.name=='engine002':variants.reverse()
+            else:variants=[(*v,None) for v in variants]
+            for name,splits,observing,poison,overlap in variants:
                 sm90.AttentionMask=observe.ObservingMask if observing else original_mask
                 options=dict(kwargs,num_splits=splits)
+                if overlap is not None:options['intra_wg_overlap']=overlap
                 if observing:options['aux_tensors']=aux
                 trials=[];baseline=None;native_matches=0;repeat_matches=0;first_change=None;first_output=None
+                mass_baseline=None;mass_repeat_matches=mass_native_matches=0;first_mass_change=None
                 for repeat in range(p['repeats']):
                     # Deliberately vary freed scratch contents, recording actual poison scope.
                     # This is a separate operator diagnostic, never native timing.
@@ -90,15 +99,31 @@ def main(root):
                     if baseline is None:baseline=host.clone();first_output=host.clone()
                     same=tensor_difference(baseline,host);match=tensor_difference(reference,host)
                     repeat_matches+=int(same['equal']);native_matches+=int(match['equal'])
-                    if not same['equal'] and first_change is None:first_change=dict(repeat=repeat,delta=same)
+                    if not same['equal'] and first_change is None:
+                        mismatch=(baseline.view(torch.int16)!=host.view(torch.int16))[0].sum(-1)
+                        tiles=mismatch.reshape(4,64,16).sum(1)
+                        changed_tiles=[dict(query64=int(i),head=int(h),elements=int(tiles[i,h])) for i,h in (tiles>0).nonzero().tolist()]
+                        first_change=dict(repeat=repeat,delta=same,changed_tiles=changed_tiles)
+                        artifact=leaf/f"private/{case['label']}_{name}_first_output_change.private.pt"
+                        torch.save(dict(first=baseline,changed=host,repeat=repeat,actual_config=configurations[-1]),artifact)
                     if observing:
                         # Require every true prefix log-mass slot to have been written.
-                        finite=bool(torch.isfinite(aux[0]).all().item())
+                        mass=aux[0].detach().cpu().contiguous()
+                        finite=bool(torch.isfinite(mass).all())
+                        if mass_baseline is None:mass_baseline=mass.clone()
+                        mass_same=tensor_difference(mass_baseline,mass);mass_repeat_matches+=int(mass_same['equal'])
+                        mass_native_matches+=int(tensor_difference(raw['aux_after'][0]['value'],mass)['equal'])
+                        if not mass_same['equal'] and first_mass_change is None:
+                            first_mass_change=dict(repeat=repeat,delta=mass_same)
+                            torch.save(dict(first=mass_baseline,changed=mass,repeat=repeat),
+                                leaf/f"private/{case['label']}_{name}_first_mass_change.private.pt")
                     else:finite=None
                     trials.append(dict(repeat=repeat,equal_first=same['equal'],equal_captured_native=match['equal'],aux_all_finite=finite))
                 error=(first_output.float()-oracle).double()
                 item['variants'].append(dict(name=name,repeats=p['repeats'],repeat_matches=repeat_matches,native_matches=native_matches,
                     first_changed_repeat=first_change,trials=trials,actual_config=configurations[-1],
+                    requested_overlap=overlap,aux_repeat_matches=mass_repeat_matches,aux_native_matches=mass_native_matches,
+                    first_aux_change=first_mass_change,
                     fp64_oracle_error=dict(max_absolute=float(error.abs().max()),rmse=float((error.square().mean()).sqrt())),
                     captured_native_delta=tensor_difference(reference,first_output)))
                 del baseline,first_output,host,out
@@ -108,8 +133,8 @@ def main(root):
             torch.cuda.empty_cache()
     sm90.AttentionMask=original_mask
     result['unexpected_cuda_captures']=captures['count'];assert captures['count']==0
-    write(root/'private/operator_summary.json',result)
+    write(leaf/'private/operator_summary.json',result)
     print(json.dumps(dict(status=result['status'],cases=len(result['cases']),unexpected_cuda_captures=captures['count'])),flush=True)
 
 
-if __name__=='__main__':main(Path(sys.argv[1]))
+if __name__=='__main__':main(Path(sys.argv[1]),Path(sys.argv[2]) if len(sys.argv)>2 else None)
