@@ -16,7 +16,8 @@ read,write,sha=campaign.read,campaign.write,campaign.sha
 FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','native_interval_steps')
 
 
-def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False):
+def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False):
+    all_cases=all_cases or cublas
     attention=attention or crossover
     parent=campaign.verify(PARENT)
     failure=read(PARENT/'receipts/early_residual_qualification_failure.json')
@@ -28,6 +29,14 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False):
         shutil.copyfile(ROOT/'scripts'/name,root/'private'/name)
     trajectory=campaign.INVESTIGATION/'private/source_addenda/attempt031/worker.py'
     shutil.copyfile(trajectory,root/'private/trajectory_worker.py')
+    if cublas:
+        policy=(PARENT/'private/execution/scripts/v31_humaneval_cfgdet_policy_worker.py').read_text()
+        assert policy.count('policy=policy,')==1
+        extra=("blas_workspace=dict(environment=os.environ.get('CUBLAS_WORKSPACE_CONFIG'), "
+               "cublas_bytes=torch._C._cuda_getCublasWorkspaceSize(), "
+               "cublaslt_bytes=torch._C._cuda_getCublasLtWorkspaceSize(), "
+               "preferred_library=str(torch.backends.cuda.preferred_blas_library())),\n            policy=policy,")
+        (root/'private/cublas_policy.py').write_text(policy.replace('policy=policy,',extra,1))
     if mixed or all_cases or attention:
         shutil.copyfile(ROOT/'scripts/v31_humaneval_gpu_fingerprint.py',root/'private/humaneval_gpu_fingerprint.py')
         gate=read(ROOT/'results/humaneval_mixed_repro_preflight_20261019/attempt001/receipt.json')
@@ -41,7 +50,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False):
         path.write_text(source)
     if attention:
         shutil.copyfile(ROOT/'scripts/v31_humaneval_attention_fingerprint.py',root/'private/attention_fingerprint.py')
-    spec=(ROOT/'docs/HUMANEVAL_TRACE_CROSSOVER_PLAN_20261019.md' if crossover else
+    spec=(ROOT/'docs/HUMANEVAL_BLAS_WORKSPACE_PLAN_20261019.md' if cublas else
+          ROOT/'docs/HUMANEVAL_TRACE_CROSSOVER_PLAN_20261019.md' if crossover else
           ROOT/'docs/HUMANEVAL_ATTENTION_TRACE_PLAN_20261019.md' if attention else
           ROOT/'docs/HUMANEVAL_FULL_TRACE_PLAN_20261019.md' if all_cases else
           ROOT/'docs/HUMANEVAL_MIXED_REPRO_PLAN_20261019.md' if mixed else SPEC)
@@ -132,6 +142,7 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False):
         prefix_budget_tokens=256,full_accuracy_released=False,mixed_group=mixed or all_cases or attention,
         full_cohort_trace=all_cases,two_way_observer=all_cases or (attention and not crossover),attention_fingerprints=attention,
         trace_crossover=crossover,
+        cublas_workspace_config=':4096:8' if cublas else None,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
     write(root/'protocol.json',p,True)
     return p
@@ -154,7 +165,7 @@ def run_job(root,part):
     original=ROOT/config['original'];launch=read(original/'private/launch.json')
     rows=read(root/f'private/{part}/cells.json');arms=read(root/f'private/{part}/arms.json')
     env=campaign.base.env_for(PARENT,'thinking_on',campaign.CONTROL);env.update(launch['environment'])
-    policy=PARENT/'private/execution/scripts/v31_humaneval_cfgdet_policy_worker.py'
+    policy=root/'private/cublas_policy.py' if p.get('cublas_workspace_config') else PARENT/'private/execution/scripts/v31_humaneval_cfgdet_policy_worker.py'
     env.update(HUMANEVAL_REQUEST_ARMS=str(root/f'private/{part}/arms.json'),
         HUMANEVAL_REPRO_LIVE_SCHEDULE=str(root/f'private/{part}/live.json'),
         HUMANEVAL_POLICY_SOURCE=str(policy),HUMANEVAL_POLICY_SOURCE_SHA256=sha(policy),
@@ -163,6 +174,7 @@ def run_job(root,part):
         HUMANEVAL_TRAJECTORY_DIR=str(leaf/'private/trajectory'),
         HUMANEVAL_RESIDUAL_TRACE_DIR=str(leaf/'private/residual'),
         FROZEN_SOURCE_SHA256=sha(root/'protocol.json'))
+    if p.get('cublas_workspace_config'):env['CUBLAS_WORKSPACE_CONFIG']=p['cublas_workspace_config']
     if p.get('attention_fingerprints'):
         env.update(HUMANEVAL_ATTENTION_TRACE_SOURCE=str(root/'private/attention_fingerprint.py'),
                    HUMANEVAL_ATTENTION_TRACE_DIR=str(leaf/'private/attention'))
@@ -204,6 +216,10 @@ def run_job(root,part):
         errors.extend(campaign.validate(public[i],rows[i],'shared',arms[i+1],native_part,native_part=='audit',256))
     if proc.returncode or len(public)!=len(rows):errors.append('worker/coverage failure')
     errors.extend(campaign.policy_errors(leaf/'private/kernel_inventory.json','PIECEWISE'))
+    if p.get('cublas_workspace_config') and (leaf/'private/kernel_inventory.json').exists():
+        actual=read(leaf/'private/kernel_inventory.json').get('blas_workspace',{})
+        if actual.get('environment')!=p['cublas_workspace_config'] or actual.get('cublas_bytes')!=33554432:
+            errors.append('ineffective BLAS workspace configuration')
     bookends=[]
     if len(public)==len(rows):
         for group in config['bookend_groups']:
@@ -230,7 +246,8 @@ if __name__=='__main__':
     parser.add_argument('--all-cases',action='store_true')
     parser.add_argument('--attention',action='store_true')
     parser.add_argument('--crossover',action='store_true')
+    parser.add_argument('--cublas-workspace',action='store_true')
     args=parser.parse_args();root=args.study.absolute()
-    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover)
+    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover,args.cublas_workspace)
     else:
         for part in read(root/'protocol.json')['jobs']:run_job(root,part)
