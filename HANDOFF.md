@@ -1,3 +1,43 @@
+## HumanEval observing-FA4 failure isolated; native correction qualifying — 2026-10-19 UTC
+
+Verified HEADd62691b2. Complete operator screen sourcec7e7c67e, protocol906d41b7,
+replays8192 calls across two independent processes with reversed factor order.
+On the captured K3532 input, automatic16-split mass-observing FA4 overlap=True
+changes4/510 nontrivial comparisons; single-split observing changes4/510. All
+2048 observing overlap=False calls are stable (2040 comparisons); all4096 plain
+calls are stable. All4096 observing mass auxiliary outputs match captured native
+bytes. Q/K/V preserved, no CUDA captures, zero model/sampler calls. First auto
+change2322 BF16 elements in one head/query64 tile, maximum0.0625. The exact
+instruction/register/shared-memory hazard is not proved. Do not claim all native
+discrepancies repaired before qualification.
+
+Report/publication under humaneval_fa4_overlap_screen_20261019/attempt001/.
+Minimal new policy forces intra_wg_overlap=False only for mass-observing calls,
+bound after the native mask fix; plain FA4 arguments, selectors, thresholds,
+budgets and sampler remain. Four CPU checks pass4.606s. Shared-dispatch receipts
+are preserved at the class-method capture point. No installed package edits.
+
+Current native attempt015 source d62691b2 freezes two152-request engines,1000s
+each:80 observed-prefix rows (8 warmups),72 pure repeats. All six methods/control
+bookends, six diagnostic questions,seeds42/43,thinking on,K256. Both full matrices
+remain held. Inspect process/receipts before action. Use the residual comparer
+then observe_native_qualify to seal only the bounded native qualification.
+
+Attempt014 stopped after one warmup160.381s because the harness read adapter
+fields at top level instead of receipts.adapter. Actual row confirms110 corrected
+observation calls. Preserve failed run; it is not a numerical counterexample.
+Two source-bound receipt regression tests pass0.382s, covering real nesting and
+missing/invalid counters; normal repository tests also pass. Replay launcher001
+likewise never started a worker and has conservative55.141s charge; corrected
+replay002 completes21.870s and first finds a single-split positive.
+
+Closed phase charges before015: diagnosis10477.365s,k25617608.205s,k1280.
+Remaining k2562191.795s under allocation002,43200s total unchanged. No older
+campaign resumed. Native qualification alone does not establish audit/clean
+equivalence for the corrected full164 campaign or qualify latency. After passing,
+freeze the corrected K256/K128 evaluation with matched controls, work-only V2
+calibration and official scoring; retain all older unqualified rankings.
+
 ## HumanEval layer29 localization and targeted operand capture — 2026-10-19 UTC
 
 Current native attempt013, source666f54a2, has four targeted layer29 probes:

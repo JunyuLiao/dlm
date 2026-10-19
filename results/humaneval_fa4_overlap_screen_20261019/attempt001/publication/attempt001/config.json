@@ -1,0 +1,46 @@
+{
+  "cases": [
+    {
+      "label": "full_swap8_q129_seed42",
+      "raw_sha256": "1e2af98de54646f56a500f8ffb2ceb11ebb18e2d1f04de668e85ec8564394ff6",
+      "sampler_index": 100
+    },
+    {
+      "label": "residual_q129_seed42",
+      "raw_sha256": "5d1c6e652effa8bef32a854df73651bee288278a04e7334e45027c8f52458241",
+      "sampler_index": 154
+    }
+  ],
+  "independent_processes": 2,
+  "interface_sha256": "827fc6a2d4ef8d1cc3ac991d33cab5cbe5a66ec7a82c9636ebf64b61ad780773",
+  "kind": "same_input_operator_diagnostic",
+  "method_accuracy_claim": false,
+  "native_base_worker_sha256": "726126f338e3ec0263c06085593cbcf8a512c6ddf3298a72f5d99ca33163909e",
+  "native_model_calls": 0,
+  "native_sampler_calls": 0,
+  "preflight_receipts": [
+    {
+      "receipt": "results/humaneval_operand_restore_preflight_20261019/attempt001/receipt.json",
+      "sha256": "c2618e572443ebf520fd78bef97851d68fe1a5c51ffae38e9fd9f64cec8e0687"
+    },
+    {
+      "receipt": "results/humaneval_last_global_compare_preflight_20261019/attempt003/receipt.json",
+      "sha256": "0b63e2c7b6fe0fdeb867470f3bad72b65a021720888021db911e19f05e2438f9"
+    }
+  ],
+  "protocol_sha256": "906d41b7bbb6f93895aed80452e256ab8f8ef298b95fd236938aee783619fbbe",
+  "repeats_per_case_and_factor_per_process": 256,
+  "reverse_factor_order": true,
+  "runtime": {
+    "cublas_bytes": 33554432,
+    "cublas_workspace": null,
+    "fa4_local_fix_sha256": "4f3df79dbd9ce1b28ba56669780330c18d07f8309ad01d8db0136e4d86d0554c",
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "guard": false,
+    "matmul_precision": "highest",
+    "tf32": false,
+    "torch": "2.13.0+cu130"
+  },
+  "source_commit": "c7e7c67e29be2afbb5f6a0de594f571297c51bb7",
+  "total_operator_calls": 8192
+}

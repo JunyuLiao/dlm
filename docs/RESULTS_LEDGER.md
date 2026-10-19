@@ -2248,3 +2248,22 @@ the preserved zero-record path failure. All charges closed; GPU idle. No new
 selector and no older campaign resume. Canonical summary and independent
 verification are under attempt003; sanitized completed evidence is under
 results/v31_failure_map_20261019/publication/attempt002.
+
+## HumanEval same-input FA4 overlap diagnostic — 2026-10-19
+
+Complete operator diagnostic only; no accuracy or latency result. Source
+c7e7c67e, protocol906d41b7bbb6f93895aed80452e256ab8f8ef298b95fd236938aee783619fbbe.
+Two independent processes, reverse factor order,8192 calls on two previously
+examined captured q129/seed42 inputs. K3532 observing FA4 varies4/510 repeat
+comparisons with automatic16 splits and4/510 with one split when overlap=True.
+K2252 shows no variation in this screen. All2048 observing calls with overlap
+disabled are stable (2040 nontrivial comparisons); all4096 plain calls are stable.
+All4096 observing attention-mass outputs match captured-native bytes; Q/K/V
+preserved, zero CUDA captures/model/sampler calls. First automatic change2322
+BF16 elements in one head/query64 tile,max0.0625. GPU reservations55.959/50.147s.
+
+This isolates a mass-observing overlap-path numerical failure. It does not prove
+the exact instruction-level hazard, universal determinism, native repair or a
+method advantage. Observation-only no-overlap native qualification is pending;
+corrected full164 K256/K128 panels remain held. Sanitized complete publication:
+results/humaneval_fa4_overlap_screen_20261019/attempt001/publication/attempt001/.

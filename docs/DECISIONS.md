@@ -2806,3 +2806,28 @@ checks1.933s. Final comparison distinguishes logical used KV/active lists from
 physical translation/padding and must pass its exact-source updated preflight.
 011/012 never launched on GPU and remain immutable preparation/supersession
 records. Plan: HUMANEVAL_OBSERVE_OPERAND_REPLAY_PLAN_20261019.md.
+
+## Isolate the remaining numerical failure to observing FA4 overlap (2026-10-19 UTC)
+
+Completed same-input replay00221.870s finds one BF16 output change in single-
+split observing FA4 at K3532; automatic16-split and poisoned freed-scratch factors
+are stable in that small screen. The controlled followup uses8192 calls, two
+independent processes and reversed factor order (55.959/50.147s). On K3532,
+observing/overlap=True varies4/510 automatic and4/510 single-split comparisons.
+All2048 observing/overlap=False calls are stable, as are all4096 plain calls.
+Attention-mass bytes match native for every observing call; Q/K/V are preserved.
+First automatic change is2322 BF16 elements, one head/query64 tile,max0.0625.
+This demonstrates an operator numerical failure, not a selector advantage or
+score bug. Exact instruction-level mechanism remains unproved. Full report:
+results/humaneval_fa4_overlap_screen_20261019/attempt001/publication/attempt001/.
+
+Qualify the smallest supported correction: disable intra-warp-group overlap
+only for mass-observing FA4, leaving plain arguments and native sampler intact.
+Four source-bound CPU checks pass4.606s. Per-request class-level receipt capture
+survives shared-worker rebinding. Attempt014's validator field-path mistake
+stops after one valid warmup160.381s; preserve it as harness failure. Two new
+source-bound regressions pass0.382s. Fresh015 source d62691b2 uses two1000s,
+152-request engines, observed versus pure72 cases, independent seeds42/43.
+Both full matrices stay gated. Native qualification must precede corrected
+audit/clean/control qualification, calibration and official-scored full runs.
+No silent slower-mode performance claim, budget expansion or old-campaign resume.

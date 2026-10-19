@@ -123,7 +123,7 @@ def compare(root,destination,workspace,quiet=False):
             contrasts[-1]['full_vs_graph_only']=within
     result=dict(status='complete_diagnostic_reproducibility_unresolved',protocol_sha256=sha(root/'protocol.json'),
         original_prefix_reference_context='Different numerical/runtime policy; changes are not same-protocol reproducibility failures'
-            if p.get('torch_deterministic_guard') else 'Prior source-matched qualification context',
+            if p.get('torch_deterministic_guard') or p.get('observing_fa4_no_overlap') else 'Prior source-matched qualification context',
         jobs=inventory,contrasts=contrasts,full_accuracy_released=False,
         limitations=['instrumentation qualification is reported per job, not assumed',
             'equal fingerprints in a bounded pair do not repair original independent-prefix differences',
