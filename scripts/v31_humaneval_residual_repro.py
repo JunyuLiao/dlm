@@ -148,6 +148,7 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
             entries=arms+[arms[i+1] for i in focused]*2
             live=['clean']+['observe']*prefix+['clean']*4
             last_modes=[None]*(prefix+1)+[arms[i+1]['arm'] for i in focused]+[None]*2
+            for i in focused:last_modes[i+1]=arms[i+1]['arm']
             bookends=[dict(original=i,observed=prefix+j,final=prefix+2+j,arm=arms[i+1]['arm'],
                 label=f"seed42_q129_"+arms[i+1]['arm']) for j,i in enumerate(focused)]
         elif crossover:
@@ -225,6 +226,7 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         write(folder/'live.json',live,True)
         if last_global:
             assert len(last_modes)==len(entries)
+            assert sum(x is not None for x in last_modes)==4
             write(folder/'last_modes.json',last_modes,True)
             write(folder/'raw_calls.json',dict(full_swap8=[100],residual_direction_guard=[153,154]),True)
         if graph_trace:

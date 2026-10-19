@@ -10,7 +10,11 @@ These are partial fingerprints, not proof of equal complete operator inputs;
 pure bookends, second engine and exit compiler inventory are absent.
 
 Freeze two750s diagnostic engines. Retain the original80-request clean-prefix
-schedule with its original sampler observation. Then replay only those two
+schedule with its original sampler observation. Add the layer29 probe to the
+two original target requests as well, providing paired operator evidence in
+full-observer and layer-only contexts. This added observation must itself be
+checked against the pure repeats; no unchanged-instrumentation claim is made.
+Then replay only those two
 question/method/seed cases with a layer29-only independent observer, followed
 by two pure unobserved repeats. Total84 requests per engine. No layer-budget,
 method, threshold, source sampler, graph dispatch or native generation change.
