@@ -44,29 +44,88 @@ def phase_caps():
         raise RuntimeError('GPU allocation addendum drift')
     if sum(add['caps_s'].values())!=43200:
         raise RuntimeError('unauthorized total GPU-budget change')
-    continuation=INVESTIGATION/'allocation_addendum002.json'
-    if not continuation.exists():return add['caps_s']
-    newer=read(continuation);ledger=read(INVESTIGATION/'gpu_budget.json')
-    if (newer['prior_allocation_sha256']!=sha(INVESTIGATION/'allocation_addendum.json') or
-        newer['prior_caps_s']!=add['caps_s'] or
-        sha(ROOT/newer['spec_file'])!=newer['spec_sha256'] or
-        newer['total_cap_s']!=43200 or sum(newer['caps_s'].values())!=43200 or
-        ledger['caps_s']!=newer['caps_s'] or ledger['allocation_addendum_sha256']!=sha(continuation)):
-        raise RuntimeError('continuation allocation binding drift')
-    return newer['caps_s']
+    current=INVESTIGATION/'allocation_addendum.json';caps=add['caps_s']
+    files=sorted(INVESTIGATION.glob('allocation_addendum[0-9][0-9][0-9].json'))
+    for number,path in enumerate(files,2):
+        newer=read(path)
+        if (path.name!=f'allocation_addendum{number:03d}.json' or newer['prior_allocation_sha256']!=sha(current) or
+            newer['prior_caps_s']!=caps or sha(ROOT/newer['spec_file'])!=newer['spec_sha256'] or
+            newer['total_cap_s']!=43200 or sum(newer['caps_s'].values())!=43200 or
+            any(type(v) is not int or v<0 for v in newer['caps_s'].values())):
+            raise RuntimeError('continuation allocation binding drift')
+        current,caps=path,newer['caps_s']
+    ledger=read(INVESTIGATION/'gpu_budget.json')
+    if ledger['caps_s']!=caps or ledger['allocation_addendum_sha256']!=sha(current):
+        raise RuntimeError('allocation ledger binding drift')
+    return caps
 
 
 def allocation_file():
-    continuation=INVESTIGATION/'allocation_addendum002.json'
-    return continuation if continuation.exists() else INVESTIGATION/'allocation_addendum.json'
+    files=sorted(INVESTIGATION.glob('allocation_addendum[0-9][0-9][0-9].json'))
+    return files[-1] if files else INVESTIGATION/'allocation_addendum.json'
 
 
-def prepare(study,budget):
+def reference_compatible(current,owner,current_source,owner_source):
+    if current_source!=owner_source or current.get('observing_fa4_no_overlap') is not True or owner.get('observing_fa4_no_overlap') is not True:
+        return False
+    fields=('runtime','native','manifests','humaneval_source_sha256','model_inventory_sha256','cohort','seed','extra_seed','primary_shard_count')
+    if any(k not in current or k not in owner or current[k]!=owner[k] for k in fields):return False
+    if set(current['suites'])!=set(owner['suites']):return False
+    return all({k:v for k,v in current['suites'][mode].items() if k!='mage_k'}==
+               {k:v for k,v in owner['suites'][mode].items() if k!='mage_k'} for mode in current['suites'])
+
+
+def reference_owner(study,p):
+    binding=p.get('shared_references')
+    if not binding:return None
+    owner=ROOT/binding['study'];other=read(owner/'protocol.json')
+    if (owner==study or other.get('shared_references') or list(binding['families'])!=list(REFERENCES) or
+        sha(owner/'protocol.json')!=binding['protocol_sha256'] or
+        sha(owner/'receipts/source_fingerprints.json')!=binding['source_fingerprints_sha256'] or
+        not reference_compatible(p,other,read(study/'receipts/source_fingerprints.json'),read(owner/'receipts/source_fingerprints.json'))):
+        raise RuntimeError('shared reference source/runtime/data binding drift')
+    verify(owner)
+    return owner
+
+
+def link_references(study,p):
+    owner=reference_owner(study,p)
+    if owner is None:return
+    if (read(owner/'independent_verification.json')['status']!='passed' or
+        read(owner/'independent_rescoring.json')['mismatches']!=0 or
+        read(owner/'independent_rescoring.json')['qualification_mismatches']!=0):
+        raise RuntimeError('shared reference owner lacks independent verification/rescoring')
+    for stage in ('qualification','runs'):
+        for mode in MODES:
+            for part in ('audit','clean'):
+                for family in REFERENCES:
+                    source=owner/stage/mode/part/family;target=study/stage/mode/part/family
+                    markers=list(source.glob('*/attempt*/attempt_complete.json'))
+                    if not markers:raise RuntimeError('shared reference owner is incomplete: '+str(source))
+                    for marker in markers:verify_leaf(owner,marker.parent)
+                    if target.exists() or target.is_symlink():
+                        if not target.is_symlink() or target.resolve()!=source.resolve():raise RuntimeError('shared reference link conflict')
+                    else:
+                        target.parent.mkdir(parents=True,exist_ok=True)
+                        target.symlink_to(os.path.relpath(source,target.parent),target_is_directory=True)
+
+
+def prepare(study,budget,observe_no_overlap=False,single_primary_shard=False,shared_references=None):
     if budget not in (128,256) or study.exists():
         raise RuntimeError('new fixed-budget attempt required')
     qualification=INVESTIGATION/'qualification/attempt001/baseline_runtime_qualified.json'
     q=read(qualification)
     if q['status']!='baseline_runtime_qualified':raise RuntimeError('baseline runtime unqualified')
+    native_qualification=None
+    if observe_no_overlap:
+        native_qualification=ROOT/'results/humaneval_mixed_repro_20261019/attempt015/qualification/attempt001/qualification.json'
+        proof=read(native_qualification)
+        if proof['status']!='native_no_overlap_qualified':raise RuntimeError('observing-FA4 native correction unqualified')
+        if proof['policy_source_sha256']!=sha(ROOT/'scripts/v31_humaneval_observe_no_overlap.py'):
+            raise RuntimeError('qualified observing policy source changed')
+        if 'evaluation' not in phase_caps():raise RuntimeError('remaining evaluation allocation must be frozen first')
+    if shared_references is not None and not observe_no_overlap:
+        raise RuntimeError('shared references require the new common-source protocol')
     gate=read(PREFLIGHT/'preflight_complete.json')
     if gate['status']!='complete' or sha(PREFLIGHT/'tests.xml')!=gate['tests_sha256']:
         raise RuntimeError('qualified H100 tests required')
@@ -88,10 +147,23 @@ def prepare(study,budget):
         shutil.copyfile(ROOT/'scripts'/name,execution/'scripts'/name)
     shutil.copyfile(INVESTIGATION/'private/source_addenda/attempt027/worker.py',
                     execution/'scripts/v31_humaneval_cfgdet_policy_worker.py')
+    if observe_no_overlap:
+        helper=execution/'scripts/v31_humaneval_observe_no_overlap.py'
+        shutil.copyfile(ROOT/'scripts/v31_humaneval_observe_no_overlap.py',helper)
+        policy=execution/'scripts/v31_humaneval_cfgdet_policy_worker.py';text=policy.read_text()
+        assert text.count('import runpy')==text.count('    policy = install_compilation_policy()\n')==1
+        text=text.replace('import runpy','import runpy\nimport sys',1)
+        setup=("    if sys.argv[6] == 'mage':\n"
+            "        correction = Path(__file__).with_name('v31_humaneval_observe_no_overlap.py')\n"
+            "        runpy.run_path(str(correction))['install']()\n"
+            "        policy.update(observing_fa4_numerical_policy='no_intra_wg_overlap',\n"
+            "            observing_fa4_policy_sha256=hashlib.sha256(correction.read_bytes()).hexdigest())\n")
+        policy.write_text(text.replace('    policy = install_compilation_policy()\n','    policy = install_compilation_policy()\n'+setup,1))
     shutil.copytree(PARENT/'private/pools',study/'private/pools')
     shutil.copyfile(PARENT/'private/HumanEval.jsonl.gz',study/'private/HumanEval.jsonl.gz')
     shutil.copytree(PARENT/'private/schedules',study/'private/schedules')
-    shutil.copytree(INVESTIGATION/'private/cache',study/'private/cache')
+    cache=(ROOT/'results/humaneval_value_cfgdet_k256_20261019/attempt001/private/cache') if observe_no_overlap else INVESTIGATION/'private/cache'
+    shutil.copytree(cache,study/'private/cache')
     cohort=read(INVESTIGATION/'protocol.json')['cohort']
     for mode in MODES:
         folder=study/f'private/schedules/{mode}'
@@ -101,11 +173,11 @@ def prepare(study,budget):
         # request/arm order exactly. The extra seed follows that prefix only.
         write(folder/'qualification.json',selected+[dict(c,seed=43) for c in selected],True)
         rest=[c for c in cells if c['index'] not in cohort]
-        write(folder/'primary_shard001.json',selected+rest[:76],True)
-        write(folder/'primary_shard002.json',rest[76:],True)
+        write(folder/'primary_shard001.json',selected+rest if single_primary_shard else selected+rest[:76],True)
+        if not single_primary_shard:write(folder/'primary_shard002.json',rest[76:],True)
         write(folder/'all_work.json',selected+rest,True)
     shutil.copyfile(PARENT/'model_source_fingerprints.json',study/'model_source_fingerprints.json')
-    shutil.copyfile(SPEC,study/'spec.md')
+    shutil.copyfile(ROOT/'docs/HUMANEVAL_NO_OVERLAP_MATRIX_PLAN_20261019.md' if observe_no_overlap else SPEC,study/'spec.md')
     shutil.copyfile(PREFLIGHT/'tests.xml',study/'preflight_tests.xml')
     original=read(PARENT/'protocol.json')
     settings=dict(inherited.SETTINGS,mage_k=budget)
@@ -118,6 +190,11 @@ def prepare(study,budget):
         compiler_policy=dict(inductor_deterministic=True,horizontal_combo_fusion=False,
             benchmark_combo_kernel=False,native_graph_modes_retained=True,
             native_helper_python_functions_preserved=True),
+        observing_fa4_no_overlap=observe_no_overlap,
+        observing_native_qualification_sha256=sha(native_qualification) if native_qualification else None,
+        observing_policy_source_sha256=sha(execution/'scripts/v31_humaneval_observe_no_overlap.py') if observe_no_overlap else None,
+        primary_shard_count=1 if single_primary_shard else 2,
+        shared_references=None,
         execution_fingerprints={str(f.relative_to(execution)):sha(f) for f in execution.rglob('*') if f.is_file()},
         input_fingerprints={str(f.relative_to(study)):sha(f) for root in (study/'private/pools',study/'private/schedules')
                             for f in root.rglob('*') if f.is_file()},
@@ -129,12 +206,20 @@ def prepare(study,budget):
         per_query_tile='query-head/Q128, prefix KV64 only; dense canvas/boundary and LOCAL',
         calibration='attention work only; previous threshold first for K256; fresh K128; full164 work verification',
         matching_tolerance=dict(sparsity_pp=.25,kept_fraction_relative=.01),
-        phase='k'+str(budget),phase_cap_s=phase_caps()['k'+str(budget)],
+        phase='evaluation' if observe_no_overlap else 'k'+str(budget),
+        phase_cap_s=phase_caps()['evaluation' if observe_no_overlap else 'k'+str(budget)],
         maximum_job_reservation_s=1800,passes=['audit','clean'],primary_control='control_before',
         status='frozen_before_generation')
+    source_identity=dict(source_commit=p['source_commit'],
+        execution_fingerprints=p['execution_fingerprints'],numerical_policy_sha256=p['numerical_policy_sha256'])
+    if shared_references is not None:
+        owner=shared_references.absolute();other=verify(owner)
+        assert reference_compatible(p,other,source_identity,read(owner/'receipts/source_fingerprints.json'))
+        p['shared_references']=dict(study=str(owner.relative_to(ROOT)),protocol_sha256=sha(owner/'protocol.json'),
+            source_fingerprints_sha256=sha(owner/'receipts/source_fingerprints.json'),families=list(REFERENCES),
+            reason='these plain dense/all-kept paths do not consult retention K; selector arms are never shared')
     write(study/'protocol.json',p,True)
-    write(study/'receipts/source_fingerprints.json',dict(source_commit=p['source_commit'],
-        execution_fingerprints=p['execution_fingerprints'],numerical_policy_sha256=p['numerical_policy_sha256']),True)
+    write(study/'receipts/source_fingerprints.json',source_identity,True)
     write(study/'state.json',dict(stage='prepared',resumable=True,full_accuracy_released=False))
     return p
 
@@ -149,6 +234,11 @@ def verify(study):
         raise RuntimeError('canonical HumanEval source drift')
     if sha(INVESTIGATION/'qualification/attempt001/baseline_runtime_qualified.json')!=p['baseline_runtime_qualification_sha256']:
         raise RuntimeError('baseline qualification identity drift')
+    if p.get('observing_fa4_no_overlap'):
+        qualification=ROOT/'results/humaneval_mixed_repro_20261019/attempt015/qualification/attempt001/qualification.json'
+        if sha(qualification)!=p['observing_native_qualification_sha256'] or read(qualification)['status']!='native_no_overlap_qualified':
+            raise RuntimeError('observing numerical qualification identity drift')
+    if p.get('shared_references'):reference_owner(study,p)
     base.SUITES.update(p['suites'])
     return p
 
@@ -196,7 +286,7 @@ def schedule(cells, warm, family, pass_name, threshold, calibration=None):
 
 
 
-def validate(row, cell, family, live, pass_name, oracle=False, prefix_budget=256):
+def validate(row, cell, family, live, pass_name, oracle=False, prefix_budget=256,observing_policy_sha=None):
     errors = []
     a = ((row.get('receipts') or {}).get('adapter') or {})
     checks = [(row.get('dataset') == cell['dataset'] and row.get('index') == cell['index'] and row.get('panel_seed') == cell['seed'] and row.get('repeat') == 0, 'input/seed'),
@@ -214,6 +304,11 @@ def validate(row, cell, family, live, pass_name, oracle=False, prefix_budget=256
         checks += [(row.get('timer_policy') == 'request_and_prefill_boundaries', 'clean boundaries'),
                    (abs(row['wall_s']-row['decode_s']-row['prefill_s']) < 2e-5, 'time sum')]
     if family in ('shared', 'calibration', V2):
+        if observing_policy_sha is not None:
+            checks += [(a.get('observing_fa4_policy_sha256')==observing_policy_sha and
+                a.get('observing_fa4_intra_wg_overlap') is False and a.get('observing_fa4_extra_forwards')==0 and
+                a.get('observing_fa4_plain_arguments_preserved') is True and type(a.get('observing_fa4_calls')) is int and a['observing_fa4_calls']>=0,
+                'observing numerical-policy receipt')]
         arm = live['arm']
         checks += [(a.get('humaneval_live_arm') == arm, 'live arm'),
                    (a.get('humaneval_threshold') == live.get('threshold'), 'live threshold'),
@@ -243,7 +338,11 @@ def validate(row, cell, family, live, pass_name, oracle=False, prefix_budget=256
 def verify_leaf(study,leaf):
     done=read(leaf/'attempt_complete.json')
     if done['protocol_sha256']!=sha(study/'protocol.json'):
-        raise RuntimeError('leaf protocol drift')
+        p=read(study/'protocol.json');owner=reference_owner(study,p)
+        rel=leaf.relative_to(study)
+        if (owner is None or len(rel.parts)<4 or rel.parts[0] not in ('runs','qualification') or rel.parts[3] not in REFERENCES or
+            leaf.resolve()!=(owner/rel).resolve() or done['protocol_sha256']!=sha(owner/'protocol.json')):
+            raise RuntimeError('leaf protocol drift')
     for name,digest in done['files_sha256'].items():
         if sha(leaf/name)!=digest:raise RuntimeError('completed native artifact drift')
     return done
@@ -347,7 +446,7 @@ def run_job(study,stage,mode,pass_name,family,cells_file,threshold=None,calibrat
     def check_record(i,row):
         try:
             errors=validate(row,rows[i],family,entries[i+1] if shared else None,
-                            pass_name,oracle,p['prefix_budget_tokens'])
+                            pass_name,oracle,p['prefix_budget_tokens'],p.get('observing_policy_source_sha256'))
             if stage=='runs' and i>=warm_count and rows[i]['index'] in p['cohort']:
                 label=entries[i+1]['label'] if shared else family
                 reference=replicas.get((label,rows[i]['index']))
@@ -517,7 +616,7 @@ def prefix_reproducibility(study):
 
 
 def run(study):
-    verify(study)
+    p=verify(study);link_references(study,p)
     # Canonical official test programs validate the scoring harness, never a
     # candidate threshold. Reuse the inherited data-bound canonical gate.
     inherited.scorer_gate(study)
@@ -527,7 +626,7 @@ def run(study):
         for pass_name in ('audit','clean'):
             run_job(study,'qualification',mode,pass_name,'shared',folder/'qualification.json',threshold,
                     oracle=pass_name=='audit')
-            for family in REFERENCES:
+            for family in ([] if p.get('shared_references') else REFERENCES):
                 run_job(study,'qualification',mode,pass_name,family,folder/'qualification.json')
     # Qualification audit/clean outputs are checked before primary generation.
     from scripts.v31_humaneval_cfgdet_report import qualification_equivalence,make_report
@@ -535,11 +634,11 @@ def run(study):
     if not all(x['passed'] for x in proof):raise RuntimeError('method audit/clean qualification failed')
     path=study/'qualification/methods_qualified.json'
     if not path.exists():write(path,dict(comparisons=proof,protocol_sha256=sha(study/'protocol.json')),True)
-    for shard in (1,2):
+    for shard in range(1,p.get('primary_shard_count',2)+1):
         for mi,mode in enumerate(MODES):
             folder=study/f'private/schedules/{mode}'
             threshold=read(study/f'calibration/{mode}/full164_threshold.json')['threshold']
-            families=['shared',*REFERENCES];shift=(shard+mi)%len(families)
+            families=['shared',*([] if p.get('shared_references') else REFERENCES)];shift=(shard+mi)%len(families)
             families=families[shift:]+families[:shift]
             for family in families:
                 for pass_name in (('clean','audit') if (shard+mi)%2 else ('audit','clean')):
@@ -554,8 +653,11 @@ def main():
     p=argparse.ArgumentParser(__doc__)
     p.add_argument('action',choices=['prepare','run']);p.add_argument('--study',type=Path,required=True)
     p.add_argument('--budget',type=int,choices=[128,256])
+    p.add_argument('--observe-no-overlap',action='store_true')
+    p.add_argument('--single-primary-shard',action='store_true')
+    p.add_argument('--shared-references',type=Path)
     a=p.parse_args();study=a.study.absolute()
-    if a.action=='prepare':prepare(study,a.budget)
+    if a.action=='prepare':prepare(study,a.budget,a.observe_no_overlap,a.single_primary_shard,a.shared_references)
     else:run(study)
 
 

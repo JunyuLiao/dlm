@@ -166,6 +166,13 @@ def summarize(study):
             'attention-consumer sparsity from matched audit; extra selector/PV work is separate',
             'Q128/KV64 geometry rectangles, not a count of CUDA CTAs',
             'S/N is amortized across native trajectory, not a controlled per-forward price'])
+    protocol=read(study/'protocol.json')
+    report['observing_fa4_no_overlap']=protocol.get('observing_fa4_no_overlap',False)
+    report['shared_references']=protocol.get('shared_references')
+    if protocol.get('observing_fa4_no_overlap'):
+        report['limitations'].append('mass-observing FA4 disables intra-warp-group overlap; plain paths stay native; its cost is included in measured latency')
+    if protocol.get('shared_references'):
+        report['limitations'].append('dense FULL/PIECEWISE/all-kept controls are the same completed common-source runs used for K256; they are not independent additional trials or additional GPU charges')
     write(study/'summary.json', report, True)
     lines = [f"# HumanEval164 K{read(study/'protocol.json')['prefix_budget_tokens']} seed42", '', 'Clean native accuracy and request latency; separate audit sparsity. Full inputs, generated text, gold and token IDs remain private.', '']
     for mode, result in results.items():
