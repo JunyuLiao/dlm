@@ -314,6 +314,19 @@ def run_job(study,stage,mode,pass_name,family,cells_file,threshold=None,calibrat
             for path in sources[label]:
                 for row in base.jsonl(path/'records.jsonl'):
                     if row['panel_seed']==42:replicas[(label,row['index'])]=row
+    def check_record(i,row):
+        try:
+            errors=validate(row,rows[i],family,entries[i+1] if shared else None,
+                            pass_name,oracle,p['prefix_budget_tokens'])
+            if stage=='runs' and i>=warm_count and rows[i]['index'] in p['cohort']:
+                label=entries[i+1]['label'] if shared else family
+                reference=replicas.get((label,rows[i]['index']))
+                if reference is None or any(row[key]!=reference[key] for key in (
+                    'output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','rng_seed','prompt_sha256')):
+                    errors.append('independent primary-prefix replication failed')
+            return errors
+        except Exception as error:
+            return ['record validation exception: '+type(error).__name__]
     budget,reservation=reserve(study,p,leaf)
     write(study/'state.json',dict(stage=stage,mode=mode,pass_name=pass_name,family=family,
         active_attempt=str(leaf.relative_to(study)),resumable=True,full_accuracy_released=False))
@@ -329,14 +342,7 @@ def run_job(study,stage,mode,pass_name,family,cells_file,threshold=None,calibrat
                 errors.append('unexpected extra request records')
                 public=public[:len(rows)]
             for i in range(checked,len(public)):
-                errors.extend(validate(public[i],rows[i],family,entries[i+1] if shared else None,
-                                       pass_name,oracle,p['prefix_budget_tokens']))
-                if stage=='runs' and i>=warm_count and rows[i]['index'] in p['cohort']:
-                    label=entries[i+1]['label'] if shared else family
-                    reference=replicas.get((label,rows[i]['index']))
-                    if reference is None or any(public[i][key]!=reference[key] for key in (
-                        'output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','rng_seed','prompt_sha256')):
-                        errors.append('independent primary-prefix replication failed')
+                errors.extend(check_record(i,public[i]))
             checked=len(public)
             if errors or time.monotonic()-start>=reservation['reserved_s']:
                 if not errors:errors.append('GPU reservation expired')
@@ -355,8 +361,7 @@ def run_job(study,stage,mode,pass_name,family,cells_file,threshold=None,calibrat
     private=base.jsonl(leaf/'private/generation.private.jsonl') if (leaf/'private/generation.private.jsonl').exists() else []
     if proc.returncode or len(public)!=len(rows) or len(private)!=len(rows):errors.append('worker/coverage failure')
     for i in range(checked,len(public)):
-        errors.extend(validate(public[i],rows[i],family,entries[i+1] if shared else None,
-                               pass_name,oracle,p['prefix_budget_tokens']))
+        errors.extend(check_record(i,public[i]))
     errors.extend(policy_errors(leaf/'private/kernel_inventory.json',cg))
     jit=jit_events(leaf/'private/worker.log',warm_count)
     if pass_name=='clean' and jit:errors.append('measured kernel JIT; clean latency unqualified')

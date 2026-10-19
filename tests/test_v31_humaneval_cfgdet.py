@@ -50,7 +50,8 @@ def test_qualification_prefix_matches_primary_order_before_extra_seed():
 
 @pytest.mark.skipif(not torch.cuda.is_available(),reason='qualified H100 required')
 @pytest.mark.parametrize('prefix_tiles,budget,dim',[(1,1,512),(2,2,512),(3,2,512),
-                                                  (5,2,512),(8,2,512),(13,2,512),(8,4,512)])
+                                                  (5,2,512),(8,2,512),(13,2,512),
+                                                  (129,2,512),(8,4,512)])
 def test_k2_full_value_swaps_match_independent_same_state_reference(prefix_tiles,budget,dim):
     from experiments.numerical_qk_reuse.v31_value_decision import moments,bounded_proposal,fixed_topk,mass_score
     from experiments.numerical_qk_reuse.v31_value_fast import bounded_proposal_device
