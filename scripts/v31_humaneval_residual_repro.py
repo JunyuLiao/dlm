@@ -16,7 +16,8 @@ read,write,sha=campaign.read,campaign.write,campaign.sha
 FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','native_interval_steps')
 
 
-def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False):
+def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False,torch_guard=False):
+    cublas=cublas or torch_guard
     all_cases=all_cases or cublas
     attention=attention or crossover
     parent=campaign.verify(PARENT)
@@ -36,7 +37,15 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
                "cublas_bytes=torch._C._cuda_getCublasWorkspaceSize(), "
                "cublaslt_bytes=torch._C._cuda_getCublasLtWorkspaceSize(), "
                "preferred_library=str(torch.backends.cuda.preferred_blas_library())),\n            policy=policy,")
-        (root/'private/cublas_policy.py').write_text(policy.replace('policy=policy,',extra,1))
+        policy=policy.replace('policy=policy,',extra,1)
+        if torch_guard:
+            marker='def install_compilation_policy():\n'
+            assert policy.count(marker)==1
+            policy=policy.replace(marker,marker+'    import torch\n    torch.use_deterministic_algorithms(True, warn_only=False)\n    torch.utils.deterministic.fill_uninitialized_memory = False\n',1)
+            marker='torch_deterministic_algorithms=torch.are_deterministic_algorithms_enabled(),'
+            assert policy.count(marker)==1
+            policy=policy.replace(marker,marker+'\n            torch_fill_uninitialized_memory=torch.utils.deterministic.fill_uninitialized_memory,',1)
+        (root/'private/cublas_policy.py').write_text(policy)
     if mixed or all_cases or attention:
         shutil.copyfile(ROOT/'scripts/v31_humaneval_gpu_fingerprint.py',root/'private/humaneval_gpu_fingerprint.py')
         gate=read(ROOT/'results/humaneval_mixed_repro_preflight_20261019/attempt001/receipt.json')
@@ -50,7 +59,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         path.write_text(source)
     if attention:
         shutil.copyfile(ROOT/'scripts/v31_humaneval_attention_fingerprint.py',root/'private/attention_fingerprint.py')
-    spec=(ROOT/'docs/HUMANEVAL_BLAS_WORKSPACE_PLAN_20261019.md' if cublas else
+    spec=(ROOT/'docs/HUMANEVAL_TORCH_GUARD_PLAN_20261019.md' if torch_guard else
+          ROOT/'docs/HUMANEVAL_BLAS_WORKSPACE_PLAN_20261019.md' if cublas else
           ROOT/'docs/HUMANEVAL_TRACE_CROSSOVER_PLAN_20261019.md' if crossover else
           ROOT/'docs/HUMANEVAL_ATTENTION_TRACE_PLAN_20261019.md' if attention else
           ROOT/'docs/HUMANEVAL_FULL_TRACE_PLAN_20261019.md' if all_cases else
@@ -143,6 +153,7 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         full_cohort_trace=all_cases,two_way_observer=all_cases or (attention and not crossover),attention_fingerprints=attention,
         trace_crossover=crossover,
         cublas_workspace_config=':4096:8' if cublas else None,
+        torch_deterministic_guard=torch_guard,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
     write(root/'protocol.json',p,True)
     return p
@@ -220,6 +231,10 @@ def run_job(root,part):
         actual=read(leaf/'private/kernel_inventory.json').get('blas_workspace',{})
         if actual.get('environment')!=p['cublas_workspace_config'] or actual.get('cublas_bytes')!=33554432:
             errors.append('ineffective BLAS workspace configuration')
+    if p.get('torch_deterministic_guard') and (leaf/'private/kernel_inventory.json').exists():
+        actual=read(leaf/'private/kernel_inventory.json')
+        if actual.get('torch_deterministic_algorithms') is not True or actual.get('torch_fill_uninitialized_memory') is not False:
+            errors.append('ineffective framework guard or unexpected memory fill')
     bookends=[]
     if len(public)==len(rows):
         for group in config['bookend_groups']:
@@ -247,7 +262,8 @@ if __name__=='__main__':
     parser.add_argument('--attention',action='store_true')
     parser.add_argument('--crossover',action='store_true')
     parser.add_argument('--cublas-workspace',action='store_true')
+    parser.add_argument('--torch-guard',action='store_true')
     args=parser.parse_args();root=args.study.absolute()
-    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover,args.cublas_workspace)
+    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover,args.cublas_workspace,args.torch_guard)
     else:
         for part in read(root/'protocol.json')['jobs']:run_job(root,part)
