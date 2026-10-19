@@ -7,6 +7,25 @@ from scripts.v31_humaneval_cfgdet_worker import bind,CONTROL
 from scripts.v31_humaneval_cfgdet_study import entry,schedule
 
 
+def test_cpu_emission_intervals_preserve_uncommitted_tail_without_gpu_work():
+    from scripts.v31_humaneval_cfgdet_base_worker import NativeEmissionIntervals
+    trace=NativeEmissionIntervals()
+    trace.observe(0,0)
+    trace.observe(256,4)
+    trace.observe(256,5)
+    trace.observe(500,7)
+    receipt=trace.receipt(9,500,2)
+    assert receipt['native_interval_trace_available']
+    assert receipt['native_interval_steps']==[3,2,2]
+    assert sum(receipt['native_interval_steps'])==9-2
+
+
+def test_coalesced_or_non_cumulative_emissions_are_not_fabricated_as_canvases():
+    from scripts.v31_humaneval_cfgdet_base_worker import NativeEmissionIntervals
+    trace=NativeEmissionIntervals();trace.observe(512,7)
+    assert trace.receipt(7,512,2)['native_interval_trace_available'] is False
+
+
 @pytest.mark.parametrize('tokens',[128,256])
 @pytest.mark.parametrize('prefix_tiles',[0,1,2,3,7])
 def test_fixed_budget_is_per_query_head_tile_and_excludes_dense_tail(tokens,prefix_tiles):

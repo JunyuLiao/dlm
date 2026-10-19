@@ -61,7 +61,7 @@ def prepare(study,budget):
     shutil.copytree(PARENT/'private/execution',execution)
     # The inherited selector/native execution remains byte-identical. Overlay
     # only the generalized harness and the qualified numerical-policy worker.
-    overlays=['v31_humaneval_cfgdet_worker.py','v31_humaneval_cfgdet_study.py',
+    overlays=['v31_humaneval_cfgdet_worker.py','v31_humaneval_cfgdet_base_worker.py','v31_humaneval_cfgdet_study.py',
               'v31_humaneval_cfgdet_report.py','v31_humaneval_cfgdet_verify.py']
     for name in overlays:
         shutil.copyfile(ROOT/'scripts'/name,execution/'scripts'/name)
@@ -172,6 +172,8 @@ def validate(row, cell, family, live, pass_name, oracle=False, prefix_budget=256
     errors = []
     a = ((row.get('receipts') or {}).get('adapter') or {})
     checks = [(row.get('dataset') == cell['dataset'] and row.get('index') == cell['index'] and row.get('panel_seed') == cell['seed'] and row.get('repeat') == 0, 'input/seed'),
+        (row.get('native_interval_trace_available') is True and
+         sum(row.get('native_interval_steps') or [])==row.get('denoise_forwards'), 'native emission intervals'),
         (row.get('cuda_graph_captures') == 0, 'measured CUDA capture'),
         (row.get('block_size') == 64 and row.get('chunk') == 4096 and row.get('max_model_len') == 9216, 'geometry'),
         (row.get('fix_51994') is True and row.get('fa4_local_fix') is True, 'dense/LOCAL fixes'),
@@ -288,7 +290,7 @@ def run_job(study,stage,mode,pass_name,family,cells_file,threshold=None,calibrat
     if base.runtime_identity()!=p['runtime']:raise RuntimeError('runtime identity drift')
     execution=study/'private/execution';env=base.env_for(study,mode,CONTROL)
     shared=family in ('shared','calibration',V2)
-    native_worker=execution/'scripts'/('v31_humaneval_cfgdet_worker.py' if shared else 'v31_vllm_paired_bench.py')
+    native_worker=execution/'scripts'/('v31_humaneval_cfgdet_worker.py' if shared else 'v31_humaneval_cfgdet_base_worker.py')
     policy_worker=execution/'scripts/v31_humaneval_cfgdet_policy_worker.py'
     env.update(STUDY_ARM=family,PYTHONHASHSEED='0',REPEATS='1',TRACE=str(int(pass_name=='audit')),
         PYTHONPATH=str(execution/'src')+':'+str(execution),
@@ -296,7 +298,7 @@ def run_job(study,stage,mode,pass_name,family,cells_file,threshold=None,calibrat
         VALUE_AUDIT=str(int(pass_name=='audit')),VALUE_CLEAN_TIMING=str(int(pass_name=='clean')),
         VALUE_BOUNDARY_TIMING=str(int(pass_name=='clean')),
         HUMANEVAL_REQUEST_ARMS=str(leaf/'private/arms.json'),HUMANEVAL_PREFIX_BUDGET=str(p['prefix_budget_tokens']),
-        HUMANEVAL_BASE_WORKER=str(execution/'scripts/v31_vllm_paired_bench.py'),
+        HUMANEVAL_BASE_WORKER=str(execution/'scripts/v31_humaneval_cfgdet_base_worker.py'),
         HUMANEVAL_REPRO_BASE=str(native_worker),HUMANEVAL_ORACLE=str(int(oracle)),
         HUMANEVAL_ORACLE_ANCHORS_PER_REQUEST='2',
         TORCHINDUCTOR_DETERMINISTIC='1',HUMANEVAL_KERNEL_INVENTORY=str(leaf/'private/kernel_inventory.json'))
@@ -322,7 +324,8 @@ def run_job(study,stage,mode,pass_name,family,cells_file,threshold=None,calibrat
                 label=entries[i+1]['label'] if shared else family
                 reference=replicas.get((label,rows[i]['index']))
                 if reference is None or any(row[key]!=reference[key] for key in (
-                    'output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','rng_seed','prompt_sha256')):
+                    'output_hash','denoise_forwards','canvases','output_tokens','sampler_calls',
+                    'native_interval_steps','rng_seed','prompt_sha256')):
                     errors.append('independent primary-prefix replication failed')
             return errors
         except Exception as error:
@@ -478,7 +481,8 @@ def prefix_reproducibility(study):
                 new={r['index']:r for path in primary[label] for r in base.jsonl(path/'records.jsonl')}
                 if set(old)!=set(read(study/'protocol.json')['cohort']):raise RuntimeError('replication cohort missing')
                 differences={k:sum(old[i][k]!=new[i][k] for i in old) for k in (
-                    'output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','rng_seed','prompt_sha256')}
+                    'output_hash','denoise_forwards','canvases','output_tokens','sampler_calls',
+                    'native_interval_steps','rng_seed','prompt_sha256')}
                 comparisons.append(dict(mode=mode,pass_name=pass_name,label=label,questions=6,
                                         differences=differences,passed=not any(differences.values())))
     return comparisons
