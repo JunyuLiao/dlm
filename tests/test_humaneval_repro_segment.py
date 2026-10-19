@@ -6,6 +6,20 @@ from types import SimpleNamespace
 import torch
 
 
+def test_segment_dispatch_preserves_downstream_captured_addresses():
+    from scripts.v31_humaneval_repro_segment_worker import copy_to_captured_outputs
+    fresh = (torch.arange(6).reshape(2, 3), [torch.ones(2), None])
+    captured = (torch.zeros(2, 3, dtype=torch.int64), [torch.zeros(2), None])
+    addresses = [captured[0].data_ptr(), captured[1][0].data_ptr()]
+    returned = copy_to_captured_outputs(fresh, captured)
+    assert returned is captured
+    assert [returned[0].data_ptr(), returned[1][0].data_ptr()] == addresses
+    assert torch.equal(returned[0], fresh[0])
+    assert torch.equal(returned[1][0], fresh[1][0])
+    fresh[0].zero_()
+    assert torch.equal(returned[0], torch.arange(6).reshape(2, 3))
+
+
 def test_completed_kernel_snapshot_is_detached_and_inert(tmp_path, monkeypatch):
     from scripts.v31_humaneval_repro_segment_worker import install
     from vllm.v1.engine.llm_engine import LLMEngine

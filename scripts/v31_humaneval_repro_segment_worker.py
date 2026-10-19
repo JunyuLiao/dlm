@@ -17,12 +17,32 @@ import runpy
 import sys
 
 
+def copy_to_captured_outputs(fresh, captured):
+    """Preserve pointer bindings required by downstream captured segments."""
+    import torch
+    from torch.utils._pytree import tree_flatten
+    src, source_spec = tree_flatten(fresh)
+    dst, dest_spec = tree_flatten(captured)
+    if source_spec != dest_spec:
+        raise RuntimeError('captured output structure mismatch')
+    for a, b in zip(src, dst):
+        if isinstance(a, torch.Tensor) and isinstance(b, torch.Tensor):
+            if a.shape != b.shape or a.dtype != b.dtype or a.device != b.device:
+                raise RuntimeError('captured output tensor mismatch')
+            if a.data_ptr() != b.data_ptr():
+                b.copy_(a)
+        elif a != b:
+            raise RuntimeError('captured scalar output mismatch')
+    return captured
+
+
 def install(schedule, root):
     import torch
     from vllm.v1.engine.llm_engine import LLMEngine
     from vllm.v1.attention.backends.flash_attn import FlashAttentionImpl
     from vllm.compilation.cuda_graph import CUDAGraphWrapper
     from vllm.config import CUDAGraphMode
+    from vllm.forward_context import get_forward_context
     import vllm.model_executor.models.diffusion_gemma as dg
     state = dict(index=-1, active=False, segment=False, prefilled=False, entries=[])
     add, step = LLMEngine.add_request, LLMEngine.step
@@ -106,8 +126,13 @@ def install(schedule, root):
     @functools.wraps(graph_call)
     def segment_dispatch(self, *args, **kwargs):
         if state['segment'] and self.runtime_mode == CUDAGraphMode.PIECEWISE:
+            descriptor = get_forward_context().batch_descriptor
+            entry = self.concrete_cudagraph_entries.get(descriptor)
+            if entry is None or entry.cudagraph is None:
+                raise RuntimeError('diagnostic requires an already captured native segment')
             state['graph_bypasses'] += 1
-            return self.runnable(*args, **kwargs)
+            fresh = self.runnable(*args, **kwargs)
+            return copy_to_captured_outputs(fresh, entry.output)
         return graph_call(self, *args, **kwargs)
 
     @functools.wraps(finish)
@@ -139,7 +164,8 @@ def install(schedule, root):
             torch.save(cpu(state['entries']), path)
             path.with_suffix('.json').write_text(json.dumps(dict(
                 diagnostic_dispatch='single first-prefill compiled segment outside its CUDA graph',
-                graph_bypasses=state['graph_bypasses'], extra_forwards=0))+'\n')
+                graph_bypasses=state['graph_bypasses'], extra_forwards=0,
+                downstream_captured_output_addresses_preserved=True))+'\n')
             state.update(active=False, entries=[])
         return result
 
