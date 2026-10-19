@@ -6,6 +6,16 @@ from types import SimpleNamespace
 import torch
 
 
+def test_compiler_policy_preserves_native_graph_and_other_options():
+    from scripts.v31_humaneval_repro_policy_worker import compilation_options
+    original = dict(cudagraph_mode='PIECEWISE',inductor_compile_config=dict(combo_kernels=True))
+    fixed = compilation_options(original)
+    assert fixed['cudagraph_mode'] == 'PIECEWISE'
+    assert fixed['inductor_compile_config'] == dict(combo_kernels=True,deterministic=True)
+    assert original['inductor_compile_config'] == dict(combo_kernels=True)
+    assert 'cudagraph_mode' not in compilation_options(None)
+
+
 def test_segment_dispatch_preserves_downstream_captured_addresses():
     from scripts.v31_humaneval_repro_segment_worker import copy_to_captured_outputs
     fresh = (torch.arange(6).reshape(2, 3), [torch.ones(2), None])

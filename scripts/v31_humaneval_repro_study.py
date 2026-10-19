@@ -155,8 +155,22 @@ def job(study, name, mode, family, pass_name, trace=False, overrides=None, wrapp
     entry.update(elapsed_s=elapsed,returncode=proc.returncode);write(study/'gpu_budget.json',budget)
     records=base.jsonl(leaf/'records.jsonl') if (leaf/'records.jsonl').exists() else []
     good=proc.returncode==0 and len(records)==len(rows)
+    policy_checks={}
+    if env.get('HUMANEVAL_POLICY_REQUIRED')=='inductor_cfgdet':
+        inventory_path=Path(env['HUMANEVAL_KERNEL_INVENTORY'])
+        inventory=read(inventory_path) if inventory_path.exists() else {}
+        effective=inventory.get('policy',{})
+        policy_checks=dict(receipt_present=bool(inventory),
+            process_compiler_deterministic=inventory.get('torch_inductor_deterministic') is True,
+            actual_kernels_deterministic=bool(inventory.get('kernels')) and all(
+                k['deterministic'] for k in inventory.get('kernels',[])),
+            explicit_model_compiler_deterministic=effective.get('effective_inductor_compile_config',{}).get('deterministic') is True,
+            native_graph_mode=effective.get('effective_cudagraph_mode')==(
+                'FULL_AND_PIECEWISE' if family=='dense_full' else 'PIECEWISE'))
+        good=good and all(policy_checks.values())
     marker=dict(status='complete' if good else 'failed',elapsed_s=elapsed,returncode=proc.returncode,
         records=len(records),expected=len(rows),protocol_sha256=sha(study/'protocol.json'),
+        policy_checks=policy_checks,
         files_sha256={str(f.relative_to(leaf)):sha(f) for f in leaf.rglob('*') if f.is_file()})
     write(leaf/('attempt_complete.json' if good else 'failed_attempt.json'),marker,True)
     write(study/'state.json',dict(status='diagnosis_pending',last_job=name,full_runs_qualified=False))
