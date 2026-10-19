@@ -19,7 +19,7 @@ def install(schedule,root):
     state=dict(index=-1,active=False,prefilled=False,call=0,layers={},cache={},data={})
     add,step=LLMEngine.add_request,LLMEngine.step
     forward=FlashAttentionImpl.forward
-    prefill=dg.DiffusionGemmaSampler._finish_prefills
+    prefill=dg.DiffusionSampler._finish_prefills
     sample=dg._compiled_sample_step
     def clone(x):return x.detach().clone() if isinstance(x,torch.Tensor) else None
     @functools.wraps(add)
@@ -84,7 +84,7 @@ def install(schedule,root):
         return out
     LLMEngine.add_request,LLMEngine.step=begin,engine_step
     FlashAttentionImpl.forward=attention
-    dg.DiffusionGemmaSampler._finish_prefills=finish_prefill
+    dg.DiffusionSampler._finish_prefills=finish_prefill
     dg._compiled_sample_step=sampler
 
 
