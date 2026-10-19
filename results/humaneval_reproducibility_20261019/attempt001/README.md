@@ -1,8 +1,8 @@
-# HumanEval reproducibility investigation — active, unqualified
+# HumanEval baseline reproducibility — qualified diagnostic
 
 Original K256 and both older paused LongBench campaigns are unchanged. The
-full corrected K256 and new K128 matrices remain gated; user authorization
-persists, but reproducibility qualification has not passed.
+full corrected K256 and new K128 matrices remain gated on their method preflight.
+Baseline runtime qualification now passes; user authorization persists.
 
 Frozen starting checkpoint63ccf1e6; plan c467882a; native snapshot20e6c0be.
 Every probe has its own source hash, environment, exact launch and immutable
@@ -54,9 +54,18 @@ Two same-engine bookends match. The earlier pointer-unsafe attempt is excluded;
 its queued repetition was cancelled after the active worker finished, without
 interrupting native generation. Focused CPU regressions:2 passed.
 
-Active candidate: supported TORCHINDUCTOR_DETERMINISTIC=1, with actual selected
-kernel and effective-policy receipts. Qualify it across processes/passes on
-V31/dense and both thinking settings. Non-thinking diagnostics remain pending.
+Environment-only policy was ineffective; the qualified source explicitly sets
+model compilation options and recompiles the exact same three native helper
+Python functions with deterministic options. Actual kernels53/53 are deterministic.
+Horizontal combo fusion is disabled; native FULL/PIECEWISE graph modes remain.
+
+Authoritative marker: qualification/attempt001/baseline_runtime_qualified.json.
+Two unobserved clean engines match12/12 paired output/N/C/T records. Eleven
+additional engines cover dense/V31 and both thinking modes; native bookends,
+complete pre/post sampler states, valid history/emissions and CPU/CUDA RNG hashes
+match across all declared process/pass comparisons. Zero measured captures.
+This is a six-question diagnostic, not a164-question accuracy or latency result.
+Diagnosis closes at10477.365s; the original study and older pauses are preserved.
 No selector improvement or accuracy ranking is established. Raw activations,
 RNG bytes and completions are private. Sanitized comparisons and independently
 rescored diagnostic records are under analysis/.

@@ -14,6 +14,11 @@ the three unchanged native compiled helper Python functions. Retain native FULL
 dense fix51994, PIECEWISE dense and all-kept FA4 controls. Check actual selected
 kernel settings and zero measured CUDA captures; a global flag is not proof.
 Reference the completed baseline runtime qualification marker in each protocol.
+The qualified policy disables horizontal combo fusion and its unsupported
+benchmarking in this pinned runtime. Disclose that numerical/compiler choice;
+measure all controls under the same policy. Preserve native FULL/PIECEWISE graphs.
+Read per-canvas interval counts from cumulative CPU output metadata already
+returned by engine.step; no extra device transfer, synchronization or forward.
 
 Freeze separate new protocols and attempt directories for K256 and K128. For
 every query-head/Q128 tile, select min(K/64, complete-prefix-block-count) blocks;
@@ -43,6 +48,8 @@ with V31 at the other GLOBAL layers. Residual changes held outputs explicitly.
 4. Run native qualification for all requested methods and controls, both passes
    and thinking modes, with fixed-budget/layer-scope/kernel receipts and bounded
    native same-state refinement-oracle checks. Fail early on malformed receipts.
+   Bound oracle work to the first two anchors per request; independent full-V512
+   tests include the long-prefix K2 case. Primary requests contain no oracle.
    Use the six metadata-selected diagnostic questions, seed42 first, followed
    by their predeclared seed43 confirmation. Seed43 remains descriptive; no
    seed-robust superiority is inferred from six previously examined questions.

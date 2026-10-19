@@ -1,40 +1,51 @@
-## HumanEval reproducibility investigation active — 2026-10-19 (Hong Kong)
+## HumanEval baseline reproducibility qualified — 2026-10-19 (Hong Kong)
 
-Starting checkpoint63ccf1e6; plan c467882a; candidate-policy sourceb59cd177.
-Original native execution20e6c0be and K256 study remain immutable. Root:
-results/humaneval_reproducibility_20261019/attempt001. Older LongBench studies
-remain paused. No full corrected K256/K128 generation or calibration has started.
+Native selector/model source20e6c0be; qualified numerical-policy source10341ab2,
+frozen private/source_addenda/attempt027/worker.py. Canonical investigation:
+results/humaneval_reproducibility_20261019/attempt001. Its authoritative marker
+is qualification/attempt001/baseline_runtime_qualified.json. Original K256 and
+older paused LongBench campaigns remain unchanged. No full corrected panel yet.
 
-A numerical mechanism is reproduced, but overall qualification has not passed.
-See docs/HUMANEVAL_REDUCTION_MECHANISM_20261019.md (evidence582bc68d).
-Native process repeats fail without audit despite matching loaded weights,
-valid initial inputs/noise. Changing only a fused normalization kernel's
-R0_BLOCK512/1024 on identical saved inputs changes11 BF16 layer outputs and10
-BF16 normalized inputs to the next Q/K/V projection; same-config repeats match.
-These replays exactly match corresponding recorded operator outputs. The earlier
-pointer-unsafe observation supports only pre-dispatch operator values; exclude
-its final output from native claims. Corrected one-segment observers match their
-native clean bookends. This proves one mechanism, not a complete repair.
+The supported correction explicitly binds deterministic Inductor options to the
+model and the three unchanged native helper Python callables; disable unsupported
+combo benchmarking. Horizontal combo fusion is disabled in this qualified policy;
+native FULL/PIECEWISE graphs and FA4 consumers remain. Report its cost honestly,
+with matched controls, rather than claiming the original optimizing defaults.
+Actual53/53 recorded kernels are deterministic. An environment flag alone was
+ineffective; model-only configuration still left sampler kernels nondeterministic.
+Both failed policy stages are retained. No sampler formula/stopping change.
 
-Two qualified processes agree throughout their first segment (both512) but have
-different final outputs, requiring consistent numerics across the whole model.
-Environment-only TORCHINDUCTOR_DETERMINISTIC=1 is ineffective: actual receipts
-show all40 kernels nondeterministic. Do not call this a tested deterministic
-execution. Its remaining queue was stopped after the active worker completed.
+Evidence: same-input R0_BLOCK512/1024 replay reproduces the recorded normalization
+rounding differences. After correction, two unobserved independent clean engines
+match all12 output/N/C/T pairs (six questions twice). Eleven further engines
+qualify dense/V31, thinking on/off, independent same-mode and audit/clean: all
+recorded pre/post sampler states, valid stability history, emissions and CPU/CUDA
+RNG fingerprints agree; all native bookends match and measured captures are zero.
+This is a complete baseline diagnostic, not a164-question accuracy result.
 
-Active: dense_on_cfgdet_clean001 with private/source_addenda/attempt025/worker.py.
-The new wrapper explicitly sets vLLM's inductor_compile_config.deterministic and
-process compiler policy for the separately compiled native sampler. It preserves
-native graph modes and has no intermediate observer/extra forwards. Controller
-fails closed on actual per-kernel policy, explicit options and graph-mode receipts.
-CPU focused regressions:3 passed. Independent same-method clean/audit and both-mode
-V31/dense qualification remain required before either full matrix.
+Diagnosis closes at10477.365/10800s. Shared total ceiling43200s remains unchanged;
+K256 and K128 each have16200s. No reservations remain from diagnosis. Active next
+stage: H100 preflight for both K2/K4 budgets, phasek256, under
+results/humaneval_cfgdet_preflight_20261019/attempt001. Read gpu_budget.json for
+its actual open/closed charge; only one GPU worker. Relevant original96 tests,
+full-V512 K2/long-prefix cases and numerical/trajectory safeguards are included.
 
-Closed GPU reservation7547.243s before this active job; total ceiling43200s.
-Allocation addendum2fb5ae9d: diagnosis10800, K25616200, K12816200. Use the live
-budget/state files for updated charges and open reservations. Internal HOLD files
-stop superseded diagnostic queues, not the current worker or older user pauses.
-No selector advantage, accuracy ranking or clean speedup is established.
+Corrected-panel plan93639f9d: docs/HUMANEVAL_CFGDET_K256_K128_PLAN_20261019.md.
+New harness: v31_humaneval_cfgdet_worker.py, cfgdet_base_worker.py and cfgdet_study.py.
+Native/base derives from frozen20e with CPU-only output-metadata interval counts;
+no new device operation/synchronization. K128/K256 selector budgets are explicit;
+qualification reference oracles are bounded to first two anchors per request.
+Work-only threshold calibration freezes final tau before the eight-method panel.
+Two82-question primary shards begin with the same seed42 six-question prefix as
+qualification, giving independent same-order engine replication without extra cold
+launches; the seed43 six-question check follows only in qualification. Main
+supervisor fails early if that prefix differs. Preserve source/method identities.
+
+Next: finish data-derived reporting/independent verification, pass H100 gate,
+freeze new K256 then K128 protocols/execution, run the authorized matrices and
+publish only complete qualified results. Full method performance is unmeasured.
+New numerical-policy/CPU-telemetry costs and all consumer differences stay visible.
+No selector improvement or clean speedup is established. Legacy STATE.json unused.
 
 ## V31 budget failure map complete — 2026-10-19 (Hong Kong)
 
