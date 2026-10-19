@@ -2507,3 +2507,22 @@ At most four confirmed cases enter an audit-only first-held-call output/support
 factorial with same K, native prefix checks, V31 bookends and a sham. This
 identifies possible repair mechanisms; it is not a deployable selector or
 held-out quality claim. Older paused studies are not resumed.
+
+## Qualify and preserve V31 failure-map continuations (2026-10-19)
+
+Native source5dcade2c and protocol0ca7a002319049af7f0a7b379647ddca576af676909aa702ea78c0d9c31cb7e4
+remain unchanged. All six qualification families passed. The cold first engine
+used344.047s; original qualification stopped at774.110s under its predeclared
+180s launch gate. Addendum71109d5b used650.094s of the existing recovery reserve
+for missing dense families; no budget borrowing or expansion. Preserve attempt001.
+
+An absolute-path invocation correction in77956613 preserves a zero-record,
+returncode2 screen launch in attempt002, charging1.001s. Attempt003 carries
+verified qualifications and identical protocol/source/inputs. Native generation
+restarts only in new leaves; no completed experiment is rerun. This is an
+orchestration correction, not a new selector or scientific protocol.
+
+Qualification bookends show output/call drift on one of two inputs at K4096
+and K2048, without score drift; K8192 matches. This does not diagnose clean
+repeatability or justify a quality claim. Keep the frozen clean bookends,
+new-seed/process replication gates, and common-prefix/sham checks for repairs.

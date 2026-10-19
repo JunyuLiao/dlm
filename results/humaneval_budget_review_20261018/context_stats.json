@@ -1,0 +1,116 @@
+{
+  "schema": "humaneval_context_stats_v1",
+  "status": "verified_cpu_tokenization",
+  "source_sha256": "b796127e635a67f93fb35c04f4cb03cf06f38c8072ee7cee8833d7bee06979ef",
+  "tokenizer_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "tokenizer_sha256": "cc8d3a0ce36466ccc1278bf987df5f71db1719b9ca6b4118264f45cb627bfe0f",
+  "processor_parity_verified_examples": 2,
+  "styles": {
+    "raw_problem": {
+      "n": 164,
+      "mean": 147.1768292682927,
+      "median": 129.5,
+      "p90": 245.10000000000005,
+      "p95": 294.65,
+      "minimum": 41,
+      "maximum": 421
+    },
+    "chat_raw_thinking": {
+      "n": 164,
+      "mean": 161.3109756097561,
+      "median": 143.5,
+      "p90": 259.1,
+      "p95": 308.65,
+      "minimum": 55,
+      "maximum": 435
+    },
+    "v27_chat_complete_function_thinking": {
+      "n": 164,
+      "mean": 186.3109756097561,
+      "median": 168.5,
+      "p90": 284.1,
+      "p95": 333.65,
+      "minimum": 80,
+      "maximum": 460
+    },
+    "legacy_cgate_chat_non_thinking": {
+      "n": 164,
+      "mean": 175.3109756097561,
+      "median": 157.5,
+      "p90": 273.1,
+      "p95": 322.65,
+      "minimum": 69,
+      "maximum": 449
+    }
+  },
+  "initial_prompt_kv64_blocks": {
+    "n": 164,
+    "mean": 3.4390243902439024,
+    "median": 3.0,
+    "p90": 5.0,
+    "p95": 6.0,
+    "minimum": 2,
+    "maximum": 8
+  },
+  "first_canvas_total_kv64_blocks": {
+    "n": 164,
+    "mean": 7.439024390243903,
+    "median": 7.0,
+    "p90": 9.0,
+    "p95": 10.0,
+    "minimum": 6,
+    "maximum": 12
+  },
+  "total_context_if_canvas6": {
+    "n": 164,
+    "mean": 1722.310975609756,
+    "median": 1704.5,
+    "p90": 1820.1000000000001,
+    "p95": 1869.6499999999999,
+    "minimum": 1616,
+    "maximum": 1996
+  },
+  "initial_full_prefix_blocks": {
+    "mean": 2.451219512195122,
+    "minimum": 1,
+    "maximum": 7
+  },
+  "first_canvas_all_kept_by_budget": [
+    {
+      "prefix_budget_blocks": 1,
+      "prefix_budget_tokens": 64,
+      "initial_prompts_all_prefix_kept": 28,
+      "questions": 164
+    },
+    {
+      "prefix_budget_blocks": 2,
+      "prefix_budget_tokens": 128,
+      "initial_prompts_all_prefix_kept": 102,
+      "questions": 164
+    },
+    {
+      "prefix_budget_blocks": 4,
+      "prefix_budget_tokens": 256,
+      "initial_prompts_all_prefix_kept": 152,
+      "questions": 164
+    },
+    {
+      "prefix_budget_blocks": 8,
+      "prefix_budget_tokens": 512,
+      "initial_prompts_all_prefix_kept": 164,
+      "questions": 164
+    },
+    {
+      "prefix_budget_blocks": 16,
+      "prefix_budget_tokens": 1024,
+      "initial_prompts_all_prefix_kept": 164,
+      "questions": 164
+    },
+    {
+      "prefix_budget_blocks": 128,
+      "prefix_budget_tokens": 8192,
+      "initial_prompts_all_prefix_kept": 164,
+      "questions": 164
+    }
+  ]
+}

@@ -1,3 +1,37 @@
+## V31 failure map running — 2026-10-19 (Hong Kong)
+
+Verified native execution source5dcade2c; source remains frozen across all
+continuations. All six qualification families passed: K8192/4096/2048, corrected
+FULL dense, PIECEWISE dense, all-kept FA4. Native qualification checked59,360
+selected head/query-block units with zero fixed-K/tail errors, LOCAL skips, or
+recorded CUDA captures. Qualification is instrumentation-only, not clean quality.
+K4096/K2048 each had one of two qualification bookends change output/calls with
+unchanged official score; K8192 bookends matched. Clean repeatability is pending.
+
+Active attempt: results/v31_failure_map_20261019/attempt003. The original900s
+qualification allocation stopped after774.110s; the committed recovery addendum
+used650.094s of its900s reserve to finish dense qualification in attempt002.
+A relative-path screening launch then failed before model import with zero
+records and1.001s charged. Commit77956613 documents the absolute-path correction;
+attempt003 references all verified completed qualifications and retains both
+parents. No native source, protocol, question, seed, gate or total-budget change.
+
+Running: clean320-request screen, then gated independent confirmation and repair.
+Hard cap remains14,400s, with screen5400/confirmation3600/repair3600 allocations.
+Source/spec/protocol and shared gpu_budget.json live under the campaign root.
+CPU verification source40b9f612 checks official scoring, coverage, physical work,
+post-warmup JIT warnings and whether original failures remain visible in audit.
+No result promotion until completion markers and independent checks pass.
+Older full503/refresh studies remain paused. No production selector change.
+
+Sanitized publication snapshot: results/v31_failure_map_20261019/publication/attempt001.
+Its six completed qualification engines cover20 measured requests and59,360
+fixed-budget units including warmups; original markers and artifact hashes were
+checked before export. It explicitly preserves the incomplete-campaign and
+repeatability limitations. CPU regression checks:25 passed,4 CUDA-only skipped.
+The user authorized committing and pushing this update and completed results;
+active screen records and private artifacts remain local.
+
 ## V31 budget failure map authorized — 2026-10-19 (Hong Kong)
 
 Starting checkpoint f4d3f349. The new three-stage contract is documented in

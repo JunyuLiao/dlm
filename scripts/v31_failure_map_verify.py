@@ -96,6 +96,14 @@ def verify(study):
             repair_failure_visibility.append(dict(index=index,seed=seed,repeat=repeat,original_failure_type=original[index],
                 visible_against_clean_reference=visible,
                 caveat='cross-pass descriptive check only; instrumented controls do not establish a matched dense causal comparison'))
+    pass_finished=[]
+    for phase,rows in phases.items():
+        groups=defaultdict(list)
+        for r in rows:groups[(r['family'],r['k'],r['label'])].append(r)
+        for (family,k,label),group in groups.items():
+            pass_finished.append(dict(phase=phase,family=family,k=k,label=label,records=len(group),
+                correct_and_finished=sum(r['score']==1 and r['finish_reason'] not in s.official.CAPPED for r in group),
+                correct_but_capped=sum(r['score']==1 and r['finish_reason'] in s.official.CAPPED for r in group)))
     s.base.write(dest/'per_item.json',per_item,True)
     s.base.write(dest/'physical_work.json',dict(aggregate=dict(work),phases=dict(phase_work),
         denominator='audit denoising GLOBAL full support plus LOCAL window-intersecting rectangles; not clean work'),True)
@@ -104,6 +112,7 @@ def verify(study):
         gpu_seconds_by_phase=dict(charges),total_gpu_seconds=sum(charges.values()),
         measured_jit_warnings=jit,clean_timing_jit_qualified=not any(x['pass_name']=='clean' for x in jit),
         repair_failure_visibility=repair_failure_visibility,
+        pass_and_finished=pass_finished,
         old_campaigns_remain_paused=True,analysis_script_sha256=s.base.sha(Path(__file__)))
     s.base.write(dest/'verified_complete.json',result,True)
     print(json.dumps(result,sort_keys=True))
