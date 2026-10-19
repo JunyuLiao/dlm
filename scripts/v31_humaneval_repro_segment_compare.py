@@ -52,6 +52,7 @@ def compare(left, right, out):
     if [(r['index'], r['rng_seed'], r['prompt_sha256']) for r in ra] != [
             (r['index'], r['rng_seed'], r['prompt_sha256']) for r in rb]:
         raise RuntimeError('request identity mismatch')
+    padded_rows = a[0]['values']['buf0']['shape'][0]
     entries = []
     for index, (x, y) in enumerate(zip(a, b)):
         if any(x[k] != y[k] for k in ('source_sha256', 'line', 'source')):
@@ -64,7 +65,7 @@ def compare(left, right, out):
             lhs, rhs = u['value'], v['value']
             # The generated segment can contain padded query rows. Compare the
             # valid prefix separately; padding differences alone are not causal.
-            padded = lhs.ndim >= 2 and n <= lhs.shape[0] <= 512
+            padded = lhs.ndim >= 1 and lhs.shape[0] == padded_rows
             values[name] = dict(full=difference(lhs, rhs),
                 valid=difference(lhs[:n], rhs[:n]) if padded else difference(lhs, rhs),
                 valid_prefix_sliced=padded, shape=list(lhs.shape), dtype=str(lhs.dtype),
@@ -76,7 +77,8 @@ def compare(left, right, out):
                   if any(v['valid']['different'] for v in x['values'].values())), None)
     result = dict(status='diagnostic_unqualified', left=left.name, right=right.name,
         within_engine_changed_groups={left.name:wa, right.name:wb}, unique_question_groups=6,
-        observed_question=0, prompt_tokens=n, first_valid_difference_entry=first, entries=entries,
+        observed_question=0, prompt_tokens=n, padded_rows=padded_rows,
+        first_valid_difference_entry=first, entries=entries,
         output_differences={f:sum(u[f] != v[f] for u,v in zip(ra[8:], rb[8:])) for f in FIELDS},
         markers_sha256={p.name:sha(p/'attempt_complete.json') for p in (left, right)})
     write(out, result, True)
