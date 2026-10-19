@@ -1,3 +1,30 @@
+## HumanEval reproducibility investigation active — 2026-10-19 (Hong Kong)
+
+Starting checkpoint63ccf1e6; diagnostic plan c467882a. Current diagnostic source
+1544b2d6, with immutable per-job observer/factor hashes and the original
+20e6c0be execution snapshot. Root: results/humaneval_reproducibility_20261019/attempt001.
+Original K256 and older paused LongBench campaigns are unchanged.
+
+Qualification fails. Two independent unobserved dense FULL clean engines differ
+on all12 measured paired records (six unique questions, twice each), despite
+matching prompt and RNG metadata. Within one dense engine, clean/sync/geometry/
+finite/audit/clean bookends agree exactly on every question. Thus process drift
+already occurs without audit; do not attribute it to per-step synchronization.
+
+The original deferred observer comparison is confounded by independent-process
+drift. Its instrumented traces have equal initial canvases/default RNG state but
+different first denoising logits. Same-engine observer qualification and actual
+model-input/loaded-tensor fingerprints are the next localization checks.
+
+Active: serial independent repeats, same-engine replication and explicit cuBLAS
+workspace contrasts, within7200s diagnostic reserve. Later K256/K128 matrices
+are gated and unstarted; K128 will need fresh work-only V2 calibration. Total
+self-imposed campaign ceiling43200s. Read gpu_budget.json/state.json for live
+charges and current leaf; no competing worker. Intermediate analysis/attempt002
+officially scores and independently rescores184 saved rows, with zero mismatch;
+these are diagnostic records including64 warmups, not a HumanEval accuracy panel.
+No root cause or reliable selector advantage is established.
+
 ## V31 budget failure map complete — 2026-10-19 (Hong Kong)
 
 Verified native source5dcade2c; analysis source7cff0c2f. Protocol SHA256
