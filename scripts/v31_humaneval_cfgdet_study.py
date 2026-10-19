@@ -369,3 +369,144 @@ def run_job(study,stage,mode,pass_name,family,cells_file,threshold=None,calibrat
     return leaf
 
 
+def exported(leaf,label):
+    return base.jsonl(leaf/f'exports/{label}/records.jsonl')
+
+
+def calibrate(study,mode):
+    p=verify(study);dest=study/f'calibration/{mode}/threshold.json'
+    if dest.exists():return read(dest)['threshold']
+    folder=study/f'private/schedules/{mode}';weights=read(folder/'calibration_weights.json')
+    candidates={};reference=None;previous=None
+    if p['prefix_budget_tokens']==256:
+        previous=read(PARENT/f'calibration/{mode}/full164_threshold.json')['threshold']
+        leaf=run_job(study,'calibration_previous',mode,'audit','calibration',folder/'calibration.json',calibration=[previous])
+        reference=work(exported(leaf,'control_before'),weights)
+        candidates[previous]=work(exported(leaf,tau_label(previous)),weights)
+    if previous is None or not match(reference,candidates[previous])['matched']:
+        grid=list(GRID) if previous is None else [previous/2,previous*2]
+        leaf=run_job(study,'calibration_grid',mode,'audit','calibration',folder/'calibration.json',calibration=grid)
+        fresh=work(exported(leaf,'control_before'),weights)
+        if reference is not None and fresh!=reference:
+            raise RuntimeError('V31 work-calibration process repeat changed')
+        reference=fresh
+        candidates.update({t:work(exported(leaf,tau_label(t)),weights) for t in grid})
+        mids=refinement_points(reference,candidates)
+        if mids:
+            leaf=run_job(study,'calibration_midpoints',mode,'audit','calibration',folder/'calibration.json',calibration=mids)
+            if work(exported(leaf,'control_before'),weights)!=reference:
+                raise RuntimeError('V31 calibration repeat changed')
+            candidates.update({t:work(exported(leaf,tau_label(t)),weights) for t in mids})
+    best=choose_threshold(reference,candidates)
+    write(dest,dict(status='work_calibrated',threshold=best,reference=reference,
+        candidates={str(t):v for t,v in candidates.items()},matching=match(reference,candidates[best]),
+        previous_threshold=previous,previous_retained=best==previous,accuracy_used=False,
+        question_count=24,weighted_population=164,protocol_sha256=sha(study/'protocol.json')),True)
+    return best
+
+
+def freeze_full_work(study,mode,threshold):
+    dest=study/f'calibration/{mode}/full164_threshold.json'
+    if dest.exists():return read(dest)['threshold']
+    folder=study/f'private/schedules/{mode}';points={};leaves={};reference=None;control=None
+    current=threshold
+    grid=read(study/f'calibration/{mode}/threshold.json')
+    for iteration in range(3):
+        leaf=run_job(study,f'full_work{iteration+1:03d}',mode,'audit','calibration',folder/'all_work.json',calibration=[current])
+        rows=exported(leaf,'control_before')
+        identity=[(r['index'],r['rng_seed'],r['output_hash'],r['denoise_forwards'],r['canvases'],r['output_tokens']) for r in rows]
+        if control is not None and identity!=control:
+            raise RuntimeError('full-cohort V31 calibration repeat changed')
+        control=identity;reference=work(rows)
+        points[current]=work(exported(leaf,tau_label(current)))
+        leaves[str(current)]=str(leaf.relative_to(study))
+        best=choose_threshold(reference,points)
+        if match(reference,points[best])['matched']:break
+        all_points={float(t):v for t,v in grid['candidates'].items()};all_points.update(points)
+        mids=refinement_points(reference,all_points)
+        choices=[t for t in mids if t not in points]
+        if not choices:break
+        current=min(choices,key=lambda t:abs(t-best))
+    best=choose_threshold(reference,points);matched=match(reference,points[best])
+    write(dest,dict(status='frozen_before_primary_accuracy',threshold=best,reference=reference,
+        candidates={str(t):v for t,v in points.items()},matching=matched,work_leaves=leaves,
+        accuracy_used=False,protocol_sha256=sha(study/'protocol.json')) ,True)
+    if not matched['matched']:
+        print(dict(event='closest_work_threshold_unmatched',mode=mode,**matched),flush=True)
+    return best
+
+
+def selected_paths(study,mode,pass_name,stage='runs'):
+    result=defaultdict(list)
+    for done in sorted((study/stage/mode/pass_name).glob('*/*/attempt*/attempt_complete.json')):
+        leaf=done.parent;verify_leaf(study,leaf)
+        for label in LABELS:
+            path=leaf/f'exports/{label}'
+            if path.exists():result[label].append(path)
+    return result
+
+
+def prefix_reproducibility(study):
+    comparisons=[]
+    for mode in MODES:
+        for pass_name in ('clean','audit'):
+            qualification=selected_paths(study,mode,pass_name,'qualification')
+            primary=selected_paths(study,mode,pass_name)
+            for label in LABELS:
+                # Qualification contains seed42 followed by the predeclared43.
+                old={r['index']:r for path in qualification[label] for r in base.jsonl(path/'records.jsonl') if r['panel_seed']==42}
+                new={r['index']:r for path in primary[label] for r in base.jsonl(path/'records.jsonl')}
+                if set(old)!=set(read(study/'protocol.json')['cohort']):raise RuntimeError('replication cohort missing')
+                differences={k:sum(old[i][k]!=new[i][k] for i in old) for k in (
+                    'output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','rng_seed','prompt_sha256')}
+                comparisons.append(dict(mode=mode,pass_name=pass_name,label=label,questions=6,
+                                        differences=differences,passed=not any(differences.values())))
+    return comparisons
+
+
+def run(study):
+    verify(study)
+    # Canonical official test programs validate the scoring harness, never a
+    # candidate threshold. Reuse the inherited data-bound canonical gate.
+    inherited.scorer_gate(study)
+    for mode in MODES:
+        threshold=freeze_full_work(study,mode,calibrate(study,mode))
+        folder=study/f'private/schedules/{mode}'
+        for pass_name in ('audit','clean'):
+            run_job(study,'qualification',mode,pass_name,'shared',folder/'qualification.json',threshold,
+                    oracle=pass_name=='audit')
+            for family in REFERENCES:
+                run_job(study,'qualification',mode,pass_name,family,folder/'qualification.json')
+    # Qualification audit/clean outputs are checked before primary generation.
+    from scripts.v31_humaneval_cfgdet_report import qualification_equivalence,make_report
+    proof=qualification_equivalence(study)
+    if not all(x['passed'] for x in proof):raise RuntimeError('method audit/clean qualification failed')
+    path=study/'qualification/methods_qualified.json'
+    if not path.exists():write(path,dict(comparisons=proof,protocol_sha256=sha(study/'protocol.json')),True)
+    for shard in (1,2):
+        for mi,mode in enumerate(MODES):
+            folder=study/f'private/schedules/{mode}'
+            threshold=read(study/f'calibration/{mode}/full164_threshold.json')['threshold']
+            families=['shared',*REFERENCES];shift=(shard+mi)%len(families)
+            families=families[shift:]+families[:shift]
+            for family in families:
+                for pass_name in (('clean','audit') if (shard+mi)%2 else ('audit','clean')):
+                    run_job(study,'runs',mode,pass_name,family,folder/f'primary_shard{shard:03d}.json',threshold)
+    replica=prefix_reproducibility(study)
+    write(study/'receipts/independent_prefix_replication.json',dict(comparisons=replica),True)
+    if not all(x['passed'] for x in replica):raise RuntimeError('independent primary-engine repeat failed')
+    make_report(study,study/'analysis/attempt001')
+
+
+def main():
+    p=argparse.ArgumentParser(__doc__)
+    p.add_argument('action',choices=['prepare','run']);p.add_argument('--study',type=Path,required=True)
+    p.add_argument('--budget',type=int,choices=[128,256])
+    a=p.parse_args();study=a.study.absolute()
+    if a.action=='prepare':prepare(study,a.budget)
+    else:run(study)
+
+
+if __name__=='__main__':main()
+
+
