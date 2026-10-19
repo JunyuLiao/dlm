@@ -51,13 +51,13 @@ def prepare(root):
 
 
 def run(root):
+    campaign.verify(PARENT)  # Binds the frozen HumanEval suites before env_for.
     p=read(root/'protocol.json');assert not (root/'receipt.json').exists() and not (root/'failed_attempt.json').exists()
     for name,digest in p['files_sha256'].items():assert sha(root/name)==digest
     assert sha(Path(p['native_base_worker']))==p['native_base_worker_sha256']
     assert sha(NATIVE/'protocol.json')==p['native_protocol_sha256']
     assert sha(ROOT/p['phase_allocation_file'])==p['phase_allocation_sha256']
-    assert campaign.base.runtime_identity()==p['runtime'];campaign.base.wait_idle()
-    budget,reservation=campaign.reserve(root,p,root)
+    assert campaign.base.runtime_identity()==p['runtime']
     launch=read(NATIVE/'runs/clean001/attempt001/private/launch.json')
     env=campaign.base.env_for(PARENT,'thinking_on',campaign.CONTROL);env.update(launch['environment'])
     e=root/'private/execution';parent=PARENT/'private/execution'
@@ -65,6 +65,9 @@ def run(root):
     command=['/home/exouser/dyh/v31_env_20261005/bin/python',str(e/'scripts/v31_humaneval_observe_operand_replay.py'),str(root)]
     write(root/'private/launch.json',dict(command=command,environment={k:env[k] for k in ('PYTHONPATH','FA4_LOCAL_FIX_DIR')},
         cublas_workspace_config=env.get('CUBLAS_WORKSPACE_CONFIG')),True)
+    # Finish fallible CPU launch preparation before opening a GPU reservation.
+    campaign.base.wait_idle()
+    budget,reservation=campaign.reserve(root,p,root)
     start=time.monotonic();failure=None;code=1
     try:
         with (root/'private/worker.log').open('w') as log:
