@@ -59,7 +59,10 @@ def test_reference_links_never_include_a_selector_family(tmp_path,monkeypatch):
     for stage in ('qualification','runs'):
         for mode in campaign.MODES:
             for part in ('audit','clean'):
-                for family in campaign.REFERENCES:write(owner/stage/mode/part/family/'primary_shard001/attempt001/attempt_complete.json',{})
+                for family in campaign.REFERENCES:
+                    leaf=owner/stage/mode/part/family/'primary_shard001/attempt001'
+                    write(leaf/'attempt_complete.json',{})
+                    write(leaf/f'exports/{family}/records.jsonl',{})
     checked=[];monkeypatch.setattr(campaign,'reference_owner',lambda *a:owner)
     monkeypatch.setattr(campaign,'verify_leaf',lambda root,leaf:checked.append((root,leaf)))
     campaign.link_references(own,{})
@@ -67,6 +70,9 @@ def test_reference_links_never_include_a_selector_family(tmp_path,monkeypatch):
     assert (own/'runs/thinking_on/clean'/campaign.REFERENCES[0]).is_symlink()
     assert not (own/'runs/thinking_on/clean/shared').exists()
     assert all(owner==root and any(family in leaf.parts for family in campaign.REFERENCES) for root,leaf in checked)
+    selected=campaign.selected_paths(own,'thinking_on','audit')
+    assert all(len(selected[family])==1 for family in campaign.REFERENCES)
+    assert not selected['control_before']
 
 
 def test_allocation_chain_keeps_total_and_rejects_ledger_drift(tmp_path,monkeypatch):
