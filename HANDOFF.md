@@ -1,3 +1,27 @@
+## HumanEval guarded-runtime compatibility stage — 2026-10-19 UTC
+
+Verified source8018d92f/22ae91c6. Mixed-method reproducibility remains unresolved.
+Fixed-BLAS attempt005 completed872.066/867.061s with the effective32MiB cuBLAS
+workspace, yet V2 question145,seed42 changes first raw logits at call529 and
+N586/591. Preserve this negative. The initial argmax-only difference on a later
+control has identical logits/trajectory and is overwritten before denoising use;
+it is a separate inactive-state observation, not another causal model failure.
+
+Guarded operator preflight attempt003 passes all4 checks under Torch guard=True,
+fill=False. Native guard attempt006 fails during warmup after95.009s, before
+question records: the pinned Inductor deterministic index_put fallback omits
+the normal lowering's BF16-to-FP32 destination conversion for native
+self-conditioning assignment. Generated code and pinned lowering source agree.
+This compatibility defect does not explain the earlier intermittent drift.
+
+Next: bounded180s operator regression under
+results/humaneval_index_put_fallback_20261019/attempt001. Require the unpatched
+compiled assignment to fail and a narrow process-local compiler adapter to match
+explicit cast/copy. No installed package edits or native sampler Python changes.
+Only after passing may a fresh-cache guarded native pair be frozen. Both full
+matrices remain gated, K128 has launched no GPU work, historical pauses persist,
+and the shared43200s/phase caps are unchanged. Read the live budget ledger.
+
 ## HumanEval mixed-method reproducibility remains unresolved — 2026-10-20 (Hong Kong)
 
 Verified diagnostic sourceb13808d4; native selector source20e6c0be and model/helper

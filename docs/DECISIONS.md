@@ -2681,3 +2681,22 @@ Require actual configured bytes in the exit receipt. Two1000s full-cohort jobs
 charge existing phasek256. This is a diagnostic candidate, not a promoted cause
 or repair. Both full matrices and K128 hold remain; no accuracy or speed claim
 is released. All caps and total43200s remain unchanged.
+
+## Fixed workspace is insufficient; isolate guard compatibility (2026-10-19 UTC)
+
+Attempt005's effective33554432-byte cuBLAS workspace does not eliminate native
+variation: V2 question145,seed42 first changes raw logits at call529 and ends at
+N586/591. Guarded definedness attempt003 passes4 operator checks. Native guard
+attempt006 stops during warmup,95.009s, before saved question records. Its actual
+failure is a BF16 source/FP32 destination indexed-assignment dtype error; later
+missing-receipt errors are consequences of initialization not completing.
+
+Pinned Inductor index_put_impl_ returns through its deterministic fallback before
+the destination-dtype conversion present in ordinary lowering. Generated native
+code passes BF16 soft embeddings into FP32 self-conditioning storage. Freeze a
+bounded operator regression and narrow process-local compiler conversion adapter,
+requiring an actual unpatched failure and exact explicit-cast reference match.
+Preserve native Python helper identity. The compatibility fix is not yet a cause
+or repair for the earlier intermittent model-logit divergence. Fresh compiler
+cache namespaces are mandatory for any later adapter-enabled native attempt.
+No full accuracy run is released; existing resource caps and holds persist.

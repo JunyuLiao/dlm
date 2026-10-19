@@ -16,7 +16,8 @@ read,write,sha=campaign.read,campaign.write,campaign.sha
 FIELDS=('output_hash','denoise_forwards','canvases','output_tokens','sampler_calls','native_interval_steps')
 
 
-def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False,torch_guard=False):
+def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cublas=False,torch_guard=False,dtype_adapter=False):
+    torch_guard=torch_guard or dtype_adapter
     cublas=cublas or torch_guard
     all_cases=all_cases or cublas
     attention=attention or crossover
@@ -32,6 +33,13 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
     assert read(PARENT/'receipts/controller_stopped_after_active_work.json')['gpu_reservations_closed']
     assert not root.exists()
     (root/'private').mkdir(parents=True)
+    if dtype_adapter:
+        gate=ROOT/'results/humaneval_index_put_fallback_20261019/attempt001'
+        receipt=read(gate/'receipt.json');assert receipt['status']=='complete' and receipt['tests']==1
+        for name,digest in receipt['files_sha256'].items():assert sha(gate/name)==digest
+        tested=gate/'private/execution/scripts/v31_humaneval_index_put_dtype.py'
+        assert sha(tested)==sha(ROOT/'scripts/v31_humaneval_index_put_dtype.py')
+        shutil.copyfile(tested,root/'private/index_put_dtype.py')
     for name in ('v31_humaneval_residual_repro_worker.py','v31_humaneval_residual_repro.py'):
         shutil.copyfile(ROOT/'scripts'/name,root/'private'/name)
     trajectory=campaign.INVESTIGATION/'private/source_addenda/attempt031/worker.py'
@@ -51,6 +59,18 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
             marker='torch_deterministic_algorithms=torch.are_deterministic_algorithms_enabled(),'
             assert policy.count(marker)==1
             policy=policy.replace(marker,marker+'\n            torch_fill_uninitialized_memory=torch.utils.deterministic.fill_uninitialized_memory,',1)
+        if dtype_adapter:
+            marker='def install_compilation_policy():\n'
+            setup=("    import runpy\n"
+                "    adapter_path=Path(os.environ['HUMANEVAL_INDEX_PUT_ADAPTER'])\n"
+                "    assert hashlib.sha256(adapter_path.read_bytes()).hexdigest()==os.environ['HUMANEVAL_INDEX_PUT_ADAPTER_SHA256']\n"
+                "    adapter_receipt=runpy.run_path(str(adapter_path))['install']()\n")
+            assert policy.count(marker)==1 and policy.count('policy=policy,')==1
+            policy=policy.replace(marker,marker+setup,1)
+            # The policy dict is returned and recorded after native compilation.
+            marker='policy = dict(name='
+            assert policy.count(marker)==1
+            policy=policy.replace(marker,'policy = dict(index_put_dtype_adapter=adapter_receipt, name=',1)
         (root/'private/cublas_policy.py').write_text(policy)
     if mixed or all_cases or attention:
         shutil.copyfile(ROOT/'scripts/v31_humaneval_gpu_fingerprint.py',root/'private/humaneval_gpu_fingerprint.py')
@@ -65,7 +85,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         path.write_text(source)
     if attention:
         shutil.copyfile(ROOT/'scripts/v31_humaneval_attention_fingerprint.py',root/'private/attention_fingerprint.py')
-    spec=(ROOT/'docs/HUMANEVAL_TORCH_GUARD_PLAN_20261019.md' if torch_guard else
+    spec=(ROOT/'docs/HUMANEVAL_GUARDED_DTYPE_NATIVE_PLAN_20261019.md' if dtype_adapter else
+          ROOT/'docs/HUMANEVAL_TORCH_GUARD_PLAN_20261019.md' if torch_guard else
           ROOT/'docs/HUMANEVAL_BLAS_WORKSPACE_PLAN_20261019.md' if cublas else
           ROOT/'docs/HUMANEVAL_TRACE_CROSSOVER_PLAN_20261019.md' if crossover else
           ROOT/'docs/HUMANEVAL_ATTENTION_TRACE_PLAN_20261019.md' if attention else
@@ -151,8 +172,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
     p=dict(schema='humaneval_residual_repro_v1',source_commit=subprocess.check_output(
         ['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         parent_protocol_sha256=sha(PARENT/'protocol.json'),failure_receipt_sha256=sha(PARENT/'receipts/early_residual_qualification_failure.json'),
-        runtime=parent['runtime'],jobs=jobs,phase='k256',maximum_job_reservation_s=900 if crossover else 1000 if all_cases else 750,
-        phase_cap_s=campaign.phase_caps()['k256'],maximum_new_reservation_s=900 if crossover else 2000 if all_cases else 1500,
+        runtime=parent['runtime'],jobs=jobs,phase='k256',maximum_job_reservation_s=1200 if dtype_adapter else 900 if crossover else 1000 if all_cases else 750,
+        phase_cap_s=campaign.phase_caps()['k256'],maximum_new_reservation_s=2400 if dtype_adapter else 900 if crossover else 2000 if all_cases else 1500,
         seed=None if all_cases or attention else 43,index=None if all_cases or attention else 129,
         seeds=[42] if crossover else [42,43] if all_cases or attention else [43],cohort=parent['cohort'] if all_cases else [116] if attention else [129],
         prefix_budget_tokens=256,full_accuracy_released=False,mixed_group=mixed or all_cases or attention,
@@ -160,6 +181,8 @@ def prepare(root,mixed=False,all_cases=False,attention=False,crossover=False,cub
         trace_crossover=crossover,
         cublas_workspace_config=':4096:8' if cublas else None,
         torch_deterministic_guard=torch_guard,
+        index_put_dtype_adapter=dtype_adapter,fresh_private_compiler_cache=dtype_adapter,
+        dtype_regression_receipt_sha256=sha(ROOT/'results/humaneval_index_put_fallback_20261019/attempt001/receipt.json') if dtype_adapter else None,
         guard_preflight_receipt_sha256=sha(ROOT/'results/humaneval_selector_definedness_20261019/attempt003/receipt.json') if torch_guard else None,
         files_sha256={str(f.relative_to(root)):sha(f) for f in root.rglob('*') if f.is_file()})
     write(root/'protocol.json',p,True)
@@ -193,6 +216,15 @@ def run_job(root,part):
         HUMANEVAL_RESIDUAL_TRACE_DIR=str(leaf/'private/residual'),
         FROZEN_SOURCE_SHA256=sha(root/'protocol.json'))
     if p.get('cublas_workspace_config'):env['CUBLAS_WORKSPACE_CONFIG']=p['cublas_workspace_config']
+    if p.get('index_put_dtype_adapter'):
+        adapter=root/'private/index_put_dtype.py'
+        env.update(HUMANEVAL_INDEX_PUT_ADAPTER=str(adapter),HUMANEVAL_INDEX_PUT_ADAPTER_SHA256=sha(adapter))
+        # Runtime lowering patches do not enter old compiler cache keys.
+        cache=root/'private/cache'
+        for key,name in dict(VLLM_CACHE_ROOT='vllm',TRITON_CACHE_DIR='triton',
+            TORCHINDUCTOR_CACHE_DIR='inductor',CUDA_CACHE_PATH='cuda',TMPDIR='tmp',
+            FA4_LOCAL_FIX_DIR='fa4_local_fix',FLASHINFER_WORKSPACE_BASE='flashinfer').items():
+            folder=cache/name;folder.mkdir(parents=True,exist_ok=True);env[key]=str(folder)
     if p.get('attention_fingerprints'):
         env.update(HUMANEVAL_ATTENTION_TRACE_SOURCE=str(root/'private/attention_fingerprint.py'),
                    HUMANEVAL_ATTENTION_TRACE_DIR=str(leaf/'private/attention'))
@@ -242,6 +274,10 @@ def run_job(root,part):
         actual=read(leaf/'private/kernel_inventory.json')
         if actual.get('torch_deterministic_algorithms') is not True or actual.get('torch_fill_uninitialized_memory') is not False:
             errors.append('ineffective framework guard or unexpected memory fill')
+        if p.get('index_put_dtype_adapter'):
+            adapter=actual.get('policy',{}).get('index_put_dtype_adapter',{})
+            if adapter.get('native_sampler_python_changed') is not False:
+                errors.append('missing native sampler identity for compiler adapter')
     bookends=[]
     if len(public)==len(rows):
         for group in config['bookend_groups']:
@@ -270,7 +306,8 @@ if __name__=='__main__':
     parser.add_argument('--crossover',action='store_true')
     parser.add_argument('--cublas-workspace',action='store_true')
     parser.add_argument('--torch-guard',action='store_true')
+    parser.add_argument('--dtype-adapter',action='store_true')
     args=parser.parse_args();root=args.study.absolute()
-    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover,args.cublas_workspace,args.torch_guard)
+    if args.action=='prepare':prepare(root,args.mixed,args.all_cases,args.attention,args.crossover,args.cublas_workspace,args.torch_guard,args.dtype_adapter)
     else:
         for part in read(root/'protocol.json')['jobs']:run_job(root,part)
