@@ -46,13 +46,24 @@ qualification, giving independent same-order engine replication without extra co
 launches; the seed43 six-question check follows only in qualification. Main
 supervisor fails early if that prefix differs. Preserve source/method identities.
 
-Running: corrected K256, frozen execution10a222c6, under
-results/humaneval_value_cfgdet_k256_20261019/attempt001. Canonical scorer gate
-passes328/328. Previous-threshold and expanded-grid thinking-on work calibration
-have completed; midpoint calibration is active. Newly recorded CPU emission
-interval telemetry passes native record validation so far. No final threshold
-or corrected method accuracy is available yet. Sourcebe673388 queues K128 only
-after independently verified K256 completion; no K128 GPU work has launched.
+Corrected K256 execution10a222c6, protocol0faecb13, is now held after a method
+qualification failure under results/humaneval_value_cfgdet_k256_20261019/attempt001.
+Canonical scorer gate passes328/328. Thinking-on work-only tau0.094485192673943
+matches all164 first-canvas work within the declared tolerances. Every thinking-on
+method except direction-guarded residual matches audit/clean output/N/C/T/intervals
+on all12 qualification cases. Residual question129,seed43 differs: N167/171 and
+T3295/3302, final interval6/10. Other11 cases agree. Full matrices remain gated.
+No method-accuracy interpretation is released.
+
+The active thinking-off full-work job finished naturally; all332 requests are
+preserved and its reservation closed before stopping the controller. The K128
+followup queue is held explicitly because qualification failed, not by a new
+user-requested pause. No K128 GPU work has launched. Next bounded diagnostic:
+docs/HUMANEVAL_RESIDUAL_REPRO_PLAN_20261019.md, two750s reservations charged to
+existing phasek256. Preserve the pass-specific request prefix and qualified
+numerical policy; observe only duplicate residual requests, with native
+bookends. Compare production caches, held corrections and sampler trajectories
+before proposing another correction. Baseline qualification remains complete.
 
 Next: freeze work-only thresholds, qualify every method, run the authorized
 matrices and independent official rescores, then publish complete qualified

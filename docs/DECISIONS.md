@@ -2596,3 +2596,23 @@ CPU output-metadata telemetry records emission intervals without new device
 operations. K128 is gated on independently sealed K256 completion and fresh
 threshold calibration. Keep original panels and older pauses intact. Diagnosis
 10477.365s, preflight31.295s; the43200s shared ceiling and phase caps are unchanged.
+
+## Residual-specific qualification failure holds both full matrices (2026-10-19)
+
+In corrected K256 protocol0faecb13, all seven other methods match audit/clean
+output/N/C/T/intervals on the12 thinking-on qualification cases. Direction-guarded
+residual differs on question129,seed43: auditN167/T3295, cleanN171/T3302; final
+emission interval6/10, preceding12 intervals equal. No first internal divergence
+has been located yet. Exact first12 intervals do not prove identical earlier
+tokens or internal states. This is not sampling-noise evidence or qualified
+residual reproducibility. The six-question baseline diagnostic stays valid.
+
+Finish the active thinking-off work-calibration job naturally (332 requests),
+then halt the owned controller before another GPU launch. Preserve its closed
+reservation and all attempt artifacts. Hold K128 followup; no full matrix starts
+and no gate is relaxed. A new bounded diagnostic freezes both pass-specific
+prefixes plus observed/unobserved residual repeats, with production-cache and
+native full sampler fingerprints. Exclude independent oracle work from the
+production-cache trace. Native formulas/budgets remain fixed; diagnostic copies
+are not latency evidence. Initial ceiling1500s charges existing phasek256,
+without expanding total43200s or borrowing from other phase caps.
