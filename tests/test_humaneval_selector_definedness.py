@@ -26,10 +26,11 @@ def test_native_statistics_and_selectors_ignore_poisoned_scratch_and_keep_canari
     for method in methods:select(warm,method,budget=4,threshold=.094485192673943)
     guarded=[]
     for key,value in list(workspace.storage.items()):
-        raw=torch.full((value.numel()+512,),True if value.dtype==torch.bool else 12345.25,
+        guard=True if value.dtype==torch.bool else 12345.25 if value.is_floating_point() else 12345
+        raw=torch.full((value.numel()+512,),guard,
                        dtype=value.dtype,device=value.device)
         workspace.storage[key]=raw[256:-256]
-        guarded.append((raw,value.dtype))
+        guarded.append((raw,guard))
     previous=[]
     for prefix,(k,z) in inputs.items():
         reference=statistics_cuda(q,k,z,nu,1/math.sqrt(512),prefix//64)
@@ -37,7 +38,8 @@ def test_native_statistics_and_selectors_ignore_poisoned_scratch_and_keep_canari
                   for method in methods}
         for poison in (float('nan'),0.,-123.5):
             for value in workspace.storage.values():
-                value.fill_(poison!=0 if value.dtype==torch.bool else poison)
+                fill=poison!=0 if value.dtype==torch.bool else poison if value.is_floating_point() else 0 if poison==0 else -123
+                value.fill_(fill)
             actual=statistics_cuda(q,k,z,nu,1/math.sqrt(512),prefix//64,workspace=workspace)
             for field in ('log_mass','mean','nu','invalid'):
                 assert torch.equal(getattr(actual,field),getattr(reference,field)),(prefix,poison,field)
@@ -45,7 +47,6 @@ def test_native_statistics_and_selectors_ignore_poisoned_scratch_and_keep_canari
                 result,_=select(actual,method,budget=4,threshold=.094485192673943)
                 assert torch.equal(result,expected[method]),(prefix,poison,method)
                 previous.append((result,result.clone()))
-            for raw,dtype in guarded:
-                expected_guard=True if dtype==torch.bool else 12345.25
-                assert bool((raw[:256]==expected_guard).all()) and bool((raw[-256:]==expected_guard).all())
+            for raw,guard in guarded:
+                assert bool((raw[:256]==guard).all()) and bool((raw[-256:]==guard).all())
             assert all(torch.equal(original,saved) for original,saved in previous)
