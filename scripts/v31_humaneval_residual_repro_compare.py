@@ -32,6 +32,8 @@ def compare(root,destination,workspace,quiet=False):
             index=group['observed'];label=group.get('label',group.get('arm'))
             data[name][label]=dict(trajectory=read(leaf/f'private/trajectory/request{index+1:03d}.json'),
                 residual=read(leaf/f'private/residual/request{index+1:03d}.json'))
+            if p.get('graph_boundary_fingerprints'):
+                data[name][label]['graphs']=read(leaf/f'private/graphs/request{index+1:03d}.json')
     left,right=list(data);contrasts=[]
     assert set(data[left])==set(data[right])
     for label,x in data[left].items():
@@ -63,6 +65,22 @@ def compare(root,destination,workspace,quiet=False):
                 for key in a['calls'][first][side] if a['calls'][first][side][key]!=b['calls'][first][side].get(key)] if first is not None else [],
             residual_events=[len(x['residual']['events']),len(y['residual']['events'])],
             residual_fingerprints_equal=x['residual']==y['residual'],first_residual_event_changed=first_residual))
+        if p.get('graph_boundary_fingerprints'):
+            u,v=x['graphs']['events'],y['graphs']['events']
+            first_graph=next((i for i,(c,d) in enumerate(zip(u,v)) if c!=d),None)
+            first_logit=contrasts[-1]['first_raw_logit_changed_call']
+            relevant=next((i for i,(c,d) in enumerate(zip(u,v)) if c!=d and
+                c['sampler_index']==d['sampler_index']==first_logit),None) if first_logit is not None else None
+            def event_at(events,index):
+                if index is None:return None
+                return {k:value for k,value in events[index].items() if k!='values'}
+            contrasts[-1]['graphs']=dict(events=[len(u),len(v)],
+                equal=x['graphs']==y['graphs'],first_changed_event=first_graph,
+                first_changed_metadata=[event_at(events,first_graph) for events in (u,v)],
+                first_changed_at_logit_call=relevant,
+                first_changed_at_logit_call_metadata=[event_at(events,relevant) for events in (u,v)],
+                values_at_first_changed_logit_boundary=[events[relevant]['values'] if relevant is not None else None for events in (u,v)],
+                limitation='Partial activation argument fingerprints include storage extents; actual tensor capture/replay is required')
     result=dict(status='complete_diagnostic_reproducibility_unresolved',protocol_sha256=sha(root/'protocol.json'),
         original_prefix_reference_context='Different numerical/runtime policy; changes are not same-protocol reproducibility failures'
             if p.get('torch_deterministic_guard') else 'Prior source-matched qualification context',

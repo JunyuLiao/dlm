@@ -32,5 +32,7 @@ def install():
     return dict(scope='guarded CUDA integer-index nonaccumulating FP32 target, BF16 values',
         original_fallback_sha256=hashlib.sha256(inspect.getsource(original).encode()).hexdigest(),
         original_implementation_sha256=hashlib.sha256(implementation.encode()).hexdigest(),
-        adapter_sha256=hashlib.sha256(inspect.getsource(fallback).encode()).hexdigest(),
+        # inspect.getsource(function) unwraps functools.wraps and would fingerprint
+        # the original fallback. The code object identifies the installed body.
+        adapter_sha256=hashlib.sha256(inspect.getsource(fallback.__code__).encode()).hexdigest(),
         native_sampler_python_changed=False)
