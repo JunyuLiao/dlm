@@ -1,3 +1,32 @@
+## Corrected HumanEval resumed with service ownership — 2026-10-20, 08:40 HKT
+
+Current controller source `f6047e96`. User explicitly authorized termination of
+borrowed GPU workloads with their owner's agreement and requested K256/K128
+resumption plus agent monitoring every15minutes. The ten identified GPU/MPS
+workers and supervisors all exited after SIGTERM; verified H100 idle afterward.
+No unrelated parent agent/proxy was killed. GPU reclaim and reservation evidence:
+`results/humaneval_resume_20261020/attempt001/`.
+
+The prior calibration_grid attempt001 remains intact, marked interrupted. Its
+open1800s reservation is now closed at the full reserved duration, explicitly a
+conservative upper bound rather than measured GPU time. Evaluation usage before
+resume2015.138868s/36000s, including215.138868s completed calibration. No allocation
+or frozen scientific source/protocol was changed. Completed calibration hashes
+were verified; resumed coordinator skips it and creates a fresh leaf attempt.
+
+Active queue: `results/humaneval_no_overlap_queue_20261020/attempt001/`, protocol
+`92802550`; service `dllm-humaneval-corrected-20261020-attempt001.service`.
+The lingering user service owns both coordinators and all workers with
+KillMode=control-group; it does not attach to an interactive coordinator.
+A CPU-only service survived its launcher and completed successfully. Seven queue
+CPU tests pass. Process and GPU snapshots now run every900s, with saved request
+counts. K256 continues first, then independent verification/rescoring gates K128.
+Inspect actual service/state/logs before action; do not start a duplicate.
+Both original scientific protocols55370024/187719fc and deploy435511e4 remain.
+No corrected full164 result is claimed until full gates/scoring complete. Agent
+must monitor and report final accuracy, trajectories, clean latency and physical
+sparsity once complete; older paused campaigns remain preserved.
+
 ## Corrected HumanEval continuation stopped; neither panel complete — 2026-10-20, 08:31 HKT
 
 Verified HEAD `caeee16b`; live status check:
