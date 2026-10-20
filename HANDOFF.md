@@ -1,3 +1,26 @@
+## Corrected HumanEval continuation stopped; neither panel complete — 2026-10-20, 08:31 HKT
+
+Verified HEAD `caeee16b`; live status check:
+`results/humaneval_progress_20261020/attempt001/` (status check only, no result panel).
+K256 completed calibration_previous (52 requests,48 measured,215.138868s), then
+coordinator/worker exited during calibration_grid CUDA graph warmup, with zero
+saved request rows for that job. Exact exit status/cause was not recorded.
+Queue attempt001 stopped at06:02:40 HKT for missing K256 final_complete.json.
+Its old state.json and the panel's active_attempt are stale; neither process
+is alive. K128 has not started. There are no primary questions or completed
+full audit/clean method qualifications for either budget; no corrected accuracy,
+clean latency or effective-sparsity table exists. Earlier72-case bounded native
+qualification still passes and is not full164 audit/clean proof.
+
+The H100 is occupied by another workload; this check launched/interrupted no
+GPU job. An evaluation reservation for the interrupted calibration_grid remains
+open and must be reconciled conservatively with explicit interruption evidence
+before continuation. Preserve old attempts. Fix durable coordinator ownership
+before relaunching; attaching a detached monitor to an interactive coordinator
+did not keep that coordinator alive. No other paused campaign is authorized by
+this progress check. Previous running/automatic-continuation statements below
+are historical and superseded by this verified status.
+
 ## HumanEval native correction qualified; corrected K256/K128 panels frozen — 2026-10-19 UTC
 
 Verified deploy HEAD `435511e4`. Native diagnostic attempt015, source `d62691b2`,
