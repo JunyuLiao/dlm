@@ -1,3 +1,54 @@
+## Corrected HumanEval K256 complete; K128 running — 2026-10-20, 12:35 HKT
+
+K256 protocol55370024/deploy435511e4 completes all164/seed42 in both modes.
+All22 full audit/clean comparisons pass, including private completions and
+native intervals,N,C,T; independent primary-prefix replication passes. Official
+independent rescoring5904 main/432 qualification records has zero mismatches or
+timeouts. Root final_complete and owner verification/rescoring certificates exist.
+Sanitized publication: K256 attempt001/publication/attempt001. Ledger updated.
+
+K256 correct on/off: V31 159/157,V2 162/158,V3a159/157,swaps155/156,residual158/156,
+native FULL161/156,PIECEWISE161/156,all-kept164/156. V2 raises N and W slightly;
+full swaps/residual fail the joint objective. Whole-trajectory work is not
+matched by first-canvas calibration. Technical V31 bookend W ratios are within
+0.08%; full data/paired intervals/overhead are in the publication.
+
+The durable service and queue protocol92802550 continue. K128 command01 starts
+at12:31:55 HKT, fresh GRID calibration; shared dense reference links are installed.
+Inspect service/state before action, keep15-minute agent checks, and do not start
+a duplicate. Frozen K128 protocol187719fc retains the exact source/runtime,
+budget128, native settings and source-matched references. Final user report is
+pending both budgets; do not end at this K256 checkpoint. Earlier pauses remain.
+
+## Denoising-trajectory literature and evidence review — 2026-10-20 UTC
+
+Reviewed repository HEAD `0b86cdd4`; research note and source receipt:
+`results/denoising_trajectory_research_20261020/`. This request was investigation
+and design only. No implementation, GPU experiment, or campaign resumption ran.
+The independent HumanEval queue was not inspected or changed; its most recent
+recorded operational status remains below and is not a fresh liveness assertion.
+
+DiffusionGemma's uniform re-noising, entropy-bounded acceptance, soft
+self-conditioning and stable/confident stopping make attention support capable
+of changing native stopping time without changing sampler rules. Correctness
+does not follow from entropy reduction. The literature already covers sparse
+support reuse/refresh, confidence-based trajectory acceleration, and denoiser
+distillation; the report's SD·RL is a direct precedent for fewer native calls.
+
+Existing RULER128K one-canvas results are a suggestive positive lead. LongBench
+total-call savings often include shorter output and consumer effects; original
+fixed-canvas evidence primarily reduced sparse step inflation. Value-method
+clean64 results were negative, and the refresh factorial is provisional under
+its numerical limits. The review does not promote historical results to the
+corrected observing source or claim completion of a corrected full164 panel.
+
+Recommended discussion: quality-constrained prediction of support value and
+lifetime, with fixed-K mask alternatives and an explicit observation-cost test;
+alternatively, on-policy denoiser adaptation with the native sampler unchanged.
+First establish predictable, corrected-source trajectory headroom before any
+new implementation. Proposed diagnostics are not launched or frozen protocols.
+Historical results, paused campaigns and STATE.json remain unchanged.
+
 ## Corrected HumanEval resumed with service ownership — 2026-10-20, 08:40 HKT
 
 Current controller source `f6047e96`. User explicitly authorized termination of

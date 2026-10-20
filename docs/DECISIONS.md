@@ -2860,3 +2860,51 @@ the unexpected diagnosis explains the revision. Preserve original protocols,
 allocation001/002, actual charges and all paused campaigns. No extra GPU or new
 method sweep is introduced. Each reservation remains at most1800s, one worker,
 with immutable attempts and a combined/phase accounting check.
+
+## 2026-10-20 — Investigate native trajectory control before another sparse selector
+
+Research-only review at HEAD `0b86cdd4` reads the DiffusionGemma report, pinned
+native sampler, related sparse/trajectory/distillation literature, and existing
+source-specific panels. Full assessment and source fingerprints:
+`results/denoising_trajectory_research_20261020/`. No method implementation,
+experiment, queue action, or new performance result accompanies this entry.
+
+The hypothesis remains plausible: attention support can change logits, native
+acceptance/re-noising, self-conditioning and the time at which unchanged native
+stopping fires. Lower entropy or attention error does not establish correct
+convergence. RULER128K supplies a one-canvas positive lead; LongBench reductions
+must separate output length, within-canvas calls and consumer effects. Earlier
+fixed-canvas results mitigated step inflation; clean64 value-method results were
+negative. The completed small refresh factorial is a provisional support-lifetime
+lead, not a confirmed cheap controller or universal benefit from holding masks.
+
+Generic mass-mask reuse, refresh, temporal confidence and fewer denoising steps
+already have close prior art. Recommend discussing a controller that predicts
+the quality-constrained downstream value of fixed-budget support and its
+lifetime, with all selection cost included. A small mask bank is one proposed
+implementation form, not a tested method. A separate training route would learn
+earlier reliable predictions on native on-policy states; DiffusionGemma SD·RL,
+OPTD and discrete consistency learning are relevant precedents.
+
+Any later diagnostic should first use corrected observing FA4 and reproducible
+source-matched dense/all-kept/V31 controls, then test common-state interventions
+and affordable decision features. Nonsignificant score differences, fewer total
+calls, or an oracle intervention alone do not establish accuracy preservation,
+faster within-canvas convergence, or clean latency improvement. No historical
+protocol, paused campaign, result ledger entry or current execution state changed.
+
+
+## 2026-10-20 — Corrected K256 is reproducible; retain negative value-method results
+
+K256 protocol55370024 completes all164 tasks/seed42 in both thinking modes.
+Full audit/clean and independent prefix replication pass for every method;
+independent official rescoring agrees on5904 main and432 qualification records.
+V2 has162/158 correct versus V31's159/157, but uses50.043/10.854 forwards versus
+49.256/10.774 and takes1.14762/0.26408s versus1.12399/0.26218s. Whole-trajectory
+GLOBAL sparsity25.618%/5.168% is lower than V31's48.325%/20.031%, so first-canvas
+matching must not be described as whole-work matching. Full swaps155/156 and
+residual158/156 do not meet the joint accuracy/latency objective; preserve those
+negatives. Native FULL and all-kept controls remain separate implementations.
+Do not infer seed robustness from seed42 or the six examined seed43 questions.
+K128 now starts fresh calibration with only source-matched dense references
+shared; no K256 selector result is reused at K128.

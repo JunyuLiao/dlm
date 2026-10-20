@@ -2284,3 +2284,34 @@ The minimal observing-only FA4 overlap=False correction has helper SHA
 No full164 accuracy, clean latency, seed-robust superiority or universal numerical
 stability is established by this diagnostic. Corrected panels require their own
 audit/clean/control gates and official scoring before joining this ledger.
+
+
+## Corrected HumanEval K256, all164, seed42 — 2026-10-20
+
+Complete protocol55370024, deploy435511e4; frozen selector source20e6c0be with
+qualified deterministic compiler and observing-only FA4 non-overlap policies.
+Sanitized full publication:
+`results/humaneval_value_observe_no_overlap_k256_20261019/attempt001/publication/attempt001/`.
+All5904 main scores and432 qualification scores independently agree, zero
+rescoring mismatches/timeouts. All22 full audit/clean comparisons and independent
+primary-prefix replications pass. Each method has identical outputs, native
+intervals,N,C,T and private completions across passes in both modes.
+
+| Method | Correct on/off | N on/off | W seconds on/off | GLOBAL sparsity on/off |
+|---|---:|---:|---:|---:|
+| dense_full_fix51994 | 161/156 | 48.079/9.470 | 0.95249/0.20567 | 0.000%/0.000% |
+| dense_piecewise | 161/156 | 48.079/9.470 | 0.95967/0.20384 | 0.000%/0.000% |
+| allkept_fa4 | 164/156 | 51.945/9.957 | 1.11127/0.22810 | 0.000%/0.000% |
+| control_before | 159/157 | 49.256/10.774 | 1.12399/0.26218 | 48.325%/20.031% |
+| value_v2_online_preserve_mass | 162/158 | 50.043/10.854 | 1.14762/0.26408 | 25.618%/5.168% |
+| value_v3a_singleton_delete | 159/157 | 51.854/10.305 | 1.20563/0.26006 | 50.587%/9.504% |
+| full_swap8 | 155/156 | 49.085/10.445 | 1.82536/0.31423 | 48.880%/14.663% |
+| residual_direction_guard | 158/156 | 52.543/10.280 | 1.32133/0.26435 | 50.979%/10.074% |
+
+Accuracy counts are out of164; on/off mean thinking enabled/disabled. V31
+control_before is the declared reference; control_after reproduces its outputs
+and N exactly, with W ratios1.000044/1.000752. V2 gains3/1 correct but increases
+mean N and W in both settings. Its whole-trajectory attention work differs despite
+first-canvas matching. Swaps/residual do not improve the joint accuracy/latency
+outcome at K256. These are seed42 observations; six-question seed43 results are
+descriptive, not seed-robust confirmation. K128 remains a separate pending panel.
