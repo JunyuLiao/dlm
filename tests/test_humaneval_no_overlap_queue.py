@@ -50,3 +50,24 @@ def test_pid_reuse_zombie_and_absent_process(monkeypatch):
         raise FileNotFoundError
     monkeypatch.setattr(Path, 'read_text', absent)
     assert queue.process_identity(123) is None
+
+
+def test_owned_queue_resumes_k256_before_verification(tmp_path):
+    commands = queue.command_plan(tmp_path, 0, True)
+    assert [command[1] for command in commands] == [
+        'scripts.v31_humaneval_cfgdet_study', 'scripts.v31_humaneval_cfgdet_verify']
+    assert commands[0][2] == 'run'
+    assert commands[1][-1] == '--rescore'
+
+
+def test_attached_failure_does_not_bypass_qualification(tmp_path):
+    with pytest.raises(RuntimeError, match='without qualified completion'):
+        queue.command_plan(tmp_path, 0, False)
+
+
+def test_completed_panel_is_not_regenerated(tmp_path):
+    complete_panel(tmp_path)
+    commands = queue.command_plan(tmp_path, 0, True)
+    assert len(commands) == 1 and commands[0][1] == 'scripts.v31_humaneval_cfgdet_verify'
+    queue.write(tmp_path / 'independent_rescoring.json', {}, True)
+    assert queue.command_plan(tmp_path, 0, True) == []

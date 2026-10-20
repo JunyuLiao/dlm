@@ -61,6 +61,9 @@ def snapshot(queue, config, stage):
     device = subprocess.run(['nvidia-smi', '--query-gpu=utilization.gpu,memory.used',
                              '--format=csv,noheader'], capture_output=True, text=True, timeout=10)
     value['gpu_status'] = dict(returncode=device.returncode, utilization_and_memory=device.stdout.strip())
+    processes = subprocess.run(['nvidia-smi', '--query-compute-apps=pid,process_name,used_memory',
+                                '--format=csv,noheader'], capture_output=True, text=True, timeout=10)
+    value['gpu_processes'] = dict(returncode=processes.returncode, processes=processes.stdout.strip())
     for panel in config['panels']:
         study = Path(panel['study'])
         state = read(study / 'state.json')
@@ -76,29 +79,44 @@ def snapshot(queue, config, stage):
     return time.monotonic()
 
 
+def command_plan(study, index, owns_coordinators):
+    if (study / 'final_complete.json').exists():
+        commands = []
+    elif index or owns_coordinators:
+        commands = [['-m', 'scripts.v31_humaneval_cfgdet_study', 'run', '--study', str(study)]]
+    else:
+        raise RuntimeError('attached K256 coordinator ended without qualified completion')
+    if not (study / 'independent_rescoring.json').exists():
+        commands.append(['-m', 'scripts.v31_humaneval_cfgdet_verify', '--study', str(study), '--rescore'])
+    return commands
+
+
 def run(queue):
     config = read(queue / 'protocol.json')
     if sha(__file__) != config['controller_sha256']:
         raise RuntimeError('queue controller source changed')
     if (queue / 'final_complete.json').exists():
         raise RuntimeError('completed queue must not be relaunched')
-    last = snapshot(queue, config, 'waiting_for_attached_k256')
-    while process_identity(config['attached_pid']) == config['attached_start_ticks']:
-        if time.monotonic() - last >= 1800:
-            last = snapshot(queue, config, 'waiting_for_attached_k256')
-        time.sleep(5)
+    owns = config.get('owns_coordinators', False)
+    interval = config.get('monitor_interval_s', 1800)
+    if interval not in (900, 1800):
+        raise RuntimeError('unsupported monitor interval')
+    if not owns:
+        last = snapshot(queue, config, 'waiting_for_attached_k256')
+        while process_identity(config['attached_pid']) == config['attached_start_ticks']:
+            if time.monotonic() - last >= interval:
+                last = snapshot(queue, config, 'waiting_for_attached_k256')
+            time.sleep(5)
     for index, panel in enumerate(config['panels']):
         study = Path(panel['study'])
         if sha(study / 'protocol.json') != panel['protocol_sha256']:
             raise RuntimeError('queued panel protocol changed')
-        if index and not (study / 'final_complete.json').exists():
-            # The shared-reference owner is independently verified before K128.
-            commands = [['-m', 'scripts.v31_humaneval_cfgdet_study', 'run', '--study', str(study)]]
-        else:
+        if (study / 'final_complete.json').exists():
             require_complete(study, panel['protocol_sha256'])
-            commands = []
-        if not (study / 'independent_rescoring.json').exists():
-            commands.append(['-m', 'scripts.v31_humaneval_cfgdet_verify', '--study', str(study), '--rescore'])
+        # In owned mode both coordinators are service children. Each coordinator
+        # verifies and skips complete leaves and starts a fresh immutable attempt
+        # for interrupted work. The reference-owner checks still gate K128.
+        commands = command_plan(study, index, owns)
         for number, command in enumerate(commands):
             stage = f'k{panel["budget"]}_command{number + 1:02d}'
             snapshot(queue, config, stage)
@@ -107,7 +125,7 @@ def run(queue):
                 write(queue / f'{stage}_process.json', dict(pid=process.pid, command=[config['python'], *command]), True)
                 last = time.monotonic()
                 while process.poll() is None:
-                    if time.monotonic() - last >= 1800:
+                    if time.monotonic() - last >= interval:
                         last = snapshot(queue, config, stage)
                     time.sleep(5)
                 if process.returncode:
