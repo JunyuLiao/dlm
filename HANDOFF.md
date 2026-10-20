@@ -1,3 +1,14 @@
+## HumanEval reproducibility documentation — 2026-10-20 update
+
+Reviewed completed publications at `09877bcb`; scientific deploy remains
+`435511e4`, K256/K128 protocols `55370024`/`187719fc`. README now links a
+detailed account of compiler-reduction drift, observing-FA4 overlap variation,
+the two corrections, full-panel verification and limits on LongBench attribution.
+`results/humaneval_documentation_20261020/attempt001/` presents all methods,
+budgets and thinking modes with uncertainty, calibration, work and tail counts.
+Documentation only: no runtime, frozen result or experiment state changes.
+Other uncommitted research and AGENTS changes remain separately owned.
+
 ## Corrected HumanEval K256 and K128 complete — 2026-10-20, 15:24 HKT
 
 Verified scientific deploy435511e4, protocols55370024/187719fc. Both budgets
@@ -57,6 +68,36 @@ Inspect service/state before action, keep15-minute agent checks, and do not star
 a duplicate. Frozen K128 protocol187719fc retains the exact source/runtime,
 budget128, native settings and source-matched references. Final user report is
 pending both budgets; do not end at this K256 checkpoint. Earlier pauses remain.
+
+## Training-free value/dynamics follow-up — 2026-10-20, 14:36 HKT
+
+Research-only review at verified HEAD `9c0a90bf`, incorporating the attached
+stopping-criterion analysis and additional primary literature:
+`results/denoising_value_dynamics_research_20261020/`. No implementation,
+experiment, GPU work, queue inspection/action, or automation was performed.
+The operational entry above remains separately owned; this review does not
+assert fresh queue liveness. Historical results and paused campaigns are intact.
+
+The narrowed scope fixes the model and native sampler, and excludes fitting a
+selector. The strongest proposed mechanism is to preserve needed evidence while
+reducing harmful response to evolving queries and current-canvas K/V. Same
+mass/current output can hide different key-value covariance and future response.
+Correct-token retention, useful correction, prefix-renormalization effects and
+the actual entropy/stability predicates must be assessed together. Covariance,
+query-driven reuse and confidence control already have close prior art.
+
+Proposed analytical candidates are response-aware same-K support with bias/mass
+guards, and a within-canvas query-change bound for support lifetime. Exact
+decision-direction gradients are diagnostic oracles, not free production scores.
+Neither candidate is validated. The corrected complete HumanEval K256 result
+strengthens the negative evidence for unconditional existing value objectives;
+historical one-canvas RULER remains a limited positive lead for long context.
+
+Any later study should first establish native same-state effects and sham
+reproducibility, compare matched-budget/mass supports and lifetimes, and score
+ordinary visited predictions. Forced continuation, hybrid sampler pathways and
+changed RNG generation are outside the primary protocol. No new study is
+implemented, frozen or launched by this research recommendation.
 
 ## Denoising-trajectory literature and evidence review — 2026-10-20 UTC
 

@@ -2909,6 +2909,37 @@ Do not infer seed robustness from seed42 or the six examined seed43 questions.
 K128 now starts fresh calibration with only source-matched dense references
 shared; no K256 selector result is reused at K128.
 
+## 2026-10-20 — Narrow trajectory research to training-free support dynamics
+
+Research-only follow-up at `9c0a90bf` incorporates the user-supplied stopping
+analysis, primary literature and newly completed corrected K256 publication.
+Full assessment, analytical derivations and evidence fingerprints:
+`results/denoising_value_dynamics_research_20261020/`. No code, GPU evaluation,
+queue action or automation accompanies this entry.
+
+Keep native denoising and stopping fixed; training-free also excludes fitting a
+selector. Investigate whether support can preserve useful evidence while reducing
+harmful sensitivity to changing queries and current-canvas K/V. Equal mass and
+current PV error do not fix that response. A response objective differs from the
+earlier post-O reconstruction objective, but key-value covariance itself is
+established prior art and does not supply novelty or a convergence guarantee.
+
+Correct-to-wrong revisions and useful corrections should be measured separately
+where external correctness is defined. Prefix deletion amplifies retained canvas
+mass, so equal-K comparisons need per-row mass controls to isolate value effects.
+A query-change support bound may delimit reuse within a fixed prefix; it cannot
+certify accuracy or carry unchanged across canvases. Full covariance/gradient
+cost, conservative bounds, false-confidence lock-in and lost correction remain
+material risks. No candidate has been validated.
+
+Native full-state forks and passive quality-versus-call accounting are proposed
+diagnostics. Do not disable stopping, substitute RNG, or mix dense/sparse sampler
+pathways in the primary study. Such changes would answer different questions.
+Preserve source-matched FULL/PIECEWISE/all-kept/V31 controls, physical work
+accounting, question/seed uncertainty and clean selector overhead. The corrected
+K256 negative and the limited historical RULER lead remain separate evidence;
+no new experimental result, ledger entry or execution authorization is implied.
+
 
 ## 2026-10-20 — Seal both corrected HumanEval budgets and separate mean gains from claims
 
@@ -2932,3 +2963,23 @@ residual does not consistently shorten trajectories. Native FULL remains faster
 than the tested sparse/value methods. No new variant or GPU study is authorized
 or launched by this result interpretation. Keep model/native sampler, fixed
 per-query-tile selector budgets, provenance and previous pauses unchanged.
+
+## 2026-10-20 — Document the two reproducibility fixes and complete HumanEval results
+
+User requested a committed/pushed README update and detailed reproducibility
+documentation. At reviewed HEAD `09877bcb`, both corrected HumanEval budgets are
+complete. Document reduction-configuration rounding and the separate intermittent
+mass-observing FA4 overlap failure, actual implemented corrections, unsuccessful
+partial fixes, native-decoding preservation and full audit/clean evidence.
+Keep operational job ownership separate from numerical repeatability and avoid
+attributing historical LongBench-v2 drift without a corrected-runtime replay.
+
+The documentation report derives all tables from the immutable combined
+publication: accuracy, N/C/T, S/W/S-per-N, GLOBAL/overall physical sparsity,
+paired intervals, first-canvas matching, whole-trajectory kept work and tails.
+Retain K128 V2's unmatched non-thinking calibration and output-cap tail, source
+and layer-scope differences, shared dense references and seed42 limits. A mean
+K128 improvement is a development lead, not established robust superiority.
+README section `2026-10-20 update` links this report and the correction account.
+No source/runtime change, GPU run, rescore or campaign resumption accompanies
+the documentation. Existing frozen artifacts and separately owned edits remain.

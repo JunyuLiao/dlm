@@ -15,6 +15,36 @@ attention computation. Sparsity is applied only to eligible physical
 H100/SM90 research implementation; skipped-tile counts do not by themselves
 establish end-to-end speedup.
 
+## 2026-10-20 update
+
+**HumanEval K256 and K128 are complete:** all 164 problems, seed 42, with
+thinking enabled and disabled. Two numerical reproducibility issues were
+corrected: compiler-dependent reduction choices in the model/sampler helpers,
+and intermittent output variation in mass-observing FA4. The corrected runtime
+uses explicit deterministic compilation and disables overlap only for the
+mass-observing attention path. Native decoding and stopping remain unchanged.
+All 22 full audit/clean comparisons per budget pass; independent engine-prefix
+replication and official rescoring also pass.
+
+| Budget / thinking | V31 → V2 correct/164 | Calls/problem, V31 → V2 | Request ms, V31 → V2 |
+|---|---:|---:|---:|
+| K256 / on | 159 → 162 | 49.256 → 50.043 | 1123.988 → 1147.622 |
+| K256 / off | 157 → 158 | 10.774 → 10.854 | 262.178 → 264.080 |
+| K128 / on | 157 → 158 | 57.415 → 53.323 | 1297.955 → 1224.068 |
+| K128 / off | 156 → 160 | 11.488 → 10.439 | 274.204 → 252.697 |
+
+K128 V2 has the strongest observed joint accuracy/latency lead over V31, but
+its speedup intervals include 1 and its non-thinking first-canvas work match
+misses the specified tolerance. First-canvas calibration does not match total
+attention work. Full-value swaps and guarded residual do not meet the joint
+objective; native dense FULL remains faster than every tested sparse method.
+
+Read the [reproducibility problem, fixes and evidence limits](docs/HUMANEVAL_REPRODUCIBILITY_FIXES_20261020.md)
+and the [complete HumanEval results, uncertainty, work accounting and tails](results/humaneval_documentation_20261020/attempt001/README.md).
+The fixes are verified on these HumanEval panels; their contribution to earlier
+LongBench-v2 inconsistencies remains unconfirmed. Older updates below describe
+their original protocols and status at publication.
+
 ## 2026-10-17 update: full-value selection and reuse
 
 The three-direction follow-up is complete: bounded full-V swaps, reuse-lifetime
