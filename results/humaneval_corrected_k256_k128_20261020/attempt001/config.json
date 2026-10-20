@@ -1,0 +1,102 @@
+{
+  "analysis_source_sha256": "185e772c17f69a7b895ebe0069deed4a337bee24ac597a509998a9c8a7b02cb2",
+  "method_provenance": "V31 inherits Yuhan cross-step reuse; value-aware selectors/refinements are separately named study variants",
+  "panels": {
+    "128": {
+      "analysis_complete_sha256": "b922e79ffd18a7e28814183cee69adac5396f8ea4dac7292f84a884292721cfa",
+      "compiler_policy": {
+        "benchmark_combo_kernel": false,
+        "horizontal_combo_fusion": false,
+        "inductor_deterministic": true,
+        "native_graph_modes_retained": true,
+        "native_helper_python_functions_preserved": true
+      },
+      "final_complete_sha256": "82248185899afdd52e7d7db7ac2636f0bd2d7a4cbcde0ec07cc0a6258fb33084",
+      "humaneval_source_sha256": "b796127e635a67f93fb35c04f4cb03cf06f38c8072ee7cee8833d7bee06979ef",
+      "independent_rescoring_sha256": "42ed914783bf453ea55f9b39c979eda5e18292efd14ca695133b48f154eedacb",
+      "model_inventory_sha256": "8efd551fa40908fc5747be476cec848be6831fc537679c468c76a1858bf32bf8",
+      "native": {
+        "canvas": 256,
+        "confidence_threshold": 0.005,
+        "denoise_steps": 48,
+        "entropy_bound": 0.1,
+        "generation_config_sha256": "99334f763c3dbe8b161aeaca1c150a05344299fda2d2e4a0e1d342c744461200",
+        "output_limits": "frozen per-input generation budgets; native stopping unchanged",
+        "seed_base": 31,
+        "stability_threshold": 1,
+        "temperature": [
+          0.8,
+          0.4
+        ],
+        "thinking_policy": "frozen per-input manifests, including non-thinking RULER; no runtime rewrite"
+      },
+      "observing_fa4_policy_sha256": "f13970b24c6f8f27c09ba38ea882368aba9db8be9abf40833f914c44cc1a9e63",
+      "protocol_sha256": "187719fc92ac1c6facfab7527257875773b58b80a0d4667e0738cfdd6183b10e",
+      "runtime_packages": {
+        "latex2sympy2-extended": "1.11.0",
+        "math-verify": "0.9.0",
+        "sympy": "1.14.0",
+        "torch": "2.13.0",
+        "vllm": "0.30.0"
+      },
+      "shared_references": {
+        "families": [
+          "dense_full_fix51994",
+          "dense_piecewise",
+          "allkept_fa4"
+        ],
+        "protocol_sha256": "55370024da6427395312efeac1f700953c2d64aa5f1e65b2e2cfdac565e90c86",
+        "reason": "these plain dense/all-kept paths do not consult retention K; selector arms are never shared",
+        "source_fingerprints_sha256": "0d03dd8a89749d714a79d70b9912226293792930a9dabd52fd31f20049bd07f4",
+        "study": "results/humaneval_value_observe_no_overlap_k256_20261019/attempt001"
+      },
+      "source_fingerprints_sha256": "0d03dd8a89749d714a79d70b9912226293792930a9dabd52fd31f20049bd07f4",
+      "study": "results/humaneval_value_observe_no_overlap_k128_20261019/attempt001"
+    },
+    "256": {
+      "analysis_complete_sha256": "21894ec29f763af6be7b0f366ff79489790462263e6a2a47efa2f3f3ad61c4b3",
+      "compiler_policy": {
+        "benchmark_combo_kernel": false,
+        "horizontal_combo_fusion": false,
+        "inductor_deterministic": true,
+        "native_graph_modes_retained": true,
+        "native_helper_python_functions_preserved": true
+      },
+      "final_complete_sha256": "b01856374a0a61b7d0a92f3bbe73c501f7afd66aa19e0be72e5ca2d77bab98b3",
+      "humaneval_source_sha256": "b796127e635a67f93fb35c04f4cb03cf06f38c8072ee7cee8833d7bee06979ef",
+      "independent_rescoring_sha256": "42ed914783bf453ea55f9b39c979eda5e18292efd14ca695133b48f154eedacb",
+      "model_inventory_sha256": "8efd551fa40908fc5747be476cec848be6831fc537679c468c76a1858bf32bf8",
+      "native": {
+        "canvas": 256,
+        "confidence_threshold": 0.005,
+        "denoise_steps": 48,
+        "entropy_bound": 0.1,
+        "generation_config_sha256": "99334f763c3dbe8b161aeaca1c150a05344299fda2d2e4a0e1d342c744461200",
+        "output_limits": "frozen per-input generation budgets; native stopping unchanged",
+        "seed_base": 31,
+        "stability_threshold": 1,
+        "temperature": [
+          0.8,
+          0.4
+        ],
+        "thinking_policy": "frozen per-input manifests, including non-thinking RULER; no runtime rewrite"
+      },
+      "observing_fa4_policy_sha256": "f13970b24c6f8f27c09ba38ea882368aba9db8be9abf40833f914c44cc1a9e63",
+      "protocol_sha256": "55370024da6427395312efeac1f700953c2d64aa5f1e65b2e2cfdac565e90c86",
+      "runtime_packages": {
+        "latex2sympy2-extended": "1.11.0",
+        "math-verify": "0.9.0",
+        "sympy": "1.14.0",
+        "torch": "2.13.0",
+        "vllm": "0.30.0"
+      },
+      "shared_references": null,
+      "source_fingerprints_sha256": "0d03dd8a89749d714a79d70b9912226293792930a9dabd52fd31f20049bd07f4",
+      "study": "results/humaneval_value_observe_no_overlap_k256_20261019/attempt001"
+    }
+  },
+  "questions": 164,
+  "seed": 42,
+  "shared_dense_controls": true,
+  "source_commit": "435511e43cf186a836761667f36fbf4f0f6061ec"
+}

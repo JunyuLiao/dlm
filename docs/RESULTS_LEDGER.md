@@ -2315,3 +2315,41 @@ mean N and W in both settings. Its whole-trajectory attention work differs despi
 first-canvas matching. Swaps/residual do not improve the joint accuracy/latency
 outcome at K256. These are seed42 observations; six-question seed43 results are
 descriptive, not seed-robust confirmation. K128 remains a separate pending panel.
+
+
+## Corrected HumanEval K128 and complete two-budget evaluation — 2026-10-20
+
+K128 protocol187719fc and K256 protocol55370024 share scientific deploy435511e4.
+Both complete all164 tasks/seed42, thinking on/off. Full publication:
+`results/humaneval_corrected_k256_k128_20261020/attempt001/`; separate metric/source
+readback receipt under `results/humaneval_corrected_validation_20261020/attempt001/`.
+All22 full audit/clean comparisons per budget and independent prefixes pass.
+Official independent rescores5904 main/432 qualification records per budget agree,
+zero mismatches/timeouts. K128 reuses only the fresh common-source dense controls;
+its selectors, calibration, qualification and primary runs are fresh.
+
+| K128 method | Correct on/off out of164 | N on/off | W seconds on/off | GLOBAL sparsity on/off |
+|---|---:|---:|---:|---:|
+| dense_full_fix51994 | 161/156 | 48.079/9.470 | 0.95249/0.20567 | 0.000%/0.000% |
+| dense_piecewise | 161/156 | 48.079/9.470 | 0.95967/0.20384 | 0.000%/0.000% |
+| allkept_fa4 | 164/156 | 51.945/9.957 | 1.11127/0.22810 | 0.000%/0.000% |
+| control_before | 157/156 | 57.415/11.488 | 1.29796/0.27420 | 59.870%/29.656% |
+| value_v2_online_preserve_mass | 158/160 | 53.323/10.439 | 1.22407/0.25270 | 56.641%/18.355% |
+| value_v3a_singleton_delete | 154/158 | 58.445/10.165 | 1.34440/0.25335 | 61.818%/14.152% |
+| full_swap8 | 155/157 | 55.982/10.280 | 2.01900/0.33977 | 59.735%/15.792% |
+| residual_direction_guard | 155/158 | 56.518/11.829 | 1.42219/0.30230 | 60.891%/32.730% |
+
+K128 V2 has mean accuracy/latency improvements over V31 in both modes, but both
+speedup intervals include1. Its non-thinking first-canvas match is outside the
+declared0.25pp target (+0.53116pp sparsity,0.93680 absolute kept ratio); the
+predeclared nearest-work rule retained this threshold. Whole-work equality is
+not established by first-canvas calibration. V2 K128 thinking-on output caps3
+versus V31's1 are retained. Swaps and residual remain slower than V31 in all four
+budget/mode cells. Main seed42 and six examined seed43 tasks do not establish
+seed-robust method improvement. All dense references and technical bookends are
+explicitly distinguished in the public tables and CSV.
+
+32 recorded GPU checks have maximum gap901s and at most one observed worker.
+The durable service exits0 and H100 is idle. Shared evaluation charge23967.119s
+includes1800s conservative interruption allowance; completed measured-leaf
+reservations22167.119s. These campaign charges are separate from clean request W.

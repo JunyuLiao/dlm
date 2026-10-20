@@ -1,3 +1,41 @@
+## Corrected HumanEval K256 and K128 complete — 2026-10-20, 15:24 HKT
+
+Verified scientific deploy435511e4, protocols55370024/187719fc. Both budgets
+complete all164 tasks, seed42, thinking on/off. All22 full audit/clean comparisons
+per budget pass, including private outputs, native intervals,N,C,T and bookends.
+Independent primary-prefix replication passes. Independent official rescores
+agree on5904 main/432 qualification records per panel, no mismatches/timeouts.
+Shared dense controls are the same source-matched runs, not extra trials.
+
+Combined source-bound publication and paper tables/methods:
+`results/humaneval_corrected_k256_k128_20261020/attempt001/`.
+Independent readback/source verification:
+`results/humaneval_corrected_validation_20261020/attempt001/receipt.json`:
+11808 logical public records (including duplicated shared references),5904
+logical audit/clean item pairs,36 cells including technical bookends; metric/
+score mismatches0, measured captures0. Source/schedule hashes pass.32 NVML
+snapshots, maximum interval901s, maximum observed compute workers1. Service
+exits0/inactive and H100 is idle. No further worker or monitoring job remains.
+
+K128 V2 versus V31 correct on/off158/160 vs157/156; calls53.323/10.439 vs
+57.415/11.488; request1.22407/0.25270s vs1.29796/0.27420s. Mean speedups1.060x/
+1.085x have question-bootstrap intervals including1. K256 V2 improves counts
+162/158 vs159/157 but raises N and W slightly. Full swaps/residual do not achieve
+the joint accuracy/latency objective. No seed-robust superiority is established.
+
+K128 non-thinking V2 retained the predeclared closest threshold: first-canvas
+sparsity+0.53116pp exceeds0.25pp target (absolute kept ratio0.93680). Disclose
+this unmatched arm; first-canvas calibration never certifies whole-work equality.
+Whole GLOBAL kept ratios for V2/V31 are1.478/1.143 atK256 on/off and1.075/0.890
+atK128. K128 thinking-on V2 has3 output caps versus V31's1; preserve tails.
+
+Evaluation ledger charge23967.119s/36000s,
+including1800s conservative interruption charge; completed-leaf measured
+reservations22167.119s. Original interruption,
+completed calibration, controls, old protocols and older pauses are preserved.
+Result ledger/decisions updated. Other uncommitted research/AGENTS edits remain
+owned separately and must not be absorbed into the results commit.
+
 ## Corrected HumanEval K256 complete; K128 running — 2026-10-20, 12:35 HKT
 
 K256 protocol55370024/deploy435511e4 completes all164/seed42 in both modes.

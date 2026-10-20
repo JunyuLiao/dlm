@@ -2908,3 +2908,27 @@ negatives. Native FULL and all-kept controls remain separate implementations.
 Do not infer seed robustness from seed42 or the six examined seed43 questions.
 K128 now starts fresh calibration with only source-matched dense references
 shared; no K256 selector result is reused at K128.
+
+
+## 2026-10-20 — Seal both corrected HumanEval budgets and separate mean gains from claims
+
+Both frozen panels complete and reproduce all164 questions across audit/clean
+for every method in both thinking modes. Independent engine prefixes and official
+rescores pass; combined publication and independent readback/source receipt are
+under humaneval_corrected_k256_k128_20261020 and humaneval_corrected_validation_20261020.
+Do not reuse older unqualified accuracy/timing rankings for these corrected cells.
+
+V2 is the strongest observed value-method lead atK128:158/160 correct vsV31's
+157/156 and mean W1.22407/0.25270s vs1.29796/0.27420s, with N53.323/10.439 vs
+57.415/11.488. The speedup intervals include1; seed42 and six examined seed43
+questions are not robust confirmation. K128 non-thinking threshold matching
+misses the0.25pp target (+0.53116pp); this stays explicitly unmatched under the
+predeclared nearest-work rule. Whole GLOBAL kept work also differs. Preserve
+V2's3 thinking-on output caps versus control1 and all per-item transitions.
+
+Full swaps and guarded residual do not meet the joint objective across these
+cells. Swaps save few model calls but add substantial full-PV/selection cost;
+residual does not consistently shorten trajectories. Native FULL remains faster
+than the tested sparse/value methods. No new variant or GPU study is authorized
+or launched by this result interpretation. Keep model/native sampler, fixed
+per-query-tile selector budgets, provenance and previous pauses unchanged.
