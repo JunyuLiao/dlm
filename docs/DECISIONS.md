@@ -2983,3 +2983,335 @@ K128 improvement is a development lead, not established robust superiority.
 README section `2026-10-20 update` links this report and the correction account.
 No source/runtime change, GPU run, rescore or campaign resumption accompanies
 the documentation. Existing frozen artifacts and separately owned edits remain.
+
+
+## 2026-10-20 — Sparse V2 refresh prototypes have only a short synthetic lead
+
+User-authorized kernel study at verified HEAD755b528c; artifacts under
+`results/v2_sparse_refresh_kernel_20261020/`. Current published V2 returns
+dense observing FA4 on refresh. New sparse-refresh variants return masked
+current full-V output on refresh, retaining the inherited hold/carry path and
+native sampler. Keep their identity separate from published selector-only V2.
+
+Fourteen H100 operator checks pass, zero skips. Fused Q128 QK/PZ discovery,
+normalized routing mass/squared risk, optimized summary scan and conditional
+full-PV were implemented; D64/warp alternatives and failed mixed-shape cluster
+lowering remain negatives. Synthetic model GLOBAL geometry at about50% sparsity
+finds best complete sparse refresh160.17/490.42/998.86us versus V31
+299.73/367.61/461.00us at1024/4096/8192 keys. Plain dense FA4 is faster at every
+measured length. Source-frozen final timing has zero measured graph captures.
+These are synthetic component diagnostics, not HumanEval or native latency.
+
+Automatic approval review rejected native QKV persistence and GPU-only private
+HumanEval attention replay pending explicit user authorization. Neither native
+worker launched; a numeric-only replay approval question is pending. A source
+commit was also rejected; immutable source snapshots retain tested code without
+Git index/history changes. Do not promote AIME26 or LongBench503 from synthetic
+results. New native first-canvas calibration, correctness/receipt/trajectory
+qualification and matched HumanEval performance/accuracy remain necessary. No
+old paused study or existing frozen protocol changed; no result ledger claim.
+
+
+## 2026-10-21 — Reduce V31 observation overhead; retain real-online V2 as a negative kernel screen
+
+At verified HEAD755b528c, user-authorized H100 work adds independent experimental
+refresh implementations under refresh_kernel_optimization_20261021. Source is
+frozen in attempt004, not installed as a native default. V31 reuses softmax
+probabilities and fuses selection/list creation, with an underflow fallback.
+All six V31 tests pass. Static complete refresh56.07/191.83/366.37us at
+1024/4096/8192 keys replaces inherited299.94/372.00/468.48us. Plain dense is
+46.90/172.94/358.71us. At8192, dynamic dispatch gives dense294.21us versus
+optimizedV31306.52us; retain the dispatch-matched control.
+
+V2 performs real ordered fixed-threshold decisions and skips full PV in the
+same attention traversal, while charging fresh current-V projection/RMS. Lean
+routing, qualified BF16x3 PZ and double-buffered votes improve the prototype.
+Nine synthetic qualification cases and final timing shapes show no mask
+mismatches; BF16 custom output differs from same-mask FA4 by about0.003 relative
+L2 and is not native equivalence. At~50% GLOBAL sparsity, complete online
+187.55/601.06/1158.78us is only tied or1–3% ahead of two-pass references and is
+still slower than dense FA4. Do not promote a successful sparse-kernel claim or
+launch conditional AIME/LongBench generation from these numbers. HumanEval is
+also unlaunched for the new output variant. Held consumer and sampler stay fixed.
+
+Alternative register layouts and schedules are not inferred successes;
+failed overlap, split/TMA, compact/staged and deferred-P attempts remain recorded.
+Compiler spills motivate the next register/pipeline redesign, but unavailable
+Nsight counters preclude a measured stall breakdown. Borrower FastWAM workers
+and dedicated supervisors were identity-verified and reclaimed as authorized;
+MPS was not signaled. Exclude contaminated screen007 and conservatively006.
+Final clean screen013 has measured graph captures0 and no foreign GPU client.
+This is a synthetic diagnostic completion with a partial optimization objective,
+not a native panel or result-ledger entry. Preserve inherited method provenance.
+
+
+## 2026-10-21 — TMA/channel-router V2 reduces online refresh cost, still fails dense gate
+
+Continue at verified HEAD755b528c in an independent source-frozen experimental
+variant, results/v2_online_pipeline_20261021 (frozen/attempt003, exact compiled
+source qualified_source/attempt002, final report/attempt003). Two channel groups
+increase Q256/H16 CTA coverage and halve the output accumulator; the final WG0
+Gaussian32 router removes one partial-risk barrier. TMA Q/K and retained-only V,
+next-K overlap, acquire/release votes, retained-mass output and one-kernel list
+compaction reduce complete refresh cost. Approximate division is explicit.
+Selected schedule3 uses214 registers with zero spills. Duplicated QK/routing
+across channel groups is measured, not hidden by a sparsity count.
+
+Final clean synthetic complete-refresh GPU medians at1024/4096/8192 keys are
+102.46/322.18/629.52us versus inherited real-online184.63/589.47/1147.74us;
+the previous kernel with fast lists is165.04/569.15/1134.71us. Two-pass discovery
+plus sparse FA4 takes185.38/609.74/1156.42us. The gain is real against those
+measured implementations, but plain dense46.23/166.18/358.58us remains faster;
+dynamic dense291.24us is stronger at8192. Do not expand the conditional native
+campaign from this result. Kernels alone are also slower than plain dense.
+
+Final diagnostic and production each pass six independent selector/FA4-output
+cases and all nine H100 regressions pass. Timed capture counter0, five final
+geometry masks exact, current-V projection/RMS and lists charged. BF16 custom
+output~0.003 relative L2 is not native accuracy or trajectory equivalence.
+Historical selector-only V2 dense refresh output is distinct from this online
+sparse output variant. Preserve Yuhan and Junyu provenance and NVIDIA BLASST
+reference. Native held/carry consumer, LOCAL/prefill and sampler are untouched.
+
+Retain negatives: serial/TMA versus spilling overlap; ordered four-KV wavefront
+DSM handoff; exp2 and full-sketch duplication; duplicated QK per WG; single-WG
+channel splitting; two-WG channel overlap. Qualification034 exposed an invalid
+exact-text decision-publication patch after adding a channel guard. The builder
+now validates the decision patch; no failed-binary timing is used. The final
+changing-support graph regressions pass. Source/report failures and contaminated
+workers remain immutable with failure markers. Exclude screen004/005/008/009.
+
+The user explicitly authorized preemption of GR00T gr00t_n15_venv/sprof_1020.
+No matching live client appeared after that approval, and no signal was needed.
+Final H100 is idle. Recorded completed-screen worker reservation is379.08s,
+including initialization/JIT/warmup; this is neither total active GPU seconds
+nor total campaign GPU use. No native HumanEval/AIME/LongBench generation or
+private-input replay was launched. Do not infer matched first-canvas work,
+accuracy, denoising calls or request latency from this synthetic calibration.
+
+Final bounded continuation: reduced QK unrolling removes overlap spills but does
+not beat the serial winner (screen026/027). The compiler reports WGMMA accumulator
+serialization in the channel-router overlap variant; no hardware attribution is
+claimed. Final builder/source freeze is attempt004, with byte-identical generated
+winning CUDA verified against pre-timing attempt003. Final report is attempt004;
+tested/timed binaries remain the original qualified_source/attempt002 artifacts.
+Completed-screen worker reservation including these two controls is411.45s, with
+the same incomplete-total accounting boundary. No native run was launched.
+
+
+## 2026-10-21 — Q128/register-source online V2 improves refresh, dense parity still fails
+
+At verified HEAD755b528c, source-frozen synthetic continuation in
+results/v2_online_warpspec_20261021 (pre-timing frozen/attempt003, final
+frozen/attempt004, exact binaries qualified_source/attempt002, report/attempt001).
+Retain Yuhan inherited cross-step reuse and Junyu Gaussian32/Hopper provenance;
+NVIDIA BLASST buffering/warp-specialization informs the execution variants.
+
+The winner uses full Q128 within one CTA/two WGs, four128-channel output groups,
+register-source BF16 PZ/PV, prepacked current Gaussian32 operands, double-buffered
+one-barrier votes, WG-local synchronization, next-K/early-V overlap and base2
+SFU/unnormalized folded-risk arithmetic. Explicit fast math is a numerical arm.
+Schedule2 prefetches all V and skips full PV online; schedule3 also skips V
+loads, separately timed. All projection/RMS, packing and list costs are charged.
+233 registers, zero spills, do not confuse core+packing with a raw CUDA kernel.
+
+Clean complete-refresh medians at1024/4096/8192/16384 keys are
+84.10/239.20/460.20/892.71us; plain dense46.72/173.13/361.68/710.40us wins.
+The corrected previous online control with matched fast lists is
+104.31/327.51/635.47/1236.88us (19–28% improvement); this is not a task or
+end-to-end speedup. All-kept FA4 and dynamic dense remain reported. Synthetic
+physical GLOBAL sparsity is~50%, except mandatory-support-limited512 at37.5%.
+No native first-canvas calibration, LOCAL accounting or task generation follows.
+
+Diagnostic and production each pass9 independent ordered-selector/output cases;
+13 H100 regressions pass with zero failures/skips. Timed captures0, changing
+support graph replay, sticky/partial/extreme/currentV checks pass. Same-mask
+FA4 relativeL2<=0.00307 does not imply native accuracy/trajectory equivalence.
+Source and exact library copies are hash verified. No failed/FP16/TMA candidate
+is promoted. Unique per-build temporary roots fix concurrent nvcc sandbox-PID
+collisions; compiled libraries must export the required ABI.
+
+Correct the prior comparison identity: channel-router builder's epoch insertion
+silently missed output[64] because it expected output[128]. Old passing examples
+do not establish race freedom. Frozen previous attempts remain unchanged;
+the builder now validates a generic exact anchor and the corrected reference
+is independently qualified and remeasured. Final comparisons use that control.
+
+Independent router/PV-CTA and vector DSM designs are correct but much slower;
+staged QK, QK lookahead and two-scorebank overlap also lose. The final two-group
+256-channel design removes spills, halves duplicated QK, but loses at509.38us
+for8192. Winning four-group routing/QK repeats four times to occupy more SMs;
+half PV therefore does not halve total kernel work. Rejecting half the8K tiles
+only cuts custom core451.74us to427.63us. The next design must reduce QK
+replication and handoff latency while retaining ordered threshold semantics.
+This evidence does not establish that dense parity is impossible.
+
+Final GPU idle, no foreign preemption needed; own stopped-worker receipt kept.
+Completed-screen process reservation638.12s includes JIT/warmup but omits tests,
+qualification, builds, probes and failed/stalled processes, so not total active
+GPU seconds. No native HumanEval/AIME/LongBench campaign was launched or old
+paused campaign resumed. No native result ledger entry; diagnostic marker sets
+objective_achieved=false. Keep native qualification and measured dense parity
+as gates for the requested conditional benchmark expansion.
+
+
+## 2026-10-21 — Explicitly requested optimized-kernel native benchmark campaign
+
+User requests current optimized online V2/V31 versus dense across all30 AIME26
+x seeds42/43/44, MATH500 full500, HumanEval164, LongBench-v2 full503. Other
+suite seed42, thinking-on. Prior synthetic dense-parity gate is superseded by
+this explicit evaluation request. New source/data/kernel/runtime-frozen attempt
+results/optimized_refresh_benchmarks_20261021/attempt003; never resume old paused
+studies. Fixed V31 budgets AIME/MATH1728, HumanEval128, LongBench8192.
+
+Integrate frozen V2 binary7300f103369c804d schedule2 and optimized V31 FA4
+observer/fused topk/list into existing native adapter lifecycle. V2 refresh
+returns online sparse current-QKV output; no dense output or posthoc simulation.
+Held/carry paged split FA4 is common. All projection/contiguous packing/list
+costs charged. Audit correctly counts sparse V2 refresh PV; total QK/PZ is
+additional repeated work and not equated with kept-PV matching. Preserve
+Yuhan reuse and Junyu Gaussian32 provenance.
+
+21 kernel/integration regressions pass, then2 audit-phase timing tests. Native
+V31 and V2 smoke requests each pass zero capture/scope/finite/budget receipts;
+no scored accuracy claim. Frozen attempts001/002 retain smoke evidence and
+are superseded after report and native-dense first-canvas receipt additions.
+Existing HumanEval K128 tau0.5600716206066294 and .021 for others seed bounded
+first-canvas work-only calibration. Freeze nearest absolute GLOBAL PV-kept work
+match and report mismatch if tolerances unattainable. Separate audit/clean
+paired-native hash qualification before full shards; official scorers and
+problem-clustered uncertainty. Dense FULL fix51994/PIECEWISE/all-kept controls.
+
+Durable user service dlm-optimized-refresh-20261021-a003 launches accepted after
+one initial automatic-review timeout (unit confirmed absent before retry).
+One worker/H100, resumable <=32-cell shards, explicit failed attempts and live
+state. No full benchmark completed yet; final marker gates claims. No sampler,
+installed runtime or paused historical run changed. Private data stay private.
+
+The first coordinator attempt003 completed four calibration control records,
+then its immutable-source audit stopped on regenerated Python bytecode that
+was mistakenly included when copying a smoke snapshot. No Python/CUDA method
+source changed. New frozen attempt004 excludes generated bytecode and starts
+unit dlm-optimized-refresh-20261021-a004; old attempt is retained as failed.
+
+
+## 2026-10-21 — Pause benchmark; resident sparse execution and K128 short budgets
+
+Explicit user instruction stops dlm-optimized-refresh-20261021-a004. Resource/
+process/start-time/SIGTERM receipt and PAUSED_USER_REQUEST retained in attempt004;
+85 completed job markers/1698 records remain immutable. Campaign partial and
+not a complete benchmark. New short V31 budgets K128 for AIME26/MATH500/HumanEval;
+LongBench8192. Old K1728 results supplementary; recalibrate each V2 workload
+for40-50% actual held GLOBAL physical tile sparsity and report every phase.
+
+ResidentMask/PagedContext precompute compact indices/splits/page tables/used
+lengths and preserve output buffers. Direct paged FA4 skips per-held canvas KV
+copy and page metadata allocation; no selection/list construction on held calls.
+Six changing-QKV/mask/page-map graph tests pass. Initial50% synthetic resident
+25.55/70.32/113.39/196.03us vs dense46.60/168.19/361.51/722.89us. Flex compiled
+BlockMask107.01/777.82us at1024/8192 is correct but loses and is retained negative.
+These are synthetic observations, not native/end-to-end performance evidence.
+SparseD is an attributed execution reference, Yuhan reuse/Junyu Gaussian32
+remain distinct. New bounded native001 qualification, no full panel resumed.
+
+Required next: clean synthetic40/50/60 matrix, mask/page/output graph identity,
+charged module/host execution, true-online refresh optimization and native
+source/finite/budget/extra-forward/LOCAL/capture/audit-clean trajectory gates.
+V2 remains online conditional full PV; projection packing fusion is an explicit
+variant, not a hidden dense replacement. Relaunch only in a new frozen attempt.
+
+
+## 2026-10-21 — Charged held execution matrix and preserved refresh negatives
+
+Required synthetic12-cell held/refresh matrices completed under sparse_execution_
+20261021/attempt001, source copied/hashed before timing. At50% physical GLOBAL
+sparsity, warmed held bucket host medians33.62/101.35/128.41/208.20us at1/4/8/16K,
+including Q staging, resident FA4/merge/replay/output delivery/synchronization;
+plain dense62.74/175.12/365.39/726.83us, native paged dense141.90/206.70/294.96/
+480.37us. Graph captures0 during timing. Compiled Flex prototype is correct but
+slower. These are synthetic module observations, not native request speedups.
+
+Exact Gaussian32 projection+packing fusion passes4 operand parity cases but
+performance mixed; no promotion. No-spill167-register unique-QK packed producer
+passes4 changing-input graph cases but complete8K refresh517.5us loses to the
+selected459.3us. Preserve all sources/builds and failed harness/compile attempts.
+V2 still true online conditional full PV and still slower than dense refresh.
+
+Native001 one-request resident fixed-split audit/clean hash/calls/canvas intervals
+agree exactly (204calls,16canvases);695held calls avoid all KV copies/selectors/
+list construction, capture count0. Native002 explicitly primes static graph
+buckets during warmup and audits zero captures on the measured request. Its
+clean pair is pending. Split arithmetic can change trajectories; native001 vs
+native002 request latency is not a matched execution-speed comparison. No full
+benchmark relaunch, per-workload sparsity calibration or accuracy claim.
+
+
+## 2026-10-21 — Static graph-bucket qualification and native paged V31
+
+Native004 one-request K128 audit/clean output hash,49calls,5canvas intervals agree
+with0measured CUDA captures and0Triton compilations, after explicit selector
+specialization warmup. Native002 timing remains withheld due nearby JIT warnings.
+These are qualification requests without matched end-to-end controls/accuracy.
+
+Direct native paged V31 observation/recovery passes2 cases including extreme
+logits and changed cache/page mapping. At8K302.55us vs native dense288.34us,
+16K492.32us vs470.09us; named dispatch uses contiguous through4096, paged above.
+Native005 is a previously examined long-output diagnostic to exercise this
+branch, not a full panel or held-out calibration.
+
+Packed unique router with retained-only probability queue compiles167regs/no
+spills and passes4 changing-input graph cases. Rejected tiles advance routing
+without output-consumer handshakes. Complete8K480.41us still loses to selected
+four-group459.29us. Retain negative refresh005; two-group version484.74us also
+negative. Synthetic performance gates do not establish a faster online refresh.
+
+
+## 2026-10-21 — Native target-sparsity diagnostic and final qualification snapshot
+
+V2 native006 tau0.05 achieves45.338% actual held GLOBAL tile sparsity on examined
+HumanEval145; audit/clean hash,563sampler calls/32canvas intervals agree exactly.
+0timed JIT events/Triton compilations/captures/extra forwards/LOCAL skips. Whole
+GLOBAL sparsity45.087%, first canvas near dense. This is one diagnostic, not
+workload calibration or benchmark accuracy. V31 long native005 audit/clean
+529sampler calls/32canvas intervals agree with170direct paged refreshes.
+
+40combined final regressions pass. Required12-cell synthetic resident/refresh
+matrices complete, prototype/negative variants retained with separate frozen
+sources. 3D-TMA variant passes13cases and complete8K449.02us vs~458us prior,
+still slower than dense. Hoisted descriptors no material gain. Prefix projection
+reuse within a canvas passes7bitwise cases, modest gain, not native-promoted.
+
+Hardware profiling denied ERR_NVGPUCTRPERM; separate stage-clock12-cell probe
+preserves output/mask bitwise, explicitly instrumented rather than clean timing.
+QK/softmax/staging dominate measured CTA intervals; no hardware stall claim.
+Do not relaunch full evaluation: V2 refresh parity, per-workload held sparsity
+calibration and matched native controls still outstanding. Mutable old controller
+now guards pause and rejects legacy full-run/preparation (2tests); frozen old
+attempt untouched. Current source hashes under qualified_source/attempt001 and
+all sanitized summaries under sparse_execution_20261021/attempt001.
+
+## 2026-10-21: Further unique-routing refresh screen remains negative
+
+Continue the user's ordered refresh-first task in
+results/sparse_execution_20261021/attempt002. Q32 warp-MMA full-D output computes
+routing once but spills and costs2968.58us at8K/~50%, vs357.76us dense. Q64
+two-channel single-WG register-P removes half the duplicated routing and has no
+spills, but459.98us complete loses to the previous449us best. Shared P677.46us
+spills; hardware cluster barrier521.33us loses to release/acquire vote. Previously
+qualified retained-only dual queue measures602.65us. Preserve every negative and
+failed harness; no variant promoted and no benchmark gate relaxed. All are
+synthetic current-Q/K/V single-traversal conditional-PV kernels. Generic unpacked
+wrapper adds matching-held-map validation. The full per-workload calibration and
+new native campaign remain outstanding. See attempt002/README.md and receipts.
+
+Further attempt002 results: aligned-shape bounds specialization improves complete
+8K refresh449.02->433.11us, but still loses to matched plain dense359.32us and
+native paged288.48us. It retains generic masking for irregular shapes. All40
+combined H100regressions pass, no skips/failures,41.54s. Unroll1 gives507.47us;
+hoisted-descriptor combination434.10us, no further gain. Unique cooperative GPU
+queue539.65us and current-PV/next-QK overlap515.70us are preserved negatives;
+each passes80changed-input graph replays with exact masks and relL2<0.003.
+Q32 probe001's capture count was inferred, not measured: its timing is weaker
+diagnostic evidence. The script now uses an actual counter; no old receipt was
+modified or retro-certified. The main refresh objective and later full panel
+remain incomplete; no accuracy or native speedup claim.
