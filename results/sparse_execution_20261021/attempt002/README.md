@@ -25,6 +25,7 @@ At Q256/H16/Hkv2/D512 BF16, approximately 50% physical sparsity, 8K keys:
 | Aligned-shape specialization, unroll32 | 433.11 | 359.32 |
 | Aligned-shape specialization, unroll1 | 507.47 | 360.43 |
 | Aligned-shape plus hoisted descriptors | 434.10 | 366.08 |
+| Interior/tail specialization | 429.32 | 365.77 |
 
 Q32 is a negative: register spills and warp-level operand handling overwhelm
 removed repeated work. Shared P also spills and loses. Hardware cluster barriers
@@ -59,3 +60,11 @@ harness, not checked with an actual capture counter. Treat its Q32 timing as
 a weaker diagnostic, not clean-qualified evidence. The script now checks an
 actual capture counter; existing probe001 is immutable and not retro-certified.
 All sparse_execution_refresh_screen rows above use actual capture counters.
+
+Interior/tail200354cb passes16kernel tests including Q256/1025-key changing
+graphs (interior_tests002); its8K screen is interior_refresh001. It improves
+the initial449.02us best by4.39%, still17.37% slower than matched plain dense
+and48.68% slower than native paged288.75us. Cached-prefix projection414.12us
+is a separate within-canvas optimization, not the full-current-V number.
+Full12-cell qualification continues under attempt018. Source checkpoint
+5a5611e2 preserves the pending implementation and sanitized evidence.

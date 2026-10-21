@@ -12,12 +12,23 @@ fails dense parity. Combined40H100regressions pass with that library1cc9e55f.
 Generic masked fallback remains. Low unrolling507.47us and combined hoisted
 descriptors434.10us lose or tie. Unique cooperative global queue539.65us and
 non-spilling PV/next-QK overlap515.70us remain negatives, each passes80changing-
-input graph replays with exact masks and relativeL2<0.003. An interior/tail
-specialization for native irregular key lengths is under qualification.
+input graph replays with exact masks and relativeL2<0.003. Interior/tail library
+200354cb improves8K complete refresh to429.32us, cached-prefix414.12us; matched
+plain dense365.77us, native paged288.75us. Its16kernel tests pass, including
+irregular1025key/Q256graph coverage. Full12-cell synthetic matrix attempt018
+passes:50% at1K/4K/8K/16K complete80.58/222.77/427.90/860.36us; matched plain
+dense46.95/180.42/363.58/717.77us and native paged137.16/199.65/287.47/471.89us.
+All43combined current regressions pass,0failure/skip,41.45s. Actual timed captures0.
+Unique/interleaved QK queues, split-key, lookahead, wide-QK
+bundles, early-copy handshakes and compact descriptors remain slower; preserve
+attempt003-017builds/receipts. Static-address descriptor attempt012 failed output
+launch qualification and is abandoned. No inferred/nominal work speedup claim.
 No native source promotion, workload calibration or benchmark relaunch has
 occurred. Generic unpacked wrapper now rejects malformed held maps before
 launch. See attempt002/README.md and frozen builds/screens. Documentation and
-kernel staging succeeded in small batches; local commit is being completed.
+kernel staging succeeded in small batches; local commit5a5611e2f3f51c81466a64c5548fb69d502fba0b
+now preserves the pending150source/test/doc/sanitized-summary files. Follow-up
+sources receive another checkpoint; unrelated concurrent planning edits remain.
 
 ## Sparse execution first — 2026-10-21 UTC (campaign paused by explicit user instruction)
 

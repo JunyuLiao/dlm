@@ -3315,3 +3315,27 @@ Q32 probe001's capture count was inferred, not measured: its timing is weaker
 diagnostic evidence. The script now uses an actual counter; no old receipt was
 modified or retro-certified. The main refresh objective and later full panel
 remain incomplete; no accuracy or native speedup claim.
+
+## 2026-10-21 — Complete broader true-online refresh synthetic screen
+
+Preserve new source-frozen attempts002-018 under sparse_execution_20261021.
+Best interior/tail specialization200354cb completes all12required synthetic
+cells at40/50/60% actual physical GLOBAL sparsity. At50%, complete refresh
+80.58/222.77/427.90/860.36us at1K/4K/8K/16K; matched plain dense
+46.95/180.42/363.58/717.77us and native paged137.16/199.65/287.47/471.89us.
+8K improves prior449.02us by4.70% but remains17.69% above plain dense and
+48.85% above native paged. Actual timed capture count0. All43combined H100
+operator/projection/resident/V31/graph tests pass with0failure/skip in41.45s.
+
+Unique Q128 queue598.60us, interleaved QK764.50/770.74us, corrected wide-QK
+679.03us, unique split-key583.81us, QK/PZ lookahead614.42us, earlier K/V479.68us,
+compact descriptors435.32/433.80us, Q32 occupancy1270.90us and register-Q queue
+636.42us are retained negatives. Static descriptor addresses fail launch
+qualification; that design is abandoned. No hidden dense PV or two-pass
+substitution. Numerical qualification does not establish native task benefit.
+
+The pending150-file local source/documentation commit is now5a5611e2. Native
+combined qualification, matched controls, workload calibration and full scored
+panel remain incomplete because the first performance gate still fails. Keep
+old optimized_refresh_benchmarks attempt004 paused/partial; do not claim a
+completed benchmark or relax sampler/budgets. See attempt018/summary.md.

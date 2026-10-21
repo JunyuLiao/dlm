@@ -158,7 +158,7 @@ class PackedKernel(Kernel):
         if self.options.get('global_queue'):
             # One private resident ring per captured invocation. Queue counters
             # are initialized inside the cooperative kernel before grid sync.
-            pk=torch.empty((h*qb*2*self.options['queue_bytes'],),device=q.device,dtype=torch.uint8)
+            pk=torch.empty((h*qb*self.options.get('queue_units_per_qblock',2)*self.options['queue_bytes'],),device=q.device,dtype=torch.uint8)
         out=torch.empty_like(q);skipped=torch.empty((1,h,qb,jt),device=q.device,dtype=torch.bool);eligible=torch.empty_like(skipped)
         normalizer=torch.empty((1,h,n),device=q.device);state=torch.empty((1,h,n,32) if trace else (1,),device=q.device);risks=torch.empty(skipped.shape if trace else (1,),device=q.device)
         if phase_profile:risks=torch.empty((h,qb,4,jt,5),device=q.device)
