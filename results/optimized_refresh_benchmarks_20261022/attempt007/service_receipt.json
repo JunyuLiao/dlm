@@ -1,0 +1,28 @@
+{
+  "utc": "2026-10-22T07:33:22.565258+00:00",
+  "service": "dlm-optimized-refresh-20261022-a007.service",
+  "source_commit": "c31224aee5df2700f45b014fb216264d0b25c68d",
+  "protocol_sha256": "d6fce54f4eca7d2406d52191f83942f438d2ff0a9590e95e3e256b3b3515d6fd",
+  "kernel_sha256": "e6f162a2a02719ef964788b3f5612d9c455d3e4310d68a11aed466fa5d26948c",
+  "model_inventory_sha256": "8efd551fa40908fc5747be476cec848be6831fc537679c468c76a1858bf32bf8",
+  "completed_benchmark": false,
+  "status": "launched_gated_campaign",
+  "prior_attempt": "attempt006",
+  "prior_status": "partial_user_threshold_policy_update",
+  "status_check_interval_minutes": 15,
+  "fixed_v2_thresholds": {
+    "humaneval": 0.5600716206066294,
+    "longbench_v2": 0.021
+  },
+  "calibration_workloads": [
+    "aime26",
+    "math500"
+  ],
+  "qualification_reuse": {
+    "protocol_sha256": "53f084448fe2dd3ac2863d07989540918d5d46c112f6720789617b5b32c59b99",
+    "rule": "only completed audit/clean pairs with identical execution sources, runtime, model, kernel, inputs, budgets and threshold; orchestration/report-only changes permitted; changed V2 thresholds require new pairs",
+    "study": "results/optimized_refresh_benchmarks_20261022/attempt006"
+  },
+  "short_v31_k": 128,
+  "longbench_v31_k": 8192
+}

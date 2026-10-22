@@ -1,3 +1,22 @@
+## Fixed-threshold native benchmark protocol — 2026-10-22 UTC
+
+At source checkpoint `c31224ae`, the user changes only threshold policy:
+HumanEval reuses saved K128 work-matched threshold `0.5600716206066294`;
+LongBench-v2 uses `0.021`, both without new calibration. Only AIME26 and MATH500
+calibrate to 40-50% actual held GLOBAL physical sparsity. Attempt007 freezes
+these choices and reports observed work/mismatch for every workload. Three CPU
+policy tests pass, including no calibration launches for fixed workloads and
+rejection of qualification evidence after a worker source change.
+
+Attempt006 is preserved partial after 29 completed qualification jobs. Its
+current worker was allowed to finish before the verified coordinator was stopped;
+no calibration or full panel launched. New attempt007 may reference only
+completed audit/clean qualification pairs with identical worker/runtime sources,
+model, kernel, inputs, budgets and threshold. Changed-threshold V2 pairs and all
+full benchmark generations run fresh. The selected V2/FA4 attention kernels and
+bounded V31 selector are unchanged. Continue 15-minute status checks; require
+final_complete.json before reporting completed results.
+
 ## Native benchmark relaunch after V31 warm-up memory fix — 2026-10-22 UTC
 
 At verified source checkpoint `f7318fa3`, V31 selector tests pass 9/9 on H100

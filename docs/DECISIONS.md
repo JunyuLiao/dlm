@@ -3405,3 +3405,21 @@ Nine H100 tests pass, including long-context exact budgets/ties/invalid rows;
 all selector allocations and launches remain charged to refresh. Attempt006
 receives a new frozen protocol/source identity and repeats native gates before
 calibration or full coverage. User requests 15-minute process-status checks.
+
+## 2026-10-22 — Apply user-fixed HumanEval and LongBench thresholds
+
+User explicitly removes HumanEval and LongBench-v2 recalibration. Reuse the
+saved K128 HumanEval threshold0.5600716206066294 from the full164 work-matched
+receipt; use LongBench threshold0.021. These replace the earlier per-workload
+40-50% calibration requirement for those two workloads. Only AIME26/MATH500
+calibrate. Report actual held/refresh/carried/first-canvas/whole work and any
+remaining V2/V31 mismatch without treating old matching as new qualification.
+
+Preserve attempt006 partial after29 completed qualification passes. Let its
+worker finish, then stop only the verified held coordinator; no calibration or
+panel ran. Sourcec31224ae/new attempt007 explicitly permits completed paired
+qualification evidence only if all execution sources, model/runtime/kernel,
+inputs/budgets and threshold match; only orchestration/report source changes
+are excluded from that equality. Changed-threshold V2 pairs run anew, and all
+full panel generations are fresh. Three policy tests pass. Fixed-threshold
+receipts contain no invented held sparsity or new calibration claim.
