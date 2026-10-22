@@ -3728,3 +3728,35 @@ conditional factor design, not the full native interaction factorial. Keep
 output length and N/C with N, and use fresh source/runtime-matched controls.
 Clean timing stays paused. No old frozen study, private source, or legacy
 STATE.json pause is changed.
+
+## Current-best optimized native panel — 2026-10-22 UTC
+
+At verified source checkpoint `06ee4806`, user explicitly requests using the
+current best kernels and proceeding to final multi-benchmark evaluation.
+Kernel tuning stops for this campaign; synthetic V2 refresh dense parity is
+still negative and is not claimed. Freeze
+`results/optimized_refresh_benchmarks_20261022/attempt004/`; service
+`dlm-optimized-refresh-20261022-a004.service` is active (launch receipt records
+protocol/model/library/source hashes). It runs native qualification, then
+independent full-request held-tile calibration per workload, then full audit and
+clean benchmark shards, then official scoring. No final results yet.
+
+Exact library `200354cb919fb6b8` uses fused current-V projection/packing in native
+V2, with resident direct-paged held/carry execution. V31 uses direct paged
+refresh above 4096 keys, contiguous below; all-kept now uses the same resident
+consumer with full support. New universal JIT counters cover every arm.
+Every measured input has an explicit untimed same-input warm request; all
+warmup cost remains in resource receipts. Full model file hashes verified.
+K128 on all short benchmarks; AIME 30x42/43/44, MATH500 500x42, HumanEval164x42;
+LongBench-v2 full503x42 with K8192. Native decoding settings remain fixed.
+
+This turn's operator qualification: 22 selected online/resident CUDA tests
+passed; 9 fused-refresh/projection tests passed; 2 resident all-kept current-KV
+and metadata tests passed after fixing a test receipt accessor. New attempts
+001/002/003 are preserved as failed preparation/partial qualification
+diagnostics. Attempt003 is sealed at 27 saved rows; it exposed audit-only
+receipt assumptions and a first-canvas calibration limitation. No full panel
+was generated there. Old 2026-10-21 attempt004 remains paused and immutable.
+See `docs/OPTIMIZED_REFRESH_NATIVE_20261022.md` and the attempt README. Trust
+`state.json`, service status, markers, and exact receipts over this launch
+snapshot. Require `final_complete.json` before final multi-benchmark claims.

@@ -3339,3 +3339,34 @@ combined qualification, matched controls, workload calibration and full scored
 panel remain incomplete because the first performance gate still fails. Keep
 old optimized_refresh_benchmarks attempt004 paused/partial; do not claim a
 completed benchmark or relax sampler/budgets. See attempt018/summary.md.
+
+## 2026-10-22 — Evaluate the current best refresh with qualified native controls
+
+The user explicitly supersedes further refresh tuning and requests the final
+multi-benchmark comparison with current best kernels. Preserve the negative
+synthetic dense-parity result. Source checkpoint `06ee4806` freezes the native
+best-library fused projection/pack integration, resident held consumer and
+resident all-kept control. Full model content hashes verify; online/resident
+22 tests, fused native/projection 9 tests, and resident all-kept 2 tests pass.
+
+New frozen attempt `optimized_refresh_benchmarks_20261022/attempt004` runs via
+durable service `dlm-optimized-refresh-20261022-a004.service`, initially at native
+qualification. Universal request JIT counters cover dense as well as sparse
+arms, per-input untimed native warmup precedes every measured request, and
+clean rows must have zero capture/JIT events. Audit-only tile fields are
+required on audit rows; their absence on clean rows cannot be treated as zero.
+All-kept uses the selected resident consumer with full physical support.
+
+Calibration must aggregate actual held GLOBAL eligible/kept tiles over full
+native requests from four workload length strata; a 256-token first-canvas cap
+can be dominated by mandatory canvas support on short prompts. Reject an
+out-of-range 40-50% held calibration before full panel launch. The mandatory
+full coverage includes the transductive calibration items and discloses them.
+K128 applies to AIME/MATH/HumanEval; LongBench remains K8192. No official final
+accuracy or latency claim until all completion markers and scores exist.
+
+Preserve failed preparation attempt001, validator diagnostic attempt002, and
+27-row partial qualification attempt003. The latter was terminated after the
+active worker exited, with process identity and signals recorded; its frozen
+sources and saved rows remain unchanged. The old 2026-10-21 attempt004 remains
+paused/partial. No old campaign is resumed or promoted by this decision.
