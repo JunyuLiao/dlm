@@ -3370,3 +3370,38 @@ Preserve failed preparation attempt001, validator diagnostic attempt002, and
 active worker exited, with process identity and signals recorded; its frozen
 sources and saved rows remain unchanged. The old 2026-10-21 attempt004 remains
 paused/partial. No old campaign is resumed or promoted by this decision.
+
+## 2026-10-22 — Correct resident all-kept receipt and freeze attempt005
+
+Native attempt004 stops before calibration/panels on missing top-level
+GLOBAL eligible/kept fields from the resident all-kept control. Its audited dense
+phase has 133120/133120 tiles and zero LOCAL skips. Source 6ecdfbf6 adds exact totals
+from the accumulated actual geometry, retaining numerical output and sampler;
+2 GPU tests verify parity and exact counts at 641/8192 keys. Preserve attempt004
+failed/partial, no retroactive completion.
+
+New attempt005 freezes source 6ecdfbf6, full model hashes, protocol/kernel/input
+identity, and shards ofat most 128requests to amortize engine startup. Its
+resident all-kept native audit/clean pair passes with full support, zero K/V copies,
+zero LOCAL skips,zero actual captures,zero universal JIT events and identical native
+trajectory. Durable unit dlm-optimized-refresh-20261022-a005 runs remaining native
+qualification, full-request held calibration, full audit/clean evaluation and
+official scoring in that order. No completed panel or official score yet. All
+prior attempts and the paused 2026-10-21 campaign remain preserved.
+
+## 2026-10-22 — Bound V31 selector storage before benchmark relaunch
+
+Preserve attempt005 as partial: 32 native qualification passes completed, then
+LongBench V31 untimed warm-up failed with CUDA out of memory in `_select`.
+The generated largest warm-up prefix exceeded the configured model limit and
+the single-CTA row/tile tensor produced a 10 MB PTX selector. No calibration or
+full benchmark panel ran. Do not report those qualification cells as accuracy.
+
+Source f7318fa3 bounds repair scans to 128 tiles, splits selector statistics
+above 512 tiles into row normalizers and tile scores before the unchanged
+fixed-budget compact top-k, and caps warm-up at the actual context limit.
+Short-context selection and the chosen attention kernels remain unchanged.
+Nine H100 tests pass, including long-context exact budgets/ties/invalid rows;
+all selector allocations and launches remain charged to refresh. Attempt006
+receives a new frozen protocol/source identity and repeats native gates before
+calibration or full coverage. User requests 15-minute process-status checks.

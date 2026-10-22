@@ -1,3 +1,44 @@
+## Native benchmark relaunch after V31 warm-up memory fix — 2026-10-22 UTC
+
+At verified source checkpoint `f7318fa3`, V31 selector tests pass 9/9 on H100
+(33.31 seconds), including exact long-context budgets, invalid rows and stable
+ties at 2204 prefix tiles. Above 512 KV64 tiles, bounded row normalizers and
+tile-score kernels feed the same top-k/list rule. Repair scans retain at most
+128 tiles at once. The selected FA4 observer, V2 library, and resident consumer
+remain unchanged. Every additional selector launch/allocation is charged.
+
+Attempt005 is preserved partial after 32 passing native qualification jobs.
+LongBench V31 failed during untimed selector warm-up with CUDA out of memory;
+no workload calibration or full panel launched. Warm-up had synthesized a
+prefix beyond the configured limit. New attempt006 freezes the corrected
+selector and context bounds before repeating qualification, full-request held
+calibration, full audit/clean coverage, and official scoring. Only a matching
+`final_complete.json` establishes completion. The 2026-10-21 campaign remains
+paused/partial. Status checks are every 15 minutes as requested by the user.
+
+## Active optimized multi-benchmark campaign — 2026-10-22, 03:14 UTC
+
+Current attempt is `results/optimized_refresh_benchmarks_20261022/attempt005/`,
+source checkpoint `6ecdfbf6`, durable unit
+`dlm-optimized-refresh-20261022-a005.service`. It is at native qualification;
+no final score or completion marker exists. The service continues through
+full-request held-tile calibration, full audit/clean panels and official scoring
+only if gates pass. K128 for AIME/MATH/HumanEval; K8192 for LongBench503.
+Native resident all-kept HumanEval pair passes with exact full physical work
+133120/133120, 280 GLOBAL calls, zero LOCAL skips/copies/JIT/captures and matching
+audit/clean trajectory. Universal counters cover every arm. Source/kernel/model
+and input fingerprints are frozen; raw records remain private.
+
+Attempt004 stopped at its resident all-kept audit because top-level GLOBAL
+totals were omitted while phase totals were present. Fix6ecdfbf6 derives
+totals from actual geometry, with exact-count tests passing at 641 and 8192 keys.
+No calibration or scored panel launched in attempt004. Its artifacts and
+failed service are preserved. All old attempts remain partial; the old
+2026-10-21 attempt004 remains explicitly paused. New shards contain at most 128
+requests to amortize engine loading; same seed/input/native warmup and timing
+rules apply. See attempt005/README.md, service_receipt.json, state.json and
+coordinator.log. Require final_complete.json before final-result claims.
+
 ## Further refresh optimization — 2026-10-21 UTC
 
 User requests completion in order: finish V2 refresh, qualify combined execution,
