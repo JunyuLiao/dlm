@@ -3438,3 +3438,21 @@ MATH500 candidates to1.6/3.2/6.4/12.8 with the same eight refinements.
 HumanEval0.5600716206066294/LongBench0.021 remain fixed by user. Five CPU
 policy tests pass. Runtime/kernel/model/input identities and native sampler
 are unchanged; all full panel generation remains fresh.
+
+## 2026-10-22 — Accept demonstrated MATH500 ceiling as explicit target miss
+
+Expanded MATH thresholds3.2/6.4/12.8 yield identical native output hashes,
+denoising calls and held work. Actual kept70880 equals the mandatory tile
+floor70880 out of115840 eligible:38.8122% sparsity. A per-canvas geometric
+proof uses current canvas/boundary tiles plus mandatory first prefix tile and
+is frozen with all measurement fingerprints. This proves saturation on those
+four calibration trajectories, not the full500 population.
+
+Source7bd6128e/attempt009 explicitly accepts this target miss at3.2 to complete
+the user's requested panel. It does not relabel38.81% as40% or alter the kernel,
+mask method, native canvas/stopping/temperature, prompts or output budgets.
+AIME's passing0.059460355750136064 and user-fixed HumanEval/LongBench
+thresholds remain. Reuse source-matched native gates and computation evidence;
+no further calibration forwards. Seven CPU policy tests pass. Full panel
+accuracy, work, clean timings and paired uncertainty still require fresh full
+coverage and official scoring; all previous attempts remain partial.

@@ -1,3 +1,26 @@
+## Full panel with disclosed MATH500 calibration ceiling — 2026-10-22 UTC
+
+At checkpoint `7bd6128e`, freeze attempt009 using all passing native gates,
+source-identical qualification evidence, and measured thresholds. HumanEval
+0.5600716206066294 and LongBench0.021 are fixed by user. AIME26 uses
+0.059460355750136064 (45.6943% held GLOBAL calibration sparsity). MATH500
+uses3.2 with an explicitly disclosed target miss:38.8122%, below40-50%.
+
+Thresholds3.2/6.4/12.8 produced identical MATH calibration output hashes,
+calls and physical work. All70880 kept held tiles among115840 eligible equal
+the mandatory current-canvas/boundary plus first-tile floor on those measured
+trajectories. Frozen per-canvas proof is in attempt008/diagnostics. Further
+threshold increases cannot remove work on those trajectories; do not extrapolate
+this ceiling to the full500 cohort. Seven policy tests pass, including rejection
+of a claimed ceiling when nonmandatory tiles remain. Attempt008 stays partial;
+no earlier attempt launched a full panel.
+
+Proceed with fresh complete audit/clean generation and official scoring under
+native decoding. Every older attempt and the2026-10-21 campaign remains
+preserved. Kernel/library/runtime identities are unchanged. Monitor every
+15minutes and report completed results only after final_complete.json, full
+coverage, scoring and trajectory/receipt gates agree.
+
 ## MATH500 calibration extension, native gates passed — 2026-10-22 UTC
 
 Source checkpoint `3db64cea` freezes attempt008 after attempt007 passed native
