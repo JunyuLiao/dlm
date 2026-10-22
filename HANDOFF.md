@@ -1,3 +1,22 @@
+## MATH500 calibration extension, native gates passed — 2026-10-22 UTC
+
+Source checkpoint `3db64cea` freezes attempt008 after attempt007 passed native
+qualification across all four workload profiles and five arms. HumanEval is
+fixed at0.5600716206066294 and LongBench at0.021, without new calibration.
+AIME26 threshold0.059460355750136064 achieved45.6943% actual held GLOBAL
+physical sparsity on four full-native calibration requests. MATH500 reached
+32.0452% at0.8, so the gate stopped before full benchmark generation.
+
+Attempt008 preserves original qualification record/config/receipt/completion
+hashes and AIME/MATH computation-only candidates. Only MATH500 expands to
+1.6/3.2/6.4/12.8 before the same bounded refinements. Five CPU policy tests
+pass, including no calibration forwards for fixed/in-range workloads and
+rejection of changed worker evidence. Attention/runtime sources, selected
+kernels, model, sampler and input identities are unchanged. All older attempts
+remain partial. Once MATH passes, run the complete fresh audit/clean panel
+and official scorers. Status checks stay at15minutes; no completion claim
+without final_complete.json and matched full coverage.
+
 ## Fixed-threshold native benchmark protocol — 2026-10-22 UTC
 
 At source checkpoint `c31224ae`, the user changes only threshold policy:

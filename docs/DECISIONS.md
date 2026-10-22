@@ -3423,3 +3423,18 @@ inputs/budgets and threshold match; only orchestration/report source changes
 are excluded from that equality. Changed-threshold V2 pairs run anew, and all
 full panel generations are fresh. Three policy tests pass. Fixed-threshold
 receipts contain no invented held sparsity or new calibration claim.
+
+## 2026-10-22 — Extend MATH500 range after native gate pass
+
+Attempt007 passes all20 workload/arm audit-clean qualification pairs, using
+explicit source-identical evidence where available. AIME26 calibration selects
+0.059460355750136064 with45.6943% actual held GLOBAL sparsity. MATH500's
+largest candidate0.8 gives32.0452%, so no full benchmark panel launches.
+Preserve attempt007 failed/partial and its complete calibration evidence.
+
+Attempt008/source3db64cea fingerprints completed qualification evidence and
+computation-only calibration records, reuses the AIME result, and extends only
+MATH500 candidates to1.6/3.2/6.4/12.8 with the same eight refinements.
+HumanEval0.5600716206066294/LongBench0.021 remain fixed by user. Five CPU
+policy tests pass. Runtime/kernel/model/input identities and native sampler
+are unchanged; all full panel generation remains fresh.
