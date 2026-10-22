@@ -40,6 +40,8 @@ def test_resident_allkept_current_kv_and_canvas_metadata(nk,n):
     receipt=adapter._value_receipt()
     assert receipt['resident_allkept_kv_copy_calls']==0
     assert receipt['resident_allkept_extra_forwards']==0
+    assert receipt['global_kept_tiles']==receipt['global_eligible_tiles']
+    assert receipt['global_eligible_tiles']==3*h*((n+127)//128)*((nk+63)//64)
     phases=adapter._value_phase_receipt()['value_phase_tiles']
     assert phases['dense']['kept_tiles']==phases['dense']['eligible_tiles']
     assert phases['dense']['calls']==3

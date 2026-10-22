@@ -57,6 +57,11 @@ def install_allkept(adapter):
             resident_allkept_gpu_ms=sum(a.elapsed_time(b) for a,b in state['events']) if state['events'] else None,
             resident_allkept_consumer='native_paged_fa4_direct_output_persistent_metadata',
             resident_allkept_extra_forwards=0)
+        # The inherited prefix receipt returns no totals without its old
+        # copy/sparse-prefix hook. This control bypasses that hook, so expose
+        # the full-support count from the actual geometry accumulated above.
+        result.update(global_eligible_tiles=self._global_tiles+self._global_canvas_tiles,
+                      global_kept_tiles=self._global_tiles+self._global_canvas_tiles)
         return result
     adapter.begin_request=types.MethodType(begin,adapter)
     adapter.forward=types.MethodType(forward,adapter)

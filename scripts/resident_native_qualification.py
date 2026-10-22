@@ -13,6 +13,13 @@ def prepare(name,index=None):
  for label in ['pools','schedules','calibration_pools']:
   if label=='schedules':shutil.copytree(old/'private'/label,study/'private'/label)
   else:(study/'private'/label).symlink_to((old/'private'/label).resolve(),target_is_directory=True)
+ # These are newly created schedule copies, never frozen historical inputs.
+ # Bound recovery to 128 requests while amortizing the minute-long engine load.
+ for folder in (study/'private/schedules').iterdir():
+  all_cells=json.loads((folder/'cells.json').read_text())
+  for shard in folder.glob('shard???.json'):shard.unlink()
+  for start in range(0,len(all_cells),128):
+   write(folder/f'shard{start//128+1:03d}.json',all_cells[start:start+128])
  if index is not None:
   cells=[]
   for path in (study/'private/schedules/humaneval').glob('shard*.json'):
@@ -42,6 +49,7 @@ def prepare(name,index=None):
  with (study/'spec.md').open('a') as specfile:specfile.write('\nCalibration uses the full native generation budget on four deterministic prompt-length strata per workload. The same calibration questions remain in mandatory full coverage and are disclosed as transductive. Every measured request is preceded by a separate untimed warm request with the same input and seed; all warm request cost remains in resource accounting. Universal request JIT events and actual CUDA capture counters apply to every arm, including native dense and resident all-kept. All-kept FA4 uses the same resident direct-paged consumer with full physical support. No final-panel launch unless calibration held GLOBAL physical sparsity is within 40-50 percent.\n')
  p['arms']=['v2_online_optimized','v31_optimized','dense_full_fix51994','dense_piecewise','allkept_fa4']
  p['source_identity_note']='base Git commit plus exact frozen execution hashes; current study integration changes included in execution hashes'
+ p['sharding']=dict(max_requests_per_shard=128,reason='amortize engine startup while bounding recovery; native per-request timing and order unchanged')
  p['spec_sha256']=sha(study/'spec.md')
  p['input_sha256']={str(x.relative_to(study)):sha(x) for label in ['pools','schedules','calibration_pools'] for x in (study/'private'/label).rglob('*') if x.is_file()}
  if index is not None:
