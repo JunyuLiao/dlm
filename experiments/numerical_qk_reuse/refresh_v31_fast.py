@@ -26,11 +26,15 @@ from vllm.vllm_flash_attn.cute import utils
 def _repair(Z,Q,K,N:tl.constexpr,PT,H:tl.constexpr,HK:tl.constexpr,D:tl.constexpr,
             QS0:tl.constexpr,QS1:tl.constexpr,KS0,KS1:tl.constexpr,SCALE:tl.constexpr,J:tl.constexpr):
     unit=tl.program_id(0);qb=tr.cdiv(N,128);h=unit//qb;kh=h//(H//HK)
-    row=tl.arange(0,128);jj=tl.arange(0,J)
+    row=tl.arange(0,128);jj=tl.arange(0,min(J,128))
     qi=(unit%qb)*128+row
-    observed=tl.load(Z+unit*PT*128+jj[None,:]*128+row[:,None],jj[None,:]<PT,0.)
-    bad=(observed!=observed)|(observed==-float('inf'))
-    if tl.sum(bad.to(tl.int32),0).sum(0)>0:
+    bad_count=tl.full((),0,tl.int32)
+    for start in range(tl.cdiv(PT,min(J,128))):
+        tiles=start*min(J,128)+jj
+        observed=tl.load(Z+unit*PT*128+tiles[None,:]*128+row[:,None],tiles[None,:]<PT,0.)
+        bad=(observed!=observed)|(observed==-float('inf'))
+        bad_count+=tl.sum(tl.sum(bad.to(tl.int32),0),0)
+    if bad_count>0:
         dd=tl.arange(0,D);kk=tl.arange(0,64)
         q=tl.load(Q+h*QS0+qi[:,None]*QS1+dd[None,:],qi[:,None]<N,0.)
         for j in range(PT):
@@ -49,10 +53,14 @@ def _repair_paged(Z,Q,K,TABLE,N:tl.constexpr,PT,H:tl.constexpr,HK:tl.constexpr,D
                   QS0:tl.constexpr,QS1:tl.constexpr,KP:tl.constexpr,KT:tl.constexpr,KH:tl.constexpr,
                   PAGE:tl.constexpr,SCALE:tl.constexpr,J:tl.constexpr):
     unit=tl.program_id(0);qb=tl.cdiv(N,128);head=unit//qb;kh=head//(H//HK)
-    row=tl.arange(0,128);jj=tl.arange(0,J);qi=(unit%qb)*128+row
-    observed=tl.load(Z+unit*PT*128+jj[None,:]*128+row[:,None],jj[None,:]<PT,0.)
-    bad=(observed!=observed)|(observed==-float('inf'))
-    if tl.sum(bad.to(tl.int32),0).sum(0)>0:
+    row=tl.arange(0,128);jj=tl.arange(0,min(J,128));qi=(unit%qb)*128+row
+    bad_count=tl.full((),0,tl.int32)
+    for start in range(tl.cdiv(PT,min(J,128))):
+        tiles=start*min(J,128)+jj
+        observed=tl.load(Z+unit*PT*128+tiles[None,:]*128+row[:,None],tiles[None,:]<PT,0.)
+        bad=(observed!=observed)|(observed==-float('inf'))
+        bad_count+=tl.sum(tl.sum(bad.to(tl.int32),0),0)
+    if bad_count>0:
         dd=tl.arange(0,D);kk=tl.arange(0,64)
         q=tl.load(Q+head*QS0+qi[:,None]*QS1+dd[None,:],qi[:,None]<N,0.)
         for j in range(PT):
@@ -97,6 +105,51 @@ def _select(Z,HELD,KEEP,CNT,IDX,N:tl.constexpr,JT,PT,K:tl.constexpr,
     tl.store(CNT+unit,tl.sum(selected.to(tl.int32),0))
 
 
+@tr.jit(do_not_specialize=['PT'])
+def _prefix_lse(Z,LSE,PT,J:tl.constexpr):
+    unit=tl.program_id(0);rows=tl.program_id(1)*4+tl.arange(0,4)
+    j=tl.arange(0,J)
+    lm=tl.load(Z+unit*PT*128+j[None,:]*128+rows[:,None],j[None,:]<PT,-float('inf'))
+    mx=tl.max(lm,1);safe=tl.where(mx>-float('inf'),mx,0.)
+    den=tl.sum(tl.exp(lm-safe[:,None]),1)
+    tl.store(LSE+unit*128+rows,safe+tl.log(tl.maximum(den,1.e-30)))
+
+
+@tr.jit(do_not_specialize=['PT','JT'])
+def _tile_scores(Z,LSE,SCORES,N:tl.constexpr,PT,JT):
+    unit=tl.program_id(0);j=tl.program_id(1)*128+tl.arange(0,128)
+    row=tl.arange(0,128)
+    lm=tl.load(Z+unit*PT*128+j[None,:]*128+row[:,None],j[None,:]<PT,-float('inf'))
+    lse=tl.load(LSE+unit*128+row)
+    valid_row=(unit%tl.cdiv(N,128))*128+row<N
+    score=tl.max(tl.where(valid_row[:,None],lm-lse[:,None],-float('inf')),0)
+    tl.store(SCORES+unit*JT+j,score,j<JT)
+
+
+@tr.jit(do_not_specialize=['JT','PT'])
+def _select_scores(SCORES,HELD,KEEP,CNT,IDX,JT,PT,K:tl.constexpr,
+                   STICKY:tl.constexpr,SINK:tl.constexpr,RECENT:tl.constexpr,J:tl.constexpr):
+    unit=tl.program_id(0);j=tl.arange(0,J)
+    score=tl.load(SCORES+unit*JT+j,j<JT,-float('inf'))
+    held=tl.load(HELD+unit*JT+j,j<JT,False)
+    score+=STICKY*held
+    protected=(j<tl.minimum(SINK,PT))|((j>=tl.maximum(0,PT-RECENT))&(j<PT))
+    score=tl.where(protected,float('inf'),score)
+    score=tl.where(j<PT,score,-float('inf'))
+    if PT>K:
+        sorted_score=tl.sort(score,descending=True)
+        cutoff=tl.sum(tl.gather(sorted_score,tl.full((1,),K-1,tl.int32),0),0)
+        greater=score>cutoff;ties=(score==cutoff)&(j<PT)
+        rank=tl.cumsum(ties.to(tl.int32),0)
+        selected=greater|(ties&(rank<=K-tl.sum(greater.to(tl.int32),0)))
+    else:selected=j<PT
+    selected=(selected&(j<PT))|((j>=PT)&(j<JT))
+    pos=tl.cumsum(selected.to(tl.int32),0)-1
+    tl.store(KEEP+unit*JT+j,selected,j<JT)
+    tl.store(IDX+unit*JT+pos,j,selected&(j<JT))
+    tl.store(CNT+unit,tl.sum(selected.to(tl.int32),0))
+
+
 def select(z,n,nk,budget,*,held=None,sticky=0.,sink=0,recent=0):
     from . import v27_fa4
     v27_fa4.load()
@@ -109,8 +162,18 @@ def select(z,n,nk,budget,*,held=None,sticky=0.,sink=0,recent=0):
     indices=torch.zeros((1,h,qb,jt),device=z.device,dtype=torch.int32)
     zeros=torch.zeros_like(count)
     empty=torch.zeros((1,h,qb,1),device=z.device,dtype=torch.int32)
-    _select[(h*qb,)](z,held,keep,count,indices,n,jt,pt,max(1,budget//64),float(sticky),
-        int(sink),int(recent),tr.next_power_of_2(jt),num_warps=4)
+    if jt<=512:
+        _select[(h*qb,)](z,held,keep,count,indices,n,jt,pt,max(1,budget//64),float(sticky),
+            int(sink),int(recent),tr.next_power_of_2(jt),num_warps=4)
+    else:
+        # Bound the live row x tile tensor at long contexts. A single CTA
+        # holding all 128 rows can exhaust local memory in native KV caches.
+        lse=torch.empty((h*qb,128),device=z.device)
+        scores=torch.empty((h*qb,jt),device=z.device)
+        _prefix_lse[(h*qb,32)](z,lse,pt,tr.next_power_of_2(max(1,pt)),num_warps=4)
+        _tile_scores[(h*qb,tr.cdiv(jt,128))](z,lse,scores,n,pt,jt,num_warps=4)
+        _select_scores[(h*qb,)](scores,held,keep,count,indices,jt,pt,max(1,budget//64),float(sticky),
+            int(sink),int(recent),tr.next_power_of_2(jt),num_warps=4)
     lists=v27_fa4._BST(mask_block_cnt=zeros,mask_block_idx=empty,full_block_cnt=count,
                      full_block_idx=indices,block_size=(128,64))
     return keep,lists
@@ -213,11 +276,12 @@ class Observer:
         Finite synthetic statistics make recovery a no-op. This performs no
         model forward and cannot affect the model's current Q/K/V or map.
         """
-        n=q.shape[2];key=(n,q.shape[1],k.shape[1],q.stride(),k.stride(),max_len,budget,sticky,paged is not None)
+        n=q.shape[2];key=(n,q.shape[1],k.shape[1],q.stride(),k.stride(2),max_len,budget,sticky,
+                        None if paged is None else paged[0].stride())
         if key in self.warmed:return
-        maximum=tr.next_power_of_2(tr.cdiv(max_len,64))
-        for exponent in range(maximum.bit_length()):
-            pt=2**exponent;jt=pt+tr.cdiv(n,64)
+        maximum=max(1,(max_len-n)//64)
+        for pt in sorted({min(2**e,maximum) for e in range(maximum.bit_length()+1)}):
+            jt=pt+tr.cdiv(n,64)
             z=torch.zeros((q.shape[1],tr.cdiv(n,128),pt,128),device=q.device)
             _repair[(q.shape[1]*tr.cdiv(n,128),)](z,q,k,n,pt,q.shape[1],k.shape[1],q.shape[-1],q.stride(1),q.stride(2),k.stride(1),k.stride(2),float(scale),pt,num_warps=4,num_stages=1)
             if paged is not None:

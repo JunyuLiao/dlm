@@ -66,3 +66,13 @@ calibration defect. No attempt003 or earlier result is a completed panel.
 Every corrected protocol receives a new attempt. The source library stays
 unchanged; this final protocol adds full-request calibration, universal timing
 counters, per-input warmup and the matched resident all-kept control.
+
+Attempt005 passed 32 native qualification passes and then failed in LongBench
+V31 untimed selector warm-up with a device-memory error. It is preserved as
+partial, with no workload calibration or full panel launched. Attempt006 keeps
+the chosen attention kernels and uses bounded selector storage above 512 KV64
+tiles: separate row normalizers and tile scores feed the same deterministic
+fixed-budget top-k/list construction. Every launch and temporary allocation is
+charged to refresh. Repair scans use at most 128 tiles at once. Warm-up prefix
+sizes stop at the actual configured context limit and cache keys exclude the
+runtime-only contiguous prefix stride. Short-context fused selection is retained.

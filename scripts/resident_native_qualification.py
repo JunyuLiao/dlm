@@ -50,6 +50,10 @@ def prepare(name,index=None):
  p['arms']=['v2_online_optimized','v31_optimized','dense_full_fix51994','dense_piecewise','allkept_fa4']
  p['source_identity_note']='base Git commit plus exact frozen execution hashes; current study integration changes included in execution hashes'
  p['sharding']=dict(max_requests_per_shard=128,reason='amortize engine startup while bounding recovery; native per-request timing and order unchanged')
+ p['v31_selector']=dict(dispatch='fused through 512 KV64 tiles; bounded row-LSE, tile-score, compact top-k above 512',
+    warmup='prefix tiles never exceed floor((max_model_len-query_tokens)/64); compile keys ignore runtime-only contiguous prefix stride',
+    accounting='all selector launches and temporary tensors charged to refresh; no held selector')
+ with (study/'spec.md').open('a') as specfile:specfile.write('\nV31 selector storage is bounded at long contexts: above 512 KV64 tiles, row normalizers and tile scores precede the unchanged deterministic fixed-budget top-k/list construction. All launches and temporary tensors are charged to refresh. Attention observation/PV kernels and the short-context fused selector are unchanged. Warm-up never synthesizes a prefix exceeding the configured model context. This corrects the preserved attempt005 qualification OOM; it does not reuse that attempt as a completed panel.\n')
  p['spec_sha256']=sha(study/'spec.md')
  p['input_sha256']={str(x.relative_to(study)):sha(x) for label in ['pools','schedules','calibration_pools'] for x in (study/'private'/label).rglob('*') if x.is_file()}
  if index is not None:

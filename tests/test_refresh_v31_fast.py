@@ -78,3 +78,34 @@ def test_prefix_observation_recovers_from_dominant_canvas_underflow(tmp_path):
     assert bool(keep[...,0].all())
     assert bool(torch.isfinite(out).all())
     assert bool((keep[...,:4].sum(-1)==2).all())
+
+
+@pytest.mark.parametrize('n,pt,budget,sticky',[(256,640,128,0.),(137,2204,8192,1.386)])
+def test_long_selector_matches_bounded_reference(n,pt,budget,sticky):
+    from experiments.numerical_qk_reuse.refresh_v31_fast import select
+    h=2;qb=(n+127)//128;nk=pt*64+n;jt=(nk+63)//64
+    g=torch.Generator(device='cuda').manual_seed(pt)
+    z=torch.randn((h,qb,pt,128),device='cuda',generator=g)
+    # Invalid query rows must not dominate qblock-max selection.
+    if n%128:z[:,-1,:,n%128:]=100.
+    held=torch.rand((1,h,qb,jt),device='cuda',generator=g)>.5
+    lm=z.permute(0,1,3,2)
+    scores=lm-lm.logsumexp(-1,keepdim=True)
+    valid=torch.arange(qb*128,device='cuda').reshape(qb,128)<n
+    scores=scores.masked_fill(~valid[None,:,:,None],-float('inf')).amax(-2)
+    scores+=sticky*held[0,...,:pt]
+    expected=torch.zeros_like(held)
+    expected[0,...,:pt].scatter_(-1,scores.topk(min(pt,budget//64),-1).indices,True)
+    expected[...,pt:]=True
+    keep,lists=select(z,n,nk,budget,held=held,sticky=sticky)
+    assert torch.equal(keep,expected)
+    assert torch.equal(lists.full_block_cnt,keep.sum(-1).int())
+
+
+def test_long_selector_ties_are_stable():
+    from experiments.numerical_qk_reuse.refresh_v31_fast import select
+    z=torch.zeros((1,2,2204,128),device='cuda')
+    keep,lists=select(z,256,2208*64,8192)
+    expected=torch.zeros_like(keep);expected[...,:128]=True;expected[...,2204:]=True
+    assert torch.equal(keep,expected)
+    assert bool((lists.full_block_cnt==132).all())
