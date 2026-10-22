@@ -1,3 +1,44 @@
+## Current MATH complete; stopped before LongBench — 2026-10-22 UTC
+
+Attempt009 has complete official scored HumanEval164, AIME26 30x3seeds and
+MATH500500 panels across five arms. MATH all40 audit/clean worker shards pass;
+audit/clean trajectories agree. No LongBench run directory or generation exists.
+The boundary controller set the user pause during the final MATH clean worker;
+the coordinator scored MATH then exited through its expected explicit-pause
+exception. Whole four-suite campaign remains partial, no final_complete marker.
+Completed suite results are preserved, not relabeled as whole-campaign completion.
+
+MATH high-sparsity V2 at3.2 scores392/500 with77.5753% whole GLOBAL and79.4255%
+held sparsity; V31K128433/500, dense FULL/PIECEWISE449/500, all-kept450/500.
+Retain as supplementary and recalibrate V2 downward on32 examined full-request
+work strata to40-50% held/whole. New follow-up attempt002 prepares MATH lower
+V2, AIMEK256 and balanced RULER128K104; source80e7fa0c freezes protocol/driver
+and ten CPU tests pass. Preserve source-identical reference arms through explicit
+immutable paths/hashes. Prior HumanEval/AIME results remain. Monitor every
+15minutes; final follow-up results require full coverage, native qualification,
+threshold gates, official scores and completion markers.
+
+## User changes follow-up order; finish MATH then pause LongBench — 2026-10-22 UTC
+
+The active attempt009 continues its current MATH500 panel. A dedicated boundary
+controller is armed to set PAUSED_USER_REQUEST only after the final all-kept
+clean shard004 worker passes launch gating, allowing it and official MATH scoring
+to finish. The next LongBench job will be rejected before launch. Preserve
+completed HumanEval/AIME results and label the original campaign partial.
+
+Source checkpoint for the next follow-up is in the Git log, with spec
+`docs/OPTIMIZED_REFRESH_FOLLOWUP_20261022.md` and driver
+`scripts/optimized_refresh_followup.py`. Recalibrate MATH V2 downward on32
+full-request work strata (four short calibration prompts were unrepresentative)
+to40-50% held AND whole GLOBAL sparsity, then run V2 over500 while retaining
+source-identical controls. Test AIME V31K256 on30xseeds42/43/44 and pair against
+preserved K128. Add the same balanced104 RULER128K prompts,13tasks x8,
+seed42, V31K8192 and physically work-matched V2 threshold. RULER's original
+thinking-off/prefilled inputs and output budgets stay intact. Ten CPU tests
+pass, including fractional RULER scoring/cluster handling and physical gates.
+No new GPU follow-up starts before current MATH completion/pause. Monitor
+process status every15minutes; all older partial attempts stay immutable.
+
 ## Full panel with disclosed MATH500 calibration ceiling — 2026-10-22 UTC
 
 At checkpoint `7bd6128e`, freeze attempt009 using all passing native gates,

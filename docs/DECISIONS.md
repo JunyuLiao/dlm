@@ -3456,3 +3456,34 @@ thresholds remain. Reuse source-matched native gates and computation evidence;
 no further calibration forwards. Seven CPU policy tests pass. Full panel
 accuracy, work, clean timings and paired uncertainty still require fresh full
 coverage and official scoring; all previous attempts remain partial.
+
+## 2026-10-22 — Finish current MATH; replace LongBench with requested follow-up
+
+User requests finishing the current MATH500 panel, stopping before LongBench,
+retaining achieved HumanEval/AIME results, recalibrating lower MATH V2 sparsity
+to40-50%, testing AIME V31K256, and adding balanced104 RULER128K withK8192
+and approximately matched V2 work. A boundary controller arms the unchanged
+pause mechanism after final MATH clean worker launch; no native worker is killed.
+
+Full MATH records at3.2 show about77% GLOBAL sparsity, unlike the four short
+calibration trajectories. The new protocol selects32 examined full-request work
+strata, targets both held/whole40-50%, and keeps original results immutable.
+New AIMEK256 is paired with preserved source-identical controls/K128. RULER
+uses its same104 official prefilled/thinking-off prompts and seed42; fractional
+score and13-task uncertainty remain intact. All new arms/thresholds receive
+native audit/clean gates; all copies/launches and clean timing remain charged.
+Ten CPU tests pass. Freeze new follow-up attempts only after MATH finishes and
+the explicit stop is verified. No LongBench generation is authorized now.
+
+## 2026-10-22 — Requested MATH boundary reached with no LongBench launch
+
+Attempt009 completes and officially scores HumanEval164, AIME30x3 and
+MATH500 across five arms. MATH all40 workers complete and trajectory pairs
+agree. User pause is honored before next LongBench run directory/launch; the
+coordinator exits on the expected explicit-pause exception. Preserve attempt009
+as partial with completed-suite markers, not a completed four-benchmark panel.
+
+MATH V2tau3.2:392/500,77.5753% whole GLOBAL sparsity,79.4255% held; V31K128
+433/500, dense FULL/PIECEWISE449/500, all-kept450/500. The lower-threshold
+follow-up uses32 full-request work strata and retains achieved controls/results.
+AIMEK256 and RULER128K104 follow source80e7fa0c. No raw data committed.
