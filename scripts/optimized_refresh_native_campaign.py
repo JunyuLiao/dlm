@@ -36,6 +36,7 @@ def qualify(study):
         raise RuntimeError('qualification gate exists but does not match this protocol')
     protocol = verify(study)
     prior = None
+    prior_gate = None
     reuse = protocol.get('qualification_reuse')
     if reuse:
         prior = ROOT / reuse['study']
@@ -50,6 +51,14 @@ def qualify(study):
         for key,value in protocol['input_sha256'].items():
             if old['input_sha256'].get(key) != value:
                 raise RuntimeError('qualification evidence input mismatch: '+key)
+        if reuse.get('gates_sha256'):
+            if sha(prior/'qualification/gates.json') != reuse['gates_sha256']:
+                raise RuntimeError('qualification gate evidence drift')
+            prior_gate=read(prior/'qualification/gates.json')
+            if prior_gate['status']!='pass' or prior_gate['protocol_sha256']!=reuse['protocol_sha256']:
+                raise RuntimeError('qualification gate evidence identity mismatch')
+            for rel,digest in reuse['evidence_sha256'].items():
+                if sha(ROOT/rel)!=digest:raise RuntimeError('qualification record evidence drift: '+rel)
     rows = []
     for suite in SUITES:
         cells = study / f'private/schedules/{suite}/smoke.json'
@@ -59,7 +68,14 @@ def qualify(study):
             fixed = protocol.get('fixed_v2_thresholds', {}).get(suite)
             tau = (fixed['threshold'] if fixed else 0.05) if arm.startswith('v2') else None
             evidence=[]
-            if prior:
+            inherited=next((row for row in prior_gate['rows'] if row['suite']==suite and row['arm']==arm and row['threshold']==tau),None) if prior_gate else None
+            if inherited:
+                for pass_name in ['audit','clean']:
+                    leaf=(prior/inherited[pass_name]).resolve()
+                    if validate(read_lines(leaf/'records.jsonl'),suite,arm,pass_name,read(cells)):
+                        raise RuntimeError('invalid inherited qualification records')
+                    evidence.append(leaf)
+            elif prior:
                 label=arm+(('_tau'+format(tau,'.12g').replace('.','p')) if tau is not None else '')
                 for pass_name in ['audit','clean']:
                     matches=sorted((prior/f'qualification/{suite}/{label}/{pass_name}/{cells.stem}').glob('attempt???'))
@@ -135,8 +151,16 @@ def calibrate_held(study, suite):
             raise RuntimeError('existing held calibration is outside target')
         return result
     cells = study / f'private/schedules/{suite}/calibration.json'
-    candidates = read(study / 'protocol.json')['calibration']['candidate_thresholds']
+    candidates = protocol['calibration'].get('candidate_thresholds_by_workload',{}).get(suite,protocol['calibration']['candidate_thresholds'])
     measured = {}
+    reused=protocol.get('calibration_reuse',{}).get(suite)
+    if reused:
+        source=ROOT/reused['source']
+        if sha(source)!=reused['sha256']:raise RuntimeError('calibration evidence drift')
+        previous=read(source)
+        if previous['suite']!=suite or previous['protocol_sha256']!=protocol['qualification_reuse']['protocol_sha256']:
+            raise RuntimeError('calibration evidence identity mismatch')
+        measured.update(previous['candidates'])
     def measure(tau):
         if str(tau) in measured:
             return
@@ -146,9 +170,9 @@ def calibrate_held(study, suite):
     def in_range():
         return any(.40 <= row['sparsity'] <= .50 for row in measured.values())
     for tau in candidates:
-        measure(tau)
         if in_range():
             break
+        measure(tau)
     if not in_range():
         for _ in range(read(study / 'protocol.json')['calibration']['refinements']):
             below = [float(k) for k, v in measured.items() if v['sparsity'] < .45]
@@ -169,6 +193,7 @@ def calibrate_held(study, suite):
                   held_kept_tiles=selected['kept_tiles'], held_calls=selected['calls'],
                   calibration_cells=len(read(cells)), in_target_range=0.40 <= selected['sparsity'] <= 0.50,
                   target_sparsity=[0.40, 0.50], candidates=measured,
+                  reused_source_matched_calibration=reused,
                   protocol_sha256=sha(study / 'protocol.json'), accuracy_used=False)
     write(dest, result)
     if not result['in_target_range']:

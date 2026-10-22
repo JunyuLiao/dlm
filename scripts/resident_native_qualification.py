@@ -43,9 +43,23 @@ def prepare(name,index=None):
   'humaneval':dict(threshold=saved['threshold'],source=str(historical.relative_to(ROOT)),source_sha256=sha(historical),reason='user requests reuse of existing K128 work/sparsity matched threshold; no new calibration'),
   'longbench_v2':dict(threshold=0.021,source='explicit user instruction 2026-10-22',reason='fixed by user; no new calibration')}
  p['calibration']['workloads']=['aime26','math500']
- previous=ROOT/'results/optimized_refresh_benchmarks_20261022/attempt006'
+ previous=ROOT/'results/optimized_refresh_benchmarks_20261022/attempt007'
  p['qualification_reuse']=dict(study=str(previous.relative_to(ROOT)),protocol_sha256=sha(previous/'protocol.json'),
    rule='only completed audit/clean pairs with identical execution sources, runtime, model, kernel, inputs, budgets and threshold; orchestration/report-only changes permitted; changed V2 thresholds require new pairs')
+ gates=previous/'qualification/gates.json';gate=json.loads(gates.read_text())
+ p['qualification_reuse']['gates_sha256']=sha(gates)
+ evidence={}
+ for row in gate['rows']:
+  for pass_name in ['audit','clean']:
+   leaf=(previous/row[pass_name]).resolve()
+   for name in ['records.jsonl','config.json','receipt.json','attempt_complete.json']:
+    f=leaf/name;evidence[str(f.relative_to(ROOT))]=sha(f)
+ p['qualification_reuse']['evidence_sha256']=evidence
+ p['calibration_reuse']={}
+ for suite in ['aime26','math500']:
+  source=previous/f'calibration_held/{suite}/selected_threshold.json'
+  p['calibration_reuse'][suite]=dict(source=str(source.relative_to(ROOT)),sha256=sha(source),reason='source/runtime/input-identical full-request held physical tile measurements')
+ p['calibration']['candidate_thresholds_by_workload']={'aime26':[], 'math500':[1.6,3.2,6.4,12.8]}
  inventory=ROOT/'results/v31_value_v2_equal_work_20261011/model_source_fingerprints.json'
  shutil.copyfile(inventory,study/'model_source_fingerprints.json')
  for entry in json.loads(inventory.read_text())['files']:
@@ -65,6 +79,7 @@ def prepare(name,index=None):
     accounting='all selector launches and temporary tensors charged to refresh; no held selector')
  with (study/'spec.md').open('a') as specfile:specfile.write('\nV31 selector storage is bounded at long contexts: above 512 KV64 tiles, row normalizers and tile scores precede the unchanged deterministic fixed-budget top-k/list construction. All launches and temporary tensors are charged to refresh. Attention observation/PV kernels and the short-context fused selector are unchanged. Warm-up never synthesizes a prefix exceeding the configured model context. This corrects the preserved attempt005 qualification OOM; it does not reuse that attempt as a completed panel.\n')
  with (study/'spec.md').open('a') as specfile:specfile.write(f'\nUser threshold update supersedes per-workload calibration for HumanEval and LongBench-v2: reuse the saved K128 HumanEval threshold {saved["threshold"]!r} and use LongBench-v2 threshold 0.021. Calibrate only AIME26/MATH500 to held GLOBAL sparsity 40-50 percent. Report actual work and any mismatch in all workloads; do not claim these fixed thresholds are newly calibrated or achieve the held target. Completed source/runtime/input/threshold-identical qualification pairs from preserved attempt006 may supply explicit referenced evidence; changed-threshold V2 pairs run anew. Full benchmark generations remain fresh in this attempt.\n')
+ with (study/'spec.md').open('a') as specfile:specfile.write('\nAttempt008 reuses explicitly fingerprinted completed qualification pairs and computation-only calibration points from source-identical attempt007. Its AIME threshold achieved 45.69 percent held GLOBAL sparsity. MATH500 had no in-range point through threshold0.8 (32.05 percent); extend only its coarse search to1.6/3.2/6.4/12.8 before the same eight bounded refinements. All prior evidence remains immutable and its original protocol identity is retained. No earlier attempt contains a full benchmark panel.\n')
  p['spec_sha256']=sha(study/'spec.md')
  p['input_sha256']={str(x.relative_to(study)):sha(x) for label in ['pools','schedules','calibration_pools'] for x in (study/'private'/label).rglob('*') if x.is_file()}
  if index is not None:

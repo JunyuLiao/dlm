@@ -85,3 +85,12 @@ any mismatch without claiming the earlier held-target gate. Source-identical
 completed qualification pairs from attempt006 may be referenced only after
 verifying identical runtime sources, kernel, model, inputs, budgets and threshold.
 Changed-threshold V2 pairs run anew. Full benchmark generations are fresh.
+
+Attempt007 passed all native qualification gates and calibrated AIME26 at
+threshold0.059460355750136064 (45.69% held GLOBAL sparsity). MATH500 reached
+32.05% at the largest candidate0.8 and therefore stopped before full generation.
+Attempt008 preserves and fingerprints that evidence, extends only MATH500's
+coarse candidates to1.6/3.2/6.4/12.8, and retains the same eight refinements.
+It reuses completed source-identical qualification pairs through explicit
+original paths and record/config/receipt/completion hashes. Attention kernels,
+sampler, inputs and all previously measured candidates remain unchanged.
