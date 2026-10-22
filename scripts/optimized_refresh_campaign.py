@@ -259,7 +259,8 @@ def score_suite(study,suite):
   paired={op.cell_key(x):(x['output_hash'],x['denoise_forwards']) for x in rows}
   if any(paired[op.cell_key(x)]!=(x['output_hash'],x['denoise_forwards']) for x in cr):raise RuntimeError('audit/clean full panel mismatch '+suite+' '+arm)
   for g in generations:records.append((arm,op.cell_key(g),g))
- fields=('source_id','thinking') if suite=='aime26' else ('thinking','gold') if suite=='math500' else lb.FIELDS if suite=='longbench_v2' else ('thinking',)
+ from scripts import v31_score_ruler as ruler
+ fields=('source_id','thinking') if suite=='aime26' else ('thinking','gold') if suite=='math500' else lb.FIELDS if suite=='longbench_v2' else ruler.FIELDS if suite=='ruler128k' else ('thinking',)
  pools=op.Pools(pool,fields);final,_=op.load_final_response()
  if suite=='aime26':
   answers={str(x['id']):str(x['answer']) for x in read_lines(pool/'aime2026_answers.jsonl')};numeric,_=op.aime_numeric_score();scores,secondary,binding,diag=aime.score(records,answers,pools,final,numeric);scoring=aime.summarize(scores,diag)
@@ -268,12 +269,20 @@ def score_suite(study,suite):
  elif suite=='humaneval':
   from scripts import v27_humaneval as harness
   harness.sandbox_preflight();gold=read(pool/'gold.json');scores,secondary,binding,diag,timeouts=he.score(records,gold,harness,pools,workers=4);scoring=he.summarize(scores,diag,{(a,k):x['id'] for a,k,x in records})
+ elif suite=='ruler128k':
+  ruler_root=Path(read(study/'private/scorer_location.json')['ruler'])
+  identity=op.ruler_verify_checkout(ruler_root)
+  if identity!=read(study/'protocol.json')['ruler_scorer']:raise RuntimeError('RULER scorer identity drift')
+  ds=SUITES[suite]['dataset'];gold=read(pool/(ds+'_gold.json'))
+  scores,secondary,binding,diag=ruler.score(records,op.ruler_metrics(ruler_root),op.ruler_task_bases(ruler_root),pools,lambda ds:gold,final)
+  scoring=ruler.summarize(scores,diag,pools)
  else:
   verifier=mat.make_verifier();scores={};diag={}
   for arm,k,x in records:
    row,b,valid=op.bind(x,pools);ok,parsed,error=mat.judge(verifier,row['gold']['answer'],final(x['completion'],row['thinking']));scores.setdefault(arm,{})[k]=ok
   scoring={arm:dict(correct=sum(s.values()),cells=len(s),accuracy=sum(s.values())/len(s)) for arm,s in scores.items()}
  write(out/'official.json',scores);write(out/'scoring.json',scoring)
+ if suite=='ruler128k':write(out/'binding.json',binding)
  summary={}
  for arm,rows in audit.items():
   cr=clean[arm];ad=[x['receipts']['adapter'] for x in rows];n=sum(x['denoise_forwards'] for x in cr);c=sum(x['canvases'] for x in cr);s=sum(x['decode_s'] for x in cr);w=sum(x['wall_s'] for x in cr)
@@ -295,11 +304,14 @@ def score_suite(study,suite):
     dst['calls']+=row.get('calls',0);dst['gpu_ms']+=row.get('gpu_ms',0.)
   for phase,row in resident_phase.items():row['mean_gpu_ms']=row['gpu_ms']/row['calls'] if row['calls'] else None
   summary[arm]=dict(cells=len(cr),correct=sum(scores[arm].values()),accuracy=sum(scores[arm].values())/len(cr),N=n,C=c,N_per_C=n/c,T=sum(x['output_tokens'] for x in cr),S=s,W=w,S_per_N=s/n,mean_W=w/len(cr),global_eligible_tiles=ga,global_kept_tiles=gk,global_sparsity=1-gk/ga,local_eligible_rectangles=local,local_skipped_tiles=0,overall_eligible_rectangles=ga+local,overall_skipped_rectangles=ga-gk,overall_sparsity=(ga-gk)/(ga+local),first_canvas_eligible=first_e,first_canvas_kept=first_k,first_canvas_sparsity=1-first_k/first_e,phase_work=phase_work,refresh_calls=refresh,mean_refresh_gpu_ms=refreshms/refresh if refresh else None,resident_phase_timing=resident_phase)
+  if suite=='ruler128k':
+   summary[arm].update(correct=sum(v>=100-1.e-9 for v in scores[arm].values()),accuracy=scoring[arm]['official']['_overall']/100,official_score=scoring[arm]['official']['_overall'],per_task=scoring[arm]['official'][SUITES[suite]['dataset']]['tasks'])
  ref=summary['v31_optimized'];v2=summary['v2_online_optimized']
  write(out/'first_canvas_work.json',dict(absolute_kept_ratio=v2['first_canvas_kept']/ref['first_canvas_kept'],kept_fraction_delta_pp=100*(ref['first_canvas_sparsity']-v2['first_canvas_sparsity']),matched_absolute=abs(v2['first_canvas_kept']/ref['first_canvas_kept']-1)<=.02,calibration_transductive=True,total_flops_matched=False))
  write(out/'summary.json',summary)
  from scripts.optimized_refresh_report import paired_report,write_suite_markdown
- paired_report(out,scores,clean,audit)
+ task_of={x['index']:x['task'] for x in read(pool/(SUITES[suite]['dataset']+'_rowinfo.json'))['rows']} if suite=='ruler128k' else None
+ paired_report(out,scores,clean,audit,task_of=task_of)
  write_suite_markdown(out,suite,summary,read(study/f'calibration_held/{suite}/selected_threshold.json'))
  write(out/'analysis_complete.json',dict(status='complete',utc=utc(),protocol_sha256=sha(study/'protocol.json')))
 

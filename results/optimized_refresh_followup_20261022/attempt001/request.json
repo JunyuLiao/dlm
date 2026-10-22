@@ -1,0 +1,23 @@
+{
+  "utc": "2026-10-22T16:59:11.200683+00:00",
+  "instruction": "finish current MATH500 across all five arms; stop before any LongBench-v2 generation",
+  "study": "results/optimized_refresh_benchmarks_20261022/attempt009",
+  "protocol_sha256": "790b3ac372a9120ea2729f5f52f7c25cb5c78e3a0a6947200fe3cbb66c30986c",
+  "trigger": {
+    "stage": "runs",
+    "suite": "math500",
+    "arm": "allkept_fa4",
+    "pass_name": "clean",
+    "shard": "shard004"
+  },
+  "preserve": [
+    "humaneval completed results",
+    "aime26 completed results",
+    "current math500 panel"
+  ],
+  "followup": [
+    "recalibrate lower MATH500 V2 threshold to measured40-50% sparsity",
+    "AIME26 V31K256",
+    "RULER128K104 sampled subset K8192 and approximately work-matched V2 >85% sparsity"
+  ]
+}

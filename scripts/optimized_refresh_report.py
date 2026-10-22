@@ -7,17 +7,19 @@ import numpy as np
 from scripts.v31_official import cell_key
 
 def write(p,x):Path(p).write_text(json.dumps(x,indent=2,sort_keys=True)+'\n')
-def paired_report(out,scores,clean,audit):
+def paired_report(out,scores,clean,audit,task_of=None):
  ref='v31_optimized';rng=np.random.default_rng(20261021);paired={}
- keys=sorted(scores[ref]);clusters=sorted(set('|'.join(k.split('|')[:2]) for k in keys));groups={c:[k for k in keys if '|'.join(k.split('|')[:2])==c] for c in clusters}
+ keys=sorted(scores[ref]);cluster=lambda k:task_of[int(k.split('|')[1])] if task_of else '|'.join(k.split('|')[:2])
+ clusters=sorted({cluster(k) for k in keys});groups={c:[k for k in keys if cluster(k)==c] for c in clusters}
  cleanmap={arm:{cell_key(x):x for x in rows} for arm,rows in clean.items()}
  for arm in scores:
   if set(scores[arm])!=set(keys):raise RuntimeError('unpaired score coverage')
-  d=np.array([statistics.mean(int(scores[arm][k])-int(scores[ref][k]) for k in groups[c]) for c in clusters])
+  d=np.array([statistics.mean(float(scores[arm][k])-float(scores[ref][k]) for k in groups[c]) for c in clusters])
   # Arithmetic mean accuracy differences; paired geometric request/step ratios.
   logs={metric:np.array([statistics.mean(math.log(cleanmap[arm][k][field]/cleanmap[ref][k][field]) for k in groups[c]) for c in clusters]) for metric,field in [('request_W','wall_s'),('generation_S','decode_s'),('denoise_N','denoise_forwards')]}
   boot=rng.integers(0,len(clusters),size=(10000,len(clusters)))
-  ac=np.mean(d[boot],axis=1);entry=dict(paired_cells=len(keys),problem_clusters=len(clusters),accuracy_difference_pp=float(d.mean()*100),accuracy_difference_ci95_pp=[float(x*100) for x in np.percentile(ac,[2.5,97.5])],arm_vs_reference=ref)
+  scale=1 if task_of else 100
+  ac=np.mean(d[boot],axis=1);entry=dict(paired_cells=len(keys),problem_clusters=len(clusters),accuracy_difference_pp=float(d.mean()*scale),accuracy_difference_ci95_pp=[float(x*scale) for x in np.percentile(ac,[2.5,97.5])],arm_vs_reference=ref,cluster_kind='RULER task' if task_of else 'problem')
   for metric,v in logs.items():entry[metric]=dict(geometric_ratio=float(np.exp(v.mean())),ci95=[float(x) for x in np.exp(np.percentile(np.mean(v[boot],axis=1),[2.5,97.5]))])
   paired[arm]=entry
  write(out/'paired_vs_v31.json',paired)
