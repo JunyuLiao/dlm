@@ -94,3 +94,12 @@ coarse candidates to1.6/3.2/6.4/12.8, and retains the same eight refinements.
 It reuses completed source-identical qualification pairs through explicit
 original paths and record/config/receipt/completion hashes. Attention kernels,
 sampler, inputs and all previously measured candidates remain unchanged.
+
+Attempt008 establishes a MATH500 calibration ceiling: thresholds3.2/6.4/12.8
+have identical output hashes and denoising calls. All70880 retained held tiles
+out of115840 eligible equal the mandatory current-canvas/boundary plus first-tile
+floor on those trajectories. Maximum measured sparsity is38.8122%, a target
+miss. Attempt009 explicitly accepts this demonstrated structural ceiling at3.2
+to complete the requested comparison, with a frozen per-canvas count proof.
+It does not claim40% attainment or generalize that ceiling to all500 problems.
+No further calibration forwards run; all full panel generations are fresh.

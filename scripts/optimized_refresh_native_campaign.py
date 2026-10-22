@@ -147,7 +147,7 @@ def calibrate_held(study, suite):
         return result
     if dest.exists():
         result = read(dest)
-        if not result.get('in_target_range'):
+        if not result.get('in_target_range') and not (result.get('accepted_structural_ceiling') and suite in protocol['calibration'].get('physical_ceiling_exceptions',{})):
             raise RuntimeError('existing held calibration is outside target')
         return result
     cells = study / f'private/schedules/{suite}/calibration.json'
@@ -197,7 +197,20 @@ def calibrate_held(study, suite):
                   protocol_sha256=sha(study / 'protocol.json'), accuracy_used=False)
     write(dest, result)
     if not result['in_target_range']:
-        raise RuntimeError(f'held sparsity calibration outside 40-50% for {suite}; preserve candidates and freeze a refined calibration protocol')
+        exception=protocol['calibration'].get('physical_ceiling_exceptions',{}).get(suite)
+        if exception:
+            proof=ROOT/exception['source']
+            if sha(proof)!=exception['sha256']:raise RuntimeError('structural ceiling proof drift')
+            ceiling=read(proof)
+            if ceiling['kept_tiles']!=ceiling['mandatory_kept_tiles'] or result['threshold']!=ceiling['selected_threshold'] or result['held_eligible_tiles']!=ceiling['eligible_tiles'] or result['held_kept_tiles']!=ceiling['kept_tiles']:
+                raise RuntimeError('calibration does not attain demonstrated mandatory tile floor')
+            for rel,digest in ceiling['evidence_sha256'].items():
+                if sha(ROOT/rel)!=digest:raise RuntimeError('ceiling measurement evidence drift')
+            result.update(status='calibration_target_missed_at_mandatory_tile_floor',accepted_structural_ceiling=True,
+                          structural_ceiling_evidence=exception,target_miss=True)
+            write(dest,result)
+        else:
+            raise RuntimeError(f'held sparsity calibration outside 40-50% for {suite}; preserve candidates and freeze a refined calibration protocol')
     return result
 
 

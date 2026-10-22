@@ -55,3 +55,28 @@ def test_calibration_reuses_points_and_extends_only_when_needed(tmp_path,monkeyp
     assert result['in_target_range']
     assert result['candidates']['0.8']==prior['candidates']['0.8']
     assert calls==([] if in_range else [1.6])
+
+
+@pytest.mark.parametrize('mandatory',[612,600])
+def test_target_miss_requires_demonstrated_mandatory_floor(tmp_path,monkeypatch,mandatory):
+    prior=tmp_path/'previous.json'
+    prior.write_text(json.dumps(dict(suite='math500',protocol_sha256='past',candidates={
+        '3.2':dict(calls=10,eligible_tiles=1000,kept_tiles=612,sparsity=.388)})))
+    proof=tmp_path/'proof.json'
+    proof.write_text(json.dumps(dict(selected_threshold=3.2,eligible_tiles=1000,kept_tiles=612,
+        mandatory_kept_tiles=mandatory,evidence_sha256={})))
+    protocol=dict(qualification_reuse={'protocol_sha256':'past'},
+        calibration_reuse={'math500':{'source':'previous.json','sha256':campaign.sha(prior)}},
+        calibration={'candidate_thresholds':[],'refinements':8,
+            'physical_ceiling_exceptions':{'math500':{'source':'proof.json','sha256':campaign.sha(proof)}}})
+    (tmp_path/'protocol.json').write_text(json.dumps(protocol))
+    cells=tmp_path/'private/schedules/math500/calibration.json';cells.parent.mkdir(parents=True)
+    cells.write_text('[{},{},{},{}]')
+    monkeypatch.setattr(campaign,'ROOT',tmp_path)
+    if mandatory==612:
+        result=campaign.calibrate_held(tmp_path,'math500')
+        assert result['accepted_structural_ceiling'] and result['target_miss']
+        assert not result['in_target_range']
+    else:
+        with pytest.raises(RuntimeError,match='mandatory tile floor'):
+            campaign.calibrate_held(tmp_path,'math500')
