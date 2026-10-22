@@ -36,6 +36,16 @@ def prepare(name,index=None):
  p=json.loads((old/'protocol.json').read_text())
  p.update(created_utc=utc(),source_commit=__import__('subprocess').check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),execution_sha256={str(x.relative_to(ex)):sha(x) for x in ex.rglob('*') if x.is_file()},spec_sha256=sha(study/'spec.md'),purpose='gated full multi-benchmark comparison with best V2 interior/tail library',resident_sparse=True,resident_execution_options={'RESIDENT_SPARSE_EXECUTION':'1','RESIDENT_SPARSE_GRAPH_BUCKETS':'0','RESIDENT_V31_PAGED_REFRESH':'1'},kernel_sha256=sha(kernel/'v2_online_sm90.so'),kernel_source_manifest_sha256=sha(kernel/'source_manifest.json'))
  p['calibration']=dict(output_cap='native full request generation budget',strata=4,objective='actual held-phase GLOBAL physical Q128 x KV64 eligible/kept tiles over full native calibration requests',target_sparsity=[0.40,0.50],center_sparsity=0.45,candidate_thresholds=[0.05,0.1,0.2,0.4,0.8,0.025,0.0125,0.0],refinements=8,accuracy_used=False)
+ historical=ROOT/'results/humaneval_value_observe_no_overlap_k128_20261019/attempt001/calibration/thinking_on/full164_threshold.json'
+ saved=json.loads(historical.read_text())
+ if not saved['matching']['matched']:raise RuntimeError('HumanEval prior calibration is not matched')
+ p['fixed_v2_thresholds']={
+  'humaneval':dict(threshold=saved['threshold'],source=str(historical.relative_to(ROOT)),source_sha256=sha(historical),reason='user requests reuse of existing K128 work/sparsity matched threshold; no new calibration'),
+  'longbench_v2':dict(threshold=0.021,source='explicit user instruction 2026-10-22',reason='fixed by user; no new calibration')}
+ p['calibration']['workloads']=['aime26','math500']
+ previous=ROOT/'results/optimized_refresh_benchmarks_20261022/attempt006'
+ p['qualification_reuse']=dict(study=str(previous.relative_to(ROOT)),protocol_sha256=sha(previous/'protocol.json'),
+   rule='only completed audit/clean pairs with identical execution sources, runtime, model, kernel, inputs, budgets and threshold; orchestration/report-only changes permitted; changed V2 thresholds require new pairs')
  inventory=ROOT/'results/v31_value_v2_equal_work_20261011/model_source_fingerprints.json'
  shutil.copyfile(inventory,study/'model_source_fingerprints.json')
  for entry in json.loads(inventory.read_text())['files']:
@@ -54,6 +64,7 @@ def prepare(name,index=None):
     warmup='prefix tiles never exceed floor((max_model_len-query_tokens)/64); compile keys ignore runtime-only contiguous prefix stride',
     accounting='all selector launches and temporary tensors charged to refresh; no held selector')
  with (study/'spec.md').open('a') as specfile:specfile.write('\nV31 selector storage is bounded at long contexts: above 512 KV64 tiles, row normalizers and tile scores precede the unchanged deterministic fixed-budget top-k/list construction. All launches and temporary tensors are charged to refresh. Attention observation/PV kernels and the short-context fused selector are unchanged. Warm-up never synthesizes a prefix exceeding the configured model context. This corrects the preserved attempt005 qualification OOM; it does not reuse that attempt as a completed panel.\n')
+ with (study/'spec.md').open('a') as specfile:specfile.write(f'\nUser threshold update supersedes per-workload calibration for HumanEval and LongBench-v2: reuse the saved K128 HumanEval threshold {saved["threshold"]!r} and use LongBench-v2 threshold 0.021. Calibrate only AIME26/MATH500 to held GLOBAL sparsity 40-50 percent. Report actual work and any mismatch in all workloads; do not claim these fixed thresholds are newly calibrated or achieve the held target. Completed source/runtime/input/threshold-identical qualification pairs from preserved attempt006 may supply explicit referenced evidence; changed-threshold V2 pairs run anew. Full benchmark generations remain fresh in this attempt.\n')
  p['spec_sha256']=sha(study/'spec.md')
  p['input_sha256']={str(x.relative_to(study)):sha(x) for label in ['pools','schedules','calibration_pools'] for x in (study/'private'/label).rglob('*') if x.is_file()}
  if index is not None:

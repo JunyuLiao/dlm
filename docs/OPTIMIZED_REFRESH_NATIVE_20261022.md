@@ -76,3 +76,12 @@ fixed-budget top-k/list construction. Every launch and temporary allocation is
 charged to refresh. Repair scans use at most 128 tiles at once. Warm-up prefix
 sizes stop at the actual configured context limit and cache keys exclude the
 runtime-only contiguous prefix stride. Short-context fused selection is retained.
+
+The user's subsequent threshold update applies from attempt007: HumanEval uses
+the saved K128 work-matched threshold `0.5600716206066294`; LongBench-v2 uses
+`0.021`. Neither receives new calibration. Only AIME26/MATH500 calibrate to
+40-50% actual held GLOBAL sparsity. Fixed workloads report observed work and
+any mismatch without claiming the earlier held-target gate. Source-identical
+completed qualification pairs from attempt006 may be referenced only after
+verifying identical runtime sources, kernel, model, inputs, budgets and threshold.
+Changed-threshold V2 pairs run anew. Full benchmark generations are fresh.

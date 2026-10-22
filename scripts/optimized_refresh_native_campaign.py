@@ -3,11 +3,12 @@ from pathlib import Path
 import argparse
 import json
 import math
+import os
 import time
 
 from scripts.optimized_refresh_campaign import (
     ARMS, ROOT, SUITES, read, read_lines, run_job, score_suite,
-    sha, utc, verify, write,
+    sha, utc, validate, verify, write,
 )
 from scripts.optimized_refresh_report import campaign_report
 
@@ -33,16 +34,46 @@ def qualify(study):
         if gate.get('status') == 'pass' and gate.get('protocol_sha256') == sha(study / 'protocol.json'):
             return gate
         raise RuntimeError('qualification gate exists but does not match this protocol')
-    verify(study)
+    protocol = verify(study)
+    prior = None
+    reuse = protocol.get('qualification_reuse')
+    if reuse:
+        prior = ROOT / reuse['study']
+        if sha(prior / 'protocol.json') != reuse['protocol_sha256']:
+            raise RuntimeError('qualification evidence protocol identity drift')
+        old = verify(prior)
+        orchestration = {'scripts/optimized_refresh_native_campaign.py', 'scripts/optimized_refresh_report.py'}
+        new_runtime = {k:v for k,v in protocol['execution_sha256'].items() if k not in orchestration}
+        old_runtime = {k:v for k,v in old['execution_sha256'].items() if k not in orchestration}
+        if new_runtime != old_runtime or protocol['runtime'] != old['runtime'] or protocol['kernel_sha256'] != old['kernel_sha256'] or protocol['model_inventory_sha256'] != old['model_inventory_sha256'] or protocol['suites'] != old['suites']:
+            raise RuntimeError('qualification evidence execution identity mismatch')
+        for key,value in protocol['input_sha256'].items():
+            if old['input_sha256'].get(key) != value:
+                raise RuntimeError('qualification evidence input mismatch: '+key)
     rows = []
     for suite in SUITES:
         cells = study / f'private/schedules/{suite}/smoke.json'
         if not cells.exists():
             cells = study / f'private/schedules/{suite}/calibration.json'
         for arm in ARMS:
-            tau = 0.05 if arm.startswith('v2') else None
-            audit = run_job(study, suite, arm, 'audit', cells, 'qualification', tau)
-            clean = run_job(study, suite, arm, 'clean', cells, 'qualification', tau)
+            fixed = protocol.get('fixed_v2_thresholds', {}).get(suite)
+            tau = (fixed['threshold'] if fixed else 0.05) if arm.startswith('v2') else None
+            evidence=[]
+            if prior:
+                label=arm+(('_tau'+format(tau,'.12g').replace('.','p')) if tau is not None else '')
+                for pass_name in ['audit','clean']:
+                    matches=sorted((prior/f'qualification/{suite}/{label}/{pass_name}/{cells.stem}').glob('attempt???'))
+                    matches=[p for p in matches if (p/'attempt_complete.json').exists()]
+                    if not matches:break
+                    leaf=matches[-1]
+                    if read(leaf/'attempt_complete.json').get('protocol_sha256') != reuse['protocol_sha256'] or validate(read_lines(leaf/'records.jsonl'),suite,arm,pass_name,read(cells)):
+                        raise RuntimeError('invalid reused qualification evidence')
+                    evidence.append(leaf)
+            if len(evidence)==2:
+                audit,clean=evidence
+            else:
+                audit = run_job(study, suite, arm, 'audit', cells, 'qualification', tau)
+                clean = run_job(study, suite, arm, 'clean', cells, 'qualification', tau)
             audit_rows = read_lines(audit / 'records.jsonl')
             clean_rows = read_lines(clean / 'records.jsonl')
             if [(r['output_hash'], r['denoise_forwards']) for r in audit_rows] != [(r['output_hash'], r['denoise_forwards']) for r in clean_rows]:
@@ -72,7 +103,8 @@ def qualify(study):
                         if adapter.get('optimized_refresh_projection_pack') != 'fused_value_pack':
                             raise RuntimeError(f'wrong V2 projection/packing wrapper: {suite}/{arm}')
             rows.append(dict(suite=suite, arm=arm, threshold=tau,
-                             audit= str(audit.relative_to(study)), clean=str(clean.relative_to(study)),
+                             audit=os.path.relpath(audit,study), clean=os.path.relpath(clean,study),
+                             reused_source_matched_evidence=len(evidence)==2,
                              cells=len(audit_rows), trajectory_match=True))
     gate = dict(status='pass', utc=utc(), protocol_sha256=sha(study / 'protocol.json'),
                 checks=['synthetic kernel parity and changing-input graph qualification',
@@ -86,6 +118,17 @@ def qualify(study):
 
 def calibrate_held(study, suite):
     dest = study / f'calibration_held/{suite}/selected_threshold.json'
+    protocol = read(study / 'protocol.json')
+    fixed = protocol.get('fixed_v2_thresholds', {}).get(suite)
+    if fixed:
+        result=dict(status='fixed_threshold_by_user',suite=suite,threshold=fixed['threshold'],
+                    provenance=fixed,calibration_cells=0,new_calibration=False,
+                    held_sparsity=None,held_eligible_tiles=None,held_kept_tiles=None,
+                    in_target_range=None,accuracy_used=False,
+                    protocol_sha256=sha(study/'protocol.json'))
+        if dest.exists() and read(dest)!=result:raise RuntimeError('fixed threshold receipt drift')
+        if not dest.exists():write(dest,result)
+        return result
     if dest.exists():
         result = read(dest)
         if not result.get('in_target_range'):
