@@ -14,14 +14,14 @@ import torch
 def install(adapter, *, method, library, observer_directory, schedule=2):
     from . import v27_fa4
     from .refresh_v31_fast import Observer
-    from .v2_online_warpspec import PackedRefresh
+    from .v2_online_warpspec import FusedPackedRefresh
     from experiments.diffusion_gemma_jl_output_aware.projections import Projections
     if method not in ('v2','v31'):raise ValueError('named optimized refresh method required')
     if adapter.mage_granularity!='qblock_max' or adapter.mage_sink or adapter.mage_recent_tiles:
         raise ValueError('qualified qblock_max without additional protection required')
     if adapter.cached_refresh_policy is not None or adapter.mage_pool is not None or adapter.mage_row_weight is not None:
         raise ValueError('unqualified reuse variant')
-    op=PackedRefresh(Path(library),schedule) if method=='v2' else Observer(observer_directory)
+    op=FusedPackedRefresh(Path(library),schedule) if method=='v2' else Observer(observer_directory)
     projections=Projections()
     old_begin,old_receipt=adapter.begin_request,adapter._value_receipt
     old_list=v27_fa4.block_sparse_tensors
@@ -97,12 +97,14 @@ def install(adapter, *, method, library, observer_directory, schedule=2):
         result.update(optimized_refresh_phase_timing=by_phase,optimized_refresh_method=method,optimized_refresh_calls=state['calls'],
             optimized_refresh_kernel=('q128_fold_bf16x3_fastmath_sm90' if method=='v2' else 'fa4_exp_scores_fused_qblock_topk'),
             optimized_refresh_library_sha256=binary_hash,optimized_refresh_schedule=schedule if method=='v2' else None,
+            optimized_refresh_build_options=op.kernel.options if method=='v2' else None,
             optimized_refresh_observer_sha256=op.source_sha256 if method=='v31' else None,
             optimized_refresh_gpu_ms=elapsed,optimized_refresh_shapes=sorted(state['shapes']),
             optimized_refresh_budget_errors=(int(torch.stack(state['budget_errors']).sum()) if state['budget_errors'] else 0) if self.value_audit else None,
             optimized_refresh_budget_units=state['units'] if self.value_audit else None,
             optimized_refresh_extra_model_forwards=0,
             optimized_refresh_projection_current_v=method=='v2',
+            optimized_refresh_projection_pack=('fused_value_pack' if method=='v2' else None),
             optimized_refresh_held_consumer='inherited_paged_split_fa4',
             optimized_refresh_threshold=self.value_threshold if method=='v2' else None,
             value_output_path='online_sparse_refresh_current_qkv' if method=='v2' else 'dense_fa4_optimized_observation',

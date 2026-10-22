@@ -22,7 +22,7 @@ SUITES=dict(humaneval=dict(dataset='humaneval',count=164,seeds=[42],mage_k=128,m
  aime26=dict(dataset='aime26',count=90,seeds=[42,43,44],mage_k=128,max_len=9216,block=64,chunk=4096,memory=.80,prior_tau=.021),
  math500=dict(dataset='math500',count=500,seeds=[42],mage_k=128,max_len=16384,block=64,chunk=4096,memory=.80,prior_tau=.021),
  longbench_v2=dict(dataset='longbench_v2_0shot_think',count=503,seeds=[42],mage_k=8192,max_len=141312,block=32,chunk=16384,memory=.85,prior_tau=.021))
-ARMS=['v31_optimized','v2_online_optimized','dense_full_fix51994','dense_piecewise','allkept_fa4']
+ARMS=['v2_online_optimized','v31_optimized','dense_full_fix51994','dense_piecewise','allkept_fa4']
 read=lambda p:json.loads(Path(p).read_text())
 sha=lambda p:hashlib.sha256(Path(p).read_bytes()).hexdigest()
 def write(p,d):
@@ -100,8 +100,10 @@ def environment(study,suite,arm,pass_name,tau,leaf):
  from scripts.v31_v2_local_threshold_sweep import env_for,SUITES as inherited
  inherited[suite]=SUITES[suite]
  env=env_for(study,suite,'current_v31_control')
- env.update(STUDY_ARM=arm,VALUE_AUDIT=str(int(pass_name=='audit')),VALUE_CLEAN_TIMING=str(int(pass_name=='clean')),VALUE_BOUNDARY_TIMING=str(int(pass_name=='clean')),TRACE=str(int(pass_name=='audit')),REPEATS='1',PYTHONHASHSEED='0',TORCHINDUCTOR_DETERMINISTIC='1',FROZEN_SOURCE_SHA256=sha(study/'protocol.json'),OPTIMIZED_REFRESH_METHOD='v2' if arm.startswith('v2') else 'v31' if arm.startswith('v31') else 'dense',OPTIMIZED_REFRESH_LIBRARY=str(study/'private/kernel/v2_online_sm90.so'),OPTIMIZED_REFRESH_OBSERVER_DIR=str(study/'private/cache/optimized_observer'),OPTIMIZED_REFRESH_BASE_WORKER=str(study/'private/execution/scripts/v31_humaneval_cfgdet_base_worker.py'),OPTIMIZED_KERNEL_INVENTORY=str(leaf/'private/kernel_inventory.json'))
+ env.update(STUDY_ARM=arm,VALUE_AUDIT=str(int(pass_name=='audit')),VALUE_CLEAN_TIMING=str(int(pass_name=='clean')),VALUE_BOUNDARY_TIMING=str(int(pass_name=='clean')),TRACE=str(int(pass_name=='audit')),REPEATS='1',PYTHONHASHSEED='0',TORCHINDUCTOR_DETERMINISTIC='1',FROZEN_SOURCE_SHA256=sha(study/'protocol.json'),OPTIMIZED_REFRESH_METHOD='v2' if arm.startswith('v2') else 'v31' if arm.startswith('v31') else 'dense',OPTIMIZED_REFRESH_LIBRARY=str(study/'private/kernel/v2_online_sm90.so'),OPTIMIZED_REFRESH_OBSERVER_DIR=str(study/'private/cache/optimized_observer'),OPTIMIZED_REFRESH_BASE_WORKER=str(study/'private/execution/scripts/v31_humaneval_cfgdet_base_worker.py'),OPTIMIZED_KERNEL_INVENTORY=str(leaf/'private/kernel_inventory.json'),RESIDENT_SPARSE_EXECUTION='1',RESIDENT_SPARSE_GRAPH_BUCKETS='0',RESIDENT_V31_PAGED_REFRESH='1')
  if arm.startswith('v2'):env.update(VALUE_SELECTOR='value_v2_online_preserve_mass',VALUE_THRESHOLD=str(tau))
+ env['OPTIMIZED_WARM_EACH_INPUT']='1'
+ env['RESIDENT_ALLKEPT_EXECUTION']='1'
  return env
 
 def validate(rows,suite,arm,pass_name,planned):
@@ -113,6 +115,7 @@ def validate(rows,suite,arm,pass_name,planned):
   if x['denoise_forwards']<=0 or x['engine_steps']!=x['sampler_calls']+x['prefill_steps']:errors.append('native calls')
   if x['value_audit']!=(pass_name=='audit') or x['value_clean_timing']!=(pass_name=='clean'):errors.append('pass flags')
   if a.get('order_errors',0):errors.append('lifecycle order')
+  if pass_name=='clean' and (x.get('request_jit_event_count')!=0 or x.get('request_jit_events')!=[]):errors.append('timed JIT event in universal counter')
   if pass_name=='audit':
    for key in ['global_eligible_tiles','global_kept_tiles','native_local_skipped_tiles']:
     if key not in a:errors.append('missing '+key)
@@ -123,8 +126,19 @@ def validate(rows,suite,arm,pass_name,planned):
   if arm.startswith(('v2','v31')):
    if not a.get('optimized_refresh_calls') or a['optimized_refresh_extra_model_forwards']!=0:errors.append('missing optimized path')
    if pass_name=='audit' and a['optimized_refresh_budget_errors']!=0:errors.append('budget')
+   if not a.get('resident_sparse_execution') or a.get('resident_sparse_extra_forwards')!=0:errors.append('missing resident execution')
+   if a.get('resident_sparse_held_kv_copy_calls')!=0 or a.get('resident_sparse_held_selector_calls')!=0 or a.get('resident_sparse_held_list_builds')!=0:errors.append('held-path overhead')
+   if not a.get('resident_sparse_held_calls'):errors.append('no held calls')
+   if pass_name=='clean' and (a.get('resident_sparse_request_triton_compiles',0)!=0 or bool(a.get('resident_sparse_request_jit_events'))):errors.append('timed JIT event')
+   if pass_name=='clean' and x.get('cuda_graph_captures')!=0:errors.append('timed CUDA capture')
+   if a.get('optimized_refresh_method')!=('v2' if arm.startswith('v2') else 'v31'):errors.append('refresh method identity')
+   if arm.startswith('v2'):
+    if a.get('optimized_refresh_library_sha256') is None:errors.append('missing V2 library receipt')
+    options=a.get('optimized_refresh_build_options') or {}
+    if not options.get('interior_mask') or not options.get('bulk3d'):errors.append('wrong V2 kernel build')
   if arm.startswith('dense') or arm=='allkept_fa4':
    if pass_name=='audit' and a['global_kept_tiles']!=a['global_eligible_tiles']:errors.append('dense work')
+  if arm=='allkept_fa4' and (not a.get('resident_allkept_execution') or a.get('resident_allkept_extra_forwards')!=0):errors.append('missing resident all-kept control')
  return sorted(set(errors))
 
 def run_job(study,suite,arm,pass_name,cells,stage,tau=None):
@@ -268,13 +282,25 @@ def score_suite(study,suite):
   for a in ad:
    phases=a['value_canvas_phase_tiles'];f=phases[min(phases,key=int)];first_e+=sum(v['eligible_tiles'] for v in f.values());first_k+=sum(v['kept_tiles'] for v in f.values())
   refresh=sum(x.get('optimized_refresh_calls',0) for x in ad);refreshms=sum(x.get('optimized_refresh_gpu_ms') or 0 for x in ad)
-  summary[arm]=dict(cells=len(cr),correct=sum(scores[arm].values()),accuracy=sum(scores[arm].values())/len(cr),N=n,C=c,N_per_C=n/c,T=sum(x['output_tokens'] for x in cr),S=s,W=w,S_per_N=s/n,mean_W=w/len(cr),global_eligible_tiles=ga,global_kept_tiles=gk,global_sparsity=1-gk/ga,local_eligible_rectangles=local,local_skipped_tiles=0,overall_sparsity=(ga-gk)/(ga+local),first_canvas_eligible=first_e,first_canvas_kept=first_k,first_canvas_sparsity=1-first_k/first_e,refresh_calls=refresh,mean_refresh_gpu_ms=refreshms/refresh if refresh else None)
+  phase_work={}
+  for a in ad:
+   for phase,row in a.get('value_phase_tiles',{}).items():
+    dst=phase_work.setdefault(phase,dict(calls=0,eligible_tiles=0,kept_tiles=0))
+    for key in dst:dst[key]+=row.get(key,0)
+  for phase,row in phase_work.items():row['sparsity']=1-row['kept_tiles']/row['eligible_tiles'] if row['eligible_tiles'] else None
+  resident_phase={}
+  for a in ad:
+   for phase,row in a.get('resident_sparse_phase_timing',{}).items():
+    dst=resident_phase.setdefault(phase,dict(calls=0,gpu_ms=0.))
+    dst['calls']+=row.get('calls',0);dst['gpu_ms']+=row.get('gpu_ms',0.)
+  for phase,row in resident_phase.items():row['mean_gpu_ms']=row['gpu_ms']/row['calls'] if row['calls'] else None
+  summary[arm]=dict(cells=len(cr),correct=sum(scores[arm].values()),accuracy=sum(scores[arm].values())/len(cr),N=n,C=c,N_per_C=n/c,T=sum(x['output_tokens'] for x in cr),S=s,W=w,S_per_N=s/n,mean_W=w/len(cr),global_eligible_tiles=ga,global_kept_tiles=gk,global_sparsity=1-gk/ga,local_eligible_rectangles=local,local_skipped_tiles=0,overall_eligible_rectangles=ga+local,overall_skipped_rectangles=ga-gk,overall_sparsity=(ga-gk)/(ga+local),first_canvas_eligible=first_e,first_canvas_kept=first_k,first_canvas_sparsity=1-first_k/first_e,phase_work=phase_work,refresh_calls=refresh,mean_refresh_gpu_ms=refreshms/refresh if refresh else None,resident_phase_timing=resident_phase)
  ref=summary['v31_optimized'];v2=summary['v2_online_optimized']
  write(out/'first_canvas_work.json',dict(absolute_kept_ratio=v2['first_canvas_kept']/ref['first_canvas_kept'],kept_fraction_delta_pp=100*(ref['first_canvas_sparsity']-v2['first_canvas_sparsity']),matched_absolute=abs(v2['first_canvas_kept']/ref['first_canvas_kept']-1)<=.02,calibration_transductive=True,total_flops_matched=False))
  write(out/'summary.json',summary)
  from scripts.optimized_refresh_report import paired_report,write_suite_markdown
  paired_report(out,scores,clean,audit)
- write_suite_markdown(out,suite,summary,read(study/f'calibration/{suite}/selected_threshold.json'))
+ write_suite_markdown(out,suite,summary,read(study/f'calibration_held/{suite}/selected_threshold.json'))
  write(out/'analysis_complete.json',dict(status='complete',utc=utc(),protocol_sha256=sha(study/'protocol.json')))
 
 if __name__=='__main__':

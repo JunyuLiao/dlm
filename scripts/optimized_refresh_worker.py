@@ -42,6 +42,9 @@ def bind(adapter):
             from experiments.numerical_qk_reuse.resident_execution_runtime import install as resident_install
             resident_install(adapter,graph_buckets=os.environ.get('RESIDENT_SPARSE_GRAPH_BUCKETS')=='1',
                 v31_paged_refresh=method=='v31' and os.environ.get('RESIDENT_V31_PAGED_REFRESH')=='1')
+    elif adapter.arm=='allkept' and os.environ.get('RESIDENT_ALLKEPT_EXECUTION')=='1':
+        from experiments.numerical_qk_reuse.resident_execution_runtime import install_allkept
+        install_allkept(adapter)
     return result
 vllm_adapter.install_vllm_patches=bind
 runpy.run_path(os.environ['OPTIMIZED_REFRESH_BASE_WORKER'],run_name='__main__')

@@ -10,6 +10,59 @@ import os
 import torch
 from .resident_sparse import PagedContext,ResidentMask,GraphPagedBucket
 
+def install_allkept(adapter):
+    """Full physical support using the selected resident held consumer."""
+    if adapter.arm != 'allkept':
+        raise ValueError('explicit all-kept control required')
+    original_begin, original_receipt = adapter.begin_request, adapter._value_receipt
+    state = dict(contexts={}, calls=0, events=[], metadata_builds=0)
+    def begin(self,*args,**kwargs):
+        result=original_begin(*args,**kwargs)
+        state.update(contexts={},calls=0,events=[],metadata_builds=0)
+        return result
+    def forward(self,impl,layer,query,kv_cache,metadata,output):
+        n=int(metadata.num_actual_tokens);nk=self.step_ctx['seq_len'];prefix=nk-n
+        key,value=kv_cache.transpose(1,2).split(impl.head_size,dim=-1)
+        tag=(self.canvas_id,nk,n,key.data_ptr(),metadata.block_table.data_ptr())
+        previous=state['contexts'].get(layer)
+        if previous is None or previous[0]!=tag:
+            splits=1 if nk<=4096 else 2
+            context=PagedContext(key,value,metadata.block_table[0],nk,splits=splits)
+            keep=torch.ones((1,query.shape[1],(n+127)//128,(nk+63)//64),device=query.device,dtype=torch.bool)
+            mask=ResidentMask.create(keep,splits=splits,prefix_tiles=prefix//64,audit=False)
+            previous=(tag,context,mask);state['contexts'][layer]=previous;state['metadata_builds']+=1
+        h=query.shape[1];units=h*((n+127)//128);eligible=units*((nk+63)//64)
+        self.calls['global_calls']+=1;self._cur_layer=layer
+        self._global_tiles+=units*(prefix//64)
+        self._global_canvas_tiles+=eligible-units*(prefix//64)
+        events=None
+        if self.value_audit:
+            events=[torch.cuda.Event(enable_timing=True) for _ in range(2)];events[0].record()
+        q=query[:n].transpose(0,1).unsqueeze(0)
+        out=previous[1](q,previous[2],float(impl.scale),out=output[:n].view(1,n,h,query.shape[-1]))
+        if events is not None:
+            events[1].record();state['events'].append(events)
+            kept=torch.tensor(eligible,device=query.device,dtype=torch.float64)
+            self._value_global_step_phases.setdefault((self.canvas_id,self._canvas_step),set()).add('dense')
+            for mapping,k in [(self._value_phases,'dense'),(self._value_canvas_phases,(self.canvas_id,'dense'))]:
+                row=mapping.setdefault(k,[0,0,[]]);row[0]+=1;row[1]+=eligible;row[2].append(kept)
+            self._value_nonfinite_outputs.append(~torch.isfinite(out).all())
+        state['calls']+=1
+        return output
+    def receipt(self):
+        result=original_receipt()
+        if state['events']:torch.cuda.synchronize()
+        result.update(resident_allkept_execution=True,resident_allkept_calls=state['calls'],
+            resident_allkept_metadata_builds=state['metadata_builds'],resident_allkept_kv_copy_calls=0,
+            resident_allkept_gpu_ms=sum(a.elapsed_time(b) for a,b in state['events']) if state['events'] else None,
+            resident_allkept_consumer='native_paged_fa4_direct_output_persistent_metadata',
+            resident_allkept_extra_forwards=0)
+        return result
+    adapter.begin_request=types.MethodType(begin,adapter)
+    adapter.forward=types.MethodType(forward,adapter)
+    adapter._value_receipt=types.MethodType(receipt,adapter)
+    return state
+
 def install(adapter,*,splits=None,graph_buckets=False,v31_paged_refresh=False):
     from . import v27_fa4
     if adapter.arm!='mage' or adapter.cached_refresh_policy is not None or adapter.stable_refresh_config is not None:

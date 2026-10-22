@@ -23,12 +23,17 @@ def paired_report(out,scores,clean,audit):
  write(out/'paired_vs_v31.json',paired)
 
 def write_suite_markdown(out,suite,summary,cal):
- lines=[f'# {suite}: optimized refresh comparison','',f"V2 threshold {cal['threshold']:.12g}; calibration absolute first-canvas kept-work ratio {cal['absolute_work_ratio']:.5f}; matched={cal['matched']}. Calibration uses computation only. All timings below are the separate clean pass.",'','| Method | Correct | Accuracy | Mean W (s) | N/C | S/N (ms) | GLOBAL sparsity | Mean refresh (audit ms) |','|---|---:|---:|---:|---:|---:|---:|---:|']
+ lines=[f'# {suite}: optimized refresh comparison','',f"V2 threshold {cal['threshold']:.12g}; held calibration sparsity {100*cal['held_sparsity']:.2f}% from {cal['held_eligible_tiles']} eligible and {cal['held_kept_tiles']} kept physical GLOBAL tiles across {cal['calibration_cells']} calibration cells. Target range was 40-50%; in range={cal['in_target_range']}. Calibration uses computation only. Timings below are the separate clean pass.",'','| Method | Correct | Accuracy | Mean W (s) | N/C | S/N (ms) | GLOBAL sparsity | Held sparsity | Refresh (audit ms) | Held (audit ms) |','|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|']
  for arm,x in summary.items():
-  refresh=f"{x['mean_refresh_gpu_ms']:.3f}" if x['mean_refresh_gpu_ms'] is not None else '—'
-  lines.append(f"| {arm} | {x['correct']}/{x['cells']} | {100*x['accuracy']:.2f}% | {x['mean_W']:.4f} | {x['N_per_C']:.3f} | {1000*x['S_per_N']:.3f} | {100*x['global_sparsity']:.2f}% | {refresh} |")
- ref=summary['v31_optimized'];v2=summary['v2_online_optimized'];ratio=v2['first_canvas_kept']/ref['first_canvas_kept'];frac=(1-v2['first_canvas_sparsity'])-(1-ref['first_canvas_sparsity'])
- lines+=['',f'Full-panel absolute first-canvas kept-work V2/V31 ratio: {ratio:.5f}; retained-fraction difference {frac*100:+.4f}pp. This does not match total FLOPs: V2 repeats QK/routing across four channel groups and charges projection/packing.','', 'LOCAL/prefill stay dense. Inherited held/carry consumer and native adaptive stopping are preserved. Refresh-event measurements are audit-only; request/generation timings are clean. S/N is an amortized generation cost, not a measured single-forward price. Paired problem-clustered confidence intervals are in paired_vs_v31.json. Calibration and previously examined questions are not held-out evidence.']
+  refresh=f"{x['mean_refresh_gpu_ms']:.3f}" if x['mean_refresh_gpu_ms'] is not None else 'n/a'
+  held=x.get('phase_work',{}).get('held',{}).get('sparsity')
+  held_text=f'{100*held:.2f}%' if held is not None else 'n/a'
+  held_ms=x.get('resident_phase_timing',{}).get('held',{}).get('mean_gpu_ms')
+  held_time=f'{held_ms:.3f}' if held_ms is not None else 'n/a'
+  lines.append(f"| {arm} | {x['correct']}/{x['cells']} | {100*x['accuracy']:.2f}% | {x['mean_W']:.4f} | {x['N_per_C']:.3f} | {1000*x['S_per_N']:.3f} | {100*x['global_sparsity']:.2f}% | {held_text} | {refresh} | {held_time} |")
+ v2=summary['v2_online_optimized'];phases=v2.get('phase_work',{})
+ phase_summary='; '.join(f"{name}: {row['kept_tiles']}/{row['eligible_tiles']} kept ({100*row['sparsity']:.2f}% sparse)" for name,row in sorted(phases.items()) if row['eligible_tiles'])
+ lines+=['',f"V2 physical GLOBAL work by phase: {phase_summary}. First-canvas work is {v2['first_canvas_kept']}/{v2['first_canvas_eligible']} kept ({100*v2['first_canvas_sparsity']:.2f}% sparse); whole-request work is {v2['global_kept_tiles']}/{v2['global_eligible_tiles']} kept ({100*v2['global_sparsity']:.2f}% sparse).",'', 'LOCAL and prefill stay dense. Inherited native adaptive stopping and the resident direct-paged held consumer are preserved. Refresh and held event timing are audit-only; request/generation timing is clean. S/N is an amortized per-step cost, not a measured single-forward price. Paired problem-clustered confidence intervals are in paired_vs_v31.json. The full mandated coverage includes the four transductive calibration questions per workload; their prior exposure is disclosed and they are not held-out evidence.']
  (out/'summary.md').write_text('\n'.join(lines)+'\n')
 
 def campaign_report(study):
@@ -41,8 +46,8 @@ def campaign_report(study):
   except Exception:continue
   if 'worker_reservation_seconds' in x:reservations.append(dict(attempt=str(p.parent.relative_to(study)),seconds=x['worker_reservation_seconds']))
  write(study/'summary.json',rows);write(study/'resource_accounting.json',dict(worker_reservation_seconds=sum(x['seconds'] for x in reservations),workers=reservations,meaning='process elapsed reservations incl loading/JIT/warmup; not active GPU time'))
- lines=['# Optimized V2/V31 and dense baselines','', 'Complete native comparisons with current optimized kernels, thinking-on, one H100. AIME26 uses seeds42/43/44; MATH500, HumanEval164 and LongBench-v2 full503 use seed42. Fixed V31 prefix budgets:1728/1728/128/8192 tokens respectively. V2 thresholds were selected only from first-canvas computation work.','']
+ lines=['# Optimized V2/V31 and dense baselines','', 'Complete native comparisons with the frozen optimized kernels, thinking-on, one H100. AIME26 uses 30 questions x seeds42/43/44; MATH500 uses all500 questions, HumanEval all164 tasks, and LongBench-v2 all503 problems at seed42. Fixed V31 prefix budgets: K128/K128/K128/K8192 respectively. V2 thresholds were calibrated independently by workload to actual held GLOBAL physical-tile sparsity.','']
  for suite in SUITES:lines.append(f'- [{suite} results](analysis/{suite}/attempt001/summary.md)')
- lines+=['','Dense FULL includes fix51994; matched PIECEWISE and all-kept FA4 are also retained. V2 is an experimental online sparse refresh output, with full PV skipped after full QK/softmax/Gaussian32 projected PV. The inherited Yuhan cross-step reuse and Junyu value-direction router remain separately attributed. Read each suite receipt for actual work matching and confidence intervals.']
+ lines+=['','Dense FULL includes fix51994; matched PIECEWISE and all-kept FA4 are retained. V2 is an experimental online sparse refresh output, with full PV skipped after full QK/softmax/Gaussian32 projected PV. The inherited Yuhan cross-step reuse and Junyu value-direction router remain separately attributed. Each suite report lists per-phase physical work, accuracy, clean latency, audit event latency, paired uncertainty, and calibration evidence.']
  (study/'summary.md').write_text('\n'.join(lines)+'\n')
  write(study/'final_complete.json',dict(status='complete',utc=utc(),protocol_sha256=sha(study/'protocol.json'),summary_sha256=sha(study/'summary.json'),all_suites=list(SUITES),native_sampler_unchanged=True))

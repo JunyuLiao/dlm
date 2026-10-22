@@ -206,6 +206,14 @@ def main():
             rows[(ds, r['id'])] = r
     import torch
     import vllm
+    from vllm.utils import jit_monitor
+    request_jit = {'events': [], 'bound': False}
+    original_jit_event = jit_monitor._handle_jit_event
+    def record_request_jit(**event):
+        if request_jit['bound']:
+            request_jit['events'].append(event)
+        return original_jit_event(**event)
+    jit_monitor._handle_jit_event = record_request_jit
     captures = {'count': 0}
     original_capture_begin = torch.cuda.CUDAGraph.capture_begin
     def count_capture(graph, *args, **kwargs):
@@ -402,7 +410,11 @@ def main():
                                'cached_refresh_frequency')})
     out = open(out_path, 'a', encoding='utf-8')
     priv = open(private_path, 'a', encoding='utf-8')
-    schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]
+    if os.environ.get('OPTIMIZED_WARM_EACH_INPUT') == '1':
+        schedule = [entry for r in range(repeats) for c in cells
+                    for entry in [(True, c, r), (False, c, r)]]
+    else:
+        schedule = [(True, cells[0], -1)] + [(False, c, r) for r in range(repeats) for c in cells]
     diagnostic_requests = 0
     for schedule_index, (warm, cell, rep) in enumerate(schedule):
         row = rows[(cell['dataset'], cell['id'])]
@@ -426,6 +438,8 @@ def main():
         counter['calls'] = 0
         dispatch['counts']={}
         dispatch['bound']=os.environ.get('VALUE_AUDIT') == '1'
+        request_jit['events'] = []
+        request_jit['bound'] = True
         if forcing is not None:
             forcing.begin(seed, (cell['dataset'], cell.get('index'), cell['seed'], max(rep, 0)))
         torch.manual_seed(seed)
@@ -459,6 +473,7 @@ def main():
         if boundary_timing:
             torch.cuda.synchronize()
         finish=time.perf_counter()
+        request_jit['bound'] = False
         wall = finish - start
         if boundary_timing and (prefill_end is None or final is None):
             raise RuntimeError('missing native prefill boundary or final completion')
@@ -485,6 +500,8 @@ def main():
                    step_median_ms=round(1000 * statistics.median(decode), 3) if decode else None,
                    finish_reason=o.finish_reason,
                    cuda_graph_captures=captures['count']-capture_start,
+                   request_jit_event_count=len(request_jit['events']),
+                   request_jit_events=list(request_jit['events']),
                    cuda_graph_dispatch_counts=dict(dispatch['counts']) if os.environ.get('VALUE_AUDIT') == '1' else None,
                    peak_cuda_allocated_bytes=torch.cuda.max_memory_allocated(),
                    output_hash=hashlib.sha256(json.dumps(list(o.token_ids)).encode()).hexdigest()[:16],
