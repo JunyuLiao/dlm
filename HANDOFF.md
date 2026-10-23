@@ -1,3 +1,60 @@
+## Denoising trajectory diagnostics — 2026-10-23 UTC
+
+Verified checkpoint `22c7ba43` on `denoising_trajectory_research`. Current report:
+`results/denoising_dynamics_census_20261022/attempt001/execution004/report003/`.
+Production protocol `b89d910d`; corrected operator protocol `14eaf14a`.
+The broader native acceleration objective remains incomplete.
+
+Completed: dense observer qualification, all21 context-eligible native dense
+requests, official scoring, bounded preserved-state response/reuse diagnostics,
+22 focused CPU tests,26 integrity checks and all16 checkpoint file hashes.
+The observer passes output, prompt, active sampler-state, RNG and forward-count
+checks in the tested scope. Census receipts contain12320 observer RNG checks,
+zero native stopping reconstruction mismatches, zero request captures/JIT events
+and zero LOCAL skips. This does not certify full KV/page/layout state restoration.
+
+Dense results: AIME6/10, N2700/C208=12.981; HumanEval10/10,362/46=7.870;
+LongBench0/1,2780/64=43.438. The long item reaches the16384-token output cap,
+with21/64 cap canvases and2631/2780 confidence-limited calls. Every request
+contains one trailing uncommitted denoising call; use emitted C, not C_observed.
+Nine original LongBench prompts exceed262144 tokens and remain blocked by
+explicit user instruction, without truncation or replacement. Full30 is partial.
+
+Corrected FP64 operator audit:653 state/budget records,635 distinct physical
+supports across84 groups; all finite-difference gates pass. Inputs are inherited
+V31 trajectories, one layer, two heads and four sampled rows, not dense native
+forks. Held-out response/error correlations are AIME0.906/0.917 and
+LongBench0.869/0.919. Response selection versus current-error selection gives
+0 lower/22 equal/2 higher future attention-bias-motion groups on AIME, and
+5/15/4 on LongBench. These correlated diagnostic groups are not task outcomes.
+All1481 partial-support norm certificates fall below0.5, with no bound violations;
+all-kept certificates are exactly1. Original FP32 and duplicate-support results
+remain preserved. Candidate readout reproduces exactly.
+
+Decision: no cheap ResponseGuard proxy or native benchmark; MarginGuard remains
+untested; this norm-bound ValidityReuse is too conservative. Full native state
+snapshot/restore and same-support continuation are the next engineering gate,
+followed by exact downstream influence diagnostics. No accuracy preservation,
+native trajectory acceleration, novelty or speedup is established. Clean S/SN/W
+and matched PIECEWISE/all-kept/V31 native controls were not run in this stage.
+
+Running: none. H100 closeout0MiB/0%, no compute clients. Conservative launched
+worker reservation1284.865s includes startup, warmup, failures and shutdown; it
+is not active GPU time or clean latency. Exact commands and integrity receipt
+are in the report. Failed executions001/002/003 remain intact; no paused
+campaign resumed. Legacy STATE.json and RESULTS_LEDGER remain unchanged.
+
+Replay addendum (spec checkpoint `15bc18d3`): native_replay001 passes logical
+KV/input/logit/sampler/RNG equality across all 30 layers at 12 sampler boundaries
+on HumanEval/53. Five measured requests agree at 275 tokens, 12 sampler calls
+and 13 model executions; zero extra forwards or request captures/JIT events.
+Physical page assignments differ. Two additional CPU tests pass. This is
+separate complete native request replay, not in-place restoration; causal
+support interventions remain gated. Additional worker reservation 179.500 s;
+combined conservative reservation 1464.365 s. No new selector is promoted.
+The existing suffix oracle is unsuitable for this study because it performs
+extra forwards and includes cached-output interventions.
+
 ## Authorized three-panel follow-up complete — 2026-10-23 UTC
 
 Verified source checkpoint `33823ef4` plus exact frozen dependency-fix hashes.

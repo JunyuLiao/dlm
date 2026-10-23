@@ -1,0 +1,105 @@
+[
+  {
+    "command": [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=30s",
+      "1800",
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/code/worker.py",
+      "--root",
+      "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004",
+      "--stage",
+      "census",
+      "--group",
+      "long"
+    ],
+    "environment_overrides": {
+      "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/cuda",
+      "HF_HUB_OFFLINE": "1",
+      "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+      "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/inductor",
+      "TORCHINDUCTOR_DETERMINISTIC": "1",
+      "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/triton",
+      "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/vllm",
+      "VLLM_USE_V2_MODEL_RUNNER": "1"
+    },
+    "gpu_prelaunch": "",
+    "receipt": "census_long_launch.json",
+    "started_unix": 1792775676.2701285
+  },
+  {
+    "command": [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=30s",
+      "1800",
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/code/worker.py",
+      "--root",
+      "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004",
+      "--stage",
+      "census",
+      "--group",
+      "short"
+    ],
+    "environment_overrides": {
+      "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/cuda",
+      "HF_HUB_OFFLINE": "1",
+      "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+      "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/inductor",
+      "TORCHINDUCTOR_DETERMINISTIC": "1",
+      "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/triton",
+      "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/vllm",
+      "VLLM_USE_V2_MODEL_RUNNER": "1"
+    },
+    "gpu_prelaunch": "",
+    "receipt": "census_short_launch.json",
+    "started_unix": 1792775344.8564928
+  },
+  {
+    "cache_initialization": "copy of execution003 cache; source cache unchanged",
+    "command": [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=30s",
+      "1800",
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/code/worker.py",
+      "--root",
+      "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004",
+      "--stage",
+      "smoke"
+    ],
+    "environment_overrides": {
+      "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/cuda",
+      "HF_HUB_OFFLINE": "1",
+      "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+      "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/inductor",
+      "TORCHINDUCTOR_DETERMINISTIC": "1",
+      "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/triton",
+      "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/vllm",
+      "VLLM_USE_V2_MODEL_RUNNER": "1"
+    },
+    "gpu_prelaunch": "",
+    "receipt": "smoke_launch.json",
+    "spec_commit": "11f426f13c645b4dc6db9a9675a03ebf3cda0479",
+    "started_unix": 1792775115.29912
+  },
+  {
+    "command": [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=30s",
+      "900",
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/operator_diagnostic001/code/diagnose.py",
+      "--device",
+      "cuda"
+    ],
+    "gpu_prelaunch": "",
+    "receipt": "operator_diagnostic001/launch_receipt.json",
+    "spec_commit": "8ce3574acbb3af1521b9f2fbf746f243037bf8f6",
+    "started_unix": 1792777543.2903144
+  }
+]

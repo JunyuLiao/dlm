@@ -1,0 +1,104 @@
+{
+  "checks": {
+    "agents_unchanged": true,
+    "cpu24_passed": true,
+    "gpu_idle": true,
+    "ledger_unchanged": true,
+    "original_identity_unchanged": true,
+    "original_protocol_unchanged": true,
+    "original_receipt_unchanged": true,
+    "previous26_checks_passed": true,
+    "previous_artifacts_unchanged": true,
+    "prior_HANDOFF.md_preserved": true,
+    "prior_docs_DECISIONS.md_preserved": true,
+    "replay_all30_layers_all12_boundaries": true,
+    "replay_all5_native_counters_match": true,
+    "replay_frozen_sources_match": true,
+    "replay_marker_protocol_matches": true,
+    "replay_no_extra_forwards": true,
+    "replay_passed": true,
+    "replay_rng_and_sampler_parity": true
+  },
+  "cpu_tests": {
+    "errors": "0",
+    "failures": "0",
+    "hostname": "megakernel",
+    "name": "pytest",
+    "skipped": "0",
+    "tests": "24",
+    "time": "1.888",
+    "timestamp": "2026-10-23T19:03:16.099630+00:00"
+  },
+  "eligible_dense_complete": true,
+  "full30_complete": false,
+  "full_state_fork_restore_validated": false,
+  "head": "15bc18d3ed8b0a2ebd1bcdbda57135e4f0432f47",
+  "native_selector_promotion": false,
+  "passed": true,
+  "replay_physical_page_layout_equal": false,
+  "reservations": [
+    {
+      "attempt": "execution001",
+      "exit": -15,
+      "seconds": 141.95726537704468,
+      "stage": "smoke_launch"
+    },
+    {
+      "attempt": "execution002",
+      "exit": 1,
+      "seconds": 24.30452275276184,
+      "stage": "smoke_launch"
+    },
+    {
+      "attempt": "execution003",
+      "exit": 1,
+      "seconds": 200.47333025932312,
+      "stage": "smoke_launch"
+    },
+    {
+      "attempt": "execution004",
+      "exit": 0,
+      "seconds": 454.47420263290405,
+      "stage": "census_long_launch"
+    },
+    {
+      "attempt": "execution004",
+      "exit": 0,
+      "seconds": 265.56276202201843,
+      "stage": "census_short_launch"
+    },
+    {
+      "attempt": "execution004",
+      "exit": 0,
+      "seconds": 159.88855600357056,
+      "stage": "smoke_launch"
+    },
+    {
+      "attempt": "operator_diagnostic001",
+      "exit": 0,
+      "seconds": 15.916511058807373
+    },
+    {
+      "attempt": "operator_diagnostic002",
+      "exit": 0,
+      "seconds": 22.287720680236816
+    },
+    {
+      "attempt": "native_replay001",
+      "returncode": 0,
+      "seconds": 179.49986481666565
+    }
+  ],
+  "reserved_wall_seconds": 1464.3647356033325,
+  "resource_definition": "Conservative launched-worker wall time including startup, warmup, failures and shutdown; not active GPU utilization or clean request latency",
+  "schema": "denoising_diagnostic_closeout_v1",
+  "source_hashes": {
+    "experiments/diffusion_gemma_sparse_attention_research/dynamics_screen.py": "8ca3b695899e229df5cdd48fa87e84a382f2a074875b4118265dcc20a3ae0c9d",
+    "experiments/diffusion_gemma_sparse_attention_research/native_observer.py": "bdf2a9d4c2ce4b51ef1328f85d3cf9026de044e49dae9b637fe9e41ca57e296b",
+    "experiments/diffusion_gemma_sparse_attention_research/trajectory_dynamics.py": "f860fd1ddc7cbb33e197ce8e2ddcc2405bc3e889f185263337d843cf8cf2c42e",
+    "scripts/run_denoising_dynamics_census.py": "1af3caf21c8a85e10c4ab11425a9117e0e475b8161997c1882e60a5ce9ec8ffc",
+    "tests/test_dynamics_screen_protocol.py": "fc255abbd5ca240a6c3be853253d7bbb3aefe87df225a9ca55f6db14d1deffc4",
+    "tests/test_trajectory_dynamics.py": "2ebdecac790b09a5ef3ca099b20a5e1c9740896e8699fd25d5a90448d309e03d"
+  },
+  "verified_unix": 1792782472.0916932
+}

@@ -1,0 +1,31 @@
+{
+  "created_utc": "2026-10-23T16:36:28.036077+00:00",
+  "head": "dea3b7de2833a8131fe2500312420fe873bd3c0e",
+  "branch": "denoising_trajectory_research",
+  "initial_tracked_status": " M AGENTS.md\n M HANDOFF.md\n M docs/DECISIONS.md\n",
+  "initial_sha256": {
+    "AGENTS.md": "f5d12b950f6337f253f3c2f8d302a41ae93650086eb36752ef47a7dc014d4117",
+    "HANDOFF.md": "1e4969faced608d21a9f4000aeb9f0fef4cd77b67836fd5dcc9f12bcea851478",
+    "docs/DECISIONS.md": "0eb511f9b7c27a2754bf9e04aa1e5a0f0f7f12ce6dd0e06de5c61353107365a1",
+    "docs/RESULTS_LEDGER.md": "18eba4a2e7f739cb787a744ce062ffa2011390c3e0ba5e0401def81b68f023c9",
+    "experiments/diffusion_gemma_sparse_attention_research/native_observer.py": "bdf2a9d4c2ce4b51ef1328f85d3cf9026de044e49dae9b637fe9e41ca57e296b",
+    "scripts/run_denoising_dynamics_census.py": "1af3caf21c8a85e10c4ab11425a9117e0e475b8161997c1882e60a5ce9ec8ffc"
+  },
+  "existing_attempt_protocol_sha256": "1579bb5f440057d04042a27b45f9a2389adbfc89b5beb61d9698ccb901633ec5",
+  "existing_attempt_receipt_sha256": "0187a8413d4ff72e4e4626c20db3944976c251a608cb035e4e81ae487d2ec27f",
+  "over_limit_policy": "blocked; no truncation or replacement, explicitly confirmed by user",
+  "initial_focused_cpu_tests": {
+    "passed": 10,
+    "failed": 0,
+    "command": "PYTHONPATH=src:. /home/exouser/dyh/v31_env_20261005/bin/python -m pytest -q tests/test_trajectory_dynamics.py tests/test_dynamics_screen_protocol.py"
+  },
+  "cuda_probe": {
+    "sandbox_available": false,
+    "outside_sandbox_available": true,
+    "torch": "2.13.0+cu130",
+    "gpu": "NVIDIA H100 80GB HBM3",
+    "device_count": 1
+  },
+  "service_manager_visibility": "sandbox connection denied; compute clients checked directly",
+  "historical_attempts_resumed": false
+}

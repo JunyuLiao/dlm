@@ -1,0 +1,105 @@
+{
+  "arms": [
+    "dense_full_fix51994"
+  ],
+  "base_head": "dea3b7de2833a8131fe2500312420fe873bd3c0e",
+  "blocked_ids": [
+    "longbench_v2/66ebdd1c5a08c7b9b35e113b",
+    "longbench_v2/66f1ae08821e116aacb27c9c",
+    "longbench_v2/66f24538821e116aacb2865e",
+    "longbench_v2/66f2a46d821e116aacb2a41a",
+    "longbench_v2/66f94f9ebb02136c067c4fde",
+    "longbench_v2/66fa2734bb02136c067c627a",
+    "longbench_v2/66fcfd6fbb02136c067c9454",
+    "longbench_v2/6700d19dbb02136c067cb024",
+    "longbench_v2/67040983bb02136c067cd996"
+  ],
+  "eligible_ids": [
+    "longbench_v2/66ec2755821e116aacb1b6f2",
+    "aime26/18",
+    "aime26/7",
+    "aime26/9",
+    "aime26/29",
+    "aime26/5",
+    "aime26/3",
+    "aime26/12",
+    "aime26/13",
+    "aime26/30",
+    "aime26/19",
+    "humaneval/HumanEval/70",
+    "humaneval/HumanEval/42",
+    "humaneval/HumanEval/53",
+    "humaneval/HumanEval/124",
+    "humaneval/HumanEval/144",
+    "humaneval/HumanEval/71",
+    "humaneval/HumanEval/25",
+    "humaneval/HumanEval/86",
+    "humaneval/HumanEval/49",
+    "humaneval/HumanEval/30"
+  ],
+  "failed_item_policy": "preserve failures and blocks; no truncation, replacement, forced continuation or altered native settings",
+  "long_max_model_len": 202752,
+  "model_path": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "native_sampler": {
+    "canvas_length": 256,
+    "confidence_threshold": 0.005,
+    "entropy_bound": 0.1,
+    "max_denoising_steps": 48,
+    "re_noise": "uniform native sampler for rejected positions",
+    "seed": 42,
+    "self_conditioning": "native processed logits",
+    "stability_threshold": 1,
+    "stopping": "whole-canvas stability AND mean processed-logit entropy; native EOS/finalization unchanged",
+    "temperature_schedule": "t_min=0.4, t_max=0.8, linear native schedule",
+    "thinking": true
+  },
+  "original_identity_sha256": "069a01ae660a79d87d6ba2306e52f79474522ca805d73ad21a991795f752af39",
+  "original_protocol_sha256": "1579bb5f440057d04042a27b45f9a2389adbfc89b5beb61d9698ccb901633ec5",
+  "phases_2_3_gate": "No intervention or selector before exact full-state fork restore and held-out diagnostic evidence",
+  "private_tokenized_manifest_sha256": "8b2611a6d2f0599d5bbee17138714aa1152d177064ea4e367a57b026ed065547",
+  "purpose": "Dense native FULL diagnostic only; no sparse method or clean timing claim",
+  "resources": {
+    "gpu": "one idle H100",
+    "max_reservation_seconds": 1800,
+    "no_preemption": true,
+    "workers_per_gpu": 1
+  },
+  "schema": "denoising_dynamics_production_v1",
+  "seed_policy": "original manifest seed unchanged, 42; no per-canvas reseeding",
+  "short_max_model_len": 12288,
+  "smoke_gate": {
+    "required": [
+      "identical output tokens hash",
+      "identical prompt tokens hash",
+      "identical sampler and model forward counts",
+      "identical final CPU/CUDA RNG states",
+      "identical active per-call sampler state hashes",
+      "zero observer RNG changes",
+      "zero reconstructed native stopping predicate mismatches"
+    ],
+    "sequence": [
+      "warm",
+      "off_before",
+      "minimal_before",
+      "rich",
+      "minimal_after",
+      "off_after"
+    ]
+  },
+  "smoke_item": "humaneval/HumanEval/53",
+  "sources": {
+    "/home/exouser/dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/model_executor/models/diffusion_gemma.py": "748157602927082f5fd95f96bec5ac43b55d1e34a42094f0ab5e5ddc6acb0146",
+    "/home/exouser/ljy/dlm/experiments/numerical_qk_reuse/v31_value_native_audit.py": "ef1ee7711dadf318b96aa2e6009ffb4d0dd4f3ded1c6f2d9d45fde760a97e766",
+    "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution001/code/prepare.py": "763655745fef5ea011cb93fdeb1b3cbd6053244ee10169a5063568658f751d09",
+    "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution001/code/production_observer.py": "855db252677f97e8ed72b91df914aae51722fe0eba326d0920db47dd2e312cf6",
+    "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution001/code/worker.py": "0e74a035fa5de19e70b0840a16bac503e57bb58747a18e8f55369d65700b6909",
+    "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution001/tests/test_production_observer.py": "ba71b3054d20d37302e1521642ef3b31b072aa06e47c5f15432a200f8e19eefd",
+    "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/manifest_identity.json": "069a01ae660a79d87d6ba2306e52f79474522ca805d73ad21a991795f752af39",
+    "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/private/manifest.json": "7ffb721ced064647643d9c3d7e96996bc9f6ea7e641cd7bf006790458b26ae09",
+    "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/protocol.json": "1579bb5f440057d04042a27b45f9a2389adbfc89b5beb61d9698ccb901633ec5",
+    "/home/exouser/ljy/dlm/scripts/v31_humaneval_cfgdet_base_worker.py": "b50d3c9016a5c59f676f719b1bff6d034c2bc45cbf255d35aefae7947e79fcc5",
+    "/home/exouser/ljy/dlm/scripts/v31_humaneval_repro_policy_worker.py": "d9ef94f9aba610fcaf3f13e1a232d5df337a9e7e1a80fd453ae997237bcb98d6"
+  },
+  "state_reproduction_scope": "Within-engine active sampler-state/output parity; full KV/layout fork restore is a separate Phase 2 gate"
+}

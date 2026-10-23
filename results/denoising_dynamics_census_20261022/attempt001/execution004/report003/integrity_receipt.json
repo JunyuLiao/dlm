@@ -1,0 +1,122 @@
+{
+  "artifact_sha256": {
+    "gpu_closeout.json": "758ed75cd19af58ce759c968a0740b756a955207eecebb1ccc7fa3522c52b523",
+    "model_verification.json": "cb3c1afe69c6b96edc1fdd9e9985431f1354e5e7930368ebf65fc7eb70e593b3",
+    "operator_diagnostic002/candidate_readout.json": "f37e322e162fcf60a9531fa0d7e5bd95434c53d069b262816a524ce04a009735",
+    "report003/COMMANDS.md": "1b8b535f7e75dd922f1d58ea6b95309eafff40612fcf6bf347ab7cd3d6127a5f",
+    "report003/analysis_complete.json": "53d093352c9542299cb88289ca8311a761a02e9cf96687b9364b5ac1e025f127",
+    "report003/analysis_input_hashes.json": "57262540986d45e92685a37f4adac619f8dfcbbdb50cfa4324bf9e166fda3383",
+    "report003/command_receipts.json": "0b6477a7eaa7765e0805fb0e97a26153bafcfbfedf670f805ce7704a182543ec",
+    "report003/method_decisions.json": "cfcf3d4481bec7f05cba7e3025b257594c4eae04a9f5819de8966833c2357cc0",
+    "report003/native_curves.pdf": "f5773d49ddb354d65ae4d422a36f52922a4ba347e43cc388984c9eb405bb19b8",
+    "report003/native_curves.png": "ad0b51e08b08812f72c0fbf20fa280c3c5e414db5e0af12ba69d2b63f846d86a",
+    "report003/native_stopping.pdf": "a7e0bfd1d7a327bbbad3f36c3a8bae4632e9b0e9104684e3a1b0c1c7e0dee654",
+    "report003/native_stopping.png": "184deb115eb67518359b3a2b1c327370dea738200557fbce93a5355ab5ab1a30",
+    "report003/numerical_audit.json": "5e60f78f92c9ab13c70265f93eeb9091ee29cde7bf30961da159ce42e5fe4553",
+    "report003/operator_response.pdf": "26d8defbb5585ace2908b54c562e3f066ff6124b968e833ef6027721b76693e0",
+    "report003/operator_response.png": "d74cb978217464cfffffcf5ea7cc6aff0413f28fab120fb458dd7d67257b45c8",
+    "report003/per_item_metrics.json": "64cc9aa798238a615a8299dfa337670c34926ac908af3cea51c008a7aaa93ca7",
+    "report003/summary.json": "211ae0de7d9f3c30acff507a5ca873757fb7b2726d363c7369f9372592e13fe7",
+    "report003/summary.md": "171232718144420e471742d11eabafef4077433f6c6b430af4a2f3ac0d25e933",
+    "tests/final_cpu.xml": "4b602232f2f3c7f6f9d23a6cde8b3a6877eef35912af4bddb8d76772d59b7e0a"
+  },
+  "checks": {
+    "all21_record_gates_passed": true,
+    "analysis_input_hashes_match": true,
+    "candidate_readout_reproduced": true,
+    "corrected_operator_finite_difference_all653_pass": true,
+    "eligible_coverage_exact": true,
+    "focused_cpu_22_pass": true,
+    "gpu_idle_at_closeout": true,
+    "long_marker": true,
+    "model_inventory_all16_match": true,
+    "nine_context_blocks_preserved": true,
+    "observer_smoke_passed": true,
+    "official_score_bindings_pass": true,
+    "operator_diagnostic001_inputs_match": true,
+    "operator_diagnostic001_marker_match": true,
+    "operator_diagnostic001_source_match": true,
+    "operator_diagnostic002_inputs_match": true,
+    "operator_diagnostic002_marker_match": true,
+    "operator_diagnostic002_source_match": true,
+    "original_identity_unchanged": true,
+    "original_private_manifest_unchanged": true,
+    "original_protocol_unchanged": true,
+    "production_sources_match": true,
+    "report_marker_match": true,
+    "score_coverage_exact": true,
+    "short_marker": true,
+    "tokenized_manifest_unchanged": true
+  },
+  "full30_complete": false,
+  "full_state_fork_restore_validated": false,
+  "head": "22c7ba43413530c6e1837eb941d4c746729f1729",
+  "native_selector_promotion": false,
+  "observer_rng_checks": 12320,
+  "passed": true,
+  "records": 21,
+  "reservations": [
+    {
+      "attempt": "execution001",
+      "exit": -15,
+      "seconds": 141.95726537704468,
+      "stage": "smoke_launch"
+    },
+    {
+      "attempt": "execution002",
+      "exit": 1,
+      "seconds": 24.30452275276184,
+      "stage": "smoke_launch"
+    },
+    {
+      "attempt": "execution003",
+      "exit": 1,
+      "seconds": 200.47333025932312,
+      "stage": "smoke_launch"
+    },
+    {
+      "attempt": "execution004",
+      "exit": 0,
+      "seconds": 454.47420263290405,
+      "stage": "census_long_launch"
+    },
+    {
+      "attempt": "execution004",
+      "exit": 0,
+      "seconds": 265.56276202201843,
+      "stage": "census_short_launch"
+    },
+    {
+      "attempt": "execution004",
+      "exit": 0,
+      "seconds": 159.88855600357056,
+      "stage": "smoke_launch"
+    },
+    {
+      "attempt": "operator_diagnostic001",
+      "exit": 0,
+      "seconds": 15.916511058807373
+    },
+    {
+      "attempt": "operator_diagnostic002",
+      "exit": 0,
+      "seconds": 22.287720680236816
+    }
+  ],
+  "reserved_wall_seconds": 1284.8648707866669,
+  "resource_definition": "Conservative launched-worker wall time including startup, warmup, failures and shutdown; not active GPU utilization or clean request latency",
+  "schema": "denoising_diagnostic_integrity_v1",
+  "tests": [
+    {
+      "errors": "0",
+      "failures": "0",
+      "hostname": "megakernel",
+      "name": "pytest",
+      "skipped": "0",
+      "tests": "22",
+      "time": "1.881",
+      "timestamp": "2026-10-23T18:24:20.773981+00:00"
+    }
+  ],
+  "verified_unix": 1792780217.3499095
+}

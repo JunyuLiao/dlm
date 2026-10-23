@@ -3549,3 +3549,59 @@ report results/v2_execution_results_20261023/attempt001 pins sources and scores.
 LongBench guard stops coordinator before worker launch, expected exit1. Original
 four-panel attempt stays partial; authorized three-panel report is complete.
 Final H100 idle. Preserve negative candidates, old attempts, all private evidence.
+
+## 2026-10-23 — Qualify eligible dense trajectory census; retain mixed response results
+
+Checkpoint22c7ba43; source-bound report:
+results/denoising_dynamics_census_20261022/attempt001/execution004/report003.
+Original attempt001 protocol, identity and receipt remain unchanged. Nine
+LongBench prompts exceed the native context limit; the user explicitly keeps
+them blocked without truncation or replacement. Full30 is not complete.
+
+The production FULL+fix51994 observer passes bounded output, active sampler
+state, prompt, RNG and forward-count equality checks. Twenty-one eligible dense
+requests finish and receive official scores: AIME6/10,N2700/C208=12.981;
+HumanEval10/10,362/46=7.870; LongBench0/1,2780/64=43.438. The long item
+is output-capped, with21/64 cap canvases and2631/2780 confidence-limited calls.
+All21 requests include a trailing uncommitted call; emitted C and observed
+intervals must remain distinct.12320 observer RNG checks, zero reconstructed
+stopping mismatches/captures/JIT/LOCAL skips;22 CPU tests and26 integrity checks
+pass. All16 model files match hashes. Full KV/page/layout fork restoration
+is not implemented or validated; this is not a native causal certificate.
+
+Preserved-state operator diagnostics use inherited V31 trajectories, layer29,
+heads0/8 and four sampled rows. Preserve the FP32/duplicate-mask predecessor.
+Corrected FP64 audit has653 state/budget records,635 distinct physical supports
+and zero finite-difference failures. Renormalization identity error4.44e-16.
+Q/K/V motion is measured separately; current-canvas deletion is not tested.
+Held-out response/error correlations are AIME0.906/0.917, LongBench0.869/0.919.
+Response selection versus current-error selection yields0/22/2 lower/equal/higher
+future attention-bias-motion groups on AIME and5/15/4 on LongBench. This mixed
+attention-level evidence does not justify a cheap ResponseGuard proxy or native
+benchmark. MarginGuard remains untested. No downstream logit/acceptance,
+correction/break or final-answer continuation oracle was measured.
+
+All1481 partial-support norm bounds fall below0.5, without violation; all-kept
+certificates are exactly1. Reject this bound as evidence for selective refresh,
+not the entire validity family. Next gate: exact full native state restore and
+same-support continuation before downstream influence interventions. Preserve
+Yuhan's original reuse and separate Gaussian32/C-gate/V31/V2 lineages. No
+speedup, accuracy preservation, novelty or trajectory acceleration established.
+No clean timing, matched sparse native panel, paused-campaign resume or
+RESULTS_LEDGER entry. H100 idle at closeout; only diagnostic leaf markers close.
+
+### Dense native request replay qualification addendum
+
+Pre-generation checkpoint `15bc18d3`; native_replay001 protocol `0c3356de`.
+The same five measured native requests match output/prompt identity, 275 tokens,
+12 sampler calls, 13 model executions and RNG. Three observed runs match
+logical KV across all 30 layers at each of 12 sampler boundaries, current model
+inputs, native logits and active sampler state; physical page-table hashes
+differ. Two CPU tests pass; no request captures/JIT or extra model forwards.
+Do not equate logical request replay with in-place full native restoration or
+a native causal intervention gate. No sparse selector is promoted. The existing
+last-layer suffix oracle performs extra forwards and includes cached-output
+variants, so it cannot satisfy this study's constraints. Native full-state
+restoration and same-support continuation remain the next engineering work.
+Additional reservation 179.500 s; combined 1464.365 s, neither clean latency nor
+active utilization. Original census/report and blocked LongBench IDs unchanged.

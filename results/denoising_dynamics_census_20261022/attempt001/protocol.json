@@ -1,0 +1,50 @@
+{
+  "arms": [
+    "dense_native_hf"
+  ],
+  "counts": {
+    "aime26": 10,
+    "humaneval": 10,
+    "longbench_v2": 10
+  },
+  "instrumentation": "opt-in read-only denoising-step observer; no extra forwards, no RNG draws, no sampler replacement",
+  "native_sampler": {
+    "canvas_length": 256,
+    "confidence_threshold": 0.005,
+    "entropy_bound": 0.1,
+    "max_denoising_steps": 48,
+    "re_noise": "uniform native sampler for rejected positions",
+    "seed": 42,
+    "self_conditioning": "native processed logits",
+    "stability_threshold": 1,
+    "stopping": "whole-canvas stability AND mean processed-logit entropy; native EOS/finalization unchanged",
+    "temperature_schedule": "t_min=0.4, t_max=0.8, linear native schedule",
+    "thinking": true
+  },
+  "public_identity_sha256": "bfb37f46e63d22d41173c1a5118a6049a5736b50ed65185832d2d6b1abf04645",
+  "purpose": "D0 native trajectory census before any sparse-selector rollout",
+  "schema": "denoising_dynamics_census_v1",
+  "selection": "SHA256 ordering within each pinned source; ten AIME26, ten LongBench-v2 long-band, ten HumanEval; no score or dense-call filtering",
+  "sources": {
+    "aime_manifest": {
+      "path": "/home/exouser/ljy/dlm/results/v31_value_matrix_20261011/private/aime26/aime26_generation_manifest.json",
+      "sha256": "85ebd2dd8d26ede269d4c5555279e9e2b79637c3f95036452c624e03e8122f39"
+    },
+    "humaneval_manifest": {
+      "path": "/home/exouser/ljy/dlm/results/v31_value_matrix_20261011/private/quick100/humaneval_generation_manifest.json",
+      "sha256": "42d8448c14a5665d8ee91d02035ab048962814643abcc7f03d8b6bcd0baee55b"
+    },
+    "longbench_data": {
+      "path": "/home/exouser/.cache/huggingface/hub/datasets--THUDM--LongBench-v2/snapshots/2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9/data.json",
+      "revision": "2b48e494f2c7a2f0af81aae178e05c7e1dde0fe9",
+      "sha256": "15d61c22d92c96900b3c4948b6aeea218d3214b676a65df48e7b8555604c7fe2"
+    },
+    "longbench_official_code": {
+      "pred.py": "ab63f77866a1c0dc770582bc3fe6b014c3b4be4667399b0ee267075780c6a138",
+      "prompts/0shot.txt": "68a162252bc9ff71d5d7abca3d69bb31aac3c35f832d657a2866f2018b8a6950",
+      "result.py": "b6675c1c0b72090c01e12c94d3b176c4991fe38ceed9a301d24d22b1997465bd"
+    },
+    "model_path": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+    "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "checked_unix": 1792782202.5578058,
+  "checks": [
+    {
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=name,uuid,driver_version,memory.used,utilization.gpu",
+        "--format=csv,noheader"
+      ],
+      "returncode": 0,
+      "stdout": "NVIDIA H100 80GB HBM3, GPU-1ef41b0c-39fa-fea6-ec30-392d06c5e0ee, 590.48.01, 0 MiB, 0 %\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "nvidia-smi",
+        "--query-compute-apps=pid,process_name,used_gpu_memory",
+        "--format=csv,noheader"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "idle": true
+}

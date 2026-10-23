@@ -1,0 +1,56 @@
+{
+  "aggregates": {
+    "development/aime26": {
+      "current_error_vs_future_bias_motion_spearman": 0.9399020141535113,
+      "feasible_fraction": 0.5,
+      "matched_pair_concordance": null,
+      "matched_pairs": 0,
+      "records": 96,
+      "response_vs_future_bias_motion_spearman": 0.9080021774632554
+    },
+    "development/longbench_v2_0shot_think": {
+      "current_error_vs_future_bias_motion_spearman": 0.8684801961794572,
+      "feasible_fraction": 0.4356060606060606,
+      "matched_pair_concordance": 0.6204081632653061,
+      "matched_pairs": 980,
+      "records": 264,
+      "response_vs_future_bias_motion_spearman": 0.8814046918717268
+    },
+    "heldout/aime26": {
+      "current_error_vs_future_bias_motion_spearman": 0.9333272454337679,
+      "feasible_fraction": 0.6060606060606061,
+      "matched_pair_concordance": 0.6190476190476191,
+      "matched_pairs": 21,
+      "records": 132,
+      "response_vs_future_bias_motion_spearman": 0.9153592751691869
+    },
+    "heldout/longbench_v2_0shot_think": {
+      "current_error_vs_future_bias_motion_spearman": 0.9194757677934374,
+      "feasible_fraction": 0.4810606060606061,
+      "matched_pair_concordance": 0.7104994903160041,
+      "matched_pairs": 981,
+      "records": 264,
+      "response_vs_future_bias_motion_spearman": 0.8688421629306914
+    }
+  },
+  "clean_timing": false,
+  "diagnostic_attention_evaluations": 4032,
+  "finite_difference_relative_error_median": 0.007373385364189744,
+  "go_no_go": "NO_GO: native continuation and held-out logit/correction evidence are absent; operator correlations alone cannot promote a selector",
+  "limitations": [
+    "Inherited V31 on-policy states, not new dense census states",
+    "One layer, two heads, four sampled rows, first canvas only",
+    "Q/K/V changes are observed displacements, not future predictors",
+    "No downstream logits, acceptance or task outcome supervision",
+    "Pairwise masks are correlated within requests; descriptive only"
+  ],
+  "native_model_forwards": 0,
+  "native_promotion": false,
+  "native_rng_draws": 0,
+  "protocol_sha256": "a1c804b00ba11108831c1d5637e3a178a19ab27fe1b7889071a7be998cbb7d37",
+  "records": 756,
+  "renormalization_identity_max_abs": 2.980232238769531e-07,
+  "resource_seconds": 13.138569526840001,
+  "validity_bound_below_half_fraction": 1.0,
+  "validity_bound_max_violation": -0.0001100301742553711
+}

@@ -1,0 +1,28 @@
+{
+  "command": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=30s",
+    "1800",
+    "/home/exouser/dyh/v31_env_20261005/bin/python",
+    "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/code/worker.py",
+    "--root",
+    "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004",
+    "--stage",
+    "smoke"
+  ],
+  "environment_overrides": {
+    "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+    "HF_HUB_OFFLINE": "1",
+    "TORCHINDUCTOR_DETERMINISTIC": "1",
+    "VLLM_USE_V2_MODEL_RUNNER": "1",
+    "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/vllm",
+    "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/triton",
+    "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/inductor",
+    "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_dynamics_census_20261022/attempt001/execution004/cache/cuda"
+  },
+  "gpu_prelaunch": "",
+  "started_unix": 1792775115.29912,
+  "spec_commit": "11f426f13c645b4dc6db9a9675a03ebf3cda0479",
+  "cache_initialization": "copy of execution003 cache; source cache unchanged"
+}

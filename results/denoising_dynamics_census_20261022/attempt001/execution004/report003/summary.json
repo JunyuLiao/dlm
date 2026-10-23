@@ -1,0 +1,353 @@
+{
+  "blocked_ids": [
+    "longbench_v2/66ebdd1c5a08c7b9b35e113b",
+    "longbench_v2/66f1ae08821e116aacb27c9c",
+    "longbench_v2/66f24538821e116aacb2865e",
+    "longbench_v2/66f2a46d821e116aacb2a41a",
+    "longbench_v2/66f94f9ebb02136c067c4fde",
+    "longbench_v2/66fa2734bb02136c067c627a",
+    "longbench_v2/66fcfd6fbb02136c067c9454",
+    "longbench_v2/6700d19dbb02136c067cb024",
+    "longbench_v2/67040983bb02136c067cd996"
+  ],
+  "candidate_selection_readout": {
+    "development/aime26": {
+      "fallback_groups": 3,
+      "groups": 12,
+      "same_support_as_error": 12,
+      "versus_error": {
+        "equal": 12,
+        "higher": 0,
+        "lower": 0,
+        "mean_delta": 0.0
+      },
+      "versus_mass": {
+        "equal": 12,
+        "higher": 0,
+        "lower": 0,
+        "mean_delta": 0.0
+      },
+      "versus_sham": {
+        "equal": 12,
+        "higher": 0,
+        "lower": 0,
+        "mean_delta": 0.0
+      }
+    },
+    "development/longbench_v2_0shot_think": {
+      "fallback_groups": 13,
+      "groups": 24,
+      "same_support_as_error": 21,
+      "versus_error": {
+        "equal": 21,
+        "higher": 2,
+        "lower": 1,
+        "mean_delta": 0.0004342623061230374
+      },
+      "versus_mass": {
+        "equal": 13,
+        "higher": 6,
+        "lower": 5,
+        "mean_delta": -5.873876803085445e-05
+      },
+      "versus_sham": {
+        "equal": 16,
+        "higher": 5,
+        "lower": 3,
+        "mean_delta": 6.365631304874947e-05
+      }
+    },
+    "heldout/aime26": {
+      "fallback_groups": 3,
+      "groups": 24,
+      "same_support_as_error": 22,
+      "versus_error": {
+        "equal": 22,
+        "higher": 2,
+        "lower": 0,
+        "mean_delta": 0.0005174955967729493
+      },
+      "versus_mass": {
+        "equal": 22,
+        "higher": 2,
+        "lower": 0,
+        "mean_delta": 0.0005174955967729493
+      },
+      "versus_sham": {
+        "equal": 17,
+        "higher": 1,
+        "lower": 6,
+        "mean_delta": -0.0009277248905010866
+      }
+    },
+    "heldout/longbench_v2_0shot_think": {
+      "fallback_groups": 12,
+      "groups": 24,
+      "same_support_as_error": 15,
+      "versus_error": {
+        "equal": 15,
+        "higher": 4,
+        "lower": 5,
+        "mean_delta": -7.2167195730635804e-06
+      },
+      "versus_mass": {
+        "equal": 12,
+        "higher": 3,
+        "lower": 9,
+        "mean_delta": -0.00013247660413511202
+      },
+      "versus_sham": {
+        "equal": 14,
+        "higher": 3,
+        "lower": 7,
+        "mean_delta": -8.897066457129368e-05
+      }
+    }
+  },
+  "clean_timing": "Not run; S, S/N and clean W remain null",
+  "decisions": {
+    "dense_observer": {
+      "evidence": "Output, active sampler state, RNG, prompt identity and forward counts match; zero predicate mismatches",
+      "limitation": "One-item rich/minimal/off smoke; full KV/layout fork restoration unvalidated",
+      "status": "GO within tested scope"
+    },
+    "long_context_generalization": {
+      "evidence": "Nine context-over-limit items preserved; only one LongBench request ran and it was capped/wrong",
+      "status": "BLOCKED COVERAGE"
+    },
+    "margin_guard": {
+      "evidence": "No downstream margin, acceptance, correction/break or native continuation oracle",
+      "next": "Implement only an exact diagnostic oracle after the native state restore gate",
+      "status": "NOT_EVALUATED"
+    },
+    "native_acceleration": {
+      "evidence": "No matched sparse native arms, no clean timing, no full-state causal fork certificate",
+      "status": "UNESTABLISHED"
+    },
+    "response_guard": {
+      "evidence": "Held-out response correlation does not beat current output error on either request; matched pairs supply only attention-level descriptive evidence",
+      "next": "Exact native full-state restore, then downstream influence oracle on dense states before any proxy",
+      "status": "NO_GO for native selector or proxy"
+    },
+    "validity_reuse": {
+      "evidence": "No bound violations, but every partial-support bound below 0.5; practical selectivity not established",
+      "next": "Retain as diagnostic; do not deploy a refresh policy from this bound",
+      "status": "NO_GO for this norm-bound implementation"
+    }
+  },
+  "eligible_complete": true,
+  "first_canvas_physical_work": "Not separately instrumented; whole-request actual geometry only",
+  "full30_complete": false,
+  "full_native_state_fork_restore": "Not implemented or validated",
+  "no_selector_or_kernel_optimization": true,
+  "numerical_audit": {
+    "finite_difference_gate_failures": 0,
+    "full_relative_fd_max": 8.403039768323243e-06,
+    "near_zero_records": 18,
+    "nontrivial_relative_fd_quantiles": [
+      1.3566500765297867e-07,
+      7.951896572379696e-07,
+      4.42091199201849e-06,
+      8.403039768323243e-06
+    ],
+    "nontrivial_response_records": 635,
+    "note": "Corrected FP64 audit with unique support and exact all-kept certificates. The original FP32 attempt remains preserved."
+  },
+  "observer_smoke": {
+    "differences": {},
+    "final_native_rng_equal": true,
+    "full_cache_fork_restore_validated": false,
+    "limitation": "Native per-call state and repeat-output invariance only; full KV/layout fork restore is a separate Phase 2 gate.",
+    "passed": true,
+    "per_call_native_state_hashes_equal": true,
+    "rich_observer_rng_checks": 24,
+    "zero_extra_forwards": true
+  },
+  "operator": {
+    "aggregates": {
+      "development/aime26": {
+        "current_error_vs_future_bias_motion_spearman": 0.960705260582229,
+        "feasible_fraction": 0.5,
+        "matched_pair_concordance": null,
+        "matched_pairs": 0,
+        "records": 36,
+        "response_vs_future_bias_motion_spearman": 0.9276131525750909
+      },
+      "development/longbench_v2_0shot_think": {
+        "current_error_vs_future_bias_motion_spearman": 0.8684801961794572,
+        "feasible_fraction": 0.4356060606060606,
+        "matched_pair_concordance": 0.6204081632653061,
+        "matched_pairs": 980,
+        "records": 264,
+        "response_vs_future_bias_motion_spearman": 0.8813675169080865
+      },
+      "heldout/aime26": {
+        "current_error_vs_future_bias_motion_spearman": 0.9172270554113563,
+        "feasible_fraction": 0.4943820224719101,
+        "matched_pair_concordance": 0.625,
+        "matched_pairs": 16,
+        "records": 89,
+        "response_vs_future_bias_motion_spearman": 0.9060760313882215
+      },
+      "heldout/longbench_v2_0shot_think": {
+        "current_error_vs_future_bias_motion_spearman": 0.9194757677934374,
+        "feasible_fraction": 0.4810606060606061,
+        "matched_pair_concordance": 0.7104994903160041,
+        "matched_pairs": 981,
+        "records": 264,
+        "response_vs_future_bias_motion_spearman": 0.8688421629306914
+      }
+    },
+    "allkept_records": 18,
+    "clean_timing": false,
+    "diagnostic_attention_evaluations": 3482,
+    "finite_difference_absolute_error_max": 4.142653587450258e-05,
+    "finite_difference_gate_failures": 0,
+    "finite_difference_relative_error_median": 8.053732577352851e-07,
+    "go_no_go": "NO_GO: native continuation and held-out logit/correction evidence are absent; operator correlations alone cannot promote a selector",
+    "limitations": [
+      "Inherited V31 on-policy states, not new dense census states",
+      "One layer, two heads, four sampled rows, first canvas only",
+      "Q/K/V changes are observed displacements, not future predictors",
+      "No downstream logits, acceptance or task outcome supervision",
+      "Pairwise masks are correlated within requests; descriptive only"
+    ],
+    "native_model_forwards": 0,
+    "native_promotion": false,
+    "native_rng_draws": 0,
+    "partial_support_bound_below_half_fraction": 1.0,
+    "partial_support_bound_checks": 1481,
+    "protocol_sha256": "14eaf14aba5088b94b344a0b3c3268297a7716cba85e013020dff12b03789d27",
+    "records": 653,
+    "renormalization_identity_max_abs": 4.440892098500626e-16,
+    "resource_seconds": 19.37521795090288,
+    "unique_support_records": 653,
+    "validity_bound_below_half_fraction": 0.9724228496388706,
+    "validity_bound_max_violation": 0.0
+  },
+  "original_manifest_identity_sha256": "069a01ae660a79d87d6ba2306e52f79474522ca805d73ad21a991795f752af39",
+  "paired_uncertainty": "Unavailable without matched arm contrast; seed42 descriptive only",
+  "physical_groups": 84,
+  "physical_work_note": "Q128 x KV64 rectangle denominator; dense GLOBAL/LOCAL have zero skips; no hardware CTA measurement",
+  "protocol_sha256": "b89d910d8d16f9fbdfe5a8217142e749fef1418c68f3e2844994a805b6b121ea",
+  "schema": "dense_census_report_v1",
+  "scope": "21 eligible dense requests and bounded inherited-state operator diagnostics; full 30-item study partial",
+  "source_drift": [],
+  "unique_physical_support_records": 635,
+  "workloads": {
+    "aime26": {
+      "C": 208,
+      "N": 2700,
+      "N_over_C": 12.98076923076923,
+      "S": null,
+      "S_over_N": null,
+      "W_clean": null,
+      "cap_canvas_fraction": 0.004807692307692308,
+      "cap_canvases": 1,
+      "closed_N_over_C": 12.932692307692308,
+      "closed_calls_max": 48.0,
+      "closed_calls_median": 12.5,
+      "closed_calls_min": 3.0,
+      "closed_calls_p90": 19.0,
+      "correct": 6,
+      "global_eligible_tiles": 25583520,
+      "global_kept_tiles": 25583520,
+      "global_skipped_tiles": 0,
+      "item_mean_N_over_C": 11.969434523809523,
+      "items": 10,
+      "jit_events": 0,
+      "local_eligible_rectangles": 40696800,
+      "local_skipped_rectangles": 0,
+      "mean_T": 5264,
+      "native_predicate_mismatches": 0,
+      "new_cuda_captures": 0,
+      "observer_rng_checks": 5816,
+      "output_capped": 4,
+      "paired_accuracy_interval": null,
+      "score": 0.6,
+      "stopping_bottlenecks": {
+        "both": 2364,
+        "confidence": 28,
+        "joint_satisfied": 207,
+        "stability": 101
+      },
+      "uncommitted_tail_calls": 10
+    },
+    "humaneval": {
+      "C": 46,
+      "N": 362,
+      "N_over_C": 7.869565217391305,
+      "S": null,
+      "S_over_N": null,
+      "W_clean": null,
+      "cap_canvas_fraction": 0.0,
+      "cap_canvases": 0,
+      "closed_N_over_C": 7.6521739130434785,
+      "closed_calls_max": 19.0,
+      "closed_calls_median": 7.0,
+      "closed_calls_min": 2.0,
+      "closed_calls_p90": 12.5,
+      "correct": 10,
+      "global_eligible_tiles": 900800,
+      "global_kept_tiles": 900800,
+      "global_skipped_tiles": 0,
+      "item_mean_N_over_C": 7.392222222222222,
+      "items": 10,
+      "jit_events": 0,
+      "local_eligible_rectangles": 3938000,
+      "local_skipped_rectangles": 0,
+      "mean_T": 972.3,
+      "native_predicate_mismatches": 0,
+      "new_cuda_captures": 0,
+      "observer_rng_checks": 816,
+      "output_capped": 0,
+      "paired_accuracy_interval": null,
+      "score": 1.0,
+      "stopping_bottlenecks": {
+        "both": 266,
+        "confidence": 6,
+        "joint_satisfied": 46,
+        "stability": 44
+      },
+      "uncommitted_tail_calls": 10
+    },
+    "longbench_v2": {
+      "C": 64,
+      "N": 2780,
+      "N_over_C": 43.4375,
+      "S": null,
+      "S_over_N": null,
+      "W_clean": null,
+      "cap_canvas_fraction": 0.328125,
+      "cap_canvases": 21,
+      "closed_N_over_C": 43.421875,
+      "closed_calls_max": 48.0,
+      "closed_calls_median": 45.0,
+      "closed_calls_min": 34.0,
+      "closed_calls_p90": 48.0,
+      "correct": 0,
+      "global_eligible_tiles": 1345388160,
+      "global_kept_tiles": 1345388160,
+      "global_skipped_tiles": 0,
+      "item_mean_N_over_C": 43.4375,
+      "items": 1,
+      "jit_events": 0,
+      "local_eligible_rectangles": 44480000,
+      "local_skipped_rectangles": 0,
+      "mean_T": 16384,
+      "native_predicate_mismatches": 0,
+      "new_cuda_captures": 0,
+      "observer_rng_checks": 5688,
+      "output_capped": 1,
+      "paired_accuracy_interval": null,
+      "score": 0.0,
+      "stopping_bottlenecks": {
+        "both": 100,
+        "confidence": 2631,
+        "joint_satisfied": 48,
+        "stability": 1
+      },
+      "uncommitted_tail_calls": 1
+    }
+  }
+}

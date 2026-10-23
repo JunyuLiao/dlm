@@ -1,0 +1,30 @@
+{
+  "dense_observer": {
+    "evidence": "Output, active sampler state, RNG, prompt identity and forward counts match; zero predicate mismatches",
+    "limitation": "One-item rich/minimal/off smoke; full KV/layout fork restoration unvalidated",
+    "status": "GO within tested scope"
+  },
+  "long_context_generalization": {
+    "evidence": "Nine context-over-limit items preserved; only one LongBench request ran and it was capped/wrong",
+    "status": "BLOCKED COVERAGE"
+  },
+  "margin_guard": {
+    "evidence": "No downstream margin, acceptance, correction/break or native continuation oracle",
+    "next": "Implement only an exact diagnostic oracle after the native state restore gate",
+    "status": "NOT_EVALUATED"
+  },
+  "native_acceleration": {
+    "evidence": "No matched sparse native arms, no clean timing, no full-state causal fork certificate",
+    "status": "UNESTABLISHED"
+  },
+  "response_guard": {
+    "evidence": "Held-out response correlation does not beat current output error on either request; matched pairs supply only attention-level descriptive evidence",
+    "next": "Exact native full-state restore, then downstream influence oracle on dense states before any proxy",
+    "status": "NO_GO for native selector or proxy"
+  },
+  "validity_reuse": {
+    "evidence": "No bound violations, but every tested bound below 0.5; practical selectivity not established",
+    "next": "Retain as diagnostic; do not deploy a refresh policy from this bound",
+    "status": "NO_GO for this norm-bound implementation"
+  }
+}
