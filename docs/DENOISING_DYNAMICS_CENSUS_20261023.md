@@ -58,3 +58,25 @@ and processor produce the exact frozen 91-token smoke input after extracting
 input_ids. Execution004 normalizes that return format and preserves all
 sampler and prompt settings. Its 15 focused CPU tests pass, including native
 sampler state/RNG parity and unequal-dimension covariance finite differences.
+
+## Preserved-state operator diagnostic
+
+The eligible dense census completed 21 requests; nine original LongBench
+items remain context-blocked without replacement. A bounded follow-on
+operator diagnostic is frozen at
+`execution004/operator_diagnostic001/protocol.json`, SHA256
+`a1c804b00ba11108831c1d5637e3a178a19ab27fe1b7889071a7be998cbb7d37`.
+It uses 12 first-canvas states from four preserved inherited V31 trajectories,
+48 hash-verified input files, layer29, heads0/8, four sampled query rows, and
+fixed prefix-budget fractions0.25/0.5/0.75/0.9. Requests002/004 are held out.
+Current-canvas and boundary tiles remain mandatory. No native model forward
+or sampler draw occurs. The 19 focused CPU tests pass before GPU execution.
+
+Record current deleted mass/output bias, exact Q/K/V directional response,
+finite differences, renormalization identity, and future held-mask error at
+ages1/2/4. Candidate masks are fixed before outcomes; matched-pair tolerances
+are0.01 deleted mass and10% relative output-error difference. These are
+inherited V31 on-policy states, not the new dense census distribution.
+Attention-level correlation cannot qualify downstream logits, native
+correction/break transitions, accuracy or stopping. No selector promotion
+without reproduced native full-state forks and held-out transition evidence.
