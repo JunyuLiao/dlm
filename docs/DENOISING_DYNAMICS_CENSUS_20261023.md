@@ -80,3 +80,17 @@ inherited V31 on-policy states, not the new dense census distribution.
 Attention-level correlation cannot qualify downstream logits, native
 correction/break transitions, accuracy or stopping. No selector promotion
 without reproduced native full-state forks and held-out transition evidence.
+
+### Corrected numerical and support audit
+
+Preserve operator_diagnostic001 unchanged. Its FP32 relative finite differences
+are ill-conditioned near zero response; candidate labels can repeat support;
+its clamped retained-mass bound mishandles all-kept support. Freeze the corrected
+`execution004/operator_diagnostic002/protocol.json`, SHA256
+`14eaf14aba5088b94b344a0b3c3268297a7716cba85e013020dff12b03789d27`.
+It keeps the same states, candidate families and held-out split, deduplicates
+physical support within each state/budget, uses FP64 and requires finite-
+difference absolute error at most1e-5+1e-3 times analytic norm. All-kept
+certificates are exactly1; partial support uses the unchanged norm bound.
+Twenty focused CPU tests pass before this corrected operator run. No native
+model/sampler operation or new method sweep is introduced.
