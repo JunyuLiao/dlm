@@ -2407,3 +2407,24 @@ identity and official scorer pins. Source checkpoints7bd6128e(original),80e7fa0c
 hashes in source_identity.json; native runtime closeout matches and service exits0.
 Inherited Yuhan reuse and Junyu Gaussian32/value-direction routing are attributed
 separately. All original campaigns/attempts and private raw outputs remain intact.
+
+## 2026-10-23 — Authorized V31 budgets and RULER V2 follow-up complete
+
+Source checkpoint33823ef4 plus frozen execution SHA256 dependency fix. Completed
+report [results/v2_execution_results_20261023/attempt001/summary.md](../results/v2_execution_results_20261023/attempt001/summary.md),
+completion/source/receipt identities agree. New AIME26 V31K1920=54/90,30xseeds
+42/43/44; MATH500 V31K384441/500 seed42; RULER128K104 V2=87.4519/100
+official score at tau0.0018561553006146874.13 examined computation-only
+calibration prompts yield48.7459% all-step GLOBAL sparsity,full10451.8603%,
+held61.9938%,first-canvas49.9422%,overall incl LOCAL49.4392%. Full GLOBAL
+target drifts above50%; record explicitly. Native sampler/LOCAL/prefill preserved.
+
+AIME K1920 minus historical K128+15.56pp[5.56,26.67],MATH K384 minus K128
++1.60pp[-0.60,3.80]; paired10k bootstrap,AIME question clusters. RULER V2
+minus V31+0.6731pp[-2.2115,3.5577],task clusters. No noninferiority claim.
+All new native audit-clean output/N agree; zero LOCAL skips,extra forwards,
+selector budget errors,timed captures/JIT. Current V2 execution matches previous
+qualification outputs. Clean mean W: AIME V315.9013s,MATH V311.5221s,RULER
+V26.6401s; other arms retain earlier timing/source identities,not matched speed
+evidence. LongBench cancelled before any worker; original campaign preserved
+as partial/scope-superseded. Report closes three authorized panels only.

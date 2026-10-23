@@ -3529,3 +3529,23 @@ physical sparsity. Preserve short V2 panels. New V31 budgets AIMEK1920/MATHK384.
 LongBench503 V31K8192/V2tau0.021 only, no dense full panel; this explicitly
 supersedes the old stop for a new frozen campaign, never resumes old attempts.
 Official scoring and native audit/clean/identity/capture/JIT gates required.
+
+## 2026-10-23 — Complete authorized follow-up after LongBench cancellation
+
+AIME V31K1920=54/90 versus historical K12840/90, paired question-clustered
++15.56pp[5.56,26.67]; MATH V31K384441/500 versus K128433/500, +1.60pp
+[-0.60,3.80]. RULER V2 calibrates only computation on13 examined questions:
+tau0.0018561553006146874,48.7459% all-step GLOBAL; full104 drifts to51.8603%,
+held61.9938%, official87.4519/100. Do not claim full-panel40-50% or matched
+per-phase work. V2 minus historical V31 score+0.6731pp[-2.2115,3.5577]; not
+noninferiority. Short V2/HumanEval and previous results preserved.
+
+Selected execution cache/CTA order passes native audit-clean and old-execution
+qualification;520 full projections/400 canvas updates reuse103,979,370 rows.
+Complete audit refresh6.293ms and held1.633ms still do not prove dense speed.
+All new full audit-clean trajectories and zero budget/extra-forward/LOCAL/timed
+capture/JIT gates pass. Historical clean controls are labeled as such. Complete
+report results/v2_execution_results_20261023/attempt001 pins sources and scores.
+LongBench guard stops coordinator before worker launch, expected exit1. Original
+four-panel attempt stays partial; authorized three-panel report is complete.
+Final H100 idle. Preserve negative candidates, old attempts, all private evidence.

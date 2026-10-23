@@ -1,3 +1,38 @@
+## Authorized three-panel follow-up complete — 2026-10-23 UTC
+
+Verified source checkpoint `33823ef4` plus exact frozen dependency-fix hashes.
+Report: `results/v2_execution_results_20261023/attempt001/`; execution:
+`results/v2_execution_followup_20261023/attempt002/`. AIME26 V31 K1920
+scores54/90, MATH500 V31 K384441/500. Preserved V2 results remain50/90 and
+438/500. HumanEval159/160/161 V2/V31/FULL is unchanged.
+RULER128K V2 threshold0.0018561553006146874 reaches48.7459% all-step GLOBAL
+sparsity on13 calibration questions,51.8603% on full104; official87.4519/100.
+Held sparsity61.9938%, first-canvas49.9422%, overall including LOCAL49.4392%.
+The calibration target passed but full-panel GLOBAL work drifted1.86pp above50%.
+V31 K8192 historical86.7788/100,47.3315% whole GLOBAL,93.4871% held; actual
+kept work98,057,592 V2 versus99,165,600 V31, despite different phase mix/N.
+New clean mean W: AIME V315.9013s, MATH V311.5221s, RULER V26.6401s.
+Controls and short V2 timings are historical references with explicit hashes;
+these cross-date timings do not establish a matched execution speedup.
+
+All new native audit/clean output/N pairs agree; no selector budget errors,
+extra forwards, LOCAL skips, timed captures/JIT events. RULER qualification
+also matches previous execution output/trajectories. Prefix cache receipts:
+520 full projections,400 current-canvas updates,103,979,370 reused prefix rows.
+Refresh still averages6.293ms versus historical V313.432ms; held1.633ms versus
+0.222ms with very different kept fractions. No dense performance claim.
+35CUDA operator tests, native projection parity/reset and protocol/report tests
+pass. Negative shared-router and direct-paged attempts remain preserved.
+
+LongBench-v2 was cancelled by the user and never launched a worker. Its guard
+stopped the original coordinator after all three active panels completed; exit1
+is expected cancellation, not a failed active panel. Original four-panel protocol
+and attempts remain partial/scope-superseded, no root final_complete marker.
+AUTHORIZED_SCOPE_COMPLETE.json and the report marker close only authorized scope.
+Managed session3983 ended; H100 verified idle,0MiB/0% at closeout. No jobs remain.
+No further experiments are scheduled. Paired uncertainty and phase work are in
+the report. Git publication excludes private inputs/generations and unrelated work.
+
 ## Output-preserving V2 execution follow-up — 2026-10-23 UTC
 
 Base checkpoint5ff5cd06, new source hashes in results/v2_execution_20261023/source_manifest.json.

@@ -26,3 +26,4 @@ def test_requested_matrix_retains_exact_budgets_and_longbench_arms():
     assert campaign.PANELS['aime26_k1920'][1]==1920
     assert campaign.PANELS['math500_k384'][1]==384
     assert campaign.PANELS['longbench_v2'][1:3]==(8192,['v31_optimized','v2_online_optimized'])
+    assert 'scripts/optimized_refresh_followup.py' in campaign.OVERLAYS

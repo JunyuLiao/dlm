@@ -19,7 +19,7 @@ PANELS={'aime26_k1920':('aime26',1920,['v31_optimized'],OLD),
         'longbench_v2':('longbench_v2',8192,['v31_optimized','v2_online_optimized'],OLD)}
 OVERLAYS=['experiments/numerical_qk_reuse/optimized_refresh_runtime.py','experiments/numerical_qk_reuse/resident_execution_runtime.py',
           'experiments/numerical_qk_reuse/v2_online_warpspec.py','experiments/numerical_qk_reuse/v2_paged_refresh.py',
-          'scripts/v2_execution_followup.py']
+          'scripts/v2_execution_followup.py','scripts/optimized_refresh_followup.py']
 
 def prepare(root):
     root.mkdir(parents=True,exist_ok=False)
