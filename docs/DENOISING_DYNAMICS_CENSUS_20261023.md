@@ -1,7 +1,7 @@
 # Native denoising census: production observer gate
 
-Execution stage: `results/denoising_dynamics_census_20261022/attempt001/execution003/`.
-Protocol SHA256: `27600fe02a5b68e5b9cfdc93d2b6bed25c20f090cf6e053d5b0b733eab0abb98`.
+Execution stage: `results/denoising_dynamics_census_20261022/attempt001/execution004/`.
+Protocol SHA256: `b89d910d8d16f9fbdfe5a8217142e749fef1418c68f3e2844994a805b6b121ea`.
 Original 30-item identity file SHA256:
 `069a01ae660a79d87d6ba2306e52f79474522ca805d73ad21a991795f752af39`.
 Original attempt protocol, manifest and receipt remain immutable.
@@ -51,3 +51,10 @@ runner and failed before model loading: the installed vLLM rejects diffusion
 models on that runner. Execution003 adapts the forward counter to the supported
 V2 runner without changing the native sampler. No experimental conclusion
 follows from the preceding startup attempts.
+
+Execution003 stopped before generation because the prompt check compared a
+BatchEncoding mapping with a token list. CPU inspection proves both tokenizer
+and processor produce the exact frozen 91-token smoke input after extracting
+input_ids. Execution004 normalizes that return format and preserves all
+sampler and prompt settings. Its 15 focused CPU tests pass, including native
+sampler state/RNG parity and unequal-dimension covariance finite differences.
