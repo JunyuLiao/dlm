@@ -2353,3 +2353,57 @@ explicitly distinguished in the public tables and CSV.
 The durable service exits0 and H100 is idle. Shared evaluation charge23967.119s
 includes1800s conservative interruption allowance; completed measured-leaf
 reservations22167.119s. These campaign charges are separate from clean request W.
+
+## Optimized V2/V31 native multi-benchmark panel — 2026-10-23
+
+Complete protocol-identified requested panels, consolidated under
+`results/optimized_refresh_results_20261023/attempt003/` with completion and
+verification markers. HumanEval164 seed42 and AIME30x3 seeds42/43/44 retain
+original optimized results; MATH500 seed42 reruns V2 at0.2; AIME adds V31K256;
+RULER128K uses104 previously examined balanced sampled prompts (8 per13tasks),
+seed42, K8192 and V2tau0.021, original thinking-off/prefilled official inputs.
+LongBench-v2 generation did not start; the original campaign remains partial.
+
+| Panel | V2 | V31 | Corrected FULL dense | PIECEWISE dense | all-kept |
+|---|---:|---:|---:|---:|---:|
+| HumanEval164,K128 |159/164|160/164|161/164|161/164|161/164|
+| AIME26K128 |50/90|40/90|51/90|51/90|49/90|
+| AIME26K256 |50/90|42/90|51/90|51/90|49/90|
+| MATH500K128 |438/500|433/500|449/500|449/500|450/500|
+| RULER128K official/100 |86.346|86.779|86.683|86.683|87.115|
+
+RULER V2/V31 full-credit79/104; dense/all-kept81/104. V2 minus V31 paired
+95% intervals: HumanEval-0.61pp[-3.05,+1.83]; AIMEK128+11.11[+4.44,+18.89];
+AIMEK256+8.89[+1.11,+17.78]; MATH+1.00[-1.20,+3.20]; RULER-0.43 score
+points[-3.56,+2.45]. AIME clusters three seeds by question; RULER clusters13tasks.
+AIMEK256 minusK128+2.22pp[-4.44,+8.89]. No noninferiority claim.
+
+| Workload | V2 mean clean W(s) | V31 W(s) | FULL W(s) | V2/FULL | V2 GLOBAL/held sparsity |
+|---|---:|---:|---:|---:|---:|
+| HumanEval |1.1755|1.2589|0.9531|1.233|66.25/68.95%|
+| AIMEK128 |6.4140|7.0757|5.1751|1.239|44.94/45.58%|
+| AIMEK256 |6.4140|6.5365|5.1751|1.239|44.94/45.58%|
+| MATH500 |1.5721|1.6069|1.3322|1.180|47.60/49.36%|
+| RULER128K |6.6321|6.5946|6.6089|1.004|79.94/94.64%|
+
+These means are not paired geometric ratios; complete paired latency intervals,
+N,N/C,T,S/N,S,W, audit refresh/held times and physical counts are in the report.
+No measured dense execution advantage is established. Source-selected V2 true
+online refresh still repeatsQK/routing across four channel groups; synthetic8K
+427.90us vs plain363.58/paged287.47 remains negative.
+
+MATH calibration32 examined work strata selects0.2, full panel meets40-50% held
+and whole target. Old3.2 scores392/500 with77.58/79.43% sparsity and stays
+supplementary; four short calibration prompts were unrepresentative. HumanEval
+uses user-fixed0.5600716206066294; AIME0.059460355750136064. RULER0.021 matches
+held kept fraction approximately (V31held93.49%); absolute first-canvas/whole
+kept work ratios0.42068/0.42594, totalFLOPs not matched. Negative calibration
+attempts preserved. Calibration is transductive, no fresh held-out claim.
+
+Verification: full audit/clean hash/N agreement, explicit zero timed captures/JIT,
+zero LOCAL skips, sparse budget/nonfinite/extra-forward gates, source/runtime/model
+identity and official scorer pins. Source checkpoints7bd6128e(original),80e7fa0c
+(MATH/AIMEfollow-up),6297d4a4(RULER); verifiere2d2755c. Exact protocol/library
+hashes in source_identity.json; native runtime closeout matches and service exits0.
+Inherited Yuhan reuse and Junyu Gaussian32/value-direction routing are attributed
+separately. All original campaigns/attempts and private raw outputs remain intact.

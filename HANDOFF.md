@@ -1,3 +1,42 @@
+## Optimized online refresh and resident execution panel complete — 2026-10-23 UTC
+
+Verified reporting checkpoint`e2d2755c`; complete consolidated report:
+`results/optimized_refresh_results_20261023/attempt003/`. Its completion marker,
+source/runtime/model hashes, official scores, paired uncertainty and audit/clean
+receipts agree. All requested jobs and scorers finished; final service exits0,
+H100 has no compute clients. Status was checked at15-minute intervals.
+LongBench-v2 never generated after the user's stop instruction; original attempt009
+remains partial with completed HumanEval/AIME/MATH suites. No old result replaced.
+
+| Panel | V2 | V31 | FULL dense | PIECEWISE | all-kept |
+|---|---:|---:|---:|---:|---:|
+| HumanEval164 |159|160|161|161|161|
+| AIME30x3,K128 |50|40|51|51|49|
+| AIME30x3,K256 |50|42|51|51|49|
+| MATH500,V2tau0.2 |438|433|449|449|450|
+| RULER128K104,official/100 |86.346|86.779|86.683|86.683|87.115|
+
+MATHtau0.2 attains47.6038% whole GLOBAL and49.3625% held sparsity; oldtau3.2
+392/500 at77.58% remains supplementary. AIMEK256 gains2/90 overK128, paired
+95% accuracy interval[-4.44,+8.89]pp. V2 minus V31: AIMEK128+11.11pp
+[+4.44,+18.89], AIMEK256+8.89[+1.11,+17.78], MATH+1.00[-1.20,+3.20],
+HumanEval-0.61[-3.05,+1.83], RULER-0.43[-3.56,+2.45]. Not noninferiority.
+
+V2 clean mean request time vs FULL is1.233x HumanEval,1.239x AIME,
+1.180x MATH and1.004x RULER; no dense speedup established. V2 beats V31 mean
+request time on short workloads but trajectories differ; no kernel-only inference.
+RULER V2/V31 held sparsity94.64/93.49%, whole79.94/47.33%; approximate held
+matching only, total work explicitly mismatched. Native sampler/LOCAL/prefill
+preserved, zero timed captures/JIT, zero audited LOCAL skips and no extra sparse
+forwards. All new native output/N audit-clean pairs agree. Source-selected V2
+remains true online; synthetic8K427.90us still slower than dense363.58/paged287.47.
+
+Detailed N,N/C,T,S/N,S,W, per-phase latency, physical phase/first-canvas/whole
+counts, uncertainty and exact source identities are in the report. Calibration is
+transductive and computation-only; RULER uses original thinking-off prefilled
+104 balanced prompts. No jobs remain running. Next research requires a new
+named protocol; all negative designs and partial attempts remain intact.
+
 ## Current MATH complete; stopped before LongBench — 2026-10-22 UTC
 
 Attempt009 has complete official scored HumanEval164, AIME26 30x3seeds and

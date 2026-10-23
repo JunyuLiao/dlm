@@ -3487,3 +3487,27 @@ MATH V2tau3.2:392/500,77.5753% whole GLOBAL sparsity,79.4255% held; V31K128
 433/500, dense FULL/PIECEWISE449/500, all-kept450/500. The lower-threshold
 follow-up uses32 full-request work strata and retains achieved controls/results.
 AIMEK256 and RULER128K104 follow source80e7fa0c. No raw data committed.
+
+## 2026-10-23 — Complete requested optimized-kernel follow-up and verify results
+
+Completed source/protocol-bound consolidated report at
+results/optimized_refresh_results_20261023/attempt003. Original short panels
+remain preserved; MATH V2tau0.2 rerun and AIME V31K256 are complete, RULER104
+all five arms officially scored. LongBench never started after requested stop.
+Original campaign remains partial; do not create a whole-campaign completion.
+
+MATH V2 improves392->438/500 after lowering3.2->0.2; final actual whole/held
+GLOBAL sparsity47.6038/49.3625%. AIMEK25642/90 versusK12840/90, uncertainty
+includes zero. V2 AIME50/90 vs V31K12840/K25642 and dense51; HumanEvalV2
+159/164 vs V31160/dense161; MATHV2438 vs V31433/dense449. RULER official
+fractional scoresV286.346,V3186.779,dense86.683,all-kept87.115.
+
+No dense speedup: V2 mean clean request ratios1.233/1.239/1.180/1.004 on
+HumanEval/AIME/MATH/RULER. RULER held sparsity94.64/93.49% for V2/V31,
+but whole sparsity79.94/47.33%, so this is approximate held matching only.
+Preserve failed first-canvas work matching and disclose absolute phase mismatch.
+Paired CIs use problem clusters (AIME three seeds) and13 RULER task clusters.
+All measured audit/clean output hashes/N agree; explicit zero clean captures/JIT
+and LOCAL skips, selector-budget/extra-forward receipts pass. Runtime identity
+matches, final service exits0 and H100 is idle. Report verifier sourcee2d2755c;
+full source/runtime/model/protocol and field coverage are published sanitized.
