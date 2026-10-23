@@ -51,3 +51,11 @@ first-canvas work, thresholds, actual sparsity and source identity. Official
 scores and completion markers are required before completed-result claims.
 Monitor process status every15minutes as requested. Raw inputs/generations stay
 private and all previous attempts remain intact.
+
+RULER calibration follow-up: K8192 gives93.5018% held GLOBAL sparsity; V2 at
+0.021 gives92.6024% on the13-task calibration cohort. The first-canvas absolute
+work objective fails because V31 refresh is dense and trajectories differ;
+those negative measurements remain preserved. The final RULER comparison uses
+held kept fraction within2pp and both held sparsities above85%, selects0.021,
+and explicitly reports absolute held/first-canvas/whole-request work mismatch.
+This is approximate sparse-execution matching, not an equal-total-FLOP claim.

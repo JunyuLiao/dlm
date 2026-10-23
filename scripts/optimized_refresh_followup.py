@@ -160,12 +160,20 @@ def relaunch_ruler(root,previous):
     for p in sorted((source/'qualification/ruler128k').iterdir()):
         dst=study/'qualification/ruler128k'/p.name;dst.parent.mkdir(parents=True,exist_ok=True)
         dst.symlink_to(p.resolve(),target_is_directory=True);add_reference(protocol,p)
-    spec=(source/'spec.md').read_text()+'\nRelaunch after coordinator treated missing clean dense adapter receipt as a dictionary. The corrected checker permits no adapter on native dense. Completed MATH/AIME and exact runtime/source-matched RULER qualification jobs remain explicitly referenced; remaining jobs and all RULER full generations are fresh.\n'
+    spec=(source/'spec.md').read_text()+'\nRelaunch permits absent native dense clean adapter receipts and short requests without held calls. Cohort-level qualification still exercises held execution. Approximate RULER K8192 matching uses actual held GLOBAL kept fraction within2 percentage points and actual held sparsity above85 percent for both methods. Dense V31 refresh and sparse V2 refresh intentionally perform different work; preserve and report absolute held, first-canvas and whole-request mismatch and native calls instead of labeling them equal. Reuse frozen computation-only calibration points from the preceding source-identical attempt. All full104 generations are fresh.\n'
     (study/'spec.md').write_text(spec)
     protocol.update(created_utc=base.utc(),source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
         execution_sha256={str(p.relative_to(ex)):base.sha(p) for p in ex.rglob('*') if p.is_file()},
         input_sha256={str(p.relative_to(study)):base.sha(p) for label in ['pools','schedules'] for p in (study/'private'/label).rglob('*') if p.is_file()},
         spec_sha256=base.sha(study/'spec.md'),relaunch_source=str(source.relative_to(ROOT)),relaunch_protocol_sha256=base.sha(source/'protocol.json'))
+    calibration=source/'calibration_held/ruler128k/selected_threshold.json'
+    if calibration.exists():
+        protocol['calibration_reuse']=dict(source=str(calibration.relative_to(ROOT)),sha256=base.sha(calibration))
+        prior=base.read(calibration)
+        for stage in ['followup_calibration_control','followup_calibration_candidates']:
+            folder=source/stage
+            if folder.exists():add_reference(protocol,folder)
+        protocol['threshold_policy'].update(objective='actual held GLOBAL kept fraction within2pp of V31K8192; both held sparsity above85%; report absolute/first-canvas/whole work mismatch',candidates=[.021,.0105,.00525,0.])
     base.write(study/'protocol.json',protocol);base.write(study/'state.json',dict(status='prepared',utc=base.utc()))
     evidence(study,PARENT)
     base.write(root/'protocol.json',dict(created_utc=base.utc(),panels={p:base.sha(root/p/'protocol.json') for p in PANELS},order=PANELS,reused_completed_panels={p:str((previous/p).relative_to(ROOT)) for p in PANELS[:2]}))
@@ -196,25 +204,31 @@ def calibrate(study,suite):
         result=dict(status='fixed_threshold_by_user',threshold=protocol['fixed_v2_threshold'],provenance={'source':'preserved achieved AIME26 panel'},calibration_cells=0)
         base.write(dest,result);return result['threshold']
     points={};reference=None
-    if suite=='ruler128k':reference=physical(base.run_job(study,suite,'v31_optimized','audit',cells,'followup_calibration_control'))
+    reused=protocol.get('calibration_reuse')
+    if reused:
+        source=ROOT/reused['source']
+        if base.sha(source)!=reused['sha256']:raise RuntimeError('calibration evidence drift')
+        prior=base.read(source);points.update(prior['points']);reference=prior['reference']
+    if suite=='ruler128k' and reference is None:reference=physical(base.run_job(study,suite,'v31_optimized','audit',cells,'followup_calibration_control'))
     def measure(tau):
         key=str(float(tau))
         if key not in points:points[key]=physical(base.run_job(study,suite,'v2_online_optimized','audit',cells,'followup_calibration_candidates',float(tau)))
     def error(key):
         row=points[key]
-        if reference:return abs(row['first_kept_tiles']/reference['first_kept_tiles']-1)
+        if reference:return abs(row['held_sparsity']-reference['held_sparsity'])
         return max(abs(row['held_sparsity']-.45),abs(row['global_sparsity']-.45))
     def acceptable(key):
         row=points[key]
-        if reference:return error(key)<=.05 and abs(row['first_kept_tiles']/row['first_eligible_tiles']-reference['first_kept_tiles']/reference['first_eligible_tiles'])<=.02
+        if reference:return error(key)<=.02 and min(row['held_sparsity'],reference['held_sparsity'])>.85
         return .4<=row['held_sparsity']<=.5 and .4<=row['global_sparsity']<=.5
     for tau in protocol['threshold_policy']['candidates']:
+        if any(acceptable(k) for k in points):break
         measure(tau)
         if any(acceptable(k) for k in points):break
     for _ in range(protocol['threshold_policy']['refinements']):
         if any(acceptable(k) for k in points):break
         order=sorted(map(float,points))
-        center=lambda t:(1-points[str(t)]['first_kept_tiles']/reference['first_kept_tiles']) if reference else (points[str(t)]['global_sparsity']+points[str(t)]['held_sparsity'])/2-.45
+        center=lambda t:(points[str(t)]['held_sparsity']-reference['held_sparsity']) if reference else (points[str(t)]['global_sparsity']+points[str(t)]['held_sparsity'])/2-.45
         neighbors=[(lo,hi) for lo,hi in zip(order,order[1:]) if center(lo)<=0<=center(hi)]
         if not neighbors:break
         lo,hi=min(neighbors,key=lambda p:p[1]-p[0]);measure(math.sqrt(lo*hi) if lo else hi/2)
