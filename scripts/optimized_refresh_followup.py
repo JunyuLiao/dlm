@@ -238,6 +238,7 @@ def qualify(study,suite,threshold):
         clean=base.run_job(study,suite,arm,'clean',cells,'qualification',tau)
         ar=base.read_lines(audit/'records.jsonl');cr=base.read_lines(clean/'records.jsonl')
         if [(x['output_hash'],x['denoise_forwards']) for x in ar]!=[(x['output_hash'],x['denoise_forwards']) for x in cr]:raise RuntimeError('follow-up audit/clean trajectory mismatch')
+        if arm.startswith(('v2','v31')) and not sum(((x.get('receipts') or {}).get('adapter') or {}).get('resident_sparse_held_calls',0) for x in ar):raise RuntimeError('qualification cohort did not exercise held consumer')
         for row in ar+cr:
             a=((row.get('receipts') or {}).get('adapter') or {})
             if arm.startswith(('v2','v31')) and a['optimized_refresh_extra_model_forwards']!=0:raise RuntimeError('extra forward')

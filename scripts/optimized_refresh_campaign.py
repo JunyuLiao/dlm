@@ -128,7 +128,6 @@ def validate(rows,suite,arm,pass_name,planned):
    if pass_name=='audit' and a['optimized_refresh_budget_errors']!=0:errors.append('budget')
    if not a.get('resident_sparse_execution') or a.get('resident_sparse_extra_forwards')!=0:errors.append('missing resident execution')
    if a.get('resident_sparse_held_kv_copy_calls')!=0 or a.get('resident_sparse_held_selector_calls')!=0 or a.get('resident_sparse_held_list_builds')!=0:errors.append('held-path overhead')
-   if not a.get('resident_sparse_held_calls'):errors.append('no held calls')
    if pass_name=='clean' and (a.get('resident_sparse_request_triton_compiles',0)!=0 or bool(a.get('resident_sparse_request_jit_events'))):errors.append('timed JIT event')
    if pass_name=='clean' and x.get('cuda_graph_captures')!=0:errors.append('timed CUDA capture')
    if a.get('optimized_refresh_method')!=('v2' if arm.startswith('v2') else 'v31'):errors.append('refresh method identity')
