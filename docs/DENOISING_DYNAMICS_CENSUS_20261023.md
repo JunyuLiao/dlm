@@ -94,3 +94,22 @@ difference absolute error at most1e-5+1e-3 times analytic norm. All-kept
 certificates are exactly1; partial support uses the unchanged norm bound.
 Twenty focused CPU tests pass before this corrected operator run. No native
 model/sampler operation or new method sweep is introduced.
+
+## Dense native request replay qualification
+
+A separate bounded dense-only replay qualification is frozen under
+`execution004/native_replay001/`. Two focused CPU tests verify the native
+FA4 page-to-logical-token transformation and distinguish logical cache
+content from physical page IDs. Run the same one-item warm/off/minimal/rich/
+minimal/off sequence, all forwards counted, native sampler unchanged.
+Fingerprint all 30 layers' referenced logical KV, current model input IDs,
+positions and self-conditioned embeddings, native logits, sampler state and
+CPU/CUDA RNG before every sampler invocation. Hashes only leave the worker;
+no old KV, attention output, logits or sampled tokens are substituted.
+
+Require rich/minimal logical fingerprints, output, sampler state, RNG and
+forward counts to agree before considering separate native request replay
+as a possible causal anchor. Physical page IDs are recorded separately.
+This is not an in-place full-state snapshot/restore certificate and cannot
+authorize support interventions by itself. Failures remain preserved; do
+not repeat or alter thresholds to manufacture parity. Reservation cap900s.
