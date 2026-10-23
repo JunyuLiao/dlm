@@ -1,3 +1,22 @@
+## Output-preserving V2 execution follow-up — 2026-10-23 UTC
+
+Base checkpoint5ff5cd06, new source hashes in results/v2_execution_20261023/source_manifest.json.
+Selected candidate uses immutable-prefix Gaussian32 projection/packing reuse within
+a canvas plus CTA ordering, same online mask/output arithmetic. At128K/~49%
+synthetic sparsity complete refresh6517.22->6071.61us;8K424.59->408.84us.
+These are synthetic results, not native speedups. Direct-paged TMA/projection
+passes6bitwise graph cases but is slower; shared routing queues remain negative.
+35CUDA regressions,1cached native integration parity/reset and3policy tests pass.
+Native qualification/full panels are pending. Existing completed panel unchanged.
+
+New user scope: AIME26 V31K1920 30xseeds42/43/44; MATH500 V31K384 all500x42;
+only RULER128K V2 recalibrates to40-50% all-step GLOBAL physical sparsity on
+same104subset; LongBench503x42 V31K8192 andV2tau0.021 without dense panels.
+Preserve prior HumanEval/AIME/MATH V2 results and old LongBench partial pause.
+New LongBench panel is explicitly authorized, never a resume of old attempts.
+Native sampler/LOCAL/prefill/commits remain fixed. Use scripts/v2_execution_followup.py
+and docs/V2_EXECUTION_FOLLOWUP_20261023.md. Inspect state every15minutes.
+
 ## Optimized online refresh and resident execution panel complete — 2026-10-23 UTC
 
 Verified reporting checkpoint`e2d2755c`; complete consolidated report:

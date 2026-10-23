@@ -159,10 +159,12 @@ def install(adapter,*,splits=None,graph_buckets=False,v31_paged_refresh=False):
                 # Only an actual V31 discovery call may bypass contiguous KV.
                 warm_count=warm[2] if warm is not None and warm[:2]==[self.canvas_id,nk] else 0
                 selection_due=(current and due) or (not current and warm_count>=self.mage_select_step)
-                if v31_paged_refresh and selection_due and nk>4096:
-                    self._resident_v31_paged=(key,value,metadata.block_table[0])
+                v2_paged=bool(os.environ.get('V2_PAGED_REFRESH_LIBRARY'))
+                if (v31_paged_refresh or v2_paged) and selection_due and nk>4096:
+                    attribute='_resident_v2_paged' if v2_paged else '_resident_v31_paged'
+                    setattr(self,attribute,(key,value,metadata.block_table[0]))
                     try:result=original_forward(impl,layer,query,kv_cache,metadata,output)
-                    finally:self._resident_v31_paged=None
+                    finally:setattr(self,attribute,None)
                     state['paged_refresh_calls']+=1
                     return result
                 return original_forward(impl,layer,query,kv_cache,metadata,output)
@@ -223,7 +225,7 @@ def install(adapter,*,splits=None,graph_buckets=False,v31_paged_refresh=False):
             resident_sparse_consumer=consumer,optimized_refresh_held_consumer=consumer,resident_sparse_extra_forwards=0)
         return result
     def buffers(self,layer,key,value,table,prefix,n):
-        if getattr(self,'_resident_v31_paged',None) is not None:
+        if getattr(self,'_resident_v31_paged',None) is not None or getattr(self,'_resident_v2_paged',None) is not None:
             # Shape/stride-only views satisfy the inherited selector contract;
             # their values are never consumed by paged observation/recovery.
             hk,d=key.shape[2:];nk=prefix+n

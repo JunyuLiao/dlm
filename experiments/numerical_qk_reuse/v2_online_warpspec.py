@@ -268,8 +268,9 @@ class CanvasPackedRefresh(PackedRefresh):
     QK/softmax/online decisions/full PV remain current and uncached.
     """
     def __init__(self,library,schedule=2):
-        super().__init__(library,schedule);self.canvas_state={}
-    def clear(self):self.canvas_state.clear()
+        super().__init__(library,schedule);self.clear()
+    def clear(self):
+        self.canvas_state={};self.full_projection_calls=0;self.canvas_projection_calls=0;self.projected_rows=0;self.reused_rows=0
     def __call__(self,q,k,v,matrix,scale,prefix_tiles,threshold,*,held=None,sticky=0.,cache_key,canvas,prefix):
         from .fused_value_pack import project
         b,h,n,d=q.shape;hk,nk=k.shape[1:3];tag=(canvas,nk,matrix.data_ptr(),str(v.device))
@@ -278,6 +279,8 @@ class CanvasPackedRefresh(PackedRefresh):
             state=dict(tag=tag,z=torch.empty((b,hk,nk,32),device=v.device),norm=torch.empty((b,hk,nk),device=v.device),valid=torch.ones((b,hk,nk),device=v.device,dtype=torch.bool),packed=None)
             self.canvas_state[cache_key]=state;start=0
         else:start=prefix
+        self.full_projection_calls+=int(start==0);self.canvas_projection_calls+=int(start!=0)
+        self.projected_rows+=hk*(nk-start);self.reused_rows+=hk*start
         nu,packed=project(v,matrix,state['z'],state['norm'],state['valid'],start=start,packed=state['packed']);state['packed']=packed
         out,keep,*_=self.kernel(q,k,v,state['z'],nu,scale,threshold,prefix_tiles=prefix_tiles,held=held,sticky=sticky,schedule=self.schedule,prepacked=packed)
         return out,keep,pack_lists(keep)

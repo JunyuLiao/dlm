@@ -3511,3 +3511,21 @@ All measured audit/clean output hashes/N agree; explicit zero clean captures/JIT
 and LOCAL skips, selector-budget/extra-forward receipts pass. Runtime identity
 matches, final service exits0 and H100 is idle. Report verifier sourcee2d2755c;
 full source/runtime/model/protocol and field coverage are published sanitized.
+
+## 2026-10-23 — Output-preserving V2 execution optimization and new panels
+
+Select immutable-prefix projection reuse and CTA-ordering candidate380b43b3784cdce8
+for native qualification. Selected output/masks stay bitwise equivalent in tested
+cases. At128K/~49% synthetic sparsity complete refresh6517.22->6071.61us,
+8K424.59->408.84us; no native speedup claim. Direct-paged variant passes6bitwise
+changing-input graph tests but is slower, retained negative. Unique-routing
+queues remain slower at128K; retain them.35CUDA regressions,1cached native
+integration reset/parity test and3protocol-policy tests pass. First/canvas refresh
+projects full V; later same-canvas refresh only changed V; RMS remains full current.
+Held consumer remains shared V31/V2 and no selector/list/KV copy on held steps.
+
+User clarification: recalibrate V2 only on RULER128K,40-50% all-step GLOBAL
+physical sparsity. Preserve short V2 panels. New V31 budgets AIMEK1920/MATHK384.
+LongBench503 V31K8192/V2tau0.021 only, no dense full panel; this explicitly
+supersedes the old stop for a new frozen campaign, never resumes old attempts.
+Official scoring and native audit/clean/identity/capture/JIT gates required.

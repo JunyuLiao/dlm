@@ -14,14 +14,20 @@ import torch
 def install(adapter, *, method, library, observer_directory, schedule=2):
     from . import v27_fa4
     from .refresh_v31_fast import Observer
-    from .v2_online_warpspec import FusedPackedRefresh
+    from .v2_online_warpspec import FusedPackedRefresh,CanvasPackedRefresh
     from experiments.diffusion_gemma_jl_output_aware.projections import Projections
     if method not in ('v2','v31'):raise ValueError('named optimized refresh method required')
     if adapter.mage_granularity!='qblock_max' or adapter.mage_sink or adapter.mage_recent_tiles:
         raise ValueError('qualified qblock_max without additional protection required')
     if adapter.cached_refresh_policy is not None or adapter.mage_pool is not None or adapter.mage_row_weight is not None:
         raise ValueError('unqualified reuse variant')
-    op=FusedPackedRefresh(Path(library),schedule) if method=='v2' else Observer(observer_directory)
+    cached=method=='v2' and os.environ.get('V2_CANVAS_PROJECTION_REUSE')=='1'
+    op=(CanvasPackedRefresh if cached else FusedPackedRefresh)(Path(library),schedule) if method=='v2' else Observer(observer_directory)
+    paged_op=None
+    paged_library=os.environ.get('V2_PAGED_REFRESH_LIBRARY') if method=='v2' else None
+    if paged_library:
+        from .v2_paged_refresh import PagedRefresh
+        paged_op=PagedRefresh(Path(paged_library),schedule)
     projections=Projections()
     old_begin,old_receipt=adapter.begin_request,adapter._value_receipt
     old_list=v27_fa4.block_sparse_tensors
@@ -35,6 +41,8 @@ def install(adapter, *, method, library, observer_directory, schedule=2):
     def begin(self,*args,**kw):
         result=old_begin(*args,**kw)
         state.update(keep=None,lists=None,calls=0,events=[],budget_errors=[],units=0,shapes=set())
+        if cached:op.clear()
+        if paged_op is not None:paged_op.clear()
         return result
 
     def select(self,layer,q,b,scale,prefix,n):
@@ -48,8 +56,17 @@ def install(adapter, *, method, library, observer_directory, schedule=2):
         # Native Q is a transposed view; contiguous conversion is charged here.
         if method=='v2':
             matrix=projections.get(layer,hk,d,'gaussian',32,1729,q.device)
-            out,keep,packed=op(q.contiguous(),b['k'].contiguous(),b['v'].contiguous(),matrix,scale,pt,
-                self.value_threshold,held=held,sticky=0. if held is None else self.mage_sticky)
+            paged=getattr(self,'_resident_v2_paged',None)
+            extra=dict(held=held,sticky=0. if held is None else self.mage_sticky)
+            if paged is not None:
+                if paged_op is None:raise RuntimeError('paged V2 refresh binary missing')
+                key,value,table=paged
+                out,keep,packed=paged_op(q.contiguous(),key,value,table,nk,matrix,scale,prefix,self.value_threshold,
+                    cache_key=layer,canvas=self.canvas_id,**extra)
+            else:
+                if cached:extra.update(cache_key=layer,canvas=self.canvas_id,prefix=prefix)
+                out,keep,packed=op(q.contiguous(),b['k'].contiguous(),b['v'].contiguous(),matrix,scale,pt,
+                    self.value_threshold,**extra)
             # Physical refresh PV work is sparse as well; no hidden dense output.
             if not self.value_clean_timing:
                 kept=keep[...,:pt].sum().double()
@@ -95,7 +112,7 @@ def install(adapter, *, method, library, observer_directory, schedule=2):
             row=by_phase.setdefault(phase,dict(calls=0,gpu_ms=0.))
             row['calls']+=1;row['gpu_ms']+=a.elapsed_time(b)
         result.update(optimized_refresh_phase_timing=by_phase,optimized_refresh_method=method,optimized_refresh_calls=state['calls'],
-            optimized_refresh_kernel=('q128_fold_bf16x3_fastmath_sm90' if method=='v2' else 'fa4_exp_scores_fused_qblock_topk'),
+            optimized_refresh_kernel=(('q128_fold_bf16x3_cta_swizzle_sm90' if op.kernel.options.get('cta_swizzle') else 'q128_fold_bf16x3_fastmath_sm90') if method=='v2' else 'fa4_exp_scores_fused_qblock_topk'),
             optimized_refresh_library_sha256=binary_hash,optimized_refresh_schedule=schedule if method=='v2' else None,
             optimized_refresh_build_options=op.kernel.options if method=='v2' else None,
             optimized_refresh_observer_sha256=op.source_sha256 if method=='v31' else None,
@@ -105,6 +122,16 @@ def install(adapter, *, method, library, observer_directory, schedule=2):
             optimized_refresh_extra_model_forwards=0,
             optimized_refresh_projection_current_v=method=='v2',
             optimized_refresh_projection_pack=('fused_value_pack' if method=='v2' else None),
+            optimized_refresh_prefix_projection_reuse=cached or paged_op is not None,
+            optimized_refresh_projection_full_calls=op.full_projection_calls if cached else None,
+            optimized_refresh_projection_canvas_calls=op.canvas_projection_calls if cached else None,
+            optimized_refresh_projected_rows=op.projected_rows if cached else None,
+            optimized_refresh_reused_projection_rows=op.reused_rows if cached else None,
+            optimized_refresh_paged_library_sha256=hashlib.sha256(Path(paged_library).read_bytes()).hexdigest() if paged_library else None,
+            optimized_refresh_paged_projection_full_calls=paged_op.full_projection_calls if paged_op else 0,
+            optimized_refresh_paged_projection_canvas_calls=paged_op.canvas_projection_calls if paged_op else 0,
+            optimized_refresh_paged_projected_rows=paged_op.projected_rows if paged_op else 0,
+            optimized_refresh_paged_reused_projection_rows=paged_op.reused_rows if paged_op else 0,
             optimized_refresh_held_consumer='inherited_paged_split_fa4',
             optimized_refresh_threshold=self.value_threshold if method=='v2' else None,
             value_output_path='online_sparse_refresh_current_qkv' if method=='v2' else 'dense_fa4_optimized_observation',
