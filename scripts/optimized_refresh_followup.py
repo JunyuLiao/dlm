@@ -141,6 +141,37 @@ raw inputs/generations out of Git. Process-status checks are every15minutes.
     print(root,flush=True)
 
 
+def relaunch_ruler(root,previous):
+    """Keep completed MATH/AIME panels, retain exact RULER qualification pairs."""
+    root.mkdir(parents=True,exist_ok=False)
+    for panel in PANELS[:2]:
+        if not (previous/panel/'final_complete.json').exists():raise RuntimeError('prior follow-up panel incomplete')
+        (root/panel).symlink_to((previous/panel).resolve(),target_is_directory=True)
+    source=previous/'ruler128k';study=root/'ruler128k'
+    ex=study/'private/execution';shutil.copytree(source/'private/execution',ex,ignore=shutil.ignore_patterns('__pycache__','*.pyc'))
+    for rel in ['scripts/optimized_refresh_followup.py','scripts/optimized_refresh_campaign.py','scripts/optimized_refresh_report.py']:shutil.copyfile(ROOT/rel,ex/rel)
+    shutil.copytree(source/'private/kernel',study/'private/kernel')
+    shutil.copytree(source/'private/schedules',study/'private/schedules')
+    (study/'private/pools').symlink_to((source/'private/pools').resolve(),target_is_directory=True)
+    (study/'private/cache').mkdir()
+    shutil.copyfile(source/'model_source_fingerprints.json',study/'model_source_fingerprints.json')
+    shutil.copyfile(source/'private/scorer_location.json',study/'private/scorer_location.json')
+    protocol=base.read(source/'protocol.json')
+    for p in sorted((source/'qualification/ruler128k').iterdir()):
+        dst=study/'qualification/ruler128k'/p.name;dst.parent.mkdir(parents=True,exist_ok=True)
+        dst.symlink_to(p.resolve(),target_is_directory=True);add_reference(protocol,p)
+    spec=(source/'spec.md').read_text()+'\nRelaunch after coordinator treated missing clean dense adapter receipt as a dictionary. The corrected checker permits no adapter on native dense. Completed MATH/AIME and exact runtime/source-matched RULER qualification jobs remain explicitly referenced; remaining jobs and all RULER full generations are fresh.\n'
+    (study/'spec.md').write_text(spec)
+    protocol.update(created_utc=base.utc(),source_commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(),
+        execution_sha256={str(p.relative_to(ex)):base.sha(p) for p in ex.rglob('*') if p.is_file()},
+        input_sha256={str(p.relative_to(study)):base.sha(p) for label in ['pools','schedules'] for p in (study/'private'/label).rglob('*') if p.is_file()},
+        spec_sha256=base.sha(study/'spec.md'),relaunch_source=str(source.relative_to(ROOT)),relaunch_protocol_sha256=base.sha(source/'protocol.json'))
+    base.write(study/'protocol.json',protocol);base.write(study/'state.json',dict(status='prepared',utc=base.utc()))
+    evidence(study,PARENT)
+    base.write(root/'protocol.json',dict(created_utc=base.utc(),panels={p:base.sha(root/p/'protocol.json') for p in PANELS},order=PANELS,reused_completed_panels={p:str((previous/p).relative_to(ROOT)) for p in PANELS[:2]}))
+    print(root,flush=True)
+
+
 def physical(leaf):
     result=dict(global_eligible_tiles=0,global_kept_tiles=0,held_eligible_tiles=0,held_kept_tiles=0,first_eligible_tiles=0,first_kept_tiles=0)
     for row in base.read_lines(leaf/'records.jsonl'):
@@ -208,7 +239,7 @@ def qualify(study,suite,threshold):
         ar=base.read_lines(audit/'records.jsonl');cr=base.read_lines(clean/'records.jsonl')
         if [(x['output_hash'],x['denoise_forwards']) for x in ar]!=[(x['output_hash'],x['denoise_forwards']) for x in cr]:raise RuntimeError('follow-up audit/clean trajectory mismatch')
         for row in ar+cr:
-            a=row['receipts']['adapter'] or {}
+            a=((row.get('receipts') or {}).get('adapter') or {})
             if arm.startswith(('v2','v31')) and a['optimized_refresh_extra_model_forwards']!=0:raise RuntimeError('extra forward')
         results.append(dict(arm=arm,audit=str(audit.relative_to(study)),clean=str(clean.relative_to(study)),trajectory_match=True))
     base.write(dest,dict(status='pass',protocol_sha256=base.sha(study/'protocol.json'),rows=results,reference_arms=protocol['reference_arms']))
@@ -252,8 +283,9 @@ def run_panel(study):
 
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['prepare','run']);parser.add_argument('--study',type=Path,required=True);args=parser.parse_args();root=args.study.resolve()
+    parser=argparse.ArgumentParser();parser.add_argument('action',choices=['prepare','relaunch_ruler','run']);parser.add_argument('--study',type=Path,required=True);parser.add_argument('--previous',type=Path);args=parser.parse_args();root=args.study.resolve()
     if args.action=='prepare':prepare(root);return
+    if args.action=='relaunch_ruler':relaunch_ruler(root,args.previous.resolve());return
     for panel in PANELS:
         study=root/panel
         if (study/'final_complete.json').exists():continue
