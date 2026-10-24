@@ -1,0 +1,204 @@
+{
+  "analysis": {
+    "gates": "At least2 anchors with >=4 feasible alternatives, matched informative pairs and distinct score choices for identifying development evidence; otherwise bank failure",
+    "method_promoted": false,
+    "no_task_accuracy": true,
+    "norm_reuse_parked": true,
+    "unit_stratification": true
+  },
+  "anchor_algorithm": "distinct max(2,floor(L/2)),max(2,L-2), strictly <L, zero emitted tokens; untouched native first-canvas L",
+  "blocked_ids": [
+    "longbench_v2/66ebdd1c5a08c7b9b35e113b",
+    "longbench_v2/66f1ae08821e116aacb27c9c",
+    "longbench_v2/66f24538821e116aacb2865e",
+    "longbench_v2/66f2a46d821e116aacb2a41a",
+    "longbench_v2/66f94f9ebb02136c067c4fde",
+    "longbench_v2/66fa2734bb02136c067c627a",
+    "longbench_v2/66fcfd6fbb02136c067c9454",
+    "longbench_v2/6700d19dbb02136c067cb024",
+    "longbench_v2/67040983bb02136c067cd996"
+  ],
+  "branch_order": [
+    "native_unrestored",
+    "native_restored",
+    "native_restored_repeat",
+    "new_measurement_disabled",
+    "HE_full_request_qualification",
+    "AA",
+    "AA_repeat",
+    "single_pulses",
+    "immutable_selections",
+    "max_bias_SS",
+    "native_post",
+    "AA_post",
+    "selected_hash_order_SA_AS_SS"
+  ],
+  "candidate_limit": 12,
+  "consumer": "PIECEWISE native versus all-kept paged SM90 FA4",
+  "created_unix": 1792835582.160096,
+  "deferred": {
+    "confirmation_seeds": [
+      43,
+      44
+    ],
+    "long_development": [
+      "longbench_v2/66ec2755821e116aacb1b6f2"
+    ],
+    "reason": "Prospective budget narrowing: development identification leaf only; no task quality or full-grid claims",
+    "scored_finalists": true,
+    "short_confirmation": [
+      "aime26/9",
+      "aime26/13",
+      "humaneval/HumanEval/144",
+      "humaneval/HumanEval/86"
+    ]
+  },
+  "development": [
+    {
+      "id": "aime26/18",
+      "seed": 42
+    },
+    {
+      "id": "humaneval/HumanEval/124",
+      "seed": 42
+    }
+  ],
+  "diagnostic_seed": 7321,
+  "endpoint_scope": "native first-canvas stopping/commit only; early first-call stop is absorbing; second-call continuous endpoints missing; remaining request explicitly aborted for cleanup",
+  "guard": {
+    "deleted_mass": 0.2,
+    "redundancy": "mass and renormalization equivalent here",
+    "relative_output_error": 0.1,
+    "renormalization": 1.25
+  },
+  "matching": {
+    "error_floor": 1e-06,
+    "error_relative": 0.05,
+    "mass_absolute": 0.01,
+    "response_floor": 1e-06,
+    "response_separation": 0.25
+  },
+  "measurement": {
+    "acceptance": "reconstructed on native device from returned scaled logits; not exact native buffer",
+    "distribution": [
+      "centered_logits",
+      "KL",
+      "JS",
+      "rawL2_supplementary"
+    ],
+    "margins": "signed per-position fixed-reference winner; worst erosion and absolute changes",
+    "state": [
+      "canvas",
+      "history",
+      "confidence",
+      "convergence",
+      "self_conditioning"
+    ],
+    "winner": "actual native argmax/history, checked against argmax(returned native scaled logits), tie counts"
+  },
+  "model_fingerprints_sha256": "afcf8a4cbd1a407a86abab37201687e24e4c13f3265179d498c6a69f88a63a2f",
+  "model_path": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "native_sampler": {
+    "canvas_length": 256,
+    "confidence_threshold": 0.005,
+    "entropy_bound": 0.1,
+    "max_denoising_steps": 48,
+    "re_noise": "uniform native sampler for rejected positions",
+    "seed": 42,
+    "self_conditioning": "native processed logits",
+    "stability_threshold": 1,
+    "stopping": "whole-canvas stability AND mean processed-logit entropy; native EOS/finalization unchanged",
+    "temperature_schedule": "t_min=0.4, t_max=0.8, linear native schedule",
+    "thinking": true
+  },
+  "physical_scope": {
+    "eligible": "wholly-prefix only",
+    "gqa": {
+      "0": 0,
+      "8": 1
+    },
+    "heads": [
+      0,
+      8
+    ],
+    "kv_block": 64,
+    "layer": 29,
+    "q_block": 128,
+    "query_blocks": [
+      0,
+      1
+    ],
+    "short_deletions": 1
+  },
+  "predecessor_unlaunched": "attempt001 phase flag captured after mutation; no GPU generation",
+  "prior_audit_sha256": "0b0e97895a95491138968fef05641a4115822c5b317b67efa55d16194c0d5595",
+  "private_manifest_sha256": "8b2611a6d2f0599d5bbee17138714aa1152d177064ea4e367a57b026ed065547",
+  "public_manifest_sha256": "6b9e465c3be24975838d71b4dcf94e7fc7082c163fed70fc416031cd4026b893",
+  "resource": {
+    "cleanup_reserve_seconds": 30,
+    "estimated_forwards": 5134,
+    "estimated_seconds": 4100,
+    "forward_reserve": 4866,
+    "forwards": 10000,
+    "no_preemption": true,
+    "one_worker": true,
+    "seconds": 7200
+  },
+  "restore": {
+    "first_canvas": "unrestored plus two restored native continuations through commit at each anchor, metadata and bytes, post-perturbation bookends",
+    "full_request": "HE124 both corresponding anchors only; unrestored plus two complete native continuations; no task scoring",
+    "metadata": [
+      "live_root_identity",
+      "pointer",
+      "shape",
+      "stride",
+      "storage_offset",
+      "alias_groups"
+    ],
+    "opaque_limit": "Configs/streams/modules shared; empirical continuation only"
+  },
+  "review_receipt_sha256": "3cafee6db7532c9189e2bda7cb63d0d1d8b371708af6799a995b440f22baaa21",
+  "runtime_fingerprints_sha256": "5cc80c458c991db117b4158abde48d997a6ef8cda8f468903bc4e4ea1b907d8e",
+  "schema": "first_canvas_pulsehold_development_v2",
+  "scientific_hypotheses": [
+    "equal-work matched-current-bias supports may differ in native future effects",
+    "separate SA propagation from AS direct second pulse and SS hold interaction"
+  ],
+  "scorer_sources": {
+    "/home/exouser/ljy/dlm/scripts/v31_official.py": "fa730a09481178e020725b810a7f235e4347ed10fec49c19ac9ec5efdbdd4b04",
+    "/home/exouser/ljy/dlm/scripts/v31_score_aime.py": "3702da7710f60b4e6d2797791177934233ed7e7d8187d0857d57f3404fd15b3e",
+    "/home/exouser/ljy/dlm/scripts/v31_score_humaneval.py": "9a85a59a652feff9a244610465701a12f6f91341f527290ddeca57275670a202",
+    "/home/exouser/ljy/dlm/scripts/v31_score_longbench_official.py": "36e9aff7ad32d20e6f3db01853f31d2dbbadcc2a7e86bf35840aa9329f870f0b"
+  },
+  "scores": [
+    "current_error",
+    "residual_response",
+    "decision_lexicographic",
+    "mass",
+    "same_feasible_set_support_hash_sham"
+  ],
+  "selectors_firewall": "first pulse only; immutable selection artifacts precede second-call branches",
+  "sources": {
+    "/home/exouser/dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/model_executor/models/diffusion_gemma.py": "748157602927082f5fd95f96bec5ac43b55d1e34a42094f0ab5e5ddc6acb0146",
+    "/home/exouser/dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py": "174c93db921c23cf0396eee4764be25b2bd2d4b6a06e9fa41ce3598b884ce8ce",
+    "/home/exouser/ljy/dlm/experiments/numerical_qk_reuse/v27_fa4.py": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+    "/home/exouser/ljy/dlm/experiments/numerical_qk_reuse/v31_local_sparse.py": "4d3fdeca04614daa810c87584adf7c7f11dcf38a08f2be83f5f3a78cb007ea85",
+    "/home/exouser/ljy/dlm/experiments/numerical_qk_reuse/v31_value_native_audit.py": "ef1ee7711dadf318b96aa2e6009ffb4d0dd4f3ded1c6f2d9d45fde760a97e766",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/README.md": "891913b806f9504886a3872b9b0156fd705845375ba28f7fb33031ace995ccd6",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/code/native_measurements.py": "48de184ad921a13aba88ce0fd83b8c61df7038edb0c379ff4684f7402fb26978",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/code/production_observer.py": "855db252677f97e8ed72b91df914aae51722fe0eba326d0920db47dd2e312cf6",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/code/pulsehold.py": "22bb319cf5ea3a97e7f749d56cc2409ebec0c4f8f858bc30b2f2f763f552b8e3",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/code/runtime.py": "a5a5143c9721772eb23d074addfdd663461d2c18913bdb0b5438a08d755329de",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/code/state_restore.py": "23d5b5736eba053ee066b0489452dad5439e0de4a430b696681609376da7da4d",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/code/support_bank.py": "3004909788a174e5c592bdb9530ab8bb38ae2b40d252d7a4b804b3f612ff39e9",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/code/worker.py": "ea304b4ce89911d442ba1e61e8edab44d94ff4f7e121d0b3d765e49800afb6ea",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/launch.py": "b8938c1222e025aae8cd304340fdaedc3c99218047fe8b063f0dd81ae5f65059",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/tests/test_pulsehold.py": "1367182c9b6d3563df7ddde10fc3c9cfbddd64f530078e970bbb80c14d67272b",
+    "/home/exouser/ljy/dlm/scripts/v31_humaneval_cfgdet_base_worker.py": "b50d3c9016a5c59f676f719b1bff6d034c2bc45cbf255d35aefae7947e79fcc5",
+    "/home/exouser/ljy/dlm/scripts/v31_humaneval_repro_policy_worker.py": "d9ef94f9aba610fcaf3f13e1a232d5df337a9e7e1a80fd453ae997237bcb98d6"
+  },
+  "spec_sha256": "891913b806f9504886a3872b9b0156fd705845375ba28f7fb33031ace995ccd6",
+  "starting_commit": "7febadb6",
+  "tie_rule": "exact numeric scores then support SHA256"
+}
