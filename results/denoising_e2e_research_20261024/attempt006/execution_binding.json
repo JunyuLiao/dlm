@@ -1,0 +1,24 @@
+{
+  "V31_separate_binding_sha256": "1429aaf32135ed45603772085427e9c367fa9460f62a1c026594bbd13a45704f",
+  "change": "Operational heartbeats and no-progress watchdog replace the static wall timeout for active long inference. No selector, sampler, budget, prompt, runtime or scoring change. Each record binds this source in addition to parent protocol.",
+  "launcher_sha256": "38a0d48c770f84ee7568ffe46bc238661f8a637e7318a502cd23221163045c02",
+  "native_method_sources": {
+    "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/online_runtime.py": "7638d380af9d1da8df399ece031a9bae02b3976765adbe5949042184efad9aa6",
+    "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/selector.py": "19239669b30ab973d1decc723e49107cd0c5aaa3c1c13cbd5a9ee2e5afe98143"
+  },
+  "native_request_sanity_bound": "prefill_chunks+(ceil(original_output_budget/256)+1)*49+2; raises only on impossible request accounting, never changes native stopping.",
+  "parent_method_source_checkpoint": "4ac2b53f",
+  "parent_protocol_sha256": "88e46d4088a094968ebbeaed05b0ce4b9cf6e824a643675eba257ac9920d35dd",
+  "schema": "long_nonv31_execution_binding_v2",
+  "scope": "Same8nonV31arms and same10long cells per arm in parent protocol. The ninth V31 arm is executed through the separate-process attempt005 binding; no arm or cell is dropped.",
+  "source_parent_binding_sha256": "fc53aa5ed42f8a8e2c11e3c9c084fa6db492fc21d6bc08f1de54800befc39a25",
+  "spec_sha256": "c67cc5b9979449e1c5e654f838081e88023fea87dcea60ea37e2690170f71d21",
+  "tests_sha256": "9fbc82ab949c0ad75c080e93379b5839cc50bafa936e44d63404c63eec1e57e1",
+  "watchdog": {
+    "campaign_forward_ceiling": null,
+    "campaign_seconds_ceiling": null,
+    "heartbeat_every_engine_calls": 64,
+    "no_progress_seconds": 14400
+  },
+  "worker_sha256": "c36a10d547767b4b3a2cc97abceedd9174b8e3cedcbfb08eff0d5621e2154f06"
+}
