@@ -1,0 +1,23 @@
+{
+  "launcher_sha256": "17860712278c8694da9d1a2ecf14692a1ebcc1463f75b534f0cd4c1ff71b11e7",
+  "native_method_sources": {
+    "/home/exouser/ljy/dlm/experiments/numerical_qk_reuse/optimized_refresh_runtime.py": "857a90f3222020eeea341af37cd34762cc067ce680161bafed9ef5071d65fc6b",
+    "/home/exouser/ljy/dlm/experiments/numerical_qk_reuse/resident_execution_runtime.py": "d8b5e3e28e2b7f879f7e323f1f9e869b5d5cd25188d9719383851a39de605421",
+    "/home/exouser/ljy/dlm/experiments/numerical_qk_reuse/vllm_adapter.py": "d73d7a00b0bab3ddfac8e5d10c3d6942637a770b82bcf6b704335032cd44d475"
+  },
+  "output_alias": "v31_optimized_separate_passes",
+  "parent_method_source_checkpoint": "4ac2b53f",
+  "parent_protocol_sha256": "88e46d4088a094968ebbeaed05b0ce4b9cf6e824a643675eba257ac9920d35dd",
+  "schema": "v31_separate_passes_binding_v1",
+  "scope": "Same V31 configuration and same50 item/seed cells, no new arm or question. Audit/clean engines separated to avoid clean-only list-cache accounting crossing into audit.",
+  "spec_sha256": "94b8367822b1f19af9e703a5be60392bf8d048e3bb22e9322d8f48c45e9373d2",
+  "tests_sha256": "8f7cfe4896c82db67772131315ea40b1f9e61335e15df54f1a200c7e343a9174",
+  "warmup": "Explicit complete per-cell warm request in each constant-mode process; all forwards and allocation counted.",
+  "watchdog": {
+    "campaign_forward_ceiling": null,
+    "campaign_seconds_ceiling": null,
+    "heartbeat_every_engine_calls": 64,
+    "no_progress_seconds": 14400
+  },
+  "worker_sha256": "1bda241cd2e47781c07410055fee46a203c6ac0221e4857bbf3a2eeca206ec7f"
+}
