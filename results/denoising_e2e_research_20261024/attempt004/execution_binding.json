@@ -1,0 +1,22 @@
+{
+  "change": "Operational heartbeats and no-progress watchdog replace the static wall timeout for active long inference. No selector, sampler, budget, prompt, runtime or scoring change. Each record binds this source in addition to parent protocol.",
+  "launcher_sha256": "4d8bec7c9772248a8522a096c65f82d37a176f999f093fd8373af271ace6ff81",
+  "native_method_sources": {
+    "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/online_runtime.py": "7638d380af9d1da8df399ece031a9bae02b3976765adbe5949042184efad9aa6",
+    "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/selector.py": "19239669b30ab973d1decc723e49107cd0c5aaa3c1c13cbd5a9ee2e5afe98143"
+  },
+  "native_request_sanity_bound": "prefill_chunks+(ceil(original_output_budget/256)+1)*49+2; raises only on impossible request accounting, never changes native stopping.",
+  "parent_method_source_checkpoint": "4ac2b53f",
+  "parent_protocol_sha256": "88e46d4088a094968ebbeaed05b0ce4b9cf6e824a643675eba257ac9920d35dd",
+  "schema": "long_execution_binding_progress_watchdog_v1",
+  "scope": "Same9arms and same10long item/seed cells in parent protocol; no added or dropped problem/seed/arm.",
+  "spec_sha256": "2efef03b2b1a46beb76e6ff3b4ede7035cfdd9ee4b0f13431c36a9a93f9c2c70",
+  "tests_sha256": "9fbc82ab949c0ad75c080e93379b5839cc50bafa936e44d63404c63eec1e57e1",
+  "watchdog": {
+    "campaign_forward_ceiling": null,
+    "campaign_seconds_ceiling": null,
+    "heartbeat_every_engine_calls": 64,
+    "no_progress_seconds": 14400
+  },
+  "worker_sha256": "c36a10d547767b4b3a2cc97abceedd9174b8e3cedcbfb08eff0d5621e2154f06"
+}
