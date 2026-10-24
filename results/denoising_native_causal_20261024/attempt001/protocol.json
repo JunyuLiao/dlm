@@ -1,0 +1,53 @@
+{
+  "anchor_after_denoising_calls": 2,
+  "base_head": "03e605740b683fb97b03e139041b59622d4b3a61",
+  "blocked_ids": [
+    "longbench_v2/66ebdd1c5a08c7b9b35e113b",
+    "longbench_v2/66f1ae08821e116aacb27c9c",
+    "longbench_v2/66f24538821e116aacb2865e",
+    "longbench_v2/66f2a46d821e116aacb2a41a",
+    "longbench_v2/66f94f9ebb02136c067c4fde",
+    "longbench_v2/66fa2734bb02136c067c627a",
+    "longbench_v2/66fcfd6fbb02136c067c9454",
+    "longbench_v2/6700d19dbb02136c067cb024",
+    "longbench_v2/67040983bb02136c067cd996"
+  ],
+  "branches": [
+    "dense_reference",
+    "dense_restored",
+    "dense_restored_repeat"
+  ],
+  "created_unix": 1792807444.830071,
+  "frozen_inputs": "Original screen30 identity; nine over-limit LongBench items stay blocked",
+  "model_path": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "native_interventions_authorized": false,
+  "native_sampler": {
+    "canvas_length": 256,
+    "confidence_threshold": 0.005,
+    "entropy_bound": 0.1,
+    "max_denoising_steps": 48,
+    "re_noise": "uniform native sampler for rejected positions",
+    "seed": 42,
+    "self_conditioning": "native processed logits",
+    "stability_threshold": 1,
+    "stopping": "whole-canvas stability AND mean processed-logit entropy; native EOS/finalization unchanged",
+    "temperature_schedule": "t_min=0.4, t_max=0.8, linear native schedule",
+    "thinking": true
+  },
+  "parent_protocol_sha256": "b89d910d8d16f9fbdfe5a8217142e749fef1418c68f3e2844994a805b6b121ea",
+  "private_manifest_sha256": "8b2611a6d2f0599d5bbee17138714aa1152d177064ea4e367a57b026ed065547",
+  "reservation_seconds": 900,
+  "schema": "native_restore_qualification_v1",
+  "scope": "native dense full-request continuation after in-place state restoration only; no sparse method",
+  "smoke_item": "humaneval/HumanEval/53",
+  "sources": {
+    "/home/exouser/dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/model_executor/models/diffusion_gemma.py": "748157602927082f5fd95f96bec5ac43b55d1e34a42094f0ab5e5ddc6acb0146",
+    "/home/exouser/dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py": "174c93db921c23cf0396eee4764be25b2bd2d4b6a06e9fa41ce3598b884ce8ce",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt001/code/production_observer.py": "855db252677f97e8ed72b91df914aae51722fe0eba326d0920db47dd2e312cf6",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt001/code/state_restore.py": "62eec63a5ec69ed26493a74802d847694db94c299a37f856809b57c8483d39c0",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt001/code/worker.py": "d719107763d2d26ae433b11b8b5c330e8deeca7a99e514af6eb069eedf40761d",
+    "/home/exouser/ljy/dlm/scripts/v31_humaneval_cfgdet_base_worker.py": "b50d3c9016a5c59f676f719b1bff6d034c2bc45cbf255d35aefae7947e79fcc5",
+    "/home/exouser/ljy/dlm/scripts/v31_humaneval_repro_policy_worker.py": "d9ef94f9aba610fcaf3f13e1a232d5df337a9e7e1a80fd453ae997237bcb98d6"
+  }
+}

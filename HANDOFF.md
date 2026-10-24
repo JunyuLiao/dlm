@@ -1,3 +1,49 @@
+## Native causal trajectory diagnostics — 2026-10-24 UTC
+
+Verified pre-generation checkpoint af0a4a5f on denoising_trajectory_research.
+Report: results/denoising_native_causal_20261024/attempt006/summary.md.
+Restore protocol fb915b0d; corrected support protocol1474ac6e.
+The bounded diagnostic stage is complete; the broader acceleration plan is partial.
+
+Attempt004 qualifies first-canvas in-place restoration on HumanEval/53:
+reference and two restored full continuations match logits, native active state,
+output275 tokens, RNG, ten remaining model/engine calls and two committed canvases.
+All235 storage spans match immediately after each restoration. Arbitrary later
+canvas restoration remains unqualified. Setter failures001/003 and attempt005
+output-shape/source-freeze failure remain preserved;002 is CPU-only.
+
+Attempt006 completes smoke plus four short items and one185546-token LongBench
+item. Six anchors,23 supports,18 deleting supports; all same-support restores,
+explicit-forward/RNG/physical-mask gates pass.3779 observed native executions,
+zero measured request captures, one FA4 JIT event per process; no clean timing.
+Only GLOBAL layer29/head0/queryblock0 prefix tiles may be pruned; current QKV
+is used on retained support; no cached outputs or stale values are substituted.
+
+Feasible mass masks with zero current argmax/acceptance differences change
+41/38/22 next-call argmax positions on AIME18/HE70/heldoutHE42, with3/3/12
+next-call acceptance differences. All-kept consumer itself changes1–6 current
+and4–45 next-call positions against native dense, requiring matched all-kept.
+Heldout LongBench response/error correlations with next native logit motion are
+0.500/0.524. Response/current-error choose identical supports in all3 heldout
+budget groups. K1450/2899 long prefix tiles: all4 candidates fail guards;
+K2610/2899: all4 pass. No candidate changes early native stop flags. No sparse
+full trajectory, official task score, N/C improvement or speed claim exists.
+
+Decision: no ResponseGuard proxy or benchmark; MarginGuard has only mixed
+exploratory first-call influence readouts, no proxy promotion. Prior1481 weak
+partial-support validity bounds remain a negative practical result. Next justified
+implementation is a diagnostic MarginGuard tile-influence oracle at middle/late
+dense states after qualifying restoration there, with independent confirmation.
+Do not force a production selector or resume any paused benchmark.
+
+19 focused CPU tests pass twice; frozen sources and analysis identity match.
+Attempt006 worker reservation1547.987s; all new causal attempts2660.187s including
+startup, warmup, failed attempts, diagnostics and cleanup, not active GPU seconds
+or clean W. H100 final check0MiB/0%, no compute clients. No jobs remain.
+Nine over-limit LongBench items remain blocked without truncation/replacement.
+Original21-item dense census and prior results/provenance are unchanged.
+Exact commands, files, source hashes and checks: attempt006/closeout001/.
+
 ## Denoising trajectory diagnostics — 2026-10-23 UTC
 
 Verified checkpoint `22c7ba43` on `denoising_trajectory_research`. Current report:

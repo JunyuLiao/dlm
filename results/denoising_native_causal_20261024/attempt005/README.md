@@ -1,0 +1,1 @@
+Bounded native support oracle diagnostic. Restores qualified native state; current QKV only on retained tiles. Dense and allkept consumer controls. Two-call branches are explicitly diagnostic and every forward counted; native stopping remains unchanged. No sparse task-score or acceleration claim. Original blocked items unchanged.

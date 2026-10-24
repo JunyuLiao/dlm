@@ -1,0 +1,339 @@
+[
+  {
+    "command": [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=30s",
+      "900",
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt001/code/worker.py",
+      "--root",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt001"
+    ],
+    "environment_overrides": {
+      "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt001/cache/cuda",
+      "HF_HUB_OFFLINE": "1",
+      "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+      "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt001/cache/inductor",
+      "TORCHINDUCTOR_DETERMINISTIC": "1",
+      "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt001/cache/triton",
+      "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt001/cache/vllm",
+      "VLLM_USE_V2_MODEL_RUNNER": "1"
+    },
+    "gpu_checks": [
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-gpu=name,memory.used,utilization.gpu",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "NVIDIA H100 80GB HBM3, 0 MiB, 0 %\n"
+      },
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-compute-apps=pid,process_name,used_gpu_memory",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ],
+    "receipt_path": "results/denoising_native_causal_20261024/attempt001/launch_receipt.json",
+    "spec_commit": "c960142f13bd8fff9f5c82e6e70e75dbfe5c9fdb",
+    "started_unix": 1792807489.4380808
+  },
+  {
+    "command": [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=30s",
+      "900",
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt003/code/worker.py",
+      "--root",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt003"
+    ],
+    "environment_overrides": {
+      "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt003/cache/cuda",
+      "HF_HUB_OFFLINE": "1",
+      "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+      "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt003/cache/inductor",
+      "TORCHINDUCTOR_DETERMINISTIC": "1",
+      "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt003/cache/triton",
+      "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt003/cache/vllm",
+      "VLLM_USE_V2_MODEL_RUNNER": "1"
+    },
+    "gpu_checks": [
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-gpu=name,memory.used,utilization.gpu",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "NVIDIA H100 80GB HBM3, 0 MiB, 0 %\n"
+      },
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-compute-apps=pid,process_name,used_gpu_memory",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ],
+    "receipt_path": "results/denoising_native_causal_20261024/attempt003/launch_receipt.json",
+    "spec_commit": "a9e5570b70db3075da8f30788ac49e4cce69c2d6",
+    "started_unix": 1792807904.987677
+  },
+  {
+    "command": [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=30s",
+      "900",
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt004/code/worker.py",
+      "--root",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt004"
+    ],
+    "environment_overrides": {
+      "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt004/cache/cuda",
+      "HF_HUB_OFFLINE": "1",
+      "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+      "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt004/cache/inductor",
+      "TORCHINDUCTOR_DETERMINISTIC": "1",
+      "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt004/cache/triton",
+      "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt004/cache/vllm",
+      "VLLM_USE_V2_MODEL_RUNNER": "1"
+    },
+    "gpu_checks": [
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-gpu=name,memory.used,utilization.gpu",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "NVIDIA H100 80GB HBM3, 0 MiB, 0 %\n"
+      },
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-compute-apps=pid,process_name,used_gpu_memory",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ],
+    "receipt_path": "results/denoising_native_causal_20261024/attempt004/launch_receipt.json",
+    "spec_commit": "bb8baee8413395711939f51f81d6439b82d9bdc5",
+    "started_unix": 1792808249.1062205
+  },
+  {
+    "command": [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=30s",
+      "1800",
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt005/code/worker.py",
+      "--root",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt005",
+      "--group",
+      "smoke"
+    ],
+    "environment_overrides": {
+      "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt005/cache/cuda",
+      "HF_HUB_OFFLINE": "1",
+      "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+      "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt005/cache/inductor",
+      "TORCHINDUCTOR_DETERMINISTIC": "1",
+      "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt005/cache/triton",
+      "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt005/cache/vllm",
+      "VLLM_USE_V2_MODEL_RUNNER": "1"
+    },
+    "gpu_checks": [
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-gpu=name,memory.used,utilization.gpu",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "NVIDIA H100 80GB HBM3, 0 MiB, 0 %\n"
+      },
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-compute-apps=pid,process_name,used_gpu_memory",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ],
+    "receipt_path": "results/denoising_native_causal_20261024/attempt005/smoke_launch.json",
+    "spec_commit": "af0a4a5f6569f31a169450b5306bba9d7bfe0c17",
+    "started_unix": 1792809610.358471
+  },
+  {
+    "command": [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=30s",
+      "1800",
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/code/worker.py",
+      "--root",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006",
+      "--group",
+      "long"
+    ],
+    "environment_overrides": {
+      "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/cuda",
+      "HF_HUB_OFFLINE": "1",
+      "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+      "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/inductor",
+      "TORCHINDUCTOR_DETERMINISTIC": "1",
+      "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/triton",
+      "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/vllm",
+      "VLLM_USE_V2_MODEL_RUNNER": "1"
+    },
+    "gpu_checks": [
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-gpu=name,memory.used,utilization.gpu",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "NVIDIA H100 80GB HBM3, 0 MiB, 0 %\n"
+      },
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-compute-apps=pid,process_name,used_gpu_memory",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ],
+    "receipt_path": "results/denoising_native_causal_20261024/attempt006/long_launch.json",
+    "spec_commit": "af0a4a5f6569f31a169450b5306bba9d7bfe0c17",
+    "started_unix": 1792811158.9985685
+  },
+  {
+    "command": [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=30s",
+      "1800",
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/code/worker.py",
+      "--root",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006",
+      "--group",
+      "short"
+    ],
+    "environment_overrides": {
+      "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/cuda",
+      "HF_HUB_OFFLINE": "1",
+      "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+      "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/inductor",
+      "TORCHINDUCTOR_DETERMINISTIC": "1",
+      "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/triton",
+      "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/vllm",
+      "VLLM_USE_V2_MODEL_RUNNER": "1"
+    },
+    "gpu_checks": [
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-gpu=name,memory.used,utilization.gpu",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "NVIDIA H100 80GB HBM3, 0 MiB, 0 %\n"
+      },
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-compute-apps=pid,process_name,used_gpu_memory",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ],
+    "receipt_path": "results/denoising_native_causal_20261024/attempt006/short_launch.json",
+    "spec_commit": "af0a4a5f6569f31a169450b5306bba9d7bfe0c17",
+    "started_unix": 1792810539.7013068
+  },
+  {
+    "command": [
+      "timeout",
+      "--signal=TERM",
+      "--kill-after=30s",
+      "1800",
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/code/worker.py",
+      "--root",
+      "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006",
+      "--group",
+      "smoke"
+    ],
+    "environment_overrides": {
+      "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/cuda",
+      "HF_HUB_OFFLINE": "1",
+      "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+      "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/inductor",
+      "TORCHINDUCTOR_DETERMINISTIC": "1",
+      "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/triton",
+      "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/cache/vllm",
+      "VLLM_USE_V2_MODEL_RUNNER": "1"
+    },
+    "gpu_checks": [
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-gpu=name,memory.used,utilization.gpu",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": "NVIDIA H100 80GB HBM3, 0 MiB, 0 %\n"
+      },
+      {
+        "command": [
+          "nvidia-smi",
+          "--query-compute-apps=pid,process_name,used_gpu_memory",
+          "--format=csv,noheader"
+        ],
+        "returncode": 0,
+        "stderr": "",
+        "stdout": ""
+      }
+    ],
+    "receipt_path": "results/denoising_native_causal_20261024/attempt006/smoke_launch.json",
+    "spec_commit": "af0a4a5f6569f31a169450b5306bba9d7bfe0c17",
+    "started_unix": 1792810149.34136
+  }
+]

@@ -1,0 +1,1 @@
+Corrected output-shape adapter in a new immutable attempt. Native PIECEWISE restoration and all-kept paged FA4 controls precede fixed-budget support diagnostics. Current Q/K/V only; no sampler changes. Prefix-only deletion has zero removed canvas mass and canvas amplification1. Whole-attention renormalization is recorded separately. Original nine LongBench items remain blocked.

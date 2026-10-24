@@ -1,0 +1,96 @@
+{
+  "anchor_after_denoising_calls": 2,
+  "base_head": "03e605740b683fb97b03e139041b59622d4b3a61",
+  "blocked_ids": [
+    "longbench_v2/66ebdd1c5a08c7b9b35e113b",
+    "longbench_v2/66f1ae08821e116aacb27c9c",
+    "longbench_v2/66f24538821e116aacb2865e",
+    "longbench_v2/66f2a46d821e116aacb2a41a",
+    "longbench_v2/66f94f9ebb02136c067c4fde",
+    "longbench_v2/66fa2734bb02136c067c627a",
+    "longbench_v2/66fcfd6fbb02136c067c9454",
+    "longbench_v2/6700d19dbb02136c067cb024",
+    "longbench_v2/67040983bb02136c067cd996"
+  ],
+  "branches": [
+    "dense_reference",
+    "dense_restored",
+    "dense_restored_repeat"
+  ],
+  "budget_fractions": [
+    0.5,
+    0.9
+  ],
+  "candidate_bank": [
+    "mass",
+    "swap_near",
+    "swap_far",
+    "position_sham"
+  ],
+  "consumer_mode": "PIECEWISE",
+  "created_unix": 1792810134.4010649,
+  "development_ids": [
+    "aime26/18",
+    "humaneval/HumanEval/70"
+  ],
+  "frozen_inputs": "Original screen30 identity; nine over-limit LongBench items stay blocked",
+  "guard": {
+    "canvas_amplification": 1.25,
+    "deleted_mass": 0.2,
+    "relative_output_error": 0.1
+  },
+  "heldout_ids": [
+    "aime26/7",
+    "humaneval/HumanEval/42",
+    "longbench_v2/66ec2755821e116aacb1b6f2"
+  ],
+  "long_ids": [
+    "longbench_v2/66ec2755821e116aacb1b6f2"
+  ],
+  "model_path": "/home/exouser/.cache/huggingface/hub/models--google--diffusiongemma-26B-A4B-it/snapshots/f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "model_revision": "f7f5b7f5fa82ffc52addd066915886d497f5517b",
+  "native_interventions_authorized": true,
+  "native_sampler": {
+    "canvas_length": 256,
+    "confidence_threshold": 0.005,
+    "entropy_bound": 0.1,
+    "max_denoising_steps": 48,
+    "re_noise": "uniform native sampler for rejected positions",
+    "seed": 42,
+    "self_conditioning": "native processed logits",
+    "stability_threshold": 1,
+    "stopping": "whole-canvas stability AND mean processed-logit entropy; native EOS/finalization unchanged",
+    "temperature_schedule": "t_min=0.4, t_max=0.8, linear native schedule",
+    "thinking": true
+  },
+  "parent_protocol_sha256": "b89d910d8d16f9fbdfe5a8217142e749fef1418c68f3e2844994a805b6b121ea",
+  "private_manifest_sha256": "8b2611a6d2f0599d5bbee17138714aa1152d177064ea4e367a57b026ed065547",
+  "promotion": "heldout native prediction must beat current output error in two workload families; otherwise preserve negative and do not run benchmark",
+  "reservation_seconds": 1800,
+  "restore_gate": "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt004/qualification/final_complete.json",
+  "restore_gate_sha256": "0418063c9645adffa83430db2ecc12df01e39706d36ac115810fc076db32685f",
+  "schema": "native_support_oracle_diagnostic_v2",
+  "scope": "two native denoising calls from common first-canvas anchor; layer29 head0 queryblock0, current QKV, prefix only; no sparse task score or trajectory speed claim",
+  "short_ids": [
+    "aime26/18",
+    "aime26/7",
+    "humaneval/HumanEval/70",
+    "humaneval/HumanEval/42"
+  ],
+  "smoke_item": "humaneval/HumanEval/124",
+  "smoke_selection": "Original screen item with longest short prompt by prompt-token count, ensuring multiple prunable prefix tiles; no outcome filtering",
+  "source_freeze": "No changes to code or protocol after this freeze; source hashes checked before and after execution",
+  "sources": {
+    "/home/exouser/dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/model_executor/models/diffusion_gemma.py": "748157602927082f5fd95f96bec5ac43b55d1e34a42094f0ab5e5ddc6acb0146",
+    "/home/exouser/dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/v1/worker/gpu/model_runner.py": "174c93db921c23cf0396eee4764be25b2bd2d4b6a06e9fa41ce3598b884ce8ce",
+    "/home/exouser/ljy/dlm/experiments/numerical_qk_reuse/v27_fa4.py": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+    "/home/exouser/ljy/dlm/experiments/numerical_qk_reuse/v31_local_sparse.py": "4d3fdeca04614daa810c87584adf7c7f11dcf38a08f2be83f5f3a78cb007ea85",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/code/production_observer.py": "855db252677f97e8ed72b91df914aae51722fe0eba326d0920db47dd2e312cf6",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/code/state_restore.py": "200415e23a0016d420de96e5a63caa7390f56682459b356bf09eb8ddc629cb7b",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/code/support_oracle.py": "c1001a1448691f41046b545e754f87a6bccfc41e0ce1880a0ecccde175a9a139",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_20261024/attempt006/code/worker.py": "27b071798c4a6d3bf32a21db972940b3faf5d1529bef3fa9a7d4d31217df550a",
+    "/home/exouser/ljy/dlm/scripts/v31_humaneval_cfgdet_base_worker.py": "b50d3c9016a5c59f676f719b1bff6d034c2bc45cbf255d35aefae7947e79fcc5",
+    "/home/exouser/ljy/dlm/scripts/v31_humaneval_repro_policy_worker.py": "d9ef94f9aba610fcaf3f13e1a232d5df337a9e7e1a80fd453ae997237bcb98d6"
+  },
+  "supersedes_preserved_attempt": "attempt005 output shape adapter failure; corrected current-QKV consumer; no usable sparse result inherited"
+}

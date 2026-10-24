@@ -2428,3 +2428,23 @@ qualification outputs. Clean mean W: AIME V315.9013s,MATH V311.5221s,RULER
 V26.6401s; other arms retain earlier timing/source identities,not matched speed
 evidence. LongBench cancelled before any worker; original campaign preserved
 as partial/scope-superseded. Report closes three authorized panels only.
+
+## 2026-10-24 — Native restoration qualification and bounded causal support diagnostics complete
+
+Diagnostic leaves only; not a sparse accuracy/trajectory benchmark or completed
+acceleration study. [Report](../results/denoising_native_causal_20261024/attempt006/summary.md),
+restore protocol fb915b0d, support protocol1474ac6e; leaf completion markers,
+source checks and analysis identity agree. Native first-canvas reference plus two
+restores match all logits, active sampler states, output275 tokens, RNG and native
+call counts;235 storage spans verified at each restoration. Six native anchors,
+23 supports (18 deleting), fixed-budget current-QKV layer29/head0/queryblock0
+prefix interventions, matched PIECEWISE and all-kept controls. Sampler unchanged.
+
+Current argmax/acceptance agreement does not preserve the next native step:
+feasible masks change41/38/22 next argmax positions and3/3/12 acceptance positions
+on AIME18/HE70/heldoutHE42. Heldout LongBench response/error prediction0.500/
+0.524, no distinct guarded response/current-error selection across3 heldout budget
+groups. No stop-flag changes in the two early calls. No method promotion, no
+sparse task-accuracy or full N/C comparison, no clean speed or novelty claim.
+19CPU tests pass twice; source/RNG/forward/physical checks pass. Request capture0,
+JIT3; timing audit-only. Failed attempts and nine blocked LongBench IDs preserved.

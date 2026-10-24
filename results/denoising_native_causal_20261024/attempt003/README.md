@@ -1,0 +1,1 @@
+Corrected native restoration qualification. Preserves attempt001/002. Object attributes restore using object.__setattr__; nested mutable values restore in place. Diagnostic path labels bounded. Native sampler and parity gates unchanged.

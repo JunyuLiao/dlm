@@ -1,0 +1,174 @@
+{
+  "branches": [
+    {
+      "commit_calls": 2,
+      "denoising_calls": 10,
+      "final_rng_cpu": "5feb54a46230d321d888e9b43cf5a57492665f199e4377408d79ee460e36679c",
+      "final_rng_cuda": "91356210b840962b20a2185038b15faf475457c7c46310c35c3c38de966b4a00",
+      "finish_reason": "stop",
+      "forwards": 10,
+      "label": "dense_reference",
+      "logits_sha256": "10a84c9ba6b85a1933c58b686d763471f4145497b41c2ad4f3e0b1e84ae1fa2c",
+      "native_state_sha256": "aa6310567f5da98e45ac7474d3e0a5ce1d8f435546e7a2a4405c139462f5b889",
+      "output_sha256": "95d5f0c1e4eceac87fcf275b2b4dea661bb088763351ee163e25a1610432fe87",
+      "output_tokens": 275,
+      "sampler_calls": 12,
+      "steps": 10,
+      "stop_reason": 106
+    },
+    {
+      "commit_calls": 2,
+      "denoising_calls": 10,
+      "final_rng_cpu": "5feb54a46230d321d888e9b43cf5a57492665f199e4377408d79ee460e36679c",
+      "final_rng_cuda": "91356210b840962b20a2185038b15faf475457c7c46310c35c3c38de966b4a00",
+      "finish_reason": "stop",
+      "forwards": 10,
+      "label": "dense_restored",
+      "logits_sha256": "10a84c9ba6b85a1933c58b686d763471f4145497b41c2ad4f3e0b1e84ae1fa2c",
+      "native_state_sha256": "aa6310567f5da98e45ac7474d3e0a5ce1d8f435546e7a2a4405c139462f5b889",
+      "output_sha256": "95d5f0c1e4eceac87fcf275b2b4dea661bb088763351ee163e25a1610432fe87",
+      "output_tokens": 275,
+      "sampler_calls": 12,
+      "steps": 10,
+      "stop_reason": 106
+    },
+    {
+      "commit_calls": 2,
+      "denoising_calls": 10,
+      "final_rng_cpu": "5feb54a46230d321d888e9b43cf5a57492665f199e4377408d79ee460e36679c",
+      "final_rng_cuda": "91356210b840962b20a2185038b15faf475457c7c46310c35c3c38de966b4a00",
+      "finish_reason": "stop",
+      "forwards": 10,
+      "label": "dense_restored_repeat",
+      "logits_sha256": "10a84c9ba6b85a1933c58b686d763471f4145497b41c2ad4f3e0b1e84ae1fa2c",
+      "native_state_sha256": "aa6310567f5da98e45ac7474d3e0a5ce1d8f435546e7a2a4405c139462f5b889",
+      "output_sha256": "95d5f0c1e4eceac87fcf275b2b4dea661bb088763351ee163e25a1610432fe87",
+      "output_tokens": 275,
+      "sampler_calls": 12,
+      "steps": 10,
+      "stop_reason": 106
+    }
+  ],
+  "compilation_policy": {
+    "effective_cudagraph_mode": "FULL_AND_PIECEWISE",
+    "effective_inductor_compile_config": {
+      "benchmark_combo_kernel": false,
+      "deterministic": true,
+      "enable_auto_functionalized_v2": false
+    },
+    "extra_forwards": 0,
+    "global_after_engine_init_before_restore": false,
+    "intermediate_observer": false,
+    "name": "explicit_inductor_cfgdet",
+    "native_helpers": {
+      "_compiled_sample_step": {
+        "backend": "inductor",
+        "dynamic": true,
+        "options": {
+          "benchmark_combo_kernel": false,
+          "deterministic": true
+        },
+        "original_python_callable_preserved": true,
+        "source_sha256": "a623a3b30db3f0e70cb798d62cba7e6a4333861a7ad38931765e7c4d1045706d"
+      },
+      "_compute_num_rejected": {
+        "backend": "inductor",
+        "dynamic": true,
+        "options": {
+          "benchmark_combo_kernel": false,
+          "deterministic": true
+        },
+        "original_python_callable_preserved": true,
+        "source_sha256": "caf48414b8ba9082617923fb972be8a3e6ba87159fd724acc8426cb99e981a76"
+      },
+      "_softcap_logits": {
+        "backend": "inductor",
+        "dynamic": true,
+        "options": {
+          "benchmark_combo_kernel": false,
+          "deterministic": true
+        },
+        "original_python_callable_preserved": true,
+        "source_sha256": "c0a7ac2b4cc21449c7327c850b04c81b663abb99b10ac7ddf847b53cf2b9b6cc"
+      }
+    },
+    "native_sampler_changed": false
+  },
+  "full_request_continuation_equal": true,
+  "initial_native_steps": 3,
+  "local_fix_sha256": "4f3df79dbd9ce1b28ba56669780330c18d07f8309ad01d8db0136e4d86d0554c",
+  "passed": true,
+  "protocol_sha256": "fb915b0d419c85a9104a720333486586ce2c263e9c9b3df5ff62b00fa7bfc2f4",
+  "request_cuda_captures": 0,
+  "resource_seconds": 331.91820829198696,
+  "sampler_changed": false,
+  "snapshot": {
+    "passed": false,
+    "python_nodes": 13315,
+    "shared_opaque_types": [
+      "AttentionConfig",
+      "CacheConfig",
+      "CompilationConfig",
+      "DecodeStream",
+      "Event",
+      "ModelConfig",
+      "ObservabilityConfig",
+      "ParallelConfig",
+      "SchedulerConfig",
+      "Stream",
+      "Tokenizer",
+      "VllmConfig",
+      "lock"
+    ],
+    "storage_bytes": 16868788160,
+    "storage_mismatches": [
+      "('cuda:0', 132798442635264, 16680222720)",
+      "('cuda:0', 132876020482048, 2883584)",
+      "('cuda:0', 132877910009856, 1)",
+      "('cuda:0', 132864705994240, 2048)",
+      "('cuda:0', 132877909232128, 4)",
+      "('cuda:0', 132864705990144, 4096)",
+      "('cuda:0', 132877908454912, 4)",
+      "('cuda:0', 132864705988096, 2048)",
+      "('cuda:0', 132877907920384, 2048)",
+      "('cuda:0', 132877907919360, 4)",
+      "('cuda:0', 132877907918848, 4)",
+      "('cuda:0', 132874074324992, 92274688)",
+      "('cuda:0', 132821189132288, 786432)",
+      "('cuda:0', 132870309847040, 768)",
+      "('cuda:0', 132864706025472, 1536)",
+      "('cuda:0', 132864706023936, 1536)",
+      "('cuda:0', 132864706022400, 1536)",
+      "('cuda:0', 132864706020864, 1536)",
+      "('cuda:0', 132864706019328, 1536)",
+      "('cuda:0', 132877905953792, 24)",
+      "('cpu', 132877905953792, 24)",
+      "('cuda:0', 132877905951232, 24)",
+      "('cpu', 132877905951232, 24)",
+      "('cuda:0', 132877905950720, 24)",
+      "('cpu', 132877905950720, 24)",
+      "('cpu', 104538092303552, 24)",
+      "('cuda:0', 132870309790208, 768)",
+      "('cuda:0', 132864706017792, 1536)",
+      "('cuda:0', 132864706016256, 1536)",
+      "('cuda:0', 132864706014720, 1536)",
+      "('cuda:0', 132864706013184, 1536)",
+      "('cuda:0', 132864706011648, 1536)",
+      "('cuda:0', 132877908136448, 4)",
+      "('cuda:0', 132877907988480, 131072)",
+      "('cuda:0', 132877907922944, 65536)"
+    ],
+    "storages": 235
+  },
+  "state_restore_scope": "first-canvas complete engine-step boundary; all KV storage, scheduler/request/sampler state and RNG in place; opaque detokenizer reconstructed at zero emitted tokens",
+  "warm": {
+    "final_rng_cpu": "5feb54a46230d321d888e9b43cf5a57492665f199e4377408d79ee460e36679c",
+    "final_rng_cuda": "91356210b840962b20a2185038b15faf475457c7c46310c35c3c38de966b4a00",
+    "finish_reason": "stop",
+    "output_sha256": "95d5f0c1e4eceac87fcf275b2b4dea661bb088763351ee163e25a1610432fe87",
+    "output_tokens": 275,
+    "steps": 13,
+    "stop_reason": 106
+  },
+  "zero_hidden_forwards": true
+}

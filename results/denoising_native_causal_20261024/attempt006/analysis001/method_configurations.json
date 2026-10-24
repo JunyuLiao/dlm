@@ -1,0 +1,53 @@
+{
+  "blocked_ids": [
+    "longbench_v2/66ebdd1c5a08c7b9b35e113b",
+    "longbench_v2/66f1ae08821e116aacb27c9c",
+    "longbench_v2/66f24538821e116aacb2865e",
+    "longbench_v2/66f2a46d821e116aacb2a41a",
+    "longbench_v2/66f94f9ebb02136c067c4fde",
+    "longbench_v2/66fa2734bb02136c067c627a",
+    "longbench_v2/66fcfd6fbb02136c067c9454",
+    "longbench_v2/6700d19dbb02136c067cb024",
+    "longbench_v2/67040983bb02136c067cd996"
+  ],
+  "budget_fractions": [
+    0.5,
+    0.9
+  ],
+  "candidate_bank": [
+    "mass",
+    "swap_near",
+    "swap_far",
+    "position_sham"
+  ],
+  "development_ids": [
+    "aime26/18",
+    "humaneval/HumanEval/70"
+  ],
+  "guard": {
+    "canvas_amplification": 1.25,
+    "deleted_mass": 0.2,
+    "relative_output_error": 0.1
+  },
+  "heldout_ids": [
+    "aime26/7",
+    "humaneval/HumanEval/42",
+    "longbench_v2/66ec2755821e116aacb1b6f2"
+  ],
+  "native_sampler": {
+    "canvas_length": 256,
+    "confidence_threshold": 0.005,
+    "entropy_bound": 0.1,
+    "max_denoising_steps": 48,
+    "re_noise": "uniform native sampler for rejected positions",
+    "seed": 42,
+    "self_conditioning": "native processed logits",
+    "stability_threshold": 1,
+    "stopping": "whole-canvas stability AND mean processed-logit entropy; native EOS/finalization unchanged",
+    "temperature_schedule": "t_min=0.4, t_max=0.8, linear native schedule",
+    "thinking": true
+  },
+  "promotion": "heldout native prediction must beat current output error in two workload families; otherwise preserve negative and do not run benchmark",
+  "schema": "native_support_oracle_diagnostic_v2",
+  "scope": "two native denoising calls from common first-canvas anchor; layer29 head0 queryblock0, current QKV, prefix only; no sparse task score or trajectory speed claim"
+}

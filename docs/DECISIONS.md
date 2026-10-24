@@ -3605,3 +3605,40 @@ variants, so it cannot satisfy this study's constraints. Native full-state
 restoration and same-support continuation remain the next engineering work.
 Additional reservation 179.500 s; combined 1464.365 s, neither clean latency nor
 active utilization. Original census/report and blocked LongBench IDs unchanged.
+
+## 2026-10-24 — Complete bounded native restoration and support diagnostics; no selector promotion
+
+Pre-generation checkpoint af0a4a5f; report results/denoising_native_causal_20261024/attempt006/summary.md.
+Restore protocol fb915b0d passes one first-canvas full native continuation:
+reference plus two restores have identical logits, active sampler states,
+output275 tokens, RNG and native call counts;235 storage spans match at restore.
+Qualification does not extend automatically to arbitrary later canvas anchors.
+Preserve setter failures001/003, CPU-only002 and failed smoke005; corrected006
+is separately frozen under protocol1474ac6e and passes all source checks.
+
+Six dense native anchors yield23 supports,18 with deletion. Only current-QKV
+prefix support at GLOBAL layer29/head0/queryblock0 is changed; sampler, native
+acceptance/re-noise/self-conditioning/stopping/caps/EOS and RNG order remain fixed.
+Feasible masks preserving current argmax/acceptance still change41/38/22 next
+argmax positions on AIME18/HE70/heldoutHE42, and3/3/12 acceptance positions.
+All-kept consumer changes1–6 current and4–45 next-call positions vs native;
+use matched all-kept and retain native dense as separate controls.
+
+Heldout LongBench response/current-error Spearman with next-logit L2 is0.500/
+0.524; response and current-error select identical supports in all3 heldout
+budget groups. K1450/2899 has0/4 feasible candidates; K2610/2899 has4/4.
+No early stop flag changes. No sparse task accuracy, full-trajectory N/C or clean
+timing is measured. Reject promotion of this ResponseGuard bank/proxy/benchmark.
+Exploratory decision influence reduces one long-state next-argmax difference
+15->6 but increases logit L2; one state and no correctness labels cannot promote
+MarginGuard. The prior weak norm-bound ValidityReuse result remains preserved.
+Next justified diagnostic is middle/late tile decision influence after restoration
+qualification, followed by independent confirmation, not kernel optimization.
+
+19 CPU tests pass twice; all frozen sources match. Three completed006 processes
+record3779 explicit observed executions, zero request CUDA captures and3 total
+JIT events. Reservation1547.987s for006,2660.187s across new causal attempts;
+not active GPU time or clean latency. H100 idle at closeout. Original nine
+LongBench context violations remain blocked by user instruction; full30 and
+broader causal acceleration plan remain partial. Yuhan reuse, Gaussian32/C-gate,
+V31 and V2 identities and prior negative results remain distinct and unchanged.
