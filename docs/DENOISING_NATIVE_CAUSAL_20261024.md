@@ -29,3 +29,10 @@ Only after parity passes may a separately frozen selector-only diagnostic
 protocol use native common-state forks. ResponseGuard precedes MarginGuard and
 ValidityReuse; no proxy or full benchmark without held-out native predictive
 evidence. Original mixed response and conservative validity results are retained.
+
+Restoration qualification attempt001 completed its dense reference and then
+failed on a frozen KV-spec dataclass attribute. Preserve it. Attempt002 contains
+only a pre-source CPU invocation receipt. Attempt003 uses object.__setattr__
+to retain frozen object references while restoring nested mutable state, and
+bounds diagnostic path labels. Fifteen CPU tests pass including frozen-object
+regression. The sampler, anchor, branch sequence and parity gates are unchanged.
