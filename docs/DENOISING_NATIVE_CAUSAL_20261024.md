@@ -36,3 +36,9 @@ only a pre-source CPU invocation receipt. Attempt003 uses object.__setattr__
 to retain frozen object references while restoring nested mutable state, and
 bounds diagnostic path labels. Fifteen CPU tests pass including frozen-object
 regression. The sampler, anchor, branch sequence and parity gates are unchanged.
+
+Attempt003 preserved its dense reference then failed because msgspec
+SamplingParams cannot use object.__setattr__. Attempt004 uses the normal
+attribute setter with FrozenInstanceError-only fallback, and adds a real native
+SamplingParams regression. Sixteen focused CPU tests pass. Native parity gates,
+anchor and sampler remain unchanged; no sparse intervention has run.
