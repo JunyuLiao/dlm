@@ -42,3 +42,27 @@ SamplingParams cannot use object.__setattr__. Attempt004 uses the normal
 attribute setter with FrozenInstanceError-only fallback, and adds a real native
 SamplingParams regression. Sixteen focused CPU tests pass. Native parity gates,
 anchor and sampler remain unchanged; no sparse intervention has run.
+
+Attempt004 passes both in-place restored full-request continuations exactly,
+including logits, active sampler state, output, native counters and RNG. Each
+restored branch executes ten remaining native engine/model calls, emits275
+tokens and commits two canvases, matching the reference. All235 storage hashes
+match immediately after each restoration. The final post-continuation storage
+comparison is expected to differ from the anchor and is not a restore failure.
+
+Attempt005 freezes a bounded selector-only native diagnostic. One-item smoke
+precedes four short requests and the one context-eligible LongBench request.
+PIECEWISE controls expose the native consumer boundary; all-kept paged FA4
+compares against the same sparse consumer. Only layer29/head0/queryblock0
+may prune wholly-prefix KV64 tiles; canvas/boundary and LOCAL remain dense.
+Candidates have fixed physical budget fractions0.5/0.9: mass, deterministic
+near/far swap, position sham; identical supports are deduplicated. Exact FP64
+Q/K/V differential scores use the preceding native displacement; guards retain
+the original0.2 deleted mass,0.1 relative bias and1.25 amplification limits.
+Two native denoising calls per branch measure logit motion, margin, acceptance,
+stability/confidence, self-conditioning and native stopping changes. All model
+forwards are explicit and counted. No suffix forward, forced continuation, old
+KV, cached-output substitution, proxy fitting or benchmark follows this smoke.
+This limited first-canvas oracle is not a population accuracy or acceleration
+result. Predictive failure remains a no-go; no full benchmark without held-out
+native prediction beyond current-error and sham controls in two families.
