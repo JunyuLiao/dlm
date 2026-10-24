@@ -1,0 +1,51 @@
+{
+  "command": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=15s",
+    "7185",
+    "/home/exouser/dyh/v31_env_20261005/bin/python",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/code/worker.py",
+    "--root",
+    "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002"
+  ],
+  "environment_overrides": {
+    "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+    "HF_HUB_OFFLINE": "1",
+    "TORCHINDUCTOR_DETERMINISTIC": "1",
+    "VLLM_USE_V2_MODEL_RUNNER": "1",
+    "PULSEHOLD_DEADLINE_UNIX": "1792842830.8852518",
+    "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/cache/vllm",
+    "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/cache/triton",
+    "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/cache/inductor",
+    "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/cache/cuda",
+    "MPLCONFIGDIR": "/home/exouser/ljy/dlm/results/denoising_native_causal_pulsehold_20261024/attempt002/cache/matplotlib",
+    "PULSEHOLD_PRIOR_FORWARDS": "0"
+  },
+  "started_unix": 1792835660.8852518,
+  "gpu_checks": [
+    {
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=name,memory.used,utilization.gpu",
+        "--format=csv,noheader"
+      ],
+      "returncode": 0,
+      "stdout": "NVIDIA H100 80GB HBM3, 0 MiB, 0 %\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "nvidia-smi",
+        "--query-compute-apps=pid,process_name,used_gpu_memory",
+        "--format=csv,noheader"
+      ],
+      "returncode": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "prior_allocated_seconds": 0,
+  "prior_forwards": 0,
+  "source_checkpoint": "c3dd985543f1778f5c313dd8fdf6992c59d0a590"
+}

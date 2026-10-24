@@ -1,0 +1,66 @@
+{
+  "acceptance_level": "same-device/dtype reconstruction from native returned scaled logits; not compiled acceptance buffer",
+  "completed_anchors": [
+    {
+      "GQA": {
+        "head_to_kv": {
+          "0": 0,
+          "8": 1
+        },
+        "passed": true,
+        "tolerance": 0.02,
+        "worst_relative_output_error": {
+          "0": 0.002447453129732915,
+          "8": 0.00230496244567336
+        }
+      },
+      "alias_groups": 13,
+      "anchor": 5,
+      "full_request_qualified": false,
+      "id": "aime26/18",
+      "live_metadata_checked": true,
+      "new_measurement_disabled_parity": true,
+      "passed": true,
+      "post_perturbation_controls_exact": true,
+      "repeated_native_allkept_exact": true,
+      "scope": "native first-canvas stop and commit only; zero emitted tokens at anchor",
+      "storages": 235,
+      "tensor_views": 276
+    },
+    {
+      "GQA": {
+        "head_to_kv": {
+          "0": 0,
+          "8": 1
+        },
+        "passed": true,
+        "tolerance": 0.02,
+        "worst_relative_output_error": {
+          "0": 0.002343103644933643,
+          "8": 0.0022562323785907798
+        }
+      },
+      "alias_groups": 13,
+      "anchor": 9,
+      "full_request_qualified": false,
+      "id": "aime26/18",
+      "live_metadata_checked": true,
+      "new_measurement_disabled_parity": true,
+      "passed": true,
+      "post_perturbation_controls_exact": true,
+      "repeated_native_allkept_exact": true,
+      "scope": "native first-canvas stop and commit only; zero emitted tokens at anchor",
+      "storages": 235,
+      "tensor_views": 276
+    }
+  ],
+  "full_request_qualification_passed": false,
+  "measurement_totals_over_repeated_controls": {
+    "call_records": 48,
+    "cpu_threshold_discrepancies_given_device_entropy": 0,
+    "native_tie_positions": 33,
+    "native_winner_mismatches": 0,
+    "reconstructed_acceptance_threshold_near": 0,
+    "reconstructed_acceptance_threshold_ties": 0
+  }
+}
