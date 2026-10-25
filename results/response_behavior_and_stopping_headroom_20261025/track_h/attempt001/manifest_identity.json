@@ -1,0 +1,110 @@
+{
+  "identities": [
+    {
+      "id": "longbench_v2/66ec2755821e116aacb1b6f2",
+      "source_id": "66ec2755821e116aacb1b6f2",
+      "split": "development",
+      "benchmark": "longbench_v2",
+      "domain": "Single-Document QA",
+      "difficulty": "easy",
+      "length_band": "long",
+      "exposure": "Original dense and Response panel exposure; selected ONLY using corrected FULL confidence-only delays",
+      "prompt_hash": "a441afc53be3efc938482df4e7096af8258aded1a46cde5c48e1eee15af8a3f5",
+      "generation_budget": 16384,
+      "seeds": [
+        42,
+        43
+      ],
+      "prompt_token_count": 185546,
+      "prompt_tokenization_sha256": "4b2746fb02f205a1c257091f360f66c26395e98f943cf5e1c9f3491f83474179"
+    },
+    {
+      "id": "longbench_v2/6724645dbb02136c067d73ad",
+      "source_id": "6724645dbb02136c067d73ad",
+      "split": "development",
+      "benchmark": "longbench_v2",
+      "domain": "Single-Document QA",
+      "difficulty": "hard",
+      "length_band": "long",
+      "exposure": "Original dense and Response panel exposure; selected ONLY using corrected FULL confidence-only delays",
+      "prompt_hash": "c8a0a8a68ac361e430a1de8bc7f5d79d86e697365cdf81d6013da11074909290",
+      "generation_budget": 16384,
+      "seeds": [
+        42,
+        43
+      ],
+      "prompt_token_count": 222764,
+      "prompt_tokenization_sha256": "51c57b31fb7f3fc70ffc0a4ba84a0693826a9a4450b8ece36b9c2444cdc4a653"
+    },
+    {
+      "id": "longbench_v2/6719dc46bb02136c067d470b",
+      "source_id": "6719dc46bb02136c067d470b",
+      "split": "confirmation",
+      "benchmark": "longbench_v2",
+      "domain": "Long-dialogue History Understanding",
+      "difficulty": "hard",
+      "length_band": "medium",
+      "exposure": "Outside original Response/A1; other historical benchmark exposure is not certified absent",
+      "prompt_hash": "b7cc9b0a7c371e47d44b540053db753a26dd3a39bdf9d39d1fb7cbbf9ab6ca8a",
+      "generation_budget": 16384,
+      "seeds": [
+        42,
+        43
+      ],
+      "prompt_token_count": 130157,
+      "prompt_tokenization_sha256": "b5594c36a4cca078eabbff8bcccbe6feab934a3b7da7ee60730992253a1c9f5b"
+    },
+    {
+      "id": "longbench_v2/67286036bb02136c067d9092",
+      "source_id": "67286036bb02136c067d9092",
+      "split": "confirmation",
+      "benchmark": "longbench_v2",
+      "domain": "Long Structured Data Understanding",
+      "difficulty": "easy",
+      "length_band": "medium",
+      "exposure": "Outside original Response/A1; other historical benchmark exposure is not certified absent",
+      "prompt_hash": "ad6ed125a11729ec6dc73176befba21a3cb32c88b2d2c7a457d302c84058a8f5",
+      "generation_budget": 16384,
+      "seeds": [
+        42,
+        43
+      ],
+      "prompt_token_count": 152399,
+      "prompt_tokenization_sha256": "a780307cfcda6f5ef7bf7afc7d7cf504805a1b8c6fb01da9666bad4a90ddb641"
+    }
+  ],
+  "screening": [
+    {
+      "id": "longbench_v2/6719dc46bb02136c067d470b",
+      "domain": "Long-dialogue History Understanding",
+      "difficulty": "hard",
+      "length_band": "medium",
+      "prompt_token_count": 130157,
+      "eligible": true
+    },
+    {
+      "id": "longbench_v2/67286036bb02136c067d9092",
+      "domain": "Long Structured Data Understanding",
+      "difficulty": "easy",
+      "length_band": "medium",
+      "prompt_token_count": 152399,
+      "eligible": true
+    }
+  ],
+  "original_blocked_ids": [
+    "longbench_v2/66ebdd1c5a08c7b9b35e113b",
+    "longbench_v2/66f1ae08821e116aacb27c9c",
+    "longbench_v2/66f24538821e116aacb2865e",
+    "longbench_v2/66f2a46d821e116aacb2a41a",
+    "longbench_v2/66f94f9ebb02136c067c4fde",
+    "longbench_v2/66fa2734bb02136c067c627a",
+    "longbench_v2/66fcfd6fbb02136c067c9454",
+    "longbench_v2/6700d19dbb02136c067cb024",
+    "longbench_v2/67040983bb02136c067cd996"
+  ],
+  "selection": "Development first prefers both-seed OLD dense anchors then ranks minimum later confidence-only delay counts; absence of old anchor is retained for prospective common profiling; confirmation domain/difficulty/hash strata outside Response/A1; no R outcomes read",
+  "source_sha256": "15d61c22d92c96900b3c4948b6aeea218d3214b676a65df48e7b8555604c7fe2",
+  "private_manifest_sha256": "567c76484e1ffa76618ece5a0ca5fe37c498fb82af9e25519fffd48035025597",
+  "reserved_postcap_canvas_tokens": 256,
+  "dense_census_sha256": "2fbf2eabed5daa70359d31cfd04f7eb764dba31fa717e685974ddbe1e9a8311f"
+}
