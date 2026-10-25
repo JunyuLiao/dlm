@@ -2479,3 +2479,18 @@ prior failed/superseded resources separate with gaps disclosed. H100 idle at
 closeout.9over-limit original LongBench items remain blocked;5eligible questions
 cover2domains. Exposed descriptive screen,not fresh benchmark/noninferiority.
 Earlier partial factorial and failed restored-output certificates stay partial.
+
+
+## 2026-10-25 — Stage A1 response prediction/location diagnostic complete
+
+Source81aae497;protocol62616624c118846e750027659e642beb5c941745c7e68604c4b06b8de3f76bf2.
+Complete12question×2seed A1 leaf at
+results/denoising_mechanism_stage_a_20261025/attempt002/final_complete.json.
+All24observer qualifications and19CPUtests pass.576unit states;24865matched
+pairs;0full-response-separated pairs;0/6score-location configurations qualify
+for nativeA2. Best available future-motion gain<10%in all208selectableunits.
+No native sparse treatment or clean latency result. FULL/PIECEWISE official
+control quality2/8AIME,8/8HE,2/8LB;common all-kept3/8,8/8,2/8(4clusters/task).
+127requests,64007counted forwards;H100idle. See summary.md,analysis001 and
+closeout001 for complete negative/mixed evidence,physical work and limitations.
+This entry records completed A1 only;AA/SA/AS/SS and StageB/C were not launched.

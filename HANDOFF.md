@@ -1,3 +1,41 @@
+## Complete Stage A1 mechanism study — 2026-10-25 UTC
+
+Generation source81aae497 (start7f04e2be), branch denoising_trajectory_research.
+Protocol62616624c118846e750027659e642beb5c941745c7e68604c4b06b8de3f76bf2.
+Review:results/denoising_mechanism_stage_a_20261025/attempt002/summary.md;
+root final_complete.json identifies a COMPLETE A1 diagnostic leaf, not A2/B/C.
+12questions×42/43 (4 per task;2development/2confirmation), all24fresh-request
+qualification cells pass. 19CPUtests;600GQA/current-operator checks,maxerror0.0042722.
+Output/N/C/T/RNG/forwards and first-canvas state/QKV routes unchanged by observer.
+No restored-output qualification or exact compiled acceptance claim.
+
+576routing-unit states,10608candidates,8232feasible;208states have>=4choices.
+24865error/mass-matched pairs, ZERO25%-separated full-response pairs for Q-only
+or full-QKV. Residual pairs2337/1956 are separate. No score/location identifies
+a development question or qualifies to A2. Even evaluation-only best support
+cannot gain10%next-motion vs current-error in any selectable unit(max2.95%).
+Q-only improves some absolute forecasts; full-QKV forecast slightly loses to
+bias-carry throughout. Residual forecasts lose to carrying current bias.
+NO native AA/SA/AS/SS, sparse finalist quality, clean speed or StageB/C result.
+
+Native FULL/PIECEWISE agree per cell: AIME2/8,HE8/8,LB2/8. Common all-kept at
+layers5/17/29 in canvas1 gives3/8,8/8,2/8;these are consumer effects,not sparse
+score gains. Native commits/tails,caps,missing-final responses,paired intervals
+and all negatives are retained. Original9over-limitLB IDs stay blocked.
+Prior450-cell CPUaddendum corrects299stale raw work fields without changing
+published aggregates;14646oldfirst-bank matched pairs still0full-separated.
+Priorresponse AIME15/20 vsCE9/sham10,HEregression and adverseLB remain intact.
+
+127requests,64007counted forwards;worker durations3653.36s,launch accounting
+upper bound3686.62s. No campaign ceiling. Actual model GLOBAL/LOCAL skipped0;
+QK/PV diagnostic work separate. H100idle,0MiB,0computeclients at closeout.
+No GPUworkerfailed;unlaunched001,CPUpreparationerror and lost launcher parent
+are preserved/disclosed. Frozen code intact;no paused campaign resumed,no push.
+Next:independent bank/forecast review before any new protocol. All6score/location
+tracks no-go toA2;Margin oracle and norm-only ValidityReuse parked. Do not launch
+StageB/C or optimize these diagnostic scores. See AUDIT_NOTES for averaging
+ambiguity and private-vector storage limits. Preserve unrelated worktree edits.
+
 ## Complete: expanded native end-to-end selector screen — 2026-10-25 UTC
 
 Branch denoising_trajectory_research. Starting5f95bab0; generation checkpoint

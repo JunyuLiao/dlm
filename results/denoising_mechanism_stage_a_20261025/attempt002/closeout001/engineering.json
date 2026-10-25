@@ -1,0 +1,551 @@
+{
+  "GQA_checks": 600,
+  "assertions": [
+    "native actual argmax equality",
+    "unchanged complete output/RNG/forward counts across common fresh branches",
+    "exact first-canvas logits/native state/RNG fingerprints",
+    "same current Q/K/V route fingerprints",
+    "live current tail K/V equality and within-canvas fixed prefix hashes",
+    "zero extra model forwards or diagnostic RNG draws",
+    "bank choices written before separate future evaluation",
+    "all engine forwards reconcile to initialization plus request forwards"
+  ],
+  "external_source_pins": 2,
+  "limits": [
+    "No restored-output assembly qualification",
+    "No compiled acceptance-count claim",
+    "No sparse native treatment in A1",
+    "All-kept three-layer GQA/current-operand paths qualified; a native deleting path needs separate A2 engineering qualification",
+    "No clean speed measurement"
+  ],
+  "maximum_relative_GQA_error": 0.004272155929356813,
+  "passed": true,
+  "qualified_cells": [
+    {
+      "anchors": [
+        5,
+        8
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "humaneval/HumanEval/124",
+      "job": "smoke",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        6,
+        11
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "aime26/18",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        5,
+        9
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "aime26/18",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    },
+    {
+      "anchors": [
+        5,
+        9
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "aime26/12",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        5,
+        8
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "aime26/12",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    },
+    {
+      "anchors": [
+        5,
+        8
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "humaneval/HumanEval/124",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        5,
+        8
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "humaneval/HumanEval/124",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    },
+    {
+      "anchors": [
+        4,
+        6
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "humaneval/HumanEval/70",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        4,
+        7
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "humaneval/HumanEval/70",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    },
+    {
+      "anchors": [
+        16,
+        31
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "longbench_v2/66ec2755821e116aacb1b6f2",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        19,
+        37
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "longbench_v2/66ec2755821e116aacb1b6f2",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    },
+    {
+      "anchors": [
+        6,
+        11
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "longbench_v2/6708a096bb02136c067d1789",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        6,
+        11
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "longbench_v2/6708a096bb02136c067d1789",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    },
+    {
+      "anchors": [
+        6,
+        10
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "aime26/17",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        4,
+        7
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "aime26/17",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    },
+    {
+      "anchors": [
+        5,
+        8
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "aime26/15",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        5,
+        9
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "aime26/15",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    },
+    {
+      "anchors": [
+        3,
+        5
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "humaneval/HumanEval/152",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        4,
+        6
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "humaneval/HumanEval/152",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    },
+    {
+      "anchors": [
+        4,
+        7
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "humaneval/HumanEval/72",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        6,
+        11
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "humaneval/HumanEval/72",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    },
+    {
+      "anchors": [
+        4,
+        6
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "longbench_v2/6719bc01bb02136c067d43fa",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        4,
+        6
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "longbench_v2/6719bc01bb02136c067d43fa",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    },
+    {
+      "anchors": [
+        12,
+        22
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "longbench_v2/66f2b5ec821e116aacb2b1ec",
+      "job": "a1",
+      "passed": true,
+      "seed": 42
+    },
+    {
+      "anchors": [
+        10,
+        19
+      ],
+      "checks": {
+        "C": true,
+        "N": true,
+        "T": true,
+        "current_QKV_routes": true,
+        "final_cpu_rng": true,
+        "final_cuda_rng": true,
+        "first_canvas_sampler_state_logits_rng": true,
+        "model_forwards": true,
+        "output_sha256": true
+      },
+      "id": "longbench_v2/66f2b5ec821e116aacb2b1ec",
+      "job": "a1",
+      "passed": true,
+      "seed": 43
+    }
+  ],
+  "source_pins": 567
+}

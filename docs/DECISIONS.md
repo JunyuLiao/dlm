@@ -3721,3 +3721,41 @@ and superseded all-kept exact exit allocation disclosed. H100 idle0MiB/0% at
 truncation.5eligible questions cover2domains;clusters10/10/5,prior exposure and
 unadjusted descriptive intervals prevent noninferiority claims. No paused campaign
 resumed, other GPU workload killed, production/kernel expansion, or push.
+
+
+## 2026-10-25 — Complete Stage A1; non-identifying response bank blocks native A2
+
+At source81aae497, protocol62616624c118846e750027659e642beb5c941745c7e68604c4b06b8de3f76bf2,
+results/denoising_mechanism_stage_a_20261025/attempt002 completes all24frozen
+item/seed cells with19CPUtests and fresh-request observer qualification.600GQA
+checks pass(max0.0042722). Native sampler/current-QKV/RNG/stopping unchanged.
+The common all-kept consumer is constant at layers5/17/29 in canvas1; FULL and
+PIECEWISE remain separate controls. No restoration is used or newly certified.
+
+There are24865error/mass-matched pairs among10608candidates,with ZERO25%full
+response separation for either Q-only or full-QKV.208/576units have>=4feasible
+choices;short banks often structurally/guard-infeasible. Distinct choices
+(185Q-only,179full-QKV vs current-error) do not identify response utility.
+Even the evaluation-only best support never reaches10%next-motion gain over
+current-error(max2.95%). Q-only absolute forecasts sometimes improve, full-QKV
+loses slightly to dense-motion bias-carry in every task/layer aggregate, and
+residual forecasting loses to carry-current-bias. No score/location qualifies
+to native AA/SA/AS/SS. This is a negative identification/promotion result for
+this bank and scores,not rejection of every response mechanism.
+
+A1official scores are native controls only: FULL/PIECEWISE2/8AIME,8/8HE,2/8LB;
+common all-kept3/8,8/8,2/8. Consumer effects are systematic;no proposed sparse
+quality/trajectory/latency conclusion follows. Native commits/uncommitted tails,
+output/48call caps,missing finals and item-cluster intervals are preserved.
+127requests,64007forwards,allocationupperbound3686.62s;no campaign ceiling.
+Actual model deletion is0;diagnosticQK/PV work is separately counted. H100idle.
+
+CPU corrections preserve original450screen cells:299stale raw work fields;
+no published aggregate change. Oldfirst-bank14646matched pairs still0full and
+65residual-separated. PriorAIMEresponselead andHE/LBnegatives remain unchanged.
+Unlaunched001 and CPUpreparation failure preserved; noGPUworker failure. Lost
+launcher parent recovered by observing original FULL worker,not relaunching it.
+Frozen README/executable averaging discrepancy and compressed private vectors
+are disclosed,not tuned away. Independent review precedes any new protocol.
+Do not launch StageB/C,kernel optimization,exhaustiveMarginGuard or unpark the
+norm-only ValidityReuse track. No push;unrelated edits preserved.
