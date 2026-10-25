@@ -1,0 +1,37 @@
+{
+  "command": [
+    "timeout",
+    "--signal=TERM",
+    "--kill-after=15s",
+    "14400",
+    "/home/exouser/dyh/v31_env_20261005/bin/python",
+    "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/e2e_worker.py",
+    "--root",
+    "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+    "--arm",
+    "v31_optimized",
+    "--suite",
+    "short",
+    "--stage",
+    "panel"
+  ],
+  "environment_overrides": {
+    "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+    "HF_HUB_OFFLINE": "1",
+    "TORCHINDUCTOR_DETERMINISTIC": "1",
+    "VLLM_USE_V2_MODEL_RUNNER": "1",
+    "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+    "MAX_MODEL_LEN": "12288",
+    "RESIDENT_SPARSE_EXECUTION": "1",
+    "RESIDENT_V31_PAGED_REFRESH": "1",
+    "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+    "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+    "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+    "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda"
+  },
+  "source_checkpoint": "14aaade2516ac422aad65fbde6ec5f4da3c83159",
+  "protocol_sha256": "88e46d4088a094968ebbeaed05b0ce4b9cf6e824a643675eba257ac9920d35dd",
+  "gpu_idle_before": true,
+  "started_unix": 1792852741.1333253,
+  "campaign_budget": null
+}

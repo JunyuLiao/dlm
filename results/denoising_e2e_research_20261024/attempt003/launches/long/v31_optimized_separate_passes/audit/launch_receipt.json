@@ -1,0 +1,37 @@
+{
+  "command": [
+    "/home/exouser/dyh/v31_env_20261005/bin/python",
+    "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt005/code/v31_worker.py",
+    "--root",
+    "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+    "--arm",
+    "v31_optimized",
+    "--suite",
+    "long",
+    "--stage",
+    "panel",
+    "--pass-name",
+    "audit"
+  ],
+  "environment_overrides": {
+    "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+    "HF_HUB_OFFLINE": "1",
+    "TORCHINDUCTOR_DETERMINISTIC": "1",
+    "VLLM_USE_V2_MODEL_RUNNER": "1",
+    "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+    "MAX_MODEL_LEN": "262144",
+    "RESIDENT_SPARSE_EXECUTION": "1",
+    "RESIDENT_V31_PAGED_REFRESH": "1",
+    "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/vllm",
+    "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/triton",
+    "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/inductor",
+    "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/cuda"
+  },
+  "source_checkpoint": "3e118e7824c8ca146d6a0be0a299a5aef2bc85eb",
+  "protocol_sha256": "88e46d4088a094968ebbeaed05b0ce4b9cf6e824a643675eba257ac9920d35dd",
+  "execution_binding_sha256": "1429aaf32135ed45603772085427e9c367fa9460f62a1c026594bbd13a45704f",
+  "gpu_idle_before": true,
+  "started_unix": 1792892982.813315,
+  "campaign_budget": null,
+  "watchdog": "14400seconds without native forward progress; active inference has no wall allocation cap"
+}

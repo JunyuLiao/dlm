@@ -1,0 +1,35 @@
+{
+  "accounting_limit": "The failed mixed-mode V31 counter and superseded all-kept exact process-exit allocation are unavailable; do not present whole-campaign forward/allocation totals as exact.",
+  "completed_panel_allocated_worker_seconds": 49117.36955976486,
+  "completed_panel_counted_model_forwards": 405458,
+  "earlier_allocation_seconds_lower_bound": 1536.1067202091217,
+  "earlier_attempts": [
+    {
+      "allocated_worker_seconds": 616.9758694171906,
+      "allocation_status": "exit receipt",
+      "counted_forwards": 511,
+      "scope": "attempt001 replay qualification failed"
+    },
+    {
+      "allocated_worker_seconds": 361.0568816661835,
+      "allocation_status": "exit receipt; engine+startup from final marker",
+      "counted_forwards": 8548,
+      "scope": "attempt002 superseded dense preflight"
+    },
+    {
+      "allocated_worker_seconds": 336.96522212028503,
+      "allocation_status": "lower bound through final measured cell; exact process-exit allocation unavailable",
+      "counted_forwards": 8599,
+      "scope": "attempt002 superseded all-kept preflight"
+    },
+    {
+      "allocated_worker_seconds": 221.10874700546265,
+      "allocation_status": "exit receipt; counter was not persisted before failure",
+      "counted_forwards": null,
+      "scope": "attempt003 failed V31 mixed-mode warm-up"
+    }
+  ],
+  "earlier_known_counted_forwards": 17658,
+  "global_campaign_ceiling": null,
+  "timing_definition": "W is synchronized engine.add_request-to-finish request time on frozen token inputs; excludes model startup, tokenization preparation, audit and task scoring. S excludes prefill."
+}

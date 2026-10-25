@@ -1,0 +1,72 @@
+{
+  "reason": "User expanded to10 AIME/10 HumanEval/5 LongBench seeds42/43; smaller frozen queue superseded before further arms. Active all-kept worker may finish natively; no other workload signaled.",
+  "signal": "SIGTERM",
+  "target": {
+    "pid": 3205941,
+    "args": [
+      "/home/exouser/dyh/v31_env_20261005/bin/python",
+      "results/denoising_e2e_research_20261024/attempt002/launch.py",
+      "--suite",
+      "short"
+    ],
+    "start_ticks": "153548888",
+    "launcher": true,
+    "worker": false
+  },
+  "identified_workers": [
+    {
+      "pid": 3205941,
+      "args": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "results/denoising_e2e_research_20261024/attempt002/launch.py",
+        "--suite",
+        "short"
+      ],
+      "start_ticks": "153548888",
+      "launcher": true,
+      "worker": false
+    },
+    {
+      "pid": 3207049,
+      "args": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002",
+        "--arm",
+        "allkept_layer29",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "start_ticks": "153585021",
+      "launcher": false,
+      "worker": true
+    },
+    {
+      "pid": 3207050,
+      "args": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002",
+        "--arm",
+        "allkept_layer29",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "start_ticks": "153585021",
+      "launcher": false,
+      "worker": true
+    }
+  ],
+  "at_unix": 1792844374.9229324,
+  "next_attempt": "attempt003"
+}

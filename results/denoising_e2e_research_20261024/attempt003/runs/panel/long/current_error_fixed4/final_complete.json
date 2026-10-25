@@ -1,0 +1,57 @@
+{
+  "arm": "current_error_fixed4",
+  "cells": 10,
+  "compilation_policy": {
+    "effective_cudagraph_mode": "PIECEWISE",
+    "effective_inductor_compile_config": {
+      "benchmark_combo_kernel": false,
+      "deterministic": true,
+      "enable_auto_functionalized_v2": false
+    },
+    "extra_forwards": 0,
+    "global_after_engine_init_before_restore": false,
+    "intermediate_observer": false,
+    "name": "explicit_inductor_cfgdet",
+    "native_helpers": {
+      "_compiled_sample_step": {
+        "backend": "inductor",
+        "dynamic": true,
+        "options": {
+          "benchmark_combo_kernel": false,
+          "deterministic": true
+        },
+        "original_python_callable_preserved": true,
+        "source_sha256": "a623a3b30db3f0e70cb798d62cba7e6a4333861a7ad38931765e7c4d1045706d"
+      },
+      "_compute_num_rejected": {
+        "backend": "inductor",
+        "dynamic": true,
+        "options": {
+          "benchmark_combo_kernel": false,
+          "deterministic": true
+        },
+        "original_python_callable_preserved": true,
+        "source_sha256": "caf48414b8ba9082617923fb972be8a3e6ba87159fd724acc8426cb99e981a76"
+      },
+      "_softcap_logits": {
+        "backend": "inductor",
+        "dynamic": true,
+        "options": {
+          "benchmark_combo_kernel": false,
+          "deterministic": true
+        },
+        "original_python_callable_preserved": true,
+        "source_sha256": "c0a7ac2b4cc21449c7327c850b04c81b663abb99b10ac7ddf847b53cf2b9b6cc"
+      }
+    },
+    "native_sampler_changed": false
+  },
+  "engine_initialization_executions": 6,
+  "execution_binding_sha256": "1636acaa6d56e3c6d204e1e410d9b9a8bf858abd1380465bf902682d1cb834b3",
+  "local_fix_sha256": "4f3df79dbd9ce1b28ba56669780330c18d07f8309ad01d8db0136e4d86d0554c",
+  "model_executions": 29969,
+  "native_sampler_unchanged": true,
+  "passed": true,
+  "protocol_sha256": "88e46d4088a094968ebbeaed05b0ce4b9cf6e824a643675eba257ac9920d35dd",
+  "startup_model_forwards": 208
+}

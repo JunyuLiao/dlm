@@ -1,0 +1,15 @@
+{
+  "status": "restored_output_assembly_unqualified",
+  "model_state_logits_rng_and_count_equal": true,
+  "complete_fingerprint_sequences_equal": true,
+  "native_call_count": 85,
+  "returned_lengths": {
+    "restored1": 2321,
+    "restored2": 2065,
+    "unrestored": 2065
+  },
+  "returned_output_mismatch": true,
+  "diagnosis": "The compared native model/sampler fingerprint sequences are identical, but returned output lists differ by256 tokens in one restored branch. Output assembly/reporting restoration is not certified; opaque state outside captured roots may remain.",
+  "decision": "Do not use restored full outputs for accuracy. Fresh from-prompt end-to-end requests require independent audit/clean exact output/count agreement.",
+  "source_checkpoint": "087a2d48"
+}

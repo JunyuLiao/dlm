@@ -1,3 +1,52 @@
+## Complete: expanded native end-to-end selector screen — 2026-10-25 UTC
+
+Branch denoising_trajectory_research. Starting5f95bab0; generation checkpoint
+4ac2b53f; V31 execution binding21a3a507/1429aaf3; non-V31 long binding
+018ab5f9/1636acaa. Completion-controller source3ee9ab1f. Protocol
+88e46d4088a094968ebbeaed05b0ce4b9cf6e824a643675eba257ac9920d35dd.
+Read results/denoising_e2e_research_20261024/attempt003/review002/summary.md
+first, then summary.md, final_complete.json, closeout001/verification.json and
+binding_review001/verification.json. Exact commands and450 per-cell metrics are
+in review002/COMMANDS.md and review002/per_cell_metrics.csv.
+
+User-requested10AIME26/10HumanEval/5eligible original long-band LongBench-v2
+questions, each seeds42/43,9arms:450 official scores and exact full audit/clean
+output/N/C/T pairs. All19 closeout checks pass;0invalid clean timings;559 source
+pins and7live runtime sources match.32 pre-generation CPU tests and36 final CPU
+tests pass. No native sampler/stopping/RNG/cap change or extra selector forward.
+Current Q/K/V only.9original over-limit LongBench IDs remain blocked. The five
+eligible long questions cover2domains; exposed small clusters are descriptive.
+
+Official correct counts(AIME/20,HE/20,LB/10): FULL+fix51994=12/20/2,
+PIECEWISE=12/20/2,all-kept=11/19/2,V31=6/19/4,current-error=9/19/3,
+query-direction response=15/19/2,margin-weighted=10/18/3,certified reuse=12/19/2,
+sham=10/19/4. New selectors affect layer29 only; inherited V31 affects5GLOBAL
+layers withK128/K8192, so its actual work differs. LOCAL stays dense.
+
+No general accuracy-preserving acceleration or speedup is established. Response
+AIME quality leads descriptively, but N/C versus sham ratio0.998[0.946,1.040]
+and output length accounts for much of fewer total calls. HE loses1dense-correct
+case. Long response needs16031calls versus dense12128/sham11781/V316833;
+paired N/C versus dense1.138[0.973,1.330]. Mean clean W(AIME/HE/LB seconds):
+dense4.991/.739/63.764,response16.682/2.070/287.100,V317.242/.949/28.857.
+0response-identifying matched pairs; AIME first banks have0units with4feasible
+alternatives. Distinct selected masks do not establish a contraction mechanism.
+Certified reuse refreshes15550times and holds5calls;park this bound. Margin
+surrogate is not an exact downstream influence oracle. No production promotion.
+
+Complete panel allocated49117.370worker seconds/405458counted forwards. Earlier
+qualification/preflight/failures remain separate with accounting gaps disclosed
+in review002/resources.json. Campaign ceilings removed by user; no watchdog,
+other-workload preemption or paused-campaign resume. All GPU workers finished;
+H100 idle0MiB/0% at02:18:47UTC. No queued experiments or automatic expansion.
+
+Next bounded proposal: improve within-unit equal-work/error/mass bank separation
+before fresh-from-prompt AA/SA/AS/SS propagation/hold tests. Full restored output
+assembly is still unqualified; do not repurpose first-canvas replay certificates.
+Exact MarginGuard, fullQ/K/V predictive response, independent confirmation and
+kernels remain deferred. Preserve all earlier negatives and Yuhan/Gaussian32/
+C-gate/V31/V2 provenance. Private inputs/generations/logs remain ignored. No push.
+
 ## Partial native pulse/hold diagnostic — 2026-10-24 UTC
 
 Branch denoising_trajectory_research; start7febadb6, source checkpoints17b8e7ba

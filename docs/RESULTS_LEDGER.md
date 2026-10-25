@@ -2448,3 +2448,34 @@ groups. No stop-flag changes in the two early calls. No method promotion, no
 sparse task-accuracy or full N/C comparison, no clean speed or novelty claim.
 19CPU tests pass twice; source/RNG/forward/physical checks pass. Request capture0,
 JIT3; timing audit-only. Failed attempts and nine blocked LongBench IDs preserved.
+
+
+## 2026-10-25 — Complete exposed 25-question native end-to-end selector screen
+
+[Reviewed results](../results/denoising_e2e_research_20261024/attempt003/review002/summary.md),
+[completion](../results/denoising_e2e_research_20261024/attempt003/final_complete.json),
+protocol88e46d4088a094968ebbeaed05b0ce4b9cf6e824a643675eba257ac9920d35dd,
+source4ac2b53f with separately pinned operational long/V31 bindings.10AIME26,
+10HumanEval,5eligible original long-band LongBench-v2, seeds42/43,9arms:
+450official scores and exact output/N/C/T audit/clean pairs;19closeout checks,
+559sources,2execution bindings and7runtime files pass;zeroinvalid clean timings.
+32CPU tests before generation;36final tests pass. Original native sampler/RNG/
+stopping/caps retained;currentQKV-only selection,noextra selector forwards.
+
+Correct(AIME/20,HE/20,LB/10):FULL12/20/2,PIECEWISE12/20/2,
+allkept11/19/2,V316/19/4,currenterror9/19/3,response15/19/2,
+marginweighted10/18/3,certifiedreuse12/19/2,sham10/19/4. New methods layer29;
+V31 inherited fiveGLOBAL/K128/K8192 scope differs physically. LOCAL stays dense.
+Response AIME quality lead descriptive;HE1regression;LB2/10 and16031calls versus
+dense2/10/12128calls,sham4/10/11781,V314/10/6833. Response mean W
+16.682/2.070/287.100s versus FULL4.991/.739/63.764s. No general
+accuracy-preserving trajectory acceleration or speedup.0response-identifying
+matched pairs;noisolated pulse/hold mechanism claim. Certified reuse15550refresh/
+5held calls;no selector promotion. Question-cluster intervals and all regressions,
+caps,physical/discovery work,selector cost,N/C,T,S/N,S,W are in the report.
+
+Complete panel allocation49117.370worker seconds/405458counted forwards;
+prior failed/superseded resources separate with gaps disclosed. H100 idle at
+closeout.9over-limit original LongBench items remain blocked;5eligible questions
+cover2domains. Exposed descriptive screen,not fresh benchmark/noninferiority.
+Earlier partial factorial and failed restored-output certificates stay partial.

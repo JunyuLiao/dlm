@@ -1,0 +1,8 @@
+{
+  "status": "failed_preserved_before_scored_records",
+  "error": "AttributeError: NoneType has no attribute double in _kept_account",
+  "source": "experiments/numerical_qk_reuse/vllm_adapter.py:2128",
+  "reason": "Harness toggled clean/audit flags inside one V31 engine; existing split-list caches built in clean warmup lack kept totals when audit begins. No native model/sampler or selector defect conclusion.",
+  "next": "Separate full audit/clean V31 processes in a new named binding; unchanged inherited selector/runtime source. Do not repair historical worker or reinterpret failed run as completed.",
+  "at_unix": 1792853039.3709898
+}

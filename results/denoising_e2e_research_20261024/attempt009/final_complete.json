@@ -1,0 +1,119 @@
+{
+  "passed": true,
+  "scope": "execution/scoring/readout completion; publication remains primary-reviewed",
+  "parent_protocol_sha256": "88e46d4088a094968ebbeaed05b0ce4b9cf6e824a643675eba257ac9920d35dd",
+  "elapsed_seconds": 21993.75078701973,
+  "commands": [
+    {
+      "name": "v31_long",
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt005/launch_v31.py",
+        "--suite",
+        "long"
+      ],
+      "cpu_only": false,
+      "started_unix": 1792892982.662695
+    },
+    {
+      "name": "official_score",
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/score_v3.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "cpu_only": true,
+      "started_unix": 1792894693.0722356
+    },
+    {
+      "name": "analysis",
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/analyze_v4.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "cpu_only": true,
+      "started_unix": 1792894715.2153268
+    },
+    {
+      "name": "paired_trajectory",
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/paired_trajectory.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "cpu_only": true,
+      "started_unix": 1792894722.3067377
+    },
+    {
+      "name": "native_bottlenecks",
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/trajectory_bottlenecks.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "cpu_only": true,
+      "started_unix": 1792894727.2564332
+    },
+    {
+      "name": "support_diversity",
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/support_diversity.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "cpu_only": true,
+      "started_unix": 1792894731.5001957
+    },
+    {
+      "name": "output_diagnostics",
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/output_diagnostics.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "cpu_only": true,
+      "started_unix": 1792894735.583265
+    },
+    {
+      "name": "plots",
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/plot_trajectories.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "cpu_only": true,
+      "started_unix": 1792894736.1407762
+    },
+    {
+      "name": "verify",
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/verify.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "cpu_only": true,
+      "started_unix": 1792894742.7717872
+    },
+    {
+      "name": "report",
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/report.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "cpu_only": true,
+      "started_unix": 1792894753.4041383
+    }
+  ],
+  "method_promoted": false
+}

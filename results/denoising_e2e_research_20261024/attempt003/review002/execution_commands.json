@@ -1,0 +1,872 @@
+{
+  "commands": [
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "1800",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt001/qualification001/code/worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt001"
+      ],
+      "environment_overrides": null,
+      "receipt": "attempt001/qualification001/launch_receipt.json",
+      "receipt_sha256": "c84182e81fd6eaf5baf9dab2d42a0a7753208294f8951764b2da3bf2581e34fd"
+    },
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002",
+        "--arm",
+        "allkept_layer29",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt002/launches/short/allkept_layer29/launch_receipt.json",
+      "receipt_sha256": "dc9f5c5c5fb9aba17e8cd4ba5917b03dcec75b4ffc2d6f441f418f28ac8f0c37"
+    },
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002",
+        "--arm",
+        "dense_piecewise",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt002/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt002/launches/short/dense_piecewise/launch_receipt.json",
+      "receipt_sha256": "bd1f43834dbfd61710cea30af5030d8437b9db54bc050fddba56b55db6a48268"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt006/code/long_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "allkept_layer29",
+        "--suite",
+        "long",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "262144",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/long/allkept_layer29/launch_receipt.json",
+      "receipt_sha256": "b30f6095ee5e9e27276329ef34481ac7d521f3e1a3caea428f83693e606dc51f"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt006/code/long_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "current_error_fixed4",
+        "--suite",
+        "long",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "262144",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/long/current_error_fixed4/launch_receipt.json",
+      "receipt_sha256": "3940949acb8b48bf72b263ca39b25a779bcbd5aa1106b9671e01cffebd37aba5"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt006/code/long_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "dense_full_fix51994",
+        "--suite",
+        "long",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "262144",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/long/dense_full_fix51994/launch_receipt.json",
+      "receipt_sha256": "204c15a59c3ae44a4a4acee248276388fab46915e983671a8259cecda0cce175"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt006/code/long_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "dense_piecewise",
+        "--suite",
+        "long",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "262144",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/long/dense_piecewise/launch_receipt.json",
+      "receipt_sha256": "ce10ae6503385b296913b1aa50a9a24404dda7f707d1a6e372d819f02c0475ef"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt006/code/long_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "margin_guard_weighted_bias",
+        "--suite",
+        "long",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "262144",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/long/margin_guard_weighted_bias/launch_receipt.json",
+      "receipt_sha256": "37aab9175ccdb298b942514b54bf0aa210ae56a2d5c16528822d699896f74d84"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt006/code/long_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "response_guard_qdirection",
+        "--suite",
+        "long",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "262144",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/long/response_guard_qdirection/launch_receipt.json",
+      "receipt_sha256": "1fa1cfdd97d7f66310b5f479aa16e125c2939d273894ba174a36a5d2f2e0146b"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt006/code/long_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "sham_fixed4",
+        "--suite",
+        "long",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "262144",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/long/sham_fixed4/launch_receipt.json",
+      "receipt_sha256": "9a75a3b883fed188ae1e9260e982031f8d081c11d203c170a6f3342b2815762a"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt005/code/v31_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "v31_optimized",
+        "--suite",
+        "long",
+        "--stage",
+        "panel",
+        "--pass-name",
+        "audit"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "262144",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/long/v31_optimized_separate_passes/audit/launch_receipt.json",
+      "receipt_sha256": "796a2fd5046e4077c1950f2fff3d5d67267b91e1795bf2565c55be28b66aef04"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt005/code/v31_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "v31_optimized",
+        "--suite",
+        "long",
+        "--stage",
+        "panel",
+        "--pass-name",
+        "clean"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "262144",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/long/v31_optimized_separate_passes/clean/launch_receipt.json",
+      "receipt_sha256": "bd7e6cdb4cda47db6e3799087bbb62947d3d5fae4f524ec21eea77fead85b15e"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt006/code/long_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "validity_reuse_mass_certificate",
+        "--suite",
+        "long",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "262144",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/long/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/long/validity_reuse_mass_certificate/launch_receipt.json",
+      "receipt_sha256": "0e3b7e4c1becd995f0bacd71cd5f58809ec68f93172df2330c2c88b953427431"
+    },
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "allkept_layer29",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/short/allkept_layer29/launch_receipt.json",
+      "receipt_sha256": "fe482d84b1ac22b1e3352283c206701124f3b13cf271953b99c089d6b04ee170"
+    },
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "current_error_fixed4",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/short/current_error_fixed4/launch_receipt.json",
+      "receipt_sha256": "0df912186909b052381bd63dd03cfc2407c2d9a532d8561dbde6c9b0d44f4428"
+    },
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "dense_full_fix51994",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/short/dense_full_fix51994/launch_receipt.json",
+      "receipt_sha256": "b34b92dd2304eb4980f31e926e13fac0a535516c0cc83269767285f4e0628f16"
+    },
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "dense_piecewise",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/short/dense_piecewise/launch_receipt.json",
+      "receipt_sha256": "9b1df75a85551e478e005c6fd93706283d7660b8f0c5d1062a8514acf0601a00"
+    },
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "margin_guard_weighted_bias",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/short/margin_guard_weighted_bias/launch_receipt.json",
+      "receipt_sha256": "7e1b2857b7c2e501161f10c121ec7fe6fdd72ca2d664b007600d1e673c6812d0"
+    },
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "response_guard_qdirection",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/short/response_guard_qdirection/launch_receipt.json",
+      "receipt_sha256": "4744c557b8ff69b3807a7c8a9ef352a5f85c61fc84717f64a89cf825ea6f1cb9"
+    },
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "sham_fixed4",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/short/sham_fixed4/launch_receipt.json",
+      "receipt_sha256": "bfc9391b2f3b52402d1a98832316c9a7d254b8491943add612b9a4b6dfdcaaf5"
+    },
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "v31_optimized",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/short/v31_optimized/launch_receipt.json",
+      "receipt_sha256": "7d7ea94050621a3eeb4453c887b269a2e926a505c5b460bb5adba1c128528bfe"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt005/code/v31_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "v31_optimized",
+        "--suite",
+        "short",
+        "--stage",
+        "panel",
+        "--pass-name",
+        "audit"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/short/v31_optimized_separate_passes/audit/launch_receipt.json",
+      "receipt_sha256": "8519460681c6b711039a568f6a78ffee78c664d59ad1a0b939701590209dd8b0"
+    },
+    {
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt005/code/v31_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "v31_optimized",
+        "--suite",
+        "short",
+        "--stage",
+        "panel",
+        "--pass-name",
+        "clean"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/short/v31_optimized_separate_passes/clean/launch_receipt.json",
+      "receipt_sha256": "7ba536efb9e743cc87a2f9596863999a714f82bd69415604b7f06a5fca29c0da"
+    },
+    {
+      "command": [
+        "timeout",
+        "--signal=TERM",
+        "--kill-after=15s",
+        "14400",
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/code/e2e_worker.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003",
+        "--arm",
+        "validity_reuse_mass_certificate",
+        "--suite",
+        "short",
+        "--stage",
+        "panel"
+      ],
+      "environment_overrides": {
+        "CUDA_CACHE_PATH": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/cuda",
+        "HF_HUB_OFFLINE": "1",
+        "MAX_MODEL_LEN": "12288",
+        "PYTHONPATH": "/home/exouser/ljy/dlm/src:/home/exouser/ljy/dlm",
+        "RESIDENT_SPARSE_EXECUTION": "1",
+        "RESIDENT_V31_PAGED_REFRESH": "1",
+        "TORCHINDUCTOR_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/inductor",
+        "TORCHINDUCTOR_DETERMINISTIC": "1",
+        "TRITON_CACHE_DIR": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/triton",
+        "VLLM_CACHE_ROOT": "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/cache/short/vllm",
+        "VLLM_ENABLE_V1_MULTIPROCESSING": "0",
+        "VLLM_USE_V2_MODEL_RUNNER": "1"
+      },
+      "receipt": "attempt003/launches/short/validity_reuse_mass_certificate/launch_receipt.json",
+      "receipt_sha256": "8597af995cf1de1b8254b2069b40a15192ee1e948b14e2b3a0c78fb2b68d50b8"
+    },
+    {
+      "CPU_only": true,
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/analyze_v4.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "receipt": "attempt009/analysis_receipt.json",
+      "receipt_sha256": "5076f521018be0fb3694b36eccf458d6674ba4cc378e54da8531fa13ace8828a"
+    },
+    {
+      "CPU_only": true,
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/trajectory_bottlenecks.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "receipt": "attempt009/native_bottlenecks_receipt.json",
+      "receipt_sha256": "c012287577d3c99f878462ff3b8540f10db25ac755ca873ecb906d6341ee7574"
+    },
+    {
+      "CPU_only": true,
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/score_v3.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "receipt": "attempt009/official_score_receipt.json",
+      "receipt_sha256": "6dd87984a7f5fbd337975b09d4ffcf902d63731b0a44e7383881d8171a1284cd"
+    },
+    {
+      "CPU_only": true,
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/output_diagnostics.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "receipt": "attempt009/output_diagnostics_receipt.json",
+      "receipt_sha256": "d7f31f97a7b13578fe7ab004967f8fdc70b044799cd59d09dc181e5a1f0932a2"
+    },
+    {
+      "CPU_only": true,
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/paired_trajectory.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "receipt": "attempt009/paired_trajectory_receipt.json",
+      "receipt_sha256": "72c7f00b6a4aa00f341aef80e794cad8359e350786ec189c687ce1c20c4650a3"
+    },
+    {
+      "CPU_only": true,
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/plot_trajectories.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "receipt": "attempt009/plots_receipt.json",
+      "receipt_sha256": "1fa2e98c420a347805e61aded1ba44793532763a9c1fc2ee162e0fd1c9ab624d"
+    },
+    {
+      "CPU_only": true,
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/report.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "receipt": "attempt009/report_receipt.json",
+      "receipt_sha256": "be4bd1b13155ab142c06045e506109cbc11473742bbb3623f0e76c6c7aa681db"
+    },
+    {
+      "CPU_only": true,
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/support_diversity.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "receipt": "attempt009/support_diversity_receipt.json",
+      "receipt_sha256": "68cf312b6558a2e69efacc3953e868f4b19912a40fe7c846ab45f65cdd21a78b"
+    },
+    {
+      "CPU_only": false,
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt005/launch_v31.py",
+        "--suite",
+        "long"
+      ],
+      "receipt": "attempt009/v31_long_receipt.json",
+      "receipt_sha256": "3280b2aa563078126b234f658d2aba4d26a942fb8a4d4c0f9dd63ff300c3ef5d"
+    },
+    {
+      "CPU_only": true,
+      "command": [
+        "/home/exouser/dyh/v31_env_20261005/bin/python",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003/verify.py",
+        "--root",
+        "/home/exouser/ljy/dlm/results/denoising_e2e_research_20261024/attempt003"
+      ],
+      "receipt": "attempt009/verify_receipt.json",
+      "receipt_sha256": "938b8e4c797077200e60cd20b871f574488e06fad13b2d870f19ff244be5a414"
+    }
+  ],
+  "same_frozen_scope": true
+}

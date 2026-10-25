@@ -3677,3 +3677,47 @@ proposal: qualification-only HE124 after4 with field-level replay receipts;
 separately predeclare a bank with>=4 feasible matched within-unit alternatives.
 Nine over-limit LongBench IDs, all earlier negatives and method provenance stay
 unchanged. No paused campaign resumed, preemption, push or later-canvas expansion.
+
+
+## 2026-10-25 — Complete user-expanded native end-to-end screen; no selector promotion
+
+Protocol88e46d4088a094968ebbeaed05b0ce4b9cf6e824a643675eba257ac9920d35dd;
+source4ac2b53f; report results/denoising_e2e_research_20261024/attempt003/review002/summary.md.
+10AIME26/10HumanEval/5eligible original long-band LongBench-v2, seeds42/43,
+9arms;450official scored cells,450exact full audit/clean output/N/C/T pairs.
+19closeout checks,559source pins,2operational bindings and7runtime files pass;
+all clean capture/JIT counts zero.32pre-generation and36final CPU tests pass.
+FULL and PIECEWISE match output/N/C/T in all50cells. CurrentQKV selector-only,
+native sampler/stopping/caps unchanged, no extra selector forwards; LOCAL dense.
+
+Correct(AIME/20,HE/20,LB/10): correctedFULL12/20/2;allkept11/19/2;
+inherited optimizedV316/19/4;currenterror9/19/3;response15/19/2;
+marginweighted10/18/3;certifiedreuse12/19/2;sham10/19/4. V31 fiveGLOBAL
+K128/K8192 work differs from new layer29 methods; never call it matched work.
+
+Response's AIME+15pp[0,+35] is a descriptive quality lead, not identified
+trajectory contraction: N/C versus sham0.998[0.946,1.040], outputT ratio versus
+FULL0.874, first-canvas calls10.35 versus dense10.20. HE has1task regression.
+Long response2/10 versus V31/sham4/10; calls16031 versus dense12128;
+paired N/C ratio1.138[0.973,1.330]. Mean W response16.682/2.070/287.100s
+versus FULL4.991/.739/63.764s. No new method supplies general quality-preserving
+acceleration or clean speedup. Long confidence bottleneck persists.
+
+First-bank response choices differ46/50cells (467units), but0matched choices
+meet25%response separation; AIME has0first-bank units with4feasible alternatives.
+Bank identification remains unresolved. Repeated E2E interventions do not isolate
+SA propagation, AS direct effects or SS interaction. Do not claim the old partial
+factorial stage complete or promote an exact MarginGuard/cheap response proxy.
+Margin-weighted surrogate is not exact downstream influence. Certified reuse
+refreshes15550times with5held calls and11371failed checks:park this bound;
+older norm-only negative remains separate. Current output fidelity is no future
+safety certificate. Next proposal is bounded operator/bank identification, then
+only if qualified a fresh-from-prompt pulse/hold study with prespecified scoring.
+
+Complete panel allocation49117.370s/405458counted forwards;earlier failed and
+superseded attempts retained separately, with missing failed-V31 forward counter
+and superseded all-kept exact exit allocation disclosed. H100 idle0MiB/0% at
+2026-10-25T02:18:47Z.9over-limit original LongBench IDs remain blocked; no
+truncation.5eligible questions cover2domains;clusters10/10/5,prior exposure and
+unadjusted descriptive intervals prevent noninferiority claims. No paused campaign
+resumed, other GPU workload killed, production/kernel expansion, or push.
