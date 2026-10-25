@@ -1,3 +1,37 @@
+## 2026-10-26 HKT — Response replication and stopping-headroom studies complete
+
+Read the [study handoff](results/response_behavior_and_stopping_headroom_20261025/summary.md)
+and [verification receipt](results/response_behavior_and_stopping_headroom_20261025/closeout001/verification.json).
+Branch: `denoising_trajectory_research`. Starting HEAD: `3a1e6e9c`.
+Verified generation checkpoints: R `5ebd3e66`, H `2480aa68`;
+R readout commit: `e2f5d47d`.
+
+Track R completed 700 audit/clean cells: 30 AIME and 40 HumanEval questions,
+two seeds, five arms. The 24-cell frozen legacy gate and all 200 supplemental
+legacy checks pass. On questions new to Response, AIME is 21/40 versus FULL
+21/40, current-error 22/40 and sham 21/40; HumanEval is 56/60 versus FULL
+58/60. No primary quality/work gate passes. Paired clean latency versus FULL
+is 4.059× on AIME and 2.590× on HumanEval. Legacy behavior reproduces exactly;
+the earlier AIME advantage does not generalize to confirmation.
+
+Track H qualified all eight fresh-control cells, three directional banks and
+ten deleting requests. Forty deleting GQA checks pass. Remaining native calls
+can decrease, but neither directional rule beats current-error/sham in replicated
+development. No confirmation pulse ran. One local improvement from 15 to 12/13
+calls accompanies a complete-request increase from 767 to 2,963/2,945 calls.
+All deleting requests score wrong and reach the output cap. No accuracy
+preservation, useful global acceleration or clean speedup is established.
+
+All 31 focused CPU tests pass. The studies used 1,520 complete requests,
+326,053 explicit model forwards and 5.2836 allocated GPU-worker hours, including
+startup, qualification, warmups and cleanup. No GPU process failed. One relay
+preflight error and one derived CPU-reporting error were preserved and repaired
+without GPU reruns. The H100 is idle. No paused campaign, Stage B/C, production
+kernel campaign or push. Next: independent review of saved native pulse/commit/RNG
+evidence before designing another selector.
+
+The following pre-existing handoff content and edits remain preserved.
+
 ## Complete Stage A1 mechanism study — 2026-10-25 UTC
 
 Generation source81aae497 (start7f04e2be), branch denoising_trajectory_research.

@@ -3759,3 +3759,31 @@ Frozen README/executable averaging discrepancy and compressed private vectors
 are disclosed,not tuned away. Independent review precedes any new protocol.
 Do not launch StageB/C,kernel optimization,exhaustiveMarginGuard or unpark the
 norm-only ValidityReuse track. No push;unrelated edits preserved.
+
+
+## 2026-10-26 — Response confirmation and signed-bias headroom (verified)
+
+Source: `results/response_behavior_and_stopping_headroom_20261025/summary.md`.
+R protocol: `e1e54486d484d8a83b2870208c438a32de8b982fdaf1af17b2dec349fd580c93`;
+generation checkpoint `5ebd3e66`. All 700 audit/clean cells complete, with 30 AIME
+and 40 HumanEval questions, two seeds and five arms. Frozen legacy checks pass
+24/24; supplemental legacy checks pass 200/200. New-to-Response AIME is 21/40,
+equal to FULL/sham and below current-error 22/40. HumanEval is 56/60, below
+FULL/sham 58/60 and current-error 59/60. No primary promotion gate passes.
+Paired N ratios versus FULL are 1.1045 and 0.9766; simultaneous intervals cross
+one. Clean W ratios are 4.0587 and 2.5901. No speedup or noninferiority claim.
+
+H protocol: `849443b09b3e60934710c781804d4bb52f5211bab0b464c742e0848f84c1ede6`;
+generation checkpoint `2480aa68`. Eight fresh-control cells, three identifying
+development banks and ten deleting requests qualify. Forty deleting GQA checks
+pass, with maximum relative error 0.004264. Neither directional rule passes
+development; confirmation has no identifying banks and no pulse was launched.
+Local native headroom exists without a score advantage: 15 remaining calls fall
+to 12/13, while total calls increase from 767 to 2,963/2,945. Every deleting
+reference and continuation scores wrong, so this cannot certify preservation.
+
+A1 reporting corrections preserve its negative results. Exact MarginGuard and
+norm-only ValidityReuse stay parked. No Stage B/C, production optimization,
+paused-campaign resume or push. Preserve all negative/mixed outcomes, missing
+cells, source identities, clustered intervals and physical-work accounting.
+Independent review precedes any proposed follow-up.

@@ -2494,3 +2494,24 @@ control quality2/8AIME,8/8HE,2/8LB;common all-kept3/8,8/8,2/8(4clusters/task).
 127requests,64007counted forwards;H100idle. See summary.md,analysis001 and
 closeout001 for complete negative/mixed evidence,physical work and limitations.
 This entry records completed A1 only;AA/SA/AS/SS and StageB/C were not launched.
+
+
+## 2026-10-26 — Completed Response replication and gated native headroom leaf
+
+- Source: `results/response_behavior_and_stopping_headroom_20261025/summary.md`.
+- R: 30 AIME and 40 HumanEval questions, two seeds, five arms, 700 complete
+  audit/clean cells. Protocol
+  `e1e54486d484d8a83b2870208c438a32de8b982fdaf1af17b2dec349fd580c93`,
+  generation `5ebd3e66`. New AIME: Response 21/40, FULL 21/40, current-error
+  22/40, sham 21/40. New HumanEval: Response 56/60, FULL 58/60, current-error
+  59/60, sham 58/60. No clear quality/work gain; clean latency is worse.
+- H: four LongBench questions, eight qualified control cells and three gated
+  development intervention cells. Protocol
+  `849443b09b3e60934710c781804d4bb52f5211bab0b464c742e0848f84c1ede6`,
+  generation `2480aa68`. Current-QKV deleting paths qualify. Local calls can
+  fall, but no score advantage or useful global gain confirms. No confirmation
+  pulse; zero identifying confirmation banks.
+- Completion: both tracks' `final_complete.json` and combined `closeout001/`.
+  All 31 focused CPU tests pass; 1,520 complete requests, 326,053 explicit
+  model forwards and 5.2836 allocated GPU-worker hours. Exploratory and targeted
+  negative/mixed evidence, without an accuracy-noninferiority claim.
