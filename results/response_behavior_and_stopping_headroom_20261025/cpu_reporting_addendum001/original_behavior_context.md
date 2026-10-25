@@ -1,0 +1,3 @@
+# Original Response behavior: CPU context addendum
+
+Original behavior is a separate result: Response AIME15/20 versus FULL12/20,current-error9/20,sham10/20. Its paired total calls/output length fall about14%/13% versus FULL, while calls versus sham fall only about3% and N/C remains about0.998. The strongest response-specific signal is quality. HumanEval is19/20 versus FULL20/20, with HE71seed43 regression. Its paired length falls only about2%, while arithmetic tokens increase19688 versus19335; do not attribute its call saving mainly to shorter output. Original10-question clusters, slow clean latency and unfavorable LongBench remain. Exact paired/arithmetic quantities are in original_behavior_context.json.
