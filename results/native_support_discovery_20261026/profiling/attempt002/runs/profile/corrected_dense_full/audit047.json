@@ -1,0 +1,621 @@
+{
+  "C": 3,
+  "GQA_qualification": [],
+  "LOCAL_dense": true,
+  "N": 24,
+  "N_per_C": 8.0,
+  "S": 0.6266395419370383,
+  "S_per_N": 0.026109980914043263,
+  "T": 754,
+  "W": 0.6489557919558138,
+  "anchors": {
+    "instability": {
+      "after_completed_calls": 3,
+      "canvas": 1,
+      "optimistic_U": 2,
+      "prefix": 452,
+      "reference_cap": false,
+      "reference_remaining": 3,
+      "reference_terminal_step": 6
+    }
+  },
+  "answer_parsed": true,
+  "arm": "corrected_dense_full",
+  "audit": true,
+  "benchmark": "humaneval",
+  "clean_timing_qualified": false,
+  "committed_canvases": 3,
+  "consumer_physical": [],
+  "correct": true,
+  "current_QKV": true,
+  "diagnostic_work": {},
+  "extra_inside_execute_Python_forwards": 0,
+  "final_cpu_rng": "5d898ff0719d3cff95ebfa4424bcc53134ef38bca55e960f0e4a730f5120a3bf",
+  "final_cuda_rng": "7b10eef37166ef0021360fd96f6edee2547811096d78397c9cf3a26fc6d65d69",
+  "finish_reason": "stop",
+  "id": "humaneval/HumanEval/79",
+  "initial_cpu_rng": "5d898ff0719d3cff95ebfa4424bcc53134ef38bca55e960f0e4a730f5120a3bf",
+  "initial_cuda_rng": "b2ad6e3947eead9909ead612f61168086867b5dc71b2efc087ee3abed8aa194a",
+  "label": "profile/corrected_dense_full/audit047",
+  "model_forwards": 28,
+  "native_trace": [
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 3.3838417530059814,
+      "entropy_slack": -3.3788417530059816,
+      "history_length": 1,
+      "history_ready": false,
+      "margin_low_quantiles": [
+        0.0,
+        0.0,
+        0.15111732482910156
+      ],
+      "margin_mean": 0.6658742427825928,
+      "native_step": 1,
+      "native_winner_sha256": "9aff247027222fc0f49a58c6be2cd4f077590ffa041e506dd95055fceaf3d0ca",
+      "stable": false,
+      "stable_position_fraction": 0.0234375
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 3.0256690979003906,
+      "entropy_slack": -3.0206690979003907,
+      "history_length": 2,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.036652565002441406,
+        0.5567855834960938
+      ],
+      "margin_mean": 1.3376963138580322,
+      "native_step": 2,
+      "native_winner_sha256": "47b6890ffaa5c92511bf319b1109d947bb59b0eea9b31f5d3291795fe78c0ef8",
+      "stable": false,
+      "stable_position_fraction": 0.4921875
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 2.3197643756866455,
+      "entropy_slack": -2.3147643756866456,
+      "history_length": 3,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.0,
+        0.6112461090087891
+      ],
+      "margin_mean": 2.143789291381836,
+      "native_step": 3,
+      "native_winner_sha256": "ff132e4f4ec05e8858915e84e516e6db9ca40bd601cfe0bfcea6ff7935f7f3e6",
+      "stable": false,
+      "stable_position_fraction": 0.59765625
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 1.7774157524108887,
+      "entropy_slack": -1.7724157524108888,
+      "history_length": 4,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.0638113021850586,
+        1.826324462890625
+      ],
+      "margin_mean": 4.190386772155762,
+      "native_step": 4,
+      "native_winner_sha256": "4dfe6754f34fc09a79c46be7680ce3e988ac255eaba773bc4008eb61c1c6d89c",
+      "stable": false,
+      "stable_position_fraction": 0.5859375
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 1.458693504333496,
+      "entropy_slack": -1.4536935043334962,
+      "history_length": 5,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.055835723876953125,
+        8.995627403259277
+      ],
+      "margin_mean": 7.179772853851318,
+      "native_step": 5,
+      "native_winner_sha256": "00c9f05ba1810594ddde85d34814dc986de6de8c8cf3798f8d5283684c89e6b9",
+      "stable": false,
+      "stable_position_fraction": 0.68359375
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 1.2444020509719849,
+      "entropy_slack": -1.239402050971985,
+      "history_length": 6,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.06335735321044922,
+        11.822922706604004
+      ],
+      "margin_mean": 8.730830192565918,
+      "native_step": 6,
+      "native_winner_sha256": "d837cb9dc469f1133601cf437bf21ff1b29bc8668f22dfaa8c666f708c8af653",
+      "stable": false,
+      "stable_position_fraction": 0.8359375
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 1.1648414134979248,
+      "entropy_slack": -1.159841413497925,
+      "history_length": 7,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.025722503662109375,
+        11.758642196655273
+      ],
+      "margin_mean": 9.15111255645752,
+      "native_step": 7,
+      "native_winner_sha256": "c14f408471b5e387a5287f06870eaa5dc0ad1423f90d11374d4563b734814f44",
+      "stable": false,
+      "stable_position_fraction": 0.8203125
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 0.949775218963623,
+      "entropy_slack": -0.944775218963623,
+      "history_length": 8,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.039589881896972656,
+        12.360845565795898
+      ],
+      "margin_mean": 9.421008110046387,
+      "native_step": 8,
+      "native_winner_sha256": "5717f590f7129d9468a8e9e36d79de736967b075ee31473e1f4b75e61103aab8",
+      "stable": false,
+      "stable_position_fraction": 0.73828125
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 0.4232962727546692,
+      "entropy_slack": -0.4182962727546692,
+      "history_length": 9,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.23767662048339844,
+        12.98481559753418
+      ],
+      "margin_mean": 10.13411808013916,
+      "native_step": 9,
+      "native_winner_sha256": "c1ba9b4fbaeade99e8048333ee4c3e021eb814ba6326cbbbf62cbf67ba8c583a",
+      "stable": false,
+      "stable_position_fraction": 0.76953125
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 0.1591317504644394,
+      "entropy_slack": -0.1541317504644394,
+      "history_length": 10,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.4495267868041992,
+        13.085504531860352
+      ],
+      "margin_mean": 10.710224151611328,
+      "native_step": 10,
+      "native_winner_sha256": "140b31353252bfc6415fb50d73a374b06cff2ce1d73445d59c6713dbe15915ef",
+      "stable": false,
+      "stable_position_fraction": 0.828125
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 0.018185541033744812,
+      "entropy_slack": -0.013185541033744811,
+      "history_length": 11,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        1.2853050231933594,
+        4.569801330566406,
+        13.883883476257324
+      ],
+      "margin_mean": 12.9478178024292,
+      "native_step": 11,
+      "native_winner_sha256": "c13a4a14dd78adbdb4e543bc9ed777fbc78c0c1121db0159b33b13b05554253e",
+      "stable": false,
+      "stable_position_fraction": 0.9453125
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": true,
+      "converged": false,
+      "entropy_mean": 0.0028654932975769043,
+      "entropy_slack": 0.002134506702423096,
+      "history_length": 12,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.6921615600585938,
+        9.832413673400879,
+        15.785585403442383
+      ],
+      "margin_mean": 15.607769012451172,
+      "native_step": 12,
+      "native_winner_sha256": "500df6fb49bb124db23930b7cda80483da0a40570b18f6579199a2c28c7710dd",
+      "stable": false,
+      "stable_position_fraction": 0.9921875
+    },
+    {
+      "canvas": 0,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": true,
+      "converged": true,
+      "entropy_mean": 0.00031639932421967387,
+      "entropy_slack": 0.004683600675780326,
+      "history_length": 13,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        4.526256561279297,
+        12.418205261230469,
+        19.34310531616211
+      ],
+      "margin_mean": 20.041479110717773,
+      "native_step": 13,
+      "native_winner_sha256": "500df6fb49bb124db23930b7cda80483da0a40570b18f6579199a2c28c7710dd",
+      "stable": true,
+      "stable_position_fraction": 1.0
+    },
+    {
+      "canvas": 0,
+      "commit": true,
+      "emitted_canvas_sha256": "31b33605f4b3f416bf3ed75bf0d992eff47cdc371bf562389e9faec22d7a95a8",
+      "native_step": 0
+    },
+    {
+      "canvas": 1,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 3.047922372817993,
+      "entropy_slack": -3.0429223728179933,
+      "history_length": 1,
+      "history_ready": false,
+      "margin_low_quantiles": [
+        0.0,
+        0.021554946899414062,
+        0.2715320587158203
+      ],
+      "margin_mean": 0.9542899131774902,
+      "native_step": 1,
+      "native_winner_sha256": "93bac592f83f7e007e998199be5726d8ff5f06ae666d00ad1ae4cd3d103fe239",
+      "stable": false,
+      "stable_position_fraction": 0.046875
+    },
+    {
+      "canvas": 1,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 2.55401873588562,
+      "entropy_slack": -2.5490187358856202,
+      "history_length": 2,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.02757740020751953,
+        0.3064460754394531
+      ],
+      "margin_mean": 1.652435541152954,
+      "native_step": 2,
+      "native_winner_sha256": "9130a43638fbc81f4f2deff023cec1e3469af9abd65fe3ea593b2f414a2cadb6",
+      "stable": false,
+      "stable_position_fraction": 0.30078125
+    },
+    {
+      "canvas": 1,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 1.2812035083770752,
+      "entropy_slack": -1.2762035083770753,
+      "history_length": 3,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.03882312774658203,
+        0.7268314361572266
+      ],
+      "margin_mean": 2.706582546234131,
+      "native_step": 3,
+      "native_winner_sha256": "a4fde960694f82ad4f464d2e2024d61fb8d9d7bd3f76325652a0caca75e838f5",
+      "stable": false,
+      "stable_position_fraction": 0.37890625
+    },
+    {
+      "canvas": 1,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 0.014510348439216614,
+      "entropy_slack": -0.009510348439216613,
+      "history_length": 4,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.4555625915527344,
+        6.0431084632873535,
+        9.390701293945312
+      ],
+      "margin_mean": 9.641352653503418,
+      "native_step": 4,
+      "native_winner_sha256": "58ad92fc9cdcc8ea2e7ca3b43fa9e371aeda32beecc0a69de0d8610234f522cc",
+      "stable": false,
+      "stable_position_fraction": 0.65234375
+    },
+    {
+      "canvas": 1,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": true,
+      "converged": false,
+      "entropy_mean": 0.0016684246947988868,
+      "entropy_slack": 0.0033315753052011133,
+      "history_length": 5,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        3.2956924438476562,
+        9.787391662597656,
+        14.317436218261719
+      ],
+      "margin_mean": 14.317208290100098,
+      "native_step": 5,
+      "native_winner_sha256": "f677bd70b90c171d173966f80d4ac6049ffd5a2a30f3189358aba079b98b676c",
+      "stable": false,
+      "stable_position_fraction": 0.99609375
+    },
+    {
+      "canvas": 1,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": true,
+      "converged": true,
+      "entropy_mean": 0.00016518088523298502,
+      "entropy_slack": 0.004834819114767015,
+      "history_length": 6,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        6.9908599853515625,
+        11.268377304077148,
+        17.922210693359375
+      ],
+      "margin_mean": 17.942556381225586,
+      "native_step": 6,
+      "native_winner_sha256": "f677bd70b90c171d173966f80d4ac6049ffd5a2a30f3189358aba079b98b676c",
+      "stable": true,
+      "stable_position_fraction": 1.0
+    },
+    {
+      "canvas": 1,
+      "commit": true,
+      "emitted_canvas_sha256": "131d7d5da4adc4e5fe7bc5dc13306391cbfc4ee46f2dad9834e1e5e207f70072",
+      "native_step": 0
+    },
+    {
+      "canvas": 2,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 2.7034049034118652,
+      "entropy_slack": -2.6984049034118653,
+      "history_length": 1,
+      "history_ready": false,
+      "margin_low_quantiles": [
+        0.0,
+        0.026123046875,
+        0.31269264221191406
+      ],
+      "margin_mean": 1.2675728797912598,
+      "native_step": 1,
+      "native_winner_sha256": "b4ee44302bc3fb91f61cc243c099b3901e28d9238bacca6c4075dd899ccae83b",
+      "stable": false,
+      "stable_position_fraction": 0.01953125
+    },
+    {
+      "canvas": 2,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": false,
+      "converged": false,
+      "entropy_mean": 0.494673490524292,
+      "entropy_slack": -0.489673490524292,
+      "history_length": 2,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.0,
+        0.39752960205078125,
+        2.5611419677734375
+      ],
+      "margin_mean": 3.5116913318634033,
+      "native_step": 2,
+      "native_winner_sha256": "deb9d3bd533e99cabad77ff59a0e4d443afd02970ab22c3e01e9f84106e3a4ee",
+      "stable": false,
+      "stable_position_fraction": 0.296875
+    },
+    {
+      "canvas": 2,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": true,
+      "converged": false,
+      "entropy_mean": 0.0017537440871819854,
+      "entropy_slack": 0.0032462559128180147,
+      "history_length": 3,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        4.741184234619141,
+        8.412460327148438,
+        11.164497375488281
+      ],
+      "margin_mean": 11.209043502807617,
+      "native_step": 3,
+      "native_winner_sha256": "da646044979112106e5b88eb8067aad3935dfd5a26f88817bd257f7a4e4b8deb",
+      "stable": false,
+      "stable_position_fraction": 0.95703125
+    },
+    {
+      "canvas": 2,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": true,
+      "converged": true,
+      "entropy_mean": 0.002739217132329941,
+      "entropy_slack": 0.0022607828676700593,
+      "history_length": 4,
+      "history_ready": true,
+      "margin_low_quantiles": [
+        0.3725242614746094,
+        10.98291015625,
+        16.01314926147461
+      ],
+      "margin_mean": 16.258987426757812,
+      "native_step": 4,
+      "native_winner_sha256": "da646044979112106e5b88eb8067aad3935dfd5a26f88817bd257f7a4e4b8deb",
+      "stable": true,
+      "stable_position_fraction": 1.0
+    },
+    {
+      "canvas": 2,
+      "commit": true,
+      "emitted_canvas_sha256": "e15f4344c09d32031aa2ad49805cb0ca36e3227527ef9da5af1ec650f1941c59",
+      "native_step": 0
+    },
+    {
+      "canvas": 3,
+      "cap_reached": false,
+      "commit": false,
+      "confidence": true,
+      "converged": false,
+      "entropy_mean": 2.0231980670359917e-05,
+      "entropy_slack": 0.00497976801932964,
+      "history_length": 1,
+      "history_ready": false,
+      "margin_low_quantiles": [
+        14.487611770629883,
+        15.021754264831543,
+        16.205020904541016
+      ],
+      "margin_mean": 16.162330627441406,
+      "native_step": 1,
+      "native_winner_sha256": "924ae03b6111734d8ab1d2d4c88ec6a7da5ba6612c50b2f0e3c27d0511980e0f",
+      "stable": false,
+      "stable_position_fraction": 0.0546875
+    }
+  ],
+  "new_captures": 0,
+  "new_jit": 0,
+  "no_final_response": false,
+  "output_capped": false,
+  "output_sha256": "8d92935feadc96d8580909c042372851d4da81656099ab0a12002d193d03e0a3",
+  "partition": "confirmation",
+  "private_generation_sha256": "a40752c4100a89a7020d4e348df53d2f6a01013881c9800bbcf2ae8455991b5a",
+  "private_reference_sha256": "9540ffbe331ebbf5811d6bb23a0a041461a732eb03cffa86cc41d239b60cd17f",
+  "prompt_hash": "f77325cbb707d40dce5ccaf5e1aceeca8324619afc34a86ea495a0aceea8b881",
+  "prompt_tokenization_sha256": "b26ce4b170179036d9d2fd715379d1164190259911bd51a89396c62db2a5bf4f",
+  "protocol_sha256": "d7e627b570b346a2e1c679804c802eb2b46fc79bfc84d9593f7e7029ab26abdf",
+  "quality_detail": {
+    "extraction": "parsed",
+    "outcome": "passed",
+    "parsed": true
+  },
+  "seed": 43,
+  "startup_model_calls_in_request": 0,
+  "stratum": "coverage",
+  "uncommitted_tail": 1,
+  "work": {
+    "decode_cudagraph_modes": {
+      "FULL": 24
+    },
+    "global_calls": 120,
+    "global_eligible_tiles": 41600,
+    "global_kept_tiles": 41600,
+    "global_skipped_tiles": 0,
+    "native_dense_geometry_source": "actual prepare_attn decode metadata; Q128 x KV64 rectangles, not CUDA CTA count",
+    "native_dense_phase_geometry_baseline": {
+      "dense": {
+        "calls": 120,
+        "eligible_tiles": 41600,
+        "kept_tiles": 41600,
+        "skipped_tiles": 0,
+        "sparsity": 0
+      }
+    },
+    "native_local_calls_audited": 600,
+    "native_local_eligible_rectangles": 207600,
+    "native_local_phase_rectangles": {
+      "dense": {
+        "calls": 600,
+        "eligible_rectangles": 207600,
+        "skipped_tiles": 0,
+        "sparsity": 0
+      }
+    },
+    "native_local_skipped_tiles": 0,
+    "order_errors": 0,
+    "overall_eligible_rectangles": 249200,
+    "overall_rectangle_sparsity": 0.0,
+    "overall_skipped_rectangles": 0,
+    "value_nonfinite_attention_calls": null,
+    "value_nonfinite_logits_calls": 0
+  }
+}

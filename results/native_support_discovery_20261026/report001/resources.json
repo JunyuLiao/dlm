@@ -1,0 +1,276 @@
+{
+  "allocated_GPU_worker_seconds": 6850.562428951263,
+  "allocations": [
+    {
+      "GPU": true,
+      "allocated_seconds": 910.0726053714752,
+      "returncode": 0,
+      "source": "profiling/attempt002/launches/profile_matched_allkept_l5_l17_l29/exit_receipt.json"
+    },
+    {
+      "GPU": false,
+      "allocated_seconds": 10.001996994018555,
+      "returncode": 0,
+      "source": "profiling/attempt002/launches/cohort_selection/exit_receipt.json"
+    },
+    {
+      "GPU": true,
+      "allocated_seconds": 1000.0827276706696,
+      "returncode": 0,
+      "source": "profiling/attempt002/launches/profile_dense_piecewise/exit_receipt.json"
+    },
+    {
+      "GPU": true,
+      "allocated_seconds": 280.0255239009857,
+      "returncode": 0,
+      "source": "profiling/attempt002/launches/qualify_matched_allkept_l5_l17_l29/exit_receipt.json"
+    },
+    {
+      "GPU": true,
+      "allocated_seconds": 410.0334401130676,
+      "returncode": 0,
+      "source": "profiling/attempt002/launches/qualify_corrected_dense_full/exit_receipt.json"
+    },
+    {
+      "GPU": true,
+      "allocated_seconds": 980.0802426338196,
+      "returncode": 0,
+      "source": "profiling/attempt002/launches/profile_corrected_dense_full/exit_receipt.json"
+    },
+    {
+      "GPU": true,
+      "allocated_seconds": 400.0327844619751,
+      "returncode": 0,
+      "source": "profiling/attempt002/launches/qualify_dense_piecewise/exit_receipt.json"
+    },
+    {
+      "GPU": false,
+      "allocated_seconds": 10.001609086990356,
+      "returncode": 0,
+      "source": "experiment/attempt006/launches/independent_numerical/exit_receipt.json"
+    },
+    {
+      "GPU": true,
+      "allocated_seconds": 1900.1493611335754,
+      "returncode": 0,
+      "source": "experiment/attempt006/launches/treatments/exit_receipt.json"
+    },
+    {
+      "GPU": false,
+      "allocated_seconds": 50.00431942939758,
+      "returncode": 0,
+      "source": "experiment/attempt006/launches/environment_verification/exit_receipt.json"
+    },
+    {
+      "GPU": false,
+      "allocated_seconds": 20.002673625946045,
+      "returncode": 0,
+      "source": "experiment/attempt006/launches/analysis/exit_receipt.json"
+    },
+    {
+      "GPU": false,
+      "allocated_seconds": 50.00511384010315,
+      "returncode": 0,
+      "source": "experiment/attempt003/launches/environment_verification/exit_receipt.json"
+    },
+    {
+      "GPU": true,
+      "allocated_seconds": 230.0197513103485,
+      "returncode": 1,
+      "source": "experiment/attempt003/launches/references/exit_receipt.json"
+    },
+    {
+      "GPU": false,
+      "allocated_seconds": 10.002042055130005,
+      "returncode": 1,
+      "source": "experiment/attempt004/launches/independent_numerical/exit_receipt.json"
+    },
+    {
+      "GPU": false,
+      "allocated_seconds": 50.004597902297974,
+      "returncode": 0,
+      "source": "experiment/attempt004/launches/environment_verification/exit_receipt.json"
+    },
+    {
+      "GPU": true,
+      "allocated_seconds": 310.02756547927856,
+      "returncode": 0,
+      "source": "experiment/attempt004/launches/references/exit_receipt.json"
+    },
+    {
+      "GPU": false,
+      "allocated_seconds": 10.001628398895264,
+      "returncode": 0,
+      "source": "experiment/attempt005/launches/independent_numerical/exit_receipt.json"
+    },
+    {
+      "GPU": false,
+      "allocated_seconds": 10.001952409744263,
+      "returncode": 0,
+      "source": "experiment/attempt005/launches/early_maps/exit_receipt.json"
+    },
+    {
+      "GPU": true,
+      "allocated_seconds": 190.01670861244202,
+      "returncode": 1,
+      "source": "experiment/attempt005/launches/treatments/exit_receipt.json"
+    },
+    {
+      "GPU": false,
+      "allocated_seconds": 50.004255056381226,
+      "returncode": 0,
+      "source": "experiment/attempt005/launches/environment_verification/exit_receipt.json"
+    },
+    {
+      "GPU": true,
+      "allocated_seconds": 240.0217182636261,
+      "returncode": 0,
+      "source": "experiment/attempt005/launches/early/exit_receipt.json"
+    },
+    {
+      "GPU": false,
+      "allocated_seconds": 10.002076148986816,
+      "returncode": 0,
+      "source": "experiment/attempt005/launches/branch_binding/exit_receipt.json"
+    }
+  ],
+  "clean_timing_qualified": false,
+  "explicit_forward_receipts": [
+    {
+      "arm": "matched_allkept_l5_l17_l29",
+      "engine_execute_forwards": 16197,
+      "extra_model_calls_inside_execute": 0,
+      "initialization_engine_forwards": 6,
+      "job": "profile",
+      "passed": true,
+      "protocol_sha256": "d7e627b570b346a2e1c679804c802eb2b46fc79bfc84d9593f7e7029ab26abdf",
+      "python_model_forward_invocations": 16404,
+      "source": "profiling/attempt002/runs/profile/matched_allkept_l5_l17_l29/final_complete.json",
+      "startup_model_calls_outside_execute": 208,
+      "worker_body_seconds": 896.9826014041901
+    },
+    {
+      "arm": "dense_piecewise",
+      "engine_execute_forwards": 20568,
+      "extra_model_calls_inside_execute": 0,
+      "initialization_engine_forwards": 6,
+      "job": "profile",
+      "passed": true,
+      "protocol_sha256": "d7e627b570b346a2e1c679804c802eb2b46fc79bfc84d9593f7e7029ab26abdf",
+      "python_model_forward_invocations": 20775,
+      "source": "profiling/attempt002/runs/profile/dense_piecewise/final_complete.json",
+      "startup_model_calls_outside_execute": 208,
+      "worker_body_seconds": 986.7231066226959
+    },
+    {
+      "arm": "corrected_dense_full",
+      "engine_execute_forwards": 20568,
+      "extra_model_calls_inside_execute": 0,
+      "initialization_engine_forwards": 6,
+      "job": "profile",
+      "passed": true,
+      "protocol_sha256": "d7e627b570b346a2e1c679804c802eb2b46fc79bfc84d9593f7e7029ab26abdf",
+      "python_model_forward_invocations": 467,
+      "source": "profiling/attempt002/runs/profile/corrected_dense_full/final_complete.json",
+      "startup_model_calls_outside_execute": 212,
+      "worker_body_seconds": 969.3954432010651
+    },
+    {
+      "arm": "matched_allkept_l5_l17_l29",
+      "engine_execute_forwards": 2886,
+      "extra_model_calls_inside_execute": 0,
+      "initialization_engine_forwards": 6,
+      "job": "qualify",
+      "passed": true,
+      "protocol_sha256": "d7e627b570b346a2e1c679804c802eb2b46fc79bfc84d9593f7e7029ab26abdf",
+      "python_model_forward_invocations": 3093,
+      "source": "profiling/attempt002/runs/qualify/matched_allkept_l5_l17_l29/final_complete.json",
+      "startup_model_calls_outside_execute": 208,
+      "worker_body_seconds": 275.49424958229065
+    },
+    {
+      "arm": "dense_piecewise",
+      "engine_execute_forwards": 5190,
+      "extra_model_calls_inside_execute": 0,
+      "initialization_engine_forwards": 6,
+      "job": "qualify",
+      "passed": true,
+      "protocol_sha256": "d7e627b570b346a2e1c679804c802eb2b46fc79bfc84d9593f7e7029ab26abdf",
+      "python_model_forward_invocations": 5397,
+      "source": "profiling/attempt002/runs/qualify/dense_piecewise/final_complete.json",
+      "startup_model_calls_outside_execute": 208,
+      "worker_body_seconds": 387.0823142528534
+    },
+    {
+      "arm": "corrected_dense_full",
+      "engine_execute_forwards": 5190,
+      "extra_model_calls_inside_execute": 0,
+      "initialization_engine_forwards": 6,
+      "job": "qualify",
+      "passed": true,
+      "protocol_sha256": "d7e627b570b346a2e1c679804c802eb2b46fc79bfc84d9593f7e7029ab26abdf",
+      "python_model_forward_invocations": 265,
+      "source": "profiling/attempt002/runs/qualify/corrected_dense_full/final_complete.json",
+      "startup_model_calls_outside_execute": 212,
+      "worker_body_seconds": 404.9652588367462
+    },
+    {
+      "engine_execute_forwards": 40354,
+      "extra_model_calls_inside_execute": 0,
+      "initialization_engine_forwards": 6,
+      "job": "treatments",
+      "passed": true,
+      "protocol_sha256": "10398a912c355dabf3d6511475a7bdf0fb3c3434c0e7055e439a724fd5bc0d70",
+      "python_model_forward_invocations": 40561,
+      "source": "experiment/attempt006/runs/treatments/final_complete.json",
+      "startup_model_calls_outside_execute": 208,
+      "worker_body_seconds": 1888.128348350525
+    },
+    {
+      "engine_execute_forwards": 630,
+      "extra_model_calls_inside_execute": 0,
+      "initialization_engine_forwards": 6,
+      "job": "early",
+      "passed": true,
+      "protocol_sha256": "79f286319eb4394c42f093743a9a42383cff1fad4ad09b42b3696556e95f49b4",
+      "python_model_forward_invocations": 837,
+      "source": "experiment/attempt006/runs/early/final_complete.json",
+      "startup_model_calls_outside_execute": 208,
+      "worker_body_seconds": 234.34049320220947
+    },
+    {
+      "engine_execute_forwards": 2272,
+      "extra_model_calls_inside_execute": 0,
+      "initialization_engine_forwards": 6,
+      "job": "references",
+      "passed": true,
+      "protocol_sha256": "7c8a403ae7f4523f090bfff6f57e7de7fb1128e44db06331b923a27e7b1c2a68",
+      "python_model_forward_invocations": 2479,
+      "source": "experiment/attempt006/runs/references/final_complete.json",
+      "startup_model_calls_outside_execute": 208,
+      "worker_body_seconds": 299.6327414512634
+    },
+    {
+      "engine_execute_forwards": 471,
+      "error_class": "AssertionError",
+      "extra_model_calls_inside_execute": 0,
+      "failed_attempt": true,
+      "passed": false,
+      "reason": "Exact traceback is retained only in the ignored worker log.",
+      "source": "experiment/attempt003/runs/references/failure.json",
+      "startup_model_calls_outside_execute": 208
+    },
+    {
+      "engine_execute_forwards": 777,
+      "error_class": "AssertionError",
+      "extra_model_calls_inside_execute": 0,
+      "failed_attempt": true,
+      "passed": false,
+      "reason": "Exact traceback is retained only in the ignored worker log.",
+      "source": "experiment/attempt005/runs/treatments/failure.json",
+      "startup_model_calls_outside_execute": 208
+    }
+  ],
+  "no_campaign_ceiling": true,
+  "total_explicit_model_forwards": 117399
+}
