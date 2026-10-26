@@ -1,3 +1,37 @@
+## 2026-10-26 UTC — Commit-boundary and actual online single-pulse study complete
+
+Read [the bounded handoff](results/commit_boundary_single_pulse_20261026/summary.md)
+and [verified decisions](results/commit_boundary_single_pulse_20261026/closeout001/method_decisions.json).
+Branch denoising_trajectory_research; start748e22b3. Verified generation sources:
+B85d2f11d, C723d4cb0; final baseline-only cohort checkpointb52335e8.
+CPU corrections preserve old negative conclusions and all frozen inputs.
+
+B qualifies3common states and10distinct historical pulses in24fresh requests.
+Committed active K/V agrees numerically across30layers; emitted prefixes and
+numerical reset SC agree. Five earlier stops change next RNG/random canvas and
+complete output; five unchanged stops reproduce them. This supports measured
+RNG-position coupling, not exclusive mediation or expected quality harm.
+
+C completes12questions (4/task), seeds42/43,7arms:21engineering and168panel
+exact audit/clean pairs, all168timings qualified. FULL/PW match24/24. Official
+quality FULL/PW2/8AIME,6/8HE,4/8LB; all-kept and every pulse5/8,6/8,4/8.
+The AIME difference already exists without deletion.8anchor seed cells on5
+questions;7direction pairs; only1correct-reference exposed seed cell. No pulse
+policy reduces complete N on AIME/LB; HE total N increases13CE,1sham,8high,12low.
+Clean W is2.5–9.4%higher than matched all-kept, depending on task/policy.
+All stage decisions are no-go for policy advancement. Local gains do not imply
+complete utility; no AA/SA/AS/SS, reuse, noninferiority or kernel-promotion claim.
+
+23CPUtests pass;596/601source pins,16model/config files,7runtime files and
+scorer reverify.466complete requests,252435explicit model calls,6.286606allocated
+GPU-worker hours. One pre-model import failure has0forwards; CPU reader failures
+and superseded attempts are preserved. All native workers exited; H100idle.
+No resource ceiling, paused campaign, StageB/C, production kernel work or push.
+Next: independent review; improve correct-reference opportunity coverage before
+another authorized selector study. Original9over-limit LB items remain blocked.
+
+The following pre-existing handoff content and edits remain preserved.
+
 ## 2026-10-26 HKT — Response replication and stopping-headroom studies complete
 
 Read the [study handoff](results/response_behavior_and_stopping_headroom_20261025/summary.md)

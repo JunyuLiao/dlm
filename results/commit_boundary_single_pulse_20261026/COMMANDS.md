@@ -113,3 +113,37 @@ before any sparse treatment. Seven-arm engineering qualification precedes the
 seven-arm panel. All audit/clean comparisons and actual capture/JIT counters are
 required. Invalid timing stays unavailable. Final analyze.py consumes unique,
 complete source-bound audit/clean cells with all input hashes.
+
+Final CPU readout commands (zero new model calls):
+
+```sh
+CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 <pinned_python> results/commit_boundary_single_pulse_20261026/reporting003/paired_tables.py
+CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 python results/commit_boundary_single_pulse_20261026/reporting003/verify.py
+CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 python results/commit_boundary_single_pulse_20261026/reporting004/verify.py
+CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 python results/commit_boundary_single_pulse_20261026/reporting004/handoff.py
+CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 <pinned_python> results/commit_boundary_single_pulse_20261026/reporting004/plots.py
+git diff --check
+```
+
+Verifier003 failed after all16 model hashes passed: its final runtime reader
+assumed top-level vllm_flash_attn. Verifier004 uses the actual vendored vllm
+package, preserves verification001/failure.json, and passes all model/runtime,
+source, scorer, native commit/tail and189work-row checks in verification002.
+The read-only final GPU/process query receipt is closeout001/hardware_final.json.
+Boundary positions/shape checks were executed as a CPU-only inline reader over
+the same ten public receipts; metadata_addendum001.json binds every input hash.
+Publication scans use git ls-files -co --exclude-standard limited to this study,
+check private-data keys/credential/path patterns, and inventory every public file.
+
+Final publication commands:
+
+```sh
+python results/commit_boundary_single_pulse_20261026/reporting004/publish.py
+git add -- results/commit_boundary_single_pulse_20261026
+git diff --cached --check
+git commit -m 'Publish qualified commit-boundary and single-pulse end-to-end negative study'
+```
+
+Shared documents are staged as explicit Git blobs built from HEAD plus only the
+study's own prefix/appends. closeout001/preservation.json records this; original
+AGENTS/HANDOFF/DECISIONS worktree edits remain uncommitted. No push is performed.

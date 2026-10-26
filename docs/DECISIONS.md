@@ -3787,3 +3787,41 @@ norm-only ValidityReuse stay parked. No Stage B/C, production optimization,
 paused-campaign resume or push. Preserve all negative/mixed outcomes, missing
 cells, source identities, clustered intervals and physical-work accounting.
 Independent review precedes any proposed follow-up.
+
+
+## 2026-10-26 — Commit-boundary coupling qualified; single-pulse policies do not advance
+
+Source: results/commit_boundary_single_pulse_20261026/summary.md and final_complete.json.
+Boundary protocol9d10674b993bcb55120a6d49c2d95c4dae164ffc0b64e2a2048e6c0f654e4044,
+source85d2f11d. Three historical common states and10distinct pulses qualify via
+fresh complete requests. Same emitted prefix, commit inputs, all30active K/V
+and numerical reset SC; earlier-stop cases change subsequent native RNG and
+random initialization. Measured coupling is supported; exclusive mediation and
+expected quality harm are not established. Returned scaled commit logits are
+phase/temperature-dependent observations, not persistent reset SC.
+
+Online protocol4f6d95ed03ffc22dada08d113f7ef17acc0844b764cff71136344ddf4eac6f11,
+source723d4cb0, cohortb52335e8. Frozen24-question dense-only roster selects12
+questions before treatment.7arms ×24seed cells complete168audit/clean pairs;
+21engineering pairs pass, all168panel timings qualify. Only8anchor states,
+7directional pairs, and1correct-reference exposed seed cell. All AIME was
+previously exposed; targeted fallback deficiencies remain explicit.
+
+All-kept and all pulse policies score5/8AIME,6/8HE,4/8LB; FULL/PW2/8,6/8,4/8.
+Zero selector quality transitions versus all-kept. AIME's three gains versus FULL
+are already consumer effects. Every pulse leaves complete AIME/LB N,C,T unchanged;
+HE N increases13CE,1sham,8high,12low. All policies have higher clean W than
+all-kept (paired ratios1.025–1.094). No directional rule beats both CE/sham on
+any question in both seeds. CE comparisons are error-unmatched in all7direction
+pairs; high/low remain matched to each other. Bank identification is distinct
+from predictive/utility value. No next-policy advancement, exhaustive MarginGuard,
+ValidityReuse revival, StageB/C, kernel work or speedup/noninferiority claim.
+
+CPU addendum verifies700corrected R work rows,420historical stale raw fields,
+34official rescored outputs and all10terminal equality cases. Older failed gates
+remain failed.23focused tests pass; final model/runtime/source/scorer verification
+passes.466requests,252435counted model calls,6.286606allocated GPU-worker hours.
+One import failure before model initialization, three CPU preparation/reporting
+errors and an upstream-failure relay stop are preserved; no native worker killed.
+No push. H100idle. Next step is independent review with better correct-reference
+opportunity coverage before any new authorized study, not automatic expansion.

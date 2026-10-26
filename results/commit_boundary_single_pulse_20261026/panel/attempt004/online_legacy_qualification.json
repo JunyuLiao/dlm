@@ -1,0 +1,162 @@
+{
+  "passed": true,
+  "cases": [
+    {
+      "arm": "current_error",
+      "same_old_current_operands": true,
+      "same_old_selected_support": true,
+      "audit_clean_pair_passed": true,
+      "actual_pulses": 1,
+      "GQA_checks": [
+        {
+          "deleting": true,
+          "error": 0.003620749106630683,
+          "head": 0,
+          "kv_head": 0,
+          "qb": 0
+        },
+        {
+          "deleting": true,
+          "error": 0.003456283826380968,
+          "head": 0,
+          "kv_head": 0,
+          "qb": 1
+        },
+        {
+          "deleting": true,
+          "error": 0.002371557056903839,
+          "head": 8,
+          "kv_head": 1,
+          "qb": 0
+        },
+        {
+          "deleting": true,
+          "error": 0.002311306307092309,
+          "head": 8,
+          "kv_head": 1,
+          "qb": 1
+        }
+      ]
+    },
+    {
+      "arm": "support_sham",
+      "same_old_current_operands": true,
+      "same_old_selected_support": true,
+      "audit_clean_pair_passed": true,
+      "actual_pulses": 1,
+      "GQA_checks": [
+        {
+          "deleting": true,
+          "error": 0.003620749106630683,
+          "head": 0,
+          "kv_head": 0,
+          "qb": 0
+        },
+        {
+          "deleting": true,
+          "error": 0.003456283826380968,
+          "head": 0,
+          "kv_head": 0,
+          "qb": 1
+        },
+        {
+          "deleting": true,
+          "error": 0.002371557056903839,
+          "head": 8,
+          "kv_head": 1,
+          "qb": 0
+        },
+        {
+          "deleting": true,
+          "error": 0.002311306307092309,
+          "head": 8,
+          "kv_head": 1,
+          "qb": 1
+        }
+      ]
+    },
+    {
+      "arm": "direction_high",
+      "same_old_current_operands": true,
+      "same_old_selected_support": true,
+      "audit_clean_pair_passed": true,
+      "actual_pulses": 1,
+      "GQA_checks": [
+        {
+          "deleting": true,
+          "error": 0.003620749106630683,
+          "head": 0,
+          "kv_head": 0,
+          "qb": 0
+        },
+        {
+          "deleting": true,
+          "error": 0.003456283826380968,
+          "head": 0,
+          "kv_head": 0,
+          "qb": 1
+        },
+        {
+          "deleting": true,
+          "error": 0.002371557056903839,
+          "head": 8,
+          "kv_head": 1,
+          "qb": 0
+        },
+        {
+          "deleting": true,
+          "error": 0.002364885527640581,
+          "head": 8,
+          "kv_head": 1,
+          "qb": 1
+        }
+      ]
+    },
+    {
+      "arm": "direction_low",
+      "same_old_current_operands": true,
+      "same_old_selected_support": true,
+      "audit_clean_pair_passed": true,
+      "actual_pulses": 1,
+      "GQA_checks": [
+        {
+          "deleting": true,
+          "error": 0.003620749106630683,
+          "head": 0,
+          "kv_head": 0,
+          "qb": 0
+        },
+        {
+          "deleting": true,
+          "error": 0.003456283826380968,
+          "head": 0,
+          "kv_head": 0,
+          "qb": 1
+        },
+        {
+          "deleting": true,
+          "error": 0.002371557056903839,
+          "head": 8,
+          "kv_head": 1,
+          "qb": 0
+        },
+        {
+          "deleting": true,
+          "error": 0.00235387054271996,
+          "head": 8,
+          "kv_head": 1,
+          "qb": 1
+        }
+      ]
+    }
+  ],
+  "input_hashes": {
+    "results/response_behavior_and_stopping_headroom_20261025/track_h/attempt001/executions/references/cell000_A_observed/operators/selections.json": "6765cbe01e4229ca143aa0d7f5de7302d13dd222df20b5d74518be6699c1513b",
+    "results/commit_boundary_single_pulse_20261026/panel/attempt004/runs/qualify/current_error_single_pulse/audit002.json": "70e82801ca31a415d3bde9c2f8b461e9d0e31ed920f242f3f313f1b6fa2a4bc9",
+    "results/commit_boundary_single_pulse_20261026/panel/attempt004/runs/qualify/support_sham_single_pulse/audit002.json": "e17f0958236450659c5a424dcf6c0c79410a5a296a5e8970da3afb0218458432",
+    "results/commit_boundary_single_pulse_20261026/panel/attempt004/runs/qualify/direction_high_single_pulse/audit002.json": "dcd8e9b5394b7b9e51b461cb6ab695b944fe4ee078fd0f0e6f9f446b885fe64d",
+    "results/commit_boundary_single_pulse_20261026/panel/attempt004/runs/qualify/direction_low_single_pulse/audit002.json": "ac09fc09b7fb18098dc1fb5633899eb4c0c97129379947cea7371bbd81b59724"
+  },
+  "no_model_forwards": true,
+  "interpretation": "Old/new support equality is required when current operands/RNG agree. A different reference state is not treated as selector failure. All current-state audit/clean pairs independently require exact selected supports."
+}

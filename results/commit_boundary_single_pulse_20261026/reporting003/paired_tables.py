@@ -71,6 +71,29 @@ def main():
                         endpoints[name] = estimate(values)
                     timing.append(dict(task=task, stratum=stratum, method=arm, reference=ref, valid_questions=valid, excluded_questions=missing, seed_cells=2*len(valid), estimates=endpoints))
 
+    controls = []
+    for task in ['aime26', 'humaneval', 'longbench_v2']:
+        for stratum in ['all', 'targeted', 'coverage']:
+            ids = [m['id'] for m in manifest['identities'] if m['benchmark'] == task and (stratum == 'all' or m['stratum'] == stratum)]
+            for arm, ref in [('matched_allkept_layer29', 'corrected_dense_full'), ('matched_allkept_layer29', 'dense_piecewise'), ('dense_piecewise', 'corrected_dense_full')]:
+                estimates = {}
+                for name in ['N', 'C', 'T', 'N_per_C', 'quality_difference', 'W', 'S', 'S_per_N']:
+                    values = []
+                    for identity in ids:
+                        timed = name in ['W', 'S', 'S_per_N']
+                        if timed and not all(rows[(identity, seed, ar)][1]['timing_qualified'] for seed in [42, 43] for ar in [arm, ref]):
+                            continue
+                        v = []
+                        for seed in [42, 43]:
+                            a = rows[(identity, seed, arm)][1 if timed else 0]
+                            b = rows[(identity, seed, ref)][1 if timed else 0]
+                            v.append(int(a['correct'])-int(b['correct']) if name=='quality_difference' else math.log(a[name]/b[name]))
+                        values.append(np.mean(v))
+                    estimates[name] = estimate(values, geometric=name!='quality_difference')
+                transitions = [dict(id=identity, seed=seed, reference_correct=rows[(identity,seed,ref)][0]['correct'], method_correct=rows[(identity,seed,arm)][0]['correct']) for identity in ids for seed in [42,43]]
+                controls.append(dict(task=task,stratum=stratum,method=arm,reference=ref,estimates=estimates,transitions=transitions,
+                    correct_to_wrong=sum(x['reference_correct'] and not x['method_correct'] for x in transitions),wrong_to_correct=sum(not x['reference_correct'] and x['method_correct'] for x in transitions)))
+
     banks, local = [], []
     for i, m in enumerate(manifest['identities']):
         for seed in [42, 43]:
@@ -112,7 +135,7 @@ def main():
             distinct_support_counts=dict(Counter(x['distinct_exposed_supports'] for x in b))))
     out=C/'paired_readout001'
     out.mkdir(exist_ok=False)
-    result=dict(primary_timing=timing, bank_cells=banks, bank_coverage=aggregate, local_effects=local,
+    result=dict(primary_timing=timing, control_comparisons=controls, bank_cells=banks, bank_coverage=aggregate, local_effects=local,
         protocol_sha256=sha(C/'protocol.json'), manifest_sha256=sha(C/'manifest_identity.json'),
         timing_rule='Both seeds of a question must have valid timing in BOTH compared arms. No favorable retiming.',
         caution='Descriptive small diagnostic cohort. Masks, seeds and routing units are not independent questions. CE contrasts may be unmatched. No-pulse correctness is not sparse preservation.')

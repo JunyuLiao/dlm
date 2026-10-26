@@ -2515,3 +2515,27 @@ This entry records completed A1 only;AA/SA/AS/SS and StageB/C were not launched.
   All 31 focused CPU tests pass; 1,520 complete requests, 326,053 explicit
   model forwards and 5.2836 allocated GPU-worker hours. Exploratory and targeted
   negative/mixed evidence, without an accuracy-noninferiority claim.
+
+
+## 2026-10-26 — Completed commit-boundary diagnostic and online single-pulse panel
+
+- Canonical source: results/commit_boundary_single_pulse_20261026/summary.md;
+  root final_complete.json, verification002/summary.json and closeout001/.
+- B source85d2f11d; protocol
+  9d10674b993bcb55120a6d49c2d95c4dae164ffc0b64e2a2048e6c0f654e4044.
+ 24fresh requests,3qualified states,10distinct deleting supports. All30committed
+  active K/V and numerical reset SC agree. Five earlier stops change next native
+  RNG/random canvas and whole output; measured coupling, not sole mediation.
+- C source723d4cb0; protocol
+  4f6d95ed03ffc22dada08d113f7ef17acc0844b764cff71136344ddf4eac6f11;
+  cohortb52335e8, manifest13b6ea729c1a4dacbdce283417539b0802ed8600978fc57d73ee5b88f37c02c3.
+ 12questions ×2seeds ×7arms;21engineering and168complete audit/clean panel pairs.
+  All168clean timings qualify; only8anchor seed cells and1correct exposed control.
+  FULL/PW official2/8AIME,6/8HE,4/8LB; A and all pulse policies5/8,6/8,4/8.
+  No selector quality gain over A; no complete-N gain; every clean policy is
+  slower than A. No directional utility gate passes. Descriptive targeted study,
+  not noninferiority, broad benchmark, reuse or production promotion.
+- All23focused CPUtests and final source/model/runtime/scorer checks pass.
+ 466complete native requests,252435model calls,6.286606allocated worker hours;
+  one preserved pre-model import failure, no native-generation failure. H100idle.
+  Historical negatives, blocked9LongBench identities and unrelated edits remain.
