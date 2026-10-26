@@ -1,0 +1,27 @@
+{
+  "KV": {
+    "numerically_equal": 184,
+    "comparable": 338,
+    "additional_missing_reference": 10
+  },
+  "SC": {
+    "byte_changes": 188,
+    "numeric_changes": 170,
+    "signed_zero_only_changes": 18
+  },
+  "actual_FP32": {
+    "candidate_count": 576,
+    "median_relative_residual": 0.22526004322903148,
+    "residual_gt_half": 86,
+    "residual_gt_one": 10,
+    "not_negligible_by_norm_flag": true
+  },
+  "ratios": {
+    "arithmetic": "mean paired seed ratios per question, then equal-question mean",
+    "geometric": "exp(mean paired log ratios), each question retains two seeds",
+    "pooled": "sum treatment / sum comparator; expensive requests receive larger implicit weight"
+  },
+  "old_score_gate": "failed; CPU matched ranking does not revalidate it",
+  "reuse_investigation": "independently authorized controlled selector by lifecycle study",
+  "repairs": "new source only; frozen historical evidence untouched"
+}
