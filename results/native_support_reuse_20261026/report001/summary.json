@@ -1,0 +1,97 @@
+{
+  "clean_online_latency_qualified": false,
+  "completed": true,
+  "configurations_advancing": 0,
+  "configurations_passing_complete_behavior": 5,
+  "configurations_passing_reuse_gate": 0,
+  "configurations_passing_selector_gate": 0,
+  "descriptive_dependent_label_local_outcomes": {
+    "regression": 79,
+    "saving": 97,
+    "tie": 208
+  },
+  "exposed_initial_seed_cells": 9,
+  "independent_development_questions": 6,
+  "initial_fallback_seed_cells": 3,
+  "no_noninferiority_claim": true,
+  "paired_seeds": [
+    42,
+    43
+  ],
+  "policy_cells_per_configuration": 12,
+  "primary_hold_refresh_configurations": 32,
+  "quality_regressions_all_config_comparators": 39,
+  "resources": {
+    "CPU_reader_failures": 2,
+    "allocated_GPU_worker_hours": 1.5278925864564048,
+    "allocated_GPU_worker_seconds": 5500.413311243057,
+    "clean_online_latency_qualified": false,
+    "complete_native_requests": 657,
+    "explicit_model_forwards": 115281,
+    "failed_GPU_workers": 0,
+    "includes_startup_warmup_qualification_scoring_wait_and_cleanup": true,
+    "no_campaign_resource_ceiling": true,
+    "one_worker_at_a_time": true,
+    "parent_poll_resolution_seconds": 10,
+    "source_compatible_copied_controls_counted_once": true,
+    "workers": [
+      {
+        "allocated_GPU_worker_seconds": 300.02397894859314,
+        "attempt": "attempt001",
+        "engine_execute_forwards": 2800,
+        "explicit_model_forwards": 3012,
+        "extra_inside_execute": 0,
+        "initialization_execute_forwards": 6,
+        "job": "dense_full",
+        "requests": 21,
+        "startup_model_calls_outside_execute": 212
+      },
+      {
+        "allocated_GPU_worker_seconds": 270.02339339256287,
+        "attempt": "attempt001",
+        "engine_execute_forwards": 2800,
+        "explicit_model_forwards": 3008,
+        "extra_inside_execute": 0,
+        "initialization_execute_forwards": 6,
+        "job": "piecewise",
+        "requests": 21,
+        "startup_model_calls_outside_execute": 208
+      },
+      {
+        "allocated_GPU_worker_seconds": 270.02359557151794,
+        "attempt": "attempt001",
+        "engine_execute_forwards": 2896,
+        "explicit_model_forwards": 3104,
+        "extra_inside_execute": 0,
+        "initialization_execute_forwards": 6,
+        "job": "references",
+        "requests": 21,
+        "startup_model_calls_outside_execute": 208
+      },
+      {
+        "allocated_GPU_worker_seconds": 4330.335608005524,
+        "attempt": "attempt002",
+        "engine_execute_forwards": 102654,
+        "explicit_model_forwards": 102862,
+        "extra_inside_execute": 0,
+        "initialization_execute_forwards": 6,
+        "job": "treatments",
+        "requests": 564,
+        "startup_model_calls_outside_execute": 208
+      },
+      {
+        "allocated_GPU_worker_seconds": 330.0067353248596,
+        "attempt": "attempt004",
+        "engine_execute_forwards": 3087,
+        "explicit_model_forwards": 3295,
+        "extra_inside_execute": 0,
+        "initialization_execute_forwards": 6,
+        "job": "qualification",
+        "requests": 30,
+        "startup_model_calls_outside_execute": 208
+      }
+    ]
+  },
+  "scientific_labels": 1344,
+  "unique_native_development_branches": 528
+}

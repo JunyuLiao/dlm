@@ -1,0 +1,5 @@
+# Reproduction
+
+Read identities.json and the canonical bindings first. Preserve attempt001 controls, attempt002 native grid, attempt004 full-off qualification, analysis001 original gates and analysis003 complete-refresh-quality reader. All copied controls retain001 identities and count once. Input hashes accompany each CPU leaf. Reproduction must write a new named attempt, never these frozen paths. Private manifest/generations/operator vectors remain ignored; publication alone is insufficient to regenerate private inputs. Native wrappers select the pinned interpreter/model/scorer; do not guess unavailable paths. No model call is hidden inside a selector.
+
+For an independent CPU review, adapt output roots in ranking, rescore, alias, numerical, common-state and analysis writers, preserving original sources and exact input hashes. Use CUDA_VISIBLE_DEVICES empty. A native rerun requires live GPU/process checks, source/model/runtime/scorer hash verification, focused tests and qualification before using new outcomes. No production kernel, broad benchmark or cross-canvas carry is authorized by this handoff.

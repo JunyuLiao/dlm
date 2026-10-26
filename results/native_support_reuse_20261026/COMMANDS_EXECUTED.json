@@ -1,0 +1,176 @@
+{
+  "cwd": "repository root",
+  "interpreter_role": "private/python wrapper, binary fingerprint in environment receipts; runtime path intentionally private",
+  "commands": [
+    "nvidia-smi --query-gpu=name,uuid,driver_version,memory.used,utilization.gpu --format=csv",
+    "nvidia-smi --query-compute-apps=pid,process_name,used_gpu_memory --format=csv",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python results/native_support_reuse_20261026/ranking_audit/attempt001/audit.py",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:. results/native_support_reuse_20261026/private/python -m pytest -q results/native_support_reuse_20261026/attempt001/tests --junitxml=results/native_support_reuse_20261026/attempt001/tests/prelaunch001.xml",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:. results/native_support_reuse_20261026/private/python -m pytest -q results/native_support_reuse_20261026/attempt001/tests --junitxml=results/native_support_reuse_20261026/attempt001/tests/prelaunch002.xml",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:. results/native_support_reuse_20261026/private/python -m pytest -q results/native_support_reuse_20261026/attempt002/tests --junitxml=results/native_support_reuse_20261026/attempt002/tests/prelaunch001.xml",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:. results/native_support_reuse_20261026/private/python -m pytest -q results/native_support_reuse_20261026/attempt003/tests --junitxml=results/native_support_reuse_20261026/attempt003/tests/prelaunch001.xml",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=src:. results/native_support_reuse_20261026/private/python -m pytest -q results/native_support_reuse_20261026/attempt004/tests --junitxml=results/native_support_reuse_20261026/attempt004/tests/prelaunch001.xml",
+    "python results/native_support_reuse_20261026/attempt001/freeze.py",
+    "CUDA_VISIBLE_DEVICES='' results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/attempt001/verify_environment.py",
+    "python results/native_support_reuse_20261026/attempt002/freeze.py",
+    "CUDA_VISIBLE_DEVICES='' results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/attempt002/verify_environment.py",
+    "python results/native_support_reuse_20261026/attempt003/freeze.py",
+    "CUDA_VISIBLE_DEVICES='' results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/attempt003/verify_environment.py",
+    "python results/native_support_reuse_20261026/attempt004/freeze.py",
+    "CUDA_VISIBLE_DEVICES='' results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/attempt004/verify_environment.py",
+    "results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/attempt001/launch.py --stage controls",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/attempt002/numerical_verify.py",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/attempt002/numerical_verify002.py",
+    "CUDA_VISIBLE_DEVICES='' PYTHONDONTWRITEBYTECODE=1 results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/attempt002/code/plan_branches.py",
+    "results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/attempt002/launch.py --stage treatments",
+    "results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/supervise.py",
+    "results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/supervise002.py",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 python results/native_support_reuse_20261026/ranking_audit/selection_pool002/analyze.py",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/audit_off_bank_cpu001.py",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/common_state_operators.py",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/rescore.py",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/build_report.py",
+    "CUDA_VISIBLE_DEVICES='' OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1 results/native_support_reuse_20261026/private/python results/native_support_reuse_20261026/attempt002/code/analyze_reuse.py"
+  ],
+  "native_and_postprocessing_children": [
+    {
+      "path": "attempt001/launches/dense_full/launch.json",
+      "sha256": "5bbd50b1609dec728fddab66ebb95dbd64d96cd7fe939145e49647a78f1d842e",
+      "record": {
+        "GPU": true,
+        "command": [
+          "<pinned_python>",
+          "/home/exouser/ljy/dlm/results/native_support_reuse_20261026/attempt001/code/worker.py",
+          "--job",
+          "dense_full"
+        ],
+        "no_campaign_timeout": true,
+        "protocol_sha256": "410b8da29208ecd695474a458e719f895c93004e1d248166774cf2c1614d2fd9",
+        "source_checkpoint": "33bedc8866f51719a217b19113094f83de72ad06",
+        "started_unix": 1793025617.7867446
+      }
+    },
+    {
+      "path": "attempt001/launches/piecewise/launch.json",
+      "sha256": "317d9b6a3377dffb5dd9cfdd56913f4d4d83b71eb9eb522a488d66a40a03e075",
+      "record": {
+        "GPU": true,
+        "command": [
+          "<pinned_python>",
+          "/home/exouser/ljy/dlm/results/native_support_reuse_20261026/attempt001/code/worker.py",
+          "--job",
+          "piecewise"
+        ],
+        "no_campaign_timeout": true,
+        "protocol_sha256": "410b8da29208ecd695474a458e719f895c93004e1d248166774cf2c1614d2fd9",
+        "source_checkpoint": "33bedc8866f51719a217b19113094f83de72ad06",
+        "started_unix": 1793025917.9284399
+      }
+    },
+    {
+      "path": "attempt001/launches/references/launch.json",
+      "sha256": "c579049b244207ed4466c5aa6981411469c55e94082c8ea84f020d6c8516c78e",
+      "record": {
+        "GPU": true,
+        "command": [
+          "<pinned_python>",
+          "/home/exouser/ljy/dlm/results/native_support_reuse_20261026/attempt001/code/worker.py",
+          "--job",
+          "references"
+        ],
+        "no_campaign_timeout": true,
+        "protocol_sha256": "410b8da29208ecd695474a458e719f895c93004e1d248166774cf2c1614d2fd9",
+        "source_checkpoint": "33bedc8866f51719a217b19113094f83de72ad06",
+        "started_unix": 1793026188.068274
+      }
+    },
+    {
+      "path": "attempt002/launches/treatments/launch.json",
+      "sha256": "887a4b0f2eedbbf7b806a251c60c462e454556f31a09f7a9dec0391604f6739e",
+      "record": {
+        "GPU": true,
+        "command": [
+          "<pinned_python>",
+          "/home/exouser/ljy/dlm/results/native_support_reuse_20261026/attempt002/code/worker.py",
+          "--job",
+          "treatments"
+        ],
+        "no_campaign_timeout": true,
+        "protocol_sha256": "7267a4bacaa6eabb5898b1a90253741bf7307b72200a46175702ae0890ffc6a1",
+        "source_checkpoint": "8d8e0bf63dbb5a4044a0125df51a8c27da2d28e7",
+        "started_unix": 1793026813.1586673
+      }
+    },
+    {
+      "path": "attempt004/launches/qualification/launch.json",
+      "sha256": "7e46d4079aebe0fb8225663ace566b448fd7fc8677bd6995b6a013e10caec62a",
+      "record": {
+        "GPU": true,
+        "command": [
+          "<pinned_python>",
+          "/home/exouser/ljy/dlm/results/native_support_reuse_20261026/attempt004/code/qualify_worker.py"
+        ],
+        "no_campaign_timeout": true,
+        "protocol_sha256": "9b00cc93e2a1e276112e6125aabb8476a84589e165073cea48a02e952337018c",
+        "source_checkpoint": "423db8c4965253ae03e18b728cf07a878012148b",
+        "started_unix": 1793031148.6604564
+      }
+    },
+    {
+      "path": "postprocessing_launches002/analysis_launch.json",
+      "sha256": "c03403e77f30ca2b4a5d59549c1c26812f163953f3149cb8a6208667abd69b58",
+      "record": {
+        "GPU_launcher": false,
+        "command": [
+          "<pinned_python>",
+          "/home/exouser/ljy/dlm/results/native_support_reuse_20261026/analysis_source/attempt003/analyze.py"
+        ],
+        "source_sha256": "1657c1cb26566c093a3a29f43d7b6c2434f11249af77521ba500c8e24a53fcbc",
+        "started_unix": 1793031494.9410481
+      }
+    },
+    {
+      "path": "postprocessing_launches002/applied_numerical_audit_launch.json",
+      "sha256": "61d4239036907e06aef6db46ee7ea5063687b10d134069a9609f6a35b89b81a2",
+      "record": {
+        "GPU_launcher": false,
+        "command": [
+          "<pinned_python>",
+          "/home/exouser/ljy/dlm/results/native_support_reuse_20261026/applied_numerical_audit.py"
+        ],
+        "source_sha256": "14cba3194a84f67027aecb8f66c47cac86004d3950940d36d985845c6aa53917",
+        "started_unix": 1793031481.6541278
+      }
+    },
+    {
+      "path": "postprocessing_launches002/full_off_qualification_launch.json",
+      "sha256": "c4d73bba2740003524ed08f6c782b594cf3bb14e354b276183e9c62919cb08bc",
+      "record": {
+        "GPU_launcher": true,
+        "command": [
+          "<pinned_python>",
+          "/home/exouser/ljy/dlm/results/native_support_reuse_20261026/attempt004/launch_qualification.py"
+        ],
+        "source_sha256": "e067d1da6eb2a1d1486b7715bf899262c7b260940c921abcba9f08ba02f9e059",
+        "started_unix": 1793031148.502226
+      }
+    },
+    {
+      "path": "postprocessing_launches002/physical_alias_audit_launch.json",
+      "sha256": "d6466d7725e8b02bf30cb4c17ff7bc050320a306c39d59b44b470a49da9bad72",
+      "record": {
+        "GPU_launcher": false,
+        "command": [
+          "<pinned_python>",
+          "/home/exouser/ljy/dlm/results/native_support_reuse_20261026/physical_alias_audit.py"
+        ],
+        "source_sha256": "c0b306069cc9e3905ed89bf8b887309226992e57b922108d49fd98f986e113bd",
+        "started_unix": 1793031478.7467523
+      }
+    }
+  ],
+  "failed_CPU_reader_command_executions": 2,
+  "stopped_waiting_CPU_controller_receipt": "qualification_controller_revisions/attempt001/superseded_unlaunched.json",
+  "no_gpu_worker_signal": true,
+  "inspection_and_edit_commands": "Task transcript; this ledger records experiment/test/source-binding commands"
+}
