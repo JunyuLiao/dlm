@@ -1,0 +1,1123 @@
+{
+  "cells": [
+    {
+      "id": "aime26/5",
+      "seed": 42,
+      "anchor": {
+        "after_completed_calls": 3,
+        "canvas": 1,
+        "optimistic_U": 13,
+        "prefix": 430,
+        "reference_cap": false,
+        "reference_remaining": 14,
+        "reference_terminal_step": 17
+      },
+      "branches": [
+        {
+          "drop_count": 1,
+          "fraction": 0.05,
+          "geometry": {
+            "canvas": 1,
+            "cpu_rng": "5feb54a46230d321d888e9b43cf5a57492665f199e4377408d79ee460e36679c",
+            "cuda_rng": "3ac93608a884ad3c176fa4c226c99e74e62d526b394e932e02b81920a04124c5",
+            "gqa_map": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "k": {
+              "dtype": "torch.bfloat16",
+              "sha256": "5353a559de43cd0e5e26138a0069df0e72953092d904e547b4cc68d81067cafd",
+              "shape": [
+                686,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            },
+            "layer": 29,
+            "length": 686,
+            "page_table_sha256": "b791362a21a8190fd62d51b7e3f9a4999222e07269cc3344ef3d4fee4a3190e2",
+            "prefix": 430,
+            "q": {
+              "dtype": "torch.bfloat16",
+              "sha256": "31c804476019202439c9b72fa6a3d8e67dc71a08cf864adaad44b5adde09409b",
+              "shape": [
+                256,
+                16,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                8192,
+                512,
+                1
+              ]
+            },
+            "step": 4,
+            "v": {
+              "dtype": "torch.bfloat16",
+              "sha256": "b5228ea10a724ef2418ad157f339358abfce29986a6d6bdaf46b5996bc436f57",
+              "shape": [
+                686,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            }
+          },
+          "identity": "5d684f21d890c3c4e5f29c3dc1fcc9978edc189dc563dee88d386d200dcb1c22",
+          "labels": [
+            {
+              "branch": "5d684f21d890c3c4e5f29c3dc1fcc9978edc189dc563dee88d386d200dcb1c22",
+              "fraction": 0.05,
+              "lifecycle": "held4",
+              "selector": "current_error"
+            },
+            {
+              "branch": "5d684f21d890c3c4e5f29c3dc1fcc9978edc189dc563dee88d386d200dcb1c22",
+              "fraction": 0.05,
+              "lifecycle": "held4",
+              "selector": "mass"
+            },
+            {
+              "branch": "5d684f21d890c3c4e5f29c3dc1fcc9978edc189dc563dee88d386d200dcb1c22",
+              "fraction": 0.05,
+              "lifecycle": "held4",
+              "selector": "margin_weighted"
+            },
+            {
+              "branch": "5d684f21d890c3c4e5f29c3dc1fcc9978edc189dc563dee88d386d200dcb1c22",
+              "fraction": 0.1,
+              "lifecycle": "held4",
+              "selector": "current_error"
+            },
+            {
+              "branch": "5d684f21d890c3c4e5f29c3dc1fcc9978edc189dc563dee88d386d200dcb1c22",
+              "fraction": 0.1,
+              "lifecycle": "held4",
+              "selector": "mass"
+            },
+            {
+              "branch": "5d684f21d890c3c4e5f29c3dc1fcc9978edc189dc563dee88d386d200dcb1c22",
+              "fraction": 0.1,
+              "lifecycle": "held4",
+              "selector": "margin_weighted"
+            }
+          ],
+          "lifecycle": "held4",
+          "selector": "current_error",
+          "sparse_sha256": "19b34fd63388822727a655f43eb313943c8f72fdece35c17a108c6d7d84b5843",
+          "support_sha256": "2f3d213cd573db783563f0043df9981fda24456aa4a0c281af92de110222a41b",
+          "units": [
+            {
+              "head": 0,
+              "qb": 0,
+              "tiles": [
+                2
+              ]
+            },
+            {
+              "head": 0,
+              "qb": 1,
+              "tiles": [
+                5
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 0,
+              "tiles": [
+                3
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 1,
+              "tiles": [
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "drop_count": 1,
+          "fraction": 0.05,
+          "geometry": {
+            "canvas": 1,
+            "cpu_rng": "5feb54a46230d321d888e9b43cf5a57492665f199e4377408d79ee460e36679c",
+            "cuda_rng": "3ac93608a884ad3c176fa4c226c99e74e62d526b394e932e02b81920a04124c5",
+            "gqa_map": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "k": {
+              "dtype": "torch.bfloat16",
+              "sha256": "5353a559de43cd0e5e26138a0069df0e72953092d904e547b4cc68d81067cafd",
+              "shape": [
+                686,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            },
+            "layer": 29,
+            "length": 686,
+            "page_table_sha256": "b791362a21a8190fd62d51b7e3f9a4999222e07269cc3344ef3d4fee4a3190e2",
+            "prefix": 430,
+            "q": {
+              "dtype": "torch.bfloat16",
+              "sha256": "31c804476019202439c9b72fa6a3d8e67dc71a08cf864adaad44b5adde09409b",
+              "shape": [
+                256,
+                16,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                8192,
+                512,
+                1
+              ]
+            },
+            "step": 4,
+            "v": {
+              "dtype": "torch.bfloat16",
+              "sha256": "b5228ea10a724ef2418ad157f339358abfce29986a6d6bdaf46b5996bc436f57",
+              "shape": [
+                686,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            }
+          },
+          "identity": "3503c64073583d1afe598aaa09387454e6b41d3f2ebdf3ee2d0ef1005c8b9ab5",
+          "labels": [
+            {
+              "branch": "3503c64073583d1afe598aaa09387454e6b41d3f2ebdf3ee2d0ef1005c8b9ab5",
+              "fraction": 0.05,
+              "lifecycle": "refresh4",
+              "selector": "current_error"
+            },
+            {
+              "branch": "3503c64073583d1afe598aaa09387454e6b41d3f2ebdf3ee2d0ef1005c8b9ab5",
+              "fraction": 0.1,
+              "lifecycle": "refresh4",
+              "selector": "current_error"
+            }
+          ],
+          "lifecycle": "refresh4",
+          "selector": "current_error",
+          "sparse_sha256": "19b34fd63388822727a655f43eb313943c8f72fdece35c17a108c6d7d84b5843",
+          "support_sha256": "2f3d213cd573db783563f0043df9981fda24456aa4a0c281af92de110222a41b",
+          "units": [
+            {
+              "head": 0,
+              "qb": 0,
+              "tiles": [
+                2
+              ]
+            },
+            {
+              "head": 0,
+              "qb": 1,
+              "tiles": [
+                5
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 0,
+              "tiles": [
+                3
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 1,
+              "tiles": [
+                3
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "humaneval/HumanEval/57",
+      "seed": 42,
+      "anchor": {
+        "after_completed_calls": 3,
+        "canvas": 1,
+        "optimistic_U": 3,
+        "prefix": 382,
+        "reference_cap": false,
+        "reference_remaining": 4,
+        "reference_terminal_step": 7
+      },
+      "branches": [
+        {
+          "drop_count": 1,
+          "fraction": 0.05,
+          "geometry": {
+            "canvas": 1,
+            "cpu_rng": "5feb54a46230d321d888e9b43cf5a57492665f199e4377408d79ee460e36679c",
+            "cuda_rng": "103198fe69ab41030c9fdf2810508afa1684ff0cea351272d72a631cac559862",
+            "gqa_map": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "k": {
+              "dtype": "torch.bfloat16",
+              "sha256": "393063af6a34ba0c3530c0ea127e942786e361db49f546d2ffede8e5bb299fbc",
+              "shape": [
+                638,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            },
+            "layer": 29,
+            "length": 638,
+            "page_table_sha256": "5f6aa5bc606a64ff60bcc68f4f0af34a822d66a9fcbfce66ce54a503add4bffc",
+            "prefix": 382,
+            "q": {
+              "dtype": "torch.bfloat16",
+              "sha256": "41e49f3b7f40390368a36d93071cd62921316c312feac800a139060ee3573dbf",
+              "shape": [
+                256,
+                16,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                8192,
+                512,
+                1
+              ]
+            },
+            "step": 4,
+            "v": {
+              "dtype": "torch.bfloat16",
+              "sha256": "e6597df1687859f642814dc5c567f2c58c873ce6039fa715b4aae5571e50aaa2",
+              "shape": [
+                638,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            }
+          },
+          "identity": "e78b55a43edc03585fa43641000befac36372d3749cdd45c429ccf8781299ec1",
+          "labels": [
+            {
+              "branch": "e78b55a43edc03585fa43641000befac36372d3749cdd45c429ccf8781299ec1",
+              "fraction": 0.05,
+              "lifecycle": "held4",
+              "selector": "current_error"
+            },
+            {
+              "branch": "e78b55a43edc03585fa43641000befac36372d3749cdd45c429ccf8781299ec1",
+              "fraction": 0.05,
+              "lifecycle": "held4",
+              "selector": "mass"
+            },
+            {
+              "branch": "e78b55a43edc03585fa43641000befac36372d3749cdd45c429ccf8781299ec1",
+              "fraction": 0.1,
+              "lifecycle": "held4",
+              "selector": "current_error"
+            },
+            {
+              "branch": "e78b55a43edc03585fa43641000befac36372d3749cdd45c429ccf8781299ec1",
+              "fraction": 0.1,
+              "lifecycle": "held4",
+              "selector": "mass"
+            }
+          ],
+          "lifecycle": "held4",
+          "selector": "current_error",
+          "sparse_sha256": "35ca07f2a7ca64ad83c963a981a3dc7316d14c01b6e77286b70df1afd61773a3",
+          "support_sha256": "2f94ffbcc8a8cb9bf24fcfc878e88d4c213d7dc0eb10d4d0b0c75a3b3ac69aa1",
+          "units": [
+            {
+              "head": 0,
+              "qb": 0,
+              "tiles": [
+                1
+              ]
+            },
+            {
+              "head": 0,
+              "qb": 1,
+              "tiles": [
+                3
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 0,
+              "tiles": [
+                3
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 1,
+              "tiles": [
+                3
+              ]
+            }
+          ]
+        },
+        {
+          "drop_count": 1,
+          "fraction": 0.05,
+          "geometry": {
+            "canvas": 1,
+            "cpu_rng": "5feb54a46230d321d888e9b43cf5a57492665f199e4377408d79ee460e36679c",
+            "cuda_rng": "103198fe69ab41030c9fdf2810508afa1684ff0cea351272d72a631cac559862",
+            "gqa_map": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "k": {
+              "dtype": "torch.bfloat16",
+              "sha256": "393063af6a34ba0c3530c0ea127e942786e361db49f546d2ffede8e5bb299fbc",
+              "shape": [
+                638,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            },
+            "layer": 29,
+            "length": 638,
+            "page_table_sha256": "5f6aa5bc606a64ff60bcc68f4f0af34a822d66a9fcbfce66ce54a503add4bffc",
+            "prefix": 382,
+            "q": {
+              "dtype": "torch.bfloat16",
+              "sha256": "41e49f3b7f40390368a36d93071cd62921316c312feac800a139060ee3573dbf",
+              "shape": [
+                256,
+                16,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                8192,
+                512,
+                1
+              ]
+            },
+            "step": 4,
+            "v": {
+              "dtype": "torch.bfloat16",
+              "sha256": "e6597df1687859f642814dc5c567f2c58c873ce6039fa715b4aae5571e50aaa2",
+              "shape": [
+                638,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            }
+          },
+          "identity": "a1b66a9bcb1bc211c7fd61444999264f334c5723a67a8d0096944673d6a99280",
+          "labels": [
+            {
+              "branch": "a1b66a9bcb1bc211c7fd61444999264f334c5723a67a8d0096944673d6a99280",
+              "fraction": 0.05,
+              "lifecycle": "refresh4",
+              "selector": "current_error"
+            },
+            {
+              "branch": "a1b66a9bcb1bc211c7fd61444999264f334c5723a67a8d0096944673d6a99280",
+              "fraction": 0.1,
+              "lifecycle": "refresh4",
+              "selector": "current_error"
+            }
+          ],
+          "lifecycle": "refresh4",
+          "selector": "current_error",
+          "sparse_sha256": "35ca07f2a7ca64ad83c963a981a3dc7316d14c01b6e77286b70df1afd61773a3",
+          "support_sha256": "2f94ffbcc8a8cb9bf24fcfc878e88d4c213d7dc0eb10d4d0b0c75a3b3ac69aa1",
+          "units": [
+            {
+              "head": 0,
+              "qb": 0,
+              "tiles": [
+                1
+              ]
+            },
+            {
+              "head": 0,
+              "qb": 1,
+              "tiles": [
+                3
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 0,
+              "tiles": [
+                3
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 1,
+              "tiles": [
+                3
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "longbench_v2/66f7a96cbb02136c067c3255",
+      "seed": 42,
+      "anchor": {
+        "after_completed_calls": 3,
+        "canvas": 0,
+        "optimistic_U": 16,
+        "prefix": 46346,
+        "reference_cap": false,
+        "reference_remaining": 17,
+        "reference_terminal_step": 20
+      },
+      "branches": [
+        {
+          "drop_count": 36,
+          "fraction": 0.05,
+          "geometry": {
+            "canvas": 0,
+            "cpu_rng": "5feb54a46230d321d888e9b43cf5a57492665f199e4377408d79ee460e36679c",
+            "cuda_rng": "9af46fb07e71e61a77ae16233b6e7274c91568f0f9895a9c2de93eb6c083202c",
+            "gqa_map": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "k": {
+              "dtype": "torch.bfloat16",
+              "sha256": "d51d74727fe4a8fa2d06247bf17a54ee6f61939b0c464325bb97ee2bddf1e4f1",
+              "shape": [
+                46602,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            },
+            "layer": 29,
+            "length": 46602,
+            "page_table_sha256": "238438e6b1f29f74d5705757140f79012623eb059d2429e86914544a77087e7b",
+            "prefix": 46346,
+            "q": {
+              "dtype": "torch.bfloat16",
+              "sha256": "2a95d4052961188e5767a5ba38e34aac258a44256a0672d3d5c25df87d7b5f53",
+              "shape": [
+                256,
+                16,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                8192,
+                512,
+                1
+              ]
+            },
+            "step": 4,
+            "v": {
+              "dtype": "torch.bfloat16",
+              "sha256": "d2af2a0d353c8aad6d499862291609f2accfaf0d8aa01396ab20a3f4da65d018",
+              "shape": [
+                46602,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            }
+          },
+          "identity": "62f30a0983aadb671b98593d112d9643abdb38ce8c3ccf0385bf031019dc2b9a",
+          "labels": [
+            {
+              "branch": "62f30a0983aadb671b98593d112d9643abdb38ce8c3ccf0385bf031019dc2b9a",
+              "fraction": 0.05,
+              "lifecycle": "held4",
+              "selector": "current_error"
+            },
+            {
+              "branch": "62f30a0983aadb671b98593d112d9643abdb38ce8c3ccf0385bf031019dc2b9a",
+              "fraction": 0.05,
+              "lifecycle": "held4",
+              "selector": "mass"
+            },
+            {
+              "branch": "62f30a0983aadb671b98593d112d9643abdb38ce8c3ccf0385bf031019dc2b9a",
+              "fraction": 0.05,
+              "lifecycle": "held4",
+              "selector": "signed_high"
+            }
+          ],
+          "lifecycle": "held4",
+          "selector": "current_error",
+          "sparse_sha256": "88b136fcd44acdd9979e471a60437fe492c2330e60b00c6fafea54e1283585bc",
+          "support_sha256": "2c8bdd65c6d53a42879ff77a378d7bdd99b3d5d2328cebdef06f1ee445bb389f",
+          "units": [
+            {
+              "head": 0,
+              "qb": 0,
+              "tiles": [
+                246,
+                342,
+                429,
+                431,
+                435,
+                450,
+                457,
+                459,
+                464,
+                467,
+                469,
+                472,
+                487,
+                495,
+                505,
+                507,
+                510,
+                560,
+                561,
+                566,
+                569,
+                572,
+                580,
+                584,
+                585,
+                589,
+                597,
+                613,
+                622,
+                627,
+                633,
+                635,
+                637,
+                640,
+                642,
+                717
+              ]
+            },
+            {
+              "head": 0,
+              "qb": 1,
+              "tiles": [
+                15,
+                29,
+                56,
+                98,
+                128,
+                181,
+                211,
+                226,
+                279,
+                291,
+                318,
+                322,
+                325,
+                327,
+                395,
+                434,
+                460,
+                487,
+                505,
+                542,
+                545,
+                552,
+                561,
+                566,
+                569,
+                595,
+                604,
+                609,
+                617,
+                625,
+                664,
+                668,
+                681,
+                703,
+                714,
+                718
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 0,
+              "tiles": [
+                90,
+                92,
+                102,
+                110,
+                114,
+                116,
+                117,
+                130,
+                140,
+                142,
+                150,
+                151,
+                158,
+                165,
+                166,
+                168,
+                173,
+                185,
+                186,
+                188,
+                220,
+                244,
+                266,
+                336,
+                342,
+                344,
+                425,
+                426,
+                428,
+                436,
+                472,
+                485,
+                496,
+                504,
+                506,
+                507
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 1,
+              "tiles": [
+                31,
+                63,
+                70,
+                90,
+                103,
+                141,
+                180,
+                186,
+                194,
+                226,
+                240,
+                251,
+                341,
+                343,
+                371,
+                455,
+                458,
+                466,
+                469,
+                470,
+                486,
+                494,
+                540,
+                552,
+                580,
+                609,
+                611,
+                630,
+                678,
+                679,
+                690,
+                697,
+                704,
+                713,
+                715,
+                717
+              ]
+            }
+          ]
+        },
+        {
+          "drop_count": 36,
+          "fraction": 0.05,
+          "geometry": {
+            "canvas": 0,
+            "cpu_rng": "5feb54a46230d321d888e9b43cf5a57492665f199e4377408d79ee460e36679c",
+            "cuda_rng": "9af46fb07e71e61a77ae16233b6e7274c91568f0f9895a9c2de93eb6c083202c",
+            "gqa_map": [
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              0,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1,
+              1
+            ],
+            "k": {
+              "dtype": "torch.bfloat16",
+              "sha256": "d51d74727fe4a8fa2d06247bf17a54ee6f61939b0c464325bb97ee2bddf1e4f1",
+              "shape": [
+                46602,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            },
+            "layer": 29,
+            "length": 46602,
+            "page_table_sha256": "238438e6b1f29f74d5705757140f79012623eb059d2429e86914544a77087e7b",
+            "prefix": 46346,
+            "q": {
+              "dtype": "torch.bfloat16",
+              "sha256": "2a95d4052961188e5767a5ba38e34aac258a44256a0672d3d5c25df87d7b5f53",
+              "shape": [
+                256,
+                16,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                8192,
+                512,
+                1
+              ]
+            },
+            "step": 4,
+            "v": {
+              "dtype": "torch.bfloat16",
+              "sha256": "d2af2a0d353c8aad6d499862291609f2accfaf0d8aa01396ab20a3f4da65d018",
+              "shape": [
+                46602,
+                2,
+                512
+              ],
+              "storage_offset": 0,
+              "stride": [
+                1024,
+                512,
+                1
+              ]
+            }
+          },
+          "identity": "4e401cc05cf43aa0125e5e35f174ff60c8bc132a82373d655a7a990a526ab905",
+          "labels": [
+            {
+              "branch": "4e401cc05cf43aa0125e5e35f174ff60c8bc132a82373d655a7a990a526ab905",
+              "fraction": 0.05,
+              "lifecycle": "refresh4",
+              "selector": "current_error"
+            }
+          ],
+          "lifecycle": "refresh4",
+          "selector": "current_error",
+          "sparse_sha256": "88b136fcd44acdd9979e471a60437fe492c2330e60b00c6fafea54e1283585bc",
+          "support_sha256": "2c8bdd65c6d53a42879ff77a378d7bdd99b3d5d2328cebdef06f1ee445bb389f",
+          "units": [
+            {
+              "head": 0,
+              "qb": 0,
+              "tiles": [
+                246,
+                342,
+                429,
+                431,
+                435,
+                450,
+                457,
+                459,
+                464,
+                467,
+                469,
+                472,
+                487,
+                495,
+                505,
+                507,
+                510,
+                560,
+                561,
+                566,
+                569,
+                572,
+                580,
+                584,
+                585,
+                589,
+                597,
+                613,
+                622,
+                627,
+                633,
+                635,
+                637,
+                640,
+                642,
+                717
+              ]
+            },
+            {
+              "head": 0,
+              "qb": 1,
+              "tiles": [
+                15,
+                29,
+                56,
+                98,
+                128,
+                181,
+                211,
+                226,
+                279,
+                291,
+                318,
+                322,
+                325,
+                327,
+                395,
+                434,
+                460,
+                487,
+                505,
+                542,
+                545,
+                552,
+                561,
+                566,
+                569,
+                595,
+                604,
+                609,
+                617,
+                625,
+                664,
+                668,
+                681,
+                703,
+                714,
+                718
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 0,
+              "tiles": [
+                90,
+                92,
+                102,
+                110,
+                114,
+                116,
+                117,
+                130,
+                140,
+                142,
+                150,
+                151,
+                158,
+                165,
+                166,
+                168,
+                173,
+                185,
+                186,
+                188,
+                220,
+                244,
+                266,
+                336,
+                342,
+                344,
+                425,
+                426,
+                428,
+                436,
+                472,
+                485,
+                496,
+                504,
+                506,
+                507
+              ]
+            },
+            {
+              "head": 8,
+              "qb": 1,
+              "tiles": [
+                31,
+                63,
+                70,
+                90,
+                103,
+                141,
+                180,
+                186,
+                194,
+                226,
+                240,
+                251,
+                341,
+                343,
+                371,
+                455,
+                458,
+                466,
+                469,
+                470,
+                486,
+                494,
+                540,
+                552,
+                580,
+                609,
+                611,
+                630,
+                678,
+                679,
+                690,
+                697,
+                704,
+                713,
+                715,
+                717
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "frozen_rule": "first feasible seed42 cell per task from pre-treatment d6761435 manifest; CE .05 held4/refresh4",
+  "no_new_support_selection": true
+}
