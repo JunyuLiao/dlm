@@ -94,7 +94,7 @@ def build(q,k,v,prefix,scale,fraction,probe,entropy_weight,protected,base_margin
                 projected_gain=float(((bias*probe[unit]).sum(-1)*entropy_weight[unit]).sum()),mean_tile=float(np.mean(tiles))))
             biases.append(bias);masses.append(mass);work['PV_rectangles']+=drop
         primitive.append(dict(head=h,qb=qb,blocks=blocks,drop_count=drop,candidates=metrics))
-        math_private.append(dict(dense=o,biases=biases,masses=masses))
+        math_private.append(dict(dense=o,biases=biases,masses=masses,prefix_mass=p[:,:blocks*64].sum(-1)))
     feasible=[[i for i,x in enumerate(u['candidates']) if x['feasible']] for u in primitive]
     if not all(feasible):
         return dict(blocks=blocks,drop_count=drop,primitive=primitive,candidates=[],selections={},screen=[],reason='no_four_unit_math_feasible_support',diagnostic_work=dict(work)),dict(),dict(work)
@@ -125,6 +125,7 @@ def build(q,k,v,prefix,scale,fraction,probe,entropy_weight,protected,base_margin
         assert torch.equal(unaffected,reference),'unselected heads changed in diagnostic consumer'
         mb=torch.stack([math_private[u]['biases'][i] for u,i in enumerate(indices)])
         masses=torch.stack([math_private[u]['masses'][i] for u,i in enumerate(indices)])
+        prefix_attention_mass=torch.stack([u['prefix_mass'] for u in math_private])
         measured,bias=bias_metrics(gather_units(sparse),a,mb);mass=float(masses.max());math_error=max(primitive[u]['candidates'][i]['current_error'] for u,i in enumerate(indices))
         projected_units=(bias*probe).sum(-1)
         projected=torch.cat([projected_units[0]+projected_units[2],projected_units[1]+projected_units[3]])
@@ -136,11 +137,13 @@ def build(q,k,v,prefix,scale,fraction,probe,entropy_weight,protected,base_margin
         assert GQA<=.03,'Same-support GQA/consumer total-output error'
         rec=dict(units=units,support_sha256=support_hash(units),proposal_family=label,source_indices=list(indices),**measured,deleted_mass=mass,
             deleted_mass_by_position=masses.cpu().tolist(),math_current_error=math_error,feasible=measured['current_error']<=.1 and mass<=.2 and math_error<=.1,
+            prefix_only_deleted_mass_max=float((masses/prefix_attention_mass.clamp_min(1e-12)).max()),renormalization_max=float((1/(1-masses)).max()),removed_current_canvas_mass=0.,
             projected_stable_crossings=crossings,projected_entropy_weighted_gain=float((projected*ew).sum()),projected_margin_change_by_position=projected.cpu().tolist(),GQA_error=GQA,
             bias_entropy_concentration=float((bias.norm(dim=-1)*entropy_weight).sum()/bias.norm(dim=-1).sum().clamp_min(1e-12)),
             mean_tile=float(np.mean([t for u in units for t in u['tiles']])))
         assert rec['nonfinite']==0
         records.append(rec);vectors.append(bias.flatten());private_candidates.append(dict(sparse=gather_units(sparse).detach().cpu(),actual_bias=bias.detach().cpu(),FP32_bias=mb.detach().cpu(),mass=masses.detach().cpu()))
+        work['candidate_readout_multiply_adds']+=4*128*q.shape[-1]
     feasible=[i for i,r in enumerate(records) if r['feasible']];selection={};screen=[]
     if feasible:
         ce=min(feasible,key=lambda i:(records[i]['current_error'],records[i]['support_sha256']))
@@ -163,5 +166,5 @@ def build(q,k,v,prefix,scale,fraction,probe,entropy_weight,protected,base_margin
         reason=None if feasible else 'no_actual_consumer_feasible_support',diagnostic_work=dict(work),current_QKV_only=True,
         scope=dict(layer=29,heads=[0,8],queryblocks=[0,1],Q=128,KV=64),mass_guard=.2,error_guard=.1,protected_current_canvas_deleted_mass=0.,
         tiny_direction_floor_relative=1e-6,allkept_repeat_exact=True,previous_protected_positions=int(torch.cat([protected[0],protected[1]]).sum()),selection_uses_future=False)
-    private=dict(dense=a.detach().cpu(),FP32_dense=FP32_dense.detach().cpu(),candidates=private_candidates,readout_probe=probe.detach().cpu(),entropy_weight=entropy_weight.detach().cpu(),protected=protected.detach().cpu(),base_margin=base_margin.detach().cpu())
+    private=dict(dense=a.detach().cpu(),FP32_dense=FP32_dense.detach().cpu(),prefix_attention_mass=prefix_attention_mass.detach().cpu(),candidates=private_candidates,readout_probe=probe.detach().cpu(),entropy_weight=entropy_weight.detach().cpu(),protected=protected.detach().cpu(),base_margin=base_margin.detach().cpu())
     return result,private,dict(work)
