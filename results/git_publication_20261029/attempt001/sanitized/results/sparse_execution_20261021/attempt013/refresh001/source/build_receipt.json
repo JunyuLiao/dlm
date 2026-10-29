@@ -1,0 +1,51 @@
+{
+  "command": [
+    "/usr/local/cuda/bin/nvcc",
+    "--use_fast_math",
+    "--prec-div=false",
+    "-std=c++17",
+    "-O3",
+    "-arch=sm_90a",
+    "--shared",
+    "-Xcompiler=-fPIC",
+    "-lineinfo",
+    "--ptxas-options=-v",
+    "-I[private_path_sha256_88e9330fcbe84d57]",
+    "-I/usr/local/cuda/include/cccl",
+    "results/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_bulk3d_sm90.cu",
+    "-o",
+    "results/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_sm90.so",
+    "-L/usr/local/cuda/lib64",
+    "-lcudart",
+    "-lcuda",
+    "-Xlinker=-rpath,/usr/local/cuda/lib64"
+  ],
+  "sources": {
+    "experiments/numerical_qk_reuse/csrc/v2_online_bulk3d_sm90.cu": "9844c27dd132b047d93533455d72992c10014d2b658ed576effbfbc8a207303e",
+    "experiments/numerical_qk_reuse/csrc/v2_online_sm90.h": "24fa6d8a8f5fd781ec715163b0db8b6745889520c5fa5eba49b54f31c3f1755c",
+    "/home/exouser/ljy/dlm/scripts/build_v2_bulk3d.py": "caf631844cf71666aebd29383051184cf51d403247d0cc23caf6f51e261571bf"
+  },
+  "options": {
+    "packed": true,
+    "fold": true,
+    "bulk3d": true,
+    "pv_qk_pipeline": false,
+    "aligned_mask": true,
+    "interior_mask": true,
+    "hoisted_desc": false,
+    "front_v": false,
+    "front_k": false,
+    "qk_asm": true,
+    "static_qk_desc": false,
+    "low_qk_desc": true,
+    "production": false,
+    "tma_all": true,
+    "async_vote": true,
+    "fast_math": true,
+    "unroll": 32,
+    "pz": "bf16x3"
+  },
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "results/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_bulk3d_sm90.cu(315): warning #177-D: variable \"key\" was declared but never referenced\n                  int reg=n*4+r*2+c,key=j*64+n*8+lane%4*2+c;\n                                    ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K,ALIGNED>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false, ALIGNED=true]\" at line 449\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nresults/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_bulk3d_sm90.cu(348): warning #177-D: variable \"reg\" was declared but never referenced\n                  int reg=n*4+r*2+c,key=n*8+lane%4*2+c;\n                      ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K,ALIGNED>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false, ALIGNED=true]\" at line 449\n\nresults/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_bulk3d_sm90.cu(348): warning #177-D: variable \"key\" was declared but never referenced\n                  int reg=n*4+r*2+c,key=n*8+lane%4*2+c;\n                                    ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K,ALIGNED>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false, ALIGNED=true]\" at line 449\n\nresults/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_bulk3d_sm90.cu(342): warning #177-D: variable \"row\" was declared but never referenced\n              int row=warp*16+lane/4+r*8;mx[r]=local_mx[r];float safe_m=isfinite(mx[r])?mx[r]:0.f;\n                  ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K,ALIGNED>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false, ALIGNED=true]\" at line 449\n\nresults/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_bulk3d_sm90.cu(386): warning #177-D: variable \"row\" was declared but never referenced\n                  int row=warp*16+lane/4+r*8;float next=fmaxf(om[r],mx[r]),safe=isfinite(next)?next:0.f;\n                      ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K,ALIGNED>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false, ALIGNED=true]\" at line 449\n\nresults/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_bulk3d_sm90.cu(315): warning #177-D: variable \"key\" was declared but never referenced\n                  int reg=n*4+r*2+c,key=j*64+n*8+lane%4*2+c;\n                                    ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K,ALIGNED>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false, ALIGNED=true]\" at line 449\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nresults/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_bulk3d_sm90.cu(348): warning #177-D: variable \"reg\" was declared but never referenced\n                  int reg=n*4+r*2+c,key=n*8+lane%4*2+c;\n                      ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K,ALIGNED>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false, ALIGNED=true]\" at line 449\n\nresults/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_bulk3d_sm90.cu(348): warning #177-D: variable \"key\" was declared but never referenced\n                  int reg=n*4+r*2+c,key=n*8+lane%4*2+c;\n                                    ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K,ALIGNED>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false, ALIGNED=true]\" at line 449\n\nresults/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_bulk3d_sm90.cu(342): warning #177-D: variable \"row\" was declared but never referenced\n              int row=warp*16+lane/4+r*8;mx[r]=local_mx[r];float safe_m=isfinite(mx[r])?mx[r]:0.f;\n                  ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K,ALIGNED>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false, ALIGNED=true]\" at line 449\n\nresults/sparse_execution_20261021/attempt013/build/e2608aff62630131/v2_online_bulk3d_sm90.cu(386): warning #177-D: variable \"row\" was declared but never referenced\n                  int row=warp*16+lane/4+r*8;float next=fmaxf(om[r],mx[r]),safe=isfinite(next)?next:0.f;\n                      ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K,ALIGNED>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false, ALIGNED=true]\" at line 449\n\nptxas info    : 12 bytes gmem\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 204 registers, used 16 barriers\nptxas info    : Compile time = 164.081 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 203 registers, used 16 barriers\nptxas info    : Compile time = 156.200 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 210 registers, used 16 barriers\nptxas info    : Compile time = 158.883 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 204 registers, used 16 barriers\nptxas info    : Compile time = 157.872 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 203 registers, used 16 barriers\nptxas info    : Compile time = 159.638 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 204 registers, used 16 barriers\nptxas info    : Compile time = 157.442 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 198 registers, used 16 barriers\nptxas info    : Compile time = 159.878 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 199 registers, used 16 barriers\nptxas info    : Compile time = 156.221 ms\n"
+}

@@ -3315,6 +3315,37 @@ Q32 probe001's capture count was inferred, not measured: its timing is weaker
 diagnostic evidence. The script now uses an actual counter; no old receipt was
 modified or retro-certified. The main refresh objective and later full panel
 remain incomplete; no accuracy or native speedup claim.
+## 2026-10-22 — Freeze the first three training-free trajectory tracks for planning
+
+At verified HEAD `d58818b4`, documented a new research plan in
+`results/denoising_dynamics_study_plan_20261022/`. This adds only pure NumPy
+reference identities and seven CPU tests as scaffolding. No native observer or
+selector, GPU evaluation, queue operation, automation, score, trajectory
+result, or latency claim was created.
+
+The first tracks are ResponseGuard (same-budget support selected by response to
+observed query/current-canvas changes with mass, bias, and renormalization
+guards), MarginGuard (decision-direction influence oracle followed by a cheap
+proxy only if its ranking predicts native transitions), and ValidityReuse (a
+within-canvas retained-mass bound for mask lifetime with certificate reset at
+canvas transitions). Preserve expensive diagnostic oracles until their causal
+value is known; optimize their kernels only after numerical and native-state
+gates.
+
+The plan requires D0 native trajectory census, effective-block confidence
+curves, removable-perturbation headroom, matched-current-output/different-
+response forks, renormalization diagnostics, stable/confident token attribution,
+correction/break rates, and native stop-bottleneck strata. It fixes screening
+subsets of ten LongBench-v2, ten AIME26, and ten HumanEval items, with
+independent confirmation subsets and dense FULL/PIECEWISE/all-kept/V31 controls.
+Calls per canvas, physical tile work, output length, selector cost, and clean
+request latency remain separate endpoints. A screen is not a final benchmark
+claim, and nonsignificance is not noninferiority.
+
+The latest online refresh/resident execution results remain systems evidence
+only: qualified numerical/held execution does not establish native task gain,
+and true-online refresh remains slower than dense in the tested synthetic
+shapes. No old refresh campaign is resumed by this decision.
 
 ## 2026-10-21 — Complete broader true-online refresh synthetic screen
 
@@ -3339,7 +3370,6 @@ combined qualification, matched controls, workload calibration and full scored
 panel remain incomplete because the first performance gate still fails. Keep
 old optimized_refresh_benchmarks attempt004 paused/partial; do not claim a
 completed benchmark or relax sampler/budgets. See attempt018/summary.md.
-
 ## 2026-10-22 — Evaluate the current best refresh with qualified native controls
 
 The user explicitly supersedes further refresh tuning and requests the final
@@ -3530,6 +3560,16 @@ LongBench503 V31K8192/V2tau0.021 only, no dense full panel; this explicitly
 supersedes the old stop for a new frozen campaign, never resumes old attempts.
 Official scoring and native audit/clean/identity/capture/JIT gates required.
 
+## 2026-10-23 — Cancel queued LongBench only; continue other scheduled work
+
+User explicitly removes LongBench-v2 from current schedule. At intervention
+AIMEK1920 is complete, MATHK384 is running and RULER128K is prepared. LongBench
+has no qualification or generation. Add its existing launch guard
+PAUSED_USER_REQUEST.json and preserve prepared artifacts. Frozen protocol remains
+unchanged; scope-change receipt records active three-panel order. Continue MATH
+and RULER unchanged. Any report must exclude cancelled LongBench from completion
+and retain the original four-panel attempt as scope-superseded/partial.
+
 ## 2026-10-23 — Complete authorized follow-up after LongBench cancellation
 
 AIME V31K1920=54/90 versus historical K12840/90, paired question-clustered
@@ -3642,6 +3682,28 @@ not active GPU time or clean latency. H100 idle at closeout. Original nine
 LongBench context violations remain blocked by user instruction; full30 and
 broader causal acceleration plan remain partial. Yuhan reuse, Gaussian32/C-gate,
 V31 and V2 identities and prior negative results remain distinct and unchanged.
+
+## Independent review of October24 native causal diagnostic — review only
+
+At verified HEAD 7febadb6, rechecked attempt006 sources, analysis hashes and
+publication inventory, and reran the 19 focused tests CPU-only (all pass).
+The review preserves all prior conclusions/results and launches no GPU work.
+Artifacts: results/denoising_native_causal_review_20261024/review001/.
+
+Revise the causal interpretation: two measured sparse calls identify a held-mask
+schedule, not isolated first-call propagation. Qualify actual native argmax and
+acceptance before treating reconstructed changes as exact. The existing
+correction_to_reference metric is not treatment-induced correction: its identity
+control can be positive. Absolute mean-margin motion hides position-level effects.
+
+Recommend a frozen middle/late first-canvas AA/SA/AS/SS pulse/hold diagnostic with
+diverse equal-work support candidates, signed reference-winner margins,
+current-error and guard-matched sham controls, and bounded scored continuations.
+This gate must demonstrate distinct predictive/selection effects before an exact
+MarginGuard tile oracle or response proxy is promoted. The loose norm reuse bound
+remains parked. No full benchmark or kernel work is recommended, and the nine
+blocked LongBench items remain unchanged. NEXT_PROTOCOL.md is a proposal, not a
+new executed or retrospectively frozen experimental protocol.
 
 ## 2026-10-24 — Stop bounded pulse/hold development at qualification and bank gates
 

@@ -18,7 +18,7 @@ from .query_adaptive import UNIFORM_METHODS
 
 ROOT = Path(os.environ.get(
     "HUMANEVAL_KERNEL_TILE_FULL_ROOT",
-    "/home/exouser/humaneval_kernel_tile_full_v1"))
+    "/home/exouser/ljy/dlm/results/humaneval_kernel_tile_full_v1"))
 SOURCE_ROOT = Path("/home/exouser/ljy/dlm/results/humaneval_query_sensitivity_v2")
 METHODS = tuple(x.strip() for x in os.environ.get(
     "HUMANEVAL_KERNEL_TILE_FULL_METHODS", "dense,gaussian32,C_gate,C_tile_max,C_tile_frac").split(",")

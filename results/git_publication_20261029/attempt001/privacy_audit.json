@@ -1,0 +1,16 @@
+{
+  "boolean_identity_checks": {
+    "input_ids": 2
+  },
+  "count_and_hash_metadata": {
+    "prompt_hash_or_hash_difference_count_fields": 58336,
+    "prompt_token_count_fields": 70725
+  },
+  "instruction_prompt_file_in_snapshot": false,
+  "interpretation": "prompt_tokens contains only integer counts; prompt_sha256 contains hashes or numeric hash-difference counts; input_ids occurs only as boolean equality-check metadata. answer_text in scorer summaries identifies a source module by path and SHA-256, not answer content. Source-file fingerprint maps name private files but contain only hashes. All original private data and local links remain local.",
+  "json_and_jsonl_files": 2732,
+  "jsonl_objects": 69645,
+  "prohibited_payload_findings": [],
+  "scope": "Recursively inspect every JSON/JSONL object in the new snapshot for actual prompts, answers, completion text, token-ID arrays, and credentials. Existing historical commits are outside this audit.",
+  "status": "passed_for_newly_published_result_payloads"
+}

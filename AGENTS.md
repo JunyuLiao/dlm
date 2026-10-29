@@ -133,6 +133,23 @@ This section belongs to the user's `/home/exouser/ljy/dlm` worktree. It is not a
 portable instruction for another agent, collaborator branch, or repository.
 Do not copy it into another agent's `AGENTS.md`.
 
+- **Authorized GPU preemption on megakernel (confirmed 2026-10-20):** the
+  server owner confirms the borrower's agreement to preemption. When GPU
+  resources are needed for this project's experiments, agents may terminate
+  positively identified FastWAM workloads under `/data/mw_finetune/` using
+  `/data/mw_finetune/envs/fastwam/bin/python`, without further permission.
+  The previously identified campaign is `fa_ls_v02_s_c1`; identify current
+  processes from live executable/arguments, project or campaign paths, PID
+  and process start time. Recheck identity before sending signals; historical
+  PIDs are not a kill list. Stop only matching workers and their verified
+  dedicated supervisors. Stop an MPS server only after verifying that all its
+  clients belong to this authorized workload. Use SIGTERM first, allow graceful
+  exit, then SIGKILL only for remaining verified targets if necessary. Record
+  the identities, signals and resource-reclamation receipt under `results/`.
+  Protect groupmates' and unidentified workloads; never target by the shared
+  username, a generic Python/MPS process name, or a historical PID alone. This
+  authorization is specific to this server and workload, not other users or
+  projects.
 - **Canonical results:** write generated results, reports, receipts, and plots
   under `/home/exouser/ljy/dlm/results`, normally referenced as `results/...`
   from the repository root. Do not create a competing result root or use a

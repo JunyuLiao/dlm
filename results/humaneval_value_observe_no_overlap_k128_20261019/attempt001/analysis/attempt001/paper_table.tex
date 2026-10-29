@@ -1,0 +1,23 @@
+% Qualified deterministic compiler; native FULL/PIECEWISE consumers.
+\begin{tabular}{llrrrrrr}
+\toprule
+Mode & Method & Correct & $N$ & $N/C$ & $W$ (s) & Speedup & GLOBAL sparsity \\
+\midrule
+thinking on & control\_before & 157/164 & 57.41 & 10.71 & 1.2980 & 1.000 & 59.87\% \\
+thinking on & value\_v2\_online\_preserve\_mass & 158/164 & 53.32 & 9.74 & 1.2241 & 1.060 & 56.64\% \\
+thinking on & value\_v3a\_singleton\_delete & 154/164 & 58.45 & 10.95 & 1.3444 & 0.965 & 61.82\% \\
+thinking on & full\_swap8 & 155/164 & 55.98 & 10.48 & 2.0190 & 0.643 & 59.73\% \\
+thinking on & residual\_direction\_guard & 155/164 & 56.52 & 10.58 & 1.4222 & 0.913 & 60.89\% \\
+thinking on & dense\_full\_fix51994 & 161/164 & 48.08 & 9.25 & 0.9525 & 1.363 & 0.00\% \\
+thinking on & dense\_piecewise & 161/164 & 48.08 & 9.25 & 0.9597 & 1.352 & 0.00\% \\
+thinking on & allkept\_fa4 & 164/164 & 51.95 & 9.48 & 1.1113 & 1.168 & 0.00\% \\
+thinking off & control\_before & 156/164 & 11.49 & 8.30 & 0.2742 & 1.000 & 29.66\% \\
+thinking off & value\_v2\_online\_preserve\_mass & 160/164 & 10.44 & 7.71 & 0.2527 & 1.085 & 18.35\% \\
+thinking off & value\_v3a\_singleton\_delete & 158/164 & 10.16 & 7.65 & 0.2533 & 1.082 & 14.15\% \\
+thinking off & full\_swap8 & 157/164 & 10.28 & 7.81 & 0.3398 & 0.807 & 15.79\% \\
+thinking off & residual\_direction\_guard & 158/164 & 11.83 & 8.43 & 0.3023 & 0.907 & 32.73\% \\
+thinking off & dense\_full\_fix51994 & 156/164 & 9.47 & 7.06 & 0.2057 & 1.333 & 0.00\% \\
+thinking off & dense\_piecewise & 156/164 & 9.47 & 7.06 & 0.2038 & 1.345 & 0.00\% \\
+thinking off & allkept\_fa4 & 156/164 & 9.96 & 7.42 & 0.2281 & 1.202 & 0.00\% \\
+\bottomrule
+\end{tabular}

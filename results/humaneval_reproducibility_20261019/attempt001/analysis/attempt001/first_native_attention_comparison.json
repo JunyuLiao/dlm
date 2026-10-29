@@ -1,0 +1,797 @@
+{
+  "within_engine_changed_groups": {
+    "dense_on_attention002": 0,
+    "dense_on_attention003": 0
+  },
+  "layers": [
+    {
+      "layer": "model.layers.0.self_attn.attn",
+      "differences": {},
+      "prefill_cache_equal": true,
+      "first_denoise_cache_equal": true
+    },
+    {
+      "layer": "model.layers.1.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 397,
+          "elements": 700416,
+          "max_abs": 0.03125
+        },
+        "key_input": {
+          "different": 157,
+          "elements": 350208,
+          "max_abs": 0.001953125
+        },
+        "value_input": {
+          "different": 233,
+          "elements": 350208,
+          "max_abs": 0.015625
+        },
+        "output": {
+          "different": 6183,
+          "elements": 700416,
+          "max_abs": 0.0625
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.2.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 139020,
+          "elements": 700416,
+          "max_abs": 0.0625
+        },
+        "key_input": {
+          "different": 63139,
+          "elements": 350208,
+          "max_abs": 0.0078125
+        },
+        "value_input": {
+          "different": 83904,
+          "elements": 350208,
+          "max_abs": 0.0625
+        },
+        "output": {
+          "different": 215020,
+          "elements": 700416,
+          "max_abs": 0.125
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.3.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 210280,
+          "elements": 700416,
+          "max_abs": 0.203125
+        },
+        "key_input": {
+          "different": 99806,
+          "elements": 350208,
+          "max_abs": 0.021484375
+        },
+        "value_input": {
+          "different": 117064,
+          "elements": 350208,
+          "max_abs": 0.859375
+        },
+        "output": {
+          "different": 254074,
+          "elements": 700416,
+          "max_abs": 0.8125
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.4.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 234554,
+          "elements": 700416,
+          "max_abs": 0.21875
+        },
+        "key_input": {
+          "different": 107349,
+          "elements": 350208,
+          "max_abs": 0.0146484375
+        },
+        "value_input": {
+          "different": 132125,
+          "elements": 350208,
+          "max_abs": 0.30859375
+        },
+        "output": {
+          "different": 265952,
+          "elements": 700416,
+          "max_abs": 0.3046875
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.5.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 518064,
+          "elements": 1400832,
+          "max_abs": 0.25
+        },
+        "key_input": {
+          "different": 68350,
+          "elements": 175104,
+          "max_abs": 0.0202178955078125
+        },
+        "value_input": {
+          "different": 68178,
+          "elements": 175104,
+          "max_abs": 0.3232421875
+        },
+        "output": {
+          "different": 547241,
+          "elements": 1400832,
+          "max_abs": 0.6171875
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.6.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 267561,
+          "elements": 700416,
+          "max_abs": 0.1875
+        },
+        "key_input": {
+          "different": 126191,
+          "elements": 350208,
+          "max_abs": 0.01953125
+        },
+        "value_input": {
+          "different": 143748,
+          "elements": 350208,
+          "max_abs": 0.1875
+        },
+        "output": {
+          "different": 282196,
+          "elements": 700416,
+          "max_abs": 0.5
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.7.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 270059,
+          "elements": 700416,
+          "max_abs": 0.5
+        },
+        "key_input": {
+          "different": 128662,
+          "elements": 350208,
+          "max_abs": 0.0283203125
+        },
+        "value_input": {
+          "different": 144147,
+          "elements": 350208,
+          "max_abs": 1.84375
+        },
+        "output": {
+          "different": 277920,
+          "elements": 700416,
+          "max_abs": 0.78125
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.8.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 275289,
+          "elements": 700416,
+          "max_abs": 0.4169921875
+        },
+        "key_input": {
+          "different": 131364,
+          "elements": 350208,
+          "max_abs": 0.056640625
+        },
+        "value_input": {
+          "different": 144992,
+          "elements": 350208,
+          "max_abs": 1.203125
+        },
+        "output": {
+          "different": 290752,
+          "elements": 700416,
+          "max_abs": 0.859375
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.9.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 284590,
+          "elements": 700416,
+          "max_abs": 0.46484375
+        },
+        "key_input": {
+          "different": 134334,
+          "elements": 350208,
+          "max_abs": 0.06640625
+        },
+        "value_input": {
+          "different": 149940,
+          "elements": 350208,
+          "max_abs": 0.625
+        },
+        "output": {
+          "different": 299429,
+          "elements": 700416,
+          "max_abs": 1.6171875
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.10.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 292624,
+          "elements": 700416,
+          "max_abs": 0.5
+        },
+        "key_input": {
+          "different": 140437,
+          "elements": 350208,
+          "max_abs": 0.04296875
+        },
+        "value_input": {
+          "different": 154271,
+          "elements": 350208,
+          "max_abs": 0.84375
+        },
+        "output": {
+          "different": 302513,
+          "elements": 700416,
+          "max_abs": 1.46875
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.11.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 599352,
+          "elements": 1400832,
+          "max_abs": 0.5
+        },
+        "key_input": {
+          "different": 77146,
+          "elements": 175104,
+          "max_abs": 0.0272979736328125
+        },
+        "value_input": {
+          "different": 77290,
+          "elements": 175104,
+          "max_abs": 0.455078125
+        },
+        "output": {
+          "different": 601230,
+          "elements": 1400832,
+          "max_abs": 0.586669921875
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.12.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 304582,
+          "elements": 700416,
+          "max_abs": 0.48828125
+        },
+        "key_input": {
+          "different": 149826,
+          "elements": 350208,
+          "max_abs": 0.0615234375
+        },
+        "value_input": {
+          "different": 157664,
+          "elements": 350208,
+          "max_abs": 0.6875
+        },
+        "output": {
+          "different": 312935,
+          "elements": 700416,
+          "max_abs": 3.21875
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.13.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 314550,
+          "elements": 700416,
+          "max_abs": 1.140625
+        },
+        "key_input": {
+          "different": 155795,
+          "elements": 350208,
+          "max_abs": 0.080718994140625
+        },
+        "value_input": {
+          "different": 163064,
+          "elements": 350208,
+          "max_abs": 0.8125
+        },
+        "output": {
+          "different": 320890,
+          "elements": 700416,
+          "max_abs": 1.6875
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.14.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 319697,
+          "elements": 700416,
+          "max_abs": 0.6015625
+        },
+        "key_input": {
+          "different": 159864,
+          "elements": 350208,
+          "max_abs": 0.083984375
+        },
+        "value_input": {
+          "different": 164611,
+          "elements": 350208,
+          "max_abs": 0.9375
+        },
+        "output": {
+          "different": 325918,
+          "elements": 700416,
+          "max_abs": 1.40625
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.15.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 322591,
+          "elements": 700416,
+          "max_abs": 1.1875
+        },
+        "key_input": {
+          "different": 160725,
+          "elements": 350208,
+          "max_abs": 0.123046875
+        },
+        "value_input": {
+          "different": 166214,
+          "elements": 350208,
+          "max_abs": 1.48046875
+        },
+        "output": {
+          "different": 328196,
+          "elements": 700416,
+          "max_abs": 2.609375
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.16.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 323476,
+          "elements": 700416,
+          "max_abs": 1.25
+        },
+        "key_input": {
+          "different": 159267,
+          "elements": 350208,
+          "max_abs": 0.142578125
+        },
+        "value_input": {
+          "different": 167776,
+          "elements": 350208,
+          "max_abs": 1.5625
+        },
+        "output": {
+          "different": 335153,
+          "elements": 700416,
+          "max_abs": 2.09765625
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.17.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 665313,
+          "elements": 1400832,
+          "max_abs": 1.69140625
+        },
+        "key_input": {
+          "different": 83382,
+          "elements": 175104,
+          "max_abs": 0.076171875
+        },
+        "value_input": {
+          "different": 83178,
+          "elements": 175104,
+          "max_abs": 1.21875
+        },
+        "output": {
+          "different": 657879,
+          "elements": 1400832,
+          "max_abs": 4.75
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.18.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 327921,
+          "elements": 700416,
+          "max_abs": 3.96875
+        },
+        "key_input": {
+          "different": 162219,
+          "elements": 350208,
+          "max_abs": 0.294921875
+        },
+        "value_input": {
+          "different": 166946,
+          "elements": 350208,
+          "max_abs": 2.34375
+        },
+        "output": {
+          "different": 335107,
+          "elements": 700416,
+          "max_abs": 7.38671875
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.19.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 329152,
+          "elements": 700416,
+          "max_abs": 4.671875
+        },
+        "key_input": {
+          "different": 165062,
+          "elements": 350208,
+          "max_abs": 0.3984375
+        },
+        "value_input": {
+          "different": 169430,
+          "elements": 350208,
+          "max_abs": 4.0625
+        },
+        "output": {
+          "different": 337054,
+          "elements": 700416,
+          "max_abs": 5.171875
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.20.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 330722,
+          "elements": 700416,
+          "max_abs": 5.1875
+        },
+        "key_input": {
+          "different": 164456,
+          "elements": 350208,
+          "max_abs": 0.5634765625
+        },
+        "value_input": {
+          "different": 168911,
+          "elements": 350208,
+          "max_abs": 2.60546875
+        },
+        "output": {
+          "different": 336429,
+          "elements": 700416,
+          "max_abs": 6.1640625
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.21.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 328589,
+          "elements": 700416,
+          "max_abs": 4.1015625
+        },
+        "key_input": {
+          "different": 164713,
+          "elements": 350208,
+          "max_abs": 0.5078125
+        },
+        "value_input": {
+          "different": 168837,
+          "elements": 350208,
+          "max_abs": 2.6640625
+        },
+        "output": {
+          "different": 338173,
+          "elements": 700416,
+          "max_abs": 11.03125
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.22.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 329244,
+          "elements": 700416,
+          "max_abs": 4.416015625
+        },
+        "key_input": {
+          "different": 163707,
+          "elements": 350208,
+          "max_abs": 0.583984375
+        },
+        "value_input": {
+          "different": 169076,
+          "elements": 350208,
+          "max_abs": 3.52734375
+        },
+        "output": {
+          "different": 338415,
+          "elements": 700416,
+          "max_abs": 9.921875
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.23.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 682649,
+          "elements": 1400832,
+          "max_abs": 5.90625
+        },
+        "key_input": {
+          "different": 85431,
+          "elements": 175104,
+          "max_abs": 0.2490234375
+        },
+        "value_input": {
+          "different": 85502,
+          "elements": 175104,
+          "max_abs": 3.921875
+        },
+        "output": {
+          "different": 676205,
+          "elements": 1400832,
+          "max_abs": 8.5
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.24.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 336061,
+          "elements": 700416,
+          "max_abs": 3.796875
+        },
+        "key_input": {
+          "different": 168829,
+          "elements": 350208,
+          "max_abs": 0.46142578125
+        },
+        "value_input": {
+          "different": 172812,
+          "elements": 350208,
+          "max_abs": 3.4140625
+        },
+        "output": {
+          "different": 343564,
+          "elements": 700416,
+          "max_abs": 13.68359375
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.25.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 338197,
+          "elements": 700416,
+          "max_abs": 2.90625
+        },
+        "key_input": {
+          "different": 169570,
+          "elements": 350208,
+          "max_abs": 0.6865234375
+        },
+        "value_input": {
+          "different": 172562,
+          "elements": 350208,
+          "max_abs": 2.4765625
+        },
+        "output": {
+          "different": 339040,
+          "elements": 700416,
+          "max_abs": 7.9296875
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.26.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 335329,
+          "elements": 700416,
+          "max_abs": 3.171875
+        },
+        "key_input": {
+          "different": 167808,
+          "elements": 350208,
+          "max_abs": 0.4111328125
+        },
+        "value_input": {
+          "different": 172646,
+          "elements": 350208,
+          "max_abs": 3.4375
+        },
+        "output": {
+          "different": 339148,
+          "elements": 700416,
+          "max_abs": 13.3828125
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.27.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 332836,
+          "elements": 700416,
+          "max_abs": 5.515625
+        },
+        "key_input": {
+          "different": 168087,
+          "elements": 350208,
+          "max_abs": 0.521484375
+        },
+        "value_input": {
+          "different": 172339,
+          "elements": 350208,
+          "max_abs": 3.8046875
+        },
+        "output": {
+          "different": 343532,
+          "elements": 700416,
+          "max_abs": 9.37890625
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.28.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 336869,
+          "elements": 700416,
+          "max_abs": 3.9375
+        },
+        "key_input": {
+          "different": 169447,
+          "elements": 350208,
+          "max_abs": 0.419921875
+        },
+        "value_input": {
+          "different": 174468,
+          "elements": 350208,
+          "max_abs": 6.1171875
+        },
+        "output": {
+          "different": 347353,
+          "elements": 700416,
+          "max_abs": 5.640625
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    },
+    {
+      "layer": "model.layers.29.self_attn.attn",
+      "differences": {
+        "q": {
+          "different": 682122,
+          "elements": 1400832,
+          "max_abs": 3.34375
+        },
+        "key_input": {
+          "different": 86526,
+          "elements": 175104,
+          "max_abs": 0.1966552734375
+        },
+        "value_input": {
+          "different": 86630,
+          "elements": 175104,
+          "max_abs": 3.197265625
+        },
+        "output": {
+          "different": 686651,
+          "elements": 1400832,
+          "max_abs": 2.890625
+        }
+      },
+      "prefill_cache_equal": false,
+      "first_denoise_cache_equal": false
+    }
+  ]
+}

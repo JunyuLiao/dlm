@@ -22,8 +22,8 @@ from .query_sensitivity_uniform import UniformThresholdState
 from .query_adaptive import observe
 from .integration import install
 
-ROOT = Path('/home/exouser/aime_query_signal_audit_v1')
-GATED = Path('/home/exouser/aime_query_sensitivity_gated_v2/arms/C_gate_tau2p5')
+ROOT = Path('/home/exouser/ljy/dlm/results/aime_query_signal_audit_v1')
+GATED = Path('/home/exouser/ljy/dlm/results/aime_query_sensitivity_gated_v2/arms/C_gate_tau2p5')
 CONDITIONS = ('dense', 'C_gate', 'T_prior')
 SEEDS = (42, 43, 44)
 

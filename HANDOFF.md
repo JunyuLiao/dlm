@@ -1,3 +1,16 @@
+## 2026-10-29 UTC — User-authorized repository publication preparation
+
+Prepared the pending code, documentation and numeric-result updates from verified
+parent `21a4a1453ca1063181a4c72377f81fba10f27565` for publication on
+`denoising_trajectory_research` at `origin`. The requested next local branch is
+`multi-models`. The inventory and privacy receipt are in
+`results/git_publication_20261029/attempt001/`.
+
+Private machine paths are redacted in separately published copies; original
+result bytes, local symlinks and downloaded literature/runtime caches remain
+local. This operation launches no experiment and changes no scientific gate,
+completion status or historical conclusion.
+
 ## 2026-10-26 UTC — Controlled support reuse complete; no policy advances
 
 Verified evidence checkpoint `3c03a9bffee6e855c02634ab572cf85b8371ca8c`. Read
@@ -265,6 +278,33 @@ freeze a bank with at least4 feasible matched within-unit alternatives. This
 handoff does not launch that work. Yuhan reuse/Gaussian32/C-gate/V31/V2 provenance
 and all earlier negatives remain intact. Existing review edits are preserved.
 
+## Independent review of native causal diagnostics — October24 evidence
+
+Reviewed results commit 7febadb6 and pre-generation spec af0a4a5f on
+denoising_trajectory_research; no GPU work or production selector changes.
+Review: results/denoising_native_causal_review_20261024/review001/REVIEW.md.
+Proposed follow-up: same directory, NEXT_PROTOCOL.md (not executed/frozen).
+Pinned sources and analysis hashes match; independently rerun 19 CPU tests pass
+with CUDA disabled. Existing unrelated document/worktree edits are preserved.
+
+Bounded execution evidence is credible, but the two-call SS-versus-AA comparison
+mixes state propagation and a second direct sparse intervention. Exact reported
+argmax/acceptance counts need qualification: worker topk tie-breaking can differ
+from native argmax, and acceptance is reconstructed on CPU. Existing correction
+labels count reference evolution even for an identical all-kept branch. Fixed-K
+LongBench response/error correlations are .4/.4 at K1450 (no feasible masks) and
+.8/1.0 at K2610 (four feasible masks), not evidence of response selection benefit.
+
+Next recommendation: qualify middle/late first-canvas restoration and native
+measurement, then a diverse equal-work AA/SA/AS/SS pulse/hold diagnostic with
+position-wise decision scores, current-error and guard-matched sham controls.
+Do not immediately build an exhaustive MarginGuard oracle. Park the loose norm
+ValidityReuse bound; keep response as a competing hypothesis. No task accuracy,
+trajectory acceleration, long-context generalization or speed claim is promoted.
+Nine original over-limit LongBench identities remain blocked. Proposed next
+ceiling: two allocated H100-hours and 10000 counted forwards, only after a new
+spec/source freeze and authorization to execute. This review launches nothing.
+
 ## Native causal trajectory diagnostics — 2026-10-24 UTC
 
 Verified pre-generation checkpoint af0a4a5f on denoising_trajectory_research.
@@ -403,6 +443,17 @@ Managed session3983 ended; H100 verified idle,0MiB/0% at closeout. No jobs remai
 No further experiments are scheduled. Paired uncertainty and phase work are in
 the report. Git publication excludes private inputs/generations and unrelated work.
 
+## User cancels only queued LongBench-v2 — 2026-10-23 UTC
+
+The active attempt002 keeps completed AIMEK1920, running MATHK384 and queued
+RULER128K V2 all-step40-50% calibration/evaluation. LongBench-v2 has not started
+and is explicitly cancelled. Its PAUSED_USER_REQUEST.json guard rejects every
+worker before launch; prepared protocol/source/pools remain intact. The original
+frozen four-panel protocol is unchanged; USER_SCOPE_CHANGE_20261023.json records
+the three-panel authorized scope. The original coordinator will stop at the
+LongBench boundary after the other panels finish; never claim original four-panel
+completion. No new LongBench worker or generation is authorized.
+
 ## Output-preserving V2 execution follow-up — 2026-10-23 UTC
 
 Base checkpoint5ff5cd06, new source hashes in results/v2_execution_20261023/source_manifest.json.
@@ -412,7 +463,12 @@ synthetic sparsity complete refresh6517.22->6071.61us;8K424.59->408.84us.
 These are synthetic results, not native speedups. Direct-paged TMA/projection
 passes6bitwise graph cases but is slower; shared routing queues remain negative.
 35CUDA regressions,1cached native integration parity/reset and3policy tests pass.
-Native qualification/full panels are pending. Existing completed panel unchanged.
+Native qualification/full panels run in results/v2_execution_followup_20261023/attempt002.
+AIMEK1920 native audit/clean qualification passes; full90 audit active at10:39UTC.
+Attempt001 failed before generation due missing frozen driver dependency, preserved.
+Attempt002 includes dependency fix by exact hashes; its Git staging approval timed
+out twice. Source/runtime/model pins verified. Managed session3983.
+Existing completed panel unchanged.
 
 New user scope: AIME26 V31K1920 30xseeds42/43/44; MATH500 V31K384 all500x42;
 only RULER128K V2 recalibrates to40-50% all-step GLOBAL physical sparsity on
@@ -603,6 +659,43 @@ failed service are preserved. All old attempts remain partial; the old
 requests to amortize engine loading; same seed/input/native warmup and timing
 rules apply. See attempt005/README.md, service_receipt.json, state.json and
 coordinator.log. Require final_complete.json before final-result claims.
+
+## Training-free denoising-dynamics study plan — 2026-10-22, 14:00 HKT
+
+At verified HEAD `d58818b4`, documented the next research direction without
+implementing or launching GPU work:
+`results/denoising_dynamics_study_plan_20261022/`. The plan incorporates the
+prior trajectory/value reviews, native DiffusionGemma analysis, corrected
+HumanEval evidence, and the latest refresh/resident execution findings. Existing
+uncommitted work and other campaigns remain untouched; no queue was inspected,
+resumed, or modified.
+
+The first three named tracks are `ResponseGuard`, `MarginGuard`, and
+`ValidityReuse`. ResponseGuard selects fixed-budget support using value/key and
+current-state response with mass, output-bias, and canvas-renormalization
+guards. MarginGuard protects downstream decision directions, first as an exact
+diagnostic oracle and only later through a validated cheap proxy. ValidityReuse
+uses a within-canvas retained-mass bound to control mask lifetime and resets the
+certificate at canvas transitions. The plan keeps expensive diagnostics even if
+their first implementation is slow; later Hopper fusion/resident execution may
+hide that cost, but no future kernel is assumed to make a negative result
+positive.
+
+The diagnostic protocol records stable/confident position fractions and dwell,
+retrospective terminal attribution, effective-block confidence curves,
+removable-perturbation headroom, current-canvas renormalization, value/key
+response, correction/break transitions, stopping bottlenecks, and exact native
+state forks. The validation protocol fixes 10-item LongBench-v2, AIME26, and
+HumanEval screening subsets plus independent confirmation subsets. It requires
+matched dense/PIECEWISE/all-kept/V31 controls, native stopping and RNG, physical
+tile accounting, clean selector overhead, and calls per canvas rather than total
+calls alone.
+
+No native observer/selector implementation, protocol freeze, score, trajectory
+result, latency claim, or GPU reservation follows from this plan. Pure NumPy
+reference identities and seven CPU tests were added as low-risk scaffolding;
+native implementation begins only in a new study attempt after the CPU/state-
+reference gates described in the documents.
 
 ## Further refresh optimization — 2026-10-21 UTC
 
@@ -4334,7 +4427,6 @@ conditional factor design, not the full native interaction factorial. Keep
 output length and N/C with N, and use fresh source/runtime-matched controls.
 Clean timing stays paused. No old frozen study, private source, or legacy
 STATE.json pause is changed.
-
 ## Current-best optimized native panel — 2026-10-22 UTC
 
 At verified source checkpoint `06ee4806`, user explicitly requests using the

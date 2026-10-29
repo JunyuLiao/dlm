@@ -259,7 +259,7 @@ def analyze(root, out, conditions):
 
 def main():
     p=argparse.ArgumentParser()
-    p.add_argument('--root',type=Path,default=Path('/home/exouser/aime_query_signal_audit_v1'))
+    p.add_argument('--root',type=Path,default=Path('/home/exouser/ljy/dlm/results/aime_query_signal_audit_v1'))
     p.add_argument('--out',type=Path)
     p.add_argument('--conditions',nargs='+',default=['dense','C_gate','T_prior'])
     a=p.parse_args(); analyze(a.root,a.out or a.root/'analysis',a.conditions)

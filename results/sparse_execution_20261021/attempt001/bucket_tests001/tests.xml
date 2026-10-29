@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="2" time="5.036" timestamp="2026-10-21T14:20:55.899301+00:00" hostname="megakernel"><testcase classname="tests.test_resident_bucket" name="test_padded_bucket_reads_current_values_lengths_and_masks[1]" time="3.198"><failure message="ValueError: full_block_idx with shape torch.Size([1, 4, 2, 32]) cannot be expanded to expected shape (1, 4, 2, 16).">splits = 1
+
+    @pytest.mark.parametrize('splits',[1,2])
+    def test_padded_bucket_reads_current_values_lengths_and_masks(splits):
+     from experiments.numerical_qk_reuse.resident_sparse import GraphPagedBucket,ResidentMask
+     from experiments.numerical_qk_reuse import v27_fa4
+     g=torch.Generator(device='cuda').manual_seed(712);h=4;hk=2;n=137;d=512;capacity=1024
+     cache=torch.empty((capacity//128,128,hk,2*d),device='cuda',dtype=torch.bfloat16);key,value=cache[...,:d],cache[...,d:]
+     table=torch.arange(capacity//128,device='cuda',dtype=torch.int32)
+&gt;    op=GraphPagedBucket(key,value,table,2048,n,h,d**-.5,splits=splits)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_resident_bucket.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/numerical_qk_reuse/resident_sparse.py:134: in __init__
+    for _ in range(3):self.context(self.q,self.mask,scale,out=self.output)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+experiments/numerical_qk_reuse/resident_sparse.py:92: in __call__
+    result,lse=fwd(qs,self.k,self.v,softmax_scale=scale,causal=False,page_table=self.page_table,
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/vllm_flash_attn/cute/interface.py:1095: in _flash_attn_fwd
+    block_sparse_config = normalize_block_sparse_config(
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/vllm_flash_attn/cute/block_sparsity.py:618: in normalize_block_sparse_config
+    normalized_tensors = normalize_block_sparse_tensors(
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/vllm_flash_attn/cute/block_sparsity.py:463: in normalize_block_sparse_tensors
+    full_cnt, full_idx = _check_and_expand_block(
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/vllm_flash_attn/cute/block_sparsity.py:277: in _check_and_expand_block
+    expanded_idx = _expand_sparsity_tensor(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tensor = tensor([[[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 0],...0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 0]]]], device='cuda:0', dtype=torch.int32)
+expected_shape = (1, 4, 2, 16), tensor_name = 'full_block_idx', context = None
+hint = None
+
+    def _expand_sparsity_tensor(
+        tensor: torch.Tensor,
+        expected_shape: Tuple[int, ...],
+        tensor_name: str,
+        context: str | None,
+        hint: str | Callable[[], str] | None,
+    ) -&gt; torch.Tensor:
+        """Check if we need to expand the tensor to expected shape, and do so if possible."""
+        needs_expand = tensor.shape != expected_shape
+        if not needs_expand:
+            return tensor
+        can_expand = all(map(lambda cur, tgt: cur == tgt or cur == 1, tensor.shape, expected_shape))
+        if not can_expand:
+            context_clause = f" ({context})" if context else ""
+            resolved_hint = hint() if callable(hint) else hint
+            hint_clause = f" Hint: {resolved_hint}" if resolved_hint else ""
+&gt;           raise ValueError(
+                f"{tensor_name}{context_clause} with shape {tensor.shape} cannot be expanded to expected shape {expected_shape}."
+                f"{hint_clause}"
+            )
+E           ValueError: full_block_idx with shape torch.Size([1, 4, 2, 32]) cannot be expanded to expected shape (1, 4, 2, 16).
+
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/vllm_flash_attn/cute/block_sparsity.py:240: ValueError</failure></testcase><testcase classname="tests.test_resident_bucket" name="test_padded_bucket_reads_current_values_lengths_and_masks[2]" time="0.150"><failure message="ValueError: full_block_idx with shape torch.Size([2, 4, 2, 32]) cannot be expanded to expected shape (2, 4, 2, 16).">splits = 2
+
+    @pytest.mark.parametrize('splits',[1,2])
+    def test_padded_bucket_reads_current_values_lengths_and_masks(splits):
+     from experiments.numerical_qk_reuse.resident_sparse import GraphPagedBucket,ResidentMask
+     from experiments.numerical_qk_reuse import v27_fa4
+     g=torch.Generator(device='cuda').manual_seed(712);h=4;hk=2;n=137;d=512;capacity=1024
+     cache=torch.empty((capacity//128,128,hk,2*d),device='cuda',dtype=torch.bfloat16);key,value=cache[...,:d],cache[...,d:]
+     table=torch.arange(capacity//128,device='cuda',dtype=torch.int32)
+&gt;    op=GraphPagedBucket(key,value,table,2048,n,h,d**-.5,splits=splits)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_resident_bucket.py:13: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/numerical_qk_reuse/resident_sparse.py:134: in __init__
+    for _ in range(3):self.context(self.q,self.mask,scale,out=self.output)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+experiments/numerical_qk_reuse/resident_sparse.py:92: in __call__
+    result,lse=fwd(qs,self.k,self.v,softmax_scale=scale,causal=False,page_table=self.page_table,
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/vllm_flash_attn/cute/interface.py:1095: in _flash_attn_fwd
+    block_sparse_config = normalize_block_sparse_config(
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/vllm_flash_attn/cute/block_sparsity.py:618: in normalize_block_sparse_config
+    normalized_tensors = normalize_block_sparse_tensors(
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/vllm_flash_attn/cute/block_sparsity.py:463: in normalize_block_sparse_tensors
+    full_cnt, full_idx = _check_and_expand_block(
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/vllm_flash_attn/cute/block_sparsity.py:277: in _check_and_expand_block
+    expanded_idx = _expand_sparsity_tensor(
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+tensor = tensor([[[[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 0],...0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+           0, 0, 0, 0, 0, 0, 0, 0, 0]]]], device='cuda:0', dtype=torch.int32)
+expected_shape = (2, 4, 2, 16), tensor_name = 'full_block_idx', context = None
+hint = None
+
+    def _expand_sparsity_tensor(
+        tensor: torch.Tensor,
+        expected_shape: Tuple[int, ...],
+        tensor_name: str,
+        context: str | None,
+        hint: str | Callable[[], str] | None,
+    ) -&gt; torch.Tensor:
+        """Check if we need to expand the tensor to expected shape, and do so if possible."""
+        needs_expand = tensor.shape != expected_shape
+        if not needs_expand:
+            return tensor
+        can_expand = all(map(lambda cur, tgt: cur == tgt or cur == 1, tensor.shape, expected_shape))
+        if not can_expand:
+            context_clause = f" ({context})" if context else ""
+            resolved_hint = hint() if callable(hint) else hint
+            hint_clause = f" Hint: {resolved_hint}" if resolved_hint else ""
+&gt;           raise ValueError(
+                f"{tensor_name}{context_clause} with shape {tensor.shape} cannot be expanded to expected shape {expected_shape}."
+                f"{hint_clause}"
+            )
+E           ValueError: full_block_idx with shape torch.Size([2, 4, 2, 32]) cannot be expanded to expected shape (2, 4, 2, 16).
+
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/vllm/vllm_flash_attn/cute/block_sparsity.py:240: ValueError</failure></testcase></testsuite></testsuites>

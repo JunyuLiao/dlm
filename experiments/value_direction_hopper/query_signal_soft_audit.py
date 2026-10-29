@@ -8,7 +8,7 @@ import json
 from pathlib import Path
 import numpy as np
 from .query_signal_audit import FEATURES,load_condition,_ema,row_metrics,mean_valid,write_csv
-ROOT=Path('/home/exouser/aime_query_signal_audit_v1')
+ROOT=Path('/home/exouser/ljy/dlm/results/aime_query_signal_audit_v1')
 
 def run():
     d=load_condition(ROOT,'dense',1); idx={f:i for i,f in enumerate(FEATURES)}

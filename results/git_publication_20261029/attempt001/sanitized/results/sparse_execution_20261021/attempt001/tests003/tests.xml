@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="4" time="2.379" timestamp="2026-10-21T14:11:54.530557+00:00" hostname="megakernel"><testcase classname="tests.test_fused_value_pack" name="test_fused_projection_and_pack_are_original_operands[449]" time="0.680"><failure message="triton.compiler.errors.CompilationError: at 19:4:&#10;        r=tl.load(R+head*D*32+dim[:,None]*32+col[None,:],dim[:,None]&lt;D,0.)&#10;        acc+=tl.dot(x,r,input_precision='tf32x3');norm+=tl.sum(x*x,1)&#10;    norm=tl.sqrt(norm);norm=norm*norm&#10;    tl.store(Z+(head*N+row[:,None])*32+col[None,:],acc,row[:,None]&lt;N)&#10;    tl.store(NORM+head*N+row,norm,row&lt;N)&#10;    hi=acc.to(tl.bfloat16);lo=(acc-hi.to(tl.float32)).to(tl.bfloat16)&#10;    index=(row[:,None]%64)*32+col[None,:];physical=index^(((index&gt;&gt;6)&amp;3)&lt;&lt;3)&#10;    base=(head*JT+row[:,None]//64)*4096&#10;    tl.store(P+base+physical,hi,row[:,None]&lt;N);tl.store(P+base+2048+physical,lo,row[:,None]&lt;N)&#10;    # Final incomplete tile's invalid rows must be initialized for unconditional&#10;    # packed cp.async loads. These values do not enter valid QK probabilities.&#10;    if block==tl.cdiv(N,32)-1:&#10;    ^&#10;AssertionError('initial value for `index` is of type int32[constexpr[32], constexpr[32]], but the then block redefines it as int32[constexpr[64], constexpr[32]]')">nk = 449
+
+    @pytest.mark.parametrize('nk',[449,1024,4096,8192])
+    def test_fused_projection_and_pack_are_original_operands(nk):
+        from experiments.numerical_qk_reuse.fused_value_pack import project
+        from experiments.numerical_qk_reuse.v31_value_projection import refresh
+        from experiments.numerical_qk_reuse.v2_online_warpspec import pack_z
+        from experiments.diffusion_gemma_jl_output_aware.projections import Projections
+        g=torch.Generator(device='cuda').manual_seed(nk);v=torch.randn((1,2,nk,512),device='cuda',dtype=torch.bfloat16,generator=g)
+        matrix=Projections().get(5,2,512,'gaussian',32,1729,v.device);z=torch.empty((1,2,nk,32),device=v.device);norm=torch.empty((1,2,nk),device=v.device);valid=torch.ones_like(norm,dtype=torch.bool)
+        oldz=torch.empty_like(z);oldnorm=torch.empty_like(norm)
+&gt;       ref=refresh(v,matrix,oldz,oldnorm,valid,0);nu,packed=project(v,matrix,z,norm,valid)
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_fused_value_pack.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/numerical_qk_reuse/fused_value_pack.py:40: in project
+    _project[(tr.cdiv(n,32),h)](v,matrix,z,norm,packed,n,d,h,*v.stride()[:3],jt,num_warps=4,enable_fp_fusion=False)
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:370: in &lt;lambda&gt;
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;triton.compiler.compiler.ASTSource object at 0x716db7fbc500&gt;
+target = GPUTarget(backend='cuda', arch=90, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm90', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': &lt;function convert_custom_float8_sm80 at 0x716fc0a6fa60&gt;, 'min_dot_size': &lt;function min_dot_size.&lt;locals&gt;.check_dot_compatibility at 0x716db7fab600&gt;}
+module_map = {'triton.language.extra.libdevice': &lt;module 'triton.language.extra.cuda.libdevice' from '[private_path_sha256_a104b1c1ee14dc5d]'&gt;}
+context = &lt;triton._C.libtriton.ir.context object at 0x716fc0aa99f0&gt;
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+&gt;       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 19:4:
+E               r=tl.load(R+head*D*32+dim[:,None]*32+col[None,:],dim[:,None]&lt;D,0.)
+E               acc+=tl.dot(x,r,input_precision='tf32x3');norm+=tl.sum(x*x,1)
+E           norm=tl.sqrt(norm);norm=norm*norm
+E           tl.store(Z+(head*N+row[:,None])*32+col[None,:],acc,row[:,None]&lt;N)
+E           tl.store(NORM+head*N+row,norm,row&lt;N)
+E           hi=acc.to(tl.bfloat16);lo=(acc-hi.to(tl.float32)).to(tl.bfloat16)
+E           index=(row[:,None]%64)*32+col[None,:];physical=index^(((index&gt;&gt;6)&amp;3)&lt;&lt;3)
+E           base=(head*JT+row[:,None]//64)*4096
+E           tl.store(P+base+physical,hi,row[:,None]&lt;N);tl.store(P+base+2048+physical,lo,row[:,None]&lt;N)
+E           # Final incomplete tile's invalid rows must be initialized for unconditional
+E           # packed cp.async loads. These values do not enter valid QK probabilities.
+E           if block==tl.cdiv(N,32)-1:
+E           ^
+E       AssertionError('initial value for `index` is of type int32[constexpr[32], constexpr[32]], but the then block redefines it as int32[constexpr[64], constexpr[32]]')
+
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError</failure></testcase><testcase classname="tests.test_fused_value_pack" name="test_fused_projection_and_pack_are_original_operands[1024]" time="0.022"><failure message="triton.compiler.errors.CompilationError: at 19:4:&#10;        r=tl.load(R+head*D*32+dim[:,None]*32+col[None,:],dim[:,None]&lt;D,0.)&#10;        acc+=tl.dot(x,r,input_precision='tf32x3');norm+=tl.sum(x*x,1)&#10;    norm=tl.sqrt(norm);norm=norm*norm&#10;    tl.store(Z+(head*N+row[:,None])*32+col[None,:],acc,row[:,None]&lt;N)&#10;    tl.store(NORM+head*N+row,norm,row&lt;N)&#10;    hi=acc.to(tl.bfloat16);lo=(acc-hi.to(tl.float32)).to(tl.bfloat16)&#10;    index=(row[:,None]%64)*32+col[None,:];physical=index^(((index&gt;&gt;6)&amp;3)&lt;&lt;3)&#10;    base=(head*JT+row[:,None]//64)*4096&#10;    tl.store(P+base+physical,hi,row[:,None]&lt;N);tl.store(P+base+2048+physical,lo,row[:,None]&lt;N)&#10;    # Final incomplete tile's invalid rows must be initialized for unconditional&#10;    # packed cp.async loads. These values do not enter valid QK probabilities.&#10;    if block==tl.cdiv(N,32)-1:&#10;    ^&#10;AssertionError('initial value for `index` is of type int32[constexpr[32], constexpr[32]], but the then block redefines it as int32[constexpr[64], constexpr[32]]')">nk = 1024
+
+    @pytest.mark.parametrize('nk',[449,1024,4096,8192])
+    def test_fused_projection_and_pack_are_original_operands(nk):
+        from experiments.numerical_qk_reuse.fused_value_pack import project
+        from experiments.numerical_qk_reuse.v31_value_projection import refresh
+        from experiments.numerical_qk_reuse.v2_online_warpspec import pack_z
+        from experiments.diffusion_gemma_jl_output_aware.projections import Projections
+        g=torch.Generator(device='cuda').manual_seed(nk);v=torch.randn((1,2,nk,512),device='cuda',dtype=torch.bfloat16,generator=g)
+        matrix=Projections().get(5,2,512,'gaussian',32,1729,v.device);z=torch.empty((1,2,nk,32),device=v.device);norm=torch.empty((1,2,nk),device=v.device);valid=torch.ones_like(norm,dtype=torch.bool)
+        oldz=torch.empty_like(z);oldnorm=torch.empty_like(norm)
+&gt;       ref=refresh(v,matrix,oldz,oldnorm,valid,0);nu,packed=project(v,matrix,z,norm,valid)
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_fused_value_pack.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/numerical_qk_reuse/fused_value_pack.py:40: in project
+    _project[(tr.cdiv(n,32),h)](v,matrix,z,norm,packed,n,d,h,*v.stride()[:3],jt,num_warps=4,enable_fp_fusion=False)
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:370: in &lt;lambda&gt;
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;triton.compiler.compiler.ASTSource object at 0x716db450aa20&gt;
+target = GPUTarget(backend='cuda', arch=90, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm90', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': &lt;function convert_custom_float8_sm80 at 0x716fc0a6fa60&gt;, 'min_dot_size': &lt;function min_dot_size.&lt;locals&gt;.check_dot_compatibility at 0x716db7fbbc40&gt;}
+module_map = {'triton.language.extra.libdevice': &lt;module 'triton.language.extra.cuda.libdevice' from '[private_path_sha256_a104b1c1ee14dc5d]'&gt;}
+context = &lt;triton._C.libtriton.ir.context object at 0x716fc0a9da70&gt;
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+&gt;       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 19:4:
+E               r=tl.load(R+head*D*32+dim[:,None]*32+col[None,:],dim[:,None]&lt;D,0.)
+E               acc+=tl.dot(x,r,input_precision='tf32x3');norm+=tl.sum(x*x,1)
+E           norm=tl.sqrt(norm);norm=norm*norm
+E           tl.store(Z+(head*N+row[:,None])*32+col[None,:],acc,row[:,None]&lt;N)
+E           tl.store(NORM+head*N+row,norm,row&lt;N)
+E           hi=acc.to(tl.bfloat16);lo=(acc-hi.to(tl.float32)).to(tl.bfloat16)
+E           index=(row[:,None]%64)*32+col[None,:];physical=index^(((index&gt;&gt;6)&amp;3)&lt;&lt;3)
+E           base=(head*JT+row[:,None]//64)*4096
+E           tl.store(P+base+physical,hi,row[:,None]&lt;N);tl.store(P+base+2048+physical,lo,row[:,None]&lt;N)
+E           # Final incomplete tile's invalid rows must be initialized for unconditional
+E           # packed cp.async loads. These values do not enter valid QK probabilities.
+E           if block==tl.cdiv(N,32)-1:
+E           ^
+E       AssertionError('initial value for `index` is of type int32[constexpr[32], constexpr[32]], but the then block redefines it as int32[constexpr[64], constexpr[32]]')
+
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError</failure></testcase><testcase classname="tests.test_fused_value_pack" name="test_fused_projection_and_pack_are_original_operands[4096]" time="0.020"><failure message="triton.compiler.errors.CompilationError: at 19:4:&#10;        r=tl.load(R+head*D*32+dim[:,None]*32+col[None,:],dim[:,None]&lt;D,0.)&#10;        acc+=tl.dot(x,r,input_precision='tf32x3');norm+=tl.sum(x*x,1)&#10;    norm=tl.sqrt(norm);norm=norm*norm&#10;    tl.store(Z+(head*N+row[:,None])*32+col[None,:],acc,row[:,None]&lt;N)&#10;    tl.store(NORM+head*N+row,norm,row&lt;N)&#10;    hi=acc.to(tl.bfloat16);lo=(acc-hi.to(tl.float32)).to(tl.bfloat16)&#10;    index=(row[:,None]%64)*32+col[None,:];physical=index^(((index&gt;&gt;6)&amp;3)&lt;&lt;3)&#10;    base=(head*JT+row[:,None]//64)*4096&#10;    tl.store(P+base+physical,hi,row[:,None]&lt;N);tl.store(P+base+2048+physical,lo,row[:,None]&lt;N)&#10;    # Final incomplete tile's invalid rows must be initialized for unconditional&#10;    # packed cp.async loads. These values do not enter valid QK probabilities.&#10;    if block==tl.cdiv(N,32)-1:&#10;    ^&#10;AssertionError('initial value for `index` is of type int32[constexpr[32], constexpr[32]], but the then block redefines it as int32[constexpr[64], constexpr[32]]')">nk = 4096
+
+    @pytest.mark.parametrize('nk',[449,1024,4096,8192])
+    def test_fused_projection_and_pack_are_original_operands(nk):
+        from experiments.numerical_qk_reuse.fused_value_pack import project
+        from experiments.numerical_qk_reuse.v31_value_projection import refresh
+        from experiments.numerical_qk_reuse.v2_online_warpspec import pack_z
+        from experiments.diffusion_gemma_jl_output_aware.projections import Projections
+        g=torch.Generator(device='cuda').manual_seed(nk);v=torch.randn((1,2,nk,512),device='cuda',dtype=torch.bfloat16,generator=g)
+        matrix=Projections().get(5,2,512,'gaussian',32,1729,v.device);z=torch.empty((1,2,nk,32),device=v.device);norm=torch.empty((1,2,nk),device=v.device);valid=torch.ones_like(norm,dtype=torch.bool)
+        oldz=torch.empty_like(z);oldnorm=torch.empty_like(norm)
+&gt;       ref=refresh(v,matrix,oldz,oldnorm,valid,0);nu,packed=project(v,matrix,z,norm,valid)
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_fused_value_pack.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/numerical_qk_reuse/fused_value_pack.py:40: in project
+    _project[(tr.cdiv(n,32),h)](v,matrix,z,norm,packed,n,d,h,*v.stride()[:3],jt,num_warps=4,enable_fp_fusion=False)
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:370: in &lt;lambda&gt;
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;triton.compiler.compiler.ASTSource object at 0x716db4533650&gt;
+target = GPUTarget(backend='cuda', arch=90, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm90', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': &lt;function convert_custom_float8_sm80 at 0x716fc0a6fa60&gt;, 'min_dot_size': &lt;function min_dot_size.&lt;locals&gt;.check_dot_compatibility at 0x716db7ff8ae0&gt;}
+module_map = {'triton.language.extra.libdevice': &lt;module 'triton.language.extra.cuda.libdevice' from '[private_path_sha256_a104b1c1ee14dc5d]'&gt;}
+context = &lt;triton._C.libtriton.ir.context object at 0x716daed3f030&gt;
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+&gt;       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 19:4:
+E               r=tl.load(R+head*D*32+dim[:,None]*32+col[None,:],dim[:,None]&lt;D,0.)
+E               acc+=tl.dot(x,r,input_precision='tf32x3');norm+=tl.sum(x*x,1)
+E           norm=tl.sqrt(norm);norm=norm*norm
+E           tl.store(Z+(head*N+row[:,None])*32+col[None,:],acc,row[:,None]&lt;N)
+E           tl.store(NORM+head*N+row,norm,row&lt;N)
+E           hi=acc.to(tl.bfloat16);lo=(acc-hi.to(tl.float32)).to(tl.bfloat16)
+E           index=(row[:,None]%64)*32+col[None,:];physical=index^(((index&gt;&gt;6)&amp;3)&lt;&lt;3)
+E           base=(head*JT+row[:,None]//64)*4096
+E           tl.store(P+base+physical,hi,row[:,None]&lt;N);tl.store(P+base+2048+physical,lo,row[:,None]&lt;N)
+E           # Final incomplete tile's invalid rows must be initialized for unconditional
+E           # packed cp.async loads. These values do not enter valid QK probabilities.
+E           if block==tl.cdiv(N,32)-1:
+E           ^
+E       AssertionError('initial value for `index` is of type int32[constexpr[32], constexpr[32]], but the then block redefines it as int32[constexpr[64], constexpr[32]]')
+
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError</failure></testcase><testcase classname="tests.test_fused_value_pack" name="test_fused_projection_and_pack_are_original_operands[8192]" time="0.018"><failure message="triton.compiler.errors.CompilationError: at 19:4:&#10;        r=tl.load(R+head*D*32+dim[:,None]*32+col[None,:],dim[:,None]&lt;D,0.)&#10;        acc+=tl.dot(x,r,input_precision='tf32x3');norm+=tl.sum(x*x,1)&#10;    norm=tl.sqrt(norm);norm=norm*norm&#10;    tl.store(Z+(head*N+row[:,None])*32+col[None,:],acc,row[:,None]&lt;N)&#10;    tl.store(NORM+head*N+row,norm,row&lt;N)&#10;    hi=acc.to(tl.bfloat16);lo=(acc-hi.to(tl.float32)).to(tl.bfloat16)&#10;    index=(row[:,None]%64)*32+col[None,:];physical=index^(((index&gt;&gt;6)&amp;3)&lt;&lt;3)&#10;    base=(head*JT+row[:,None]//64)*4096&#10;    tl.store(P+base+physical,hi,row[:,None]&lt;N);tl.store(P+base+2048+physical,lo,row[:,None]&lt;N)&#10;    # Final incomplete tile's invalid rows must be initialized for unconditional&#10;    # packed cp.async loads. These values do not enter valid QK probabilities.&#10;    if block==tl.cdiv(N,32)-1:&#10;    ^&#10;AssertionError('initial value for `index` is of type int32[constexpr[32], constexpr[32]], but the then block redefines it as int32[constexpr[64], constexpr[32]]')">nk = 8192
+
+    @pytest.mark.parametrize('nk',[449,1024,4096,8192])
+    def test_fused_projection_and_pack_are_original_operands(nk):
+        from experiments.numerical_qk_reuse.fused_value_pack import project
+        from experiments.numerical_qk_reuse.v31_value_projection import refresh
+        from experiments.numerical_qk_reuse.v2_online_warpspec import pack_z
+        from experiments.diffusion_gemma_jl_output_aware.projections import Projections
+        g=torch.Generator(device='cuda').manual_seed(nk);v=torch.randn((1,2,nk,512),device='cuda',dtype=torch.bfloat16,generator=g)
+        matrix=Projections().get(5,2,512,'gaussian',32,1729,v.device);z=torch.empty((1,2,nk,32),device=v.device);norm=torch.empty((1,2,nk),device=v.device);valid=torch.ones_like(norm,dtype=torch.bool)
+        oldz=torch.empty_like(z);oldnorm=torch.empty_like(norm)
+&gt;       ref=refresh(v,matrix,oldz,oldnorm,valid,0);nu,packed=project(v,matrix,z,norm,valid)
+                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_fused_value_pack.py:14: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+experiments/numerical_qk_reuse/fused_value_pack.py:40: in project
+    _project[(tr.cdiv(n,32),h)](v,matrix,z,norm,packed,n,d,h,*v.stride()[:3],jt,num_warps=4,enable_fp_fusion=False)
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:370: in &lt;lambda&gt;
+    return lambda *args, **kwargs: self.run(grid=grid, warmup=False, *args, **kwargs)
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:739: in run
+    kernel = self._do_compile(key, signature, device, constexprs, options, attrs, warmup)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/runtime/jit.py:884: in _do_compile
+    kernel = self.compile(src, target=target, options=options.__dict__)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/compiler/compiler.py:307: in compile
+    module = src.make_ir(target, options, codegen_fns, module_map, context)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;triton.compiler.compiler.ASTSource object at 0x716db45081a0&gt;
+target = GPUTarget(backend='cuda', arch=90, warp_size=32)
+options = CUDAOptions(num_warps=4, num_ctas=1, num_stages=3, warp_size=32, maxnreg=None, ptx_version=None, ptx_options=None, ir_...ib/libdevice.10.bc'),), debug=False, backend_name='cuda', sanitize_overflow=True, arch='sm90', instrumentation_mode='')
+codegen_fns = {'convert_custom_types': &lt;function convert_custom_float8_sm80 at 0x716fc0a6fa60&gt;, 'min_dot_size': &lt;function min_dot_size.&lt;locals&gt;.check_dot_compatibility at 0x716db7fbbce0&gt;}
+module_map = {'triton.language.extra.libdevice': &lt;module 'triton.language.extra.cuda.libdevice' from '[private_path_sha256_a104b1c1ee14dc5d]'&gt;}
+context = &lt;triton._C.libtriton.ir.context object at 0x716db45d45f0&gt;
+
+    def make_ir(self, target: GPUTarget, options, codegen_fns, module_map, context):
+        from .code_generator import ast_to_ttir
+&gt;       return ast_to_ttir(self.fn, self, context=context, options=options, codegen_fns=codegen_fns,
+                           module_map=module_map)
+E       triton.compiler.errors.CompilationError: at 19:4:
+E               r=tl.load(R+head*D*32+dim[:,None]*32+col[None,:],dim[:,None]&lt;D,0.)
+E               acc+=tl.dot(x,r,input_precision='tf32x3');norm+=tl.sum(x*x,1)
+E           norm=tl.sqrt(norm);norm=norm*norm
+E           tl.store(Z+(head*N+row[:,None])*32+col[None,:],acc,row[:,None]&lt;N)
+E           tl.store(NORM+head*N+row,norm,row&lt;N)
+E           hi=acc.to(tl.bfloat16);lo=(acc-hi.to(tl.float32)).to(tl.bfloat16)
+E           index=(row[:,None]%64)*32+col[None,:];physical=index^(((index&gt;&gt;6)&amp;3)&lt;&lt;3)
+E           base=(head*JT+row[:,None]//64)*4096
+E           tl.store(P+base+physical,hi,row[:,None]&lt;N);tl.store(P+base+2048+physical,lo,row[:,None]&lt;N)
+E           # Final incomplete tile's invalid rows must be initialized for unconditional
+E           # packed cp.async loads. These values do not enter valid QK probabilities.
+E           if block==tl.cdiv(N,32)-1:
+E           ^
+E       AssertionError('initial value for `index` is of type int32[constexpr[32], constexpr[32]], but the then block redefines it as int32[constexpr[64], constexpr[32]]')
+
+../../dyh/v31_env_20261005/lib/python3.12/site-packages/triton/compiler/compiler.py:80: CompilationError</failure></testcase></testsuite></testsuites>

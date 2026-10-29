@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import numpy as np
 
-ROOT=Path('/home/exouser/aime_query_signal_audit_v1')
+ROOT=Path('/home/exouser/ljy/dlm/results/aime_query_signal_audit_v1')
 
 def main(root=ROOT):
     out=root/'analysis'

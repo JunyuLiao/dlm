@@ -1,0 +1,43 @@
+{
+  "command": [
+    "/usr/local/cuda/bin/nvcc",
+    "--use_fast_math",
+    "--prec-div=false",
+    "-std=c++17",
+    "-O3",
+    "-arch=sm_90a",
+    "--shared",
+    "-Xcompiler=-fPIC",
+    "-lineinfo",
+    "--ptxas-options=-v",
+    "-I[private_path_sha256_88e9330fcbe84d57]",
+    "-I/usr/local/cuda/include/cccl",
+    "results/sparse_execution_20261021/attempt002/build/75a817c3aa0ff110/v2_online_pv_qk_pipeline_sm90.cu",
+    "-o",
+    "results/sparse_execution_20261021/attempt002/build/75a817c3aa0ff110/v2_online_sm90.so",
+    "-L/usr/local/cuda/lib64",
+    "-lcudart",
+    "-lcuda",
+    "-Xlinker=-rpath,/usr/local/cuda/lib64"
+  ],
+  "sources": {
+    "experiments/numerical_qk_reuse/csrc/v2_online_pv_qk_pipeline_sm90.cu": "d7440cbe09b831497a22641c179910ac4f26079fb6df445c80c7d7d2b6f04b89",
+    "experiments/numerical_qk_reuse/csrc/v2_online_sm90.h": "24fa6d8a8f5fd781ec715163b0db8b6745889520c5fa5eba49b54f31c3f1755c",
+    "/home/exouser/ljy/dlm/scripts/build_v2_bulk3d.py": "08eea9d566fdd84a4a71903a956aee7c3984c63bc08bc2a38fe86e7a6eb4cd3f"
+  },
+  "options": {
+    "packed": true,
+    "fold": true,
+    "bulk3d": true,
+    "pv_qk_pipeline": true,
+    "production": false,
+    "tma_all": true,
+    "async_vote": true,
+    "fast_math": true,
+    "unroll": 1,
+    "pz": "bf16x3"
+  },
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "results/sparse_execution_20261021/attempt002/build/75a817c3aa0ff110/v2_online_pv_qk_pipeline_sm90.cu(164): warning #177-D: variable \"reg\" was declared but never referenced\n                  int reg=n*4+r*2+c,key=n*8+lane%4*2+c;\n                      ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false]\" at line 273\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nresults/sparse_execution_20261021/attempt002/build/75a817c3aa0ff110/v2_online_pv_qk_pipeline_sm90.cu(164): warning #177-D: variable \"key\" was declared but never referenced\n                  int reg=n*4+r*2+c,key=n*8+lane%4*2+c;\n                                    ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false]\" at line 273\n\nresults/sparse_execution_20261021/attempt002/build/75a817c3aa0ff110/v2_online_pv_qk_pipeline_sm90.cu(158): warning #177-D: variable \"row\" was declared but never referenced\n              int row=warp*16+lane/4+r*8;mx[r]=local_mx[r];float safe_m=isfinite(mx[r])?mx[r]:0.f;\n                  ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false]\" at line 273\n\nresults/sparse_execution_20261021/attempt002/build/75a817c3aa0ff110/v2_online_pv_qk_pipeline_sm90.cu(202): warning #177-D: variable \"row\" was declared but never referenced\n                  int row=warp*16+lane/4+r*8;float next=fmaxf(om[r],mx[r]),safe=isfinite(next)?next:0.f;\n                      ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false]\" at line 273\n\nresults/sparse_execution_20261021/attempt002/build/75a817c3aa0ff110/v2_online_pv_qk_pipeline_sm90.cu(164): warning #177-D: variable \"reg\" was declared but never referenced\n                  int reg=n*4+r*2+c,key=n*8+lane%4*2+c;\n                      ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false]\" at line 273\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nresults/sparse_execution_20261021/attempt002/build/75a817c3aa0ff110/v2_online_pv_qk_pipeline_sm90.cu(164): warning #177-D: variable \"key\" was declared but never referenced\n                  int reg=n*4+r*2+c,key=n*8+lane%4*2+c;\n                                    ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false]\" at line 273\n\nresults/sparse_execution_20261021/attempt002/build/75a817c3aa0ff110/v2_online_pv_qk_pipeline_sm90.cu(158): warning #177-D: variable \"row\" was declared but never referenced\n              int row=warp*16+lane/4+r*8;mx[r]=local_mx[r];float safe_m=isfinite(mx[r])?mx[r]:0.f;\n                  ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false]\" at line 273\n\nresults/sparse_execution_20261021/attempt002/build/75a817c3aa0ff110/v2_online_pv_qk_pipeline_sm90.cu(202): warning #177-D: variable \"row\" was declared but never referenced\n                  int row=warp*16+lane/4+r*8;float next=fmaxf(om[r],mx[r]),safe=isfinite(next)?next:0.f;\n                      ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false]\" at line 273\n\nptxas info    : (C7517) wgmma.wait_group is injected in around line 18772 by compiler to allow use of registers defined by GMMA in function '_ZN11v2_pipeline11partitionedILb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE'\nptxas info    : (C7517) wgmma.wait_group is injected in around line 13833 by compiler to allow use of registers defined by GMMA in function '_ZN11v2_pipeline11partitionedILb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE'\nptxas info    : (C7517) wgmma.wait_group is injected in around line 8865 by compiler to allow use of registers defined by GMMA in function '_ZN11v2_pipeline11partitionedILb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE'\nptxas info    : (C7517) wgmma.wait_group is injected in around line 3916 by compiler to allow use of registers defined by GMMA in function '_ZN11v2_pipeline11partitionedILb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE'\nptxas info    : 12 bytes gmem\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 240 registers, used 16 barriers\nptxas info    : Compile time = 141.759 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 240 registers, used 16 barriers\nptxas info    : Compile time = 136.254 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 240 registers, used 16 barriers\nptxas info    : Compile time = 135.765 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 236 registers, used 16 barriers\nptxas info    : Compile time = 136.759 ms\n"
+}

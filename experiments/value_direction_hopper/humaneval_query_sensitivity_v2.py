@@ -284,7 +284,7 @@ def prepare(root):
     root.mkdir(parents=True, exist_ok=True)
     # Preserve the previously disclosed sample, rather than changing it in
     # response to outcomes. The original preparation contains no generations.
-    old_path = Path("/home/exouser/humaneval_query_sensitivity_v2/manifest.json")
+    old_path = Path("/home/exouser/ljy/dlm/results/humaneval_query_sensitivity_v2/manifest.json")
     manifest_path = root / "manifest.json"
     if not manifest_path.exists():
         if old_path.exists():

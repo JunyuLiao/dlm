@@ -1,0 +1,41 @@
+{
+  "command": [
+    "/usr/local/cuda/bin/nvcc",
+    "--use_fast_math",
+    "--prec-div=false",
+    "-std=c++17",
+    "-O3",
+    "-arch=sm_90a",
+    "--shared",
+    "-Xcompiler=-fPIC",
+    "-lineinfo",
+    "--ptxas-options=-v",
+    "-I[private_path_sha256_88e9330fcbe84d57]",
+    "-I/usr/local/cuda/include/cccl",
+    "results/sparse_execution_20261021/attempt001/build/b13378e7df4166eb/v2_online_unique_packed_sm90.cu",
+    "-o",
+    "results/sparse_execution_20261021/attempt001/build/b13378e7df4166eb/v2_online_sm90.so",
+    "-L/usr/local/cuda/lib64",
+    "-lcudart",
+    "-lcuda",
+    "-Xlinker=-rpath,/usr/local/cuda/lib64"
+  ],
+  "sources": {
+    "experiments/numerical_qk_reuse/csrc/v2_online_unique_packed_sm90.cu": "6fba7b47e028e255756cbaa476049af9af22b6004343caf6085383c0c1216053",
+    "experiments/numerical_qk_reuse/csrc/v2_online_sm90.h": "24fa6d8a8f5fd781ec715163b0db8b6745889520c5fa5eba49b54f31c3f1755c",
+    "/home/exouser/ljy/dlm/scripts/build_v2_unique_packed.py": "0dc536a32dee14becfc00bdc4e9507cb3bee73003ebe3ed42513529c3c7f7bf0"
+  },
+  "options": {
+    "packed": true,
+    "three": true,
+    "unique_packed": true,
+    "production": false,
+    "tma_all": true,
+    "fast_math": true,
+    "unroll": 4,
+    "pz": "bf16x3"
+  },
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "ptxas info    : 12 bytes gmem\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 167 registers, used 3 barriers\nptxas info    : Compile time = 226.412 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 167 registers, used 3 barriers\nptxas info    : Compile time = 223.257 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 167 registers, used 3 barriers\nptxas info    : Compile time = 217.780 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 167 registers, used 3 barriers\nptxas info    : Compile time = 222.744 ms\n"
+}

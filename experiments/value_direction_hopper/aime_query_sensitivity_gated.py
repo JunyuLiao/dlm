@@ -21,8 +21,8 @@ from .experiment import atomic, fingerprint, sha
 from .query_adaptive import State, observe
 
 
-DEFAULT_ROOT = Path('/home/exouser/aime_query_sensitivity_gated_v2')
-PRIOR = Path('/home/exouser/aime_query_sensitivity_uniform_causal_v1')
+DEFAULT_ROOT = Path('/home/exouser/ljy/dlm/results/aime_query_sensitivity_gated_v2')
+PRIOR = Path('/home/exouser/ljy/dlm/results/aime_query_sensitivity_uniform_causal_v1')
 CONTROLS = base.DLMDIR / 'results/query_adaptive_aime_temporal_v14'
 METHODS = ('M_gate', 'M_gate_norm', 'C_gate', 'T_gate')
 TAUS = (1.5, 2.5, 3.5)

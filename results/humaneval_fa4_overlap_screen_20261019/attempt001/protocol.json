@@ -1,0 +1,74 @@
+{
+  "cases": [
+    {
+      "label": "full_swap8_q129_seed42",
+      "raw_path": "/home/exouser/ljy/dlm/results/humaneval_mixed_repro_20261019/attempt013/runs/clean001/attempt001/private/last_global/request023.private.pt",
+      "raw_sha256": "1e2af98de54646f56a500f8ffb2ceb11ebb18e2d1f04de668e85ec8564394ff6",
+      "sampler_index": 100
+    },
+    {
+      "label": "residual_q129_seed42",
+      "raw_path": "/home/exouser/ljy/dlm/results/humaneval_mixed_repro_20261019/attempt013/runs/clean001/attempt001/private/last_global/request024.private.pt",
+      "raw_sha256": "5d1c6e652effa8bef32a854df73651bee288278a04e7334e45027c8f52458241",
+      "sampler_index": 154
+    }
+  ],
+  "engines": [
+    "engine001",
+    "engine002"
+  ],
+  "files_sha256": {
+    "private/controller.py": "228e5d103886c495f882e50839ea8ea8987439da8635eda83b07f8047725ad34",
+    "private/execution/scripts/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "private/execution/scripts/v31_humaneval_last_global_compare.py": "84e8daa9ce7400bbe00216547c8d133b2c2005caf3ed69d2f607083b71482b6f",
+    "private/execution/scripts/v31_humaneval_observe_operand_replay.py": "b69d7c95b653134f176b8d409acee7698e5fe8c7a44ed7bdd298a3ce393f457f",
+    "private/execution/scripts/v31_humaneval_operand_restore.py": "1a5e9a19c90d18e160c2f417a9eb5b42d4425304b447689525cbd6cc35b381d7",
+    "spec.md": "1a6c50f6f0b1ddae838069638ba4dfdbf5218e076e9917ef103893398c145d55"
+  },
+  "interface_sha256": "827fc6a2d4ef8d1cc3ac991d33cab5cbe5a66ec7a82c9636ebf64b61ad780773",
+  "maximum_job_reservation_s": 180,
+  "native_base_worker": "/home/exouser/ljy/dlm/results/humaneval_value_cfgdet_k256_20261019/attempt001/private/execution/scripts/v31_humaneval_cfgdet_base_worker.py",
+  "native_base_worker_sha256": "726126f338e3ec0263c06085593cbcf8a512c6ddf3298a72f5d99ca33163909e",
+  "native_model_forwards": 0,
+  "native_protocol_sha256": "5ca09355f51be57df17eefb5a5c5a6593d9cbcd011b4d00fd46842bb08f7304a",
+  "native_sampler_calls": 0,
+  "overlap_screen": true,
+  "phase": "k256",
+  "phase_allocation_file": "results/humaneval_reproducibility_20261019/attempt001/allocation_addendum002.json",
+  "phase_allocation_sha256": "a2c7ededbeee1c5305e296dbc02fb4a0423216b8e11198ee11dcb99b77f2738a",
+  "phase_cap_s": 19800,
+  "preflight_receipts": [
+    {
+      "receipt": "results/humaneval_operand_restore_preflight_20261019/attempt001/receipt.json",
+      "sha256": "c2618e572443ebf520fd78bef97851d68fe1a5c51ffae38e9fd9f64cec8e0687"
+    },
+    {
+      "receipt": "results/humaneval_last_global_compare_preflight_20261019/attempt003/receipt.json",
+      "sha256": "0b63e2c7b6fe0fdeb867470f3bad72b65a021720888021db911e19f05e2438f9"
+    }
+  ],
+  "prior_operand_replay": {
+    "receipt": "results/humaneval_observe_operand_replay_20261019/attempt002/receipt.json",
+    "sha256": "47fe156e9be5999a8ad99a27f5a65ea69d834ba2df3a8f930aead63dc70725d6"
+  },
+  "repeats": 256,
+  "runtime": {
+    "gpu": "NVIDIA H100 80GB HBM3, GPU-1ef41b0c-39fa-fea6-ec30-392d06c5e0ee, 590.48.01",
+    "host_sha256": "66f6c4a48143633348177f67d61c43161ae04ffc6e746451b40b483cfef70cd9",
+    "packages": {
+      "latex2sympy2-extended": "1.11.0",
+      "math-verify": "0.9.0",
+      "sympy": "1.14.0",
+      "torch": "2.13.0",
+      "vllm": "0.30.0"
+    },
+    "runtime_sources": {
+      "vllm/model_executor/models/diffusion_gemma.py": "748157602927082f5fd95f96bec5ac43b55d1e34a42094f0ab5e5ddc6acb0146",
+      "vllm/vllm_flash_attn/cute/flash_fwd_sm90.py": "692156e78b190853bc1824661f2dc9878f4fe0b749211f754dfdcc7c8b8de8d2",
+      "vllm/vllm_flash_attn/flash_attn_interface.py": "d6fccbb0fe1931c79013f5942199c5c9cbba0eedd7ac5ff037f55db19c38421a"
+    },
+    "torch_cuda": "13.0"
+  },
+  "source_commit": "c7e7c67e29be2afbb5f6a0de594f571297c51bb7",
+  "status": "frozen_before_gpu"
+}

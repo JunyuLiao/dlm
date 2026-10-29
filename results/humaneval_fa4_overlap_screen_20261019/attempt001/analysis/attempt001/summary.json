@@ -1,0 +1,280 @@
+{
+  "engines": {
+    "engine001": {
+      "gpu_reservation_s": 55.95942901284434,
+      "qkv_preserved": true,
+      "unexpected_cuda_captures": 0
+    },
+    "engine002": {
+      "gpu_reservation_s": 50.147154226200655,
+      "qkv_preserved": true,
+      "unexpected_cuda_captures": 0
+    }
+  },
+  "native_accuracy_released": false,
+  "native_generation_calls": 0,
+  "protocol_sha256": "906d41b7bbb6f93895aed80452e256ab8f8ef298b95fd236938aee783619fbbe",
+  "rows": [
+    {
+      "aux_native_matches": 512,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 2252,
+      "variant": "split0_observe_overlap1"
+    },
+    {
+      "aux_native_matches": 512,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 2252,
+      "variant": "split0_observe_overlap0"
+    },
+    {
+      "aux_native_matches": 0,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 2252,
+      "variant": "split0_plain_overlap1"
+    },
+    {
+      "aux_native_matches": 0,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 2252,
+      "variant": "split0_plain_overlap0"
+    },
+    {
+      "aux_native_matches": 512,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 2252,
+      "variant": "split1_observe_overlap1"
+    },
+    {
+      "aux_native_matches": 512,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 2252,
+      "variant": "split1_observe_overlap0"
+    },
+    {
+      "aux_native_matches": 0,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 2252,
+      "variant": "split1_plain_overlap1"
+    },
+    {
+      "aux_native_matches": 0,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 2252,
+      "variant": "split1_plain_overlap0"
+    },
+    {
+      "aux_native_matches": 512,
+      "calls": 512,
+      "changes": 4,
+      "comparisons": 510,
+      "first_changes": [
+        {
+          "changed_tiles": [
+            {
+              "elements": 2322,
+              "head": 5,
+              "query64": 1
+            }
+          ],
+          "delta": {
+            "different_bytes": 2357,
+            "different_elements": 2322,
+            "dtype": "torch.bfloat16",
+            "equal": false,
+            "kind": "tensor",
+            "max_absolute": 0.0625,
+            "nonfinite_differences": 0,
+            "relative_l2": 0.0001879349360145867,
+            "rmse": 0.00013103619388923522,
+            "shape": [
+              1,
+              256,
+              16,
+              512
+            ]
+          },
+          "engine": "engine001",
+          "repeat": 77
+        },
+        {
+          "changed_tiles": [
+            {
+              "elements": 11718,
+              "head": 5,
+              "query64": 3
+            }
+          ],
+          "delta": {
+            "different_bytes": 18878,
+            "different_elements": 11718,
+            "dtype": "torch.bfloat16",
+            "equal": false,
+            "kind": "tensor",
+            "max_absolute": 10.23046875,
+            "nonfinite_differences": 0,
+            "relative_l2": 0.08789749770121934,
+            "rmse": 0.0612858566661689,
+            "shape": [
+              1,
+              256,
+              16,
+              512
+            ]
+          },
+          "engine": "engine002",
+          "repeat": 38
+        }
+      ],
+      "kv_tokens": 3532,
+      "variant": "split0_observe_overlap1"
+    },
+    {
+      "aux_native_matches": 512,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 3532,
+      "variant": "split0_observe_overlap0"
+    },
+    {
+      "aux_native_matches": 0,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 3532,
+      "variant": "split0_plain_overlap1"
+    },
+    {
+      "aux_native_matches": 0,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 3532,
+      "variant": "split0_plain_overlap0"
+    },
+    {
+      "aux_native_matches": 512,
+      "calls": 512,
+      "changes": 4,
+      "comparisons": 510,
+      "first_changes": [
+        {
+          "changed_tiles": [
+            {
+              "elements": 5318,
+              "head": 7,
+              "query64": 0
+            }
+          ],
+          "delta": {
+            "different_bytes": 5402,
+            "different_elements": 5318,
+            "dtype": "torch.bfloat16",
+            "equal": false,
+            "kind": "tensor",
+            "max_absolute": 0.125,
+            "nonfinite_differences": 0,
+            "relative_l2": 0.0005819130906817713,
+            "rmse": 0.00040572870660357806,
+            "shape": [
+              1,
+              256,
+              16,
+              512
+            ]
+          },
+          "engine": "engine001",
+          "repeat": 49
+        },
+        {
+          "changed_tiles": [
+            {
+              "elements": 2502,
+              "head": 5,
+              "query64": 0
+            }
+          ],
+          "delta": {
+            "different_bytes": 2528,
+            "different_elements": 2502,
+            "dtype": "torch.bfloat16",
+            "equal": false,
+            "kind": "tensor",
+            "max_absolute": 0.0625,
+            "nonfinite_differences": 0,
+            "relative_l2": 0.00022591981291043955,
+            "rmse": 0.00015751863114281083,
+            "shape": [
+              1,
+              256,
+              16,
+              512
+            ]
+          },
+          "engine": "engine002",
+          "repeat": 2
+        }
+      ],
+      "kv_tokens": 3532,
+      "variant": "split1_observe_overlap1"
+    },
+    {
+      "aux_native_matches": 512,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 3532,
+      "variant": "split1_observe_overlap0"
+    },
+    {
+      "aux_native_matches": 0,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 3532,
+      "variant": "split1_plain_overlap1"
+    },
+    {
+      "aux_native_matches": 0,
+      "calls": 512,
+      "changes": 0,
+      "comparisons": 510,
+      "first_changes": [],
+      "kv_tokens": 3532,
+      "variant": "split1_plain_overlap0"
+    }
+  ],
+  "screen_receipt_sha256": "30348871400ae5c62e1e9f708e3773205e74e0981ce9b170e2566016fc67fea7",
+  "source_commit": "c7e7c67e29be2afbb5f6a0de594f571297c51bb7",
+  "status": "complete_operator_diagnostic_native_qualification_pending"
+}

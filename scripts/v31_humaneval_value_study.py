@@ -24,7 +24,7 @@ from scripts.v31_humaneval_value_worker import CONTROL, V2, V3A, REFINEMENTS
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT = ROOT / 'results/humaneval_value_k256_20261018/attempt001'
 SPEC = ROOT / 'docs/HUMANEVAL_VALUE_K256_PLAN_20261018.md'
-SOURCE = Path('/home/exouser/humaneval_query_sensitivity_v2/source_data/HumanEval.jsonl.gz')
+SOURCE = Path('/home/exouser/ljy/dlm/results/humaneval_query_sensitivity_v2/source_data/HumanEval.jsonl.gz')
 MODES = ('thinking_on', 'thinking_off')
 CANDIDATES = (V2, V3A, *REFINEMENTS)
 REFERENCES = ('dense_full_fix51994', 'dense_piecewise', 'allkept_fa4')

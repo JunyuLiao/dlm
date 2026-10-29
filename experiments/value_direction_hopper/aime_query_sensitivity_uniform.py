@@ -65,7 +65,7 @@ from .query_adaptive import UNIFORM_METHODS
 
 
 ROOT = Path(os.environ.get(
-    "AIME_OUTPUT_ROOT", "/home/exouser/aime_query_sensitivity_uniform_v1"))
+    "AIME_OUTPUT_ROOT", "/home/exouser/ljy/dlm/results/aime_query_sensitivity_uniform_v1"))
 _method_text = os.environ.get("AIME_UNIFORM_METHODS", "T_prior,T_hybrid,T_run")
 METHODS = tuple(x.strip() for x in _method_text.split(",") if x.strip())
 if not METHODS or any(x not in UNIFORM_METHODS for x in METHODS):

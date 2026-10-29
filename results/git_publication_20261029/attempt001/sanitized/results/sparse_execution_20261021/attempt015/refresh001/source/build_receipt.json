@@ -1,0 +1,49 @@
+{
+  "command": [
+    "/usr/local/cuda/bin/nvcc",
+    "--use_fast_math",
+    "--prec-div=false",
+    "-std=c++17",
+    "-O3",
+    "-arch=sm_90a",
+    "--shared",
+    "-Xcompiler=-fPIC",
+    "-lineinfo",
+    "--ptxas-options=-v",
+    "-I[private_path_sha256_88e9330fcbe84d57]",
+    "-I/usr/local/cuda/include/cccl",
+    "results/sparse_execution_20261021/attempt015/build/5c5b4743e90e9125/v2_online_qreg_queue_sm90.cu",
+    "-o",
+    "results/sparse_execution_20261021/attempt015/build/5c5b4743e90e9125/v2_online_sm90.so",
+    "-L/usr/local/cuda/lib64",
+    "-lcudart",
+    "-lcuda",
+    "-Xlinker=-rpath,/usr/local/cuda/lib64"
+  ],
+  "sources": {
+    "experiments/numerical_qk_reuse/csrc/v2_online_qreg_queue_sm90.cu": "e4ed9d06eb57baf776d35fe17dd447ed037047cd639257385ba8aa5b14b77a9f",
+    "experiments/numerical_qk_reuse/csrc/v2_online_sm90.h": "24fa6d8a8f5fd781ec715163b0db8b6745889520c5fa5eba49b54f31c3f1755c",
+    "/home/exouser/ljy/dlm/scripts/build_v2_unique_packed.py": "bdd6d0673db4b7014efc617bbd8d8a46a68be8f986fd07959237181cd89ec021"
+  },
+  "options": {
+    "packed": true,
+    "three": true,
+    "unique_packed": true,
+    "channel_groups": 1,
+    "kept_queue": false,
+    "register_pv": false,
+    "production": false,
+    "tma_all": true,
+    "async_vote": true,
+    "fast_math": true,
+    "unroll": 32,
+    "pz": "bf16x3",
+    "global_queue": true,
+    "qreg_queue": true,
+    "queue_bytes": 24576,
+    "queue_units_per_qblock": 2
+  },
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "results/sparse_execution_20261021/attempt015/build/5c5b4743e90e9125/v2_online_qreg_queue_sm90.cu(113): warning #177-D: variable \"wg\" was declared but never referenced\n      int t=threadIdx.x,u=t%128,lane=t%32,warp=u/32,wg=t/128;\n                                                    ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false]\" at line 246\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nresults/sparse_execution_20261021/attempt015/build/5c5b4743e90e9125/v2_online_qreg_queue_sm90.cu(113): warning #177-D: variable \"wg\" was declared but never referenced\n      int t=threadIdx.x,u=t%128,lane=t%32,warp=u/32,wg=t/128;\n                                                    ^\n          detected during instantiation of \"cudaError_t v2_pipeline::launch<V,K>(const fmha::v2_online_sm90::Params &, cudaStream_t, const v2_pipeline::TmaMaps &) [with V=false, K=false]\" at line 246\n\nRemark: The warnings can be suppressed with \"-diag-suppress <warning-number>\"\n\nptxas info    : 12 bytes gmem\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    24 bytes stack frame, 24 bytes spill stores, 24 bytes spill loads\nptxas info    : Used 255 registers, used 2 barriers, 24 bytes cumulative stack size\nptxas info    : Compile time = 462.604 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    24 bytes stack frame, 24 bytes spill stores, 24 bytes spill loads\nptxas info    : Used 255 registers, used 2 barriers, 24 bytes cumulative stack size\nptxas info    : Compile time = 442.703 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    24 bytes stack frame, 24 bytes spill stores, 24 bytes spill loads\nptxas info    : Used 255 registers, used 2 barriers, 24 bytes cumulative stack size\nptxas info    : Compile time = 448.459 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    24 bytes stack frame, 24 bytes spill stores, 24 bytes spill loads\nptxas info    : Used 255 registers, used 2 barriers, 24 bytes cumulative stack size\nptxas info    : Compile time = 437.722 ms\n"
+}

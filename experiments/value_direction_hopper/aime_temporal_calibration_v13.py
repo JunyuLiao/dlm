@@ -15,7 +15,7 @@ from . import aime_temporal_sweep as b
 
 KINDS = ('local', 'global')
 PHASES = ('call1', 'call2', 'late')
-OLD = Path('/home/exouser/aime_temporal_v12')
+OLD = Path('/home/exouser/ljy/dlm/results/aime_temporal_v12')
 ROOT = b.DLMDIR / 'results/query_adaptive_aime_temporal_v13'
 BASE_CFG = b._cfg
 

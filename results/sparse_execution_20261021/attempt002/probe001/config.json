@@ -1,0 +1,26 @@
+{
+  "scope": "synthetic only; not native calibration or completed benchmark",
+  "keys": [
+    1024,
+    4096,
+    8192,
+    16384
+  ],
+  "shape": {
+    "q": 256,
+    "h": 16,
+    "hkv": 2,
+    "d": 512
+  },
+  "actual_sparsity_target": 0.5,
+  "qualification_l2_limit": 0.01,
+  "library": "results/sparse_execution_20261021/attempt002/build/8bdc8e8f743e817f/v2_online_sm90.so",
+  "library_sha256": "6d253227472d4a19bd1169532278d4d5698a5e1075c20f9ca1eee3d61be49d02",
+  "sources": {
+    "/home/exouser/ljy/dlm/scripts/v2_q32_unique_probe.py": "e69f16b2baeee09b613958dffc3088235f9756fc5bad7b6a1bb8d207a97b69c6",
+    "experiments/numerical_qk_reuse/csrc/v2_online_q32_unique_sm90.cu": "0dede50841dceac744a663aa1174522004ab762c900c80cd0ffd19658c44515c",
+    "experiments/numerical_qk_reuse/v2_online_sm90.py": "9a2283886ae33116be94eaeb767a77345b5a7d39335ccf5d127335e06126e87d"
+  },
+  "warmup": true,
+  "capture_during_timing": false
+}

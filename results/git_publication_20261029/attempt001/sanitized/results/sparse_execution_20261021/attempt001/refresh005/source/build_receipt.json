@@ -1,0 +1,44 @@
+{
+  "command": [
+    "/usr/local/cuda/bin/nvcc",
+    "--use_fast_math",
+    "--prec-div=false",
+    "-std=c++17",
+    "-O3",
+    "-arch=sm_90a",
+    "--shared",
+    "-Xcompiler=-fPIC",
+    "-lineinfo",
+    "--ptxas-options=-v",
+    "-I[private_path_sha256_88e9330fcbe84d57]",
+    "-I/usr/local/cuda/include/cccl",
+    "results/sparse_execution_20261021/attempt001/build/7e7c346e30dc9b72/v2_online_unique_kept_queue_sm90.cu",
+    "-o",
+    "results/sparse_execution_20261021/attempt001/build/7e7c346e30dc9b72/v2_online_sm90.so",
+    "-L/usr/local/cuda/lib64",
+    "-lcudart",
+    "-lcuda",
+    "-Xlinker=-rpath,/usr/local/cuda/lib64"
+  ],
+  "sources": {
+    "experiments/numerical_qk_reuse/csrc/v2_online_unique_kept_queue_sm90.cu": "a3607c632eb1a18741a02b0acab7a8fa3f6b8d31963c82e0e21b6b02c434067f",
+    "experiments/numerical_qk_reuse/csrc/v2_online_sm90.h": "24fa6d8a8f5fd781ec715163b0db8b6745889520c5fa5eba49b54f31c3f1755c",
+    "/home/exouser/ljy/dlm/scripts/build_v2_unique_packed.py": "0072d9a0c374a4b52eae5858f4d2a3cbc45b869e9a4659bfa137f112f5fcd547"
+  },
+  "options": {
+    "packed": true,
+    "three": true,
+    "unique_packed": true,
+    "channel_groups": 1,
+    "kept_queue": true,
+    "production": false,
+    "tma_all": true,
+    "async_vote": true,
+    "fast_math": true,
+    "unroll": 4,
+    "pz": "bf16x3"
+  },
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "ptxas info    : (C7519) Potential Performance Loss: wgmma.mma_async instructions are serialized due to program dependence on compiler-inserted WG.AR in divergent path in the function '_ZN11v2_pipeline11partitionedILb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' in line 7154\nptxas info    : (C7519) Potential Performance Loss: wgmma.mma_async instructions are serialized due to program dependence on compiler-inserted WG.AR in divergent path in the function '_ZN11v2_pipeline11partitionedILb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' in line 629\nptxas info    : 12 bytes gmem\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 167 registers, used 3 barriers\nptxas info    : Compile time = 223.339 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb1EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 167 registers, used 3 barriers\nptxas info    : Compile time = 219.497 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb1ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 168 registers, used 3 barriers\nptxas info    : Compile time = 208.285 ms\nptxas info    : Compiling entry function '_ZN11v2_pipeline11partitionedILb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE' for 'sm_90a'\nptxas info    : Function properties for _ZN11v2_pipeline11partitionedILb0ELb0EEEvN4fmha14v2_online_sm906ParamsENS_7TmaMapsE\n    0 bytes stack frame, 0 bytes spill stores, 0 bytes spill loads\nptxas info    : Used 168 registers, used 3 barriers\nptxas info    : Compile time = 202.626 ms\n"
+}
