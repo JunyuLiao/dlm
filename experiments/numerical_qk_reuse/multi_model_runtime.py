@@ -10,6 +10,7 @@ import functools
 import hashlib
 import importlib.util
 import inspect
+import math
 from pathlib import Path
 import textwrap
 import types
@@ -59,7 +60,7 @@ class ModelHarness:
         self.in_joint = False
         self.source_changes = {}
 
-    def load(self):
+    def load(self, install=True):
         path = self.root / "private/models" / self.key
         config = AutoConfig.from_pretrained(path, trust_remote_code=True)
         if self.key == "ultrallada":
@@ -74,6 +75,11 @@ class ModelHarness:
         self.model.eval()
         self.tokenizer = AutoTokenizer.from_pretrained(path, trust_remote_code=True)
         self.original_forward = self.model.forward
+        if install:
+            self.install()
+        return self
+
+    def install(self):
         if self.key == "llada22":
             self._install_llada22()
         elif self.key == "trado":
@@ -193,7 +199,14 @@ class ModelHarness:
             self.runtime.begin_forward()
             return original(*args, **kwargs)
         self.model.forward = types.MethodType(forward, self.model)
-        self.sampler = import_file(self.root / "private/source/llada_generate.py", "pinned_llada_sampler")
+        self.sampler = import_file(self.root / "private/source/ultra_llada_generate.py", "pinned_ultra_sampler")
+        head = self.model.model.transformer.ff_out
+        original_head = head.forward
+        def head_forward(m, hidden):
+            # The publisher's greedy sampler only uses the active block's
+            # independent row logits. Prefix/future logits cannot be selected.
+            return original_head(hidden[:, self.runtime.block_start:self.runtime.block_end])
+        head.forward = types.MethodType(head_forward, head)
 
     def _install_trado(self):
         source = inspect.getmodule(type(self.model))
@@ -235,8 +248,13 @@ class ModelHarness:
     def encode(self, text, *, completion=False):
         if self.key == "ultrallada":
             return self.tokenizer(text, add_special_tokens=True).input_ids
-        return self.tokenizer.apply_chat_template([{"role": "user", "content": text}],
-                                                  add_generation_prompt=True, tokenize=True)
+        encoded = self.tokenizer.apply_chat_template([{"role": "user", "content": text}],
+                                                     add_generation_prompt=True, tokenize=True)
+        if hasattr(encoded, "input_ids"):
+            encoded = encoded.input_ids
+        if encoded and isinstance(encoded[0], list):
+            encoded = encoded[0]
+        return list(encoded)
 
     @torch.inference_mode()
     def generate(self, text, cap, seed, *, small=False):
@@ -259,17 +277,25 @@ class ModelHarness:
                 confidence_threshold=.9, stopping_criteria_idx=[self.tokenizer.eos_token_id])
             tokens = output[0, prompt_length:prompt_length + cap].tolist()
         else:
-            # Publisher supports block-at-a-time variable-length generation.
             block = min(64, cap)
-            x = ids
-            for _ in range(math_ceil(cap, block)):
-                self.runtime.block(x.shape[1], x.shape[1] + block)
-                x = self.sampler.generate(self.model, x, steps=block,
-                                         gen_length=block, block_length=block,
-                                         temperature=0., cfg_scale=0., remasking="low_confidence",
-                                         mask_id=126336)
-                if self.tokenizer.eos_token_id in x[0, prompt_length:]:
-                    break
+            extent = math_ceil(cap, block) * block
+            x = torch.full((1, prompt_length + extent), 126336, device="cuda", dtype=torch.long)
+            x[:, :prompt_length] = ids
+            # Keep the full future-mask horizon and publisher's fixed schedule.
+            # Only omit logits on rows whose selection confidence is -inf.
+            for b in range(extent // block):
+                start, end = prompt_length + b * block, prompt_length + (b + 1) * block
+                self.runtime.block(start, end)
+                count = self.sampler.get_num_transfer_tokens(x[:, start:end] == 126336, block)
+                for step in range(block):
+                    logits = self.model(x).logits
+                    x0 = logits.argmax(-1)
+                    prob = torch.nn.functional.softmax(logits, dim=-1)
+                    confidence = prob.gather(-1, x0[..., None]).squeeze(-1)
+                    mask = x[:, start:end] == 126336
+                    confidence = torch.where(mask, confidence, -math.inf)
+                    chosen = torch.topk(confidence[0], k=count[0, step]).indices
+                    x[:, start:end][:, chosen] = x0[:, chosen]
             tokens = x[0, prompt_length:prompt_length + cap].tolist()
         eos = self.tokenizer.eos_token_id
         finished = eos in tokens

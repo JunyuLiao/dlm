@@ -148,8 +148,10 @@ class AttentionRuntime:
         self.counts["eligible_tiles"] += legal_tiles
         if self.arm == "dense_native":
             self.counts["kept_tiles"] += legal_tiles
-            # Active block can see the complete cached prefix and itself.
-            return v27_fa4.dense_plain(q, k, v, scale)
+            # Match the publisher's SDPA consumer on the active legal extent.
+            return torch.nn.functional.scaled_dot_product_attention(
+                q, k, v, is_causal=False, scale=scale,
+                enable_gqa=q.shape[1] != k.shape[1]).transpose(1, 2)
         if self.arm == "allkept_fa4":
             self.counts["kept_tiles"] += legal_tiles
             return v27_fa4.dense(q, k, v, scale)

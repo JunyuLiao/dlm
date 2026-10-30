@@ -72,13 +72,27 @@ def main():
     try:
         if a.model:
             from experiments.numerical_qk_reuse.multi_model_runtime import ModelHarness
-            h = ModelHarness(a.root, a.model).load()
+            h = ModelHarness(a.root, a.model).load(install=False)
+            native = None
+            if a.model == "llada22":
+                ids = torch.tensor([h.encode("What is 2 plus 3? Answer briefly.")], device="cuda")
+                torch.manual_seed(42)
+                native = h.model.generate(inputs=ids, gen_length=32, block_length=32,
+                                          steps=32, threshold=.5, editing_threshold=0.,
+                                          max_post_steps=16, temperature=0., eos_early_stop=True)[0].tolist()
+            h.install()
             rows = []
             for arm in ARMS:
                 h.runtime.arm = arm
                 result = h.generate("What is 2 plus 3? Answer briefly.", 32 if a.model != "trado" else 16, 42)
                 rows.append({"arm": arm, "output_tokens": len(result["tokens"]),
                              "finished": result["finished"], "counts": result["counts"]})
+                if native is not None and arm == "dense_native":
+                    eos = h.tokenizer.eos_token_id
+                    native_trim = native[:native.index(eos) + 1] if eos in native else native
+                    rows[-1]["publisher_output_equal"] = result["tokens"] == native_trim
+                    if not rows[-1]["publisher_output_equal"]:
+                        raise AssertionError("cached native dense differs from publisher sampler")
                 print(json.dumps(rows[-1]), flush=True)
             result = {"status": "synthetic_model_smoke_only", "rows": rows,
                       "source_changes": h.source_changes}
