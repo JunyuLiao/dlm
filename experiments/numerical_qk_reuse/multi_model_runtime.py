@@ -147,6 +147,8 @@ class ModelHarness:
         return module.dense(out.reshape(batch, length, -1)), None, None
 
     def _llada_forward(self, input_ids=None, attention_mask=None, position_ids=None, **kwargs):
+        self.runtime.counts["total_model_forwards"] += 1
+        self.runtime.counts[f"{self.runtime.phase}_model_forwards"] += 1
         if input_ids is None:
             input_ids = kwargs.pop("inputs", None)
         if self.in_joint:
@@ -154,6 +156,9 @@ class ModelHarness:
             ids = input_ids[:, start:end]
             self.runtime.begin_forward()
             self.current_x = input_ids
+            self.runtime.counts["masked_tokens_before_calls"] += int((ids == 156895).sum())
+            if not bool((ids == 156895).any()):
+                self.runtime.counts["fully_unmasked_refinement_calls"] += 1
             self.query_offset = start
             self.store_cache = False
         else:
@@ -244,6 +249,7 @@ class ModelHarness:
         original = self.model.forward
         def forward(m, *args, **kwargs):
             self.runtime.begin_forward()
+            self.runtime.counts["total_model_forwards"] += 1
             return original(*args, **kwargs)
         self.model.forward = types.MethodType(forward, self.model)
         self.sampler = import_file(self.root / "private/source/ultra_llada_generate.py", "pinned_ultra_sampler")
@@ -289,6 +295,8 @@ class ModelHarness:
                 if self.runtime.block_start != start or self.runtime.phase != "denoise":
                     self.runtime.block(start, end)
                 self.runtime.begin_forward()
+            self.runtime.counts["total_model_forwards"] += 1
+            self.runtime.counts[f"{self.runtime.phase}_model_forwards"] += 1
             return original(input_ids, **kwargs)
         self.model.forward = types.MethodType(forward, self.model)
 

@@ -57,6 +57,29 @@ def kernels():
         assert error <= .04, ("block", block, error)
         records.append({"block_size": block, "max_abs_error": error})
     torch.cuda.synchronize()
+    # Independent score/mask oracle, beyond consumer-output parity.
+    from experiments.numerical_qk_reuse.multi_model_attention import budget_map, singleton_scores
+    from experiments.numerical_qk_reuse.v31_value_selectors import full_support, deletion_scores
+    q = torch.randn((1, 4, 37, 128), device="cuda", dtype=torch.bfloat16)
+    k = torch.randn((1, 2, 511, 128), device="cuda", dtype=torch.bfloat16)
+    z = torch.randn((1, 2, 511, 32), device="cuda", dtype=torch.float32)
+    nu = torch.ones((2,), device="cuda")
+    scores = torch.matmul(q[0].float(), k[0].float().repeat_interleave(2, 0).transpose(1, 2)) * 128 ** -.5
+    cpu = statistics_reference(scores.cpu(), z.cpu(), nu.cpu(), 8)
+    gpu = statistics_cuda(q, k, z, nu, 128 ** -.5, 8)
+    mandatory = torch.zeros((4, 8), dtype=torch.bool, device="cuda")
+    mandatory[:, -1] = True
+    for threshold in (.01, .1, .5):
+        expected = online_reference(cpu, threshold, preserve_mass=True, mandatory=mandatory.cpu())[0]
+        actual = online_cuda(gpu, threshold, True, mandatory, torch.zeros_like(mandatory), 0.)[0]
+        assert torch.equal(actual.cpu(), expected), ("V2 oracle", threshold)
+    alpha, contribution, output, g = full_support(cpu)
+    expected_score = deletion_scores(cpu, alpha, g, alpha.sum(1), g.sum(1))
+    expected = budget_map(expected_score, mandatory.cpu(), cpu.valid.any(-1))
+    actual = budget_map(singleton_scores(gpu), mandatory, gpu.valid.any(-1))
+    assert torch.equal(actual.cpu(), expected), "V3a singleton oracle mismatch"
+    records.append({"selector_oracles": "V2 ordered recurrence and V3a singleton",
+                    "thresholds": [.01, .1, .5], "mask_mismatches": 0})
     return records
 
 
