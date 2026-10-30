@@ -63,6 +63,12 @@ def main():
         sources.append({"config_sha256": hashlib.sha256((leaf / "config.json").read_bytes()).hexdigest(),
                         "records_sha256": hashlib.sha256((leaf / "records.jsonl").read_bytes()).hexdigest()})
     summaries = {}
+    expected_panels = {(m, s, arm)
+                       for m in ("llada22", "ultrallada", "trado")
+                       for s in (("aime26", "humaneval") if m == "trado" else ("aime26", "humaneval", "ruler128k"))
+                       for arm in ("dense_native", "allkept_fa4", "mass_topk_reuse_r4", "value_v2_gaussian32_reuse_r4", "value_v3a_singleton_reuse_r4")}
+    if not a.allow_partial and set(tables) != expected_panels:
+        raise ValueError(f"missing complete panels: {sorted(expected_panels - set(tables))}")
     for (model, suite, arm), rows in tables.items():
         keys = [(r["id"], r["seed"]) for r in rows]
         if len(keys) != len(set(keys)):
@@ -88,23 +94,36 @@ def main():
     paired = {}
     rng = np.random.default_rng(738)
     for (model, suite, arm), rows in tables.items():
-        reference = tables.get((model, suite, "mass_topk_reuse_r4"))
-        if not reference or arm == "mass_topk_reuse_r4":
-            continue
-        ref = {(r["id"], r["seed"]): r for r in reference}
-        clusters = collections.defaultdict(list)
-        for r in rows:
-            if (r["id"], r["seed"]) in ref:
-                other = ref[(r["id"], r["seed"])]
-                clusters[r["id"]].append([r["quality"] - other["quality"],
-                                          r["counts"]["denoising_forwards"] - other["counts"]["denoising_forwards"]])
-        matrix = np.array([np.mean(v, axis=0) for v in clusters.values()])
-        boot = matrix[rng.integers(len(matrix), size=(10000, len(matrix)))].mean(1)
-        paired[f"{model}/{suite}/{arm}"] = {"questions": len(matrix),
-            "accuracy_delta": float(matrix[:, 0].mean()),
-            "accuracy_delta_ci95": np.quantile(boot[:, 0], [.025, .975]).tolist(),
-            "calls_delta": float(matrix[:, 1].mean()),
-            "calls_delta_ci95": np.quantile(boot[:, 1], [.025, .975]).tolist()}
+        for ref_arm in ("mass_topk_reuse_r4", "dense_native", "allkept_fa4"):
+            reference = tables.get((model, suite, ref_arm))
+            if not reference or arm == ref_arm:
+                continue
+            ref = {(r["id"], r["seed"]): r for r in reference}
+            clusters = collections.defaultdict(list)
+            wins = losses = 0
+            for r in rows:
+                if (r["id"], r["seed"]) in ref:
+                    other = ref[(r["id"], r["seed"])]
+                    delta = r["quality"] - other["quality"]
+                    wins += delta > 0
+                    losses += delta < 0
+                    rn, rc = r["counts"]["denoising_forwards"], r["counts"]["canvases"]
+                    on, oc = other["counts"]["denoising_forwards"], other["counts"]["canvases"]
+                    clusters[r["id"]].append([delta, rn - on, rc - oc,
+                                              r["output_tokens"] - other["output_tokens"],
+                                              np.log((rn / rc) / (on / oc)), np.log(rn / on)])
+            matrix = np.array([np.mean(v, axis=0) for v in clusters.values()])
+            boot = matrix[rng.integers(len(matrix), size=(10000, len(matrix)))].mean(1)
+            paired[f"{model}/{suite}/{arm}_vs_{ref_arm}"] = {"questions": len(matrix),
+                "accuracy_delta": float(matrix[:, 0].mean()),
+                "accuracy_delta_ci95": np.quantile(boot[:, 0], [.025, .975]).tolist(),
+                "calls_delta": float(matrix[:, 1].mean()),
+                "calls_delta_ci95": np.quantile(boot[:, 1], [.025, .975]).tolist(),
+                "canvases_delta": float(matrix[:, 2].mean()),
+                "output_tokens_delta": float(matrix[:, 3].mean()),
+                "paired_geomean_N_per_C_ratio": float(np.exp(matrix[:, 4].mean())),
+                "paired_geomean_N_ratio": float(np.exp(matrix[:, 5].mean())),
+                "quality_wins": int(wins), "quality_losses": int(losses)}
     for name, data in [("summary.json", summaries), ("paired_vs_v31.json", paired), ("sources.json", sources)]:
         (out / name).write_text(json.dumps(data, indent=2) + "\n")
     (out / "scored_records.jsonl").write_text("".join(json.dumps(r) + "\n" for rows in tables.values() for r in rows))
