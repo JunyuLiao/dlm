@@ -1,0 +1,281 @@
+{
+  "status": "pass",
+  "cases": [
+    {
+      "arm": "dense_native",
+      "q": 4,
+      "kv": 197,
+      "heads": 8,
+      "kv_heads": 2,
+      "max_abs_error": 0.0,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 32,
+        "kept_tiles": 32
+      }
+    },
+    {
+      "arm": "allkept_fa4",
+      "q": 4,
+      "kv": 197,
+      "heads": 8,
+      "kv_heads": 2,
+      "max_abs_error": 0.001953125,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 32,
+        "kept_tiles": 32
+      }
+    },
+    {
+      "arm": "mass_topk_reuse_r4",
+      "q": 4,
+      "kv": 197,
+      "heads": 8,
+      "kv_heads": 2,
+      "max_abs_error": 0.001953125,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 32,
+        "selection_layer_calls": 1,
+        "discovery_qk_pairs": 6304,
+        "kept_tiles": 16
+      }
+    },
+    {
+      "arm": "value_v2_gaussian32_reuse_r4",
+      "q": 4,
+      "kv": 197,
+      "heads": 8,
+      "kv_heads": 2,
+      "max_abs_error": 0.001953125,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 32,
+        "selection_layer_calls": 1,
+        "projected_value_tokens": 394,
+        "discovery_qk_pairs": 6304,
+        "kept_tiles": 32
+      }
+    },
+    {
+      "arm": "value_v3a_singleton_reuse_r4",
+      "q": 4,
+      "kv": 197,
+      "heads": 8,
+      "kv_heads": 2,
+      "max_abs_error": 0.001953125,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 32,
+        "selection_layer_calls": 1,
+        "projected_value_tokens": 394,
+        "discovery_qk_pairs": 6304,
+        "kept_tiles": 16
+      }
+    },
+    {
+      "arm": "dense_native",
+      "q": 32,
+      "kv": 193,
+      "heads": 4,
+      "kv_heads": 1,
+      "max_abs_error": 0.0,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 16,
+        "kept_tiles": 16
+      }
+    },
+    {
+      "arm": "allkept_fa4",
+      "q": 32,
+      "kv": 193,
+      "heads": 4,
+      "kv_heads": 1,
+      "max_abs_error": 0.001953125,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 16,
+        "kept_tiles": 16
+      }
+    },
+    {
+      "arm": "mass_topk_reuse_r4",
+      "q": 32,
+      "kv": 193,
+      "heads": 4,
+      "kv_heads": 1,
+      "max_abs_error": 0.00390625,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 16,
+        "selection_layer_calls": 1,
+        "discovery_qk_pairs": 24704,
+        "kept_tiles": 8
+      }
+    },
+    {
+      "arm": "value_v2_gaussian32_reuse_r4",
+      "q": 32,
+      "kv": 193,
+      "heads": 4,
+      "kv_heads": 1,
+      "max_abs_error": 0.001953125,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 16,
+        "selection_layer_calls": 1,
+        "projected_value_tokens": 193,
+        "discovery_qk_pairs": 24704,
+        "kept_tiles": 16
+      }
+    },
+    {
+      "arm": "value_v3a_singleton_reuse_r4",
+      "q": 32,
+      "kv": 193,
+      "heads": 4,
+      "kv_heads": 1,
+      "max_abs_error": 0.00390625,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 16,
+        "selection_layer_calls": 1,
+        "projected_value_tokens": 193,
+        "discovery_qk_pairs": 24704,
+        "kept_tiles": 8
+      }
+    },
+    {
+      "arm": "dense_native",
+      "q": 129,
+      "kv": 259,
+      "heads": 4,
+      "kv_heads": 4,
+      "max_abs_error": 0.0,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 40,
+        "kept_tiles": 40
+      }
+    },
+    {
+      "arm": "allkept_fa4",
+      "q": 129,
+      "kv": 259,
+      "heads": 4,
+      "kv_heads": 4,
+      "max_abs_error": 0.001953125,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 40,
+        "kept_tiles": 40
+      }
+    },
+    {
+      "arm": "mass_topk_reuse_r4",
+      "q": 129,
+      "kv": 259,
+      "heads": 4,
+      "kv_heads": 4,
+      "max_abs_error": 0.00390625,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 40,
+        "selection_layer_calls": 1,
+        "discovery_qk_pairs": 133644,
+        "kept_tiles": 16
+      }
+    },
+    {
+      "arm": "value_v2_gaussian32_reuse_r4",
+      "q": 129,
+      "kv": 259,
+      "heads": 4,
+      "kv_heads": 4,
+      "max_abs_error": 0.001953125,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 40,
+        "selection_layer_calls": 1,
+        "projected_value_tokens": 1036,
+        "discovery_qk_pairs": 133644,
+        "kept_tiles": 40
+      }
+    },
+    {
+      "arm": "value_v3a_singleton_reuse_r4",
+      "q": 129,
+      "kv": 259,
+      "heads": 4,
+      "kv_heads": 4,
+      "max_abs_error": 0.00390625,
+      "counts": {
+        "canvases": 1,
+        "denoising_forwards": 1,
+        "eligible_tiles": 40,
+        "selection_layer_calls": 1,
+        "projected_value_tokens": 1036,
+        "discovery_qk_pairs": 133644,
+        "kept_tiles": 16
+      }
+    },
+    {
+      "block_size": 4,
+      "max_abs_error": 0.00390625
+    },
+    {
+      "block_size": 32,
+      "max_abs_error": 0.00390625
+    },
+    {
+      "selector_oracles": "V2 ordered recurrence and V3a singleton",
+      "thresholds": [
+        0.01,
+        0.1,
+        0.5
+      ],
+      "mask_mismatches": 0
+    },
+    {
+      "statistics_batch_selector": "mass_topk_reuse_r4",
+      "query_rows": 385,
+      "query_blocks_reference": 1,
+      "query_blocks_candidate": 8,
+      "mask_mismatches": 0,
+      "output_equal": true
+    },
+    {
+      "statistics_batch_selector": "value_v2_gaussian32_reuse_r4",
+      "query_rows": 385,
+      "query_blocks_reference": 1,
+      "query_blocks_candidate": 8,
+      "mask_mismatches": 0,
+      "output_equal": true
+    },
+    {
+      "statistics_batch_selector": "value_v3a_singleton_reuse_r4",
+      "query_rows": 385,
+      "query_blocks_reference": 1,
+      "query_blocks_candidate": 8,
+      "mask_mismatches": 0,
+      "output_equal": true
+    }
+  ],
+  "gpu_worker_seconds": 10.569644451141357
+}

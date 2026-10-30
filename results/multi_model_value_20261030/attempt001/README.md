@@ -6,8 +6,8 @@ campaign without a GPU-hour ceiling, with host GPU monitoring every15minutes.
 Specification: `docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md`.
 Frozen scientific configuration: `protocol.json`. Execution bindings001–004
 record the immutable worker sources; current LLaDA2.2 worker is `224f8f11`.
-Pending optimized coordinator `8c0d14b0` requires kernel gate attempt005 and
-keeps per-model sources fixed. Analysis-only changes do not change running
+Qualified optimized coordinator `8c0d14b0` passed kernel gate attempt005;
+binding006 keeps per-model sources fixed. Analysis-only changes do not change running
 generation. All model revisions and checkpoint/source file
 hashes are in `*_model_identity.json`. Runtime packages and raw generations
 remain private. A separate CPU monitor appends `health/gpu_health.jsonl`.
