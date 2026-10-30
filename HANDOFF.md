@@ -15,7 +15,7 @@ are exactly50%. All-kept FA4 changes denoising calls despite the same answer,
 so retain native and all-kept controls. TraDo attempt008 and UltraLLaDA
 attempt002 also reproduce publisher sampler outputs; all five arms pass
 synthetic smoke. Execution uses immutable private source snapshots and one
-serial GPU worker; the current worker is all-kept LLaDA2.2 AIME shard001.
+serial GPU worker; the current worker is V2 LLaDA2.2 AIME shard004.
 V2 coding calibration attempt003 confirms48.49% at threshold0.8944271909999159.
 The two earlier calibration attempts are retained: their development prompts
 were too short for the target under mandatory KV64 protection. New independent
@@ -61,7 +61,7 @@ starts the all-kept arm. Live check07:26UTC confirms the sole intended worker,
 about32GB,41C. Canonical complete-shard primary requests910 (plus active shard).
 The15-minute monitor's latest scheduled07:17UTC check passed.
 
-CPU finalizer source `9872ab69` is scheduled (PID3688024): wait for40complete
+CPU finalizer source `a9c5c7b9` is scheduled (PID3723724,attempt002): wait for40complete
 panels/5110unique primary requests, audit before extra GPU work, then run the
 six-request-per-model development reuse diagnostic with paired observer-off
 references. Native outputs and forward counts must match exactly; structural
@@ -69,7 +69,21 @@ edits reset held support. Final scoring records task-source fingerprints,
 problem-clustered intervals and explicit seed-output duplication. A second
 coverage/fairness audit must pass before root `final_complete.json` is written.
 It never signals or relaunches primary workers. The agent continues monitoring;
-the campaign is incomplete. Schedule: `finalizer_schedule001.json`.
+the campaign is incomplete. Original schedule: `finalizer_schedule001.json`;
+CPU-only waiting finalizer replacement: `finalizer_handoff002.json`.
+
+At17:17UTC eight primary arm panels are complete. AIME native/all-kept/V31
+score36/29/21of90; N138512/154593/119064; C19813/20767/13271;
+T631678/662063/422252. V31 is50.0002%sparse. V2's first68complete requests
+are75.3832%sparse despite independent calibration51.0154%; threshold remains
+frozen. This panel does not support a matched50%sparsity comparison. Preserve
+the drift in `v2_aime_sparsity_drift_interim001.json`, not a post-outcome retune.
+Analysis `analysis_partial006/` is explicitly partial, with all164HumanEval
+counts unchanged. V3aAIME and subsequent model/workload panels remain queued.
+Health monitor has67receipts through17:17UTC, no driver failures and maximum
+gap900.14seconds. Direct live check17:18UTC passes: one intended worker,42C.
+The replacement waiting finalizer adds actual-target validity flags and per-task
+RULER scores; no primary worker was signaled or source changed.
 
 Publisher runtime compatibility for TraDo and UltraLLaDA is isolated inside
 the campaign private directory; shared environments are unchanged. Qualification

@@ -4085,3 +4085,24 @@ cap status, paired problem-clustered intervals and repeated-seed output counts.
 The first820 HumanEval rescores reproduce all five correct counts after the
 plain-function extraction correction; historical analysis is preserved.
 
+## 2026-10-30 — Disclose V2 AIME calibration drift without benchmark retuning
+
+The first68completed LLaDA2.2 V2 AIME requests measure75.3832%consumer sparsity,
+although independent development calibration confirmed51.0154% at the frozen
+threshold0.17782794100389226. This was detected from work counters. The main
+cohort threshold is not retuned. Keep the original panel and label its matched
+50%sparsity comparison invalid; report its achieved work and accuracy honestly.
+V31's complete90requests measure50.0002%consumer sparsity. Native/all-kept/V31
+score36/29/21of90; this is a complete-arm partial-campaign readout, not an
+all-method or cross-model conclusion. Shorter V31 trajectories accompany lower
+accuracy, not established improved convergence.
+
+Scoring sourcea9c5c7b9 records actual sparse-target validity on summaries and
+paired comparisons and separates complete from partial panels. It also emits
+all13RULER task scores. The waiting CPU finalizer was replaced only after
+verifying its identity, no active children, and incomplete primary coverage.
+Old attempt001 is preserved as superseded; new attempt002 runs the updated
+analysis after all primary requests. No GPU worker was signaled or generation
+source changed. Health monitoring continued with maximum gap900.14seconds and
+zero driver errors across67receipts through17:17UTC.
+
