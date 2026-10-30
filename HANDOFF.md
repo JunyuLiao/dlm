@@ -1,136 +1,91 @@
-## 2026-10-30 UTC — Three-model campaign active; first HumanEval model complete
+## 2026-10-30 UTC — Three-model campaign active; LLaDA2.2 AIME V3a running
 
-Branch `multi-models`; LLaDA2.2 worker checkpoint `224f8f11`; corrected scoring
-checkpoint `1300acfc`; active optimized coordinator checkpoint `8c0d14b0`.
-User approved LLaDA2.2-mini, UltraLLaDA and TraDo-8B-Instruct with no GPU-hour
-restriction and 15-minute GPU health checks until completion. Protocol:
-`docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md`; campaign:
-`results/multi_model_value_20261030/attempt001/`.
+Branch `multi-models`. User approved LLaDA2.2-mini, UltraLLaDA and TraDo with
+no GPU-hour restriction and 15-minute GPU checks until the full experiment is
+complete. Frozen specification: `docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md`.
+Campaign: `results/multi_model_value_20261030/attempt001/`. Planned primary
+coverage is40panels/5110requests. Root `final_complete.json` is absent.
 
-All three immutable model snapshots are downloaded and fingerprinted. D128
-FA4/selector independent CPU-mask/CUDA consumer qualification attempt004 passes;
-initial shape/caller failures remain preserved. LLaDA2.2 synthetic short/long checks
-reproduce publisher dense final outputs; long-context V31/V3a consumer budgets
-are exactly50%. All-kept FA4 changes denoising calls despite the same answer,
-so retain native and all-kept controls. TraDo attempt008 and UltraLLaDA
-attempt002 also reproduce publisher sampler outputs; all five arms pass
-synthetic smoke. Execution uses immutable private source snapshots and one
-serial GPU worker; the current worker is V3a LLaDA2.2 AIME shard001.
-V2 coding calibration attempt003 confirms48.49% at threshold0.8944271909999159.
-The two earlier calibration attempts are retained: their development prompts
-were too short for the target under mandatory KV64 protection. New independent
-specifications have median169tokens versus HumanEval161; no benchmark output
-or score was used. Execution bindings001/002/003 describe source changes.
-LLaDA2.2 HumanEval is complete820primaryrequests, all five arms164each.
-Official scoring: native141, all-kept138, mass83, V2online10, V3a103correct.
-Mass/V2/V3a consumer sparsity49.978/49.216/49.990%; N6029/2331/6941;
-C1285/503/1422; T35900/10317/40227. V3a accuracy exceeds mass on this panel
-but has more calls and remains far below dense. V2 shorter outputs/calls are
-quality loss, not convergence evidence. Full paired records and intervals:
-`analysis_humaneval_llada22_complete002/`; verification passes820cells.
-Corrected scorer commit1300acfc removes an invented channel-name prefix before
-plain-function parsing. All five official correct counts are unchanged after
-rescoring saved generations; old analysis001 is preserved and superseded.
-The campaign-wide marker is absent; no cross-model conclusion yet.
+Current numerical worker source is `224f8f11` for LLaDA2.2. Queue004 uses
+coordinator `8c0d14b0`; V3a AIME shard002 is active. Shard001 completed23requests
+at49.9957%consumer sparsity. All three model checkpoints, runtimes and private
+inputs are pinned. Publisher runtime compatibility is isolated; shared
+installations are unchanged. Private RULER130 inputs per supported tokenizer
+are complete, with thirteen tasks and no truncation. TraDo128K is unsupported.
 
-Current generation source `224f8f11`, queue attempt004. AIME computation-only
-calibration at native32768cap on independent math problems confirms51.0154%
-consumer sparsity at threshold0.17782794100389226 (calibration attempt001).
-The source change only matches future calibration caps; sampler/attention
-remain unchanged. One CPU boundary race caused a redundant mass shard003
-attempt002; keep canonical first complete attempt001. All41output/call/canvas/
-physical counts match the repeat. Exclude the duplicate from primary coverage;
-receipts: `coordinator_boundary_race001.json`, `verification/redundant_repeat001/`.
-No GPUworker was signaled. The current queue source has safe boundary stopping;
-the repaired later source also rechecks completion after idle waits.
+LLaDA2.2 HumanEval is complete:820primaryrequests,164perarm. Official correct
+counts native/all-kept/V31/V2/V3a are141/138/83/10/103. Sparse N6029/2331/6941,
+C1285/503/1422,T35900/10317/40227; consumer sparsity49.978/49.216/49.990%.
+V3a exceeds V31 accuracy here with more calls and remains well below dense.
+V2 shorter outputs/calls accompany quality loss. Paired intervals and corrected
+scoring: `analysis_humaneval_llada22_complete002/`; verification passes820cells.
+Scorer correction1300acfc removes an invented channel name before plain-function
+extraction. All five correct counts are unchanged; older analysis is preserved.
 
-At 04:15UTC AIME dense shard001 completes23requests normally and queue003
-exits at its requested boundary. Kernel qualification attempt005 passes all
-three selectors: batching eight independent Q128 statistics groups gives
-bitwise-identical masks and consumer outputs. Queue004 is active; batching is
-enabled only for UltraLLaDA. LLaDA2.2 keeps worker source `224f8f11` for all primary
-comparisons. Per-model worker-source bindings prevent an optimization handoff
-from changing an already started model's execution source. No GPU-hour cap.
-Qualified source bindings are in `execution_binding006.json`. Live H100 check
-confirms one intended next worker; total canonical completed requests843.
+Four AIME arms are complete,90requests each: native/all-kept/V31/V2 score
+36/29/21/9. Their N138512/154593/119064/38202;
+C19813/20767/13271/3950;T631678/662063/422252/123666. Native has85EOS finishes,
+all-kept86,V31andV2all90. V31 consumer sparsity50.0002%; V2 reaches75.2079%
+despite independent calibration confirmation51.0154% at threshold
+0.17782794100389226. Preserve that drift and frozen threshold: its matched50%
+comparison is invalid. Receipts: `v2_aime_complete_arm001.json` and
+`v2_aime_sparsity_drift_interim001.json`. `analysis_partial006/` predates V2
+completion. No complete AIME all-method or cross-model conclusion is available.
 
-At07:25UTC native-dense LLaDA2.2 AIME completes all90requests,30problems across
-three seeds:85EOS finishes,five cap reaches; N138512,C19813,T631678. No paired
-AIME conclusion is available until other arms finish. Queue004 automatically
-starts the all-kept arm. Live check07:26UTC confirms the sole intended worker,
-about32GB,41C. Canonical complete-shard primary requests910 (plus active shard).
-The15-minute monitor's latest scheduled07:17UTC check passed.
+HumanEval V2 calibration attempt003 confirms48.4928% at0.8944271909999159.
+Two earlier attempts are preserved because short development inputs could not
+reach the target under mandatory tile protections. New independently written
+nonbenchmark specifications have median169tokens versus HumanEval161; no test
+score guided the correction. All calibration/source bindings are preserved.
+One CPU boundary race produced a redundant41-request mass shard003 attempt002;
+canonical first complete attempt001 is retained. All41outputs and work counts
+match the repeat; exclude it from primary coverage. See the boundary-race and
+`verification/redundant_repeat001/` receipts. No GPU worker was signaled.
 
-CPU finalizer source `a9c5c7b9` is scheduled (PID3723724,attempt002): wait for40complete
-panels/5110unique primary requests, audit before extra GPU work, then run the
-six-request-per-model development reuse diagnostic with paired observer-off
-references. Native outputs and forward counts must match exactly; structural
-edits reset held support. Final scoring records task-source fingerprints,
-problem-clustered intervals and explicit seed-output duplication. A second
-coverage/fairness audit must pass before root `final_complete.json` is written.
-It never signals or relaunches primary workers. The agent continues monitoring;
-the campaign is incomplete. Original schedule: `finalizer_schedule001.json`;
-CPU-only waiting finalizer replacement: `finalizer_handoff002.json`.
+D128 consumer/kernel qualification attempt004 passes independent V2/V3a mask
+oracles and dense-consumer references. Attempt005 passes bitwise mask/output
+parity for statistics groups1versus8. Only Ultra uses groups8. Native/all-kept
+controls remain separate because their numerical consumers change trajectories.
+Times are instrumented accounting, not clean latency or speedup evidence.
 
-At17:17UTC eight primary arm panels are complete. AIME native/all-kept/V31
-score36/29/21of90; N138512/154593/119064; C19813/20767/13271;
-T631678/662063/422252. V31 is50.0002%sparse. V2's first68complete requests
-are75.3832%sparse despite independent calibration51.0154%; threshold remains
-frozen. This panel does not support a matched50%sparsity comparison. Preserve
-the drift in `v2_aime_sparsity_drift_interim001.json`, not a post-outcome retune.
-Analysis `analysis_partial006/` is explicitly partial, with all164HumanEval
-counts unchanged. V3aAIME and subsequent model/workload panels remain queued.
-Health monitor has67receipts through17:17UTC, no driver failures and maximum
-gap900.14seconds. Direct live check17:18UTC passes: one intended worker,42C.
-The replacement waiting finalizer adds actual-target validity flags and per-task
-RULER scores; no primary worker was signaled or source changed.
+Before Ultra's first calibration/benchmark, review found native-selection edge
+cases: unresolved MASK predictions in earlier blocks remain eligible, and
+full confidence-vector coordinates preserve torch.topk ties. The corrected
+adapter keeps both while omitting only ineligible row logits. There are zero
+Ultra benchmark records. Six focused CPU tests pass; independent pinned-
+publisher toy comparisons match final outputs and all128pre-forward states for
+leftover masks and tied confidences. Receipt:
+`qualification/ultra_cpu_sampler/attempt001/receipt.json`.
 
-At17:38UTC V2AIME completes90requests:9correct, N38202,C3950,T123666,
-all90EOS finishes,75.2079%consumer sparsity. This is a complete arm at an
-unmatched operating point, not evidence at50%sparsity. Receipt:
-`v2_aime_complete_arm001.json`. V3aAIME starts automatically at its fixed50%
-budget. Direct live GPU check passes: sole intended worker,about32GB,42C.
-The scheduled17:32UTC health check also passes. Nine primary arm panels are
-complete; no overall completion marker is present.
+Corrected uncached Ultra fallback `e9672e29` has attention bytes identical to
+8c0d14b0. Candidate `09cfd911` shares its corrected sampler and adds cached
+held-map tile accounting. Scheduler PID3732877, CPU source `4dd4a2fd`, waits in
+`scheduling/priority_attempt004/`. During the last V3a AIME shard004 it requests
+only a coordinator boundary stop, lets that GPU worker finish normally, then
+requires two-block publisher-model parity and cache counter/output parity at
+`qualification/held_counts/attempt006/receipt.json`. A native-parity failure
+blocks Ultra launch. An optional counter failure after native parity may retain
+the corrected uncached fallback. It never falls back to the older Ultra sampler.
+No optional optimization is enabled yet. Pending order: TraDo/UltraHumanEval,
+TraDoAIME,LLaDA2.2RULER,UltraAIME/RULER. The union remains40panels/5110requests.
+LLaDA2.2 and TraDo numerical sources remain224f8f11and8c0d14b0respectively.
 
-Scheduling CPU source `f5a5760f` is waiting (PID3730598,priority_attempt003). It will
-request a coordinator boundary stop only while the last V3aAIME shard004 is
-active, let that GPU worker finish normally, then run remaining panels in this
-order: TraDo/UltraHumanEval, TraDoAIME, LLaDA2.2RULER, UltraAIME/RULER. The
-union remains exactly40panels/5110requests. Worker sources and scientific
-settings remain fixed. This exercises full short-benchmark adapters before the
-longest full-horizon panels. Receipts: `priority_schedule001.json` and
-`scheduling/priority_attempt001/config.json`. Current worker is unaffected.
-The first waiting scheduler was superseded before reaching its boundary;
-`priority_schedule_handoff002.json` records identity checks and zero children.
-The replacement will qualify cached held-map tile accounting before Ultra's
-first benchmark: exact old/new consumer outputs, masks and counts across fresh,
-held and invalidation cases, then five-arm two-block Ultra generation parity.
-Required gate: `qualification/held_counts/attempt006/receipt.json`. If it fails,
-the original Ultra source is retained. If it passes, only Ultra switches to
-worker source04332cd2; LLaDA2.2 and TraDo keep existing numerical sources.
-The optimization removes redundant count reductions/synchronizations on held
-calls; it does not change a selector or sampler. Five focused CPU checks pass.
-Current scheduling config: `scheduling/priority_attempt003/config.json`.
-Qualification candidate remains04332cd2; the CPU-only source change tolerates
-partial worker-state writes. Monitor PID3730597 uses the same robust reader,
-still900seconds; identity-checked CPU replacements leave the GPU worker intact.
-At18:47UTC its new live receipt passes: sole intended V3a worker,about35GB,42C,
-22of23requests complete in shard001. Receipt:
-`health/cpu_monitoring_handoff003.json`. No optional optimization is enabled yet.
+Finalizer PID3732878, source `4dd4a2fd`, attempt003 waits for full primary
+coverage and an idle GPU, audits fairness, runs six development observer-on/off
+pairs per model, scores officially, audits again, then writes the root marker.
+It imports each model's actual bound numerical source for diagnostics and
+requires identical native outputs/forward counts. Structural edits reset held
+support. Reports include scorer fingerprints, N/C/T, cap status, problem-
+clustered intervals, seed-output duplication, achieved-target validity and
+all13RULER task scores. It never signals or relaunches primary workers.
+See `cpu_supervision_handoff004.json`; prior waiting attempts remain preserved.
 
-Publisher runtime compatibility for TraDo and UltraLLaDA is isolated inside
-the campaign private directory; shared environments are unchanged. Qualification
-failures are retained. Private full130 RULER inputs are complete per tokenizer;
-no truncation or104-item substitution. Short manifests preserve
-AIME30x3 and HumanEval164x1; development math/code inputs are separate.
-
-The CPU monitor is running and writes `health/gpu_health.jsonl` every900s.
-Only one model worker may occupy the H100. Check actual process/GPU state and
-the latest immutable qualification leaf before launch. Continue qualification,
-freeze source bindings, calibrate V2 computation-only, run all planned shards,
-score officially, audit fairness/coverage, then publish a completion marker.
-The older paused/negative DiffusionGemma campaigns remain untouched.
+Monitor PID3730597, CPU source `f5a5760f`, records nvidia-smi every900seconds
+and tolerates transient worker-state writes. Only one model worker occupies the
+H100. Health receipts and direct checks pass; inspect `health/gpu_health.jsonl`
+and `private/active_worker.json` for live identities. Continue until all planned
+panels, diagnostics, scoring and audits complete, then report final results.
+Historical paused/negative DiffusionGemma campaigns remain untouched.
 
 ## 2026-10-29 UTC — User-authorized repository publication preparation
 

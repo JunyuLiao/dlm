@@ -4106,3 +4106,33 @@ analysis after all primary requests. No GPU worker was signaled or generation
 source changed. Health monitoring continued with maximum gap900.14seconds and
 zero driver errors across67receipts through17:17UTC.
 
+## 2026-10-30 — Preserve Ultra native prefix masks and confidence tie coordinates
+
+Before any Ultra calibration or benchmark, code review found two edge cases in
+the bounded-logit adapter: the publisher can revisit unresolved earlier MASK
+predictions, and topk tie behavior depends on the full confidence-vector shape.
+The adapter now projects rows from the first eligible mask through the current
+block and selects in full sequence coordinates. Full future-mask input, block
+length, fixed unmasking schedule, random draws and native stopping remain fixed.
+No Ultra benchmark record had been generated, and no existing LLaDA2.2 or
+TraDo numerical source changed.
+
+Six focused CPU tests pass. Two independent pinned-publisher CPU scenarios,
+leftover previous masks and tied confidences, match outputs and all128native
+pre-forward states. Record:
+`results/multi_model_value_20261030/attempt001/qualification/ultra_cpu_sampler/attempt001/receipt.json`.
+Fallbacke9672e29uses original qualified attention with the corrected sampler;
+candidate09cfd911adds only cached held-map counting. Two-block publisher-model
+parity must pass before Ultra launches. Optional counter parity failure may
+retain the corrected uncached source; native parity failure blocks launch.
+
+Scheduling prioritizes the other models' full HumanEval adapters after normal
+completion of LLaDA2.2 AIME, then TraDoAIME,LLaDA2.2RULER,UltraAIME/RULER.
+All40panels/5110requests, model pins and scientific settings are retained.
+CPU supervisor source4dd4a2fdwaits in priority_attempt004/finalization_attempt003.
+Final observer diagnostics import actual model worker sources, preventing a
+sampler correction from being lost in a later development diagnostic. Verified
+waiting CPU processes were replaced with no active children; no GPU worker
+was signaled. Monitorf5a5760fcontinues its900-second checks and tolerates
+transient non-atomic worker-state writes.
+
