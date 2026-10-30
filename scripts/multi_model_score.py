@@ -103,6 +103,7 @@ def main():
             problem_outputs[r["id"]].add(r["output_sha256"])
         n = counts["denoising_forwards"]
         c = counts["canvases"]
+        consumer_sparsity = 1. - counts["kept_tiles"] / counts["eligible_tiles"]
         summary = {"requests": len(rows), "expected": expected,
                    "accuracy": statistics.mean(r["quality"] for r in rows),
                    "full_credit": sum(r["quality"] == 1. for r in rows),
@@ -118,7 +119,10 @@ def main():
                    "pooled_output_tokens_per_denoising_call": sum(r["output_tokens"] for r in rows) / n,
                    "finished": sum(r["finished"] for r in rows),
                    "without_eos_at_cap": sum(not r["finished"] and r["output_tokens"] == r["generation_cap"] for r in rows),
-                   "consumer_sparsity": 1. - counts["kept_tiles"] / counts["eligible_tiles"],
+                   "consumer_sparsity": consumer_sparsity,
+                   "sparse_target_range": [.48, .52] if "reuse" in arm else None,
+                   "sparse_target_satisfied": .48 <= consumer_sparsity <= .52 if "reuse" in arm else None,
+                   "panel_complete": len(rows) == expected,
                    "counts": dict(counts)}
         summaries[f"{model}/{suite}/{arm}"] = summary
         if suite == "ruler128k":
@@ -157,7 +161,10 @@ def main():
                                               np.log((rn / rc) / (on / oc)), np.log(rn / on)])
             matrix = np.array([np.mean(v, axis=0) for v in clusters.values()])
             boot = matrix[rng.integers(len(matrix), size=(10000, len(matrix)))].mean(1)
+            sparse_arms = [x for x in (arm, ref_arm) if "reuse" in x]
             paired[f"{model}/{suite}/{arm}_vs_{ref_arm}"] = {"questions": len(matrix),
+                "both_panels_complete": all(summaries[f"{model}/{suite}/{x}"]["panel_complete"] for x in (arm, ref_arm)),
+                "all_sparse_arms_at_target": all(summaries[f"{model}/{suite}/{x}"]["sparse_target_satisfied"] for x in sparse_arms) if sparse_arms else None,
                 "accuracy_delta": float(matrix[:, 0].mean()),
                 "accuracy_delta_ci95": np.quantile(boot[:, 0], [.025, .975]).tolist(),
                 "calls_delta": float(matrix[:, 1].mean()),
