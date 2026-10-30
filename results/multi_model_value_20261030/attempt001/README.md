@@ -1,6 +1,6 @@
 # Three-model value-direction evaluation
 
-Status: running; LLaDA2.2 HumanEval complete, campaign incomplete. User authorized the complete
+Status: running; LLaDA2.2 HumanEval/AIME complete, TraDo HumanEval active. User authorized the complete
 campaign without a GPU-hour ceiling, with host GPU monitoring every15minutes.
 
 Specification: `docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md`.
@@ -57,9 +57,20 @@ See `llada22_humaneval_complete_summary.md` and corrected-scoring analysis
 with more denoising calls, while remaining below dense. This is not a
 cross-model conclusion. V2's reduced calls accompany severe quality loss.
 
-LLaDA2.2 AIME has four complete arms: native36/90, all-kept29/90, V31mass21/90,
-V2online9/90. V3a is running. V31 consumer sparsity is50.0002%; V2 drifts to
+LLaDA2.2 AIME has five complete arms: native36/90, all-kept29/90, V31mass21/90,
+V2online9/90,V3a25/90. V3a's4.44pplead has95%problem CI[-8.89,17.78], including
+zero. V31/V3a consumer sparsity is50.0002/49.9967%; V2 drifts to
 75.2079% despite development confirmation51.0154%. Its threshold is preserved,
 and a matched50%sparsity comparison is explicitly invalid for that panel.
-See `v2_aime_complete_arm001.json` and `analysis_partial006/` (the latter
-predates V2's completion). No AIME all-method conclusion is available yet.
+See `llada22_short_complete_summary.md` and
+`analysis_llada22_short_complete001/model_scope_complete.json`. Exact-scope
+verification passes1270requests/10panels. No reliable AIME win or general
+dense-quality-preservation claim is established. RULER and other models remain
+unfinished, so there is no campaign-wide completion claim.
+
+Ultra's two-block publisher-model and cached-counter parity gate006 passes.
+Its corrected prefix-mask/full-coordinate sampler has independent CPU publisher
+oracle coverage. Optional4GiBstatistics-memory gate007 fails strict V3a output
+parity; the original memory budget is retained. Binding007 records the selected
+sources and both outcomes. TraDo HumanEval computation-only calibration confirms
+50.2730%sparsity at threshold0.17782794100389226before its benchmark launch.

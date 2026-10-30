@@ -2628,3 +2628,41 @@ CPU-coordinator idle-wait race, matches all outputs/N/C/tilecounts and is
 excluded from primary coverage. No GPUworker was signaled. Historical
 DiffusionGemma identities/negatives and inherited Yuhan reuse provenance stay
 distinct. AIME/RULER and other models are not complete at this checkpoint.
+
+
+## 2026-10-30 — LLaDA2.2 AIME26 five-arm panel complete; three-model campaign active
+
+Campaign `results/multi_model_value_20261030/attempt001/`; generation source
+`224f8f11`, model revisione4f77d25, protocol SHAa87a8704. Runtime SHA489b4abf,
+attention SHA619ec332 and worker SHA0e9d0544 are common to all AIME shards.
+All450primaryrequests are complete:30problems x seeds42/43/44 x five arms.
+Native32768cap, adaptive editing/stopping and current-KV protection are fixed.
+The independent exact-scope audit passes all1270HumanEval/AIME requests across
+10panels; RULER and other-model panels remain outside this completed scope.
+
+| Arm | Correct /90 | N | C | T | Consumer sparsity | Cap reaches |
+|---|---:|---:|---:|---:|---:|---:|
+| Native dense |36|138512|19813|631678|0%|5|
+| All-kept FA4 |29|154593|20767|662063|0%|4|
+| V31 mass reuse4 |21|119064|13271|422252|50.0002%|0|
+| V2 Gaussian32 reuse4 |9|38202|3950|123666|75.2079%|0|
+| V3a singleton reuse4 |25|125912|14869|473315|49.9967%|0|
+
+V3a minus V31 accuracy is+4.44pp,95%problem-clustered bootstrap CI[-8.89,17.78].
+Paired geometric N/Cratio0.93646has CI[0.83594,1.03437]; Nratio1.13084has
+CI[0.82987,1.60609]. More output/canvases and uncertain intervals preclude a
+reliable AIME win or faster-convergence claim. V3a remains below both dense
+point accuracies; nonsignificance does not establish noninferiority.
+
+V2's threshold0.17782794100389226was frozen after51.0154%independent development
+confirmation. Its main75.2079%operating point is retained and explicitly invalid
+for a matched50%comparison. No benchmark-score retune was performed. Consumer
+sparsity covers denoising FA4eligible tiles; discovery and dense prefix/commit
+work remain separate. Instrumented times are not clean speedup evidence.
+
+Evidence: `llada22_short_complete_summary.md`,
+`analysis_llada22_short_complete001/model_scope_complete.json`, official scores
+and paired records in that analysis leaf, and
+`verification/llada22_short_complete002/receipt.json` under the campaign root.
+The previously complete HumanEval counts141/138/83/10/103are unchanged. No full
+campaign completion marker or cross-model conclusion is available yet.

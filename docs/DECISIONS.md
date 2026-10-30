@@ -4152,3 +4152,24 @@ no GPU worker signaled. LLaDA2.2/TraDo numerical sources and all40panels remain
 fixed. At20:00UTC V3a AIME shards001/002 are complete46requests, shard003 is
 healthy on the sole H100 worker, and all later qualifications remain unexecuted.
 
+## 2026-10-30 — Native Ultra/counter qualification passes; larger memory option rejected
+
+After the last LLaDA2.2 AIME worker finishes normally, Ultra gate006 passes all26
+checks, including two-block publisher final-output parity, unchanged128calls/
+twoblocks, and old/new cached-counter mask/output/counter checks. Ultra worker
+source3504a4aais selected with cached held-tile accounting. Gate007 then fails
+strict consumer-output equality for V3a at the larger statistics memory budget.
+Retain the original configured512MiBbudget and preserve the negative probe;
+do not relax the gate or enable the larger allocation. Source binding007
+fingerprints both outcomes and the actual three-model worker bindings.
+
+LLaDA2.2 AIME all five arms complete90requests each, with complete-scope
+coverage/source/forward accounting passing1270HumanEval/AIME requests. AIME
+V3a25/90versus V3121/90is+4.44pp with problem CI[-8.89,17.78]; this does not
+establish a reliable AIME lead. V2's75.2079%operating point is explicitly
+unmatched. Full numbers and provenance are appended to the results ledger.
+The three-model campaign remains active. TraDo HumanEval calibrates by
+computation only to50.2730% at0.17782794100389226and begins its native dense
+benchmark. No GPU worker was signaled, no source or frozen cohort was edited,
+and no clean latency claim is made.
+

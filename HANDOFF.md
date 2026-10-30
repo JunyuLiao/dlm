@@ -1,4 +1,4 @@
-## 2026-10-30 UTC — Three-model campaign active; LLaDA2.2 AIME V3a running
+## 2026-10-30 UTC — LLaDA2.2 short panels complete; TraDo HumanEval active
 
 Branch `multi-models`. User approved LLaDA2.2-mini, UltraLLaDA and TraDo with
 no GPU-hour restriction and 15-minute GPU checks until the full experiment is
@@ -7,8 +7,8 @@ Campaign: `results/multi_model_value_20261030/attempt001/`. Planned primary
 coverage is40panels/5110requests. Root `final_complete.json` is absent.
 
 Current numerical worker source is `224f8f11` for LLaDA2.2. Queue004 uses
-coordinator `8c0d14b0`; V3a AIME shard003 is active. Shards001/002 completed46requests;
-at49.9957%consumer sparsity. All three model checkpoints, runtimes and private
+coordinator `8c0d14b0`; its LLaDA AIME worker has completed normally. Stage001
+now runs TraDo HumanEval under queue005. All three model checkpoints, runtimes and private
 inputs are pinned. Publisher runtime compatibility is isolated; shared
 installations are unchanged. Private RULER130 inputs per supported tokenizer
 are complete, with thirteen tasks and no truncation. TraDo128K is unsupported.
@@ -22,15 +22,19 @@ scoring: `analysis_humaneval_llada22_complete002/`; verification passes820cells.
 Scorer correction1300acfc removes an invented channel name before plain-function
 extraction. All five correct counts are unchanged; older analysis is preserved.
 
-Four AIME arms are complete,90requests each: native/all-kept/V31/V2 score
-36/29/21/9. Their N138512/154593/119064/38202;
-C19813/20767/13271/3950;T631678/662063/422252/123666. Native has85EOS finishes,
-all-kept86,V31andV2all90. V31 consumer sparsity50.0002%; V2 reaches75.2079%
+All five AIME arms are complete,90requests each: native/all-kept/V31/V2/V3a
+score36/29/21/9/25. N138512/154593/119064/38202/125912;
+C19813/20767/13271/3950/14869;T631678/662063/422252/123666/473315. Native has85EOS
+finishes,all-kept86,all sparse arms90. V31 consumer sparsity50.0002%,V3a49.9967%; V2 reaches75.2079%
 despite independent calibration confirmation51.0154% at threshold
 0.17782794100389226. Preserve that drift and frozen threshold: its matched50%
 comparison is invalid. Receipts: `v2_aime_complete_arm001.json` and
 `v2_aime_sparsity_drift_interim001.json`. `analysis_partial006/` predates V2
-completion. No complete AIME all-method or cross-model conclusion is available.
+completion. Complete two-benchmark analysis: `analysis_llada22_short_complete001/`;
+audit `verification/llada22_short_complete002/` passes1270requests/10panels.
+V3a AIME accuracy lead over V31 is4.44pp,95%problem CI[-8.89,17.78]; no reliable
+AIME lead or faster-convergence result is established. All sparse arms remain
+below native dense point accuracy. No cross-model conclusion is available.
 
 HumanEval V2 calibration attempt003 confirms48.4928% at0.8944271909999159.
 Two earlier attempts are preserved because short development inputs could not
@@ -60,21 +64,17 @@ leftover masks and tied confidences. Receipt:
 Corrected uncached Ultra fallback `e9672e29` has attention bytes identical to
 8c0d14b0. Candidate `3504a4aa` shares its corrected sampler and adds cached
 held-map tile accounting plus a gated statistics memory option. Scheduler
-PID3734648, CPU source `3504a4aa`, waits in
-`scheduling/priority_attempt005/`. During the last V3a AIME shard004 it requests
-only a coordinator boundary stop, lets that GPU worker finish normally, then
-requires two-block publisher-model parity and cache counter/output parity at
-`qualification/held_counts/attempt006/receipt.json`. A native-parity failure
-blocks Ultra launch. An optional counter failure after native parity may retain
-the corrected uncached fallback. It never falls back to the older Ultra sampler.
-No optional optimization is enabled yet. After gate006 passes, optional
-`qualification/statistics_memory/attempt007/` compares all three sparse arms at
-Q513,KV131071,H32,D128 under30GiBsimulated model/map residency. It requires
-identical masks, consumer outputs and counters with mean budget512MiBversus4GiB;
-actual statistics batch calls must be5versus2. Only a passing receipt enables
-the larger budget for future Ultra requests. Otherwise512MiBis retained.
+PID3734648, CPU source `3504a4aa`, is active in
+`scheduling/priority_attempt005/`. It requested only a coordinator stop while
+last V3a shard004 ran; that GPU worker completed normally. Gate006 passes all26
+cases including two-block publisher-model parity and cached counter/output
+parity. Cached tile accounting is enabled for Ultra. Optional larger-memory
+gate007 failed strict V3a consumer-output parity; keep the original configured
+512MiBstatistics budget. No larger memory budget is enabled. The negative
+attempt is preserved, not relaxed or silently retried. Source binding007 records
+the passing and rejected gates and the selected actual worker sources.
 The corrected native sampler function is byte-identical to the CPU-oracle
-version. Handoff: `priority_schedule_handoff005.json`. Pending order: TraDo/UltraHumanEval,
+version. Handoff: `priority_schedule_handoff005.json`. Current order: TraDo/UltraHumanEval,
 TraDoAIME,LLaDA2.2RULER,UltraAIME/RULER. The union remains40panels/5110requests.
 LLaDA2.2 and TraDo numerical sources remain224f8f11and8c0d14b0respectively.
 
@@ -90,7 +90,9 @@ See `cpu_supervision_handoff004.json`; prior waiting attempts remain preserved.
 
 Monitor PID3730597, CPU source `f5a5760f`, records nvidia-smi every900seconds
 and tolerates transient worker-state writes. Only one model worker occupies the
-H100. At20:00UTC the sole intended third-shard worker is healthy,about32GB,41C.
+H100. At22:02UTC the sole TraDo calibration worker is healthy,about17GB,42C.
+TraDo HumanEval calibration confirms50.2730% at threshold0.17782794100389226;
+native dense benchmark shard001 is complete41requests and shard002 is active.
 Health receipts and direct checks pass; inspect `health/gpu_health.jsonl`
 and `private/active_worker.json` for live identities. Continue until all planned
 panels, diagnostics, scoring and audits complete, then report final results.
