@@ -1,0 +1,28 @@
+{
+  "status": "planned_not_executed",
+  "models": [
+    "llada22",
+    "ultrallada",
+    "trado"
+  ],
+  "source_commit": "2f8098d859c2e605db26602c9d854c4c63ef1f4e",
+  "source_file": "scripts/multi_model_reuse_diagnostic.py",
+  "development_prompts_per_model": 6,
+  "output_cap": 128,
+  "max_sampled_states_per_request": 8,
+  "ages": [
+    0,
+    1,
+    2,
+    3
+  ],
+  "selectors": [
+    "mass_topk_reuse_r4",
+    "value_v2_gaussian32_reuse_r4",
+    "value_v3a_singleton_reuse_r4"
+  ],
+  "shared_state_trajectory": "native_dense",
+  "extra_model_forwards": 0,
+  "observer_output_fed_to_model": false,
+  "after_primary_queue": true
+}

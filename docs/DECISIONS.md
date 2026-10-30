@@ -4021,3 +4021,40 @@ kernel work under this protocol. Initial masks were precomputed; W/S/SN are audi
 measures. Independent review may consider a separately frozen fewer-canvas
 question. Do not relax these failed local/replication gates. Broader reuse and
 other locations are not universally rejected. Keep every mixed/negative result.
+# 2026-10-30 — Authorized multi-model value evaluation; qualified generation starts
+
+User approved the three-model accuracy-first plan and removed the proposed
+GPU-hour restriction. Use one H100 and record health every900seconds until
+completion. The campaign is `results/multi_model_value_20261030/attempt001/`;
+the scientific spec is `docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md`.
+Historical DiffusionGemma failures, frozen evidence and paused campaigns are
+unchanged. This is a portability test, not a causal K/V-tying intervention.
+
+Pinned LLaDA2.2-mini, UltraLLaDA and TraDo snapshots are complete. Their
+publisher runtimes are isolated without modifying shared environments. D128
+consumer CUDA parity and independent V2/V3a mask oracles pass. All five arms
+pass synthetic smoke; native ports reproduce publisher final outputs on those
+checks. All-kept FA4 can change LLaDA2.2 calls despite identical final text;
+native and all-kept controls remain separate. These are qualification facts,
+not benchmark accuracy results.
+
+The first two LLaDA2.2 code calibrations cannot reach48–52%: median34-token
+development inputs plus required first support/current KV64 protections create
+a geometry floor. Preserve both attempts. Independently written specifications
+for the same nonbenchmark functions have median169tokens versus HumanEval161.
+No benchmark generation or score guided this correction. Attempt003 confirms
+48.492767% at V2 threshold0.8944271909999159. All original calibration inputs,
+failed-range results and source bindings remain intact. Other model/workload
+thresholds remain uncalibrated at this checkpoint.
+
+The full40-panel/5110-request queue is running from frozen source `da425f4a`:
+native dense, all-kept FA4, mass top-k reuse4, online Gaussian32 V2 reuse4 and
+singleton V3a reuse4. First complete HumanEval native shards pass independent
+coverage, source/model/protocol, zero-skip and total-forward accounting checks.
+Full130 RULER inputs per supported tokenizer are complete without truncation;
+TraDo128K remains unsupported. No scientific accuracy conclusion is available.
+Final work requires complete native shards, official scoring, paired problem
+intervals, explicit work/calibration-drift audit and completion markers. A
+separate development-only same-state fresh/held diagnostic is frozen and still
+unexecuted; it cannot substitute for task accuracy or convergence evidence.
+
