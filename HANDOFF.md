@@ -1,6 +1,7 @@
 ## 2026-10-30 UTC — Three-model campaign active; first HumanEval model complete
 
-Branch `multi-models`; generation checkpoint `da425f4a`; analysis `898176b3`.
+Branch `multi-models`; LLaDA2.2 worker checkpoint `224f8f11`; corrected scoring
+checkpoint `1300acfc`; pending optimized coordinator checkpoint `8c0d14b0`.
 User approved LLaDA2.2-mini, UltraLLaDA and TraDo-8B-Instruct with no GPU-hour
 restriction and 15-minute GPU health checks until completion. Protocol:
 `docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md`; campaign:
@@ -13,8 +14,8 @@ reproduce publisher dense final outputs; long-context V31/V3a consumer budgets
 are exactly50%. All-kept FA4 changes denoising calls despite the same answer,
 so retain native and all-kept controls. TraDo attempt008 and UltraLLaDA
 attempt002 also reproduce publisher sampler outputs; all five arms pass
-synthetic smoke. The full serial queue attempt002 is active from the frozen
-private execution tree, beginning LLaDA2.2 native dense HumanEval shards.
+synthetic smoke. Execution uses immutable private source snapshots and one
+serial GPU worker; the current worker is native dense LLaDA2.2 AIME shard001.
 V2 coding calibration attempt003 confirms48.49% at threshold0.8944271909999159.
 The two earlier calibration attempts are retained: their development prompts
 were too short for the target under mandatory KV64 protection. New independent
@@ -26,11 +27,15 @@ Mass/V2/V3a consumer sparsity49.978/49.216/49.990%; N6029/2331/6941;
 C1285/503/1422; T35900/10317/40227. V3a accuracy exceeds mass on this panel
 but has more calls and remains far below dense. V2 shorter outputs/calls are
 quality loss, not convergence evidence. Full paired records and intervals:
-`analysis_humaneval_llada22_complete001/`; verification passes820cells.
+`analysis_humaneval_llada22_complete002/`; verification passes820cells.
+Corrected scorer commit1300acfc removes an invented channel-name prefix before
+plain-function parsing. All five official correct counts are unchanged after
+rescoring saved generations; old analysis001 is preserved and superseded.
 The campaign-wide marker is absent; no cross-model conclusion yet.
 
 Current generation source `224f8f11`, queue attempt003. AIME computation-only
-calibration is running at native32768cap on independent math problems.
+calibration at native32768cap on independent math problems confirms51.0154%
+consumer sparsity at threshold0.17782794100389226 (calibration attempt001).
 The source change only matches future calibration caps; sampler/attention
 remain unchanged. One CPU boundary race caused a redundant mass shard003
 attempt002; keep canonical first complete attempt001. All41output/call/canvas/
@@ -38,6 +43,15 @@ physical counts match the repeat. Exclude the duplicate from primary coverage;
 receipts: `coordinator_boundary_race001.json`, `verification/redundant_repeat001/`.
 No GPUworker was signaled. The current queue source has safe boundary stopping;
 the repaired later source also rechecks completion after idle waits.
+
+At 03:34UTC the H100 worker is healthy (42GB,42C). Queue003 has a boundary-stop
+request: its current GPU worker must finish normally. CPU waiter source
+`8c0d14b0` then runs kernel qualification attempt005 before queue004. This
+tests batching up to eight independent Q128 statistics groups, requiring
+bitwise-identical masks and consumer outputs. It is enabled only for UltraLLaDA
+after the gate passes; LLaDA2.2 keeps worker source `224f8f11` for all primary
+comparisons. Per-model worker-source bindings prevent an optimization handoff
+from changing an already started model's execution source. No GPU-hour cap.
 
 Publisher runtime compatibility for TraDo and UltraLLaDA is isolated inside
 the campaign private directory; shared environments are unchanged. Qualification
