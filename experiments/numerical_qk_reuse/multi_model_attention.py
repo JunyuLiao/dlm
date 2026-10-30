@@ -90,10 +90,11 @@ def dense_block(q, k, v, offset, block_size, scale):
 
 
 class AttentionRuntime:
-    def __init__(self, arm="dense_native", threshold=.02, backend="fa4"):
+    def __init__(self, arm="dense_native", threshold=.02, backend="fa4", statistics_query_blocks=1):
         if arm not in ARMS:
             raise ValueError(arm)
         self.arm, self.threshold, self.backend = arm, threshold, backend
+        self.statistics_query_blocks = statistics_query_blocks
         self.maps, self.matrices = {}, {}
         self.counts = Counter()
         self.block_start = 0
@@ -164,10 +165,13 @@ class AttentionRuntime:
                 torch.ones((k.shape[1],), device=q.device))
             kept = torch.empty((1, heads, qt, kt), device=q.device, dtype=torch.bool)
             # Bound statistics memory by one Q128 group, even for 128K full attention.
-            for qb in range(qt):
-                part = q[:, :, qb * 128:(qb + 1) * 128]
+            chunk_qb = max(1, min(self.statistics_query_blocks, 134217728 // max(1, heads * kt * 128 * 32)))
+            for qb in range(0, qt, chunk_qb):
+                end_qb = min(qt, qb + chunk_qb)
+                blocks = end_qb - qb
+                part = q[:, :, qb * 128:end_qb * 128]
                 stats = statistics_cuda(part, k, z, nu, scale, kt)
-                mandatory = torch.zeros((heads, kt), device=q.device, dtype=torch.bool)
+                mandatory = torch.zeros((heads * blocks, kt), device=q.device, dtype=torch.bool)
                 mandatory[:, self.block_start // 64:tr.cdiv(self.block_end, 64)] = True
                 eligible = stats.valid.any(-1)
                 mandatory &= eligible
@@ -182,7 +186,7 @@ class AttentionRuntime:
                     else:
                         score = singleton_scores(stats)
                     keep = budget_map(score, mandatory, eligible)
-                kept[:, :, qb] = keep
+                kept[:, :, qb:end_qb] = keep.reshape(1, heads, blocks, kt)
                 self.counts["discovery_qk_pairs"] += heads * part.shape[2] * nk
             self.maps[key] = (kept, v27_fa4.block_sparse_tensors(kept))
         else:

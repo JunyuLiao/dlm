@@ -80,6 +80,22 @@ def kernels():
     assert torch.equal(actual.cpu(), expected), "V3a singleton oracle mismatch"
     records.append({"selector_oracles": "V2 ordered recurrence and V3a singleton",
                     "thresholds": [.01, .1, .5], "mask_mismatches": 0})
+    q = torch.randn((1, 4, 385, 128), device="cuda", dtype=torch.bfloat16)
+    k = torch.randn((1, 2, 513, 128), device="cuda", dtype=torch.bfloat16)
+    v = torch.randn_like(k)
+    for arm in ARMS[2:]:
+        reference = AttentionRuntime(arm, .15, statistics_query_blocks=1)
+        candidate = AttentionRuntime(arm, .15, statistics_query_blocks=8)
+        for runtime in (reference, candidate):
+            runtime.block(448, 513)
+            runtime.begin_forward()
+        a = reference.attention(q, k, v, 2, 128 ** -.5)
+        b = candidate.attention(q, k, v, 2, 128 ** -.5)
+        assert torch.equal(reference.maps[(2, 385, 513)][0], candidate.maps[(2, 385, 513)][0]), (arm, "batch masks")
+        assert torch.equal(a, b), (arm, "batch output")
+        records.append({"statistics_batch_selector": arm, "query_rows": 385,
+                        "query_blocks_reference": 1, "query_blocks_candidate": 8,
+                        "mask_mismatches": 0, "output_equal": True})
     return records
 
 
