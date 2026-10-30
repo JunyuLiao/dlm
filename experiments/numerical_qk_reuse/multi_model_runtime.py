@@ -62,6 +62,10 @@ class ModelHarness:
         self.source_changes = {}
 
     def load(self, install=True):
+        if self.key in ("trado", "ultrallada"):
+            # Publisher checkpoints do not require optional Hub kernel swaps.
+            # Keep their own forward implementations under older Transformers.
+            sys.modules["kernels"] = None
         if self.key == "trado":
             # Preserve the publisher's pure-Triton RMSNorm implementation.
             # Its package __init__ imports an incompatible, unused FA2 .so;
