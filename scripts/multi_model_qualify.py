@@ -1,0 +1,97 @@
+"""Independent synthetic CUDA qualification; never runs benchmark prompts."""
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+import time
+
+import torch
+import torch.nn.functional as F
+
+from experiments.numerical_qk_reuse.multi_model_attention import (
+    AttentionRuntime, ARMS, dense_block,
+)
+from experiments.numerical_qk_reuse.v31_value_selectors import (
+    statistics_reference, online_reference, singleton_reference,
+)
+from experiments.numerical_qk_reuse.v31_value_kernels import statistics_cuda, online_cuda
+
+
+def kernels():
+    torch.manual_seed(8291)
+    records = []
+    for nq, nk, h, hk in [(4, 197, 8, 2), (32, 193, 4, 1), (129, 259, 4, 4)]:
+        q = torch.randn((1, h, nq, 128), device="cuda", dtype=torch.bfloat16)
+        k = torch.randn((1, hk, nk, 128), device="cuda", dtype=torch.bfloat16)
+        v = torch.randn_like(k)
+        ref = F.scaled_dot_product_attention(q, k.repeat_interleave(h // hk, 1),
+                                             v.repeat_interleave(h // hk, 1), is_causal=False)
+        for arm in ARMS:
+            r = AttentionRuntime(arm, .02)
+            r.block(max(0, nk - 32), nk)
+            r.begin_forward()
+            out = r.attention(q, k, v, 0, 128 ** -.5).transpose(1, 2)
+            if arm in ARMS[:2]:
+                error = float((out - ref).abs().max())
+                assert error <= .04, (arm, nq, nk, error)
+            else:
+                keep, _ = r.maps[(0, nq, nk)]
+                bias = keep.repeat_interleave(128, 2).repeat_interleave(64, 3)[:, :, :nq, :nk]
+                expected = F.scaled_dot_product_attention(q, k.repeat_interleave(h // hk, 1),
+                                                          v.repeat_interleave(h // hk, 1), attn_mask=bias)
+                error = float((out - expected).abs().max())
+                assert error <= .04, (arm, nq, nk, error)
+            records.append({"arm": arm, "q": nq, "kv": nk, "heads": h,
+                            "kv_heads": hk, "max_abs_error": error,
+                            "counts": dict(r.counts)})
+    # Test true block-causal prefix visibility, with offset and partial tile.
+    q = torch.randn((1, 4, 67, 128), device="cuda", dtype=torch.bfloat16)
+    k = torch.randn((1, 2, 131, 128), device="cuda", dtype=torch.bfloat16)
+    v = torch.randn_like(k)
+    for block in (4, 32):
+        bias = torch.arange(131, device="cuda")[None] // block <= (torch.arange(67, device="cuda")[:, None] + 64) // block
+        ref = F.scaled_dot_product_attention(q, k.repeat_interleave(2, 1), v.repeat_interleave(2, 1), attn_mask=bias)
+        out = dense_block(q, k, v, 64, block, 128 ** -.5).transpose(1, 2)
+        error = float((out - ref).abs().max())
+        assert error <= .04, ("block", block, error)
+        records.append({"block_size": block, "max_abs_error": error})
+    torch.cuda.synchronize()
+    return records
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("root", type=Path)
+    p.add_argument("--model", choices=("llada22", "ultrallada", "trado"))
+    p.add_argument("--attempt", default="attempt001")
+    a = p.parse_args()
+    leaf = a.root / "qualification" / (a.model or "kernels") / a.attempt
+    leaf.mkdir(parents=True, exist_ok=False)
+    started = time.time()
+    try:
+        if a.model:
+            from experiments.numerical_qk_reuse.multi_model_runtime import ModelHarness
+            h = ModelHarness(a.root, a.model).load()
+            rows = []
+            for arm in ARMS:
+                h.runtime.arm = arm
+                result = h.generate("What is 2 plus 3? Answer briefly.", 32 if a.model != "trado" else 16, 42)
+                rows.append({"arm": arm, "output_tokens": len(result["tokens"]),
+                             "finished": result["finished"], "counts": result["counts"]})
+                print(json.dumps(rows[-1]), flush=True)
+            result = {"status": "synthetic_model_smoke_only", "rows": rows,
+                      "source_changes": h.source_changes}
+        else:
+            result = {"status": "pass", "cases": kernels()}
+        result["gpu_worker_seconds"] = time.time() - started
+        (leaf / "receipt.json").write_text(json.dumps(result, indent=2) + "\n")
+        print(json.dumps(result), flush=True)
+    except BaseException as e:
+        (leaf / "failure.json").write_text(json.dumps({"status": "failed", "error": repr(e),
+                                                      "gpu_worker_seconds": time.time() - started}, indent=2) + "\n")
+        raise
+
+
+if __name__ == "__main__":
+    main()
