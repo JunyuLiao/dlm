@@ -74,6 +74,16 @@ class ModelHarness:
             package = types.ModuleType("flash_attn")
             package.__path__ = list(spec.submodule_search_locations)
             package.__spec__ = spec
+            def fa2_compat(q, k, v, dropout_p=0., softmax_scale=None, causal=False, **kwargs):
+                from . import v27_fa4
+                if dropout_p:
+                    raise ValueError("inference qualification requires dropout zero")
+                fwd = v27_fa4.load()
+                return fwd(q, k, v, softmax_scale=softmax_scale, causal=causal)[0]
+            def unused_varlen(*args, **kwargs):
+                raise RuntimeError("unqualified variable-length FA2 path requested")
+            package.flash_attn_func = fa2_compat
+            package.flash_attn_varlen_func = unused_varlen
             sys.modules["flash_attn"] = package
             import transformers.utils as hf_utils
             if not hasattr(hf_utils, "LossKwargs"):

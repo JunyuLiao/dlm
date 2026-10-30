@@ -80,12 +80,25 @@ def main():
             native_calls = [0]
             if a.model == "llada22":
                 ids = torch.tensor([h.encode(prompt)], device="cuda")
-                hook = h.model.register_forward_pre_hook(lambda *args: native_calls.__setitem__(0, native_calls[0] + 1))
+                original_forward = h.model.forward
+                def counted_forward(*args, **kwargs):
+                    native_calls[0] += 1
+                    return original_forward(*args, **kwargs)
+                h.model.forward = counted_forward
                 torch.manual_seed(42)
                 native = h.model.generate(inputs=ids, gen_length=32, block_length=32,
                                           steps=32, threshold=.5, editing_threshold=0.,
                                           max_post_steps=16, temperature=0., eos_early_stop=True)[0].tolist()
-                hook.remove()
+                h.model.forward = original_forward
+            elif a.model == "ultrallada":
+                from experiments.numerical_qk_reuse.multi_model_runtime import import_file
+                sampler = import_file(a.root / "private/source/ultra_llada_generate.py", "ultra_reference_qualification")
+                ids = torch.tensor([h.encode(prompt)], device="cuda")
+                torch.manual_seed(42)
+                native = sampler.generate(h.model, ids, steps=32, gen_length=32,
+                                          block_length=32, temperature=0., cfg_scale=0.,
+                                          remasking="low_confidence", mask_id=126336)[0, ids.shape[1]:].tolist()
+                native_calls[0] = 32
             h.install()
             rows = []
             for arm in ARMS:
