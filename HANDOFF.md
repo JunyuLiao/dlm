@@ -54,6 +54,16 @@ from changing an already started model's execution source. No GPU-hour cap.
 Qualified source bindings are in `execution_binding006.json`. Live H100 check
 confirms one intended next worker; total canonical completed requests843.
 
+CPU finalizer source `9872ab69` is scheduled (PID3688024): wait for40complete
+panels/5110unique primary requests, audit before extra GPU work, then run the
+six-request-per-model development reuse diagnostic with paired observer-off
+references. Native outputs and forward counts must match exactly; structural
+edits reset held support. Final scoring records task-source fingerprints,
+problem-clustered intervals and explicit seed-output duplication. A second
+coverage/fairness audit must pass before root `final_complete.json` is written.
+It never signals or relaunches primary workers. The agent continues monitoring;
+the campaign is incomplete. Schedule: `finalizer_schedule001.json`.
+
 Publisher runtime compatibility for TraDo and UltraLLaDA is isolated inside
 the campaign private directory; shared environments are unchanged. Qualification
 failures are retained. Private full130 RULER inputs are complete per tokenizer;

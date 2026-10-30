@@ -4058,3 +4058,30 @@ intervals, explicit work/calibration-drift audit and completion markers. A
 separate development-only same-state fresh/held diagnostic is frozen and still
 unexecuted; it cannot substitute for task accuracy or convergence evidence.
 
+## 2026-10-30 — Fixed model sources and complete-coverage publication gate
+
+The first complete LLaDA2.2 HumanEval comparison is separately recorded in the
+results ledger; the three-model campaign remains incomplete. AIME calibration
+on independent math prompts at the native32768 output cap confirms51.0154%
+consumer sparsity at threshold0.17782794100389226. No test score was used to
+select that threshold.
+
+After the current AIME worker finished normally, kernel qualification attempt005
+compared statistics groups1 versus8. V31/V2/V3a give zero mask mismatches and
+bitwise-identical consumer outputs on synthetic cases. Queue004 enables this
+batching only for UltraLLaDA and keeps LLaDA2.2 worker source224f8f11 unchanged.
+Binding006 records per-model sources, the passing gate and its fingerprint.
+The CPU monitoring process was replaced by the enhanced monitor with the same
+900-second interval; no GPU worker was signaled.
+
+Finalizer source9872ab69 waits for40panels/5110unique primary requests and an
+idle GPU. It requires a coverage/fairness audit, observer-off parity for all
+development diagnostic requests, official scoring and a second audit before
+writing a campaign completion marker. The diagnostic adds no model forwards
+inside observed requests and never changes their outputs; separate native
+reference requests are explicitly accounted. Structural edits reset diagnostic
+held support. Scoring records exact task-code fingerprints, per-request N/C/T,
+cap status, paired problem-clustered intervals and repeated-seed output counts.
+The first820 HumanEval rescores reproduce all five correct counts after the
+plain-function extraction correction; historical analysis is preserved.
+
