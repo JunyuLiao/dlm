@@ -62,6 +62,7 @@ def main():
                     raise RuntimeError("GPU has an active worker before launch: " + gpu.stdout.strip())
                 log = root / "private/logs" / model / suite / log_name
                 log.parent.mkdir(parents=True, exist_ok=True)
+                started = time.time()
                 with log.open("x") as handle:
                     child = subprocess.Popen(command, env=environment, stdout=handle, stderr=subprocess.STDOUT)
                     active = {"pid": child.pid, "model": model, "suite": suite,
@@ -69,7 +70,12 @@ def main():
                               "attempt": command[command.index("--attempt") + 1]}
                     (root / "private/active_worker.json").write_text(json.dumps(active) + "\n")
                     rc = child.wait()
-                print(json.dumps({"event": "worker_exit", **active, "returncode": rc}), flush=True)
+                process_receipt = {"event": "worker_exit", **active, "returncode": rc,
+                                   "started": started, "finished": time.time(),
+                                   "allocated_worker_seconds": time.time() - started}
+                with (leaf / "process_receipts.jsonl").open("a") as handle:
+                    handle.write(json.dumps(process_receipt) + "\n")
+                print(json.dumps(process_receipt), flush=True)
                 if rc:
                     (leaf / "worker_failure.json").write_text(json.dumps(dict(active, returncode=rc), indent=2) + "\n")
                     raise RuntimeError(f"worker failed: {model}/{suite}/{log_name}")
