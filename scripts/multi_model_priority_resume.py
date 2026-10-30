@@ -19,6 +19,7 @@ def main():
     p.add_argument("--supervisor-pid", type=int, required=True)
     p.add_argument("--attempt", default="priority_attempt001")
     p.add_argument("--qualify-held-counts", action="store_true")
+    p.add_argument("--candidate-source", type=Path)
     a = p.parse_args()
     root = a.root.resolve()
     leaf = root / "scheduling" / a.attempt
@@ -27,7 +28,7 @@ def main():
     start = proc.joinpath("stat").read_text().split()[21]
     coordinator = root / "private/execution/8c0d14b031636ddcc708df75fa1d57aefa8b0ba4"
     bindings = root / "private/model_worker_bindings001.json"
-    candidate = Path(__file__).resolve().parents[1]
+    candidate = a.candidate_source.resolve() if a.candidate_source else Path(__file__).resolve().parents[1]
     stages = [(["trado", "ultrallada"], ["humaneval"]),
               (["trado"], ["aime26"]),
               (["llada22"], ["ruler128k"]),
@@ -43,10 +44,17 @@ def main():
               "reason": "qualify full short-benchmark adapters before longest full-horizon panels"}
     (leaf / "config.json").write_text(json.dumps(config, indent=2) + "\n")
     while proc.exists():
-        active = json.loads((root / "private/active_worker.json").read_text())
+        try:
+            active = json.loads((root / "private/active_worker.json").read_text())
+        except (OSError, json.JSONDecodeError):
+            time.sleep(1)
+            continue
         child_proc = Path("/proc") / str(active["pid"])
         if active.get("model") == "llada22" and active.get("suite") == "aime26" and child_proc.exists():
-            argv = child_proc.joinpath("cmdline").read_bytes().split(b"\0")
+            try:
+                argv = child_proc.joinpath("cmdline").read_bytes().split(b"\0")
+            except FileNotFoundError:
+                continue
             argv = [x.decode() for x in argv if x]
             is_last = ("--arm" in argv and argv[argv.index("--arm") + 1] == "value_v3a_singleton_reuse_r4"
                        and "--shard" in argv and argv[argv.index("--shard") + 1] == "4")

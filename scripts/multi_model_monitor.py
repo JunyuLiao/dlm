@@ -19,6 +19,19 @@ def query(command):
         return {"error": f"{type(error).__name__}: {error}"}
 
 
+def read_state(path):
+    # Older frozen workers publish this small file without an atomic rename.
+    # A reader at a worker transition must retain driver monitoring.
+    for attempt in range(3):
+        try:
+            return json.loads(path.read_text()), None
+        except (OSError, json.JSONDecodeError) as error:
+            last_error = type(error).__name__
+            if attempt < 2:
+                time.sleep(.05)
+    return None, last_error
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("root", type=Path)
@@ -35,16 +48,24 @@ def main():
                   "compute_processes": query(["nvidia-smi", "--query-compute-apps=pid,process_name,used_gpu_memory", "--format=csv,noheader"])}
         state = root / "private" / "active_worker.json"
         if state.exists():
-            value = json.loads(state.read_text())
+            value, error = read_state(state)
+            if error:
+                record["worker_state_read_error"] = error
+        else:
+            value = None
+        if value is not None:
             pid = int(value["pid"])
             record["worker"] = {k: value[k] for k in ("pid", "model", "phase", "attempt") if k in value}
             record["worker"]["liveness"] = query(["ps", "-p", str(pid), "-o", "pid=,ppid=,lstart=,etime=,pcpu=,pmem=,comm="])
             forward = root / "private/forward_heartbeats" / f"worker{pid}.json"
             if forward.exists():
-                value = json.loads(forward.read_text())
-                record["worker"]["forward_heartbeat_age_seconds"] = time.time() - value["time"]
-                record["worker"]["denoising_forwards_in_request"] = value["counts"].get("denoising_forwards")
-                record["worker"]["block_start"] = value["block_start"]
+                heartbeat, error = read_state(forward)
+                if heartbeat is not None:
+                    record["worker"]["forward_heartbeat_age_seconds"] = time.time() - heartbeat["time"]
+                    record["worker"]["denoising_forwards_in_request"] = heartbeat["counts"].get("denoising_forwards")
+                    record["worker"]["block_start"] = heartbeat["block_start"]
+                else:
+                    record["worker"]["forward_state_read_error"] = error
         record_files = list(root.glob("runs/**/records.jsonl"))
         record["record_files"] = len(record_files)
         record["complete_shards"] = len(list(root.glob("runs/**/final_complete.json")))
