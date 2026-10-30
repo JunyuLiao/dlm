@@ -11,6 +11,7 @@ def main():
     a = p.parse_args()
     root = a.root.resolve()
     panels = {}
+    accepted_shards = set()
     for path in sorted((root / "runs").glob("*/*/*/shard*/attempt*/records.jsonl")):
         leaf = path.parent
         parts = path.relative_to(root / "runs").parts
@@ -18,6 +19,10 @@ def main():
         value = panels.setdefault(key, {"complete_shards": 0, "complete_requests": 0, "partial_requests": 0})
         count = sum(1 for line in path.open() if line.strip())
         complete = (leaf / "final_complete.json").exists()
+        if str(leaf.parent) in accepted_shards:
+            continue
+        if complete:
+            accepted_shards.add(str(leaf.parent))
         value["complete_shards"] += int(complete)
         value["complete_requests" if complete else "partial_requests"] += count
         value["last_record_utc"] = datetime.datetime.fromtimestamp(path.stat().st_mtime, datetime.timezone.utc).isoformat()

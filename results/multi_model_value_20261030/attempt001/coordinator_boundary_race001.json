@@ -1,0 +1,12 @@
+{
+  "cause": "Coordinator computed next attempt before waiting for an in-flight shard to finish; completion marker arrived during the idle wait",
+  "affected_shard": "llada22/humaneval/mass_topk_reuse_r4/shard003",
+  "canonical_attempt": "attempt001",
+  "redundant_repeat_attempt": "attempt002",
+  "primary_coverage_rule": "earliest complete immutable attempt per exact model/suite/arm/shard",
+  "duplicate_counts_as_new_questions": false,
+  "duplicate_is_diagnostic_repeat_only": true,
+  "current_repeat_worker_signaled": false,
+  "repair": "recheck completion after idle wait before launch; scoring and verification accept one canonical completed attempt",
+  "utc": "2026-10-30T02:22:14.648932+00:00"
+}

@@ -37,8 +37,13 @@ def main():
     he.sandbox_preflight()
     tables = collections.defaultdict(list)
     sources = []
+    accepted_shards = set()
     for marker in sorted((root / "runs").glob("*/*/*/shard*/attempt*/final_complete.json")):
         leaf = marker.parent
+        shard_identity = str(leaf.parent.relative_to(root))
+        if shard_identity in accepted_shards:
+            continue  # First complete immutable attempt is the canonical shard.
+        accepted_shards.add(shard_identity)
         config = json.loads((leaf / "config.json").read_text())
         dataset = json.loads((root / "private/data" / config["model"] / (config["suite"] + ".json")).read_text())
         byid = {r["id"]: r for r in dataset}

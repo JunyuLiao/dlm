@@ -56,7 +56,7 @@ def main():
             environment.update(PYTHONPATH=os.pathsep.join(paths),
                                HF_MODULES_CACHE=str(root / "private/hf_modules"),
                                TRITON_CACHE_DIR=str(root / "private/triton_cache"))
-            def run(command, log_name):
+            def run(command, log_name, completed_parent=None):
                 # Driver and competing-worker check before every model child.
                 while True:
                     gpu = subprocess.run(["nvidia-smi", "--query-compute-apps=pid", "--format=csv,noheader"], capture_output=True, text=True, check=True)
@@ -66,6 +66,10 @@ def main():
                         raise RuntimeError("GPU has an active worker before launch: " + gpu.stdout.strip())
                     print(json.dumps({"event": "waiting_for_current_worker_exit", "gpu_pids": gpu.stdout.strip()}), flush=True)
                     time.sleep(10)
+                if completed_parent is not None and list(completed_parent.glob("attempt*/final_complete.json")):
+                    print(json.dumps({"event": "completed_during_idle_wait_skip",
+                                      "model": model, "suite": suite, "log": log_name}), flush=True)
+                    return
                 log = root / "private/logs" / model / suite / log_name
                 log.parent.mkdir(parents=True, exist_ok=True)
                 started = time.time()
@@ -117,7 +121,7 @@ def main():
                     run([sys.executable, str(source / "scripts/multi_model_worker.py"), str(root),
                          model, suite, "--arm", arm, "--shard", str(shard), "--shards", "4",
                          "--threshold", str(threshold["selected_threshold"]), "--attempt", attempt],
-                        f"{arm}_shard{shard:03}_{attempt}.log")
+                        f"{arm}_shard{shard:03}_{attempt}.log", completed_parent=parent)
     (leaf / "final_complete.json").write_text(json.dumps({"status": "complete", "scope": config,
                                                          "finished": time.time()}, indent=2) + "\n")
 

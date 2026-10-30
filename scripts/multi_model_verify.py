@@ -28,8 +28,15 @@ def main():
     errors = []
     table = collections.defaultdict(dict)
     receipts = []
+    accepted_shards = set()
+    repeated_attempts = []
     for path in sorted((root / "runs").glob("*/*/*/shard*/attempt*/final_complete.json")):
         leaf = path.parent
+        shard_identity = str(leaf.parent.relative_to(root))
+        if shard_identity in accepted_shards:
+            repeated_attempts.append(str(leaf.relative_to(root)))
+            continue
+        accepted_shards.add(shard_identity)
         config = json.loads((leaf / "config.json").read_text())
         receipt = json.loads((leaf / "receipt.json").read_text())
         if receipt["records_sha256"] != sha(leaf / "records.jsonl"):
@@ -103,6 +110,7 @@ def main():
               "complete_panels": len(table), "expected_panels": 40,
               "complete_requests": sum(len(v) for v in table.values()), "expected_requests": 5110,
               "panels": panels, "receipt_fingerprints": receipts,
+              "redundant_complete_attempts_excluded": repeated_attempts,
               "main_panel_sparsity_drift_is_reported_not_retuned": True}
     (out / "receipt.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps({k: result[k] for k in ("status", "complete_panels", "complete_requests", "errors")}), flush=True)
