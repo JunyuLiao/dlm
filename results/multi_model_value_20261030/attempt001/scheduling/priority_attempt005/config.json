@@ -1,0 +1,50 @@
+{
+  "utc": "2026-10-30T20:00:55.667090+00:00",
+  "source_sha256": "cf3efc7eb259ed8d03ae87efccfdc9206ee6953de071cb7121cc3364d499e554",
+  "supervisor_pid": 3681682,
+  "supervisor_start_ticks": "202529744",
+  "stages": [
+    {
+      "models": [
+        "trado",
+        "ultrallada"
+      ],
+      "suites": [
+        "humaneval"
+      ]
+    },
+    {
+      "models": [
+        "trado"
+      ],
+      "suites": [
+        "aime26"
+      ]
+    },
+    {
+      "models": [
+        "llada22"
+      ],
+      "suites": [
+        "ruler128k"
+      ]
+    },
+    {
+      "models": [
+        "ultrallada"
+      ],
+      "suites": [
+        "aime26",
+        "ruler128k"
+      ]
+    }
+  ],
+  "qualify_held_counts_before_unstarted_models": true,
+  "candidate_source_commit": "3504a4aafb450e90b842c4015453b3528ced00cf",
+  "qualification_source_commit": "3504a4aafb450e90b842c4015453b3528ced00cf",
+  "corrected_sampler_fallback_commit": "e9672e29d9d2db8fc423c37b1896581b55280952",
+  "worker_sources_sha256": "df735b33073a1ebd0592bbb69790a14ea13d7f45130af6bc582353bc7e731e49",
+  "scientific_settings_changed": false,
+  "gpu_workers_signaled": false,
+  "reason": "qualify full short-benchmark adapters before longest full-horizon panels"
+}

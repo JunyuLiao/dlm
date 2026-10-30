@@ -7,7 +7,7 @@ Campaign: `results/multi_model_value_20261030/attempt001/`. Planned primary
 coverage is40panels/5110requests. Root `final_complete.json` is absent.
 
 Current numerical worker source is `224f8f11` for LLaDA2.2. Queue004 uses
-coordinator `8c0d14b0`; V3a AIME shard002 is active. Shard001 completed23requests
+coordinator `8c0d14b0`; V3a AIME shard003 is active. Shards001/002 completed46requests;
 at49.9957%consumer sparsity. All three model checkpoints, runtimes and private
 inputs are pinned. Publisher runtime compatibility is isolated; shared
 installations are unchanged. Private RULER130 inputs per supported tokenizer
@@ -58,15 +58,23 @@ leftover masks and tied confidences. Receipt:
 `qualification/ultra_cpu_sampler/attempt001/receipt.json`.
 
 Corrected uncached Ultra fallback `e9672e29` has attention bytes identical to
-8c0d14b0. Candidate `09cfd911` shares its corrected sampler and adds cached
-held-map tile accounting. Scheduler PID3732877, CPU source `4dd4a2fd`, waits in
-`scheduling/priority_attempt004/`. During the last V3a AIME shard004 it requests
+8c0d14b0. Candidate `3504a4aa` shares its corrected sampler and adds cached
+held-map tile accounting plus a gated statistics memory option. Scheduler
+PID3734648, CPU source `3504a4aa`, waits in
+`scheduling/priority_attempt005/`. During the last V3a AIME shard004 it requests
 only a coordinator boundary stop, lets that GPU worker finish normally, then
 requires two-block publisher-model parity and cache counter/output parity at
 `qualification/held_counts/attempt006/receipt.json`. A native-parity failure
 blocks Ultra launch. An optional counter failure after native parity may retain
 the corrected uncached fallback. It never falls back to the older Ultra sampler.
-No optional optimization is enabled yet. Pending order: TraDo/UltraHumanEval,
+No optional optimization is enabled yet. After gate006 passes, optional
+`qualification/statistics_memory/attempt007/` compares all three sparse arms at
+Q513,KV131071,H32,D128 under30GiBsimulated model/map residency. It requires
+identical masks, consumer outputs and counters with mean budget512MiBversus4GiB;
+actual statistics batch calls must be5versus2. Only a passing receipt enables
+the larger budget for future Ultra requests. Otherwise512MiBis retained.
+The corrected native sampler function is byte-identical to the CPU-oracle
+version. Handoff: `priority_schedule_handoff005.json`. Pending order: TraDo/UltraHumanEval,
 TraDoAIME,LLaDA2.2RULER,UltraAIME/RULER. The union remains40panels/5110requests.
 LLaDA2.2 and TraDo numerical sources remain224f8f11and8c0d14b0respectively.
 
@@ -82,7 +90,8 @@ See `cpu_supervision_handoff004.json`; prior waiting attempts remain preserved.
 
 Monitor PID3730597, CPU source `f5a5760f`, records nvidia-smi every900seconds
 and tolerates transient worker-state writes. Only one model worker occupies the
-H100. Health receipts and direct checks pass; inspect `health/gpu_health.jsonl`
+H100. At20:00UTC the sole intended third-shard worker is healthy,about32GB,41C.
+Health receipts and direct checks pass; inspect `health/gpu_health.jsonl`
 and `private/active_worker.json` for live identities. Continue until all planned
 panels, diagnostics, scoring and audits complete, then report final results.
 Historical paused/negative DiffusionGemma campaigns remain untouched.

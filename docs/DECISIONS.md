@@ -4136,3 +4136,19 @@ waiting CPU processes were replaced with no active children; no GPU worker
 was signaled. Monitorf5a5760fcontinues its900-second checks and tolerates
 transient non-atomic worker-state writes.
 
+## 2026-10-30 — Qualify long-context statistics memory before enabling larger batches
+
+Candidate3504a4aaretains the corrected Ultra sampler unchanged. Optional gate007
+compares512MiBand4GiBconfigured projected-statistics budgets at Q513,KV131071,
+H32,D128, with30GiBreserved to simulate model/map residency. All three sparse
+selectors must give bitwise-equal masks/consumer outputs and equal work counters;
+the probe records actual statistics submissions and peak GPU allocation. No
+latency or end-to-end speedup is inferred from this prospective optimization.
+Only a passing gate enables the larger budget. A failed optional probe retains
+the original budget, while native-sampler qualification remains mandatory.
+
+The waiting scheduler was rebound before its boundary, with no children and
+no GPU worker signaled. LLaDA2.2/TraDo numerical sources and all40panels remain
+fixed. At20:00UTC V3a AIME shards001/002 are complete46requests, shard003 is
+healthy on the sole H100 worker, and all later qualifications remain unexecuted.
+
