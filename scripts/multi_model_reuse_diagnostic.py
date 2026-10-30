@@ -37,7 +37,8 @@ def main():
     request_id = None
     cap_per_request = 8
     sampled = [0]
-    extra = {"attention_calls": 0, "discovery_qk_pairs": 0, "model_forwards": 0}
+    extra = {"attention_calls": 0, "discovery_qk_pairs": 0,
+             "projected_value_tokens": 0, "model_forwards": 0}
 
     def observe(q, k, v, layer, scale, **kwargs):
         out = original(q, k, v, layer, scale, **kwargs)
@@ -58,13 +59,17 @@ def main():
             shadow.begin_forward()
             fresh = shadow.attention(part, k, v, layer, scale)
             keep, lists = shadow.maps[(layer, part.shape[2], k.shape[2])]
-            key = (request_id, h.runtime.block_start, name)
+            # Structural edits can change indices inside the same block. A
+            # held map is meaningful only for an unchanged attention geometry.
+            key = (request_id, h.runtime.block_start, h.runtime.invalidations,
+                   tuple(part.shape), tuple(k.shape), name)
             if key not in held:
-                held[key] = (keep.clone(), lists)
-            old_keep, old_lists = held[key]
+                held[key] = (keep.clone(), lists, h.runtime.call_in_block)
+            old_keep, old_lists, observed_call = held[key]
             carried = v27_fa4.sparse_lists(part, k, v, old_lists, scale)
             extra["attention_calls"] += 2
             extra["discovery_qk_pairs"] += shadow.counts["discovery_qk_pairs"]
+            extra["projected_value_tokens"] += shadow.counts["projected_value_tokens"]
             denom = dense.float().norm(dim=-1).clamp_min(1e-8)
             fresh_error = (fresh.float() - dense.float()).norm(dim=-1) / denom
             held_error = (carried.float() - dense.float()).norm(dim=-1) / denom
@@ -72,6 +77,7 @@ def main():
             union = int((keep | old_keep).sum())
             record = {"id": request_id, "model": a.model, "selector": name,
                       "block_start": h.runtime.block_start, "age": age,
+                      "held_age": h.runtime.call_in_block - observed_call,
                       "query_rows": part.shape[2], "context_tokens": k.shape[2],
                       "fresh_held_iou": inter / union if union else 1.,
                       "fresh_kept_tiles": int(keep.sum()), "held_kept_tiles": int(old_keep.sum()),
@@ -84,7 +90,6 @@ def main():
                 handle.write(json.dumps(record) + "\n")
         return out
 
-    h.runtime.attention = observe
     path = root / "private/data" / a.model / "calibration_code_contextmatched001.json"
     rows = json.loads(path.read_text())
     started = time.time()
@@ -92,15 +97,28 @@ def main():
     for row in rows:
         request_id = row["id"]
         sampled[0] = 0
+        h.runtime.attention = original
+        baseline = h.generate(row["prompt"], 128, 142)
+        h.runtime.attention = observe
         result = h.generate(row["prompt"], 128, 142)
+        output_equal = baseline["tokens"] == result["tokens"]
+        counts_equal = baseline["counts"] == result["counts"]
+        if not output_equal or not counts_equal:
+            failure = {"status": "observer_parity_failed", "id": request_id,
+                       "output_equal": output_equal, "counts_equal": counts_equal}
+            (leaf / "failure.json").write_text(json.dumps(failure, indent=2) + "\n")
+            raise RuntimeError("diagnostic observer changed the native execution")
         requests.append({"id": request_id, "counts": result["counts"],
                          "output_sha256": hashlib.sha256(json.dumps(result["tokens"]).encode()).hexdigest(),
+                         "observer_output_equal": output_equal,
+                         "observer_counts_equal": counts_equal,
                          "sampled_states": sampled[0]})
     receipt = {"status": "complete_development_diagnostic", "model": a.model,
                "manifest_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
                "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
                "threshold": threshold, "requests": requests, "measurements": len(records),
                "extra_observer_work": extra, "gpu_worker_seconds": time.time() - started,
+               "qualification_reference_requests": len(requests),
                "model_output_intervention": False, "quality_scored": False}
     (leaf / "receipt.json").write_text(json.dumps(receipt, indent=2) + "\n")
     (leaf / "final_complete.json").write_text(json.dumps({"status": "complete", "scope": "development_only"}) + "\n")
