@@ -104,6 +104,14 @@ class ModelHarness:
                                         device_map="cuda")
         self.model.eval()
         self.tokenizer = AutoTokenizer.from_pretrained(path, trust_remote_code=True)
+        if self.key == "trado":
+            publisher_forward = self.model.forward
+            def mask_compat(*args, **kwargs):
+                mask = kwargs.get("attention_mask")
+                if mask is not None and mask.ndim == 3:
+                    kwargs["attention_mask"] = mask.unsqueeze(1)
+                return publisher_forward(*args, **kwargs)
+            self.model.forward = mask_compat
         self.original_forward = self.model.forward
         if install:
             self.install()

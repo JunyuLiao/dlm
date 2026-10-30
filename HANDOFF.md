@@ -1,3 +1,31 @@
+## 2026-10-30 UTC — Authorized three-model value evaluation in preparation
+
+Branch `multi-models`; verified implementation checkpoint `7b697c2c`.
+User approved LLaDA2.2-mini, UltraLLaDA and TraDo-8B-Instruct with no GPU-hour
+restriction and 15-minute GPU health checks until completion. Protocol:
+`docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md`; campaign:
+`results/multi_model_value_20261030/attempt001/`.
+
+All three immutable model snapshots are downloaded and fingerprinted. D128
+FA4/selector consumer synthetic CUDA qualification attempt002 passes; initial
+shape failure remains in attempt001. LLaDA2.2 synthetic short/long checks
+reproduce publisher dense final outputs; long-context V31/V3a consumer budgets
+are exactly50%. All-kept FA4 changes denoising calls despite the same answer,
+so retain native and all-kept controls. No benchmark result is yet complete.
+
+Publisher runtime compatibility for TraDo and UltraLLaDA is isolated inside
+the campaign private directory; shared environments are unchanged. Qualification
+failures are retained. Private full130 RULER inputs are being generated per
+tokenizer; no truncation or104-item substitution. Short manifests preserve
+AIME30x3 and HumanEval164x1; development math/code inputs are separate.
+
+The CPU monitor is running and writes `health/gpu_health.jsonl` every900s.
+Only one model worker may occupy the H100. Check actual process/GPU state and
+the latest immutable qualification leaf before launch. Continue qualification,
+freeze source bindings, calibrate V2 computation-only, run all planned shards,
+score officially, audit fairness/coverage, then publish a completion marker.
+The older paused/negative DiffusionGemma campaigns remain untouched.
+
 ## 2026-10-29 UTC — User-authorized repository publication preparation
 
 Prepared the pending code, documentation and numeric-result updates from verified
