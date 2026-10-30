@@ -39,7 +39,12 @@ def main():
             pid = int(value["pid"])
             record["worker"] = {k: value[k] for k in ("pid", "model", "phase", "attempt") if k in value}
             record["worker"]["liveness"] = query(["ps", "-p", str(pid), "-o", "pid=,ppid=,lstart=,etime=,pcpu=,pmem=,comm="])
-        record["completed_record_files"] = len(list(root.glob("runs/**/records.jsonl")))
+        record_files = list(root.glob("runs/**/records.jsonl"))
+        record["record_files"] = len(record_files)
+        record["complete_shards"] = len(list(root.glob("runs/**/final_complete.json")))
+        record["record_lines"] = sum(sum(1 for line in p.open() if line.strip()) for p in record_files)
+        if record_files:
+            record["latest_progress_age_seconds"] = time.time() - max(p.stat().st_mtime for p in record_files)
         record["final_complete"] = (root / "final_complete.json").exists()
         with (health / "gpu_health.jsonl").open("a") as handle:
             handle.write(json.dumps(record) + "\n")
