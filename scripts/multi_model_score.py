@@ -82,13 +82,18 @@ def main():
         if not a.allow_partial and len(rows) != expected:
             raise ValueError(f"incomplete {model}/{suite}/{arm}: {len(rows)}/{expected}")
         counts = collections.Counter()
+        problem_outputs = collections.defaultdict(set)
         for r in rows:
             counts.update(r["counts"])
+            problem_outputs[r["id"]].add(r["output_sha256"])
         n = counts["denoising_forwards"]
         c = counts["canvases"]
         summary = {"requests": len(rows), "expected": expected,
                    "accuracy": statistics.mean(r["quality"] for r in rows),
                    "full_credit": sum(r["quality"] == 1. for r in rows),
+                   "unique_problems": len(problem_outputs),
+                   "problems_with_distinct_outputs_across_seeds": sum(len(v) > 1 for v in problem_outputs.values()),
+                   "repeated_same_problem_output_requests": len(rows) - sum(len(v) for v in problem_outputs.values()),
                    "N": n, "C": c, "pooled_N_per_C": n / c,
                    "mean_request_N": n / len(rows),
                    "mean_request_C": c / len(rows),
