@@ -63,12 +63,13 @@ def calibration(h, root, suite, attempt, bracket=(1e-6, 1.), manifest=None):
     leaf.mkdir(parents=True, exist_ok=False)
     data_path = Path(manifest) if manifest else root / "private/data" / h.key / (CALIBRATION[suite] + ".json")
     rows = json.loads(data_path.read_text())
-    cap = 512 if suite == "aime26" else 256 if suite == "humaneval" else 128
+    cap = CAPS[h.key][suite]
     # Frozen logarithmic bisection, sparsity measurements only. Online reuse
     # makes the curve non-monotone: retain all candidates and choose closest.
     lo, hi = bracket
     immutable(leaf / "config.json", {"model": h.key, "suite": suite,
                                      "threshold_bracket": list(bracket), "candidates": 7,
+                                     "generation_cap": cap,
                                      "source_sha256": sha(__file__), "data_sha256": sha(data_path)})
     candidates = []
     for index in range(7):
