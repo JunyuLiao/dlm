@@ -1,6 +1,6 @@
 ## 2026-10-30 UTC — Authorized three-model value evaluation in preparation
 
-Branch `multi-models`; generation checkpoint `27d580d6`; analysis `898176b3`.
+Branch `multi-models`; generation checkpoint `da425f4a`; analysis `898176b3`.
 User approved LLaDA2.2-mini, UltraLLaDA and TraDo-8B-Instruct with no GPU-hour
 restriction and 15-minute GPU health checks until completion. Protocol:
 `docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md`; campaign:
@@ -13,14 +13,19 @@ reproduce publisher dense final outputs; long-context V31/V3a consumer budgets
 are exactly50%. All-kept FA4 changes denoising calls despite the same answer,
 so retain native and all-kept controls. TraDo attempt008 and UltraLLaDA
 attempt002 also reproduce publisher sampler outputs; all five arms pass
-synthetic smoke. The full serial queue is active from the frozen private
-execution tree, starting LLaDA2.2 coding calibration before HumanEval panels.
-No benchmark result is yet complete.
+synthetic smoke. The full serial queue attempt002 is active from the frozen
+private execution tree, beginning LLaDA2.2 native dense HumanEval shards.
+V2 coding calibration attempt003 confirms48.49% at threshold0.8944271909999159.
+The two earlier calibration attempts are retained: their development prompts
+were too short for the target under mandatory KV64 protection. New independent
+specifications have median169tokens versus HumanEval161; no benchmark output
+or score was used. Execution bindings001/002/003 describe source changes.
+No full benchmark result is yet complete.
 
 Publisher runtime compatibility for TraDo and UltraLLaDA is isolated inside
 the campaign private directory; shared environments are unchanged. Qualification
-failures are retained. Private full130 RULER inputs are being generated per
-tokenizer; no truncation or104-item substitution. Short manifests preserve
+failures are retained. Private full130 RULER inputs are complete per tokenizer;
+no truncation or104-item substitution. Short manifests preserve
 AIME30x3 and HumanEval164x1; development math/code inputs are separate.
 
 The CPU monitor is running and writes `health/gpu_health.jsonl` every900s.
