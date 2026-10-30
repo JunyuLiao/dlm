@@ -1,17 +1,21 @@
 ## 2026-10-30 UTC — Authorized three-model value evaluation in preparation
 
-Branch `multi-models`; verified implementation checkpoint `7b697c2c`.
+Branch `multi-models`; generation checkpoint `27d580d6`; analysis `898176b3`.
 User approved LLaDA2.2-mini, UltraLLaDA and TraDo-8B-Instruct with no GPU-hour
 restriction and 15-minute GPU health checks until completion. Protocol:
 `docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md`; campaign:
 `results/multi_model_value_20261030/attempt001/`.
 
 All three immutable model snapshots are downloaded and fingerprinted. D128
-FA4/selector consumer synthetic CUDA qualification attempt002 passes; initial
-shape failure remains in attempt001. LLaDA2.2 synthetic short/long checks
+FA4/selector independent CPU-mask/CUDA consumer qualification attempt004 passes;
+initial shape/caller failures remain preserved. LLaDA2.2 synthetic short/long checks
 reproduce publisher dense final outputs; long-context V31/V3a consumer budgets
 are exactly50%. All-kept FA4 changes denoising calls despite the same answer,
-so retain native and all-kept controls. No benchmark result is yet complete.
+so retain native and all-kept controls. TraDo attempt008 and UltraLLaDA
+attempt002 also reproduce publisher sampler outputs; all five arms pass
+synthetic smoke. The full serial queue is active from the frozen private
+execution tree, starting LLaDA2.2 coding calibration before HumanEval panels.
+No benchmark result is yet complete.
 
 Publisher runtime compatibility for TraDo and UltraLLaDA is isolated inside
 the campaign private directory; shared environments are unchanged. Qualification
