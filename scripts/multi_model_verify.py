@@ -21,6 +21,9 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("root", type=Path)
     p.add_argument("--attempt", default="attempt001")
+    p.add_argument("--models", nargs="+", choices=MODELS, default=list(MODELS))
+    p.add_argument("--suites", nargs="+", choices=("aime26", "humaneval", "ruler128k"),
+                   default=["aime26", "humaneval", "ruler128k"])
     a = p.parse_args()
     root = a.root.resolve()
     out = root / "verification" / a.attempt
@@ -36,12 +39,14 @@ def main():
     repeated_attempts = []
     for path in sorted((root / "runs").glob("*/*/*/shard*/attempt*/final_complete.json")):
         leaf = path.parent
+        config = json.loads((leaf / "config.json").read_text())
+        if config["model"] not in a.models or config["suite"] not in a.suites:
+            continue
         shard_identity = str(leaf.parent.relative_to(root))
         if shard_identity in accepted_shards:
             repeated_attempts.append(str(leaf.relative_to(root)))
             continue
         accepted_shards.add(shard_identity)
-        config = json.loads((leaf / "config.json").read_text())
         receipt = json.loads((leaf / "receipt.json").read_text())
         manifest = root / "private/data" / config["model"] / (config["suite"] + ".json")
         inputs = {r["id"]: r for r in json.loads(manifest.read_text())}
@@ -85,8 +90,14 @@ def main():
         receipts.append({"path": str(leaf.relative_to(root)), "receipt_sha256": sha(leaf / "receipt.json"),
                          "gpu_worker_seconds": receipt["gpu_worker_seconds"]})
     panels = {}
-    for model in MODELS:
+    expected_panels = expected_requests = 0
+    sparse_target_misses = {}
+    for model in a.models:
         for suite in (("aime26", "humaneval") if model == "trado" else ("aime26", "humaneval", "ruler128k")):
+            if suite not in a.suites:
+                continue
+            expected_panels += len(ARMS)
+            expected_requests += len(ARMS) * (90 if suite == "aime26" else 164 if suite == "humaneval" else 130)
             dataset_path = root / "private/data" / model / f"{suite}.json"
             dataset = json.loads(dataset_path.read_text())
             expected = {(r["id"], seed) for r in dataset for seed in r["seeds"]}
@@ -116,6 +127,8 @@ def main():
                     kept = sum(r["counts"]["kept_tiles"] for r in actual.values())
                     panels["/".join(panel)] = {"requests": len(actual), "eligible_tiles": eligible,
                                               "kept_tiles": kept, "consumer_sparsity": 1. - kept / eligible}
+                    if "reuse" in arm and not .48 <= 1. - kept / eligible <= .52:
+                        sparse_target_misses["/".join(panel)] = 1. - kept / eligible
                 if len(execution_bindings[panel]) > 1:
                     errors.append(f"inconsistent execution binding within panel: {panel}")
                 for ref_arm in ARMS[:2]:
@@ -131,11 +144,17 @@ def main():
                             for field in ("prompt_sha256", "prompt_tokens", "generation_cap", "model_revision", "runtime_sha256"):
                                 if row[field] != other[field]:
                                     errors.append(f"fairness binding mismatch: {panel}/{key}/{field}")
+    if not expected_panels:
+        errors.append("requested verification scope has no supported panels")
     result = {"status": "pass" if not errors else "fail", "errors": errors,
-              "complete_panels": len(table), "expected_panels": 40,
-              "complete_requests": sum(len(v) for v in table.values()), "expected_requests": 5110,
+              "scope": {"models": a.models, "suites": a.suites},
+              "verification_source_sha256": sha(Path(__file__)),
+              "complete_panels": len(table), "expected_panels": expected_panels,
+              "complete_requests": sum(len(v) for v in table.values()), "expected_requests": expected_requests,
               "panels": panels, "receipt_fingerprints": receipts,
               "redundant_complete_attempts_excluded": repeated_attempts,
+              "main_sparse_target_misses": sparse_target_misses,
+              "matched_target_comparison_valid_for_all_sparse_panels": not sparse_target_misses,
               "main_panel_sparsity_drift_is_reported_not_retuned": True}
     (out / "receipt.json").write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps({k: result[k] for k in ("status", "complete_panels", "complete_requests", "errors")}), flush=True)
