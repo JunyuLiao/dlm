@@ -17,14 +17,17 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("root", type=Path)
     p.add_argument("--supervisor-pid", type=int, required=True)
+    p.add_argument("--attempt", default="priority_attempt001")
+    p.add_argument("--qualify-held-counts", action="store_true")
     a = p.parse_args()
     root = a.root.resolve()
-    leaf = root / "scheduling/priority_attempt001"
+    leaf = root / "scheduling" / a.attempt
     leaf.mkdir(parents=True, exist_ok=False)
     proc = Path("/proc") / str(a.supervisor_pid)
     start = proc.joinpath("stat").read_text().split()[21]
     coordinator = root / "private/execution/8c0d14b031636ddcc708df75fa1d57aefa8b0ba4"
     bindings = root / "private/model_worker_bindings001.json"
+    candidate = Path(__file__).resolve().parents[1]
     stages = [(["trado", "ultrallada"], ["humaneval"]),
               (["trado"], ["aime26"]),
               (["llada22"], ["ruler128k"]),
@@ -33,6 +36,8 @@ def main():
               "source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
               "supervisor_pid": a.supervisor_pid, "supervisor_start_ticks": start,
               "stages": [{"models": m, "suites": s} for m, s in stages],
+              "qualify_held_counts_before_unstarted_models": a.qualify_held_counts,
+              "candidate_source_commit": candidate.name if a.qualify_held_counts else None,
               "worker_sources_sha256": hashlib.sha256(bindings.read_bytes()).hexdigest(),
               "scientific_settings_changed": False, "gpu_workers_signaled": False,
               "reason": "qualify full short-benchmark adapters before longest full-horizon panels"}
@@ -72,6 +77,35 @@ def main():
     environment = dict(os.environ)
     environment.update(PYTHONPATH=os.pathsep.join((str(coordinator / "src"), str(coordinator))),
                        MULTI_MODEL_STATS_QUERY_BLOCKS="8")
+    if a.qualify_held_counts:
+        env = dict(environment)
+        env.update(PYTHONPATH=os.pathsep.join((str(root / "private/compat/ultrallada"), str(candidate / "src"), str(candidate))),
+                   HF_MODULES_CACHE=str(root / "private/hf_modules"),
+                   TRITON_CACHE_DIR=str(root / "private/triton_cache"))
+        log = root / "private/held_counts_qualification006.log"
+        with log.open("x") as handle:
+            child = subprocess.Popen([sys.executable, str(candidate / "scripts/multi_model_qualify_held_counts.py"),
+                                      str(root), "--attempt", "attempt006"],
+                                     env=env, stdout=handle, stderr=subprocess.STDOUT)
+            (root / "private/active_worker.json").write_text(json.dumps({
+                "pid": child.pid, "model": "ultrallada", "phase": "qualification",
+                "attempt": "held_counts_attempt006", "started": time.time()}) + "\n")
+            rc = child.wait()
+        gate = root / "qualification/held_counts/attempt006/receipt.json"
+        enabled = rc == 0 and gate.exists() and json.loads(gate.read_text())["status"] == "pass"
+        if enabled:
+            values = json.loads(bindings.read_text())
+            values["ultrallada"] = candidate.name
+            bindings = root / "private/model_worker_bindings002.json"
+            with bindings.open("x") as handle:
+                handle.write(json.dumps(values, indent=2) + "\n")
+        (leaf / "held_counts_optimization.json").write_text(json.dumps({
+            "status": "enabled" if enabled else "qualification_failed_original_source_retained",
+            "model": "ultrallada", "candidate_source_commit": candidate.name,
+            "qualification_returncode": rc,
+            "qualification_sha256": hashlib.sha256(gate.read_bytes()).hexdigest() if gate.exists() else None,
+            "numerical_worker_sources_sha256": hashlib.sha256(bindings.read_bytes()).hexdigest(),
+            "existing_llada_and_trado_sources_changed": False}, indent=2) + "\n")
     for index, (models, suites) in enumerate(stages, 1):
         log = root / "private" / f"priority_stage{index:03}.log"
         with log.open("x") as handle:
