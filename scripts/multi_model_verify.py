@@ -26,7 +26,11 @@ def main():
     out = root / "verification" / a.attempt
     out.mkdir(parents=True, exist_ok=False)
     errors = []
+    protocol = json.loads((root / "protocol.json").read_text())
+    if protocol["spec_sha256"] != sha(Path("docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md")):
+        errors.append("frozen specification digest mismatch")
     table = collections.defaultdict(dict)
+    execution_bindings = collections.defaultdict(set)
     receipts = []
     accepted_shards = set()
     repeated_attempts = []
@@ -39,9 +43,19 @@ def main():
         accepted_shards.add(shard_identity)
         config = json.loads((leaf / "config.json").read_text())
         receipt = json.loads((leaf / "receipt.json").read_text())
+        manifest = root / "private/data" / config["model"] / (config["suite"] + ".json")
+        inputs = {r["id"]: r for r in json.loads(manifest.read_text())}
+        if config["manifest_sha256"] != sha(manifest):
+            errors.append("manifest digest mismatch: " + str(leaf.relative_to(root)))
+        if config["protocol_sha256"] != sha(root / "protocol.json"):
+            errors.append("protocol digest mismatch: " + str(leaf.relative_to(root)))
+        if config["model_revision"] != protocol["models"][config["model"]]:
+            errors.append("model revision mismatch: " + str(leaf.relative_to(root)))
         if receipt["records_sha256"] != sha(leaf / "records.jsonl"):
             errors.append("records digest mismatch: " + str(leaf.relative_to(root)))
         panel = (config["model"], config["suite"], config["arm"])
+        execution_bindings[panel].add((config["runtime_sha256"], config["attention_source_sha256"],
+                                      config["host_gpu_uuid"], config.get("statistics_query_blocks", 1)))
         rows = [json.loads(line) for line in (leaf / "records.jsonl").read_text().splitlines() if line.strip()]
         if len(rows) != config["cells"]:
             errors.append("shard cell count mismatch: " + str(leaf.relative_to(root)))
@@ -50,6 +64,11 @@ def main():
             if key in table[panel]:
                 errors.append(f"duplicate cell: {panel}/{key}")
             table[panel][key] = row
+            source_row = inputs.get(row["id"])
+            if source_row is None or row["seed"] not in source_row["seeds"]:
+                errors.append(f"unexpected manifest cell: {panel}/{key}")
+            elif row["prompt_sha256"] != hashlib.sha256(source_row["prompt"].encode()).hexdigest():
+                errors.append(f"prompt digest mismatch: {panel}/{key}")
             for field in ("manifest_sha256", "source_sha256", "runtime_sha256", "protocol_sha256", "model_revision"):
                 if row[field] != config[field]:
                     errors.append(f"record/config binding mismatch: {panel}/{key}/{field}")
@@ -97,6 +116,12 @@ def main():
                     kept = sum(r["counts"]["kept_tiles"] for r in actual.values())
                     panels["/".join(panel)] = {"requests": len(actual), "eligible_tiles": eligible,
                                               "kept_tiles": kept, "consumer_sparsity": 1. - kept / eligible}
+                if len(execution_bindings[panel]) > 1:
+                    errors.append(f"inconsistent execution binding within panel: {panel}")
+                for ref_arm in ARMS[:2]:
+                    reference = execution_bindings.get((model, suite, ref_arm))
+                    if reference and execution_bindings[panel] and execution_bindings[panel] != reference:
+                        errors.append(f"attention/runtime/GPU/statistics binding mismatch: {panel}/{ref_arm}")
                 for key, row in actual.items():
                     if arm == "value_v2_gaussian32_reuse_r4" and row["threshold"] != calibration["selected_threshold"]:
                         errors.append(f"V2 threshold drift: {panel}/{key}")

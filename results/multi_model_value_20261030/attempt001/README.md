@@ -1,12 +1,14 @@
 # Three-model value-direction evaluation
 
-Status: running; no final accuracy result yet. User authorized the complete
+Status: running; LLaDA2.2 HumanEval complete, campaign incomplete. User authorized the complete
 campaign without a GPU-hour ceiling, with host GPU monitoring every15minutes.
 
 Specification: `docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md`.
-Frozen scientific configuration: `protocol.json`. Generation source binding:
-`27d580d661a307f4a669e61fc852b7b3ae2a4914`; later analysis-only changes do not
-change running generation. All model revisions and checkpoint/source file
+Frozen scientific configuration: `protocol.json`. Execution bindings001–004
+record the immutable worker sources; current LLaDA2.2 worker is `224f8f11`.
+Pending optimized coordinator `8c0d14b0` requires kernel gate attempt005 and
+keeps per-model sources fixed. Analysis-only changes do not change running
+generation. All model revisions and checkpoint/source file
 hashes are in `*_model_identity.json`. Runtime packages and raw generations
 remain private. A separate CPU monitor appends `health/gpu_health.jsonl`.
 
@@ -47,3 +49,10 @@ Qualification:
 Do not treat preparation, calibration, partial shards or audit timing as a
 completed benchmark. Publication requires exact coverage, official scoring,
 paired question-clustered analysis and a root completion marker.
+
+Complete first model/task panel: HumanEval164 on LLaDA2.2, all five arms,
+820 primary requests. Native/all-kept/V31/V2/V3a score141/138/83/10/103.
+See `llada22_humaneval_complete_summary.md` and corrected-scoring analysis
+`analysis_humaneval_llada22_complete002/`. V3a improves over V31 on this panel
+with more denoising calls, while remaining below dense. This is not a
+cross-model conclusion. V2's reduced calls accompany severe quality loss.
