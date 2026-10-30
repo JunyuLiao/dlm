@@ -2595,3 +2595,37 @@ This entry records completed A1 only;AA/SA/AS/SS and StageB/C were not launched.
 - H100idle. CPUreader/unlaunched qualification preserved; no GPU worker signaled,
   resource ceiling, paused resume or push. Clean online/V31rerun,broad benchmark,
   kernels and new refresh-trigger policies remain unlaunched per scientific gates.
+## 2026-10-30 — Complete LLaDA2.2-mini HumanEval value-selector panel
+
+Source: `results/multi_model_value_20261030/attempt001/`;
+`llada22_humaneval_complete_summary.md`,
+`analysis_humaneval_llada22_complete001/model_panel_complete.json` and
+`verification/llada22_humaneval_complete001/receipt.json`.
+Protocol `protocol.json`; generation bindings003/004; model revision
+`e4f77d25ab5ca86f2223c6cdc6a72b887e20c8a5`. The three-model campaign
+is still active; this records only the complete164-question seed42 panel.
+
+All five arms complete164requests,820primarytotal, native32-token blocks,
+all20attention layers, Q128xKV64, currentV, sampler/editing/EOS unchanged.
+Native dense/all-kept/mass/V2/V3a official correct counts141/138/83/10/103.
+Mass/V2/V3a consumer sparsity49.9780/49.2165/49.9902%; N6029/2331/6941;
+C1285/503/1422; outputT35900/10317/40227. NativeN4717,C1405,T39862;
+all-keptN5153,C1439,T40870. Keep consumer differences explicit.
+
+V3a versus mass accuracy+12.195pp, question-bootstrap95%[3.049,21.341]pp;
+40qualitywins/20losses. Mean calls+5.561[2.189,9.726], paired geometric
+Nratio1.10030 and N/Cratio0.99754. This is accuracy improvement over mass
+with more total calls/canvases/output, far below native dense accuracy.
+V2 has severe quality loss; fewer calls and shorter output do not establish
+useful denoising acceleration. No clean latency or cross-model claim.
+
+V2 threshold0.8944271909999159 was frozen from independent development
+computation, confirmed48.4928%; all sixcalibrationrequests finish before256cap.
+Short-development-geometry failed calibration attempts remain retained.
+Exact coverage, source/protocol/model fairness, record hashes and total-forward
+accounting pass820cells. One redundant41-cell mass shard repeat, caused by a
+CPU-coordinator idle-wait race, matches all outputs/N/C/tilecounts and is
+excluded from primary coverage. No GPUworker was signaled. Historical
+DiffusionGemma identities/negatives and inherited Yuhan reuse provenance stay
+distinct. AIME/RULER and other models are not complete at this checkpoint.
+
