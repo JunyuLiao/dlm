@@ -118,6 +118,9 @@ class AttentionRuntime:
     def begin_forward(self):
         self.counts["denoising_forwards"] += 1
         self.call_in_block += 1
+        callback = getattr(self, "heartbeat", None)
+        if callback is not None:
+            callback()
 
     def invalidate(self):
         self.maps.clear()

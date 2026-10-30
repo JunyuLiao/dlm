@@ -39,6 +39,12 @@ def main():
             pid = int(value["pid"])
             record["worker"] = {k: value[k] for k in ("pid", "model", "phase", "attempt") if k in value}
             record["worker"]["liveness"] = query(["ps", "-p", str(pid), "-o", "pid=,ppid=,lstart=,etime=,pcpu=,pmem=,comm="])
+            forward = root / "private/forward_heartbeats" / f"worker{pid}.json"
+            if forward.exists():
+                value = json.loads(forward.read_text())
+                record["worker"]["forward_heartbeat_age_seconds"] = time.time() - value["time"]
+                record["worker"]["denoising_forwards_in_request"] = value["counts"].get("denoising_forwards")
+                record["worker"]["block_start"] = value["block_start"]
         record_files = list(root.glob("runs/**/records.jsonl"))
         record["record_files"] = len(record_files)
         record["complete_shards"] = len(list(root.glob("runs/**/final_complete.json")))

@@ -16,6 +16,8 @@ import textwrap
 import types
 import sys
 import os
+import time
+import json
 
 import torch
 from transformers import AutoConfig, AutoModel, AutoModelForCausalLM, AutoTokenizer
@@ -61,6 +63,8 @@ class ModelHarness:
             if not gate.exists() or __import__('json').loads(gate.read_text()).get("status") != "pass":
                 raise RuntimeError("batched statistics require the preserved parity gate")
         self.runtime = AttentionRuntime(arm, threshold, statistics_query_blocks=query_blocks)
+        self.last_heartbeat = 0.
+        self.runtime.heartbeat = self.heartbeat
         self.cache = {}
         self.store_cache = False
         self.query_offset = 0
@@ -68,6 +72,22 @@ class ModelHarness:
         self.original_forward = None
         self.in_joint = False
         self.source_changes = {}
+
+    def heartbeat(self):
+        now = time.time()
+        if now - self.last_heartbeat < 60:
+            return
+        self.last_heartbeat = now
+        path = self.root / "private/forward_heartbeats" / f"worker{os.getpid()}.json"
+        path.parent.mkdir(parents=True, exist_ok=True)
+        value = {"pid": os.getpid(), "model": self.key, "arm": self.runtime.arm,
+                 "time": now, "phase": self.runtime.phase,
+                 "block_start": self.runtime.block_start, "block_end": self.runtime.block_end,
+                 "call_in_block": self.runtime.call_in_block,
+                 "counts": dict(self.runtime.counts)}
+        temporary = path.with_suffix(".tmp")
+        temporary.write_text(json.dumps(value) + "\n")
+        temporary.replace(path)
 
     def load(self, install=True):
         if self.key in ("trado", "ultrallada"):
