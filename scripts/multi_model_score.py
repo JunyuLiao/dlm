@@ -23,7 +23,7 @@ def final_text(text):
 def main():
     from scripts.v31_official import aime_numeric_score
     from scripts import v27_humaneval as he
-    from dllm.evaluation.ruler.official import load_scorers
+    from dllm.evaluation.ruler.official import load_scorers, verify_checkout
     p = argparse.ArgumentParser()
     p.add_argument("root", type=Path)
     p.add_argument("--output", default="analysis001")
@@ -33,8 +33,22 @@ def main():
     out = root / a.output
     out.mkdir(parents=True, exist_ok=False)
     numeric, numeric_source = aime_numeric_score()
+    ruler_source = verify_checkout("reference/RULER")
     scorer = load_scorers("reference/RULER")
     he.sandbox_preflight()
+    scoring_identity = {
+        "aggregation_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+        "aime_numeric": numeric_source,
+        "humaneval_source_sha256": hashlib.sha256(Path(he.__file__).read_bytes()).hexdigest(),
+        "humaneval_extractor": he.EXTRACTOR,
+        "humaneval_program": he.PROGRAM,
+        "humaneval_sandbox": he.SANDBOX,
+        "ruler": ruler_source,
+        "bootstrap_seed": 738, "bootstrap_resamples": 10000,
+        "inference_unit": "problem_cluster",
+        "final_text_rule": "after_last_closed_think_or_raw; unclosed_think_empty",
+    }
+    (out / "scoring_identity.json").write_text(json.dumps(scoring_identity, indent=2) + "\n")
     tables = collections.defaultdict(list)
     sources = []
     accepted_shards = set()
