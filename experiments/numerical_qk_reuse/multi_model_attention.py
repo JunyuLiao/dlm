@@ -96,7 +96,6 @@ class AttentionRuntime:
         self.arm, self.threshold, self.backend = arm, threshold, backend
         self.statistics_query_blocks = statistics_query_blocks
         self.maps, self.matrices = {}, {}
-        self.map_kept_counts = {}
         self.counts = Counter()
         self.block_start = 0
         self.block_end = 0
@@ -106,7 +105,6 @@ class AttentionRuntime:
 
     def reset(self):
         self.maps.clear()
-        self.map_kept_counts.clear()
         self.counts.clear()
         self.call_in_block = 0
 
@@ -114,7 +112,6 @@ class AttentionRuntime:
         self.block_start, self.block_end = start, end
         self.call_in_block = 0
         self.maps.clear()
-        self.map_kept_counts.clear()
         self.phase = "denoise"
         self.counts["canvases"] += 1
 
@@ -127,7 +124,6 @@ class AttentionRuntime:
 
     def invalidate(self):
         self.maps.clear()
-        self.map_kept_counts.clear()
         self.invalidations += 1
 
     def project(self, v, layer):
@@ -196,11 +192,8 @@ class AttentionRuntime:
                 kept[:, :, qb:end_qb] = keep.reshape(1, heads, blocks, kt)
                 self.counts["discovery_qk_pairs"] += heads * part.shape[2] * nk
             self.maps[key] = (kept, v27_fa4.block_sparse_tensors(kept))
-            # A held map has an unchanged integer tile count. Avoid a fresh
-            # GPU reduction and host synchronization on every held layer call.
-            self.map_kept_counts[key] = int(kept.sum().item())
         else:
             self.counts["held_layer_calls"] += 1
         keep, lists = self.maps[key]
-        self.counts["kept_tiles"] += self.map_kept_counts[key]
+        self.counts["kept_tiles"] += int(keep.sum().item())
         return v27_fa4.sparse_lists(q, k, v, lists, scale)

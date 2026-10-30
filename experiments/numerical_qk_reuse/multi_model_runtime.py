@@ -51,6 +51,42 @@ class LogitWindow:
         return self.tensor[batch, slice(begin, end, rows.step), vocab]
 
 
+def ultra_fixed_generate(model, ids, cap, runtime, sampler, set_logit_start,
+                         mask_id=126336):
+    """Publisher schedule with full-coordinate selection and bounded logits.
+
+    An earlier block can still contain MASK predictions. Include every mask
+    through the current block, and retain the full confidence-vector shape so
+    torch.topk uses the publisher's tie behavior.
+    """
+    block = min(64, cap)
+    if cap % block:
+        raise ValueError("publisher generation cap must be divisible by block size")
+    prompt_length = ids.shape[1]
+    x = torch.full((1, prompt_length + cap), mask_id, device=ids.device, dtype=torch.long)
+    x[:, :prompt_length] = ids
+    for b in range(cap // block):
+        start, end = prompt_length + b * block, prompt_length + (b + 1) * block
+        runtime.block(start, end)
+        # Future blocks remain masked, so there is always at least one live row.
+        lo = int((x[:, :end] == mask_id).nonzero()[0, 1])
+        set_logit_start(lo)
+        count = sampler.get_num_transfer_tokens(x[:, start:end] == mask_id, block)
+        for step in range(block):
+            logits = model(x).logits
+            x0 = logits.argmax(-1)
+            prob = torch.nn.functional.softmax(logits, dim=-1)
+            confidence = prob.gather(-1, x0[..., None]).squeeze(-1)
+            masked = x[:, lo:end] == mask_id
+            x0 = torch.where(masked, x0, x[:, lo:end])
+            confidence = torch.where(masked, confidence, -math.inf)
+            full_confidence = torch.full(x.shape, -math.inf, dtype=confidence.dtype, device=x.device)
+            full_confidence[:, lo:end] = confidence
+            chosen = torch.topk(full_confidence[0], k=count[0, step]).indices
+            x[:, chosen] = x0[:, chosen - lo]
+    return x
+
+
 class ModelHarness:
     def __init__(self, root, model_key, arm="dense_native", threshold=.02):
         self.root = Path(root).resolve()
@@ -284,10 +320,15 @@ class ModelHarness:
         head = self.model.model.transformer.ff_out
         original_head = head.forward
         def head_forward(m, hidden):
-            # The publisher's greedy sampler only uses the active block's
-            # independent row logits. Prefix/future logits cannot be selected.
-            return original_head(hidden[:, self.runtime.block_start:self.runtime.block_end])
+            # Keep unresolved earlier masks eligible. Rows before the first
+            # mask and after the current block cannot win native selection.
+            return original_head(hidden[:, self.ultra_logit_start:self.runtime.block_end])
         head.forward = types.MethodType(head_forward, head)
+        self.source_changes["ultra_selection"] = {
+            "publisher_sampler_sha256": hashlib.sha256((self.root / "private/source/ultra_llada_generate.py").read_bytes()).hexdigest(),
+            "adapter_sha256": hashlib.sha256(inspect.getsource(ultra_fixed_generate).encode()).hexdigest(),
+            "full_future_mask_horizon": True, "full_confidence_coordinates": True,
+            "unresolved_prefix_masks_remain_eligible": True}
 
     def _install_trado(self):
         source = inspect.getmodule(type(self.model))
@@ -360,25 +401,8 @@ class ModelHarness:
                 confidence_threshold=.9, stopping_criteria_idx=[self.tokenizer.eos_token_id])
             tokens = output[0, prompt_length:prompt_length + cap].tolist()
         else:
-            block = min(64, cap)
-            extent = math_ceil(cap, block) * block
-            x = torch.full((1, prompt_length + extent), 126336, device="cuda", dtype=torch.long)
-            x[:, :prompt_length] = ids
-            # Keep the full future-mask horizon and publisher's fixed schedule.
-            # Only omit logits on rows whose selection confidence is -inf.
-            for b in range(extent // block):
-                start, end = prompt_length + b * block, prompt_length + (b + 1) * block
-                self.runtime.block(start, end)
-                count = self.sampler.get_num_transfer_tokens(x[:, start:end] == 126336, block)
-                for step in range(block):
-                    logits = self.model(x).logits
-                    x0 = logits.argmax(-1)
-                    prob = torch.nn.functional.softmax(logits, dim=-1)
-                    confidence = prob.gather(-1, x0[..., None]).squeeze(-1)
-                    mask = x[:, start:end] == 126336
-                    confidence = torch.where(mask, confidence, -math.inf)
-                    chosen = torch.topk(confidence[0], k=count[0, step]).indices
-                    x[:, start:end][:, chosen] = x0[:, chosen]
+            x = ultra_fixed_generate(self.model, ids, cap, self.runtime, self.sampler,
+                                     lambda lo: setattr(self, "ultra_logit_start", lo))
             tokens = x[0, prompt_length:prompt_length + cap].tolist()
         eos = self.tokenizer.eos_token_id
         finished = eos in tokens

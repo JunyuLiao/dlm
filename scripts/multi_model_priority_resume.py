@@ -20,6 +20,7 @@ def main():
     p.add_argument("--attempt", default="priority_attempt001")
     p.add_argument("--qualify-held-counts", action="store_true")
     p.add_argument("--candidate-source", type=Path)
+    p.add_argument("--fallback-source", type=Path)
     a = p.parse_args()
     root = a.root.resolve()
     leaf = root / "scheduling" / a.attempt
@@ -30,6 +31,7 @@ def main():
     bindings = root / "private/model_worker_bindings001.json"
     candidate = a.candidate_source.resolve() if a.candidate_source else Path(__file__).resolve().parents[1]
     qualification_source = Path(__file__).resolve().parents[1]
+    fallback = a.fallback_source.resolve() if a.fallback_source else None
     stages = [(["trado", "ultrallada"], ["humaneval"]),
               (["trado"], ["aime26"]),
               (["llada22"], ["ruler128k"]),
@@ -41,6 +43,7 @@ def main():
               "qualify_held_counts_before_unstarted_models": a.qualify_held_counts,
               "candidate_source_commit": candidate.name if a.qualify_held_counts else None,
               "qualification_source_commit": qualification_source.name if a.qualify_held_counts else None,
+              "corrected_sampler_fallback_commit": fallback.name if fallback else None,
               "worker_sources_sha256": hashlib.sha256(bindings.read_bytes()).hexdigest(),
               "scientific_settings_changed": False, "gpu_workers_signaled": False,
               "reason": "qualify full short-benchmark adapters before longest full-horizon panels"}
@@ -103,18 +106,22 @@ def main():
             rc = child.wait()
         gate = root / "qualification/held_counts/attempt006/receipt.json"
         failure = gate.parent / "failure.json"
-        if failure.exists() and json.loads(failure.read_text()).get("mandatory_native_publisher_mismatch"):
-            raise RuntimeError("mandatory native publisher two-block qualification failed; do not launch Ultra")
+        native_passed = (gate.exists() and json.loads(gate.read_text()).get("native_publisher_parity_passed")) or (failure.exists() and json.loads(failure.read_text()).get("native_publisher_parity_passed"))
+        if not native_passed:
+            raise RuntimeError("mandatory native publisher two-block qualification not passed; do not launch Ultra")
         enabled = rc == 0 and gate.exists() and json.loads(gate.read_text())["status"] == "pass"
-        if enabled:
-            values = json.loads(bindings.read_text())
-            values["ultrallada"] = candidate.name
-            bindings = root / "private/model_worker_bindings002.json"
-            with bindings.open("x") as handle:
-                handle.write(json.dumps(values, indent=2) + "\n")
+        if not enabled and fallback is None:
+            raise RuntimeError("cache optimization failed without a qualified corrected-sampler fallback")
+        values = json.loads(bindings.read_text())
+        values["ultrallada"] = candidate.name if enabled else fallback.name
+        bindings = root / "private/model_worker_bindings002.json"
+        with bindings.open("x") as handle:
+            handle.write(json.dumps(values, indent=2) + "\n")
         (leaf / "held_counts_optimization.json").write_text(json.dumps({
-            "status": "enabled" if enabled else "qualification_failed_original_source_retained",
+            "status": "enabled" if enabled else "cache_qualification_failed_corrected_sampler_retained",
             "model": "ultrallada", "candidate_source_commit": candidate.name,
+            "selected_worker_source_commit": values["ultrallada"],
+            "native_publisher_parity_passed": native_passed,
             "qualification_returncode": rc,
             "qualification_sha256": hashlib.sha256(gate.read_bytes()).hexdigest() if gate.exists() else None,
             "numerical_worker_sources_sha256": hashlib.sha256(bindings.read_bytes()).hexdigest(),
