@@ -98,7 +98,12 @@ class ModelHarness:
             gate = self.root / "qualification/kernels/attempt005/receipt.json"
             if not gate.exists() or __import__('json').loads(gate.read_text()).get("status") != "pass":
                 raise RuntimeError("batched statistics require the preserved parity gate")
-        self.runtime = AttentionRuntime(arm, threshold, statistics_query_blocks=query_blocks)
+        mean_cap = 134217728
+        memory_gate = self.root / "qualification/statistics_memory/attempt007/receipt.json"
+        if model_key == "ultrallada" and memory_gate.exists() and json.loads(memory_gate.read_text()).get("status") == "pass":
+            mean_cap = 1073741824
+        self.runtime = AttentionRuntime(arm, threshold, statistics_query_blocks=query_blocks,
+                                        statistics_mean_elements_cap=mean_cap)
         self.last_heartbeat = 0.
         self.runtime.heartbeat = self.heartbeat
         self.cache = {}

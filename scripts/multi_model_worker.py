@@ -125,6 +125,7 @@ def benchmark(h, root, suite, arm, shard, shards, attempt, threshold):
     h.runtime.arm, h.runtime.threshold = arm, threshold
     identity = {"model": h.key, "suite": suite, "arm": arm, "shard": shard,
                 "statistics_query_blocks": h.runtime.statistics_query_blocks,
+                "statistics_mean_elements_cap": h.runtime.statistics_mean_elements_cap,
                 "projection_rank": 32 if "value" in arm else None,
                 "projection_seed_rule": "1729_plus_layer_index_per_kv_head" if "value" in arm else None,
                 "query_tile_rows": 128, "kv_tile_tokens": 64, "head_dim": 128,

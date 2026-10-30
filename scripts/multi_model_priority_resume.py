@@ -117,6 +117,22 @@ def main():
         bindings = root / "private/model_worker_bindings002.json"
         with bindings.open("x") as handle:
             handle.write(json.dumps(values, indent=2) + "\n")
+        if enabled:
+            log = root / "private/statistics_memory_qualification007.log"
+            with log.open("x") as handle:
+                child = subprocess.Popen([sys.executable, str(qualification_source / "scripts/multi_model_qualify_statistics_memory.py"),
+                                          str(root), "--attempt", "attempt007"],
+                                         env=env, stdout=handle, stderr=subprocess.STDOUT)
+                (root / "private/active_worker.json").write_text(json.dumps({
+                    "pid": child.pid, "model": "ultrallada", "phase": "qualification",
+                    "attempt": "statistics_memory_attempt007", "started": time.time()}) + "\n")
+                memory_rc = child.wait()
+            memory_gate = root / "qualification/statistics_memory/attempt007/receipt.json"
+            (leaf / "statistics_memory_optimization.json").write_text(json.dumps({
+                "status": "enabled" if memory_rc == 0 and memory_gate.exists() else "original_memory_budget_retained",
+                "returncode": memory_rc, "candidate_mean_elements_cap": 1073741824,
+                "gate_sha256": hashlib.sha256(memory_gate.read_bytes()).hexdigest() if memory_gate.exists() else None,
+                "scientific_settings_changed": False}, indent=2) + "\n")
         (leaf / "held_counts_optimization.json").write_text(json.dumps({
             "status": "enabled" if enabled else "cache_qualification_failed_corrected_sampler_retained",
             "model": "ultrallada", "candidate_source_commit": candidate.name,

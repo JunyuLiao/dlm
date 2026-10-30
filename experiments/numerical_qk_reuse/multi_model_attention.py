@@ -90,11 +90,15 @@ def dense_block(q, k, v, offset, block_size, scale):
 
 
 class AttentionRuntime:
-    def __init__(self, arm="dense_native", threshold=.02, backend="fa4", statistics_query_blocks=1):
+    def __init__(self, arm="dense_native", threshold=.02, backend="fa4", statistics_query_blocks=1,
+                 statistics_mean_elements_cap=134217728):
         if arm not in ARMS:
             raise ValueError(arm)
         self.arm, self.threshold, self.backend = arm, threshold, backend
         self.statistics_query_blocks = statistics_query_blocks
+        self.statistics_mean_elements_cap = int(statistics_mean_elements_cap)
+        if self.statistics_mean_elements_cap < 1:
+            raise ValueError("statistics element budget must be positive")
         self.maps, self.matrices = {}, {}
         self.map_kept_counts = {}
         self.counts = Counter()
@@ -172,7 +176,7 @@ class AttentionRuntime:
                 torch.ones((k.shape[1],), device=q.device))
             kept = torch.empty((1, heads, qt, kt), device=q.device, dtype=torch.bool)
             # Bound statistics memory by one Q128 group, even for 128K full attention.
-            chunk_qb = max(1, min(self.statistics_query_blocks, 134217728 // max(1, heads * kt * 128 * 32)))
+            chunk_qb = max(1, min(self.statistics_query_blocks, self.statistics_mean_elements_cap // max(1, heads * kt * 128 * 32)))
             for qb in range(0, qt, chunk_qb):
                 end_qb = min(qt, qb + chunk_qb)
                 blocks = end_qb - qb
