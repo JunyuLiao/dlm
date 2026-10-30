@@ -26,9 +26,11 @@ def main():
     p.add_argument("--suites", nargs="+", default=["humaneval", "aime26", "ruler128k"])
     p.add_argument("--calibration-only", action="store_true")
     p.add_argument("--wait-for-idle", action="store_true")
+    p.add_argument("--model-source-bindings", type=Path)
     a = p.parse_args()
     root = a.root.resolve()
     source = Path(__file__).resolve().parents[1]
+    model_sources = json.loads(a.model_source_bindings.read_text()) if a.model_source_bindings else {}
     queue_attempt = next_attempt(root / "queue")
     leaf = root / "queue" / queue_attempt
     leaf.mkdir(parents=True)
@@ -37,6 +39,7 @@ def main():
               "gpu_hour_limit": None, "monitor_interval_seconds": 900}
     (leaf / "config.json").write_text(json.dumps(config, indent=2) + "\n")
     for model in a.models:
+        worker_source = root / "private/execution" / model_sources[model] if model in model_sources else source
         qualification = sorted((root / "qualification" / model).glob("attempt*/receipt.json"))
         if not qualification:
             raise RuntimeError(f"model qualification absent: {model}")
@@ -49,13 +52,14 @@ def main():
                 while not data.exists():
                     time.sleep(30)
             environment = dict(os.environ)
-            paths = [str(source / "src"), str(source)]
+            paths = [str(worker_source / "src"), str(worker_source)]
             compat = root / "private/compat" / model
             if compat.exists():
                 paths.insert(0, str(compat))
             environment.update(PYTHONPATH=os.pathsep.join(paths),
                                HF_MODULES_CACHE=str(root / "private/hf_modules"),
                                TRITON_CACHE_DIR=str(root / "private/triton_cache"))
+            environment["MULTI_MODEL_STATS_QUERY_BLOCKS"] = "8" if model == "ultrallada" and os.environ.get("MULTI_MODEL_STATS_QUERY_BLOCKS") == "8" else "1"
             def run(command, log_name, completed_parent=None):
                 # Driver and competing-worker check before every model child.
                 while True:
@@ -105,7 +109,7 @@ def main():
                 threshold = json.loads(selected[-1].read_text())
             else:
                 attempt = next_attempt(root / "calibration" / model / suite)
-                run([sys.executable, str(source / "scripts/multi_model_worker.py"), str(root),
+                run([sys.executable, str(worker_source / "scripts/multi_model_worker.py"), str(root),
                      model, suite, "--calibrate", "--attempt", attempt], f"calibration_{attempt}.log")
                 threshold = json.loads((root / "calibration" / model / suite / attempt / "selected_threshold.json").read_text())
             if not threshold["in_range"]:
@@ -118,7 +122,7 @@ def main():
                     if list(parent.glob("attempt*/final_complete.json")):
                         continue
                     attempt = next_attempt(parent)
-                    run([sys.executable, str(source / "scripts/multi_model_worker.py"), str(root),
+                    run([sys.executable, str(worker_source / "scripts/multi_model_worker.py"), str(root),
                          model, suite, "--arm", arm, "--shard", str(shard), "--shards", "4",
                          "--threshold", str(threshold["selected_threshold"]), "--attempt", attempt],
                         f"{arm}_shard{shard:03}_{attempt}.log", completed_parent=parent)

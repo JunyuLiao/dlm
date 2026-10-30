@@ -38,10 +38,15 @@ def main():
         raise RuntimeError("batched statistics qualification failed; preserve evidence")
     environment["MULTI_MODEL_STATS_QUERY_BLOCKS"] = "8"
     log = root / "private/queue004.log"
+    bindings = root / "private/model_worker_bindings001.json"
+    if not bindings.exists():
+        bindings.write_text(json.dumps({"llada22": "224f8f11173bd16e5cf10054a963c74233758cf2",
+                                        "ultrallada": source.name, "trado": source.name}, indent=2) + "\n")
     print(json.dumps({"event": "qualified_resume", "statistics_query_blocks": 8,
                       "source": source.name, "time": time.time()}), flush=True)
     with log.open("x") as handle:
-        subprocess.run([sys.executable, str(source / "scripts/multi_model_queue.py"), str(root)],
+        subprocess.run([sys.executable, str(source / "scripts/multi_model_queue.py"), str(root),
+                        "--model-source-bindings", str(bindings)],
                        env=environment, stdout=handle, stderr=subprocess.STDOUT, check=True)
 
 
