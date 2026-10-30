@@ -77,12 +77,15 @@ def main():
             prompt = ("A synthetic context follows. " + "The blue square is beside the green circle. " * 36
                       + " What is 2 plus 3? Answer briefly.") if a.long_prompt else "What is 2 plus 3? Answer briefly."
             native = None
+            native_calls = [0]
             if a.model == "llada22":
                 ids = torch.tensor([h.encode(prompt)], device="cuda")
+                hook = h.model.register_forward_pre_hook(lambda *args: native_calls.__setitem__(0, native_calls[0] + 1))
                 torch.manual_seed(42)
                 native = h.model.generate(inputs=ids, gen_length=32, block_length=32,
                                           steps=32, threshold=.5, editing_threshold=0.,
                                           max_post_steps=16, temperature=0., eos_early_stop=True)[0].tolist()
+                hook.remove()
             h.install()
             rows = []
             for arm in ARMS:
@@ -94,6 +97,7 @@ def main():
                     eos = h.tokenizer.eos_token_id
                     native_trim = native[:native.index(eos) + 1] if eos in native else native
                     rows[-1]["publisher_output_equal"] = result["tokens"] == native_trim
+                    rows[-1]["publisher_forward_count"] = native_calls[0]
                     if not rows[-1]["publisher_output_equal"]:
                         raise AssertionError("cached native dense differs from publisher sampler")
                 print(json.dumps(rows[-1]), flush=True)
