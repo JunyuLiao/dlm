@@ -82,6 +82,7 @@ def main():
         sources.append({"config_sha256": hashlib.sha256((leaf / "config.json").read_bytes()).hexdigest(),
                         "records_sha256": hashlib.sha256((leaf / "records.jsonl").read_bytes()).hexdigest()})
     summaries = {}
+    ruler_tasks = {}
     expected_panels = {(m, s, arm)
                        for m in ("llada22", "ultrallada", "trado")
                        for s in (("aime26", "humaneval") if m == "trado" else ("aime26", "humaneval", "ruler128k"))
@@ -120,6 +121,19 @@ def main():
                    "consumer_sparsity": 1. - counts["kept_tiles"] / counts["eligible_tiles"],
                    "counts": dict(counts)}
         summaries[f"{model}/{suite}/{arm}"] = summary
+        if suite == "ruler128k":
+            dataset = json.loads((root / "private/data" / model / "ruler128k.json").read_text())
+            task_ids = {r["id"]: r["task"] for r in dataset}
+            by_task = collections.defaultdict(list)
+            for row in rows:
+                by_task[task_ids[row["id"]]].append(row)
+            ruler_tasks[f"{model}/{arm}"] = {
+                task: {"requests": len(values), "official_mean_score": statistics.mean(r["quality"] for r in values),
+                       "full_credit": sum(r["quality"] == 1. for r in values),
+                       "mean_N": statistics.mean(r["counts"]["denoising_forwards"] for r in values),
+                       "mean_C": statistics.mean(r["counts"]["canvases"] for r in values),
+                       "mean_T": statistics.mean(r["output_tokens"] for r in values)}
+                for task, values in sorted(by_task.items())}
     paired = {}
     rng = np.random.default_rng(738)
     for (model, suite, arm), rows in tables.items():
@@ -157,7 +171,8 @@ def main():
                 "paired_geomean_N_ratio": float(np.exp(matrix[:, 5].mean())),
                 "paired_geomean_N_ratio_ci95": np.exp(np.quantile(boot[:, 5], [.025, .975])).tolist(),
                 "quality_wins": int(wins), "quality_losses": int(losses)}
-    for name, data in [("summary.json", summaries), ("paired_vs_v31.json", paired), ("sources.json", sources)]:
+    for name, data in [("summary.json", summaries), ("paired_vs_v31.json", paired),
+                       ("ruler_task_summary.json", ruler_tasks), ("sources.json", sources)]:
         (out / name).write_text(json.dumps(data, indent=2) + "\n")
     (out / "scored_records.jsonl").write_text("".join(json.dumps(r) + "\n" for rows in tables.values() for r in rows))
     lines = ["# Three-model value evaluation", "", "Instrumented execution; no clean latency claim.", "",
