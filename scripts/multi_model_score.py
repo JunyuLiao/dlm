@@ -90,9 +90,14 @@ def main():
                    "accuracy": statistics.mean(r["quality"] for r in rows),
                    "full_credit": sum(r["quality"] == 1. for r in rows),
                    "N": n, "C": c, "pooled_N_per_C": n / c,
+                   "mean_request_N": n / len(rows),
+                   "mean_request_C": c / len(rows),
                    "mean_request_N_per_C": statistics.mean(r["counts"]["denoising_forwards"] / r["counts"]["canvases"] for r in rows),
                    "T": sum(r["output_tokens"] for r in rows),
+                   "mean_request_T": statistics.mean(r["output_tokens"] for r in rows),
+                   "pooled_output_tokens_per_denoising_call": sum(r["output_tokens"] for r in rows) / n,
                    "finished": sum(r["finished"] for r in rows),
+                   "without_eos_at_cap": sum(not r["finished"] and r["output_tokens"] == r["generation_cap"] for r in rows),
                    "consumer_sparsity": 1. - counts["kept_tiles"] / counts["eligible_tiles"],
                    "counts": dict(counts)}
         summaries[f"{model}/{suite}/{arm}"] = summary
@@ -125,9 +130,13 @@ def main():
                 "calls_delta": float(matrix[:, 1].mean()),
                 "calls_delta_ci95": np.quantile(boot[:, 1], [.025, .975]).tolist(),
                 "canvases_delta": float(matrix[:, 2].mean()),
+                "canvases_delta_ci95": np.quantile(boot[:, 2], [.025, .975]).tolist(),
                 "output_tokens_delta": float(matrix[:, 3].mean()),
+                "output_tokens_delta_ci95": np.quantile(boot[:, 3], [.025, .975]).tolist(),
                 "paired_geomean_N_per_C_ratio": float(np.exp(matrix[:, 4].mean())),
+                "paired_geomean_N_per_C_ratio_ci95": np.exp(np.quantile(boot[:, 4], [.025, .975])).tolist(),
                 "paired_geomean_N_ratio": float(np.exp(matrix[:, 5].mean())),
+                "paired_geomean_N_ratio_ci95": np.exp(np.quantile(boot[:, 5], [.025, .975])).tolist(),
                 "quality_wins": int(wins), "quality_losses": int(losses)}
     for name, data in [("summary.json", summaries), ("paired_vs_v31.json", paired), ("sources.json", sources)]:
         (out / name).write_text(json.dumps(data, indent=2) + "\n")
