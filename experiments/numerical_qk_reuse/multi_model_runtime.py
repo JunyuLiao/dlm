@@ -15,6 +15,7 @@ from pathlib import Path
 import textwrap
 import types
 import sys
+import os
 
 import torch
 from transformers import AutoConfig, AutoModel, AutoModelForCausalLM, AutoTokenizer
@@ -52,7 +53,14 @@ class ModelHarness:
     def __init__(self, root, model_key, arm="dense_native", threshold=.02):
         self.root = Path(root).resolve()
         self.key = model_key
-        self.runtime = AttentionRuntime(arm, threshold)
+        query_blocks = int(os.environ.get("MULTI_MODEL_STATS_QUERY_BLOCKS", "1"))
+        if query_blocks not in (1, 8):
+            raise ValueError("statistics query blocks must be qualified 1 or 8")
+        if query_blocks != 1:
+            gate = self.root / "qualification/kernels/attempt005/receipt.json"
+            if not gate.exists() or __import__('json').loads(gate.read_text()).get("status") != "pass":
+                raise RuntimeError("batched statistics require the preserved parity gate")
+        self.runtime = AttentionRuntime(arm, threshold, statistics_query_blocks=query_blocks)
         self.cache = {}
         self.store_cache = False
         self.query_offset = 0

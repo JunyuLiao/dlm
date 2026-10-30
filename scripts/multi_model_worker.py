@@ -124,6 +124,7 @@ def benchmark(h, root, suite, arm, shard, shards, attempt, threshold):
     cells = [cell for i, cell in enumerate(cells) if i % shards == shard - 1]
     h.runtime.arm, h.runtime.threshold = arm, threshold
     identity = {"model": h.key, "suite": suite, "arm": arm, "shard": shard,
+                "statistics_query_blocks": h.runtime.statistics_query_blocks,
                 "shards": shards, "cells": len(cells), "threshold": threshold,
                 "manifest_sha256": sha(data_path), "source_sha256": sha(__file__),
                 "protocol_sha256": sha(root / "protocol.json"),
