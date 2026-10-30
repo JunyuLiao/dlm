@@ -15,7 +15,7 @@ are exactly50%. All-kept FA4 changes denoising calls despite the same answer,
 so retain native and all-kept controls. TraDo attempt008 and UltraLLaDA
 attempt002 also reproduce publisher sampler outputs; all five arms pass
 synthetic smoke. Execution uses immutable private source snapshots and one
-serial GPU worker; the current worker is native dense LLaDA2.2 AIME shard002.
+serial GPU worker; the current worker is all-kept LLaDA2.2 AIME shard001.
 V2 coding calibration attempt003 confirms48.49% at threshold0.8944271909999159.
 The two earlier calibration attempts are retained: their development prompts
 were too short for the target under mandatory KV64 protection. New independent
@@ -53,6 +53,13 @@ comparisons. Per-model worker-source bindings prevent an optimization handoff
 from changing an already started model's execution source. No GPU-hour cap.
 Qualified source bindings are in `execution_binding006.json`. Live H100 check
 confirms one intended next worker; total canonical completed requests843.
+
+At07:25UTC native-dense LLaDA2.2 AIME completes all90requests,30problems across
+three seeds:85EOS finishes,five cap reaches; N138512,C19813,T631678. No paired
+AIME conclusion is available until other arms finish. Queue004 automatically
+starts the all-kept arm. Live check07:26UTC confirms the sole intended worker,
+about32GB,41C. Canonical complete-shard primary requests910 (plus active shard).
+The15-minute monitor's latest scheduled07:17UTC check passed.
 
 CPU finalizer source `9872ab69` is scheduled (PID3688024): wait for40complete
 panels/5110unique primary requests, audit before extra GPU work, then run the
