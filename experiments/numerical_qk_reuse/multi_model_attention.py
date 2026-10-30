@@ -130,7 +130,7 @@ class AttentionRuntime:
             self.matrices[key] = (torch.randn((hk, d, 32), generator=gen) / math.sqrt(32)).to(v.device)
         # Batched projection shares one matrix per KV head, independent of Q heads.
         z = torch.matmul(v[0].float(), self.matrices[key]).unsqueeze(0).contiguous()
-        nu = v.float().square().sum(-1).mean(-1).sqrt().clamp_min(1e-12)
+        nu = v[0].float().square().sum(-1).mean(-1).sqrt().clamp_min(1e-12)
         self.counts["projected_value_tokens"] += hk * v.shape[2]
         return z, nu
 
@@ -159,7 +159,7 @@ class AttentionRuntime:
             self.counts["selection_layer_calls"] += 1
             z, nu = self.project(v, layer) if "value" in self.arm else (
                 torch.zeros((1, k.shape[1], nk, 32), device=q.device),
-                torch.ones((1, k.shape[1]), device=q.device))
+                torch.ones((k.shape[1],), device=q.device))
             kept = torch.empty((1, heads, qt, kt), device=q.device, dtype=torch.bool)
             # Bound statistics memory by one Q128 group, even for 128K full attention.
             for qb in range(qt):
