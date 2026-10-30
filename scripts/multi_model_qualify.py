@@ -65,7 +65,7 @@ def kernels():
     z = torch.randn((1, 2, 511, 32), device="cuda", dtype=torch.float32)
     nu = torch.ones((2,), device="cuda")
     scores = torch.matmul(q[0].float(), k[0].float().repeat_interleave(2, 0).transpose(1, 2)) * 128 ** -.5
-    cpu = statistics_reference(scores.cpu(), z.cpu(), nu.cpu(), 8)
+    cpu = statistics_reference(scores.cpu(), z[0].cpu(), nu.cpu(), 8)
     gpu = statistics_cuda(q, k, z, nu, 128 ** -.5, 8)
     mandatory = torch.zeros((4, 8), dtype=torch.bool, device="cuda")
     mandatory[:, -1] = True
