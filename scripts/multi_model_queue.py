@@ -25,6 +25,7 @@ def main():
     p.add_argument("--models", nargs="+", default=list(CAPS))
     p.add_argument("--suites", nargs="+", default=["humaneval", "aime26", "ruler128k"])
     p.add_argument("--calibration-only", action="store_true")
+    p.add_argument("--wait-for-idle", action="store_true")
     a = p.parse_args()
     root = a.root.resolve()
     source = Path(__file__).resolve().parents[1]
@@ -57,9 +58,14 @@ def main():
                                TRITON_CACHE_DIR=str(root / "private/triton_cache"))
             def run(command, log_name):
                 # Driver and competing-worker check before every model child.
-                gpu = subprocess.run(["nvidia-smi", "--query-compute-apps=pid", "--format=csv,noheader"], capture_output=True, text=True, check=True)
-                if gpu.stdout.strip():
-                    raise RuntimeError("GPU has an active worker before launch: " + gpu.stdout.strip())
+                while True:
+                    gpu = subprocess.run(["nvidia-smi", "--query-compute-apps=pid", "--format=csv,noheader"], capture_output=True, text=True, check=True)
+                    if not gpu.stdout.strip():
+                        break
+                    if not a.wait_for_idle:
+                        raise RuntimeError("GPU has an active worker before launch: " + gpu.stdout.strip())
+                    print(json.dumps({"event": "waiting_for_current_worker_exit", "gpu_pids": gpu.stdout.strip()}), flush=True)
+                    time.sleep(10)
                 log = root / "private/logs" / model / suite / log_name
                 log.parent.mkdir(parents=True, exist_ok=True)
                 started = time.time()
@@ -69,13 +75,24 @@ def main():
                               "phase": "calibration" if "--calibrate" in command else "benchmark",
                               "attempt": command[command.index("--attempt") + 1]}
                     (root / "private/active_worker.json").write_text(json.dumps(active) + "\n")
+                    # Supervisor termination never signals its current GPU child.
+                    # A replacement waits for a normal completed shard boundary.
+                    import signal
+                    stop = [False]
+                    def supervisor_stop(signum, frame):
+                        stop[0] = True
+                    previous = signal.signal(signal.SIGTERM, supervisor_stop)
                     rc = child.wait()
+                    signal.signal(signal.SIGTERM, previous)
                 process_receipt = {"event": "worker_exit", **active, "returncode": rc,
                                    "started": started, "finished": time.time(),
                                    "allocated_worker_seconds": time.time() - started}
                 with (leaf / "process_receipts.jsonl").open("a") as handle:
                     handle.write(json.dumps(process_receipt) + "\n")
                 print(json.dumps(process_receipt), flush=True)
+                if stop[0]:
+                    (leaf / "stopped_at_worker_boundary.json").write_text(json.dumps(process_receipt, indent=2) + "\n")
+                    raise SystemExit(0)
                 if rc:
                     (leaf / "worker_failure.json").write_text(json.dumps(dict(active, returncode=rc), indent=2) + "\n")
                     raise RuntimeError(f"worker failed: {model}/{suite}/{log_name}")
