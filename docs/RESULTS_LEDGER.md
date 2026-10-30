@@ -2628,4 +2628,3 @@ CPU-coordinator idle-wait race, matches all outputs/N/C/tilecounts and is
 excluded from primary coverage. No GPUworker was signaled. Historical
 DiffusionGemma identities/negatives and inherited Yuhan reuse provenance stay
 distinct. AIME/RULER and other models are not complete at this checkpoint.
-
