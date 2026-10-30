@@ -99,6 +99,15 @@ def main():
                                           block_length=32, temperature=0., cfg_scale=0.,
                                           remasking="low_confidence", mask_id=126336)[0, ids.shape[1]:].tolist()
                 native_calls[0] = 32
+            elif a.model == "trado":
+                from experiments.numerical_qk_reuse.multi_model_runtime import import_file
+                sampler = import_file(a.root / "private/source/SDAR_generate.py", "trado_reference_qualification")
+                ids = torch.tensor([h.encode(prompt)], device="cuda")
+                torch.manual_seed(42)
+                native = sampler.block_diffusion_generate(
+                    h.model, {"input_ids": ids}, mask_id=151669, gen_length=16,
+                    block_length=4, denoising_steps=4, temperature=1., top_k=0, top_p=1.,
+                    confidence_threshold=.9, stopping_criteria_idx=[h.tokenizer.eos_token_id])[0, ids.shape[1]:ids.shape[1]+16].tolist()
             h.install()
             rows = []
             for arm in ARMS:

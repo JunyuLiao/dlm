@@ -66,6 +66,8 @@ class ModelHarness:
             # Publisher checkpoints do not require optional Hub kernel swaps.
             # Keep their own forward implementations under older Transformers.
             sys.modules["kernels"] = None
+            import transformers.utils.import_utils as hf_imports
+            hf_imports._kernels_available = False
         if self.key == "trado":
             # Preserve the publisher's pure-Triton RMSNorm implementation.
             # Its package __init__ imports an incompatible, unused FA2 .so;
