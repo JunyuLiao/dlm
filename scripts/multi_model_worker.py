@@ -20,7 +20,7 @@ CAPS = {
     "ultrallada": {"aime26": 4096, "humaneval": 1024, "ruler128k": 128},
     "trado": {"aime26": 2000, "humaneval": 2000},
 }
-CALIBRATION = {"aime26": "calibration_math", "humaneval": "calibration_code", "ruler128k": "calibration_ruler"}
+CALIBRATION = {"aime26": "calibration_math", "humaneval": "calibration_code_contextmatched001", "ruler128k": "calibration_ruler"}
 
 
 def sha(path):
@@ -58,10 +58,10 @@ def run_cell(harness, row, cap, seed):
     return pub, priv
 
 
-def calibration(h, root, suite, attempt, bracket=(1e-6, 1.)):
+def calibration(h, root, suite, attempt, bracket=(1e-6, 1.), manifest=None):
     leaf = root / "calibration" / h.key / suite / attempt
     leaf.mkdir(parents=True, exist_ok=False)
-    data_path = root / "private/data" / h.key / (CALIBRATION[suite] + ".json")
+    data_path = Path(manifest) if manifest else root / "private/data" / h.key / (CALIBRATION[suite] + ".json")
     rows = json.loads(data_path.read_text())
     cap = 512 if suite == "aime26" else 256 if suite == "humaneval" else 128
     # Frozen logarithmic bisection, sparsity measurements only. Online reuse
@@ -86,6 +86,8 @@ def calibration(h, root, suite, attempt, bracket=(1e-6, 1.)):
         sparse = 1. - kept / eligible
         candidates.append({"threshold": threshold, "sparsity": sparse, "kept_tiles": kept, "eligible_tiles": eligible})
         print(json.dumps({"event": "calibration_candidate", "model": h.key, "suite": suite, **candidates[-1]}), flush=True)
+        if .48 <= sparse <= .52:
+            break
         if sparse < .5:
             lo = threshold
         else:
@@ -161,6 +163,7 @@ def main():
     p.add_argument("--threshold", type=float, default=.02)
     p.add_argument("--threshold-low", type=float, default=1e-6)
     p.add_argument("--threshold-high", type=float, default=1.)
+    p.add_argument("--calibration-manifest", type=Path)
     a = p.parse_args()
     root = a.root.resolve()
     active = {"pid": os.getpid(), "model": a.model,
@@ -169,7 +172,7 @@ def main():
     (root / "private/active_worker.json").write_text(json.dumps(active) + "\n")
     h = ModelHarness(root, a.model).load()
     if a.calibrate:
-        result = calibration(h, root, a.suite, a.attempt, (a.threshold_low, a.threshold_high))
+        result = calibration(h, root, a.suite, a.attempt, (a.threshold_low, a.threshold_high), a.calibration_manifest)
         print(json.dumps(result), flush=True)
     else:
         if not a.arm:
