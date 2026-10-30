@@ -14,6 +14,7 @@ import math
 from pathlib import Path
 import textwrap
 import types
+import sys
 
 import torch
 from transformers import AutoConfig, AutoModel, AutoModelForCausalLM, AutoTokenizer
@@ -61,6 +62,15 @@ class ModelHarness:
         self.source_changes = {}
 
     def load(self, install=True):
+        if self.key == "trado":
+            # Preserve the publisher's pure-Triton RMSNorm implementation.
+            # Its package __init__ imports an incompatible, unused FA2 .so;
+            # load only the package namespace so pure submodules stay usable.
+            spec = importlib.util.find_spec("flash_attn")
+            package = types.ModuleType("flash_attn")
+            package.__path__ = list(spec.submodule_search_locations)
+            package.__spec__ = spec
+            sys.modules["flash_attn"] = package
         path = self.root / "private/models" / self.key
         config = AutoConfig.from_pretrained(path, trust_remote_code=True)
         if self.key == "ultrallada":
