@@ -71,6 +71,10 @@ class ModelHarness:
             package.__path__ = list(spec.submodule_search_locations)
             package.__spec__ = spec
             sys.modules["flash_attn"] = package
+            import transformers.utils as hf_utils
+            if not hasattr(hf_utils, "LossKwargs"):
+                from typing import TypedDict
+                hf_utils.LossKwargs = TypedDict("LossKwargs", {}, total=False)
         path = self.root / "private/models" / self.key
         config = AutoConfig.from_pretrained(path, trust_remote_code=True)
         if self.key == "ultrallada":
