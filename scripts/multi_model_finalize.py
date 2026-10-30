@@ -95,6 +95,13 @@ def main():
         # Audit before adding any further GPU work. Verification is repeated
         # after diagnostics so it also protects the final publication boundary.
         run("multi_model_verify.py", [str(root), "--attempt", verification + "_before"], "verify_before")
+        binding_paths = sorted((root / "private").glob("model_worker_bindings*.json"))
+        if not binding_paths:
+            raise RuntimeError("diagnostic model-source bindings absent")
+        bindings = json.loads(binding_paths[-1].read_text())
+        (leaf / "diagnostic_source_bindings.json").write_text(json.dumps({
+            "models": bindings, "binding_sha256": sha(binding_paths[-1]),
+            "diagnostic_script_source_commit": source.name}, indent=2) + "\n")
         for model in CAPS:
             gpu = subprocess.run(["nvidia-smi", "--query-compute-apps=pid", "--format=csv,noheader"],
                                  capture_output=True, text=True, check=True)
@@ -102,6 +109,8 @@ def main():
                 raise RuntimeError("unexpected GPU worker before development diagnostic")
             diagnostic = root / "reuse_diagnostic" / model / a.attempt
             env = dict(environment)
+            numerical_source = root / "private/execution" / bindings[model]
+            env["PYTHONPATH"] = os.pathsep.join((str(numerical_source / "src"), str(numerical_source)))
             compat = root / "private/compat" / model
             if compat.exists():
                 env["PYTHONPATH"] = str(compat) + os.pathsep + env["PYTHONPATH"]
