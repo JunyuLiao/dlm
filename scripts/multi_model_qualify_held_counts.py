@@ -54,9 +54,19 @@ def main():
             assert not new.maps and not new.map_kept_counts
             new.block(0, 4)
             assert not new.maps and not new.map_kept_counts
-        from experiments.numerical_qk_reuse.multi_model_runtime import ModelHarness
-        h = ModelHarness(root, "ultrallada").load()
+        from experiments.numerical_qk_reuse.multi_model_runtime import ModelHarness, import_file
+        h = ModelHarness(root, "ultrallada").load(install=False)
         prompt = "Write a short Python function that adds one to its integer input."
+        sampler = import_file(root / "private/source/ultra_llada_generate.py", "ultra_two_block_publisher_qualification")
+        ids = torch.tensor([h.encode(prompt)], device="cuda")
+        torch.manual_seed(42)
+        torch.cuda.manual_seed_all(42)
+        native = sampler.generate(h.model, ids, steps=128, gen_length=128,
+                                  block_length=64, temperature=0., cfg_scale=0.,
+                                  remasking="low_confidence", mask_id=126336)[0, ids.shape[1]:].tolist()
+        eos = h.tokenizer.eos_token_id
+        native = native[:native.index(eos) + 1] if eos in native else native
+        h.install()
         for arm in ARMS:
             old = module.AttentionRuntime(arm, .15, statistics_query_blocks=8)
             new = AttentionRuntime(arm, .15, statistics_query_blocks=8)
@@ -66,8 +76,11 @@ def main():
             candidate = h.generate(prompt, 128, 42)
             assert reference["tokens"] == candidate["tokens"], (arm, "model output")
             assert reference["counts"] == candidate["counts"], (arm, "model counters")
+            if arm == "dense_native" and candidate["tokens"] != native:
+                raise AssertionError("mandatory native publisher two-block output mismatch")
             rows.append({"arm": arm, "model": "ultrallada", "generation_cap": 128,
                          "blocks": candidate["counts"]["canvases"], "output_equal": True,
+                         "publisher_two_block_output_equal": True if arm == "dense_native" else None,
                          "counters_equal": True,
                          "output_sha256": hashlib.sha256(json.dumps(candidate["tokens"]).encode()).hexdigest()})
         result = {"status": "pass", "cases": rows, "reference_attention_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
@@ -77,7 +90,9 @@ def main():
         (leaf / "receipt.json").write_text(json.dumps(result, indent=2) + "\n")
         print(json.dumps({k: v for k, v in result.items() if k != "cases"}), flush=True)
     except BaseException as error:
-        (leaf / "failure.json").write_text(json.dumps({"error": repr(error), "gpu_worker_seconds": time.time() - started}, indent=2) + "\n")
+        (leaf / "failure.json").write_text(json.dumps({"error": repr(error),
+            "mandatory_native_publisher_mismatch": "mandatory native publisher" in str(error),
+            "gpu_worker_seconds": time.time() - started}, indent=2) + "\n")
         raise
 
 

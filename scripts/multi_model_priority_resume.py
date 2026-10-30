@@ -29,6 +29,7 @@ def main():
     coordinator = root / "private/execution/8c0d14b031636ddcc708df75fa1d57aefa8b0ba4"
     bindings = root / "private/model_worker_bindings001.json"
     candidate = a.candidate_source.resolve() if a.candidate_source else Path(__file__).resolve().parents[1]
+    qualification_source = Path(__file__).resolve().parents[1]
     stages = [(["trado", "ultrallada"], ["humaneval"]),
               (["trado"], ["aime26"]),
               (["llada22"], ["ruler128k"]),
@@ -39,6 +40,7 @@ def main():
               "stages": [{"models": m, "suites": s} for m, s in stages],
               "qualify_held_counts_before_unstarted_models": a.qualify_held_counts,
               "candidate_source_commit": candidate.name if a.qualify_held_counts else None,
+              "qualification_source_commit": qualification_source.name if a.qualify_held_counts else None,
               "worker_sources_sha256": hashlib.sha256(bindings.read_bytes()).hexdigest(),
               "scientific_settings_changed": False, "gpu_workers_signaled": False,
               "reason": "qualify full short-benchmark adapters before longest full-horizon panels"}
@@ -92,7 +94,7 @@ def main():
                    TRITON_CACHE_DIR=str(root / "private/triton_cache"))
         log = root / "private/held_counts_qualification006.log"
         with log.open("x") as handle:
-            child = subprocess.Popen([sys.executable, str(candidate / "scripts/multi_model_qualify_held_counts.py"),
+            child = subprocess.Popen([sys.executable, str(qualification_source / "scripts/multi_model_qualify_held_counts.py"),
                                       str(root), "--attempt", "attempt006"],
                                      env=env, stdout=handle, stderr=subprocess.STDOUT)
             (root / "private/active_worker.json").write_text(json.dumps({
@@ -100,6 +102,9 @@ def main():
                 "attempt": "held_counts_attempt006", "started": time.time()}) + "\n")
             rc = child.wait()
         gate = root / "qualification/held_counts/attempt006/receipt.json"
+        failure = gate.parent / "failure.json"
+        if failure.exists() and json.loads(failure.read_text()).get("mandatory_native_publisher_mismatch"):
+            raise RuntimeError("mandatory native publisher two-block qualification failed; do not launch Ultra")
         enabled = rc == 0 and gate.exists() and json.loads(gate.read_text())["status"] == "pass"
         if enabled:
             values = json.loads(bindings.read_text())
