@@ -56,7 +56,7 @@ def main():
                 quality = float(numeric(text, row["gold"])["correct"])
                 detail = "numeric_exact"
             elif suite == "humaneval":
-                code, detail = he.extract_code("<channel|>final\n" + text, row["gold"]["entry_point"])
+                code, detail = he.extract_code("<channel|>" + text, row["gold"]["entry_point"])
                 quality = float(he.run_test(he.program_for(row["gold"], code))[0]) if code else 0.
             else:
                 quality = scorer[row["task_base"]]([row.get("answer_prefix", "") + text], [row["gold"]]) / 100.
