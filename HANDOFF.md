@@ -93,6 +93,15 @@ budget. Direct live GPU check passes: sole intended worker,about32GB,42C.
 The scheduled17:32UTC health check also passes. Nine primary arm panels are
 complete; no overall completion marker is present.
 
+At18:01UTC scheduling-only source `d6699723` is waiting (PID3726848). It will
+request a coordinator boundary stop only while the last V3aAIME shard004 is
+active, let that GPU worker finish normally, then run remaining panels in this
+order: TraDo/UltraHumanEval, TraDoAIME, LLaDA2.2RULER, UltraAIME/RULER. The
+union remains exactly40panels/5110requests. Worker sources and scientific
+settings remain fixed. This exercises full short-benchmark adapters before the
+longest full-horizon panels. Receipts: `priority_schedule001.json` and
+`scheduling/priority_attempt001/config.json`. Current worker is unaffected.
+
 Publisher runtime compatibility for TraDo and UltraLLaDA is isolated inside
 the campaign private directory; shared environments are unchanged. Qualification
 failures are retained. Private full130 RULER inputs are complete per tokenizer;
