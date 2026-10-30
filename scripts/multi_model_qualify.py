@@ -65,6 +65,7 @@ def main():
     p.add_argument("root", type=Path)
     p.add_argument("--model", choices=("llada22", "ultrallada", "trado"))
     p.add_argument("--attempt", default="attempt001")
+    p.add_argument("--long-prompt", action="store_true")
     a = p.parse_args()
     leaf = a.root / "qualification" / (a.model or "kernels") / a.attempt
     leaf.mkdir(parents=True, exist_ok=False)
@@ -73,9 +74,11 @@ def main():
         if a.model:
             from experiments.numerical_qk_reuse.multi_model_runtime import ModelHarness
             h = ModelHarness(a.root, a.model).load(install=False)
+            prompt = ("A synthetic context follows. " + "The blue square is beside the green circle. " * 36
+                      + " What is 2 plus 3? Answer briefly.") if a.long_prompt else "What is 2 plus 3? Answer briefly."
             native = None
             if a.model == "llada22":
-                ids = torch.tensor([h.encode("What is 2 plus 3? Answer briefly.")], device="cuda")
+                ids = torch.tensor([h.encode(prompt)], device="cuda")
                 torch.manual_seed(42)
                 native = h.model.generate(inputs=ids, gen_length=32, block_length=32,
                                           steps=32, threshold=.5, editing_threshold=0.,
@@ -84,7 +87,7 @@ def main():
             rows = []
             for arm in ARMS:
                 h.runtime.arm = arm
-                result = h.generate("What is 2 plus 3? Answer briefly.", 32 if a.model != "trado" else 16, 42)
+                result = h.generate(prompt, 32 if a.model != "trado" else 16, 42)
                 rows.append({"arm": arm, "output_tokens": len(result["tokens"]),
                              "finished": result["finished"], "counts": result["counts"]})
                 if native is not None and arm == "dense_native":

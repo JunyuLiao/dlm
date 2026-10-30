@@ -170,6 +170,15 @@ class ModelHarness:
             return result
 
         model._joint_decode_block = types.MethodType(joint, model)
+        native_edits = model._apply_edit_operations_with_tracking
+        def edits(m, block_tokens, *args, **kwargs):
+            delete_id = kwargs.get("delete_token_id", 156930)
+            split_id = kwargs.get("split_token_id", 156931)
+            if delete_id in block_tokens or split_id in block_tokens:
+                self.runtime.invalidate()
+                self.runtime.counts["structural_edit_events"] += 1
+            return native_edits(block_tokens, *args, **kwargs)
+        model._apply_edit_operations_with_tracking = types.MethodType(edits, model)
         # Keep the native editing loop and all its random draws. Only replace
         # the quadratic mask allocation by a visibility descriptor.
         text = textwrap.dedent(inspect.getsource(type(model).generate))
@@ -245,25 +254,25 @@ class ModelHarness:
             return original(input_ids, **kwargs)
         self.model.forward = types.MethodType(forward, self.model)
 
-    def encode(self, text, *, completion=False):
+    def encode(self, text, *, completion=False, answer_prefix=""):
         if self.key == "ultrallada":
-            return self.tokenizer(text, add_special_tokens=True).input_ids
+            return self.tokenizer(text + answer_prefix, add_special_tokens=True).input_ids
         encoded = self.tokenizer.apply_chat_template([{"role": "user", "content": text}],
                                                      add_generation_prompt=True, tokenize=True)
         if hasattr(encoded, "input_ids"):
             encoded = encoded.input_ids
         if encoded and isinstance(encoded[0], list):
             encoded = encoded[0]
-        return list(encoded)
+        return list(encoded) + self.tokenizer(answer_prefix, add_special_tokens=False).input_ids
 
     @torch.inference_mode()
-    def generate(self, text, cap, seed, *, small=False):
+    def generate(self, text, cap, seed, *, small=False, answer_prefix=""):
         torch.manual_seed(seed)
         torch.cuda.manual_seed_all(seed)
         self.runtime.reset()
         self.runtime.phase = "prefill"
         self.cache.clear()
-        ids = torch.tensor([self.encode(text)], device="cuda", dtype=torch.long)
+        ids = torch.tensor([self.encode(text, answer_prefix=answer_prefix)], device="cuda", dtype=torch.long)
         prompt_length = ids.shape[1]
         if self.key == "llada22":
             output = self.model.generate(inputs=ids, gen_length=cap, block_length=32,

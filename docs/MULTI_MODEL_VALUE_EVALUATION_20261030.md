@@ -17,7 +17,7 @@ a new named variant. Historical DiffusionGemma evidence is unchanged.
 
 - Models: inclusionAI/LLaDA2.2-mini; relaxe-system-lab/UltraLLaDA;
   Gen-Verse/TraDo-8B-Instruct. Resolve and freeze model revisions before loading.
-- Arms: `dense_native`, `allkept_triton`, `mass_topk_reuse_r4`,
+- Arms: `dense_native`, `allkept_fa4`, `mass_topk_reuse_r4`,
   `value_v2_gaussian32_reuse_r4`, `value_v3a_singleton_reuse_r4`.
 - Native masks, proposals, edits, random draws, sampler schedules, stopping,
   EOS behavior, and output caps are shared within a model/workload cell.
@@ -52,6 +52,18 @@ a new named variant. Historical DiffusionGemma evidence is unchanged.
   defaults threshold0.5, editing_threshold0, max_post_steps16, steps32,
   temperature0 and native EOS stopping. TraDo uses dynamic threshold0.9,
   temperature1, top_p1, top_k0, native EOS stopping.
+- Qualified execution uses native SDPA on active dense calls and the existing
+  FA4 sparse consumer on D128. LLaDA2.2's block-causal prefix is cached under
+  an explicit numerical qualification, with the native editing loop unchanged.
+  UltraLLaDA retains the publisher's full future-mask horizon and fixed call
+  schedule; only unused prefix/future vocabulary logits are omitted. It does
+  not cache the bidirectional prefix or introduce adaptive stopping.
+- RULER generation uses the pinned official generator, all thirteen tasks,
+  ten samples/task. The same task/sample identities and seeds are used per
+  model, but token-length-controlled text is generated for each tokenizer;
+  cross-model accuracy is not a matched-prompt comparison. The generator's
+  total-length budget130816 reserves room for chat overhead and 128 output
+  tokens within131072. Publish actual lengths; no truncated inputs.
 - Official benchmark scoring; paired problem-clustered uncertainty. Report
   correct count/accuracy, N, C, request-level N/C, T, tokens/N, edits/refinement,
   finish/cap status, physical tiles, discovery work, reuse age, GPU seconds.
