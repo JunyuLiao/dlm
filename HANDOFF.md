@@ -1,4 +1,4 @@
-## 2026-10-30 UTC — Authorized three-model value evaluation in preparation
+## 2026-10-30 UTC — Three-model campaign active; first HumanEval model complete
 
 Branch `multi-models`; generation checkpoint `da425f4a`; analysis `898176b3`.
 User approved LLaDA2.2-mini, UltraLLaDA and TraDo-8B-Instruct with no GPU-hour
@@ -20,7 +20,24 @@ The two earlier calibration attempts are retained: their development prompts
 were too short for the target under mandatory KV64 protection. New independent
 specifications have median169tokens versus HumanEval161; no benchmark output
 or score was used. Execution bindings001/002/003 describe source changes.
-No full benchmark result is yet complete.
+LLaDA2.2 HumanEval is complete820primaryrequests, all five arms164each.
+Official scoring: native141, all-kept138, mass83, V2online10, V3a103correct.
+Mass/V2/V3a consumer sparsity49.978/49.216/49.990%; N6029/2331/6941;
+C1285/503/1422; T35900/10317/40227. V3a accuracy exceeds mass on this panel
+but has more calls and remains far below dense. V2 shorter outputs/calls are
+quality loss, not convergence evidence. Full paired records and intervals:
+`analysis_humaneval_llada22_complete001/`; verification passes820cells.
+The campaign-wide marker is absent; no cross-model conclusion yet.
+
+Current generation source `224f8f11`, queue attempt003. AIME computation-only
+calibration is running at native32768cap on independent math problems.
+The source change only matches future calibration caps; sampler/attention
+remain unchanged. One CPU boundary race caused a redundant mass shard003
+attempt002; keep canonical first complete attempt001. All41output/call/canvas/
+physical counts match the repeat. Exclude the duplicate from primary coverage;
+receipts: `coordinator_boundary_race001.json`, `verification/redundant_repeat001/`.
+No GPUworker was signaled. The current queue source has safe boundary stopping;
+the repaired later source also rechecks completion after idle waits.
 
 Publisher runtime compatibility for TraDo and UltraLLaDA is isolated inside
 the campaign private directory; shared environments are unchanged. Qualification
