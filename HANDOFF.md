@@ -15,7 +15,7 @@ are exactly50%. All-kept FA4 changes denoising calls despite the same answer,
 so retain native and all-kept controls. TraDo attempt008 and UltraLLaDA
 attempt002 also reproduce publisher sampler outputs; all five arms pass
 synthetic smoke. Execution uses immutable private source snapshots and one
-serial GPU worker; the current worker is V2 LLaDA2.2 AIME shard004.
+serial GPU worker; the current worker is V3a LLaDA2.2 AIME shard001.
 V2 coding calibration attempt003 confirms48.49% at threshold0.8944271909999159.
 The two earlier calibration attempts are retained: their development prompts
 were too short for the target under mandatory KV64 protection. New independent
@@ -84,6 +84,14 @@ Health monitor has67receipts through17:17UTC, no driver failures and maximum
 gap900.14seconds. Direct live check17:18UTC passes: one intended worker,42C.
 The replacement waiting finalizer adds actual-target validity flags and per-task
 RULER scores; no primary worker was signaled or source changed.
+
+At17:38UTC V2AIME completes90requests:9correct, N38202,C3950,T123666,
+all90EOS finishes,75.2079%consumer sparsity. This is a complete arm at an
+unmatched operating point, not evidence at50%sparsity. Receipt:
+`v2_aime_complete_arm001.json`. V3aAIME starts automatically at its fixed50%
+budget. Direct live GPU check passes: sole intended worker,about32GB,42C.
+The scheduled17:32UTC health check also passes. Nine primary arm panels are
+complete; no overall completion marker is present.
 
 Publisher runtime compatibility for TraDo and UltraLLaDA is isolated inside
 the campaign private directory; shared environments are unchanged. Qualification

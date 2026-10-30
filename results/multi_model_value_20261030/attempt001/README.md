@@ -56,3 +56,10 @@ See `llada22_humaneval_complete_summary.md` and corrected-scoring analysis
 `analysis_humaneval_llada22_complete002/`. V3a improves over V31 on this panel
 with more denoising calls, while remaining below dense. This is not a
 cross-model conclusion. V2's reduced calls accompany severe quality loss.
+
+LLaDA2.2 AIME has four complete arms: native36/90, all-kept29/90, V31mass21/90,
+V2online9/90. V3a is running. V31 consumer sparsity is50.0002%; V2 drifts to
+75.2079% despite development confirmation51.0154%. Its threshold is preserved,
+and a matched50%sparsity comparison is explicitly invalid for that panel.
+See `v2_aime_complete_arm001.json` and `analysis_partial006/` (the latter
+predates V2's completion). No AIME all-method conclusion is available yet.
