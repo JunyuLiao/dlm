@@ -93,7 +93,7 @@ budget. Direct live GPU check passes: sole intended worker,about32GB,42C.
 The scheduled17:32UTC health check also passes. Nine primary arm panels are
 complete; no overall completion marker is present.
 
-Scheduling source `04332cd2` is waiting (PID3727536,priority_attempt002). It will
+Scheduling CPU source `f5a5760f` is waiting (PID3730598,priority_attempt003). It will
 request a coordinator boundary stop only while the last V3aAIME shard004 is
 active, let that GPU worker finish normally, then run remaining panels in this
 order: TraDo/UltraHumanEval, TraDoAIME, LLaDA2.2RULER, UltraAIME/RULER. The
@@ -111,7 +111,13 @@ the original Ultra source is retained. If it passes, only Ultra switches to
 worker source04332cd2; LLaDA2.2 and TraDo keep existing numerical sources.
 The optimization removes redundant count reductions/synchronizations on held
 calls; it does not change a selector or sampler. Five focused CPU checks pass.
-Current scheduling config: `scheduling/priority_attempt002/config.json`.
+Current scheduling config: `scheduling/priority_attempt003/config.json`.
+Qualification candidate remains04332cd2; the CPU-only source change tolerates
+partial worker-state writes. Monitor PID3730597 uses the same robust reader,
+still900seconds; identity-checked CPU replacements leave the GPU worker intact.
+At18:47UTC its new live receipt passes: sole intended V3a worker,about35GB,42C,
+22of23requests complete in shard001. Receipt:
+`health/cpu_monitoring_handoff003.json`. No optional optimization is enabled yet.
 
 Publisher runtime compatibility for TraDo and UltraLLaDA is isolated inside
 the campaign private directory; shared environments are unchanged. Qualification
