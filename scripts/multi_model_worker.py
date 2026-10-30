@@ -58,7 +58,7 @@ def run_cell(harness, row, cap, seed):
     return pub, priv
 
 
-def calibration(h, root, suite, attempt):
+def calibration(h, root, suite, attempt, bracket=(1e-6, 1.)):
     leaf = root / "calibration" / h.key / suite / attempt
     leaf.mkdir(parents=True, exist_ok=False)
     data_path = root / "private/data" / h.key / (CALIBRATION[suite] + ".json")
@@ -66,7 +66,10 @@ def calibration(h, root, suite, attempt):
     cap = 512 if suite == "aime26" else 256 if suite == "humaneval" else 128
     # Frozen logarithmic bisection, sparsity measurements only. Online reuse
     # makes the curve non-monotone: retain all candidates and choose closest.
-    lo, hi = 1e-6, 1.
+    lo, hi = bracket
+    immutable(leaf / "config.json", {"model": h.key, "suite": suite,
+                                     "threshold_bracket": list(bracket), "candidates": 7,
+                                     "source_sha256": sha(__file__), "data_sha256": sha(data_path)})
     candidates = []
     for index in range(7):
         threshold = (lo * hi) ** .5
@@ -120,6 +123,9 @@ def benchmark(h, root, suite, arm, shard, shards, attempt, threshold):
     identity = {"model": h.key, "suite": suite, "arm": arm, "shard": shard,
                 "shards": shards, "cells": len(cells), "threshold": threshold,
                 "manifest_sha256": sha(data_path), "source_sha256": sha(__file__),
+                "protocol_sha256": sha(root / "protocol.json"),
+                "attention_source_sha256": sha(__import__('experiments.numerical_qk_reuse.multi_model_attention', fromlist=['x']).__file__),
+                "model_revision": json.loads((root / f"{h.key}_model_identity.json").read_text())["revision"],
                 "runtime_sha256": sha(__import__('experiments.numerical_qk_reuse.multi_model_runtime', fromlist=['x']).__file__),
                 "host_gpu_uuid": subprocess.check_output(["nvidia-smi", "--query-gpu=uuid", "--format=csv,noheader"], text=True).strip()}
     immutable(leaf / "config.json", identity)
@@ -127,7 +133,9 @@ def benchmark(h, root, suite, arm, shard, shards, attempt, threshold):
     for index, (row, seed) in enumerate(cells):
         pub, priv = run_cell(h, row, CAPS[h.key][suite], seed)
         pub.update(model=h.key, suite=suite, arm=arm, threshold=threshold,
-                   manifest_sha256=identity["manifest_sha256"], source_sha256=identity["source_sha256"])
+                   manifest_sha256=identity["manifest_sha256"], source_sha256=identity["source_sha256"],
+                   protocol_sha256=identity["protocol_sha256"], runtime_sha256=identity["runtime_sha256"],
+                   model_revision=identity["model_revision"])
         append(leaf / "private/generation.private.jsonl", dict(priv, **{k: pub[k] for k in ("model", "suite", "arm")}))
         append(leaf / "records.jsonl", pub)
         print(json.dumps({"event": "cell_complete", "model": h.key, "suite": suite,
@@ -151,6 +159,8 @@ def main():
     p.add_argument("--shards", type=int, default=4)
     p.add_argument("--attempt", default="attempt001")
     p.add_argument("--threshold", type=float, default=.02)
+    p.add_argument("--threshold-low", type=float, default=1e-6)
+    p.add_argument("--threshold-high", type=float, default=1.)
     a = p.parse_args()
     root = a.root.resolve()
     active = {"pid": os.getpid(), "model": a.model,
@@ -159,7 +169,7 @@ def main():
     (root / "private/active_worker.json").write_text(json.dumps(active) + "\n")
     h = ModelHarness(root, a.model).load()
     if a.calibrate:
-        result = calibration(h, root, a.suite, a.attempt)
+        result = calibration(h, root, a.suite, a.attempt, (a.threshold_low, a.threshold_high))
         print(json.dumps(result), flush=True)
     else:
         if not a.arm:
