@@ -2735,3 +2735,24 @@ GPU idle and verified campaign CPU monitor retired at completion.
 Detailed evidence: `results/llada22_v2_humaneval_diagnosis_20261102/attempt001/summary.md` and `receipt.json`; aggregate full-panel source is `results/multi_model_value_report_20261102/attempt002/summary.json` and sanitized scored rows. LLaDA2.2 V2 HumanEval is10/164 (6.10%), N2331,C503,T10317,mean62.91 output tokens, median58, max155, consumer sparsity49.2165%. All164 end in EOS; zero hit the1024-token cap. The scorer finds98 syntax errors,2 missing entry points,3 no final response. Of61 parsed functions,21 are docstring-only,12 pass/ellipsis-only,28 have substantive bodies;10 pass tests. Dense median output224 tokens and V31 median193.
 
 This is strong evidence of a genuine early-EOS trajectory failure exposed by long-form code completion, not cap truncation or scoring extraction: same pinned source replay exactly reproduces the saved110-token unparseable task0 completion. The layer10 refresh map matches the exact CUDA recomputation and CPU V2 online recurrence, zero mismatches. It does not rule out every possible integration issue nor establish same-state EOS causality; the planned route counterfactual was not launched after host auto-approval timed out. V2 AIME/RULER require short outputs (52.18/28.12 tokens/request) and have28/90 and86.23% results respectively; the six count-only code calibration prompts also average only69.8 output tokens and selected no quality gate. So HumanEval's long complete-function format is a concrete workload-specific failure case. No calibration or benchmark rerun occurred.
+
+## 2026-11-02 — EOS-confidence masking partially improves V2 HumanEval
+
+Completed paired all164-task seed42 panel and official scoring; sanitized summary:
+`results/llada22_v2_eos_conf0_humaneval_20261102/attempt003/summary.md`.
+The EOS-confidence-only intervention raises V2 from10/164 to27/164 (+10.37pp,
+paired problem-bootstrap95% CI[+4.88,+15.85]) and mean output length from62.9 to
+139.4 tokens. Syntax errors fall98->89 and substantive parsed entry points
+increase28->65. Dense with the same mask changes141->142 (+0.61pp,
+CI[0,+1.83]), supporting a V2-trajectory-specific gain on this cohort.
+
+However, V2 consumer sparsity shifts49.22%->61.53% under the unchanged frozen
+threshold, N/request14.2->55.9 and N/C4.634->10.322; all164 masked V2 requests
+still stop on EOS. It remains27/164 versus83/164 V31 and142/164 dense+mask.
+Thus this is a partial, exploratory mitigation, not a repair or matched-sparsity
+result. The official scorer and paired source/accounting audit pass in
+`results/llada22_v2_eos_conf0_humaneval_20261102/attempt003/analysis_eos_conf0_20261102_attempt003/`;
+no post-hoc calibration was done.
+Attempt001 and002 launch failures are preserved. Do not reuse the examined
+HumanEval cohort for threshold selection; calibrate separately on long-code
+development prompts, then evaluate a fresh cohort.

@@ -4209,3 +4209,11 @@ Pinned replay (`224f8f11`, runtime SHA489b4abf, attention SHA619ec332) exactly r
 ## 2026-11-02 — implement, but do not claim, EOS-confidence ablation
 
 Add opt-in EOS-confidence-zero candidates for dense and V2 HumanEval, leaving predicted tokens/logits, native final-transfer fallback and EOS stop intact. Protocol freezes all164 items/seed42, V2 threshold0.8944271909999159, and native32-token blocks/cap1024; no post-benchmark retuning. Two focused helper tests pass. The first host launch timed out before running; workspace fallback failed model load because PyTorch could not see CUDA, despite read-only nvidia-smi showing idle. No generation has occurred. Preserve attempts and do not claim efficacy; run with host CUDA access and score/audit before promotion. Protocol: `results/llada22_v2_eos_conf0_humaneval_20261102/attempt001/protocol.json`.
+
+## 2026-11-02 — EOS-confidence ablation partially rescues V2 HumanEval
+
+Fresh attempt003 completes two paired164-request HumanEval arms, seed42: dense+EOS-confidence-zero and V2+EOS-confidence-zero. EOS confidence is set to zero only for confidence-based selection; sampled EOS token, logits, V2 threshold, mandatory tiles, native forced progress/EOS stopping and cap1024 are unchanged. Official score and source/raw/accounting audit pass.
+
+Original V2 is10/164, meanT62.9, N/request14.2, C/request3.07, N/C4.634, sparsity49.22%. V2+mask is27/164, meanT139.4, N/request55.9, C/request5.41, N/C10.322, sparsity61.53%. Paired accuracy +10.37pp,95% problem bootstrap CI[+4.88,+15.85],20 wins/3 losses/141ties. Dense+mask is142/164 versus dense141/164 (+0.61pp, CI[0,+1.83]). All V2+mask requests still terminate EOS before cap;89 have syntax errors and65 have substantive parsed entrypoint bodies; only27 pass tests. It is a real partial gain, not a complete repair. Realized sparsity leaves the48-52% target and calls/work increase greatly, so no matched-sparsity or efficiency improvement claim. Keep variant experimental.
+
+The prior two launch attempts remain preserved and have zero generated requests. Validation protocols/results: `results/llada22_v2_eos_conf0_humaneval_20261102/attempt003/`.
