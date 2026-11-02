@@ -1,3 +1,7 @@
+## 2026-11-02 11:42UTC — disclose final sparsity drift; no further recalibration
+
+User now explicitly requests that final AIME benchmark target misses be documented, then proceed to the next experiment without recalibrating or rerunning. LLaDA attempt003 remains running unchanged. Supplemental completion policy: `results/multi_model_aime_v2_completion_20261102/attempt001/protocol.json`; use `scripts/multi_model_aime_finish.py` only after the original coordinator exits. It verifies complete 90-request coverage and proceeds to TraDo if needed. The frozen numerical coordinator is unchanged; its old target-miss failure is informational under this user instruction. Final reporting must disclose actual sparsity and avoid a matched-50% claim for any missed cell.
+
 ## 2026-11-02 08:55UTC — six-question AIME calibration correction
 
 User rejected full90 calibration candidates. Host-verified worker3882648/coordinator3882644 were sentSIGTERM; preserve attempt002. Frozen follow-up attempt003 uses6fixedquestions seed42 per candidate,8candidates maximum, and full90only for final V2benchmark. Source imported from original numerical pins; no accuracy/gold calibration access. Full90candidate001(.03) finished at65.6096%; candidate002(.0001732) stopped at12requests. Scope30/4010original panels already score-complete and pass independent audits. AIME rematches still pending; no final completion claim.

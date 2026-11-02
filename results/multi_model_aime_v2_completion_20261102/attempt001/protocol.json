@@ -1,0 +1,21 @@
+{
+  "reason": "Explicit user instruction: after small calibration, disclose any final benchmark sparsity miss and move on; no further recalibration or benchmark repeat",
+  "base_campaign": "results/multi_model_value_20261030/attempt001",
+  "generation_root": "results/multi_model_aime_v2_matched_20261102/attempt003",
+  "models": [
+    "llada22",
+    "trado"
+  ],
+  "calibration_requests_per_candidate": 6,
+  "final_requests_per_model": 90,
+  "post_benchmark_recalibration": false,
+  "target": [
+    0.48,
+    0.52
+  ],
+  "final_target_miss_is_completion_failure": false,
+  "sampler_or_kernel_changed": false,
+  "numerical_coordinator_sha256": "6883b4976de4a858fa90e982569b9adfe23546bc8ed2246c1cf84edea7ce9cc6",
+  "completion_coordinator_sha256": "e080cef84906b2fd357eec5dfd1ca410db2dbf2fe3c7902b92c155c8c9fdf11c",
+  "preserve_original_protocol_and_old_target_miss_markers": true
+}

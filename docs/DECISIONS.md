@@ -4183,3 +4183,7 @@ Ultra RULER development scoring follow-up: all three completed calibration examp
 ## 2026-11-02 — user limits AIME calibration to small samples
 
 Stop full90calibration in attempt002 and preserve it. New attempt003 runs6fixedquestions seed42 per candidate; full90reserved for finalbenchmark. Use counts only and explicit transductive label. See MULTI_MODEL_AIME_REMATCH_20261102.md.
+
+## 2026-11-02 — user accepts final target drift without another rerun
+
+After six-question calibration, run the final 90 AIME requests once per model. Report actual sparsity even if it misses 48-52%, then proceed; no post-benchmark recalibration or repeat. Preserve attempt003 and its original stopping-gate evidence. Supplemental completion policy lives in results/multi_model_aime_v2_completion_20261102/attempt001/. Numerical execution is unchanged; only completion interpretation and next-model scheduling change. Any missed cell cannot support an exactly matched-50% claim.

@@ -1,4 +1,4 @@
-"""Verify and summarize the user-retained scope and count-matched V2 reruns."""
+"""Verify retained scope and calibrated V2 reruns, disclosing final target drift."""
 from __future__ import annotations
 
 import argparse
@@ -56,17 +56,18 @@ def main():
     p.add_argument("rematch", type=Path)
     p.add_argument("--original-analysis", required=True)
     p.add_argument("--rerun-analysis", required=True)
+    p.add_argument("--completion", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
     a = p.parse_args()
     a.out.mkdir(parents=True, exist_ok=False)
     errors = []
     for model in ("llada22", "trado"):
-        marker = a.rematch / model / "final_complete.json"
+        marker = a.completion / model / "final_complete.json"
         if not marker.exists():
             raise RuntimeError("missing accepted fresh rerun: " + model)
         d = json.loads(marker.read_text())
-        assert d["requests"] == 90 and .48 <= d["sparsity"] <= .52
-    if not (a.rematch / "generation_complete.json").exists():
+        assert d["requests"] == 90 and not d["post_benchmark_recalibration"]
+    if not (a.completion / "generation_complete.json").exists():
         raise RuntimeError("two-model generation not complete")
     orig_path = a.base / a.original_analysis / "scored_records.jsonl"
     rerun_path = a.rematch / a.rerun_analysis / "scored_records.jsonl"
@@ -90,7 +91,7 @@ def main():
                 for s in suites for arm in ARMS}
     if set(tables) != expected:
         errors.append("retained panel scope mismatch")
-    summaries, contrasts, sources = {}, {}, []
+    summaries, contrasts, sources, target_misses = {}, {}, [], []
     for key, rows in sorted(tables.items()):
         model, suite, arm = key
         count = 90 if suite == "aime26" else 164 if suite == "humaneval" else 130
@@ -103,7 +104,7 @@ def main():
         eligible, kept = totals["eligible_tiles"], totals["kept_tiles"]
         sparse = 1 - kept / eligible
         if "reuse" in arm and not .48 <= sparse <= .52:
-            errors.append(f"sparsity target: {key}/{sparse}")
+            target_misses.append({"model": model, "suite": suite, "arm": arm, "sparsity": sparse})
         if arm in ARMS[:2] and eligible != kept:
             errors.append(f"dense control skips: {key}")
         reference = {(r["id"], r["seed"]): r for r in tables[model, suite, "dense_native"]}
@@ -148,6 +149,8 @@ def main():
                "retained_panels": len(summaries), "retained_requests": sum(x["requests"] for x in summaries.values()),
                "original_scored_sha256": sha(orig_path), "rerun_scored_sha256": sha(rerun_path),
                "source_sha256": sha(__file__), "sources": sources,
+               "completion_policy_sha256": sha(a.completion / "protocol.json"),
+               "sparsity_target_misses": target_misses,
                "cancelled": ["ultrallada/aime26", "ultrallada/ruler128k"],
                "transductive_count_calibration": ["llada22/aime26/V2", "trado/aime26/V2"]}
     for name, value in (("summary.json", summaries), ("paired.json", contrasts),
@@ -157,11 +160,15 @@ def main():
     (a.out / "scored_records.jsonl").write_text("".join(json.dumps(r) + "\n" for rs in tables.values() for r in rs))
     (a.out / "historical_target_miss_records.jsonl").write_text("".join(json.dumps(r) + "\n" for r in history))
     labels = dict(zip(ARMS, ("Dense", "All-kept", "V31", "V2", "V3a")))
-    lines = ["# Retained multi-model evaluation", "", "All retained sparse arms must achieve48–52% consumer sparsity. AIME V2 is transductively count-calibrated; other arms are frozen primary panels. Ultra AIME/RULER were cancelled; TraDo RULER is unsupported. No clean latency claim.", "",
+    lines = ["# Retained multi-model evaluation", "", "Sparse arms target 48–52% consumer sparsity. Per the user's revised stopping rule, final AIME V2 target drift is disclosed without recalibration or another benchmark rerun. AIME V2 is transductively count-calibrated; other arms are frozen primary panels. Ultra AIME/RULER were cancelled; TraDo RULER is unsupported. No clean latency claim.", "",
              "| Model/task | Arm | Accuracy | N | C | N/C | T | Sparsity |", "|---|---|---:|---:|---:|---:|---:|---:|"]
     for label, r in summaries.items():
         m, s, arm = label.split("/")
         lines.append(f"| {m}/{s} | {labels[arm]} | {100*r['accuracy']:.2f}% | {r['N']} | {r['C']} | {r['N_per_C']:.3f} | {r['T']} | {100*r['consumer_sparsity']:.2f}% |")
+    if target_misses:
+        lines.extend(["", "Final target misses (these cells do not establish a matched 50% comparison):"])
+        for miss in target_misses:
+            lines.append(f"- {miss['model']}/{miss['suite']}/{miss['arm']}: {100*miss['sparsity']:.4f}% consumer sparsity.")
     (a.out / "summary.md").write_text("\n".join(lines) + "\n")
     if errors:
         raise RuntimeError("final audit failed: " + repr(errors))

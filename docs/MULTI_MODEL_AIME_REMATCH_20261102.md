@@ -46,3 +46,7 @@ all 180 rerun identities, source pins, physical sparsity and official scores.
 ## User correction: small calibration, attempt003
 
 The user explicitly rejected90-request calibration candidates as too slow. Stop and preserve attempt002, then use six fixed questions per model, seed42 only. Sample one representative from each sextile of native dense eligible work, selecting representatives solely to approximate historical pooled tile sparsity. No gold or score is used. Import exact historical measurements for those six cells when available. At most8small candidates; damped log-threshold interpolation on count-only measurements. Full90 generation is reserved for the final V2 benchmark, whose actual48–52% target is audited. All caps/samplers/kernels stay fixed. New frozen leaf:results/multi_model_aime_v2_matched_20261102/attempt003/.
+
+## 2026-11-02 — user accepts final target drift without another rerun
+
+After six-question calibration, run the final 90 AIME requests once per model. Report actual sparsity even if it misses 48-52%, then proceed; no post-benchmark recalibration or repeat. Preserve attempt003 and its original stopping-gate evidence. Supplemental completion policy lives in results/multi_model_aime_v2_completion_20261102/attempt001/. Numerical execution is unchanged; only completion interpretation and next-model scheduling change. Any missed cell cannot support an exactly matched-50% claim.
