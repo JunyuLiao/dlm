@@ -71,11 +71,12 @@ def token_metrics(text, entry_point):
             isinstance(n, ast.Expr) and isinstance(n.value, ast.Constant)
             and isinstance(n.value.value, str))]
         docstring_only |= not statements
-        stub_only |= bool(statements) and all(
+        is_stub = bool(statements) and all(
             isinstance(n, ast.Pass) or isinstance(n, ast.Expr)
             and isinstance(n.value, ast.Constant) and n.value.value is Ellipsis
             for n in statements)
-        substantive |= bool(statements) and not stub_only
+        stub_only |= is_stub
+        substantive |= bool(statements) and not is_stub
     return {"fence_count": len(fences), "python_fence_count": len(bodies),
             "any_fenced_body_parses": bool(syntax), "entry_point_present": present,
             "entry_point_docstring_only": docstring_only,

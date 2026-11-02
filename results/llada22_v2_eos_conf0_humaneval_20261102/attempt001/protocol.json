@@ -1,0 +1,44 @@
+{
+  "schema": "llada22_humaneval_eos_confidence_ablation_v1",
+  "purpose": "Test the published EOS-confidence-zero decoding mitigation on LLaDA2.2-mini HumanEval while holding attention method and native sampler settings fixed.",
+  "base_campaign": "results/multi_model_value_20261030/attempt001",
+  "base_analysis": "results/multi_model_value_report_20261102/attempt002",
+  "model": "inclusionAI/LLaDA2.2-mini",
+  "model_revision": "e4f77d25ab5ca86f2223c6cdc6a72b887e20c8a5",
+  "numerical_worker_revision": "224f8f11173bd16e5cf10054a963c74233758cf2",
+  "worker_sha256": "0e9d0544af2b0fd5dd496ca66fbcff51e815182c0c68c77ffc5dc4045fe35b62",
+  "runtime_sha256": "489b4abf466c40e44fd11d18af41e4c4a69cf7f418c1dd6eb972a76eb43f17dd",
+  "attention_sha256": "619ec332ed70247d0a72996f496fbb34ae7e7debac6637e3c236eac53a099aab",
+  "runner_sha256": "b3efb3767f2584a88408514a7264a0f7c9aa8293c178e5931f2bd1f32b885244",
+  "suite": "humaneval",
+  "cohort": "all 164 official HumanEval prompts, seed 42",
+  "arms": {
+    "dense_native_eos_conf0": {
+      "selector_arm": "dense_native",
+      "purpose": "Control for the general effect of EOS-confidence masking."
+    },
+    "value_v2_gaussian32_reuse_r4_eos_conf0": {
+      "selector_arm": "value_v2_gaussian32_reuse_r4",
+      "threshold": 0.8944271909999159,
+      "purpose": "Test whether EOS-confidence masking repairs the previously measured V2 early-EOS trajectory."
+    }
+  },
+  "intervention": "For every native diffusion sample, set confidence to zero at positions whose sampled token is EOS. Do not change sampled tokens, logits, V2 maps, threshold, reuse interval, or forced-progress schedule. EOS remains available for the native final transfer and EOS stopping logic.",
+  "native_sampler": {
+    "block_length": 32,
+    "steps": 32,
+    "confidence_threshold": 0.5,
+    "editing_threshold": 0.0,
+    "max_post_steps": 16,
+    "temperature": 0.0,
+    "eos_early_stop": true,
+    "generation_cap": 1024
+  },
+  "sparsity_target": [0.48, 0.52],
+  "threshold_policy": "Hold the previously frozen HumanEval V2 threshold fixed; do not recalibrate or rerun based on final sparsity or accuracy. Disclose realized sparsity.",
+  "scoring": "Pinned official HumanEval code extraction and isolated unit tests; report syntax, entry point, substantive function body, functional pass, EOS position, response length, N, C, N/C and achieved physical consumer sparsity.",
+  "paired_controls": "Use existing same-item dense/V31/V2 results and generate dense plus the same EOS-confidence policy to distinguish a general termination-policy gain from a V2 interaction.",
+  "privacy": "Prompts, gold, tokens and raw generations stay in ignored private directories; publish sanitized records and aggregates only.",
+  "no_latency_claim": true,
+  "no_full_benchmark_score_tuning": true
+}
