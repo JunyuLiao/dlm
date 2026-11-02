@@ -1,0 +1,1 @@
+AIME V2 count-matched follow-up. Full90 AIME tile-count calibration is transductive and accuracy-blinded; a separate fresh90 benchmark rerun must achieve48-52% physical consumer sparsity. Numerical model kernels and native samplers use original pinned sources. Original V2 panels remain immutable and are not used as the matched V2 result. See rematch_protocol.json.
