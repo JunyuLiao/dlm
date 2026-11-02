@@ -1,0 +1,116 @@
+{
+  "scope": [
+    "llada22/aime26/value_v2_gaussian32_reuse_r4",
+    "trado/aime26/value_v2_gaussian32_reuse_r4"
+  ],
+  "reason": "explicit user request: do not run actual90 per calibration",
+  "base_campaign": "results/multi_model_value_20261030/attempt001",
+  "coordinator_sha256": "6883b4976de4a858fa90e982569b9adfe23546bc8ed2246c1cf84edea7ce9cc6",
+  "native_numerical_sources": {
+    "llada22": "224f8f11173bd16e5cf10054a963c74233758cf2",
+    "ultrallada": "3504a4aafb450e90b842c4015453b3528ced00cf",
+    "trado": "8c0d14b031636ddcc708df75fa1d57aefa8b0ba4"
+  },
+  "target": [
+    0.48,
+    0.52
+  ],
+  "initial_thresholds": {
+    "llada22": 0.008,
+    "trado": 0.02
+  },
+  "candidate_maximum": 8,
+  "algorithm": "six fixed prompts seed42; count-only native trajectories; damped log-threshold interpolation; existing exact six-cell counts reused; final90 benchmark only; require final48-52%",
+  "calibration_is_transductive": true,
+  "accuracy_blinded": true,
+  "same_questions_and_seeds": true,
+  "sampler_caps": {
+    "llada22": 32768,
+    "trado": 2000
+  },
+  "reuse_interval_calls": 4,
+  "projection_rank": 32,
+  "native_sampler_changed": false,
+  "controls": "original native/allkept/V31/V3a unchanged; original V2 disclosed separately",
+  "publication": "no prompt gold tokens completion text in tracked artifacts",
+  "cancelled": [
+    "ultrallada/aime26",
+    "ultrallada/ruler128k"
+  ],
+  "calibration_requests_per_candidate": 6,
+  "calibration_sample": {
+    "llada22": [
+      {
+        "id": "aime26/20",
+        "seed": 42
+      },
+      {
+        "id": "aime26/28",
+        "seed": 42
+      },
+      {
+        "id": "aime26/25",
+        "seed": 42
+      },
+      {
+        "id": "aime26/30",
+        "seed": 42
+      },
+      {
+        "id": "aime26/19",
+        "seed": 42
+      },
+      {
+        "id": "aime26/27",
+        "seed": 42
+      }
+    ],
+    "trado": [
+      {
+        "id": "aime26/03",
+        "seed": 42
+      },
+      {
+        "id": "aime26/18",
+        "seed": 42
+      },
+      {
+        "id": "aime26/25",
+        "seed": 42
+      },
+      {
+        "id": "aime26/01",
+        "seed": 42
+      },
+      {
+        "id": "aime26/06",
+        "seed": 42
+      },
+      {
+        "id": "aime26/24",
+        "seed": 42
+      }
+    ]
+  },
+  "sample_selection_evidence": {
+    "llada22": {
+      "selection": "one representative per sextile of dense eligible work, representatives minimize historical pooled-sparsity deviation only",
+      "historical_max_sparsity_difference": 0.0005437631481399752,
+      "historical_thresholds_used": [
+        0.17782794100389226,
+        0.03
+      ]
+    },
+    "trado": {
+      "selection": "one representative per sextile of dense eligible work, representatives minimize historical pooled-sparsity deviation only",
+      "historical_max_sparsity_difference": 2.0374777798259913e-06,
+      "historical_thresholds_used": [
+        0.04869675251658631
+      ]
+    }
+  },
+  "historical_count_roots": [
+    "/home/exouser/ljy/dlm/results/multi_model_aime_v2_matched_20261102/attempt002"
+  ],
+  "supersedes": "/home/exouser/ljy/dlm/results/multi_model_aime_v2_matched_20261102/attempt002"
+}

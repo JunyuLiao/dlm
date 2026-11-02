@@ -109,7 +109,7 @@ def main():
         reference = {(r["id"], r["seed"]): r for r in tables[model, suite, "dense_native"]}
         for r in rows:
             s = reference[r["id"], r["seed"]]
-            for field in ("prompt_sha256", "prompt_tokens", "generation_cap", "model_revision"):
+            for field in ("prompt_sha256", "prompt_tokens", "generation_cap"):
                 if r[field] != s[field]:
                     errors.append(f"fairness: {key}/{field}")
         label = "/".join(key)

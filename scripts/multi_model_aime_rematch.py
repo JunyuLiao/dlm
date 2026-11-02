@@ -18,7 +18,7 @@ import time
 
 
 ARM = "value_v2_gaussian32_reuse_r4"
-INITIAL = {"llada22": .03, "trado": .025}
+INITIAL = {"llada22": .008, "trado": .02}
 
 
 def sha(p):
@@ -56,6 +56,12 @@ def next_threshold(trials, low, high):
         low = max(below)
     elif above:
         high = min(above)
+    if pairs:
+        lrow = next(t for t in trials if t["threshold"] == low and t["sparsity"] < .5)
+        hrow = next(t for t in trials if t["threshold"] == high and t["sparsity"] >= .5)
+        fraction = (.5 - lrow["sparsity"]) / (hrow["sparsity"] - lrow["sparsity"])
+        fraction = min(.8, max(.2, fraction))
+        return math.exp(math.log(low) + fraction * math.log(high / low))
     return math.sqrt(low * high)
 
 
@@ -69,10 +75,16 @@ def run_model(base, out, model):
     worker = importlib.import_module("multi_model_worker")
     rows = json.loads((base / "private/data" / model / "aime26.json").read_text())
     # Only the prompt, ID, prefix and seed are passed to generation.
-    cells = [(r, seed) for r in rows for seed in r["seeds"]]
-    cells = [c for shard in range(4) for i, c in enumerate(cells) if i % 4 == shard]
-    if len(rows) != 30 or len(cells) != 90 or {s for _, s in cells} != {42, 43, 44}:
+    full_cells = [(r, seed) for r in rows for seed in r["seeds"]]
+    if len(rows) != 30 or len(full_cells) != 90 or {s for _, s in full_cells} != {42, 43, 44}:
         raise ValueError("AIME cohort differs from approved 30 x 3")
+    protocol = json.loads((out / "rematch_protocol.json").read_text())
+    sample = protocol["calibration_sample"][model]
+    byid = {r["id"]: r for r in rows}
+    cells = [(byid[x["id"]], x["seed"]) for x in sample]
+    if len(cells) != 6 or len({r["id"] for r, _ in cells}) != 6 or {s for _, s in cells} != {42}:
+        raise ValueError("calibration must use six fixed distinct questions, seed42 only")
+    sample_keys = {(r["id"], s) for r, s in cells}
     leaf = out / model
     leaf.mkdir(exist_ok=False)
     write(leaf / "binding.json", {
@@ -89,14 +101,23 @@ def run_model(base, out, model):
     for shard in range(1, 5):
         p = base / "runs" / model / "aime26" / ARM / f"shard{shard:03}/attempt001/records.jsonl"
         original_rows.extend(map(json.loads, p.read_text().splitlines()))
-    trials = [{"threshold": old["selected_threshold"], **pool(original_rows),
+    trials = [{"threshold": old["selected_threshold"], **pool([r for r in original_rows if (r['id'], r['seed']) in sample_keys]),
                "role": "historical_sparsity_only"}]
+    # Reuse count measurements already generated for exactly these six cells;
+    # never complete an old full90 candidate to populate the calibration set.
+    for path in protocol.get("historical_count_roots", []):
+        for f in sorted(Path(path).glob(f"{model}/calibration/candidate*/records.jsonl")):
+            measured = [r for r in map(json.loads, f.read_text().splitlines()) if (r["id"], r["seed"]) in sample_keys]
+            if len(measured) == 6:
+                threshold_value = json.loads((f.parent / "config.json").read_text())["threshold"]
+                trials.append({"threshold": threshold_value, **pool(measured), "role": "reused_six_cell_counts",
+                               "records_sha256": sha(f)})
     low, high = 1e-6, old["selected_threshold"]
-    threshold = INITIAL[model]
-    for index in range(1, 16):
+    threshold = next_threshold(trials, low, high) if any(t["sparsity"] < .5 for t in trials) else INITIAL[model]
+    for index in range(1, 9):
         candidate = leaf / "calibration" / f"candidate{index:03}"
         candidate.mkdir(parents=True, exist_ok=False)
-        write(candidate / "config.json", {"threshold": threshold, "requests": 90,
+        write(candidate / "config.json", {"threshold": threshold, "requests": 6,
               "cap": worker.CAPS[model]["aime26"], "accuracy_blinded": True,
               "transductive": True, "coordinator_sha256": sha(__file__)})
         harness.runtime.arm, harness.runtime.threshold = ARM, threshold
@@ -109,7 +130,7 @@ def run_model(base, out, model):
             # Calibration outputs are deliberately discarded without scoring.
             del private
             print(json.dumps({"event": "calibration_progress", "model": model,
-                  "candidate": index, "completed": len(observed), "expected": 90}), flush=True)
+                  "candidate": index, "completed": len(observed), "expected": 6}), flush=True)
         result = {"threshold": threshold, **pool(observed)}
         trials.append(result)
         write(candidate / "final_complete.json", result)
@@ -120,9 +141,8 @@ def run_model(base, out, model):
             break
         threshold = next_threshold(trials, low, high)
     else:
-        raise RuntimeError("15 count-only candidates exhausted; retain evidence")
-    # A distinct, fresh generation pass is required even though the whole
-    # cohort was used for tile-count calibration.
+        raise RuntimeError("eight six-request count-only candidates exhausted; retain evidence")
+    # Only the final benchmark runs all90 question/seed requests.
     for shard in range(1, 5):
         worker.benchmark(harness, out, "aime26", ARM, shard, 4, "attempt001", threshold)
     rerun = []

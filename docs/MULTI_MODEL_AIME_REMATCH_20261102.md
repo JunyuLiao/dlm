@@ -42,3 +42,7 @@ nonmonotone bracketing and existing score extraction. The existing numerical
 selector and native-runtime qualifications remain applicable because those
 sources are imported without modification. Final verification must check
 all 180 rerun identities, source pins, physical sparsity and official scores.
+
+## User correction: small calibration, attempt003
+
+The user explicitly rejected90-request calibration candidates as too slow. Stop and preserve attempt002, then use six fixed questions per model, seed42 only. Sample one representative from each sextile of native dense eligible work, selecting representatives solely to approximate historical pooled tile sparsity. No gold or score is used. Import exact historical measurements for those six cells when available. At most8small candidates; damped log-threshold interpolation on count-only measurements. Full90 generation is reserved for the final V2 benchmark, whose actual48–52% target is audited. All caps/samplers/kernels stay fixed. New frozen leaf:results/multi_model_aime_v2_matched_20261102/attempt003/.

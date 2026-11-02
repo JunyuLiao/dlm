@@ -4179,3 +4179,7 @@ and no clean latency claim is made.
 User stopped Ultra RULER after three dev requests each reached128forwards/128tokens without EOS. Ultra AIME was previously cancelled. No accuracy claim for cancelled panels. Original completed scope30panels/4010requests remains immutable. New supplemental protocol uses accuracy-blinded transductive AIME tile counts then distinct fresh reruns to repair realized V2 target misses75.2079% and60.4505%. See MULTI_MODEL_AIME_REMATCH_20261102.md.
 
 Ultra RULER development scoring follow-up: all three completed calibration examples receive full official retrieval credit (3/3), despite128forwards/128tokens and no EOS. Fixed Ultra scheduling makes cap usage insufficient to infer incorrect output or an adaptive-stopping failure. User cancellation remains; no full130benchmark estimate is reported. Source: ultrallada_ruler_dev_scores_20261102.json.
+
+## 2026-11-02 — user limits AIME calibration to small samples
+
+Stop full90calibration in attempt002 and preserve it. New attempt003 runs6fixedquestions seed42 per candidate; full90reserved for finalbenchmark. Use counts only and explicit transductive label. See MULTI_MODEL_AIME_REMATCH_20261102.md.

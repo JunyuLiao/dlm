@@ -1,3 +1,7 @@
+## 2026-11-02 08:55UTC — six-question AIME calibration correction
+
+User rejected full90 calibration candidates. Host-verified worker3882648/coordinator3882644 were sentSIGTERM; preserve attempt002. Frozen follow-up attempt003 uses6fixedquestions seed42 per candidate,8candidates maximum, and full90only for final V2benchmark. Source imported from original numerical pins; no accuracy/gold calibration access. Full90candidate001(.03) finished at65.6096%; candidate002(.0001732) stopped at12requests. Scope30/4010original panels already score-complete and pass independent audits. AIME rematches still pending; no final completion claim.
+
 ## 2026-11-02 UTC — Ultra long panels cancelled; AIME V2 rematching
 
 User cancelled Ultra AIME and Ultra RULER during calibration. Preserve their cap evidence; neither is a completed benchmark. Remaining original coverage30panels/4010requests is complete. LLaDA2.2 and TraDo AIME V2 missed48–52% physical sparsity. Identical development recalibration reproduced the original LLaDA threshold and cannot repair this. Follow-up `results/multi_model_aime_v2_matched_20261102/attempt001/` freezes transductive full90 count-only calibration and a distinct fresh90 rerun per model. No final result or completion claim yet. See `docs/MULTI_MODEL_AIME_REMATCH_20261102.md`. The old40-panel finalizer must be retired; its waiting status cannot establish completion for the changed scope. Source checkpoint before this change:c4d80e6e.

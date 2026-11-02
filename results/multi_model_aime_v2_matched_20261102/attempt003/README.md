@@ -1,0 +1,1 @@
+Six-question AIME V2 rematching. Per-candidate calibration runs6fixedquestions x seed42, using full native trajectory and tile counts only. Full90 requests are reserved for the final benchmark. Selection is transductive and accuracy-blinded. Earlier attempts and their partial counts are preserved; no full90 calibration candidate is launched. See rematch_protocol.json.
