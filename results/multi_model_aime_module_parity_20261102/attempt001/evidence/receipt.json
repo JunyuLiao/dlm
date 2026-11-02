@@ -1,0 +1,2225 @@
+{
+  "status": "pass",
+  "synthetic_only": true,
+  "benchmark_requests": 0,
+  "audit_after_generation": true,
+  "source_sha256": "99dfa3b7ee5e481691013de1489d1a2ebdf7c6f3aa2d7364257123f92308390a",
+  "models": {
+    "llada22": {
+      "unchanged_model_methods": [
+        "_install_llada22",
+        "_install_trado",
+        "_llada_attention",
+        "_llada_forward",
+        "encode",
+        "install",
+        "load"
+      ],
+      "llada_trado_generation_ast_equal": true,
+      "original_constructor_state_preserved": true,
+      "excluded_unreachable_model": "ultrallada",
+      "dependencies": {
+        "v27_fa4.py": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+        "v31_value_kernels.py": "abd2b963693031f6cd34955f050f3c218a7932e1e5873b9163142fa626b493d0",
+        "v31_value_summary.py": "ef8d32e01c575bdc167125ddd00321bde391355354cdeecc4baab5e874d4934b",
+        "v31_value_selectors.py": "5c43e4305e02eb661ded09bf86d2246eca13726336cb1513eb9d1b61f430e765"
+      },
+      "original_runtime_sha256": "489b4abf466c40e44fd11d18af41e4c4a69cf7f418c1dd6eb972a76eb43f17dd",
+      "actual_runtime_sha256": "561b9d8c5c5c036e984dbe29040289906e500f45457ec7759e13ff28fbe7d71e",
+      "original_attention_sha256": "619ec332ed70247d0a72996f496fbb34ae7e7debac6637e3c236eac53a099aab",
+      "actual_attention_sha256": "1e9741b4804a1495b11b716974e1667e3be03032917e545ea5dfebd974bad14b",
+      "statistics_query_blocks": 1,
+      "cases": [
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        }
+      ]
+    },
+    "trado": {
+      "unchanged_model_methods": [
+        "_install_llada22",
+        "_install_trado",
+        "_llada_attention",
+        "_llada_forward",
+        "encode",
+        "heartbeat",
+        "install",
+        "load"
+      ],
+      "llada_trado_generation_ast_equal": true,
+      "original_constructor_state_preserved": true,
+      "excluded_unreachable_model": "ultrallada",
+      "dependencies": {
+        "v27_fa4.py": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+        "v31_value_kernels.py": "abd2b963693031f6cd34955f050f3c218a7932e1e5873b9163142fa626b493d0",
+        "v31_value_summary.py": "ef8d32e01c575bdc167125ddd00321bde391355354cdeecc4baab5e874d4934b",
+        "v31_value_selectors.py": "5c43e4305e02eb661ded09bf86d2246eca13726336cb1513eb9d1b61f430e765"
+      },
+      "original_runtime_sha256": "d5fd51e26fefae48d7fe68b7b2cc4791ba98b195d3dc186f8979b1b5dea4f344",
+      "actual_runtime_sha256": "561b9d8c5c5c036e984dbe29040289906e500f45457ec7759e13ff28fbe7d71e",
+      "original_attention_sha256": "3208a49429772c816e14f52ff96972fe909b1b7d44a4334577804a0d315adc27",
+      "actual_attention_sha256": "1e9741b4804a1495b11b716974e1667e3be03032917e545ea5dfebd974bad14b",
+      "statistics_query_blocks": 1,
+      "cases": [
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 4,
+          "kv": 197,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 32,
+          "kv": 513,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "dense_native",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "allkept_fa4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": null
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "mass_topk_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.012489663701836472,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v2_gaussian32_reuse_r4",
+          "threshold": 0.025109133251762627,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 0,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 1,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 2,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 3,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 4,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        },
+        {
+          "arm": "value_v3a_singleton_reuse_r4",
+          "threshold": 0.02,
+          "q": 129,
+          "kv": 4097,
+          "step": 5,
+          "output_bitwise_equal": true,
+          "counters_equal": true,
+          "maps_equal": true
+        }
+      ]
+    }
+  },
+  "gpu_worker_seconds": 10.952418088912964
+}

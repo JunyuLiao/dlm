@@ -2666,3 +2666,66 @@ and paired records in that analysis leaf, and
 `verification/llada22_short_complete002/receipt.json` under the campaign root.
 The previously complete HumanEval counts141/138/83/10/103are unchanged. No full
 campaign completion marker or cross-model conclusion is available yet.
+
+## 2026-11-02 — completed retained multi-model evaluation and AIME V2 reruns
+
+Source: `results/multi_model_value_report_20261102/attempt002/README.md`,
+`summary.json`, `paired.json`, `receipt.json`, `final_complete.json`, and
+`evidence_index.json`. Original protocol:
+`results/multi_model_value_20261030/attempt001/protocol.json` (SHAa87a8704).
+Supplemental six-request calibration:
+`results/multi_model_aime_v2_matched_20261102/attempt003/rematch_protocol.json`;
+completion policy `results/multi_model_aime_v2_completion_20261102/attempt001/protocol.json`.
+All30 retained panels /4010 requests complete. Fresh180 AIME V2 requests replace
+the original target-miss panels. Original40-panel protocol remains incomplete
+because Ultra AIME/RULER were cancelled; TraDo128K unsupported.
+
+| Model/task | Native | All-kept | V31 | V2 | V3a |
+|---|---:|---:|---:|---:|---:|
+| LLaDA2.2 AIME /90 |36|29|21|28|25|
+| LLaDA2.2 HumanEval /164 |141|138|83|10|103|
+| LLaDA2.2 RULER fractional % |85.436|84.821|86.013|86.231|85.026|
+| TraDo AIME /90 |8|4|3|6|2|
+| TraDo HumanEval /164 |130|128|70|125|78|
+| Ultra HumanEval /164 |2|2|0|0|0|
+
+All retained sparse arms realize48–52% eligible denoising-consumer sparsity.
+New AIME V2 LLaDA51.7157% at0.012489663701836472; N122995,C13290,T422632.
+TraDo49.7800% at0.025109133251762627; N48514,C23887,T95292.
+Both thresholds use two new six-question seed42 candidates, counts only;
+calibration is transductive. Full90 is run once after selection, with no
+post-benchmark recalibration. Original LLaDA75.2079%/9of90 and TraDo60.4505%/6of90
+remain separate historical target misses.
+
+TraDo V2 HumanEval minus V31:+33.5366pp,95% question-clustered CI[25.0000,42.0732];
+N10059vs11616,C5362vs5105,T20933vs19934. Paired geometric N/Cratio0.85086
+[0.81654,0.88544]; paired total-Nratio1.43229 reflects skew and differs from pooled sums.
+It remains3.0488pp below native with CI[-7.9268,+1.2195]; no noninferiority claim.
+LLaDA V3a HumanEval minus V31:+12.1951pp [3.0488,21.3415]; N6941vs6029,
+C1422vs1285,T40227vs35900. N/Cratio0.99754 [0.95701,1.04076] gives no per-canvas
+convergence improvement. LLaDA V2 HumanEval remains severely degraded10/164.
+AIME V2 gains over V31:+7.7778pp [-6.6667,22.2222] LLaDA and+3.3333pp
+[-1.1111,8.9167] TraDo; RULER V2:+0.2179pp [-2.1282,2.6154]. No reliable
+AIME/RULER accuracy gain or universal value-direction result is established.
+
+Execution deviation: rerun worker hashes match their original pins, but runtime
+SHA561b9d8c and attention SHA1e9741b4 differ from the original controls due to
+Python package resolution. Failed report attempt001 retained. After-execution
+qualification verifies identical LLaDA/TraDo generation AST, unchanged numerical
+dependencies and216 synthetic bitwise output/map and exact count cases.
+`results/multi_model_aime_module_parity_20261102/attempt001/evidence/receipt.json`.
+These are qualified accounting/runtime variants, not exact-source reproductions.
+Eleven focused CPU tests pass; final audit checks all180 row/scorer/source bindings.
+
+Ultra HumanEval every arm uses1024forwards/16canvases per request without EOS;
+its poor dense operating point limits method conclusions. Ultra RULER's three
+completed development examples use128forwards/2canvases each (~4.7h/request),
+no EOS, all three full retrieval credit; no130-item benchmark exists. Ultra AIME
+stopped in calibration with4096forwards/64canvases per completed dev request.
+Initial Yuhan reuse and Junyu Gaussian32 provenance remain distinct.
+
+Canonical original benchmark-worker receipts total167827.126s (46.619h), fresh
+AIME replacements20518.392s (5.700h); these exclude loading/calibration/cancelled
+attempts and are not clean request latency. No speedup claim. Optional reuse
+observer diagnostics not executed after narrowed scope; no causal reuse claim.
+GPU idle and verified campaign CPU monitor retired at completion.

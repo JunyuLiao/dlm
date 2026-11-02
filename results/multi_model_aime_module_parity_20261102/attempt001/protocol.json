@@ -1,0 +1,36 @@
+{
+  "reason": "Final audit detected actual newer runtime/attention module imports; verify unchanged LLaDA/TraDo generation paths and exact synthetic route/output/count parity without benchmark reruns",
+  "script_sha256": "99dfa3b7ee5e481691013de1489d1a2ebdf7c6f3aa2d7364257123f92308390a",
+  "synthetic_only": true,
+  "benchmark_requests": 0,
+  "shapes": [
+    [
+      4,
+      197,
+      8,
+      2
+    ],
+    [
+      32,
+      513,
+      4,
+      1
+    ],
+    [
+      129,
+      4097,
+      4,
+      4
+    ]
+  ],
+  "all_five_arms": true,
+  "six_steps_per_case_with_hold_refresh_and_invalidation": true,
+  "bitwise_output_mask_and_count_parity_required": true,
+  "generation_ast_and_kernel_dependency_hashes_required": true,
+  "models": [
+    "llada22",
+    "trado"
+  ],
+  "actual_attention_sha256": "1e9741b4804a1495b11b716974e1667e3be03032917e545ea5dfebd974bad14b",
+  "actual_runtime_sha256": "561b9d8c5c5c036e984dbe29040289906e500f45457ec7759e13ff28fbe7d71e"
+}

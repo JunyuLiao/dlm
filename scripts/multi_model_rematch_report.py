@@ -57,10 +57,14 @@ def main():
     p.add_argument("--original-analysis", required=True)
     p.add_argument("--rerun-analysis", required=True)
     p.add_argument("--completion", type=Path, required=True)
+    p.add_argument("--module-parity", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
     a = p.parse_args()
     a.out.mkdir(parents=True, exist_ok=False)
     errors = []
+    parity = json.loads(a.module_parity.read_text())
+    if parity["status"] != "pass" or not parity["synthetic_only"] or parity["benchmark_requests"]:
+        raise RuntimeError("actual runtime modules lack passing synthetic equivalence evidence")
     for model in ("llada22", "trado"):
         marker = a.completion / model / "final_complete.json"
         if not marker.exists():
@@ -128,19 +132,45 @@ def main():
         for ref_arm in ("mass_topk_reuse_r4", "dense_native", "allkept_fa4"):
             if arm != ref_arm:
                 contrasts[label + "_vs_" + ref_arm] = paired(rows, tables[model, suite, ref_arm])
-    # Verify raw rerun shard identities and original numerical/consumer sources.
+    # Verify actual modules, making source differences explicit. The frozen
+    # worker imported newer shared modules through Python package resolution.
+    # This is an execution deviation; exact-source equality must not be claimed.
     for marker in sorted((a.rematch / "runs").glob("*/*/*/shard*/attempt*/final_complete.json")):
         leaf = marker.parent
         config = json.loads((leaf / "config.json").read_text())
         receipt = json.loads((leaf / "receipt.json").read_text())
         original_config = a.base / leaf.relative_to(a.rematch) / "config.json"
         ref = json.loads(original_config.read_text())
-        for field in ("manifest_sha256", "source_sha256", "runtime_sha256", "attention_source_sha256",
-                      "protocol_sha256", "model_revision", "host_gpu_uuid"):
+        for field in ("manifest_sha256", "source_sha256", "protocol_sha256", "model_revision", "host_gpu_uuid"):
             if config[field] != ref[field]:
                 errors.append(f"numerical binding: {leaf}/{field}")
+        model = config["model"]
+        equivalence = parity["models"][model]
+        for field, stem in (("runtime_sha256", "runtime"), ("attention_source_sha256", "attention")):
+            if config[field] != equivalence["actual_" + stem + "_sha256"] or ref[field] != equivalence["original_" + stem + "_sha256"]:
+                errors.append(f"unqualified actual module: {leaf}/{field}")
+        selected = json.loads((a.rematch / model / "selected_threshold.json").read_text())
+        if selected["requests"] != 6 or not .48 <= selected["sparsity"] <= .52 or selected["threshold"] != config["threshold"]:
+            errors.append(f"small calibration binding: {leaf}")
         if receipt["records_sha256"] != sha(leaf / "records.jsonl"):
             errors.append(f"rerun records hash: {leaf}")
+        raw = load_rows(leaf / "records.jsonl")
+        scored = {(r["id"], r["seed"]): r for r in tables[model, "aime26", ARM]}
+        if len(raw) != config["cells"]:
+            errors.append(f"raw shard coverage: {leaf}")
+        for row in raw:
+            for field in ("manifest_sha256", "source_sha256", "runtime_sha256", "protocol_sha256", "model_revision", "threshold"):
+                if row[field] != config[field]:
+                    errors.append(f"raw record binding: {leaf}/{field}")
+            numerical = scored.get((row["id"], row["seed"]))
+            for field in ("counts", "output_tokens", "output_sha256", "prompt_sha256", "prompt_tokens", "finished", "generation_cap"):
+                if numerical is None or row[field] != numerical[field]:
+                    errors.append(f"score/raw binding: {leaf}/{field}")
+            counts = row["counts"]
+            if counts["total_model_forwards"] != counts["denoising_forwards"] + counts.get("prefill_model_forwards", 0) + counts.get("commit_model_forwards", 0):
+                errors.append(f"forward accounting: {leaf}")
+            if {"text", "tokens", "input_ids", "prompt", "gold", "answer"}.intersection(row):
+                errors.append(f"public privacy: {leaf}")
         sources.append({"path": str(leaf), "config_sha256": sha(leaf / "config.json"),
                         "records_sha256": sha(leaf / "records.jsonl")})
     if len(sources) != 8:
@@ -150,6 +180,8 @@ def main():
                "original_scored_sha256": sha(orig_path), "rerun_scored_sha256": sha(rerun_path),
                "source_sha256": sha(__file__), "sources": sources,
                "completion_policy_sha256": sha(a.completion / "protocol.json"),
+               "actual_module_parity_receipt_sha256": sha(a.module_parity),
+               "source_identity_deviation": "AIME V2 reruns imported newer accounting/runtime modules; matching model generation AST, unchanged kernel dependencies and exact synthetic output/map/count parity verified after execution. Original runtime/attention hashes differ; this is not an exact-source rerun.",
                "sparsity_target_misses": target_misses,
                "cancelled": ["ultrallada/aime26", "ultrallada/ruler128k"],
                "transductive_count_calibration": ["llada22/aime26/V2", "trado/aime26/V2"]}
@@ -161,6 +193,7 @@ def main():
     (a.out / "historical_target_miss_records.jsonl").write_text("".join(json.dumps(r) + "\n" for r in history))
     labels = dict(zip(ARMS, ("Dense", "All-kept", "V31", "V2", "V3a")))
     lines = ["# Retained multi-model evaluation", "", "Sparse arms target 48–52% consumer sparsity. Per the user's revised stopping rule, final AIME V2 target drift is disclosed without recalibration or another benchmark rerun. AIME V2 is transductively count-calibrated; other arms are frozen primary panels. Ultra AIME/RULER were cancelled; TraDo RULER is unsupported. No clean latency claim.", "",
+             "Execution deviation: AIME V2 reruns used newer shared runtime/attention modules. Generation AST and kernel dependencies match for these two models; a subsequent synthetic H100 audit confirms bitwise output/map and exact work-count parity. Source hashes differ from the original controls; retain this qualification and the after-execution timing of the audit.", "",
              "| Model/task | Arm | Accuracy | N | C | N/C | T | Sparsity |", "|---|---|---:|---:|---:|---:|---:|---:|"]
     for label, r in summaries.items():
         m, s, arm = label.split("/")

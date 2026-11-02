@@ -50,3 +50,7 @@ The user explicitly rejected90-request calibration candidates as too slow. Stop 
 ## 2026-11-02 — user accepts final target drift without another rerun
 
 After six-question calibration, run the final 90 AIME requests once per model. Report actual sparsity even if it misses 48-52%, then proceed; no post-benchmark recalibration or repeat. Preserve attempt003 and its original stopping-gate evidence. Supplemental completion policy lives in results/multi_model_aime_v2_completion_20261102/attempt001/. Numerical execution is unchanged; only completion interpretation and next-model scheduling change. Any missed cell cannot support an exactly matched-50% claim.
+
+## Completion and source qualification
+
+Both final90-request runs complete: LLaDA V2 28/90 at51.7157%; TraDo V2 6/90 at49.7800%. No post-benchmark recalibration. Final retained-scope report:results/multi_model_value_report_20261102/attempt002/. The audit detected newer shared runtime/attention imports despite pinned worker imports; source hashes differ from original controls. A subsequent216-case synthetic parity audit plus matching model generation AST and unchanged kernel dependencies qualifies the actual modules; this execution deviation remains explicit. See final report for full accuracy/trajectory tables and evidence.
