@@ -2729,3 +2729,9 @@ AIME replacements20518.392s (5.700h); these exclude loading/calibration/cancelle
 attempts and are not clean request latency. No speedup claim. Optional reuse
 observer diagnostics not executed after narrowed scope; no causal reuse claim.
 GPU idle and verified campaign CPU monitor retired at completion.
+
+## 2026-11-02 — LLaDA2.2 V2 HumanEval short-output diagnosis
+
+Detailed evidence: `results/llada22_v2_humaneval_diagnosis_20261102/attempt001/summary.md` and `receipt.json`; aggregate full-panel source is `results/multi_model_value_report_20261102/attempt002/summary.json` and sanitized scored rows. LLaDA2.2 V2 HumanEval is10/164 (6.10%), N2331,C503,T10317,mean62.91 output tokens, median58, max155, consumer sparsity49.2165%. All164 end in EOS; zero hit the1024-token cap. The scorer finds98 syntax errors,2 missing entry points,3 no final response. Of61 parsed functions,21 are docstring-only,12 pass/ellipsis-only,28 have substantive bodies;10 pass tests. Dense median output224 tokens and V31 median193.
+
+This is strong evidence of a genuine early-EOS trajectory failure exposed by long-form code completion, not cap truncation or scoring extraction: same pinned source replay exactly reproduces the saved110-token unparseable task0 completion. The layer10 refresh map matches the exact CUDA recomputation and CPU V2 online recurrence, zero mismatches. It does not rule out every possible integration issue nor establish same-state EOS causality; the planned route counterfactual was not launched after host auto-approval timed out. V2 AIME/RULER require short outputs (52.18/28.12 tokens/request) and have28/90 and86.23% results respectively; the six count-only code calibration prompts also average only69.8 output tokens and selected no quality gate. So HumanEval's long complete-function format is a concrete workload-specific failure case. No calibration or benchmark rerun occurred.

@@ -1,0 +1,21 @@
+{
+  "purpose": "Same-state attention-route effect on the first greedy EOS prediction during an exact LLaDA2.2 V2 HumanEval replay.",
+  "base_campaign": "results/multi_model_value_20261030/attempt001",
+  "model": "llada22",
+  "model_revision": "e4f77d25ab5ca86f2223c6cdc6a72b887e20c8a5",
+  "numerical_source": "224f8f11173bd16e5cf10054a963c74233758cf2",
+  "runtime_sha256": "489b4abf466c40e44fd11d18af41e4c4a69cf7f418c1dd6eb972a76eb43f17dd",
+  "attention_source_sha256": "619ec332ed70247d0a72996f496fbb34ae7e7debac6637e3c236eac53a099aab",
+  "cohort": ["humaneval/0"],
+  "cohort_status": "previously examined benchmark item; mechanism replay, not held-out evidence",
+  "seed": 42,
+  "generation_cap": 1024,
+  "native_sampler_modified": false,
+  "primary_replay": "V2 at the frozen HumanEval threshold 0.8944271909999159; exact output token hash and length must reproduce saved benchmark record",
+  "same_state_counterfactual": "At first V2 greedy EOS prediction on a masked token, compare EOS logit, probability, rank and top-1 under same input/prefix KV for all-kept FA4, V31 mass ranking, and V2 at the AIME threshold 0.012489663701836472. Extra forwards are diagnostic only.",
+  "selector_oracle": "At a captured V2 refresh for layer 10, compare actual map with exact CUDA recomputation and CPU V2 online recurrence from captured Q/K/V.",
+  "official_benchmark_or_calibration": false,
+  "no_full_benchmark_rerun": true,
+  "no_threshold_retuning": true,
+  "no_latency_claim": true
+}

@@ -1,0 +1,22 @@
+{
+  "purpose": "Diagnose whether short, incorrect LLaDA2.2 V2 HumanEval outputs arise from selector integration, benchmark/scorer setup, or trajectory sensitivity.",
+  "base_campaign": "results/multi_model_value_20261030/attempt001",
+  "model": "llada22",
+  "model_revision": "e4f77d25ab5ca86f2223c6cdc6a72b887e20c8a5",
+  "numerical_source": "224f8f11173bd16e5cf10054a963c74233758cf2",
+  "runtime_sha256": "489b4abf466c40e44fd11d18af41e4c4a69cf7f418c1dd6eb972a76eb43f17dd",
+  "attention_source_sha256": "619ec332ed70247d0a72996f496fbb34ae7e7debac6637e3c236eac53a099aab",
+  "cohort": ["humaneval/0"],
+  "cohort_status": "previously examined benchmark item; mechanism replay, not held-out evidence",
+  "seed": 42,
+  "generation_cap": 1024,
+  "native_sampler_modified": false,
+  "primary_replay": "V2 at the frozen HumanEval threshold 0.8944271909999159; output token hash and length must exactly reproduce its saved benchmark record",
+  "same_state_counterfactual": "At the first newly emitted EOS, run one extra forward per route using identical pre-forward token IDs and cached prefix KV under all-kept FA4, V31 mass ranking, and V2 with the AIME threshold 0.012489663701836472. Do not score these counterfactual logits as generated output.",
+  "selector_oracle": "Capture the actual V2 refresh map at layer 10 and compare with exact CUDA recomputation and CPU V2 online recurrence on captured Q/K/V.",
+  "official_benchmark_or_calibration": false,
+  "raw_prompt_gold_completion_token_ids": "remain private and are excluded from public receipt",
+  "no_full_benchmark_rerun": true,
+  "no_threshold_retuning": true,
+  "no_latency_claim": true
+}

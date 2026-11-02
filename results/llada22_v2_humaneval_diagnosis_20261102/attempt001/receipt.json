@@ -1,0 +1,59 @@
+{
+  "status": "pass_diagnostic_complete",
+  "model_revision": "e4f77d25ab5ca86f2223c6cdc6a72b887e20c8a5",
+  "numerical_worker_revision": "224f8f11173bd16e5cf10054a963c74233758cf2",
+  "runtime_sha256": "489b4abf466c40e44fd11d18af41e4c4a69cf7f418c1dd6eb972a76eb43f17dd",
+  "attention_source_sha256": "619ec332ed70247d0a72996f496fbb34ae7e7debac6637e3c236eac53a099aab",
+  "cohort": [
+    "humaneval/0"
+  ],
+  "previously_examined_input": true,
+  "official_calibration_or_benchmark": false,
+  "gpu_worker_seconds": null,
+  "replay": {
+    "id": "humaneval/0",
+    "seed": 42,
+    "threshold": 0.8944271909999159,
+    "token_count": 110,
+    "saved_token_count": 110,
+    "output_sha256": "2dea9f11105c4d983f3e1eecaeba8d2a0c2ee42d452d7ef05f6c1ef06164a9e6",
+    "saved_output_sha256": "2dea9f11105c4d983f3e1eecaeba8d2a0c2ee42d452d7ef05f6c1ef06164a9e6",
+    "exact_saved_output_reproduction": true,
+    "official_score": 0.0,
+    "token_diagnostics": {
+      "fence_count": 1,
+      "python_fence_count": 1,
+      "any_fenced_body_parses": false,
+      "entry_point_present": false,
+      "entry_point_docstring_only": false,
+      "entry_point_stub_only": false,
+      "entry_point_has_substantive_body": false
+    },
+    "counterfactual_extra_forwards": 0,
+    "within_process_repeat": {
+      "token_count": 110,
+      "output_sha256": "2dea9f11105c4d983f3e1eecaeba8d2a0c2ee42d452d7ef05f6c1ef06164a9e6",
+      "matches_first_replay": true,
+      "matches_saved_benchmark": true
+    }
+  },
+  "same_state_eos": null,
+  "selector_route_oracle": {
+    "layer": 10,
+    "call_in_block": 1,
+    "refresh_point": true,
+    "threshold": 0.8944271909999159,
+    "query_rows": 32,
+    "key_tokens": 288,
+    "eligible_tile_units": 80,
+    "mandatory_tiles": 16,
+    "actual_map_equals_cuda_recompute": true,
+    "cuda_route_equals_cpu_online_recurrence": true,
+    "actual_tiles": 34,
+    "recomputed_tiles": 34,
+    "cpu_recurrence_tiles": 34,
+    "tile_mismatches_actual_vs_cuda": 0,
+    "tile_mismatches_cuda_vs_cpu": 0,
+    "counterfactual_forwards_excluded": true
+  }
+}
