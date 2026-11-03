@@ -36,7 +36,10 @@ def install(adapter,**unused):
             selected,*_=current_canvas_cuda(stats,self.value_threshold,mandatory,pt,held,
                 0. if held is None else self.mage_sticky)
             keep[:,:,qi]=selected
+            if self.value_audit:
+                self._value_pending.append(torch.stack((selected[:,:pt].sum(),stats.invalid.sum())))
             self.calls['value_statistics_qk_rectangles']=self.calls.get('value_statistics_qk_rectangles',0)+h*jt
+            self.calls['value_candidate_evaluations']=self.calls.get('value_candidate_evaluations',0)+h*jt
             self.calls['value_peak_summary_bytes']=max(self.calls.get('value_peak_summary_bytes',0),stats.nbytes)
         packed=old_list(keep)
         out=v27_fa4.sparse_lists(q,k,v,packed,scale)
@@ -59,6 +62,8 @@ def install(adapter,**unused):
                  value_output_path='current_canvas_init_sparse_refresh_current_qkv',
                  value_state_role='router_only; FA4 consumes selected current full V',
                  value_discovery_work='full QK and Gaussian32 PZ; separately counted',
+                 value_prefix_mass_source='current_triton_tile_logsumexp',
+                 value_projection_kernel='current_full_v_batched_float32_projection_and_rms',
                  value_projection_manifest=projections.manifest,
                  optimized_refresh_extra_model_forwards=0,
                  optimized_refresh_projection_current_v=True,
