@@ -1,3 +1,15 @@
+## 2026-11-03 — current-tile initialization implementation and evaluation authorized
+
+User requests current mandatory KV64 tile initialization, followed by a scan
+from tile0, recalibration and full164 LLaDA2.2-mini HumanEval evaluation.
+Spec: `docs/LLADA22_CURRENT_TILE_INIT_20261103.md`. New variant and runner:
+`v2_current_tile_init.py`, `scripts/llada22_current_tile_eval.py`; report:
+`scripts/llada22_current_tile_report.py`. Nine focused CPU tests pass. Original
+selector, native sampler/EOS/editing and frozen historical evidence stay intact.
+Next: freeze source-bound attempt001,30 CUDA recurrence/consumer checks and12
+exact control replays, six-prompt count-only calibration, then164 requests once.
+Check GPU every900seconds; report achieved benchmark drift without recalibration.
+
 ## 2026-11-03 — HumanEval sparsity recount corrects optional-budget interpretation
 
 CPU-only audit of all820 original LLaDA HumanEval requests across five methods

@@ -4300,3 +4300,16 @@ predictions. Tile geometry gives partial final KV tiles full tile weight, so
 tile sparsity must remain distinct from valid-token-pair or whole-model FLOP
 sparsity. No recalibration, GPU work, generation or selector change. Report:
 `results/llada22_humaneval_sparsity_audit_20261103/attempt001/README.md`.
+# 2026-11-03 — current-tile-initialized V2 follow-up authorized
+
+Implement the user's requested order: mandatory last KV64 tile first, then
+tile0 through J-2, once each. New separately named variant preserves V2's
+mass-on-skip and normalized-output-on-skip recurrence. Reuse original optimized
+chunk kernel after state initialization; no tensor reordering or extra model
+forward. Preserve original source-pinned LLaDA runtime and native EOS/editing.
+Six original nonbenchmark context-matched code development prompts, seed142,
+at most8 log-bisection candidates in[.01,4], target48–52%, six-prompt repeat;
+then164 HumanEval, seed42 once. No post-benchmark recalibration. Prior HumanEval
+exposure is disclosed. Spec: `docs/LLADA22_CURRENT_TILE_INIT_20261103.md`.
+Nine CPU tests pass; CUDA checks and source/control parity required before
+generation. No new accuracy result yet.
