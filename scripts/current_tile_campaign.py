@@ -46,6 +46,10 @@ def run(root):
     assert p['hf_worker_sha256']==sha(REPO/'scripts/current_tile_multimodel_worker.py')
     assert p['single_tile_selector_sha256']==sha(REPO/'experiments/numerical_qk_reuse/v2_current_tile_init.py')
     assert p['multiple_tile_selector_sha256']==sha(REPO/'experiments/numerical_qk_reuse/v2_current_canvas_init.py')
+    amendment=root/'execution_amendment001.json'
+    binding=read(amendment) if amendment.exists() else None
+    if binding:
+        assert binding['worker_sha256']==sha(REPO/'scripts/current_tile_multimodel_worker_qualified.py')
     stop=threading.Event();active={'phase':'qualification','pid':os.getpid()}
     def monitor():
         while True:
@@ -80,9 +84,10 @@ def run(root):
             attempt=1+max([int(d.name[-3:]) for d in parent.glob('attempt*')],default=0)
             while True:
                 active.update(model=model,suite=suite,attempt=attempt,phase='calibration_and_generation')
-                script='current_tile_gemma_panel.py' if model=='diffusiongemma' else 'current_tile_multimodel_worker.py'
+                script='current_tile_gemma_panel.py' if model=='diffusiongemma' else ('current_tile_multimodel_worker_qualified.py' if binding else 'current_tile_multimodel_worker.py')
                 command=[sys.executable,str(REPO/'scripts'/script),str(root),model,suite,'--attempt',str(attempt)]
-                child(command,root/'private/logs'/model/suite/f'attempt{attempt:03}.log')
+                log=root/'private/logs'/model/suite/f'attempt{attempt:03}.log'
+                child(command,log)
                 result=read(parent/f'attempt{attempt:03}'/'generation_complete.json')
                 print(json.dumps({'event':'panel_finished',**result}),flush=True)
                 if result['accepted']:break

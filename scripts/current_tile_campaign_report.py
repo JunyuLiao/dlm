@@ -140,6 +140,7 @@ def main(root):
         assert .4<=summary['consumer_sparsity']<=.6
         summary.update(threshold=marker['threshold'],attempt=marker['attempt'],protocol_sha256=sha(leaf/'protocol.json'),
                        calibration=read(leaf/'calibration/selected_threshold.json'),generation_marker_sha256=sha(chosen[0]))
+        if model!='diffusiongemma':summary['control_receipt']=read(leaf/'control_receipt.json')
         if model=='diffusiongemma':
             summary['overall_sparsity']=(summary['eligible_tiles']-summary['kept_tiles'])/summary['counts']['overall_eligible_rectangles']
         results[f'{model}/{suite}']=summary;scored+=rs
