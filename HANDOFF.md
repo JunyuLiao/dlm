@@ -1,3 +1,33 @@
+## 2026-11-03 14:45UTC — nine-panel campaign active; first accepted panel scored
+
+Root: `results/current_tile_multimodel_20261103/attempt001/`; protocol source
+fcd89912,binding7c6952ab, Gemma/report additionafaecc64, control amendmentd95e5d9e.
+Coordinator continuation: `scripts/current_tile_campaign.py run <root>`;
+log `private/coordinator_attempt002.log`, active state `private/active_worker.json`.
+One GPU worker, internal900s nvidia-smi monitor, no GPU-hour ceiling.
+
+Completed LLaDA HumanEval attempt001:119/164=72.56%,55.6663% tile sparsity,
+threshold0.21327096650454075; Tmean219.305,N/C3.35529. Independent official
+scoring in its `official_summary.json`; source-bound generation marker and
+four complete shards present. Six prompt-length strata calibration gives
+50.6491%,four candidates. Within40–60%,do not recalibrate this panel.
+
+TraDo HumanEval attempt001 stopped before calibration: source-pinned original
+V2 differs from historical saved output, two repeats reproduce each other;
+all-kept control exactly matches historical hashes/counts. Private probe and
+`execution_amendment001.json` retain disclosure. Qualified worker continuation
+`current_tile_multimodel_worker_qualified.py` requires exact all-kept plus
+historical-or-repeat V2 parity and records all mismatches. No historical
+baseline overwritten. Attempt002 is calibrating; no new TraDo benchmark yet.
+
+Data generation complete:130x13tasks balance10/task and13development samples
+each for new TraDo32K/Gemma128K. LLaDA original130 retained. Actual prompt
+ranges:TraDo29798–32472,Gemma114716–130776,LLaDA115092–130776; reserve outputs
+and no truncation. Gemma old RULER104 is a different cohort.96 CUDA recurrence
+cases and11 CPU tests pass.138 historical files hash-protected. Remaining:
+TraDoHE,RULER32K,LLaDARULER128K,TraDoAIME,LLaDAAIME,GemmaHE/AIME/RULER128K,
+then combined official score/source/privacy audit. Keep monitoring to completion.
+
 ## 2026-11-03 — nine-panel current-tile campaign authorized
 
 User requests LLaDA2.2-mini,TraDo-8B-Instruct and DiffusionGemma on AIME30x3,

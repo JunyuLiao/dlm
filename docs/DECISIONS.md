@@ -4334,3 +4334,23 @@ dense gap and a changed calibrated operating point. Do not claim matched-50%
 superiority or isolated fixed-threshold causality. Report and audit:
 `results/llada22_current_tile_init_20261103/publication001/README.md` and
 `attempt001/analysis001/`. H100 released; no further experiment scheduled.
+
+
+## 2026-11-03 — nine-model-task current initialization campaign underway
+
+User requests9 panels:3models x AIME30x3,HE164,RULER130. LLaDA/GemmaRULER128K,
+TraDo32K; other methods read-only. Frozen specCURRENT_TILE_MULTIMODEL_20261103.
+Accept full40–60% after near50% calibration; otherwise preserve completed result,
+recalibrate from small samples and rerun. This supersedes earlier no-retuning
+policy.6stratified examined prompts forshort benchmarks,13separate retrieval
+samples,count-only; no90-request calibration candidates.96 CUDA/11CPU pass.
+Gemma uses current mandatory suffix initialization, original GLOBAL-only,
+select-step1/carry/progress/sticky native lifecycle and FA4 consumers. Old
+Gemma104RULER and new130cohorts stay distinct; newTraDo32K has no old baseline.
+
+First accepted LLaDAHE threshold.2132709665,cal50.649%,full55.666%,119/164,
+T219.305,N/C3.35529. TraDo original V2 replay differs historically but repeats
+exactly twice; all-kept reproduces historical. Failed attempt retained; explicit
+execution_amendment001 permits repeat-qualified V2 while recording mismatch.
+No original runtime/selector/sampler or historical result changed. Continue
+remaining8panels with900s monitoring; no final campaign claim yet.
