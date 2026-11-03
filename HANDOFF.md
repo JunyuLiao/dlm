@@ -1,3 +1,17 @@
+## 2026-11-03 — nine-panel current-tile campaign authorized
+
+User requests LLaDA2.2-mini,TraDo-8B-Instruct and DiffusionGemma on AIME30x3,
+HumanEval164 and balanced RULER130 (128K/32K/128K respectively). Preserve other
+methods. Superseding sparsity policy: calibrate near50%; accept full40–60%,
+otherwise recalibrate and rerun in a new attempt. Spec:
+`docs/CURRENT_TILE_MULTIMODEL_20261103.md`. Eleven focused CPU tests pass.
+Source-pinned HF runner and serial coordinator implemented; separate multi-tile
+current-canvas selector port for Gemma preserves GLOBAL-only scope and native
+reuse/carry/progress/sticky lifecycle. Existing LLaDA HumanEval61.35% remains
+historical and is to be rerun. New TraDo32K/Gemma130 RULER cohorts require
+private official generation and have no matched full historical baseline.
+Next: freeze root/per-panel protocols,CUDA gate,launch and900s health checks.
+
 ## 2026-11-03 — current-tile-initialized V2 HumanEval complete
 
 Verified execution source1ca4e9d2. Report:
