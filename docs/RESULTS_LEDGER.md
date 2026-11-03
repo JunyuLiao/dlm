@@ -2822,3 +2822,28 @@ on those same short states is corrected. Full-cohort average optional kept is
 V21.067 vs V311.829, with available tiles4.070 vs5.655 on different generated
 trajectories. This difference is not independent causal evidence. Original
 equal-count support-identity causal probes remain valid; no new accuracy claim.
+
+
+## 2026-11-03 — LLaDA2.2 HumanEval current-tile-initialized V2
+
+Complete protocol-bound164-problem seed42 follow-up; source freeze1ca4e9d2,
+`results/llada22_current_tile_init_20261103/attempt001/protocol.json`.
+Analysis/completion: `attempt001/analysis001/receipt.json`, `summary.json`,
+`attempt001/final_complete.json`; interpretation and verification:
+`results/llada22_current_tile_init_20261103/publication001/`.
+
+New variant102/164=62.20%, original V210/164=6.10%,V3183/164=50.61%,
+V3a103/164=62.80%,native141/164=85.98%,all-kept138/164=84.15%. New-original
++56.10pp[48.17,64.02],new-V31+11.59pp[1.83,21.95] using10000 paired
+problem-bootstrap resamples. Repeated examined cohort; exploratory only.
+N4534,C1250,T35129,N/C3.6272; perrequestN27.646,C7.622,T214.201.
+Eligible8561280,kept3308832,pooled geometric tile sparsity61.3512%.
+Calibration six development prompts seed142,four candidates,six confirmation
+requests:tau0.29084308668979075,50.9271%. Final target miss disclosed,no further
+calibration/rerun; comparison is not matched50% or a fixed-threshold ablation.
+Syntax errors10 (original98), substantive functions144 (original28),164EOS,
+0caps. Every original V2 pass preserved. Same native sampler/EOS/editing/cap.
+Nine CPU tests,30 independent CUDA checks,12 exact original-control replays,
+four41-cell shard/hash/identity/official-scorer audits pass. GPU idle afterrun;
+no clean latency/speedup claim. Allocated benchmark worker681.744seconds,
+excluding qualification,model loading,calibration and scoring.

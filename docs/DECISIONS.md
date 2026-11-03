@@ -4313,3 +4313,24 @@ then164 HumanEval, seed42 once. No post-benchmark recalibration. Prior HumanEval
 exposure is disclosed. Spec: `docs/LLADA22_CURRENT_TILE_INIT_20261103.md`.
 Nine CPU tests pass; CUDA checks and source/control parity required before
 generation. No new accuracy result yet.
+
+
+## 2026-11-03 — current-tile V2 restores code trajectory; disclose sparsity drift
+
+Completed user-requested current-tile initialization with separately recalibrated
+threshold. Original224f8f11 runtime/sampler, mandatory last tile processed once,
+then0..J-2; original optimized recurrence and FA4 consumer unchanged. No EOS
+intervention or top-k repair. Nine CPU tests,30 CUDA oracle/consumer checks and
+12 exact original-control replays pass before generation. Six development
+prompts seed142, four candidates and six-prompt confirmation select0.29084308669
+at50.9271% sparsity. Full164 seed42 runs once, reaches61.3512%; honor standing
+no-post-benchmark-recalibration instruction and disclose unmatched sparsity.
+
+Accuracy102/164 versus original V210/164,V3183/164,V3a103/164,dense141/164.
+All10 original passes retained and92 added. T62.9->214.2,syntax98->10,
+substantive bodies28->144,N/C4.634->3.627; all164 EOS,0 caps. Strong evidence
+that chronological initialization contributes to the failure, with remaining
+dense gap and a changed calibrated operating point. Do not claim matched-50%
+superiority or isolated fixed-threshold causality. Report and audit:
+`results/llada22_current_tile_init_20261103/publication001/README.md` and
+`attempt001/analysis001/`. H100 released; no further experiment scheduled.

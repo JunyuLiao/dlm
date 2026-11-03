@@ -1,3 +1,27 @@
+## 2026-11-03 — current-tile-initialized V2 HumanEval complete
+
+Verified execution source1ca4e9d2. Report:
+`results/llada22_current_tile_init_20261103/publication001/README.md`;
+full table/audit: `attempt001/analysis001/`. Current-tile initialization plus
+six-prompt recalibration scores102/164 (62.20%), original V210/164, V3183/164,
+V3a103/164, dense141/164, all-kept138/164. Every original V2 pass is preserved,
+92 additional passes. Output62.9->214.2 mean tokens, syntax errors98->10,
+substantive function bodies28->144. EOS/native acceptance/editing unchanged.
+
+Threshold0.29084308668979075 confirms50.9271% on six development prompts
+(four candidates, seed142). Full164 seed42 achieves61.3512% sparsity; disclose
+drift without further calibration/rerun. This is not a matched-50% comparison
+or a fixed-threshold initialization ablation. Paired new-minus-V31+11.59pp
+[1.83,21.95], new-minus-original+56.10pp[48.17,64.02]; exploratory examined
+cohort. N4534,C1250,T35129,N/C3.6272; meanN27.65,C7.62,T214.20. Total calls
+increase with recovered output; no clean latency claim. All164 EOS,0 caps.
+
+Nine CPU tests,30 independent CPU/CUDA/consumer cases,12 exact historical
+control replays and four41-cell source-bound official-scored shards pass.
+Completion/summary hashes independently checked. Generation finished before
+second900s monitor sample; post-run H100idle0MiB/0%,38C. Running:none.
+Next: report completed results; no further experiment scheduled.
+
 ## 2026-11-03 — current-tile initialization implementation and evaluation authorized
 
 User requests current mandatory KV64 tile initialization, followed by a scan
