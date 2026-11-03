@@ -1,0 +1,86 @@
+{
+  "status": "frozen",
+  "arm": "value_v2_current_tile_init_gaussian32_reuse_r4",
+  "parent": "bdc25a0d593124ed023c18c879d0032a09ee82c8",
+  "source_sha256": {
+    "runner": "aef794f0f9a3d4950f60fca27c13339d2886225032e95bc9eab34ae443885c17",
+    "variant": "d077593e90d051556368a6e32ebc3ad7dca292a3d8d98d90d5b8a8b3028463cb",
+    "multi_model_runtime": "489b4abf466c40e44fd11d18af41e4c4a69cf7f418c1dd6eb972a76eb43f17dd",
+    "multi_model_attention": "619ec332ed70247d0a72996f496fbb34ae7e7debac6637e3c236eac53a099aab",
+    "v31_value_kernels": "abd2b963693031f6cd34955f050f3c218a7932e1e5873b9163142fa626b493d0",
+    "v31_value_selectors": "5c43e4305e02eb661ded09bf86d2246eca13726336cb1513eb9d1b61f430e765",
+    "v27_fa4": "cd1fcff886aeeb7802a041180ab3d3b19c8987be254899b8b70195de90af0afd",
+    "worker": "0e9d0544af2b0fd5dd496ca66fbcff51e815182c0c68c77ffc5dc4045fe35b62",
+    "manifest": "0c900f9e48cd8b311e9889b487802e393258409bfb7e37c917a5804bf637ba5b",
+    "development": "abe1a52dabca4fff1e716352345decfb6a334f41270cbaeba014ae0ab2032e97"
+  },
+  "model_revision": "e4f77d25ab5ca86f2223c6cdc6a72b887e20c8a5",
+  "initialization": "last mandatory KV64 tile once; then chronological tiles 0..J-2",
+  "sampler": {
+    "block_length": 32,
+    "steps": 32,
+    "threshold": 0.5,
+    "editing_threshold": 0.0,
+    "max_post_steps": 16,
+    "temperature": 0.0,
+    "eos_early_stop": true,
+    "cap": 1024
+  },
+  "calibration": {
+    "prompts": 6,
+    "seed": 142,
+    "bracket": [
+      0.01,
+      4.0
+    ],
+    "max_candidates": 8,
+    "target": [
+      0.48,
+      0.52
+    ],
+    "selection": "closest pooled tile sparsity to .5; no scoring",
+    "confirmation_requests": 6,
+    "no_post_benchmark_recalibration": true
+  },
+  "benchmark": {
+    "problems": 164,
+    "seed": 42,
+    "shards": 4,
+    "requests_per_shard": 41
+  },
+  "controls": "first four canonical items each: original V2, V31, allkept FA4; exact saved hashes/counts",
+  "scope": {
+    "layers": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19
+    ],
+    "q_heads": 16,
+    "q_tile": 128,
+    "kv_tile": 64,
+    "projection": 32,
+    "projection_seed": "1729+layer",
+    "reuse": 4,
+    "cross_canvas_carry": false
+  },
+  "monitor_interval_seconds": 900,
+  "latency": "instrumented accounting only",
+  "interpretation": "previously examined HumanEval follow-up; exploratory, not held-out confirmation"
+}
