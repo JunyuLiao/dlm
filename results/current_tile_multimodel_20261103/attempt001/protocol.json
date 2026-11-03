@@ -1,0 +1,78 @@
+{
+  "status": "frozen",
+  "date": "2026-11-03",
+  "source_commit": "fcd8991274adec3b3529634dcbe121443e644a82",
+  "panels": [
+    {
+      "model": "llada22",
+      "suite": "humaneval",
+      "requests": 164
+    },
+    {
+      "model": "trado",
+      "suite": "humaneval",
+      "requests": 164
+    },
+    {
+      "model": "trado",
+      "suite": "ruler32k",
+      "requests": 130
+    },
+    {
+      "model": "llada22",
+      "suite": "ruler128k",
+      "requests": 130
+    },
+    {
+      "model": "trado",
+      "suite": "aime26",
+      "requests": 90
+    },
+    {
+      "model": "llada22",
+      "suite": "aime26",
+      "requests": 90
+    },
+    {
+      "model": "diffusiongemma",
+      "suite": "humaneval",
+      "requests": 164
+    },
+    {
+      "model": "diffusiongemma",
+      "suite": "aime26",
+      "requests": 90
+    },
+    {
+      "model": "diffusiongemma",
+      "suite": "ruler128k",
+      "requests": 130
+    }
+  ],
+  "spec_sha256": "68631a39c4af449c920ebbe734ab795eebb370161920c0a3990a5a602a751134",
+  "hf_worker_sha256": "804a03e1acd7967558bacf43ecb048cd7e4e0a0421d6dd77335496ef1f7b24d1",
+  "single_tile_selector_sha256": "d077593e90d051556368a6e32ebc3ad7dca292a3d8d98d90d5b8a8b3028463cb",
+  "multiple_tile_selector_sha256": "4ea681d1bd04584f052f559865ab34876dc29a0b969c79ecb0b41f3c8bb0a220",
+  "qualification_source_sha256": "7f20ecade80e7b4e52cb10be80298b2b5d179dae94d8cd9dc0af5cf99fedf003",
+  "per_panel_source_freeze": "committed source hashes and input/model identity in each attempt before generation",
+  "calibration_target": [
+    0.48,
+    0.52
+  ],
+  "full_benchmark_acceptance": [
+    0.4,
+    0.6
+  ],
+  "recalibrate_outside": true,
+  "small_calibration_only": true,
+  "accuracy_blinded": true,
+  "monitor_seconds": 900,
+  "gpu_hour_limit": null,
+  "native_samplers_unchanged": true,
+  "other_methods": "historical evidence read-only",
+  "ruler_lengths": {
+    "llada22": 131072,
+    "trado": 32768,
+    "diffusiongemma": 131072
+  }
+}
