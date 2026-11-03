@@ -186,7 +186,13 @@ class Observer:
                              after_eos=int((after == self.eos).sum()), stable_stop=stable,
                              delete_proposals=int((loc['x0'] == loc['delete_token_id']).sum()),
                              split_proposals=int((loc['x0'] == loc['split_token_id']).sum()))
-            self.steps.append(self.step)
+            # CPython may revisit the first line of the multiline stop predicate.
+            # Count one sampler iteration, not one line event.
+            identity = (self.step['block_start'], self.step['step_id'])
+            if not self.steps or (self.steps[-1]['block_start'], self.steps[-1]['step_id']) != identity:
+                self.steps.append(self.step.copy())
+            elif self.steps[-1] != self.step:
+                raise RuntimeError('revisited stop predicate changed observed state')
         return self.trace
 
     def joint(self, *args, **kwargs):
@@ -306,9 +312,11 @@ def main():
         task = next(d for d in data if d['id'] == item_id)
         for arm in protocol['arms']:
             h.runtime.arm, h.runtime.threshold = arm, TAU
+            clean_before = h.generate(task['prompt'], 1024, 42, answer_prefix=task.get('answer_prefix',''))
             obs = Observer(h, private, item_id, arm)
             with obs:
                 result = h.generate(task['prompt'], 1024, 42, answer_prefix=task.get('answer_prefix',''))
+            clean_after = h.generate(task['prompt'], 1024, 42, answer_prefix=task.get('answer_prefix',''))
             original = []
             for path in (base/'runs/llada22/humaneval'/arm).glob('shard*/attempt001/records.jsonl'):
                 original += [json.loads(line) for line in path.read_text().splitlines()]
@@ -317,9 +325,15 @@ def main():
                           counts=result['counts'], output_sha256=token_hash(result['tokens']),
                           matches_saved_output=token_hash(result['tokens']) == saved['output_sha256'],
                           matches_saved_counts=result['counts'] == saved['counts'],
+                          clean_before_sha256=token_hash(clean_before['tokens']),
+                          clean_after_sha256=token_hash(clean_after['tokens']),
+                          clean_before_counts=clean_before['counts'],
+                          clean_after_counts=clean_after['counts'],
+                          observer_matches_clean_bookends=(result['tokens']==clean_before['tokens']==clean_after['tokens']
+                                                          and result['counts']==clean_before['counts']==clean_after['counts']),
                           steps=obs.steps, blocks=obs.blocks)
             immutable(private/f"{item_id.replace('/','_')}_{arm}.json",result)
-            if not public['matches_saved_output'] or not public['matches_saved_counts']:
+            if not protocol.get('qualification_only',False) and (not public['matches_saved_output'] or not public['matches_saved_counts'] or not public['observer_matches_clean_bookends']):
                 immutable(out/'parity_failure.json',public)
                 raise RuntimeError('observation changed saved native output/counts')
             if arm == V2:
@@ -330,6 +344,8 @@ def main():
                     probes += [dict(id=item_id,**r) for r in operator_probe(attention,snap)]
                 # QKV and tokens are private even though scalar diagnostics are public.
                 torch.save(obs.snapshots, private/f"{item_id.replace('/','_')}_snapshots.pt")
+            if len(obs.steps) != result['counts']['denoising_forwards']:
+                raise RuntimeError('trace step accounting mismatch')
             results.append(public)
             immutable(out/f"{item_id.replace('/','_')}_{arm}_receipt.json",public)
             print(json.dumps(dict(event='request_complete', id=item_id,arm=arm,
@@ -338,7 +354,7 @@ def main():
     immutable(out/'receipt.json',dict(status='complete',protocol_sha256=sha(out/'protocol.json'),
                                       source_sha256=sha(__file__),results=results,
                                       gpu_worker_seconds=time.monotonic()-start,
-                                      observer_output_and_count_parity=True,
+                                      observer_output_and_count_parity=all(r['observer_matches_clean_bookends'] for r in results),
                                       no_sampler_modifications=True,
                                       official_benchmark=False))
     immutable(out/'final_complete.json',dict(status='complete',requests=len(results),
