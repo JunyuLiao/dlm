@@ -14,7 +14,7 @@ from scripts.llada22_eos_trajectory_diagnostic import (
 
 
 def mass_count_matched(scores, mandatory, counts):
-    ranking = scores.masked_fill(mandatory, torch.inf).argsort(-1, descending=True, stable=True)
+    ranking = scores.masked_fill(mandatory, torch.inf).argsort(dim=-1, descending=True, stable=True)
     out = torch.zeros_like(mandatory)
     out.scatter_(1, ranking, torch.arange(scores.shape[1],device=scores.device)[None] < counts[:,None])
     return out

@@ -1,6 +1,7 @@
 import torch
 
 from scripts.llada22_eos_trajectory_diagnostic import eos_stats, output_metrics
+from scripts.llada22_snapshot_attention_diagnostic import mass_count_matched
 
 
 def test_mass_and_output_error_use_token_probabilities_and_sparse_renormalization():
@@ -37,3 +38,10 @@ def test_eos_probability_margin_and_rank_are_shift_invariant():
     assert stats['eos_margin'] == [-2., 3.]
     assert stats['eos_argmax'] == [False, True]
     assert stats == shifted
+
+
+def test_matched_count_mass_control_protects_mandatory_and_exact_head_counts():
+    scores = torch.tensor([[1.,3.,2.],[3.,1.,2.]])
+    mandatory = torch.tensor([[True,False,False],[False,False,True]])
+    keep = mass_count_matched(scores,mandatory,torch.tensor([2,1]))
+    assert keep.tolist() == [[True,True,False],[False,False,True]]
