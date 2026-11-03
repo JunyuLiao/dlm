@@ -1,4 +1,4 @@
-"""Audit paired LLaDA EOS-confidence ablation outputs against saved baselines."""
+"""Audit the retired LLaDA EOS-confidence ablation against saved baselines."""
 from __future__ import annotations
 
 import argparse

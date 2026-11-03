@@ -4217,3 +4217,27 @@ Fresh attempt003 completes two paired164-request HumanEval arms, seed42: dense+E
 Original V2 is10/164, meanT62.9, N/request14.2, C/request3.07, N/C4.634, sparsity49.22%. V2+mask is27/164, meanT139.4, N/request55.9, C/request5.41, N/C10.322, sparsity61.53%. Paired accuracy +10.37pp,95% problem bootstrap CI[+4.88,+15.85],20 wins/3 losses/141ties. Dense+mask is142/164 versus dense141/164 (+0.61pp, CI[0,+1.83]). All V2+mask requests still terminate EOS before cap;89 have syntax errors and65 have substantive parsed entrypoint bodies; only27 pass tests. It is a real partial gain, not a complete repair. Realized sparsity leaves the48-52% target and calls/work increase greatly, so no matched-sparsity or efficiency improvement claim. Keep variant experimental.
 
 The prior two launch attempts remain preserved and have zero generated requests. Validation protocols/results: `results/llada22_v2_eos_conf0_humaneval_20261102/attempt003/`.
+
+## 2026-11-03 — retire EOS-confidence masking and investigate the actual V2 failure
+
+User rejects EOS-confidence masking as the wrong objective. Retain its complete
+paired run only as a negative ablation: V2 improves10->27/164, but N/C rises
+4.634->10.322, sparsity drifts49.22->61.53%, and all requests still EOS-stop.
+Do not use it as a V2 fix or rerun it.
+
+The original failure is a LLaDA2.2 HumanEval trajectory collapse after fewer
+canvases, not a low N/C problem: V2 has N/C4.634 versus V31 4.692 but only
+3.07 versus7.84 canvases/request, mean output62.9 versus218.9 tokens, and
+6.10% versus50.61% accuracy. The same V2 works on LLaDA AIME (31.11%) and
+RULER (86.23%), and on TraDo HumanEval (76.22%, versus V3142.68% and V3a
+47.56%). Existing selector-family offline diagnostics show V2's low retained
+mass/high full-dimensional error and low mass-map IoU, but those snapshots are
+not LLaDA2.2 measurements. Root-cause report:
+`results/llada22_v2_humaneval_root_cause_20261103/summary.md`.
+
+Next diagnostic is observation-only: per-canvas entropy, accepted/renoised
+fractions, argmax flips, EOS/stopping state, support IoU, and equal-budget
+LLaDA Q/K/V comparisons of full-dimensional attention error, retained mass,
+post-attention/logit change, and argmax changes. Compare fresh versus
+four-call-held maps and a mass-anchored value hybrid before new HumanEval
+generation.

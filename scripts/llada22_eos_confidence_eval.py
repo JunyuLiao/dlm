@@ -1,7 +1,7 @@
-"""Paired HumanEval validation of LLaDA EOS-confidence masking.
+"""Retired negative ablation: paired HumanEval validation of EOS masking.
 
 Uses the pinned original numerical worker and keeps all raw task data private.
-This is a new decoding variant; it never alters the original benchmark arms.
+This is retained for reproducibility only; it is not an active V2 method.
 """
 from __future__ import annotations
 

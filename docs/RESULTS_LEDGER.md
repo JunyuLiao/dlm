@@ -2756,3 +2756,19 @@ no post-hoc calibration was done.
 Attempt001 and002 launch failures are preserved. Do not reuse the examined
 HumanEval cohort for threshold selection; calibrate separately on long-code
 development prompts, then evaluate a fresh cohort.
+
+## 2026-11-03 — retire EOS mask; LLaDA2.2 V2 HumanEval root-cause analysis
+
+The EOS-confidence-zero run is retained as a negative ablation only. Its score
+increase is accompanied by a large N/C increase and a sparsity miss, so it is
+discarded as a method. The root-cause report is
+`results/llada22_v2_humaneval_root_cause_20261103/summary.md`.
+
+The cross-benchmark/model comparison isolates a LLaDA2.2 HumanEval trajectory
+interaction: original V2 has N/C4.634 versus V314.692 but only3.07 versus7.84
+canvases/request and meanT62.9 versus218.9; V2 remains strong on LLaDA AIME
+and RULER and on TraDo HumanEval. Existing 111-snapshot selector diagnostics
+show V2 age-0 full-dimensional mean-row error0.404, retained mass0.224 and
+mass-map IoU0.139 versus V310.250/0.369/1.000, but this is a separate
+long-context/model study and is not direct LLaDA2.2 evidence. No per-request
+LLaDA attention-error or retained-mass fields exist in the benchmark receipts.
