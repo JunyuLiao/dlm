@@ -1,0 +1,17 @@
+{
+  "schema": "same_state_equal_head_budget_eos_probe_v1",
+  "purpose": "Isolate tile identity and forced-first-tile bias from total sparsity at the actual EOS-writing state",
+  "source": "attempt007",
+  "source_item_count": 4,
+  "runner_sha256": "dbb387c8e657e224685ef840a9e8ef3197a0fe5349d6c1e3bf8027293d093a2c",
+  "controls": [
+    "saved V2 support exact full-logit reproduction",
+    "native mass top-k with identical kept count in EVERY layer/head",
+    "at most one first-tile-to-higher-mass-tile replacement per layer/head"
+  ],
+  "fixed": "Same input tokens, same prefix KV, same per-layer/per-head tile counts, same full-dimensional FA4 PV consumer, no sampler calls",
+  "model_forwards": 12,
+  "native_continuations": 0,
+  "benchmark_scores": 0,
+  "raw_private": true
+}
