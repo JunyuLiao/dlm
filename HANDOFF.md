@@ -1,3 +1,26 @@
+## 2026-11-03 — HumanEval sparsity recount corrects optional-budget interpretation
+
+CPU-only audit of all820 original LLaDA HumanEval requests across five methods
+passes20 shard hashes/completions and reproduces published E/K and sparsity
+exactly. Report: `results/llada22_humaneval_sparsity_audit_20261103/attempt001/README.md`.
+V3149.9780%, V249.2165%, V3a49.9902% are pooled geometric denoising tile
+sparsities including mandatory tiles, excluding discovery/prefill/commit.
+
+Withdraw the implication that V31 keeps more optional tiles at the same short
+state. Only the current KV64 tile is common-mandatory; V2's forced first tile
+is optional under that mask. With3–5 KV tiles, V31 also keeps just one optional
+tile. At all four EOS-state comparisons, V2 keeps2.034–2.075 total/head versus
+V312.000, so V2 is slightly denser. The full-run optional averages differ
+(V21.067, V311.829) because their available context/call distributions differ
+(4.070 versus5.655 tiles/head/call). Native V31/V3a per-J budgets and all16
+observed eligible counters reconstruct exactly from the saved traces.
+
+Supported mechanism is harmful support identity/first-tile bias, not a uniquely
+smaller V2 local tile budget. Exact per-head-count mass controls retain their
+causal logit and attention-error evidence. Partial final tiles explain why
+valid-token-pair sparsity differs from tile sparsity; published denominator is
+honestly tile work, not whole-model FLOPs. No GPU run or new generation.
+
 ## 2026-11-03 — direct native EOS/support diagnostic complete
 
 Execution source freeze `1115e28d`; canonical report:

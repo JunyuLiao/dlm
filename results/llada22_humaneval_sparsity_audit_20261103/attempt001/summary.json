@@ -1,0 +1,659 @@
+{
+  "status": "pass",
+  "cpu_only": true,
+  "no_new_generation": true,
+  "definition": "1 - sum actual consumed H x Q128 x KV64 tiles / sum eligible tiles over each arm native denoising trajectory; includes mandatory/current and selection forwards, excludes discovery, prefill and commit",
+  "mandatory_definition": "Only the KV64 tile intersecting aligned current 32-token canvas; first KV64 tile is selector-forced by V2 but optional under the shared mask",
+  "optional_denominator_note": "KV64 tile optional means outside mandatory tile; if current block occupies latter half of tile, mandatory also includes preceding 32 keys",
+  "full_cohort": {
+    "dense_native": {
+      "requests": 164,
+      "forwards": 4717,
+      "eligible_tiles": 9733760,
+      "kept_tiles": 9733760,
+      "mandatory_tiles": 1509440,
+      "optional_eligible_tiles": 8224320,
+      "optional_kept_tiles": 8224320,
+      "pooled_tile_sparsity": 0.0,
+      "optional_tile_sparsity": 0.0,
+      "mean_request_tile_sparsity": 0.0,
+      "mean_eligible_tiles_per_layer_head_call": 6.448590205639177,
+      "mean_kept_tiles_per_layer_head_call": 6.448590205639177,
+      "mean_optional_kept_tiles_per_layer_head_call": 5.448590205639177,
+      "mean_output_tokens": 243.0609756097561
+    },
+    "allkept_fa4": {
+      "requests": 164,
+      "forwards": 5153,
+      "eligible_tiles": 11563200,
+      "kept_tiles": 11563200,
+      "mandatory_tiles": 1648960,
+      "optional_eligible_tiles": 9914240,
+      "optional_kept_tiles": 9914240,
+      "pooled_tile_sparsity": 0.0,
+      "optional_tile_sparsity": 0.0,
+      "mean_request_tile_sparsity": 0.0,
+      "mean_eligible_tiles_per_layer_head_call": 7.012419949543955,
+      "mean_kept_tiles_per_layer_head_call": 7.012419949543955,
+      "mean_optional_kept_tiles_per_layer_head_call": 6.012419949543955,
+      "mean_output_tokens": 249.20731707317074
+    },
+    "mass_topk_reuse_r4": {
+      "requests": 164,
+      "forwards": 6029,
+      "eligible_tiles": 10911040,
+      "kept_tiles": 5457920,
+      "mandatory_tiles": 1929280,
+      "optional_eligible_tiles": 8981760,
+      "optional_kept_tiles": 3528640,
+      "pooled_tile_sparsity": 0.4997800392996451,
+      "optional_tile_sparsity": 0.6071326777825281,
+      "mean_request_tile_sparsity": 0.4945799730928535,
+      "mean_eligible_tiles_per_layer_head_call": 5.655498424282634,
+      "mean_kept_tiles_per_layer_head_call": 2.828993199535578,
+      "mean_optional_kept_tiles_per_layer_head_call": 1.828993199535578,
+      "mean_output_tokens": 218.90243902439025
+    },
+    "value_v2_gaussian32_reuse_r4": {
+      "requests": 164,
+      "forwards": 2331,
+      "eligible_tiles": 3035840,
+      "kept_tiles": 1541706,
+      "mandatory_tiles": 745920,
+      "optional_eligible_tiles": 2289920,
+      "optional_kept_tiles": 795786,
+      "pooled_tile_sparsity": 0.4921649362285232,
+      "optional_tile_sparsity": 0.652483056176635,
+      "mean_request_tile_sparsity": 0.4653285057595594,
+      "mean_eligible_tiles_per_layer_head_call": 4.06992706992707,
+      "mean_kept_tiles_per_layer_head_call": 2.0668516731016733,
+      "mean_optional_kept_tiles_per_layer_head_call": 1.066851673101673,
+      "mean_output_tokens": 62.90853658536585
+    },
+    "value_v3a_singleton_reuse_r4": {
+      "requests": 164,
+      "forwards": 6941,
+      "eligible_tiles": 13064320,
+      "kept_tiles": 6533440,
+      "mandatory_tiles": 2221120,
+      "optional_eligible_tiles": 10843200,
+      "optional_kept_tiles": 4312320,
+      "pooled_tile_sparsity": 0.4999020232204967,
+      "optional_tile_sparsity": 0.6023019034971226,
+      "mean_request_tile_sparsity": 0.49506974709049006,
+      "mean_eligible_tiles_per_layer_head_call": 5.881861403256015,
+      "mean_kept_tiles_per_layer_head_call": 2.941506987465783,
+      "mean_optional_kept_tiles_per_layer_head_call": 1.941506987465783,
+      "mean_output_tokens": 245.28658536585365
+    }
+  },
+  "traced_geometry": [
+    {
+      "id": "humaneval/0",
+      "arm": "value_v2_gaussian32_reuse_r4",
+      "histogram_J": {
+        "3": 6,
+        "4": 10,
+        "5": 4
+      },
+      "eligible_tiles": 24960,
+      "actual_kept_tiles": 13318,
+      "v31_budget_on_same_geometry_kept_tiles": 12800,
+      "tile_sparsity": 0.466426282051282,
+      "valid_query_key_pair_sparsity": 0.5052951388888889
+    },
+    {
+      "id": "humaneval/0",
+      "arm": "mass_topk_reuse_r4",
+      "histogram_J": {
+        "3": 6,
+        "4": 16,
+        "5": 8,
+        "6": 2
+      },
+      "eligible_tiles": 42880,
+      "actual_kept_tiles": 21120,
+      "v31_budget_on_same_geometry_kept_tiles": 21120,
+      "tile_sparsity": 0.5074626865671642,
+      "valid_query_key_pair_sparsity": 0.5506072874493927
+    },
+    {
+      "id": "humaneval/0",
+      "arm": "value_v3a_singleton_reuse_r4",
+      "histogram_J": {
+        "3": 7,
+        "4": 8,
+        "5": 10,
+        "6": 7
+      },
+      "eligible_tiles": 46400,
+      "actual_kept_tiles": 22720,
+      "v31_budget_on_same_geometry_kept_tiles": 22720,
+      "tile_sparsity": 0.5103448275862069,
+      "valid_query_key_pair_sparsity": 0.5421245421245421
+    },
+    {
+      "id": "humaneval/0",
+      "arm": "allkept_fa4",
+      "histogram_J": {
+        "3": 3,
+        "4": 4,
+        "5": 11,
+        "6": 6
+      },
+      "eligible_tiles": 37120,
+      "actual_kept_tiles": 37120,
+      "v31_budget_on_same_geometry_kept_tiles": 17280,
+      "tile_sparsity": 0.0,
+      "valid_query_key_pair_sparsity": 0.0
+    },
+    {
+      "id": "humaneval/1",
+      "arm": "value_v2_gaussian32_reuse_r4",
+      "histogram_J": {
+        "3": 4,
+        "4": 13
+      },
+      "eligible_tiles": 20480,
+      "actual_kept_tiles": 11135,
+      "v31_budget_on_same_geometry_kept_tiles": 10880,
+      "tile_sparsity": 0.456298828125,
+      "valid_query_key_pair_sparsity": 0.5168694690265486
+    },
+    {
+      "id": "humaneval/1",
+      "arm": "mass_topk_reuse_r4",
+      "histogram_J": {
+        "3": 4,
+        "4": 6,
+        "5": 3
+      },
+      "eligible_tiles": 16320,
+      "actual_kept_tiles": 8320,
+      "v31_budget_on_same_geometry_kept_tiles": 8320,
+      "tile_sparsity": 0.4901960784313726,
+      "valid_query_key_pair_sparsity": 0.5319148936170213
+    },
+    {
+      "id": "humaneval/1",
+      "arm": "value_v3a_singleton_reuse_r4",
+      "histogram_J": {
+        "3": 4,
+        "4": 4,
+        "5": 3
+      },
+      "eligible_tiles": 13760,
+      "actual_kept_tiles": 7040,
+      "v31_budget_on_same_geometry_kept_tiles": 7040,
+      "tile_sparsity": 0.4883720930232558,
+      "valid_query_key_pair_sparsity": 0.5316455696202531
+    },
+    {
+      "id": "humaneval/1",
+      "arm": "allkept_fa4",
+      "histogram_J": {
+        "3": 4,
+        "4": 4,
+        "5": 10,
+        "6": 9,
+        "7": 2
+      },
+      "eligible_tiles": 46720,
+      "actual_kept_tiles": 46720,
+      "v31_budget_on_same_geometry_kept_tiles": 22720,
+      "tile_sparsity": 0.0,
+      "valid_query_key_pair_sparsity": 0.0
+    },
+    {
+      "id": "humaneval/2",
+      "arm": "value_v2_gaussian32_reuse_r4",
+      "histogram_J": {
+        "2": 2,
+        "3": 11
+      },
+      "eligible_tiles": 11840,
+      "actual_kept_tiles": 8404,
+      "v31_budget_on_same_geometry_kept_tiles": 7680,
+      "tile_sparsity": 0.29020270270270265,
+      "valid_query_key_pair_sparsity": 0.3408730158730159
+    },
+    {
+      "id": "humaneval/2",
+      "arm": "mass_topk_reuse_r4",
+      "histogram_J": {
+        "2": 5,
+        "3": 20,
+        "4": 9,
+        "5": 4
+      },
+      "eligible_tiles": 40320,
+      "actual_kept_tiles": 22720,
+      "v31_budget_on_same_geometry_kept_tiles": 22720,
+      "tile_sparsity": 0.4365079365079365,
+      "valid_query_key_pair_sparsity": 0.4824561403508772
+    },
+    {
+      "id": "humaneval/2",
+      "arm": "value_v3a_singleton_reuse_r4",
+      "histogram_J": {
+        "2": 5,
+        "3": 19,
+        "4": 8
+      },
+      "eligible_tiles": 31680,
+      "actual_kept_tiles": 18880,
+      "v31_budget_on_same_geometry_kept_tiles": 18880,
+      "tile_sparsity": 0.4040404040404041,
+      "valid_query_key_pair_sparsity": 0.449438202247191
+    },
+    {
+      "id": "humaneval/2",
+      "arm": "allkept_fa4",
+      "histogram_J": {
+        "2": 2,
+        "3": 4,
+        "4": 3
+      },
+      "eligible_tiles": 8960,
+      "actual_kept_tiles": 8960,
+      "v31_budget_on_same_geometry_kept_tiles": 5120,
+      "tile_sparsity": 0.0,
+      "valid_query_key_pair_sparsity": 0.0
+    },
+    {
+      "id": "humaneval/3",
+      "arm": "value_v2_gaussian32_reuse_r4",
+      "histogram_J": {
+        "3": 4,
+        "4": 19,
+        "5": 8
+      },
+      "eligible_tiles": 40960,
+      "actual_kept_tiles": 20781,
+      "v31_budget_on_same_geometry_kept_tiles": 19840,
+      "tile_sparsity": 0.4926513671875,
+      "valid_query_key_pair_sparsity": 0.5459686147186147
+    },
+    {
+      "id": "humaneval/3",
+      "arm": "mass_topk_reuse_r4",
+      "histogram_J": {
+        "3": 4,
+        "4": 8,
+        "5": 11
+      },
+      "eligible_tiles": 31680,
+      "actual_kept_tiles": 14720,
+      "v31_budget_on_same_geometry_kept_tiles": 14720,
+      "tile_sparsity": 0.5353535353535354,
+      "valid_query_key_pair_sparsity": 0.572972972972973
+    },
+    {
+      "id": "humaneval/3",
+      "arm": "value_v3a_singleton_reuse_r4",
+      "histogram_J": {
+        "3": 5,
+        "4": 7,
+        "5": 5
+      },
+      "eligible_tiles": 21760,
+      "actual_kept_tiles": 10880,
+      "v31_budget_on_same_geometry_kept_tiles": 10880,
+      "tile_sparsity": 0.5,
+      "valid_query_key_pair_sparsity": 0.5396825396825397
+    },
+    {
+      "id": "humaneval/3",
+      "arm": "allkept_fa4",
+      "histogram_J": {
+        "3": 4,
+        "4": 6,
+        "5": 4
+      },
+      "eligible_tiles": 17920,
+      "actual_kept_tiles": 17920,
+      "v31_budget_on_same_geometry_kept_tiles": 8960,
+      "tile_sparsity": 0.0,
+      "valid_query_key_pair_sparsity": 0.0
+    }
+  ],
+  "same_states": [
+    {
+      "id": "humaneval/0",
+      "method": "actual_v2",
+      "key_tokens": 288,
+      "J": 5,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.05625,
+      "optional_kept_per_head": 1.05625,
+      "tile_sparsity": 0.58875,
+      "valid_query_key_pair_sparsity": 0.6541666666666667,
+      "first_tile_keep_fraction": 1.0,
+      "retained_mass": 0.6051179990172386,
+      "output_error_over_value_rms": 0.18126404397189616
+    },
+    {
+      "id": "humaneval/0",
+      "method": "v31_half",
+      "key_tokens": 288,
+      "J": 5,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.0,
+      "optional_kept_per_head": 1.0,
+      "tile_sparsity": 0.6,
+      "valid_query_key_pair_sparsity": 0.6666666666666666,
+      "first_tile_keep_fraction": 0.425,
+      "retained_mass": 0.6428857535123825,
+      "output_error_over_value_rms": 0.14862821735441684
+    },
+    {
+      "id": "humaneval/0",
+      "method": "mass_same_count_each_head",
+      "key_tokens": 288,
+      "J": 5,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.05625,
+      "optional_kept_per_head": 1.05625,
+      "tile_sparsity": 0.58875,
+      "valid_query_key_pair_sparsity": 0.6541666666666667,
+      "first_tile_keep_fraction": 0.45625,
+      "retained_mass": 0.6523191690444946,
+      "output_error_over_value_rms": 0.14327774122357367
+    },
+    {
+      "id": "humaneval/1",
+      "method": "actual_v2",
+      "key_tokens": 224,
+      "J": 4,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.040625,
+      "optional_kept_per_head": 1.040625,
+      "tile_sparsity": 0.48984375,
+      "valid_query_key_pair_sparsity": 0.5598214285714286,
+      "first_tile_keep_fraction": 1.0,
+      "retained_mass": 0.5522034794092179,
+      "output_error_over_value_rms": 0.1854428719729185
+    },
+    {
+      "id": "humaneval/1",
+      "method": "v31_half",
+      "key_tokens": 224,
+      "J": 4,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.0,
+      "optional_kept_per_head": 1.0,
+      "tile_sparsity": 0.5,
+      "valid_query_key_pair_sparsity": 0.5714285714285714,
+      "first_tile_keep_fraction": 0.3375,
+      "retained_mass": 0.6558472752571106,
+      "output_error_over_value_rms": 0.13120376765727998
+    },
+    {
+      "id": "humaneval/1",
+      "method": "mass_same_count_each_head",
+      "key_tokens": 224,
+      "J": 4,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.040625,
+      "optional_kept_per_head": 1.040625,
+      "tile_sparsity": 0.48984375,
+      "valid_query_key_pair_sparsity": 0.5598214285714286,
+      "first_tile_keep_fraction": 0.36875,
+      "retained_mass": 0.6666557729244232,
+      "output_error_over_value_rms": 0.12547194883227347
+    },
+    {
+      "id": "humaneval/2",
+      "method": "actual_v2",
+      "key_tokens": 160,
+      "J": 3,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.034375,
+      "optional_kept_per_head": 1.0343749999999998,
+      "tile_sparsity": 0.321875,
+      "valid_query_key_pair_sparsity": 0.38625,
+      "first_tile_keep_fraction": 1.0,
+      "retained_mass": 0.6386464476585388,
+      "output_error_over_value_rms": 0.15928131453692912
+    },
+    {
+      "id": "humaneval/2",
+      "method": "v31_half",
+      "key_tokens": 160,
+      "J": 3,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.0,
+      "optional_kept_per_head": 1.0,
+      "tile_sparsity": 0.33333333333333337,
+      "valid_query_key_pair_sparsity": 0.4,
+      "first_tile_keep_fraction": 0.365625,
+      "retained_mass": 0.7424857497215271,
+      "output_error_over_value_rms": 0.10652341227978468
+    },
+    {
+      "id": "humaneval/2",
+      "method": "mass_same_count_each_head",
+      "key_tokens": 160,
+      "J": 3,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.034375,
+      "optional_kept_per_head": 1.0343749999999998,
+      "tile_sparsity": 0.321875,
+      "valid_query_key_pair_sparsity": 0.38625,
+      "first_tile_keep_fraction": 0.4,
+      "retained_mass": 0.7494649201631546,
+      "output_error_over_value_rms": 0.102259505353868
+    },
+    {
+      "id": "humaneval/3",
+      "method": "actual_v2",
+      "key_tokens": 288,
+      "J": 5,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.075,
+      "optional_kept_per_head": 1.0750000000000002,
+      "tile_sparsity": 0.585,
+      "valid_query_key_pair_sparsity": 0.65,
+      "first_tile_keep_fraction": 1.0,
+      "retained_mass": 0.5266308397054672,
+      "output_error_over_value_rms": 0.2041895367205143
+    },
+    {
+      "id": "humaneval/3",
+      "method": "v31_half",
+      "key_tokens": 288,
+      "J": 5,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.0,
+      "optional_kept_per_head": 1.0,
+      "tile_sparsity": 0.6,
+      "valid_query_key_pair_sparsity": 0.6666666666666666,
+      "first_tile_keep_fraction": 0.353125,
+      "retained_mass": 0.5993306070566178,
+      "output_error_over_value_rms": 0.15591629222035408
+    },
+    {
+      "id": "humaneval/3",
+      "method": "mass_same_count_each_head",
+      "key_tokens": 288,
+      "J": 5,
+      "mandatory_per_head": 1,
+      "kept_per_head": 2.075,
+      "optional_kept_per_head": 1.0750000000000002,
+      "tile_sparsity": 0.585,
+      "valid_query_key_pair_sparsity": 0.65,
+      "first_tile_keep_fraction": 0.403125,
+      "retained_mass": 0.613679239153862,
+      "output_error_over_value_rms": 0.14727958515286446
+    }
+  ],
+  "J_budget": [
+    {
+      "J": 2,
+      "mandatory": 1,
+      "V31_total": 1,
+      "V31_optional": 0,
+      "V2_if_no_optional_update_total": 2,
+      "V2_if_no_optional_update_optional": 1
+    },
+    {
+      "J": 3,
+      "mandatory": 1,
+      "V31_total": 2,
+      "V31_optional": 1,
+      "V2_if_no_optional_update_total": 2,
+      "V2_if_no_optional_update_optional": 1
+    },
+    {
+      "J": 4,
+      "mandatory": 1,
+      "V31_total": 2,
+      "V31_optional": 1,
+      "V2_if_no_optional_update_total": 2,
+      "V2_if_no_optional_update_optional": 1
+    },
+    {
+      "J": 5,
+      "mandatory": 1,
+      "V31_total": 2,
+      "V31_optional": 1,
+      "V2_if_no_optional_update_total": 2,
+      "V2_if_no_optional_update_optional": 1
+    },
+    {
+      "J": 6,
+      "mandatory": 1,
+      "V31_total": 3,
+      "V31_optional": 2,
+      "V2_if_no_optional_update_total": 2,
+      "V2_if_no_optional_update_optional": 1
+    },
+    {
+      "J": 7,
+      "mandatory": 1,
+      "V31_total": 4,
+      "V31_optional": 3,
+      "V2_if_no_optional_update_total": 2,
+      "V2_if_no_optional_update_optional": 1
+    },
+    {
+      "J": 8,
+      "mandatory": 1,
+      "V31_total": 4,
+      "V31_optional": 3,
+      "V2_if_no_optional_update_total": 2,
+      "V2_if_no_optional_update_optional": 1
+    },
+    {
+      "J": 9,
+      "mandatory": 1,
+      "V31_total": 4,
+      "V31_optional": 3,
+      "V2_if_no_optional_update_total": 2,
+      "V2_if_no_optional_update_optional": 1
+    },
+    {
+      "J": 10,
+      "mandatory": 1,
+      "V31_total": 5,
+      "V31_optional": 4,
+      "V2_if_no_optional_update_total": 2,
+      "V2_if_no_optional_update_optional": 1
+    }
+  ],
+  "sources": [
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/dense_native/shard001/attempt001/records.jsonl",
+      "sha256": "a74f4654c50c9d9216e2806d05d3ec6745f00a451431730ea3c08a68aca4d625"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/dense_native/shard002/attempt001/records.jsonl",
+      "sha256": "d1629c8a90abf00a8c2d5de0c840d6685486b5b49cd67d4dc011eaf350fa3519"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/dense_native/shard003/attempt001/records.jsonl",
+      "sha256": "4a29dc8ae7f6ca46ee990a1548d1f8251cd15ae58bd1fbba0f97ee9cc36d68c7"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/dense_native/shard004/attempt001/records.jsonl",
+      "sha256": "969c06baf6e626f339ecb963672871cb65470e9d812c0b28c1d0212f7d1880fc"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/allkept_fa4/shard001/attempt001/records.jsonl",
+      "sha256": "62520e39004752030a50d94d83b6254b7b89125d7080bdd5da4f57242a78c90c"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/allkept_fa4/shard002/attempt001/records.jsonl",
+      "sha256": "db132cdec0527ba142023e1d9f451fc40d581c08c0b9b04301fc1d46d5ad9167"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/allkept_fa4/shard003/attempt001/records.jsonl",
+      "sha256": "4614ca4bc2872154a4f7410eba257037391fbbb0132e4074683f2cba28872130"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/allkept_fa4/shard004/attempt001/records.jsonl",
+      "sha256": "9218b02ce505b86a0c42d56bcda965065b47c98b0aba32aa792cdf5931a2c9d2"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/mass_topk_reuse_r4/shard001/attempt001/records.jsonl",
+      "sha256": "9abe3e3303d5b21ed3d9e6a11d1a6529f371361356a1390f741e660445d9c5c3"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/mass_topk_reuse_r4/shard002/attempt001/records.jsonl",
+      "sha256": "a7cdd3611318d4573405b5c75eb5953ffceb1f48fa9e3cd156f645480e4800ab"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/mass_topk_reuse_r4/shard003/attempt001/records.jsonl",
+      "sha256": "4e8daf1a882261dbd4f2d0d7c5bd07e54752b17b14e52c6b844436ac7c869655"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/mass_topk_reuse_r4/shard004/attempt001/records.jsonl",
+      "sha256": "9ef87061fb48f206ca2c2e6c53e74938dc057cc37e0a611cfae980f670fe638b"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/value_v2_gaussian32_reuse_r4/shard001/attempt001/records.jsonl",
+      "sha256": "3a4d3c64b1cf2b0e961e80a61c79079185c6e71107507f1098c2b5587333c36c"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/value_v2_gaussian32_reuse_r4/shard002/attempt001/records.jsonl",
+      "sha256": "1b2f832fd79ffc8afddb6ffd84cd253a365e761a5c7d423d6eb7c0b136d055c8"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/value_v2_gaussian32_reuse_r4/shard003/attempt001/records.jsonl",
+      "sha256": "b68739cf37439a87503e3d526640e52915596ed9aed73d991041452eb10db649"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/value_v2_gaussian32_reuse_r4/shard004/attempt001/records.jsonl",
+      "sha256": "9611a7ed2cbff49c0a5312f5f48286447ce43f08eccd6348a78272e1eb9c9e9b"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/value_v3a_singleton_reuse_r4/shard001/attempt001/records.jsonl",
+      "sha256": "28e8184137812b3a5012c1bafac0d2d84131121cba3ef3ba29d6a707722c783a"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/value_v3a_singleton_reuse_r4/shard002/attempt001/records.jsonl",
+      "sha256": "61587c02fa64e486072fc2b2b3b9df6c7c3661a89e100b2b2a70a19cf222ad4c"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/value_v3a_singleton_reuse_r4/shard003/attempt001/records.jsonl",
+      "sha256": "e424deaccb9ef1bbccb4f39b6126328f44a0d3464ce7a5f8b218e85c804af6f6"
+    },
+    {
+      "path": "results/multi_model_value_20261030/attempt001/runs/llada22/humaneval/value_v3a_singleton_reuse_r4/shard004/attempt001/records.jsonl",
+      "sha256": "286f96d743d7521f33a686785f68d08a8fde38da7d052677ee3f8759205cb3e9"
+    },
+    {
+      "path": "results/llada22_v2_humaneval_diagnosis_20261103/attempt007/receipt.json",
+      "sha256": "dd63f05252199397a2a6a9e47a77d86ea4bb32b0114933dad733365630854f52"
+    },
+    {
+      "path": "results/llada22_v2_humaneval_diagnosis_20261103/attempt008/metrics.json",
+      "sha256": "1f2426a03998b2d75294ea636f3fe6ef8cb43932d378617ef4728881aa2a6143"
+    },
+    {
+      "path": "results/multi_model_value_report_20261102/attempt002/summary.json",
+      "sha256": "b34b68b5f0cbc4baebbe2740e27d69b47923fed721faa35ab16b8d1c9cc2a730"
+    }
+  ],
+  "source_sha256": "8ead4dee42e9fefbbf05db649b86bb6a3f443bf6b5665ee2d3f120e9ca2bf3c7"
+}

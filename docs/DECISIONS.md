@@ -4274,3 +4274,29 @@ and qualification003. Complete attempts007/008/009 retain strict saved and
 observer parity, direct operator/oracle evidence, and12 count-matched logit
 probes. No EOS intervention, threshold tuning, or new benchmark score. Report:
 `results/llada22_v2_humaneval_diagnosis_20261103/analysis001/README.md`.
+
+## 2026-11-03 — recheck actual HumanEval sparsity and correct optional-tile wording
+
+User correctly questions whether V31 should have similarly few optional tiles.
+Recount all820 saved LLaDA HumanEval requests, validating20 raw-record hashes
+and completion markers. All aggregate eligible/kept counters and percentages
+match:V3149.9780%, V249.2165%, V3a49.9902%; dense controls0%. Counts cover
+mandatory and optional output-consumer Q128/KV64 tiles on actual denoising
+trajectories, excluding discovery, prefill and commits. Each aligned32-token
+canvas has one common mandatory KV64 tile; V2's algorithm-forced first tile is
+optional under the shared mask. V31's round(J/2) includes the mandatory tile.
+
+At J=3,4,5 V31 keeps2 total/1 optional tile, just as V2's typical first+current
+support. At the four audited EOS states V2 keeps slightly MORE tiles/head
+(2.056/2.041/2.034/2.075) than V31(2.000 each). All16 saved native request
+geometries reproduce eligible counts; every traced V31/V3a rounded per-J budget
+also exactly reproduces its kept count. Aggregate available context differs
+(V24.070 vs V315.655 tiles/head/call) because generated trajectories differ.
+
+Withdraw earlier phrasing implying V2's local optional-tile count uniquely
+explains failure. Supported contrast is tile identity; exact per-head-count
+mass controls already demonstrate improved retained mass/error and fewer EOS
+predictions. Tile geometry gives partial final KV tiles full tile weight, so
+tile sparsity must remain distinct from valid-token-pair or whole-model FLOP
+sparsity. No recalibration, GPU work, generation or selector change. Report:
+`results/llada22_humaneval_sparsity_audit_20261103/attempt001/README.md`.

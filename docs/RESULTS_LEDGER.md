@@ -2803,3 +2803,22 @@ Correction to the earlier diagnosis: matched AIME V2 mean output is
 insufficient to explain HumanEval failure. Native SDPA shows process-history
 drift even without observation; matched all-kept FA4 controls remain exact.
 EOS mask stays retired; no recalibration or benchmark rerun. H100 released.
+
+## 2026-11-03 — HumanEval sparsity recount and same-geometry qualification
+
+Complete CPU-only verification of820 original LLaDA HumanEval request records,
+20 shard hashes and completion markers. No new benchmark. Passing receipt:
+`results/llada22_humaneval_sparsity_audit_20261103/attempt001/`.
+V31 E10911040/K5457920 ->49.9780%; V2 E3035840/K1541706 ->49.2165%;
+V3a E13064320/K6533440 ->49.9902%. Native/all-kept0%. All published counters
+and pooled percentages reproduce exactly; they include common mandatory tiles
+and selection/reuse consumer calls but exclude discovery/prefill/commit.
+
+With J3–5, V31/V3a keep2 tiles including one common mandatory tile, so also
+one optional tile. V2's forced first tile is common-mask optional. At four
+identical EOS-state QKV comparisons V2 retains2.034–2.075 total tiles/head,
+V312.000. Previous wording suggesting V31 generally has more optional tiles
+on those same short states is corrected. Full-cohort average optional kept is
+V21.067 vs V311.829, with available tiles4.070 vs5.655 on different generated
+trajectories. This difference is not independent causal evidence. Original
+equal-count support-identity causal probes remain valid; no new accuracy claim.
