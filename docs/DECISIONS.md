@@ -4241,3 +4241,36 @@ LLaDA Q/K/V comparisons of full-dimensional attention error, retained mass,
 post-attention/logit change, and argmax changes. Compare fresh versus
 four-call-held maps and a mass-anchored value hybrid before new HumanEval
 generation.
+
+## 2026-11-03 — native EOS diagnostic isolates compulsory-support collapse
+
+Completed mechanism replay on first four canonical, previously examined
+HumanEval items, seed42, V2/V31/V3a/all-kept FA4. All16 observed requests match
+historical output hashes/counts and both uninstrumented bookends. In every V2
+case, first actual EOS writes occur on block call1, before held-map reuse.
+Identical-state all-kept removes29/29 selected EOS argmaxes; V31 removes25/29.
+Changing only tile identity with exact V2 counts in every layer/head removes
+17/29 argmaxes and24/28 EOS predictions above0.5 confidence. One first-tile
+swap/head gives the same aggregate result; it is a diagnostic, not a new method.
+
+Direct LLaDA operator evidence replaces the earlier cross-model hypothesis:
+95.23% of1280 EOS-state head/layer cases keep only first+current mandatory tiles.
+Retained mass is58.06%, versus67.05% for exact-count mass support; output error
+over value RMS0.18254 versus0.12957. Independent CPU statistics and recurrence
+produce zero CUDA-map mismatches on160 snapshots/layers. Actual FA4 versus
+mathematical masked-output relative L2 is at most0.001821. Full-V/projected map
+IoU0.99163 leaves rank32 as a minor factor in these measured states.
+
+Correct the previous AIME length claim:422632/90=4695.9 tokens/request, not52.18.
+Thus output length alone cannot explain the task contrast. Frozen HumanEval
+tau0.89443 makes sequential optional updates rarely pass after first support;
+50% aggregate sparsity on few-tile contexts masks a positional support collapse.
+Native confidence/forced-progress fills EOS and editing can reinforce it to
+stable EOS-dominated blocks. Do not attribute this to an intrinsic MoE defect.
+
+SDPA dense clean and observed runs agree within process but can differ from
+historical output/counts depending on process history; preserve attempts002/004
+and qualification003. Complete attempts007/008/009 retain strict saved and
+observer parity, direct operator/oracle evidence, and12 count-matched logit
+probes. No EOS intervention, threshold tuning, or new benchmark score. Report:
+`results/llada22_v2_humaneval_diagnosis_20261103/analysis001/README.md`.

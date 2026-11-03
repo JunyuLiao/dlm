@@ -2772,3 +2772,34 @@ show V2 age-0 full-dimensional mean-row error0.404, retained mass0.224 and
 mass-map IoU0.139 versus V310.250/0.369/1.000, but this is a separate
 long-context/model study and is not direct LLaDA2.2 evidence. No per-request
 LLaDA attention-error or retained-mass fields exist in the benchmark receipts.
+
+## 2026-11-03 — direct LLaDA HumanEval attention/EOS mechanism diagnostic
+
+Complete source-bound diagnostic only, not a benchmark or held-out estimate.
+Report and passing aggregate receipt:
+`results/llada22_v2_humaneval_diagnosis_20261103/analysis001/`.
+Source freeze1115e28d. Native attempt007 covers four previously examined
+canonical items x V2/V31/V3a/all-kept FA4:16 observed requests and32 clean
+bookends. All historical hashes/counts and observer bookends agree. Operator
+attempt008 covers160 snapshot/layer cases. Attempt009 adds12 same-state
+forwards with exact per-head work and a first-tile-swap control; no continuation.
+
+All four V2 first EOS writes occur on fresh call1, not held-map reuse. Of29
+selected EOS positions, fresh V2 preserves29, all-kept0, V314 and V3a7. Equal
+per-head V2-count mass support or one first-tile swap/head preserves12 argmaxes
+and4 high-confidence EOS predictions, versus29 and28 originally. Saved-mask
+logit reproduction is bit-exact. Native progress/edit rules can turn these
+seeds into stable blocks containing18/32/32/20 EOS tokens.
+
+At EOS,1219/1280 head/layer cases retain only first+current mandatory tiles.
+Same-QKV V2 mass58.06%, error/value-RMS0.18254; same-count mass67.05%,0.12957.
+Full-V same-tau mass57.87%,error0.18402; projected/full map IoU0.99163 over160
+cases. Independent CPU/CUDA mask mismatches0; maximum FA4-vs-masked-FP32 relative
+L2 error0.001821. This identifies support bias and native EOS reinforcement in
+the sampled failures, not a proven full-benchmark repair or MoE-specific cause.
+
+Correction to the earlier diagnosis: matched AIME V2 mean output is
+422632/90=4695.9 tokens/request;52.18 was incorrect. Output length alone is
+insufficient to explain HumanEval failure. Native SDPA shows process-history
+drift even without observation; matched all-kept FA4 controls remain exact.
+EOS mask stays retired; no recalibration or benchmark rerun. H100 released.

@@ -1,3 +1,34 @@
+## 2026-11-03 — direct native EOS/support diagnostic complete
+
+Execution source freeze `1115e28d`; canonical report:
+`results/llada22_v2_humaneval_diagnosis_20261103/analysis001/README.md`.
+Four previously examined HumanEval items, seed42, V2/V31/V3a/all-kept FA4:
+all16 observed outputs and counts match historical records and both clean
+bookends (48 native replays). EOS is first written on a fresh first call in
+each terminating block; all29 selected EOS positions remain EOS under fresh V2,
+but all-kept removes29 and ordinary V31 removes25. Same-count mass routing or
+one forced-first-tile swap/head removes17 argmaxes and24/28 high-confidence EOS
+predictions with exactly identical tile count in every layer/head.
+
+At EOS states,95.23% of1280 head/layer cases retain only first+mandatory tiles.
+Same-count mass support raises retained probability58.06->67.05% and lowers
+value-RMS-normalized attention error0.18254->0.12957. All160 independent CPU
+statistics/recurrence masks match CUDA; FA4 consumer max relative L2 error is
+0.001821. Gaussian32/full-V map IoU0.99163: projection rank is not the main
+problem in these states. Native mask filling/forced progress and token editing
+reinforce the poor support's EOS state; no EOS handling was changed.
+
+The old52.18-token AIME interpretation was wrong: completed matched AIME V2
+emits422632/90=4695.9 tokens/request. HumanEval is therefore not explained by
+output length alone. Different calibrated thresholds/geometries matter; the
+HumanEval threshold0.89443 collapses to compulsory support on short contexts.
+Native SDPA showed process-history drift despite clean/observer parity; retain
+failed attempts and use exact all-kept FA4 as matched mechanism control.
+EOS mask remains retired. No recalibration, new benchmark score or repaired
+accuracy claim. Nine focused tests and final hash/accounting audit pass. H100
+released,0MiB/0%,37C. Next: address V2 support allocation at fixed per-head work
+with native sampler/EOS rules; no further experiment is scheduled.
+
 ## 2026-11-02 — LLaDA2.2 V2 HumanEval diagnosis
 
 V2 HumanEval's10/164 score is a real early-EOS/short-code failure, not reaching the1024-token cap or an extraction mismatch. All164 V2 requests end EOS, none cap; T mean/median/max62.91/58/155 versus dense243.06/224/783 and V31 218.90/193/788. Official scoring classifies98 syntax errors; among61 parseable entry points21 are docstring-only and12 pass/ellipsis stubs. Calibration was count-only on six handwritten coding prompts, output mean69.8 tokens; full-panel sparsity49.22% is on target. Same pinned replay reproduces the saved110-token failing output exactly. One observed layer10 map matches the CUDA route and independent CPU V2 recurrence with zero mismatches. This supports task-format sensitivity to HumanEval's long complete-function output, while not proving the exact same-state EOS cause. The planned EOS-logit counterfactual did not launch because host execution approval timed out before command execution, including retry. Report: `results/llada22_v2_humaneval_diagnosis_20261102/attempt001/summary.md`.
