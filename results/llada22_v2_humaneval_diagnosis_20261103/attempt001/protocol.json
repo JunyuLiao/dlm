@@ -1,0 +1,32 @@
+{
+  "schema": "llada22_humaneval_same_state_eos_diagnostic_v1",
+  "purpose": "Compare attention routes at the exact first V2 EOS state without changing native sampling or producing benchmark output.",
+  "base_campaign": "results/multi_model_value_20261030/attempt001",
+  "previous_attempt": "results/llada22_v2_humaneval_diagnosis_20261102/attempt002",
+  "model": "llada22",
+  "model_revision": "e4f77d25ab5ca86f2223c6cdc6a72b887e20c8a5",
+  "numerical_worker_revision": "224f8f11173bd16e5cf10054a963c74233758cf2",
+  "runtime_sha256": "489b4abf466c40e44fd11d18af41e4c4a69cf7f418c1dd6eb972a76eb43f17dd",
+  "attention_source_sha256": "619ec332ed70247d0a72996f496fbb34ae7e7debac6637e3c236eac53a099aab",
+  "runner_sha256": "a75b1e6f669d1ae8e64e546b7f939c0b385d9c34e271f514e1a64bce5c751dfb",
+  "cohort": ["humaneval/0"],
+  "cohort_status": "previously examined benchmark item; mechanism replay only",
+  "seed": 42,
+  "generation_cap": 1024,
+  "native_sampler_modified": false,
+  "v2_humaneval_threshold": 0.8944271909999159,
+  "v2_aime_threshold": 0.012489663701836472,
+  "routes": [
+    "original_v2_at_humaneval_threshold",
+    "allkept_fa4",
+    "v31_mass_topk_fixed_budget",
+    "v2_recomputed_at_humaneval_threshold",
+    "v2_recomputed_at_aime_threshold"
+  ],
+  "comparison": "Capture the first token position where native V2 predicts EOS. Reuse identical block token IDs and prefix KV for diagnostic-only extra forwards. Report EOS logit/probability/rank, top-5 tokens, and full-vector delta versus the original V2 logits.",
+  "no_benchmark_score": true,
+  "no_calibration": true,
+  "no_threshold_retuning": true,
+  "no_latency_claim": true,
+  "privacy": "Prompt, gold, token IDs and raw generations remain private; publish aggregate diagnostic fields only."
+}
