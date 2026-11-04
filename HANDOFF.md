@@ -1,3 +1,17 @@
+## 2026-11-04 — TraDo RULER32K baseline completion authorized
+
+User requests native dense,all-kept FA4,V31/V3a at50%;no V2 generation.
+Same existing130problems(10/taskx13),seed42,128output cap. Spec:
+`docs/TRADO_RULER32K_BASELINES_20261104.md`;runner
+`scripts/trado_ruler32k_baselines.py`. Original8c0d14b0 TraDo runtime and
+native sampler,all36denoisinglayers,Q128/KV64,four-call reuse. Top-k uses
+round(J/2)including mandatory tiles. Exact per-selection budget audit;
+independent CPU/CUDA selector and FP32 consumer checks plus historical all-kept
+replay before launch. Reuse completed V2 evidence unchanged. New root
+`results/trado_ruler32k_baselines_20261104/attempt001/`;900smonitor,noGPUceiling.
+Next:freeze,qualify,generate520requests,official RULERscore/paired audit.
+DiffusionGemma remains stopped.
+
 ## 2026-11-04 13:18UTC — retained six-panel campaign complete; Gemma stopped
 
 User stopped DiffusionGemma and requested final results. Explicit guard:

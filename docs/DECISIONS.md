@@ -4384,3 +4384,15 @@ not exactly matched50% or a fixed-threshold ablation. Other tasks do not show
 universal improvement; TraDo historical V2 replay mismatch stays disclosed.
 Maintenance recovery retains only66 complete old records plus64fresh;21partial
 excluded. H100idle0MiB/0%,37C. No new work scheduled.
+
+
+## 2026-11-04 — fill TraDo RULER32K missing baseline cells
+
+User requests only native dense,all-kept FA4,V31,V3a on the existing130prompt
+cohort,seed42; no V2 generation. Preserve prior V2 and other benchmark results.
+Use original TraDo source/runtime/sampler,128cap and four-call sparse reuse.
+V31/V3a exact geometry-based half-budget inclusive ofmandatory; no calibration.
+Freeze source/model/data identities; CUDA independent CPU/consumer qualification,
+exact all-kept replay and per-selection physical budget assertions required.
+SpecTRADO_RULER32K_BASELINES_20261104;520newrequests,official fractional scores,
+task statistics and paired intervals. GPUmonitor900s. Gemma stays cancelled.
