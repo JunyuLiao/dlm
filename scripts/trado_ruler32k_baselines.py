@@ -101,7 +101,8 @@ def qualify(attention,root):
             if arm==ARMS[2]:
                 lm=stats.log_mass;denom=torch.logsumexp(lm,1,keepdim=True)
                 ranking=(lm-torch.where(torch.isfinite(denom),denom,0.)).amax(-1)
-                cx=cpu.log_mass;cs=(cx-torch.logsumexp(cx,1,keepdim=True)).amax(-1)
+                cx=cpu.log_mass;cd=torch.logsumexp(cx,1,keepdim=True)
+                cs=(cx-torch.where(torch.isfinite(cd),cd,0.)).amax(-1)
             else:
                 ranking=attention.singleton_scores(stats)
                 alpha,contrib,output,g=full_support(cpu)
