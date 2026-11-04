@@ -79,9 +79,9 @@ def main(root):
                         assert r['input_sha256']==item['input_sha256'] and r['prompt_tokens']==item['prompt_tokens']
                         assert r['panel_protocol_sha256']==sha(leaf/'protocol.json') and r['root_protocol_sha256']==sha(root/'protocol.json')
                         assert (r['model'],r['arm'],r['seed'],r['generation_cap'])==(model,arm,42,128)
-                        c=r['counts'];assert 0<c['kept_tiles']<=c['eligible_tiles']
+                        c=r['counts'];assert 0<c['kept_tiles']<=c['eligible_tiles'] and c['verified_prompt_tokenizations']==1
                         if arm in FIXED[:2]:assert c['kept_tiles']==c['eligible_tiles']
-                        elif arm in FIXED[2:]:assert c['audited_k512_head_units']>0
+                        elif arm in FIXED[2:]:assert c['audited_k512_head_units']==(16 if model=='llada22' else 32)*c['selection_layer_calls']>0
                         else:assert c['current_tile_init_selection_layer_calls']==c['selection_layer_calls']>0
                         prediction=extract(pr['text'].strip())
                         records.append(dict(r,correct=prediction==item['gold'],parsed=prediction is not None))

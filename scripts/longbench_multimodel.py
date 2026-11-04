@@ -227,11 +227,16 @@ def panel(root,model,phase,attempt):
         return keep
     attention.budget_map=audited_budget
     data=read(root/'private/data'/f'{model}.json');byid={r['id']:r for r in data}
-    # Assert the actual model encoder consumes exactly the frozen chat request.
-    for item in data:
-        ids=h.encode(item['prompt'])
+    expected_inputs={hashlib.sha256(item['prompt'].encode()).hexdigest():item for item in data}
+    encode=h.encode
+    def checked_encode(text,**kwargs):
+        # Audit the real generation encoding, without an extra full prompt pass.
+        ids=encode(text,**kwargs);item=expected_inputs[hashlib.sha256(text.encode()).hexdigest()]
         assert len(ids)==item['prompt_tokens'] and hashlib.sha256(json.dumps(ids).encode()).hexdigest()==item['input_sha256']
         assert len(ids)+128<=LIMITS[model]
+        h.runtime.counts['verified_prompt_tokenizations']+=1
+        return ids
+    h.encode=checked_encode
     selected=None
     if phase=='cti':
         fixed_candidates=sorted((root/'panels'/model/'fixed').glob('attempt*/generation_complete.json'))
@@ -280,8 +285,9 @@ def panel(root,model,phase,attempt):
                 pub,priv=worker.run_cell(h,item,128,42);counts=pub['counts']
                 assert pub['prompt_tokens']==item['prompt_tokens']
                 if arm in FIXED[:2]:assert counts['eligible_tiles']==counts['kept_tiles']
-                elif arm in FIXED[2:]:assert counts['audited_k512_head_units']>0
+                elif arm in FIXED[2:]:assert counts['audited_k512_head_units']==(16 if model=='llada22' else 32)*counts['selection_layer_calls']>0
                 else:assert counts['current_tile_init_selection_layer_calls']==counts['selection_layer_calls']>0
+                assert counts['verified_prompt_tokenizations']==1
                 pub.update(model=model,suite='longbench_v2',arm=arm,threshold=selected['threshold'] if selected else None,
                     panel_protocol_sha256=sha(leaf/'protocol.json'),root_protocol_sha256=sha(root/'protocol.json'),
                     **{k:item[k] for k in ('length','difficulty','domain','sub_domain','truncated','original_prompt_tokens','input_sha256')})
