@@ -1,3 +1,15 @@
+## 2026-11-04 — branch README publication update
+
+Verified result/source commit `67304234`. The root README now summarizes
+LLaDA2.2-mini and TraDo-8B-Instruct across AIME26, HumanEval and RULER,
+including the completed TraDo RULER32K dense/V31/V3a supplement. It distinguishes
+original V2 from current-tile initialization, records achieved sparsity and
+native decoding settings, and discloses calibration/replay limitations.
+All numerical tables come from completed, preserved result artifacts.
+Documentation-only change; no experiment or stopped campaign is resumed.
+Publication targets: `JunyuLiao/dlm:multi-models` and
+`coconight01/dlm_test:ljy/value-aware-multi-models`.
+
 ## 2026-11-04 16:12UTC — TraDo RULER32K baseline completion done
 
 520 new requests (4 arms × 130) complete; no V2 generation. Root:

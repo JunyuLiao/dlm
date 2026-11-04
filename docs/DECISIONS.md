@@ -4416,3 +4416,16 @@ benchmark records. Attempt002 passes 8 CUDA selector/consumer cases, 5 CPU tests
 exact all-kept replay, per-selection budget assertions and 16 complete shards.
 Analysis001 missing-comparison-key failure is preserved; analysis002 scores/audits
 all 650 records. H100 idle, no further experiment scheduled; Gemma remains stopped.
+
+## 2026-11-04 — publish branch README for the two-model value-aware study
+
+User requests a README update and publication to both repositories. Replace the
+historical DiffusionGemma landing page with the completed LLaDA2.2-mini / TraDo
+comparison, using the six-panel current-tile report and completed TraDo RULER32K
+supplement at verified result commit `67304234`. Include all six accuracy rows,
+current-tile denoising/sparsity statistics, native sampler and benchmark settings,
+method lineage, calibration scope, original-V2 replay limitations and evidence
+links. Preserve historical implementations/reports and link their documentation.
+No new scores, thresholds, generation or runtime changes. Publish the same
+documentation commit to origin `multi-models` and upstream
+`ljy/value-aware-multi-models`.

@@ -1,346 +1,104 @@
-# Value-direction-aware sparse attention for diffusion LLMs
+# Value-aware sparse attention across diffusion LLMs
 
-This repository implements physical-tile sparse attention for the native
-DiffusionGemma block-diffusion decoder. The main method is **Gaussian32**: it
-uses a fixed rank-32 Gaussian sketch of the value vectors to estimate the
-change that a candidate key/value block would make to the attention output.
-**C_gate** is a query-adaptive protection variant of the same router. It gives
-queries that are still changing, or have not yet demonstrated stable accepted
-tokens, a larger routing sensitivity coefficient.
+This branch evaluates value-direction-aware attention on **LLaDA2.2-mini** and **TraDo-8B-Instruct**, comparing online Gaussian32 selection with attention-mass ranking, full-information singleton selection and two dense controls. The framework retains each model’s native denoising sampler and uses physical block-sparse attention on one H100.
 
-The implementation preserves the model's native proposal, acceptance,
-renoising, self-conditioning, stopping rule, temperature schedule, and output
-attention computation. Sparsity is applied only to eligible physical
-`128 query × 64 key/value` tiles in decoder self-attention. The project is an
-H100/SM90 research implementation; skipped-tile counts do not by themselves
-establish end-to-end speedup.
+**Results through November 4, 2026:** all six current-tile V2 model/benchmark panels are complete, as are the four additional TraDo RULER32K baseline panels. Existing baseline results are retained. DiffusionGemma follow-up experiments were stopped and are outside this completed scope.
 
-## 2026-10-20 update
+## Methods
 
-**HumanEval K256 and K128 are complete:** all 164 problems, seed 42, with
-thinking enabled and disabled. Two numerical reproducibility issues were
-corrected: compiler-dependent reduction choices in the model/sampler helpers,
-and intermittent output variation in mass-observing FA4. The corrected runtime
-uses explicit deterministic compilation and disables overlap only for the
-mass-observing attention path. Native decoding and stopping remain unchanged.
-All 22 full audit/clean comparisons per budget pass; independent engine-prefix
-replication and official rescoring also pass.
+| Method | Selection and output attention |
+|---|---|
+| Native dense | Native SDPA attention; reference decoding trajectory. |
+| All-kept FA4 | The sparse methods’ full-dimensional FA4 consumer with every eligible tile retained; separates consumer differences from sparsification. |
+| V31 | Rank physical tiles by attention mass and retain a context-dependent fixed budget. |
+| Original V2 | Online Gaussian32 value-direction selector; chronological scan begins with the first prefix tile. Threshold determines the retained set. |
+| V3a | Rank full-information singleton deletion risk relative to the full-support projected output, with a fixed budget. |
+| Current-tile V2 | Initialize the same online V2 recurrence from the mandatory current tile, then scan prefix tiles `0..J-2`. Recalibrate the threshold for this order. |
 
-| Budget / thinking | V31 → V2 correct/164 | Calls/problem, V31 → V2 | Request ms, V31 → V2 |
-|---|---:|---:|---:|
-| K256 / on | 159 → 162 | 49.256 → 50.043 | 1123.988 → 1147.622 |
-| K256 / off | 157 → 158 | 10.774 → 10.854 | 262.178 → 264.080 |
-| K128 / on | 157 → 158 | 57.415 → 53.323 | 1297.955 → 1224.068 |
-| K128 / off | 156 → 160 | 11.488 → 10.439 | 274.204 → 252.697 |
+The current-tile variant removes the forced first-prefix-tile initialization. It preserves V2’s rank-32 Gaussian projection, preserve-mass skip semantics and full-dimensional current-value output. It does not alter EOS, acceptance, editing or stopping, and adds no model forward. Gaussian32 is Junyu’s prior method; cross-step map reuse is inherited from Yuhan. The initialization change is a separate named variant.
 
-K128 V2 has the strongest observed joint accuracy/latency lead over V31, but
-its speedup intervals include 1 and its non-thinking first-canvas work match
-misses the specified tolerance. First-canvas calibration does not match total
-attention work. Full-value swaps and guarded residual do not meet the joint
-objective; native dense FULL remains faster than every tested sparse method.
+## Accuracy and retrieval results
 
-Read the [reproducibility problem, fixes and evidence limits](docs/HUMANEVAL_REPRODUCIBILITY_FIXES_20261020.md)
-and the [complete HumanEval results, uncertainty, work accounting and tails](results/humaneval_documentation_20261020/attempt001/README.md).
-The fixes are verified on these HumanEval panels; their contribution to earlier
-LongBench-v2 inconsistencies remains unconfirmed. Older updates below describe
-their original protocols and status at publication.
+| Model | Benchmark | Native dense | All-kept FA4 | V31 | Original V2 | V3a | Current-tile V2 |
+|---|---|---:|---:|---:|---:|---:|---:|
+| LLaDA2.2-mini | AIME26 | 40.00% | 32.22% | 23.33% | 31.11% | 27.78% | 30.00% |
+| LLaDA2.2-mini | HumanEval | 85.98% | 84.15% | 50.61% | 6.10% | 62.80% | 72.56% |
+| LLaDA2.2-mini | RULER128K | 85.44% | 84.82% | 86.01% | 86.23% | 85.03% | 85.21% |
+| TraDo-8B-Instruct | AIME26 | 8.89% | 4.44% | 3.33% | 6.67% | 2.22% | 8.89% |
+| TraDo-8B-Instruct | HumanEval | 79.27% | 78.05% | 42.68% | 76.22% | 47.56% | 74.39% |
+| TraDo-8B-Instruct | RULER32K | 64.64% | 64.85% | 63.49% | — | 64.96% | 64.72% |
 
-## 2026-10-17 update: full-value selection and reuse
+AIME26 is exact-match accuracy over **30 problems × 3 seeds = 90 requests**. HumanEval is official functional **pass@1 over all 164 problems**, with one seed. RULER is official **fractional target-retrieval credit over 130 problems**, balanced at 10 per task across 13 tasks; it is not binary accuracy. No original-V2 TraDo RULER32K evaluation exists.
 
-The three-direction follow-up is complete: bounded full-V swaps, reuse-lifetime
-prediction/directional trust, and omitted-output reconstruction. Documentation
-covers every evaluated variant, including rejected diagnostics, exact formulas,
-fixed budgets, layer scope, experiment setup and evidence limits:
+Key observations:
 
-1. [Evaluated methods and frozen setup](docs/research_update_20261017/01_METHODS_AND_SETUP.md).
-2. [All results, uncertainty and statistics](docs/research_update_20261017/02_RESULTS_AND_STATISTICS.md).
-3. [Integration, qualification and reproduction](docs/research_update_20261017/03_INTEGRATION_AND_REPRODUCTION.md).
+- **LLaDA2.2-mini HumanEval:** current-tile V2 recovers **119/164** passes from original V2’s **10/164**, compared with V31 **83/164**, V3a **103/164** and native dense **141/164**. Mean output length rises from **62.9 to 219.3 tokens**. This is initialization plus recalibration: achieved sparsity changes from **49.22% to 55.67%**, so it is not an exactly matched-50% or fixed-threshold ablation.
+- **TraDo HumanEval:** current-tile V2 scores **122/164**, versus original V2 **125/164**, V31 **70/164**, V3a **78/164** and native dense **130/164**. The initialization change does not establish a universal improvement.
+- **TraDo RULER32K:** V31 and V3a both achieve **49.97%** sparsity. V3a exceeds V31 by **1.47 percentage points**, but the paired problem-bootstrap 95% CI **[−0.32, +3.78]** and task-cluster CI **[−0.71, +4.42]** cross zero. This does not establish superiority or noninferiority.
 
-Official scoring covers **5,370 trials across AIME26, LongBench-v2, MATH100 and
-RULER128K**. Full-value swaps are the strongest candidate: LongBench calls fall
-23.51%, but accuracy uncertainty and concentrated tail savings limit the claim;
-all four candidates increase AIME calls. **No method passes the predeclared
-all-workload accuracy/call screen; no full503 expansion or timing run was launched.**
-Native value changes are GLOBAL-layer29-only, with fixed per-query-tile K.
+## Denoising and achieved sparsity
 
-[Complete statistical tables and public exports](results/research_update_20261017/README.md),
-[source-bound plots/CSVs](results/v31_value_decision_reuse_20261015/synthesis_20261017/attempt001/summary.md)
-and [interpretation](results/v31_value_decision_reuse_20261015/conclusions_20261017.md)
-are available. Public analysis reproduces on CPU without private generations;
-full generation/scoring requires the authorized frozen inputs and pinned runtime.
-Clean timing remains paused. The October 15 publication below retains the
-definitions and source-specific results of the earlier method families.
+The table below describes the accepted **current-tile V2** panels. Full work statistics for all **35 method/benchmark combinations** are in the [combined metrics](results/trado_ruler32k_baselines_20261104/attempt002/analysis002/combined_35_rows.json).
 
-## This week's cross-step-reuse research
+| Model | Benchmark | Denoising calls N | Canvases C | Mean output tokens | N/C | Achieved sparsity | EOS / cap hits |
+|---|---|---:|---:|---:|---:|---:|---:|
+| LLaDA2.2-mini | AIME26 | 130126 | 16858 | 5964.2 | 7.719 | 51.95% | 87 / 3 |
+| LLaDA2.2-mini | HumanEval | 4278 | 1275 | 219.3 | 3.355 | 55.67% | 164 / 0 |
+| LLaDA2.2-mini | RULER128K | 1041 | 236 | 28.0 | 4.411 | 49.63% | 130 / 0 |
+| TraDo-8B-Instruct | AIME26 | 47516 | 22972 | 1018.1 | 2.068 | 50.51% | 88 / 2 |
+| TraDo-8B-Instruct | HumanEval | 9838 | 5137 | 122.2 | 1.915 | 53.31% | 164 / 0 |
+| TraDo-8B-Instruct | RULER32K | 2767 | 1113 | 31.0 | 2.486 | 49.45% | 126 / 4 |
 
-The 2026-10-15 publication separates three directions, each with formulas,
-implementation files, evidence limits, integration and reproduction commands:
+`N` counts denoising forwards; `C` counts native generation canvases; `N/C` is their pooled ratio. Output length counts emitted tokens, including emitted EOS. Cap hits indicate non-EOS outputs reaching the configured limit. Fewer calls caused by premature termination are not useful acceleration.
 
-1. [Value-aware V1/V2/V3 methods](docs/research_week_20261015/01_VALUE_AWARE_METHODS.md).
-2. [V2 threshold calibration and absolute-work accounting](docs/research_week_20261015/02_V2_THRESHOLD_CALIBRATION.md).
-3. [Cheap cached refresh, stable updates and factor isolation](docs/research_week_20261015/03_CHEAP_CACHED_REFRESH.md).
+Consumer tile sparsity is `1 - sum(kept tiles) / sum(eligible tiles)` over actual denoising calls, including mandatory tiles and calls that reuse a map. It excludes selector discovery, dense prefill and block commits. It measures geometric attention sparsity, not whole-model FLOPs or preserved attention mass. The runs are instrumented; **no clean end-to-end latency or speedup claim is made**.
 
-[Sanitized evidence and source hashes](results/research_week_20261015/README.md)
-accompany the implementation. The V2 local sweep remains user-paused; the newer
-full503 refresh study has a generation checkpoint, not a final accuracy result.
-Clean timing remains paused. Read `HANDOFF.md` for campaign-specific status.
+## Evaluation setup
 
-## Method
-
-For a value vector $v_k$, Gaussian32 constructs a fixed sketch
-
-$$
-z_k = v_k R, \qquad R\in\mathbb{R}^{d_v\times32},
-$$
-
-where the entries of $R$ are independent $\mathcal{N}(0,1/32)$ samples.
-The projection is generated once per native layer and KV head (seed `1729`)
-and is reused for the request.
-
-For query $i$ and candidate KV tile $J$, the router computes the
-within-tile softmax weights $w^J_{ik}$, the projected weighted value
-direction
-
-$$
-\mu^J_i = \sum_{k\in J} w^J_{ik}z_k,
-$$
-
-and the candidate attention mass $\alpha^J_i$ from the running softmax
-statistics. If $o_i$ is the projected output accumulated from previously
-retained tiles, the estimated candidate contribution is
-
-$$
-\Delta^J_i = \alpha^J_i(\mu^J_i-o_i).
-$$
-
-This keeps blocks with large attention mass and a distinct value direction,
-while allowing low-mass, redundant, or internally cancelling blocks to be
-skipped. The physical tile is skipped only when every valid query row in the
-`128 × 64` tile is below the threshold. The production kernel compares an
-equivalent monotone log magnitude, normalized by a native-head value RMS
-reference; its `log_threshold` is therefore the logarithm of the routing
-threshold. Original BF16 values are used for the retained attention output.
-
-### C_gate query-sensitivity protection
-
-Gaussian32 can receive one FP32 sensitivity coefficient per query row. The
-kernel applies it to the value-routing risk before the tile maximum is taken:
-
-$$
-\rho_i \leftarrow \rho_i + \log s_i.
-$$
-
-The C_gate state is causal. At the first denoising call, every query receives
-the maximum coefficient $s_i=1+\beta$. After a call finishes, the state is
-updated from the completed sampler mask and completed logits only:
-
-$$
-u^C_i=\sqrt{\max(1-p_i,0)},\qquad
-q_i\leftarrow\gamma_q q_i+(1-\gamma_q)\,\mathbf{1}[i\text{ was renoised}],
-$$
-
-$$
-g_i=1-\exp(-r_i/\tau),\qquad
-h_i=1-g_i(1-q_i)(1-u^C_i),\qquad
-s_i=\mathrm{clip}(1+\beta h_i,1,1+\beta).
-$$
-
-Here $p_i$ is the completed-call top-1 probability and $r_i$ is the
-completed stable-acceptance run, reset by a top-1 flip. Thus a query remains
-protected until it has both stopped being renoised and accumulated stable
-history. C_gate does not introduce a phase-specific threshold: one calibrated
-local threshold and one calibrated global threshold are copied to call 1,
-call 2, and every later call.
-
-The full causal family is implemented in
-[`query_adaptive.py`](experiments/value_direction_hopper/query_adaptive.py).
-It includes `M_prior`, `C_prior`, `T_prior`, `T_smooth`, `T_hybrid`, `T_run`,
-the stable-run gates (`M_gate`, `M_gate_norm`, `C_gate`, `T_gate`), and the
-additional confidence/entropy controls used by the studies. The historical
-`M`, `C`, `T`, `MT`, and `CT` formulas remain available for comparison.
-
-## Methods and baselines
-
-| Name | Router | Purpose |
+| Setting | LLaDA2.2-mini | TraDo-8B-Instruct |
 |---|---|---|
-| **Dense** (`native_dense`) | Native DiffusionGemma SDPA; all eligible tiles retained | Accuracy and trajectory reference |
-| **Gaussian32** (`kernel_gaussian32`, `gaussian32`) | Value-direction-aware rank-32 Gaussian projection and centered output-risk estimate | Main sparse method |
-| **C_gate** | Gaussian32 plus causal per-query sensitivity protection | Query-adaptive Gaussian32 variant |
-| **BLASST** (`kernel_blasst`, `blasst_aggressive`) | Attention-mass/block-max routing using the BLASST convention | Mass-based sparse baseline |
+| Model / frozen revision | `inclusionAI/LLaDA2.2-mini` / `e4f77d25` | `Gen-Verse/TraDo-8B-Instruct` / `2d37bd3e` |
+| Native block length | 32 tokens | 4 tokens |
+| Sampler | Temperature 0; confidence threshold 0.5; editing threshold 0; 32 steps; maximum 16 post-steps; native editing and EOS | Temperature 1; top-p 1; top-k 0; confidence threshold 0.9; 4 denoising steps; native EOS |
+| Output caps: AIME / HumanEval / RULER | 32,768 / 1,024 / 128 | 2,000 / 2,000 / 128 |
+| RULER context limit | 131,072 tokens (128K) | 32,768 tokens (32K) |
+| Actual RULER prompt lengths | 115,092–130,776 tokens | 29,798–32,472 tokens |
 
-`blasst_aggressive` permits the calibrated parameter to exceed the original
-BLASST `lambda <= 1` range when a target sparsity requires it. The Hopper
-integration stores this baseline as a `log_scale` and subtracts the valid KV
-length logarithm inside the router. Dense and BLASST are controls; Gaussian32
-is the primary value-direction-aware method and C_gate is its query-protection
-variant.
+Both models use **BF16, batch size 1, one H100**, native prompt adapters and source-pinned runtimes. AIME seeds are **42/43/44**; HumanEval and RULER use **42**. RULER inputs fit without truncation. Different context lengths and tokenizer-specific RULER prompts make cross-model scores different evaluation conditions. Output budgets also differ by model.
 
-## Repository map
+All denoising attention layers are eligible; prompt prefill and committed-block attention stay dense. Selection uses **Q128 × KV64** physical tiles per query head/block, a fixed Gaussian32 projection seeded by `1729 + layer`, a refresh every fourth denoising call, and no cross-canvas carry. Maps reset at canvas boundaries or structural index changes; padded query rows do not vote. Retained attention always uses full-dimensional current values. V31/V3a budgets follow effective context length: `max(round(J/2), mandatory_count)`, where `J` is the number of available KV tiles and mandatory current tiles count toward the budget. Native dense and all-kept FA4 remain separate controls because their numerical trajectories can differ.
 
-The following files are the implementation and reproduction surface for this
-method:
+Current-tile V2 thresholds are calibrated by physical tile counts, without gold answers or accuracy-guided tuning. AIME/HumanEval use six fixed benchmark prompts selected by length strata: **transductive, exploratory calibration**. RULER uses 13 separately generated development prompts, one per task, with seed 142. Calibration never runs the full 90-request AIME panel. The target is approximately 50%; accepted full-panel sparsity is 40–60%. All six accepted panels fall in that range. Thresholds and calibration histories are in the [six-panel report](results/current_tile_multimodel_20261103/attempt001/publication001/README.md).
+
+## Evidence and limitations
+
+- [Six-panel V2 report](results/current_tile_multimodel_20261103/attempt001/publication001/README.md): calibration, historical comparisons, paired intervals, source identities and maintenance recovery. Its original TraDo RULER32K baseline gaps are filled by the later supplement below.
+- [Completed TraDo RULER32K supplement](results/trado_ruler32k_baselines_20261104/attempt002/publication001/README.md): native dense, all-kept FA4, V31 and V3a results; per-task scores; exact half-budget audits; existing V2 re-scored without new V2 generation.
+- Canonical completion markers: [six V2 panels](results/current_tile_multimodel_20261103/attempt001/final_complete.json) and [TraDo baseline supplement](results/trado_ruler32k_baselines_20261104/attempt002/final_complete.json). Frozen results and failed attempts remain unchanged.
+- These are previously examined, exploratory cohorts. Paired intervals do not measure all runtime or seed uncertainty; AIME resampling clusters its three seeds by problem. Similar sparsity does not establish identical attention work or equivalent model quality.
+- **TraDo historical V2 replay limitation:** fresh original-V2 replays differ from saved historical outputs despite matching pins; fresh repeats agree with each other, and all-kept controls replay exactly. Historical original-V2 comparisons are descriptive, not a bitwise reproduced reference. The reports disclose this qualification limitation.
+- LLaDA RULER128K combines 66 verified records from two complete pre-maintenance shards with 64 records from fresh shards at the frozen threshold. The 21 partial records are preserved and excluded. An earlier 61.35%-sparse LLaDA HumanEval development result is also preserved separately and is not the accepted result above.
+- Raw prompts, gold answers, tokens, completions and model weights remain private. Public evidence contains sanitized records, aggregates, hashes and execution receipts.
+
+## Implementation and reproduction
 
 | File | Role |
 |---|---|
-| [`src/dllm/models/adapters/diffusion_gemma.py`](src/dllm/models/adapters/diffusion_gemma.py) | Loads `google/diffusiongemma-26B-A4B-it`, keeps native `generate()`, and exposes the DiffusionGemma attention registry. |
-| [`experiments/value_direction_hopper/csrc/value_direction.cu`](experiments/value_direction_hopper/csrc/value_direction.cu) | H100/SM90 CUDA router and retained-output kernel for dense, Gaussian32, and BLASST modes. |
-| [`experiments/value_direction_hopper/csrc/value_direction.h`](experiments/value_direction_hopper/csrc/value_direction.h) | Versioned allocation-free CUDA ABI (currently v4), including the optional `B × Q` sensitivity input. |
-| [`experiments/value_direction_hopper/cuda.py`](experiments/value_direction_hopper/cuda.py) | Explicit CUDA build and ABI-checked shared-library loader. |
-| [`experiments/value_direction_hopper/csrc/torch_bridge.cpp`](experiments/value_direction_hopper/csrc/torch_bridge.cpp) | ATen operator bridge used by the native PyTorch model. |
-| [`experiments/value_direction_hopper/torch_build.py`](experiments/value_direction_hopper/torch_build.py) | Builds the hash- and PyTorch-version-pinned ATen bridge. |
-| [`experiments/value_direction_hopper/projection.py`](experiments/value_direction_hopper/projection.py) | Optional fused FP32/TF32x3 Gaussian32 sketch and value-norm refresh. |
-| [`experiments/value_direction_hopper/integration.py`](experiments/value_direction_hopper/integration.py) | Installs the attention override, request-local sketch leases, structural masks, threshold selection, and deferred tile accounting. |
-| [`experiments/value_direction_hopper/query_adaptive.py`](experiments/value_direction_hopper/query_adaptive.py) | Sensitivity formulas, causal state, completed-call updates, stable-run tracking, and sampler hook. |
-| [`experiments/value_direction_hopper/query_sensitivity_uniform.py`](experiments/value_direction_hopper/query_sensitivity_uniform.py) | Adapter that enforces one local/global log-threshold pair for every denoising call. |
-| [`experiments/value_direction_hopper/aime_uniform_baselines.py`](experiments/value_direction_hopper/aime_uniform_baselines.py) | AIME26 Gaussian32 and BLASST uniform-threshold calibration/evaluation. |
-| [`experiments/value_direction_hopper/aime_query_sensitivity_uniform.py`](experiments/value_direction_hopper/aime_query_sensitivity_uniform.py) | AIME26 calibration/evaluation driver for causal query-sensitivity methods. |
-| [`experiments/value_direction_hopper/aime_query_sensitivity_gated.py`](experiments/value_direction_hopper/aime_query_sensitivity_gated.py) | Causal stable-run gate screen and finalist workflow, including C_gate. |
-| [`experiments/value_direction_hopper/experiment.py`](experiments/value_direction_hopper/experiment.py) | Frozen RULER4K generation for native dense, Gaussian32, and BLASST kernel modes. |
-| [`experiments/value_direction_hopper/README.md`](experiments/value_direction_hopper/README.md) | Detailed Hopper build, integration, calibration, and audit instructions. |
-| [`tests/test_query_adaptive.py`](tests/test_query_adaptive.py) | CPU-side formula, causal-history, tile-reduction, and sampler-hook tests. |
-| [`tests/test_value_direction_hopper.py`](tests/test_value_direction_hopper.py) | H100 kernel, ABI, mask, cache, projection, ATen bridge, and CUDA graph tests. |
+| [multi_model_runtime.py](experiments/numerical_qk_reuse/multi_model_runtime.py) | Model-specific native sampler integration and numerical execution. |
+| [multi_model_attention.py](experiments/numerical_qk_reuse/multi_model_attention.py) | Attention routing, full-dimensional sparse consumers and work counters. |
+| [v2_current_tile_init.py](experiments/numerical_qk_reuse/v2_current_tile_init.py) | Independent CPU recurrence and optimized current-tile initialization. |
+| [current_tile_multimodel_worker.py](scripts/current_tile_multimodel_worker.py) | Small-sample calibration, threshold freeze and sharded generation. |
+| [current_tile_retained_report.py](scripts/current_tile_retained_report.py) | Publish the retained two-model comparison with preserved historical evidence. |
+| [trado_ruler32k_baselines.py](scripts/trado_ruler32k_baselines.py) | Source-bound TraDo RULER32K baseline runner and qualification. |
+| [trado_ruler32k_baseline_report.py](scripts/trado_ruler32k_baseline_report.py) | Official RULER scoring, paired comparisons and combined 35-row metrics. |
+| [test_v2_current_tile_init.py](tests/test_v2_current_tile_init.py) | CPU recurrence, initialization, padding and budget checks. |
 
-Historical reference implementations under
-[`experiments/diffusion_gemma_jl_output_aware`](experiments/diffusion_gemma_jl_output_aware)
-and [`experiments/diffusion_gemma_value_aware`](experiments/diffusion_gemma_value_aware)
-are useful for the PyTorch/reference operator and calibration audits. The
-Hopper path is the current integrated implementation described here.
+The [original multi-model protocol](docs/MULTI_MODEL_VALUE_EVALUATION_20261030.md), [current-tile protocol](docs/CURRENT_TILE_MULTIMODEL_20261103.md) and [TraDo baseline protocol](docs/TRADO_RULER32K_BASELINES_20261104.md) define frozen source, sampler, scorer and qualification requirements. Later scope changes and completion markers take precedence over the original nine-panel schedule. Reproduction requires the specified model/runtime revisions and authorized private inputs; one generic Transformers environment does not cover every model. In particular, the TraDo supplement uses its pinned Transformers 4.52.4 compatibility environment.
 
-## Installation
+## Historical DiffusionGemma work
 
-Use Python 3.10 or newer and a CUDA-enabled PyTorch environment. The checked-in
-package requires the DiffusionGemma support in `transformers==5.11.0`:
-
-```bash
-cd /home/exouser/ljy/dlm
-pip install -e .
-pip install -e '.[eval]'
-pip install -e '.[test]'
-```
-
-The checkpoint is gated on Hugging Face. Accept its terms and authenticate with
-`hf auth login` when the adapter reports a 401/403 or gated-repository error.
-The CUDA implementation requires an NVIDIA Hopper GPU (SM90, such as H100),
-BF16 Q/K/V tensors, and native head dimensions 256 or 512.
-
-## Build and integrate the Hopper path
-
-Build the CUDA library explicitly before inference. Do not compile during a
-generation run:
-
-```bash
-cd /home/exouser/ljy/dlm
-PYTHONPATH=src:. python -m experiments.value_direction_hopper.cuda \
-  --fast-sfu --inline-roles
-```
-
-The command prints a hash-named `value_direction_*.so` under
-`results/value_direction_hopper_v1/build`. Build its ATen bridge with the exact
-same kernel and active PyTorch version:
-
-```bash
-PYTHONPATH=src:. python -m experiments.value_direction_hopper.torch_build \
-  --kernel /absolute/path/to/value_direction_HASH.so
-```
-
-The bridge writes a provenance file and refuses a mismatched kernel or PyTorch
-runtime. `integration.install(...)` binds a request-local router to the native
-DiffusionGemma attention registry; it does not replace the decoder or sampler.
-The integration owns sketch-cache invalidation and refreshes the boundary and
-canvas values on every call.
-
-## Reproduce a frozen RULER run
-
-After building the two libraries, run the explicit Hopper experiment with a
-new output directory:
-
-```bash
-PYTHONPATH=src:. python -m experiments.value_direction_hopper.experiment run \
-  --root results/my_ruler_run \
-  --library /absolute/path/to/value_direction_HASH.so \
-  --torch-library /absolute/path/to/value_direction_torch_HASH.so
-
-PYTHONPATH=src:. python -m experiments.value_direction_hopper.experiment report \
-  --root results/my_ruler_run
-```
-
-The experiment records immutable configuration/source hashes, resumes verified
-completed shards, and writes physical eligible/skipped tile counts. Its method
-controls are `native_dense`, `kernel_gaussian32`, and `kernel_blasst`; the
-frozen manifest, model revision, projection seed, precision, masks, and
-threshold policies are captured in the run directory.
-
-## Reproduce uniform-threshold AIME studies
-
-The AIME drivers use the six existing calibration IDs and copy one local/global
-pair to every denoising call. Use a fresh result directory for each protocol:
-
-```bash
-PYTHONPATH=src:. python -m experiments.value_direction_hopper.aime_uniform_baselines \
-  calibrate --root results/aime_uniform_baselines
-PYTHONPATH=src:. python -m experiments.value_direction_hopper.aime_uniform_baselines \
-  run --root results/aime_uniform_baselines
-PYTHONPATH=src:. python -m experiments.value_direction_hopper.aime_uniform_baselines \
-  report --root results/aime_uniform_baselines
-```
-
-For the causal query methods, select the methods and targets through the
-driver's environment variables, then prepare, calibrate, freeze, run, and
-report:
-
-```bash
-AIME_OUTPUT_ROOT=/absolute/path/to/results/aime_query_uniform \
-AIME_UNIFORM_METHODS=C_gate,T_prior,T_smooth \
-AIME_TARGETS=50 \
-PYTHONPATH=src:. python -m experiments.value_direction_hopper.aime_query_sensitivity_uniform prepare
-
-AIME_OUTPUT_ROOT=/absolute/path/to/results/aime_query_uniform \
-AIME_UNIFORM_METHODS=C_gate,T_prior,T_smooth \
-AIME_TARGETS=50 \
-PYTHONPATH=src:. python -m experiments.value_direction_hopper.aime_query_sensitivity_uniform calibrate
-
-AIME_OUTPUT_ROOT=/absolute/path/to/results/aime_query_uniform \
-AIME_FINAL_SEEDS=42,43,44 \
-PYTHONPATH=src:. python -m experiments.value_direction_hopper.aime_query_sensitivity_uniform run
-
-PYTHONPATH=src:. python -m experiments.value_direction_hopper.aime_query_sensitivity_uniform \
-  --root /absolute/path/to/results/aime_query_uniform report
-```
-
-The gated finalist workflow has the same `prepare`, `run`, and `report`
-stages and accepts `--root`; its calibration and screen policy are recorded in
-the root's JSON files. Threshold fitting uses tile counts and trajectory
-metadata only. Calibration IDs overlap the historical AIME manifest, so those
-runs should be reported as development evidence rather than held-out results.
-
-The numeric configuration and threshold-file contract is documented in the
-[Hopper frozen-configuration section](experiments/value_direction_hopper/README.md#frozen-hyperparameters-and-threshold-artifacts).
-Load the full-precision pair from the selected `thresholds/*.json` record and
-keep its `configuration.json` fingerprint, source hashes, model revision, and
-kernel provenance together with the run. Thresholds are protocol-specific;
-they should be recalibrated when the model, manifest, kernel, tile geometry,
-projection, sensitivity hyperparameters, or runtime changes.
-
-## Verification
-
-Run the CPU formula suite in every environment. The H100 suite additionally
-requires `VD_KERNEL` and checks the real SM90 library, mask packing, GQA,
-projection refresh, ABI v4 sensitivity, ATen bridge, and CUDA graph behavior:
-
-```bash
-PYTHONPATH=src:. python -m pytest -q tests/test_query_adaptive.py
-
-VD_KERNEL=/absolute/path/to/value_direction_HASH.so \
-VD_TORCH_KERNEL=/absolute/path/to/value_direction_torch_HASH.so \
-PYTHONPATH=src:. python -m pytest -q \
-  tests/test_value_direction_hopper.py tests/test_value_direction_hopper_report.py
-```
-
-Keep raw runs and reports under `results/`. Do not infer wall-clock gains from
-physical sparsity alone; report the dense backend, physical tile sparsity,
-denoising call count, and synchronized end-to-end timing separately.
+Earlier studies remain available in the [Hopper implementation guide](experiments/value_direction_hopper/README.md), [value-aware method documentation](docs/research_week_20261015/01_VALUE_AWARE_METHODS.md), [HumanEval reproducibility record](docs/HUMANEVAL_REPRODUCIBILITY_FIXES_20261020.md) and [results ledger](docs/RESULTS_LEDGER.md). Their models, dense baselines, layer scopes and native samplers are separate from the HF multi-model results summarized above.
 
 ## License
 
-The repository is released under the Apache-2.0 license. See
-[`LICENSE`](LICENSE).
+[Apache-2.0](LICENSE).
