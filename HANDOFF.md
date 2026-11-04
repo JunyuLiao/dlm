@@ -1,3 +1,23 @@
+## 2026-11-04 — new two-model LongBench v2 campaign authorized
+
+User requests seed 42: native dense, all-kept FA4, V31/V3a K512 tokens and
+V2 current-tile initialization. Use all 395 official short+medium items for
+LLaDA2.2 and all 180 short items for TraDo. Model token limits include a
+128-token output reserve; official middle truncation is disclosed per item.
+Spec: `docs/MULTIMODEL_LONGBENCH_V2_20261104.md`. Runner/report:
+`scripts/longbench_multimodel.py`, `scripts/longbench_multimodel_report.py`.
+New root: `results/multimodel_longbench_v2_20261104/attempt001/`.
+
+K512 = eight KV64 tiles including current mandatory support; four-call reuse,
+all denoising layers, dense prefill/commit. Finish all four dense/fixed-budget
+arms for both models, measure actual sparsity, then count-only V2 calibration
+on 6 length strata/group. Accept approximate matching at >=95%; only one
+new full-panel attempt allowed if achieved V2 sparsity is below 95%.
+11 focused CPU tests pass. Next: freeze data/source identities, CUDA selector
+and consumer checks, exact historical all-kept replay, generation. H100 idle
+before setup. One worker, 900-second nvidia-smi monitor, no GPU-hour limit.
+This new authorization does not resume historical Gemma/LongBench campaigns.
+
 ## 2026-11-04 — branch README publication update
 
 Verified result/source commit `67304234`. The root README now summarizes

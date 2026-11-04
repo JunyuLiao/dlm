@@ -4429,3 +4429,19 @@ links. Preserve historical implementations/reports and link their documentation.
 No new scores, thresholds, generation or runtime changes. Publish the same
 documentation commit to origin `multi-models` and upstream
 `ljy/value-aware-multi-models`.
+
+## 2026-11-04 — new LongBench v2 high-sparsity two-model panel
+
+New user authorization: LLaDA2.2 official short+medium (395), TraDo official
+short (180), seed 42; native dense, all-kept FA4, V31/V3a top-k 512 tokens and
+current-tile-initialized V2. K512 is eight KV64 tiles, not 512 tiles. Use
+official zero-shot prompt/scorer, 128 output tokens, native model samplers.
+Word length labels are distinct from token limits; retain all selected items,
+apply disclosed official middle truncation with output reserve when needed.
+Run all dense/fixed-budget arms first, then calibrate V2 count-only on six
+prompt-length strata per group against measured sparsity. Approximate >=95%
+V2 sparsity is acceptable; no accuracy-driven thresholds or full-panel
+calibration sweeps. Spec `MULTIMODEL_LONGBENCH_V2_20261104.md`, campaign
+`results/multimodel_longbench_v2_20261104/attempt001/`. Eleven focused CPU
+tests pass; CUDA qualification and exact all-kept replay gate generation.
+Historical campaigns and negative evidence stay intact; Gemma remains stopped.
