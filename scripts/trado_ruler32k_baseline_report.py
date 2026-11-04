@@ -63,7 +63,9 @@ def main(root):
     assert read(root/'qualification/control_receipt.json')['exact_output_and_counts']
     ruler=ROOT/'reference/RULER';scorer_identity=verify_checkout(ruler);scorers=load_scorers(ruler)
     data=read(source_files()['manifest']);byid={r['id']:r for r in data};expected={(r['id'],42) for r in data}
-    out=root/'analysis001';out.mkdir(exist_ok=False)
+    attempt=1
+    while (root/f'analysis{attempt:03}').exists():attempt+=1
+    out=root/f'analysis{attempt:03}';out.mkdir(exist_ok=False)
     allrows={};sources=[]
     def score(r,priv):
         item=byid[r['id']]
@@ -123,7 +125,7 @@ def main(root):
     paired={}
     task_of={r['id']:r['task'] for r in data}
     for arm in allrows:
-        for ref in ('dense_native','allkept_fa4','mass_topk_reuse_r4',V2):
+        for ref in allrows:
             if arm!=ref:paired[arm+'_vs_'+ref]=contrast(allrows[arm],allrows[ref],task_of)
     write(out/'summary.json',summary);write(out/'task_scores.json',tasks);write(out/'paired.json',paired)
     write(out/'scoring_identity.json',{'runner_sha256':sha(__file__),'ruler':scorer_identity,'v2_reference_rescored':True,
@@ -176,7 +178,8 @@ def main(root):
              'new_v2_generation_requests':0,'prior_reference_hashes_unchanged':True,
              'kernel_receipt_sha256':sha(root/'qualification/kernel_receipt.json'),'control_receipt_sha256':sha(root/'qualification/control_receipt.json')}
     write(out/'receipt.json',receipt)
-    write(root/'final_complete.json',{'status':'complete','new_panels':4,'new_requests':520,'comparison_requests':650,'receipt_sha256':sha(out/'receipt.json')})
+    write(root/'final_complete.json',{'status':'complete','new_panels':4,'new_requests':520,'comparison_requests':650,
+                                    'analysis':out.name,'receipt_sha256':sha(out/'receipt.json')})
     print(json.dumps({'status':'complete','summary':summary}),flush=True)
 
 

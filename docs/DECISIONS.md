@@ -4396,3 +4396,23 @@ Freeze source/model/data identities; CUDA independent CPU/consumer qualification
 exact all-kept replay and per-selection physical budget assertions required.
 SpecTRADO_RULER32K_BASELINES_20261104;520newrequests,official fractional scores,
 task statistics and paired intervals. GPUmonitor900s. Gemma stays cancelled.
+
+
+## 2026-11-04 — TraDo RULER32K four baseline panels complete
+
+Complete: 520 new requests, native dense/all-kept/V31/V3a, exact prior 130-item
+cohort, seed 42, native sampler/cap/source unchanged. V31/V3a geometry half-budgets
+achieve 49.9672%/49.9679%; no calibration. Scores are
+64.6411%/64.8462%/63.4872%/64.9616%. Existing current-tile V2 scores 64.7180%
+and re-scores exactly, with zero V2 generation. Sparse score differences are
+uncertain; paired problem and 13-task-cluster intervals are reported.
+Readable report: `results/trado_ruler32k_baselines_20261104/attempt002/publication001/`.
+Canonical evidence: `analysis002/` under the same root. The new 35-row combined
+supplement preserves prior reports.
+
+Attempt001 CUDA gate rejected a buggy independent CPU oracle that used NaN
+padded-row mass scores; corrected reference, production selector unchanged, no
+benchmark records. Attempt002 passes 8 CUDA selector/consumer cases, 5 CPU tests,
+exact all-kept replay, per-selection budget assertions and 16 complete shards.
+Analysis001 missing-comparison-key failure is preserved; analysis002 scores/audits
+all 650 records. H100 idle, no further experiment scheduled; Gemma remains stopped.

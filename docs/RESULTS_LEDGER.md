@@ -2886,3 +2886,36 @@ Maintenance attempt002LLaDARULER inherits66hash-verified completed cells,64fresh
 21partial preserved/excluded.11CPUtests and96CUDAcases before/aftermaintenance,
 24complete shard references and768cell privatehash/identity/scoring checks pass.
 Gemma failed pre-GPU setup,no new score; H100idle0MiB/0%,37C aftercloseout.
+
+
+## 2026-11-04 — completed TraDo RULER32K dense/V31/V3a baseline supplement
+
+Protocol `results/trado_ruler32k_baselines_20261104/attempt002/protocol.json`,
+source `292eb125`, binding `c972b07f`. Readable report `publication001/README.md`;
+canonical `analysis002/receipt.json`, `summary.json`, `task_scores.json`,
+`paired.json` and root `final_complete.json`. Four new arms, 520 requests;
+130 existing current-tile V2 completions re-scored exactly on CPU, no V2 generation.
+Same 130 questions (10/task × 13), seed 42, 32,768 context, prompt lengths
+29,798–32,472, output cap 128.
+
+| Method | Official fractional score | Fullcredit /130 | N | C | T | N/C | Sparsity | EOS /caps |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| Native dense |64.6411%|70|2836|1124|4083|2.52313|0%|128/2|
+| All-keptFA4 |64.8462%|71|2804|1122|4068|2.49911|0%|127/3|
+| V31 |63.4872%|68|2669|1076|3886|2.48048|49.9672%|127/3|
+| V3a |64.9616%|71|2643|1079|3899|2.44949|49.9679%|129/1|
+| Current-tileV2(existing) |64.7180%|71|2767|1113|4030|2.48607|49.4524%|126/4|
+
+V3a − V31 +1.474 pp, problem 95% CI [−0.320, 3.782]; V2 − V31 +1.231 pp
+[−1.769, 4.424]; V2 − dense +0.077 pp [−3.192, 3.385]. 10,000 paired problem
+bootstrap resamples; 13-task-cluster sensitivity also crosses zero. No clear
+accuracy superiority or noninferiority. V31/V3a keep
+`max(round(J/2), mandatory_count)`, current tile included, per head/Q128/KV64,
+four-call reuse, all 36 layers, dense prefill/commits, native TraDo 4-token blocks.
+No clean latency claim. Five CPU tests, eight independent CUDA selector/FP32
+consumer cases, exact historical all-kept replay, 16 complete shards, 520
+source/private hash joins and per-selection exact-budget assertions pass.
+Existing V2 source/runtime/model/prompt/seed/cap identities match. Previous
+results remain untouched; a new combined 35-row table is published.
+Attempt001 pre-generation CPU oracle failure and partial analysis001 are retained.
+H100 released: 0 MiB / 0%, 37°C. Gemma remains stopped.

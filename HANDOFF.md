@@ -1,3 +1,29 @@
+## 2026-11-04 16:12UTC — TraDo RULER32K baseline completion done
+
+520 new requests (4 arms × 130) complete; no V2 generation. Root:
+`results/trado_ruler32k_baselines_20261104/attempt002/`; source `292eb125`,
+binding `c972b07f`. Readable report and combined accuracy table are in
+`publication001/`; canonical scores, task/work statistics, paired intervals,
+receipt and the 35-row combined supplement are in `analysis002/`.
+Root `final_complete.json` identifies 650 comparison records, including
+130 unchanged V2 completions re-scored on CPU.
+
+Scores: native dense 64.6411%, all-kept 64.8462%, V31 63.4872%, V3a 64.9616%,
+existing V2 64.7180%. Sparsity: V31 49.9672%, V3a 49.9679%, V2 49.4524%.
+In that method order: full credit 70/71/68/71/71; N 2836/2804/2669/2643/2767;
+C 1124/1122/1076/1079/1113; T 4083/4068/3886/3899/4030;
+N/C 2.523/2.499/2.480/2.449/2.486. No clear sparse accuracy advantage:
+V3a − V31 +1.47 pp, problem CI [−0.32, 3.78]; existing V2 − V31 +1.23 pp
+[−1.77, 4.42]. Task-cluster intervals are also reported.
+
+Five CPU tests, 8 independent CUDA selector/FP32 consumer cases, exact historical
+all-kept replay, 16 complete new shards, 520 private hash/config/source joins,
+and per-selection half-budget assertions pass. Attempt001 pre-generation oracle
+failed due to padded-row NaNs; corrected independent oracle,zero benchmark
+records. Analysis001 formatting missed a comparison key; analysis002 retained
+fresh score/audit; no GPU rerun. Both failed attempts remain preserved.
+H100 idle: 0 MiB / 0%, 37°C. Running: none. DiffusionGemma stays stopped.
+
 ## 2026-11-04 — TraDo RULER32K baseline completion authorized
 
 User requests native dense,all-kept FA4,V31/V3a at50%;no V2 generation.
