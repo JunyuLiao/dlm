@@ -4354,3 +4354,15 @@ exactly twice; all-kept reproduces historical. Failed attempt retained; explicit
 execution_amendment001 permits repeat-qualified V2 while recording mismatch.
 No original runtime/selector/sampler or historical result changed. Continue
 remaining8panels with900s monitoring; no final campaign claim yet.
+
+
+## 2026-11-04 — recover maintenance interruption with completed-shard provenance
+
+User authorizes continuation after maintenance. Driver idle and no old workers.
+Three complete accepted panels retained; LLaDARULER128K stopped at87/130.
+Recover66 fully completed records in two shards, retain unfinished21 separately
+and rerun that shard in new attempt002. Exact frozen threshold reused; numerical
+source, calibration, shard hashes/coverage and private token hashes verified.
+New recovery_binding and maintenance amendment preserve mixed-attempt lineage;
+no old run directory overwritten. Fresh96CUDA gate and native controls before
+continuation. Remaining nine-panel protocol and40–60% retry rule unchanged.

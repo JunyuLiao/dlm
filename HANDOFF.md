@@ -1,3 +1,19 @@
+## 2026-11-04 — maintenance recovery of nine-panel campaign
+
+User confirms maintenance stopped jobs; fresh03:18UTC H100 check idle, no
+campaign processes. Root unchanged:`results/current_tile_multimodel_20261103/attempt001/`.
+Three complete accepted panels: LLaDAHE119/164,55.666%; TraDoHE122/164,53.314%;
+TraDoRULER32K64.718%fractional,49.452%. Their original evidence stays intact.
+LLaDARULER128K attempt001 interrupted at87records:two complete33-cell shards,
+21partial records. New attempt002 reuses only complete66 with original receipts
+via verified links; partial shard reruns and old21records stay preserved.
+Reuse frozen tau0.000022116536235334544(cal49.620%),no recalibration on restart.
+`maintenance_recovery_20261104.json` binds provenance; source
+`scripts/current_tile_multimodel_recovery.py` validates numerical identity,
+calibration hashes, complete-shard hashes/coverage and private token hashes.
+Repeat96CUDA gate and control replays after reboot, then continue original order
+and900s monitoring. Remaining model/task scope and40–60% retry policy unchanged.
+
 ## 2026-11-03 14:45UTC — nine-panel campaign active; first accepted panel scored
 
 Root: `results/current_tile_multimodel_20261103/attempt001/`; protocol source

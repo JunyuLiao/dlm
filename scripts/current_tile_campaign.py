@@ -50,6 +50,10 @@ def run(root):
     binding=read(amendment) if amendment.exists() else None
     if binding:
         assert binding['worker_sha256']==sha(REPO/'scripts/current_tile_multimodel_worker_qualified.py')
+    recovery_file=root/'maintenance_recovery_20261104.json'
+    recovery=read(recovery_file) if recovery_file.exists() else None
+    if recovery:
+        assert recovery['worker_sha256']==sha(REPO/'scripts/current_tile_multimodel_recovery.py')
     stop=threading.Event();active={'phase':'qualification','pid':os.getpid()}
     def monitor():
         while True:
@@ -71,8 +75,8 @@ def run(root):
             code=proc.wait()
         if code:raise RuntimeError(f'worker exit {code}; inspect {log.relative_to(root)}')
     try:
-        gate=root/'qualification/cuda_receipt.json'
-        if not gate.exists():child([sys.executable,str(REPO/'scripts/current_tile_campaign_qualify.py'),str(gate)],root/'private/logs/qualification.log')
+        gate=root/('qualification/cuda_receipt_20261104.json' if recovery else 'qualification/cuda_receipt.json')
+        if not gate.exists():child([sys.executable,str(REPO/'scripts/current_tile_campaign_qualify.py'),str(gate)],root/('private/logs/qualification_20261104.log' if recovery else 'private/logs/qualification.log'))
         assert read(gate)['status']=='pass'
         for model,suite in ORDER:
             if model=='trado' and suite=='ruler32k' or model=='diffusiongemma':
@@ -85,6 +89,7 @@ def run(root):
             while True:
                 active.update(model=model,suite=suite,attempt=attempt,phase='calibration_and_generation')
                 script='current_tile_gemma_panel.py' if model=='diffusiongemma' else ('current_tile_multimodel_worker_qualified.py' if binding else 'current_tile_multimodel_worker.py')
+                if recovery and model!='diffusiongemma':script='current_tile_multimodel_recovery.py'
                 command=[sys.executable,str(REPO/'scripts'/script),str(root),model,suite,'--attempt',str(attempt)]
                 log=root/'private/logs'/model/suite/f'attempt{attempt:03}.log'
                 child(command,log)
