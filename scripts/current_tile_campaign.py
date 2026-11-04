@@ -42,6 +42,8 @@ def prepare(root):
 
 
 def run(root):
+    if (root/'USER_SCOPE_CHANGE_20261104.json').exists():
+        raise RuntimeError('Original nine-panel coordinator stopped by user; see USER_SCOPE_CHANGE_20261104.json')
     p=read(root/'protocol.json')
     assert p['hf_worker_sha256']==sha(REPO/'scripts/current_tile_multimodel_worker.py')
     assert p['single_tile_selector_sha256']==sha(REPO/'experiments/numerical_qk_reuse/v2_current_tile_init.py')

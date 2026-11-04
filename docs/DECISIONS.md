@@ -4366,3 +4366,21 @@ source, calibration, shard hashes/coverage and private token hashes verified.
 New recovery_binding and maintenance amendment preserve mixed-attempt lineage;
 no old run directory overwritten. Fresh96CUDA gate and native controls before
 continuation. Remaining nine-panel protocol and40–60% retry rule unchanged.
+
+
+## 2026-11-04 — stop Gemma; finalize retained current-tile LLaDA/TraDo panels
+
+User cancels DiffusionGemma for now and requests final results. No GPU worker
+was running: queued Gemma attempt failed at execution-link setup before model
+load,calibration or benchmark. Preserve failure,add explicit original-coordinator
+scope guard; no new Gemma result. Report retained6panels/768requests only.
+
+LLaDA new V2:AIME27/90,51.9455%;HE119/164,55.6663%;RULER128K85.2052%,49.6305%.
+TraDo:AIME8/90,50.5113%;HE122/164,53.3138%;RULER32K64.718%,49.4524%.
+All within40–60%; old methods remain unchanged. Full31-row comparison and
+source/accounting/privacy audit undercurrent_tile_multimodel_20261103/attempt001/
+publication001 and analysis001. LLaDAHE recovery is initialization+calibration,
+not exactly matched50% or a fixed-threshold ablation. Other tasks do not show
+universal improvement; TraDo historical V2 replay mismatch stays disclosed.
+Maintenance recovery retains only66 complete old records plus64fresh;21partial
+excluded. H100idle0MiB/0%,37C. No new work scheduled.

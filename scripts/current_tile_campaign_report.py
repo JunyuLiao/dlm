@@ -119,6 +119,10 @@ def contrasts(new,old):
 
 
 def main(root):
+    scope_file=root/'USER_SCOPE_CHANGE_20261104.json'
+    retained_only=scope_file.exists()
+    order=[(m,s) for m,s in ORDER if not retained_only or m!='diffusiongemma']
+    panel_count=len(order);request_count=sum(90 if s=='aime26' else 164 if s=='humaneval' else 130 for m,s in order)
     index=1
     while (root/f'analysis{index:03}').exists():index+=1
     out=root/f'analysis{index:03}';out.mkdir(exist_ok=False)
@@ -127,7 +131,7 @@ def main(root):
     ruler_identity=verify_checkout(REPO/'reference/RULER');scorers=load_scorers(REPO/'reference/RULER')
     old_rows=rows(HF_REPORT/'scored_records.jsonl');old_summary=read(HF_REPORT/'summary.json')
     results={};scored=[];pair={};attempts={};dg_scores={}
-    for model,suite in ORDER:
+    for model,suite in order:
         parent=root/'panels'/model/suite
         markers=sorted(parent.glob('attempt*/generation_complete.json'))
         attempts[f'{model}/{suite}']=[read(f) for f in markers]
@@ -148,7 +152,7 @@ def main(root):
             for arm in ('dense_native','allkept_fa4','mass_topk_reuse_r4','value_v2_gaussian32_reuse_r4','value_v3a_singleton_reuse_r4'):
                 old=[r for r in old_rows if (r['model'],r['suite'],r['arm'])==(model,suite,arm)]
                 if old:pair[f'{model}/{suite}/vs_{arm}']=contrasts(rs,old)
-    assert sum(r['requests'] for r in results.values())==1152
+    assert sum(r['requests'] for r in results.values())==request_count
     historical={k:v for k,v in old_summary.items() if k.startswith(('llada22/','trado/'))}
     dg_short=read(DG_SHORT/'summary.json');dg_follow=read(DG_REPORT/'summary.json')
     historical['diffusiongemma/humaneval']=dg_short['humaneval']
@@ -161,11 +165,11 @@ def main(root):
     write(out/'scoring_identity.json',{'source_sha256':sha(__file__),'humaneval_sha256':sha(he.__file__),
         'humaneval_program':he.PROGRAM,'humaneval_extractor':he.EXTRACTOR,'humaneval_sandbox':he.SANDBOX,
         'aime_numeric':ns,'ruler':ruler_identity,'bootstrap_resamples':10000,'bootstrap_seed':738})
-    text=['# Current-tile V2: nine completed model/benchmark panels','',
+    text=[f'# Current-tile V2: {panel_count} completed model/benchmark panels','',
           'Only the new V2 variants were benchmarked. Prior methods remain unchanged. All selected complete panels achieve40–60% physical eligible denoising-consumer sparsity after small count-only calibration; any rejected completed attempt is retained in attempts.json.','',
           '| Model | Benchmark | Score | Requests | Mean output | Steps/request | Canvases/request | Steps/canvas | Sparsity | Threshold | Attempt |',
           '|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|']
-    for (model,suite) in ORDER:
+    for (model,suite) in order:
         s=results[f'{model}/{suite}']
         text.append(f"| {model} | {suite} | {100*s['accuracy']:.2f}% | {s['requests']} | {s['mean_output_tokens']:.1f} | {s['N_per_request']:.2f} | {s['C_per_request']:.2f} | {s['N_per_C']:.3f} | {100*s['consumer_sparsity']:.2f}% | {s['threshold']:.9g} | {s['attempt']} |")
     text+=['','AIME:30 problems x seeds42/43/44. HumanEval:164 problems,seed42. RULER:10 samples/task across13 official tasks,seed42; fractional retrieval score. RULER128K on LLaDA/Gemma,32K on TraDo.','',
@@ -173,16 +177,21 @@ def main(root):
            'Sparsity includes mandatory/current tiles and all native denoising consumer phases, excludes discovery/prefill/commits. Gemma also reports overall GLOBAL+LOCAL sparsity in summary.json. Short-benchmark calibration uses six fixed prompt-length strata of examined benchmark prompts, count-only and transductive; retrieval uses13 separately generated development prompts. No gold or score chooses a threshold. A completed outside40–60% panel triggers a new calibration/attempt; inside the range it is retained without retuning.','',
            'Historical references are in historical_results_unchanged.json. The old Gemma RULER cohort contains104 items (8/task); its score is a separate cohort reference, not a paired baseline for the new130. TraDo32K has no historical matched panel. Paired intervals are emitted only after prompt/seed/cap identity checks; repeated examined benchmarks are exploratory. No clean latency or universal accuracy-preservation claim.','']
     (out/'README.md').write_text('\n'.join(text))
-    receipt={'status':'pass','panels':9,'selected_requests':1152,'protocol_sha256':sha(root/'protocol.json'),
+    receipt={'status':'pass','panels':panel_count,'selected_requests':request_count,'protocol_sha256':sha(root/'protocol.json'),
              'summary_sha256':sha(out/'summary.json'),'scored_records_sha256':sha(out/'scored_records.jsonl'),
              'scoring_identity_sha256':sha(out/'scoring_identity.json'),'all_final_sparsities_in_40_60':True}
+    if retained_only:
+        receipt['scope_change_sha256']=sha(scope_file)
+        receipt['diffusiongemma']='stopped by user before GPU generation; not included in completed scope'
     protected=root/'baseline_readonly_inventory.json'
     if protected.exists():
         for name,digest in read(protected).items():assert sha(REPO/name)==digest,('historical evidence changed',name)
         receipt['historical_protected_hashes_pass']=True
     write(out/'receipt.json',receipt)
-    write(root/'final_complete.json',{'status':'complete','panels':9,'requests':1152,'analysis':out.name,'receipt_sha256':sha(out/'receipt.json')})
-    print(json.dumps({'status':'complete','panels':9,'requests':1152}),flush=True)
+    write(root/'final_complete.json',{'status':'complete','panels':panel_count,'requests':request_count,'analysis':out.name,
+          'scope':'retained LLaDA/TraDo only; DiffusionGemma stopped' if retained_only else 'original nine panels',
+          'receipt_sha256':sha(out/'receipt.json')})
+    print(json.dumps({'status':'complete','panels':panel_count,'requests':request_count}),flush=True)
 
 
 if __name__=='__main__':

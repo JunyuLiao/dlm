@@ -2847,3 +2847,42 @@ Nine CPU tests,30 independent CUDA checks,12 exact original-control replays,
 four41-cell shard/hash/identity/official-scorer audits pass. GPU idle afterrun;
 no clean latency/speedup claim. Allocated benchmark worker681.744seconds,
 excluding qualification,model loading,calibration and scoring.
+
+
+## 2026-11-04 — completed current-tile V2 retained two-model,three-benchmark scope
+
+Original protocol current_tile_multimodel_20261103/attempt001; source freezes
+fcd89912/7c6952ab, qualified continuationd95e5d9e, maintenance recovery7e213a57.
+User stops Gemma; USER_SCOPE_CHANGE_20261104 and coordinator guard prevent
+further launch. Original9panel scope superseded; retained6panels/768requests
+complete. Canonical source/scorer/record audit analysis001/receipt.json,
+rootfinal_complete.json; scannable31-row report publication001/README.md and
+comparison_metrics.json.138 historical protected files unchanged.
+
+| Model | Task | Correct or fractional score | N | C | T | N/C | Tile sparsity |
+|---|---|---:|---:|---:|---:|---:|---:|
+| LLaDA2.2-mini | AIME26,90requests |27/90=30.00%|130126|16858|536775|7.71895|51.9455%|
+| LLaDA2.2-mini | HumanEval164 |119/164=72.56%|4278|1275|35966|3.35529|55.6663%|
+| LLaDA2.2-mini | RULER128K130 |85.2052%|1041|236|3640|4.41102|49.6305%|
+| TraDo-8B-Instruct | AIME26,90requests |8/90=8.89%|47516|22972|91627|2.06843|50.5113%|
+| TraDo-8B-Instruct | HumanEval164 |122/164=74.39%|9838|5137|20038|1.91513|53.3138%|
+| TraDo-8B-Instruct | RULER32K130 |64.7180%|2767|1113|4030|2.48607|49.4524%|
+
+AIME30xseeds42/43/44,HE164seed42,RULER10/taskx13tasksseed42.6count-only
+calibration prompts/candidate forshort tasks,13separate retrieval development
+prompts; all final40–60%,no sparsity-driven full benchmark repeat needed.
+RULER128KLLaDA uses original130; TraDo32K new,no historical matched baseline.
+Native samplers/EOS/editing/caps preserved; all denoising layers eligible;
+prefill/commitsdense,Gaussian32,Q128/KV64,four-call reuse,no carry. Geometric
+sparsity includes mandatory/selection/reuse consumer tiles,excludesdiscovery.
+
+LLaDAHE syntaxerrors98->7,substantive28->150,meanT62.9->219.3;new-original
+V2+66.46pp[59.15,73.17],new-V31+21.95pp[12.80,31.10],10000problem-bootstrap.
+This changes threshold and achieved sparsity; exploratory examined cohort,
+not fixed-threshold/exact50%/heldout evidence. TraDoV2 historical replay differs,
+fresh repeats agree and all-kept exact; disclose reference limitation. No broad
+accuracy improvement or clean latency claim. NativeSDPA/all-keptFA4 separate.
+Maintenance attempt002LLaDARULER inherits66hash-verified completed cells,64fresh;
+21partial preserved/excluded.11CPUtests and96CUDAcases before/aftermaintenance,
+24complete shard references and768cell privatehash/identity/scoring checks pass.
+Gemma failed pre-GPU setup,no new score; H100idle0MiB/0%,37C aftercloseout.

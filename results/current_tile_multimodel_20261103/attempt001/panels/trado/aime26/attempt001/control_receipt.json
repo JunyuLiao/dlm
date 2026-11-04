@@ -1,0 +1,111 @@
+{
+  "status": "pass",
+  "cases": [
+    {
+      "arm": "value_v2_gaussian32_reuse_r4",
+      "id": "humaneval/0",
+      "exact_output_and_counts": false,
+      "historical_matches": {
+        "output_sha256": false,
+        "counts": false,
+        "output_tokens": false
+      },
+      "observed": {
+        "id": "humaneval/0",
+        "seed": 42,
+        "prompt_sha256": "81f9a9edbf3455b2d9bf766c3c9274b2876e1d6d0b51b38f3e605d72ba17e9bb",
+        "prompt_tokens": 150,
+        "output_tokens": 164,
+        "output_sha256": "c8b0d87e707abb68d9faeb59f41b55d974a06206122f76f1ff51b10ed36791d7",
+        "finished": true,
+        "generation_cap": 2000,
+        "counts": {
+          "total_model_forwards": 104,
+          "prefill_model_forwards": 1,
+          "dense_prefix_attention_calls": 1548,
+          "canvases": 42,
+          "denoising_forwards": 61,
+          "denoise_model_forwards": 61,
+          "eligible_tiles": 292608,
+          "selection_layer_calls": 1512,
+          "projected_value_tokens": 2830464,
+          "discovery_qk_pairs": 45287424,
+          "kept_tiles": 163454,
+          "held_layer_calls": 684,
+          "commit_model_forwards": 42
+        },
+        "instrumented_seconds": 13.564148213001317,
+        "cuda_peak_allocated_bytes": 16709379072
+      },
+      "historical": {
+        "output_sha256": "82b2efe78f1a7f16f4cbb6f637ccd5b612016421476311587a48f7923d3c75c8",
+        "counts": {
+          "total_model_forwards": 140,
+          "prefill_model_forwards": 1,
+          "dense_prefix_attention_calls": 1800,
+          "canvases": 49,
+          "denoising_forwards": 90,
+          "denoise_model_forwards": 90,
+          "eligible_tiles": 479232,
+          "selection_layer_calls": 1764,
+          "projected_value_tokens": 3499776,
+          "discovery_qk_pairs": 55996416,
+          "kept_tiles": 243193,
+          "held_layer_calls": 1476,
+          "commit_model_forwards": 49
+        },
+        "output_tokens": 194
+      },
+      "same_process_repeat_match": true
+    },
+    {
+      "arm": "allkept_fa4",
+      "id": "humaneval/0",
+      "exact_output_and_counts": true,
+      "historical_matches": {
+        "output_sha256": true,
+        "counts": true,
+        "output_tokens": true
+      },
+      "observed": {
+        "id": "humaneval/0",
+        "seed": 42,
+        "prompt_sha256": "81f9a9edbf3455b2d9bf766c3c9274b2876e1d6d0b51b38f3e605d72ba17e9bb",
+        "prompt_tokens": 150,
+        "output_tokens": 167,
+        "output_sha256": "0ea4f5eb136ae890eec4c0fc4f90ad307aa53a6be42ab8443844b970e2c80e5c",
+        "finished": true,
+        "generation_cap": 2000,
+        "counts": {
+          "total_model_forwards": 101,
+          "prefill_model_forwards": 1,
+          "dense_prefix_attention_calls": 1584,
+          "canvases": 43,
+          "denoising_forwards": 57,
+          "denoise_model_forwards": 57,
+          "eligible_tiles": 271872,
+          "kept_tiles": 271872,
+          "commit_model_forwards": 43
+        },
+        "instrumented_seconds": 6.072100508004951,
+        "cuda_peak_allocated_bytes": 16709379072
+      },
+      "historical": {
+        "output_sha256": "0ea4f5eb136ae890eec4c0fc4f90ad307aa53a6be42ab8443844b970e2c80e5c",
+        "counts": {
+          "total_model_forwards": 101,
+          "prefill_model_forwards": 1,
+          "dense_prefix_attention_calls": 1584,
+          "canvases": 43,
+          "denoising_forwards": 57,
+          "denoise_model_forwards": 57,
+          "eligible_tiles": 271872,
+          "kept_tiles": 271872,
+          "commit_model_forwards": 43
+        },
+        "output_tokens": 167
+      },
+      "same_process_repeat_match": null
+    }
+  ]
+}

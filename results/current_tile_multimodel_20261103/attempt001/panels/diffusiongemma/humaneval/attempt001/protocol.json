@@ -1,0 +1,50 @@
+{
+  "model": "diffusiongemma",
+  "suite": "humaneval",
+  "arm": "value_v2_current_canvas_init_gaussian32_progress_reuse",
+  "attempt": 1,
+  "settings": {
+    "block": 64,
+    "chunk": 4096,
+    "count": 164,
+    "dataset": "humaneval",
+    "mage_k": 128,
+    "max_len": 9216,
+    "memory": 0.8,
+    "prior_tau": 0.5600716206066294,
+    "seeds": [
+      42
+    ]
+  },
+  "source_commit": "7e213a57d6edfe160e3cf5e607a7c10b4b661b79",
+  "source_sha256": {
+    "scripts/current_tile_gemma_panel.py": "7bad96599f68c20c71818878befc25694de3afc694c7ec8ff47fc6fa0f3b7f83",
+    "scripts/current_canvas_gemma_worker.py": "b226ed3f40d4bab84128a19d0e944cfdc4766986e7577a092870180f95e821f4",
+    "experiments/numerical_qk_reuse/current_canvas_gemma_runtime.py": "9a478749758275cf2fe9ea9b93c3a0902720ae0e32dfdb94992ca528c4890772",
+    "experiments/numerical_qk_reuse/v2_current_canvas_init.py": "4ea681d1bd04584f052f559865ab34876dc29a0b969c79ecb0b41f3c8bb0a220"
+  },
+  "frozen_execution_root_identity": "790b3ac372a9120ea2729f5f52f7c25cb5c78e3a0a6947200fe3cbb66c30986c",
+  "manifest_sha256": "19b3ee42216bf1b7d9ce68f7368d6d3ccae68963cff3a950858f3649f576d11c",
+  "calibration_indices": [
+    59,
+    39,
+    8,
+    100,
+    142,
+    127
+  ],
+  "calibration_transductive": true,
+  "calibration_count": 6,
+  "target": [
+    0.48,
+    0.52
+  ],
+  "final_acceptance": [
+    0.4,
+    0.6
+  ],
+  "scope": "GLOBAL 5/11/17/23/29 only; LOCAL/prefill/commit dense",
+  "native_lifecycle": "unchanged select step1, carry first, progress .15, sticky1.386",
+  "coordinator_protocol_sha256": "78b350b096744d7ea993cc988e76d3f3150d6edca3f9380dbbe6e02de83d66b9",
+  "native_sampler_unchanged": true
+}

@@ -1,0 +1,123 @@
+{
+  "status": "pass",
+  "cases": [
+    {
+      "arm": "value_v2_gaussian32_reuse_r4",
+      "id": "humaneval/0",
+      "exact_output_and_counts": true,
+      "historical_matches": {
+        "output_sha256": true,
+        "counts": true,
+        "output_tokens": true
+      },
+      "observed": {
+        "id": "humaneval/0",
+        "seed": 42,
+        "prompt_sha256": "81f9a9edbf3455b2d9bf766c3c9274b2876e1d6d0b51b38f3e605d72ba17e9bb",
+        "prompt_tokens": 161,
+        "output_tokens": 110,
+        "output_sha256": "2dea9f11105c4d983f3e1eecaeba8d2a0c2ee42d452d7ef05f6c1ef06164a9e6",
+        "finished": true,
+        "generation_cap": 1024,
+        "counts": {
+          "total_model_forwards": 25,
+          "prefill_model_forwards": 1,
+          "dense_prefix_attention_calls": 100,
+          "canvases": 4,
+          "denoise_model_forwards": 20,
+          "denoising_forwards": 20,
+          "masked_tokens_before_calls": 226,
+          "eligible_tiles": 24960,
+          "selection_layer_calls": 160,
+          "projected_value_tokens": 140800,
+          "discovery_qk_pairs": 18022400,
+          "kept_tiles": 13318,
+          "held_layer_calls": 240,
+          "structural_edit_events": 3,
+          "fully_unmasked_refinement_calls": 5,
+          "commit_model_forwards": 4
+        },
+        "instrumented_seconds": 12.615357226000924,
+        "cuda_peak_allocated_bytes": 32621742592
+      },
+      "historical": {
+        "output_sha256": "2dea9f11105c4d983f3e1eecaeba8d2a0c2ee42d452d7ef05f6c1ef06164a9e6",
+        "counts": {
+          "total_model_forwards": 25,
+          "prefill_model_forwards": 1,
+          "dense_prefix_attention_calls": 100,
+          "canvases": 4,
+          "denoise_model_forwards": 20,
+          "denoising_forwards": 20,
+          "masked_tokens_before_calls": 226,
+          "eligible_tiles": 24960,
+          "selection_layer_calls": 160,
+          "projected_value_tokens": 140800,
+          "discovery_qk_pairs": 18022400,
+          "kept_tiles": 13318,
+          "held_layer_calls": 240,
+          "structural_edit_events": 3,
+          "fully_unmasked_refinement_calls": 5,
+          "commit_model_forwards": 4
+        },
+        "output_tokens": 110
+      },
+      "same_process_repeat_match": null
+    },
+    {
+      "arm": "allkept_fa4",
+      "id": "humaneval/0",
+      "exact_output_and_counts": true,
+      "historical_matches": {
+        "output_sha256": true,
+        "counts": true,
+        "output_tokens": true
+      },
+      "observed": {
+        "id": "humaneval/0",
+        "seed": 42,
+        "prompt_sha256": "81f9a9edbf3455b2d9bf766c3c9274b2876e1d6d0b51b38f3e605d72ba17e9bb",
+        "prompt_tokens": 161,
+        "output_tokens": 210,
+        "output_sha256": "7713269d0c8d424139ec98793216b9a1e6638a88be811942f2ced191869db0c1",
+        "finished": true,
+        "generation_cap": 1024,
+        "counts": {
+          "total_model_forwards": 32,
+          "prefill_model_forwards": 1,
+          "dense_prefix_attention_calls": 160,
+          "canvases": 7,
+          "denoise_model_forwards": 24,
+          "denoising_forwards": 24,
+          "masked_tokens_before_calls": 375,
+          "eligible_tiles": 37120,
+          "kept_tiles": 37120,
+          "fully_unmasked_refinement_calls": 7,
+          "commit_model_forwards": 7,
+          "structural_edit_events": 1
+        },
+        "instrumented_seconds": 3.2473104710006737,
+        "cuda_peak_allocated_bytes": 32621742592
+      },
+      "historical": {
+        "output_sha256": "7713269d0c8d424139ec98793216b9a1e6638a88be811942f2ced191869db0c1",
+        "counts": {
+          "total_model_forwards": 32,
+          "prefill_model_forwards": 1,
+          "dense_prefix_attention_calls": 160,
+          "canvases": 7,
+          "denoise_model_forwards": 24,
+          "denoising_forwards": 24,
+          "masked_tokens_before_calls": 375,
+          "eligible_tiles": 37120,
+          "kept_tiles": 37120,
+          "fully_unmasked_refinement_calls": 7,
+          "commit_model_forwards": 7,
+          "structural_edit_events": 1
+        },
+        "output_tokens": 210
+      },
+      "same_process_repeat_match": null
+    }
+  ]
+}

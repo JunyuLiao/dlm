@@ -1,3 +1,31 @@
+## 2026-11-04 13:18UTC — retained six-panel campaign complete; Gemma stopped
+
+User stopped DiffusionGemma and requested final results. Explicit guard:
+`results/current_tile_multimodel_20261103/attempt001/USER_SCOPE_CHANGE_20261104.json`.
+Original nine-panel coordinator now refuses relaunch. Gemma attempt001 failed
+at private execution-link setup before GPU load/generation; no new Gemma score.
+H100 idle0MiB/0%,37C,no campaign processes. Do not resume Gemma without user.
+
+Retained6panels/768requests officially scored and audited. Report:
+`results/current_tile_multimodel_20261103/attempt001/publication001/README.md`;
+31-row full comparison `comparison_metrics.json`; canonical `analysis001/` and
+root `final_complete.json` cover retained scope only. All138 protected old files
+unchanged. Accepted new V2 results:
+LLaDA AIME27/90,51.9455%;HE119/164,55.6663%;RULER128K85.2052%,49.6305%.
+TraDo AIME8/90,50.5113%;HE122/164,53.3138%;RULER32K64.718%,49.4524%.
+All full sparsities in40–60%,no target-driven second full run required.
+
+LLaDAHE meanT219.305,N/C3.355 vs original62.909,4.634;syntax98->7,
+substantive functions28->150. New-original+66.46pp[59.15,73.17],new-V31
++21.95pp[12.80,31.10]. Initialization-plus-recalibration,not fixed-threshold
+or exact50% comparison. Other tasks show no universal gain; TraDoHE122vs125.
+TraDo historical V2 replay limitation disclosed; all-kept exact, fresh V2 repeats
+match. RULER32K has no old matched baseline. Maintenance-recovered LLaDARULER
+attempt002 retains66 completed prior cells and64fresh,excluding21partial.
+11CPU/96CUDA before and after maintenance,24complete shard references,
+official scorer/identity/private-token-hash audits pass. No latency claim.
+Running:none. Next: report final results; no experiment scheduled.
+
 ## 2026-11-04 — maintenance recovery of nine-panel campaign
 
 User confirms maintenance stopped jobs; fresh03:18UTC H100 check idle, no
