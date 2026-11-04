@@ -16,9 +16,22 @@ all denoising layers, dense prefill/commit. Finish all four dense/fixed-budget
 arms for both models, measure actual sparsity, then count-only V2 calibration
 on 6 length strata/group. Accept approximate matching at >=95%; only one
 new full-panel attempt allowed if achieved V2 sparsity is below 95%.
-11 focused CPU tests pass. Next: freeze data/source identities, CUDA selector
-and consumer checks, exact historical all-kept replay, generation. H100 idle
-before setup. One worker, 900-second nvidia-smi monitor, no GPU-hour limit.
+11 focused CPU tests pass, including a repeat in the historical Python 3.12
+environment. Frozen input/source commit `3b40b9bc`, binding `a616396e`,
+interpreter correction `c1c5c267`. Root `execution_amendment001.json` records
+the original Python 3.12.13 / torch 2.13.0+cu130 / Triton 3.7.1 runtime;
+initial default-Python qualification lacked FA4 and generated zero benchmark
+requests. Both failed pre-generation attempts remain preserved.
+
+Active: LLaDA fixed-panel attempt002, native dense generation. Twelve
+independent CPU/CUDA mask and FP32 consumer cases (up to 131068 keys) pass,
+and historical all-kept output/count replay matches exactly. Coordinator
+private PID file `coordinator_attempt002.pid`, log `coordinator_attempt002.log`;
+live progress `private/progress.json`. Inputs: LLaDA 99/395 truncated (2 short,
+97 medium); TraDo 64/180 short truncated. Actual prompt limits verified, with
+every generation encoding hash checked. One worker, 900-second nvidia-smi
+monitor, no GPU-hour limit. Keep monitoring until all panels and official
+scoring/audits finish.
 This new authorization does not resume historical Gemma/LongBench campaigns.
 
 ## 2026-11-04 — branch README publication update
