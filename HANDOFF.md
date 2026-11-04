@@ -6,7 +6,10 @@ LLaDA2.2 and all 180 short items for TraDo. Model token limits include a
 128-token output reserve; official middle truncation is disclosed per item.
 Spec: `docs/MULTIMODEL_LONGBENCH_V2_20261104.md`. Runner/report:
 `scripts/longbench_multimodel.py`, `scripts/longbench_multimodel_report.py`.
-New root: `results/multimodel_longbench_v2_20261104/attempt001/`.
+New root: `results/multimodel_longbench_v2_20261104/attempt002/`.
+Attempt001 stopped during CPU tokenizer preparation: Transformers captured
+the historical read-only module cache before the task-local override was set.
+Set the cache before import; preserve attempt001, with zero GPU generations.
 
 K512 = eight KV64 tiles including current mandatory support; four-call reuse,
 all denoising layers, dense prefill/commit. Finish all four dense/fixed-budget

@@ -100,7 +100,6 @@ def verify_sources(root):
 
 
 def prepare(root):
-    from transformers import AutoTokenizer
     assert not root.exists();root.mkdir(parents=True)
     assert subprocess.check_output(['git','-C',str(OFFICIAL),'rev-parse','HEAD'],text=True).strip()==OFFICIAL_PIN
     for name in ('pred.py','result.py','prompts/0shot.txt'):
@@ -108,6 +107,8 @@ def prepare(root):
     private=root/'private';private.mkdir()
     for name in ('models','source','compat'):(private/name).symlink_to((BASE/'private'/name).resolve(),target_is_directory=True)
     os.environ['HF_MODULES_CACHE']=str(private/'hf_modules')
+    # Transformers freezes this cache path when imported, before tokenizers load.
+    from transformers import AutoTokenizer
     data=read(DATA);assert len(data)==503
     assert Counter(r['length'] for r in data)=={'short':180,'medium':215,'long':108}
     template=(OFFICIAL/'prompts/0shot.txt').read_text();manifests={}

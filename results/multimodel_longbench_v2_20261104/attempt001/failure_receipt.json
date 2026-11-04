@@ -1,0 +1,7 @@
+{
+  "status": "failed_before_freeze",
+  "phase": "CPU_tokenizer_preparation",
+  "benchmark_requests": 0,
+  "reason": "Transformers imported before task-local HF_MODULES_CACHE was set; TraDo attempted to create a module in the read-only historical cache. LLaDA preparation retained; no frozen protocol or GPU generation exists.",
+  "correction": "Set task-local HF_MODULES_CACHE before importing Transformers; new attempt002."
+}
