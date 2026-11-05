@@ -94,5 +94,7 @@ def install(harness,base_runtime):
             self.counts['kept_tiles']+=self.map_kept_counts[key]
             return self.consumer.sparse_lists(q,k,v,self.maps[key][1],scale)
     runtime=BlasstRuntime();runtime.consumer=__import__(base_runtime.__module__,fromlist=['v27_fa4']).v27_fa4
-    runtime.heartbeat=harness.heartbeat;harness.runtime=runtime
+    heartbeat=getattr(harness,'heartbeat',getattr(harness.runtime,'heartbeat',None))
+    if heartbeat is not None:runtime.heartbeat=heartbeat
+    harness.runtime=runtime
     return runtime

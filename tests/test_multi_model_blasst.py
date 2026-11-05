@@ -32,3 +32,12 @@ def test_vectorized_matches_sequential_random_rules():
     mandatory=torch.zeros((4,19),dtype=torch.bool);mandatory[:,-1]=True
     for log_lambda in (-math.inf,-2.,0.,1.,4.):
         assert torch.equal(select_maxima(maximum,log_lambda,mandatory),reference(maximum,log_lambda,mandatory))
+
+
+def test_install_accepts_source_pinned_harness_without_heartbeat():
+    from types import SimpleNamespace
+    from experiments.numerical_qk_reuse.multi_model_blasst import install
+    from experiments.numerical_qk_reuse.multi_model_attention import AttentionRuntime
+    harness=SimpleNamespace(runtime=AttentionRuntime())
+    runtime=install(harness,AttentionRuntime)
+    assert runtime is harness.runtime and runtime.arm.startswith('blasst_aggressive')
