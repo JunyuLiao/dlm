@@ -66,9 +66,16 @@ def install(harness,base_runtime):
     class BlasstRuntime(base_runtime):
         def __init__(self):
             super().__init__('dense_native');self.arm=ARM;self.log_kappa=0.;self.lambda_min=math.inf;self.lambda_max=0.
+            self.map_kept_counts={}
 
         def reset(self):
-            super().reset();self.lambda_min=math.inf;self.lambda_max=0.
+            super().reset();self.map_kept_counts.clear();self.lambda_min=math.inf;self.lambda_max=0.
+
+        def block(self,start,end):
+            super().block(start,end);self.map_kept_counts.clear()
+
+        def invalidate(self):
+            super().invalidate();self.map_kept_counts.clear()
 
         def attention(self,q,k,v,layer,scale,*,offset=0,block_size=0):
             if self.phase!='denoise':return super().attention(q,k,v,layer,scale,offset=offset,block_size=block_size)

@@ -41,3 +41,18 @@ def test_install_accepts_source_pinned_harness_without_heartbeat():
     harness=SimpleNamespace(runtime=AttentionRuntime())
     runtime=install(harness,AttentionRuntime)
     assert runtime is harness.runtime and runtime.arm.startswith('blasst_aggressive')
+
+
+def test_legacy_runtime_kept_counts_are_owned_and_invalidated_by_variant():
+    from collections import Counter
+    from types import SimpleNamespace
+    from experiments.numerical_qk_reuse.multi_model_blasst import install
+    class LegacyRuntime:
+        def __init__(self,arm):self.arm=arm;self.maps={};self.counts=Counter()
+        def reset(self):self.maps.clear();self.counts.clear()
+        def block(self,start,end):self.maps.clear()
+        def invalidate(self):self.maps.clear()
+    LegacyRuntime.__module__='experiments.numerical_qk_reuse.multi_model_attention'
+    harness=SimpleNamespace(runtime=LegacyRuntime('dense_native'));r=install(harness,LegacyRuntime)
+    for clear in (r.reset,lambda:r.block(0,4),r.invalidate):
+        r.map_kept_counts['example']=8;clear();assert not r.map_kept_counts

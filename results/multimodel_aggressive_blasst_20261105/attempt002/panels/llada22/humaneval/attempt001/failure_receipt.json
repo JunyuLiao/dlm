@@ -1,0 +1,7 @@
+{
+  "status": "failed_before_first_calibration_record",
+  "benchmark_requests": 0,
+  "completed_calibration_requests": 0,
+  "reason": "Historical runtime lacks map_kept_counts; the new BLASST port must own its count cache and lifecycle rather than inherit newer fields.",
+  "correction": "Initialize and clear variant-owned cache on reset/block/invalidation; add legacy-runtime regression test; preserve failed attempt."
+}
