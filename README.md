@@ -2,7 +2,7 @@
 
 This branch evaluates value-direction-aware attention on **LLaDA2.2-mini** and **TraDo-8B-Instruct**, comparing online Gaussian32 selection with attention-mass ranking, full-information singleton selection and two dense controls. The framework retains each model’s native denoising sampler and uses physical block-sparse attention on one H100.
 
-**Results through November 4, 2026:** all six current-tile V2 model/benchmark panels are complete, as are the four additional TraDo RULER32K baseline panels. Existing baseline results are retained. DiffusionGemma follow-up experiments were stopped and are outside this completed scope.
+**Results through November 5, 2026:** the six current-tile V2 panels, four additional TraDo RULER32K controls, ten LongBench v2 panels and six aggressive-BLASST panels are complete. Existing results are retained. DiffusionGemma follow-up experiments remain stopped.
 
 ## Methods
 
@@ -14,6 +14,7 @@ This branch evaluates value-direction-aware attention on **LLaDA2.2-mini** and *
 | Original V2 | Online Gaussian32 value-direction selector; chronological scan begins with the first prefix tile. Threshold determines the retained set. |
 | V3a | Rank full-information singleton deletion risk relative to the full-support projected output, with a fixed budget. |
 | Current-tile V2 | Initialize the same online V2 recurrence from the mandatory current tile, then scan prefix tiles `0..J-2`. Recalibrate the threshold for this order. |
+| Aggressive BLASST | Compare each tile's maximum logit with the preceding maximum over all seen tiles, including skipped ones. Keep first/current support; independently calibrate λ(L)=exp(log κ)/L, allowing λ>1. |
 
 The current-tile variant removes the forced first-prefix-tile initialization. It preserves V2’s rank-32 Gaussian projection, preserve-mass skip semantics and full-dimensional current-value output. It does not alter EOS, acceptance, editing or stopping, and adds no model forward. Gaussian32 is Junyu’s prior method; cross-step map reuse is inherited from Yuhan. The initialization change is a separate named variant.
 
@@ -35,6 +36,34 @@ Key observations:
 - **LLaDA2.2-mini HumanEval:** current-tile V2 recovers **119/164** passes from original V2’s **10/164**, compared with V31 **83/164**, V3a **103/164** and native dense **141/164**. Mean output length rises from **62.9 to 219.3 tokens**. This is initialization plus recalibration: achieved sparsity changes from **49.22% to 55.67%**, so it is not an exactly matched-50% or fixed-threshold ablation.
 - **TraDo HumanEval:** current-tile V2 scores **122/164**, versus original V2 **125/164**, V31 **70/164**, V3a **78/164** and native dense **130/164**. The initialization change does not establish a universal improvement.
 - **TraDo RULER32K:** V31 and V3a both achieve **49.97%** sparsity. V3a exceeds V31 by **1.47 percentage points**, but the paired problem-bootstrap 95% CI **[−0.32, +3.78]** and task-cluster CI **[−0.71, +4.42]** cross zero. This does not establish superiority or noninferiority.
+
+## Aggressive BLASST follow-up
+
+The same six cohorts, native samplers, caps and seeds add one independently calibrated baseline. Other methods above remain unchanged.
+
+| Model | Benchmark | Aggressive BLASST score | Mean output tokens | Steps/canvas | Achieved sparsity |
+|---|---|---:|---:|---:|---:|
+| LLaDA2.2-mini | AIME26 | 0/90 = 0.00% | 32.3 | 5.704 | 41.12% |
+| LLaDA2.2-mini | HumanEval | 2/164 = 1.22% | 32.5 | 3.734 | 46.29% |
+| LLaDA2.2-mini | RULER128K | 84.01% | 28.3 | 4.445 | 48.20% |
+| TraDo-8B-Instruct | AIME26 | 9/90 = 10.00% | 1030.5 | 2.012 | 50.69% |
+| TraDo-8B-Instruct | HumanEval | 122/164 = 74.39% | 114.8 | 1.980 | 51.96% |
+| TraDo-8B-Instruct | RULER32K | 63.79% | 29.9 | 2.460 | 48.03% |
+
+**LLaDA AIME/HumanEval missed the 48–52% calibration target**, reaching 42.44%/40.98%. Higher tested parameters saturated at two retained tiles per head/layer/forward on their shortened native trajectories. Their full-panel 41.12%/46.29% sparsity falls inside the predeclared 40–60% acceptance range, but these are not exact-50% work matches. All requests in these two panels ended by native EOS, with no cap hits. This is a severe short-output negative result; exact EOS causality is not established. No accuracy-directed retuning or EOS intervention was used.
+
+The other four calibrations reached 48–52%. BLASST uses the existing aggressive preceding-seen rule with its own first-tile initialization, separate from V2-CTI, and no V2 thresholds or value projection. It shares all-layer denoising scope, Q128/KV64, four-call map reuse, full-D128 FA4 output and dense prefill/commit. See the [full comparison, calibration and paired intervals](results/multimodel_aggressive_blasst_20261105/attempt003/publication001/README.md).
+
+## LongBench v2 high-sparsity evaluation
+
+| Model | Official length groups | Problems | Native dense | All-kept FA4 | V31 K512 | V3a K512 | V2-CTI | V2 sparsity |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| LLaDA2.2-mini | Short + Medium | 395 | 31.65% | 32.91% | 36.71% | 34.94% | 33.92% | 98.50% |
+| TraDo-8B-Instruct | Short | 180 | 38.89% | 40.56% | 42.22% | 44.44% | 43.89% | 98.35% |
+
+Seed 42, official zero-shot prompt and exact answer extraction, 128-token output cap, unchanged native samplers. K512 means **512 KV tokens = eight KV64 tiles**, including current mandatory tiles. V31/V3a achieve 99.443%/99.441% sparsity on LLaDA and 97.988%/97.971% on TraDo. V2-CTI is calibrated after the fixed-budget panels using 12/6 count-only prompt strata; approximate matching above 95% is accepted, not exact retained-work equality.
+
+Word-length labels differ from token limits. All selected items remain included; middle truncation with output reserve affects 99 LLaDA items (2 Short, 97 Medium) and 64 TraDo Short items. Truncated/untruncated, difficulty and length-group statistics, denoising counts and paired intervals are in the [completed LongBench report](results/multimodel_longbench_v2_20261104/attempt002/analysis001/README.md). This is a single-seed exploratory comparison, with no clean latency claim.
 
 ## Denoising and achieved sparsity
 

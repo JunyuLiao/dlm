@@ -2956,3 +2956,41 @@ single-seed exploratory evidence, no seed-variability/noninferiority claim.
 launch; exact historical all-kept replay; 80 complete shards; 382 protected
 files unchanged. Allocator retries recovered. Failed pre-generation cache and
 interpreter attempts retained. Gemma and historical cancelled jobs stay stopped.
+
+## 2026-11-05 — completed aggressive BLASST on six matched model/benchmark cells
+
+Protocol `results/multimodel_aggressive_blasst_20261105/attempt003/protocol.json`,
+source `01dc2ccf`, binding `c820d573`; report `publication001/README.md`,
+canonical `analysis001/summary.json`, `comparison.json`, `paired.json`, receipt
+and root completion. Six panels / 768 requests, same current cohorts/caps/seeds.
+
+| Model | Benchmark | Score | Full credit | N | C | T | N/C | Sparsity |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| LLaDA2.2 | AIME26 |0.00%|0/90|1232|216|2907|5.70370|41.1231%|
+| LLaDA2.2 | HumanEval |1.2195%|2/164|1516|406|5334|3.73399|46.2863%|
+| LLaDA2.2 | RULER128K |84.0129%|98/130|1049|236|3677|4.44492|48.1980%|
+| TraDo | AIME26 |10.00%|9/90|46787|23256|92748|2.01183|50.6863%|
+| TraDo | HumanEval |74.3902%|122/164|9568|4832|18829|1.98013|51.9555%|
+| TraDo | RULER32K |63.7949%|70/130|2652|1078|3889|2.46011|48.0313%|
+
+Aggressive preceding-all-seen maximum, strict all-query skip, first/current
+protection, lambda(L)=exp(log_kappa)/L, lambda>1 permitted. Q128/KV64, all
+denoising layers, four-call reuse/no carry, pinned full-D128 FA4 consumer,
+dense prefill/commit. Native sampler/editing/EOS unchanged. No V2 thresholds
+or projections; independent small count-only calibration. Final log_kappa:
+LLaDA AIME 22.5, HE 15, RULER 2.39771338; TraDo AIME 3.26985651,
+HE 6.21212325, RULER 2.86544408. Two LLaDA short-task calibration targets
+missed: 42.4354% / 40.9836%; final accepted in frozen 40–60% band, not exact
+50% matches. Saturation audit shows exactly two tiles/head/layer/forward for
+higher tested thresholds. No untested-threshold impossibility claim.
+Short outputs 32.3/32.5 mean tokens and 90/164 EOS, zero caps accompany the
+LLaDA AIME/HE collapse; exact EOS causality is not established. TraDo HE ties
+V2-CTI 122/164, paired delta 0 pp CI [−5.49,+5.49]. Both RULER comparisons
+have uncertain paired differences. Full controls/intervals remain in report.
+
+11 focused CPU tests, 120 CUDA mask/FP32 consumer checks, 18 CPU masks against
+original core, six exact all-kept replays, 24 complete shards, 768 source/config/
+private-token joins and 244 unchanged historical files pass. Two failed
+pre-calibration integration attempts preserved, zero benchmark records.
+Instrumented accounting only; no clean speedup claim. GPU idle 0 MiB / 0%,
+37°C. LongBench prerequisite finished scoring/audit before BLASST GPU launch.

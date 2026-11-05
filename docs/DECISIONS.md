@@ -4472,3 +4472,20 @@ this scored completion marker. Its first attempt passes CUDA/control gates
 but fails before calibration on an optional heartbeat lookup absent in the
 old LLaDA harness. Preserve that zero-benchmark attempt; corrected source and
 regression test receive fresh campaign attempt002, unchanged cohorts/runtime.
+
+## 2026-11-05 — aggressive BLASST complete; retain short-context negatives
+
+Six panels / 768 requests complete at aggressive_blasst_20261105/attempt003.
+Independent calibration achieves final 48.20/48.03% on LLaDA128K/TraDo32K,
+51.96% TraDo HE and 50.69% TraDo AIME. LLaDA AIME/HE calibrations saturate
+below 48–52%; full 41.12/46.29% is inside the frozen 40–60% acceptance band.
+Disclose those two misses and prohibit exact-50% claims. Keep the severe
+negative results (0/90 AIME, 2/164 HE, mean output around 32 tokens) without
+accuracy-directed recalibration or EOS changes. Saturation receipts confirm
+two kept tiles/head/layer/forward at the higher tested thresholds; they do
+not rule out untested trajectory-dependent operating points. TraDo HE ties
+V2-CTI score at 122/164; paired intervals, not point ties, describe uncertainty.
+All old controls remain unchanged. Two source-interface failures are retained;
+new variant owns optional callback and kept-count lifecycle. CPU/CUDA/core,
+all-kept replay, official scoring and immutable-evidence audits pass. H100 idle;
+no additional GPU experiments scheduled.

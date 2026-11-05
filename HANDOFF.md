@@ -1,3 +1,30 @@
+## 2026-11-05 13:20 UTC — LongBench and aggressive BLASST complete
+
+Running: none. Fresh host nvidia-smi: H100 idle 0 MiB / 0%, 37°C; campaign
+processes exited. LongBench 2875 requests complete, committed/pushed `95f5d8a5`.
+BLASST 768 requests complete at
+`results/multimodel_aggressive_blasst_20261105/attempt003/`.
+Readable report `publication001/README.md`, canonical `analysis001/` scores,
+paired intervals/full 36-row comparison and receipt, root completion and
+publication audit. Source `01dc2ccf`, binding `c820d573`; no source changes
+during generation. Two failed integration attempts remain preserved.
+
+BLASST results (AIME / HumanEval / RULER): LLaDA 0/90, 2/164, 84.0129%;
+TraDo 9/90, 122/164, 63.7949%. Full sparsity: LLaDA 41.1231%, 46.2863%,
+48.1980%; TraDo 50.6863%, 51.9555%, 48.0313%. LLaDA AIME/HumanEval calibration
+missed 48–52% (42.4354% / 40.9836%); accepted inside frozen final 40–60%,
+not exact-50% comparisons. `calibration_saturation_audit.json` confirms higher
+tested thresholds retain exactly two tiles/head/layer/forward on those short
+native trajectories; no claim about untested intermediate parameters.
+Mean outputs 32.3 / 32.5 tokens, every request EOS, zero caps on those cells.
+No accuracy-directed retuning. All other calibrations reach 48–52%.
+
+11 CPU tests, 120 independent CUDA mask/FP32-consumer cases, 18 CPU comparisons
+against original BLASST core, six exact historical all-kept replays, 24 complete
+shards, 768 private token/config/source joins and 244 protected files pass.
+No clean latency or universal quality claim. Final task: publish sanitized
+completion docs/evidence; no new experiment scheduled.
+
 ## 2026-11-05 08:05 UTC — LongBench complete; aggressive BLASST active
 
 LongBench root `results/multimodel_longbench_v2_20261104/attempt002/` has all
