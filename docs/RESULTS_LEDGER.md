@@ -2919,3 +2919,40 @@ Existing V2 source/runtime/model/prompt/seed/cap identities match. Previous
 results remain untouched; a new combined 35-row table is published.
 Attempt001 pre-generation CPU oracle failure and partial analysis001 are retained.
 H100 released: 0 MiB / 0%, 37°C. Gemma remains stopped.
+
+## 2026-11-05 — completed LongBench v2 two-model K512 / V2-CTI study
+
+Protocol `results/multimodel_longbench_v2_20261104/attempt002/protocol.json`,
+source `3b40b9bc`, binding `a616396e`, historical interpreter amendment
+`c1c5c267`. Complete 10 panels / 2875 seed-42 requests; canonical official
+`analysis001/README.md`, `summary.json`, `slices.json`, `paired.json`, receipt,
+root completion marker and independent `publication_audit.json`.
+
+| Model | Method | Correct | Score | Mean T | N/request | C/request | N/C | Sparsity |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| LLaDA2.2 | Native dense |125/395|31.65%|47.3|20.89|2.56|8.153|0%|
+| LLaDA2.2 | All-kept FA4 |130/395|32.91%|48.7|21.33|2.61|8.179|0%|
+| LLaDA2.2 | V31 K512 |145/395|36.71%|22.9|8.24|1.83|4.506|99.443%|
+| LLaDA2.2 | V3a K512 |138/395|34.94%|23.1|8.72|1.83|4.757|99.441%|
+| LLaDA2.2 | V2-CTI |134/395|33.92%|26.9|10.26|1.93|5.326|98.504%|
+| TraDo | Native dense |70/180|38.89%|15.8|10.59|4.67|2.269|0%|
+| TraDo | All-kept FA4 |73/180|40.56%|15.6|10.76|4.60|2.338|0%|
+| TraDo | V31 K512 |76/180|42.22%|14.8|10.34|4.40|2.350|97.988%|
+| TraDo | V3a K512 |80/180|44.44%|14.9|10.23|4.42|2.316|97.971%|
+| TraDo | V2-CTI |79/180|43.89%|14.8|10.41|4.39|2.371|98.351%|
+
+Official zero-shot/regex scorer, invalid parses wrong, no chance compensation.
+LLaDA short180+medium215, TraDo short180; 128 output cap. Middle truncation
+affects 99 LLaDA (2 short/97 medium) and 64 TraDo, with actual chat request
+hash/length checked. Native samplers/caps, all-layer denoising sparse scope,
+dense prefill/commit, Q128/KV64, four-call reuse and no carry. K512 = eight
+KV64 tiles including mandatory support. Physical sparsity includes held calls,
+excludes dense prefill/commit and selector discovery; no clean latency claim.
+V2 calibration only after fixed panels: 12/6 count-only prompt strata, tau
+.01/.03, calibration 98.1950/98.5836%, no correctness used. Approximate work
+matching accepted; no second full run. Paired problem intervals are in report;
+single-seed exploratory evidence, no seed-variability/noninferiority claim.
+11 CPU tests; independent 12-case CPU/CUDA masks and FP32 consumer checks per
+launch; exact historical all-kept replay; 80 complete shards; 382 protected
+files unchanged. Allocator retries recovered. Failed pre-generation cache and
+interpreter attempts retained. Gemma and historical cancelled jobs stay stopped.

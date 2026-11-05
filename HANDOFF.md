@@ -1,3 +1,32 @@
+## 2026-11-05 08:05 UTC — LongBench complete; aggressive BLASST active
+
+LongBench root `results/multimodel_longbench_v2_20261104/attempt002/` has all
+10 panels / 2875 requests, official `analysis001/README.md`, source-bound
+`final_complete.json` and `publication_audit.json`. All 80 shard receipts,
+private token/input hashes, actual budgets, aggregate counts and 382 protected
+historical files pass. Native/all-kept/V31/V3a/V2-CTI scores:
+LLaDA 31.6456/32.9114/36.7089/34.9367/33.9241%; TraDo
+38.8889/40.5556/42.2222/44.4444/43.8889%.
+V2 tau .01/.03 yields 98.5039/98.3508% sparsity; fixed V31/V3a sparsity
+LLaDA 99.4431/99.4407%, TraDo 97.9884/97.9710%. Exact matching is not claimed.
+LLaDA has 395 short+medium (99 truncated), TraDo 180 short (64 truncated),
+128 output cap. Per-group/difficulty/truncation slices and paired intervals
+are retained. Long-context allocator retries recovered; no failed benchmark cells.
+
+BLASST follow-up now active at
+`results/multimodel_aggressive_blasst_20261105/attempt003/`.
+Source corrections `efdbc41f` / `01dc2ccf`, frozen binding `c820d573`, coordinator PID file
+`private/coordinator.pid`, log `private/coordinator.log`. Historical Python
+3.12 / torch 2.13cu130 / Triton 3.7.1, per-model compat, one H100 worker.
+Attempt001 passed 20 CUDA mask/consumer checks and exact all-kept replay but
+stopped before calibration: old LLaDA harness lacks optional heartbeat callback.
+Attempt002 also exposed missing kept-count cache in the legacy runtime; the
+variant now owns and invalidates that cache, with a legacy-interface test.
+Both failures have zero completed calibration/benchmark requests. Eleven CPU
+tests pass. Current LLaDA HumanEval attempt001 is
+qualifying/calibrating. Continue 900-second GPU health checks through six
+panels / 768 requests and official scoring/audit. Other methods unchanged.
+
 ## 2026-11-05 — aggressive BLASST follow-up queued after LongBench v2
 
 User adds aggressive BLASST on the same two models and AIME26/HumanEval/RULER

@@ -4459,3 +4459,16 @@ native samplers/EOS/editing/caps/seeds remain unchanged. Compare to retained
 historical controls with source/prompt/cap pairing and disclose attained work.
 Spec `MULTIMODEL_AGGRESSIVE_BLASST_20261105.md`; no accuracy guarantees are
 implied by allowing lambda above one. No Gemma or historical paused job resumes.
+
+## 2026-11-05 — LongBench complete and aggressive BLASST dependency released
+
+All 2875 LongBench requests scored/audited; 10 complete panels, 80 shard
+receipts, private token/input hashes, actual budget checks and 382 immutable
+historical files pass. V2-CTI full sparsity 98.5039% LLaDA / 98.3509% TraDo,
+with fixed V31/V3a at 99.44% / 97.98% respectively. Report approximate work
+matching, native 128-token cap and 99/64 middle-truncated prompts explicitly.
+No full-panel sparsity retry needed. New BLASST GPU work begins only after
+this scored completion marker. Its first attempt passes CUDA/control gates
+but fails before calibration on an optional heartbeat lookup absent in the
+old LLaDA harness. Preserve that zero-benchmark attempt; corrected source and
+regression test receive fresh campaign attempt002, unchanged cohorts/runtime.
