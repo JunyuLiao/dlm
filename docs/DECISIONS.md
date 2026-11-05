@@ -4445,3 +4445,17 @@ calibration sweeps. Spec `MULTIMODEL_LONGBENCH_V2_20261104.md`, campaign
 `results/multimodel_longbench_v2_20261104/attempt001/`. Eleven focused CPU
 tests pass; CUDA qualification and exact all-kept replay gate generation.
 Historical campaigns and negative evidence stay intact; Gemma remains stopped.
+
+## 2026-11-05 — add aggressive BLASST after current LongBench completion
+
+New user instruction queues six 50%-sparsity panels, LLaDA2.2 and TraDo on
+the existing AIME26/HumanEval/RULER128K-or-32K cohorts. Preserve the running
+LongBench source/protocol and wait for its complete official score/audit marker.
+Use the repository's aggressive preceding-seen maximum extension, lambda>1
+permitted, with existing inverse-length policy and independent count-only
+calibration. Thresholds from V2 do not transfer. Match all-layer denoising
+scope, current protection, Q128/KV64, full-D128 FA4 consumer and four-call reuse;
+native samplers/EOS/editing/caps/seeds remain unchanged. Compare to retained
+historical controls with source/prompt/cap pairing and disclose attained work.
+Spec `MULTIMODEL_AGGRESSIVE_BLASST_20261105.md`; no accuracy guarantees are
+implied by allowing lambda above one. No Gemma or historical paused job resumes.

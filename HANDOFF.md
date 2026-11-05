@@ -1,3 +1,27 @@
+## 2026-11-05 — aggressive BLASST follow-up queued after LongBench v2
+
+User adds aggressive BLASST on the same two models and AIME26/HumanEval/RULER
+setups, at approximately 50% sparsity. New spec:
+`docs/MULTIMODEL_AGGRESSIVE_BLASST_20261105.md`. Follow-up root planned:
+`results/multimodel_aggressive_blasst_20261105/attempt001/`.
+The dependency is the current LongBench campaign's complete scored/audited
+`final_complete.json`; no BLASST GPU work may start before that marker.
+LongBench queue/source remains unchanged; new follow-up marker is
+`FOLLOWUP_AGGRESSIVE_BLASST_20261105.json` under its root.
+
+Port the existing preceding-seen-maximum rule (including skipped tiles),
+lambda(L)=exp(log_kappa)/L with lambda>1 permitted, first/current protection,
+Q128/KV64, four-call reuse, full-D128 FA4 output. Fresh small count-only
+calibration per model/task; no V2 threshold transfer. Keep original dense and
+V31/V3a/V2-CTI results unchanged. Native sampler/caps/seeds match current setup;
+six panels / 768 new benchmark requests. CPU implementation and tests prepared;
+independent CUDA qualification and exact all-kept replay gate generation.
+
+LongBench remains active: both models' dense/V31/V3a panels are complete;
+LLaDA V2-CTI is generating at frozen tau .01 (12-prompt calibration 98.195%).
+Fixed sparsity: LLaDA V31/V3a 99.4431/99.4407%; TraDo 97.9884/97.9710%.
+Continue 900-second health checks until LongBench and the queued baseline finish.
+
 ## 2026-11-04 — new two-model LongBench v2 campaign authorized
 
 User requests seed 42: native dense, all-kept FA4, V31/V3a K512 tokens and

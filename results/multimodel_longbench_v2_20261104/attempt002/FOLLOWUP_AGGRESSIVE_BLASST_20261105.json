@@ -1,0 +1,26 @@
+{
+  "status": "queued_after_current_campaign",
+  "user_authorized": true,
+  "dependency": "final_complete.json must exist and have status complete",
+  "models": [
+    "llada22",
+    "trado"
+  ],
+  "benchmarks": [
+    "aime26",
+    "humaneval",
+    "ruler128k_or_32k"
+  ],
+  "new_benchmark_requests": 768,
+  "target_sparsity": [
+    0.48,
+    0.52
+  ],
+  "full_acceptable": [
+    0.4,
+    0.6
+  ],
+  "threshold_transfer_from_v2": false,
+  "spec": "docs/MULTIMODEL_AGGRESSIVE_BLASST_20261105.md",
+  "gpu_work_before_dependency_complete": false
+}
